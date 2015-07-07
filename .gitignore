@@ -1,0 +1,11 @@
+logs
+target
+/.idea_modules
+/.classpath
+/.project
+/.settings
+/RUNNING_PID
+
+/.idea/*
+!/.idea/modules.iml
+!/.idea/modules/*.iml
