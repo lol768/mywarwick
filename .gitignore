@@ -6,6 +6,8 @@ target
 /.settings
 /RUNNING_PID
 
+/node_modules
+
 /.idea/*
 !/.idea/modules.iml
 !/.idea/modules/*.iml

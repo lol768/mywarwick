@@ -1,0 +1,26 @@
+@(now: String)@*
+*@CACHE MANIFEST
+# @{now}
+
+CACHE:
+/assets/js/bundle.js
+/assets/css/main.css
+/assets/images/favicon.png
+/assets/components/warwick-id7/images/shim.gif
+/assets/components/warwick-id7/dist/js/id7-bundle.min.js
+/assets/components/warwick-id7/dist/css/id7.min.css
+/assets/components/warwick-id7/dist/css/id7-default-theme.min.css
+/assets/components/warwick-id7/dist/images/masthead-logo-bleed-xs.svg
+
+# fonts, not sure if we have to cache them all...
+# apparently browsers that support appcache generally support ttf,
+# so if we cache one type it should be that. maybe!
+/assets/components/warwick-id7/dist/fonts/fontawesome-webfont.woff2?v=4.3.0
+//fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic&subset=latin,latin-ext
+//fonts.gstatic.com/s/lato/v11/2V_mouV5odI0UgtVODTOwvesZW2xOQ-xsNqO47m55DA.woff
+//fonts.gstatic.com/s/lato/v11/sccV8o9st-AMv7Su44YKKQLUuEpTyoUstqEm5AMlJo4.woff
+
+# Attempt to get anything else over the network
+NETWORK:
+*
+

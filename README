@@ -1,4 +1,19 @@
-This is your new Play application
-=================================
+Start
+=====
 
-This file will be packaged with your application, when using `activator dist`.
+Setup
+--------
+
+You will need a recent JDK, 8 ideally. You will need `node` (with `npm`) installed in order to build the static assets.
+
+To get Node dependencies run `npm install`.
+
+Building
+--------
+
+To build assets, run `node_modules/.bin/gulp assets`.
+To continually build assets when they change, run `node_modules/.bin/gulp watch-assets`.
+
+To start the app, run `./activator "run 8080"`. You can choose a different port but using 8080 might make it simpler
+to re-use your Apache/Nginx proxy config that you have working for Tomcat.
+

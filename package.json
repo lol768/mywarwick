@@ -1,0 +1,52 @@
+{
+  "name": "start",
+  "version": "2.0.0",
+  "description": "Start",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "autoprefixer-core": "^5.2.1",
+    "babel-core": "^5.6.15",
+    "babel-loader": "^5.3.1",
+    "babelify": "^6.1.2",
+    "bower": "^1.4.1",
+    "browserify": "^10.2.4",
+    "css-loader": "^0.15.2",
+    "exorcist": "^0.4.0",
+    "extract-text-webpack-plugin": "^0.8.2",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^5.1.0",
+    "gulp-less": "^3.0.3",
+    "gulp-sourcemaps": "^1.5.2",
+    "gulp-uglify": "^1.2.0",
+    "gulp-util": "^3.0.6",
+    "jquery": "^2.1.4",
+    "less": "^2.5.1",
+    "less-loader": "^2.2.0",
+    "lodash": "^3.10.0",
+    "node-libs-browser": "^0.5.2",
+    "postcss-loader": "^0.5.1",
+    "react": "^0.13.3",
+    "rx": "^2.5.3",
+    "style-loader": "^0.12.3",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.2.3",
+    "webpack": "^1.10.1"
+  },
+  "scripts": {
+    "test": "node node_modules/karma/bin/karma.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "-"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "id7": "https://github.com/UniversityofWarwick/id7/archive/v1.1.6.tar.gz",
+    "moment": "^2.10.3"
+  }
+}
