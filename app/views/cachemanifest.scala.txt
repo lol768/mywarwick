@@ -1,16 +1,12 @@
-@(now: String)@*
+@(startDate: String, assets: Seq[(String, String)])@*
 *@CACHE MANIFEST
-# @{now}
+# @startDate
 
 CACHE:
-/assets/js/bundle.js
-/assets/css/main.css
-/assets/images/favicon.png
-/assets/components/warwick-id7/images/shim.gif
-/assets/components/warwick-id7/dist/js/id7-bundle.min.js
-/assets/components/warwick-id7/dist/css/id7.min.css
-/assets/components/warwick-id7/dist/css/id7-default-theme.min.css
-/assets/components/warwick-id7/dist/images/masthead-logo-bleed-xs.svg
+@for((path, modified) <- assets) {
+# @modified
+/assets/@path
+}
 
 # fonts, not sure if we have to cache them all...
 # apparently browsers that support appcache generally support ttf,

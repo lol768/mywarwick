@@ -1,29 +1,70 @@
 package actors
 
-import actors.TileActor.TileUpdate
 import akka.actor._
-import play.api.Logger
 import play.api.libs.json._
 import scala.concurrent.duration._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.util.Random
 
-object TileWebsocketActor  {
-  def props(out: ActorRef) = Props(new TileWebsocketActor(out))
+object WebsocketActor  {
+  def props(out: ActorRef) = Props(new WebsocketActor(out))
 }
 
 /**
- * Websocket-facing actor, wired in to the controller. Receives messages from
- * the client using
+ * Websocket-facing actor, wired in to the controller. It receives
+ * any messages send from the client in the form of a JsValue. Other
+ * actors can also send any kind of message to it.
+ *
+ * Currently this contains a lot of stuff but only because it's generating
+ * a bunch of fake data as we have no backend yet. When it's done, it
+ * ought to be pretty slim as it will mainly just subscribe to some actor
+ * within the larger system, passing data to the websocket.
  *
  * @param out this output will be attached to the websocket and will send
  *            messages back to the client.
  */
-class TileWebsocketActor(out : ActorRef) extends Actor {
-  import TileWebsocketActor._
-  import context.dispatcher
+class WebsocketActor(out : ActorRef) extends Actor with ActorLogging {
 
+  // An update to a single tile
+  case class TileUpdate(val data: JsValue)
+
+  override def receive = {
+    // these will be the TileUpdates we send to ourself.
+    case TileUpdate(data) => {
+      out ! data
+    }
+    // we've received some JSON (probably from the web client) -
+    // we're indiscriminately responding with some manifest I've invented.
+    // It might make more sense to check the contents of `o` first.
+    case o : JsValue =>
+      out ! Json.obj(
+        "type" -> "tiles-description",
+        "user" -> Map(
+          "userId" -> "cusxyz"
+        ),
+        "tiles" -> Seq(
+          Map(
+            "tileId" -> "1",
+            "title" -> "Some random value tile",
+            "type" -> "numerical"
+          ),
+          Map(
+            "tileId" -> "2",
+            "title" -> "Inbox insite",
+            "type" -> "activity-stream"
+          ),
+          Map(
+            "tileId" -> "3",
+            "title" -> "Office 365",
+            "type" -> "activity-stream"
+          )
+        )
+      )
+    case nonsense => log.error(s"Ignoring unrecognised message: ${nonsense}")
+  }
+
+  // Send some ActivityStream items regularly
   context.system.scheduler.schedule(0 millis, (1400 + Random.nextInt(400)) millis) {
     self ! TileUpdate(Json.obj(
       "type" -> "tile-update",
@@ -111,61 +152,6 @@ class TileWebsocketActor(out : ActorRef) extends Actor {
     ))
   }
 
-  override def receive = {
-    case TileUpdate(data) => {
-      out ! data
-    }
-    case o : JsValue =>
-      out ! Json.obj(
-        "type" -> "tiles-description",
-        "user" -> Map(
-          "userId" -> "cusxyz"
-        ),
-        "tiles" -> Seq(
-          Map(
-            "tileId" -> "1",
-            "title" -> "Some random value tile",
-            "type" -> "numerical"
-          ),
-          Map(
-            "tileId" -> "2",
-            "title" -> "Inbox insite",
-            "type" -> "activity-stream"
-          ),
-          Map(
-            "tileId" -> "3",
-            "title" -> "Office 365",
-            "type" -> "activity-stream"
-          )
-        )
-      )
-    case _ => println("What the fuck is this")
-  }
-
 }
 
-
-object TileActor {
-  def props(tileId: String) = Props(new TileActor(tileId))
-
-  // An update to a single tile
-  case class TileUpdate(val data: JsValue)
-}
-
-class TileActor(val tileId: String) extends Actor {
-  import TileActor._
-
-  val parent = context.actorSelection("..")
-
-  context.system.scheduler.schedule(0 millis, (1400 + Random.nextInt(400)) millis) {
-    parent ! TileUpdate(Json.obj(
-      "tileId" -> tileId,
-      "value" -> Random.nextInt(1000)
-    ))
-  }
-
-  def receive = {
-    case x => Logger.info("Hello: " + x)
-  }
-}
 

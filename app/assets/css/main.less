@@ -1,3 +1,14 @@
+// Gulpfile is set up to allow @imports relative to
+// the node_modules directory, so you can import from
+// NPM dependencies.
+
+@import 'id7/less/variables.less';
+@import 'id7/less/id7.less';
+@import 'id7/less/default-theme.less';
+
+@id7-image-root-dir: "../id7/images";
+@icon-font-path: '../id7/fonts';
+@fa-font-path: '../id7/fonts';
 
 .activity-stream {
   list-style: none;
@@ -14,6 +25,9 @@
   }
 }
 
+.good {
+  color: @id7-brand-orange-bright;
+}
 
 @media screen and (max-width: 479px /*@screen-xs-max*/) {
 

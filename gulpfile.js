@@ -18,6 +18,7 @@ var exorcist   = require('exorcist');
 var source     = require('vinyl-source-stream');
 var buffer     = require('vinyl-buffer');
 var _          = require('lodash');
+var path       = require('path');
 
 var paths = {
   assetPath: 'app/assets',
@@ -25,8 +26,15 @@ var paths = {
   scriptIn: ['app/assets/js/main.js'],
   scriptOut: 'target/web/public/main/js',
 
+  assetsOut: 'target/web/public/main',
+
   styleIn: ['app/assets/css/main.less', 'node_modules/id7/less/id7.less'],
   styleOut: 'target/web/public/main/css',
+
+  // Paths under node_modules that will be searched when @import-ing in your LESS.
+  styleModules: [
+    'id7/less'
+  ]
 };
 
 var browserifyOptions = {
@@ -65,10 +73,23 @@ gulp.task('watch-scripts', [], function() {
   return bundle(bw);
 });
 
-gulp.task('styles', function() {
+gulp.task('id7-static', function() {
+  return gulp.src([
+    'node_modules/id7/dist/fonts/**',
+    'node_modules/id7/dist/images/**',
+    'node_modules/id7/dist/js/**'
+  ], {base:'node_modules/id7/dist'})
+    .pipe(gulp.dest(paths.assetsOut + '/id7'))
+});
+
+gulp.task('styles', ['id7-static'], function() {
   return gulp.src(paths.styleIn)
     .pipe(sourcemaps.init())
-    .pipe(less())
+    .pipe(less({
+      paths: [path.join(__dirname, 'node_modules')].concat(paths.styleModules.map(function(modulePath) {
+        return path.join(__dirname, 'node_modules', modulePath)
+      }))
+    }))
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.styleOut))
 });
