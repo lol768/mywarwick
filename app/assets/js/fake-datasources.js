@@ -76,11 +76,7 @@ export class FakeDataSource extends DataSource {
     this.updateStream = stream;
   }
 
-  /**
-   * @returns {*} fuck all
-   */
   getUpdateStream(): Rx.Observable {
-    "use strict";
     return this.updateStream.asObservable();
   }
 }
