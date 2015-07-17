@@ -1,6 +1,6 @@
 @(/*user: model.UserContext, */title: String)(content: Html)
 <!DOCTYPE html>
-<html lang="en-GB" class="no-js" manifest="/start.appcache"> <!-- class="id7-non-branded" to remove Warwick branding -->
+<html lang="en-GB" class="no-js"@* manifest="/start.appcache"*@> <!-- class="id7-non-branded" to remove Warwick branding -->
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -18,7 +18,8 @@
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("css/main.css")">
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
 
-    <script src="@routes.Assets.versioned("id7/js/id7-bundle.js")"></script>
+    @*<script src="@routes.Assets.versioned("lib/id7/js/id7-bundle.js")"></script>*@
+    <script src="/assets/lib/id7/js/id7-bundle.js"></script>
     <script src="@routes.Assets.versioned("js/bundle.js")"></script>
 
     </head>
@@ -60,7 +61,7 @@
                                     <div class="id7-logo-row">
                                         <div class="id7-logo">
                                             <a href="http://warwick.ac.uk" title="Warwick homepage">
-                                                <img src="@routes.Assets.versioned("id7/images/shim.gif")" alt="Warwick">
+                                                <img src="@routes.Assets.versioned("lib/id7/images/shim.gif")" alt="Warwick">
                                             </a>
                                         </div>
                                          <nav class="id7-site-links">
