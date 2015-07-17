@@ -24,6 +24,8 @@ libraryDependencies ++= Seq(
   specs2 % Test
 )
 
+unmanagedResourceDirectories in Assets <+= baseDirectory { _ / "target" / "gulp" }
+
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-testkit" % "2.3.12" % Test
 )

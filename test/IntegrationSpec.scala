@@ -17,10 +17,10 @@ class IntegrationSpec extends Specification {
   "Application" should {
 
     "work from within a browser" in new WithBrowser {
-      skipped("""
-      |Skipping because it emits warning exceptions about
-      |bundle.js (built by Gulp) being missing.
-      """.stripMargin.trim)
+//      skipped("""
+//      |Skipping because it emits warning exceptions about
+//      |bundle.js (built by Gulp) being missing.
+//      """.stripMargin.trim)
 
       browser.goTo("http://localhost:" + port)
 

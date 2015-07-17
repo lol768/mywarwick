@@ -24,12 +24,12 @@ var paths = {
   assetPath: 'app/assets',
 
   scriptIn: ['app/assets/js/main.js'],
-  scriptOut: 'target/web/public/main/js',
+  scriptOut: 'target/gulp/js',
 
-  assetsOut: 'target/web/public/main',
+  assetsOut: 'target/gulp',
 
   styleIn: ['app/assets/css/main.less', 'node_modules/id7/less/id7.less'],
-  styleOut: 'target/web/public/main/css',
+  styleOut: 'target/gulp/css',
 
   // Paths under node_modules that will be searched when @import-ing in your LESS.
   styleModules: [
