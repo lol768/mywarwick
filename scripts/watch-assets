@@ -1,0 +1,10 @@
+#!/bin/bash
+
+DIRNAME=`dirname $0`
+cd $DIRNAME/..
+
+if [[ ! -f node_modules/.bin/gulp ]]; then
+  "No gulp script found, have you run `npm install`?"
+  exit 1
+fi
+./node_modules/.bin/gulp watch-assets

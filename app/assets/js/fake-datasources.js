@@ -57,7 +57,7 @@ export class FakeDataSource extends DataSource {
           }
         ]
       });
-    }, 30000);
+    }, 1000);
 
     setInterval(() => {
       stream.onNext({

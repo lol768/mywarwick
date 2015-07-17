@@ -11,12 +11,12 @@ CACHE:
 # fonts, not sure if we have to cache them all...
 # apparently browsers that support appcache generally support ttf,
 # so if we cache one type it should be that. maybe!
-/assets/components/warwick-id7/dist/fonts/fontawesome-webfont.woff2?v=4.3.0
+/assets/id7/fonts/fontawesome-webfont.woff2
+#/assets/components/warwick-id7/dist/fonts/fontawesome-webfont.woff2
 //fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic&subset=latin,latin-ext
 //fonts.gstatic.com/s/lato/v11/2V_mouV5odI0UgtVODTOwvesZW2xOQ-xsNqO47m55DA.woff
 //fonts.gstatic.com/s/lato/v11/sccV8o9st-AMv7Su44YKKQLUuEpTyoUstqEm5AMlJo4.woff
+//fonts.gstatic.com/s/lato/v11/1YwB1sO8YE1Lyjf12WNiUA.woff2
 
-# Attempt to get anything else over the network
 NETWORK:
 *
-

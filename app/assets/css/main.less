@@ -6,6 +6,66 @@
 @import 'id7/less/id7.less';
 @import 'id7/less/default-theme.less';
 
+//@import (inline) 'material-design-lite/material.css';
+
+@card-gutter: 10px;
+@card-border: #ddd;
+
+.card {
+  margin: @card-gutter 0;
+  border: 1px solid @card-border;
+
+  .card-heading, .card-item {
+    padding: @card-gutter;
+  }
+
+  .card-heading {
+    border-bottom: 1px solid @card-border;
+    font-size: 130%;
+  }
+
+  .card-item {
+
+  }
+}
+
+
+
+@activity-transition-function: cubic-bezier(0, 1, 0.5, 1);
+//@activity-transition-function: ease;
+
+
+// These classes are set by
+// <ReactCSSTransitionGroup transitionName="activity">
+// as items come and go.
+.activity-enter {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  transition: all .5s @activity-transition-function;
+  overflow: hidden;
+
+  &.activity-enter-active {
+    padding-top: @card-gutter;
+    padding-bottom: @card-gutter;
+    max-height: 5em;
+  }
+}
+.activity-leave {
+  max-height: 5em;
+  transition: all .5s @activity-transition-function;
+  overflow: hidden;
+
+  &.activity-leave-active {
+    padding-top: 0;
+    padding-bottom: 0;
+    max-height: 0;
+  }
+}
+
+
+@id7-brand-default: orange;
+
 @id7-image-root-dir: "../id7/images";
 @icon-font-path: '../id7/fonts';
 @fa-font-path: '../id7/fonts';
@@ -13,6 +73,12 @@
 .activity-stream {
   list-style: none;
   padding: 0;
+  margin: 0;
+
+  li {
+    padding: 0;
+    margin: 0
+  }
 
   .published {
     display: block;
@@ -23,10 +89,6 @@
   .title {
     font-weight: bold;
   }
-}
-
-.good {
-  color: @id7-brand-orange-bright;
 }
 
 @media screen and (max-width: 479px /*@screen-xs-max*/) {

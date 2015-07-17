@@ -22,8 +22,7 @@ import scala.concurrent.duration._
 @Singleton
 class ApiController @Inject() (
     actorSystem: ActorSystem,
-    printerService: PrinterService,
-    @Named("system-root-actor") systemRoot: ActorRef
+    printerService: PrinterService
   ) extends Controller {
 
   // Asking an actor for a reply will use this timeout
@@ -37,13 +36,11 @@ class ApiController @Inject() (
   def test = Action.async {
     for {
       result <- (printer ? "ron").mapTo[PrinterService.Response]
-      echo   <- (systemRoot ? "ECHO!").mapTo[String]
     } yield {
       Ok(Json.obj(
         "actor"    -> true,
         "username" -> result.username,
-        "balance"  -> result.balance,
-        "echo"     -> echo
+        "balance"  -> result.balance
       ))
     }
   }

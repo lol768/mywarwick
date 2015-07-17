@@ -102,3 +102,4 @@ gulp.task('watch-styles', function() {
 // Shortcuts for building all asset types at once
 gulp.task('assets', ['scripts','styles']);
 gulp.task('watch-assets', ['watch-scripts','watch-styles']);
+gulp.task('wizard', ['watch-assets']);

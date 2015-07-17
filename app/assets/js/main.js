@@ -1,5 +1,5 @@
 var $ = jQuery;
-var React = require('react');
+var React = require('react/addons');
 var rx = require('rx');
 
 var Stream = require('./websocket').Stream;
@@ -17,10 +17,11 @@ $(function(){
     // Generate fake data locally
     var ds = fakedata.createSource();
 
+    /*<components.ValueTile size="xs" title="A cool number" stream={ds.getTileUpdatesFor("1")} key="1" />
+     <components.WeatherTile size="xs" location="Coventry" stream={ds.getTileUpdatesFor("2")} key="2" />*/
+
     var app =
       <components.TileApp datasource={ds}>
-        <components.ValueTile size="xs" title="A cool number" stream={ds.getTileUpdatesFor("1")} key="1" />
-        <components.WeatherTile size="xs" location="Coventry" stream={ds.getTileUpdatesFor("2")} key="2" />
         <components.ActivityStreamTile title="Inbox insite" stream={ds.getTileUpdatesFor("3")} key="3" />
         <components.ActivityStreamTile title="Coursework notifications" stream={ds.getTileUpdatesFor("4")} key="4" />
       </components.TileApp>;
