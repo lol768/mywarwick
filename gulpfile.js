@@ -73,16 +73,28 @@ gulp.task('watch-scripts', [], function() {
   return bundle(bw);
 });
 
-gulp.task('id7-static', function() {
-  return gulp.src([
-    'node_modules/id7/dist/fonts/**',
-    'node_modules/id7/dist/images/**',
-    'node_modules/id7/dist/js/**'
-  ], {base:'node_modules/id7/dist'})
-    .pipe(gulp.dest(paths.assetsOut + '/id7'))
-});
+function exportAssetModule(name, taskName, baseDir) {
+  gulp.task(taskName, function() {
+    var base = 'node_modules/' + name + '/' + baseDir;
+    return gulp.src([
+      base + '/**/*.woff',
+      base + '/**/*.woff2',
+      base + '/**/*.ttf',
+      base + '/**/*.js',
+      base + '/**/*.js.map',
+      base + '/**/*.gif',
+      base + '/**/*.png',
+      base + '/**/*.jpg',
+      base + '/**/*.svg',
+    ], {base:base})
+      .pipe(gulp.dest(paths.assetsOut + '/lib/' + name))
+  });
+}
 
-gulp.task('styles', ['id7-static'], function() {
+exportAssetModule('id7', 'id7-static', 'dist');
+exportAssetModule('material-design-lite', 'material-static', '');
+
+gulp.task('styles', ['id7-static', 'material-static'], function() {
   return gulp.src(paths.styleIn)
     .pipe(sourcemaps.init())
     .pipe(less({
@@ -95,7 +107,7 @@ gulp.task('styles', ['id7-static'], function() {
 });
 
 // Recompile LESS on changes
-gulp.task('watch-styles', function() {
+gulp.task('watch-styles', ['styles'], function() {
   return gulp.watch(paths.assetPath+'/css/**/*.less', ['styles']);
 })
 

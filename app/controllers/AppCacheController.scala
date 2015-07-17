@@ -25,10 +25,10 @@ class AppCacheController extends Controller {
     "js/bundle.js",
     "css/main.css",
     "images/favicon.png",
-    "id7/images/shim.gif",
-    "id7/js/id7-bundle.min.js",
-    "id7/images/masthead-logo-bleed-xs.svg",
-    "id7/fonts/fontawesome-webfont.woff2"
+    "lib/id7/images/shim.gif",
+    "lib/id7/js/id7-bundle.min.js",
+    "lib/id7/images/masthead-logo-bleed-xs.svg",
+    "lib/id7/fonts/fontawesome-webfont.woff2"
   )
 
 
