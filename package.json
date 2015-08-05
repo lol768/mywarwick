@@ -20,19 +20,21 @@
     "gulp-uglify": "^1.2.0",
     "gulp-util": "^3.0.6",
     "gulp-postcss": "^5.1.10",
-    "id7": "https://github.com/UniversityofWarwick/id7/archive/v1.1.7.tar.gz",
+    "node-libs-browser": "^0.5.2",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.2.3"
+  },
+  "dependencies": {
     "immutable": "^3.7.4",
+    "id7": "https://github.com/UniversityofWarwick/id7/archive/v1.1.7.tar.gz",
     "jquery": "^2.1.4",
     "less": "^2.5.1",
     "lodash": "^3.10.0",
     "material-design-lite": "^1.0.0-3",
     "moment": "^2.10.3",
-    "node-libs-browser": "^0.5.2",
     "react": "^0.13.3",
-    "rx": "^2.5.3",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.2.3"
+    "rx": "^2.5.3"
   },
   "scripts": {
     "test": "node node_modules/karma/bin/karma.js"
@@ -42,6 +44,5 @@
     "url": "-"
   },
   "author": "",
-  "license": "ISC",
-  "dependencies": {}
+  "license": "ISC"
 }
