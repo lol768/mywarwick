@@ -1,28 +1,44 @@
+import Gulp._
+import play.sbt.PlayImport.PlayKeys._
+
 name := """start"""
 
 version := "1.0-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+val gulpAssetsTask = TaskKey[Unit]("gulp-assets")
+
+lazy val root = (project in file(".")).enablePlugins(PlayScala).settings(
+  gulpAssetsTask := Gulp(baseDirectory.value).buildAssets(),
+
+  dist <<= (dist) dependsOn (gulpAssetsTask),
+  assembly <<= (assembly) dependsOn (gulpAssetsTask)
+)
 
 scalaVersion := "2.11.6"
 
-//val webjars = Seq(
-//  "org.webjars" %% "webjars-play" % "2.4.0-1", // A helper
-//  "org.webjars.bower" % "requirejs" % "2.1.18",
-//  "org.webjars" % "bootstrap" % "3.3.5",
-//  "org.webjars.bower" % "react" % "0.13.3",
-//  "org.webjars" % "jsx-requirejs-plugin" % "0.6.0"
-//)
-
-//pipelineStages := Seq(rjs, digest)
+mainClass in assembly := Some("play.core.server.ProdServerStart")
+test in assembly := {}
+fullClasspath in assembly += Attributed.blank(PlayKeys.playPackageAssets.value)
+assemblyMergeStrategy in assembly := {
+  case "pom.xml" | "pom.properties" => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}
 
 libraryDependencies ++= Seq(
   jdbc,
   cache,
   ws,
   filters,
+  evolutions,
+  "com.typesafe.play" %% "anorm" % "2.4.0",
   specs2 % Test
-)
+).map(_.excludeAll(
+  ExclusionRule(organization = "commons-logging")
+))
+
+
 
 unmanagedResourceDirectories in Assets <+= baseDirectory { _ / "target" / "gulp" }
 
@@ -35,3 +51,8 @@ resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 // Play provides two styles of routers, one expects its actions to be injected, the
 // other, legacy style, accesses its actions statically.
 routesGenerator := InjectedRoutesGenerator
+
+// Run Gulp when Play runs
+playRunHooks <+= baseDirectory.map(base => Gulp(base))
+
+// Run gulp when building a distribution

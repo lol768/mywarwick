@@ -19,6 +19,7 @@
     "gulp-sourcemaps": "^1.5.2",
     "gulp-uglify": "^1.2.0",
     "gulp-util": "^3.0.6",
+    "gulp-postcss": "^5.1.10",
     "id7": "https://github.com/UniversityofWarwick/id7/archive/v1.1.7.tar.gz",
     "immutable": "^3.7.4",
     "jquery": "^2.1.4",

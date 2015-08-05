@@ -7,18 +7,21 @@
 'use strict';
 
 var gulp       = require('gulp');
-var gutil = require('gulp-util');
-var less       = require('gulp-less');
+var gutil      = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
+var source     = require('vinyl-source-stream');
+var buffer     = require('vinyl-buffer');
+var _          = require('lodash');
+var path       = require('path');
+
+var postcss    = require('gulp-postcss');
+var less       = require('gulp-less');
 var uglify     = require('gulp-uglify');
 var browserify = require('browserify');
 var babelify   = require('babelify');
 var watchify   = require('watchify');
 var exorcist   = require('exorcist');
-var source     = require('vinyl-source-stream');
-var buffer     = require('vinyl-buffer');
-var _          = require('lodash');
-var path       = require('path');
+var autoprefix = require('autoprefixer-core');
 
 var paths = {
   assetPath: 'app/assets',
@@ -52,10 +55,12 @@ var bundle = function(browserify) {
     .on('error', gutil.log.bind(gutil, 'Browserify Error'))
     .pipe(exorcist(paths.scriptOut + "/bundle.js.map"))
     .pipe(source('bundle.js'))
-    .pipe(buffer())
-    .pipe(sourcemaps.init({loadMaps: true}))
-      .pipe(uglify(uglifyOptions))
-    .pipe(sourcemaps.write('.'))
+    //.pipe(buffer())
+    //  .pipe(sourcemaps.init({loadMaps: true}))
+    //    .pipe(postcss([
+    //      autoprefix()
+    //    ]))
+    //  .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.scriptOut))
 }
 
@@ -73,6 +78,10 @@ gulp.task('watch-scripts', [], function() {
   return bundle(bw);
 });
 
+/**
+ * Copies static resources out of an NPM module, and into
+ * the asset output directory.
+ */
 function exportAssetModule(name, taskName, baseDir) {
   gulp.task(taskName, function() {
     var base = 'node_modules/' + name + '/' + baseDir;
@@ -102,6 +111,9 @@ gulp.task('styles', ['id7-static', 'material-static'], function() {
         return path.join(__dirname, 'node_modules', modulePath)
       }))
     }))
+    .pipe(postcss([
+      autoprefix({browsers: 'last 1 version'})
+    ]))
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.styleOut))
 });
