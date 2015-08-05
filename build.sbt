@@ -5,6 +5,8 @@ name := """start"""
 
 version := "1.0-SNAPSHOT"
 
+scalaVersion := "2.11.6"
+
 val gulpAssetsTask = TaskKey[Unit]("gulp-assets")
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala).settings(
@@ -14,37 +16,34 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala).settings(
   assembly <<= (assembly) dependsOn (gulpAssetsTask)
 )
 
-scalaVersion := "2.11.6"
-
-mainClass in assembly := Some("play.core.server.ProdServerStart")
+// Set up a phat jar
 test in assembly := {}
+mainClass in assembly := Some("play.core.server.ProdServerStart")
 fullClasspath in assembly += Attributed.blank(PlayKeys.playPackageAssets.value)
 assemblyMergeStrategy in assembly := {
   case "pom.xml" | "pom.properties" => MergeStrategy.discard
-  case x =>
-    val oldStrategy = (assemblyMergeStrategy in assembly).value
-    oldStrategy(x)
+  case other => (assemblyMergeStrategy in assembly).value(other) // use default
 }
 
-libraryDependencies ++= Seq(
+val appDeps = Seq(
   jdbc,
   cache,
   ws,
   filters,
   evolutions,
-  "com.typesafe.play" %% "anorm" % "2.4.0",
-  specs2 % Test
-).map(_.excludeAll(
+  "com.typesafe.play" %% "anorm" % "2.4.0")
+
+val testDeps = Seq(
+  specs2,
+  "com.typesafe.akka" %% "akka-testkit" % "2.3.12"
+).map(_ % Test)
+
+libraryDependencies ++= (appDeps ++ testDeps).map(_.excludeAll(
   ExclusionRule(organization = "commons-logging")
 ))
 
-
-
+// Make gulp output available as Play assets.
 unmanagedResourceDirectories in Assets <+= baseDirectory { _ / "target" / "gulp" }
-
-libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-testkit" % "2.3.12" % Test
-)
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
@@ -53,6 +52,4 @@ resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 routesGenerator := InjectedRoutesGenerator
 
 // Run Gulp when Play runs
-playRunHooks <+= baseDirectory.map(base => Gulp(base))
-
-// Run gulp when building a distribution
+//playRunHooks <+= baseDirectory.map(base => Gulp(base))
