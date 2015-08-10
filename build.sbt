@@ -5,16 +5,18 @@ name := """start"""
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.11.6"
+scalaVersion := Common.scalaVersion
 
 val gulpAssetsTask = TaskKey[Unit]("gulp-assets")
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala).settings(
+lazy val main = (project in file(".")).enablePlugins(PlayScala).dependsOn(admin).aggregate(admin).settings(
   gulpAssetsTask := Gulp(baseDirectory.value).buildAssets(),
 
   dist <<= (dist) dependsOn (gulpAssetsTask),
-  assembly <<= (assembly) dependsOn (gulpAssetsTask)
+  assembly <<= assembly.dependsOn(gulpAssetsTask)
 )
+
+lazy val admin = (project in file("modules/admin")).enablePlugins(PlayScala)
 
 // Set up a phat jar
 test in assembly := {}

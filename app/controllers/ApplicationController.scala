@@ -11,7 +11,9 @@ import actors.WebsocketActor
 import play.api.libs.ws._
 
 @Singleton
-class ApplicationController @Inject() (ws: WSClient) extends Controller {
+class ApplicationController @Inject() (
+                                        ws: WSClient
+                                        ) extends Controller {
 
   def index = Action {
     Ok(views.html.index())

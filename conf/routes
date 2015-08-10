@@ -5,6 +5,8 @@
 # Home page
 GET        /                      @controllers.ApplicationController.index
 
+->         /admin                 admin.Routes
+
 GET        /tilesocket            @controllers.ApplicationController.socket
 
 GET        /start.appcache        @controllers.AppCacheController.cacheManifest

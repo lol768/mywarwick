@@ -5,6 +5,7 @@ target
 /.project
 /.settings
 /RUNNING_PID
+/data
 
 /node_modules
 

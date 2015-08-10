@@ -13,6 +13,7 @@ var source     = require('vinyl-source-stream');
 var buffer     = require('vinyl-buffer');
 var _          = require('lodash');
 var path       = require('path');
+var mold       = require('mold-source-map');
 
 var postcss    = require('gulp-postcss');
 var less       = require('gulp-less');
@@ -41,24 +42,28 @@ var paths = {
 };
 
 var browserifyOptions = {
-  entries: paths.scriptIn,
+  entries: 'main.js',
+  basedir: 'app/assets/js',
   debug: true, // confusingly, this enables sourcemaps
   transform: [ babelify ] // Transforms ES6 + JSX into normal JS
 };
 
 var uglifyOptions = {/*defaults*/};
 
+console.log(path.join(__dirname, 'app', 'assets'))
+
 // Function for running Browserify on JS, since
 // we reuse it a couple of times.
 var bundle = function(browserify) {
   browserify.bundle()
     .on('error', gutil.log.bind(gutil, 'Browserify Error'))
-    .pipe(exorcist(paths.scriptOut + "/bundle.js.map"))
+    .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, 'app', 'assets')))
+    //.pipe(exorcist(paths.scriptOut + "/bundle.js.map"))
     .pipe(source('bundle.js'))
     //.pipe(buffer())
     //  .pipe(sourcemaps.init({loadMaps: true}))
     //    .pipe(postcss([
-    //      autoprefix()
+
     //    ]))
     //  .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.scriptOut))

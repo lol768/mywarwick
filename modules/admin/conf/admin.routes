@@ -1,0 +1,3 @@
+
+
+GET        /                      @controllers.admin.AdminController.index
