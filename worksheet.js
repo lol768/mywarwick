@@ -1,17 +1,16 @@
 var Rx = require('rx');
 
 
-var stream = new Rx.Subject();
+const Dispatcher = new Rx.Subject();
 
-var promise = Promise.reject(new Error("bad"));
+const peopleResults = new Rx.Subject();
+peopleResults.map((x) => '[Mappy bird:'+x+']').subscribe(Dispatcher);
 
-var d = stream.flatMap(
-  (v) => {
-    console.log('onNext:', v);
-    return promise;
-  }
-).subscribeOnError((err) => console.error("Hey check it:", err));
+Dispatcher.forEach((d) => {
+  console.log("Got a real thingy happening here: " + d);
+})
 
-stream.onNext(3);
+Dispatcher.onNext("Direct");
+peopleResults.onNext("PeopleResult");
 
 //promise.reject(new Error("OH NOES"))

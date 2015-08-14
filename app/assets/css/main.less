@@ -10,10 +10,14 @@
 
 @card-gutter: 10px;
 @card-border: #ddd;
+@card-bg-color: #fff;
+
+@bg-color: #eee;
 
 .card {
   margin: @card-gutter 0;
   border: 1px solid @card-border;
+  background-color: @card-bg-color;
 
   .card-heading, .card-item {
     padding: @card-gutter;
@@ -91,7 +95,16 @@
   }
 }
 
-@media screen and (max-width: 479px /*@screen-xs-max*/) {
+@media screen and (max-width: @screen-sm-max) {
+  body {
+    background: @bg-color;
+  }
+
+  .id7-fixed-width-container,
+  .id7-main-content-area { background: none; }
+}
+
+@media screen and (max-width: @screen-xs-max) {
 
   .id7-main-content-area {
     & > .id7-main-content {

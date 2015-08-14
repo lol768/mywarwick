@@ -22,6 +22,7 @@
     "gulp-util": "^3.0.6",
     "mold-source-map": "^0.4.0",
     "node-libs-browser": "^0.5.2",
+    "node-notifier": "^4.2.3",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.2.3"
@@ -34,9 +35,9 @@
     "localforage": "^1.2.7",
     "lodash": "^3.10.0",
     "loglevel": "^1.3.1",
-    "material-design-lite": "^1.0.0-3",
     "moment": "^2.10.3",
     "react": "^0.13.3",
+    "react-flipcard": "^0.1.2",
     "rx": "^2.5.3"
   },
   "scripts": {

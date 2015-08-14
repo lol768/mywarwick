@@ -56,16 +56,16 @@ console.log(path.join(__dirname, 'app', 'assets'))
 // we reuse it a couple of times.
 var bundle = function(browserify) {
   browserify.bundle()
-    .on('error', gutil.log.bind(gutil, 'Browserify Error'))
-    .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, 'app', 'assets')))
+    .on('error', function(e) {
+      gutil.log(gutil.colors.red(e.toString()));
+    })
+    .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, 'app', 'assets', 'js')))
     //.pipe(exorcist(paths.scriptOut + "/bundle.js.map"))
     .pipe(source('bundle.js'))
-    //.pipe(buffer())
-    //  .pipe(sourcemaps.init({loadMaps: true}))
-    //    .pipe(postcss([
-
-    //    ]))
-    //  .pipe(sourcemaps.write('.'))
+    .pipe(buffer())
+      .pipe(sourcemaps.init({loadMaps: true}))
+      .pipe(uglify())
+      .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.scriptOut))
 }
 
@@ -106,12 +106,14 @@ function exportAssetModule(name, taskName, baseDir) {
 }
 
 exportAssetModule('id7', 'id7-static', 'dist');
-exportAssetModule('material-design-lite', 'material-static', '');
+//exportAssetModule('material-design-lite', 'material-static', '');
 
-gulp.task('styles', ['id7-static', 'material-static'], function() {
+gulp.task('styles', ['id7-static'], function() {
   return gulp.src(paths.styleIn)
     .pipe(sourcemaps.init())
     .pipe(less({
+      // Allow requiring less relative to node_modules, plus any other dir under node_modules
+      // that's in styleModules.
       paths: [path.join(__dirname, 'node_modules')].concat(paths.styleModules.map(function(modulePath) {
         return path.join(__dirname, 'node_modules', modulePath)
       }))

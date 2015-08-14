@@ -1,7 +1,7 @@
-var Rx = require('rx');
-var moment = require('moment');
-var log = require('loglevel');
-var DataPipe = require('../datapipe');
+const Rx = require('rx');
+const moment = require('moment');
+const log = require('loglevel');
+const DataPipe = require('../datapipe');
 
 /**
  * Implementation of DataSource that provides an Observable
@@ -11,13 +11,15 @@ export default class FakeDataPipe extends DataPipe {
 
   constructor() {
     super();
-    var stream = new Rx.ReplaySubject(1);
+    let stream = new Rx.ReplaySubject(1);
 
     this.fake = true;
     this.counter = 0;
 
     this.stream = stream;
   }
+
+  connect() {}
 
   requestData(info) {
     super.requestData(info);

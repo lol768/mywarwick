@@ -1,9 +1,10 @@
 
 const React = require('react/addons');
-const TileItem = require('./tileitem');
-const TilePanel = require('./tilepanel');
 const log = require('loglevel');
 const moment = require('moment');
+
+const TileItem = require('../../components/tileitem');
+const TilePanel = require('../../components/tilepanel');
 
 export default class ActivityStreamTile extends React.Component {
   constructor(props) {
@@ -21,7 +22,7 @@ export default class ActivityStreamTile extends React.Component {
     );
   }
 
-  renderItem(item) {
+  static renderItem(item) {
     return <TileItem key={item.id}>
       <span className="title">{item.title}</span>
       <span className="published" title={item.published}>{moment(item.published).fromNow()}</span>
@@ -33,9 +34,9 @@ export default class ActivityStreamTile extends React.Component {
   //</ReactCSSTransitionGroup>
 
   render() {
-    //var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
-    var items = _.chain(this.state.items).slice(-10).value();
-    var renderedItems = items.map(this.renderItem);
+    //let ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
+    let items = _.chain(this.state.items).slice(-10).value();
+    let renderedItems = items.map(ActivityStreamTile.renderItem);
     return <TilePanel heading={this.props.title} contentClass="">
       <ul className="activity-stream">
         {renderedItems}

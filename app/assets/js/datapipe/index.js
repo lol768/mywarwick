@@ -1,6 +1,6 @@
 "use strict";
 
-var log = require('loglevel');
+const log = require('loglevel');
 
 export default class DataPipe {
 
@@ -16,7 +16,11 @@ export default class DataPipe {
 
   }
 
-  getUpdateStream(): Rx.Observable {
+  send(obj) {
+    throw new TypeError("Must implement send");
+  }
+
+  getUpdateStream():Rx.Observable {
     throw new TypeError("Must implement getUpdateStream");
   }
 
@@ -25,7 +29,7 @@ export default class DataPipe {
    * Subclasses can choose to override this if they get these updates from a
    * separate stream.
    */
-  getTileUpdates(): Rx.Observable {
+  getTileUpdates():Rx.Observable {
     return this.getUpdateStream().filter(msg => msg.type === 'tile-update');
   }
 
