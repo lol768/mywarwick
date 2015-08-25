@@ -3,6 +3,9 @@ const log = require('loglevel');
 const TilePanel = require('../../components/tilepanel');
 const L = require('leaflet');
 
+/**
+ * Wraps a Leaflet map as a React component.
+ */
 class LeafletMap extends React.Component {
   componentDidMount() {
     let options = {
@@ -22,9 +25,10 @@ class LeafletMap extends React.Component {
     };
     let map = this.map = L.map(React.findDOMNode(this.refs.map), options);
 
-    // FIXME this isn't doing anything
-    map.setView([52.3824362, -1.5619084], 15);
-    log.info("Map view set");
+    if (this.props.coords) {
+      map.setView(this.props.coords, this.props.zoom || 15);
+      log.info("Map view set");
+    }
 
     // store callback so it can be unregistered later :|
     this._thisOnClick = this.onClick.bind(this);
