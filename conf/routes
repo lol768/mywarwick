@@ -3,15 +3,16 @@
 # ~~~~
 
 # Home page
-GET        /                      @controllers.ApplicationController.index
+GET        /                       @controllers.ApplicationController.index
 
-->         /admin                 admin.Routes
+->         /admin                  admin.Routes
 
-GET        /websockets/page       @controllers.ApplicationController.socket
+GET        /test/inject            @controllers.ApplicationController.showInjectForm
+POST       /test/inject            @controllers.ApplicationController.injectEvent
 
-GET        /start.appcache        @controllers.AppCacheController.cacheManifest
+GET        /websockets/page        @controllers.ApplicationController.socket
 
-GET        /api/test              @controllers.ApiController.test
+GET        /start.appcache         @controllers.AppCacheController.cacheManifest
 
 # Map static resources from the /public folder to the /assets URL path
-GET        /assets/*file          @controllers.Assets.versioned(path="/public", file: Asset)
+GET        /assets/*file           @controllers.Assets.versioned(path="/public", file: Asset)

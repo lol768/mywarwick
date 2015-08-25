@@ -9,6 +9,7 @@
 var gulp       = require('gulp');
 var gutil      = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
+var replace    = require('gulp-replace');
 var source     = require('vinyl-source-stream');
 var buffer     = require('vinyl-buffer');
 var _          = require('lodash');
@@ -64,6 +65,7 @@ var bundle = function(browserify) {
     .pipe(source('bundle.js'))
     .pipe(buffer())
       .pipe(sourcemaps.init({loadMaps: true}))
+      .pipe(replace('$$BUILDTIME$$', (new Date()).toString()))
       .pipe(uglify())
       .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.scriptOut))
@@ -87,28 +89,24 @@ gulp.task('watch-scripts', [], function() {
  * Copies static resources out of an NPM module, and into
  * the asset output directory.
  */
-function exportAssetModule(name, taskName, baseDir) {
+function exportAssetModule(name, taskName, baseDir, extraExtensions) {
   gulp.task(taskName, function() {
     var base = 'node_modules/' + name + '/' + baseDir;
-    return gulp.src([
-      base + '/**/*.woff',
-      base + '/**/*.woff2',
-      base + '/**/*.ttf',
-      base + '/**/*.js',
-      base + '/**/*.js.map',
-      base + '/**/*.gif',
-      base + '/**/*.png',
-      base + '/**/*.jpg',
-      base + '/**/*.svg',
-    ], {base:base})
+
+    var baseExtensions = ['woff','woff2','ttf','js','js.map','gif','png','jpg','svg'];
+    var srcs = (extraExtensions || []).concat(baseExtensions);
+    var srcPaths = srcs.map(function(s) { return base + '/**/*.' + s; });
+
+    return gulp.src(srcPaths, {base:base})
       .pipe(gulp.dest(paths.assetsOut + '/lib/' + name))
   });
 }
 
+exportAssetModule('leaflet', 'leaflet-static', 'dist', ['css']);
 exportAssetModule('id7', 'id7-static', 'dist');
 //exportAssetModule('material-design-lite', 'material-static', '');
 
-gulp.task('styles', ['id7-static'], function() {
+gulp.task('styles', ['id7-static','leaflet-static'], function() {
   return gulp.src(paths.styleIn)
     .pipe(sourcemaps.init())
     .pipe(less({

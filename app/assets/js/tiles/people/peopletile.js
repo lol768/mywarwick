@@ -2,10 +2,8 @@
 const log = require('loglevel');
 const TilePanel = require('../../components/tilepanel');
 const React = require('react/addons');
-const Dispatcher = require('../../dispatcher').default;
 const FlipCard = require('react-flipcard');
 
-const actions = require('./').actions;
 const PeopleStore = require('./store');
 
 /**
@@ -16,7 +14,7 @@ export default class PeopleTile extends React.Component {
     super(props);
     this.state = {};
 
-    this.peopleStore = new PeopleStore(this.props.store);
+    this.peopleStore = new PeopleStore(this.props.tileId, this.props.dataPipe);
   }
 
   componentDidMount() {
@@ -50,8 +48,17 @@ export default class PeopleTile extends React.Component {
     return <TilePanel heading={this.props.title} contentClass="">
           <div className="card-item">
             <form onSubmit={this.submitForm.bind(this)}>
-              <input type="text" placeholder="Enter a name" onChange={this.handleChange.bind(this)} />
-              <button>Search</button>
+              <div className="input-group">
+                <input type="text"
+                       className="form-control"
+                       name="query"
+                       placeholder="Enter a name" onChange={this.handleChange.bind(this)} />
+                <span className="input-group-btn">
+                  <button className="btn btn-default" type="button">
+                    <i className="fa fa-fw fa-search"></i>
+                  </button>
+                </span>
+              </div>
             </form>
           </div>
           {this.renderResults()}
@@ -68,7 +75,7 @@ export default class PeopleTile extends React.Component {
     let name = this.state.value;
     if (name) {
       this.state.flipped = true;
-      Dispatcher.dispatch(actions.search(name));
+      this.peopleStore.search(name);
     }
   }
 }

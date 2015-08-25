@@ -10,18 +10,21 @@ const React = require('react/addons');
 
 const people = require('./tiles/people');
 const activitystream = require('./tiles/activitystream');
+const MapTile = require('./tiles/map/tile');
+
 const TileApp = require('./components/tileapp');
 const SocketDataPipe = require('./datapipe/socket');
 const FakeDataPipe = require('./datapipe/fake');
 const TileStore = require('./stores/tile');
 
-(()=>{
+localforage.config({
+  name: 'Start'
+})
 
-  localforage.config({
-    name: 'Start'
-  })
+// String replaced by Gulp build.
+const BUILD_TIME = "$$BUILDTIME$$";
 
-})()
+log.info("Scripts built at:", BUILD_TIME);
 
 $(function(){
 
@@ -32,11 +35,9 @@ $(function(){
       path: '/websockets/page'
     });
 
-    // Test sending data.
-    websocket.send('{"tileId":"3","data":{"query":"Qua"}}');
-
     // Generate fake data locally
-    const data = new FakeDataPipe();
+    //const data = new FakeDataPipe();
+    const data = websocket;
     const store = new TileStore(data);
 
     // FIXME ask datasource to send us historical data we haven't seen
@@ -71,7 +72,8 @@ $(function(){
       <TileApp store={store}>
         <activitystream.ActivityStreamTile title="News" store={store} key="3" tileId="3" />
         <activitystream.ActivityStreamTile title="T&L" store={store} key="4" tileId="4" />
-        <people.PeopleTile title="People" store={store} key="glob" tileId="glob" />
+        <people.PeopleTile title="People" store={store} dataPipe={data} key="glob" tileId="glob" />
+        <MapTile title="Map" dataPipe={data} key="map" tileId="map" />
       </TileApp>;
 
     React.render(app, $tileContainer[0]);

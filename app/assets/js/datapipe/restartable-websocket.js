@@ -60,9 +60,10 @@ export default class RestartableWebSocket {
   }
 
   send(msg: String) {
-    if (this.ws.readyState) {
+    if (this.ws.readyState == 1) {
       this.ws.send(msg);
     } else {
+      // Send message once we're reconnected
       this.buffer.push(msg);
     }
   }

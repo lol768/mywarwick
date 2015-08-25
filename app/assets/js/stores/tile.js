@@ -47,28 +47,32 @@ export default class TileStore extends BaseStore {
       }
     };
 
+    //dataSource.getTileUpdates().flatMap(withExisting).subscribe((u) => {
+    //  log.info("Well lookee here, an updatee",u);
+    //})
+
     // Pipe tile updates from the stream into the store.
     // Replaces any previous "value", and appends to any
     // previous "items".
     dataSource.getTileUpdates().flatMap(withExisting).map((result) => {
-      log.debug('Got tile update', result);
-
       let [data, existing] = result;
       existing.tileId = data.tileId;
       existing.value = data.value;
       let items = data.items;
-      items.push.apply(items, existing.items);
-      items = _.uniq(items, 'id');
-      items = _.sortByOrder(items, [(item) => moment(item.published).unix()], ['desc'])
+      if (items) {
+        items.push.apply(items, existing.items);
+        items = _.uniq(items, 'id');
+        items = _.sortByOrder(items, [(item) => moment(item.published).unix()], ['desc'])
 
-      // If 2 or more items have the same 'replaces' property value,
-      // we keep the first one only (which is the newest one since we just
-      // sorted descending by date
-      items = _.uniq(items, uniqueIfPresent('replaces'));
+        // If 2 or more items have the same 'replaces' property value,
+        // we keep the first one only (which is the newest one since we just
+        // sorted descending by date
+        items = _.uniq(items, uniqueIfPresent('replaces'));
 
-      existing.items = items;
+        existing.items = items;
+      }
       return existing;
-    }).flatMap((data) =>
+    }).subscribe((data) =>
       // flatMap because this returns a Promise that it wraps as an observable
       this.save(data.tileId, data),
       log.error
