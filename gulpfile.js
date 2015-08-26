@@ -49,9 +49,21 @@ var browserifyOptions = {
   transform: [ babelify ] // Transforms ES6 + JSX into normal JS
 };
 
-var uglifyOptions = {/*defaults*/};
+var jsMangle = (process.env.JS_MANGLE !== 'false');
+if (!jsMangle) {
+  gutil.log(gutil.colors.yellow('Keeping original variable names in JS (will produce larger files)'));
+}
 
-console.log(path.join(__dirname, 'app', 'assets'))
+var uglifyOptions = {
+  /**
+   * mangle renames variables to shorter ones. Dev Tools doesn't currently translate
+   * them in stack traces, making some errors cryptic ("o is not a function").
+   * However, the bundle is much larger without mangling, so we want it in production.
+   * In development you can set JS_MANGLE=false when running the build to turn it off:
+   * The watch-assets script does this for you.
+   */
+  mangle: jsMangle
+};
 
 // Function for running Browserify on JS, since
 // we reuse it a couple of times.
@@ -66,7 +78,7 @@ var bundle = function(browserify) {
     .pipe(buffer())
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(replace('$$BUILDTIME$$', (new Date()).toString()))
-      .pipe(uglify())
+      .pipe(uglify(uglifyOptions))
       .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.scriptOut))
 }
@@ -93,7 +105,7 @@ function exportAssetModule(name, taskName, baseDir, extraExtensions) {
   gulp.task(taskName, function() {
     var base = 'node_modules/' + name + '/' + baseDir;
 
-    var baseExtensions = ['woff','woff2','ttf','js','js.map','gif','png','jpg','svg'];
+    var baseExtensions = ['otf','eot','woff','woff2','ttf','js','js.map','gif','png','jpg','svg'];
     var srcs = (extraExtensions || []).concat(baseExtensions);
     var srcPaths = srcs.map(function(s) { return base + '/**/*.' + s; });
 
@@ -103,10 +115,11 @@ function exportAssetModule(name, taskName, baseDir, extraExtensions) {
 }
 
 exportAssetModule('leaflet', 'leaflet-static', 'dist', ['css']);
-exportAssetModule('id7', 'id7-static', 'dist');
+exportAssetModule('font-awesome', 'fa-static', '');
+//exportAssetModule('id7', 'id7-static', 'dist');
 //exportAssetModule('material-design-lite', 'material-static', '');
 
-gulp.task('styles', ['id7-static','leaflet-static'], function() {
+gulp.task('styles', ['leaflet-static','fa-static'], function() {
   return gulp.src(paths.styleIn)
     .pipe(sourcemaps.init())
     .pipe(less({

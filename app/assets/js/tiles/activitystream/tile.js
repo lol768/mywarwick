@@ -2,6 +2,7 @@
 const React = require('react/addons');
 const log = require('loglevel');
 const moment = require('moment');
+const _ = require('lodash');
 
 const TileItem = require('../../components/tileitem');
 const TilePanel = require('../../components/tilepanel');

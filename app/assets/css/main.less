@@ -2,11 +2,12 @@
 // the node_modules directory, so you can import from
 // NPM dependencies.
 
-@import 'id7/less/variables.less';
-@import 'id7/less/id7.less';
-@import 'id7/less/default-theme.less';
+@import 'bootstrap/less/bootstrap.less';
+@import 'font-awesome/less/font-awesome.less';
 
 @import '/assets/lib/leaflet/leaflet.css';
+
+@fa-font-path: "/assets/lib/font-awesome/fonts";
 
 .map {
   height: 200px;
@@ -71,13 +72,6 @@
   }
 }
 
-
-@id7-brand-default: orange;
-
-@id7-image-root-dir: "../lib/id7/images";
-@icon-font-path: '../lib/id7/fonts';
-@fa-font-path: '../lib/id7/fonts';
-
 .activity-stream {
   list-style: none;
   padding: 0;
@@ -99,22 +93,11 @@
   }
 }
 
-@media screen and (max-width: @screen-sm-max) {
-  body {
-    background: @bg-color;
-  }
-
-  .id7-fixed-width-container,
-  .id7-main-content-area { background: none; }
+body {
+  background: @bg-color;
 }
 
 @media screen and (max-width: @screen-xs-max) {
-
-  .id7-main-content-area {
-    & > .id7-main-content {
-      padding: 0;
-    }
-  }
 
   .tiles {
     .panel {

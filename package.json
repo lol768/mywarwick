@@ -30,7 +30,8 @@
     "watchify": "^3.2.3"
   },
   "dependencies": {
-    "id7": "https://github.com/UniversityofWarwick/id7/archive/v1.1.7.tar.gz",
+    "bootstrap": "^3.3.5",
+    "font-awesome": "^4.4.0",
     "immutable": "^3.7.4",
     "jquery": "^2.1.4",
     "leaflet": "^1.0.0-beta.1",

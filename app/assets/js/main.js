@@ -2,7 +2,7 @@ const log = require('loglevel');
 // only 'warn' otherwise
 log.enableAll(false);
 
-const $ = window.jQuery;
+const $ = require('jquery');
 
 const rx = require('rx');
 const localforage = require('localforage');
@@ -19,7 +19,7 @@ const TileStore = require('./stores/tile');
 
 localforage.config({
   name: 'Start'
-})
+});
 
 // String replaced by Gulp build.
 const BUILD_TIME = "$$BUILDTIME$$";

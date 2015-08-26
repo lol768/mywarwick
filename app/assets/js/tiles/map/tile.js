@@ -2,6 +2,7 @@ const React = require('react/addons');
 const log = require('loglevel');
 const TilePanel = require('../../components/tilepanel');
 const L = require('leaflet');
+const fa = require('../../components/fontawesome');
 
 /**
  * Wraps a Leaflet map as a React component.
@@ -79,7 +80,7 @@ export default class MapTile extends React.Component {
                    placeholder="Find a department, service, building or room" />
             <span className="input-group-btn">
               <button className="btn btn-default" type="submit">
-                <i className="fa fa-fw fa-search"></i>
+                <fa.Icon fixedWidth={true} name='search' />
               </button>
             </span>
           </div>

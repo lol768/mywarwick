@@ -3,6 +3,7 @@ const log = require('loglevel');
 const TilePanel = require('../../components/tilepanel');
 const React = require('react/addons');
 const FlipCard = require('react-flipcard');
+const fa = require('../../components/fontawesome');
 
 const PeopleStore = require('./store');
 
@@ -54,8 +55,8 @@ export default class PeopleTile extends React.Component {
                        name="query"
                        placeholder="Enter a name" onChange={this.handleChange.bind(this)} />
                 <span className="input-group-btn">
-                  <button className="btn btn-default" type="button">
-                    <i className="fa fa-fw fa-search"></i>
+                  <button className="btn btn-default" type="submit">
+                    <fa.Icon fixedWidth={true} name="search"></fa.Icon>
                   </button>
                 </span>
               </div>

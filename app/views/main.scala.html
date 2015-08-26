@@ -1,6 +1,6 @@
 @(/*user: model.UserContext, */title: String)(content: Html)
 <!DOCTYPE html>
-<html lang="en-GB" class="no-js"> <!-- class="id7-non-branded" to remove Warwick branding -->
+<html lang="en-GB" class="no-js">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -12,123 +12,19 @@
     <title>@title</title>
 
       <!-- Lato web font -->
-    <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic&amp;subset=latin,latin-ext"
-    rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic&amp;subset=latin,latin-ext" rel="stylesheet">
 
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("css/main.css")">
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
 
-    @*<script src="@routes.Assets.versioned("lib/id7/js/id7-bundle.js")"></script>*@
-    <script src="/assets/lib/id7/js/id7-bundle.js"></script>
     <script src="@routes.Assets.versioned("js/bundle.js")"></script>
 
     </head>
     <body>
-        <div class="id7-left-border"></div>
-        <div class="id7-fixed-width-container">
-            <a class="sr-only sr-only-focusable" href="#main">Skip to main content</a>
-
-            @*<header class="id7-page-header">
-                <div class="id7-utility-masthead">
-                    <nav class="id7-utility-bar">
-                        <ul>
-                             @if(user.loggedIn) {
-                                <li>
-                                    <a href="#"
-                                        data-toggle="id7:account-popover"
-                                        data-usercode="@user.userId"
-                                        data-name="@user.fullName"
-                                        data-loginlink="@user.request.map(_.loginLink)"
-                                        data-logoutlink="@user.request.map(_.logoutLink)"
-                                        >
-                                    @user.fullName
-                                    <span class="caret"></span>
-                                    </a>
-                                </li>
-                            } else {
-                                <li>
-                                    <a href="@user.request.map(_.loginLink)">Sign in</a>
-                                </li>
-                            }
-                        </ul>
-                    </nav>
-
-                    <div class="id7-masthead">
-                        <div class="id7-masthead-contents">
-                            <div class="clearfix">
-                                <div class="id7-logo-column">
-                                        <!-- Don't include the logo row on non-branded sites -->
-                                    <div class="id7-logo-row">
-                                        <div class="id7-logo">
-                                            <a href="http://warwick.ac.uk" title="Warwick homepage">
-                                                <img src="@routes.Assets.versioned("lib/id7/images/shim.gif")" alt="Warwick">
-                                            </a>
-                                        </div>
-                                         <nav class="id7-site-links">
-                                            <ul>
-                                              <li><a href="http://warwick.ac.uk/study">Study</a></li>
-                                              <li><a href="http://warwick.ac.uk/research">Research</a></li>
-                                              <li><a href="http://warwick.ac.uk/business">Business</a></li>
-                                              <li><a href="http://warwick.ac.uk/alumni">Alumni</a></li>
-                                              <li><a href="http://warwick.ac.uk/news">News</a></li>
-                                              <li><a href="http://warwick.ac.uk/about">About</a></li>
-                                            </ul>
-                                          </nav>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="id7-header-text clearfix">
-                                <h1>
-                                        <!-- Parent site link often excluded -->
-                                    <span class="id7-current-site-link"><a href="#">Start</a></span>
-                                </h1>
-                            </div>
-                        </div>
-                    </div>
-                </div>*@
-
-                    <!-- Docs master nav -->
-                <div class="id7-navigation" data-affixHeader="false" data-affixNav="false">
-                        <!-- Include the navigation component here if used -->
-                </div>
-            </header>
-
-                <!-- Page content of course! -->
-            <main class="id7-main-content-area" id="main">
-                <header class="id7-main-content-header">
-                    <div class="id7-horizontal-divider">
-                        <svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" version="1.1" width="1130" height="40" viewBox="0, 0, 1130, 40">
-                            <path d="m 0,0 1030.48, 0 22.8,40 16.96,-31.4 16.96,31.4 22.8,-40 20,0" class="divider" stroke="#383838" fill="none" />
-                        </svg>
-                    </div>
-
-                    @*<div class="id7-page-title">
-                        <h1>@title</h1>
-                    </div>*@
-                </header>
-
-                <div class="id7-main-content">
-                    @content
-                </div>
-            </main>
-
-            @*<footer class="id7-page-footer id7-footer-divider"> <!-- one of id7-footer-coloured or id7-footer-divider -->
-
-                <div class="id7-app-footer">
-
-                    <div class="id7-footer-utility">
-                        <ul>
-                            <li><a href="http://warwick.ac.uk/copyright">© MMXV</a></li>
-                            <li><a href="http://warwick.ac.uk/terms">Terms</a></li>
-                            <li><a href="http://warwick.ac.uk/privacy">Privacy</a></li>
-                            <li><a href="http://warwick.ac.uk/cookies">Cookies</a></li>
-                            <li><a href="http://warwick.ac.uk/accessibility">Accessibility</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </footer>*@
-        </div>
-        <div class="id7-right-border"></div>
+        <main>
+            <div class="page-content">
+                @content
+            </div>
+        </main>
     </body>
 </html>
