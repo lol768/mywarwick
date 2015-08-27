@@ -70,7 +70,7 @@ export default class MapTile extends React.Component {
     if (this.state.submitted) {
       submittedText = <p>Well done</p>;
     }
-    return <TilePanel heading={this.props.title} contentClass="">
+    return <TilePanel contentClass="">
       <div className="card-item">
         <form onSubmit={this.submitForm.bind(this)}>
           <div className="input-group">
@@ -84,7 +84,7 @@ export default class MapTile extends React.Component {
               </button>
             </span>
           </div>
-          <LeafletMap></LeafletMap>
+
         </form>
       </div>
     </TilePanel>;

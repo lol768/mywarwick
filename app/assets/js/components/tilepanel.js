@@ -6,9 +6,14 @@ export default class TilePanel extends React.Component {
     super(props);
   }
   render() {
-    return <div className="col-md-3 col-sm-4">
+    let headingElement = null;
+    if (this.props.heading) {
+      headingElement = <div className="card-heading">{this.props.heading}</div>
+    }
+
+    return <div className="col-md-4 col-sm-6">
       <div className="card card-default">
-        <div className="card-heading">{this.props.heading}</div>
+        {headingElement}
         <div className="card-content">
           {this.props.children}
         </div>

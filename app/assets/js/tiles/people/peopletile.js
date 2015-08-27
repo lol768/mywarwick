@@ -46,7 +46,7 @@ export default class PeopleTile extends React.Component {
   }
 
   render() {
-    return <TilePanel heading={this.props.title} contentClass="">
+    return <TilePanel contentClass="">
           <div className="card-item">
             <form onSubmit={this.submitForm.bind(this)}>
               <div className="input-group">
