@@ -62,10 +62,10 @@ var bundle = function(browserify) {
     .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, 'app', 'assets', 'js')))
     //.pipe(exorcist(paths.scriptOut + "/bundle.js.map"))
     .pipe(source('bundle.js'))
-    .pipe(buffer())
-      .pipe(sourcemaps.init({loadMaps: true}))
-      .pipe(uglify())
-      .pipe(sourcemaps.write('.'))
+    //.pipe(buffer())
+    //  .pipe(sourcemaps.init({loadMaps: true}))
+    //  .pipe(uglify())
+    //  .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.scriptOut))
 }
 

@@ -1,7 +1,6 @@
 // Gulpfile is set up to allow @imports relative to
 // the node_modules directory, so you can import from
 // NPM dependencies.
-
 @import 'id7/less/variables.less';
 @import 'id7/less/id7.less';
 @import 'id7/less/default-theme.less';
@@ -33,11 +32,8 @@
   }
 }
 
-
-
 @activity-transition-function: cubic-bezier(0, 1, 0.5, 1);
 //@activity-transition-function: ease;
-
 
 // These classes are set by
 // <ReactCSSTransitionGroup transitionName="activity">
@@ -55,6 +51,7 @@
     max-height: 5em;
   }
 }
+
 .activity-leave {
   max-height: 5em;
   transition: all .5s @activity-transition-function;
@@ -67,8 +64,7 @@
   }
 }
 
-
-@id7-brand-default: orange;
+// @id7-brand-default: orange;
 
 @id7-image-root-dir: "../lib/id7/images";
 @icon-font-path: '../lib/id7/fonts';
@@ -95,13 +91,107 @@
   }
 }
 
+.id7-fixed-width-container,
+.id7-main-content-area {
+  background: #f9f9f9 !important;
+}
+
+.id7-masthead {
+  padding-bottom: 10px;
+}
+
+.tab-bar {
+  cursor: pointer;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #f0f0f0;
+  border-top: 1px solid #d7d7d7;
+  height: 44px;
+  padding-top: 5px;
+  font-size: 13px;
+  line-height: 1;
+  color: #8d8d8d;
+  z-index: 1000;
+
+  i {
+    font-size: 18px;
+    margin-bottom: 3px;
+  }
+}
+
+.tab-bar-tabs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    margin: 0;
+    padding: 0;
+    float: left;
+    width: 20%;
+    text-align: center;
+    position: relative;
+
+    &:hover {
+      color: #555;
+    }
+
+    &:active {
+      color: #333;
+    }
+
+    &.tab-bar-item--active {
+      color: rgb(0, 122, 255);
+    }
+  }
+}
+
+.tab-bar i {
+  position: relative;
+}
+
+.tab-bar .badge {
+  background-color: #ff0404;
+  position: absolute;
+  top: 0;
+  right: -10px;
+
+  padding: 3px 5px;
+  font-size: 10px;
+}
+
+.tab-label {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link-block__item {
+  padding: 10px 6px;
+  display: block;
+  border-bottom: 1px solid #ddd;
+}
+
+.link-block {
+  .link-colour(@text-color);
+
+  li {
+    margin-bottom: 0;
+  }
+}
+
 @media screen and (max-width: @screen-sm-max) {
   body {
-    background: @bg-color;
+    // background: @bg-color;
   }
 
   .id7-fixed-width-container,
-  .id7-main-content-area { background: none; }
+  .id7-main-content-area {
+    background: none;
+  }
 }
 
 @media screen and (max-width: @screen-xs-max) {
