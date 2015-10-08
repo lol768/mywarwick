@@ -33,7 +33,7 @@ var paths = {
 
   assetsOut: 'target/gulp',
 
-  styleIn: ['app/assets/css/main.less', 'node_modules/id7/less/id7.less'],
+  styleIn: ['app/assets/css/main.less', 'node_modules/id7/less/id7.lite.less'],
   styleOut: 'target/gulp/css',
 
   // Paths under node_modules that will be searched when @import-ing in your LESS.
@@ -114,12 +114,10 @@ function exportAssetModule(name, taskName, baseDir, extraExtensions) {
   });
 }
 
-exportAssetModule('leaflet', 'leaflet-static', 'dist', ['css']);
-exportAssetModule('font-awesome', 'fa-static', '');
-//exportAssetModule('id7', 'id7-static', 'dist');
+exportAssetModule('id7', 'id7-static', 'dist');
 //exportAssetModule('material-design-lite', 'material-static', '');
 
-gulp.task('styles', ['leaflet-static','fa-static'], function() {
+gulp.task('styles', ['id7-static'], function() {
   return gulp.src(paths.styleIn)
     .pipe(sourcemaps.init())
     .pipe(less({
