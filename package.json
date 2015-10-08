@@ -15,8 +15,10 @@
     "exorcist": "^0.4.0",
     "gulp": "^3.9.0",
     "gulp-babel": "^5.1.0",
+    "gulp-file": "^0.2.0",
     "gulp-less": "^3.0.3",
     "gulp-postcss": "^5.1.10",
+    "gulp-replace": "^0.5.4",
     "gulp-sourcemaps": "^1.5.2",
     "gulp-uglify": "^1.2.0",
     "gulp-util": "^3.0.6",
@@ -28,9 +30,11 @@
     "watchify": "^3.2.3"
   },
   "dependencies": {
-    "id7": "git://github.com/UniversityofWarwick/id7.git#ID-195",
+    "bootstrap": "^3.3.5",
+    "font-awesome": "^4.4.0",
     "immutable": "^3.7.4",
     "jquery": "^2.1.4",
+    "leaflet": "^1.0.0-beta.1",
     "less": "^2.5.1",
     "localforage": "^1.2.7",
     "lodash": "^3.10.0",

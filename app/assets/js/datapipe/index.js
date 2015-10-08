@@ -13,7 +13,7 @@ export default class DataPipe {
    * the data for one).
    */
   requestData(info) {
-
+    throw new TypeError("Must implement requestData");
   }
 
   send(obj) {

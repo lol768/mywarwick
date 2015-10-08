@@ -9,6 +9,7 @@
 var gulp       = require('gulp');
 var gutil      = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
+var replace    = require('gulp-replace');
 var source     = require('vinyl-source-stream');
 var buffer     = require('vinyl-buffer');
 var _          = require('lodash');
@@ -48,9 +49,21 @@ var browserifyOptions = {
   transform: [ babelify ] // Transforms ES6 + JSX into normal JS
 };
 
-var uglifyOptions = {/*defaults*/};
+var jsMangle = (process.env.JS_MANGLE !== 'false');
+if (!jsMangle) {
+  gutil.log(gutil.colors.yellow('Keeping original variable names in JS (will produce larger files)'));
+}
 
-console.log(path.join(__dirname, 'app', 'assets'))
+var uglifyOptions = {
+  /**
+   * mangle renames variables to shorter ones. Dev Tools doesn't currently translate
+   * them in stack traces, making some errors cryptic ("o is not a function").
+   * However, the bundle is much larger without mangling, so we want it in production.
+   * In development you can set JS_MANGLE=false when running the build to turn it off:
+   * The watch-assets script does this for you.
+   */
+  mangle: jsMangle
+};
 
 // Function for running Browserify on JS, since
 // we reuse it a couple of times.
@@ -62,10 +75,11 @@ var bundle = function(browserify) {
     .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, 'app', 'assets', 'js')))
     //.pipe(exorcist(paths.scriptOut + "/bundle.js.map"))
     .pipe(source('bundle.js'))
-    //.pipe(buffer())
-    //  .pipe(sourcemaps.init({loadMaps: true}))
-    //  .pipe(uglify())
-    //  .pipe(sourcemaps.write('.'))
+    .pipe(buffer())
+      .pipe(sourcemaps.init({loadMaps: true}))
+      .pipe(replace('$$BUILDTIME$$', (new Date()).toString()))
+      .pipe(uglify(uglifyOptions))
+      .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.scriptOut))
 }
 
@@ -87,28 +101,25 @@ gulp.task('watch-scripts', [], function() {
  * Copies static resources out of an NPM module, and into
  * the asset output directory.
  */
-function exportAssetModule(name, taskName, baseDir) {
+function exportAssetModule(name, taskName, baseDir, extraExtensions) {
   gulp.task(taskName, function() {
     var base = 'node_modules/' + name + '/' + baseDir;
-    return gulp.src([
-      base + '/**/*.woff',
-      base + '/**/*.woff2',
-      base + '/**/*.ttf',
-      base + '/**/*.js',
-      base + '/**/*.js.map',
-      base + '/**/*.gif',
-      base + '/**/*.png',
-      base + '/**/*.jpg',
-      base + '/**/*.svg',
-    ], {base:base})
+
+    var baseExtensions = ['otf','eot','woff','woff2','ttf','js','js.map','gif','png','jpg','svg'];
+    var srcs = (extraExtensions || []).concat(baseExtensions);
+    var srcPaths = srcs.map(function(s) { return base + '/**/*.' + s; });
+
+    return gulp.src(srcPaths, {base:base})
       .pipe(gulp.dest(paths.assetsOut + '/lib/' + name))
   });
 }
 
-exportAssetModule('id7', 'id7-static', 'dist');
+exportAssetModule('leaflet', 'leaflet-static', 'dist', ['css']);
+exportAssetModule('font-awesome', 'fa-static', '');
+//exportAssetModule('id7', 'id7-static', 'dist');
 //exportAssetModule('material-design-lite', 'material-static', '');
 
-gulp.task('styles', ['id7-static'], function() {
+gulp.task('styles', ['leaflet-static','fa-static'], function() {
   return gulp.src(paths.styleIn)
     .pipe(sourcemaps.init())
     .pipe(less({

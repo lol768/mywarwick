@@ -2,7 +2,7 @@ const log = require('loglevel');
 // only 'warn' otherwise
 log.enableAll(false);
 
-const $ = window.jQuery;
+const $ = require('jquery');
 
 const localforage = require('localforage');
 
@@ -16,13 +16,18 @@ const UtilityBar = require('./components/ui/UtilityBar');
 
     localforage.config({
         name: 'Start'
-    })
+    });
+
+    // String replaced by Gulp build.
+    const BUILD_TIME = "$$BUILDTIME$$";
+
+    log.info("Scripts built at:", BUILD_TIME);
 
 })();
 
 $(function () {
 
-    ReactDOM.render(<UtilityBar name="John Smith" />, document.getElementById('utility-bar-container'));
+    ReactDOM.render(<UtilityBar name="John Smith"/>, document.getElementById('utility-bar-container'));
     ReactDOM.render(<Application />, document.getElementById('app-container'));
 
 });

@@ -7,4 +7,6 @@ if [[ ! -f node_modules/.bin/gulp ]]; then
   "No gulp script found, have you run `npm install`?"
   exit 1
 fi
-./node_modules/.bin/gulp watch-assets
+
+# We set JS_MANGLE=false so that variables have their original name.
+JS_MANGLE=false ./node_modules/.bin/gulp watch-assets

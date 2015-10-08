@@ -1,17 +1,20 @@
 // Gulpfile is set up to allow @imports relative to
 // the node_modules directory, so you can import from
 // NPM dependencies.
-@import 'id7/less/variables.less';
-@import 'id7/less/id7.less';
-@import 'id7/less/default-theme.less';
+@import 'bootstrap/less/bootstrap.less';
+@import 'font-awesome/less/font-awesome.less';
 
-//@import (inline) 'material-design-lite/material.css';
+@import '/assets/lib/leaflet/leaflet.css';
 
-@card-gutter: 10px;
-@card-border: #ddd;
-@card-bg-color: #fff;
+@import 'variables';
 
-@bg-color: #eee;
+body {
+  background: @bg-color;
+}
+
+.map {
+  height: 200px;
+}
 
 .card {
   margin: @card-gutter 0;
@@ -31,9 +34,6 @@
 
   }
 }
-
-@activity-transition-function: cubic-bezier(0, 1, 0.5, 1);
-//@activity-transition-function: ease;
 
 // These classes are set by
 // <ReactCSSTransitionGroup transitionName="activity">
@@ -63,12 +63,6 @@
     max-height: 0;
   }
 }
-
-// @id7-brand-default: orange;
-
-@id7-image-root-dir: "../lib/id7/images";
-@icon-font-path: '../lib/id7/fonts';
-@fa-font-path: '../lib/id7/fonts';
 
 .activity-stream {
   list-style: none;
@@ -176,7 +170,7 @@
 }
 
 .link-block {
-  .link-colour(@text-color);
+  // .link-colour(@text-color);
 
   li {
     margin-bottom: 0;
@@ -195,12 +189,6 @@
 }
 
 @media screen and (max-width: @screen-xs-max) {
-
-  .id7-main-content-area {
-    & > .id7-main-content {
-      padding: 0;
-    }
-  }
 
   .tiles {
     .panel {
