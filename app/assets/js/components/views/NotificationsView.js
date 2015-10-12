@@ -11,12 +11,18 @@ export default class NotificationsView extends ReactComponent {
     render() {
         return (
             <GroupedList groupBy={groupItemsByDate}>
-                <ActivityItem text="Your submission for CS310 Project Final Report is due tomorrow"
+                <ActivityItem key="a"
+                              text="Your submission for CS310 Project Final Report is due tomorrow"
                               source="Tabula"
-                              date="2015-10-09T00:00"/>
-                <ActivityItem text="The book '1984' is due back tomorrow"
+                              date="2015-10-12T12:00"/>
+                <ActivityItem key="b"
+                              text="The book '1984' is due back tomorrow"
                               source="Library"
-                              date="2015-10-08T09:00"/>
+                              date="2015-10-11T09:10"/>
+                <ActivityItem key="c"
+                              text="The page 'Teaching 15/16' has been updated"
+                              source="SiteBuilder"
+                              date="2015-09-14T14:36"/>
             </GroupedList>
         );
     }
@@ -33,13 +39,25 @@ let groupItemsByDate = {
     // Which group an item belongs in
     // Return an arbitrary identifier that is the same for all items in the same group
     groupForItem(item) {
-        return moment(item.props.date).format('YYYY-MM-DD');
+        var date = moment(item.props.date).startOf('day');
+
+        if (date.isSame(moment(), 'day')) {
+            return 'Today';
+        } else if (date.isSame(moment().subtract(1, 'day'), 'day')) {
+            return 'Yesterday';
+        } else if (date.isSame(moment(), 'week')) {
+            return 'This Week';
+        } else if (date.isSame(moment().subtract(1, 'week'), 'week')) {
+            return 'Last Week';
+        } else {
+            return 'Older';
+        }
     },
 
     // The title to be displayed for items in the group
     // Return a nice title for the user to look at, from the group identifier
     titleForGroup(group) {
-        return moment(group).calendar();
+        return group;
     }
 
 };
