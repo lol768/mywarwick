@@ -14,7 +14,7 @@ export default class GroupedList extends ReactComponent {
             .map((items, group) => (
                 // Title the group with a list header
                 <div className="list-group">
-                    <ListHeader title={this.props.groupBy.titleForGroup(group)}/>
+                    <ListHeader key={group + "-header"} title={this.props.groupBy.titleForGroup(group)}/>
                     {items}
                 </div>
             ))
