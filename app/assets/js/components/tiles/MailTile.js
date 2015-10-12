@@ -87,7 +87,7 @@ export default class MailTile extends ReactComponent {
         switch (this.props.size) {
             case 'large':
                 return (
-                    <Tile title="Mail" href="http://warwick.ac.uk/mymail">
+                    <Tile title="Mail" href="http://warwick.ac.uk/mymail" backgroundColor="#0078d7" icon="envelope-o">
                         <ul className="list-unstyled">
                             {this.state.messages.map((message) => <MailMessageListItem key={message.id} {...message} />)}
                         </ul>
@@ -95,7 +95,7 @@ export default class MailTile extends ReactComponent {
                 );
             default:
                 return (
-                    <Tile title="Mail" href="http://warwick.ac.uk/mymail">
+                    <Tile title="Mail" href="http://warwick.ac.uk/mymail" backgroundColor="#0078d7" icon="envelope-o">
                         {this.state.messages.length} unread
                     </Tile>
                 );

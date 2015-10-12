@@ -213,12 +213,15 @@
 .mail-list-item {
   overflow: hidden;
 }
+
 .mail-list-item__from {
   font-weight: bold;
 }
+
 .mail-list-item__date {
   float: right;
 }
+
 .mail-list-item__subject {
   display: block;
 }
@@ -230,14 +233,43 @@
 .activity-item {
   .list-group-item;
 }
+
 .list-header {
   .list-group-item;
   .disabled;
 }
+
 .activity-item__text {
   display: block;
   font-weight: bold;
 }
+
 .activity-item__date {
   float: right;
+}
+
+.tile {
+  min-height: 125px;
+  padding: 10px 10px 20px;
+  position: relative;
+  font-size: 15px;
+  margin-bottom: 10px;
+
+  > a {
+    text-decoration: none;
+    color: inherit;
+
+    > .tile-body > header {
+      > h1 {
+        color: #fff;
+        border: 0;
+        margin: 0;
+        font-size: 16px;
+
+        > .fa {
+          margin-right: 4px;
+        }
+      }
+    }
+  }
 }
