@@ -2,7 +2,7 @@
 // the node_modules directory, so you can import from
 // NPM dependencies.
 @import 'id7/less/variables.less';
-@import 'id7/less/id7.lite.less';
+@import 'id7/less/id7.less';
 @import 'id7/less/default-theme.less';
 
 //@import (inline) 'material-design-lite/material.css';
@@ -221,4 +221,23 @@
 }
 .mail-list-item__subject {
   display: block;
+}
+
+.news-item {
+  .panel;
+}
+
+.activity-item {
+  .list-group-item;
+}
+.list-header {
+  .list-group-item;
+  .disabled;
+}
+.activity-item__text {
+  display: block;
+  font-weight: bold;
+}
+.activity-item__date {
+  float: right;
 }
