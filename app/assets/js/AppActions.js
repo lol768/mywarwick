@@ -2,10 +2,10 @@ const Dispatcher = require('./Dispatcher');
 
 export default class AppActions {
 
-    static selectTab(tab) {
+    static navigate(path) {
         Dispatcher.dispatch({
-            type: 'select-tab',
-            tab: tab
+            type: 'navigate',
+            path: path
         });
     }
 

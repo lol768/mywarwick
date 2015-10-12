@@ -8,17 +8,18 @@ const TabBarItem = require('./TabBarItem');
 export default class TabBar extends ReactComponent {
 
     onSelectItem(item) {
-        AppActions.selectTab(item.props.title);
+        AppActions.navigate(item.props.path);
     }
 
     render() {
         let tabBarItems = this.props.items.map((item) => {
             return (
-                <TabBarItem key={item.title}
+                <TabBarItem key={item.path}
+                            active={this.props.selectedItem == item.path}
                             title={item.title}
-                            active={this.props.selectedTab == item.title}
                             icon={item.icon}
                             badge={item.badge}
+                            path={item.path}
                             onClick={this.onSelectItem.bind(this)}/>
             );
         });

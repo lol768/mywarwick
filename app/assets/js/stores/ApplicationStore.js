@@ -2,22 +2,19 @@ const FluxStore = require('flux/lib/FluxStore');
 
 const Dispatcher = require('../Dispatcher');
 
-var tab = 'me';
+// Start the application at the requested URL
+var path = window.location.pathname;
 
 class ApplicationStore extends FluxStore {
 
-    constructor(dispatcher) {
-        super(dispatcher);
-    }
-
-    getSelectedTab() {
-        return tab;
+    getCurrentPath() {
+        return path;
     }
 
     __onDispatch(action) {
         switch (action.type) {
-            case 'select-tab':
-                tab = action.tab;
+            case 'navigate':
+                path = action.path;
                 this.__emitChange();
                 break;
             default:

@@ -12,6 +12,8 @@ const ReactDOM = require('react-dom');
 const Application = require('./components/Application');
 const UtilityBar = require('./components/ui/UtilityBar');
 
+const AppActions = require('./AppActions');
+
 (()=> {
 
     localforage.config({
@@ -29,5 +31,9 @@ $(function () {
 
     ReactDOM.render(<UtilityBar name="John Smith"/>, document.getElementById('utility-bar-container'));
     ReactDOM.render(<Application />, document.getElementById('app-container'));
+
+    window.addEventListener('popstate', function() {
+        AppActions.navigate(window.location.pathname);
+    });
 
 });
