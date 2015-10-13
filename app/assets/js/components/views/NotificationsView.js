@@ -3,23 +3,38 @@ const ReactComponent = require('react/lib/ReactComponent');
 
 const ActivityItem = require('../ui/ActivityItem');
 
+const NotificationsStore = require('../../stores/NotificationsStore');
+
 export default class NotificationsView extends ReactComponent {
 
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            notifications: NotificationsStore.getNotifications()
+        };
+
+        NotificationsStore.addListener(() => {
+            this.setState({
+                notifications: NotificationsStore.getNotifications()
+            });
+        });
+    }
+
     render() {
+
+        var notificationsList = this.state.notifications.map((notification) => {
+            return (
+                <ActivityItem key={notification.key}
+                              text={notification.text}
+                              source={notification.source}
+                              date={notification.date}/>
+            )
+        })
+
         return (
             <div>
-                <ActivityItem key="a"
-                              text="Your submission for CS310 Project Final Report is due tomorrow"
-                              source="Tabula"
-                              date="2015-10-12T12:00"/>
-                <ActivityItem key="b"
-                              text="The book '1984' is due back tomorrow"
-                              source="Library"
-                              date="2015-10-11T09:10"/>
-                <ActivityItem key="c"
-                              text="The page 'Teaching 15/16' has been updated"
-                              source="SiteBuilder"
-                              date="2015-09-14T14:36"/>
+                {notificationsList}
             </div>
         );
     }

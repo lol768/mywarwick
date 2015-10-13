@@ -1,16 +1,10 @@
 package actors
 
-import actors.WebsocketActor.ClientData
 import akka.actor._
 import play.api.data.validation.ValidationError
-import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json._
-import scala.concurrent.duration._
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-import scala.util.Random
-
-object WebsocketActor  {
+object WebsocketActor {
   def props(out: ActorRef, messageBus: MessageBus) = Props(classOf[WebsocketActor], out, messageBus)
 
   /**
@@ -25,6 +19,7 @@ object WebsocketActor  {
    * @param data Freeform JSON payload.
    */
   case class ClientData(messageId: Int, tileId: String, data: JsValue)
+
   implicit val clientDataFormat = Json.format[ClientData]
 
   /**
@@ -36,6 +31,7 @@ object WebsocketActor  {
 
   // An update to a single tile
   case class TileUpdate(data: JsValue)
+
 }
 
 /**
@@ -51,11 +47,24 @@ object WebsocketActor  {
  * @param out this output will be attached to the websocket and will send
  *            messages back to the client.
  */
-class WebsocketActor(out : ActorRef, messageBus: MessageBus) extends Actor with ActorLogging {
+class WebsocketActor(out: ActorRef, messageBus: MessageBus) extends Actor with ActorLogging {
+
   import WebsocketActor._
 
-  // We've got fun and games
-  out ! JsObject(Seq("welcome" -> JsString("Welcome to the jungle")))
+  val t = new java.util.Timer()
+  val task = new java.util.TimerTask {
+    var counter = 1;
+    def run() = {
+      counter = counter + 1
+      out ! JsObject(Seq(
+        "key" -> JsString(counter + ""),
+        "text" -> JsString("Your submission for CS310 Project Final Report is due tomorrow"),
+        "source" -> JsString("Tabula"),
+        "date" -> JsString("2015-10-14T12:00")
+      ))
+    }
+  }
+  t.schedule(task, 5000L, 9000L)
 
   /**
    * Test of subscribing to a message bus, such as the one here which other
@@ -94,7 +103,7 @@ class WebsocketActor(out : ActorRef, messageBus: MessageBus) extends Actor with 
 
   def toErrorResponse(js: JsValue, errors: Seq[(JsPath, Seq[ValidationError])]) = {
     val messageId = (js \ "messageId").validate[Int]
-    val errorsSeq = Json.arr( Json.obj(
+    val errorsSeq = Json.arr(Json.obj(
       "code" -> "400",
       "title" -> "JSON parse error",
       "detail" -> errors.toString()
