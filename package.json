@@ -28,7 +28,8 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.2.3",
-    "gulp-manifest": "~0.1.0"
+    "gulp-manifest": "~0.1.0",
+    "gulp-rename": "~1.2.2"
   },
   "dependencies": {
     "flux": "^2.1.1",

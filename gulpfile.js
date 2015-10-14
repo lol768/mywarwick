@@ -25,6 +25,9 @@ var watchify = require('watchify');
 var exorcist = require('exorcist');
 var autoprefix = require('autoprefixer-core');
 var manifest = require('gulp-manifest');
+var rename = require('gulp-rename');
+
+var lessCompiler = require('less');
 
 var paths = {
   assetPath: 'app/assets',
@@ -145,20 +148,38 @@ gulp.task('watch-styles', ['styles'], function () {
 
 // Run once the scripts and styles are in place
 gulp.task('manifest', ['scripts', 'styles'], function () {
-  return gulp.src([
-    paths.assetsOut + '/**/*',
-    '!' + paths.assetsOut + '/**/*.map' // don't cache source maps
-  ], {base: path.assetsOut})
-    .pipe(manifest({
-      hash: true,
-      preferOnline: true,
-      exclude: 'app.manifest',
-      prefix: '/assets/'
-    }))
-    .pipe(gulp.dest(paths.assetsOut));
+  getFontAwesomeVersion(function (fontAwesomeVersion) {
+    return gulp.src([
+      paths.assetsOut + '/**/*',
+      '!' + paths.assetsOut + '/**/*.map' // don't cache source maps
+    ], {base: path.assetsOut})
+      .pipe(rename(function (path) {
+        if (path.basename == 'fontawesome-webfont') {
+          path.extname += '?v=' + fontAwesomeVersion;
+        }
+
+        return path;
+      }))
+      .pipe(manifest({
+        hash: true,
+        preferOnline: true,
+        exclude: 'app.manifest',
+        prefix: '/assets/'
+      }))
+      .pipe(gulp.dest(paths.assetsOut));
+  });
 });
 
 // Shortcuts for building all asset types at once
 gulp.task('assets', ['scripts', 'styles', 'manifest']);
 gulp.task('watch-assets', ['watch-scripts', 'watch-styles']);
 gulp.task('wizard', ['watch-assets']);
+
+// Get the current FA version for use in the cache manifest
+function getFontAwesomeVersion(cb) {
+  lessCompiler.render('@import "node_modules/id7/less/font-awesome/variables.less"; @{fa-version} { a: a; }', {},
+    function (e, output) {
+      var version = output.css.match(/"([0-9\.]+)"/)[1];
+      cb(version);
+    });
+}
