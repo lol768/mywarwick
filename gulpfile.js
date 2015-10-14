@@ -162,7 +162,6 @@ gulp.task('manifest', ['scripts', 'styles'], function () {
       }))
       .pipe(manifest({
         hash: true,
-        preferOnline: true,
         exclude: 'app.manifest',
         prefix: '/assets/'
       }))
