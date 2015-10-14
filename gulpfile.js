@@ -6,24 +6,25 @@
  */
 'use strict';
 
-var gulp       = require('gulp');
-var gutil      = require('gulp-util');
+var gulp = require('gulp');
+var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
-var replace    = require('gulp-replace');
-var source     = require('vinyl-source-stream');
-var buffer     = require('vinyl-buffer');
-var _          = require('lodash');
-var path       = require('path');
-var mold       = require('mold-source-map');
+var replace = require('gulp-replace');
+var source = require('vinyl-source-stream');
+var buffer = require('vinyl-buffer');
+var _ = require('lodash');
+var path = require('path');
+var mold = require('mold-source-map');
 
-var postcss    = require('gulp-postcss');
-var less       = require('gulp-less');
-var uglify     = require('gulp-uglify');
+var postcss = require('gulp-postcss');
+var less = require('gulp-less');
+var uglify = require('gulp-uglify');
 var browserify = require('browserify');
-var babelify   = require('babelify');
-var watchify   = require('watchify');
-var exorcist   = require('exorcist');
+var babelify = require('babelify');
+var watchify = require('watchify');
+var exorcist = require('exorcist');
 var autoprefix = require('autoprefixer-core');
+var manifest = require('gulp-manifest');
 
 var paths = {
   assetPath: 'app/assets',
@@ -46,7 +47,7 @@ var browserifyOptions = {
   entries: 'main.js',
   basedir: 'app/assets/js',
   debug: true, // confusingly, this enables sourcemaps
-  transform: [ babelify ] // Transforms ES6 + JSX into normal JS
+  transform: [babelify] // Transforms ES6 + JSX into normal JS
 };
 
 var jsMangle = (process.env.JS_MANGLE !== 'false');
@@ -67,32 +68,34 @@ var uglifyOptions = {
 
 // Function for running Browserify on JS, since
 // we reuse it a couple of times.
-var bundle = function(browserify) {
+var bundle = function (browserify) {
   browserify.bundle()
-    .on('error', function(e) {
+    .on('error', function (e) {
       gutil.log(gutil.colors.red(e.toString()));
     })
     .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, 'app', 'assets', 'js')))
     //.pipe(exorcist(paths.scriptOut + "/bundle.js.map"))
     .pipe(source('bundle.js'))
     .pipe(buffer())
-      .pipe(sourcemaps.init({loadMaps: true}))
-      .pipe(replace('$$BUILDTIME$$', (new Date()).toString()))
-      .pipe(uglify(uglifyOptions))
-      .pipe(sourcemaps.write('.'))
+    .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(replace('$$BUILDTIME$$', (new Date()).toString()))
+    .pipe(uglify(uglifyOptions))
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.scriptOut))
-}
+};
 
-gulp.task('scripts', [], function() {
+gulp.task('scripts', [], function () {
   var b = browserify(browserifyOptions);
   return bundle(b);
 });
 
 // Recompile scripts on changes. Watchify is more efficient than
 // grunt.watch as it knows how to do incremental rebuilds.
-gulp.task('watch-scripts', [], function() {
+gulp.task('watch-scripts', [], function () {
   var bw = watchify(browserify(_.assign({}, watchify.args, browserifyOptions)));
-  bw.on('update', function() { bundle(bw); });
+  bw.on('update', function () {
+    bundle(bw);
+  });
   bw.on('log', gutil.log);
   return bundle(bw);
 });
@@ -102,28 +105,29 @@ gulp.task('watch-scripts', [], function() {
  * the asset output directory.
  */
 function exportAssetModule(name, taskName, baseDir, extraExtensions) {
-  gulp.task(taskName, function() {
+  gulp.task(taskName, function () {
     var base = 'node_modules/' + name + '/' + baseDir;
 
-    var baseExtensions = ['otf','eot','woff','woff2','ttf','js','js.map','gif','png','jpg','svg'];
+    var baseExtensions = ['otf', 'eot', 'woff', 'woff2', 'ttf', 'js', 'js.map', 'gif', 'png', 'jpg', 'svg'];
     var srcs = (extraExtensions || []).concat(baseExtensions);
-    var srcPaths = srcs.map(function(s) { return base + '/**/*.' + s; });
+    var srcPaths = srcs.map(function (s) {
+      return base + '/**/*.' + s;
+    });
 
-    return gulp.src(srcPaths, {base:base})
+    return gulp.src(srcPaths, {base: base})
       .pipe(gulp.dest(paths.assetsOut + '/lib/' + name))
   });
 }
 
 exportAssetModule('id7', 'id7-static', 'dist');
-//exportAssetModule('material-design-lite', 'material-static', '');
 
-gulp.task('styles', ['id7-static'], function() {
+gulp.task('styles', ['id7-static'], function () {
   return gulp.src(paths.styleIn)
     .pipe(sourcemaps.init())
     .pipe(less({
       // Allow requiring less relative to node_modules, plus any other dir under node_modules
       // that's in styleModules.
-      paths: [path.join(__dirname, 'node_modules')].concat(paths.styleModules.map(function(modulePath) {
+      paths: [path.join(__dirname, 'node_modules')].concat(paths.styleModules.map(function (modulePath) {
         return path.join(__dirname, 'node_modules', modulePath)
       }))
     }))
@@ -135,11 +139,26 @@ gulp.task('styles', ['id7-static'], function() {
 });
 
 // Recompile LESS on changes
-gulp.task('watch-styles', ['styles'], function() {
-  return gulp.watch(paths.assetPath+'/css/**/*.less', ['styles']);
-})
+gulp.task('watch-styles', ['styles'], function () {
+  return gulp.watch(paths.assetPath + '/css/**/*.less', ['styles']);
+});
+
+// Run once the scripts and styles are in place
+gulp.task('manifest', ['scripts', 'styles'], function () {
+  return gulp.src([
+    paths.assetsOut + '/**/*',
+    '!' + paths.assetsOut + '/**/*.map' // don't cache source maps
+  ], {base: path.assetsOut})
+    .pipe(manifest({
+      hash: true,
+      preferOnline: true,
+      exclude: 'app.manifest',
+      prefix: '/assets/'
+    }))
+    .pipe(gulp.dest(paths.assetsOut));
+});
 
 // Shortcuts for building all asset types at once
-gulp.task('assets', ['scripts','styles']);
-gulp.task('watch-assets', ['watch-scripts','watch-styles']);
+gulp.task('assets', ['scripts', 'styles', 'manifest']);
+gulp.task('watch-assets', ['watch-scripts', 'watch-styles']);
 gulp.task('wizard', ['watch-assets']);
