@@ -36,7 +36,7 @@ object WebsocketActor {
 
 /**
  * Websocket-facing actor, wired in to the controller. It receives
- * any messages send from the client in the form of a JsValue. Other
+ * any messages sent from the client in the form of a JsValue. Other
  * actors can also send any kind of message to it.
  *
  * Currently this contains a lot of stuff but only because it's generating
@@ -51,17 +51,26 @@ class WebsocketActor(out: ActorRef, messageBus: MessageBus) extends Actor with A
 
   import WebsocketActor._
 
+  var messageKey = 0;
+
+  def sendNotification(key: String, text: String, source: String, date: String): Unit = {
+    out ! JsObject(Seq(
+      "key" -> JsString(key),
+      "text" -> JsString(text),
+      "source" -> JsString(source),
+      "date" -> JsString(date)
+    ))
+    messageKey = messageKey + 1
+  }
+
   val t = new java.util.Timer()
   val task = new java.util.TimerTask {
-    var counter = 1;
     def run() = {
-      counter = counter + 1
-      out ! JsObject(Seq(
-        "key" -> JsString(counter + ""),
-        "text" -> JsString("Your submission for CS310 Project Final Report is due tomorrow"),
-        "source" -> JsString("Tabula"),
-        "date" -> JsString("2015-10-14T12:00")
-      ))
+      sendNotification(messageKey.toString,
+        "Your submission for CH155 Huge Essay is due tomorrow",
+        "Tabula",
+        "2015-10-15T12:00"
+      )
     }
   }
   t.schedule(task, 5000L, 9000L)

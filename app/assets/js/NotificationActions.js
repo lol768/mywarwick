@@ -1,6 +1,6 @@
 const Dispatcher = require('./Dispatcher');
 
-export default class NotificationActions {
+export default class NotificationActions{
 
     static didReceiveNotification(notification) {
         Dispatcher.dispatch({
@@ -11,7 +11,7 @@ export default class NotificationActions {
 
     static didReceiveManyNotifications(notifications) {
         Dispatcher.dispatch({
-            type: 'many-notifications',
+            type: 'fetch-notifications',
             notifications: notifications
         });
     }

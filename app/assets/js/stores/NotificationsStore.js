@@ -6,15 +6,7 @@ const Immutable = require('immutable');
 
 const localforage = require('localforage');
 
-localforage.getItem('NotificationsStore', function(err, value) {
-    if (err) {
-        console.error('');
-    } else {
-        if (value != null) {
-            NotificationActions.didReceiveManyNotifications(value);
-        }
-    }
-});
+const SocketDatapipe = require('../SocketDatapipe');
 
 var notifications = Immutable.List();
 
@@ -24,16 +16,25 @@ class NotificationsStore extends FluxStore {
         return notifications;
     }
 
+    getNotificationIDs() {
+        var ids = [];
+        notifications.map((item) => {
+            ids.push(item.key)
+        });
+        return ids;
+    }
+
+
     __onDispatch(action) {
         switch (action.type) {
-            case 'many-notifications':
+            case 'fetch-notifications':
                 notifications = Immutable.List(action.notifications);
                 localforage.setItem('NotificationsStore', notifications.toJSON());
                 this.__emitChange();
                 break;
 
             case 'notification':
-                notifications = notifications.unshift(action.notification);
+                notifications = notifications.unshift(action.notification); // unshift returns new length, might be useful
                 localforage.setItem('NotificationsStore', notifications.toJSON());
                 this.__emitChange();
                 break;

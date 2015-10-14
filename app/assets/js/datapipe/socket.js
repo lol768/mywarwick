@@ -5,6 +5,8 @@ const DataPipe = require('../datapipe');
 
 const RestartableWebSocket = require('./restartable-websocket');
 
+const NotificationActions = require('../NotificationActions');
+
 export default class SocketDataPipe extends DataPipe {
   constructor(options) {
     super();
@@ -50,6 +52,7 @@ export default class SocketDataPipe extends DataPipe {
     log.debug("Message event received:", event);
     let data = JSON.parse(event.data);
     this.stream.onNext(data);
+    NotificationActions.didReceiveNotification(data);
   }
 
   getUpdateStream(): Rx.Observable {
