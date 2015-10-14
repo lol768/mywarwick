@@ -9,6 +9,7 @@ const NotificationsView = require('./views/NotificationsView');
 const ActivityView = require('./views/ActivityView');
 const NewsView = require('./views/NewsView');
 const SearchView = require('./views/SearchView');
+const UpdatePopup = require('./ui/UpdatePopup');
 
 const _ = require('lodash');
 
@@ -76,6 +77,7 @@ export default class Application extends ReactComponent {
 
         return (
             <div>
+                <UpdatePopup />
                 {views[this.state.path]}
                 <TabBar items={TabBarItems} selectedItem={this.state.path} />
             </div>

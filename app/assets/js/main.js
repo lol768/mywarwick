@@ -14,6 +14,8 @@ const UtilityBar = require('./components/ui/UtilityBar');
 
 const AppActions = require('./AppActions');
 
+const Dispatcher = require('./Dispatcher');
+
 (()=> {
 
     localforage.config({
@@ -35,5 +37,35 @@ $(function () {
     window.addEventListener('popstate', function() {
         AppActions.navigate(window.location.pathname);
     });
+
+    if (window.applicationCache) {
+        function onDownloading() {
+            Dispatcher.dispatch({
+                type: 'app-update-start'
+            });
+        }
+
+        function onProgress(e) {
+            Dispatcher.dispatch({
+                type: 'app-update-progress',
+                loaded: e.loaded,
+                total: e.total
+            });
+        }
+
+        function onUpdateReady() {
+            Dispatcher.dispatch({
+                type: 'app-update-ready'
+            });
+        }
+
+        window.applicationCache.addEventListener('progress', onProgress);
+        window.applicationCache.addEventListener('downloading', onDownloading);
+        window.applicationCache.addEventListener('updateready', onUpdateReady);
+
+        if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+            onUpdateReady();
+        }
+    }
 
 });
