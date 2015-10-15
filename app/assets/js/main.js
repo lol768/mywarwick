@@ -14,8 +14,6 @@ const UtilityBar = require('./components/ui/UtilityBar');
 
 const AppActions = require('./AppActions');
 
-const SocketDatapipe = require('./datapipe/socket');
-
 const NotificationActions = require('./NotificationActions');
 const NotificationsStore = require('./stores/NotificationsStore');
 

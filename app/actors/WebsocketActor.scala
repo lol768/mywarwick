@@ -56,6 +56,7 @@ class WebsocketActor(out: ActorRef, messageBus: MessageBus) extends Actor with A
   def sendNotification(key: String, text: String, source: String, date: String): Unit = {
     out ! JsObject(Seq(
       "key" -> JsString(key),
+      "type" -> JsString("notification"),
       "text" -> JsString(text),
       "source" -> JsString(source),
       "date" -> JsString(date)
