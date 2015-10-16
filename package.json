@@ -49,7 +49,7 @@
     "rx": "^4.0.2"
   },
   "scripts": {
-    "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha --compilers js:babel/register -r TestHelper test/assets/js"
+    "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha --compilers js:babel/register -r TestHelper --recursive test/assets/js"
   },
   "repository": {
     "type": "git",

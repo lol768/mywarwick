@@ -1,5 +1,4 @@
 const Dispatcher = require('Dispatcher');
-sinon.spy(Dispatcher, "dispatch");
 
 const TabBar = require('components/ui/TabBar');
 const TabBarItem = require('components/ui/TabBarItem');
@@ -13,6 +12,7 @@ const TabBarItems = [
 ];
 
 describe('TabBar', () => {
+    spy(Dispatcher, 'dispatch');
 
     it('dispatches navigate action', () => {
         let tabBar = <TabBar items={TabBarItems}/>;
@@ -20,11 +20,9 @@ describe('TabBar', () => {
         let instance = ReactTestUtils.renderIntoDocument(tabBar);
         ReactTestUtils.Simulate.click(instance.refs.Notifications.refs.li);
 
-        expect(Dispatcher.dispatch.called).to.equal(true);
-        expect(Dispatcher.dispatch.args[0][0]).to.eql({
+        assert(Dispatcher.dispatch.calledWith({
             type: 'navigate',
             path: '/notifications'
-        });
+        }));
     });
-
 });
