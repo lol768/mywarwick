@@ -8,10 +8,12 @@
   },
   "devDependencies": {
     "autoprefixer-core": "^5.2.1",
+    "babel": "^5.8.23",
     "babel-core": "^5.6.15",
     "babel-loader": "^5.3.1",
     "babelify": "^6.1.2",
     "browserify": "^10.2.4",
+    "chai": "~3.3.0",
     "exorcist": "^0.4.0",
     "gulp": "^3.9.0",
     "gulp-babel": "^5.1.0",
@@ -22,9 +24,12 @@
     "gulp-sourcemaps": "^1.5.2",
     "gulp-uglify": "^1.2.0",
     "gulp-util": "^3.0.6",
+    "jsdom": "~6.5.1",
+    "mocha": "~2.3.3",
     "mold-source-map": "^0.4.0",
     "node-libs-browser": "^0.5.2",
     "node-notifier": "^4.2.3",
+    "sinon": "~1.17.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.2.3"
@@ -44,7 +49,7 @@
     "rx": "^4.0.2"
   },
   "scripts": {
-    "test": "node node_modules/karma/bin/karma.js"
+    "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha --compilers js:babel/register -r TestHelper test/assets/js"
   },
   "repository": {
     "type": "git",

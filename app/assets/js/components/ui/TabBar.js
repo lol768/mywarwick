@@ -14,13 +14,14 @@ export default class TabBar extends ReactComponent {
     render() {
         let tabBarItems = this.props.items.map((item) => {
             return (
-                <TabBarItem key={item.path}
+                <TabBarItem key={item.title}
                             active={this.props.selectedItem == item.path}
                             title={item.title}
                             icon={item.icon}
                             badge={item.badge}
                             path={item.path}
-                            onClick={this.onSelectItem.bind(this)}/>
+                            onClick={this.onSelectItem.bind(this)}
+                            ref={item.title}/>
             );
         });
 
