@@ -8,10 +8,6 @@ const MailTile = require('../tiles/MailTile');
 export default class MeView extends ReactComponent {
 
     render() {
-
-        // using this render to clear local forage db
-        localforage.clear();
-
         return (
             <div>
                 <MailTile size="large" />

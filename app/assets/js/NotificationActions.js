@@ -9,16 +9,10 @@ export default class NotificationActions{
         });
     }
 
-    static didFetchFromServer(notifications) {
+    // either a bunch from server or form local storage
+    static didFetchNotifications(notifications) {
         Dispatcher.dispatch({
             type: 'fetch-notifications',
-            notifications: notifications.notifications
-        });
-    }
-
-    static didFetchFromLocalStorage(notifications) {
-        Dispatcher.dispatch({
-            type: 'localstorage-notifications',
             notifications: notifications
         });
     }

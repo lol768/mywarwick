@@ -12,7 +12,7 @@ localforage.getItem('NotificationsStore', function (err, value) {
         console.error('problem reading notifications from local storage: ' + err);
     } else {
         if (value != null) {
-            NotificationActions.didFetchFromLocalStorage(value);
+            NotificationActions.didFetchNotifications(value);
         }
     }
 });
@@ -36,15 +36,8 @@ class NotificationsStore extends FluxStore {
 
     __onDispatch(action) {
         switch (action.type) {
-            case 'localstorage-notifications':
-                notifications = Immutable.List(action.notifications);
-                this.__emitChange();
-                break;
-
             case 'fetch-notifications':
-                $(action.notifications).each(function (i, elem) {
-                    notifications = notifications.unshift(elem);
-                });
+                notifications = notifications.concat(action.notifications);
                 localforage.setItem('NotificationsStore', notifications.toJSON());
                 this.__emitChange();
                 break;

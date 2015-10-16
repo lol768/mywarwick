@@ -23,14 +23,9 @@ export default class NotificationsView extends ReactComponent {
 
     render() {
 
-        var notificationsList = this.state.notifications.map((notification) => {
-            return (
-                <ActivityItem key={notification.key}
-                              text={notification.text}
-                              source={notification.source}
-                              date={notification.date}/>
-            )
-        })
+        var notificationsList = this.state.notifications.map(notification =>
+                <ActivityItem {...notification} />
+        );
 
         return (
             <div>

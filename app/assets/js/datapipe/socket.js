@@ -55,7 +55,7 @@ export default class SocketDataPipe extends DataPipe {
         //TODO implement proper message routing
         switch (data.type) {
             case 'fetch-notifications':
-                NotificationActions.didFetchFromServer(data);
+                NotificationActions.didFetchNotifications(data.notifications);
                 break;
             case 'notification':
                 NotificationActions.didReceiveNotification(data);
