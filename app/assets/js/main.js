@@ -14,6 +14,9 @@ const UtilityBar = require('./components/ui/UtilityBar');
 
 const AppActions = require('./AppActions');
 
+const NotificationActions = require('./NotificationActions');
+const NotificationsStore = require('./stores/NotificationsStore');
+
 (()=> {
 
     localforage.config({
@@ -32,8 +35,9 @@ $(function () {
     ReactDOM.render(<UtilityBar name="John Smith"/>, document.getElementById('utility-bar-container'));
     ReactDOM.render(<Application />, document.getElementById('app-container'));
 
-    window.addEventListener('popstate', function() {
+    window.addEventListener('popstate', function () {
         AppActions.navigate(window.location.pathname);
     });
 
 });
+
