@@ -13,15 +13,22 @@ import play.api.data.Forms._
 import actors.{MessageEnvelope, MessageBus, WebsocketActor}
 
 import play.api.libs.ws._
+import warwick.sso.SsoClient
 
 @Singleton
-class ApplicationController @Inject() (
-                                        messageBus: MessageBus,
-                                        ws: WSClient
-                                        ) extends Controller {
+class ApplicationController @Inject()(
+                                       messageBus: MessageBus,
+                                       ws: WSClient,
+                                       ssoClient: SsoClient
+                                       ) extends Controller {
 
-  def index = Action {
-    Ok(views.html.index())
+//  def index = Action {
+//    Ok(views.html.index())
+//  }
+
+  def index = ssoClient.Lenient { request =>
+    val name = request.context.user.flatMap(_.name.full).getOrElse("nobody")
+    Ok(s"Hello, ${name}!")
   }
 
   def socket = WebSocket.acceptWithActor[JsValue, JsValue] { request => out =>
@@ -57,7 +64,7 @@ class ApplicationController @Inject() (
               obj(
                 "id" -> "1438336410350",
                 "title" -> data.title,
-                "links" -> obj("canonical" -> obj( "href" -> "http://www2.warwick.ac.uk/about/warwick50/events/stafffestival" )),
+                "links" -> obj("canonical" -> obj("href" -> "http://www2.warwick.ac.uk/about/warwick50/events/stafffestival")),
                 "published" -> ISODateTimeFormat.dateTime().print(1438336410350L)
               )
             )

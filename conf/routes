@@ -9,6 +9,7 @@ GET         /activity               @controllers.ApplicationController.index
 GET         /news                   @controllers.ApplicationController.index
 GET         /search                 @controllers.ApplicationController.index
 
+->          /sso                    sso.Routes
 ->          /admin                  admin.Routes
 
 GET         /test/inject            @controllers.ApplicationController.showInjectForm
