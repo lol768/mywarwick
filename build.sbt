@@ -1,5 +1,4 @@
-import Gulp._
-import play.sbt.PlayImport.PlayKeys._
+
 
 name := """start"""
 
@@ -33,7 +32,8 @@ val appDeps = Seq(
   ws,
   filters,
   evolutions,
-  "com.typesafe.play" %% "anorm" % "2.4.0")
+  "com.typesafe.play" %% "anorm" % "2.4.0",
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.7-SNAPSHOT")
 
 val testDeps = Seq(
   specs2,
@@ -44,14 +44,19 @@ libraryDependencies ++= (appDeps ++ testDeps).map(_.excludeAll(
   ExclusionRule(organization = "commons-logging")
 ))
 
+// https://bugs.elab.warwick.ac.uk/browse/SSO-1653
+dependencyOverrides += "xml-apis" % "xml-apis" % "1.4.01"
+
 // Make gulp output available as Play assets.
 unmanagedResourceDirectories in Assets <+= baseDirectory { _ / "target" / "gulp" }
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+resolvers += "nexus" at "https://mvn.elab.warwick.ac.uk/nexus/content/groups/public"
 
 // Play provides two styles of routers, one expects its actions to be injected, the
 // other, legacy style, accesses its actions statically.
 routesGenerator := InjectedRoutesGenerator
+//routesImport += "controllers.PathBinders._"
 
 // Run Gulp when Play runs
 //playRunHooks <+= baseDirectory.map(base => Gulp(base))

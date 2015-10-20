@@ -1,4 +1,4 @@
-@(title: String)(content: Html)
+@(title: String, name: String = "Paul McCartney")(content: Html)
 <!DOCTYPE html>
 <html lang="en-GB" class="no-js"> <!-- class="id7-non-branded" to remove Warwick branding -->
   <head>
@@ -34,7 +34,7 @@
             <ul>
               <li>
                 <a href="#">
-                  John Smith
+                  @name
                   <span class="caret"></span>
                 </a>
               </li>
