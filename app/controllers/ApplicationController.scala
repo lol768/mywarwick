@@ -22,13 +22,9 @@ class ApplicationController @Inject()(
                                        ssoClient: SsoClient
                                        ) extends Controller {
 
-//  def index = Action {
-//    Ok(views.html.index())
-//  }
-
   def index = ssoClient.Lenient { request =>
     val name = request.context.user.flatMap(_.name.full).getOrElse("nobody")
-    Ok(s"Hello, ${name}!")
+        Ok(views.html.index(s"${name}"))
   }
 
   def socket = WebSocket.acceptWithActor[JsValue, JsValue] { request => out =>

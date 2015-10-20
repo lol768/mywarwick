@@ -8,4 +8,4 @@ CREATE TABLE objectcache (
 
 
 # --- !Downs
-DROP TABLE objectcache;%
+DROP TABLE objectcache;
