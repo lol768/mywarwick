@@ -28,6 +28,7 @@
     "mold-source-map": "^0.4.0",
     "node-libs-browser": "^0.5.2",
     "node-notifier": "^4.2.3",
+    "react-addons-test-utils": "^0.14.0",
     "sinon": "~1.17.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",

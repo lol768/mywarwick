@@ -1,5 +1,3 @@
-const Dispatcher = require('Dispatcher');
-
 const TabBar = require('components/ui/TabBar');
 const TabBarItem = require('components/ui/TabBarItem');
 
@@ -12,17 +10,13 @@ const TabBarItems = [
 ];
 
 describe('TabBar', () => {
-    spy(Dispatcher, 'dispatch');
-
-    it('dispatches navigate action', () => {
-        let tabBar = <TabBar items={TabBarItems}/>;
+    it('calls onSelectItem', () => {
+        let fn = sinon.spy();
+        let tabBar = <TabBar items={TabBarItems} onSelectItem={fn}/>;
 
         let instance = ReactTestUtils.renderIntoDocument(tabBar);
         ReactTestUtils.Simulate.click(instance.refs.Notifications.refs.li);
 
-        assert(Dispatcher.dispatch.calledWith({
-            type: 'navigate',
-            path: '/notifications'
-        }));
+        assert(fn.called);
     });
 });
