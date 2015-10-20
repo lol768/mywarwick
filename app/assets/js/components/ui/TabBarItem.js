@@ -9,7 +9,8 @@ export default class TabBarItem extends ReactComponent {
 
     render() {
         return (
-            <li className={this.props.active ? "tab-bar-item tab-bar-item--active" : "tab-bar-item"} onClick={this.onClick.bind(this)}>
+            <li className={this.props.active ? "tab-bar-item tab-bar-item--active" : "tab-bar-item"}
+                onClick={this.onClick.bind(this)} ref="li">
                 <i className={"fa fa-" + this.props.icon}>
                     <span className="badge">{this.props.badge}</span>
                 </i>
