@@ -10,6 +10,9 @@ GET         /news                   @controllers.ApplicationController.index
 GET         /search                 @controllers.ApplicationController.index
 
 ->          /sso                    sso.Routes
+GET         /shire                  @warwick.sso.AssertionConsumer.get
+POST        /shire                  @warwick.sso.AssertionConsumer.post
+
 ->          /admin                  admin.Routes
 
 GET         /test/inject            @controllers.ApplicationController.showInjectForm

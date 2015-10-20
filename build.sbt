@@ -44,6 +44,9 @@ libraryDependencies ++= (appDeps ++ testDeps).map(_.excludeAll(
   ExclusionRule(organization = "commons-logging")
 ))
 
+// https://bugs.elab.warwick.ac.uk/browse/SSO-1653
+dependencyOverrides += "xml-apis" % "xml-apis" % "1.4.01"
+
 // Make gulp output available as Play assets.
 unmanagedResourceDirectories in Assets <+= baseDirectory { _ / "target" / "gulp" }
 
