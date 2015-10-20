@@ -22,7 +22,6 @@ var uglify     = require('gulp-uglify');
 var browserify = require('browserify');
 var babelify   = require('babelify');
 var watchify   = require('watchify');
-var exorcist   = require('exorcist');
 var autoprefix = require('autoprefixer-core');
 
 var paths = {
@@ -49,21 +48,10 @@ var browserifyOptions = {
   transform: [ babelify ] // Transforms ES6 + JSX into normal JS
 };
 
-var jsMangle = (process.env.JS_MANGLE !== 'false');
-if (!jsMangle) {
-  gutil.log(gutil.colors.yellow('Keeping original variable names in JS (will produce larger files)'));
+var shouldUglify = (process.env.UGLIFY !== 'false');
+if (!shouldUglify) {
+  gutil.log(gutil.colors.yellow('Not running Uglify (faster; larger files)'));
 }
-
-var uglifyOptions = {
-  /**
-   * mangle renames variables to shorter ones. Dev Tools doesn't currently translate
-   * them in stack traces, making some errors cryptic ("o is not a function").
-   * However, the bundle is much larger without mangling, so we want it in production.
-   * In development you can set JS_MANGLE=false when running the build to turn it off:
-   * The watch-assets script does this for you.
-   */
-  mangle: jsMangle
-};
 
 // Function for running Browserify on JS, since
 // we reuse it a couple of times.
@@ -73,15 +61,14 @@ var bundle = function(browserify) {
       gutil.log(gutil.colors.red(e.toString()));
     })
     .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, 'app', 'assets', 'js')))
-    //.pipe(exorcist(paths.scriptOut + "/bundle.js.map"))
     .pipe(source('bundle.js'))
     .pipe(buffer())
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(replace('$$BUILDTIME$$', (new Date()).toString()))
-      .pipe(uglify(uglifyOptions))
+      .pipe(shouldUglify ? uglify() : gutil.noop())
       .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.scriptOut))
-}
+};
 
 gulp.task('scripts', [], function() {
   var b = browserify(browserifyOptions);
