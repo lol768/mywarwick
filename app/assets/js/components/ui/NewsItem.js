@@ -12,7 +12,11 @@ export default class NewsItem extends ReactComponent {
                 {image}
 
                 <div className="news-item__body">
-                    <h1 className="news-item__title">{this.props.title}</h1>
+                    <h1 className="news-item__title">
+                        <a href={this.props.url} target="_blank">
+                            {this.props.title}
+                        </a>
+                    </h1>
 
                     <div className="news-item__content">
                         {this.props.children}
@@ -20,14 +24,8 @@ export default class NewsItem extends ReactComponent {
 
                     <div className="news-item__footer">
                         <p>
-                            <a href={this.props.moreLink}>
-                                Read more
-                                <i className="fa fa-chevron-right"></i>
-                            </a>
-                        </p>
-
-                        <p>
-                            Source: {this.props.source}
+                            <i className="fa fa-fw fa-circle" style={{color: '#7ecbb6'}}></i>
+                            {this.props.source}
                         </p>
                     </div>
                 </div>

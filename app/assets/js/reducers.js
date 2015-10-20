@@ -1,10 +1,14 @@
 import Immutable from 'immutable';
 
-import { NAVIGATE, DID_RECEIVE_NOTIFICATION, DID_FETCH_NOTIFICATIONS } from './actions';
+import { NAVIGATE, DID_RECEIVE_NOTIFICATION, DID_FETCH_NOTIFICATIONS, NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './actions';
 
-const initialState = Immutable.Map({
+const initialState = Immutable.fromJS({
     path: '/',
-    notifications: Immutable.List()
+    notifications: [],
+    news: {
+        fetching: false,
+        items: []
+    }
 });
 
 export function app(state = initialState, action) {
@@ -23,6 +27,25 @@ export function app(state = initialState, action) {
 
             return state.set('notifications', notifications);
         }
+        case NEWS_FETCH:
+            return state.mergeDeep({
+                news: {
+                    fetching: true
+                }
+            });
+        case NEWS_FETCH_SUCCESS:
+            return state.mergeDeep({
+                news: {
+                    fetching: false,
+                    items: action.items
+                }
+            });
+        case NEWS_FETCH_FAILURE:
+            return state.mergeDeep({
+                news: {
+                    fetching: false
+                }
+            });
         default:
             return state;
     }
