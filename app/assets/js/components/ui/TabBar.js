@@ -1,15 +1,9 @@
 const React = require('react');
 const ReactComponent = require('react/lib/ReactComponent');
 
-const AppActions = require('../../AppActions');
-
 const TabBarItem = require('./TabBarItem');
 
 export default class TabBar extends ReactComponent {
-
-    onSelectItem(item) {
-        AppActions.navigate(item.props.path);
-    }
 
     render() {
         let tabBarItems = this.props.items.map((item) => {
@@ -20,7 +14,7 @@ export default class TabBar extends ReactComponent {
                             icon={item.icon}
                             badge={item.badge}
                             path={item.path}
-                            onClick={this.onSelectItem.bind(this)}/>
+                            onClick={() => this.props.onSelectItem(item.path)}/>
             );
         });
 

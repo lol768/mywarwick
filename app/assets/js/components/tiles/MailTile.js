@@ -3,13 +3,11 @@ const ReactComponent = require('react/lib/ReactComponent');
 
 const Tile = require('./Tile');
 
-const Dispatcher = require('../../Dispatcher');
-const FluxStore = require('flux/lib/FluxStore');
-
 const Immutable = require('immutable');
 
 var messages = Immutable.List();
 
+/*
 class MailStore extends FluxStore {
 
     getMessages() {
@@ -66,12 +64,25 @@ setTimeout(() => {
         date: '09:48'
     });
 }, 2000);
+*/
 
 export default class MailTile extends ReactComponent {
 
     constructor(props) {
         super(props);
 
+        this.state = {
+            messages: [
+                {
+                    id: 1,
+                    from: 'Squirrell, Linda',
+                    subject: 'IT Induction Day - Reminder',
+                    date: 'Monday'
+                }
+            ]
+        };
+
+        /*
         this.state = {
             messages: Store.getMessages()
         };
@@ -81,6 +92,7 @@ export default class MailTile extends ReactComponent {
                 messages: Store.getMessages()
             });
         });
+        */
     }
 
     render() {

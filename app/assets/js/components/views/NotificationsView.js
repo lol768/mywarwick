@@ -3,35 +3,22 @@ const ReactComponent = require('react/lib/ReactComponent');
 
 const ActivityItem = require('../ui/ActivityItem');
 
-const NotificationsStore = require('../../stores/NotificationsStore');
+import { connect } from 'react-redux';
 
-export default class NotificationsView extends ReactComponent {
-
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            notifications: NotificationsStore.getNotifications()
-        };
-
-        NotificationsStore.addListener(() => {
-            this.setState({
-                notifications: NotificationsStore.getNotifications()
-            });
-        });
-    }
+class NotificationsView extends ReactComponent {
 
     render() {
+        var notifications = this.props.notifications.map(notification => <ActivityItem {...notification} />);
 
-        var notificationsList = this.state.notifications.map(notification =>
-                <ActivityItem {...notification} />
-        );
-
-        return (
-            <div>
-                {notificationsList}
-            </div>
-        );
+        return <div>{notifications}</div>;
     }
 
 }
+
+function select(state) {
+    return {
+        notifications: state.get('notifications')
+    };
+}
+
+export default connect(select)(NotificationsView);

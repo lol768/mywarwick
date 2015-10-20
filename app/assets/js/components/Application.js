@@ -1,8 +1,6 @@
 const React = require('react');
 const ReactComponent = require('react/lib/ReactComponent');
 
-const ApplicationStore = require('./../stores/ApplicationStore');
-
 const TabBar = require('./ui/TabBar');
 const MeView = require('./views/MeView');
 const NotificationsView = require('./views/NotificationsView');
@@ -11,6 +9,10 @@ const NewsView = require('./views/NewsView');
 const SearchView = require('./views/SearchView');
 
 const _ = require('lodash');
+
+import { connect } from 'react-redux';
+
+import { navigate } from '../actions';
 
 const TabBarItems = [
     {
@@ -41,31 +43,11 @@ const TabBarItems = [
     }
 ];
 
-export default class Application extends ReactComponent {
-
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            path: ApplicationStore.getCurrentPath()
-        };
-    }
-
-    componentDidMount() {
-        ApplicationStore.addListener(() => {
-            let path = ApplicationStore.getCurrentPath();
-
-            this.setState({
-                path: path
-            });
-
-            if (window.history.pushState && window.location.pathname != path) {
-                window.history.pushState(null, null, path);
-            }
-        });
-    }
+class Application extends ReactComponent {
 
     render() {
+        const { dispatch, path } = this.props;
+
         let views = {
             '/': <MeView />,
             '/notifications': <NotificationsView />,
@@ -76,10 +58,18 @@ export default class Application extends ReactComponent {
 
         return (
             <div>
-                {views[this.state.path]}
-                <TabBar items={TabBarItems} selectedItem={this.state.path} />
+                {views[path]}
+                <TabBar items={TabBarItems} selectedItem={path} onSelectItem={path => dispatch(navigate(path))} />
             </div>
         );
     }
 
 }
+
+function mapStateToProps(state) {
+    return {
+        path: state.get('path')
+    };
+}
+
+export default connect(mapStateToProps)(Application);

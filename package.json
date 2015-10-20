@@ -29,7 +29,6 @@
     "watchify": "^3.2.3"
   },
   "dependencies": {
-    "flux": "^2.1.1",
     "id7": "git://github.com/UniversityofWarwick/id7.git#lite",
     "immutable": "^3.7.4",
     "jquery": "^2.1.4",
@@ -40,7 +39,10 @@
     "moment": "^2.10.3",
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
-    "rx": "^4.0.2"
+    "rx": "^4.0.2",
+    "redux": "~3.0.2",
+    "react-redux": "~4.0.0",
+    "reselect": "~2.0.0"
   },
   "scripts": {
     "test": "node node_modules/karma/bin/karma.js"

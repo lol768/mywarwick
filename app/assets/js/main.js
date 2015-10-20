@@ -12,10 +12,13 @@ const ReactDOM = require('react-dom');
 const Application = require('./components/Application');
 const UtilityBar = require('./components/ui/UtilityBar');
 
-const AppActions = require('./AppActions');
+import store from './store';
+window.Store = store;
+import { navigate } from './actions';
 
-const NotificationActions = require('./NotificationActions');
-const NotificationsStore = require('./stores/NotificationsStore');
+import { Provider } from 'react-redux';
+
+require('./notifications');
 
 (()=> {
 
@@ -30,14 +33,36 @@ const NotificationsStore = require('./stores/NotificationsStore');
 
 })();
 
+var currentPath = '/';
+
 $(function () {
 
     ReactDOM.render(<UtilityBar name="John Smith"/>, document.getElementById('utility-bar-container'));
-    ReactDOM.render(<Application />, document.getElementById('app-container'));
+    ReactDOM.render(
+        <Provider store={store}>
+            <Application />
+        </Provider>,
+        document.getElementById('app-container'));
 
     window.addEventListener('popstate', function () {
-        AppActions.navigate(window.location.pathname);
+        currentPath = window.location.pathname;
+        store.dispatch(navigate(window.location.pathname));
     });
 
 });
 
+store.subscribe(() => {
+    console.log('Store updated', store.getState().toJS());
+});
+
+store.subscribe(() => {
+    var path = store.getState().get('path');
+
+    if (path != currentPath) {
+        currentPath = path;
+
+        if (window.history.pushState) {
+            window.history.pushState(null, null, currentPath);
+        }
+    }
+});
