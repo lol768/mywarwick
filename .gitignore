@@ -1,5 +1,6 @@
 /conf/application.conf
 /conf/worker.conf
+logback.xml
 logs
 target
 /.idea_modules
