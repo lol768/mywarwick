@@ -8,12 +8,7 @@ addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.1")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.0.3")
 
-
 // web plugins
-
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
-
-resolvers += "nexus" at "https://mvn.elab.warwick.ac.uk/nexus/content/groups/public"
 
 //addSbtPlugin("com.typesafe.sbt" % "sbt-coffeescript" % "1.0.0")
 
