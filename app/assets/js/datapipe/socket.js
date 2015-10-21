@@ -4,7 +4,8 @@ const DataPipe = require('../datapipe');
 
 const RestartableWebSocket = require('./restartable-websocket');
 
-const NotificationActions = require('../NotificationActions');
+import store from '../store';
+import { didReceiveNotification, didFetchNotifications } from '../actions';
 
 export default class SocketDataPipe extends DataPipe {
     constructor(options) {
@@ -55,10 +56,10 @@ export default class SocketDataPipe extends DataPipe {
         //TODO implement proper message routing
         switch (data.type) {
             case 'fetch-notifications':
-                NotificationActions.didFetchNotifications(data.notifications);
+                store.dispatch(didFetchNotifications(data.notifications));
                 break;
             case 'notification':
-                NotificationActions.didReceiveNotification(data);
+                store.dispatch(didReceiveNotification(data));
                 break;
             default:
             // nowt
