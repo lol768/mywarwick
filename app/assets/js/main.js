@@ -18,6 +18,8 @@ import { navigate } from './actions';
 
 import { Provider } from 'react-redux';
 
+import './update';
+
 require('./notifications');
 
 (()=> {
@@ -35,38 +37,6 @@ require('./notifications');
 
 var currentPath = '/';
 
-import { registerReducer } from './reducers';
-
-import Immutable from 'immutable';
-const initialState = Immutable.fromJS({
-    isUpdating: false,
-    loaded: 0,
-    total: 0
-});
-
-registerReducer('update', (state = initialState, action) => {
-    console.log('update reducer', state, action);
-    switch (action.type) {
-        case 'update.start':
-            return state.merge({
-                isUpdating: true
-            });
-        case 'update.progress':
-            return state.merge({
-                isUpdating: true,
-                loaded: action.loaded,
-                total: action.total
-            });
-        case 'update.ready':
-            return state.merge({
-                isUpdating: true,
-                loaded: state.get('total')
-            });
-        default:
-            return state;
-    }
-});
-
 $(function () {
 
     ReactDOM.render(<UtilityBar name="John Smith"/>, document.getElementById('utility-bar-container'));
@@ -80,36 +50,6 @@ $(function () {
         currentPath = window.location.pathname;
         store.dispatch(navigate(window.location.pathname));
     });
-
-    if (window.applicationCache) {
-        function onDownloading() {
-            store.dispatch({
-                type: 'update.start'
-            });
-        }
-
-        function onProgress(e) {
-            store.dispatch({
-                type: 'update.progress',
-                loaded: e.loaded,
-                total: e.total
-            });
-        }
-
-        function onUpdateReady() {
-            store.dispatch({
-                type: 'update.ready'
-            });
-        }
-
-        window.applicationCache.addEventListener('progress', onProgress);
-        window.applicationCache.addEventListener('downloading', onDownloading);
-        window.applicationCache.addEventListener('updateready', onUpdateReady);
-
-        if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
-            onUpdateReady();
-        }
-    }
 
 });
 
