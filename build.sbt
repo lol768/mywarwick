@@ -25,6 +25,7 @@ val appDeps = Seq(
   filters,
   evolutions,
   "com.typesafe.play" %% "anorm" % "2.4.0",
+  "com.oracle" % "ojdbc6" % "11.2.0.3.0",
   "uk.ac.warwick.sso" %% "sso-client-play" % "2.7-SNAPSHOT")
 
 val testDeps = Seq(
