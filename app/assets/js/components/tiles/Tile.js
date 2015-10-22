@@ -1,9 +1,9 @@
-const React = require('react');
+import React from 'react';
 
 const DEFAULT_TILE_COLOR = '#5b3069'; // Warwick Aubergine
 const DEFAULT_TEXT_COLOR = 'white';
 
-const Tile = (props) => {
+export default (props) => {
     let icon = props.icon ? <i className={"fa fa-fw fa-" + props.icon}></i> : null;
     let backgroundColor = props.backgroundColor ? props.backgroundColor : DEFAULT_TILE_COLOR;
     let color = props.color ? props.color : DEFAULT_TEXT_COLOR;
@@ -24,5 +24,3 @@ const Tile = (props) => {
         </article>
     );
 };
-
-export default Tile;

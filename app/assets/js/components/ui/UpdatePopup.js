@@ -3,28 +3,17 @@ const ReactComponent = require('react/lib/ReactComponent');
 
 const ProgressBar = require('./ProgressBar');
 const AppIcon = require('./AppIcon');
-const ApplicationStore = require('../../stores/ApplicationStore');
 
-export default class UpdatePopup extends ReactComponent {
+import { connect } from 'react-redux';
 
-  constructor(props) {
-    super(props);
-
-    this.state = {};
-  }
-
-  componentDidMount() {
-    ApplicationStore.addListener(() => {
-      this.setState(ApplicationStore.getUpdateState());
-    });
-  }
+class UpdatePopup extends ReactComponent {
 
   render() {
-    if (!this.state.isUpdating) {
+    if (!this.props.isUpdating) {
       return <div />;
     }
 
-    if (this.state.loaded < this.state.total || this.state.loaded == 0) {
+    if (this.props.loaded < this.props.total || this.props.loaded == 0) {
       return (
         <div className="activity-item" style={{marginBottom: 15}}>
           <div className="media">
@@ -33,7 +22,7 @@ export default class UpdatePopup extends ReactComponent {
             </div>
             <div className="media-body" style={{lineHeight: 2}}>
               An update to Start.Warwick is being downloaded.
-              <ProgressBar value={this.state.loaded} max={this.state.total} />
+              <ProgressBar value={this.props.loaded} max={this.props.total} />
             </div>
           </div>
         </div>
@@ -62,3 +51,5 @@ export default class UpdatePopup extends ReactComponent {
   }
 
 }
+
+export default connect((state) => state.get('update').toJS())(UpdatePopup);

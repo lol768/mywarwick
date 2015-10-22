@@ -12,9 +12,13 @@ const ReactDOM = require('react-dom');
 const Application = require('./components/Application');
 const UtilityBar = require('./components/ui/UtilityBar');
 
-const AppActions = require('./AppActions');
+import store from './store';
+window.Store = store;
+import { navigate } from './actions';
 
-const Dispatcher = require('./Dispatcher');
+import { Provider } from 'react-redux';
+
+require('./notifications');
 
 (()=> {
 
@@ -29,33 +33,72 @@ const Dispatcher = require('./Dispatcher');
 
 })();
 
+var currentPath = '/';
+
+import { registerReducer } from './reducers';
+
+import Immutable from 'immutable';
+const initialState = Immutable.fromJS({
+    isUpdating: false,
+    loaded: 0,
+    total: 0
+});
+
+registerReducer('update', (state = initialState, action) => {
+    console.log('update reducer', state, action);
+    switch (action.type) {
+        case 'update.start':
+            return state.merge({
+                isUpdating: true
+            });
+        case 'update.progress':
+            return state.merge({
+                isUpdating: true,
+                loaded: action.loaded,
+                total: action.total
+            });
+        case 'update.ready':
+            return state.merge({
+                isUpdating: true,
+                loaded: state.get('total')
+            });
+        default:
+            return state;
+    }
+});
+
 $(function () {
 
     ReactDOM.render(<UtilityBar name="John Smith"/>, document.getElementById('utility-bar-container'));
-    ReactDOM.render(<Application />, document.getElementById('app-container'));
+    ReactDOM.render(
+        <Provider store={store}>
+            <Application />
+        </Provider>,
+        document.getElementById('app-container'));
 
-    window.addEventListener('popstate', function() {
-        AppActions.navigate(window.location.pathname);
+    window.addEventListener('popstate', function () {
+        currentPath = window.location.pathname;
+        store.dispatch(navigate(window.location.pathname));
     });
 
     if (window.applicationCache) {
         function onDownloading() {
-            Dispatcher.dispatch({
-                type: 'app-update-start'
+            store.dispatch({
+                type: 'update.start'
             });
         }
 
         function onProgress(e) {
-            Dispatcher.dispatch({
-                type: 'app-update-progress',
+            store.dispatch({
+                type: 'update.progress',
                 loaded: e.loaded,
                 total: e.total
             });
         }
 
         function onUpdateReady() {
-            Dispatcher.dispatch({
-                type: 'app-update-ready'
+            store.dispatch({
+                type: 'update.ready'
             });
         }
 
@@ -68,4 +111,20 @@ $(function () {
         }
     }
 
+});
+
+store.subscribe(() => {
+    console.log('Store updated', store.getState().toJS());
+});
+
+store.subscribe(() => {
+    var path = store.getState().get('path');
+
+    if (path != currentPath) {
+        currentPath = path;
+
+        if (window.history.pushState) {
+            window.history.pushState(null, null, currentPath);
+        }
+    }
 });

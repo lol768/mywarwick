@@ -1,17 +1,12 @@
 package actors
 
-import actors.WebsocketActor.ClientData
 import akka.actor._
 import play.api.data.validation.ValidationError
-import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json._
 import scala.concurrent.duration._
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-import scala.util.Random
-
-object WebsocketActor  {
-  def props(out: ActorRef, messageBus: MessageBus) = Props(classOf[WebsocketActor], out, messageBus)
+object WebsocketActor {
+  def props(out: ActorRef) = Props(classOf[WebsocketActor], out)
 
   /**
    * This is the format of the JSON that client web pages will send to
@@ -25,6 +20,7 @@ object WebsocketActor  {
    * @param data Freeform JSON payload.
    */
   case class ClientData(messageId: Int, tileId: String, data: JsValue)
+
   implicit val clientDataFormat = Json.format[ClientData]
 
   /**
@@ -36,11 +32,12 @@ object WebsocketActor  {
 
   // An update to a single tile
   case class TileUpdate(data: JsValue)
+
 }
 
 /**
  * Websocket-facing actor, wired in to the controller. It receives
- * any messages send from the client in the form of a JsValue. Other
+ * any messages sent from the client in the form of a JsValue. Other
  * actors can also send any kind of message to it.
  *
  * Currently this contains a lot of stuff but only because it's generating
@@ -51,18 +48,31 @@ object WebsocketActor  {
  * @param out this output will be attached to the websocket and will send
  *            messages back to the client.
  */
-class WebsocketActor(out : ActorRef, messageBus: MessageBus) extends Actor with ActorLogging {
+class WebsocketActor(out: ActorRef) extends Actor with ActorLogging {
+
   import WebsocketActor._
 
-  // We've got fun and games
-  out ! JsObject(Seq("welcome" -> JsString("Welcome to the jungle")))
+  var messageKey = 0;
 
-  /**
-   * Test of subscribing to a message bus, such as the one here which other
-   * processes can publish things like a TileUpdate onto, and we receive that and
-   * pass it on to the connected client.
-   */
-  messageBus.subscribe(self, "example.topic")
+  def sendNotification(key: String, text: String, source: String, date: String): Unit = {
+    out ! JsObject(Seq(
+      "key" -> JsString(key),
+      "type" -> JsString("notification"),
+      "text" -> JsString(text),
+      "source" -> JsString(source),
+      "date" -> JsString(date)
+    ))
+    messageKey = messageKey + 1
+  }
+
+  import context.dispatcher
+  context.system.scheduler.schedule(5 seconds, 9 seconds) {
+    sendNotification(messageKey.toString,
+      "Your submission for CH155 Huge Essay is due tomorrow",
+      "Tabula",
+      "2015-10-15T12:00"
+    )
+  }
 
   // FIXME UserMessageHandler and the way we create it here is non-production.
   // it likely shouldn't own UserMessageHandler as a child (which is what context.actorOf
@@ -94,7 +104,7 @@ class WebsocketActor(out : ActorRef, messageBus: MessageBus) extends Actor with 
 
   def toErrorResponse(js: JsValue, errors: Seq[(JsPath, Seq[ValidationError])]) = {
     val messageId = (js \ "messageId").validate[Int]
-    val errorsSeq = Json.arr( Json.obj(
+    val errorsSeq = Json.arr(Json.obj(
       "code" -> "400",
       "title" -> "JSON parse error",
       "detail" -> errors.toString()

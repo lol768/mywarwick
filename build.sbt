@@ -1,5 +1,4 @@
-import Gulp._
-import play.sbt.PlayImport.PlayKeys._
+
 
 name := """start"""
 
@@ -12,20 +11,12 @@ val gulpAssetsTask = TaskKey[Unit]("gulp-assets")
 lazy val main = (project in file(".")).enablePlugins(PlayScala).dependsOn(admin).aggregate(admin).settings(
   gulpAssetsTask := Gulp(baseDirectory.value).buildAssets(),
 
-  dist <<= (dist) dependsOn (gulpAssetsTask),
-  assembly <<= assembly.dependsOn(gulpAssetsTask)
+  // Package up assets before we build tar.gz
+  packageZipTarball in Universal <<= (packageZipTarball in Universal).dependsOn(gulpAssetsTask)
 )
 
-lazy val admin = (project in file("modules/admin")).enablePlugins(PlayScala)
 
-// Set up a phat jar
-test in assembly := {}
-mainClass in assembly := Some("play.core.server.ProdServerStart")
-fullClasspath in assembly += Attributed.blank(PlayKeys.playPackageAssets.value)
-assemblyMergeStrategy in assembly := {
-  case "pom.xml" | "pom.properties" => MergeStrategy.discard
-  case other => (assemblyMergeStrategy in assembly).value(other) // use default
-}
+lazy val admin = (project in file("modules/admin")).enablePlugins(PlayScala)
 
 val appDeps = Seq(
   jdbc,
@@ -33,7 +24,8 @@ val appDeps = Seq(
   ws,
   filters,
   evolutions,
-  "com.typesafe.play" %% "anorm" % "2.4.0")
+  "com.typesafe.play" %% "anorm" % "2.4.0",
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.7-SNAPSHOT")
 
 val testDeps = Seq(
   specs2,
@@ -44,14 +36,17 @@ libraryDependencies ++= (appDeps ++ testDeps).map(_.excludeAll(
   ExclusionRule(organization = "commons-logging")
 ))
 
+// https://bugs.elab.warwick.ac.uk/browse/SSO-1653
+dependencyOverrides += "xml-apis" % "xml-apis" % "1.4.01"
+
 // Make gulp output available as Play assets.
 unmanagedResourceDirectories in Assets <+= baseDirectory { _ / "target" / "gulp" }
 
-resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+// Configure the tar.gz generation how we like it
+packagingSettings
 
-// Play provides two styles of routers, one expects its actions to be injected, the
-// other, legacy style, accesses its actions statically.
-routesGenerator := InjectedRoutesGenerator
+resolvers += WarwickNexus
+resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
 // Run Gulp when Play runs
 //playRunHooks <+= baseDirectory.map(base => Gulp(base))

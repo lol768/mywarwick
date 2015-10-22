@@ -14,7 +14,8 @@ object Gulp {
 
   class GulpProcess(base: File) extends PlayRunHook {
     def buildAssets(): Unit = {
-      val assetRun = Process("node_modules/.bin/gulp assets") !
+      Process("npm install").!
+      Process("node_modules/.bin/gulp assets").!
     }
 
     override def beforeStarted() = buildAssets

@@ -1,4 +1,4 @@
-@(title: String)(content: Html)
+@(title: String, name: String = "Paul McCartney")(content: Html)
 <!DOCTYPE html>
 <html lang="en-GB" class="no-js" manifest="@routes.Assets.versioned("app.manifest")"> <!-- class="id7-non-branded" to remove Warwick branding -->
   <head>
@@ -38,8 +38,8 @@
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
 
     @*<script src="@routes.Assets.versioned("lib/id7/js/id7-bundle.js")"></script>*@
-    <script src="/assets/lib/id7/js/id7-bundle.js"></script>
-    <script src="@routes.Assets.versioned("js/bundle.js")"></script>
+    <script async src="/assets/lib/id7/js/id7-bundle.js"></script>
+    <script async src="@routes.Assets.versioned("js/bundle.js")"></script>
 
   </head>
   <body>
@@ -53,7 +53,7 @@
             <ul>
               <li>
                 <a href="#">
-                  John Smith
+                  @name
                   <span class="caret"></span>
                 </a>
               </li>

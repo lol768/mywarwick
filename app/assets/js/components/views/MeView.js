@@ -1,7 +1,7 @@
 const React = require('react');
 const ReactComponent = require('react/lib/ReactComponent');
 
-const MailTile = require('../tiles/MailTile');
+import MailTile from '../tiles/mail';
 
 export default class MeView extends ReactComponent {
 
