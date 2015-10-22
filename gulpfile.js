@@ -52,9 +52,9 @@ var browserifyOptions = {
   transform: [babelify] // Transforms ES6 + JSX into normal JS
 };
 
-var shouldUglify = (process.env.UGLIFY !== 'false');
-if (!shouldUglify) {
-  gutil.log(gutil.colors.yellow('Not running Uglify (faster; larger files)'));
+var PRODUCTION = (process.env.PRODUCTION !== 'false');
+if (PRODUCTION) {
+    gutil.log(gutil.colors.yellow('Production build (use PRODUCTION=false in development)'));
 }
 
 // Function for running Browserify on JS, since
@@ -69,7 +69,7 @@ var bundle = function (browserify) {
     .pipe(buffer())
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(replace('$$BUILDTIME$$', (new Date()).toString()))
-    .pipe(shouldUglify ? uglify() : gutil.noop())
+    .pipe(PRODUCTION ? uglify() : gutil.noop())
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.scriptOut))
 };
@@ -135,25 +135,32 @@ gulp.task('watch-styles', ['styles'], function () {
 
 // Run once the scripts and styles are in place
 gulp.task('manifest', ['scripts', 'styles'], function () {
-  getFontAwesomeVersion(function (fontAwesomeVersion) {
-    return gulp.src([
-      paths.assetsOut + '/**/*',
-      '!' + paths.assetsOut + '/**/*.map' // don't cache source maps
-    ], {base: path.assetsOut})
-      .pipe(rename(function (path) {
-        if (path.basename == 'fontawesome-webfont') {
-          path.extname += '?v=' + fontAwesomeVersion;
-        }
+    if (PRODUCTION) {
+        getFontAwesomeVersion(function (fontAwesomeVersion) {
+            return gulp.src([
+                paths.assetsOut + '/**/*',
+                '!' + paths.assetsOut + '/**/*.map' // don't cache source maps
+            ], {base: path.assetsOut})
+                .pipe(rename(function (path) {
+                    if (path.basename == 'fontawesome-webfont') {
+                        path.extname += '?v=' + fontAwesomeVersion;
+                    }
 
-        return path;
-      }))
-      .pipe(manifest({
-        hash: true,
-        exclude: 'app.manifest',
-        prefix: '/assets/'
-      }))
-      .pipe(gulp.dest(paths.assetsOut));
-  });
+                    return path;
+                }))
+                .pipe(manifest({
+                    hash: true,
+                    exclude: 'app.manifest',
+                    prefix: '/assets/'
+                }))
+                .pipe(gulp.dest(paths.assetsOut));
+        });
+    } else {
+        // Produce an empty manifest file
+        gulp.src([])
+            .pipe(manifest())
+            .pipe(gulp.dest(paths.assetsOut));
+    }
 });
 
 // Shortcuts for building all asset types at once
