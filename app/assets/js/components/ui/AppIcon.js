@@ -24,7 +24,8 @@ const COLOURS = {
     servicenow: '#c52129',
     greenBlue: '#32adb2',
     outlook: '#0078d7',
-    mahara: '#789b3b'
+    mahara: '#789b3b',
+    id7default: '#8c6e96'
 };
 
 const ICONS = _({
@@ -39,7 +40,8 @@ const ICONS = _({
     SiteBuilder: 'red globe',
     BlogBuilder: 'green globe',
     Mahara: 'mahara mortar-board',
-    Moodle: 'moodle mortar-board'
+    Moodle: 'moodle mortar-board',
+    Update: 'id7default arrow-up'
 }).mapValues(icon).value();
 
 const AppIcon = (props) => {

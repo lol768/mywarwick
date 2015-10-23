@@ -18,6 +18,8 @@ import { navigate } from './actions';
 
 import { Provider } from 'react-redux';
 
+import './update';
+
 require('./notifications');
 
 (()=> {

@@ -8,6 +8,7 @@ const NotificationsView = require('./views/NotificationsView');
 const ActivityView = require('./views/ActivityView');
 const NewsView = require('./views/NewsView');
 const SearchView = require('./views/SearchView');
+const UpdatePopup = require('./ui/UpdatePopup');
 
 const _ = require('lodash');
 
@@ -30,6 +31,7 @@ class Application extends ReactComponent {
 
         return (
             <div>
+                <UpdatePopup />
                 {views[path]}
                 <TabBar selectedItem={path} onSelectItem={path => dispatch(navigate(path))}>
                     <TabBarItem title="Me" icon="user" path="/" />

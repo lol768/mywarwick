@@ -1,5 +1,6 @@
 import Immutable from 'immutable';
 
+import store from './store';
 import { NAVIGATE, DID_RECEIVE_NOTIFICATION, DID_FETCH_NOTIFICATIONS, NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './actions';
 
 const initialState = Immutable.fromJS({
@@ -33,6 +34,12 @@ export function makeReducers() {
 
 export function registerReducer(name, reducer) {
     mutateReducers(appendReducer(mutableGlobalReducers, name, reducer));
+
+    // Dispatch an action handled by the newly-added receiver, to add
+    // the initial state to the store immediately
+    store.dispatch({
+        type: name + '.__init'
+    });
 }
 
 /*
