@@ -2,6 +2,7 @@ const React = require('react');
 const ReactComponent = require('react/lib/ReactComponent');
 
 const TabBar = require('./ui/TabBar');
+import TabBarItem from './ui/TabBarItem';
 const MeView = require('./views/MeView');
 const NotificationsView = require('./views/NotificationsView');
 const ActivityView = require('./views/ActivityView');
@@ -14,39 +15,10 @@ import { connect } from 'react-redux';
 
 import { navigate } from '../actions';
 
-const TabBarItems = [
-    {
-        title: 'Me',
-        icon: 'user',
-        path: '/'
-    },
-    {
-        title: 'Notifications',
-        icon: 'inbox',
-        badge: 3,
-        path: '/notifications'
-    },
-    {
-        title: 'Activity',
-        icon: 'dashboard',
-        path: '/activity'
-    },
-    {
-        title: 'News',
-        icon: 'mortar-board',
-        path: '/news'
-    },
-    {
-        title: 'Search',
-        icon: 'search',
-        path: '/search'
-    }
-];
-
 class Application extends ReactComponent {
 
     render() {
-        const { dispatch, path } = this.props;
+        const { dispatch, path, notificationsCount } = this.props;
 
         let views = {
             '/': <MeView />,
@@ -59,7 +31,13 @@ class Application extends ReactComponent {
         return (
             <div>
                 {views[path]}
-                <TabBar items={TabBarItems} selectedItem={path} onSelectItem={path => dispatch(navigate(path))} />
+                <TabBar selectedItem={path} onSelectItem={path => dispatch(navigate(path))}>
+                    <TabBarItem title="Me" icon="user" path="/" />
+                    <TabBarItem title="Notifications" icon="inbox" path="/notifications" badge={notificationsCount} />
+                    <TabBarItem title="Activity" icon="dashboard" path="/activity" />
+                    <TabBarItem title="News" icon="mortar-board" path="/news" />
+                    <TabBarItem title="Search" icon="search" path="/search" />
+                </TabBar>
             </div>
         );
     }
@@ -68,7 +46,8 @@ class Application extends ReactComponent {
 
 function mapStateToProps(state) {
     return {
-        path: state.get('path')
+        path: state.get('path'),
+        notificationsCount: state.get('notifications').count()
     };
 }
 

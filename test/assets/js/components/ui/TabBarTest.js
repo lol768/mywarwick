@@ -1,21 +1,18 @@
-const TabBar = require('components/ui/TabBar');
-const TabBarItem = require('components/ui/TabBarItem');
-
-const TabBarItems = [
-    {
-        title: 'Notifications',
-        icon: 'inbox',
-        path: '/notifications'
-    }
-];
+import TabBar from 'components/ui/TabBar';
+import TabBarItem from 'components/ui/TabBarItem';
 
 describe('TabBar', () => {
     it('calls onSelectItem', () => {
         let fn = sinon.spy();
-        let tabBar = <TabBar items={TabBarItems} onSelectItem={fn}/>;
+        let tabBar = (
+            <TabBar onSelectItem={fn}>
+                <TabBarItem title="Me" icon="user" path="/" />
+                <TabBarItem title="Notifications" icon="inbox" path="/notifications" />
+            </TabBar>
+        );
 
         let instance = ReactTestUtils.renderIntoDocument(tabBar);
-        ReactTestUtils.Simulate.click(instance.refs.Notifications.refs.li);
+        ReactTestUtils.Simulate.click(instance.refs.notifications.refs.li);
 
         assert(fn.called);
     });

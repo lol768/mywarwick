@@ -1,4 +1,4 @@
-import React from 'React';
+import React from 'react';
 
 const DEFAULT_TILE_COLOR = '#5b3069'; // Warwick Aubergine
 const DEFAULT_TEXT_COLOR = 'white';
