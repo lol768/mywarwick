@@ -1,6 +1,5 @@
 import Immutable from 'immutable';
 
-import store from './store';
 import { NAVIGATE, DID_RECEIVE_NOTIFICATION, DID_FETCH_NOTIFICATIONS, NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './actions';
 
 const initialState = Immutable.fromJS({
@@ -32,6 +31,7 @@ export function makeReducers() {
     return Immutable.Map();
 }
 
+const store = require('./store');
 export function registerReducer(name, reducer) {
     mutateReducers(appendReducer(mutableGlobalReducers, name, reducer));
 

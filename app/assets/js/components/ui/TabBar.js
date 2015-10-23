@@ -1,7 +1,7 @@
 import React, { cloneElement } from 'react';
-const ReactComponent = require('react/lib/ReactComponent');
+import ReactComponent from 'react/lib/ReactComponent';
 
-const TabBarItem = require('./TabBarItem');
+import TabBarItem from './TabBarItem';
 
 export default class TabBar extends ReactComponent {
 

@@ -1,8 +1,8 @@
-const Rx = require('rx');
-const log = require('loglevel');
-const DataPipe = require('../datapipe');
+import Rx from 'rx';
+import log from 'loglevel';
+import DataPipe from '../datapipe';
 
-const RestartableWebSocket = require('./restartable-websocket');
+import RestartableWebSocket from './restartable-websocket';
 
 import store from '../store';
 import { didReceiveNotification, didFetchNotifications } from '../actions';

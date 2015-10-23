@@ -1,3 +1,3 @@
-const SocketDatapipe = require('./datapipe/socket');
+import SocketDatapipe from './datapipe/socket';
 
 export default new SocketDatapipe({path: '/websockets/page'});

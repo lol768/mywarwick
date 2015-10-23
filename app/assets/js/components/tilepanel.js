@@ -1,5 +1,5 @@
 
-const React = require('react/addons');
+import React from 'react/addons';
 
 export default class TilePanel extends React.Component {
   constructor(props) {

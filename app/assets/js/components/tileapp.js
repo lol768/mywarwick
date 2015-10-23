@@ -4,10 +4,10 @@
  * Top level app component.
  */
 
-const React = require('react/addons');
-const moment = require('moment');
-const log = require('loglevel');
-const localforage = require('localforage');
+import React from 'react/addons';
+import moment from 'moment';
+import log from 'loglevel';
+import localforage from 'localforage';
 
 export default class TileApp extends React.Component {
 

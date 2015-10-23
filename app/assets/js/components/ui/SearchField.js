@@ -1,5 +1,5 @@
-const React = require('react');
-const ReactComponent = require('react/lib/ReactComponent');
+import React from 'react';
+import ReactComponent from 'react/lib/ReactComponent';
 
 export default class SearchField extends ReactComponent {
 

@@ -1,7 +1,7 @@
-const Rx = require('rx');
-const moment = require('moment');
-const log = require('loglevel');
-const DataPipe = require('../datapipe');
+import Rx from 'rx';
+import moment from 'moment';
+import log from 'loglevel';
+import DataPipe from '../datapipe';
 
 /**
  * Implementation of DataSource that provides an Observable

@@ -1,9 +1,9 @@
-const React = require('react');
-const ReactComponent = require('react/lib/ReactComponent');
+import React from 'react';
+import ReactComponent from 'react/lib/ReactComponent';
 
-const SearchField = require('../ui/SearchField');
-const LinkBlock = require('../ui/LinkBlock');
-const Link = require('../ui/Link');
+import SearchField from '../ui/SearchField';
+import LinkBlock from '../ui/LinkBlock';
+import Link from '../ui/Link';
 
 export default class SearchView extends ReactComponent {
 

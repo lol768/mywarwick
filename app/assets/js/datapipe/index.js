@@ -1,6 +1,6 @@
 "use strict";
 
-const log = require('loglevel');
+import log from 'loglevel';
 
 export default class DataPipe {
 

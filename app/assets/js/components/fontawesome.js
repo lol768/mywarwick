@@ -1,4 +1,4 @@
-const React = require('react/addons');
+import React from 'react/addons';
 
 export class Icon extends React.Component {
   render() {

@@ -1,10 +1,10 @@
-const React = require('react');
-const ReactComponent = require('react/lib/ReactComponent');
+import React from 'react';
+import ReactComponent from 'react/lib/ReactComponent';
 
-const moment = require('moment');
+import moment from 'moment';
 
-const ActivityItem = require('../ui/ActivityItem');
-const GroupedList = require('../ui/GroupedList');
+import ActivityItem from '../ui/ActivityItem';
+import GroupedList from '../ui/GroupedList';
 
 export default class ActivityView extends ReactComponent {
 

@@ -1,8 +1,8 @@
-const React = require('react');
-const ReactComponent = require('react/lib/ReactComponent');
+import React from 'react';
+import ReactComponent from 'react/lib/ReactComponent';
 
-const ProgressBar = require('./ProgressBar');
-const AppIcon = require('./AppIcon');
+import ProgressBar from './ProgressBar';
+import AppIcon from './AppIcon';
 
 import { connect } from 'react-redux';
 

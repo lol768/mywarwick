@@ -1,8 +1,8 @@
-const React = require('react');
-const ReactComponent = require('react/lib/ReactComponent');
+import React from 'react';
+import ReactComponent from 'react/lib/ReactComponent';
 
-const NewsItem = require('../ui/NewsItem');
-const CheckableListItem = require('../ui/CheckableListItem');
+import NewsItem from '../ui/NewsItem';
+import CheckableListItem from '../ui/CheckableListItem';
 
 import { connect } from 'react-redux';
 import { fetchNews } from '../../actions';

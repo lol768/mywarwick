@@ -1,7 +1,7 @@
-const React = require('react');
-const ReactComponent = require('react/lib/ReactComponent');
+import React from 'react';
+import ReactComponent from 'react/lib/ReactComponent';
 
-const ActivityItem = require('../ui/ActivityItem');
+import ActivityItem from '../ui/ActivityItem';
 
 import { connect } from 'react-redux';
 

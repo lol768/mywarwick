@@ -1,9 +1,9 @@
-const React = require('react');
-const ReactComponent = require('react/lib/ReactComponent');
+import React from 'react';
+import ReactComponent from 'react/lib/ReactComponent';
 
-const _ = require('lodash');
+import _ from 'lodash';
 
-const ListHeader = require('./ListHeader');
+import ListHeader from './ListHeader';
 
 export default class GroupedList extends ReactComponent {
 

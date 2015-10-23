@@ -1,9 +1,9 @@
-const React = require('react');
-const ReactComponent = require('react/lib/ReactComponent');
+import React from 'react';
+import ReactComponent from 'react/lib/ReactComponent';
 
-const moment = require('moment');
+import moment from 'moment';
 
-const AppIcon = require('./AppIcon');
+import AppIcon from './AppIcon';
 
 export default class ActivityItem extends ReactComponent {
 

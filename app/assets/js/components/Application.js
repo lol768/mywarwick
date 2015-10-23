@@ -1,16 +1,15 @@
-const React = require('react');
-const ReactComponent = require('react/lib/ReactComponent');
+import React from 'react';
+import ReactComponent from 'react/lib/ReactComponent';
 
-const TabBar = require('./ui/TabBar');
+import TabBar from './ui/TabBar';
 import TabBarItem from './ui/TabBarItem';
-const MeView = require('./views/MeView');
-const NotificationsView = require('./views/NotificationsView');
-const ActivityView = require('./views/ActivityView');
-const NewsView = require('./views/NewsView');
-const SearchView = require('./views/SearchView');
-const UpdatePopup = require('./ui/UpdatePopup');
+import MeView from './views/MeView';
+import NotificationsView from './views/NotificationsView';
+import ActivityView from './views/ActivityView';
+import NewsView from './views/NewsView';
+import SearchView from './views/SearchView';
 
-const _ = require('lodash');
+import _ from 'lodash';
 
 import { connect } from 'react-redux';
 
@@ -31,7 +30,6 @@ class Application extends ReactComponent {
 
         return (
             <div>
-                <UpdatePopup />
                 {views[path]}
                 <TabBar selectedItem={path} onSelectItem={path => dispatch(navigate(path))}>
                     <TabBarItem title="Me" icon="user" path="/" />

@@ -1,7 +1,7 @@
 
-const Rx = require('rx');
-const log = require('loglevel');
-const DataPipe = require('../datapipe');
+import Rx from 'rx';
+import log from 'loglevel';
+import DataPipe from '../datapipe';
 
 /**
  * Simple binary backoff for retrying failed connections.

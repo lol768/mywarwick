@@ -1,16 +1,16 @@
-const log = require('loglevel');
+import log from 'loglevel';
 // only 'warn' otherwise
 log.enableAll(false);
 
-const $ = require('jquery');
+import $ from 'jquery';
 
-const localforage = require('localforage');
+import localforage from 'localforage';
 
-const React = require('react');
-const ReactDOM = require('react-dom');
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-const Application = require('./components/Application');
-const UtilityBar = require('./components/ui/UtilityBar');
+import Application from './components/Application';
+import UtilityBar from './components/ui/UtilityBar';
 
 import store from './store';
 window.Store = store;
@@ -20,7 +20,7 @@ import { Provider } from 'react-redux';
 
 import './update';
 
-require('./notifications');
+import './notifications';
 
 (()=> {
 

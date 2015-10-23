@@ -1,5 +1,5 @@
-const GroupedList = require('components/ui/GroupedList');
-const ListHeader = require('components/ui/ListHeader');
+import GroupedList from 'components/ui/GroupedList';
+import ListHeader from 'components/ui/ListHeader';
 
 describe('GroupedList', () => {
     let SimpleGrouping = {
