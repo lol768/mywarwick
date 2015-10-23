@@ -1,6 +1,7 @@
 package actors
 
 import akka.actor._
+import org.joda.time.DateTime
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import scala.concurrent.duration._
@@ -70,7 +71,7 @@ class WebsocketActor(out: ActorRef) extends Actor with ActorLogging {
     sendNotification(messageKey.toString,
       "Your submission for CH155 Huge Essay is due tomorrow",
       "Tabula",
-      "2015-10-15T12:00"
+      DateTime.now().toString
     )
   }
 

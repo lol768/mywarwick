@@ -21,6 +21,7 @@ import { Provider } from 'react-redux';
 import './update';
 
 import './notifications';
+import './notifications-glue';
 
 (()=> {
 

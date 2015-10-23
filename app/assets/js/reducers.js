@@ -1,10 +1,9 @@
 import Immutable from 'immutable';
 
-import { NAVIGATE, DID_RECEIVE_NOTIFICATION, DID_FETCH_NOTIFICATIONS, NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './actions';
+import { NAVIGATE, NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './actions';
 
 const initialState = Immutable.fromJS({
     path: '/',
-    notifications: [],
     news: {
         fetching: false,
         items: []
@@ -31,8 +30,10 @@ export function makeReducers() {
     return Immutable.Map();
 }
 
-const store = require('./store');
+// const store = require('./store');
+import store from './store';
 export function registerReducer(name, reducer) {
+    console.log('Registering reducer', name);
     mutateReducers(appendReducer(mutableGlobalReducers, name, reducer));
 
     // Dispatch an action handled by the newly-added receiver, to add
@@ -102,10 +103,6 @@ export default function app(state = initialState, action = undefined) {
     switch (action.type) {
         case NAVIGATE:
             return state.set('path', action.path);
-        case DID_RECEIVE_NOTIFICATION:
-            return state.update('notifications', (notifications) => notifications.unshift(action.notification));
-        case DID_FETCH_NOTIFICATIONS:
-            return state.update('notifications', (notifications) => notifications.concat(action.notifications));
         case NEWS_FETCH:
             return state.mergeDeep({
                 news: {

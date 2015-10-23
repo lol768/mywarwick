@@ -1,35 +1,41 @@
-import localforage from 'localforage';
-import { createSelector } from 'reselect';
+import Immutable from 'immutable';
+import { uniq, sortByOrder } from 'lodash';
 
 import store from './store';
-import { didFetchNotifications } from './actions';
+import { registerReducer } from './reducers';
 
-import SocketDatapipe from './SocketDatapipe';
+export const NOTIFICATION_RECEIVE = 'notifications.receive';
+export const NOTIFICATION_FETCH = 'notifications.fetch';
 
-localforage.getItem('notifications', function (err, value) {
-    if (err) {
-        console.error('problem reading notifications from local storage: ' + err);
-    } else {
-        if (value != null) {
-            store.dispatch(didFetchNotifications(value));
-        }
-    }
-});
+export function receivedNotification(notification) {
+    return {
+        type: NOTIFICATION_RECEIVE,
+        notification: notification
+    };
+}
 
-const notificationsSelector = (state) => state.get('notifications');
+export function fetchedNotifications(notifications) {
+    return {
+        type: NOTIFICATION_FETCH,
+        notifications: notifications
+    };
+}
 
-const persistNotificationsSelect = createSelector([notificationsSelector], (notifications) => {
-    // Persist the current set of notifications to local storage on change
-    console.log('notifications changed; persisting');
-    localforage.setItem('notifications', notifications.toJS());
-});
+export function mergeNotifications(notifications, newNotifications) {
+    let concat = notifications.concat(newNotifications).toJS();
 
-store.subscribe(() => persistNotificationsSelect(store.getState()));
+    let sorted = sortByOrder(concat, ['date', 'key'], ['desc', 'desc']);
 
-//TODO I'm sure this should happen somewhere more sensible
-SocketDatapipe.send({
-    tileId: "1",
-    data: {
-        type: "fetch-notifications" // since last login
+    return Immutable.List(uniq(sorted, 'key'));
+}
+
+registerReducer('notifications', (state = Immutable.List(), action) => {
+    switch (action.type) {
+        case NOTIFICATION_RECEIVE:
+            return mergeNotifications(state, [action.notification]);
+        case NOTIFICATION_FETCH:
+            return mergeNotifications(state, action.notifications);
+        default:
+            return state;
     }
 });
