@@ -11,6 +11,7 @@ target
 /data
 
 /node_modules
+/mocha.json
 
 /.idea/*
 !/.idea/modules.iml

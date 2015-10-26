@@ -25,6 +25,7 @@
     "gulp-util": "^3.0.6",
     "jsdom": "~6.5.1",
     "mocha": "~2.3.3",
+    "mocha-bamboo-reporter": "*",
     "mold-source-map": "^0.4.0",
     "node-libs-browser": "^0.5.2",
     "node-notifier": "^4.2.3",
@@ -56,7 +57,8 @@
     "isomorphic-fetch": "~2.1.1"
   },
   "scripts": {
-    "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha --compilers js:babel/register -r TestHelper --recursive test/assets/js"
+    "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha --compilers js:babel/register -r TestHelper --recursive test/assets/js",
+    "bamboo": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha -R mocha-bamboo-reporter --compilers js:babel/register -r TestHelper --recursive test/assets/js"
   },
   "repository": {
     "type": "git",
