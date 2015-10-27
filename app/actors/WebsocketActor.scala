@@ -53,22 +53,21 @@ class WebsocketActor(out: ActorRef) extends Actor with ActorLogging {
 
   import WebsocketActor._
 
-  var messageKey = 0;
-
-  def sendNotification(key: String, text: String, source: String, date: String): Unit = {
+  def sendNotification(id: String, text: String, source: String, date: String): Unit = {
     out ! JsObject(Seq(
-      "key" -> JsString(key),
+      "id" -> JsString(id),
       "type" -> JsString("notification"),
       "text" -> JsString(text),
       "source" -> JsString(source),
       "date" -> JsString(date)
     ))
-    messageKey = messageKey + 1
   }
 
   import context.dispatcher
+
   context.system.scheduler.schedule(5 seconds, 9 seconds) {
-    sendNotification(messageKey.toString,
+    sendNotification(
+      DateTime.now().toString,
       "Your submission for CH155 Huge Essay is due tomorrow",
       "Tabula",
       DateTime.now().toString

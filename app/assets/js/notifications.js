@@ -7,6 +7,8 @@ import { registerReducer } from './reducers';
 export const NOTIFICATION_RECEIVE = 'notifications.receive';
 export const NOTIFICATION_FETCH = 'notifications.fetch';
 
+import { onReceive } from './stream';
+
 export function receivedNotification(notification) {
     return {
         type: NOTIFICATION_RECEIVE,
@@ -22,11 +24,7 @@ export function fetchedNotifications(notifications) {
 }
 
 export function mergeNotifications(notifications, newNotifications) {
-    let concat = notifications.concat(newNotifications).toJS();
-
-    let sorted = sortByOrder(concat, ['date', 'key'], ['desc', 'desc']);
-
-    return Immutable.List(uniq(sorted, 'key'));
+    return Immutable.List(onReceive(notifications.toJS(), newNotifications));
 }
 
 registerReducer('notifications', (state = Immutable.List(), action) => {

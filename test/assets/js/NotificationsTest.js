@@ -4,15 +4,14 @@ import Immutable from 'immutable';
 
 describe('mergeNotifications', () => {
 
-    let notification = (key, date) => ({key: key, date: date});
+    let notification = (id, date) => ({id: id, date: date});
 
     it('adds the first notification', () => {
         let a = notification('a', 1);
 
         let notifications = mergeNotifications(Immutable.List(), [a]);
 
-        expect(notifications.count()).to.equal(1);
-        expect(notifications.first()).to.equal(a);
+        expect(notifications).to.eql(Immutable.List([a]));
     });
 
     it('inserts a newer notification at the start', () => {
@@ -21,9 +20,7 @@ describe('mergeNotifications', () => {
 
         let notifications = mergeNotifications(Immutable.List([a]), [b]);
 
-        expect(notifications.count()).to.equal(2);
-        expect(notifications.first()).to.equal(b);
-        expect(notifications.get(1)).to.equal(a);
+        expect(notifications).to.eql(Immutable.List([b, a]));
     });
 
     it('does not add the same notification twice', () => {
@@ -49,7 +46,7 @@ describe('mergeNotifications', () => {
 
         let notifications2 = mergeNotifications(Immutable.List([a2]), [a]);
 
-        expect(notifications.equals(notifications2)).to.equal(true);
+        expect(notifications).to.eql(notifications2);
     });
 
     it('has a defined sort order', () => {
@@ -61,7 +58,7 @@ describe('mergeNotifications', () => {
         let notifications = mergeNotifications(Immutable.List(), [a, b]);
         let notifications2 = mergeNotifications(Immutable.List(), [b, a]);
 
-        expect(notifications.equals(notifications2)).to.equal(true);
+        expect(notifications).to.eql(notifications2);
     })
 
 });

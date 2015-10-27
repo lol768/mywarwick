@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 class NotificationsView extends ReactComponent {
 
     render() {
-        var notifications = this.props.notifications.map(notification => <ActivityItem {...notification} />);
+        var notifications = this.props.notifications.map(n => <ActivityItem key={"notification-" + n.id} {...n} />);
 
         return <div>{notifications}</div>;
     }

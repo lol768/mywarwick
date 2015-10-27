@@ -1,8 +1,11 @@
 import localforage from 'localforage';
+window.localforage = localforage;
 import { createSelector } from 'reselect';
 
 import SocketDatapipe from './SocketDatapipe';
 import store from './store';
+
+import { fetchedNotifications } from './notifications';
 
 localforage.getItem('notifications', function (err, value) {
     if (err) {
@@ -18,7 +21,6 @@ const notificationsSelector = (state) => state.get('notifications');
 
 const persistNotificationsSelect = createSelector([notificationsSelector], (notifications) => {
     // Persist the current set of notifications to local storage on change
-    console.log('notifications changed; persisting');
     localforage.setItem('notifications', notifications.toJS());
 });
 
