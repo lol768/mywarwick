@@ -17,7 +17,7 @@ class NotificationsView extends ReactComponent {
 
 function select(state) {
     return {
-        notifications: state.get('notifications')
+        notifications: state.get('notifications').getPartition(0)
     };
 }
 

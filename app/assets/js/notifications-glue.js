@@ -7,6 +7,7 @@ import store from './store';
 
 import { fetchedNotifications } from './notifications';
 
+/*
 localforage.getItem('notifications', function (err, value) {
     if (err) {
         console.error('problem reading notifications from local storage: ' + err);
@@ -16,12 +17,13 @@ localforage.getItem('notifications', function (err, value) {
         }
     }
 });
+*/
 
 const notificationsSelector = (state) => state.get('notifications');
 
 const persistNotificationsSelect = createSelector([notificationsSelector], (notifications) => {
     // Persist the current set of notifications to local storage on change
-    localforage.setItem('notifications', notifications.toJS());
+    // localforage.setItem('notifications', notifications.toJS());
 });
 
 store.subscribe(() => persistNotificationsSelect(store.getState()));

@@ -47,7 +47,7 @@ class Application extends ReactComponent {
 function mapStateToProps(state) {
     return {
         path: state.get('path'),
-        notificationsCount: state.get('notifications').count()
+        notificationsCount: state.get('notifications').getPartition(0).length
     };
 }
 
