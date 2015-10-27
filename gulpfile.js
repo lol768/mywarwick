@@ -149,7 +149,7 @@ gulp.task('manifest', ['scripts', 'styles'], function () {
                     return path;
                 }))
                 .pipe(manifest({
-                    cache: ['/activity', '/notifications', '/news', '/search'],
+                    cache: ['/', '/activity', '/notifications', '/news', '/search'],
                     hash: true,
                     exclude: 'app.manifest',
                     prefix: '/assets/'
