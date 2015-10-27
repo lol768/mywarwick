@@ -1,0 +1,12 @@
+# http://EditorConfig.org
+
+root = true
+
+[*]
+end_of_line = lf
+charset = utf-8
+
+# Two spaces for all the things
+[*.{sbt,scala,less,js,jsx,css,xml}]
+indent_style = space
+indent_size = 2

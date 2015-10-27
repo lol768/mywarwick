@@ -18,13 +18,16 @@
     "gulp-babel": "^5.1.0",
     "gulp-file": "^0.2.0",
     "gulp-less": "^3.0.3",
+    "gulp-manifest": "~0.1.0",
     "gulp-postcss": "^5.1.10",
+    "gulp-rename": "~1.2.2",
     "gulp-replace": "^0.5.4",
     "gulp-sourcemaps": "^1.5.2",
     "gulp-uglify": "^1.2.0",
     "gulp-util": "^3.0.6",
     "jsdom": "~6.5.1",
     "mocha": "~2.3.3",
+    "mocha-bamboo-reporter": "*",
     "mold-source-map": "^0.4.0",
     "node-libs-browser": "^0.5.2",
     "node-notifier": "^4.2.3",
@@ -32,13 +35,13 @@
     "sinon": "~1.17.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.2.3",
-    "gulp-manifest": "~0.1.0",
-    "gulp-rename": "~1.2.2"
+    "watchify": "^3.2.3"
   },
   "dependencies": {
+    "es6-promise": "~3.0.2",
     "id7": "git://github.com/UniversityofWarwick/id7.git#lite",
     "immutable": "^3.7.4",
+    "isomorphic-fetch": "~2.1.1",
     "jquery": "^2.1.4",
     "less": "^2.5.1",
     "localforage": "^1.2.7",
@@ -47,16 +50,15 @@
     "moment": "^2.10.3",
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
-    "rx": "^4.0.2",
-    "redux": "~3.0.2",
     "react-redux": "~4.0.0",
-    "reselect": "~2.0.0",
-    "es6-promise": "~3.0.2",
+    "redux": "~3.0.2",
     "redux-thunk": "~1.0.0",
-    "isomorphic-fetch": "~2.1.1"
+    "reselect": "~2.0.0",
+    "rx": "^4.0.2"
   },
   "scripts": {
-    "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha --compilers js:babel/register -r TestHelper --recursive test/assets/js"
+    "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha --compilers js:babel/register -r TestHelper --recursive test/assets/js",
+    "bamboo": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" /usr/nodejs/4.2/bin/node node_modules/mocha/bin/mocha -R mocha-bamboo-reporter --compilers js:babel/register -r TestHelper --recursive test/assets/js"
   },
   "repository": {
     "type": "git",
