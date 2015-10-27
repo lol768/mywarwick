@@ -1,5 +1,4 @@
 import Immutable from 'immutable';
-import { uniq, sortByOrder } from 'lodash';
 
 import store from './store';
 import { registerReducer } from './reducers';
@@ -7,7 +6,7 @@ import { registerReducer } from './reducers';
 export const NOTIFICATION_RECEIVE = 'notifications.receive';
 export const NOTIFICATION_FETCH = 'notifications.fetch';
 
-import { Stream } from './stream';
+import { makeStream, onStreamReceive } from './stream';
 import _ from 'lodash';
 
 export function receivedNotification(notification) {
@@ -26,21 +25,16 @@ export function fetchedNotifications(notifications) {
 
 let partitionByYearAndMonth = (n) => n.date.substr(0, 7); // YYYY-MM
 
-export function mergeNotifications(oldStream, newNotifications) {
-  let stream = new Stream(partitionByYearAndMonth);
-  _(oldStream.partitions).each((items) => stream.receive(items)).value();
-
-  stream.receive(newNotifications);
-
-  return stream;
+export function mergeNotifications(stream, newNotifications) {
+  return onStreamReceive(stream, partitionByYearAndMonth, newNotifications);
 }
 
-registerReducer('notifications', (state = new Stream(partitionByYearAndMonth), action) => {
+registerReducer('notifications', (state = makeStream(), action) => {
   switch (action.type) {
     case NOTIFICATION_RECEIVE:
-      return mergeNotifications(state, [action.notification]);
+      return mergeNotifications(state, Immutable.List([action.notification]));
     case NOTIFICATION_FETCH:
-      return mergeNotifications(state, action.notifications);
+      return mergeNotifications(state, Immutable.List(action.notifications));
     default:
       return state;
   }

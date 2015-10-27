@@ -5,6 +5,8 @@ import ActivityItem from '../ui/ActivityItem';
 
 import { connect } from 'react-redux';
 
+import { getStreamPartition } from '../../stream';
+
 class NotificationsView extends ReactComponent {
 
     render() {
@@ -17,7 +19,7 @@ class NotificationsView extends ReactComponent {
 
 function select(state) {
     return {
-        notifications: state.get('notifications').getPartition(0)
+        notifications: getStreamPartition(state.get('notifications'), 0)
     };
 }
 

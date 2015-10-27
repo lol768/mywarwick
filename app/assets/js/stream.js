@@ -10,65 +10,33 @@ let sortStream = (stream) => _.sortByOrder(stream, [DATE_KEY, ID_KEY], [DESC, DE
 
 let uniqStream = (stream) => _.uniq(stream, ID_KEY);
 
-export class Stream {
+export function makeStream() {
+  return Immutable.Map();
+}
 
-  /*
-   * Takes a partition function that is used to group stream items into
-   * buckets, to make updates and persistence more efficient for streams
-   * with a large number of items.
-   *
-   * The result of the partition function has to be a valid object key, and
-   * be sortable. Aside from that, it doesn't really matter what it is, as
-   * long as it's the same for all items that belong in the same partition.
-   */
-  constructor(partitionFn) {
-    this.partitionFn = partitionFn;
-    this.partitions = {};
-    this.sortedPartitionKeys = [];
-  }
+/*
+ * Takes a partition function that is used to group stream items into
+ * buckets, to make updates and persistence more efficient for streams
+ * with a large number of items.
+ *
+ * The result of the partition function has to be a valid object key, and
+ * be sortable. Aside from that, it doesn't really matter what it is, as
+ * long as it's the same for all items that belong in the same partition.
+ */
+export function onStreamReceive(stream = Immutable.Map(), grouper = (item) => item.date, rx = Immutable.List()) {
+  rx.groupBy(grouper).mapEntries(([k, v]) => {
+    stream = stream.update(k, Immutable.List(), (str) => Immutable.List(mergeReceivedItems(str.toJS(), v.toList().toJS())));
+  });
 
-  /*
-   * Merge a list of received items into this Stream.
-   */
-  receive(rx) {
-    let beforeCount = this._privatePartitionCount();
+  return stream;
+}
 
-    _(rx).groupBy(this.partitionFn).each((items, key) => {
-      this.partitions[key] = onReceive(this.partitions[key], items);
-    }).value();
-
-    // If any new partitions were added, re-sort the partition keys for
-    // index-based access
-    if (this._privatePartitionCount() != beforeCount) {
-      this.sortedPartitionKeys = Object.keys(this.partitions).sort();
-    }
-  }
-
-  /*
-   * This is pseudo-private because apparently Object.keys() runs in linear
-   * time on the size of the object...
-   */
-  _privatePartitionCount() {
-    return Object.keys(this.partitions).length;
-  }
-
-  /*
-   * ... whereas Array.length is constant time.
-   */
-  partitionCount() {
-    return this.sortedPartitionKeys.length;
-  }
-
-  /*
-   * Get the items in the stream partition at the given index.  Indexes are
-   * determined by sorting the partition keys.
-   */
-  getPartition(i) {
-    let key = this.sortedPartitionKeys[i];
-
-    return this.partitions[key];
-  }
-
+/*
+ * Get the items in the stream partition at the given index.  Indexes are
+ * determined by sorting the partition keys.
+ */
+export function getStreamPartition(stream, i) {
+  return stream.entrySeq().sortBy(([k, v]) => k).map(([k, v]) => v).get(i);
 }
 
 /*
@@ -79,7 +47,7 @@ export class Stream {
  * perform the merge.  If these all fail, it falls back to concatenating,
  * de-duplicating and sorting the whole thing.
  */
-export function onReceive(stream = [], rx = []) {
+export function mergeReceivedItems(stream = [], rx = []) {
   // Preconditions: stream has no duplicates, stream is in reverse date order
 
   // Defensive copy both

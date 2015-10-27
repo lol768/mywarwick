@@ -15,6 +15,8 @@ import { connect } from 'react-redux';
 
 import { navigate } from '../actions';
 
+import { getStreamPartition } from '../stream';
+
 class Application extends ReactComponent {
 
     render() {
@@ -47,7 +49,7 @@ class Application extends ReactComponent {
 function mapStateToProps(state) {
     return {
         path: state.get('path'),
-        notificationsCount: state.get('notifications').getPartition(0).length
+        notificationsCount: getStreamPartition(state.get('notifications'), 0).count()
     };
 }
 

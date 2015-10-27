@@ -23,7 +23,7 @@ const notificationsSelector = (state) => state.get('notifications');
 
 const persistNotificationsSelect = createSelector([notificationsSelector], (notifications) => {
     // Persist the current set of notifications to local storage on change
-    // localforage.setItem('notifications', notifications.toJS());
+    localforage.setItem('notifications', notifications.toJS());
 });
 
 store.subscribe(() => persistNotificationsSelect(store.getState()));
