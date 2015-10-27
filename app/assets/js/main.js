@@ -39,6 +39,9 @@ var currentPath = '/';
 
 $(function () {
 
+    var currentTabFromPath = window.location.pathname.match(/(\/[^/]*)/)[0];
+    store.dispatch(navigate(currentTabFromPath));
+
     ReactDOM.render(<UtilityBar name="John Smith"/>, document.getElementById('utility-bar-container'));
     ReactDOM.render(
         <Provider store={store}>
@@ -66,5 +69,6 @@ store.subscribe(() => {
         if (window.history.pushState) {
             window.history.pushState(null, null, currentPath);
         }
+
     }
 });
