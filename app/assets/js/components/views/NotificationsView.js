@@ -5,10 +5,12 @@ import ActivityItem from '../ui/ActivityItem';
 
 import { connect } from 'react-redux';
 
+import { getStreamPartition } from '../../stream';
+
 class NotificationsView extends ReactComponent {
 
     render() {
-        var notifications = this.props.notifications.map(notification => <ActivityItem {...notification} />);
+        var notifications = this.props.notifications.map(n => <ActivityItem key={n.id} {...n} />);
 
         return <div>{notifications}</div>;
     }
@@ -17,7 +19,7 @@ class NotificationsView extends ReactComponent {
 
 function select(state) {
     return {
-        notifications: state.get('notifications')
+        notifications: getStreamPartition(state.get('notifications'), 0)
     };
 }
 

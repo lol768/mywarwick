@@ -15,19 +15,19 @@ class UserMessageHandler extends Actor with ActorLogging {
         "type" -> JsString("fetch-notifications"),
           "notifications" -> JsArray(
             Seq(JsObject(Seq(
-              "key" -> JsString("999"),
+              "id" -> JsString("999"),
               "text" -> JsString("This notification happened since you last logged in"),
               "source" -> JsString("Tabula"),
               "date" -> JsString("2015-10-14T15:00")
             )),
               JsObject(Seq(
-                "key" -> JsString("998"),
+                "id" -> JsString("998"),
                 "text" -> JsString("This notification happened since you last logged in"),
                 "source" -> JsString("Tabula"),
                 "date" -> JsString("2015-10-17T18:00")
               )),
               JsObject(Seq(
-                "key" -> JsString("997"),
+                "id" -> JsString("997"),
                 "text" -> JsString("This notification happened since you last logged in"),
                 "source" -> JsString("Tabula"),
                 "date" -> JsString("2015-10-18T12:00")

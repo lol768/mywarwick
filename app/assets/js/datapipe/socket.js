@@ -5,12 +5,12 @@ import DataPipe from '../datapipe';
 import RestartableWebSocket from './restartable-websocket';
 
 import store from '../store';
-import { didReceiveNotification, didFetchNotifications } from '../actions';
+import { receivedNotification, fetchedNotifications } from '../notifications';
 
 export default class SocketDataPipe extends DataPipe {
     constructor(options) {
         super();
-        this.url = options.url || ("wss://" + window.location.hostname + (location.port ? ':' + location.port : '') + options.path);
+        this.url = options.url || ("wss://" + window.location.hostname + (window.location.port ? ':' + location.port : '') + options.path);
         this.stream = new Rx.ReplaySubject(1);
         this.ws = new RestartableWebSocket(this.url);
         this.ws.onmessage = this.messageReceived.bind(this);
@@ -56,10 +56,10 @@ export default class SocketDataPipe extends DataPipe {
         //TODO implement proper message routing
         switch (data.type) {
             case 'fetch-notifications':
-                store.dispatch(didFetchNotifications(data.notifications));
+                store.dispatch(fetchedNotifications(data.notifications));
                 break;
             case 'notification':
-                store.dispatch(didReceiveNotification(data));
+                store.dispatch(receivedNotification(data));
                 break;
             default:
             // nowt
