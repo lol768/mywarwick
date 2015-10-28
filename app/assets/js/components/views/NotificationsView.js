@@ -10,7 +10,7 @@ import { getStreamPartition } from '../../stream';
 class NotificationsView extends ReactComponent {
 
     render() {
-        var notifications = this.props.notifications.map(n => <ActivityItem key={"notification-" + n.id} {...n} />);
+        var notifications = this.props.notifications.map(n => <ActivityItem key={n.id} {...n} />);
 
         return <div>{notifications}</div>;
     }
