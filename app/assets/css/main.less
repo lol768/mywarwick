@@ -210,19 +210,33 @@
 
 }
 
-.mail-list-item {
+.tile--text-btm {
+  .tile__body {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+  }
+}
+
+.tile__callout {
+  display: block;
+  font-size: 2em;
+  line-height: 1;
+}
+
+.list-tile-item {
   overflow: hidden;
 }
 
-.mail-list-item__from {
+.list-tile-item__title {
   font-weight: bold;
 }
 
-.mail-list-item__date {
+.list-tile-item__date {
   float: right;
 }
 
-.mail-list-item__subject {
+.list-tile-item__text {
   display: block;
 }
 
@@ -273,20 +287,24 @@ a.list-group-item {
   font-size: 15px;
   margin-bottom: 10px;
 
-  > a {
-    text-decoration: none;
+  a {
     color: inherit;
+    text-decoration: none;
+  }
 
-    > .tile-body > header {
-      > h1 {
-        color: #fff;
-        border: 0;
-        margin: 0;
-        font-size: 16px;
+  ul, ol {
+    .list-unstyled;
+  }
 
-        > .fa {
-          margin-right: 4px;
-        }
+  > header {
+    > h1 {
+      color: inherit;
+      border: 0;
+      margin: 0;
+      font-size: 16px;
+
+      > .fa {
+        margin-right: 4px;
       }
     }
   }
