@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 
-import tileElements from '../tiles';
+import * as tileElements from '../tiles';
 
 import moment from 'moment';
 

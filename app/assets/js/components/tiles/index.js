@@ -5,12 +5,23 @@ import Tile from './Tile';
 
 import moment from 'moment';
 
-export let ListTile = (props) => (
+export let list = (props) => (
   <Tile {...props}>
     <ul>
       {props.items.map((item) => <ListTileItem {...item} />)}
     </ul>
   </Tile>
+);
+
+export let text = (props) => (
+  <Tile {...props} className={props.className + " tile--text-btm"}>
+    <span className="tile__callout">{props.callout}</span>
+    <span className="tile__text">{props.text}</span>
+  </Tile>
+);
+
+export let count = (props) => (
+  <text {...props} callout={props.items.length} text={props.word}/>
 );
 
 let ListTileItem = (props) => (
@@ -22,20 +33,3 @@ let ListTileItem = (props) => (
     </a>
   </li>
 );
-
-export let TextTile = (props) => (
-  <Tile {...props} className={props.className + " tile--text-btm"}>
-    <span className="tile__callout">{props.callout}</span>
-    <span className="tile__text">{props.text}</span>
-  </Tile>
-);
-
-export let CountTile = (props) => (
-  <TextTile {...props} callout={props.items.length} text={props.word} />
-);
-
-export default {
-  list: ListTile,
-  text: TextTile,
-  count: CountTile
-};
