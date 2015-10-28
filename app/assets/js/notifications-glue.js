@@ -7,7 +7,7 @@ import store from './store';
 import { fetchedNotifications } from './notifications';
 
 localforage.getItem('notifications').then(
-  (value) => store.dispatch(fetchedNotifications(value)),
+  (value) => value != null ? store.dispatch(fetchedNotifications(value)),
   (err) => console.log('Problem reading notifications from local storage', err)
 );
 
