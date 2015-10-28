@@ -72,16 +72,11 @@ export function mergeReceivedItems(stream = [], rx = []) {
     return uniqStream(stream);
   }
 
-  // Do the smallest possible merge
-  // >= to include identical items in dedupe later
+  // Try and do the smallest possible merge
+  // (>= to include identical items in dedupe later)
   let mergeStart = _(stream).findLastIndex((x) => x[DATE_KEY] >= oldestRx[DATE_KEY]);
 
-  if (mergeStart == -1) {
-    // If all rx items older than all stream items, merge whole array
-    stream.push(...rx);
-
-    return sortStream(uniqStream(stream));
-  } else {
+  if (mergeStart >= 0) {
     let toMerge = stream.splice(0, mergeStart + 1);
     toMerge.push(...rx);
 
@@ -89,4 +84,9 @@ export function mergeReceivedItems(stream = [], rx = []) {
 
     return stream;
   }
+
+  // If all rx items older than all stream items, merge whole array
+  stream.push(...rx);
+
+  return sortStream(uniqStream(stream));
 }
