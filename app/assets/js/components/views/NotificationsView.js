@@ -9,6 +9,8 @@ import { connect } from 'react-redux';
 
 import { getStreamPartition } from '../../stream';
 
+import InfiniteScrollable from '../ui/InfiniteScrollable';
+
 const SOME_MORE = 20;
 
 class NotificationsView extends ReactComponent {
@@ -21,52 +23,10 @@ class NotificationsView extends ReactComponent {
     };
   }
 
-  componentDidMount() {
-    this.attachScrollListener();
-  }
-
-  componentDidUpdate() {
-    this.attachScrollListener();
-  }
-
-  componentWillUnmount() {
-    this.detachScrollListener();
-  }
-
-  attachScrollListener() {
-    if (this.hasMore()) {
-      $(window).on('scroll resize', this.onScroll.bind(this));
-
-      this.onScroll();
-    }
-  }
-
-  detachScrollListener() {
-    $(window).off('scroll resize', this.onScroll.bind(this));
-  }
-
-  hasMore() {
-    return this.props.notifications.count() > this.state.numberToShow;
-  }
-
-  onScroll() {
-    var $this = $(ReactDOM.findDOMNode(this));
-
-    let offsetTop = $this.offset().top;
-    let height = $this.height();
-
-    let windowHeight = $(window).height();
-    let scrollTop = $(window).scrollTop();
-
-    let loadMoreThreshold = offsetTop + height - (windowHeight * 1.5);
-
-    if (scrollTop >= loadMoreThreshold) {
-      this.detachScrollListener();
-
-      this.setState({
-        numberToShow: this.state.numberToShow + SOME_MORE
-      });
-    }
+  loadMore() {
+    this.setState({
+      numberToShow: this.state.numberToShow + SOME_MORE
+    });
   }
 
   render() {
@@ -74,7 +34,13 @@ class NotificationsView extends ReactComponent {
       .take(this.state.numberToShow)
       .map(n => <ActivityItem key={n.id} {...n} />);
 
-    return <div>{notifications}</div>;
+    let hasMore = this.state.numberToShow < this.props.notifications.count();
+
+    return (
+      <InfiniteScrollable hasMore={hasMore} onLoadMore={this.loadMore.bind(this)}>
+        {notifications}
+      </InfiniteScrollable>
+    )
   }
 
 }
