@@ -1,35 +1,41 @@
-import localforage from 'localforage';
-import { createSelector } from 'reselect';
+import Immutable from 'immutable';
 
 import store from './store';
-import { didFetchNotifications } from './actions';
+import { registerReducer } from './reducers';
 
-import SocketDatapipe from './SocketDatapipe';
+export const NOTIFICATION_RECEIVE = 'notifications.receive';
+export const NOTIFICATION_FETCH = 'notifications.fetch';
 
-localforage.getItem('notifications', function (err, value) {
-    if (err) {
-        console.error('problem reading notifications from local storage: ' + err);
-    } else {
-        if (value != null) {
-            store.dispatch(didFetchNotifications(value));
-        }
-    }
-});
+import { makeStream, onStreamReceive } from './stream';
+import _ from 'lodash';
 
-const notificationsSelector = (state) => state.get('notifications');
+export function receivedNotification(notification) {
+  return {
+    type: NOTIFICATION_RECEIVE,
+    notification: notification
+  };
+}
 
-const persistNotificationsSelect = createSelector([notificationsSelector], (notifications) => {
-    // Persist the current set of notifications to local storage on change
-    console.log('notifications changed; persisting');
-    localforage.setItem('notifications', notifications.toJS());
-});
+export function fetchedNotifications(notifications) {
+  return {
+    type: NOTIFICATION_FETCH,
+    notifications: notifications
+  };
+}
 
-store.subscribe(() => persistNotificationsSelect(store.getState()));
+let partitionByYearAndMonth = (n) => n.date.substr(0, 7); // YYYY-MM
 
-//TODO I'm sure this should happen somewhere more sensible
-SocketDatapipe.send({
-    tileId: "1",
-    data: {
-        type: "fetch-notifications" // since last login
-    }
+export function mergeNotifications(stream, newNotifications) {
+  return onStreamReceive(stream, partitionByYearAndMonth, newNotifications);
+}
+
+registerReducer('notifications', (state = makeStream(), action) => {
+  switch (action.type) {
+    case NOTIFICATION_RECEIVE:
+      return mergeNotifications(state, Immutable.List([action.notification]));
+    case NOTIFICATION_FETCH:
+      return mergeNotifications(state, Immutable.List(action.notifications));
+    default:
+      return state;
+  }
 });
