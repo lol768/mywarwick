@@ -34,9 +34,12 @@ export function onStreamReceive(stream = Immutable.Map(), grouper = (item) => it
 /*
  * Get the items in the stream partition at the given index.  Indexes are
  * determined by sorting the partition keys.
+ *
+ * If the partition does not exist, return an empty list.
  */
 export function getStreamPartition(stream, i) {
-  return stream.entrySeq().sortBy(([k, v]) => k).map(([k, v]) => v).get(i);
+  return stream.entrySeq().sortBy(([k, v]) => k).map(([k, v]) => v).get(i)
+    || Immutable.List();
 }
 
 /*

@@ -11,7 +11,7 @@ describe('Stream', () => {
     let stream = onStreamReceive(undefined, grouper, Immutable.List([item('a', 1)]));
 
     expect(getStreamPartition(stream, 0)).to.eql(Immutable.List([item('a', 1)]));
-    expect(getStreamPartition(stream, 1)).to.equal(undefined);
+    expect(getStreamPartition(stream, 1)).to.equal(Immutable.List());
   });
 
   it('imposes an ordering on partition keys', () => {
