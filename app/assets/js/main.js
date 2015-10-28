@@ -9,6 +9,9 @@ import localforage from 'localforage';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import attachFastClick from 'fastclick';
+attachFastClick(document.body);
+
 import Application from './components/Application';
 import UtilityBar from './components/ui/UtilityBar';
 
