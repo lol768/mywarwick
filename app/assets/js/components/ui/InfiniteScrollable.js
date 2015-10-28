@@ -3,8 +3,6 @@ import ReactComponent from 'react/lib/ReactComponent';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 
-const SOME_MORE = 20;
-
 export default class InfiniteScrollable extends ReactComponent {
 
   componentDidMount() {
