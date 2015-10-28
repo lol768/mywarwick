@@ -17,7 +17,7 @@ let ListTileItem = (props) => (
   <li className="list-tile-item">
     <a href={props.href} target="_blank">
       <span className="list-tile-item__title">{props.title}</span>
-      <span className="list-tile-item__date">{moment(props.date).fromNow()}</span>
+      { props.date ? <span className="list-tile-item__date">{moment(props.date).fromNow()}</span> : null }
       <span className="list-tile-item__text">{props.text}</span>
     </a>
   </li>
@@ -33,3 +33,9 @@ export let TextTile = (props) => (
 export let CountTile = (props) => (
   <TextTile {...props} callout={props.items.length} text={props.word} />
 );
+
+export default {
+  list: ListTile,
+  text: TextTile,
+  count: CountTile
+};
