@@ -210,19 +210,35 @@
 
 }
 
-.mail-list-item {
-  overflow: hidden;
+.tile--text-btm {
+  .tile__body {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+  }
 }
 
-.mail-list-item__from {
+.tile__callout {
+  display: block;
+  font-size: 2em;
+  line-height: 1.1;
+}
+
+.list-tile-item {
+  overflow: hidden;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, .3);
+}
+
+.list-tile-item__title {
   font-weight: bold;
 }
 
-.mail-list-item__date {
+.list-tile-item__date {
   float: right;
 }
 
-.mail-list-item__subject {
+.list-tile-item__text {
   display: block;
 }
 
@@ -273,20 +289,24 @@ a.list-group-item {
   font-size: 15px;
   margin-bottom: 10px;
 
-  > a {
-    text-decoration: none;
+  a {
     color: inherit;
+    text-decoration: none;
+  }
 
-    > .tile-body > header {
-      > h1 {
-        color: #fff;
-        border: 0;
-        margin: 0;
-        font-size: 16px;
+  ul, ol {
+    .list-unstyled;
+  }
 
-        > .fa {
-          margin-right: 4px;
-        }
+  > header {
+    > h1 {
+      color: inherit;
+      border: 0;
+      margin: 0;
+      font-size: 16px;
+
+      > .fa {
+        margin-right: 4px;
       }
     }
   }
