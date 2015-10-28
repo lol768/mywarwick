@@ -5,6 +5,12 @@ import $ from 'jquery';
 
 export default class InfiniteScrollable extends ReactComponent {
 
+  constructor(props) {
+    super(props);
+
+    this.boundScrollListener = this.onScroll.bind(this);
+  }
+
   componentDidMount() {
     this.attachScrollListener();
   }
@@ -18,15 +24,17 @@ export default class InfiniteScrollable extends ReactComponent {
   }
 
   attachScrollListener() {
+    this.detachScrollListener();
+
     if (this.props.hasMore) {
-      $(window).on('scroll resize', this.onScroll.bind(this));
+      $(window).on('scroll resize', this.boundScrollListener);
 
       this.onScroll();
     }
   }
 
   detachScrollListener() {
-    $(window).off('scroll resize', this.onScroll.bind(this));
+    $(window).off('scroll resize', this.boundScrollListener);
   }
 
   onScroll() {
