@@ -23,15 +23,13 @@ export default class SearchView extends ReactComponent {
 
   onSearchFocus() {
 
-    var _this = this;
-
-    _this.setState({
+    this.setState({
       searchFocus: true
     });
 
-    $(document).bind('click.searchBox', function (e) {
+    $(document).bind('click.searchBox', (e) => {
       if ($(e.target).closest('.recentLinks').length || $(e.target).hasClass('form-control')) return;
-      _this.setState({
+      this.setState({
         searchFocus: false
       });
       $(document).unbind('.searchBox');
