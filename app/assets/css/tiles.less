@@ -1,0 +1,61 @@
+.tile {
+  min-height: 125px;
+  padding: 10px 10px 20px;
+  position: relative;
+  font-size: 15px;
+  margin-bottom: 10px;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ul, ol {
+    .list-unstyled;
+  }
+
+  > header {
+    > h1 {
+      color: inherit;
+      border: 0;
+      margin: 0;
+      font-size: 16px;
+
+      > .fa {
+        margin-right: 4px;
+      }
+    }
+  }
+}
+
+.tile--text-btm {
+  .tile__body {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+  }
+}
+
+.tile__callout {
+  display: block;
+  font-size: 2em;
+  line-height: 1.1;
+}
+
+.list-tile-item {
+  overflow: hidden;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, .3);
+}
+
+.list-tile-item__title {
+  font-weight: bold;
+}
+
+.list-tile-item__date {
+  float: right;
+}
+
+.list-tile-item__text {
+  display: block;
+}

@@ -1,0 +1,27 @@
+.id7-fixed-width-container,
+.id7-main-content-area {
+  background: #f9f9f9 !important;
+}
+
+.id7-masthead {
+  padding-bottom: 14px;
+}
+
+@media screen and (max-width: @screen-sm-max) {
+
+  .id7-fixed-width-container,
+  .id7-main-content-area {
+    background: none;
+  }
+
+}
+
+@media screen and (max-width: @screen-xs-max) {
+
+  .id7-main-content-area {
+    & > .id7-main-content {
+      padding: 0;
+    }
+  }
+
+}

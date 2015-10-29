@@ -21,7 +21,7 @@ export default class TabBar extends ReactComponent {
     render() {
         return (
             <nav className="tab-bar">
-                <ul className="tab-bar-tabs">
+                <ul className="tab-bar__tabs">
                     {this.getChildren()}
                 </ul>
             </nav>

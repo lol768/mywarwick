@@ -1,0 +1,27 @@
+.app-icon--size(@size) {
+  border-radius: @size / 4;
+  width: @size;
+  height: @size;
+  font-size: @size * .7;
+  line-height: @size;
+}
+
+.app-icon {
+  .app-icon--sm;
+  display: inline-block;
+  text-align: center;
+}
+
+.app-icon--sm {
+  .app-icon--size(24px);
+}
+
+.app-icon--lg {
+  .app-icon--size(32px);
+  line-height: 31px;
+}
+
+.app-icon--xl {
+  .app-icon--size(48px);
+  line-height: 46px;
+}
