@@ -36,7 +36,7 @@ var paths = {
 
   assetsOut: 'target/gulp',
 
-  styleIn: ['app/assets/css/main.less', 'node_modules/id7/less/id7.lite.less'],
+  styleIn: ['app/assets/css/main.less'],
   styleOut: 'target/gulp/css',
 
   // Paths under node_modules that will be searched when @import-ing in your LESS.
