@@ -28,11 +28,15 @@ val appDeps = Seq(
   evolutions,
   "com.typesafe.play" %% "anorm" % "2.4.0",
   "com.oracle" % "ojdbc6" % "11.2.0.3.0",
-  "uk.ac.warwick.sso" %% "sso-client-play" % "2.8-SNAPSHOT")
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.8-SNAPSHOT"
+)
 
 val testDeps = Seq(
-  specs2,
-  "com.typesafe.akka" %% "akka-testkit" % "2.3.12"
+  "org.mockito" % "mockito-all" % "1.10.19",
+  "org.scalatest" %% "scalatest" % "2.2.5",
+  "org.scalatestplus" %% "play" % "1.4.0-M4",
+  "com.typesafe.akka" %% "akka-testkit" % "2.3.12",
+  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.8-SNAPSHOT"
 ).map(_ % Test)
 
 libraryDependencies ++= (appDeps ++ testDeps).map(_.excludeAll(
