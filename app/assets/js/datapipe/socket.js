@@ -4,9 +4,6 @@ import DataPipe from '../datapipe';
 
 import RestartableWebSocket from './restartable-websocket';
 
-import store from '../store';
-import { receivedNotification, fetchedNotifications } from '../notifications';
-
 export default class SocketDataPipe extends DataPipe {
     constructor(options) {
         super();
@@ -14,6 +11,10 @@ export default class SocketDataPipe extends DataPipe {
         this.stream = new Rx.ReplaySubject(1);
         this.ws = new RestartableWebSocket(this.url);
         this.ws.onmessage = this.messageReceived.bind(this);
+        this.ws.onopen = () => {
+            this.onopen();
+        };
+        this.onopen = () => {};
 
         this.messageId = 0;
     }
@@ -52,18 +53,6 @@ export default class SocketDataPipe extends DataPipe {
         log.debug("Message event received:", event);
         let data = JSON.parse(event.data);
         this.stream.onNext(data);
-
-        //TODO implement proper message routing
-        switch (data.type) {
-            case 'fetch-notifications':
-                store.dispatch(fetchedNotifications(data.notifications));
-                break;
-            case 'notification':
-                store.dispatch(receivedNotification(data));
-                break;
-            default:
-            // nowt
-        }
     }
 
     getUpdateStream():Rx.Observable {

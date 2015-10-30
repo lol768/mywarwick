@@ -1,13 +1,12 @@
 import Immutable from 'immutable';
+import _ from 'lodash';
 
 import store from './store';
 import { registerReducer } from './reducers';
+import { makeStream, onStreamReceive } from './stream';
 
 export const NOTIFICATION_RECEIVE = 'notifications.receive';
 export const NOTIFICATION_FETCH = 'notifications.fetch';
-
-import { makeStream, onStreamReceive } from './stream';
-import _ from 'lodash';
 
 export function receivedNotification(notification) {
   return {

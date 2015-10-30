@@ -4,10 +4,11 @@ import akka.actor._
 import org.joda.time.DateTime
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
+import warwick.sso.LoginContext
 import scala.concurrent.duration._
 
 object WebsocketActor {
-  def props(out: ActorRef) = Props(classOf[WebsocketActor], out)
+  def props(loginContext: LoginContext)(out: ActorRef) = Props(classOf[WebsocketActor], out, loginContext)
 
   /**
    * This is the format of the JSON that client web pages will send to
@@ -49,21 +50,29 @@ object WebsocketActor {
  * @param out this output will be attached to the websocket and will send
  *            messages back to the client.
  */
-class WebsocketActor(out: ActorRef) extends Actor with ActorLogging {
+class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor with ActorLogging {
 
   import WebsocketActor._
+  import context.dispatcher
+
+  // FIXME UserMessageHandler and the way we create it here is non-production.
+  // it likely shouldn't own UserMessageHandler as a child (which is what context.actorOf
+  // does here).
+  val handler = context.actorOf(UserMessageHandler.props(loginContext))
+
+  val signedIn = loginContext.user.exists( _.isFound )
+  val who = loginContext.user.flatMap(_.name.full).getOrElse("nobody")
 
   def sendNotification(id: String, text: String, source: String, date: String): Unit = {
-    out ! JsObject(Seq(
+    self ! TileUpdate(JsObject(Seq(
       "id" -> JsString(id),
       "type" -> JsString("notification"),
       "text" -> JsString(text),
       "source" -> JsString(source),
       "date" -> JsString(date)
-    ))
+    )))
   }
 
-  import context.dispatcher
 
   context.system.scheduler.schedule(5 seconds, 9 seconds) {
     sendNotification(
@@ -74,15 +83,10 @@ class WebsocketActor(out: ActorRef) extends Actor with ActorLogging {
     )
   }
 
-  // FIXME UserMessageHandler and the way we create it here is non-production.
-  // it likely shouldn't own UserMessageHandler as a child (which is what context.actorOf
-  // does here).
-  val handler = context.actorOf(Props[UserMessageHandler])
-
   override def receive = {
     // these will be the TileUpdates we send to ourself.
     case TileUpdate(data) => {
-      log.info("About to pipe out some data")
+      log.debug(s"About to pipe out some data to ${who}")
       out ! data
     }
     case js: JsValue => handleClientMessage(js)

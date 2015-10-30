@@ -10,7 +10,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import attachFastClick from 'fastclick';
-attachFastClick(document.body);
 
 import Application from './components/Application';
 import UtilityBar from './components/ui/UtilityBar';
@@ -43,10 +42,12 @@ var currentPath = '/';
 
 $(function () {
 
+    attachFastClick(document.body);
+
     currentPath = window.location.pathname.match(/(\/[^/]*)/)[0];
     store.dispatch(navigate(currentPath));
 
-    ReactDOM.render(<UtilityBar name="John Smith"/>, document.getElementById('utility-bar-container'));
+    ReactDOM.render(<UtilityBar name="nobody" />, document.getElementById('utility-bar-container'));
     ReactDOM.render(
         <Provider store={store}>
             <Application />
@@ -61,7 +62,7 @@ $(function () {
 });
 
 store.subscribe(() => {
-    console.log('Store updated', store.getState().toJS());
+    log.debug('Store updated', store.getState().toJS());
 });
 
 store.subscribe(() => {
@@ -76,3 +77,11 @@ store.subscribe(() => {
 
     }
 });
+
+// temporary - print out authentication info from the websocket.
+import SocketDatapipe from './SocketDatapipe';
+SocketDatapipe.getUpdateStream().subscribe((data) => {
+    if (data.type === 'who-am-i') {
+        log.info("Who am I?", data['user-info']);
+    }
+})
