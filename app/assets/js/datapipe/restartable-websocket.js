@@ -47,12 +47,14 @@ export default class RestartableWebSocket {
   constructor(url) {
     this.url = url
     this.connected = false;
-    this.onmessage = function() {}
+    this.onmessage = function() {};
+    this.onopen = function() {};
 
     this.backoff = new BinaryBackoff(500, 30000, 2000);
+
     this.backoff.retries.subscribe((ms) => {
       log.info("WS retrying connection in",ms,"ms");
-    })
+    });
 
     this.ensureConnection();
 
@@ -82,6 +84,7 @@ export default class RestartableWebSocket {
         this.buffer = [];
 
         this.backoff.success();
+        this.onopen();
       };
       ws.onclose = () => {
         log.info("WS closed");

@@ -36,7 +36,7 @@ var paths = {
 
   assetsOut: 'target/gulp',
 
-  styleIn: ['app/assets/css/main.less', 'node_modules/id7/less/id7.lite.less'],
+  styleIn: ['app/assets/css/main.less'],
   styleOut: 'target/gulp/css',
 
   // Paths under node_modules that will be searched when @import-ing in your LESS.
@@ -54,7 +54,9 @@ var browserifyOptions = {
 
 var PRODUCTION = (process.env.PRODUCTION !== 'false');
 if (PRODUCTION) {
-  gutil.log(gutil.colors.yellow('Production build (use PRODUCTION=false in development)'));
+  gutil.log(gutil.colors.yellow('Production build (use PRODUCTION=false in development).'));
+} else {
+  gutil.log(gutil.colors.yellow('Development build.'));
 }
 
 // Function for running Browserify on JS, since
@@ -134,7 +136,7 @@ gulp.task('watch-styles', ['styles'], function () {
   return gulp.watch(paths.assetPath + '/css/**/*.less', ['styles']);
 });
 
-// Run once the scripts and styles are in places
+// Run once the scripts and styles are in place
 gulp.task('manifest', ['scripts', 'styles'], function () {
   if (PRODUCTION) {
     getFontAwesomeVersion(function (fontAwesomeVersion) {
