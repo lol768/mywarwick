@@ -22,7 +22,7 @@ class NotificationServiceImpl @Inject()(notificationDao: NotificationDao, notifi
   def save(providerId: String, notificationType: String, title: String, text: String, scopes: Seq[String], replace: Boolean): String = {
 
     val replaceIds = replace match {
-      case true => notificationScopeDao.getNotificationsByScope(scopes)
+      case true => notificationScopeDao.getNotificationsByScope(scopes, providerId)
       case _ => Nil
     }
 

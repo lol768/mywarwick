@@ -13,7 +13,7 @@ trait NotificationScopeDao {
 
   def save(notificationId: String, name: String): String
 
-  def getNotificationsByScope(scopes: Seq[String]): Seq[String]
+  def getNotificationsByScope(scopes: Seq[String], providerId: String): Seq[String]
 
 }
 
@@ -23,7 +23,7 @@ class NotificationScopeDaoImpl @Inject()(@NamedDatabase("default") val db: Datab
     db.withConnection { implicit c =>
       val scopeId = UUID.randomUUID().toString
 
-      SQL("INSERT INTO NOTIFICATION_SCOPE(NOTIFICATION_ID, SCOPE_ID, SCOPE_TYPE, SCOPE_NAME) VALUES ({notificationId}, {scopeId}, {scopeType}, {scopeName})")
+      SQL("INSERT INTO NOTIFICATION_SCOPE (NOTIFICATION_ID, SCOPE_ID, SCOPE_TYPE, SCOPE_NAME) VALUES ({notificationId}, {scopeId}, {scopeType}, {scopeName})")
         .on('notificationId -> notificationId,
           'scopeId -> scopeId,
           'scopeType -> name,
@@ -34,10 +34,10 @@ class NotificationScopeDaoImpl @Inject()(@NamedDatabase("default") val db: Datab
     }
   }
 
-  override def getNotificationsByScope(scopes: Seq[String]): Seq[String] = {
+  override def getNotificationsByScope(scopes: Seq[String], providerId: String): Seq[String] = {
     db.withConnection { implicit c =>
-      SQL("SELECT NOTIFICATION_ID FROM NOTIFICATION_SCOPE WHERE SCOPE_NAME IN ({scopes}) GROUP BY NOTIFICATION_ID HAVING COUNT(*) = {count}")
-        .on('scopes -> scopes, 'count -> scopes.length)
+      SQL("SELECT NOTIFICATION_ID FROM NOTIFICATION_SCOPE JOIN NOTIFICATION ON NOTIFICATION.ID = NOTIFICATION_SCOPE.NOTIFICATION_ID WHERE SCOPE_NAME IN ({scopes}) AND PROVIDER_ID = {providerId} GROUP BY NOTIFICATION_ID HAVING COUNT(*) = {count}")
+        .on('scopes -> scopes, 'count -> scopes.length, 'providerId -> providerId)
         .as(str("NOTIFICATION_ID").*)
     }
   }
