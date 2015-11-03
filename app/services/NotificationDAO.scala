@@ -16,14 +16,14 @@ trait NotificationDao {
            notification_type: String,
            title: String,
            text: String,
-           replaces: Option[String]): String
+           replaces: Seq[String]): String
 
   def updateReplacedNotification(id: String, replacedById: String)
 
-  //  def getNotificationById(id: String): Option[Notification] =
-  //    getNotificationsByIds(Seq(id)).headOption
-  //
-  //  def getNotificationsByIds(ids: Seq[String]): Seq[Notification]
+    def getNotificationById(id: String): Option[Notification] =
+      getNotificationsByIds(Seq(id)).headOption
+
+    def getNotificationsByIds(ids: Seq[String]): Seq[Notification]
 
 }
 
@@ -42,7 +42,7 @@ class NotificationDaoImpl @Inject()(@NamedDatabase("default") val db: Database) 
     }
   }
 
-  override def save(providerId: String, notificationType: String, title: String, text: String, replaces: Option[String]): String = {
+  override def save(providerId: String, notificationType: String, title: String, text: String, replaces: Seq[String]): String = {
     val id = UUID.randomUUID().toString
     val now = new DateTime()
     db.withConnection { implicit c =>
@@ -56,7 +56,6 @@ class NotificationDaoImpl @Inject()(@NamedDatabase("default") val db: Database) 
         .execute()
     }
 
-    //TODO: does this even do what I want it to?
     replaces.foreach(replacesId => {
       updateReplacedNotification(replacesId, id)
     })
@@ -64,7 +63,6 @@ class NotificationDaoImpl @Inject()(@NamedDatabase("default") val db: Database) 
     id
   }
 
-  //TODO: currently replacing notifications by addressing ids directly, should incorporate scope
   override def updateReplacedNotification(replacesId: String, replacedById: String) = {
     db.withConnection { implicit c =>
       SQL("UPDATE notification SET replacedby_id = {replacedById} WHERE id = {replacesId}")
@@ -74,12 +72,11 @@ class NotificationDaoImpl @Inject()(@NamedDatabase("default") val db: Database) 
     }
   }
 
-  //  def getNotificationsByIds(ids: Seq[String]): Seq[Notification] = {
-  //    DB.withConnection { implicit c =>
-  //      val ungroupedPhotos = SQL(s"SELECT * FROM notification WHERE id IN ({ids})")
-  //      .on('ids -> ids)
-  //      .as(notificationParser.*)
-  //      .toSeq
-  //    }
-  //  }
+  def getNotificationsByIds(ids: Seq[String]): Seq[Notification] = {
+    db.withConnection { implicit c =>
+      SQL(s"SELECT * FROM notification WHERE id IN ({ids})")
+        .on('ids -> ids)
+        .as(notificationParser.*)
+    }
+  }
 }

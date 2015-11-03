@@ -17,7 +17,8 @@ case class IncomingNotification(
                          notificationType: String,
                          title: String,
                          text: String,
-                         replaces: Option[String]
+                         scopes: Seq[String],
+                         replace: Boolean
                          )
 
 object Notification {
