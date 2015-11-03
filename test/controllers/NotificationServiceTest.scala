@@ -31,7 +31,7 @@ class NotificationServiceTest extends PlaySpec with MockitoSugar with Results {
 
     "replaces notifications" in {
 
-      when(notificationScopeDao.getNotificationsByScope(Seq("ch155", "coursework-due"))).thenReturn(Seq("456", "789"))
+      when(notificationScopeDao.getNotificationsByScope(Seq("ch155", "coursework-due"), "tabula")).thenReturn(Seq("456", "789"))
 
       when(notificationDao.save(any(), any(), any(), any(), any())).thenReturn("123")
 
