@@ -28,7 +28,7 @@ class ApplicationTest extends PlaySpec with OneAppPerSuite {
     )
     .overrides(
       // Fake SSOClient
-      bind[SsoClient].to[MockSsoClient]
+      bind[SSOClient].to[MockSSOClient]
       // FIXME still numerous non-fake things, like UserLookup. Replace whole Guice module?
     )
     .build()
