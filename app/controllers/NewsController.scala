@@ -9,7 +9,10 @@ import services.{FeedService, NewsService}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class NewsController @Inject()(newsService: NewsService, feedService: FeedService) extends Controller {
+class NewsController @Inject()(
+  newsService: NewsService,
+  feedService: FeedService
+) extends Controller {
 
   implicit val newsItemWrites = new Writes[NewsItem] {
     def writes(item: NewsItem) = Json.obj(
@@ -31,8 +34,7 @@ class NewsController @Inject()(newsService: NewsService, feedService: FeedServic
     Future.sequence(futures).map { results =>
       val items = results.flatMap { case (source, feed) => feed.items.map(_.asNewsItem(source)) }
 
-      Ok(Json.stringify(Json.obj("items" -> items)))
-        .withHeaders("Content-Type" -> "application/json;charset=utf-8")
+      Ok(Json.obj("items" -> items))
     }
   }
 
