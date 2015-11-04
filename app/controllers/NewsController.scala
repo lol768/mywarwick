@@ -9,7 +9,10 @@ import services.{FeedService, NewsService}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class NewsController @Inject()(newsService: NewsService, feedService: FeedService) extends Controller {
+class NewsController @Inject()(
+  newsService: NewsService,
+  feedService: FeedService
+) extends Controller {
 
   implicit val newsItemWrites = new Writes[NewsItem] {
     def writes(item: NewsItem) = Json.obj(
