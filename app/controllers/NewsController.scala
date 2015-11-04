@@ -31,8 +31,7 @@ class NewsController @Inject()(newsService: NewsService, feedService: FeedServic
     Future.sequence(futures).map { results =>
       val items = results.flatMap { case (source, feed) => feed.items.map(_.asNewsItem(source)) }
 
-      Ok(Json.stringify(Json.obj("items" -> items)))
-        .withHeaders("Content-Type" -> "application/json;charset=utf-8")
+      Ok(Json.obj("items" -> items))
     }
   }
 
