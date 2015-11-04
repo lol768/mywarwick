@@ -1,21 +1,20 @@
 package services
 
+import java.sql.Connection
 import java.util.UUID
 
-import anorm.JodaParameterMetaData._
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject}
 import models.{IncomingNotification, Notification}
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
+import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[NotificationDaoImpl])
 trait NotificationDao {
   def save(incomingNotification: IncomingNotification,
-           replaces: Seq[String]): String
-
-  def updateReplacedNotification(id: String, replacedById: String)
+    replaces: Seq[String])(implicit connection: Connection): String
 
   def getNotificationById(id: String): Option[Notification] =
     getNotificationsByIds(Seq(id)).headOption
@@ -39,37 +38,36 @@ class NotificationDaoImpl @Inject()(@NamedDatabase("default") val db: Database) 
     }
   }
 
-  override def save(incomingNotification: IncomingNotification, replaces: Seq[String]): String = {
+  override def save(incomingNotification: IncomingNotification, replaces: Seq[String])(implicit c: Connection): String = {
     import incomingNotification._
     val id = UUID.randomUUID().toString
     val now = new DateTime()
-    db.withConnection { implicit c =>
-      SQL("INSERT INTO notification(id, provider_id, type, title, text, generated_at, created_at) VALUES({id}, {providerId}, {type}, {title}, {text}, {generatedAt}, {createdAt})")
-        .on(
-          'id -> id,
-          'providerId -> providerId,
-          'type -> notificationType,
-          'title -> title,
-          'text -> text,
-          'generatedAt -> now,
-          'createdAt -> now
-        )
-        .execute()
-    }
 
-    replaces.foreach(replacesId => {
-      updateReplacedNotification(replacesId, id)
-    })
+    SQL("INSERT INTO notification(id, provider_id, type, title, text, generated_at, created_at) VALUES({id}, {providerId}, {type}, {title}, {text}, {generatedAt}, {createdAt})")
+      .on(
+        'id -> id,
+        'providerId -> providerId,
+        'type -> notificationType,
+        'title -> title,
+        'text -> text,
+        'generatedAt -> generatedAt.getOrElse(now),
+        'createdAt -> now
+      )
+      .execute()
+
+    updateReplacedNotification(id, replaces)
 
     id
   }
 
-  override def updateReplacedNotification(replacesId: String, replacedById: String) = {
+  def updateReplacedNotification(replacedById: String, replaces: Seq[String]) = {
     db.withConnection { implicit c =>
-      SQL("UPDATE notification SET replaced_by_id = {replacedById} WHERE id = {replacesId}")
-        .on('replacedById -> replacedById,
-          'replacesId -> replacesId)
-        .execute()
+      replaces.grouped(1000).foreach { group =>
+        SQL("UPDATE notification SET replaced_by_id = {replacedById} WHERE id IN ({replaces})")
+          .on('replacedById -> replacedById,
+            'replaces -> group)
+          .execute()
+      }
     }
   }
 

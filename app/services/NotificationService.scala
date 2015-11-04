@@ -11,22 +11,18 @@ trait NotificationService {
   def save(incomingNotification: IncomingNotification): String
 }
 
-class NotificationServiceImpl @Inject()(notificationDao: NotificationDao, notificationScopeDao: NotificationScopeDao) extends NotificationService {
+class NotificationServiceImpl @Inject()(
+  notificationCreationDao: NotificationCreationDao,
+  notificationDao: NotificationDao,
+  notificationScopeDao: NotificationScopeDao
+) extends NotificationService {
   override def getNotificationById(id: String): Option[Notification] = notificationDao.getNotificationById(id)
 
-  //  def save(providerId: String, notificationType: String, title: String, text: String, scopes: Seq[String], replace: Boolean): String = {
   def save(incomingNotification: IncomingNotification): String = {
     import incomingNotification._
-    val replaceIds = replace match {
-      case true => notificationScopeDao.getNotificationsByScope(scopes, providerId)
-      case _ => Nil
-    }
+    val replaceIds = notificationScopeDao.getNotificationsByScope(replace, providerId)
 
-    val notification = notificationDao.save(incomingNotification, replaceIds)
-
-    scopes.foreach(name => notificationScopeDao.save(notification, name))
-
-    notification
+    notificationCreationDao.createNotification(incomingNotification, replaceIds)
 
   }
 }
