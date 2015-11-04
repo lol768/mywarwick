@@ -14,8 +14,8 @@ import warwick.sso.SSOClient
 import scala.concurrent.Future
 
 class ApplicationController @Inject() (
-    ssoClient: SSOClient
-  ) extends Controller {
+  ssoClient: SSOClient
+) extends Controller {
 
   val logger = Logger(getClass)
 

@@ -1,9 +1,7 @@
 package services
 
-import com.google.inject.Singleton
 import models.NewsSource
 
-@Singleton
 class NewsService {
 
   def allSources: Seq[NewsSource] = Seq(

@@ -1,6 +1,5 @@
 package services
 
-import com.google.inject.Singleton
 import models.{Feed, FeedItem, NewsSource}
 import org.joda.time.DateTime
 import play.api.Play.current
@@ -12,7 +11,6 @@ import play.api.libs.ws.WS
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-@Singleton
 class FeedService {
 
   implicit val feedItemReads: Reads[FeedItem] = (
