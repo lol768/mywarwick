@@ -1,5 +1,6 @@
 package controllers
 
+import models.IncomingNotification
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -19,9 +20,9 @@ class NotificationServiceTest extends PlaySpec with MockitoSugar with Results {
     "save a notification" in {
 
       val notificationId = "123"
-      when(notificationDao.save(any(), any(), any(), any(), any())).thenReturn(notificationId)
+      when(notificationDao.save(any(), any())).thenReturn(notificationId)
 
-      val createdNotificationId = notificationService.save("tabula", "coursework-due", "Coursework due", "Your submission for CH155 Huge Essay is due tomorrow", Seq("ch155", "coursework-due"), replace = false)
+      val createdNotificationId = notificationService.save(IncomingNotification("tabula", "coursework-due", "Coursework due", "Your submission for CH155 Huge Essay is due tomorrow", Seq("ch155", "coursework-due"), replace = false))
 
       createdNotificationId mustBe notificationId
 
@@ -33,11 +34,11 @@ class NotificationServiceTest extends PlaySpec with MockitoSugar with Results {
 
       when(notificationScopeDao.getNotificationsByScope(Seq("ch155", "coursework-due"), "tabula")).thenReturn(Seq("456", "789"))
 
-      when(notificationDao.save(any(), any(), any(), any(), any())).thenReturn("123")
+      when(notificationDao.save(any(), any())).thenReturn("123")
 
-      notificationService.save("tabula", "coursework-due", "Coursework due", "Your submission for CH155 Huge Essay is due tomorrow", Seq("ch155", "coursework-due"), replace = true)
+      notificationService.save(IncomingNotification("tabula", "coursework-due", "Coursework due", "Your submission for CH155 Huge Essay is due tomorrow", Seq("ch155", "coursework-due"), replace = true))
 
-      verify(notificationDao, times(1)).save(any(), any(), any(), any(), Matchers.eq(Seq("456", "789")))
+      verify(notificationDao, times(1)).save(any(), Matchers.eq(Seq("456", "789")))
 
     }
 

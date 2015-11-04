@@ -16,7 +16,7 @@ class IncomingNotificationController @Inject()(
   def handler = Action(parse.json) { request =>
     request.body.validate[IncomingNotification].map {
       case notification: IncomingNotification =>
-        val notificationId: String = notificationService.save(notification.providerId, notification.notificationType, notification.title, notification.text, notification.scopes, notification.replace)
+        val notificationId: String = notificationService.save(notification)
         Ok(Json.toJson(
           Map("status" -> "ok",
             "notificationId" -> notificationId)))

@@ -6,28 +6,25 @@ import anorm.JodaParameterMetaData._
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject}
-import models.{DBConversions, Notification}
+import models.{IncomingNotification, Notification}
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 
 @ImplementedBy(classOf[NotificationDaoImpl])
 trait NotificationDao {
-  def save(provider_id: String,
-           notification_type: String,
-           title: String,
-           text: String,
+  def save(incomingNotification: IncomingNotification,
            replaces: Seq[String]): String
 
   def updateReplacedNotification(id: String, replacedById: String)
 
-    def getNotificationById(id: String): Option[Notification] =
-      getNotificationsByIds(Seq(id)).headOption
+  def getNotificationById(id: String): Option[Notification] =
+    getNotificationsByIds(Seq(id)).headOption
 
-    def getNotificationsByIds(ids: Seq[String]): Seq[Notification]
+  def getNotificationsByIds(ids: Seq[String]): Seq[Notification]
 
 }
 
-class NotificationDaoImpl @Inject()(@NamedDatabase("default") val db: Database) extends NotificationDao with DBConversions {
+class NotificationDaoImpl @Inject()(@NamedDatabase("default") val db: Database) extends NotificationDao {
 
   private def notificationParser: RowParser[Notification] = {
     get[String]("id") ~
@@ -42,7 +39,8 @@ class NotificationDaoImpl @Inject()(@NamedDatabase("default") val db: Database) 
     }
   }
 
-  override def save(providerId: String, notificationType: String, title: String, text: String, replaces: Seq[String]): String = {
+  override def save(incomingNotification: IncomingNotification, replaces: Seq[String]): String = {
+    import incomingNotification._
     val id = UUID.randomUUID().toString
     val now = new DateTime()
     db.withConnection { implicit c =>

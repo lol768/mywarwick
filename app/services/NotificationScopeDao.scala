@@ -5,8 +5,8 @@ import java.util.UUID
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject}
-import models.DBConversions
 import play.api.db.{Database, NamedDatabase}
+
 
 @ImplementedBy(classOf[NotificationScopeDaoImpl])
 trait NotificationScopeDao {
@@ -17,7 +17,7 @@ trait NotificationScopeDao {
 
 }
 
-class NotificationScopeDaoImpl @Inject()(@NamedDatabase("default") val db: Database) extends NotificationScopeDao with DBConversions {
+class NotificationScopeDaoImpl @Inject()(@NamedDatabase("default") val db: Database) extends NotificationScopeDao {
 
   override def save(notificationId: String, name: String): String = {
     db.withConnection { implicit c =>
