@@ -29,10 +29,10 @@ class NotificationDaoImpl @Inject()(@NamedDatabase("default") val db: Database) 
   private def notificationParser: RowParser[Notification] = {
     get[String]("id") ~
       get[String]("provider_id") ~
-      get[String]("notification_type") ~
+      get[String]("type") ~
       get[String]("title") ~
       get[String]("text") ~
-      get[String]("replacedby_id") ~
+      get[String]("replaced_by_id") ~
       get[DateTime]("created_at") map {
       case id ~ providerId ~ notificationType ~ title ~ text ~ replacedById ~ createdAt =>
         Notification(id, providerId, notificationType, title, text, replacedById, createdAt)
@@ -44,13 +44,16 @@ class NotificationDaoImpl @Inject()(@NamedDatabase("default") val db: Database) 
     val id = UUID.randomUUID().toString
     val now = new DateTime()
     db.withConnection { implicit c =>
-      SQL("INSERT INTO notification(id, provider_id, notification_type, title, text, replacedby_id, created_at) VALUES({id}, {providerId}, {notificationType}, {title}, {text}, null, {createdAt})")
-        .on('id -> id,
+      SQL("INSERT INTO notification(id, provider_id, type, title, text, generated_at, created_at) VALUES({id}, {providerId}, {type}, {title}, {text}, {generatedAt}, {createdAt})")
+        .on(
+          'id -> id,
           'providerId -> providerId,
-          'notificationType -> notificationType,
+          'type -> notificationType,
           'title -> title,
           'text -> text,
-          'createdAt -> now)
+          'generatedAt -> now,
+          'createdAt -> now
+        )
         .execute()
     }
 
@@ -63,7 +66,7 @@ class NotificationDaoImpl @Inject()(@NamedDatabase("default") val db: Database) 
 
   override def updateReplacedNotification(replacesId: String, replacedById: String) = {
     db.withConnection { implicit c =>
-      SQL("UPDATE notification SET replacedby_id = {replacedById} WHERE id = {replacesId}")
+      SQL("UPDATE notification SET replaced_by_id = {replacedById} WHERE id = {replacesId}")
         .on('replacedById -> replacedById,
           'replacesId -> replacesId)
         .execute()
