@@ -1,4 +1,8 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
+import ReactComponent from 'react/lib/ReactComponent';
+
+import $ from 'jquery';
 
 const DEFAULT_TILE_COLOR = '#8c6e96'; // Default ID7 theme colour
 const DEFAULT_TEXT_COLOR = 'white';
@@ -8,28 +12,60 @@ let sizeClasses = {
   wide: 'col-xs-12 col-sm-6'
 };
 
-export default (props) => {
-  let icon = props.icon ? <i className={"fa fa-fw fa-" + props.icon}></i> : null;
-  let backgroundColor = props.backgroundColor ? props.backgroundColor : DEFAULT_TILE_COLOR;
-  let color = props.color ? props.color : DEFAULT_TEXT_COLOR;
+export default class Tile extends ReactComponent {
 
-  let outerClassName = props.zoomed ? 'tile--zoomed' : sizeClasses[props.size || 'normal'];
+  constructor(props) {
+    super(props);
 
-  return (
-    <div className={outerClassName}>
-      <article className={"tile " + props.className}
-               style={{backgroundColor: backgroundColor, color: color}}
-               onClick={props.onClick}>
-        <header className="tile__title">
-          <h1>
-            {icon}
-            {props.title}
-          </h1>
-        </header>
-        <div className="tile__body">
-          {props.children}
-        </div>
-      </article>
-    </div>
-  );
-};
+    this.boundOnReposition = this.onReposition.bind(this);
+  }
+
+  componentDidMount() {
+    this.onReposition();
+
+    $(window).on('resize', this.boundOnReposition);
+  }
+
+  componentWillUnmount() {
+    $(window).off('resize', this.boundOnReposition);
+  }
+
+  onReposition() {
+    let $this = $(ReactDOM.findDOMNode(this));
+
+    this.setState({
+      naturalOuterWidth: $this.outerWidth(),
+      naturalOuterHeight: $this.outerHeight(),
+      originalOffset: $this.offset()
+    });
+  }
+
+  render() {
+    let props = this.props;
+
+    let icon = props.icon ? <i className={"fa fa-fw fa-" + props.icon}></i> : null;
+    let backgroundColor = props.backgroundColor ? props.backgroundColor : DEFAULT_TILE_COLOR;
+    let color = props.color ? props.color : DEFAULT_TEXT_COLOR;
+
+    let outerClassName = props.zoomed ? 'tile--zoomed' : sizeClasses[props.size || 'normal'];
+
+    return (
+      <div className={outerClassName}>
+        <article className={"tile " + props.className}
+                 style={{backgroundColor: backgroundColor, color: color}}
+                 onClick={props.onClick}>
+          <header className="tile__title">
+            <h1>
+              {icon}
+              {props.title}
+            </h1>
+          </header>
+          <div className="tile__body">
+            {props.children}
+          </div>
+        </article>
+      </div>
+    );
+  }
+
+}

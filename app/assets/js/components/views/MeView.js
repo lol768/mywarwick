@@ -1,10 +1,14 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
 
 import * as tileElements from '../tiles';
 
 import moment from 'moment';
 import _ from 'lodash';
+
+import jQuery from 'jquery';
+import $ from 'jquery.transit';
 
 let TILE_DATA = [
   {
@@ -116,30 +120,95 @@ export default class MeView extends ReactComponent {
     }
   }
 
-  renderTile(tile) {
+  renderTile(tile, zoomed = false) {
     let onTileClick = this.onTileClick.bind(this);
 
     let element = tileElements[tile.type];
 
-    let props = _.merge(tile, {
+    let props = _.merge({}, tile, {
       onClick(e) {
         onTileClick(tile, e);
       },
 
-      zoomed: this.state.zoomedTile == tile
+      zoomed: zoomed,
+      key: zoomed ? tile.key + '-zoomed' : tile.key,
+      ref: zoomed ? tile.key + '-zoomed' : tile.key
     });
 
     return React.createElement(element, props);
   }
 
-  renderTiles() {
+  animateTileZoom(tileComponent, zoomComponent) {
+    let DURATION = 500;
+
+    let state = tileComponent.refs.tile.state;
+
+    let $tile = $(ReactDOM.findDOMNode(tileComponent)),
+      $zoom = $(ReactDOM.findDOMNode(zoomComponent));
+
+    let scaleX = state.naturalOuterWidth / $zoom.outerWidth();
+    let scaleY = state.naturalOuterHeight / $zoom.outerHeight();
+
+    $tile.stop().css({
+      transformOriginX: 0,
+      transformOriginY: 0,
+      zIndex: 1001
+    }).transition({
+      x: -state.originalOffset.left,
+      y: -state.originalOffset.top + $(window).scrollTop(),
+      scaleX: $(window).width() / state.naturalOuterWidth,
+      scaleY: $(window).height() / state.naturalOuterHeight,
+      opacity: 0
+    }, DURATION, function () {
+      $tile.css({
+        zIndex: '',
+        transformOriginX: '',
+        transformOriginY: '',
+        x: '',
+        y: '',
+        transform: '',
+        opacity: ''
+      });
+    });
+
+    $zoom.stop().show().css({
+      transformOriginX: 0,
+      transformOriginY: 0,
+      x: state.originalOffset.left,
+      y: state.originalOffset.top - $(window).scrollTop(),
+      scaleX: scaleX,
+      scaleY: scaleY,
+      opacity: 0
+    }).transition({
+      x: 0,
+      y: 0,
+      scaleX: 1,
+      scaleY: 1,
+      opacity: 1
+    }, DURATION);
+  }
+
+  componentDidUpdate() {
     let { zoomedTile } = this.state;
 
     if (zoomedTile) {
-      return this.renderTile(zoomedTile);
-    } else {
-      return TILE_DATA.map((tile) => this.renderTile(tile));
+      let tileComponent = this.refs[zoomedTile.key];
+      let zoomComponent = this.refs[zoomedTile.key + '-zoomed'];
+
+      this.animateTileZoom(tileComponent, zoomComponent);
     }
+  }
+
+  renderTiles() {
+    let { zoomedTile } = this.state;
+
+    let tiles = TILE_DATA.map((tile) => this.renderTile(tile));
+
+    if (zoomedTile) {
+      tiles.push(this.renderTile(zoomedTile, true));
+    }
+
+    return tiles;
   }
 
   render() {

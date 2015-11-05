@@ -6,13 +6,19 @@ import Tile from './Tile';
 
 import moment from 'moment';
 
-export let list = (props) => (
-  <Tile {...props}>
-    <ul>
-      {props.items.map((item) => <ListTileItem {...item} />)}
-    </ul>
-  </Tile>
-);
+export class list extends ReactComponent {
+
+  render() {
+    return (
+      <Tile ref="tile" {...this.props}>
+        <ul>
+          {this.props.items.map((item) => <ListTileItem {...item} />)}
+        </ul>
+      </Tile>
+    );
+  }
+
+}
 
 export class text extends ReactComponent {
 
@@ -61,7 +67,7 @@ export class text extends ReactComponent {
     ));
 
     return (
-      <Tile {...this.props} className={this.props.className + " tile--text-btm"}>
+      <Tile ref="tile" {...this.props} className={this.props.className + " tile--text-btm"}>
         <ReactCSSTransitionGroup transitionName="text-tile"
                                  transitionEnterTimeout={1000}
                                  transitionLeaveTimeout={1000}>
@@ -73,9 +79,13 @@ export class text extends ReactComponent {
 
 }
 
-export let count = (props) => (
-  <text {...props} callout={props.items.length} text={props.word}/>
-);
+export class count extends ReactComponent {
+  render() {
+    return (
+      <text {...this.props} callout={this.props.items.length} text={this.props.word}/>
+    );
+  }
+}
 
 let ListTileItem = (props) => (
   <li className="list-tile-item">
