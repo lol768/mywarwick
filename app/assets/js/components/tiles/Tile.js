@@ -13,10 +13,13 @@ export default (props) => {
   let backgroundColor = props.backgroundColor ? props.backgroundColor : DEFAULT_TILE_COLOR;
   let color = props.color ? props.color : DEFAULT_TEXT_COLOR;
 
+  let outerClassName = props.zoomed ? 'tile--zoomed' : sizeClasses[props.size || 'normal'];
+
   return (
-    <div className={sizeClasses[props.size || 'normal']}>
-      <article className={"tile " + props.className} data-href={props.href}
-               style={{backgroundColor: backgroundColor, color: color}}>
+    <div className={outerClassName}>
+      <article className={"tile " + props.className}
+               style={{backgroundColor: backgroundColor, color: color}}
+               onClick={props.onClick}>
         <header className="tile__title">
           <h1>
             {icon}

@@ -4,8 +4,9 @@ import ReactComponent from 'react/lib/ReactComponent';
 import * as tileElements from '../tiles';
 
 import moment from 'moment';
+import _ from 'lodash';
 
-let tileData = [
+let TILE_DATA = [
   {
     key: 'mail',
     type: 'list',
@@ -50,7 +51,6 @@ let tileData = [
     key: 'live-departures',
     type: 'text',
     title: 'Live Departures',
-    href: 'http://warwick.ac.uk/insite/kcm',
     backgroundColor: '#ef4050',
     icon: 'bus',
     callout: '17:52',
@@ -83,10 +83,52 @@ let tileData = [
 
 export default class MeView extends ReactComponent {
 
-  render() {
-    let tiles = tileData.map((tile) => React.createElement(tileElements[tile.type], tile));
+  constructor(props) {
+    super(props);
 
-    return <div className="row">{tiles}</div>;
+    this.state = {
+      zoomedTile: null
+    };
+  }
+
+  onTileClick(tile) {
+    if (tile.href) {
+      window.open(tile.href);
+    } else {
+      this.setState({
+        zoomedTile: this.state.zoomedTile ? null : tile
+      });
+    }
+  }
+
+  renderTile(tile) {
+    let onTileClick = this.onTileClick.bind(this);
+
+    let element = tileElements[tile.type];
+
+    let props = _.merge(tile, {
+      onClick(e) {
+        onTileClick(tile, e);
+      },
+
+      zoomed: this.state.zoomedTile == tile
+    });
+
+    return React.createElement(element, props);
+  }
+
+  renderTiles() {
+    let { zoomedTile } = this.state;
+
+    if (zoomedTile) {
+      return this.renderTile(zoomedTile);
+    } else {
+      return TILE_DATA.map((tile) => this.renderTile(tile));
+    }
+  }
+
+  render() {
+    return <div className="row">{this.renderTiles()}</div>;
   }
 
 }

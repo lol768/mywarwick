@@ -1,9 +1,23 @@
+.tile--zoomed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 44px;
+  z-index: 100;
+
+  .tile {
+    height: 100%;
+  }
+}
+
 .tile {
   min-height: 125px;
   padding: 10px 10px 20px;
   position: relative;
   font-size: 15px;
   margin-bottom: 10px;
+  overflow: hidden;
 
   a {
     color: inherit;
