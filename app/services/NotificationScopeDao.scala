@@ -24,8 +24,6 @@ class NotificationScopeDaoImpl @Inject()(@NamedDatabase("default") val db: Datab
   override def save(notificationId: String, name: String, value: String)(implicit c: Connection): String = {
     val scopeId = UUID.randomUUID().toString
 
-    throw new Exception()
-
     SQL("INSERT INTO NOTIFICATION_SCOPE (NOTIFICATION_ID, ID, NAME, VALUE, CREATED_AT) VALUES ({notificationId}, {id}, {name}, {value}, {createdAt})")
       .on(
         'notificationId -> notificationId,
