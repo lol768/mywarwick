@@ -43,7 +43,7 @@
 }
 
 .tile--text-btm {
-  .tile__body {
+  .tile__item {
     position: absolute;
     left: 10px;
     bottom: 10px;
@@ -72,4 +72,23 @@
 
 .list-tile-item__text {
   display: block;
+}
+
+.text-tile-enter {
+  bottom: -80px !important;
+}
+
+.text-tile-enter-active {
+  bottom: 10px !important;
+  transition: bottom 500ms ease-out;
+  transition-delay: 500ms;
+}
+
+.text-tile-leave {
+  bottom: 10px !important;
+}
+
+.text-tile-leave-active {
+  bottom: -80px !important;
+  transition: bottom 500ms ease-in;
 }

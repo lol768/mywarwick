@@ -44,8 +44,13 @@ let TILE_DATA = [
     href: 'https://tabula.warwick.ac.uk',
     backgroundColor: '#239b92',
     icon: 'cog',
-    callout: 3,
-    text: 'actions required'
+    items: [
+      {
+        key: 1,
+        callout: 3,
+        text: 'actions required'
+      }
+    ]
   },
   {
     key: 'live-departures',
@@ -53,8 +58,18 @@ let TILE_DATA = [
     title: 'Live Departures',
     backgroundColor: '#ef4050',
     icon: 'bus',
-    callout: '17:52',
-    text: 'U1 to Leamington'
+    items: [
+      {
+        key: 1,
+        callout: '17:52',
+        text: 'U1 to Leamington'
+      },
+      {
+        key: 2,
+        callout: '18:01',
+        text: '11 to Coventry'
+      }
+    ]
   },
   {
     key: 'modules',
