@@ -21,3 +21,6 @@ GET        /assets/*file           @controllers.Assets.versioned(path="/public",
 GET        /news/feed              @controllers.NewsController.feed
 
 GET        /service/gtg            @controllers.ServiceCheckController.gtg
+
+POST       /test/api/activities/app/:appId   @controllers.MyAPIController.postActivities(appId: String)
+GET        /test/api/activities/me           @controllers.MyAPIController.myActivity

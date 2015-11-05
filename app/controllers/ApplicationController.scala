@@ -1,25 +1,20 @@
 package controllers
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import actors.WebsocketActor.TileUpdate
-import org.joda.time.format.ISODateTimeFormat
 import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.Play.current
-import play.api.data._
-import play.api.data.Forms._
 
 import actors.WebsocketActor
 
-import play.api.libs.ws._
-import warwick.sso.SsoClient
+import warwick.sso.SSOClient
 
 import scala.concurrent.Future
 
 class ApplicationController @Inject() (
-  ssoClient: SsoClient
+  ssoClient: SSOClient
 ) extends Controller {
 
   val logger = Logger(getClass)
