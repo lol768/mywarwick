@@ -5,7 +5,6 @@ import javax.inject.Inject
 import models.API
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import play.api.cache.Cached
 import play.api.libs.json._
 import play.api.mvc.Controller
 import services.SecurityService
@@ -14,9 +13,10 @@ import services.SecurityService
   * Testing out auth. This can go away as soon as we start using it in
   * an actual API controller.
   */
-class MyAPIController @Inject() (
+class MyAPIController @Inject()(
   security: SecurityService
 ) extends Controller {
+
   import security._
 
   def postActivities(appId: String) = APIAction { request =>

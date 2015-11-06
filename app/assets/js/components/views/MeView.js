@@ -145,6 +145,7 @@ export default class MeView extends ReactComponent {
       componentWillEnter(callback) {
         view.componentWillEnter(props, callback);
       }
+
       componentWillLeave(callback) {
         view.componentWillLeave(props, callback);
       }
@@ -179,7 +180,7 @@ export default class MeView extends ReactComponent {
       scaleX: 1,
       scaleY: 1,
       opacity: 1
-    }, ZOOM_ANIMATION_DURATION, function() {
+    }, ZOOM_ANIMATION_DURATION, function () {
       $tile.css({
         transformOriginX: '',
         transformOriginY: '',

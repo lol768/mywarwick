@@ -10,12 +10,12 @@ import play.api.mvc._
 import warwick.sso._
 
 import scala.concurrent.Future
-import scala.concurrent.duration._
 
 @ImplementedBy(classOf[SecurityServiceImpl])
 trait SecurityService {
 
   def UserAction: ActionBuilder[AuthenticatedRequest]
+
   def RequiredUserAction: ActionBuilder[AuthenticatedRequest]
 
   def APIAction: ActionBuilder[AuthenticatedRequest]
@@ -27,7 +27,7 @@ trait SecurityService {
   * behaviours in controllers without them being tied into SSOClient specifics, and
   * we can combine actions together here too.
   */
-class SecurityServiceImpl @Inject() (
+class SecurityServiceImpl @Inject()(
   val ssoClient: SSOClient,
   val basicAuth: BasicAuth,
   cache: CacheApi
