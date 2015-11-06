@@ -11,6 +11,8 @@ import _ from 'lodash';
 import jQuery from 'jquery';
 import $ from 'jquery.transit';
 
+const ZOOM_ANIMATION_DURATION = 500;
+
 let TILE_DATA = [
   {
     key: 'mail',
@@ -151,8 +153,6 @@ export default class MeView extends ReactComponent {
   }
 
   animateTileZoomOut(tileComponent, zoomComponent, callback) {
-    let DURATION = 500;
-
     let state = tileComponent.refs.tile.state;
 
     let $tile = $(ReactDOM.findDOMNode(tileComponent)),
@@ -178,7 +178,7 @@ export default class MeView extends ReactComponent {
       scaleX: 1,
       scaleY: 1,
       opacity: 1
-    }, DURATION, function() {
+    }, ZOOM_ANIMATION_DURATION, function() {
       $tile.css({
         transformOriginX: '',
         transformOriginY: '',
@@ -195,12 +195,10 @@ export default class MeView extends ReactComponent {
       scaleX: scaleX,
       scaleY: scaleY,
       opacity: 0
-    }, DURATION, callback);
+    }, ZOOM_ANIMATION_DURATION, callback);
   }
 
   animateTileZoom(tileComponent, zoomComponent, callback) {
-    let DURATION = 500;
-
     let state = tileComponent.refs.tile.state;
 
     let $tile = $(ReactDOM.findDOMNode(tileComponent)),
@@ -221,7 +219,7 @@ export default class MeView extends ReactComponent {
       scaleX: $(window).width() / state.naturalOuterWidth,
       scaleY: $(window).height() / state.naturalOuterHeight,
       opacity: 0
-    }, DURATION, function () {
+    }, ZOOM_ANIMATION_DURATION, function () {
       $tile.css({
         zIndex: '',
         transformOriginX: '',
@@ -249,7 +247,7 @@ export default class MeView extends ReactComponent {
       scaleX: 1,
       scaleY: 1,
       opacity: 1
-    }, DURATION);
+    }, ZOOM_ANIMATION_DURATION);
   }
 
   componentWillEnterGroup(props, callback) {
