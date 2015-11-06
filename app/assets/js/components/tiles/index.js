@@ -5,6 +5,7 @@ import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import Tile from './Tile';
 
 import moment from 'moment';
+import _ from 'lodash';
 
 export class list extends ReactComponent {
 
@@ -80,11 +81,28 @@ export class text extends ReactComponent {
 }
 
 export class count extends ReactComponent {
+
   render() {
-    return (
-      <text {...this.props} callout={this.props.items.length} text={this.props.word}/>
-    );
+    if (this.props.zoomed) {
+      return (
+        <Tile ref="tile" {...this.props}>
+          <ul>
+            {this.props.items.map((item) => <ListTileItem {...item} />)}
+          </ul>
+        </Tile>
+      );
+    } else {
+      return (
+        <Tile ref="tile" {...this.props} className={"tile--text-btm " + this.props.className}>
+          <div className="tile__item">
+            <span className="tile__callout">{this.props.items.length}</span>
+            <span className="tile__text">{this.props.word}</span>
+          </div>
+        </Tile>
+      );
+    }
   }
+
 }
 
 let ListTileItem = (props) => (

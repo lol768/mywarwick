@@ -80,7 +80,8 @@ let TILE_DATA = [
   },
   {
     key: 'modules',
-    type: 'list',
+    type: 'count',
+    word: 'modules this term',
     title: 'My Modules',
     icon: 'mortar-board',
     items: [
