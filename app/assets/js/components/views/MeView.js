@@ -142,11 +142,11 @@ export default class MeView extends ReactComponent {
     });
 
     let element = class extends baseTile {
-      componentWillEnterGroup(callback) {
-        view.componentWillEnterGroup(props, callback);
+      componentWillEnter(callback) {
+        view.componentWillEnter(props, callback);
       }
-      componentWillLeaveGroup(callback) {
-        view.componentWillLeaveGroup(props, callback);
+      componentWillLeave(callback) {
+        view.componentWillLeave(props, callback);
       }
     };
 
@@ -251,7 +251,7 @@ export default class MeView extends ReactComponent {
     }, ZOOM_ANIMATION_DURATION);
   }
 
-  componentWillEnterGroup(props, callback) {
+  componentWillEnter(props, callback) {
     if (props.zoomed) {
       let tileComponent = this.refs.group.refs['.$' + props.originalRef];
       let zoomComponent = this.refs.group.refs['.$' + props.ref];
@@ -263,7 +263,7 @@ export default class MeView extends ReactComponent {
     }
   }
 
-  componentWillLeaveGroup(props, callback) {
+  componentWillLeave(props, callback) {
     if (props.zoomed) {
       let tileComponent = this.refs.group.refs['.$' + props.originalRef];
       let zoomComponent = this.refs.group.refs['.$' + props.ref];
