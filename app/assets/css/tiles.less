@@ -1,9 +1,24 @@
+.tile--zoomed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 44px;
+  z-index: 100;
+  display: none;
+
+  .tile {
+    height: 100%;
+  }
+}
+
 .tile {
   min-height: 125px;
   padding: 10px 10px 20px;
   position: relative;
   font-size: 15px;
   margin-bottom: 10px;
+  overflow: hidden;
 
   a {
     color: inherit;
@@ -14,7 +29,7 @@
     .list-unstyled;
   }
 
-  > header {
+  > .tile__wrap > header {
     > h1 {
       color: inherit;
       border: 0;
@@ -28,11 +43,26 @@
   }
 }
 
-.tile--text-btm {
-  .tile__body {
+.tile--normal .tile--text-btm {
+  .tile__item {
     position: absolute;
     left: 10px;
     bottom: 10px;
+  }
+}
+
+.tile--zoomed {
+  .tile__wrap {
+    .container;
+  }
+  .tile__body {
+    .row;
+  }
+  .tile__item {
+    .make-xs-column(12);
+    .make-sm-column(6);
+    margin-top: 10px;
+    margin-bottom: 5px;
   }
 }
 
@@ -58,4 +88,23 @@
 
 .list-tile-item__text {
   display: block;
+}
+
+.text-tile-enter {
+  bottom: -80px !important;
+}
+
+.text-tile-enter-active {
+  bottom: 10px !important;
+  transition: bottom 500ms ease-out;
+  transition-delay: 500ms;
+}
+
+.text-tile-leave {
+  bottom: 10px !important;
+}
+
+.text-tile-leave-active {
+  bottom: -80px !important;
+  transition: bottom 500ms ease-in;
 }
