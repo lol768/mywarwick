@@ -1,28 +1,109 @@
 import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 import Tile from './Tile';
 
 import moment from 'moment';
+import _ from 'lodash';
 
-export let list = (props) => (
-  <Tile {...props}>
-    <ul>
-      {props.items.map((item) => <ListTileItem {...item} />)}
-    </ul>
-  </Tile>
-);
+export class list extends ReactComponent {
 
-export let text = (props) => (
-  <Tile {...props} className={props.className + " tile--text-btm"}>
-    <span className="tile__callout">{props.callout}</span>
-    <span className="tile__text">{props.text}</span>
-  </Tile>
-);
+  render() {
+    return (
+      <Tile ref="tile" {...this.props}>
+        <ul>
+          {this.props.items.map((item) => <ListTileItem {...item} />)}
+        </ul>
+      </Tile>
+    );
+  }
 
-export let count = (props) => (
-  <text {...props} callout={props.items.length} text={props.word}/>
-);
+}
+
+export class text extends ReactComponent {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      itemIndex: 0
+    };
+  }
+
+  componentDidMount() {
+    let interval = setInterval(this.onInterval.bind(this), 5000);
+
+    this.setState({
+      transitionInterval: interval
+    });
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.state.transitionInterval);
+
+    this.setState({
+      transitionInterval: null
+    });
+  }
+
+  onInterval() {
+    let oldItemIndex = this.state.itemIndex;
+
+    let itemIndex = (oldItemIndex == this.props.items.length - 1) ? 0 : oldItemIndex + 1;
+
+    this.setState({
+      itemIndex: itemIndex
+    });
+  }
+
+  render() {
+    let itemsToDisplay = this.props.zoomed ? this.props.items : [this.props.items[this.state.itemIndex]];
+
+    let items = itemsToDisplay.map((item) => (
+      <div className="tile__item" key={item.key}>
+        <span className="tile__callout">{item.callout}</span>
+        <span className="tile__text">{item.text}</span>
+      </div>
+    ));
+
+    return (
+      <Tile ref="tile" {...this.props} className={this.props.className + " tile--text-btm"}>
+        <ReactCSSTransitionGroup transitionName="text-tile"
+                                 transitionEnterTimeout={1000}
+                                 transitionLeaveTimeout={1000}>
+          {items}
+        </ReactCSSTransitionGroup>
+      </Tile>
+    );
+  }
+
+}
+
+export class count extends ReactComponent {
+
+  render() {
+    if (this.props.zoomed) {
+      return (
+        <Tile ref="tile" {...this.props}>
+          <ul>
+            {this.props.items.map((item) => <ListTileItem {...item} />)}
+          </ul>
+        </Tile>
+      );
+    } else {
+      return (
+        <Tile ref="tile" {...this.props} className={"tile--text-btm " + this.props.className}>
+          <div className="tile__item">
+            <span className="tile__callout">{this.props.items.length}</span>
+            <span className="tile__text">{this.props.word}</span>
+          </div>
+        </Tile>
+      );
+    }
+  }
+
+}
 
 let ListTileItem = (props) => (
   <li className="list-tile-item">

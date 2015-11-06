@@ -20,6 +20,7 @@ var postcss = require('gulp-postcss');
 var less = require('gulp-less');
 var uglify = require('gulp-uglify');
 var browserify = require('browserify');
+var browserifyShim = require('browserify-shim');
 var babelify = require('babelify');
 var watchify = require('watchify');
 var autoprefix = require('autoprefixer-core');
@@ -49,7 +50,7 @@ var browserifyOptions = {
   entries: 'main.js',
   basedir: 'app/assets/js',
   debug: true, // confusingly, this enables sourcemaps
-  transform: [babelify, 'browserify-shim'] // Transforms ES6 + JSX into normal JS
+  transform: [babelify] // Transforms ES6 + JSX into normal JS
 };
 
 var PRODUCTION = (process.env.PRODUCTION !== 'false');
@@ -76,16 +77,21 @@ var bundle = function (browserify) {
     .pipe(gulp.dest(paths.scriptOut))
 };
 
-gulp.task('scripts', [], function () {
-  var b = browserify(browserifyOptions);
+var browserifyFlags = function(b) {
   b.exclude('jquery');
+  b.transform({global:true}, browserifyShim);
+  return b;
+}
+
+gulp.task('scripts', [], function () {
+  var b = browserifyFlags(browserify(browserifyOptions));
   return bundle(b);
 });
 
 // Recompile scripts on changes. Watchify is more efficient than
 // grunt.watch as it knows how to do incremental rebuilds.
 gulp.task('watch-scripts', [], function () {
-  var bw = watchify(browserify(_.assign({}, watchify.args, browserifyOptions)));
+  var bw = watchify(browserifyFlags(browserify(_.assign({}, watchify.args, browserifyOptions))));
   bw.on('update', function () {
     bundle(bw);
   });

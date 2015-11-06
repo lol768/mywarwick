@@ -4,11 +4,11 @@ import Immutable from 'immutable';
 import { NAVIGATE, NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './actions';
 
 const initialState = Immutable.fromJS({
-    path: '/',
-    news: {
-        fetching: false,
-        items: []
-    }
+  path: '/',
+  news: {
+    fetching: false,
+    items: []
+  }
 });
 
 /*
@@ -20,7 +20,7 @@ var mutableGlobalReducers = makeReducers();
  * Update the reducers that are registered with the global reducer
  */
 export function mutateReducers(value) {
-    mutableGlobalReducers = value;
+  mutableGlobalReducers = value;
 }
 
 /*
@@ -28,35 +28,35 @@ export function mutateReducers(value) {
  * caring what it is
  */
 export function makeReducers() {
-    return Immutable.Map();
+  return Immutable.Map();
 }
 
 // const store = require('./store');
 import store from './store';
 export function registerReducer(name, reducer) {
-    log.debug('Registering reducer', name);
-    mutateReducers(appendReducer(mutableGlobalReducers, name, reducer));
+  log.debug('Registering reducer', name);
+  mutateReducers(appendReducer(mutableGlobalReducers, name, reducer));
 
-    // Dispatch an action handled by the newly-added receiver, to add
-    // the initial state to the store immediately
-    store.dispatch({
-        type: name + '.__init'
-    });
+  // Dispatch an action handled by the newly-added receiver, to add
+  // the initial state to the store immediately
+  store.dispatch({
+    type: name + '.__init'
+  });
 }
 
 /*
  * Unregister all reducers for a certain namespace
  */
 export function unregisterAllReducers(name) {
-    mutateReducers(mutableGlobalReducers.delete(name));
+  mutateReducers(mutableGlobalReducers.delete(name));
 }
 
 /*
  * Unregister a specific reducer within a namespace
  */
 export function unregisterReducer(name, reducer) {
-    if (mutableGlobalReducers.has(name))
-        mutateReducers(mutableGlobalReducers.get(name).filterNot((r) => r == reducer));
+  if (mutableGlobalReducers.has(name))
+    mutateReducers(mutableGlobalReducers.get(name).filterNot((r) => r == reducer));
 }
 
 /*
@@ -69,9 +69,9 @@ export function unregisterReducer(name, reducer) {
  * application state with the key `name`.
  */
 export function appendReducer(reducers, name, reducer) {
-    return reducers.has(name) ?
-        reducers.update(name, (list) => list.push(reducer)) :
-        reducers.set(name, Immutable.List().push(reducer));
+  return reducers.has(name) ?
+    reducers.update(name, (list) => list.push(reducer)) :
+    reducers.set(name, Immutable.List().push(reducer));
 }
 
 /*
@@ -85,63 +85,63 @@ export function appendReducer(reducers, name, reducer) {
  * function, so the state remains unchanged.
  */
 export function composeReducers(reducers) {
-    if (reducers === undefined || reducers.count() == 0) {
-        return (state) => state;
-    } else {
-        return (state, action) => reducers.reduce((state, reducer) => reducer(state, action), state);
-    }
+  if (reducers === undefined || reducers.count() == 0) {
+    return (state) => state;
+  } else {
+    return (state, action) => reducers.reduce((state, reducer) => reducer(state, action), state);
+  }
 }
 
 /*
  * Primary reducer for the application
  */
 export default function app(state = initialState, action = undefined) {
-    if (action === undefined || action.type === undefined) {
+  if (action === undefined || action.type === undefined) {
+    return state;
+  }
+
+  // Some or all of these switch cases could be moved to sub-reducers instead
+  switch (action.type) {
+    case NAVIGATE:
+      return state.set('path', action.path);
+    case NEWS_FETCH:
+      return state.mergeDeep({
+        news: {
+          fetching: true
+        }
+      });
+    case NEWS_FETCH_SUCCESS:
+      return state.mergeDeep({
+        news: {
+          fetching: false,
+          items: action.items
+        }
+      });
+    case NEWS_FETCH_FAILURE:
+      return state.mergeDeep({
+        news: {
+          fetching: false
+        }
+      });
+    default:
+      // Only actions with a namespace-style type may use sub-reducers
+      if (action.type.indexOf('.') >= 0) {
+        // The action's namespace is everything before the first full-
+        // stop
+        let namespace = action.type.substring(0, action.type.indexOf('.'));
+
+        // Compose the reducers for this namespace, then run them with
+        // the current subtree
+        let fn = composeReducers(mutableGlobalReducers.get(namespace));
+        let substate = fn(state.get(namespace), action);
+
+        return (substate === undefined) ?
+          state.delete(namespace) :
+          state.mergeDeep({
+            [namespace]: substate
+          });
+      } else {
         return state;
-    }
-
-    // Some or all of these switch cases could be moved to sub-reducers instead
-    switch (action.type) {
-        case NAVIGATE:
-            return state.set('path', action.path);
-        case NEWS_FETCH:
-            return state.mergeDeep({
-                news: {
-                    fetching: true
-                }
-            });
-        case NEWS_FETCH_SUCCESS:
-            return state.mergeDeep({
-                news: {
-                    fetching: false,
-                    items: action.items
-                }
-            });
-        case NEWS_FETCH_FAILURE:
-            return state.mergeDeep({
-                news: {
-                    fetching: false
-                }
-            });
-        default:
-            // Only actions with a namespace-style type may use sub-reducers
-            if (action.type.indexOf('.') >= 0) {
-                // The action's namespace is everything before the first full-
-                // stop
-                let namespace = action.type.substring(0, action.type.indexOf('.'));
-
-                // Compose the reducers for this namespace, then run them with
-                // the current subtree
-                let fn = composeReducers(mutableGlobalReducers.get(namespace));
-                let substate = fn(state.get(namespace), action);
-
-                return (substate === undefined) ?
-                    state.delete(namespace) :
-                    state.mergeDeep({
-                        [namespace]: substate
-                    });
-            } else {
-                return state;
-            }
-    }
+      }
+  }
 }

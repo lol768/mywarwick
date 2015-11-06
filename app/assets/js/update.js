@@ -9,72 +9,72 @@ const UPDATE_PROGRESS = 'update.progress';
 const UPDATE_READY = 'update.ready';
 
 function updateStart() {
-    return {
-        type: UPDATE_START
-    };
+  return {
+    type: UPDATE_START
+  };
 }
 
 function updateProgress(loaded, total) {
-    return {
-        type: UPDATE_PROGRESS,
-        loaded: loaded,
-        total: total
-    };
+  return {
+    type: UPDATE_PROGRESS,
+    loaded: loaded,
+    total: total
+  };
 }
 
 function updateReady() {
-    return {
-        type: UPDATE_READY
-    };
+  return {
+    type: UPDATE_READY
+  };
 }
 
 const initialState = Immutable.fromJS({
-    isUpdating: false,
-    loaded: 0,
-    total: 0
+  isUpdating: false,
+  loaded: 0,
+  total: 0
 });
 
 registerReducer('update', (state = initialState, action) => {
-    log.debug('update reducer', state, action);
-    switch (action.type) {
-        case UPDATE_START:
-            return state.merge({
-                isUpdating: true
-            });
-        case UPDATE_PROGRESS:
-            return state.merge({
-                isUpdating: true,
-                loaded: action.loaded,
-                total: action.total
-            });
-        case UPDATE_READY:
-            return state.merge({
-                isUpdating: true,
-                loaded: state.get('total')
-            });
-        default:
-            return state;
-    }
+  log.debug('update reducer', state, action);
+  switch (action.type) {
+    case UPDATE_START:
+      return state.merge({
+        isUpdating: true
+      });
+    case UPDATE_PROGRESS:
+      return state.merge({
+        isUpdating: true,
+        loaded: action.loaded,
+        total: action.total
+      });
+    case UPDATE_READY:
+      return state.merge({
+        isUpdating: true,
+        loaded: state.get('total')
+      });
+    default:
+      return state;
+  }
 });
 
 if (window.applicationCache) {
-    function onDownloading() {
-        store.dispatch(updateStart());
-    }
+  function onDownloading() {
+    store.dispatch(updateStart());
+  }
 
-    function onProgress(e) {
-        store.dispatch(updateProgress(e.loaded, e.total));
-    }
+  function onProgress(e) {
+    store.dispatch(updateProgress(e.loaded, e.total));
+  }
 
-    function onUpdateReady() {
-        store.dispatch(updateReady());
-    }
+  function onUpdateReady() {
+    store.dispatch(updateReady());
+  }
 
-    window.applicationCache.addEventListener('progress', onProgress);
-    window.applicationCache.addEventListener('downloading', onDownloading);
-    window.applicationCache.addEventListener('updateready', onUpdateReady);
+  window.applicationCache.addEventListener('progress', onProgress);
+  window.applicationCache.addEventListener('downloading', onDownloading);
+  window.applicationCache.addEventListener('updateready', onUpdateReady);
 
-    if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
-        onUpdateReady();
-    }
+  if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+    onUpdateReady();
+  }
 }

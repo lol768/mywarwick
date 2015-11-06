@@ -18,11 +18,11 @@ class UpdatePopup extends ReactComponent {
         <div className="activity-item" style={{marginBottom: 15}}>
           <div className="media">
             <div className="media-left">
-              <AppIcon app="Update" size="lg" />
+              <AppIcon app="Update" size="lg"/>
             </div>
             <div className="media-body" style={{lineHeight: 2}}>
               An update to Start.Warwick is being downloaded.
-              <ProgressBar value={this.props.loaded} max={this.props.total} />
+              <ProgressBar value={this.props.loaded} max={this.props.total}/>
             </div>
           </div>
         </div>
@@ -32,7 +32,7 @@ class UpdatePopup extends ReactComponent {
         <div className="activity-item" style={{marginBottom: 15}}>
           <div className="media">
             <div className="media-left">
-              <AppIcon app="Update" size="lg" />
+              <AppIcon app="Update" size="lg"/>
             </div>
             <div className="media-body" style={{lineHeight: 2}}>
               An update to Start.Warwick is ready to be installed.

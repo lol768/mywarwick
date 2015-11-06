@@ -2,18 +2,16 @@ package controllers
 
 import javax.inject.Inject
 
+import actors.WebsocketActor
 import play.api.Logger
+import play.api.Play.current
 import play.api.libs.json._
 import play.api.mvc._
-import play.api.Play.current
-
-import actors.WebsocketActor
-
 import warwick.sso.SSOClient
 
 import scala.concurrent.Future
 
-class ApplicationController @Inject() (
+class ApplicationController @Inject()(
   ssoClient: SSOClient
 ) extends Controller {
 
@@ -21,7 +19,8 @@ class ApplicationController @Inject() (
 
   def index = ssoClient.Lenient { request =>
     val name = request.context.user.flatMap(_.name.full).getOrElse("nobody")
-        Ok(views.html.index(s"${name}"))
+    implicit val linkGenerator = ssoClient.linkGenerator(request)
+    Ok(views.html.index(s"${name}"))
   }
 
   def socket = WebSocket.tryAcceptWithActor[JsValue, JsValue] { request =>

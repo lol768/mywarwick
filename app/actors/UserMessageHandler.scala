@@ -1,7 +1,7 @@
 package actors
 
 import actors.WebsocketActor.ClientDataWrapper
-import akka.actor.{Props, Actor, ActorLogging}
+import akka.actor.{Actor, ActorLogging, Props}
 import play.api.Logger
 import play.api.libs.json._
 import warwick.sso.LoginContext
@@ -22,7 +22,7 @@ class UserMessageHandler(loginContext: LoginContext) extends Actor with ActorLog
       val msgType = (clientData.data \ "type").as[String]
 
       logger.debug(s"Received message type ${msgType}")
-      
+
       msgType match {
         case "fetch-notifications" =>
           sender ! JsObject(Seq(

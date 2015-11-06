@@ -1,4 +1,3 @@
-
 import Rx from 'rx';
 import log from 'loglevel';
 import DataPipe from '../datapipe';
@@ -32,7 +31,9 @@ class BinaryBackoff {
   success() {
     // Reset timer back to min after a short period.
     // If we have to `retry()` straight away, this party gets cancelled.
-    this.resetTimer = setTimeout(() => {this.current = this.min}, this.reset);
+    this.resetTimer = setTimeout(() => {
+      this.current = this.min
+    }, this.reset);
   }
 }
 
@@ -47,13 +48,15 @@ export default class RestartableWebSocket {
   constructor(url) {
     this.url = url
     this.connected = false;
-    this.onmessage = function() {};
-    this.onopen = function() {};
+    this.onmessage = function () {
+    };
+    this.onopen = function () {
+    };
 
     this.backoff = new BinaryBackoff(500, 30000, 2000);
 
     this.backoff.retries.subscribe((ms) => {
-      log.info("WS retrying connection in",ms,"ms");
+      log.info("WS retrying connection in", ms, "ms");
     });
 
     this.ensureConnection();
@@ -61,7 +64,7 @@ export default class RestartableWebSocket {
     this.buffer = [];
   }
 
-  send(msg: String) {
+  send(msg:String) {
     if (this.ws.readyState == 1) {
       this.ws.send(msg);
     } else {

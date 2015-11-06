@@ -1,5 +1,5 @@
 import Immutable from 'immutable';
-import { onStreamReceive, getStreamPartition, mergeReceivedItems } from '../../../app/assets/js/stream';
+import { onStreamReceive, getStreamPartition, mergeReceivedItems, takeFromStream, getStreamSize } from '../../../app/assets/js/stream';
 
 let item = (id, date) => ({id: id, date: date});
 
@@ -14,15 +14,29 @@ describe('Stream', () => {
     expect(getStreamPartition(stream, 1)).to.equal(Immutable.List());
   });
 
-  it('imposes an ordering on partition keys', () => {
-    let stream = onStreamReceive(undefined, grouper, Immutable.List([
-      item('a', 1), item('b', 11), item('c', 21)
-    ]));
+  let stream = onStreamReceive(undefined, grouper, Immutable.List([
+    item('a', 1), item('b', 11), item('c', 21)
+  ]));
 
+  it('orders partitions by key', () => {
     expect(stream.count()).to.equal(3);
-    expect(getStreamPartition(stream, 0).first().date).to.equal(1);
+    expect(getStreamPartition(stream, 0).first().date).to.equal(21);
     expect(getStreamPartition(stream, 1).first().date).to.equal(11);
-    expect(getStreamPartition(stream, 2).first().date).to.equal(21);
+    expect(getStreamPartition(stream, 2).first().date).to.equal(1);
+  });
+
+  it('knows the length of the stream', () => {
+    expect(getStreamSize(stream)).to.equal(3);
+  });
+
+  it('takes a given number of items from the stream in order', () => {
+    expect(takeFromStream(stream, -1)).to.eql(Immutable.List());
+
+    expect(takeFromStream(stream, 2)).to.eql(Immutable.List([item('c', 21), item('b', 11)]));
+  });
+
+  it('returns zero items from an empty stream', () => {
+    expect(takeFromStream(onStreamReceive(undefined, grouper, Immutable.List()), 100)).to.eql(Immutable.List());
   });
 
 });

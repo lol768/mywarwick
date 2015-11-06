@@ -19,7 +19,8 @@ export default class FakeDataPipe extends DataPipe {
     this.stream = stream;
   }
 
-  connect() {}
+  connect() {
+  }
 
   requestData(info) {
     super.requestData(info);
@@ -32,7 +33,7 @@ export default class FakeDataPipe extends DataPipe {
           id: '1000001',
           title: 'Staff Summer Festival',
           links: {
-            canonical: { href: "http://www2.warwick.ac.uk/about/warwick50/events/stafffestival" }
+            canonical: {href: "http://www2.warwick.ac.uk/about/warwick50/events/stafffestival"}
           },
           published: moment(1438336410350).format(),
         },
@@ -40,7 +41,7 @@ export default class FakeDataPipe extends DataPipe {
           id: '1000009',
           title: 'Economics seminar Friday 7th Aug in S0.23',
           links: {
-            canonical: { href: "http://www2.warwick.ac.uk/about/warwick50/events/stafffestival" }
+            canonical: {href: "http://www2.warwick.ac.uk/about/warwick50/events/stafffestival"}
           },
           published: moment(1438636410350).format(),
         }
@@ -56,7 +57,7 @@ export default class FakeDataPipe extends DataPipe {
           title: 'Your CourseSync was updated - 13 changes',
           replaces: 'coursesync-updated-cusxxx',
           links: {
-            canonical: { href: "http://www2.warwick.ac.uk/about/warwick50/events/stafffestival" }
+            canonical: {href: "http://www2.warwick.ac.uk/about/warwick50/events/stafffestival"}
           },
           published: moment(1438336410350).format(),
         },
@@ -65,7 +66,7 @@ export default class FakeDataPipe extends DataPipe {
           title: 'Your CourseSync was updated - 3 changes',
           replaces: 'coursesync-updated-cusxxx',
           links: {
-            canonical: { href: "http://www2.warwick.ac.uk/about/warwick50/events/stafffestival" }
+            canonical: {href: "http://www2.warwick.ac.uk/about/warwick50/events/stafffestival"}
           },
           published: moment(1438636410350).format(),
         },
@@ -73,7 +74,7 @@ export default class FakeDataPipe extends DataPipe {
           id: '1200015',
           title: 'Your CS118 coursework is due in 12pm',
           links: {
-            canonical: { href: "http://www2.warwick.ac.uk/about/warwick50/events/stafffestival" }
+            canonical: {href: "http://www2.warwick.ac.uk/about/warwick50/events/stafffestival"}
           },
           published: moment(1438436410350).format(),
         }
@@ -82,7 +83,7 @@ export default class FakeDataPipe extends DataPipe {
 
   }
 
-  getUpdateStream(): Rx.Observable {
+  getUpdateStream():Rx.Observable {
     return this.stream.asObservable();
   }
 
@@ -91,7 +92,7 @@ export default class FakeDataPipe extends DataPipe {
       const id = this.fakeId();
       this.stream.onNext({
         type: 'tile-update',
-        tileId: (""+tileId),
+        tileId: ("" + tileId),
         items: [
           {
             id: id,

@@ -1,4 +1,4 @@
-import Immutable from 'immutable';
+import { List, Map } from 'immutable';
 import _ from 'lodash';
 
 export const DATE_KEY = 'date';
@@ -11,7 +11,7 @@ let sortStream = (stream) => _.sortByOrder(stream, [DATE_KEY, ID_KEY], [DESC, DE
 let uniqStream = (stream) => _.uniq(stream, ID_KEY);
 
 export function makeStream() {
-  return Immutable.Map();
+  return Map();
 }
 
 /*
@@ -23,12 +23,16 @@ export function makeStream() {
  * be sortable. Aside from that, it doesn't really matter what it is, as
  * long as it's the same for all items that belong in the same partition.
  */
-export function onStreamReceive(stream = Immutable.Map(), grouper = (item) => item.date, rx = Immutable.List()) {
+export function onStreamReceive(stream = Map(), grouper = (item) => item.date, rx = List()) {
   rx.groupBy(grouper).mapEntries(([k, v]) => {
-    stream = stream.update(k, Immutable.List(), (str) => Immutable.List(mergeReceivedItems(str.toJS(), v.toList().toJS())));
+    stream = stream.update(k, List(), (str) => List(mergeReceivedItems(str.toJS(), v.toList().toJS())));
   });
 
   return stream;
+}
+
+function getOrderedStreamPartitions(stream) {
+  return stream.entrySeq().sortBy(([k, v]) => k).map(([k, v]) => v).reverse();
 }
 
 /*
@@ -38,8 +42,25 @@ export function onStreamReceive(stream = Immutable.Map(), grouper = (item) => it
  * If the partition does not exist, return an empty list.
  */
 export function getStreamPartition(stream, i) {
-  return stream.entrySeq().sortBy(([k, v]) => k).map(([k, v]) => v).get(i)
-    || Immutable.List();
+  return getOrderedStreamPartitions(stream).get(i) || List();
+}
+
+/*
+ * Return the n most recent items from the stream.
+ */
+export function takeFromStream(stream, n) {
+  return getOrderedStreamPartitions(stream)
+    .reduce(
+      (result, part) => result.concat(part.take(n - result.size)),
+      List()
+    );
+}
+
+/*
+ * Return the total number of items in the stream.
+ */
+export function getStreamSize(stream) {
+  return stream.valueSeq().reduce((sum, part) => sum + part.size, 0);
 }
 
 /*

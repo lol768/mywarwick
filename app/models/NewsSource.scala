@@ -1,3 +1,6 @@
 package models
 
-case class NewsSource(title: String, url: String)
+case class NewsSource(
+  title: String,
+  url: String
+)

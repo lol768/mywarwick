@@ -7,7 +7,7 @@ import ActivityItem from '../ui/ActivityItem';
 
 import { connect } from 'react-redux';
 
-import { getStreamPartition } from '../../stream';
+import { takeFromStream, getStreamSize } from '../../stream';
 
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 
@@ -30,11 +30,10 @@ class NotificationsView extends ReactComponent {
   }
 
   render() {
-    let notifications = this.props.notifications
-      .take(this.state.numberToShow)
+    let notifications = takeFromStream(this.props.notifications, this.state.numberToShow)
       .map(n => <ActivityItem key={n.id} {...n} />);
 
-    let hasMore = this.state.numberToShow < this.props.notifications.count();
+    let hasMore = this.state.numberToShow < getStreamSize(this.props.notifications);
 
     return (
       <InfiniteScrollable hasMore={hasMore} onLoadMore={this.loadMore.bind(this)}>
@@ -47,7 +46,7 @@ class NotificationsView extends ReactComponent {
 
 function select(state) {
   return {
-    notifications: getStreamPartition(state.get('notifications'), 0)
+    notifications: state.get('notifications')
   };
 }
 
