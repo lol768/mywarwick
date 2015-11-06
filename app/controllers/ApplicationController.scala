@@ -21,6 +21,7 @@ class ApplicationController @Inject() (
 
   def index = ssoClient.Lenient { request =>
     val name = request.context.user.flatMap(_.name.full).getOrElse("nobody")
+    implicit val linkGenerator = ssoClient.linkGenerator(request)
         Ok(views.html.index(s"${name}"))
   }
 

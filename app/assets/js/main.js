@@ -21,6 +21,7 @@ import { navigate } from './actions';
 import { Provider } from 'react-redux';
 
 import './update';
+import './user';
 
 import './notifications';
 import './notifications-glue';
@@ -47,7 +48,11 @@ $(function () {
     currentPath = window.location.pathname.match(/(\/[^/]*)/)[0];
     store.dispatch(navigate(currentPath));
 
-    ReactDOM.render(<UtilityBar name="nobody" />, document.getElementById('utility-bar-container'));
+    ReactDOM.render(
+        <Provider store={store}>
+            <UtilityBar />
+        </Provider>,
+        document.getElementById('utility-bar-container'));
     ReactDOM.render(
         <Provider store={store}>
             <Application />
@@ -78,10 +83,3 @@ store.subscribe(() => {
     }
 });
 
-// temporary - print out authentication info from the websocket.
-import SocketDatapipe from './SocketDatapipe';
-SocketDatapipe.getUpdateStream().subscribe((data) => {
-    if (data.type === 'who-am-i') {
-        log.info("Who am I?", data['user-info']);
-    }
-})
