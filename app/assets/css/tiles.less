@@ -29,7 +29,7 @@
     .list-unstyled;
   }
 
-  > header {
+  > .tile__wrap > header {
     > h1 {
       color: inherit;
       border: 0;
@@ -43,11 +43,26 @@
   }
 }
 
-.tile--text-btm {
+.tile--normal .tile--text-btm {
   .tile__item {
     position: absolute;
     left: 10px;
     bottom: 10px;
+  }
+}
+
+.tile--zoomed {
+  .tile__wrap {
+    .container;
+  }
+  .tile__body {
+    .row;
+  }
+  .tile__item {
+    .make-xs-column(12);
+    .make-sm-column(6);
+    margin-top: 10px;
+    margin-bottom: 5px;
   }
 }
 

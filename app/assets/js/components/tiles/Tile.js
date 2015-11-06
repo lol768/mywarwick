@@ -47,21 +47,23 @@ export default class Tile extends ReactComponent {
     let backgroundColor = props.backgroundColor ? props.backgroundColor : DEFAULT_TILE_COLOR;
     let color = props.color ? props.color : DEFAULT_TEXT_COLOR;
 
-    let outerClassName = props.zoomed ? 'tile--zoomed' : sizeClasses[props.size || 'normal'];
+    let outerClassName = props.zoomed ? 'tile--zoomed' : ('tile--normal ' + sizeClasses[props.size || 'normal']);
 
     return (
       <div className={outerClassName}>
         <article className={"tile " + props.className}
                  style={{backgroundColor: backgroundColor, color: color}}
                  onClick={props.onClick}>
-          <header className="tile__title">
-            <h1>
-              {icon}
-              {props.title}
-            </h1>
-          </header>
-          <div className="tile__body">
-            {props.children}
+          <div className="tile__wrap">
+            <header className="tile__title">
+              <h1>
+                {icon}
+                {props.title}
+              </h1>
+            </header>
+            <div className="tile__body">
+              {props.children}
+            </div>
           </div>
         </article>
       </div>

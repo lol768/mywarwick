@@ -57,7 +57,7 @@ export class text extends ReactComponent {
   }
 
   render() {
-    let itemsToDisplay = [this.props.items[this.state.itemIndex]];
+    let itemsToDisplay = this.props.zoomed ? this.props.items : [this.props.items[this.state.itemIndex]];
 
     let items = itemsToDisplay.map((item) => (
       <div className="tile__item" key={item.key}>
