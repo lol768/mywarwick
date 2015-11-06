@@ -3,23 +3,26 @@
 # ~~~~
 
 # Home page
-GET         /                        @controllers.ApplicationController.index
-GET         /notifications           @controllers.ApplicationController.index
-GET         /activity                @controllers.ApplicationController.index
-GET         /news                    @controllers.ApplicationController.index
-GET         /search                  @controllers.ApplicationController.index
+GET         /                                      @controllers.ApplicationController.index
+GET         /notifications                         @controllers.ApplicationController.index
+GET         /activity                              @controllers.ApplicationController.index
+GET         /news                                  @controllers.ApplicationController.index
+GET         /search                                @controllers.ApplicationController.index
 
-->          /sso                     sso.Routes
+->          /sso                                   sso.Routes
 
-->          /admin                   admin.Routes
+->          /admin                                 admin.Routes
 
-GET         /websockets/page         @controllers.ApplicationController.socket
+GET         /websockets/page                       @controllers.ApplicationController.socket
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file            @controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                          @controllers.Assets.versioned(path="/public", file: Asset)
 
-GET         /news/feed               @controllers.NewsController.feed
+GET         /news/feed                             @controllers.NewsController.feed
 
-GET         /service/gtg             @controllers.ServiceCheckController.gtg
+GET         /service/gtg                           @controllers.ServiceCheckController.gtg
 
-POST        /api/notification        @controllers.api.IncomingNotificationController.handler
+POST        /api/notification                      @controllers.api.IncomingNotificationController.handler
+
+POST        /test/api/activities/app/:appId        @controllers.MyAPIController.postActivities(appId: String)
+GET         /test/api/activities/me                @controllers.MyAPIController.myActivity
