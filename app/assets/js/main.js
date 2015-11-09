@@ -67,10 +67,6 @@ $(function () {
 });
 
 store.subscribe(() => {
-  log.debug('Store updated', store.getState().toJS());
-});
-
-store.subscribe(() => {
   var path = store.getState().get('path');
 
   if (path != currentPath) {

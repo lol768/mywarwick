@@ -1,4 +1,3 @@
-import log from 'loglevel';
 import Immutable from 'immutable';
 
 import store from './store';
@@ -35,7 +34,6 @@ const initialState = Immutable.fromJS({
 });
 
 registerReducer('update', (state = initialState, action) => {
-  log.debug('update reducer', state, action);
   switch (action.type) {
     case UPDATE_START:
       return state.merge({
