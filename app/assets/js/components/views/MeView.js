@@ -11,6 +11,11 @@ import _ from 'lodash';
 import jQuery from 'jquery';
 import $ from 'jquery.transit';
 
+import store from '../../store';
+import Immutable from 'immutable';
+import { registerReducer } from '../../reducers';
+import { connect } from 'react-redux';
+
 const ZOOM_ANIMATION_DURATION = 500;
 
 let TILE_DATA = [
@@ -104,23 +109,33 @@ let TILE_DATA = [
   }
 ];
 
-export default class MeView extends ReactComponent {
+const TILE_ZOOM_IN = 'me.zoom-in';
+const TILE_ZOOM_OUT = 'me.zoom-out';
+
+function zoomInOn(tile) {
+  return {
+    type: TILE_ZOOM_IN,
+    tile: tile.key
+  };
+}
+
+function zoomOut() {
+  return {
+    type: TILE_ZOOM_OUT
+  };
+}
+
+class MeView extends ReactComponent {
 
   constructor(props) {
     super(props);
-
-    this.state = {
-      zoomedTile: null
-    };
   }
 
   onTileClick(tile) {
     if (tile.href) {
       window.open(tile.href);
     } else {
-      this.setState({
-        zoomedTile: this.state.zoomedTile ? null : tile
-      });
+      store.dispatch(this.props.zoomedTile ? zoomOut() : zoomInOn(tile));
     }
   }
 
@@ -277,11 +292,12 @@ export default class MeView extends ReactComponent {
   }
 
   renderTiles() {
-    let { zoomedTile } = this.state;
+    let zoomedTileKey = this.props.zoomedTile;
 
     let tiles = TILE_DATA.map((tile) => this.renderTile(tile));
 
-    if (zoomedTile) {
+    if (zoomedTileKey) {
+      let zoomedTile = _.find(TILE_DATA, (tile) => tile.key == zoomedTileKey);
       tiles.push(this.renderTile(zoomedTile, true));
     }
 
@@ -297,3 +313,26 @@ export default class MeView extends ReactComponent {
   }
 
 }
+
+let initialState = Immutable.Map({
+  zoomedTile: null
+});
+
+registerReducer('me', (state = initialState, action) => {
+  switch (action.type) {
+    case TILE_ZOOM_IN:
+      return state.merge({
+        zoomedTile: action.tile
+      });
+    case TILE_ZOOM_OUT:
+      return state.merge({
+        zoomedTile: null
+      });
+    default:
+      return state;
+  }
+});
+
+let select = (state) => ({zoomedTile: state.get('me').get('zoomedTile')});
+
+export default connect(select)(MeView);
