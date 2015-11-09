@@ -68,7 +68,8 @@
     "url": "-"
   },
   "browserify-shim": {
-    "jquery": "global:$"
+    "jquery": "global:$",
+    "modernizr": "global:Modernizr"
   },
   "author": "",
   "license": "ISC"
