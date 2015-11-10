@@ -62,8 +62,8 @@ class Application extends ReactComponent {
 
     let views = {
       '/': <MeView />,
-      '/notifications': <NotificationsView />,
-      '/activity': <ActivityView />,
+      '/notifications': <NotificationsView grouped={true} />,
+      '/activity': <ActivityView grouped={true} />,
       '/news': <NewsView />,
       '/search': <SearchView />
     };

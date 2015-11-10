@@ -8,6 +8,14 @@ import ListHeader from './ListHeader';
 export default class GroupedList extends ReactComponent {
 
   render() {
+    if (this.props.groupBy === undefined) {
+      return (
+        <div className="list-group">
+          {this.props.children}
+        </div>
+      );
+    }
+
     // Group the child nodes using the object passed to the groupBy property
     let groups = _(this.props.children)
       .groupBy(this.props.groupBy.groupForItem)

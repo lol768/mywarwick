@@ -53,11 +53,11 @@ class ID7Layout extends ReactComponent {
                           <MastheadIcon icon="inbox" badge={this.props.notificationsCount} key="notifications"
                                         popoverTitle="Notifications"
                                         onMore={() => this.props.dispatch(navigate('/notifications'))}>
-                            <NotificationsView />
+                            <NotificationsView grouped={false} />
                           </MastheadIcon>
                           <MastheadIcon icon="dashboard" key="activity" badge="4" popoverTitle="Activity"
                                         onMore={() => this.props.dispatch(navigate('/activity'))}>
-                            <ActivityView />
+                            <ActivityView grouped={false} />
                           </MastheadIcon>
                           <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
                             <LinkBlock columns="1">
@@ -92,7 +92,7 @@ class ID7Layout extends ReactComponent {
 
           <div className="id7-main-content">
             { isDesktop ?
-              <div class="row">
+              <div className="row">
                 <div className="col-sm-8 col-lg-9">
                   {this.props.children}
                 </div>
