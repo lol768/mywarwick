@@ -1,25 +1,25 @@
 package controllers.api
 
 import com.google.inject.Inject
-import models.IncomingNotification
+import models.IncomingActivity
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
-import services.NotificationService
+import services.ActivityService
 
-class IncomingNotificationController @Inject()(
-  notificationService: NotificationService
+class IncomingActivityController @Inject()(
+  activityService: ActivityService
 ) extends Controller {
 
   implicit val dateReads = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
-  implicit val notificationReads = Json.reads[IncomingNotification]
+  implicit val activityReads = Json.reads[IncomingActivity]
 
   def handler = Action(parse.json) { request =>
-    request.body.validate[IncomingNotification].map { notification =>
-      val notificationId: String = notificationService.save(notification)
+    request.body.validate[IncomingActivity].map { activity =>
+      val activityId: String = activityService.save(activity)
       Ok(Json.toJson(
         Map("status" -> "ok",
-          "notificationId" -> notificationId)))
+          "activityId" -> activityId)))
     }.recoverTotal {
       e => BadRequest("Error:" + JsError.toJson(e))
     }

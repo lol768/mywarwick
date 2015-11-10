@@ -22,7 +22,7 @@ GET         /news/feed                             @controllers.NewsController.f
 
 GET         /service/gtg                           @controllers.ServiceCheckController.gtg
 
-POST        /api/notification                      @controllers.api.IncomingNotificationController.handler
+POST        /api/notification                      @controllers.api.IncomingActivityController.handler
 
 POST        /test/api/activities/app/:appId        @controllers.MyAPIController.postActivities(appId: String)
 GET         /test/api/activities/me                @controllers.MyAPIController.myActivity
