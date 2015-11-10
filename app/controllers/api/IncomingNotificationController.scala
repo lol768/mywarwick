@@ -6,7 +6,7 @@ import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
 import services.ActivityService
 
-class IncomingActivityController @Inject()(
+class IncomingNotificationController @Inject()(
   activityService: ActivityService
 ) extends Controller {
 
@@ -16,7 +16,7 @@ class IncomingActivityController @Inject()(
 
   def handler = Action(parse.json) { request =>
     request.body.validate[IncomingActivity].map { activity =>
-      val activityId: String = activityService.save(activity)
+      val activityId: String = activityService.save(activity, shouldNotify = true)
       Ok(Json.toJson(
         Map("status" -> "ok",
           "activityId" -> activityId)))

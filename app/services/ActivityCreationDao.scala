@@ -7,7 +7,7 @@ import play.api.db.{Database, NamedDatabase}
 @ImplementedBy(classOf[ActivityCreationDaoImpl])
 trait ActivityCreationDao {
 
-  def createActivity(activity: IncomingActivity, replaces: Seq[String]): String
+  def createActivity(activity: IncomingActivity, replaces: Seq[String], shouldNotify: Boolean): String
 
 }
 
@@ -17,11 +17,11 @@ class ActivityCreationDaoImpl @Inject()(
   activityScopeDao: ActivityScopeDao
 ) extends ActivityCreationDao {
 
-  override def createActivity(incomingActivity: IncomingActivity, replaceIds: Seq[String]): String = {
+  override def createActivity(incomingActivity: IncomingActivity, replaceIds: Seq[String], shouldNotify: Boolean): String = {
 
     db.withTransaction { implicit c =>
       import incomingActivity._
-      val activity = activityDao.save(incomingActivity, replaceIds)(c)
+      val activity = activityDao.save(incomingActivity, replaceIds, shouldNotify)(c)
 
       scopes.foreach {
         case (name, value) => activityScopeDao.save(activity, name, value)(c)

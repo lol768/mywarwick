@@ -7,7 +7,7 @@ import models.{Activity, IncomingActivity}
 trait ActivityService {
   def getActivityById(id: String): Option[Activity]
 
-  def save(incomingActivity: IncomingActivity): String
+  def save(incomingActivity: IncomingActivity, shouldNotify: Boolean): String
 }
 
 class ActivityServiceImpl @Inject()(
@@ -17,11 +17,11 @@ class ActivityServiceImpl @Inject()(
 ) extends ActivityService {
   override def getActivityById(id: String): Option[Activity] = activityDao.getActivityById(id)
 
-  def save(incomingActivity: IncomingActivity): String = {
+  def save(incomingActivity: IncomingActivity, shouldNotify: Boolean): String = {
     import incomingActivity._
     val replaceIds = activityScopeDao.getActivitiesByScope(replace, providerId)
 
-    activityCreationDao.createActivity(incomingActivity, replaceIds)
+    activityCreationDao.createActivity(incomingActivity, replaceIds, shouldNotify)
 
   }
 }

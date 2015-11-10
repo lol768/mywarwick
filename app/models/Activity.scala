@@ -15,13 +15,12 @@ case class Activity(
 
 case class IncomingActivity(
   providerId: String,
-  activityType: String,
+  `type`: String,
   title: String,
   text: String,
   scopes: Map[String, String],
   replace: Map[String, String],
-  generatedAt: Option[DateTime],
-  shouldNotify: Boolean
+  generatedAt: Option[DateTime]
 )
 
 object Activity {
