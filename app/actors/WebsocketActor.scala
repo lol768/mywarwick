@@ -12,25 +12,25 @@ object WebsocketActor {
   def props(loginContext: LoginContext)(out: ActorRef) = Props(classOf[WebsocketActor], out, loginContext)
 
   /**
-   * This is the format of the JSON that client web pages will send to
-   * the server
-   *
-   * TODO will all messages really have a tileId?
-   *
-   * @param messageId Sequential ID provided by client to use in replies.
-   *                  This is short-lived and only unique within a web page load.
-   * @param tileId Id of the tile that is requesting information.
-   * @param data Freeform JSON payload.
-   */
+    * This is the format of the JSON that client web pages will send to
+    * the server
+    *
+    * TODO will all messages really have a tileId?
+    *
+    * @param messageId Sequential ID provided by client to use in replies.
+    *                  This is short-lived and only unique within a web page load.
+    * @param tileId Id of the tile that is requesting information.
+    * @param data Freeform JSON payload.
+    */
   case class ClientData(messageId: Int, tileId: String, data: JsValue)
 
   implicit val clientDataFormat = Json.format[ClientData]
 
   /**
-   * Wrapper for ClientData when passing it on to other actors.
-   * @param sender where to send replies.
-   * @param data the ClientData.
-   */
+    * Wrapper for ClientData when passing it on to other actors.
+    * @param sender where to send replies.
+    * @param data the ClientData.
+    */
   case class ClientDataWrapper(sender: ActorRef, data: ClientData)
 
   // An update to a single tile
@@ -39,18 +39,18 @@ object WebsocketActor {
 }
 
 /**
- * Websocket-facing actor, wired in to the controller. It receives
- * any messages sent from the client in the form of a JsValue. Other
- * actors can also send any kind of message to it.
- *
- * Currently this contains a lot of stuff but only because it's generating
- * a bunch of fake data as we have no backend yet. When it's done, it
- * ought to be pretty slim as it will mainly just subscribe to some actor
- * within the larger system, passing data to the websocket.
- *
- * @param out this output will be attached to the websocket and will send
- *            messages back to the client.
- */
+  * Websocket-facing actor, wired in to the controller. It receives
+  * any messages sent from the client in the form of a JsValue. Other
+  * actors can also send any kind of message to it.
+  *
+  * Currently this contains a lot of stuff but only because it's generating
+  * a bunch of fake data as we have no backend yet. When it's done, it
+  * ought to be pretty slim as it will mainly just subscribe to some actor
+  * within the larger system, passing data to the websocket.
+  *
+  * @param out this output will be attached to the websocket and will send
+  *            messages back to the client.
+  */
 class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor with ActorLogging {
 
   import WebsocketActor._
@@ -61,7 +61,7 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor wi
   // does here).
   val handler = context.actorOf(UserMessageHandler.props(loginContext))
 
-  val signedIn = loginContext.user.exists( _.isFound )
+  val signedIn = loginContext.user.exists(_.isFound)
   val who = loginContext.user.flatMap(_.name.full).getOrElse("nobody")
 
   def sendNotification(id: String, text: String, source: String, date: String): Unit = {

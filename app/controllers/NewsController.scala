@@ -14,8 +14,8 @@ class NewsController @Inject()(
   feedService: FeedService
 ) extends Controller {
 
-  implicit val newsItemWrites = new Writes[NewsItem] {
-    def writes(item: NewsItem) = Json.obj(
+  implicit val writes = Writes { item: NewsItem =>
+    Json.obj(
       "id" -> item.id,
       "title" -> item.title,
       "url" -> Json.obj(

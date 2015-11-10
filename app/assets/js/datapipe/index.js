@@ -37,7 +37,7 @@ export default class DataPipe {
    * @param tileId The tile to get updates for.
    * @returns {Rx.Observable<T>}
    */
-  getTileUpdatesFor(tileId: string): Rx.Observable {
+  getTileUpdatesFor(tileId:string):Rx.Observable {
     return this.getTileUpdates().filter(msg => msg.tileId === tileId);
   }
 }

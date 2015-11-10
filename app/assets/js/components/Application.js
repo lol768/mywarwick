@@ -15,42 +15,42 @@ import { connect } from 'react-redux';
 
 import { navigate } from '../actions';
 
-import { getStreamPartition } from '../stream';
+import { getStreamSize } from '../stream';
 
 class Application extends ReactComponent {
 
-    render() {
-        const { dispatch, path, notificationsCount } = this.props;
+  render() {
+    const { dispatch, path, notificationsCount } = this.props;
 
-        let views = {
-            '/': <MeView />,
-            '/notifications': <NotificationsView />,
-            '/activity': <ActivityView />,
-            '/news': <NewsView />,
-            '/search': <SearchView />
-        };
+    let views = {
+      '/': <MeView />,
+      '/notifications': <NotificationsView />,
+      '/activity': <ActivityView />,
+      '/news': <NewsView />,
+      '/search': <SearchView />
+    };
 
-        return (
-            <div>
-                {views[path]}
-                <TabBar selectedItem={path} onSelectItem={path => dispatch(navigate(path))}>
-                    <TabBarItem title="Me" icon="user" path="/" />
-                    <TabBarItem title="Notifications" icon="inbox" path="/notifications" badge={notificationsCount} />
-                    <TabBarItem title="Activity" icon="dashboard" path="/activity" />
-                    <TabBarItem title="News" icon="mortar-board" path="/news" />
-                    <TabBarItem title="Search" icon="search" path="/search" />
-                </TabBar>
-            </div>
-        );
-    }
+    return (
+      <div>
+        {views[path]}
+        <TabBar selectedItem={path} onSelectItem={path => dispatch(navigate(path))}>
+          <TabBarItem title="Me" icon="user" path="/"/>
+          <TabBarItem title="Notifications" icon="inbox" path="/notifications" badge={notificationsCount}/>
+          <TabBarItem title="Activity" icon="dashboard" path="/activity"/>
+          <TabBarItem title="News" icon="mortar-board" path="/news"/>
+          <TabBarItem title="Search" icon="search" path="/search"/>
+        </TabBar>
+      </div>
+    );
+  }
 
 }
 
 function mapStateToProps(state) {
-    return {
-        path: state.get('path'),
-        notificationsCount: getStreamPartition(state.get('notifications'), 0).count()
-    };
+  return {
+    path: state.get('path'),
+    notificationsCount: getStreamSize(state.get('notifications'))
+  };
 }
 
 export default connect(mapStateToProps)(Application);

@@ -1,32 +1,26 @@
 package controllers
 
-import javax.inject.{Inject, Singleton}
-
-import actors.WebsocketActor.TileUpdate
-import org.joda.time.format.ISODateTimeFormat
-import play.api.Logger
-import play.api.libs.json._
-import play.api.mvc._
-import play.api.Play.current
-import play.api.data._
-import play.api.data.Forms._
+import javax.inject.Inject
 
 import actors.WebsocketActor
-
-import play.api.libs.ws._
-import warwick.sso.SsoClient
+import play.api.Logger
+import play.api.Play.current
+import play.api.libs.json._
+import play.api.mvc._
+import warwick.sso.SSOClient
 
 import scala.concurrent.Future
 
-class ApplicationController @Inject() (
-  ssoClient: SsoClient
+class ApplicationController @Inject()(
+  ssoClient: SSOClient
 ) extends Controller {
 
   val logger = Logger(getClass)
 
   def index = ssoClient.Lenient { request =>
     val name = request.context.user.flatMap(_.name.full).getOrElse("nobody")
-        Ok(views.html.index(s"${name}"))
+    implicit val linkGenerator = ssoClient.linkGenerator(request)
+    Ok(views.html.index(s"${name}"))
   }
 
   def socket = WebSocket.tryAcceptWithActor[JsValue, JsValue] { request =>
