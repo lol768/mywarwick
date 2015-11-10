@@ -66,6 +66,11 @@ export default class Popover extends ReactComponent {
         { this.props.arrow ? <div className="arrow"></div> : null }
         { this.props.title ? <div className="popover-title">{this.props.title}</div> : null }
         <div className="popover-content" style={contentStyle} data-scrollable>{this.props.children}</div>
+        { this.props.onMore ?
+          <div className="popover-title" style={{borderBottom: 'none', cursor: 'pointer'}} onClick={this.props.onMore}>
+            View All
+          </div>
+          : null }
       </div>
     );
   }

@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 
 import UtilityBar from './UtilityBar';
 
-import { MastheadPopoverIcons, MastheadIcon } from './MastheadPopoverIcons';
+import MastheadIcon from './MastheadIcon';
 import NotificationsView from '../views/NotificationsView';
 import ActivityView from '../views/ActivityView';
 import LinkBlock from './LinkBlock';
@@ -12,10 +12,18 @@ import Link from './Link';
 import NewsView from '../views/NewsView';
 import MastheadSearch from './MastheadSearch';
 
+import { navigate } from '../../actions';
+
 import { connect } from 'react-redux';
 import { getStreamSize } from '../../stream';
 
 class ID7Layout extends ReactComponent {
+
+  goToHome(e) {
+    e.preventDefault();
+
+    this.props.dispatch(navigate('/'));
+  }
 
   render() {
     let isDesktop = this.props.layoutClassName == 'desktop';
@@ -36,16 +44,19 @@ class ID7Layout extends ReactComponent {
                   <div className="id7-logo-column">
                     <div className="id7-logo-row">
                       <div className="id7-logo">
-                        <a href="http://warwick.ac.uk" title="Warwick homepage">
+                        <a href="/" title="Warwick homepage" onClick={this.goToHome.bind(this)}>
                           <img src="" alt="Warwick"/>
                         </a>
                       </div>
                       { isDesktop ?
-                        <MastheadPopoverIcons>
-                          <MastheadIcon icon="inbox" badge={this.props.notificationsCount} key="notifications" popoverTitle="Notifications">
+                        <div className="masthead-popover-icons">
+                          <MastheadIcon icon="inbox" badge={this.props.notificationsCount} key="notifications"
+                                        popoverTitle="Notifications"
+                                        onMore={() => this.props.dispatch(navigate('/notifications'))}>
                             <NotificationsView />
                           </MastheadIcon>
-                          <MastheadIcon icon="dashboard" key="activity" badge="4" popoverTitle="Activity">
+                          <MastheadIcon icon="dashboard" key="activity" badge="4" popoverTitle="Activity"
+                                        onMore={() => this.props.dispatch(navigate('/activity'))}>
                             <ActivityView />
                           </MastheadIcon>
                           <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
@@ -53,12 +64,11 @@ class ID7Layout extends ReactComponent {
                               <Link key="bpm" href="http://warwick.ac.uk/bpm">Course Transfers</Link>
                               <Link key="ett" href="http://warwick.ac.uk/ett">Exam Timetable</Link>
                               <Link key="massmail" href="http://warwick.ac.uk/massmail">Mass Mailing</Link>
-
                               <Link key="mrm" href="http://warwick.ac.uk/mrm">Module Registration</Link>
                               <Link key="printercredits" href="http://warwick.ac.uk/printercredits">Printer Credits</Link>
                             </LinkBlock>
                           </MastheadIcon>
-                        </MastheadPopoverIcons>
+                        </div>
                         : null }
                     </div>
                   </div>
@@ -90,7 +100,7 @@ class ID7Layout extends ReactComponent {
                   <NewsView />
                 </div>
               </div>
-            : this.props.children }
+              : this.props.children }
           </div>
         </main>
       </div>
