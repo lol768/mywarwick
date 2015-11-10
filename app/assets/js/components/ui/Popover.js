@@ -56,7 +56,8 @@ export default class Popover extends ReactComponent {
 
     let contentStyle = {
       maxHeight: this.props.height,
-      overflowY: this.props.height ? 'scroll' : undefined,
+      overflowY: this.props.height ? 'auto' : undefined,
+      overflowX: 'hidden',
       padding: 0
     };
 

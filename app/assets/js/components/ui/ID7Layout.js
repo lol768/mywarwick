@@ -7,7 +7,10 @@ import UtilityBar from './UtilityBar';
 import { MastheadPopoverIcons, MastheadIcon } from './MastheadPopoverIcons';
 import NotificationsView from '../views/NotificationsView';
 import ActivityView from '../views/ActivityView';
-import ID7SearchColumn from './ID7SearchColumn';
+import LinkBlock from './LinkBlock';
+import Link from './Link';
+import NewsView from '../views/NewsView';
+import MastheadSearch from './MastheadSearch';
 
 import { connect } from 'react-redux';
 import { getStreamSize } from '../../stream';
@@ -39,17 +42,27 @@ class ID7Layout extends ReactComponent {
                       </div>
                       { isDesktop ?
                         <MastheadPopoverIcons>
-                          <MastheadIcon icon="globe" badge={this.props.notificationsCount} key="notifications">
+                          <MastheadIcon icon="inbox" badge={this.props.notificationsCount} key="notifications" popoverTitle="Notifications">
                             <NotificationsView />
                           </MastheadIcon>
-                          <MastheadIcon icon="dashboard" key="activity">
+                          <MastheadIcon icon="dashboard" key="activity" badge="4" popoverTitle="Activity">
                             <ActivityView />
+                          </MastheadIcon>
+                          <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
+                            <LinkBlock columns="1">
+                              <Link key="bpm" href="http://warwick.ac.uk/bpm">Course Transfers</Link>
+                              <Link key="ett" href="http://warwick.ac.uk/ett">Exam Timetable</Link>
+                              <Link key="massmail" href="http://warwick.ac.uk/massmail">Mass Mailing</Link>
+
+                              <Link key="mrm" href="http://warwick.ac.uk/mrm">Module Registration</Link>
+                              <Link key="printercredits" href="http://warwick.ac.uk/printercredits">Printer Credits</Link>
+                            </LinkBlock>
                           </MastheadIcon>
                         </MastheadPopoverIcons>
                         : null }
                     </div>
                   </div>
-                  { isDesktop ? <ID7SearchColumn /> : null }
+                  { isDesktop ? <MastheadSearch /> : null }
                 </div>
               </div>
             </div>
@@ -68,7 +81,16 @@ class ID7Layout extends ReactComponent {
           </header>
 
           <div className="id7-main-content">
-            {this.props.children}
+            { isDesktop ?
+              <div class="row">
+                <div className="col-sm-8 col-lg-9">
+                  {this.props.children}
+                </div>
+                <div className="col-sm-4 col-lg-3">
+                  <NewsView />
+                </div>
+              </div>
+            : this.props.children }
           </div>
         </main>
       </div>

@@ -64,13 +64,13 @@ export class MastheadIcon extends ReactComponent {
   render() {
     return (
       <span>
-      <a href="#" onClick={this.props.onClick} ref="icon" className={this.props.popoverActive ? 'popover-active' : ''}>
+      <a href="#" onClick={this.props.onClick} ref="icon" className={this.props.popoverActive ? 'masthead-popover-icon popover-active' : 'masthead-popover-icon'}>
         <i className={"fa fa-" + this.props.icon}>
           <span className="badge">{formatBadgeCount(this.props.badge)}</span>
         </i>
       </a>
         { this.props.popoverActive ?
-          <Popover arrow attachTo={this.refs.icon} placement="bottom" height={300} width={300} top={-10}>
+          <Popover arrow attachTo={this.refs.icon} placement="bottom" height={300} width={300} top={-10} title={this.props.popoverTitle}>
             {this.props.children}
           </Popover>
           : null }

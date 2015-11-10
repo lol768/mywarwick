@@ -1,31 +1,30 @@
 .masthead-popover-icons {
-  font-size: 24px;
+  font-size: 28px;
   float: right;
-  margin-top: 45px;
+  margin-top: 42px;
 
-  a {
+  .masthead-popover-icon {
     padding: 10px;
 
     &:hover, &.popover-active {
       color: #8c6e96;
     }
+
+    > i {
+      position: relative;
+
+      > .badge {
+        background-color: #ff0404;
+        position: absolute;
+        top: 0;
+        right: -6px;
+
+        padding: 2px 3px 2px 2px;
+        border-radius: 4px;
+        font-size: 10px;
+      }
+    }
   }
-
-  i {
-    position: relative;
-  }
-
-  i > .badge {
-    background-color: #ff0404;
-    position: absolute;
-    top: 0;
-    right: -6px;
-
-    padding: 2px 3px 2px 2px;
-    border-radius: 4px;
-    font-size: 10px;
-  }
-
 
   .popover-title {
     text-align: center;
