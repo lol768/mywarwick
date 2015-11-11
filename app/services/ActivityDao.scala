@@ -74,12 +74,12 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
   }
 
   def getActivitiesByIds(ids: Seq[String]): Seq[Activity] = {
-    ids.grouped(1000).flatMap { ids =>
-      db.withConnection { implicit c =>
+    db.withConnection { implicit c =>
+      ids.grouped(1000).flatMap { ids =>
         SQL(s"SELECT * FROM ACTIVITY WHERE id IN ({ids})")
           .on('ids -> ids)
           .as(activityParser.*)
-      }
-    }.toSeq
+      }.toSeq
+    }
   }
 }
