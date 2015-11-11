@@ -60,10 +60,9 @@ class TileDataController @Inject()(
     )),
 
     JsObject(Seq(
-      "key" -> JsString("live - departures"),
+      "key" -> JsString("live-departures"),
       "type" -> JsString("text"),
       "title" -> JsString("Live Departures"),
-      "href" -> JsString("http://warwick.ac.uk/insite/kcm"),
       "backgroundColor" -> JsString("#ef4050"),
       "icon" -> JsString("bus"),
       "items" -> JsArray(Seq(
@@ -82,7 +81,8 @@ class TileDataController @Inject()(
 
     JsObject(Seq(
       "key" -> JsString("modules"),
-      "type" -> JsString("list"),
+      "type" -> JsString("count"),
+      "word" -> JsString("modules this term"),
       "title" -> JsString("My Modules"),
       "icon" -> JsString("mortar-board"),
       "items" -> JsArray(Seq(
@@ -108,7 +108,7 @@ class TileDataController @Inject()(
   def requestTileData = ssoClient.Lenient { request =>
     Ok(Json.obj(
       "type" -> "tiles",
-      "tiles" -> Json.stringify(tileData)
+      "tiles" -> tileData
     ))
   }
 

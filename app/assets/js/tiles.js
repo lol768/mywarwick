@@ -18,7 +18,7 @@ export function receivedTileData(data) {
 // TODO: not sure if ajax is what we want here, perhaps some other way to request tile-specific data. Or use websocket msg
 export function fetchTileData() {
   $.getJSON('/api/tiles', function (data) {
-    store.dispatch(receivedTileData(JSON.parse(data.tiles)));
+    store.dispatch(receivedTileData(data.tiles));
   })
 }
 
