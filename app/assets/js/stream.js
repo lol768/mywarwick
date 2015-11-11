@@ -74,8 +74,6 @@ export function getStreamSize(stream) {
 export function mergeReceivedItems(stream = [], rx = []) {
   // Preconditions: stream has no duplicates, stream is in reverse date order
 
-  // Defensive copy both
-  stream = _.cloneDeep(stream);
   rx = uniqStream(rx);
 
   let newest = _(stream).first();

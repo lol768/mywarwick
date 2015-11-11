@@ -1,5 +1,3 @@
-
-
 name := """start"""
 
 version := "1.0-SNAPSHOT"

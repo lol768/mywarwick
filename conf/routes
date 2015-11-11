@@ -22,7 +22,9 @@ GET         /news/feed                             @controllers.NewsController.f
 
 GET         /service/gtg                           @controllers.ServiceCheckController.gtg
 
+POST        /api/notification                      @controllers.api.IncomingNotificationController.handler
+GET         /api/tiles                             @controllers.api.TileDataController.requestTileData
+
 POST        /test/api/activities/app/:appId        @controllers.MyAPIController.postActivities(appId: String)
 GET         /test/api/activities/me                @controllers.MyAPIController.myActivity
 
-GET         /api/tiles                             @controllers.api.TileDataController.requestTileData

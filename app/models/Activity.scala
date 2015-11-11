@@ -2,27 +2,28 @@ package models
 
 import org.joda.time.DateTime
 
-case class Notification(
+case class Activity(
   id: String,
   providerId: String,
-  notificationType: String,
+  activityType: String,
   title: String,
   text: String,
   replacedBy: String,
-  createdAt: DateTime
+  createdAt: DateTime,
+  shouldNotify: Boolean
 )
 
-case class IncomingNotification(
+case class IncomingActivity(
   providerId: String,
-  notificationType: String,
+  `type`: String,
   title: String,
   text: String,
-  scopes: Map[String, String],
+  tags: Map[String, String],
   replace: Map[String, String],
   generatedAt: Option[DateTime]
 )
 
-object Notification {
+object Activity {
 
 }
 
