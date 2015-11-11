@@ -20,10 +20,10 @@ class ActivityCreationDaoImpl @Inject()(
   override def createActivity(incomingActivity: IncomingActivity, replaceIds: Seq[String], shouldNotify: Boolean): String = {
 
     db.withTransaction { implicit c =>
-      val activity = activityDao.save(incomingActivity, replaceIds, shouldNotify)(c)
+      val activity = activityDao.save(incomingActivity, replaceIds, shouldNotify)
 
       incomingActivity.tags.foreach {
-        case (name, value) => activityTagDao.save(activity, name, value)(c)
+        case (name, value) => activityTagDao.save(activity, name, value)
       }
 
       activity
