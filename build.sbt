@@ -6,8 +6,6 @@ version := "1.0-SNAPSHOT"
 
 scalaVersion := Common.scalaVersion
 
-val gulpAssetsTask = TaskKey[Unit]("gulp-assets")
-
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
   .dependsOn(admin, servicechecks)
   .aggregate(admin, servicechecks)
@@ -16,10 +14,9 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
     // Package up assets before we build tar.gz
     packageZipTarball in Universal <<= (packageZipTarball in Universal).dependsOn(gulpAssetsTask)
   )
-
 lazy val admin = (project in file("modules/admin")).enablePlugins(PlayScala)
 lazy val servicechecks = (project in file("modules/servicechecks")).enablePlugins(PlayScala)
-
+val gulpAssetsTask = TaskKey[Unit]("gulp-assets")
 val appDeps = Seq(
   jdbc,
   cache,
@@ -28,7 +25,8 @@ val appDeps = Seq(
   evolutions,
   "com.typesafe.play" %% "anorm" % "2.4.0",
   "com.oracle" % "ojdbc6" % "11.2.0.3.0",
-  "uk.ac.warwick.sso" %% "sso-client-play" % "2.9"
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.9",
+  "uk.ac.warwick.play-utils" %% "anorm" % "1.1"
 )
 
 val testDeps = Seq(
