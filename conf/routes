@@ -24,3 +24,5 @@ GET         /service/gtg                           @controllers.ServiceCheckCont
 
 POST        /test/api/activities/app/:appId        @controllers.MyAPIController.postActivities(appId: String)
 GET         /test/api/activities/me                @controllers.MyAPIController.myActivity
+
+GET         /api/tiles                             @controllers.api.TileDataController.requestTileData

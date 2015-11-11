@@ -102,8 +102,6 @@ export default function app(state = initialState, action = undefined) {
 
     // Some or all of these switch cases could be moved to sub-reducers instead
     switch (action.type) {
-        case 'tile-data':
-          return state.set('tile-data', action.tileData)
         case NAVIGATE:
             return state.set('path', action.path);
         case NEWS_FETCH:
