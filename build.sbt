@@ -1,5 +1,3 @@
-
-
 name := """start"""
 
 version := "1.0-SNAPSHOT"
@@ -28,7 +26,8 @@ val appDeps = Seq(
   evolutions,
   "com.typesafe.play" %% "anorm" % "2.4.0",
   "com.oracle" % "ojdbc6" % "11.2.0.3.0",
-  "uk.ac.warwick.sso" %% "sso-client-play" % "2.9"
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.9",
+  "uk.ac.warwick.play-utils" %% "anorm" % "1.1"
 )
 
 val testDeps = Seq(
