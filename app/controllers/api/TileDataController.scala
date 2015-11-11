@@ -24,22 +24,19 @@ class TileDataController @Inject()(
       "size" -> JsString("wide"),
       "items" -> JsArray(Seq(
         JsObject(Seq(
-//          "key" -> JsNumber(1),
-          "key" -> JsString(UUID.randomUUID().toString),
+          "key" -> JsNumber(1),
           "title" -> JsString("Christelle Evaert"),
           "text" -> JsString("Departmental meeting cancelled"),
           "date" -> JsString(new DateTime(2015, 3, 24, 11, 11).toString())
         )),
         JsObject(Seq(
-//          "key" -> JsNumber(2),
-          "key" -> JsString(UUID.randomUUID().toString),
+          "key" -> JsNumber(2),
           "title" -> JsString("IT Service Desk"),
           "text" -> JsString("Emergency RFC"),
           "date" -> JsString(new DateTime(2015, 3, 25, 3, 57).toString())
         )),
         JsObject(Seq(
-//          "key" -> JsNumber(3),
-          "key" -> JsString(UUID.randomUUID().toString),
+          "key" -> JsNumber(3),
           "title" -> JsString("Linda Squirrel"),
           "text" -> JsString("IT Induction Day reminder"),
           "date" -> JsString(new DateTime(2015, 3, 27, 22, 7).toString())
@@ -53,10 +50,15 @@ class TileDataController @Inject()(
       "type" -> JsString("text"),
       "title" -> JsString("Tabula"),
       "href" -> JsString("https://tabula.warwick.ac.uk"),
-      "backgroundColor" -> JsString("# 239 b92"),
+      "backgroundColor" -> JsString("#239b92"),
       "icon" -> JsString("cog"),
-      "callout" -> JsNumber(3),
-      "text" -> JsString("actions required ")
+      "items" -> JsArray(Seq(
+        JsObject(Seq(
+          "key" -> JsNumber(1),
+          "callout" -> JsNumber(3),
+          "text" -> JsString("actions required")
+        ))
+      ))
     )),
 
     JsObject(Seq(
@@ -64,32 +66,40 @@ class TileDataController @Inject()(
       "type" -> JsString("text"),
       "title" -> JsString("Live Departures"),
       "href" -> JsString("http://warwick.ac.uk/insite/kcm"),
-      "backgroundColor" -> JsString("# ef4050"),
+      "backgroundColor" -> JsString("#ef4050"),
       "icon" -> JsString("bus"),
-      "callout" -> JsString(" 17: 52"),
-      "text" -> JsString("U1 to Leamington")
+      "items" -> JsArray(Seq(
+        JsObject(Seq(
+          "key" -> JsNumber(1),
+          "callout" -> JsString("11:00"),
+          "text" -> JsString("Express to Hogwarts")
+        )),
+        JsObject(Seq(
+          "key" -> JsNumber(2),
+          "callout" -> JsString("18:01"),
+          "text" -> JsString("11 to Coventry")
+        ))
+      ))
     )),
 
     JsObject(Seq(
       "key" -> JsString("modules"),
       "type" -> JsString("list"),
       "title" -> JsString("My Modules"),
-      "icon" -> JsString("mortar - board"),
+      "icon" -> JsString("mortar-board"),
       "items" -> JsArray(Seq(
         JsObject(Seq(
-//          "key" -> JsNumber(4),
-          "key" -> JsString(UUID.randomUUID().toString),
+          "key" -> JsNumber(1),
           "href" -> JsString("http://warwick.ac.uk/cs118"),
           "text" -> JsString("CS118 Programming for Computer Scientists")
         )),
         JsObject(Seq(
-//          "key" -> JsNumber(5),
-          "key" -> JsString(UUID.randomUUID().toString),
+          "key" -> JsNumber(2),
           "href" -> JsString("http://warwick.ac.uk/cs256"),
           "text" -> JsString("CS256 Functional Programming")
         )),
         JsObject(Seq(
-          "key" -> JsString(UUID.randomUUID().toString),
+          "key" -> JsNumber(3),
           "href" -> JsString("http://warwick.ac.uk/cs324"),
           "text" -> JsString("CS324 Computer Graphics")
         ))
@@ -97,7 +107,7 @@ class TileDataController @Inject()(
     ))
   ))
 
-  def requestTileData = Action { request =>
+  def requestTileData = ssoClient.Lenient { request =>
     Ok(Json.toJson(
       Map("type" -> "tiles",
         "tiles" -> Json.stringify(tileData)

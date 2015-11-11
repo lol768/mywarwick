@@ -15,13 +15,14 @@ export function receivedTileData(data) {
   };
 }
 
+// TODO: not sure if ajax is what we want here, perhaps some other way to request tile-specific data. Or use websocket msg
 export function fetchTileData() {
   $.getJSON('/api/tiles', function (data) {
     store.dispatch(receivedTileData(JSON.parse(data.tiles)));
   })
 }
 
-registerReducer('tiles', (state = [], action) => {
+registerReducer('tiles', (state = Immutable.List(), action) => {
   switch (action.type) {
     case TILE_RECEIVE:
       return action.tiles;
@@ -30,18 +31,12 @@ registerReducer('tiles', (state = [], action) => {
   }
 });
 
-
-//SocketDatapipe.getUpdateStream().subscribe((data) => {
-//  switch (data.type) {
-//    case 'tile-data':
-//      store.dispatch((tileData) => {
-//        return {
-//          type: 'tile-data',
-//          tileData: tileData
-//        }
-//      });
-//      break;
-//    default:
-//      return;
-//  }
-//});
+SocketDatapipe.getUpdateStream().subscribe((data) => {
+  switch (data.type) {
+    case 'tile-data':
+      store.dispatch(receivedTileData(JSON.parse(data.tiles)));
+      break;
+    default:
+      return;
+  }
+});

@@ -16,11 +16,9 @@ export default class MeView extends ReactComponent {
 
   render() {
 
-    let key = "3738383";
-    console.log(this.props.tiles);
     let tiles = this.props.tiles.map((tile) => React.createElement(tileElements[tile.type], tile));
 
-    return <div key={key} className="row">{tiles}</div>;
+    return <div className="row">{tiles}</div>;
   }
 
 }
