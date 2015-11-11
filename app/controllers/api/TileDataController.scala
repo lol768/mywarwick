@@ -109,9 +109,8 @@ class TileDataController @Inject()(
 
   def requestTileData = ssoClient.Lenient { request =>
     Ok(Json.toJson(
-      Map("type" -> "tiles",
-        "tiles" -> Json.stringify(tileData)
-      )
+      "type" -> "tiles",
+      "tiles" -> Json.stringify(tileData)
     ))
   }
 }
