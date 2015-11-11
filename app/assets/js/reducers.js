@@ -1,4 +1,3 @@
-import log from 'loglevel';
 import Immutable from 'immutable';
 
 import { NAVIGATE, NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './actions';
@@ -34,7 +33,6 @@ export function makeReducers() {
 // const store = require('./store');
 import store from './store';
 export function registerReducer(name, reducer) {
-  log.debug('Registering reducer', name);
   mutateReducers(appendReducer(mutableGlobalReducers, name, reducer));
 
   // Dispatch an action handled by the newly-added receiver, to add
