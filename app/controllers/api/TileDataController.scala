@@ -1,11 +1,9 @@
 package controllers.api
 
-import java.util.UUID
-
 import com.google.inject.Inject
 import org.joda.time.DateTime
 import play.api.libs.json._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.Controller
 import warwick.sso.SSOClient
 
 class TileDataController @Inject()(
@@ -108,9 +106,10 @@ class TileDataController @Inject()(
   ))
 
   def requestTileData = ssoClient.Lenient { request =>
-    Ok(Json.toJson(
+    Ok(Json.obj(
       "type" -> "tiles",
       "tiles" -> Json.stringify(tileData)
     ))
   }
+
 }
