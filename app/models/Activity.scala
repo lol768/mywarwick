@@ -18,7 +18,7 @@ case class IncomingActivity(
   `type`: String,
   title: String,
   text: String,
-  scopes: Map[String, String],
+  tags: Map[String, String],
   replace: Map[String, String],
   generatedAt: Option[DateTime]
 )

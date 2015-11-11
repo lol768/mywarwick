@@ -14,17 +14,16 @@ trait ActivityCreationDao {
 class ActivityCreationDaoImpl @Inject()(
   @NamedDatabase("default") val db: Database,
   activityDao: ActivityDao,
-  activityScopeDao: ActivityScopeDao
+  activityTagDao: ActivityTagDao
 ) extends ActivityCreationDao {
 
   override def createActivity(incomingActivity: IncomingActivity, replaceIds: Seq[String], shouldNotify: Boolean): String = {
 
     db.withTransaction { implicit c =>
-      import incomingActivity._
       val activity = activityDao.save(incomingActivity, replaceIds, shouldNotify)(c)
 
-      scopes.foreach {
-        case (name, value) => activityScopeDao.save(activity, name, value)(c)
+      incomingActivity.tags.foreach {
+        case (name, value) => activityTagDao.save(activity, name, value)(c)
       }
 
       activity

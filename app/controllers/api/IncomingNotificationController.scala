@@ -16,12 +16,13 @@ class IncomingNotificationController @Inject()(
 
   def handler = Action(parse.json) { request =>
     request.body.validate[IncomingActivity].map { activity =>
-      val activityId: String = activityService.save(activity, shouldNotify = true)
-      Ok(Json.toJson(
-        Map("status" -> "ok",
-          "activityId" -> activityId)))
+      val activityId = activityService.save(activity, shouldNotify = true)
+      Ok(Json.obj(
+        "status" -> "ok",
+        "id" -> activityId
+      ))
     }.recoverTotal {
-      e => BadRequest("Error:" + JsError.toJson(e))
+      e => BadRequest(JsError.toJson(e))
     }
   }
 }

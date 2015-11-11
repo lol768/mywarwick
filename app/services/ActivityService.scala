@@ -13,13 +13,13 @@ trait ActivityService {
 class ActivityServiceImpl @Inject()(
   activityCreationDao: ActivityCreationDao,
   activityDao: ActivityDao,
-  activityScopeDao: ActivityScopeDao
+  activityScopeDao: ActivityTagDao
 ) extends ActivityService {
   override def getActivityById(id: String): Option[Activity] = activityDao.getActivityById(id)
 
   def save(incomingActivity: IncomingActivity, shouldNotify: Boolean): String = {
     import incomingActivity._
-    val replaceIds = activityScopeDao.getActivitiesByScope(replace, providerId)
+    val replaceIds = activityScopeDao.getActivitiesWithTags(replace, providerId)
 
     activityCreationDao.createActivity(incomingActivity, replaceIds, shouldNotify)
 
