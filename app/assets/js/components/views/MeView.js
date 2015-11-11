@@ -268,6 +268,8 @@ class MeView extends ReactComponent {
       let tileComponent = this.refs.group.refs['.$' + props.originalRef];
       let zoomComponent = this.refs.group.refs['.$' + props.ref];
 
+      $(ReactDOM.findDOMNode(zoomComponent)).hide();
+
       // have to do this otherwise the zoomComponent doesn't have its sizing information
       setTimeout(() => this.animateTileZoom(tileComponent, zoomComponent, callback), 0);
     } else {

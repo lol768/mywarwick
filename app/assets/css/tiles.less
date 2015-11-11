@@ -5,13 +5,14 @@
   right: 0;
   bottom: 44px;
   z-index: 100;
-  display: none;
 
   @media (min-width: @screen-sm-min) {
-    top: 250px;
-    left: 200px;
-    right: 200px;
-    bottom: 250px;
+    top: 30%;
+    left: 50%;
+    right: auto;
+    width: @screen-sm-min - 100px;
+    margin-left: -(@screen-sm-min - 100px) / 2;
+    bottom: auto;
   }
 
   .tile {
@@ -73,7 +74,7 @@
 
 .tile--zoomed {
   .tile__wrap {
-    .container;
+    .container-fluid;
   }
   .tile__body {
     .row;
