@@ -43,7 +43,7 @@ class ActivitiesController @Inject()(
   private def saveActivities(postedActivities: Option[Seq[PostedActivity]], appId: String, shouldNotify: Boolean): Seq[String] = {
     postedActivities
       .getOrElse(Seq.empty)
-      .map(_.toActivityPrototype(appId, shouldNotify = false))
+      .map(_.toActivityPrototype(appId, shouldNotify))
       .map(activityService.save)
   }
 }
