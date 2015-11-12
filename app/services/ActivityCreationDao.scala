@@ -1,13 +1,13 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject}
-import models.IncomingActivity
+import models.ActivityPrototype
 import play.api.db.{Database, NamedDatabase}
 
 @ImplementedBy(classOf[ActivityCreationDaoImpl])
 trait ActivityCreationDao {
 
-  def createActivity(activity: IncomingActivity, replaces: Seq[String], shouldNotify: Boolean): String
+  def createActivity(activity: ActivityPrototype, replaces: Seq[String]): String
 
 }
 
@@ -17,17 +17,15 @@ class ActivityCreationDaoImpl @Inject()(
   activityTagDao: ActivityTagDao
 ) extends ActivityCreationDao {
 
-  override def createActivity(incomingActivity: IncomingActivity, replaceIds: Seq[String], shouldNotify: Boolean): String = {
-
+  override def createActivity(activity: ActivityPrototype, replaceIds: Seq[String]): String =
     db.withTransaction { implicit c =>
-      val activity = activityDao.save(incomingActivity, replaceIds, shouldNotify)
+      val activityId = activityDao.save(activity, replaceIds)
 
-      incomingActivity.tags.foreach {
-        case (name, value) => activityTagDao.save(activity, name, value)
+      activity.tags.foreach {
+        case (name, value) => activityTagDao.save(activityId, name, value)
       }
 
-      activity
+      activityId
     }
 
-  }
 }

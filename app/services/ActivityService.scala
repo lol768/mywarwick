@@ -1,28 +1,26 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject}
-import models.{Activity, IncomingActivity}
+import models.{Activity, ActivityPrototype}
 
 @ImplementedBy(classOf[ActivityServiceImpl])
 trait ActivityService {
   def getActivityById(id: String): Option[Activity]
 
-  def save(incomingActivity: IncomingActivity, shouldNotify: Boolean): String
+  def save(activity: ActivityPrototype): String
 }
 
 class ActivityServiceImpl @Inject()(
   activityCreationDao: ActivityCreationDao,
   activityDao: ActivityDao,
-  activityScopeDao: ActivityTagDao
+  activityTagDao: ActivityTagDao
 ) extends ActivityService {
   override def getActivityById(id: String): Option[Activity] = activityDao.getActivityById(id)
 
-  def save(incomingActivity: IncomingActivity, shouldNotify: Boolean): String = {
-    import incomingActivity._
-    val replaceIds = activityScopeDao.getActivitiesWithTags(replace, providerId)
+  def save(activity: ActivityPrototype): String = {
+    val replaceIds = activityTagDao.getActivitiesWithTags(activity.replace, activity.appId)
 
-    activityCreationDao.createActivity(incomingActivity, replaceIds, shouldNotify)
-
+    activityCreationDao.createActivity(activity, replaceIds)
   }
 }
 
