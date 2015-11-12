@@ -1,14 +1,6 @@
 import Immutable from 'immutable';
 
-import { NAVIGATE, NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './actions';
-
-const initialState = Immutable.fromJS({
-  path: '/',
-  news: {
-    fetching: false,
-    items: []
-  }
-});
+const initialState = Immutable.Map();
 
 /*
  * Named to make it super clear when you're not being totally functional
@@ -98,48 +90,23 @@ export default function app(state = initialState, action = undefined) {
     return state;
   }
 
-  // Some or all of these switch cases could be moved to sub-reducers instead
-  switch (action.type) {
-    case NAVIGATE:
-      return state.set('path', action.path);
-    case NEWS_FETCH:
-      return state.mergeDeep({
-        news: {
-          fetching: true
-        }
-      });
-    case NEWS_FETCH_SUCCESS:
-      return state.mergeDeep({
-        news: {
-          fetching: false,
-          items: action.items
-        }
-      });
-    case NEWS_FETCH_FAILURE:
-      return state.mergeDeep({
-        news: {
-          fetching: false
-        }
-      });
-    default:
-      // Only actions with a namespace-style type may use sub-reducers
-      if (action.type.indexOf('.') >= 0) {
-        // The action's namespace is everything before the first full-
-        // stop
-        let namespace = action.type.substring(0, action.type.indexOf('.'));
+  // Only actions with a namespace-style type may use sub-reducers
+  if (action.type.indexOf('.') >= 0) {
+    // The action's namespace is everything before the first full-
+    // stop
+    let namespace = action.type.substring(0, action.type.indexOf('.'));
 
-        // Compose the reducers for this namespace, then run them with
-        // the current subtree
-        let fn = composeReducers(mutableGlobalReducers.get(namespace));
-        let substate = fn(state.get(namespace), action);
+    // Compose the reducers for this namespace, then run them with
+    // the current subtree
+    let fn = composeReducers(mutableGlobalReducers.get(namespace));
+    let subtree = fn(state.get(namespace), action);
 
-        return (substate === undefined) ?
-          state.delete(namespace) :
-          state.mergeDeep({
-            [namespace]: substate
-          });
-      } else {
-        return state;
-      }
+    return (subtree === undefined) ?
+      state.delete(namespace) :
+      state.mergeDeep({
+        [namespace]: subtree
+      });
+  } else {
+    return state;
   }
 }
