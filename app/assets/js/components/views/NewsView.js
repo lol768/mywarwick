@@ -5,7 +5,9 @@ import NewsItem from '../ui/NewsItem';
 import CheckableListItem from '../ui/CheckableListItem';
 
 import { connect } from 'react-redux';
-import { fetchNews } from '../../actions';
+import _ from 'lodash';
+
+import { fetchNews } from '../../news';
 
 class NewsView extends ReactComponent {
 
@@ -17,7 +19,7 @@ class NewsView extends ReactComponent {
   render() {
     let html = (content) => ({__html: content.replace(/<br[ /]+?>/g, '')});
 
-    let items = this.props.items.map((item) =>
+    let items = _.take(this.props.items, 5).map((item) =>
       <NewsItem key={item.id} title={item.title} source={item.source} url={item.url.href}>
         <div dangerouslySetInnerHTML={html(item.content)}></div>
       </NewsItem>

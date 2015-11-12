@@ -4,6 +4,9 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 
 import ActivityItem from '../ui/ActivityItem';
+import GroupedList from '../ui/GroupedList';
+
+import groupItemsByDate from '../../GroupItemsByDate';
 
 import { connect } from 'react-redux';
 
@@ -37,7 +40,9 @@ class NotificationsView extends ReactComponent {
 
     return (
       <InfiniteScrollable hasMore={hasMore} onLoadMore={this.loadMore.bind(this)}>
-        {notifications}
+        <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
+          {notifications.toJS()}
+        </GroupedList>
       </InfiniteScrollable>
     )
   }

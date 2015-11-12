@@ -11,7 +11,6 @@ import _ from 'lodash';
 import jQuery from 'jquery';
 import $ from 'jquery.transit';
 
-import store from '../../store';
 import Immutable from 'immutable';
 import { registerReducer } from '../../reducers';
 import { connect } from 'react-redux';
@@ -35,6 +34,8 @@ function zoomOut() {
   };
 }
 
+var tileZoomAnimating = false;
+
 class MeView extends ReactComponent {
 
   constructor(props) {
@@ -45,9 +46,14 @@ class MeView extends ReactComponent {
   onTileClick(tile) {
     if (tile.href) {
       window.open(tile.href);
-    } else {
-      store.dispatch(this.props.zoomedTile ? zoomOut() : zoomInOn(tile));
+    } else if (!this.props.zoomedTile) {
+      this.props.dispatch(zoomInOn(tile));
     }
+  }
+
+  onTileDismiss() {
+    if (!tileZoomAnimating)
+      this.props.dispatch(zoomOut());
   }
 
   renderTile(tile, zoomed = false) {
@@ -64,7 +70,8 @@ class MeView extends ReactComponent {
       zoomed: zoomed,
       key: zoomed ? tile.key + '-zoomed' : tile.key,
       ref: zoomed ? tile.key + '-zoomed' : tile.key,
-      originalRef: tile.key
+      originalRef: tile.key,
+      onDismiss: this.onTileDismiss.bind(this)
     });
 
     let element = class extends baseTile {
@@ -81,25 +88,25 @@ class MeView extends ReactComponent {
   }
 
   animateTileZoomOut(tileComponent, zoomComponent, callback) {
-    let state = tileComponent.refs.tile.state;
+    let $tile = $(ReactDOM.findDOMNode(tileComponent.refs.tile.refs.tile)),
+      $zoom = $(ReactDOM.findDOMNode(zoomComponent.refs.tile.refs.tile));
 
-    let $tile = $(ReactDOM.findDOMNode(tileComponent)),
-      $zoom = $(ReactDOM.findDOMNode(zoomComponent));
+    let scaleX = $tile.outerWidth() / ($zoom.outerWidth() - 5);
+    let scaleY = $tile.outerHeight() / $zoom.outerHeight();
 
-    let scaleX = state.naturalOuterWidth / $zoom.outerWidth();
-    let scaleY = state.naturalOuterHeight / $zoom.outerHeight();
-
-    $(document.body).css('overflow', 'hidden');
+    let x = $zoom.offset().left - $tile.offset().left;
+    let y = $zoom.offset().top - $tile.offset().top;
 
     $tile.css({
-      x: -state.originalOffset.left,
-      y: -state.originalOffset.top + $(window).scrollTop(),
+      x: x,
+      y: y,
       transformOriginX: 0,
       transformOriginY: 0,
       zIndex: 1001,
-      scaleX: $(window).width() / state.naturalOuterWidth,
-      scaleY: $(window).height() / state.naturalOuterHeight,
-      opacity: 0
+      scaleX: 1 / scaleX,
+      scaleY: 1 / scaleY,
+      opacity: 0,
+      visibility: ''
     }).transition({
       x: 0,
       y: 0,
@@ -112,41 +119,44 @@ class MeView extends ReactComponent {
         transformOriginY: '',
         zIndex: ''
       });
-      $(document.body).css('overflow', '');
     });
 
     $zoom.css({
+      transformOriginX: 0,
+      transformOriginY: 0,
       zIndex: 1002
     }).transition({
-      x: state.originalOffset.left,
-      y: state.originalOffset.top - $(window).scrollTop(),
+      x: -x,
+      y: -y,
       scaleX: scaleX,
-      scaleY: scaleY,
-      opacity: 0
-    }, ZOOM_ANIMATION_DURATION, callback);
+      scaleY: scaleY
+    }, ZOOM_ANIMATION_DURATION, function () {
+      tileZoomAnimating = false;
+      callback();
+    });
   }
 
   animateTileZoom(tileComponent, zoomComponent, callback) {
-    let state = tileComponent.refs.tile.state;
+    let $tile = $(ReactDOM.findDOMNode(tileComponent.refs.tile.refs.tile)),
+      $zoom = $(ReactDOM.findDOMNode(zoomComponent.refs.tile.refs.tile));
 
-    let $tile = $(ReactDOM.findDOMNode(tileComponent)),
-      $zoom = $(ReactDOM.findDOMNode(zoomComponent));
+    $zoom.parent().show();
 
-    let scaleX = state.naturalOuterWidth / $zoom.outerWidth();
-    let scaleY = state.naturalOuterHeight / $zoom.outerHeight();
+    let scaleX = $tile.outerWidth() / ($zoom.outerWidth() - 5);
+    let scaleY = $tile.outerHeight() / $zoom.outerHeight();
 
-    $(document.body).css('overflow', 'hidden');
+    let x = $zoom.offset().left - $tile.offset().left;
+    let y = $zoom.offset().top - $tile.offset().top;
 
     $tile.stop().css({
       transformOriginX: 0,
       transformOriginY: 0,
-      zIndex: 1001
+      zIndex: 99
     }).transition({
-      x: -state.originalOffset.left,
-      y: -state.originalOffset.top + $(window).scrollTop(),
-      scaleX: $(window).width() / state.naturalOuterWidth,
-      scaleY: $(window).height() / state.naturalOuterHeight,
-      opacity: 0
+      x: x,
+      y: y,
+      scaleX: 1 / scaleX,
+      scaleY: 1 / scaleY
     }, ZOOM_ANIMATION_DURATION, function () {
       $tile.css({
         zIndex: '',
@@ -155,17 +165,17 @@ class MeView extends ReactComponent {
         x: '',
         y: '',
         transform: '',
-        opacity: ''
+        visibility: 'hidden'
       });
-      $(document.body).css('overflow', '');
+      tileZoomAnimating = false;
       callback();
     });
 
     $zoom.stop().show().css({
       transformOriginX: 0,
       transformOriginY: 0,
-      x: state.originalOffset.left,
-      y: state.originalOffset.top - $(window).scrollTop(),
+      x: -x,
+      y: -y,
       scaleX: scaleX,
       scaleY: scaleY,
       opacity: 0
@@ -183,6 +193,10 @@ class MeView extends ReactComponent {
       let tileComponent = this.refs.group.refs['.$' + props.originalRef];
       let zoomComponent = this.refs.group.refs['.$' + props.ref];
 
+      tileZoomAnimating = true;
+
+      $(ReactDOM.findDOMNode(zoomComponent)).hide();
+
       // have to do this otherwise the zoomComponent doesn't have its sizing information
       setTimeout(() => this.animateTileZoom(tileComponent, zoomComponent, callback), 0);
     } else {
@@ -194,6 +208,12 @@ class MeView extends ReactComponent {
     if (props.zoomed) {
       let tileComponent = this.refs.group.refs['.$' + props.originalRef];
       let zoomComponent = this.refs.group.refs['.$' + props.ref];
+
+      tileZoomAnimating = true;
+
+      $(tileComponent.refs.tile.refs.tile).css({
+        visibility: 'hidden'
+      });
 
       // have to do this otherwise the tileComponent doesn't have its sizing information
       setTimeout(() => this.animateTileZoomOut(tileComponent, zoomComponent, callback), 0);
@@ -213,9 +233,14 @@ class MeView extends ReactComponent {
     }
 
     return (
-      <ReactTransitionGroup ref="group">
-        {tiles}
-      </ReactTransitionGroup>
+      <div>
+        { zoomedTileKey ?
+          <div className="tile-zoom-backdrop" onClick={this.onTileDismiss.bind(this)}></div>
+          : null}
+        <ReactTransitionGroup ref="group">
+          {tiles}
+        </ReactTransitionGroup>
+      </div>
     );
   }
 
