@@ -6,6 +6,8 @@ import Popover from './Popover';
 import LinkBlock from './LinkBlock';
 import Link from './Link';
 
+import $ from 'jquery';
+
 export default class MastheadSearch extends ReactComponent {
 
   constructor(props) {
@@ -14,6 +16,8 @@ export default class MastheadSearch extends ReactComponent {
     this.state = {
       popover: false
     };
+
+    this.boundOnReflow = this.onReflow.bind(this);
   }
 
   onFocus() {
@@ -26,6 +30,18 @@ export default class MastheadSearch extends ReactComponent {
     this.setState({
       popover: false
     });
+  }
+
+  componentDidMount() {
+    $(window).on('id7:reflow', this.boundOnReflow);
+  }
+
+  componentWillUnmount() {
+    $(window).off('id7:reflow', this.boundOnReflow);
+  }
+
+  onReflow() {
+    this.setState({});
   }
 
   onChange() {
@@ -41,7 +57,7 @@ export default class MastheadSearch extends ReactComponent {
                      ref="field"/>
 
         { this.state.popover ?
-          <Popover attachTo={this.refs.field.refs.input} top={40} left={10} width={300} height={300}>
+          <Popover attachTo={this.refs.field.refs.input} top={42} left={20} width={$(this.refs.field.refs.input).outerWidth() - 1} height={300}>
             <LinkBlock columns="1">
               <Link key="a" href="http://">Recent 1</Link>
               <Link key="b" href="http://">Recent 2</Link>
