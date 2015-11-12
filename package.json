@@ -39,6 +39,7 @@
     "watchify": "^3.2.3"
   },
   "dependencies": {
+    "classnames": "^2.2.0",
     "es6-promise": "~3.0.2",
     "fastclick": "^1.0.6",
     "id7": "git://github.com/UniversityofWarwick/id7.git",
@@ -68,7 +69,8 @@
     "url": "-"
   },
   "browserify-shim": {
-    "jquery": "global:$"
+    "jquery": "global:$",
+    "modernizr": "global:Modernizr"
   },
   "author": "",
   "license": "ISC"

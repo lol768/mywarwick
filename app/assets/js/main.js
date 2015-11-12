@@ -13,10 +13,11 @@ import attachFastClick from 'fastclick';
 
 import Application from './components/Application';
 import UtilityBar from './components/ui/UtilityBar';
+import ID7Layout from './components/ui/ID7Layout';
 
 import store from './store';
 window.Store = store;
-import { navigate } from './actions';
+import { navigate } from './navigate';
 
 import { Provider } from 'react-redux';
 
@@ -50,12 +51,9 @@ $(function () {
 
   ReactDOM.render(
     <Provider store={store}>
-      <UtilityBar />
-    </Provider>,
-    document.getElementById('utility-bar-container'));
-  ReactDOM.render(
-    <Provider store={store}>
-      <Application />
+      <ID7Layout utilityBar={<UtilityBar />}>
+        <Application />
+      </ID7Layout>
     </Provider>,
     document.getElementById('app-container'));
 

@@ -1,5 +1,6 @@
 import log from 'loglevel';
 import localforage from 'localforage';
+window.localforage = localforage;
 import { createSelector } from 'reselect';
 
 import SocketDatapipe from './SocketDatapipe';

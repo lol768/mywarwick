@@ -13,17 +13,36 @@ case class Activity(
   shouldNotify: Boolean
 )
 
-case class IncomingActivity(
-  providerId: String,
+case class ActivityPrototype(
+  appId: String,
   `type`: String,
   title: String,
   text: String,
   tags: Map[String, String],
   replace: Map[String, String],
-  generatedAt: Option[DateTime]
+  generatedAt: Option[DateTime],
+  shouldNotify: Boolean
 )
 
-object Activity {
+case class PostedActivity(
+  `type`: String,
+  title: String,
+  text: String,
+  tags: Option[Map[String, String]],
+  replace: Option[Map[String, String]],
+  generated_at: Option[DateTime]
+) {
+
+  def toActivityPrototype(appId: String, shouldNotify: Boolean): ActivityPrototype =
+    ActivityPrototype(
+      appId = appId,
+      `type` = `type`,
+      title = title,
+      text = text,
+      tags = tags.getOrElse(Map.empty),
+      replace = replace.getOrElse(Map.empty),
+      generatedAt = generated_at,
+      shouldNotify = shouldNotify
+    )
 
 }
-
