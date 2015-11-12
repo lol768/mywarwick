@@ -1,4 +1,4 @@
-package services
+package services.dao
 
 import com.google.inject.{ImplementedBy, Inject}
 import models.ActivityPrototype

@@ -1,6 +1,7 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject}
+import services.dao.AppPermissionDao
 import warwick.sso.User
 
 @ImplementedBy(classOf[AppPermissionServiceImpl])

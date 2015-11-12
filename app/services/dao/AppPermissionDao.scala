@@ -1,4 +1,4 @@
-package services
+package services.dao
 
 import anorm.SqlParser._
 import com.google.inject.{ImplementedBy, Inject}
