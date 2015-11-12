@@ -14,7 +14,7 @@ import _ from 'lodash';
 
 import { connect } from 'react-redux';
 
-import { navigate } from '../actions';
+import { navigate } from '../navigate';
 
 import { getStreamSize } from '../stream';
 
