@@ -28,6 +28,7 @@ export default class InfiniteScrollable extends ReactComponent {
 
     if (this.props.hasMore) {
       $(window).on('scroll resize', this.boundScrollListener);
+      $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]').on('scroll', this.boundScrollListener);
 
       this.onScroll();
     }
@@ -35,6 +36,8 @@ export default class InfiniteScrollable extends ReactComponent {
 
   detachScrollListener() {
     $(window).off('scroll resize', this.boundScrollListener);
+
+    $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]').off('scroll', this.boundScrollListener);
   }
 
   onScroll() {

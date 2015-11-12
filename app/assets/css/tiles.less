@@ -5,11 +5,31 @@
   right: 0;
   bottom: 44px;
   z-index: 100;
-  display: none;
+
+  @media (min-width: @screen-sm-min) {
+    top: 30%;
+    left: 50%;
+    right: auto;
+    width: @screen-sm-min - 100px;
+    margin-left: -(@screen-sm-min - 100px) / 2;
+    bottom: auto;
+  }
 
   .tile {
     height: 100%;
+    cursor: default;
   }
+}
+
+.tile-zoom-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+  background-color: black;
+  opacity: 0.35;
 }
 
 .tile {
@@ -19,6 +39,7 @@
   font-size: 15px;
   margin-bottom: 10px;
   overflow: hidden;
+  cursor: pointer;
 
   a {
     color: inherit;
@@ -53,7 +74,7 @@
 
 .tile--zoomed {
   .tile__wrap {
-    .container;
+    .container-fluid;
   }
   .tile__body {
     .row;
@@ -70,6 +91,13 @@
   display: block;
   font-size: 2em;
   line-height: 1.1;
+}
+
+.tile__dismiss {
+  position: absolute;
+  top: 12px;
+  right: 10px;
+  cursor: pointer;
 }
 
 .list-tile-item {
