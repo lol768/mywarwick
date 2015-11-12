@@ -124,6 +124,8 @@ function zoomOut() {
   };
 }
 
+var tileZoomAnimating = false;
+
 class MeView extends ReactComponent {
 
   constructor(props) {
@@ -133,9 +135,14 @@ class MeView extends ReactComponent {
   onTileClick(tile) {
     if (tile.href) {
       window.open(tile.href);
-    } else {
-      this.props.dispatch(this.props.zoomedTile ? zoomOut() : zoomInOn(tile));
+    } else if (!this.props.zoomedTile) {
+      this.props.dispatch(zoomInOn(tile));
     }
+  }
+
+  onTileDismiss() {
+    if (!tileZoomAnimating)
+      this.props.dispatch(zoomOut());
   }
 
   renderTile(tile, zoomed = false) {
@@ -152,7 +159,8 @@ class MeView extends ReactComponent {
       zoomed: zoomed,
       key: zoomed ? tile.key + '-zoomed' : tile.key,
       ref: zoomed ? tile.key + '-zoomed' : tile.key,
-      originalRef: tile.key
+      originalRef: tile.key,
+      onDismiss: this.onTileDismiss.bind(this)
     });
 
     let element = class extends baseTile {
@@ -186,7 +194,8 @@ class MeView extends ReactComponent {
       zIndex: 1001,
       scaleX: 1 / scaleX,
       scaleY: 1 / scaleY,
-      opacity: 0
+      opacity: 0,
+      visibility: ''
     }).transition({
       x: 0,
       y: 0,
@@ -210,7 +219,10 @@ class MeView extends ReactComponent {
       y: -y,
       scaleX: scaleX,
       scaleY: scaleY
-    }, ZOOM_ANIMATION_DURATION, callback);
+    }, ZOOM_ANIMATION_DURATION, function () {
+      tileZoomAnimating = false;
+      callback();
+    });
   }
 
   animateTileZoom(tileComponent, zoomComponent, callback) {
@@ -241,8 +253,10 @@ class MeView extends ReactComponent {
         transformOriginY: '',
         x: '',
         y: '',
-        transform: ''
+        transform: '',
+        visibility: 'hidden'
       });
+      tileZoomAnimating = false;
       callback();
     });
 
@@ -268,6 +282,8 @@ class MeView extends ReactComponent {
       let tileComponent = this.refs.group.refs['.$' + props.originalRef];
       let zoomComponent = this.refs.group.refs['.$' + props.ref];
 
+      tileZoomAnimating = true;
+
       $(ReactDOM.findDOMNode(zoomComponent)).hide();
 
       // have to do this otherwise the zoomComponent doesn't have its sizing information
@@ -281,6 +297,12 @@ class MeView extends ReactComponent {
     if (props.zoomed) {
       let tileComponent = this.refs.group.refs['.$' + props.originalRef];
       let zoomComponent = this.refs.group.refs['.$' + props.ref];
+
+      tileZoomAnimating = true;
+
+      $(tileComponent.refs.tile.refs.tile).css({
+        visibility: 'hidden'
+      });
 
       // have to do this otherwise the tileComponent doesn't have its sizing information
       setTimeout(() => this.animateTileZoomOut(tileComponent, zoomComponent, callback), 0);
@@ -302,7 +324,7 @@ class MeView extends ReactComponent {
     return (
       <div>
         { zoomedTileKey ?
-          <div className="tile-zoom-backdrop" onClick={() => this.props.dispatch(zoomOut())}></div>
+          <div className="tile-zoom-backdrop" onClick={this.onTileDismiss.bind(this)}></div>
           : null}
         <ReactTransitionGroup ref="group">
           {tiles}
