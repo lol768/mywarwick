@@ -12,7 +12,7 @@ import Link from './Link';
 import NewsView from '../views/NewsView';
 import MastheadSearch from './MastheadSearch';
 
-import { navigate } from '../../actions';
+import { navigate } from '../../navigate';
 
 import { connect } from 'react-redux';
 import { getStreamSize } from '../../stream';

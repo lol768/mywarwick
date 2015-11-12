@@ -17,7 +17,7 @@ import ID7Layout from './components/ui/ID7Layout';
 
 import store from './store';
 window.Store = store;
-import { navigate } from './actions';
+import { navigate } from './navigate';
 
 import { Provider } from 'react-redux';
 
