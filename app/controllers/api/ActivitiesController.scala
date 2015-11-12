@@ -7,8 +7,8 @@ import play.api.mvc.Controller
 import services.{ActivityService, AppPermissionService, SecurityService}
 
 class ActivitiesController @Inject()(
-  activityService: ActivityService,
   securityService: SecurityService,
+  activityService: ActivityService,
   appPermissionService: AppPermissionService
 ) extends Controller {
 
