@@ -14,15 +14,15 @@ export default class ActivityView extends ReactComponent {
         <ActivityItem key="a"
                       text="You changed your preferred photo"
                       source="Photos"
-                      date="2015-10-12T12:00"/>
+                      date={moment().subtract(1, 'days')}/>
         <ActivityItem key="b"
                       text="You submitted coursework for LA118 Intro to Criminal Law"
                       source="Tabula"
-                      date="2015-10-11T09:10"/>
+                      date={moment().add(1, 'days')}/>
         <ActivityItem key="c"
                       text="You signed in using Edge on Windows 10"
                       source="Web Sign-On"
-                      date="2015-09-14T14:36"/>
+                      date={moment().subtract(2, 'months')}/>
       </GroupedList>
     );
   }

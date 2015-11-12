@@ -5,8 +5,7 @@ import { createSelector } from 'reselect';
 import SocketDatapipe from './SocketDatapipe';
 import store from './store';
 
-import { receivedNotification, fetchedNotifications } from './notifications';
-
+import { receivedActivity, receivedNotification, fetchedNotifications } from './notifications';
 
 localforage.getItem('notifications').then(
   (value) => {
@@ -16,13 +15,15 @@ localforage.getItem('notifications').then(
 );
 
 const notificationsSelector = (state) => state.get('notifications');
+const ActivitiesSelector = (state) => state.get('activities');
 
-const persistNotificationsSelect = createSelector([notificationsSelector], (notifications) => {
-  // Persist the current set of notifications to local storage on change
+const persistActivitiesSelect = createSelector([notificationsSelector, ActivitiesSelector], (notifications, activities) => {
+  // Persist the current set of activities to local storage on change
   localforage.setItem('notifications', notifications.valueSeq().flatten().toJS());
+  localforage.setItem('activities', activities.valueSeq().flatten().toJS());
 });
 
-store.subscribe(() => persistNotificationsSelect(store.getState()));
+store.subscribe(() => persistActivitiesSelect(store.getState()));
 
 SocketDatapipe.getUpdateStream().subscribe((data) => {
   //TODO is this the best place for this?
@@ -32,6 +33,9 @@ SocketDatapipe.getUpdateStream().subscribe((data) => {
       break;
     case 'notification':
       store.dispatch(receivedNotification(data));
+      break;
+    case 'activity':
+      store.dispatch(receivedActivity(data));
       break;
     default:
     // nowt

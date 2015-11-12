@@ -7,6 +7,14 @@ import { makeStream, onStreamReceive } from './stream';
 
 export const NOTIFICATION_RECEIVE = 'notifications.receive';
 export const NOTIFICATION_FETCH = 'notifications.fetch';
+export const ACTIVITY_RECEIVE = 'activity.receive';
+
+export function receivedActivity(activity) {
+  return {
+    type: ACTIVITY_RECEIVE,
+    activity: activity
+  };
+}
 
 export function receivedNotification(notification) {
   return {
@@ -34,6 +42,15 @@ registerReducer('notifications', (state = makeStream(), action) => {
       return mergeNotifications(state, Immutable.List([action.notification]));
     case NOTIFICATION_FETCH:
       return mergeNotifications(state, Immutable.List(action.notifications));
+    default:
+      return state;
+  }
+});
+
+registerReducer('activity', (state = makeStream(), action) => {
+  switch (action.type) {
+    case ACTIVITY_RECEIVE:
+      return mergeNotifications(state, Immutable.List(action.activity));
     default:
       return state;
   }
