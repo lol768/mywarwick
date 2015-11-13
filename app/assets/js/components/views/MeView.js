@@ -14,99 +14,9 @@ import $ from 'jquery.transit';
 import Immutable from 'immutable';
 import { registerReducer } from '../../reducers';
 import { connect } from 'react-redux';
+import { fetchTileData } from '../../tiles'
 
 const ZOOM_ANIMATION_DURATION = 500;
-
-let TILE_DATA = [
-  {
-    key: 'mail',
-    type: 'list',
-    title: 'Mail',
-    href: 'http://warwick.ac.uk/mymail',
-    backgroundColor: '#0078d7',
-    icon: 'envelope-o',
-    word: 'unread',
-    size: 'wide',
-    items: [
-      {
-        key: 1,
-        title: 'Christelle Evaert',
-        text: 'Departmental meeting cancelled',
-        date: moment().subtract(1, 'hour').toISOString()
-      },
-      {
-        key: 2,
-        title: 'IT Service Desk',
-        text: 'Emergency RFC',
-        date: moment().subtract(4, 'hour').toISOString()
-      },
-      {
-        key: 3,
-        title: 'Linda Squirrel',
-        text: 'IT Induction Day reminder',
-        date: moment().subtract(26, 'hour').toISOString()
-      }
-    ]
-  },
-  {
-    key: 'tabula',
-    type: 'text',
-    title: 'Tabula',
-    href: 'https://tabula.warwick.ac.uk',
-    backgroundColor: '#239b92',
-    icon: 'cog',
-    items: [
-      {
-        key: 1,
-        callout: 3,
-        text: 'actions required'
-      }
-    ]
-  },
-  {
-    key: 'live-departures',
-    type: 'text',
-    title: 'Live Departures',
-    backgroundColor: '#ef4050',
-    icon: 'bus',
-    items: [
-      {
-        key: 1,
-        callout: '17:52',
-        text: 'U1 to Leamington'
-      },
-      {
-        key: 2,
-        callout: '18:01',
-        text: '11 to Coventry'
-      }
-    ]
-  },
-  {
-    key: 'modules',
-    type: 'count',
-    word: 'modules this term',
-    title: 'My Modules',
-    icon: 'mortar-board',
-    items: [
-      {
-        key: 1,
-        href: 'http://warwick.ac.uk/cs118',
-        text: 'CS118 Programming for Computer Scientists'
-      },
-      {
-        key: 2,
-        href: 'http://warwick.ac.uk/cs256',
-        text: 'CS256 Functional Programming'
-      },
-      {
-        key: 3,
-        href: 'http://warwick.ac.uk/cs324',
-        text: 'CS324 Computer Graphics'
-      }
-    ]
-  }
-];
 
 const TILE_ZOOM_IN = 'me.zoom-in';
 const TILE_ZOOM_OUT = 'me.zoom-out';
@@ -130,6 +40,7 @@ class MeView extends ReactComponent {
 
   constructor(props) {
     super(props);
+    fetchTileData();
   }
 
   onTileClick(tile) {
@@ -314,10 +225,10 @@ class MeView extends ReactComponent {
   renderTiles() {
     let zoomedTileKey = this.props.zoomedTile;
 
-    let tiles = TILE_DATA.map((tile) => this.renderTile(tile));
+    let tiles = this.props.tiles.map((tile) => this.renderTile(tile));
 
     if (zoomedTileKey) {
-      let zoomedTile = _.find(TILE_DATA, (tile) => tile.key == zoomedTileKey);
+      let zoomedTile = _.find(this.props.tiles, (tile) => tile.key == zoomedTileKey);
       tiles.push(this.renderTile(zoomedTile, true));
     }
 
@@ -358,6 +269,9 @@ registerReducer('me', (state = initialState, action) => {
   }
 });
 
-let select = (state) => ({zoomedTile: state.get('me').get('zoomedTile')});
+let select = (state) => ({
+  zoomedTile: state.get('me').get('zoomedTile'),
+  tiles: state.get('tiles').toJS()
+});
 
 export default connect(select)(MeView);
