@@ -40,7 +40,7 @@ class MeView extends ReactComponent {
 
   constructor(props) {
     super(props);
-    fetchTileData();
+    this.props.dispatch(fetchTileData());
   }
 
   onTileClick(tile) {
