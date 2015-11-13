@@ -1,6 +1,9 @@
 import Immutable from 'immutable';
+import localforage from 'localforage';
+import log from 'loglevel';
 
 import store from './store';
+import { createSelector } from 'reselect';
 import { registerReducer } from './reducers';
 import { makeStream, takeFromStream } from './stream';
 
@@ -20,6 +23,22 @@ export function receivedTileData(data) {
     tiles: data
   };
 }
+
+localforage.getItem('tiles').then(
+  (value) => {
+    if (value != null) store.dispatch(receivedTileData(value));
+  },
+  (err) => log.warn('Problem loading tiles from local storage', err)
+);
+
+const tilesSelector = (state) => state.get('tiles');
+
+const persistTilesSelect = createSelector([tilesSelector], (tiles) => {
+  // Persist tile data to local storage on change
+  localforage.setItem('tiles', tiles.toJS());
+});
+
+store.subscribe(() => persistTilesSelect(store.getState()));
 
 // TODO: not sure if ajax is what we want here, perhaps some other way to request tile-specific data. Or use websocket msg
 export function fetchTileData() {
