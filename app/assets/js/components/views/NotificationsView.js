@@ -56,3 +56,4 @@ function select(state) {
 }
 
 export default connect(select)(NotificationsView);
+
