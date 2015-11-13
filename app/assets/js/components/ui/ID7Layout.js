@@ -55,7 +55,8 @@ class ID7Layout extends ReactComponent {
                                         onMore={() => this.props.dispatch(navigate('/notifications'))}>
                             <NotificationsView grouped={false} />
                           </MastheadIcon>
-                          <MastheadIcon icon="dashboard" key="activity" badge="4" popoverTitle="Activity"
+                          <MastheadIcon icon="dashboard" key="activity" badge={this.props.activitiesCount}
+                                        popoverTitle="Activity"
                                         onMore={() => this.props.dispatch(navigate('/activity'))}>
                             <ActivityView grouped={false} />
                           </MastheadIcon>
@@ -112,7 +113,8 @@ class ID7Layout extends ReactComponent {
 let select = (state) => {
   return {
     layoutClassName: state.get('ui').get('className'),
-    notificationsCount: getStreamSize(state.get('notifications'))
+    notificationsCount: getStreamSize(state.get('notifications')),
+    activitiesCount: getStreamSize(state.get('activities')),
   };
 };
 

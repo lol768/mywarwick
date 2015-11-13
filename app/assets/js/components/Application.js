@@ -58,7 +58,7 @@ $(() => {
 class Application extends ReactComponent {
 
   render() {
-    const { dispatch, path, notificationsCount, layoutClassName } = this.props;
+    const { dispatch, path, notificationsCount, activitiesCount, layoutClassName } = this.props;
 
     let views = {
       '/': <MeView />,
@@ -75,7 +75,7 @@ class Application extends ReactComponent {
           <TabBar selectedItem={path} onSelectItem={path => dispatch(navigate(path))}>
             <TabBarItem title="Me" icon="user" path="/"/>
             <TabBarItem title="Notifications" icon="inbox" path="/notifications" badge={notificationsCount}/>
-            <TabBarItem title="Activity" icon="dashboard" path="/activity"/>
+            <TabBarItem title="Activity" icon="dashboard" path="/activity" badge={activitiesCount}/>
             <TabBarItem title="News" icon="mortar-board" path="/news"/>
             <TabBarItem title="Search" icon="search" path="/search"/>
           </TabBar>
@@ -90,6 +90,7 @@ function mapStateToProps(state) {
   return {
     path: state.get('path'),
     notificationsCount: getStreamSize(state.get('notifications')),
+    activitiesCount: getStreamSize(state.get('activities')),
     layoutClassName: state.get('ui').get('className')
   };
 }

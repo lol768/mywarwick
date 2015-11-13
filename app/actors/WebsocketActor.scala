@@ -89,8 +89,8 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor wi
     sendNotification(
       DateTime.now().toString,
       "activity",
-      "You booked a squash court #1 for Wednesday 25th Dec at 11:15",
-      "Sports Centre",
+      "You booked squash court #1 for Wednesday 25th Dec at 11:15",
+      "Sport",
       DateTime.now().toString
     )
   }
