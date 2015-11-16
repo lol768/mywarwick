@@ -25,13 +25,18 @@ localforage.getItem('activities').then(
 const notificationsSelector = (state) => state.get('notifications');
 const activitiesSelector = (state) => state.get('activities');
 
-const persistActivitiesSelect = createSelector([notificationsSelector, activitiesSelector], (notifications, activities) => {
+const persistActivitiesSelect = createSelector([activitiesSelector], (activities) => {
   // Persist the current set of activities to local storage on change
-  localforage.setItem('notifications', notifications.valueSeq().flatten().toJS());
   localforage.setItem('activities', activities.valueSeq().flatten().toJS());
 });
 
+const persistNotificationsSelect = createSelector([notificationsSelector], (notifications) => {
+  // Persist the current set of notifications to local storage on change
+  localforage.setItem('notifications', notifications.valueSeq().flatten().toJS());
+});
+
 store.subscribe(() => persistActivitiesSelect(store.getState()));
+store.subscribe(() => persistNotificationsSelect(store.getState()));
 
 SocketDatapipe.getUpdateStream().subscribe((data) => {
   //TODO is this the best place for this? Perhaps some type of general message hub
