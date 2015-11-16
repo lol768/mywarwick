@@ -1,7 +1,7 @@
 package controllers.api
 
 import com.google.inject.Inject
-import models.PostedActivity
+import models.{ActivityTarget, PostedActivity}
 import play.api.libs.json._
 import play.api.mvc.Controller
 import services.{ActivityService, SecurityService}
@@ -20,6 +20,7 @@ class ActivitiesController @Inject()(
 
   implicit val dateReads = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
+  implicit val activityTargetReads = Json.reads[ActivityTarget]
   implicit val postedActivityReads = Json.reads[PostedActivity]
   implicit val activityPostBodyReads = Json.reads[ActivitiesPostBody]
 

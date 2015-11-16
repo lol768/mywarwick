@@ -21,7 +21,13 @@ case class ActivityPrototype(
   tags: Map[String, String],
   replace: Map[String, String],
   generatedAt: Option[DateTime],
-  shouldNotify: Boolean
+  shouldNotify: Boolean,
+  target: ActivityTarget
+)
+
+case class ActivityTarget(
+  users: Option[Seq[String]],
+  groups: Option[Seq[String]]
 )
 
 case class PostedActivity(
@@ -30,7 +36,8 @@ case class PostedActivity(
   text: String,
   tags: Option[Map[String, String]],
   replace: Option[Map[String, String]],
-  generated_at: Option[DateTime]
+  generated_at: Option[DateTime],
+  target: ActivityTarget
 ) {
 
   def toActivityPrototype(appId: String, shouldNotify: Boolean): ActivityPrototype =
@@ -42,7 +49,8 @@ case class PostedActivity(
       tags = tags.getOrElse(Map.empty),
       replace = replace.getOrElse(Map.empty),
       generatedAt = generated_at,
-      shouldNotify = shouldNotify
+      shouldNotify = shouldNotify,
+      target = target
     )
 
 }
