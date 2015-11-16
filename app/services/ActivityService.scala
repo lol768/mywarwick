@@ -8,6 +8,8 @@ import warwick.sso.Usercode
 trait ActivityService {
   def getActivityById(id: String): Option[Activity]
 
+  def getActivitiesForUser(usercode: Usercode): Seq[Activity]
+
   def save(activity: ActivityPrototype): String
 }
 
@@ -17,6 +19,7 @@ class ActivityServiceImpl @Inject()(
   activityDao: ActivityDao,
   activityTagDao: ActivityTagDao
 ) extends ActivityService {
+
   override def getActivityById(id: String): Option[Activity] = activityDao.getActivityById(id)
 
   implicit def stringSeqToUsercodeSeq(strings: Seq[String]): Seq[Usercode] = strings.map(Usercode)
@@ -32,5 +35,8 @@ class ActivityServiceImpl @Inject()(
 
     activityCreationDao.createActivity(activity, recipients, replaceIds)
   }
+
+  override def getActivitiesForUser(usercode: Usercode): Seq[Activity] =
+    activityDao.getActivitiesForUser(usercode.string)
 }
 

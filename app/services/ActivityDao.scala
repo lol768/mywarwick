@@ -13,6 +13,8 @@ import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
+  def getActivitiesForUser(usercode: String): Seq[Activity]
+
   def save(activity: ActivityPrototype, replaces: Seq[String])(implicit connection: Connection): String
 
   def getActivityById(id: String): Option[Activity] =
@@ -75,10 +77,17 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
   def getActivitiesByIds(ids: Seq[String]): Seq[Activity] = {
     db.withConnection { implicit c =>
       ids.grouped(1000).flatMap { ids =>
-        SQL(s"SELECT * FROM ACTIVITY WHERE id IN ({ids})")
+        SQL("SELECT * FROM ACTIVITY WHERE id IN ({ids})")
           .on('ids -> ids)
           .as(activityParser.*)
       }.toSeq
     }
   }
+
+  override def getActivitiesForUser(usercode: String): Seq[Activity] =
+    db.withConnection { implicit c =>
+      SQL("SELECT * FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY.ID = ACTIVITY_RECIPIENT.ACTIVITY_ID WHERE USERCODE = {usercode}")
+        .on('usercode -> usercode)
+        .as(activityParser.*)
+    }
 }
