@@ -31,7 +31,7 @@ class ActivityTargetServiceImpl @Inject()(
 
   private def getGroupMembers(groupNames: Seq[GroupName]): Seq[Usercode] =
     groupNames
-      .flatMap(groupService.getWebGroup)
+      .flatMap(groupService.getWebGroup(_).getOrElse(None))
       .flatMap(_.members)
 
 }
