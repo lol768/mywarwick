@@ -52,10 +52,15 @@ class SecurityServiceImpl @Inject()(
     }
   }
 
-  // FIXME this response obviously sucks. Use a consistent good standard for JSON error responses
   def basicAuthDenied(request: RequestHeader) = Future {
-    Forbidden(Json.obj(
-      "denied" -> true
+    Unauthorized(Json.obj(
+      "success" -> true,
+      "status" -> "unauthorized",
+      "errors" -> Json.arr(
+        Json.obj(
+          "message" -> "Authentication failed.  You may authenticate through Single Sign-On or HTTP Basic authentication."
+        )
+      )
     ))
   }
 

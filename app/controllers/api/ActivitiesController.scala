@@ -4,11 +4,12 @@ import com.google.inject.Inject
 import models.PostedActivity
 import play.api.libs.json._
 import play.api.mvc.Controller
-import services.{ActivityService, SecurityService}
+import services.{ActivityService, AppPermissionService, SecurityService}
 
 class ActivitiesController @Inject()(
+  securityService: SecurityService,
   activityService: ActivityService,
-  securityService: SecurityService
+  appPermissionService: AppPermissionService
 ) extends Controller {
 
   import securityService._
@@ -25,17 +26,29 @@ class ActivitiesController @Inject()(
 
   def post(appId: String) = APIAction(parse.json) { request =>
     request.context.user.map { user =>
-      request.body.validate[ActivitiesPostBody].map { data =>
-        val activityIds = saveActivities(data.activities, appId, shouldNotify = false)
-        val notificationIds = saveActivities(data.notifications, appId, shouldNotify = true)
-
-        Created(Json.obj(
-          "status" -> "ok",
-          "activities" -> activityIds,
-          "notifications" -> notificationIds
+      if (!appPermissionService.canUserPostForApp(appId, user)) {
+        Forbidden(Json.obj(
+          "success" -> false,
+          "status" -> "forbidden",
+          "errors" -> Json.arr(
+            Json.obj(
+              "message" -> s"User '${user.usercode.string}' does not have permission to post notifications for application '$appId'"
+            )
+          )
         ))
-      }.recoverTotal {
-        e => BadRequest(JsError.toJson(e))
+      } else {
+        request.body.validate[ActivitiesPostBody].map { data =>
+          val activityIds = saveActivities(data.activities, appId, shouldNotify = false)
+          val notificationIds = saveActivities(data.notifications, appId, shouldNotify = true)
+
+          Created(Json.obj(
+            "status" -> "ok",
+            "activities" -> activityIds,
+            "notifications" -> notificationIds
+          ))
+        }.recoverTotal {
+          e => BadRequest(JsError.toJson(e))
+        }
       }
     }.get // APIAction calls this only if request.context.user is defined
   }
