@@ -1,4 +1,4 @@
-package services
+package services.dao
 
 import java.sql.Connection
 

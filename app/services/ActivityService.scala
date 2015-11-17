@@ -2,6 +2,7 @@ package services
 
 import com.google.inject.{ImplementedBy, Inject}
 import models.{Activity, ActivityPrototype}
+import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[ActivityServiceImpl])
