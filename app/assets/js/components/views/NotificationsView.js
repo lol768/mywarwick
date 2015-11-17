@@ -5,14 +5,12 @@ import $ from 'jquery';
 
 import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
-
 import groupItemsByDate from '../../GroupItemsByDate';
+import InfiniteScrollable from '../ui/InfiniteScrollable';
 
 import { connect } from 'react-redux';
 
 import { takeFromStream, getStreamSize } from '../../stream';
-
-import InfiniteScrollable from '../ui/InfiniteScrollable';
 
 const SOME_MORE = 20;
 

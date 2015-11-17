@@ -1,6 +1,7 @@
 package actors
 
 import akka.actor._
+import models.ActivityType
 import org.joda.time.DateTime
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
@@ -9,6 +10,8 @@ import warwick.sso.LoginContext
 import scala.concurrent.duration._
 
 object WebsocketActor {
+  implicit val clientDataFormat = Json.format[ClientData]
+
   def props(loginContext: LoginContext)(out: ActorRef) = Props(classOf[WebsocketActor], out, loginContext)
 
   /**
@@ -23,8 +26,6 @@ object WebsocketActor {
     * @param data Freeform JSON payload.
     */
   case class ClientData(messageId: Int, tileId: String, data: JsValue)
-
-  implicit val clientDataFormat = Json.format[ClientData]
 
   /**
     * Wrapper for ClientData when passing it on to other actors.
@@ -64,10 +65,10 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor wi
   val signedIn = loginContext.user.exists(_.isFound)
   val who = loginContext.user.flatMap(_.name.full).getOrElse("nobody")
 
-  def sendNotification(id: String, text: String, source: String, date: String): Unit = {
+  def sendNotification(id: String, `type`: ActivityType, text: String, source: String, date: String): Unit = {
     self ! TileUpdate(JsObject(Seq(
       "id" -> JsString(id),
-      "type" -> JsString("notification"),
+      "type" -> JsString(`type`.dbValue),
       "text" -> JsString(text),
       "source" -> JsString(source),
       "date" -> JsString(date)
@@ -78,8 +79,19 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor wi
   context.system.scheduler.schedule(5 seconds, 9 seconds) {
     sendNotification(
       DateTime.now().toString,
+      ActivityType.Notification,
       "Your submission for CH155 Huge Essay is due tomorrow",
       "Tabula",
+      DateTime.now().toString
+    )
+  }
+
+  context.system.scheduler.schedule(3 seconds, 12 seconds) {
+    sendNotification(
+      DateTime.now().toString,
+      ActivityType.Activity,
+      "You booked squash court #1 for Wednesday 25th Dec at 11:15",
+      "Sport",
       DateTime.now().toString
     )
   }
