@@ -12,7 +12,11 @@ import play.api.test._
 import services.{ActivityService, AppPermissionService, SecurityServiceImpl}
 import warwick.sso._
 
+import scala.util.Success
+
 class ActivitiesControllerTest extends PlaySpec with MockitoSugar with Results {
+
+  val tabula = "tabula"
   val ron = Users.create(usercode = Usercode("ron"))
 
   val ssoClient = new MockSSOClient(new LoginContext {
@@ -31,16 +35,15 @@ class ActivitiesControllerTest extends PlaySpec with MockitoSugar with Results {
     appPermissionService
   )
 
-  val tabula = "tabula"
-
-  "ActivitiesController#post" should {
+  "ActivitiesController#postNotification" should {
     val request = FakeRequest().withJsonBody(Json.obj(
-      "notifications" -> Json.arr(
-        Json.obj(
-          "type" -> "due",
-          "title" -> "Coursework due soon",
-          "url" -> "http://tabula.warwick.ac.uk",
-          "text" -> "Your submission for CS118 is due tomorrow"
+      "type" -> "due",
+      "title" -> "Coursework due soon",
+      "url" -> "http://tabula.warwick.ac.uk",
+      "text" -> "Your submission for CS118 is due tomorrow",
+      "recipients" -> Json.obj(
+        "users" -> Json.arr(
+          "someone"
         )
       )
     ))
@@ -48,20 +51,28 @@ class ActivitiesControllerTest extends PlaySpec with MockitoSugar with Results {
     "return forbidden when user is not authorised to post for app" in {
       when(appPermissionService.canUserPostForApp(tabula, ron)).thenReturn(false)
 
-      val result = call(controller.post(tabula), request)
+      val result = call(controller.postNotification(tabula), request)
 
       status(result) mustBe FORBIDDEN
-      contentAsString(result) must include("does not have permission")
+      val json = contentAsJson(result)
+
+      (json \ "success").as[Boolean] mustBe false
+      (json \ "status").as[String] mustBe "forbidden"
+      (json \ "errors" \\ "message").map(_.as[String]).head must include("does not have permission")
     }
 
     "return created activity ID on success" in {
       when(appPermissionService.canUserPostForApp(tabula, ron)).thenReturn(true)
-      when(activityService.save(any())).thenReturn("created-activity-id")
+      when(activityService.save(any())).thenReturn(Success("created-activity-id"))
 
-      val result = call(controller.post(tabula), request)
+      val result = call(controller.postNotification(tabula), request)
 
       status(result) mustBe CREATED
-      (contentAsJson(result) \ "notifications").as[JsArray].value.head.as[String] mustBe "created-activity-id"
+      val json = contentAsJson(result)
+
+      (json \ "success").as[Boolean] mustBe true
+      (json \ "status").as[String] mustBe "ok"
+      (json \ "id").as[String] mustBe "created-activity-id"
     }
   }
 }
