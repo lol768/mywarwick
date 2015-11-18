@@ -9,14 +9,14 @@ import warwick.sso._
 
 import scala.util.Success
 
-class ActivityTargetServiceTest extends PlaySpec with MockitoSugar with Results {
+class ActivityRecipientServiceTest extends PlaySpec with MockitoSugar with Results {
 
   "ActivityTargetService" should {
 
     val userLookupService = mock[UserLookupService]
     val groupService = mock[GroupService]
 
-    val service = new ActivityTargetServiceImpl(userLookupService, groupService)
+    val service = new ActivityRecipientServiceImpl(userLookupService, groupService)
 
     "enumerate the members of a group and deduplicate" in {
 
@@ -28,7 +28,7 @@ class ActivityTargetServiceTest extends PlaySpec with MockitoSugar with Results 
         ))
       )
 
-      service.getRecipients(Seq(Usercode("a")), Seq(GroupName("in-elab"))) mustBe Set(Usercode("a"), Usercode("b"))
+      service.getRecipientUsercodes(Seq(Usercode("a")), Seq(GroupName("in-elab"))) mustBe Set(Usercode("a"), Usercode("b"))
 
     }
 
@@ -41,7 +41,7 @@ class ActivityTargetServiceTest extends PlaySpec with MockitoSugar with Results 
         ))
       )
 
-      service.getRecipients(Seq(Usercode("csumbo"), Usercode("invalid")), Seq.empty) mustBe Set(Usercode("csumbo"))
+      service.getRecipientUsercodes(Seq(Usercode("csumbo"), Usercode("invalid")), Seq.empty) mustBe Set(Usercode("csumbo"))
 
     }
 

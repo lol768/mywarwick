@@ -3,19 +3,19 @@ package services
 import com.google.inject.{ImplementedBy, Inject}
 import warwick.sso.{UserLookupService, Usercode}
 
-@ImplementedBy(classOf[ActivityTargetServiceImpl])
-trait ActivityTargetService {
+@ImplementedBy(classOf[ActivityRecipientServiceImpl])
+trait ActivityRecipientService {
 
-  def getRecipients(usercodes: Seq[Usercode], groupNames: Seq[GroupName]): Set[Usercode]
+  def getRecipientUsercodes(usercodes: Seq[Usercode], groupNames: Seq[GroupName]): Set[Usercode]
 
 }
 
-class ActivityTargetServiceImpl @Inject()(
+class ActivityRecipientServiceImpl @Inject()(
   userLookupService: UserLookupService,
   groupService: GroupService
-) extends ActivityTargetService {
+) extends ActivityRecipientService {
 
-  override def getRecipients(usercodes: Seq[Usercode], groupNames: Seq[GroupName]): Set[Usercode] = {
+  override def getRecipientUsercodes(usercodes: Seq[Usercode], groupNames: Seq[GroupName]): Set[Usercode] = {
     val usercodeRecipients = filterValidUsercodes(usercodes)
     val groupRecipients = getGroupMembers(groupNames)
 

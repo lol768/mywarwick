@@ -1,10 +1,13 @@
 package controllers.api
 
 import com.google.inject.Inject
-import models.{ActivityTarget, PostedActivity}
+import models.{ActivityRecipients, PostedActivity}
 import play.api.libs.json._
-import play.api.mvc.Controller
-import services.{ActivityService, AppPermissionService, SecurityService}
+import play.api.mvc.{Controller, Result}
+import services.{ActivityService, AppPermissionService, NoRecipientsException, SecurityService}
+import warwick.sso.{AuthenticatedRequest, User}
+
+import scala.util.{Failure, Success}
 
 class ActivitiesController @Inject()(
   securityService: SecurityService,
@@ -14,50 +17,76 @@ class ActivitiesController @Inject()(
 
   import securityService._
 
-  case class ActivitiesPostBody(
-    notifications: Option[Seq[PostedActivity]],
-    activities: Option[Seq[PostedActivity]]
-  )
-
   implicit val dateReads = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
-  implicit val activityTargetReads = Json.reads[ActivityTarget]
+  implicit val activityRecipientReads = Json.reads[ActivityRecipients]
   implicit val postedActivityReads = Json.reads[PostedActivity]
-  implicit val activityPostBodyReads = Json.reads[ActivitiesPostBody]
 
-  def post(appId: String) = APIAction(parse.json) { request =>
+  def postActivity(appId: String) = APIAction(parse.json) { implicit request =>
+    postItem(appId, shouldNotify = false)
+  }
+
+  def postNotification(appId: String) = APIAction(parse.json) { implicit request =>
+    postItem(appId, shouldNotify = true)
+  }
+
+  def postItem(appId: String, shouldNotify: Boolean)(implicit request: AuthenticatedRequest[JsValue]): Result =
     request.context.user.map { user =>
-      if (!appPermissionService.canUserPostForApp(appId, user)) {
-        Forbidden(Json.obj(
-          "success" -> false,
-          "status" -> "forbidden",
-          "errors" -> Json.arr(
-            Json.obj(
-              "message" -> s"User '${user.usercode.string}' does not have permission to post notifications for application '$appId'"
-            )
-          )
-        ))
-      } else {
-        request.body.validate[ActivitiesPostBody].map { data =>
-          val activityIds = saveActivities(data.activities, appId, shouldNotify = false)
-          val notificationIds = saveActivities(data.notifications, appId, shouldNotify = true)
-
-          Created(Json.obj(
-            "status" -> "ok",
-            "activities" -> activityIds,
-            "notifications" -> notificationIds
-          ))
+      if (appPermissionService.canUserPostForApp(appId, user)) {
+        request.body.validate[PostedActivity].map { data =>
+          activityService.save(data.toActivityPrototype(appId, shouldNotify)) match {
+            case Success(activityId) => created(activityId)
+            case Failure(_: NoRecipientsException) => noRecipients
+            case Failure(_) => otherError
+          }
         }.recoverTotal {
-          e => BadRequest(JsError.toJson(e))
+          e => validationError(e)
         }
+      } else {
+        forbidden(appId, user)
       }
     }.get // APIAction calls this only if request.context.user is defined
-  }
 
-  private def saveActivities(postedActivities: Option[Seq[PostedActivity]], appId: String, shouldNotify: Boolean): Seq[String] = {
-    postedActivities
-      .getOrElse(Seq.empty)
-      .map(_.toActivityPrototype(appId, shouldNotify))
-      .map(activityService.save)
-  }
+  private def forbidden(appId: String, user: User): Result =
+    Forbidden(Json.obj(
+      "success" -> false,
+      "status" -> "forbidden",
+      "errors" -> Json.arr(
+        Json.obj(
+          "message" -> s"User '${user.usercode.string}' does not have permission to post to the stream for application '$appId'"
+        )
+      )
+    ))
+
+  private def created(activityId: String): Result =
+    Created(Json.obj(
+      "success" -> true,
+      "status" -> "ok",
+      "id" -> activityId
+    ))
+
+  private def noRecipients: Result =
+    PaymentRequired(Json.obj(
+      "success" -> false,
+      "status" -> "request_failed",
+      "errors" -> Json.arr(
+        Json.obj(
+          "message" -> "No valid recipients for activity"
+        )
+      )
+    ))
+
+  private def otherError: Result =
+    InternalServerError(Json.obj(
+      "success" -> false,
+      "status" -> "internal_server_error"
+    ))
+
+  private def validationError(error: JsError): Result =
+    BadRequest(Json.obj(
+      "success" -> false,
+      "status" -> "bad_request",
+      "errors" -> JsError.toJson(error)
+    ))
+
 }

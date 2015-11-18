@@ -22,5 +22,7 @@ GET         /news/feed                             @controllers.NewsController.f
 
 GET         /service/gtg                           @controllers.ServiceCheckController.gtg
 
-POST        /api/activities/:appId                 @controllers.api.ActivitiesController.post(appId: String)
+POST        /api/streams/:appId/notifications      @controllers.api.ActivitiesController.postNotification(appId: String)
+POST        /api/streams/:appId/activities         @controllers.api.ActivitiesController.postActivity(appId: String)
+
 GET         /api/tiles                             @controllers.api.TileDataController.requestTileData
