@@ -95,7 +95,7 @@ export class count extends ReactComponent {
       return (
         <Tile ref="tile" {...this.props} className={"tile--text-btm " + this.props.className}>
           <div className="tile__item">
-            <span className="tile__callout">{this.props.items.length}</span>
+            <span className="tile__callout">{this.props.count || this.props.items.length}</span>
             <span className="tile__text">{this.props.word}</span>
           </div>
         </Tile>
