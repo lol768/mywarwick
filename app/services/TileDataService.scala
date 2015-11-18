@@ -50,18 +50,13 @@ class TileDataServiceImpl extends TileDataService {
 
       JsObject(Seq(
         "key" -> JsString("tabula"),
-        "type" -> JsString("text"),
+        "type" -> JsString("count"),
         "title" -> JsString("Tabula"),
         "href" -> JsString("https://tabula.warwick.ac.uk"),
         "backgroundColor" -> JsString("#239b92"),
         "icon" -> JsString("cog"),
-        "items" -> JsArray(Seq(
-          JsObject(Seq(
-            "key" -> JsNumber(1),
-            "callout" -> JsNumber(3),
-            "text" -> JsString("actions required")
-          ))
-        ))
+        "count" -> JsNumber(3),
+        "word" -> JsString("actions required")
       )),
 
       JsObject(Seq(
@@ -88,6 +83,7 @@ class TileDataServiceImpl extends TileDataService {
         "key" -> JsString("modules"),
         "type" -> JsString("count"),
         "word" -> JsString("modules this term"),
+        "count" -> JsNumber(99),
         "title" -> JsString("My Modules"),
         "icon" -> JsString("mortar-board"),
         "items" -> JsArray(Seq(
