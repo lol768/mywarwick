@@ -13,7 +13,7 @@ const SITEBUILDER_GO_QUERY_URL = 'https://sitebuilder.warwick.ac.uk/sitebuilder2
 
 export function fetchSearchResults(query) {
   return dispatch => {
-    dispatch({type: SEARCH_QUERY_START});
+    dispatch({type: SEARCH_QUERY_START, query: query});
     $.ajax({
       url: SITEBUILDER_GO_QUERY_URL,
       data: {
@@ -22,7 +22,7 @@ export function fetchSearchResults(query) {
       },
       dataType: 'jsonp',
       success: (response) => {
-        dispatch({type: SEARCH_QUERY_SUCCESS, results: response});
+        dispatch({type: SEARCH_QUERY_SUCCESS, query: query, results: response});
       },
       error: () => {
         dispatch({type: SEARCH_QUERY_FAILURE});
@@ -40,6 +40,7 @@ export function clickSearchResult(result) {
 
 let initialState = Immutable.fromJS({
   fetching: false,
+  query: undefined,
   results: [],
   recentItems: [
     {
@@ -79,11 +80,11 @@ registerReducer('search', (state = initialState, action) => {
     case SEARCH_RESULT_CLICK:
       return state.update('recentItems', (list) => pushRecentItem(list, action.result));
     case SEARCH_QUERY_START:
-      return state.set('fetching', true);
+      return state.set('fetching', true).set('query', action.query);
     case SEARCH_QUERY_SUCCESS:
-      return state.set('fetching', false).set('results', action.results);
+      return state.set('fetching', false).set('results', action.results).set('query', action.query);
     case SEARCH_QUERY_FAILURE:
-      return state.set('fetching', false).set('results', []);
+      return state.set('fetching', false).set('results', []).set('query', undefined);
     default:
       return state;
   }

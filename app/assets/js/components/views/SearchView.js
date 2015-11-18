@@ -58,7 +58,7 @@ export class SearchView extends ReactComponent {
   }
 
   getLinks() {
-    let items = this.props.results.length > 0 ?
+    let items = this.props.results.length > 0 && this.refs.field.value() == this.props.query ?
       this.props.results :
       getRecentItemsOrderedByFrequency(this.props.recentItems);
 

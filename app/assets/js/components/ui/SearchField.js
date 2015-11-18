@@ -8,6 +8,10 @@ export default class SearchField extends ReactComponent {
       this.props.onChange(this.refs.input.value);
   }
 
+  value() {
+    return this.refs.input.value;
+  }
+
   render() {
     return (
       <div className="id7-search">
