@@ -1,7 +1,9 @@
 package controllers.api
 
 import com.google.inject.Inject
-import models.{ActivityRecipients, PostedActivity}
+import models.{ActivityRecipients, ActivityTag, PostedActivity, TagValue}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.mvc.{Controller, Result}
 import services.{ActivityService, AppPermissionService, NoRecipientsException, SecurityService}
@@ -17,10 +19,17 @@ class ActivitiesController @Inject()(
 
   import securityService._
 
-  implicit val dateReads = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+  implicit val readsActivityRecipients = Json.reads[ActivityRecipients]
 
-  implicit val activityRecipientReads = Json.reads[ActivityRecipients]
-  implicit val postedActivityReads = Json.reads[PostedActivity]
+  implicit val readsActivityTag: Reads[ActivityTag] = (
+    (__ \ "name").read[String] and
+      __.read[TagValue]((
+        (__ \ "value").read[String] and
+          (__ \ "display_value").read[String]
+        ) (TagValue))
+    ) (ActivityTag)
+
+  implicit val readsPostedActivity = Json.reads[PostedActivity]
 
   def postActivity(appId: String) = APIAction(parse.json) { implicit request =>
     postItem(appId, shouldNotify = false)

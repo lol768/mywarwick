@@ -13,6 +13,13 @@ case class Activity(
   shouldNotify: Boolean
 )
 
+case class ActivityTag(
+  name: String,
+  value: TagValue
+)
+
+case class TagValue(internalValue: String, displayValue: String)
+
 case class ActivityResponse(
   id: String,
   notification: Boolean,
@@ -20,7 +27,7 @@ case class ActivityResponse(
   `type`: String,
   title: String,
   text: String,
-  tags: Map[String, String],
+  tags: Seq[ActivityTag],
   date: DateTime
 )
 
@@ -29,7 +36,7 @@ case class ActivityPrototype(
   `type`: String,
   title: String,
   text: String,
-  tags: Map[String, String],
+  tags: Seq[ActivityTag],
   replace: Map[String, String],
   generatedAt: Option[DateTime],
   shouldNotify: Boolean,
@@ -45,7 +52,7 @@ case class PostedActivity(
   `type`: String,
   title: String,
   text: String,
-  tags: Option[Map[String, String]],
+  tags: Option[Seq[ActivityTag]],
   replace: Option[Map[String, String]],
   generated_at: Option[DateTime],
   recipients: ActivityRecipients
@@ -57,7 +64,7 @@ case class PostedActivity(
       `type` = `type`,
       title = title,
       text = text,
-      tags = tags.getOrElse(Map.empty),
+      tags = tags.getOrElse(Seq.empty),
       replace = replace.getOrElse(Map.empty),
       generatedAt = generated_at,
       shouldNotify = shouldNotify,

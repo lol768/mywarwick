@@ -6,6 +6,7 @@ import java.util.UUID
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject}
+import models.ActivityTag
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import warwick.anorm.converters.ColumnConversions._
@@ -13,7 +14,7 @@ import warwick.anorm.converters.ColumnConversions._
 @ImplementedBy(classOf[ActivityTagDaoImpl])
 trait ActivityTagDao {
 
-  def save(activityId: String, name: String, value: String)(implicit connection: Connection): String
+  def save(activityId: String, tag: ActivityTag)(implicit connection: Connection): String
 
   def getActivitiesWithTags(tags: Map[String, String], providerId: String): Seq[String]
 
@@ -21,15 +22,16 @@ trait ActivityTagDao {
 
 class ActivityTagDaoImpl @Inject()(@NamedDatabase("default") val db: Database) extends ActivityTagDao {
 
-  override def save(activityId: String, name: String, value: String)(implicit c: Connection): String = {
+  override def save(activityId: String, tag: ActivityTag)(implicit c: Connection): String = {
     val tagId = UUID.randomUUID().toString
 
-    SQL("INSERT INTO ACTIVITY_TAG (ACTIVITY_ID, ID, NAME, VALUE, CREATED_AT) VALUES ({activityId}, {id}, {name}, {value}, {createdAt})")
+    SQL("INSERT INTO ACTIVITY_TAG (ACTIVITY_ID, ID, NAME, VALUE, DISPLAY_VALUE, CREATED_AT) VALUES ({activityId}, {id}, {name}, {value}, {displayValue}, {createdAt})")
       .on(
         'activityId -> activityId,
         'id -> tagId,
-        'name -> name,
-        'value -> value,
+        'name -> tag.name,
+        'value -> tag.value.internalValue,
+        'displayValue -> tag.value.displayValue,
         'createdAt -> DateTime.now()
       )
       .execute()

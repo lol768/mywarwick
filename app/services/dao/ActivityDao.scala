@@ -6,7 +6,7 @@ import java.util.UUID
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject}
-import models.{Activity, ActivityPrototype, ActivityResponse}
+import models._
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import warwick.anorm.converters.ColumnConversions._
@@ -91,7 +91,8 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
       SELECT
       ACTIVITY.ID, PROVIDER_ID, TYPE, TITLE, TEXT, SHOULD_NOTIFY, GENERATED_AT,
       ACTIVITY_TAG.NAME  AS TAG_NAME,
-      ACTIVITY_TAG.VALUE AS TAG_VALUE
+      ACTIVITY_TAG.VALUE AS TAG_VALUE,
+      ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
       FROM ACTIVITY
         JOIN ACTIVITY_RECIPIENT ON ACTIVITY.ID = ACTIVITY_RECIPIENT.ACTIVITY_ID
       JOIN ACTIVITY_TAG ON ACTIVITY.ID = ACTIVITY_TAG.ACTIVITY_ID
@@ -120,8 +121,9 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
       get[Boolean]("SHOULD_NOTIFY") ~
       get[DateTime]("GENERATED_AT") ~
       get[String]("TAG_NAME") ~
-      get[String]("TAG_VALUE") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ shouldNotify ~ generatedAt ~ tagName ~ tagValue =>
+      get[String]("TAG_VALUE") ~
+      get[String]("TAG_DISPLAY_VALUE") map {
+      case id ~ providerId ~ activityType ~ title ~ text ~ shouldNotify ~ generatedAt ~ tagName ~ tagValue ~ tagDisplayValue =>
         ActivityResponse(
           id,
           shouldNotify,
@@ -129,7 +131,7 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
           activityType,
           title,
           text,
-          Map(tagName -> tagValue),
+          Seq(ActivityTag(tagName, TagValue(tagValue, tagDisplayValue))),
           generatedAt
         )
     }
