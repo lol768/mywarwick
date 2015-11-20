@@ -25,4 +25,6 @@ GET         /service/gtg                           @controllers.ServiceCheckCont
 POST        /api/streams/:appId/notifications      @controllers.api.ActivitiesController.postNotification(appId: String)
 POST        /api/streams/:appId/activities         @controllers.api.ActivitiesController.postActivity(appId: String)
 
+GET         /api/streams/user                      @controllers.ActivitiesController.get
+
 GET         /api/tiles                             @controllers.api.TileDataController.requestTileData

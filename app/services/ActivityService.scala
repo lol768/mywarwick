@@ -1,17 +1,17 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject}
-import models.{Activity, ActivityPrototype}
+import models.{Activity, ActivityPrototype, ActivityResponse}
 import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
-import warwick.sso.Usercode
+import warwick.sso.{User, Usercode}
 
-import scala.util.{Success, Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 @ImplementedBy(classOf[ActivityServiceImpl])
 trait ActivityService {
   def getActivityById(id: String): Option[Activity]
 
-  def getActivitiesForUser(usercode: Usercode): Seq[Activity]
+  def getActivitiesForUser(user: User): Seq[ActivityResponse]
 
   def save(activity: ActivityPrototype): Try[String]
 }
@@ -46,8 +46,8 @@ class ActivityServiceImpl @Inject()(
 
   }
 
-  override def getActivitiesForUser(usercode: Usercode): Seq[Activity] =
-    activityDao.getActivitiesForUser(usercode.string)
+  override def getActivitiesForUser(user: User): Seq[ActivityResponse] =
+    activityDao.getActivitiesForUser(user.usercode.string)
 }
 
 class NoRecipientsException extends Throwable

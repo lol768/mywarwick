@@ -8,9 +8,20 @@ case class Activity(
   activityType: String,
   title: String,
   text: String,
-  replacedBy: String,
+  replacedBy: Option[String],
   createdAt: DateTime,
   shouldNotify: Boolean
+)
+
+case class ActivityResponse(
+  id: String,
+  notification: Boolean,
+  source: String,
+  `type`: String,
+  title: String,
+  text: String,
+  tags: Map[String, String],
+  date: DateTime
 )
 
 case class ActivityPrototype(

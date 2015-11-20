@@ -6,14 +6,14 @@ import java.util.UUID
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject}
-import models.{Activity, ActivityPrototype}
+import models.{Activity, ActivityPrototype, ActivityResponse}
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
-  def getActivitiesForUser(usercode: String): Seq[Activity]
+  def getActivitiesForUser(usercode: String): Seq[ActivityResponse]
 
   def save(activity: ActivityPrototype, replaces: Seq[String])(implicit connection: Connection): String
 
@@ -32,7 +32,7 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
       get[String]("type") ~
       get[String]("title") ~
       get[String]("text") ~
-      get[String]("replaced_by_id") ~
+      get[Option[String]]("replaced_by_id") ~
       get[DateTime]("created_at") ~
       get[Boolean]("should_notify") map {
       case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ createdAt ~ shouldNotify =>
@@ -84,10 +84,54 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
     }
   }
 
-  override def getActivitiesForUser(usercode: String): Seq[Activity] =
+  override def getActivitiesForUser(usercode: String): Seq[ActivityResponse] =
     db.withConnection { implicit c =>
-      SQL("SELECT * FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY.ID = ACTIVITY_RECIPIENT.ACTIVITY_ID WHERE USERCODE = {usercode}")
+      val activities = SQL(
+        """
+      SELECT
+      ACTIVITY.ID, PROVIDER_ID, TYPE, TITLE, TEXT, SHOULD_NOTIFY, GENERATED_AT,
+      ACTIVITY_TAG.NAME  AS TAG_NAME,
+      ACTIVITY_TAG.VALUE AS TAG_VALUE
+      FROM ACTIVITY
+        JOIN ACTIVITY_RECIPIENT ON ACTIVITY.ID = ACTIVITY_RECIPIENT.ACTIVITY_ID
+      JOIN ACTIVITY_TAG ON ACTIVITY.ID = ACTIVITY_TAG.ACTIVITY_ID
+      WHERE USERCODE = {usercode}
+      AND REPLACED_BY_ID IS NULL
+        """)
         .on('usercode -> usercode)
-        .as(activityParser.*)
+        .as(activityResponseParser.*)
+
+      combineActivities(activities)
     }
+
+  def combineActivities(activities: Seq[ActivityResponse]): Seq[ActivityResponse] = {
+    activities
+      .groupBy(_.id)
+      .map { case (id, a) => a.reduceLeft((a1, a2) => a1.copy(tags = a1.tags ++ a2.tags)) }
+      .toSeq
+  }
+
+  def activityResponseParser: RowParser[ActivityResponse] = {
+    get[String]("ID") ~
+      get[String]("PROVIDER_ID") ~
+      get[String]("TYPE") ~
+      get[String]("TITLE") ~
+      get[String]("TEXT") ~
+      get[Boolean]("SHOULD_NOTIFY") ~
+      get[DateTime]("GENERATED_AT") ~
+      get[String]("TAG_NAME") ~
+      get[String]("TAG_VALUE") map {
+      case id ~ providerId ~ activityType ~ title ~ text ~ shouldNotify ~ generatedAt ~ tagName ~ tagValue =>
+        ActivityResponse(
+          id,
+          shouldNotify,
+          providerId,
+          activityType,
+          title,
+          text,
+          Map(tagName -> tagValue),
+          generatedAt
+        )
+    }
+  }
 }
