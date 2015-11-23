@@ -11,25 +11,35 @@ export const SEARCH_RESULT_CLICK = 'search.result.click';
 
 const SITEBUILDER_GO_QUERY_URL = 'https://sitebuilder.warwick.ac.uk/sitebuilder2/api/go/redirects.json';
 
+import _ from 'lodash';
+
 export function fetchSearchResults(query) {
-  return dispatch => {
-    dispatch({type: SEARCH_QUERY_START, query: query});
-    $.ajax({
-      url: SITEBUILDER_GO_QUERY_URL,
-      data: {
-        maxResults: 5,
-        prefix: query
-      },
-      dataType: 'jsonp',
-      success: (response) => {
-        dispatch({type: SEARCH_QUERY_SUCCESS, query: query, results: response});
-      },
-      error: () => {
-        dispatch({type: SEARCH_QUERY_FAILURE});
-      }
-    });
+  if (_.trim(query).length == 0) {
+    return {type: SEARCH_QUERY_SUCCESS, query: query, results: []};
+  } else {
+    return dispatch => debouncedSearchGoRedirects(dispatch, query);
   }
 }
+
+function searchGoRedirects(dispatch, query) {
+  dispatch({type: SEARCH_QUERY_START, query: query});
+  $.ajax({
+    url: SITEBUILDER_GO_QUERY_URL,
+    data: {
+      maxResults: 5,
+      prefix: query
+    },
+    dataType: 'jsonp',
+    success: (response) => {
+      dispatch({type: SEARCH_QUERY_SUCCESS, query: query, results: response});
+    },
+    error: () => {
+      dispatch({type: SEARCH_QUERY_FAILURE});
+    }
+  });
+}
+
+let debouncedSearchGoRedirects = _.debounce(searchGoRedirects, 300);
 
 export function clickSearchResult(result) {
   return {

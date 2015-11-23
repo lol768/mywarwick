@@ -22,8 +22,6 @@ export class SearchView extends ReactComponent {
     };
 
     this.boundOnReflow = this.onReflow.bind(this);
-
-    this.debouncedOnChange = _.debounce(this.onChange, 300);
   }
 
   onFocus() {
@@ -80,7 +78,7 @@ export class SearchView extends ReactComponent {
 
   searchField() {
     return (
-      <SearchField onChange={this.debouncedOnChange.bind(this)}
+      <SearchField onChange={this.onChange.bind(this)}
                    onFocus={this.onFocus.bind(this)}
                    ref="field"/>
     );
