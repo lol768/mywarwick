@@ -1,5 +1,7 @@
 package actors
 
+import actors.UserActor.{WebSocketDisconnect, Notification, WebSocketConnect}
+import actors.UsersActor.MessageToUser
 import akka.actor._
 import models.ActivityType
 import org.joda.time.DateTime
@@ -57,6 +59,11 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor wi
   import WebsocketActor._
   import context.dispatcher
 
+  val usersActor = context.actorSelection("/user/users")
+  loginContext.user.foreach { user =>
+    usersActor ! MessageToUser(user.usercode, WebSocketConnect(context.self))
+  }
+
   // FIXME UserMessageHandler and the way we create it here is non-production.
   // it likely shouldn't own UserMessageHandler as a child (which is what context.actorOf
   // does here).
@@ -102,8 +109,22 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor wi
       log.debug(s"About to pipe out some data to ${who}")
       out ! data
     }
+    case Notification(activity) =>
+      sendNotification(
+        id = activity.id,
+        `type` = if (activity.shouldNotify) ActivityType.Notification else ActivityType.Activity,
+        text = activity.text,
+        source = activity.providerId,
+        date = activity.createdAt.toString
+      )
     case js: JsValue => handleClientMessage(js)
     case nonsense => log.error(s"Ignoring unrecognised message: ${nonsense}")
+  }
+
+  override def postStop() = {
+    loginContext.user.foreach { user =>
+      usersActor ! MessageToUser(user.usercode, WebSocketDisconnect(context.self))
+    }
   }
 
   def handleClientMessage(js: JsValue): Unit = {

@@ -8,7 +8,7 @@ case class Activity(
   activityType: String,
   title: String,
   text: String,
-  replacedBy: String,
+  replacedBy: Option[String],
   createdAt: DateTime,
   shouldNotify: Boolean
 )

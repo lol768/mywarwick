@@ -1,11 +1,15 @@
 package services
 
+import actors.UserActor.Notification
+import actors.UsersActor.MessageToUser
 import com.google.inject.{ImplementedBy, Inject}
 import models.{Activity, ActivityPrototype}
+import play.api.Play.current
+import play.api.libs.concurrent.Akka
 import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
 import warwick.sso.Usercode
 
-import scala.util.{Success, Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 @ImplementedBy(classOf[ActivityServiceImpl])
 trait ActivityService {
@@ -39,9 +43,12 @@ class ActivityServiceImpl @Inject()(
     } else {
       val replaceIds = activityTagDao.getActivitiesWithTags(activity.replace, activity.appId)
 
-      val activityId = activityCreationDao.createActivity(activity, recipients, replaceIds)
+      val createdActivity = activityCreationDao.createActivity(activity, recipients, replaceIds)
 
-      Success(activityId)
+      val usersActor = Akka.system.actorSelection("/user/users")
+      recipients.foreach(usercode => usersActor ! MessageToUser(usercode, Notification(createdActivity)))
+
+      Success(createdActivity.id)
     }
 
   }

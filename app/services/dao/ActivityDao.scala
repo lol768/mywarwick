@@ -32,7 +32,7 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
       get[String]("type") ~
       get[String]("title") ~
       get[String]("text") ~
-      get[String]("replaced_by_id") ~
+      get[Option[String]]("replaced_by_id") ~
       get[DateTime]("created_at") ~
       get[Boolean]("should_notify") map {
       case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ createdAt ~ shouldNotify =>
