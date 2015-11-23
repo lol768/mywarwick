@@ -18,7 +18,7 @@ case class ActivityTag(
   value: TagValue
 )
 
-case class TagValue(internalValue: String, displayValue: String)
+case class TagValue(internalValue: String, displayValue: Option[String])
 
 case class ActivityResponse(
   id: String,

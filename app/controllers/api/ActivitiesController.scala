@@ -25,7 +25,7 @@ class ActivitiesController @Inject()(
     (__ \ "name").read[String] and
       __.read[TagValue]((
         (__ \ "value").read[String] and
-          (__ \ "display_value").read[String]
+          (__ \ "display_value").readNullable[String]
         ) (TagValue))
     ) (ActivityTag)
 

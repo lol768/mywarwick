@@ -122,7 +122,7 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
       get[DateTime]("GENERATED_AT") ~
       get[String]("TAG_NAME") ~
       get[String]("TAG_VALUE") ~
-      get[String]("TAG_DISPLAY_VALUE") map {
+      get[Option[String]]("TAG_DISPLAY_VALUE") map {
       case id ~ providerId ~ activityType ~ title ~ text ~ shouldNotify ~ generatedAt ~ tagName ~ tagValue ~ tagDisplayValue =>
         ActivityResponse(
           id,

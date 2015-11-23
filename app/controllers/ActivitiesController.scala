@@ -2,7 +2,7 @@ package controllers
 
 import com.google.inject.Inject
 import models.{ActivityResponse, ActivityTag}
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.json.{JsString, JsValue, Json, Writes}
 import play.api.mvc.Controller
 import services.{ActivityService, SecurityService}
 
@@ -14,10 +14,10 @@ class ActivitiesController @Inject()(
   import securityService._
 
   implicit val writesActivityTag = new Writes[ActivityTag] {
-    override def writes(o: ActivityTag): JsValue = Json.obj(
-      "name" -> o.name,
-      "value" -> o.value.internalValue,
-      "display_value" -> o.value.displayValue
+    override def writes(tag: ActivityTag): JsValue = Json.obj(
+      "name" -> tag.name,
+      "value" -> tag.value.internalValue,
+      "display_value" -> JsString(tag.value.displayValue.getOrElse(tag.value.internalValue))
     )
   }
 
