@@ -1,15 +1,16 @@
 package actors
 
+import actors.UserActor.{Notification, WebSocketConnect, WebSocketDisconnect}
 import akka.actor._
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.Subscribe
-import models.{Activity, ActivityType}
-import org.joda.time.DateTime
+import akka.cluster.sharding.ClusterSharding
+import models.ActivityType
+import play.api.Play.current
 import play.api.data.validation.ValidationError
+import play.api.libs.concurrent.Akka
 import play.api.libs.json._
 import warwick.sso.LoginContext
-
-import scala.concurrent.duration._
 
 object WebsocketActor {
   implicit val clientDataFormat = Json.format[ClientData]
@@ -36,11 +37,6 @@ object WebsocketActor {
     */
   case class ClientDataWrapper(sender: ActorRef, data: ClientData)
 
-  // An update to a single tile
-  case class TileUpdate(data: JsValue)
-
-  case class Notification(activity: Activity)
-
 }
 
 /**
@@ -59,12 +55,17 @@ object WebsocketActor {
 class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor with ActorLogging {
 
   import WebsocketActor._
-  import context.dispatcher
+
+  val mediator = DistributedPubSub(context.system).mediator
+  val region = ClusterSharding(Akka.system).shardRegion("UserActor")
 
   loginContext.user.foreach { user =>
-    val mediator = DistributedPubSub(context.system).mediator
-    mediator ! Subscribe(user.usercode.string, self)
+    mediator ! Subscribe(s"user:${user.usercode.string}:websocket", self)
+    region ! WebSocketConnect(user.usercode)
   }
+
+  override def postStop(): Unit =
+    loginContext.user.foreach(user => region ! WebSocketDisconnect(user.usercode))
 
   // FIXME UserMessageHandler and the way we create it here is non-production.
   // it likely shouldn't own UserMessageHandler as a child (which is what context.actorOf
@@ -75,43 +76,17 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor wi
   val who = loginContext.user.flatMap(_.name.full).getOrElse("nobody")
 
   def sendNotification(id: String, `type`: ActivityType, text: String, source: String, date: String): Unit = {
-    self ! TileUpdate(JsObject(Seq(
+    out ! JsObject(Seq(
       "id" -> JsString(id),
       "type" -> JsString(`type`.dbValue),
       "text" -> JsString(text),
       "source" -> JsString(source),
       "date" -> JsString(date)
-    )))
-  }
-
-
-  context.system.scheduler.schedule(5 seconds, 9 seconds) {
-    sendNotification(
-      DateTime.now().toString,
-      ActivityType.Notification,
-      "Your submission for CH155 Huge Essay is due tomorrow",
-      "Tabula",
-      DateTime.now().toString
-    )
-  }
-
-  context.system.scheduler.schedule(3 seconds, 12 seconds) {
-    sendNotification(
-      DateTime.now().toString,
-      ActivityType.Activity,
-      "You booked squash court #1 for Wednesday 25th Dec at 11:15",
-      "Sport",
-      DateTime.now().toString
-    )
+    ))
   }
 
   override def receive = {
-    // these will be the TileUpdates we send to ourself.
-    case TileUpdate(data) => {
-      log.debug(s"About to pipe out some data to ${who}")
-      out ! data
-    }
-    case Notification(activity) =>
+    case Notification(_, activity) =>
       sendNotification(
         id = activity.id,
         `type` = if (activity.shouldNotify) ActivityType.Notification else ActivityType.Activity,
