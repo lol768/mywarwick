@@ -1,4 +1,4 @@
-package controllers
+package controllers.api
 
 import com.google.inject.Inject
 import models.{ActivityResponse, ActivityTag}
@@ -7,7 +7,7 @@ import play.api.libs.json.{JsString, JsValue, Json, Writes}
 import play.api.mvc.Controller
 import services.{ActivityService, SecurityService}
 
-class ActivitiesController @Inject()(
+class UserActivitiesController @Inject()(
   activityService: ActivityService,
   securityService: SecurityService
 ) extends Controller {

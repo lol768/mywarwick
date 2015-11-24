@@ -14,7 +14,7 @@ import warwick.sso._
 
 import scala.util.Success
 
-class ActivitiesControllerTest extends PlaySpec with MockitoSugar with Results {
+class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with Results {
 
   val tabula = "tabula"
   val ron = Users.create(usercode = Usercode("ron"))
@@ -29,7 +29,7 @@ class ActivitiesControllerTest extends PlaySpec with MockitoSugar with Results {
   val appPermissionService = mock[AppPermissionService]
   val activityService = mock[ActivityService]
 
-  val controller = new ActivitiesController(
+  val controller = new IncomingActivitiesController(
     new SecurityServiceImpl(ssoClient, mock[BasicAuth], mock[CacheApi]),
     activityService,
     appPermissionService

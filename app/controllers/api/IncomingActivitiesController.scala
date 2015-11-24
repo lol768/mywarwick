@@ -11,7 +11,7 @@ import warwick.sso.{AuthenticatedRequest, User}
 
 import scala.util.{Failure, Success}
 
-class ActivitiesController @Inject()(
+class IncomingActivitiesController @Inject()(
   securityService: SecurityService,
   activityService: ActivityService,
   appPermissionService: AppPermissionService
