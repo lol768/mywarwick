@@ -1,9 +1,8 @@
 package services
 
-import actors.UserActor.Notification
+import actors.WebsocketActor.Notification
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.Publish
-import akka.cluster.sharding.ClusterSharding
 import com.google.inject.{ImplementedBy, Inject}
 import models.{Activity, ActivityPrototype}
 import play.api.Play.current
@@ -47,11 +46,8 @@ class ActivityServiceImpl @Inject()(
 
       val createdActivity = activityCreationDao.createActivity(activity, recipients, replaceIds)
 
-      val region = ClusterSharding(Akka.system).shardRegion("UserActor")
-
-      recipients
-        .map(Notification(_, createdActivity))
-        .foreach(notification => region ! notification)
+      val mediator = DistributedPubSub(Akka.system).mediator
+      recipients.foreach(usercode => mediator ! Publish(usercode.string, Notification(createdActivity)))
 
       Success(createdActivity.id)
     }
