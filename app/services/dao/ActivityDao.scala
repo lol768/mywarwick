@@ -13,7 +13,7 @@ import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
-  def getActivitiesForUser(usercode: String): Seq[ActivityResponse]
+  def getActivitiesForUser(usercode: String, limit: Int, before: DateTime): Seq[ActivityResponse]
 
   def save(activity: ActivityPrototype, replaces: Seq[String])(implicit connection: Connection): String
 
@@ -67,8 +67,10 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
     db.withConnection { implicit c =>
       replaces.grouped(1000).foreach { group =>
         SQL("UPDATE ACTIVITY SET replaced_by_id = {replacedById} WHERE id IN ({replaces})")
-          .on('replacedById -> replacedById,
-            'replaces -> group)
+          .on(
+            'replacedById -> replacedById,
+            'replaces -> group
+          )
           .execute()
       }
     }
@@ -84,7 +86,7 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
     }
   }
 
-  override def getActivitiesForUser(usercode: String): Seq[ActivityResponse] =
+  override def getActivitiesForUser(usercode: String, limit: Int, before: DateTime): Seq[ActivityResponse] =
     db.withConnection { implicit c =>
       val activities = SQL(
         """
@@ -98,8 +100,15 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
       JOIN ACTIVITY_TAG ON ACTIVITY.ID = ACTIVITY_TAG.ACTIVITY_ID
       WHERE USERCODE = {usercode}
       AND REPLACED_BY_ID IS NULL
+      AND GENERATED_AT < {before}
+      ORDER BY GENERATED_AT DESC
+      FETCH NEXT {limit} ROWS ONLY
         """)
-        .on('usercode -> usercode)
+        .on(
+          'usercode -> usercode,
+          'before -> before,
+          'limit -> limit
+        )
         .as(activityResponseParser.*)
 
       combineActivities(activities)
