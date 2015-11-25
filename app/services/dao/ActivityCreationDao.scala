@@ -27,7 +27,7 @@ class ActivityCreationDaoImpl @Inject()(
         tag => activityTagDao.save(activityId, tag)
       }
 
-      recipients.foreach(usercode => activityRecipientDao.create(activityId, usercode.string))
+      recipients.foreach(usercode => activityRecipientDao.create(activityId, usercode.string, activity.generatedAt))
 
       activityId
     }

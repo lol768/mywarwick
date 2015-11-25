@@ -90,19 +90,28 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
     db.withConnection { implicit c =>
       val activities = SQL(
         """
-      SELECT
-      ACTIVITY.ID, PROVIDER_ID, TYPE, TITLE, TEXT, SHOULD_NOTIFY, GENERATED_AT,
-      ACTIVITY_TAG.NAME  AS TAG_NAME,
-      ACTIVITY_TAG.VALUE AS TAG_VALUE,
-      ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
-      FROM ACTIVITY
-        JOIN ACTIVITY_RECIPIENT ON ACTIVITY.ID = ACTIVITY_RECIPIENT.ACTIVITY_ID
-      JOIN ACTIVITY_TAG ON ACTIVITY.ID = ACTIVITY_TAG.ACTIVITY_ID
-      WHERE USERCODE = {usercode}
-      AND REPLACED_BY_ID IS NULL
-      AND GENERATED_AT < {before}
-      ORDER BY GENERATED_AT DESC
-      FETCH NEXT {limit} ROWS ONLY
+        SELECT
+          ACTIVITY.ID,
+          PROVIDER_ID,
+          TYPE,
+          TITLE,
+          TEXT,
+          SHOULD_NOTIFY,
+          GENERATED_AT,
+          ACTIVITY_TAG.NAME          AS TAG_NAME,
+          ACTIVITY_TAG.VALUE         AS TAG_VALUE,
+          ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
+        FROM ACTIVITY_TAG
+          JOIN ACTIVITY ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
+        WHERE ACTIVITY_ID IN (
+          SELECT ACTIVITY_ID
+          FROM ACTIVITY_RECIPIENT
+            JOIN ACTIVITY ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
+          WHERE USERCODE = {usercode}
+                AND REPLACED_BY_ID IS NULL
+                AND ACTIVITY_RECIPIENT.GENERATED_AT < {date}
+          ORDER BY ACTIVITY_RECIPIENT.GENERATED_AT DESC
+          FETCH NEXT {limit} ROWS ONLY);
         """)
         .on(
           'usercode -> usercode,
