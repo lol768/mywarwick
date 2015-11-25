@@ -48,7 +48,7 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
     SQL("INSERT INTO ACTIVITY (id, provider_id, type, title, text, generated_at, created_at, should_notify) VALUES ({id}, {providerId}, {type}, {title}, {text}, {generatedAt}, {createdAt}, {shouldNotify})")
       .on(
         'id -> id,
-        'providerId -> appId,
+        'providerId -> providerId,
         'type -> `type`,
         'title -> title,
         'text -> text,

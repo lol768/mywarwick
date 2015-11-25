@@ -32,7 +32,7 @@ case class ActivityResponse(
 )
 
 case class ActivityPrototype(
-  appId: String,
+  providerId: String,
   `type`: String,
   title: String,
   text: String,
@@ -58,9 +58,9 @@ case class PostedActivity(
   recipients: ActivityRecipients
 ) {
 
-  def toActivityPrototype(appId: String, shouldNotify: Boolean): ActivityPrototype =
+  def toActivityPrototype(providerId: String, shouldNotify: Boolean): ActivityPrototype =
     ActivityPrototype(
-      appId = appId,
+      providerId = providerId,
       `type` = `type`,
       title = title,
       text = text,

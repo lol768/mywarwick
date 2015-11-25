@@ -6,7 +6,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.mvc.{Controller, Result}
-import services.{ActivityService, AppPermissionService, NoRecipientsException, SecurityService}
+import services.{ActivityService, ProviderPermissionService, NoRecipientsException, SecurityService}
 import warwick.sso.{AuthenticatedRequest, User}
 
 import scala.util.{Failure, Success}
@@ -14,7 +14,7 @@ import scala.util.{Failure, Success}
 class IncomingActivitiesController @Inject()(
   securityService: SecurityService,
   activityService: ActivityService,
-  appPermissionService: AppPermissionService
+  providerPermissionService: ProviderPermissionService
 ) extends Controller {
 
   import securityService._
@@ -31,19 +31,19 @@ class IncomingActivitiesController @Inject()(
 
   implicit val readsPostedActivity = Json.reads[PostedActivity]
 
-  def postActivity(appId: String) = APIAction(parse.json) { implicit request =>
-    postItem(appId, shouldNotify = false)
+  def postActivity(providerId: String) = APIAction(parse.json) { implicit request =>
+    postItem(providerId, shouldNotify = false)
   }
 
-  def postNotification(appId: String) = APIAction(parse.json) { implicit request =>
-    postItem(appId, shouldNotify = true)
+  def postNotification(providerId: String) = APIAction(parse.json) { implicit request =>
+    postItem(providerId, shouldNotify = true)
   }
 
-  def postItem(appId: String, shouldNotify: Boolean)(implicit request: AuthenticatedRequest[JsValue]): Result =
+  def postItem(providerId: String, shouldNotify: Boolean)(implicit request: AuthenticatedRequest[JsValue]): Result =
     request.context.user.map { user =>
-      if (appPermissionService.canUserPostForApp(appId, user)) {
+      if (providerPermissionService.canUserPostForProvider(providerId, user)) {
         request.body.validate[PostedActivity].map { data =>
-          activityService.save(data.toActivityPrototype(appId, shouldNotify)) match {
+          activityService.save(data.toActivityPrototype(providerId, shouldNotify)) match {
             case Success(activityId) => created(activityId)
             case Failure(_: NoRecipientsException) => noRecipients
             case Failure(_) => otherError
@@ -52,17 +52,17 @@ class IncomingActivitiesController @Inject()(
           e => validationError(e)
         }
       } else {
-        forbidden(appId, user)
+        forbidden(providerId, user)
       }
     }.get // APIAction calls this only if request.context.user is defined
 
-  private def forbidden(appId: String, user: User): Result =
+  private def forbidden(providerId: String, user: User): Result =
     Forbidden(Json.obj(
       "success" -> false,
       "status" -> "forbidden",
       "errors" -> Json.arr(
         Json.obj(
-          "message" -> s"User '${user.usercode.string}' does not have permission to post to the stream for application '$appId'"
+          "message" -> s"User '${user.usercode.string}' does not have permission to post to the stream for provider '$providerId'"
         )
       )
     ))

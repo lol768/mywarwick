@@ -38,7 +38,7 @@ class ActivityServiceImpl @Inject()(
     if (recipients.isEmpty) {
       Failure(new NoRecipientsException)
     } else {
-      val replaceIds = activityTagDao.getActivitiesWithTags(activity.replace, activity.appId)
+      val replaceIds = activityTagDao.getActivitiesWithTags(activity.replace, activity.providerId)
 
       val activityId = activityCreationDao.createActivity(activity, recipients, replaceIds)
 
