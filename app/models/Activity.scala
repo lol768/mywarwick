@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 case class Activity(
   id: String,
   providerId: String,
-  activityType: String,
+  `type`: String,
   title: String,
   text: String,
   replacedBy: Option[String],
@@ -47,28 +47,3 @@ case class ActivityRecipients(
   users: Option[Seq[String]],
   groups: Option[Seq[String]]
 )
-
-case class PostedActivity(
-  `type`: String,
-  title: String,
-  text: String,
-  tags: Option[Seq[ActivityTag]],
-  replace: Option[Map[String, String]],
-  generated_at: Option[DateTime],
-  recipients: ActivityRecipients
-) {
-
-  def toActivityPrototype(providerId: String, shouldNotify: Boolean): ActivityPrototype =
-    ActivityPrototype(
-      providerId = providerId,
-      `type` = `type`,
-      title = title,
-      text = text,
-      tags = tags.getOrElse(Seq.empty),
-      replace = replace.getOrElse(Map.empty),
-      generatedAt = generated_at,
-      shouldNotify = shouldNotify,
-      recipients = recipients
-    )
-
-}

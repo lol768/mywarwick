@@ -1,7 +1,8 @@
 package controllers.api
 
 import com.google.inject.Inject
-import models.{ActivityRecipients, ActivityTag, PostedActivity, TagValue}
+import models._
+import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
@@ -21,15 +22,24 @@ class IncomingActivitiesController @Inject()(
 
   implicit val readsActivityRecipients = Json.reads[ActivityRecipients]
 
-  implicit val readsActivityTag: Reads[ActivityTag] = (
-    (__ \ "name").read[String] and
+  implicit val readsActivityTag: Reads[ActivityTag] =
+    ((__ \ "name").read[String] and
       __.read[TagValue]((
         (__ \ "value").read[String] and
           (__ \ "display_value").readNullable[String]
         ) (TagValue))
-    ) (ActivityTag)
+      ) (ActivityTag)
 
-  implicit val readsPostedActivity = Json.reads[PostedActivity]
+  def readsPostedActivity(providerId: String, shouldNotify: Boolean): Reads[ActivityPrototype] =
+    (Reads.pure(providerId) and
+      (__ \ "type").read[String] and
+      (__ \ "title").read[String] and
+      (__ \ "text").read[String] and
+      (__ \ "tags").read[Seq[ActivityTag]].orElse(Reads.pure(Seq.empty)) and
+      (__ \ "replace").read[Map[String, String]].orElse(Reads.pure(Map.empty)) and
+      (__ \ "generated_at").readNullable[DateTime] and
+      Reads.pure(shouldNotify) and
+      (__ \ "recipients").read[ActivityRecipients]) (ActivityPrototype)
 
   def postActivity(providerId: String) = APIAction(parse.json) { implicit request =>
     postItem(providerId, shouldNotify = false)
@@ -42,8 +52,8 @@ class IncomingActivitiesController @Inject()(
   def postItem(providerId: String, shouldNotify: Boolean)(implicit request: AuthenticatedRequest[JsValue]): Result =
     request.context.user.map { user =>
       if (providerPermissionService.canUserPostForProvider(providerId, user)) {
-        request.body.validate[PostedActivity].map { data =>
-          activityService.save(data.toActivityPrototype(providerId, shouldNotify)) match {
+        request.body.validate[ActivityPrototype](readsPostedActivity(providerId, shouldNotify)).map { data =>
+          activityService.save(data) match {
             case Success(activityId) => created(activityId)
             case Failure(_: NoRecipientsException) => noRecipients
             case Failure(_) => otherError
