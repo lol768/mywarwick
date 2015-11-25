@@ -9,6 +9,7 @@ case class Activity(
   title: String,
   text: String,
   replacedBy: Option[String],
+  generatedAt: DateTime,
   createdAt: DateTime,
   shouldNotify: Boolean
 )
@@ -28,7 +29,7 @@ case class ActivityResponse(
   title: String,
   text: String,
   tags: Seq[ActivityTag],
-  date: DateTime
+  generatedAt: DateTime
 )
 
 case class ActivityPrototype(

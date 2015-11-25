@@ -33,10 +33,11 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
       get[String]("title") ~
       get[String]("text") ~
       get[Option[String]]("replaced_by_id") ~
+      get[DateTime]("generated_at") ~
       get[DateTime]("created_at") ~
       get[Boolean]("should_notify") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ createdAt ~ shouldNotify =>
-        Activity(id, providerId, activityType, title, text, replacedById, createdAt, shouldNotify)
+      case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify =>
+        Activity(id, providerId, activityType, title, text, replacedById, generatedAt, createdAt, shouldNotify)
     }
   }
 
@@ -109,7 +110,7 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
             JOIN ACTIVITY ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
           WHERE USERCODE = {usercode}
                 AND REPLACED_BY_ID IS NULL
-                AND ACTIVITY_RECIPIENT.GENERATED_AT < {date}
+                AND ACTIVITY_RECIPIENT.GENERATED_AT < {before}
           ORDER BY ACTIVITY_RECIPIENT.GENERATED_AT DESC
           FETCH NEXT {limit} ROWS ONLY);
         """)
