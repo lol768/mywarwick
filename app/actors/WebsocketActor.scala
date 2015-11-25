@@ -74,14 +74,22 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor wi
   val signedIn = loginContext.user.exists(_.isFound)
   val who = loginContext.user.flatMap(_.name.full).getOrElse("nobody")
 
-  def sendNotification(id: String, `type`: ActivityType, text: String, source: String, date: String): Unit = {
-    self ! TileUpdate(JsObject(Seq(
-      "id" -> JsString(id),
-      "type" -> JsString(`type`.dbValue),
-      "text" -> JsString(text),
-      "source" -> JsString(source),
-      "date" -> JsString(date)
-    )))
+  override def receive = {
+    // these will be the TileUpdates we send to ourself.
+    case TileUpdate(data) => {
+      log.debug(s"About to pipe out some data to ${who}")
+      out ! data
+    }
+    case Notification(activity) =>
+      sendNotification(
+        id = activity.id,
+        `type` = if (activity.shouldNotify) ActivityType.Notification else ActivityType.Activity,
+        text = activity.text,
+        source = activity.providerId,
+        date = activity.createdAt.toString
+      )
+    case js: JsValue => handleClientMessage(js)
+    case nonsense => log.error(s"Ignoring unrecognised message: ${nonsense}")
   }
 
 
@@ -105,22 +113,14 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor wi
     )
   }
 
-  override def receive = {
-    // these will be the TileUpdates we send to ourself.
-    case TileUpdate(data) => {
-      log.debug(s"About to pipe out some data to ${who}")
-      out ! data
-    }
-    case Notification(activity) =>
-      sendNotification(
-        id = activity.id,
-        `type` = if (activity.shouldNotify) ActivityType.Notification else ActivityType.Activity,
-        text = activity.text,
-        source = activity.providerId,
-        date = activity.createdAt.toString
-      )
-    case js: JsValue => handleClientMessage(js)
-    case nonsense => log.error(s"Ignoring unrecognised message: ${nonsense}")
+  def sendNotification(id: String, `type`: ActivityType, text: String, source: String, date: String): Unit = {
+    self ! TileUpdate(JsObject(Seq(
+      "id" -> JsString(id),
+      "type" -> JsString(`type`.dbValue),
+      "text" -> JsString(text),
+      "source" -> JsString(source),
+      "date" -> JsString(date)
+    )))
   }
 
   def handleClientMessage(js: JsValue): Unit = {
