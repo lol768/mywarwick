@@ -12,8 +12,15 @@ class TileDataController @Inject()(
   tileDataService: TileDataService
 ) extends Controller {
 
-  def requestTileData = ssoClient.Lenient { request =>
-    val tileData = tileDataService.getTileData(request.context.user)
+
+  def requestTileData(tileIds: Option[String]) = ssoClient.Lenient { request =>
+    val tileData: JsValue = tileIds match {
+      case Some(ids) =>
+        val tileIdsArray = ids.split(",")
+        tileDataService.getTileDataByIds(tileIdsArray)
+      case None =>
+        tileDataService.getTileData(request.context.user)
+    }
 
     Ok(Json.obj(
       "type" -> "tiles",
