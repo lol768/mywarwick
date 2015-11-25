@@ -14,23 +14,17 @@ case class Activity(
   shouldNotify: Boolean
 )
 
+case class ActivityResponse(
+  activity: Activity,
+  tags: Seq[ActivityTag]
+)
+
 case class ActivityTag(
   name: String,
   value: TagValue
 )
 
 case class TagValue(internalValue: String, displayValue: Option[String])
-
-case class ActivityResponse(
-  id: String,
-  notification: Boolean,
-  source: String,
-  `type`: String,
-  title: String,
-  text: String,
-  tags: Seq[ActivityTag],
-  generatedAt: DateTime
-)
 
 case class ActivityPrototype(
   providerId: String,

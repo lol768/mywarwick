@@ -27,15 +27,15 @@ trait ActivityDao {
 class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) extends ActivityDao {
 
   private def activityParser: RowParser[Activity] = {
-    get[String]("id") ~
-      get[String]("provider_id") ~
-      get[String]("type") ~
-      get[String]("title") ~
-      get[String]("text") ~
-      get[Option[String]]("replaced_by_id") ~
-      get[DateTime]("generated_at") ~
-      get[DateTime]("created_at") ~
-      get[Boolean]("should_notify") map {
+    get[String]("ID") ~
+      get[String]("PROVIDER_ID") ~
+      get[String]("TYPE") ~
+      get[String]("TITLE") ~
+      get[String]("TEXT") ~
+      get[Option[String]]("REPLACED_BY_ID") ~
+      get[DateTime]("GENERATED_AT") ~
+      get[DateTime]("CREATED_AT") ~
+      get[Boolean]("SHOULD_NOTIFY") map {
       case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify =>
         Activity(id, providerId, activityType, title, text, replacedById, generatedAt, createdAt, shouldNotify)
     }
@@ -126,7 +126,7 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
 
   def combineActivities(activities: Seq[ActivityResponse]): Seq[ActivityResponse] = {
     activities
-      .groupBy(_.id)
+      .groupBy(_.activity.id)
       .map { case (id, a) => a.reduceLeft((a1, a2) => a1.copy(tags = a1.tags ++ a2.tags)) }
       .toSeq
   }
@@ -137,21 +137,17 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
       get[String]("TYPE") ~
       get[String]("TITLE") ~
       get[String]("TEXT") ~
-      get[Boolean]("SHOULD_NOTIFY") ~
+      get[Option[String]]("REPLACED_BY_ID") ~
       get[DateTime]("GENERATED_AT") ~
+      get[DateTime]("CREATED_AT") ~
+      get[Boolean]("SHOULD_NOTIFY") ~
       get[String]("TAG_NAME") ~
       get[String]("TAG_VALUE") ~
       get[Option[String]]("TAG_DISPLAY_VALUE") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ shouldNotify ~ generatedAt ~ tagName ~ tagValue ~ tagDisplayValue =>
+      case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify ~ tagName ~ tagValue ~ tagDisplayValue =>
         ActivityResponse(
-          id,
-          shouldNotify,
-          providerId,
-          activityType,
-          title,
-          text,
-          Seq(ActivityTag(tagName, TagValue(tagValue, tagDisplayValue))),
-          generatedAt
+          Activity(id, providerId, activityType, title, text, replacedById, generatedAt, createdAt, shouldNotify),
+          Seq(ActivityTag(tagName, TagValue(tagValue, tagDisplayValue)))
         )
     }
   }

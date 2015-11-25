@@ -22,7 +22,18 @@ class UserActivitiesController @Inject()(
     )
   }
 
-  implicit val writesActivityResponse = Json.writes[ActivityResponse]
+  implicit val writesActivityResponse = new Writes[ActivityResponse] {
+    override def writes(o: ActivityResponse): JsValue = Json.obj(
+      "id" -> o.activity.id,
+      "notification" -> o.activity.shouldNotify,
+      "provider" -> o.activity.providerId,
+      "type" -> o.activity.`type`,
+      "title" -> o.activity.title,
+      "text" -> o.activity.text,
+      "tags" -> o.tags,
+      "date" -> o.activity.generatedAt
+    )
+  }
 
   def get = RequiredUserAction { implicit request =>
 
