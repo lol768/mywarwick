@@ -20,6 +20,10 @@ trait SecurityService {
 
   def APIAction: ActionBuilder[AuthenticatedRequest]
 
+  type TryAccept[A] = Future[Either[Result, A]]
+
+  def SecureWebsocket[A](request : play.api.mvc.RequestHeader)(block : warwick.sso.LoginContext => TryAccept[A]) : TryAccept[A]
+
 }
 
 /**
@@ -40,6 +44,9 @@ class SecurityServiceImpl @Inject()(
 
   // TODO this always returns a forbidden result if no user found. We might want API calls for anonymous users.
   val APIAction = ssoClient.Lenient andThen BasicAuthFallback
+
+  override def SecureWebsocket[A](request : play.api.mvc.RequestHeader)(block : warwick.sso.LoginContext => TryAccept[A]) =
+    ssoClient.withUser(request)(block)
 
   /**
     * If a user already exists in the incoming AuthenticatedRequest, we use that.

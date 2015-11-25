@@ -1,6 +1,6 @@
 package integration
 
-import controllers.ApplicationController
+import controllers.HomeController
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.Environment
 import play.api.inject._
@@ -37,7 +37,7 @@ class ApplicationTest extends PlaySpec with OneAppPerSuite {
 
     "start up successfully" in {
 
-      val c = app.injector.instanceOf[ApplicationController]
+      val c = app.injector.instanceOf[HomeController]
 
     }
 
