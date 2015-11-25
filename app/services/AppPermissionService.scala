@@ -1,21 +1,21 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject}
-import services.dao.AppPermissionDao
+import services.dao.ProviderPermissionDao
 import warwick.sso.User
 
-@ImplementedBy(classOf[AppPermissionServiceImpl])
-trait AppPermissionService {
+@ImplementedBy(classOf[ProviderPermissionServiceImpl])
+trait ProviderPermissionService {
 
-  def canUserPostForApp(appId: String, user: User): Boolean
+  def canUserPostForProvider(providerId: String, user: User): Boolean
 
 }
 
-class AppPermissionServiceImpl @Inject()(
-  appPermissionDao: AppPermissionDao
-) extends AppPermissionService {
+class ProviderPermissionServiceImpl @Inject()(
+  providerPermissionDao: ProviderPermissionDao
+) extends ProviderPermissionService {
 
-  override def canUserPostForApp(appId: String, user: User): Boolean =
-    appPermissionDao.canUserPostForApp(appId, user.usercode.string)
+  override def canUserPostForProvider(providerId: String, user: User): Boolean =
+    providerPermissionDao.canUserPostForApp(providerId, user.usercode.string)
 
 }

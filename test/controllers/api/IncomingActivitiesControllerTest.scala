@@ -9,12 +9,12 @@ import play.api.libs.json.{JsArray, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import services.{ActivityService, AppPermissionService, SecurityServiceImpl}
+import services.{ActivityService, ProviderPermissionService, SecurityServiceImpl}
 import warwick.sso._
 
 import scala.util.Success
 
-class ActivitiesControllerTest extends PlaySpec with MockitoSugar with Results {
+class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with Results {
 
   val tabula = "tabula"
   val ron = Users.create(usercode = Usercode("ron"))
@@ -26,13 +26,13 @@ class ActivitiesControllerTest extends PlaySpec with MockitoSugar with Results {
     override def loginUrl(target: Option[String]): String = "https://app.example.com/login"
   })
 
-  val appPermissionService = mock[AppPermissionService]
+  val providerPermissionService = mock[ProviderPermissionService]
   val activityService = mock[ActivityService]
 
-  val controller = new ActivitiesController(
+  val controller = new IncomingActivitiesController(
     new SecurityServiceImpl(ssoClient, mock[BasicAuth], mock[CacheApi]),
     activityService,
-    appPermissionService
+    providerPermissionService
   )
 
   "ActivitiesController#postNotification" should {
@@ -49,7 +49,7 @@ class ActivitiesControllerTest extends PlaySpec with MockitoSugar with Results {
     ))
 
     "return forbidden when user is not authorised to post for app" in {
-      when(appPermissionService.canUserPostForApp(tabula, ron)).thenReturn(false)
+      when(providerPermissionService.canUserPostForProvider(tabula, ron)).thenReturn(false)
 
       val result = call(controller.postNotification(tabula), request)
 
@@ -62,7 +62,7 @@ class ActivitiesControllerTest extends PlaySpec with MockitoSugar with Results {
     }
 
     "return created activity ID on success" in {
-      when(appPermissionService.canUserPostForApp(tabula, ron)).thenReturn(true)
+      when(providerPermissionService.canUserPostForProvider(tabula, ron)).thenReturn(true)
       when(activityService.save(any())).thenReturn(Success("created-activity-id"))
 
       val result = call(controller.postNotification(tabula), request)
