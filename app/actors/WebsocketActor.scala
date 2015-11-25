@@ -1,7 +1,9 @@
 package actors
 
 import akka.actor._
-import models.ActivityType
+import akka.cluster.pubsub.DistributedPubSub
+import akka.cluster.pubsub.DistributedPubSubMediator.Subscribe
+import models.{Activity, ActivityType}
 import org.joda.time.DateTime
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
@@ -37,6 +39,8 @@ object WebsocketActor {
   // An update to a single tile
   case class TileUpdate(data: JsValue)
 
+  case class Notification(activity: Activity)
+
 }
 
 /**
@@ -56,6 +60,11 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor wi
 
   import WebsocketActor._
   import context.dispatcher
+
+  loginContext.user.foreach { user =>
+    val mediator = DistributedPubSub(context.system).mediator
+    mediator ! Subscribe(user.usercode.string, self)
+  }
 
   // FIXME UserMessageHandler and the way we create it here is non-production.
   // it likely shouldn't own UserMessageHandler as a child (which is what context.actorOf
@@ -102,6 +111,14 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor wi
       log.debug(s"About to pipe out some data to ${who}")
       out ! data
     }
+    case Notification(activity) =>
+      sendNotification(
+        id = activity.id,
+        `type` = if (activity.shouldNotify) ActivityType.Notification else ActivityType.Activity,
+        text = activity.text,
+        source = activity.providerId,
+        date = activity.createdAt.toString
+      )
     case js: JsValue => handleClientMessage(js)
     case nonsense => log.error(s"Ignoring unrecognised message: ${nonsense}")
   }

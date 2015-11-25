@@ -1,6 +1,12 @@
 package services
 
+import actors.WebsocketActor.Notification
+import akka.cluster.pubsub.DistributedPubSub
+import akka.cluster.pubsub.DistributedPubSubMediator.Publish
 import com.google.inject.{ImplementedBy, Inject}
+import models.{Activity, ActivityPrototype}
+import play.api.Play.current
+import play.api.libs.concurrent.Akka
 import models.{Activity, ActivityPrototype, ActivityResponse}
 import org.joda.time.DateTime
 import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
@@ -40,9 +46,12 @@ class ActivityServiceImpl @Inject()(
     } else {
       val replaceIds = activityTagDao.getActivitiesWithTags(activity.replace, activity.providerId)
 
-      val activityId = activityCreationDao.createActivity(activity, recipients, replaceIds)
+      val createdActivity = activityCreationDao.createActivity(activity, recipients, replaceIds)
 
-      Success(activityId)
+      val mediator = DistributedPubSub(Akka.system).mediator
+      recipients.foreach(usercode => mediator ! Publish(usercode.string, Notification(createdActivity)))
+
+      Success(createdActivity.id)
     }
 
   }
