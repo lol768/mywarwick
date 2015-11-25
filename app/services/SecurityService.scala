@@ -47,7 +47,8 @@ class SecurityServiceImpl @Inject()(
     */
   object BasicAuthFallback extends ActionFunction[AuthenticatedRequest, AuthenticatedRequest] {
     override def invokeBlock[A](request: AuthenticatedRequest[A], block: (AuthenticatedRequest[A]) => Future[Result]): Future[Result] = {
-      block(request)
+      if (request.context.user.exists(_.isFound)) block(request)
+      else basicAuth.Check(basicAuthDenied).invokeBlock(request, block)
     }
   }
 
