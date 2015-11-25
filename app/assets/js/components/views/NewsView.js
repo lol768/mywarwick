@@ -7,7 +7,7 @@ import CheckableListItem from '../ui/CheckableListItem';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 
-import { fetchNews } from '../../news';
+import { fetchNews } from '../../messageHub';
 
 class NewsView extends ReactComponent {
 

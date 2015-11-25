@@ -12,9 +12,10 @@ import jQuery from 'jquery';
 import $ from 'jquery.transit';
 
 import Immutable from 'immutable';
-import { registerReducer } from '../../reducers';
 import { connect } from 'react-redux';
-import { fetchTileData } from '../../tiles'
+
+import { registerReducer } from '../../reducers';
+import { fetchTileData } from '../../messageHub';
 
 const ZOOM_ANIMATION_DURATION = 500;
 
