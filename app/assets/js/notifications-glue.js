@@ -1,7 +1,7 @@
 import log from 'loglevel';
 import localforage from 'localforage';
-window.localforage = localforage;
 import { createSelector } from 'reselect';
+import fetch from 'isomorphic-fetch';
 
 import SocketDatapipe from './SocketDatapipe';
 import store from './store';
@@ -55,13 +55,9 @@ SocketDatapipe.getUpdateStream().subscribe((data) => {
   }
 });
 
-//TODO I'm sure this should happen somewhere more sensible
-SocketDatapipe.send({
-  tileId: "1",
-  data: {
-    type: "fetch-notifications" // since last login
-  }
-});
+fetch('/api/streams/user')
+  .then(response => response.json())
+  .then(json => store.dispatch(fetchedNotifications(json.activities)));
 
 SocketDatapipe.send({
   tileId: "1",

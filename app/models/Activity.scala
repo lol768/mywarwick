@@ -1,6 +1,7 @@
 package models
 
 import org.joda.time.DateTime
+import play.api.libs.json.{JsString, Writes, JsValue, Json}
 
 case class Activity(
   id: String,
@@ -14,10 +15,38 @@ case class Activity(
   shouldNotify: Boolean
 )
 
+object ActivityResponse {
+
+  import ActivityTag.{writes => activityTagWrites}
+
+  implicit val writes: Writes[ActivityResponse] = new Writes[ActivityResponse] {
+    override def writes(o: ActivityResponse): JsValue = Json.obj(
+      "id" -> o.activity.id,
+      "notification" -> o.activity.shouldNotify,
+      "provider" -> o.activity.providerId,
+      "type" -> o.activity.`type`,
+      "title" -> o.activity.title,
+      "text" -> o.activity.text,
+      "tags" -> o.tags,
+      "date" -> o.activity.generatedAt
+    )
+  }
+}
+
 case class ActivityResponse(
   activity: Activity,
   tags: Seq[ActivityTag]
 )
+
+object ActivityTag {
+  implicit val writes: Writes[ActivityTag] = new Writes[ActivityTag] {
+    override def writes(tag: ActivityTag): JsValue = Json.obj(
+      "name" -> tag.name,
+      "value" -> tag.value.internalValue,
+      "display_value" -> JsString(tag.value.displayValue.getOrElse(tag.value.internalValue))
+    )
+  }
+}
 
 case class ActivityTag(
   name: String,

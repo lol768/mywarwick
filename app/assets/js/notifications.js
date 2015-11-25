@@ -38,7 +38,7 @@ export function fetchedNotifications(notifications) {
   };
 }
 
-let partitionByYearAndMonth = (n) => n.date.substr(0, 7); // YYYY-MM
+let partitionByYearAndMonth = (n) => n.date.toString().substr(0, 7);
 
 export function mergeNotifications(stream, newNotifications) {
   return onStreamReceive(stream, partitionByYearAndMonth, newNotifications);

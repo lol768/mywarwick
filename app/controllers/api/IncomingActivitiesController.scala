@@ -28,7 +28,7 @@ class IncomingActivitiesController @Inject()(
         (__ \ "value").read[String] and
           (__ \ "display_value").readNullable[String]
         ) (TagValue))
-      ) (ActivityTag)
+      ) (ActivityTag.apply _)
 
   def readsPostedActivity(providerId: String, shouldNotify: Boolean): Reads[ActivityPrototype] =
     (Reads.pure(providerId) and
@@ -39,7 +39,7 @@ class IncomingActivitiesController @Inject()(
       (__ \ "replace").read[Map[String, String]].orElse(Reads.pure(Map.empty)) and
       (__ \ "generated_at").readNullable[DateTime] and
       Reads.pure(shouldNotify) and
-      (__ \ "recipients").read[ActivityRecipients]) (ActivityPrototype)
+      (__ \ "recipients").read[ActivityRecipients]) (ActivityPrototype.apply _)
 
   def postActivity(providerId: String) = APIAction(parse.json) { implicit request =>
     postItem(providerId, shouldNotify = false)
