@@ -25,19 +25,20 @@ class ActivityCreationDaoImpl @Inject()(
       val activityId = activityDao.save(activity, replaces)
 
       activity.tags.foreach {
-        case (name, value) => activityTagDao.save(activityId, name, value)
+        tag => activityTagDao.save(activityId, tag)
       }
 
-      recipients.foreach(usercode => activityRecipientDao.create(activityId, usercode.string))
+      recipients.foreach(usercode => activityRecipientDao.create(activityId, usercode.string, activity.generatedAt))
 
       Activity(
         id = activityId,
-        providerId = activity.appId,
-        activityType = activity.`type`,
+        providerId = activity.providerId,
+        `type` = activity.`type`,
         title = activity.title,
         text = activity.text,
         replacedBy = None,
-        createdAt = DateTime.now(),
+        generatedAt = activity.generatedAt.getOrElse(DateTime.now),
+        createdAt = DateTime.now,
         shouldNotify = activity.shouldNotify
       )
     }
