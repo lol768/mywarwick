@@ -13,7 +13,7 @@ class TileDataController @Inject()(
 ) extends Controller {
 
   def requestTileData = ssoClient.Lenient { request =>
-    val tileData = tileDataService.getTileData(request.context.user)
+    val tileData = tileDataService.getTileConfig(request.context.user)
     Ok(Json.obj(
       "type" -> "tiles",
       "tiles" -> tileData

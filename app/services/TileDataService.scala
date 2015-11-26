@@ -1,19 +1,24 @@
 package services
 
-import com.google.inject.ImplementedBy
+import ch.qos.logback.core.net.SyslogOutputStream
+import com.google.inject.{ImplementedBy, Inject}
+import models.UserTile
 import org.joda.time.DateTime
 import play.api.libs.json._
+import services.dao.UserPrefsDao
 import warwick.sso.User
 
 @ImplementedBy(classOf[TileDataServiceImpl])
 trait TileDataService {
 
-  def getTileData(user: Option[User]): JsValue
+  def getTileConfig(user: Option[User]): JsValue
 
   def getTileDataByIds(user: Option[User], tileIds: Seq[String]): JsArray
 }
 
-class TileDataServiceImpl extends TileDataService {
+class TileDataServiceImpl @Inject()(
+  userPrefsDao: UserPrefsDao
+) extends TileDataService {
 
   val tileData = JsArray(Seq(
     JsObject(Seq(
@@ -112,11 +117,12 @@ class TileDataServiceImpl extends TileDataService {
       .foldLeft(JsArray())((tileArray, tile) => tileArray ++ Json.arr(tile))
   }
 
-  override def getTileData(user: Option[User]): JsValue =
-  // TODO fetch tile data by user context
-  // get user tile prefs
-  // then fetch tile data from source
-    tileData
-
-
+  override def getTileConfig(user: Option[User]): JsValue =
+    user match {
+      case Some(u) =>
+        val userTiles = userPrefsDao.getTilesForUser(u.usercode.string)
+        Json.toJson(userTiles)
+      //TODO: return some JSON error
+      case None => ???
+    }
 }
