@@ -24,14 +24,16 @@ val appDeps = Seq(
   "com.typesafe.play" %% "anorm" % "2.4.0",
   "com.oracle" % "ojdbc6" % "11.2.0.3.0",
   "uk.ac.warwick.sso" %% "sso-client-play" % "2.9",
-  "uk.ac.warwick.play-utils" %% "anorm" % "1.1"
+  "uk.ac.warwick.play-utils" %% "anorm" % "1.1",
+  "com.typesafe.akka" %% "akka-cluster" % "2.4.0",
+  "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.0"
 )
 
 val testDeps = Seq(
   "org.mockito" % "mockito-all" % "1.10.19",
   "org.scalatest" %% "scalatest" % "2.2.5",
   "org.scalatestplus" %% "play" % "1.4.0-M4",
-  "com.typesafe.akka" %% "akka-testkit" % "2.3.12",
+  "com.typesafe.akka" %% "akka-testkit" % "2.4.0",
   "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.9"
 ).map(_ % Test)
 

@@ -45,12 +45,9 @@ export function fetchTileData() {
 }
 
 export function fetchNotifications() {
-  SocketDatapipe.send({
-    tileId: "1",
-    data: {
-      type: "fetch-notifications" // since last login
-    }
-  });
+  fetch('/api/streams/user')
+    .then(response => response.json())
+    .then(json => store.dispatch(fetchedNotifications(json.activities)));
 }
 
 //                       //
