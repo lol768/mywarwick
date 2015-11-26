@@ -1,4 +1,4 @@
-package services
+package services.dao
 
 import anorm.SQL
 import anorm.SqlParser._
@@ -7,7 +7,6 @@ import helpers.TestObjectFactory._
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
 import play.api.db.Database
-import services.dao.{ActivityDao, ActivityRecipientDao}
 import warwick.anorm.converters.ColumnConversions._
 
 class ActivityRecipientDaoTest extends PlaySpec with OneStartAppPerSuite {
