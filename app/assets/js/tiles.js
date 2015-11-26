@@ -7,10 +7,6 @@ import { createSelector } from 'reselect';
 import { registerReducer } from './reducers';
 import { makeStream, takeFromStream } from './stream';
 
-import fetch from 'isomorphic-fetch';
-import { polyfill } from 'es6-promise';
-polyfill();
-
 import SocketDatapipe from './SocketDatapipe';
 
 export const TILES_FETCH = 'tiles.fetch';
@@ -40,18 +36,6 @@ const persistTilesSelect = createSelector([tilesSelector], (tiles) => {
 
 store.subscribe(() => persistTilesSelect(store.getState()));
 
-// TODO: not sure if ajax is what we want here, perhaps some other way to request tile-specific data. Or use websocket msg
-export function fetchTileData() {
-  return dispatch => {
-    dispatch({type: TILES_FETCH});
-
-    return fetch('/api/tiles')
-      .then(response => response.json())
-      .then(json => dispatch(receivedTileData(json.tiles)))
-      .catch(err => dispatch({type: TILES_FETCH_FAILURE}));
-  }
-}
-
 registerReducer('tiles', (state = Immutable.List(), action) => {
   switch (action.type) {
     case TILES_FETCH:
@@ -64,15 +48,5 @@ registerReducer('tiles', (state = Immutable.List(), action) => {
       return action.tiles;
     default:
       return state;
-  }
-});
-
-SocketDatapipe.getUpdateStream().subscribe((data) => {
-  switch (data.type) {
-    case 'tile-data':
-      store.dispatch(receivedTileData(JSON.parse(data.tiles)));
-      break;
-    default:
-      return;
   }
 });

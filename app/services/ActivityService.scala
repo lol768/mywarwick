@@ -46,12 +46,12 @@ class ActivityServiceImpl @Inject()(
     } else {
       val replaceIds = activityTagDao.getActivitiesWithTags(activity.replace, activity.providerId)
 
-      val createdActivity = activityCreationDao.createActivity(activity, recipients, replaceIds)
+      val result = activityCreationDao.createActivity(activity, recipients, replaceIds)
 
       val mediator = DistributedPubSub(Akka.system).mediator
-      recipients.foreach(usercode => mediator ! Publish(usercode.string, Notification(createdActivity)))
+      recipients.foreach(usercode => mediator ! Publish(usercode.string, Notification(result)))
 
-      Success(createdActivity.id)
+      Success(result.activity.id)
     }
 
   }
