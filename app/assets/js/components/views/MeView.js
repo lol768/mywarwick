@@ -15,7 +15,7 @@ import Immutable from 'immutable';
 import { connect } from 'react-redux';
 
 import { registerReducer } from '../../reducers';
-import { fetchTileData } from '../../messageHub';
+import { fetchTileData } from '../../serverpipe';
 
 const ZOOM_ANIMATION_DURATION = 500;
 

@@ -5,7 +5,7 @@ import fetch from 'isomorphic-fetch';
 
 import store from './store';
 
-import { fetchWhoAmI, fetchNotifications } from './messageHub';
+import { fetchWhoAmI, fetchActivities } from './serverpipe';
 import { fetchedActivities, fetchedNotifications } from './notifications';
 
 localforage.getItem('notifications').then(
@@ -40,4 +40,4 @@ store.subscribe(() => persistNotificationsSelect(store.getState()));
 
 // TODO these initial fetches might happen someplace more appropriate
 fetchWhoAmI();
-fetchNotifications();
+fetchActivities();

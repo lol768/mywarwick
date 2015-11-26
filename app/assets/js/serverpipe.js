@@ -33,21 +33,35 @@ export function fetchNews() {
   }
 }
 
+function fetchWithCredentials(url) {
+  return fetch(url, {
+    credentials: 'same-origin'
+  });
+}
+
 export function fetchTileData() {
   return dispatch => {
     dispatch({type: TILES_FETCH});
 
-    return fetch('/api/tiles')
+    return fetchWithCredentials('/api/tiles')
       .then(response => response.json())
       .then(json => dispatch(receivedTileData(json.tiles)))
       .catch(err => dispatch({type: TILES_FETCH_FAILURE}));
   }
 }
 
-export function fetchNotifications() {
-  fetch('/api/streams/user')
+import _ from 'lodash';
+
+export function fetchActivities() {
+  fetchWithCredentials('/api/streams/user')
     .then(response => response.json())
-    .then(json => store.dispatch(fetchedNotifications(json.activities)));
+    .then(json => {
+      let notifications = _.filter(json.activites, (a) => a.notification);
+      let activities = _.filter(json.activites, (a) => !a.notification);
+
+      store.dispatch(fetchedNotifications(notifications));
+      store.dispatch(fetchedActivities(activities));
+    });
 }
 
 //                       //
@@ -56,14 +70,8 @@ export function fetchNotifications() {
 
 SocketDatapipe.getUpdateStream().subscribe((data) => {
   switch (data.type) {
-    case 'fetch-notifications':
-      store.dispatch(fetchedNotifications(data.notifications));
-      break;
-    case 'notification':
-      store.dispatch(receivedNotification(data));
-      break;
     case 'activity':
-      store.dispatch(receivedActivity(data));
+      store.dispatch(data.activity.notification ? receivedNotification(data.activity) : receivedActivity(data.activity));
       break;
     case 'who-am-i':
       store.dispatch({

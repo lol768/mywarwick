@@ -74,7 +74,10 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor wi
   import ActivityResponse.writes
 
   override def receive = {
-    case Notification(activity) => out ! Json.toJson(activity)
+    case Notification(activity) => out ! Json.obj(
+      "type" -> "activity",
+      "activity" -> activity
+    )
     case js: JsValue => handleClientMessage(js)
     case nonsense => log.error(s"Ignoring unrecognised message: ${nonsense}")
   }
