@@ -55,3 +55,6 @@ resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
 // Run Gulp when Play runs
 //playRunHooks <+= baseDirectory.map(base => Gulp(base))
+
+// code coverage settings (run jacoco:cover)
+jacoco.settings
