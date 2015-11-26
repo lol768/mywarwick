@@ -2,6 +2,7 @@ package integration
 
 import controllers.HomeController
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import play.api.Configuration
 import play.api.Environment
 import play.api.inject._
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -15,7 +16,8 @@ import warwick.sso._
   */
 class ApplicationTest extends PlaySpec with OneAppPerSuite {
 
-  implicit override lazy val app = new GuiceApplicationBuilder()
+  lazy val config = Configuration.load(Environment.simple(), Map("config.file" -> "test/test.conf"))
+  implicit override lazy val app = new GuiceApplicationBuilder(configuration = config)
     .in(Environment.simple())
     .configure(inMemoryDatabase())
     .bindings(
