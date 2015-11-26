@@ -16,6 +16,6 @@ class ProviderPermissionServiceImpl @Inject()(
 ) extends ProviderPermissionService {
 
   override def canUserPostForProvider(providerId: String, user: User): Boolean =
-    providerPermissionDao.canUserPostForApp(providerId, user.usercode.string)
+    providerPermissionDao.canUserPostForProvider(providerId, user.usercode.string)
 
 }
