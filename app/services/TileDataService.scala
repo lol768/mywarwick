@@ -10,7 +10,7 @@ trait TileDataService {
 
   def getTileData(user: Option[User]): JsValue
 
-  def getTileDataByIds(tileIds: Seq[String]): JsArray
+  def getTileDataByIds(user: Option[User], tileIds: Seq[String]): JsArray
 }
 
 class TileDataServiceImpl extends TileDataService {
@@ -106,14 +106,16 @@ class TileDataServiceImpl extends TileDataService {
     ))
   ))
 
-  override def getTileDataByIds(tileIds: Seq[String]): JsArray = {
+  override def getTileDataByIds(user: Option[User], tileIds: Seq[String]): JsArray = {
     val tileDataSeq = tileData.as[Seq[JsObject]]
     tileDataSeq.filter((tile) => tileIds.contains((tile \ "key").as[String]))
-          .foldLeft(JsArray())((tileArray, tile) => tileArray ++ Json.arr(tile))
+      .foldLeft(JsArray())((tileArray, tile) => tileArray ++ Json.arr(tile))
   }
 
   override def getTileData(user: Option[User]): JsValue =
   // TODO fetch tile data by user context
+  // get user tile prefs
+  // then fetch tile data from source
     tileData
 
 

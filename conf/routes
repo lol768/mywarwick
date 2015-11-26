@@ -27,4 +27,5 @@ GET         /api/streams/user                             @controllers.api.UserA
 POST        /api/streams/:providerId/notifications        @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
 POST        /api/streams/:providerId/activities           @controllers.api.IncomingActivitiesController.postActivity(providerId: String)
 
-GET         /api/tiles                                    @controllers.api.TileDataController.requestTileData(tileIds: Option[String])
+GET         /api/tiles                                    @controllers.api.TileDataController.requestTileData
+GET         /api/tiles/ids                                @controllers.api.TileDataController.requestTileDataByIds(tileIds: Seq[String])
