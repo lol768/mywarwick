@@ -9,7 +9,7 @@ import play.api.db.Database
 
 class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
-  implicit val c = app.injector.instanceOf[Database].getConnection()
+  implicit def c = app.injector.instanceOf[Database].getConnection()
 
   val activityDao = app.injector.instanceOf[ActivityDao]
   val activityTagDao = app.injector.instanceOf[ActivityTagDao]
