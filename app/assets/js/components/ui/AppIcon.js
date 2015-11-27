@@ -30,7 +30,7 @@ const COLOURS = {
 
 const ICONS = _({
   Photos: 'green camera',
-  Tabula: 'tabula cog',
+  tabula: 'tabula cog',
   'Web Sign-On': 'orange lock',
   Library: 'orange book',
   Sport: 'blue futbol-o',

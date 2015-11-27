@@ -28,28 +28,7 @@ class IncomingActivitiesController @Inject()(
         (__ \ "value").read[String] and
           (__ \ "display_value").readNullable[String]
         ) (TagValue))
-      ) (ActivityTag)
-
-  def postActivity(providerId: String) = APIAction(parse.json) { implicit request =>
-    postItem(providerId, shouldNotify = false)
-  }
-
-  def postItem(providerId: String, shouldNotify: Boolean)(implicit request: AuthenticatedRequest[JsValue]): Result =
-    request.context.user.map { user =>
-      if (providerPermissionService.canUserPostForProvider(providerId, user)) {
-        request.body.validate[ActivityPrototype](readsPostedActivity(providerId, shouldNotify)).map { data =>
-          activityService.save(data) match {
-            case Success(activityId) => created(activityId)
-            case Failure(_: NoRecipientsException) => noRecipients
-            case Failure(_) => otherError
-          }
-        }.recoverTotal {
-          e => validationError(e)
-        }
-      } else {
-        forbidden(providerId, user)
-      }
-    }.get // APIAction calls this only if request.context.user is defined
+      ) (ActivityTag.apply _)
 
   def readsPostedActivity(providerId: String, shouldNotify: Boolean): Reads[ActivityPrototype] =
     (Reads.pure(providerId) and
@@ -60,7 +39,32 @@ class IncomingActivitiesController @Inject()(
       (__ \ "replace").read[Map[String, String]].orElse(Reads.pure(Map.empty)) and
       (__ \ "generated_at").readNullable[DateTime] and
       Reads.pure(shouldNotify) and
-      (__ \ "recipients").read[ActivityRecipients]) (ActivityPrototype)
+      (__ \ "recipients").read[ActivityRecipients]) (ActivityPrototype.apply _)
+
+  def postActivity(providerId: String) = APIAction(parse.json) { implicit request =>
+    postItem(providerId, shouldNotify = false)
+  }
+
+  def postNotification(providerId: String) = APIAction(parse.json) { implicit request =>
+    postItem(providerId, shouldNotify = true)
+  }
+
+  def postItem(providerId: String, shouldNotify: Boolean)(implicit request: AuthenticatedRequest[JsValue]): Result =
+    request.context.user.map { user =>
+      if (providerPermissionService.canUserPostForProvider(providerId, user)) {
+        request.body.validate[ActivityPrototype](readsPostedActivity(providerId, shouldNotify)).map { data =>
+          activityService.save(data) match {
+            case Success(activityId) => created(activityId)
+            case Failure(NoRecipientsException) => noRecipients
+            case Failure(_) => otherError
+          }
+        }.recoverTotal {
+          e => validationError(e)
+        }
+      } else {
+        forbidden(providerId, user)
+      }
+    }.get // APIAction calls this only if request.context.user is defined
 
   private def forbidden(providerId: String, user: User): Result =
     Forbidden(Json.obj(
@@ -103,9 +107,5 @@ class IncomingActivitiesController @Inject()(
       "status" -> "bad_request",
       "errors" -> JsError.toJson(error)
     ))
-
-  def postNotification(providerId: String) = APIAction(parse.json) { implicit request =>
-    postItem(providerId, shouldNotify = true)
-  }
 
 }

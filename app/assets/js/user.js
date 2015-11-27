@@ -15,12 +15,4 @@ registerReducer('user', (state = Immutable.Map(), action) => {
   }
 });
 
-SocketDatapipe.getUpdateStream().subscribe((data) => {
-  if (data.type === 'who-am-i') {
-    store.dispatch({
-      type: USER_RECEIVE,
-      data: data['user-info']
-    });
-  }
-});
 

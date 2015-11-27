@@ -7,24 +7,28 @@ import play.api.Logger
 import play.api.Play.current
 import play.api.libs.json._
 import play.api.mvc._
-import warwick.sso.SSOClient
+import services.SecurityService
+import warwick.sso._
 
 import scala.concurrent.Future
 
-class ApplicationController @Inject()(
+class HomeController @Inject()(
+  security: SecurityService,
   ssoClient: SSOClient
 ) extends Controller {
 
+  import security._
+
   val logger = Logger(getClass)
 
-  def index = ssoClient.Lenient { request =>
-    val name = request.context.user.flatMap(_.name.full).getOrElse("nobody")
-    implicit val linkGenerator = ssoClient.linkGenerator(request)
-    Ok(views.html.index(s"${name}"))
+  def index = Action { request =>
+    implicit val links = ssoClient.linkGenerator(request)
+    Ok(views.html.index())
   }
 
+
   def socket = WebSocket.tryAcceptWithActor[JsValue, JsValue] { request =>
-    ssoClient.withUser(request) { loginContext =>
+    SecureWebsocket(request) { loginContext: LoginContext =>
       val who = loginContext.user.map(_.usercode).getOrElse("nobody")
       logger.info(s"Websocket opening for ${who}")
       Future.successful(Right(WebsocketActor.props(loginContext) _))

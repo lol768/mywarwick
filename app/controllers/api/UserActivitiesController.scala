@@ -14,26 +14,7 @@ class UserActivitiesController @Inject()(
 
   import securityService._
 
-  implicit val writesActivityTag = new Writes[ActivityTag] {
-    override def writes(tag: ActivityTag): JsValue = Json.obj(
-      "name" -> tag.name,
-      "value" -> tag.value.internalValue,
-      "display_value" -> JsString(tag.value.displayValue.getOrElse(tag.value.internalValue))
-    )
-  }
-
-  implicit val writesActivityResponse = new Writes[ActivityResponse] {
-    override def writes(o: ActivityResponse): JsValue = Json.obj(
-      "id" -> o.activity.id,
-      "notification" -> o.activity.shouldNotify,
-      "provider" -> o.activity.providerId,
-      "type" -> o.activity.`type`,
-      "title" -> o.activity.title,
-      "text" -> o.activity.text,
-      "tags" -> o.tags,
-      "date" -> o.activity.generatedAt
-    )
-  }
+  import ActivityResponse.writes
 
   def get = RequiredUserAction { implicit request =>
 

@@ -1,12 +1,12 @@
 import log from 'loglevel';
 import localforage from 'localforage';
-window.localforage = localforage;
 import { createSelector } from 'reselect';
+import fetch from 'isomorphic-fetch';
 
-import SocketDatapipe from './SocketDatapipe';
 import store from './store';
 
-import { receivedActivity, fetchedActivities, receivedNotification, fetchedNotifications } from './notifications';
+import { fetchWhoAmI, fetchActivities } from './serverpipe';
+import { fetchedActivities, fetchedNotifications } from './notifications';
 
 localforage.getItem('notifications').then(
   (value) => {
@@ -38,34 +38,6 @@ const persistNotificationsSelect = createSelector([notificationsSelector], (noti
 store.subscribe(() => persistActivitiesSelect(store.getState()));
 store.subscribe(() => persistNotificationsSelect(store.getState()));
 
-SocketDatapipe.getUpdateStream().subscribe((data) => {
-  //TODO is this the best place for this? Perhaps some type of general message hub
-  switch (data.type) {
-    case 'fetch-notifications':
-      store.dispatch(fetchedNotifications(data.notifications));
-      break;
-    case 'notification':
-      store.dispatch(receivedNotification(data));
-      break;
-    case 'activity':
-      store.dispatch(receivedActivity(data));
-      break;
-    default:
-    // nowt
-  }
-});
-
-//TODO I'm sure this should happen somewhere more sensible
-SocketDatapipe.send({
-  tileId: "1",
-  data: {
-    type: "fetch-notifications" // since last login
-  }
-});
-
-SocketDatapipe.send({
-  tileId: "1",
-  data: {
-    type: 'who-am-i'
-  }
-});
+// TODO these initial fetches might happen someplace more appropriate
+fetchWhoAmI();
+fetchActivities();

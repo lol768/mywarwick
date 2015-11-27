@@ -1,23 +1,9 @@
 import { registerReducer } from './reducers';
 import Immutable from 'immutable';
 
-import fetch from 'isomorphic-fetch';
-import { polyfill } from 'es6-promise';
-polyfill();
-
-const NEWS_FETCH = 'news.fetch';
-const NEWS_FETCH_SUCCESS = 'news.fetch.success';
-const NEWS_FETCH_FAILURE = 'news.fetch.failure';
-
-export function fetchNews() {
-  return dispatch => {
-    dispatch({type: NEWS_FETCH});
-    return fetch('/news/feed')
-      .then(response => response.json())
-      .then(json => dispatch({type: NEWS_FETCH_SUCCESS, items: json.items}))
-      .catch(err => dispatch({type: NEWS_FETCH_FAILURE}));
-  }
-}
+export const NEWS_FETCH = 'news.fetch';
+export const NEWS_FETCH_SUCCESS = 'news.fetch.success';
+export const NEWS_FETCH_FAILURE = 'news.fetch.failure';
 
 let initialState = Immutable.fromJS({
   fetching: false,

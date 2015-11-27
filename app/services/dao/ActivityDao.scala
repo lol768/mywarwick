@@ -92,13 +92,7 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
       val activities = SQL(
         """
         SELECT
-          ACTIVITY.ID,
-          PROVIDER_ID,
-          TYPE,
-          TITLE,
-          TEXT,
-          SHOULD_NOTIFY,
-          GENERATED_AT,
+          ACTIVITY.*,
           ACTIVITY_TAG.NAME          AS TAG_NAME,
           ACTIVITY_TAG.VALUE         AS TAG_VALUE,
           ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
@@ -112,7 +106,7 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
                 AND REPLACED_BY_ID IS NULL
                 AND ACTIVITY_RECIPIENT.GENERATED_AT < {before}
           ORDER BY ACTIVITY_RECIPIENT.GENERATED_AT DESC
-          FETCH NEXT {limit} ROWS ONLY);
+          FETCH NEXT {limit} ROWS ONLY)
         """)
         .on(
           'usercode -> usercode,
