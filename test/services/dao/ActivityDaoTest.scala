@@ -47,7 +47,7 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
       val activityId = activityDao.save(makeActivityPrototype(), Seq.empty)
       activityRecipientDao.create(activityId, "someone", None)
 
-      activityDao.getActivitiesForUser("someone", 100, DateTime.now).map(_.activity.id) must contain(activityId)
+      activityDao.getActivitiesForUser("someone", 100).map(_.activity.id) must contain(activityId)
 
     }
 
@@ -57,7 +57,7 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
       activityRecipientDao.create(activityId, "someone", None)
       activityTagDao.save(activityId, ActivityTag("name", TagValue("value")))
 
-      activityDao.getActivitiesForUser("someone", 100, DateTime.now).map(_.activity.id) must contain(activityId)
+      activityDao.getActivitiesForUser("someone", 100).map(_.activity.id) must contain(activityId)
 
     }
 

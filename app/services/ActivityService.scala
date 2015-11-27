@@ -57,7 +57,7 @@ class ActivityServiceImpl @Inject()(
   }
 
   override def getActivitiesForUser(user: User, limit: Int, before: Option[DateTime]): Seq[ActivityResponse] =
-    activityDao.getActivitiesForUser(user.usercode.string, limit.min(50), before.getOrElse(DateTime.now))
+    activityDao.getActivitiesForUser(user.usercode.string, limit.min(50), before)
 }
 
 class NoRecipientsException extends Throwable

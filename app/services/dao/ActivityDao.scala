@@ -14,7 +14,7 @@ import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
-  def getActivitiesForUser(usercode: String, limit: Int, before: DateTime): Seq[ActivityResponse]
+  def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None): Seq[ActivityResponse]
 
   def save(activity: ActivityPrototype, replaces: Seq[String])(implicit connection: Connection): String
 
@@ -91,8 +91,9 @@ class ActivityDaoImpl @Inject()(
     }
   }
 
-  override def getActivitiesForUser(usercode: String, limit: Int, before: DateTime): Seq[ActivityResponse] =
+  override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None): Seq[ActivityResponse] =
     db.withConnection { implicit c =>
+      val maybeBefore = if (before.isDefined) "AND ACTIVITY_RECIPIENT.GENERATED_AT < {before}" else ""
       val activities = SQL(
         s"""
         SELECT
@@ -108,13 +109,13 @@ class ActivityDaoImpl @Inject()(
             JOIN ACTIVITY ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
           WHERE USERCODE = {usercode}
                 AND REPLACED_BY_ID IS NULL
-                AND ACTIVITY_RECIPIENT.GENERATED_AT < {before}
+                $maybeBefore
           ORDER BY ACTIVITY_RECIPIENT.GENERATED_AT DESC
           ${dialect.limit("{limit}")})
         """)
         .on(
           'usercode -> usercode,
-          'before -> before,
+          'before -> before.getOrElse(DateTime.now),
           'limit -> limit
         )
         .as(activityResponseParser.*)
