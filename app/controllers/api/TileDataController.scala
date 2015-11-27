@@ -1,32 +1,29 @@
 package controllers.api
 
 import com.google.inject.Inject
-import org.joda.time.DateTime
 import play.api.libs.json._
-import play.api.mvc.{PathBindable, Controller}
-import services.TileDataService
+import play.api.mvc.Controller
+import services.TileService
 import warwick.sso.SSOClient
 
 class TileDataController @Inject()(
   ssoClient: SSOClient,
-  tileDataService: TileDataService
+  tileService: TileService
 ) extends Controller {
 
-  def requestTileData = ssoClient.Lenient { request =>
-    val tileData = tileDataService.getTileConfig(request.context.user)
+  def requestTiles = ssoClient.Lenient { request =>
+    val tilesConfig = tileService.getTilesConfig(request.context.user)
+    val tileData = tileService.getTilesData(tilesConfig)
+
+    val tiles = JsObject(Seq(
+      "tileConfig" -> Json.toJson(tilesConfig),
+      "tileData" -> Json.toJson(tileData)
+    ))
+
     Ok(Json.obj(
       "type" -> "tiles",
-      "tiles" -> tileData
+      "tiles" -> tiles
     ))
   }
-
-  def requestTileDataByIds(tileIds: Seq[String]) = ssoClient.Lenient { request =>
-    val tileData = tileDataService.getTileDataByIds(request.context.user, tileIds)
-    Ok(Json.obj(
-      "type" -> "tiles",
-      "tiles" -> tileData
-    ))
-  }
-
 
 }
