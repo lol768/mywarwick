@@ -11,8 +11,7 @@ import warwick.anorm.converters.ColumnConversions._
 
 class ActivityRecipientDaoTest extends PlaySpec with OneStartAppPerSuite {
 
-  val db = app.injector.instanceOf[Database]
-  implicit val c = db.getConnection()
+  implicit val c = app.injector.instanceOf[Database].getConnection()
 
   val activityDao = app.injector.instanceOf[ActivityDao]
   val activityRecipientDao = app.injector.instanceOf[ActivityRecipientDao]

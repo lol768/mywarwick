@@ -6,6 +6,7 @@ import play.api.inject._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
+import system.{DatabaseDialect, H2DatabaseDialect}
 import warwick.sso._
 
 trait OneStartAppPerSuite extends Suite with OneAppPerSuite {
@@ -25,9 +26,8 @@ trait OneStartAppPerSuite extends Suite with OneAppPerSuite {
         })
       )
       .overrides(
-        // Fake SSOClient
-        bind[SSOClient].to[MockSSOClient]
-        // FIXME still numerous non-fake things, like UserLookup. Replace whole Guice module?
+        bind[SSOClient].to[MockSSOClient],
+        bind[DatabaseDialect].to[H2DatabaseDialect]
       )
       .build()
 

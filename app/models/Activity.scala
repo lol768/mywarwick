@@ -53,7 +53,7 @@ case class ActivityTag(
   value: TagValue
 )
 
-case class TagValue(internalValue: String, displayValue: Option[String])
+case class TagValue(internalValue: String, displayValue: Option[String] = None)
 
 case class ActivityPrototype(
   providerId: String,

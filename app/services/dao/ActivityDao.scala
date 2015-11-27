@@ -9,6 +9,7 @@ import com.google.inject.{ImplementedBy, Inject}
 import models._
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
+import system.DatabaseDialect
 import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
@@ -24,7 +25,10 @@ trait ActivityDao {
 
 }
 
-class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) extends ActivityDao {
+class ActivityDaoImpl @Inject()(
+  @NamedDatabase("default") val db: Database,
+  dialect: DatabaseDialect
+) extends ActivityDao {
 
   private def activityParser: RowParser[Activity] = {
     get[String]("ID") ~
@@ -90,15 +94,15 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
   override def getActivitiesForUser(usercode: String, limit: Int, before: DateTime): Seq[ActivityResponse] =
     db.withConnection { implicit c =>
       val activities = SQL(
-        """
+        s"""
         SELECT
           ACTIVITY.*,
           ACTIVITY_TAG.NAME          AS TAG_NAME,
           ACTIVITY_TAG.VALUE         AS TAG_VALUE,
           ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
-        FROM ACTIVITY_TAG
-          JOIN ACTIVITY ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
-        WHERE ACTIVITY_ID IN (
+        FROM ACTIVITY
+          LEFT JOIN ACTIVITY_TAG ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
+        WHERE ACTIVITY.ID IN (
           SELECT ACTIVITY_ID
           FROM ACTIVITY_RECIPIENT
             JOIN ACTIVITY ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
@@ -106,7 +110,7 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
                 AND REPLACED_BY_ID IS NULL
                 AND ACTIVITY_RECIPIENT.GENERATED_AT < {before}
           ORDER BY ACTIVITY_RECIPIENT.GENERATED_AT DESC
-          FETCH NEXT {limit} ROWS ONLY)
+          ${dialect.limit("{limit}")})
         """)
         .on(
           'usercode -> usercode,
@@ -135,13 +139,13 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
       get[DateTime]("GENERATED_AT") ~
       get[DateTime]("CREATED_AT") ~
       get[Boolean]("SHOULD_NOTIFY") ~
-      get[String]("TAG_NAME") ~
-      get[String]("TAG_VALUE") ~
+      get[Option[String]]("TAG_NAME") ~ // Option because an activity can have no tags
+      get[Option[String]]("TAG_VALUE") ~
       get[Option[String]]("TAG_DISPLAY_VALUE") map {
       case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify ~ tagName ~ tagValue ~ tagDisplayValue =>
         ActivityResponse(
           Activity(id, providerId, activityType, title, text, replacedById, generatedAt, createdAt, shouldNotify),
-          Seq(ActivityTag(tagName, TagValue(tagValue, tagDisplayValue)))
+          (for (name <- tagName; value <- tagValue) yield ActivityTag(name, TagValue(value, tagDisplayValue))).toSeq
         )
     }
   }

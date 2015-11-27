@@ -6,9 +6,6 @@ import play.api.db.Database
 
 class ProviderPermissionDaoTest extends PlaySpec with OneStartAppPerSuite {
 
-  val db = app.injector.instanceOf[Database]
-  implicit val c = db.getConnection()
-
   val providerPermissionDao = app.injector.instanceOf[ProviderPermissionDao]
 
   "ProviderPermissionDao" should {
