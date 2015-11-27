@@ -6,6 +6,10 @@ import play.api.libs.json.{JsString, Writes, JsValue, Json}
 case class Activity(
   id: String,
   providerId: String,
+  /**
+    * > Some sort of filterable name for what sort of thing the activity is about, e.g `coursework-due` or `squash-court-reserved`
+    * > (I think)
+    */
   `type`: String,
   title: String,
   text: String,
@@ -71,3 +75,7 @@ case class ActivityRecipients(
   users: Option[Seq[String]],
   groups: Option[Seq[String]]
 )
+
+object ActivityRecipients {
+  lazy val empty = ActivityRecipients(None, None)
+}

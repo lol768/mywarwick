@@ -6,7 +6,11 @@ addSbtPlugin("uk.ac.warwick" % "play-warwick" % "0.1-SNAPSHOT")
 // The Play plugin
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.1")
 
+// .tgz generator
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.0.3")
+
+// Code coverage
+addSbtPlugin("de.johoop" % "jacoco4sbt" % "2.1.6")
 
 // web plugins
 

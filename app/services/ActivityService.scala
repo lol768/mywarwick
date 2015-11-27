@@ -1,12 +1,11 @@
 package services
 
 import actors.WebsocketActor.Notification
+import akka.actor.ActorSystem
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.Publish
 import com.google.inject.{ImplementedBy, Inject}
-import models.{Activity, ActivityPrototype}
-import play.api.Play.current
-import play.api.libs.concurrent.Akka
+import play.api.Application
 import models.{Activity, ActivityPrototype, ActivityResponse}
 import org.joda.time.DateTime
 import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
@@ -27,8 +26,13 @@ class ActivityServiceImpl @Inject()(
   activityRecipientService: ActivityRecipientService,
   activityCreationDao: ActivityCreationDao,
   activityDao: ActivityDao,
-  activityTagDao: ActivityTagDao
+  activityTagDao: ActivityTagDao,
+  app: Application,
+  pubsub: PubSub
 ) extends ActivityService {
+
+  // for ActorSystem
+  implicit def application = app
 
   override def getActivityById(id: String): Option[Activity] = activityDao.getActivityById(id)
 
@@ -42,14 +46,13 @@ class ActivityServiceImpl @Inject()(
     )
 
     if (recipients.isEmpty) {
-      Failure(new NoRecipientsException)
+      Failure(NoRecipientsException)
     } else {
       val replaceIds = activityTagDao.getActivitiesWithTags(activity.replace, activity.providerId)
 
       val result = activityCreationDao.createActivity(activity, recipients, replaceIds)
 
-      val mediator = DistributedPubSub(Akka.system).mediator
-      recipients.foreach(usercode => mediator ! Publish(usercode.string, Notification(result)))
+      recipients.foreach(usercode => pubsub.publish(usercode.string, Notification(result)))
 
       Success(result.activity.id)
     }
@@ -60,4 +63,4 @@ class ActivityServiceImpl @Inject()(
     activityDao.getActivitiesForUser(user.usercode.string, limit.min(50), before)
 }
 
-class NoRecipientsException extends Throwable
+object NoRecipientsException extends Throwable

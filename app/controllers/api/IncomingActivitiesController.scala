@@ -55,7 +55,7 @@ class IncomingActivitiesController @Inject()(
         request.body.validate[ActivityPrototype](readsPostedActivity(providerId, shouldNotify)).map { data =>
           activityService.save(data) match {
             case Success(activityId) => created(activityId)
-            case Failure(_: NoRecipientsException) => noRecipients
+            case Failure(NoRecipientsException) => noRecipients
             case Failure(_) => otherError
           }
         }.recoverTotal {
