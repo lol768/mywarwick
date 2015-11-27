@@ -11,10 +11,13 @@ import warwick.sso._
 
 trait OneStartAppPerSuite extends Suite with OneAppPerSuite {
 
-  lazy val config = Configuration.load(Environment.simple(), Map("config.file" -> "test/test.conf"))
+  lazy val config = Configuration.load(
+    Environment.simple(),
+    Map("config.file" -> "test/test.conf")
+  )
 
   implicit override lazy val app =
-    new GuiceApplicationBuilder(configuration = config)
+    new GuiceApplicationBuilder(loadConfiguration = _ => config)
       .in(Environment.simple())
       .configure(inMemoryDatabase("default", Map("MODE" -> "Oracle")))
       .bindings(
