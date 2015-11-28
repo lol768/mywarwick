@@ -27,12 +27,8 @@ class ActivityServiceImpl @Inject()(
   activityCreationDao: ActivityCreationDao,
   activityDao: ActivityDao,
   activityTagDao: ActivityTagDao,
-  app: Application,
   pubsub: PubSub
 ) extends ActivityService {
-
-  // for ActorSystem
-  implicit def application = app
 
   override def getActivityById(id: String): Option[Activity] = activityDao.getActivityById(id)
 

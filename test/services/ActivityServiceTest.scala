@@ -1,18 +1,16 @@
 package services
 
-import helpers.{OneStartAppPerSuite, Fixtures}
+import helpers.Fixtures
 import models._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.test.FakeApplication
 import services.dao.{ActivityTagDao, ActivityDao, ActivityCreationDao}
 import warwick.sso.Usercode
 
 import scala.util.{Success, Failure}
 
-
-class ActivityServiceTest extends PlaySpec with MockitoSugar with OneStartAppPerSuite {
+class ActivityServiceTest extends PlaySpec with MockitoSugar {
 
   class Scope {
     val activityRecipientService = mock[ActivityRecipientService]
@@ -24,7 +22,6 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar with OneStartAppPer
       activityCreationDao,
       activityDao,
       activityTagDao,
-      app,
       new PubSub {
         override def publish(topic: String, message: Any): Unit = {}
       }
