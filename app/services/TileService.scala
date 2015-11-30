@@ -1,7 +1,8 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject}
-import models.{EnumUtils, UserTile}
+import models.{TileLayout, TileLayout$, UserTile}
+import play.api.db.{Database, NamedDatabase}
 import play.api.libs.json._
 import services.dao.TileDao
 import warwick.sso.User
@@ -9,23 +10,21 @@ import warwick.sso.User
 @ImplementedBy(classOf[TileServiceImpl])
 trait TileService {
 
-  def getTilesData(tiles: Seq[UserTile]): JsValue
+  def getTilesForUser(user: Option[User]): TileLayout
 
-  def getTilesConfig(user: Option[User]): Seq[UserTile]
 }
 
 class TileServiceImpl @Inject()(
-  tileDao: TileDao
+  tileDao: TileDao,
+  @NamedDatabase("default") db: Database
 ) extends TileService {
 
-  override def getTilesData(tiles: Seq[UserTile]): JsValue = {
-    // TODO: use url and options from each UserTile to request data
-    JsObject(Seq())
-  }
-
-  override def getTilesConfig(user: Option[User]): Seq[UserTile] =
-    user match {
-      case Some(u) => tileDao.getTilesForUser(u.usercode.string)
-      case None => tileDao.getDefaultTilesConfig
+  override def getTilesForUser(user: Option[User]): TileLayout =
+    db.withConnection { implicit c =>
+      user match {
+        case Some(u) => TileLayout(tileDao.getTilesForUser(u.usercode.string))
+        case None => TileLayout(tileDao.getDefaultTilesConfig)
+      }
     }
+
 }

@@ -15,10 +15,10 @@ object UserTile {
   implicit val userTileFormat = Json.format[UserTile]
 }
 
-case class UserTileLayout(
+case class TileLayout(
   tiles: Seq[UserTile]
 )
 
-object UserTileLayout {
-  implicit val userPrefFormat = Json.format[UserTileLayout]
+object TileLayout {
+  implicit val format = Json.format[TileLayout]
 }

@@ -1,29 +1,39 @@
 package controllers.api
 
 import com.google.inject.Inject
+import models.UserTile
 import play.api.libs.json._
 import play.api.mvc.Controller
-import services.TileService
-import warwick.sso.SSOClient
+import services.{SecurityService, TileContentService, TileService}
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class TileDataController @Inject()(
-  ssoClient: SSOClient,
-  tileService: TileService
+  securityService: SecurityService,
+  tileService: TileService,
+  tileContentService: TileContentService
 ) extends Controller {
 
-  def requestTiles = ssoClient.Lenient { request =>
-    val tilesConfig = tileService.getTilesConfig(request.context.user)
-    val tileData = tileService.getTilesData(tilesConfig)
+  import securityService._
 
-    val tiles = JsObject(Seq(
-      "tileConfig" -> Json.toJson(tilesConfig),
-      "tileData" -> Json.toJson(tileData)
-    ))
+  def requestTiles = UserAction.async { request =>
+    val tileLayout = tileService.getTilesForUser(request.context.user)
+    val tileContent = tileLayout.tiles.map(tileContentService.getTileContent)
 
-    Ok(Json.obj(
-      "type" -> "tiles",
-      "tiles" -> tiles
-    ))
+    Future.sequence(tileContent).map { tileContent =>
+      val result: Seq[(UserTile, JsObject)] = tileLayout.tiles.zip(tileContent)
+
+      Ok(Json.obj(
+        "type" -> "tiles",
+        "tiles" -> result.map {
+          case (tile, content) => Json.obj(
+            "tile" -> tile,
+            "content" -> content
+          )
+        }
+      ))
+    }
   }
 
 }
