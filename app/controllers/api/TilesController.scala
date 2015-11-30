@@ -23,10 +23,12 @@ class TilesController @Inject()(
     getTileResult(tileLayout.tiles)
   }
 
-  def tilesById(ids: Seq[String]) = UserAction.async { request =>
-    val tiles = tileService.getTilesByIds(ids)
+  def tilesById(ids: Seq[String]) = RequiredUserAction.async { request =>
+    request.context.user.map { user =>
+      val tiles = tileService.getTilesByIds(user.usercode, ids)
 
-    getTileResult(tiles)
+      getTileResult(tiles)
+    }.get // RequiredUserAction
   }
 
   private def getTileResult(tiles: Seq[UserTile]): Future[Result] = {

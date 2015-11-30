@@ -13,40 +13,37 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       anorm.SQL(
         """
-      INSERT INTO TILE (ID, TYPE, DEFAULT_SIZE, FETCH_URL) VALUES
-        ('tile-id', 'list', 'large', 'http://provider'),
-        ('other-tile-id', 'text', 'wide', 'http://provider');
-      INSERT INTO USER_TILE (ID, USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
-        ('a', 'someone', 'tile-id', 1, 'large', SYSDATE, SYSDATE),
-        ('b', 'someone', 'other-tile-id', 0, 'large', SYSDATE, SYSDATE);
+      INSERT INTO TILE (TYPE, DEFAULT_SIZE, FETCH_URL) VALUES
+        ('tile', 'large', 'http://provider'),
+        ('other-tile', 'wide', 'http://provider');
+      INSERT INTO USER_TILE (USERCODE, TILE_TYPE, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
+        ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE),
+        ('someone', 'other-tile', 0, 'large', SYSDATE, SYSDATE);
         """).execute()
 
       val tiles = tileDao.getTilesForUser("someone")
 
-      tiles.map(_.tile.id) must equal(Seq("other-tile-id", "tile-id"))
+      tiles.map(_.tile.`type`) must equal(Seq("other-tile", "tile"))
 
     }
 
     "get user tiles by id" in transaction { implicit c =>
 
-      tileDao.getTilesByIds(Seq.empty) mustBe Seq.empty
-
       anorm.SQL(
         """
-      INSERT INTO TILE (ID, TYPE, DEFAULT_SIZE, FETCH_URL) VALUES
-        ('tile-id', 'list', 'large', 'http://provider'),
-        ('other-tile-id', 'text', 'wide', 'http://provider');
-      INSERT INTO USER_TILE (ID, USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
-        ('a', 'someone', 'tile-id', 1, 'large', SYSDATE, SYSDATE),
-        ('b', 'someone', 'other-tile-id', 0, 'large', SYSDATE, SYSDATE);
+      INSERT INTO TILE (TYPE, DEFAULT_SIZE, FETCH_URL) VALUES
+        ('tile', 'large', 'http://provider'),
+        ('other-tile', 'wide', 'http://provider');
+      INSERT INTO USER_TILE (USERCODE, TILE_TYPE, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
+        ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE),
+        ('someone', 'other-tile', 0, 'large', SYSDATE, SYSDATE);
         """).execute()
 
-      val tiles = tileDao.getTilesByIds(Seq("a"))
-      tiles.size mustBe 1
+      tileDao.getTilesByIds("someone", Seq.empty) mustBe Seq.empty
 
-      val tile = tiles.head
-      tile.id mustBe "a"
-      tile.tile.id mustBe "tile-id"
+      val tiles = tileDao.getTilesByIds("someone", Seq("tile", "other-tile"))
+
+      tiles.map(_.tile.`type`).toSet must equal(Set("tile", "other-tile"))
 
     }
 
