@@ -1,5 +1,7 @@
 package services.dao
 
+import java.sql.Connection
+
 import helpers.OneStartAppPerSuite
 import helpers.TestObjectFactory._
 import models.{ActivityTag, TagValue}
@@ -15,8 +17,7 @@ class ActivityCreationDaoTest extends PlaySpec with OneStartAppPerSuite {
 
   "ActivityCreationDao" should {
 
-    database { implicit c =>
-
+    def createActivity()(implicit c: Connection): (String, String) = {
       val replacedActivityId = activityDao.save(makeActivityPrototype(), Seq.empty)
 
       val activityResponse = activityCreationDao.createActivity(
@@ -32,23 +33,32 @@ class ActivityCreationDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       val activityId = activityResponse.activity.id
 
-      "create an activity" in {
-        activityDao.getActivityById(activityId).map(_.id) mustBe Some(activityId)
-      }
+      (activityId,replacedActivityId)
+    }
 
-      "replace a previous activity" in {
-        activityDao.getActivityById(replacedActivityId).flatMap(_.replacedBy) mustBe Some(activityId)
-      }
+    "create an activity" in transaction { implicit c =>
+      val (activityId, _) = createActivity()
 
-      "associate the activity with its recipients" in {
-        activityDao.getActivitiesForUser("someone", 100).map(_.activity.id) must contain(activityId)
-      }
+      activityDao.getActivityById(activityId).map(_.id) mustBe Some(activityId)
+    }
 
-      "tag the activity with the specified tags" in {
-        activityTagDao.getActivitiesWithTags(Map("module" -> "CS118"), "tabula") must contain(activityId)
-        activityTagDao.getActivitiesWithTags(Map("assignment" -> "assignment-identifier"), "tabula") must contain(activityId)
-      }
+    "replace a previous activity" in transaction { implicit c =>
+      val (activityId, replacedActivityId) = createActivity()
 
+      activityDao.getActivityById(replacedActivityId).flatMap(_.replacedBy) mustBe Some(activityId)
+    }
+
+    "associate the activity with its recipients" in transaction { implicit c =>
+      val (activityId, _) = createActivity()
+
+      activityDao.getActivitiesForUser("someone", 100).map(_.activity.id) must contain(activityId)
+    }
+
+    "tag the activity with the specified tags" in transaction { implicit c =>
+      val (activityId, _) = createActivity()
+
+      activityTagDao.getActivitiesWithTags(Map("module" -> "CS118"), "tabula") must contain(activityId)
+      activityTagDao.getActivitiesWithTags(Map("assignment" -> "assignment-identifier"), "tabula") must contain(activityId)
     }
 
   }

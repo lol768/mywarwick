@@ -37,9 +37,6 @@ trait OneStartAppPerSuite extends Suite with OneAppPerSuite {
       )
       .build()
 
-  def database(block: Connection => Unit): Unit =
-    transaction(rollback = false)(block)
-
   def transaction(block: Connection => Unit): Unit =
     transaction(rollback = true)(block)
 
