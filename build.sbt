@@ -58,3 +58,5 @@ resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
 // code coverage settings (run jacoco:cover)
 jacoco.settings
+
+parallelExecution in jacoco.Config := false

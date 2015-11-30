@@ -1,18 +1,19 @@
 package services
 
-import helpers.Fixtures
+import helpers.{Fixtures, OneStartAppPerSuite}
 import models._
+import org.mockito.Matchers
+import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.test.FakeApplication
-import services.dao.{ActivityTagDao, ActivityDao, ActivityCreationDao}
+import play.api.db.Database
+import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
 import warwick.sso.Usercode
 
-import scala.util.{Success, Failure}
+import scala.util.{Failure, Success}
 
-
-class ActivityServiceTest extends PlaySpec with MockitoSugar {
+class ActivityServiceTest extends PlaySpec with MockitoSugar with OneStartAppPerSuite {
 
   class Scope {
     val activityRecipientService = mock[ActivityRecipientService]
@@ -24,10 +25,10 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
       activityCreationDao,
       activityDao,
       activityTagDao,
-      FakeApplication(),
       new PubSub {
         override def publish(topic: String, message: Any): Unit = {}
-      }
+      },
+      app.injector.instanceOf[Database]
     )
 
     val proto = Fixtures.activityPrototype.submissionDue
@@ -45,8 +46,8 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
       val response = ActivityResponse(createdActivity, Nil)
 
       when(activityRecipientService.getRecipientUsercodes(Nil, Nil)) thenReturn Set(Usercode("cusebr"))
-      when(activityTagDao.getActivitiesWithTags(Map(), "tabula")) thenReturn Nil
-      when(activityCreationDao.createActivity(proto, Set(Usercode("cusebr")), Nil)) thenReturn response
+      when(activityTagDao.getActivitiesWithTags(Matchers.eq(Map()), Matchers.eq("tabula"))(any())) thenReturn Nil
+      when(activityCreationDao.createActivity(Matchers.eq(proto), Matchers.eq(Set(Usercode("cusebr"))), Matchers.eq(Nil))(any())) thenReturn response
 
       service.save(proto) must be (Success("1234"))
     }

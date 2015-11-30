@@ -8,23 +8,40 @@ import anorm._
 import com.google.inject.{ImplementedBy, Inject}
 import models._
 import org.joda.time.DateTime
-import play.api.db.{Database, NamedDatabase}
+import system.DatabaseDialect
 import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
-  def getActivitiesForUser(usercode: String, limit: Int, before: DateTime): Seq[ActivityResponse]
+  def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse]
 
-  def save(activity: ActivityPrototype, replaces: Seq[String])(implicit connection: Connection): String
+  def save(activity: ActivityPrototype, replaces: Seq[String])(implicit c: Connection): String
 
-  def getActivityById(id: String): Option[Activity] =
+  def getActivityById(id: String)(implicit c: Connection): Option[Activity] =
     getActivitiesByIds(Seq(id)).headOption
 
-  def getActivitiesByIds(ids: Seq[String]): Seq[Activity]
+  def getActivitiesByIds(ids: Seq[String])(implicit c: Connection): Seq[Activity]
 
 }
 
-class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) extends ActivityDao {
+class ActivityDaoImpl @Inject()(
+  dialect: DatabaseDialect
+) extends ActivityDao {
+
+  private def activityParser: RowParser[Activity] = {
+    get[String]("ID") ~
+      get[String]("PROVIDER_ID") ~
+      get[String]("TYPE") ~
+      get[String]("TITLE") ~
+      get[String]("TEXT") ~
+      get[Option[String]]("REPLACED_BY_ID") ~
+      get[DateTime]("GENERATED_AT") ~
+      get[DateTime]("CREATED_AT") ~
+      get[Boolean]("SHOULD_NOTIFY") map {
+      case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify =>
+        Activity(id, providerId, activityType, title, text, replacedById, generatedAt, createdAt, shouldNotify)
+    }
+  }
 
   override def save(activity: ActivityPrototype, replaces: Seq[String])(implicit c: Connection): String = {
     import activity._
@@ -49,74 +66,53 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
     id
   }
 
-  def updateReplacedActivity(replacedById: String, replaces: Seq[String]) = {
-    db.withConnection { implicit c =>
-      replaces.grouped(1000).foreach { group =>
-        SQL("UPDATE ACTIVITY SET replaced_by_id = {replacedById} WHERE id IN ({replaces})")
-          .on(
-            'replacedById -> replacedById,
-            'replaces -> group
-          )
-          .execute()
-      }
+  def updateReplacedActivity(replacedById: String, replaces: Seq[String])(implicit c: Connection) =
+    replaces.grouped(1000).foreach { group =>
+      SQL("UPDATE ACTIVITY SET replaced_by_id = {replacedById} WHERE id IN ({replaces})")
+        .on(
+          'replacedById -> replacedById,
+          'replaces -> group
+        )
+        .execute()
     }
-  }
 
-  def getActivitiesByIds(ids: Seq[String]): Seq[Activity] = {
-    db.withConnection { implicit c =>
-      ids.grouped(1000).flatMap { ids =>
-        SQL("SELECT * FROM ACTIVITY WHERE id IN ({ids})")
-          .on('ids -> ids)
-          .as(activityParser.*)
-      }.toSeq
-    }
-  }
+  def getActivitiesByIds(ids: Seq[String])(implicit c: Connection): Seq[Activity] =
+    ids.grouped(1000).flatMap { ids =>
+      SQL("SELECT * FROM ACTIVITY WHERE id IN ({ids})")
+        .on('ids -> ids)
+        .as(activityParser.*)
+    }.toSeq
 
-  private def activityParser: RowParser[Activity] = {
-    get[String]("ID") ~
-      get[String]("PROVIDER_ID") ~
-      get[String]("TYPE") ~
-      get[String]("TITLE") ~
-      get[String]("TEXT") ~
-      get[Option[String]]("REPLACED_BY_ID") ~
-      get[DateTime]("GENERATED_AT") ~
-      get[DateTime]("CREATED_AT") ~
-      get[Boolean]("SHOULD_NOTIFY") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify =>
-        Activity(id, providerId, activityType, title, text, replacedById, generatedAt, createdAt, shouldNotify)
-    }
-  }
-
-  override def getActivitiesForUser(usercode: String, limit: Int, before: DateTime): Seq[ActivityResponse] =
-    db.withConnection { implicit c =>
-      val activities = SQL(
-        """
+  override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse] = {
+    val maybeBefore = if (before.isDefined) "AND ACTIVITY_RECIPIENT.GENERATED_AT < {before}" else ""
+    val activities = SQL(
+      s"""
         SELECT
           ACTIVITY.*,
           ACTIVITY_TAG.NAME          AS TAG_NAME,
           ACTIVITY_TAG.VALUE         AS TAG_VALUE,
           ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
-        FROM ACTIVITY_TAG
-          JOIN ACTIVITY ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
-        WHERE ACTIVITY_ID IN (
+        FROM ACTIVITY
+          LEFT JOIN ACTIVITY_TAG ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
+        WHERE ACTIVITY.ID IN (
           SELECT ACTIVITY_ID
           FROM ACTIVITY_RECIPIENT
             JOIN ACTIVITY ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
           WHERE USERCODE = {usercode}
                 AND REPLACED_BY_ID IS NULL
-                AND ACTIVITY_RECIPIENT.GENERATED_AT < {before}
+                $maybeBefore
           ORDER BY ACTIVITY_RECIPIENT.GENERATED_AT DESC
-          FETCH NEXT {limit} ROWS ONLY)
+          ${dialect.limit("{limit}")})
         """)
-        .on(
-          'usercode -> usercode,
-          'before -> before,
-          'limit -> limit
-        )
-        .as(activityResponseParser.*)
+      .on(
+        'usercode -> usercode,
+        'before -> before.getOrElse(DateTime.now),
+        'limit -> limit
+      )
+      .as(activityResponseParser.*)
 
-      combineActivities(activities)
-    }
+    combineActivities(activities)
+  }
 
   def combineActivities(activities: Seq[ActivityResponse]): Seq[ActivityResponse] = {
     activities
@@ -135,13 +131,13 @@ class ActivityDaoImpl @Inject()(@NamedDatabase("default") val db: Database) exte
       get[DateTime]("GENERATED_AT") ~
       get[DateTime]("CREATED_AT") ~
       get[Boolean]("SHOULD_NOTIFY") ~
-      get[String]("TAG_NAME") ~
-      get[String]("TAG_VALUE") ~
+      get[Option[String]]("TAG_NAME") ~ // Option because an activity can have no tags
+      get[Option[String]]("TAG_VALUE") ~
       get[Option[String]]("TAG_DISPLAY_VALUE") map {
       case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify ~ tagName ~ tagValue ~ tagDisplayValue =>
         ActivityResponse(
           Activity(id, providerId, activityType, title, text, replacedById, generatedAt, createdAt, shouldNotify),
-          Seq(ActivityTag(tagName, TagValue(tagValue, tagDisplayValue)))
+          (for (name <- tagName; value <- tagValue) yield ActivityTag(name, TagValue(value, tagDisplayValue))).toSeq
         )
     }
   }
