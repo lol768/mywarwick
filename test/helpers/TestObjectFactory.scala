@@ -1,10 +1,27 @@
 package helpers
 
+import models.{ActivityPrototype, ActivityRecipients}
 import org.joda.time.DateTime
 import services.{Group, GroupName}
 import warwick.sso.{Department, Name, User, Usercode}
 
 object TestObjectFactory {
+
+  def makeActivityPrototype(): ActivityPrototype =
+    ActivityPrototype(
+      providerId = "tabula",
+      `type` = "due",
+      title = "Coursework due",
+      text = "Your coursework is due in 7 days",
+      tags = Seq.empty,
+      replace = Map.empty,
+      generatedAt = None,
+      shouldNotify = true,
+      recipients = ActivityRecipients(
+        users = None,
+        groups = None
+      )
+    )
 
   def makeGroup(name: String = "in-elab", members: Seq[String] = Seq("a", "b")): Group =
     Group(

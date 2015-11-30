@@ -1,6 +1,7 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject}
+import play.api.db.{Database, NamedDatabase}
 import services.dao.ProviderPermissionDao
 import warwick.sso.User
 
@@ -12,10 +13,11 @@ trait ProviderPermissionService {
 }
 
 class ProviderPermissionServiceImpl @Inject()(
-  providerPermissionDao: ProviderPermissionDao
+  providerPermissionDao: ProviderPermissionDao,
+  @NamedDatabase("default") db: Database
 ) extends ProviderPermissionService {
 
   override def canUserPostForProvider(providerId: String, user: User): Boolean =
-    providerPermissionDao.canUserPostForApp(providerId, user.usercode.string)
+    db.withConnection(implicit c => providerPermissionDao.canUserPostForProvider(providerId, user.usercode.string))
 
 }
