@@ -44,12 +44,13 @@ trait OneStartAppPerSuite extends Suite with OneAppPerSuite {
     val database = app.injector.instanceOf[Database]
     val connection = database.getConnection(autocommit = false)
 
-    block(connection)
+    try block(connection)
+    finally {
+      if (rollback)
+        connection.rollback()
 
-    if (rollback)
-      connection.rollback()
-
-    connection.setAutoCommit(true)
+      connection.setAutoCommit(true)
+    }
   }
 
 }
