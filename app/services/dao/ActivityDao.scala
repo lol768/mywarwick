@@ -8,25 +8,23 @@ import anorm._
 import com.google.inject.{ImplementedBy, Inject}
 import models._
 import org.joda.time.DateTime
-import play.api.db.{Database, NamedDatabase}
 import system.DatabaseDialect
 import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
-  def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None): Seq[ActivityResponse]
+  def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse]
 
-  def save(activity: ActivityPrototype, replaces: Seq[String])(implicit connection: Connection): String
+  def save(activity: ActivityPrototype, replaces: Seq[String])(implicit c: Connection): String
 
-  def getActivityById(id: String): Option[Activity] =
+  def getActivityById(id: String)(implicit c: Connection): Option[Activity] =
     getActivitiesByIds(Seq(id)).headOption
 
-  def getActivitiesByIds(ids: Seq[String]): Seq[Activity]
+  def getActivitiesByIds(ids: Seq[String])(implicit c: Connection): Seq[Activity]
 
 }
 
 class ActivityDaoImpl @Inject()(
-  @NamedDatabase("default") val db: Database,
   dialect: DatabaseDialect
 ) extends ActivityDao {
 
@@ -68,34 +66,27 @@ class ActivityDaoImpl @Inject()(
     id
   }
 
-  def updateReplacedActivity(replacedById: String, replaces: Seq[String]) = {
-    db.withConnection { implicit c =>
-      replaces.grouped(1000).foreach { group =>
-        SQL("UPDATE ACTIVITY SET replaced_by_id = {replacedById} WHERE id IN ({replaces})")
-          .on(
-            'replacedById -> replacedById,
-            'replaces -> group
-          )
-          .execute()
-      }
+  def updateReplacedActivity(replacedById: String, replaces: Seq[String])(implicit c: Connection) =
+    replaces.grouped(1000).foreach { group =>
+      SQL("UPDATE ACTIVITY SET replaced_by_id = {replacedById} WHERE id IN ({replaces})")
+        .on(
+          'replacedById -> replacedById,
+          'replaces -> group
+        )
+        .execute()
     }
-  }
 
-  def getActivitiesByIds(ids: Seq[String]): Seq[Activity] = {
-    db.withConnection { implicit c =>
-      ids.grouped(1000).flatMap { ids =>
-        SQL("SELECT * FROM ACTIVITY WHERE id IN ({ids})")
-          .on('ids -> ids)
-          .as(activityParser.*)
-      }.toSeq
-    }
-  }
+  def getActivitiesByIds(ids: Seq[String])(implicit c: Connection): Seq[Activity] =
+    ids.grouped(1000).flatMap { ids =>
+      SQL("SELECT * FROM ACTIVITY WHERE id IN ({ids})")
+        .on('ids -> ids)
+        .as(activityParser.*)
+    }.toSeq
 
-  override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None): Seq[ActivityResponse] =
-    db.withConnection { implicit c =>
-      val maybeBefore = if (before.isDefined) "AND ACTIVITY_RECIPIENT.GENERATED_AT < {before}" else ""
-      val activities = SQL(
-        s"""
+  override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse] = {
+    val maybeBefore = if (before.isDefined) "AND ACTIVITY_RECIPIENT.GENERATED_AT < {before}" else ""
+    val activities = SQL(
+      s"""
         SELECT
           ACTIVITY.*,
           ACTIVITY_TAG.NAME          AS TAG_NAME,
@@ -113,15 +104,15 @@ class ActivityDaoImpl @Inject()(
           ORDER BY ACTIVITY_RECIPIENT.GENERATED_AT DESC
           ${dialect.limit("{limit}")})
         """)
-        .on(
-          'usercode -> usercode,
-          'before -> before.getOrElse(DateTime.now),
-          'limit -> limit
-        )
-        .as(activityResponseParser.*)
+      .on(
+        'usercode -> usercode,
+        'before -> before.getOrElse(DateTime.now),
+        'limit -> limit
+      )
+      .as(activityResponseParser.*)
 
-      combineActivities(activities)
-    }
+    combineActivities(activities)
+  }
 
   def combineActivities(activities: Seq[ActivityResponse]): Seq[ActivityResponse] = {
     activities

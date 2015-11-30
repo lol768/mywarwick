@@ -3,13 +3,9 @@ package services.dao
 import helpers.OneStartAppPerSuite
 import helpers.TestObjectFactory._
 import models.{ActivityTag, TagValue}
-import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
-import play.api.db.Database
 
 class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
-
-  implicit def c = app.injector.instanceOf[Database].getConnection()
 
   val activityDao = app.injector.instanceOf[ActivityDao]
   val activityTagDao = app.injector.instanceOf[ActivityTagDao]
@@ -17,7 +13,7 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
   "ActivityDao" should {
 
-    "get activity by id" in {
+    "get activity by id" in transaction { implicit c =>
 
       val activityId = activityDao.save(makeActivityPrototype(), Seq.empty)
 
@@ -25,7 +21,7 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
     }
 
-    "get activities by ids" in {
+    "get activities by ids" in transaction { implicit c =>
 
       val activityId = activityDao.save(makeActivityPrototype(), Seq.empty)
 
@@ -33,7 +29,7 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
     }
 
-    "replace activities" in {
+    "replace activities" in transaction { implicit c =>
 
       val activityId = activityDao.save(makeActivityPrototype(), Seq.empty)
       val newActivityId = activityDao.save(makeActivityPrototype(), Seq(activityId))
@@ -42,7 +38,7 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
     }
 
-    "find activities without tags" in {
+    "find activities without tags" in transaction { implicit c =>
 
       val activityId = activityDao.save(makeActivityPrototype(), Seq.empty)
       activityRecipientDao.create(activityId, "someone", None)
@@ -51,7 +47,7 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
     }
 
-    "find activities with tags" in {
+    "find activities with tags" in transaction { implicit c =>
 
       val activityId = activityDao.save(makeActivityPrototype(), Seq.empty)
       activityRecipientDao.create(activityId, "someone", None)

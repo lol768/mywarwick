@@ -8,14 +8,12 @@ import play.api.db.Database
 
 class ActivityTagDaoTest extends PlaySpec with OneStartAppPerSuite {
 
-  implicit val c = app.injector.instanceOf[Database].getConnection()
-
   val activityDao = app.injector.instanceOf[ActivityDao]
   val dao = app.injector.instanceOf[ActivityTagDao]
 
   "ActivityTagDao" should {
 
-    "tag an activity then find it by the tag" in {
+    "tag an activity then find it by the tag" in transaction { implicit c =>
 
       val activityId = activityDao.save(makeActivityPrototype(), Seq.empty)
       dao.save(activityId, ActivityTag("name", TagValue("value", Some("Display value"))))
@@ -26,7 +24,7 @@ class ActivityTagDaoTest extends PlaySpec with OneStartAppPerSuite {
 
     }
 
-    "return only activities with all tags" in {
+    "return only activities with all tags" in transaction { implicit c =>
 
       val activityId = activityDao.save(makeActivityPrototype(), Seq.empty)
       dao.save(activityId, ActivityTag("a", TagValue("a", None)))

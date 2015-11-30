@@ -1,13 +1,10 @@
 package services
 
 import actors.WebsocketActor.Notification
-import akka.actor.ActorSystem
-import akka.cluster.pubsub.DistributedPubSub
-import akka.cluster.pubsub.DistributedPubSubMediator.Publish
 import com.google.inject.{ImplementedBy, Inject}
-import play.api.Application
 import models.{Activity, ActivityPrototype, ActivityResponse}
 import org.joda.time.DateTime
+import play.api.db.{Database, NamedDatabase}
 import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
 import warwick.sso.{User, Usercode}
 
@@ -27,12 +24,14 @@ class ActivityServiceImpl @Inject()(
   activityCreationDao: ActivityCreationDao,
   activityDao: ActivityDao,
   activityTagDao: ActivityTagDao,
-  pubsub: PubSub
+  pubsub: PubSub,
+  @NamedDatabase("default") db: Database
 ) extends ActivityService {
 
-  override def getActivityById(id: String): Option[Activity] = activityDao.getActivityById(id)
+  override def getActivityById(id: String): Option[Activity] = db.withConnection(implicit c => activityDao.getActivityById(id))
 
   implicit def stringSeqToUsercodeSeq(strings: Seq[String]): Seq[Usercode] = strings.map(Usercode)
+
   implicit def stringSeqToGroupNameSeq(strings: Seq[String]): Seq[GroupName] = strings.map(GroupName)
 
   def save(activity: ActivityPrototype): Try[String] = {
@@ -44,19 +43,21 @@ class ActivityServiceImpl @Inject()(
     if (recipients.isEmpty) {
       Failure(NoRecipientsException)
     } else {
-      val replaceIds = activityTagDao.getActivitiesWithTags(activity.replace, activity.providerId)
+      db.withTransaction { implicit c =>
+        val replaceIds = activityTagDao.getActivitiesWithTags(activity.replace, activity.providerId)
 
-      val result = activityCreationDao.createActivity(activity, recipients, replaceIds)
+        val result = activityCreationDao.createActivity(activity, recipients, replaceIds)
 
-      recipients.foreach(usercode => pubsub.publish(usercode.string, Notification(result)))
+        recipients.foreach(usercode => pubsub.publish(usercode.string, Notification(result)))
 
-      Success(result.activity.id)
+        Success(result.activity.id)
+      }
     }
 
   }
 
   override def getActivitiesForUser(user: User, limit: Int, before: Option[DateTime]): Seq[ActivityResponse] =
-    activityDao.getActivitiesForUser(user.usercode.string, limit.min(50), before)
+    db.withConnection(implicit c => activityDao.getActivitiesForUser(user.usercode.string, limit.min(50), before))
 }
 
 object NoRecipientsException extends Throwable
