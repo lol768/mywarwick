@@ -51,7 +51,7 @@ class TileDaoImpl @Inject()() extends TileDao {
       get[DateTime]("UPDATED_AT") map {
       case id ~ tileType ~ defaultSize ~ fetchUrl ~ position ~ size ~ createdAt ~ updatedAt =>
         UserTile(
-          Tile(id, tileType, TileSize.withName(size), fetchUrl), TileConfig(position, TileSize.withName(size)), None, createdAt, updatedAt
+          Tile(id, tileType, TileSize.withName(defaultSize), fetchUrl), TileConfig(position, TileSize.withName(size)), None, createdAt, updatedAt
         )
     }
   }
