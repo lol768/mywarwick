@@ -4,6 +4,7 @@ import org.joda.time.DateTime
 import play.api.libs.json.{JsObject, Json}
 
 case class UserTile(
+  id: String,
   tile: Tile,
   tileConfig: TileConfig,
   options: Option[JsObject],
