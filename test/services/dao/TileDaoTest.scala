@@ -13,17 +13,17 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       anorm.SQL(
         """
-      INSERT INTO TILE (TYPE, DEFAULT_SIZE, FETCH_URL) VALUES
+      INSERT INTO TILE (ID, DEFAULT_SIZE, FETCH_URL) VALUES
         ('tile', 'large', 'http://provider'),
         ('other-tile', 'wide', 'http://provider');
-      INSERT INTO USER_TILE (USERCODE, TILE_TYPE, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
+      INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
         ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE),
         ('someone', 'other-tile', 0, 'large', SYSDATE, SYSDATE);
         """).execute()
 
       val tiles = tileDao.getTilesForUser("someone")
 
-      tiles.map(_.tile.`type`) must equal(Seq("other-tile", "tile"))
+      tiles.map(_.tile.id) must equal(Seq("other-tile", "tile"))
 
     }
 
@@ -31,10 +31,10 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       anorm.SQL(
         """
-      INSERT INTO TILE (TYPE, DEFAULT_SIZE, FETCH_URL) VALUES
+      INSERT INTO TILE (ID, DEFAULT_SIZE, FETCH_URL) VALUES
         ('tile', 'large', 'http://provider'),
         ('other-tile', 'wide', 'http://provider');
-      INSERT INTO USER_TILE (USERCODE, TILE_TYPE, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
+      INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
         ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE),
         ('someone', 'other-tile', 0, 'large', SYSDATE, SYSDATE);
         """).execute()
@@ -43,7 +43,7 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       val tiles = tileDao.getTilesByIds("someone", Seq("tile", "other-tile"))
 
-      tiles.map(_.tile.`type`).toSet must equal(Set("tile", "other-tile"))
+      tiles.map(_.tile.id).toSet must equal(Set("tile", "other-tile"))
 
     }
 
