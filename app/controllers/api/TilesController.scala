@@ -38,7 +38,8 @@ class TilesController @Inject()(
       val result: Seq[(UserTile, JsObject)] = tiles.zip(content)
 
       Ok(Json.obj(
-        "type" -> "tiles",
+        "success" -> true,
+        "status" -> "ok",
         "tiles" -> result.map {
           case (t, c) => Json.obj(
             "tile" -> t,

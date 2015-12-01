@@ -3,11 +3,12 @@ package controllers.api
 import com.google.inject.Inject
 import models._
 import org.joda.time.DateTime
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.mvc.{Controller, Result}
-import services.{ActivityService, ProviderPermissionService, NoRecipientsException, SecurityService}
+import services.{ActivityService, NoRecipientsException, ProviderPermissionService, SecurityService}
 import warwick.sso.{AuthenticatedRequest, User}
 
 import scala.util.{Failure, Success}
@@ -15,8 +16,9 @@ import scala.util.{Failure, Success}
 class IncomingActivitiesController @Inject()(
   securityService: SecurityService,
   activityService: ActivityService,
-  providerPermissionService: ProviderPermissionService
-) extends Controller {
+  providerPermissionService: ProviderPermissionService,
+  val messagesApi: MessagesApi
+) extends Controller with I18nSupport {
 
   import securityService._
 
@@ -72,6 +74,7 @@ class IncomingActivitiesController @Inject()(
       "status" -> "forbidden",
       "errors" -> Json.arr(
         Json.obj(
+          "id" -> "no-permission",
           "message" -> s"User '${user.usercode.string}' does not have permission to post to the stream for provider '$providerId'"
         )
       )
@@ -90,6 +93,7 @@ class IncomingActivitiesController @Inject()(
       "status" -> "request_failed",
       "errors" -> Json.arr(
         Json.obj(
+          "id" -> "no-recipients",
           "message" -> "No valid recipients for activity"
         )
       )
@@ -98,14 +102,28 @@ class IncomingActivitiesController @Inject()(
   private def otherError: Result =
     InternalServerError(Json.obj(
       "success" -> false,
-      "status" -> "internal_server_error"
+      "status" -> "internal_server_error",
+      "errors" -> Json.arr(
+        Json.obj(
+          "id" -> "internal-error",
+          "message" -> "An internal error occurred"
+        )
+      )
     ))
 
   private def validationError(error: JsError): Result =
     BadRequest(Json.obj(
       "success" -> false,
       "status" -> "bad_request",
-      "errors" -> JsError.toJson(error)
+      "errors" -> JsError.toFlatForm(error).map {
+        case (field, errors) =>
+          val propertyName = field.substring(4)
+
+          Json.obj(
+            "id" -> s"invalid-$propertyName",
+            "message" -> errors.flatMap(_.messages).map(Messages(_, propertyName)).mkString(", ")
+          )
+      }
     ))
 
 }
