@@ -1,0 +1,302 @@
+swagger: '2.0'
+info:
+  version: 1.0-snapshot
+  title: Start.Warwick
+  description: Your personal homepage to keep track of the information that you need regularly such as email and timetables.
+  termsOfService: 'http://warwick.ac.uk/terms'
+  contact:
+    name: 'Web Team, Warwick IT Services'
+    email: webteam@warwick.ac.uk
+    url: 'http://warwick.ac.uk/webteam'
+  license:
+    name: MIT
+    url: 'http://opensource.org/licenses/MIT'
+host: start-dev.warwick.ac.uk
+basePath: /api
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  basicAuth:
+    type: basic
+    description: 'Authenticate with Web-Sign On by providing a valid username and password, preferably belonging to a External User account dedicated for Start.Warwick API access.  Accounts must be authorised to write to user streams on behalf of a provider.'
+paths:
+  /api/tiles:
+    get:
+      description: Retrieves the tile loadout for the logged-in user
+      responses:
+        200:
+          $ref: '#/responses/getTiles'
+        401:
+          $ref: '#/responses/unauthorized'
+  /api/tiles/by_id:
+    get:
+      description: Retrieves one or more tiles belonging to the logged-in user
+      parameters:
+        - name: tile
+          in: query
+          type: array
+          description: The IDs of the tiles to retrieve
+          items:
+            type: string
+      responses:
+        200:
+          $ref: '#/responses/getTiles'
+        401:
+          $ref: '#/responses/unauthorized'
+  /streams/user:
+    get:
+      description: 'Retrieves the stream for the logged-in user, in reverse chronological order'
+      parameters:
+        - name: before
+          in: query
+          type: integer
+          format: datetime
+          description: The date of the most recent item that may be retrieved
+        - name: limit
+          in: query
+          type: integer
+          description: The maximum number of items
+          default: 20
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              status:
+                type: string
+              activities:
+                type: array
+                items:
+                  $ref: '#/definitions/StreamItem'
+        401:
+          $ref: '#/responses/unauthorized'
+  /streams/{provider_id}/activity:
+    $ref: '#/x-pathItems/streamPost'
+  /streams/{provider_id}/notifications:
+    $ref: '#/x-pathItems/streamPost'
+responses:
+  getTiles:
+    description: OK
+    schema:
+      $ref: '#/definitions/TilesResponse'
+  unauthorized:
+    description: Unauthorized
+    schema:
+      $ref: '#/definitions/ErrorResponse'
+x-pathItems:
+  streamPost:
+    post:
+      security:
+        - basicAuth: []
+      description: Adds an item to the stream for the specified recipients
+      parameters:
+        - name: provider_id
+          in: path
+          type: string
+          description: "The identifier assigned to the application providing the notification, e.g. 'tabula'"
+          required: true
+        - name: item
+          in: body
+          description: The item to be added to the stream
+          required: true
+          schema:
+            $ref: '#/definitions/PostedStreamItem'
+      responses:
+        201:
+          description: Item created
+          schema:
+            $ref: '#/definitions/CreatedResult'
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          $ref: '#/responses/unauthorized'
+        402:
+          description: No valid recipients
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+definitions:
+  TilesResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      status:
+        type: string
+      tiles:
+        type: array
+        items:
+          type: object
+          properties:
+            tile:
+              $ref: '#/definitions/Tile'
+            content:
+              type: object
+              description: Document representing the information for display on the associated tile
+  ErrorResponse:
+    readOnly: true
+    type: object
+    properties:
+      success:
+        type: boolean
+      status:
+        type: string
+      errors:
+        type: array
+        items:
+          $ref: '#/definitions/Error'
+        minLength: 1
+  Tile:
+    readOnly: true
+    type: object
+    properties:
+      tile:
+        type: object
+        properties:
+          id:
+            type: string
+          defaultSize:
+            type: string
+            enum:
+              - small
+              - tall
+              - large
+              - wide
+          fetchUrl:
+            type: string
+      tileConfig:
+        type: object
+        properties:
+          position:
+            type: integer
+          size:
+            type: string
+            enum:
+              - small
+              - tall
+              - large
+              - wide
+      options:
+        type: object
+        description: User-configured tile options
+      createdAt:
+        type: integer
+        format: datetime
+      updatedAt:
+        type: integer
+        format: datetime
+  Error:
+    readOnly: true
+    type: object
+    properties:
+      id:
+        type: string
+        example: no-permission
+        description: A short name for the error
+      message:
+        type: string
+        example: User 'example-user' does not have permission to post to the stream for provider 'example-provider'
+        description: A human-readable description of the error
+  StreamItem:
+    readOnly: true
+    type: object
+    properties:
+      id:
+        type: string
+      notification:
+        type: boolean
+      provider:
+        type: string
+      type:
+        type: string
+      title:
+        type: string
+      text:
+        type: string
+      tags:
+        type: array
+        items:
+          $ref: '#/definitions/ActivityTag'
+      date:
+        type: integer
+        format: datetime
+  CreatedResult:
+    type: object
+    properties:
+      success:
+        type: boolean
+        example: true
+      status:
+        type: string
+        example: ok
+      id:
+        type: string
+        example: 9e71b33b-debd-40e5-8e6c-989c9de8c547
+  PostedStreamItem:
+    type: object
+    required:
+      - type
+      - title
+      - text
+      - recipients
+    properties:
+      type:
+        type: string
+      title:
+        type: string
+      text:
+        type: string
+      tags:
+        type: array
+        items:
+          $ref: '#/definitions/ActivityTag'
+      replace:
+        type: object
+      generated_at:
+        type: string
+        format: date-time
+        description: The time the notification was generated.  If not provided, defaults to the time the notification was received by Start.Warwick.
+      recipients:
+        description: The recipients for the notification.  A user will not receive more than one notification, no matter how many times they are specified as a recipient.
+        type: object
+        properties:
+          users:
+            description: A list of users who should receive the notification
+            type: array
+            items:
+              type: string
+              format: usercode
+              example: u1234567
+          groups:
+            description: A list of WebGroups whose members should receive the notification
+            type: array
+            items:
+              type: string
+              format: groupname
+              example: in-elab
+  ActivityTag:
+    type: object
+    properties:
+      name:
+        type: string
+        example: module
+      value:
+        type: string
+        example: CS118
+      display_value:
+        type: string
+    required:
+      - name
+      - value
