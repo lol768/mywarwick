@@ -117,7 +117,7 @@ class IncomingActivitiesController @Inject()(
       "status" -> "bad_request",
       "errors" -> JsError.toFlatForm(error).map {
         case (field, errors) =>
-          val propertyName = field.substring(4)
+          val propertyName = field.substring(4) // Remove 'obj.' from start of field name
 
           Json.obj(
             "id" -> s"invalid-$propertyName",
