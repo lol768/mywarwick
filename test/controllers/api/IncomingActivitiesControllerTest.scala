@@ -5,6 +5,7 @@ import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.cache.CacheApi
+import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsArray, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
@@ -32,7 +33,8 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
   val controller = new IncomingActivitiesController(
     new SecurityServiceImpl(ssoClient, mock[BasicAuth], mock[CacheApi]),
     activityService,
-    providerPermissionService
+    providerPermissionService,
+    mock[MessagesApi]
   )
 
   "ActivitiesController#postNotification" should {
