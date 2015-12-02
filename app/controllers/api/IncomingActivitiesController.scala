@@ -62,9 +62,7 @@ class IncomingActivitiesController @Inject()(
     }.get // APIAction calls this only if request.context.user is defined
 
   private def forbidden(providerId: String, user: User): Result =
-    Forbidden(Json.obj(
-      "success" -> false,
-      "status" -> "forbidden",
+    Forbidden(API.failure("forbidden",
       "errors" -> Json.arr(
         Json.obj(
           "id" -> "no-permission",
@@ -89,9 +87,7 @@ class IncomingActivitiesController @Inject()(
     ))
 
   private def otherError: Result =
-    InternalServerError(Json.obj(
-      "success" -> false,
-      "status" -> "internal_server_error",
+    InternalServerError(API.failure("internal_server_error",
       "errors" -> Json.arr(
         Json.obj(
           "id" -> "internal-error",
