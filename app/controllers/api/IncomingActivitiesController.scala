@@ -3,12 +3,12 @@ package controllers.api
 import com.google.inject.Inject
 import models._
 import org.joda.time.DateTime
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.{Messages, MessagesApi, I18nSupport}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.mvc.{Controller, Result}
-import services.{ActivityService, NoRecipientsException, ProviderPermissionService, SecurityService}
+import services.{ActivityService, ProviderPermissionService, NoRecipientsException, SecurityService}
 import warwick.sso.{AuthenticatedRequest, User}
 
 import scala.util.{Failure, Success}
@@ -21,16 +21,6 @@ class IncomingActivitiesController @Inject()(
 ) extends Controller with I18nSupport {
 
   import securityService._
-
-  implicit val readsActivityRecipients = Json.reads[ActivityRecipients]
-
-  implicit val readsActivityTag: Reads[ActivityTag] =
-    ((__ \ "name").read[String] and
-      __.read[TagValue]((
-        (__ \ "value").read[String] and
-          (__ \ "display_value").readNullable[String]
-        ) (TagValue))
-      ) (ActivityTag.apply _)
 
   def readsPostedActivity(providerId: String, shouldNotify: Boolean): Reads[ActivityPrototype] =
     (Reads.pure(providerId) and
@@ -58,7 +48,10 @@ class IncomingActivitiesController @Inject()(
           activityService.save(data) match {
             case Success(activityId) => created(activityId)
             case Failure(NoRecipientsException) => noRecipients
-            case Failure(_) => otherError
+            // FIXME we are swallowing almost any exception here
+            // differentiate between user error and bug
+            // or at least log the exception.
+            case Failure(e) => otherError
           }
         }.recoverTotal {
           e => validationError(e)
@@ -81,16 +74,12 @@ class IncomingActivitiesController @Inject()(
     ))
 
   private def created(activityId: String): Result =
-    Created(Json.obj(
-      "success" -> true,
-      "status" -> "ok",
+    Created(API.success(
       "id" -> activityId
     ))
 
   private def noRecipients: Result =
-    PaymentRequired(Json.obj(
-      "success" -> false,
-      "status" -> "request_failed",
+    PaymentRequired(API.failure("request_failed",
       "errors" -> Json.arr(
         Json.obj(
           "id" -> "no-recipients",
@@ -112,9 +101,7 @@ class IncomingActivitiesController @Inject()(
     ))
 
   private def validationError(error: JsError): Result =
-    BadRequest(Json.obj(
-      "success" -> false,
-      "status" -> "bad_request",
+    BadRequest(API.failure("bad_request",
       "errors" -> JsError.toFlatForm(error).map {
         case (field, errors) =>
           val propertyName = field.substring(4) // Remove 'obj.' from start of field name
