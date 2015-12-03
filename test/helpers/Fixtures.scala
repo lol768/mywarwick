@@ -9,19 +9,22 @@ import org.joda.time.DateTime
   */
 object Fixtures {
 
+  val user = UserFixtures
+
   object activityPrototype {
 
-    lazy val submissionDue = ActivityPrototype(
-      providerId = "tabula",
-      `type` = "coursework-due",
-      title = "Coursework for CS108 is due",
-      text = "You need to submit this.",
-      tags = Nil,
-      replace = Map(),
-      generatedAt = Some(new DateTime),
-      shouldNotify = true,
-      recipients = ActivityRecipients.empty
-    )
+    lazy val submissionDue =
+      ActivityPrototype(
+        providerId = "tabula",
+        `type` = "due",
+        title = "Coursework due",
+        text = "Your coursework is due in 7 days",
+        tags = Seq.empty,
+        replace = Map.empty,
+        generatedAt = None,
+        shouldNotify = true,
+        recipients = ActivityRecipients.empty
+      )
 
   }
 

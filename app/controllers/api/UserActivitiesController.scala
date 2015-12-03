@@ -1,7 +1,7 @@
 package controllers.api
 
 import com.google.inject.Inject
-import models.{ActivityResponse, ActivityTag}
+import models.{API, ActivityResponse, ActivityTag}
 import org.joda.time.DateTime
 import play.api.libs.json.{JsString, JsValue, Json, Writes}
 import play.api.mvc.Controller
@@ -25,9 +25,7 @@ class UserActivitiesController @Inject()(
       .map(user => activityService.getActivitiesForUser(user, limit = limit, before = before))
       .getOrElse(Seq.empty)
 
-    Ok(Json.obj(
-      "success" -> true,
-      "status" -> "ok",
+    Ok(API.success(
       "activities" -> activities
     ))
 

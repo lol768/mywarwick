@@ -14,19 +14,6 @@ class NewsController @Inject()(
   feedService: FeedService
 ) extends Controller {
 
-  implicit val writes = Writes { item: NewsItem =>
-    Json.obj(
-      "id" -> item.id,
-      "title" -> item.title,
-      "url" -> Json.obj(
-        "href" -> item.url
-      ),
-      "content" -> item.content,
-      "publicationDate" -> item.publicationDate.getMillis,
-      "source" -> item.source
-    )
-  }
-
   def feed = Action.async {
     val futures = newsService.allSources
       .map(source => feedService.fetch(source).map(feed => (source, feed)))

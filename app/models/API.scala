@@ -1,5 +1,6 @@
 package models
 
+import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json.{JsValue, Json, Writes}
 import warwick.sso.User
 
@@ -34,17 +35,24 @@ trait APIWriters {
 object API extends APIWriters {
 
   /**
-    * This particular method is a bit nonsense, but it does
-    * show how we might compose bits of JSON to re-use certain
-    * structures like users
+    * Standard format for a successful API response.
     */
-  def myActivityResponse(user: User): JsValue = Json.obj(
-    "user" -> user,
-    "activities" -> activityStream()
-  )
+  def success(data: (String, JsValueWrapper)*): JsValue =
+    Json.obj(data : _*) ++
+    Json.obj(
+      "success" -> true,
+      "status" -> "ok"
+    )
 
-  def activityStream(/** TODO arguments */): JsValue = Json.obj(
-    "@context" -> "http://www.w3.org/ns/activitystreams"
-  )
+  /**
+    * Standard format for a failed API response.
+    * TODO include params for standard-format error messages
+    */
+  def failure(status: String, data: (String, JsValueWrapper)*): JsValue =
+    Json.obj(data : _*) ++
+      Json.obj(
+        "success" -> false,
+        "status" -> status
+      )
 
 }
