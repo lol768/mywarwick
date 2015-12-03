@@ -7,7 +7,7 @@ polyfill();
 
 import { USER_RECEIVE } from './user';
 import { NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './news';
-import { TILES_FETCH, TILES_RECEIVE, TILES_FETCH_FAILURE, receivedTileData } from './tiles';
+import { TILES_FETCH, TILES_CONFIG_RECEIVE, TILES_CONTENT_RECEIVE, TILES_FETCH_FAILURE, receivedTilesConfig, receivedTileContent } from './tiles';
 import { receivedActivity, fetchedActivities, receivedNotification, fetchedNotifications } from './notifications';
 
 //                       //
@@ -39,18 +39,24 @@ function fetchWithCredentials(url) {
   });
 }
 
-export function fetchTileData() {
+export function fetchTilesConfig() {
   return dispatch => {
     dispatch({type: TILES_FETCH});
 
     return fetchWithCredentials('/api/tiles')
       .then(response => response.json())
-      .then(json => dispatch(receivedTileData(json.tiles)))
+      .then(json => dispatch(receivedTilesConfig(json.tiles)))
       .catch(err => dispatch({type: TILES_FETCH_FAILURE}));
   }
 }
 
 import _ from 'lodash';
+
+export function fetchTileContent(tileId) {
+  fetchWithCredentials('/api/tileContent?tileId=' + tileId)
+  .then(response => response.json())
+  .then(json => dispatch(receivedTileContent(json.tileContent)))
+}
 
 export function fetchActivities() {
   fetchWithCredentials('/api/streams/user')

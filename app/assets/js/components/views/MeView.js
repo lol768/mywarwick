@@ -15,7 +15,7 @@ import Immutable from 'immutable';
 import { connect } from 'react-redux';
 
 import { registerReducer } from '../../reducers';
-import { fetchTileData } from '../../serverpipe';
+import { fetchTilesConfig, fetchTileContent } from '../../serverpipe';
 
 const ZOOM_ANIMATION_DURATION = 500;
 
@@ -41,7 +41,7 @@ class MeView extends ReactComponent {
 
   constructor(props) {
     super(props);
-    this.props.dispatch(fetchTileData());
+    this.props.dispatch(fetchTilesConfig());
   }
 
   onTileClick(tile) {
@@ -60,32 +60,28 @@ class MeView extends ReactComponent {
   renderTile(tile, zoomed = false) {
     let onTileClick = this.onTileClick.bind(this);
 
-    let view = this;
-    let baseTile = tileElements[tile.type];
+    var tileDefaults = tile.tile;
 
-    let props = _.merge({}, tile, {
+    var tileConfig = tile.tileConfig;
+
+    let view = this;
+    let baseTile = tileElements[tileDefaults.tileType];
+
+    let props = _.merge({}, tileDefaults, {
       onClick(e) {
         onTileClick(tile, e);
       },
       view: this,
+      tileDefaults: tileDefaults,
       zoomed: zoomed,
-      key: zoomed ? tile.key + '-zoomed' : tile.key,
-      ref: zoomed ? tile.key + '-zoomed' : tile.key,
-      originalRef: tile.key,
+      tileConfig: tileConfig,
+      key: zoomed ? tileDefaults.id + '-zoomed' : tileDefaults.key,
+      ref: zoomed ? tileDefaults.key + '-zoomed' : tileDefaults.key,
+      originalRef: tileDefaults.key,
       onDismiss: this.onTileDismiss.bind(this)
     });
 
-    let element = class extends baseTile {
-      componentWillEnter(callback) {
-        view.componentWillEnter(props, callback);
-      }
-
-      componentWillLeave(callback) {
-        view.componentWillLeave(props, callback);
-      }
-    };
-
-    return React.createElement(element, props);
+    return React.createElement(baseTile, props);
   }
 
   animateTileZoomOut(tileComponent, zoomComponent, callback) {

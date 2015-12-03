@@ -26,7 +26,7 @@ class TileDaoImpl @Inject()() extends TileDao {
     if (ids.isEmpty)
       Seq.empty
     else
-      SQL("SELECT ID, DEFAULT_SIZE, FETCH_URL, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT FROM USER_TILE JOIN TILE ON TILE.ID = TILE_ID WHERE ID IN ({ids}) AND USERCODE = {usercode}")
+      SQL("SELECT ID, TILE_TYPE, DEFAULT_SIZE, FETCH_URL, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT FROM USER_TILE JOIN TILE ON TILE.ID = TILE_ID WHERE ID IN ({ids}) AND USERCODE = {usercode}")
         .on(
           'usercode -> usercode,
           'ids -> ids
@@ -34,26 +34,27 @@ class TileDaoImpl @Inject()() extends TileDao {
         .as(userTileParser.*)
 
   override def getTilesForUser(usercode: String)(implicit c: Connection): Seq[UserTile] =
-    SQL("SELECT ID, DEFAULT_SIZE, FETCH_URL, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT FROM USER_TILE JOIN TILE ON TILE.ID = TILE_ID WHERE USERCODE = {usercode} ORDER BY TILE_POSITION ASC")
+    SQL("SELECT ID, TILE_TYPE, DEFAULT_SIZE, FETCH_URL, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT FROM USER_TILE JOIN TILE ON TILE.ID = TILE_ID WHERE USERCODE = {usercode} ORDER BY TILE_POSITION ASC")
       .on('usercode -> usercode)
       .as(userTileParser.*)
 
   override def getDefaultTilesConfig(implicit c: Connection): Seq[UserTile] =
   //TODO: define collection of default tiles, and return them here
-    SQL("SELECT ID, DEFAULT_SIZE, FETCH_URL, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT FROM USER_TILE JOIN TILE ON TILE.ID = TILE_ID")
+    SQL("SELECT ID, TILE_TYPE, DEFAULT_SIZE, FETCH_URL, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT FROM USER_TILE JOIN TILE ON TILE.ID = TILE_ID")
       .as(userTileParser.*)
 
   def userTileParser: RowParser[UserTile] = {
     get[String]("ID") ~
+    get[String]("TILE_TYPE") ~
       get[String]("DEFAULT_SIZE") ~
       get[String]("FETCH_URL") ~
       get[Int]("TILE_POSITION") ~
       get[String]("TILE_SIZE") ~
       get[DateTime]("CREATED_AT") ~
       get[DateTime]("UPDATED_AT") map {
-      case tileId ~ defaultSize ~ fetchUrl ~ position ~ size ~ createdAt ~ updatedAt =>
+      case tileId ~ tileType ~ defaultSize ~ fetchUrl ~ position ~ size ~ createdAt ~ updatedAt =>
         UserTile(
-          Tile(tileId, TileSize.withName(defaultSize), fetchUrl),
+          Tile(tileId, tileType, TileSize.withName(defaultSize), fetchUrl),
           TileConfig(position, TileSize.withName(size)),
           None, createdAt, updatedAt
         )

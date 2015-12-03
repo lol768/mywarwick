@@ -20,8 +20,27 @@ class TilesController @Inject()(
   def tiles = UserAction.async { request =>
     val tileLayout = tileService.getTilesForUser(request.context.user)
 
-    getTileResult(tileLayout.tiles)
+    Future(
+      Ok(Json.obj(
+        "type" -> "tiles",
+        "tiles" -> tileLayout.tiles
+      ))
+    )
   }
+
+  def tilesData =
+    Future(
+      Ok(Json.obj(
+        "key" -> JsString("tabula"),
+        "type" -> JsString("count"),
+        "title" -> JsString("Tabula"),
+        "href" -> JsString("https://tabula.warwick.ac.uk"),
+        "backgroundColor" -> JsString("#239b92"),
+        "icon" -> JsString("cog"),
+        "count" -> JsNumber(3),
+        "word" -> JsString("actions required")
+      ))
+    )
 
   def tilesById(ids: Seq[String]) = RequiredUserAction.async { request =>
     request.context.user.map { user =>

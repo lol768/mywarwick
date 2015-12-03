@@ -10,19 +10,28 @@ import { makeStream, takeFromStream } from './stream';
 import SocketDatapipe from './SocketDatapipe';
 
 export const TILES_FETCH = 'tiles.fetch';
-export const TILES_RECEIVE = 'tiles.receive';
+export const TILES_CONFIG_RECEIVE = 'tiles.config.receive';
+export const TILE_CONTENT_RECEIVE = 'tile.content.receive';
 export const TILES_FETCH_FAILURE = 'tiles.fetch.failure';
 
-export function receivedTileData(data) {
+export function receivedTilesConfig(data) {
   return {
     type: TILES_RECEIVE,
     tiles: data
   };
 }
 
+export function receivedTileContent(data) {
+  return {
+    type: TILE_CONTENT_RECEIVE,
+    tilesContent: data
+  };
+}
+
+// TODO: should local storage keep tile config and tile content
 localforage.getItem('tiles').then(
   (value) => {
-    if (value != null) store.dispatch(receivedTileData(value));
+    if (value != null) store.dispatch(receivedTilesConfig(value));
   },
   (err) => log.warn('Problem loading tiles from local storage', err)
 );
@@ -44,7 +53,9 @@ registerReducer('tiles', (state = Immutable.List(), action) => {
     case TILES_FETCH_FAILURE:
       // Could set `error: true` and display an error message and/or retry
       return state;
-    case TILES_RECEIVE:
+    case TILES_CONTENT_RECEIVE:
+      return action.tilesContent;
+    case TILES_CONFIG_RECEIVE:
       return action.tiles;
     default:
       return state;
