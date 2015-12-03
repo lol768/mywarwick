@@ -15,6 +15,7 @@ import scala.util.{Failure, Success}
 
 class ActivityServiceTest extends PlaySpec with MockitoSugar with OneStartAppPerSuite {
 
+
   class Scope {
     val activityRecipientService = mock[ActivityRecipientService]
     val activityCreationDao = mock[ActivityCreationDao]
