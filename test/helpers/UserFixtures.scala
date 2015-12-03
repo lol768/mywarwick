@@ -3,7 +3,7 @@ package helpers
 import models.{ActivityPrototype, ActivityRecipients}
 import org.joda.time.DateTime
 import services.{Group, GroupName}
-import warwick.sso.{Department, Name, User, Usercode}
+import warwick.sso._
 
 /** Access via Fixtures.user */
 private[helpers] object UserFixtures {
@@ -20,37 +20,10 @@ private[helpers] object UserFixtures {
     )
 
   def makeFoundUser(usercode: String = "user"): User =
-    User(
-      usercode = Usercode(usercode),
-      universityId = None,
-      name = Name(None, None),
-      email = None,
-      department = None,
-      isStaffOrPGR = false,
-      isStaffNotPGR = false,
-      isStudent = true,
-      isAlumni = false,
-      isFound = true,
-      isVerified = true,
-      isLoginDisabled = false,
-      rawProperties = Map.empty
-    )
+    Users.create(Usercode(usercode), student = true)
+
 
   def makeNotFoundUser(usercode: String = "user"): User =
-    User(
-      usercode = Usercode(usercode),
-      universityId = None,
-      name = Name(None, None),
-      email = None,
-      department = None,
-      isStaffOrPGR = false,
-      isStaffNotPGR = false,
-      isStudent = true,
-      isAlumni = false,
-      isFound = false,
-      isVerified = true,
-      isLoginDisabled = false,
-      rawProperties = Map.empty
-    )
+    Users.create(Usercode(usercode), found = false)
 
 }

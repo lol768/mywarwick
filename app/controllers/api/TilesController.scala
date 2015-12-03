@@ -5,6 +5,7 @@ import models.UserTile
 import play.api.libs.json._
 import play.api.mvc.{Controller, Result}
 import services.{SecurityService, TileContentService, TileService}
+import warwick.sso.User
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -20,23 +21,23 @@ class TilesController @Inject()(
   def tiles = UserAction.async { request =>
     val tileLayout = tileService.getTilesForUser(request.context.user)
 
-    getTileResult(tileLayout.tiles)
+    getTileResult(request.context.user, tileLayout.tiles)
   }
 
   def tilesById(ids: Seq[String]) = RequiredUserAction.async { request =>
     request.context.user.map { user =>
       val tiles = tileService.getTilesByIds(user.usercode, ids)
 
-      getTileResult(tiles)
+      getTileResult(Option(user), tiles)
     }.get // RequiredUserAction
   }
 
-  private def getTileResult(tiles: Seq[UserTile]): Future[Result] = {
-    val futureContent = tiles.map(tileContentService.getTileContent)
+  private def getTileResult(user: Option[User], tiles: Seq[UserTile]): Future[Result] = {
+    val futures = tiles.map { t =>
+      tileContentService.getTileContent(user, t).map((t, _))
+    }
 
-    Future.sequence(futureContent).map { content =>
-      val result: Seq[(UserTile, JsObject)] = tiles.zip(content)
-
+    Future.sequence(futures).map { result =>
       Ok(Json.obj(
         "success" -> true,
         "status" -> "ok",

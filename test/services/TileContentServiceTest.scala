@@ -1,34 +1,29 @@
 package services
 
-import com.google.inject.Guice
-import helpers.TestApplications
+import helpers.{ExternalServers, Fixtures, TestApplications}
 import models._
+import org.apache.http.client.methods.HttpUriRequest
 import org.joda.time.DateTime
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.Configuration
-import play.api.inject.BuiltinModule
-import play.api.inject.guice.{GuiceApplicationBuilder, GuiceInjectorBuilder}
 import play.api.libs.json.Json
-import play.api.libs.ws.ning.{NingWSAPI, NingWSModule}
-import play.core.server._
-import play.api.routing.sird._
+import play.api.mvc.Results._
 import play.api.mvc._
-import Results._
+import play.api.routing.Router
+import play.api.routing.sird._
+import play.api.test.TestServer
+import uk.ac.warwick.sso.client.trusted.CurrentApplication
 
-class TileContentServiceTest extends PlaySpec with ScalaFutures {
+class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSugar {
 
-  type RouteFunction = PartialFunction[RequestHeader, Handler]
+  val oneThirtyThree = API.success(
+    "value" -> "£1.33"
+  )
 
-  val config = Configuration.from(Map("play.http" -> Map()))
-  val app = TestApplications.minimal()
-  val injector = app.injector
-
-  val routes: RouteFunction = {
-    case GET(p"/content/printcredits") => Action {
-      Ok(API.success(
-        "value" -> "£1.33"
-      ))
+  val routes: Router.Routes = {
+    case POST(p"/content/printcredits") => Action { request =>
+      Ok(oneThirtyThree)
     }
   }
 
@@ -45,21 +40,21 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures {
   )
 
   "TileContentService" should {
-    val service = new TileContentServiceImpl(injector.instanceOf[NingWSAPI])
+    val trusted = mock[CurrentApplication]
+    val service = new TileContentServiceImpl(trusted) {
+      // do nothing - no testing of TrustedApps here
+      override def signRequest(trustedApp: CurrentApplication, usercode: String, request: HttpUriRequest): Unit = {}
+    }
+    val user = Fixtures.user.makeFoundUser()
 
     "fetch a Tile's URL" in {
-      runServer(routes) { port =>
+      ExternalServers.runServer(routes) { port =>
         val ut = userPrinterTile(s"http://localhost:${port}/content/printcredits")
-        service.getTileContent(ut).futureValue must be (Json.obj())
+        service.getTileContent(Some(user), ut).futureValue must be (oneThirtyThree)
       }
     }
   }
 
-  def runServer[A](routes: RouteFunction)(block: (Int) => A): A = {
-    val port = 19000
-    val server = NettyServer.fromRouter(ServerConfig(port = Some(port)))(routes)
-    try block(port)
-    finally server.stop()
-  }
+
 
 }
