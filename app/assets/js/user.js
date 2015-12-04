@@ -22,15 +22,16 @@ export function userReceive(data) {
     localforage.getItem('usercode', (err, currentUsercode) => {
       // If we are a different user than we were before (incl. anonymous),
       // nuke the store, which also clears local storage
-      if (currentUsercode !== data.usercode)
-        dispatch(resetStore());
-
-      localforage.setItem('usercode', data.usercode, () => {
-        dispatch({
-          type: USER_RECEIVE,
-          data: data
-        });
-      });
+      if (currentUsercode !== data.usercode) {
+        dispatch(resetStore())
+          .then(() => localforage.setItem('usercode', data.usercode))
+          .then(() =>
+            dispatch({
+              type: USER_RECEIVE,
+              data: data
+            })
+          );
+      }
     });
   };
 }

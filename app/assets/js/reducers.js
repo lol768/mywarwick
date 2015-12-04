@@ -104,5 +104,5 @@ export default function app(state = initialState, action = undefined) {
 import localforage from 'localforage';
 
 export function resetStore() {
-  return dispatch => localforage.clear(() => dispatch({type: RESET}));
+  return dispatch => localforage.clear().then(() => dispatch({type: RESET}));
 }
