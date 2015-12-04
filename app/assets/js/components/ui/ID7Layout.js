@@ -22,16 +22,11 @@ import { updateLayoutClass } from '../Application';
 class ID7Layout extends ReactComponent {
 
   componentWillMount() {
-    this.maybeUpdateLayoutClass();
+    this.props.dispatch(updateLayoutClass());
   }
 
   componentWillReceiveProps() {
-    this.maybeUpdateLayoutClass();
-  }
-
-  maybeUpdateLayoutClass() {
-    if (!this.props.layoutClassName)
-      this.props.dispatch(updateLayoutClass());
+    this.props.dispatch(updateLayoutClass());
   }
 
   goToHome(e) {
