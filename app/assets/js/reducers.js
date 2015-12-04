@@ -89,8 +89,7 @@ export function composeReducers(reducers) {
  * Primary reducer for the application
  */
 export default function app(state = initialState, action = undefined) {
-  console.log('Action: ' + action.type, action);
-  if (mutableGlobalReducers === undefined)
+  if (mutableGlobalReducers === undefined || action == undefined)
     return state;
 
   if (action.type === RESET)
