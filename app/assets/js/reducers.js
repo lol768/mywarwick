@@ -1,6 +1,11 @@
 import Immutable from 'immutable';
 
+import store from './store';
+
 const initialState = Immutable.Map();
+
+export const RESET = 'RESET';
+const INIT = 'INIT';
 
 /*
  * Named to make it super clear when you're not being totally functional
@@ -22,15 +27,13 @@ export function makeReducers() {
   return Immutable.Map();
 }
 
-// const store = require('./store');
-import store from './store';
 export function registerReducer(name, reducer) {
   mutateReducers(appendReducer(mutableGlobalReducers, name, reducer));
 
-  // Dispatch an action handled by the newly-added receiver, to add
-  // the initial state to the store immediately
+  // Dispatch an initialisation action to add the initial state to
+  // the store immediately
   store.dispatch({
-    type: name + '.__init'
+    type: INIT
   });
 }
 
@@ -86,27 +89,21 @@ export function composeReducers(reducers) {
  * Primary reducer for the application
  */
 export default function app(state = initialState, action = undefined) {
-  if (action === undefined || action.type === undefined) {
+  console.log('Action: ' + action.type, action);
+  if (mutableGlobalReducers === undefined)
     return state;
-  }
 
-  // Only actions with a namespace-style type may use sub-reducers
-  if (action.type.indexOf('.') >= 0) {
-    // The action's namespace is everything before the first full-
-    // stop
-    let namespace = action.type.substring(0, action.type.indexOf('.'));
+  if (action.type === RESET)
+    state = initialState;
 
-    // Compose the reducers for this namespace, then run them with
-    // the current subtree
-    let fn = composeReducers(mutableGlobalReducers.get(namespace));
-    let subtree = fn(state.get(namespace), action);
+  return mutableGlobalReducers.reduce(
+    (state, reducers, namespace) => state.update(namespace, (subtree) => composeReducers(reducers)(subtree, action)),
+    state
+  );
+}
 
-    return (subtree === undefined) ?
-      state.delete(namespace) :
-      state.mergeDeep({
-        [namespace]: subtree
-      });
-  } else {
-    return state;
-  }
+import localforage from 'localforage';
+
+export function resetStore() {
+  return dispatch => localforage.clear(() => dispatch({type: RESET}));
 }
