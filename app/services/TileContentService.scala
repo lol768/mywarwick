@@ -1,5 +1,6 @@
 package services
 
+import java.io.IOException
 import java.nio.charset.Charset
 import javax.inject.Inject
 
@@ -42,7 +43,15 @@ class TileContentServiceImpl @Inject() (
     val response = client.execute(request)
     try {
       val content = response.getEntity.getContent
-      Json.parse(content).as[JsObject]
+      // TODO should be parsing this into some proper API respone object, not dealing with JsObject
+      val apiResult = Json.parse(content).as[JsObject]
+      val success = (apiResult \ "success").validate[Boolean].getOrElse(false)
+      if (success) {
+        apiResult - "success" - "status"
+      } else {
+        // FIXME how to pass API failure? Future failure, or encode it in the value?
+        throw new IOException()
+      }
     } finally {
       response.close()
     }
