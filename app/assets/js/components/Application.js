@@ -27,29 +27,30 @@ import store from '../store';
 
 import { registerReducer } from '../reducers';
 
-registerReducer('ui', (state = Immutable.Map()) => {
-  // This is not ideal; reducers should be pure functions but this one depends
-  // on the value of isDesktop().  Done this way so we can reset the store
-  // without losing this value, that is required to render correctly render
-  // the UI.
-
-  return state.merge({
-    className: isDesktop() ? 'desktop' : 'mobile'
-  });
+registerReducer('ui', (state = Immutable.Map(), action) => {
+  switch (action.type) {
+    case 'ui.class':
+      return state.set('className', action.className);
+    default:
+      return state;
+  }
 });
+
+export function updateLayoutClass() {
+  return {
+    type: 'ui.class',
+    className: isDesktop() ? 'desktop' : 'mobile'
+  };
+}
 
 var wasDesktop = isDesktop();
-store.dispatch({
-  type: 'ui.class'
-});
+store.dispatch(updateLayoutClass());
 
 $(() => {
   $(window).on('resize', () => {
     if (wasDesktop != isDesktop()) {
       wasDesktop = isDesktop();
-      store.dispatch({
-        type: 'ui.class'
-      });
+      store.dispatch(updateLayoutClass());
     }
   });
 });
