@@ -1,7 +1,7 @@
 package controllers.api
 
 import com.google.inject.Inject
-import models.UserTile
+import models.{API, UserTile}
 import play.api.libs.json._
 import play.api.mvc.{Controller, Result}
 import services.{SecurityService, TileContentService, TileService}
@@ -9,6 +9,16 @@ import warwick.sso.User
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
+case class TileAndContent(tile: UserTile, content: JsObject)
+object TileAndContent {
+  implicit val format = Json.format[TileAndContent]
+}
+case class TileResult(tiles: Seq[TileAndContent])
+object TileResult {
+  implicit val format = Json.format[TileResult]
+}
+
 
 class TilesController @Inject()(
   securityService: SecurityService,
@@ -38,16 +48,11 @@ class TilesController @Inject()(
     }
 
     Future.sequence(futures).map { result =>
-      Ok(Json.obj(
-        "success" -> true,
-        "status" -> "ok",
-        "tiles" -> result.map {
-          case (t, c) => Json.obj(
-            "tile" -> t,
-            "content" -> c
-          )
-        }
-      ))
+      val tileResult = TileResult(result.map {
+        case(tile, content) => TileAndContent(tile, content)
+      })
+      Ok(Json.toJson(API.Success[TileResult]("ok", tileResult)))
     }
   }
 }
+

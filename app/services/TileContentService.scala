@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 import com.google.common.base.Charsets
 import com.google.inject.ImplementedBy
-import models.UserTile
+import models.{API, UserTile}
 import org.apache.http.client.methods.{HttpUriRequest, HttpPost}
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
@@ -42,16 +42,13 @@ class TileContentServiceImpl @Inject() (
     signRequest(trustedApp, usercode, request)
     val response = client.execute(request)
     try {
-      val content = response.getEntity.getContent
-      // TODO should be parsing this into some proper API respone object, not dealing with JsObject
-      val apiResult = Json.parse(content).as[JsObject]
-      val success = (apiResult \ "success").validate[Boolean].getOrElse(false)
-      if (success) {
-        apiResult - "success" - "status"
-      } else {
-        // FIXME how to pass API failure? Future failure, or encode it in the value?
-        throw new IOException()
+
+      Json.parse(response.getEntity.getContent).as[API.Response[JsObject]] match {
+        case API.Success(status, data) => data
+          // FIXME this is shit
+        case API.Failure(status, errors) => throw new IOException(errors.map(_.message).mkString(", "))
       }
+
     } finally {
       response.close()
     }
