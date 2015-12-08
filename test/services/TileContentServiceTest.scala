@@ -18,9 +18,6 @@ import uk.ac.warwick.sso.client.trusted.CurrentApplication
 
 class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSugar {
 
-  override implicit def patienceConfig =
-    PatienceConfig(timeout = Span(1, Seconds), interval = Span(20, Millis))
-
   val response: API.Response[JsObject] = API.Success("ok", Json.obj(
     "href" -> "https://printcredits.example.com/api.json",
     "items" -> Seq(
@@ -30,12 +27,14 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
       )
     )
   ))
-
   val routes: Router.Routes = {
     case POST(p"/content/printcredits") => Action { request =>
       Ok(Json.toJson(response))
     }
   }
+
+  override implicit def patienceConfig =
+    PatienceConfig(timeout = Span(1, Seconds), interval = Span(20, Millis))
 
   def userPrinterTile(url: String) = UserTile(
     tile = Tile(

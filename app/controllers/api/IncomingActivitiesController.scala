@@ -22,17 +22,6 @@ class IncomingActivitiesController @Inject()(
 
   import securityService._
 
-  def readsPostedActivity(providerId: String, shouldNotify: Boolean): Reads[ActivityPrototype] =
-    (Reads.pure(providerId) and
-      (__ \ "type").read[String] and
-      (__ \ "title").read[String] and
-      (__ \ "text").read[String] and
-      (__ \ "tags").read[Seq[ActivityTag]].orElse(Reads.pure(Seq.empty)) and
-      (__ \ "replace").read[Map[String, String]].orElse(Reads.pure(Map.empty)) and
-      (__ \ "generated_at").readNullable[DateTime] and
-      Reads.pure(shouldNotify) and
-      (__ \ "recipients").read[ActivityRecipients]) (ActivityPrototype.apply _)
-
   def postActivity(providerId: String) = APIAction(parse.json) { implicit request =>
     postItem(providerId, shouldNotify = false)
   }
@@ -60,6 +49,17 @@ class IncomingActivitiesController @Inject()(
         forbidden(providerId, user)
       }
     }.get // APIAction calls this only if request.context.user is defined
+
+  def readsPostedActivity(providerId: String, shouldNotify: Boolean): Reads[ActivityPrototype] =
+    (Reads.pure(providerId) and
+      (__ \ "type").read[String] and
+      (__ \ "title").read[String] and
+      (__ \ "text").read[String] and
+      (__ \ "tags").read[Seq[ActivityTag]].orElse(Reads.pure(Seq.empty)) and
+      (__ \ "replace").read[Map[String, String]].orElse(Reads.pure(Map.empty)) and
+      (__ \ "generated_at").readNullable[DateTime] and
+      Reads.pure(shouldNotify) and
+      (__ \ "recipients").read[ActivityRecipients]) (ActivityPrototype.apply _)
 
   private def forbidden(providerId: String, user: User): Result =
     Forbidden(API.failure("forbidden",

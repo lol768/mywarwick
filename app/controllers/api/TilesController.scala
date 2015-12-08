@@ -37,14 +37,6 @@ class TilesController @Inject()(
     getTileResult(request.context.user, tileLayout.tiles)
   }
 
-  def tilesById(ids: Seq[String]) = RequiredUserAction.async { request =>
-    request.context.user.map { user =>
-      val tiles = tileService.getTilesByIds(user.usercode, ids)
-
-      getTileResult(Option(user), tiles)
-    }.get // RequiredUserAction
-  }
-
   private def getTileResult(user: Option[User], tiles: Seq[UserTile]): Future[Result] = {
     val futures = tiles.map { t =>
       tileContentService.getTileContent(user, t).map {
@@ -62,6 +54,14 @@ class TilesController @Inject()(
       })
       Ok(Json.toJson(API.Success[TileResult]("ok", tileResult)))
     }
+  }
+
+  def tilesById(ids: Seq[String]) = RequiredUserAction.async { request =>
+    request.context.user.map { user =>
+      val tiles = tileService.getTilesByIds(user.usercode, ids)
+
+      getTileResult(Option(user), tiles)
+    }.get // RequiredUserAction
   }
 }
 
