@@ -71,10 +71,11 @@ paths:
                 type: boolean
               status:
                 type: string
-              activities:
-                type: array
-                items:
-                  $ref: '#/definitions/StreamItem'
+              data:
+                activities:
+                  type: array
+                  items:
+                    $ref: '#/definitions/StreamItem'
         401:
           $ref: '#/responses/unauthorized'
   /streams/{provider_id}/activity:
@@ -135,16 +136,17 @@ definitions:
         type: boolean
       status:
         type: string
-      tiles:
-        type: array
-        items:
-          type: object
-          properties:
-            tile:
-              $ref: '#/definitions/Tile'
-            content:
-              type: object
-              description: Document representing the information for display on the associated tile
+      data:
+        tiles:
+          type: array
+          items:
+            type: object
+            properties:
+              tile:
+                $ref: '#/definitions/Tile'
+              content:
+                type: object
+                description: Document representing the information for display on the associated tile
   ErrorResponse:
     readOnly: true
     type: object
@@ -241,9 +243,10 @@ definitions:
       status:
         type: string
         example: ok
-      id:
-        type: string
-        example: 9e71b33b-debd-40e5-8e6c-989c9de8c547
+      data:
+        id:
+          type: string
+          example: 9e71b33b-debd-40e5-8e6c-989c9de8c547
   PostedStreamItem:
     type: object
     required:
