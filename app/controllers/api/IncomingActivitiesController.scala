@@ -3,6 +3,7 @@ package controllers.api
 import com.google.inject.Inject
 import models._
 import org.joda.time.DateTime
+import play.api.i18n.{Messages, MessagesApi, I18nSupport}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
@@ -15,20 +16,11 @@ import scala.util.{Failure, Success}
 class IncomingActivitiesController @Inject()(
   securityService: SecurityService,
   activityService: ActivityService,
-  providerPermissionService: ProviderPermissionService
-) extends Controller {
+  providerPermissionService: ProviderPermissionService,
+  val messagesApi: MessagesApi
+) extends Controller with I18nSupport {
 
   import securityService._
-
-  implicit val readsActivityRecipients = Json.reads[ActivityRecipients]
-
-  implicit val readsActivityTag: Reads[ActivityTag] =
-    ((__ \ "name").read[String] and
-      __.read[TagValue]((
-        (__ \ "value").read[String] and
-          (__ \ "display_value").readNullable[String]
-        ) (TagValue))
-      ) (ActivityTag.apply _)
 
   def readsPostedActivity(providerId: String, shouldNotify: Boolean): Reads[ActivityPrototype] =
     (Reads.pure(providerId) and
@@ -56,7 +48,10 @@ class IncomingActivitiesController @Inject()(
           activityService.save(data) match {
             case Success(activityId) => created(activityId)
             case Failure(NoRecipientsException) => noRecipients
-            case Failure(_) => otherError
+            // FIXME we are swallowing almost any exception here
+            // differentiate between user error and bug
+            // or at least log the exception.
+            case Failure(e) => otherError
           }
         }.recoverTotal {
           e => validationError(e)
@@ -67,45 +62,51 @@ class IncomingActivitiesController @Inject()(
     }.get // APIAction calls this only if request.context.user is defined
 
   private def forbidden(providerId: String, user: User): Result =
-    Forbidden(Json.obj(
-      "success" -> false,
-      "status" -> "forbidden",
+    Forbidden(API.failure("forbidden",
       "errors" -> Json.arr(
         Json.obj(
+          "id" -> "no-permission",
           "message" -> s"User '${user.usercode.string}' does not have permission to post to the stream for provider '$providerId'"
         )
       )
     ))
 
   private def created(activityId: String): Result =
-    Created(Json.obj(
-      "success" -> true,
-      "status" -> "ok",
+    Created(API.success(
       "id" -> activityId
     ))
 
   private def noRecipients: Result =
-    PaymentRequired(Json.obj(
-      "success" -> false,
-      "status" -> "request_failed",
+    PaymentRequired(API.failure("request_failed",
       "errors" -> Json.arr(
         Json.obj(
+          "id" -> "no-recipients",
           "message" -> "No valid recipients for activity"
         )
       )
     ))
 
   private def otherError: Result =
-    InternalServerError(Json.obj(
-      "success" -> false,
-      "status" -> "internal_server_error"
+    InternalServerError(API.failure("internal_server_error",
+      "errors" -> Json.arr(
+        Json.obj(
+          "id" -> "internal-error",
+          "message" -> "An internal error occurred"
+        )
+      )
     ))
 
   private def validationError(error: JsError): Result =
-    BadRequest(Json.obj(
-      "success" -> false,
-      "status" -> "bad_request",
-      "errors" -> JsError.toJson(error)
+    BadRequest(API.failure("bad_request",
+      "errors" -> JsError.toFlatForm(error).map {
+        case (field, errors) =>
+          val propertyName = field.substring(4) // Remove 'obj.' from start of field name
+
+          Json.obj(
+            "id" -> s"invalid-$propertyName",
+            "message" -> errors.flatMap(_.messages).map(Messages(_, propertyName)).mkString(", ")
+          )
+      }
     ))
 
 }

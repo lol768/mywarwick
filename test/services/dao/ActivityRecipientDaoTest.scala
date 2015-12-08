@@ -2,8 +2,7 @@ package services.dao
 
 import anorm.SQL
 import anorm.SqlParser._
-import helpers.OneStartAppPerSuite
-import helpers.TestObjectFactory._
+import helpers.{Fixtures, OneStartAppPerSuite}
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
 import play.api.db.Database
@@ -13,12 +12,14 @@ class ActivityRecipientDaoTest extends PlaySpec with OneStartAppPerSuite {
 
   val activityDao = app.injector.instanceOf[ActivityDao]
   val activityRecipientDao = app.injector.instanceOf[ActivityRecipientDao]
+  
+  val activityPrototype = Fixtures.activityPrototype.submissionDue
 
   "ActivityRecipientDao" should {
 
     "create a recipient" in transaction { implicit c =>
 
-      val activityId = activityDao.save(makeActivityPrototype(), Seq.empty)
+      val activityId = activityDao.save(activityPrototype, Seq.empty)
 
       activityRecipientDao.create(activityId, "someone", None)
 
@@ -32,7 +33,7 @@ class ActivityRecipientDaoTest extends PlaySpec with OneStartAppPerSuite {
 
     "mark an activity as sent" in transaction { implicit c =>
 
-      val activityId = activityDao.save(makeActivityPrototype(), Seq.empty)
+      val activityId = activityDao.save(activityPrototype, Seq.empty)
 
       activityRecipientDao.create(activityId, "someone", None)
       activityRecipientDao.markSent(activityId, "someone")

@@ -1,7 +1,8 @@
 package models
 
 import org.joda.time.DateTime
-import play.api.libs.json.{JsString, Writes, JsValue, Json}
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 case class Activity(
   id: String,
@@ -43,6 +44,14 @@ case class ActivityResponse(
 )
 
 object ActivityTag {
+  implicit val reads: Reads[ActivityTag] =
+    ((__ \ "name").read[String] and
+      __.read[TagValue]((
+        (__ \ "value").read[String] and
+          (__ \ "display_value").readNullable[String]
+        ) (TagValue))
+      ) (ActivityTag.apply _)
+
   implicit val writes: Writes[ActivityTag] = new Writes[ActivityTag] {
     override def writes(tag: ActivityTag): JsValue = Json.obj(
       "name" -> tag.name,
@@ -78,4 +87,6 @@ case class ActivityRecipients(
 
 object ActivityRecipients {
   lazy val empty = ActivityRecipients(None, None)
+
+  implicit val readsActivityRecipients = Json.reads[ActivityRecipients]
 }

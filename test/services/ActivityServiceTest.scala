@@ -13,7 +13,8 @@ import warwick.sso.Usercode
 
 import scala.util.{Failure, Success}
 
-class ActivityServiceTest extends PlaySpec with MockitoSugar with OneStartAppPerSuite {
+class ActivityServiceTest extends PlaySpec with MockitoSugar {
+
 
   class Scope {
     val activityRecipientService = mock[ActivityRecipientService]
@@ -28,7 +29,7 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar with OneStartAppPer
       new PubSub {
         override def publish(topic: String, message: Any): Unit = {}
       },
-      app.injector.instanceOf[Database]
+      new MockDatabase()
     )
 
     val proto = Fixtures.activityPrototype.submissionDue

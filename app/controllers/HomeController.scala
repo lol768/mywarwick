@@ -8,6 +8,7 @@ import play.api.Play.current
 import play.api.libs.json._
 import play.api.mvc._
 import services.SecurityService
+import system.Logging
 import warwick.sso._
 
 import scala.concurrent.Future
@@ -15,17 +16,14 @@ import scala.concurrent.Future
 class HomeController @Inject()(
   security: SecurityService,
   ssoClient: SSOClient
-) extends Controller {
+) extends Controller with Logging {
 
   import security._
-
-  val logger = Logger(getClass)
 
   def index = Action { request =>
     implicit val links = ssoClient.linkGenerator(request)
     Ok(views.html.index())
   }
-
 
   def socket = WebSocket.tryAcceptWithActor[JsValue, JsValue] { request =>
     SecureWebsocket(request) { loginContext: LoginContext =>

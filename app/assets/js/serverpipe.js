@@ -5,7 +5,7 @@ import fetch from 'isomorphic-fetch';
 import { polyfill } from 'es6-promise';
 polyfill();
 
-import { USER_RECEIVE } from './user';
+import { userReceive } from './user';
 import { NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './news';
 import { TILES_FETCH, TILES_CONFIG_RECEIVE, TILE_CONTENT_RECEIVE, TILES_FETCH_FAILURE, receivedTilesConfig, receivedTileContent } from './tiles';
 import { receivedActivity, fetchedActivities, receivedNotification, fetchedNotifications } from './notifications';
@@ -80,10 +80,7 @@ SocketDatapipe.getUpdateStream().subscribe((data) => {
       store.dispatch(data.activity.notification ? receivedNotification(data.activity) : receivedActivity(data.activity));
       break;
     case 'who-am-i':
-      store.dispatch({
-        type: USER_RECEIVE,
-        data: data['user-info']
-      });
+      store.dispatch(userReceive(data['user-info']));
       break;
     default:
     // nowt
