@@ -61,7 +61,6 @@ class MeView extends ReactComponent {
     let onTileClick = this.onTileClick.bind(this);
 
     var tileDefaults = tile.tile;
-
     var tileConfig = tile.tileConfig;
 
     let view = this;

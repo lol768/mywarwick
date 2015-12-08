@@ -4,6 +4,8 @@ import ReactComponent from 'react/lib/ReactComponent';
 import store from '../../store';
 import classNames from 'classnames';
 
+import { connect } from 'react-redux';
+
 import $ from 'jquery';
 
 import { fetchTileContent } from '../../serverpipe'
@@ -63,3 +65,9 @@ export default class Tile extends ReactComponent {
   }
 
 }
+
+let select = (state) => ({
+  content: state.get('tile-data').get(this.props.id, undefined).toJS()
+});
+
+export default connect(select)(Tile);

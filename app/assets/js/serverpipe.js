@@ -7,7 +7,7 @@ polyfill();
 
 import { USER_RECEIVE } from './user';
 import { NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './news';
-import { TILES_FETCH, TILES_CONFIG_RECEIVE, TILES_CONTENT_RECEIVE, TILES_FETCH_FAILURE, receivedTilesConfig, receivedTileContent } from './tiles';
+import { TILES_FETCH, TILES_CONFIG_RECEIVE, TILE_CONTENT_RECEIVE, TILES_FETCH_FAILURE, receivedTilesConfig, receivedTileContent } from './tiles';
 import { receivedActivity, fetchedActivities, receivedNotification, fetchedNotifications } from './notifications';
 
 //                       //
@@ -52,7 +52,7 @@ export function fetchTilesConfig() {
 
 import _ from 'lodash';
 
-export function fetchTileContent(tileId) {
+export function fetchTileContent() {
   fetchWithCredentials('/api/tileContent?tileId=' + tileId)
   .then(response => response.json())
   .then(json => dispatch(receivedTileContent(json.tileContent)))

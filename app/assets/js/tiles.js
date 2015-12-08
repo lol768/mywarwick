@@ -16,7 +16,7 @@ export const TILES_FETCH_FAILURE = 'tiles.fetch.failure';
 
 export function receivedTilesConfig(data) {
   return {
-    type: TILES_RECEIVE,
+    type: TILES_CONFIG_RECEIVE,
     tiles: data
   };
 }
@@ -24,7 +24,7 @@ export function receivedTilesConfig(data) {
 export function receivedTileContent(data) {
   return {
     type: TILE_CONTENT_RECEIVE,
-    tilesContent: data
+    tileContent: data
   };
 }
 
@@ -53,11 +53,18 @@ registerReducer('tiles', (state = Immutable.List(), action) => {
     case TILES_FETCH_FAILURE:
       // Could set `error: true` and display an error message and/or retry
       return state;
-    case TILES_CONTENT_RECEIVE:
-      return action.tilesContent;
     case TILES_CONFIG_RECEIVE:
       return action.tiles;
     default:
       return state;
+  }
+});
+
+
+registerReducer('tile-data', (state = Immutable.Map(), action) => {
+  switch (action.type) {
+    case TILE_CONTENT_RECEIVE:
+      console.log(action.tileContent);
+      return state.set(action.tileContent.id, action.tileContent);
   }
 });

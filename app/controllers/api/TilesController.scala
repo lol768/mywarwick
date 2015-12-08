@@ -28,20 +28,6 @@ class TilesController @Inject()(
     )
   }
 
-  def tilesData =
-    Future(
-      Ok(Json.obj(
-        "key" -> JsString("tabula"),
-        "type" -> JsString("count"),
-        "title" -> JsString("Tabula"),
-        "href" -> JsString("https://tabula.warwick.ac.uk"),
-        "backgroundColor" -> JsString("#239b92"),
-        "icon" -> JsString("cog"),
-        "count" -> JsNumber(3),
-        "word" -> JsString("actions required")
-      ))
-    )
-
   def tilesById(ids: Seq[String]) = RequiredUserAction.async { request =>
     request.context.user.map { user =>
       val tiles = tileService.getTilesByIds(user.usercode, ids)

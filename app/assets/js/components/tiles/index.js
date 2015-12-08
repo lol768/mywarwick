@@ -11,8 +11,11 @@ export class list extends ReactComponent {
 
   render() {
     var content;
+    // if there is tile data to display
     if (this.props.content)
-      content = <ul>{this.props.items.map((item) => <ListTileItem {...item} />)}</ul>
+      content = <ul>
+        {this.props.content.items.map((item) => <ListTileItem {...item} />)}
+      </ul>;
     else content = <em>loading tile data...</em>;
     return (
       <Tile ref="tile" {...this.props}>
@@ -34,7 +37,7 @@ export class text extends ReactComponent {
 
   componentDidMount() {
     let interval = setInterval(this.onInterval.bind(this), 5000);
-    if(this.props.content) {
+    if (this.props.content) {
       this.setState({
         transitionInterval: interval
       });
@@ -63,9 +66,9 @@ export class text extends ReactComponent {
     var content;
     // if there is tile data to display
     if (this.props.content) {
-      let itemsToDisplay = this.props.zoomed ? this.props.items : [this.props.items[this.state.itemIndex]];
+      let itemsToDisplay = this.props.zoomed ? this.props.content.items : [this.props.content.items[this.state.itemIndex]];
 
-      let content = itemsToDisplay.map((item) => (
+      content = itemsToDisplay.map((item) => (
         <div className="tile__item" key={item.key}>
           <span className="tile__callout">{item.callout}</span>
           <span className="tile__text">{item.text}</span>
@@ -93,7 +96,7 @@ export class count extends ReactComponent {
       return (
         <Tile ref="tile" {...this.props}>
           <ul>
-            {this.props.items.map((item) => <ListTileItem {...item} />)}
+            {this.props.content.items.map((item) => <ListTileItem {...item} />)}
           </ul>
         </Tile>
       );
