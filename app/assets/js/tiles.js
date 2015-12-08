@@ -45,7 +45,7 @@ registerReducer('tiles', (state = Immutable.List(), action) => {
       // Could set `error: true` and display an error message and/or retry
       return state;
     case TILES_RECEIVE:
-      return action.tiles;
+      return Immutable.fromJS(action.tiles);
     default:
       return state;
   }

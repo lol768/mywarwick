@@ -17,7 +17,17 @@ import { navigate } from '../../navigate';
 import { connect } from 'react-redux';
 import { getStreamSize } from '../../stream';
 
+import { updateLayoutClass } from '../Application';
+
 class ID7Layout extends ReactComponent {
+
+  componentWillMount() {
+    this.props.dispatch(updateLayoutClass());
+  }
+
+  componentWillReceiveProps() {
+    this.props.dispatch(updateLayoutClass());
+  }
 
   goToHome(e) {
     e.preventDefault();
@@ -114,7 +124,7 @@ let select = (state) => {
   return {
     layoutClassName: state.get('ui').get('className'),
     notificationsCount: getStreamSize(state.get('notifications')),
-    activitiesCount: getStreamSize(state.get('activities')),
+    activitiesCount: getStreamSize(state.get('activities'))
   };
 };
 

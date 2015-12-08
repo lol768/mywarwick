@@ -1,6 +1,8 @@
 import Immutable from 'immutable';
 
-import { registerReducer } from './reducers';
+import localforage from 'localforage';
+
+import { registerReducer, resetStore } from './reducers';
 import SocketDatapipe from './SocketDatapipe';
 import store from './store';
 
@@ -15,4 +17,21 @@ registerReducer('user', (state = Immutable.Map(), action) => {
   }
 });
 
-
+export function userReceive(data) {
+  return dispatch => {
+    localforage.getItem('usercode', (err, currentUsercode) => {
+      // If we are a different user than we were before (incl. anonymous),
+      // nuke the store, which also clears local storage
+      if (currentUsercode !== data.usercode) {
+        dispatch(resetStore())
+          .then(() => localforage.setItem('usercode', data.usercode))
+          .then(() =>
+            dispatch({
+              type: USER_RECEIVE,
+              data: data
+            })
+          );
+      }
+    });
+  };
+}

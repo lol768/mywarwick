@@ -27,30 +27,30 @@ import store from '../store';
 
 import { registerReducer } from '../reducers';
 
-let initialState = Immutable.Map();
-registerReducer('ui', (state = initialState, action) => {
+registerReducer('ui', (state = Immutable.Map(), action) => {
   switch (action.type) {
     case 'ui.class':
-      return state.merge({className: action.name});
+      return state.set('className', action.className);
     default:
       return state;
   }
 });
 
+export function updateLayoutClass() {
+  return {
+    type: 'ui.class',
+    className: isDesktop() ? 'desktop' : 'mobile'
+  };
+}
+
 var wasDesktop = isDesktop();
-store.dispatch({
-  type: 'ui.class',
-  name: wasDesktop ? 'desktop' : 'mobile'
-});
+store.dispatch(updateLayoutClass());
 
 $(() => {
   $(window).on('resize', () => {
     if (wasDesktop != isDesktop()) {
       wasDesktop = isDesktop();
-      store.dispatch({
-        type: 'ui.class',
-        name: wasDesktop ? 'desktop' : 'mobile'
-      });
+      store.dispatch(updateLayoutClass());
     }
   });
 });
