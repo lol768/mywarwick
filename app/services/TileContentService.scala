@@ -22,7 +22,7 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[TileContentServiceImpl])
 trait TileContentService {
 
-  def getTileContent(user: Option[User], userTile: UserTile): Future[JsObject]
+  def getTileContent(user: Option[User], userTile: UserTile): Future[API.Response[JsObject]]
 
 }
 
@@ -36,19 +36,13 @@ class TileContentServiceImpl @Inject() (
   import Threadpools.tileData
 
   // TODO cache
-  override def getTileContent(user: Option[User], userTile: UserTile): Future[JsObject] = Future {
+  override def getTileContent(user: Option[User], userTile: UserTile): Future[API.Response[JsObject]] = Future {
     val request = jsonPost(userTile.tile.fetchUrl, userTile.options.getOrElse(Json.obj()))
     val usercode = user.map(_.usercode.string).orNull
     signRequest(trustedApp, usercode, request)
     val response = client.execute(request)
     try {
-
-      Json.parse(response.getEntity.getContent).as[API.Response[JsObject]] match {
-        case API.Success(status, data) => data
-          // FIXME this is shit
-        case API.Failure(status, errors) => throw new IOException(errors.map(_.message).mkString(", "))
-      }
-
+      Json.parse(response.getEntity.getContent).as[API.Response[JsObject]]
     } finally {
       response.close()
     }

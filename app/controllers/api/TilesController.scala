@@ -1,6 +1,9 @@
 package controllers.api
 
+import java.io.IOException
+
 import com.google.inject.Inject
+import models.API.Response
 import models.{API, UserTile}
 import play.api.libs.json._
 import play.api.mvc.{Controller, Result}
@@ -44,7 +47,13 @@ class TilesController @Inject()(
 
   private def getTileResult(user: Option[User], tiles: Seq[UserTile]): Future[Result] = {
     val futures = tiles.map { t =>
-      tileContentService.getTileContent(user, t).map((t, _))
+      tileContentService.getTileContent(user, t).map {
+        // replicates current behaviour of aborting the whole thing.
+        // TODO return tiles that worked, don't bail out completely
+        case s: API.Success[JsObject] => s.data
+        case API.Failure(status, errors) =>
+          throw new IOException(errors.map(_.message).mkString("; "))
+      }.map((t, _))
     }
 
     Future.sequence(futures).map { result =>

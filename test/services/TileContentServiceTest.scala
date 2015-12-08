@@ -8,7 +8,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.time.{Seconds, Span, Millis}
 import org.scalatestplus.play.PlaySpec
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.mvc.Results._
 import play.api.mvc._
@@ -21,7 +21,7 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
   override implicit def patienceConfig =
     PatienceConfig(timeout = Span(1, Seconds), interval = Span(20, Millis))
 
-  val data: Seq[(String, JsValueWrapper)] = Seq(
+  val response: API.Response[JsObject] = API.Success("ok", Json.obj(
     "href" -> "https://printcredits.example.com/api.json",
     "items" -> Seq(
       Map(
@@ -29,13 +29,11 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
         "text" -> "credit available"
       )
     )
-  )
-
-  val response = API.success(data : _*)
+  ))
 
   val routes: Router.Routes = {
     case POST(p"/content/printcredits") => Action { request =>
-      Ok(response)
+      Ok(Json.toJson(response))
     }
   }
 
@@ -62,7 +60,7 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
     "fetch a Tile's URL" in {
       ExternalServers.runServer(routes) { port =>
         val ut = userPrinterTile(s"http://localhost:${port}/content/printcredits")
-        service.getTileContent(Some(user), ut).futureValue must be (Json.obj(data : _*))
+        service.getTileContent(Some(user), ut).futureValue must be (response)
       }
     }
   }

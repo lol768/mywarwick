@@ -8,9 +8,6 @@ object APIObjectTest {
   case class ExampleData(items: Seq[String])
 }
 
-/**
-  * Created by nick on 04/12/15.
-  */
 class APIObjectTest extends PlaySpec {
   import APIObjectTest.ExampleData
 

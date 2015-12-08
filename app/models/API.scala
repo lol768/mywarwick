@@ -46,9 +46,16 @@ object API extends APIWriters {
   sealed abstract class Response[A : Reads : Writes](val success: Boolean, status: String) {
     implicit def reads = Response.reads[A]
     implicit def writes = Response.writes[A]
+
+    // Maybe this is useful, if you like using Either
+    def either: Either[Failure[A], Success[A]]
   }
-  case class Success[A : Reads : Writes](status: String = "ok", data: A) extends Response[A](true, status)
-  case class Failure[A : Reads : Writes](status: String, errors: Seq[Error]) extends Response[A](false, status)
+  case class Success[A : Reads : Writes](status: String = "ok", data: A) extends Response[A](true, status) {
+    def either = Right(this)
+  }
+  case class Failure[A : Reads : Writes](status: String, errors: Seq[Error]) extends Response[A](false, status) {
+    def either = Left(this)
+  }
 
   object Response {
     implicit def reads[A : Reads : Writes]: Reads[Response[A]] = new Reads[Response[A]] {
