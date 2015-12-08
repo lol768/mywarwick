@@ -39,8 +39,8 @@ class TileDaoImpl @Inject()() extends TileDao {
       .as(userTileParser.*)
 
   override def getDefaultTilesConfig(implicit c: Connection): Seq[UserTile] =
-  //TODO: define collection of default tiles, and return them here
-    SQL("SELECT ID, DEFAULT_SIZE, FETCH_URL, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT FROM USER_TILE JOIN TILE ON TILE.ID = TILE_ID")
+    //TODO: define collection of default tiles, and return them here
+    SQL("SELECT ID, DEFAULT_SIZE, FETCH_URL, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT FROM USER_TILE JOIN TILE ON TILE.ID = TILE_ID WHERE USERCODE IS NULL")
       .as(userTileParser.*)
 
   def userTileParser: RowParser[UserTile] = {
