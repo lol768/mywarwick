@@ -2,7 +2,7 @@ package actors
 
 import akka.actor._
 import akka.cluster.pubsub.DistributedPubSub
-import akka.cluster.pubsub.DistributedPubSubMediator.Subscribe
+import akka.cluster.pubsub.DistributedPubSubMediator.{SubscribeAck, Subscribe}
 import models.{ActivityResponse, Activity, ActivityType}
 import org.joda.time.DateTime
 import play.api.data.validation.ValidationError
@@ -79,6 +79,8 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor wi
       "activity" -> activity
     )
     case js: JsValue => handleClientMessage(js)
+    case SubscribeAck(Subscribe(topic, group, ref)) =>
+      log.debug(s"Websocket subscribed to PubSub messages on the topic of '${topic}'")
     case nonsense => log.error(s"Ignoring unrecognised message: ${nonsense}")
   }
 
