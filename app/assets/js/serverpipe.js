@@ -7,7 +7,7 @@ polyfill();
 
 import { userReceive } from './user';
 import { NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './news';
-import { TILES_FETCH, TILES_CONFIG_RECEIVE, TILE_CONTENT_RECEIVE, TILES_FETCH_FAILURE, receivedTilesConfig, receivedTileContent } from './tiles';
+import { TILES_FETCH, TILES_CONFIG_RECEIVE, TILES_CONTENT_RECEIVE, TILES_FETCH_FAILURE, receivedTilesConfig, receivedTilesContent } from './tiles';
 import { receivedActivity, fetchedActivities, receivedNotification, fetchedNotifications } from './notifications';
 
 //                       //
@@ -43,7 +43,7 @@ export function fetchTilesConfig() {
   return dispatch => {
     dispatch({type: TILES_FETCH});
 
-    return fetchWithCredentials('/api/tiles')
+    return fetchWithCredentials('/api/tiles/config')
       .then(response => response.json())
       .then(json => dispatch(receivedTilesConfig(json.data.tiles)))
       .catch(err => dispatch({type: TILES_FETCH_FAILURE}));
@@ -52,10 +52,25 @@ export function fetchTilesConfig() {
 
 import _ from 'lodash';
 
-export function fetchTileContent() {
-  fetchWithCredentials('/api/tileContent?tileId=' + tileId)
-  .then(response => response.json())
-  .then(json => dispatch(receivedTileContent(json.tileContent)))
+export function fetchTilesContentById(tileIds) {
+  return dispatch => {
+    dispatch({type: TILES_FETCH});
+
+    let queryStr = tileIds.map((id) => `id=${id}`).join('');
+    fetchWithCredentials(`/api/tiles/contentbyid?${queryStr}`)
+      .then(response => response.json())
+      .then(json => dispatch(receivedTilesContent(json.data)))
+  }
+}
+
+export function fetchTilesContent() {
+  return dispatch => {
+    dispatch({type: TILES_FETCH});
+
+    fetchWithCredentials('/api/tiles/content')
+      .then(response => response.json())
+      .then(json => dispatch(receivedTilesContent(json.data)))
+  }
 }
 
 export function fetchActivities() {

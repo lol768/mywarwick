@@ -15,7 +15,7 @@ import Immutable from 'immutable';
 import { connect } from 'react-redux';
 
 import { registerReducer } from '../../reducers';
-import { fetchTilesConfig, fetchTileContent } from '../../serverpipe';
+import { fetchTilesConfig, fetchTilesContent } from '../../serverpipe';
 
 const ZOOM_ANIMATION_DURATION = 500;
 
@@ -42,6 +42,7 @@ class MeView extends ReactComponent {
   constructor(props) {
     super(props);
     this.props.dispatch(fetchTilesConfig());
+    this.props.dispatch(fetchTilesContent());
   }
 
   onTileClick(tile) {
@@ -58,22 +59,20 @@ class MeView extends ReactComponent {
   }
 
   renderTile(tile, zoomed = false) {
-    console.log(`rendering tile id: ${tile.tile.id}`);
+    console.log(`rendering tile id: ${tile.id}`);
     let onTileClick = this.onTileClick.bind(this);
 
-    let tileConfig = tile.tile;
-    let baseTile = tileElements[tileConfig.tileType];
+    let baseTile = tileElements[tile.tileType];
 
-    let props = _.merge({}, tileConfig, {
+    let props = _.merge({}, tile, {
       onClick(e) {
         onTileClick(tile, e);
       },
       view: this,
       zoomed: zoomed,
-      content: tile.content,
-      key: zoomed ? tileConfig.id + '-zoomed' : tileConfig.id,
-      ref: zoomed ? tileConfig.id + '-zoomed' : tileConfig.id,
-      originalRef: tileConfig.id,
+      key: zoomed ? tile.id + '-zoomed' : tile.id,
+      ref: zoomed ? tile.id + '-zoomed' : tile.id,
+      originalRef: tile.id,
       onDismiss: this.onTileDismiss.bind(this)
     });
 

@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 
 import $ from 'jquery';
 
-import { fetchTileContent } from '../../serverpipe'
+import { fetchTilesContent } from '../../serverpipe'
 const DEFAULT_TILE_COLOR = '#8c6e96'; // Default ID7 theme colour
 const DEFAULT_TEXT_COLOR = 'white';
 
@@ -21,11 +21,9 @@ let sizeClasses = {
 
 export default class Tile extends ReactComponent {
 
-  //componentDidMount() {
-  //  store.dispatch(fetchTileContent(this.props.id));
-  //}
-
   render() {
+    console.log(this.props.content);
+
     let props = this.props;
 
     let icon = props.icon ? <i className={classNames('fa', 'fa-fw', 'fa-' + props.icon)}></i> : null;
@@ -66,8 +64,8 @@ export default class Tile extends ReactComponent {
 
 }
 
-//let select = (state) => ({
-//  content: state.get('tile-data').get(this.props.id, undefined)
-//});
-//
-//export default connect(select)(Tile);
+let select = (state) => ({
+  content: state.get('tile-data')
+});
+
+export default connect(select)(Tile);

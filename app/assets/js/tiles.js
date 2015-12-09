@@ -11,7 +11,7 @@ import SocketDatapipe from './SocketDatapipe';
 
 export const TILES_FETCH = 'tiles.fetch';
 export const TILES_CONFIG_RECEIVE = 'tiles.config.receive';
-export const TILE_CONTENT_RECEIVE = 'tile.content.receive';
+export const TILES_CONTENT_RECEIVE = 'tile.content.receive';
 export const TILES_FETCH_FAILURE = 'tiles.fetch.failure';
 
 export function receivedTilesConfig(data) {
@@ -21,10 +21,10 @@ export function receivedTilesConfig(data) {
   };
 }
 
-export function receivedTileContent(data) {
+export function receivedTilesContent(data) {
   return {
-    type: TILE_CONTENT_RECEIVE,
-    tileContent: data
+    type: TILES_CONTENT_RECEIVE,
+    tilesContent: data
   };
 }
 
@@ -60,10 +60,14 @@ registerReducer('tiles', (state = Immutable.List(), action) => {
   }
 });
 
-
 registerReducer('tile-data', (state = Immutable.Map(), action) => {
   switch (action.type) {
-    case TILE_CONTENT_RECEIVE:
-      return state.set(action.tileContent.id, action.tileContent);
+    case TILES_CONTENT_RECEIVE:
+      // TODO: merge new tile content data into state like {"tabula" -> tabulaContent}
+      let newMap = action.tilesContent.map((content) =>
+        this[content.id] = content
+      );
+      console.log(newMap);
+      return state.merge(Immutable.Map(newMap));
   }
 });

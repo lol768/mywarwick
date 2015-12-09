@@ -49,10 +49,10 @@ class TileContentServiceImpl @Inject()(
       // TODO: gracefully handle dodgy fetch urls
       //      case jpe: JsonParseException => API.Failure("", Seq(API.Error("0", "Could not parse json from Tile fetch url")))
 
-      // WARNING, VERY DODGY TEST CODE, SHOULD REMOVE
+      // TODO: WARNING, VERY SKETCHY TEST CODE, WILL REMOVE
       case jpe: JsonParseException =>
         API.Success("ok", Json.obj(
-          "key" -> JsString("tabula"),
+          "id" -> JsString("tabula"),
           "type" -> JsString("count"),
           "title" -> JsString("Tabula"),
           "href" -> JsString("https://tabula.warwick.ac.uk"),
