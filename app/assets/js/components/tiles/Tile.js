@@ -21,9 +21,9 @@ let sizeClasses = {
 
 export default class Tile extends ReactComponent {
 
-  componentDidMount() {
-    store.dispatch(fetchTileContent(this.props.id));
-  }
+  //componentDidMount() {
+  //  store.dispatch(fetchTileContent(this.props.id));
+  //}
 
   render() {
     let props = this.props;
@@ -32,7 +32,7 @@ export default class Tile extends ReactComponent {
     let backgroundColor = props.backgroundColor ? props.backgroundColor : DEFAULT_TILE_COLOR;
     let color = props.color ? props.color : DEFAULT_TEXT_COLOR;
 
-    let sizeClass = sizeClasses[props.tileConfig.size || props.tileDefaults.defaultSize];
+    let sizeClass = sizeClasses[props.size || props.defaultSize];
     let outerClassName = classNames({
       'tile--normal': !props.zoomed,
       [sizeClass]: !props.zoomed,
@@ -66,8 +66,8 @@ export default class Tile extends ReactComponent {
 
 }
 
-let select = (state) => ({
-  content: state.get('tile-data').get(this.props.id, undefined).toJS()
-});
-
-export default connect(select)(Tile);
+//let select = (state) => ({
+//  content: state.get('tile-data').get(this.props.id, undefined)
+//});
+//
+//export default connect(select)(Tile);

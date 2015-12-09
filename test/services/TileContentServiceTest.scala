@@ -39,6 +39,7 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
   def userPrinterTile(url: String) = UserTile(
     tile = Tile(
       id = "printcredits",
+      tileType = "count",
       defaultSize = TileSize.small,
       fetchUrl = url
     ),
@@ -59,11 +60,10 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
     "fetch a Tile's URL" in {
       ExternalServers.runServer(routes) { port =>
         val ut = userPrinterTile(s"http://localhost:${port}/content/printcredits")
-        service.getTileContent(Some(user), ut).futureValue must be (response)
+        service.getTileContent(Some(user), ut).futureValue must be(response)
       }
     }
   }
-
 
 
 }

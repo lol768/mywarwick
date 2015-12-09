@@ -58,25 +58,22 @@ class MeView extends ReactComponent {
   }
 
   renderTile(tile, zoomed = false) {
+    console.log(`rendering tile id: ${tile.tile.id}`);
     let onTileClick = this.onTileClick.bind(this);
 
-    var tileDefaults = tile.tile;
-    var tileConfig = tile.tileConfig;
+    let tileConfig = tile.tile;
+    let baseTile = tileElements[tileConfig.tileType];
 
-    let view = this;
-    let baseTile = tileElements[tileDefaults.tileType];
-
-    let props = _.merge({}, tileDefaults, {
+    let props = _.merge({}, tileConfig, {
       onClick(e) {
         onTileClick(tile, e);
       },
       view: this,
-      tileDefaults: tileDefaults,
       zoomed: zoomed,
-      tileConfig: tileConfig,
-      key: zoomed ? tileDefaults.id + '-zoomed' : tileDefaults.key,
-      ref: zoomed ? tileDefaults.key + '-zoomed' : tileDefaults.key,
-      originalRef: tileDefaults.key,
+      content: tile.content,
+      key: zoomed ? tileConfig.id + '-zoomed' : tileConfig.id,
+      ref: zoomed ? tileConfig.id + '-zoomed' : tileConfig.id,
+      originalRef: tileConfig.id,
       onDismiss: this.onTileDismiss.bind(this)
     });
 

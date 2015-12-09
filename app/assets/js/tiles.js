@@ -53,8 +53,8 @@ registerReducer('tiles', (state = Immutable.List(), action) => {
     case TILES_FETCH_FAILURE:
       // Could set `error: true` and display an error message and/or retry
       return state;
-    case TILES_RECEIVE:
-      return Immutable.fromJS(action.tiles);
+    case TILES_CONFIG_RECEIVE:
+      return Immutable.List(action.tiles);
     default:
       return state;
   }
@@ -64,7 +64,6 @@ registerReducer('tiles', (state = Immutable.List(), action) => {
 registerReducer('tile-data', (state = Immutable.Map(), action) => {
   switch (action.type) {
     case TILE_CONTENT_RECEIVE:
-      console.log(action.tileContent);
       return state.set(action.tileContent.id, action.tileContent);
   }
 });
