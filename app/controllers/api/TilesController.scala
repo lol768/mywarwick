@@ -1,7 +1,7 @@
 package controllers.api
 
 import com.google.inject.Inject
-import models.UserTile
+import models.TileInstance$
 import play.api.libs.json._
 import play.api.mvc.{Controller, Result}
 import services.{SecurityService, TileContentService, TileService}
@@ -25,17 +25,17 @@ class TilesController @Inject()(
 
   def tilesById(ids: Seq[String]) = RequiredUserAction.async { request =>
     request.context.user.map { user =>
-      val tiles = tileService.getTilesByIds(user.usercode, ids)
+      val tiles = tileService.getTilesByIds(user, ids)
 
       getTileResult(tiles)
     }.get // RequiredUserAction
   }
 
-  private def getTileResult(tiles: Seq[UserTile]): Future[Result] = {
+  private def getTileResult(tiles: Seq[TileInstance]): Future[Result] = {
     val futureContent = tiles.map(tileContentService.getTileContent)
 
     Future.sequence(futureContent).map { content =>
-      val result: Seq[(UserTile, JsObject)] = tiles.zip(content)
+      val result: Seq[(TileInstance, JsObject)] = tiles.zip(content)
 
       Ok(Json.obj(
         "success" -> true,
