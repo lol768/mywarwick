@@ -6,7 +6,6 @@ import models._
 import org.joda.time.DateTime
 import play.api.i18n.{Messages, MessagesApi, I18nSupport}
 import play.api.libs.functional.syntax._
-import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.mvc.{Controller, Result}
 import services.{ActivityService, ProviderPermissionService, NoRecipientsException, SecurityService}
@@ -22,6 +21,8 @@ class IncomingActivitiesController @Inject()(
 ) extends BaseController with I18nSupport {
 
   import securityService._
+
+  implicit val dateReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
   def readsPostedActivity(providerId: String, shouldNotify: Boolean): Reads[ActivityPrototype] =
     (Reads.pure(providerId) and
