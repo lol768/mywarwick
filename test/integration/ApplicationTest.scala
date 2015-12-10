@@ -8,6 +8,7 @@ import play.api.Environment
 import play.api.inject._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
+import services.{ActivityService, TileContentService}
 import warwick.sso._
 
 /**
@@ -21,7 +22,12 @@ class ApplicationTest extends PlaySpec with OneStartAppPerSuite {
 
     "start up successfully" in {
 
-      val c = app.injector.instanceOf[HomeController]
+      app.injector.instanceOf[HomeController]
+      app.injector.instanceOf[TileContentService]
+
+      // FIXME This would fail because it uses AkkaPubSub, which doesn't
+      // work with a local-only actor system. Should be override PubSub for tests?
+      //app.injector.instanceOf[ActivityService]
 
     }
 

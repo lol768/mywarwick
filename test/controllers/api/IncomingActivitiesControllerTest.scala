@@ -74,7 +74,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
 
       (json \ "success").as[Boolean] mustBe true
       (json \ "status").as[String] mustBe "ok"
-      (json \ "id").as[String] mustBe "created-activity-id"
+      (json \ "data" \ "id").as[String] mustBe "created-activity-id"
     }
   }
 }

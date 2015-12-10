@@ -1,6 +1,7 @@
 package controllers.api
 
 import com.google.inject.Inject
+import controllers.BaseController
 import models._
 import org.joda.time.DateTime
 import play.api.i18n.{Messages, MessagesApi, I18nSupport}
@@ -18,7 +19,7 @@ class IncomingActivitiesController @Inject()(
   activityService: ActivityService,
   providerPermissionService: ProviderPermissionService,
   val messagesApi: MessagesApi
-) extends Controller with I18nSupport {
+) extends BaseController with I18nSupport {
 
   import securityService._
 
