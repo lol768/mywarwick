@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 
-import moment from 'moment';
+import formatDate from '../../dateFormatter';
 
 import AppIcon from './AppIcon';
 
@@ -17,7 +17,7 @@ export default class ActivityItem extends ReactComponent {
           <div className="media-body">
             <span className="activity-item__text">{this.props.text}</span>
             <span className="activity-item__source">{this.props.provider}</span>
-            <span className="activity-item__date">{moment(this.props.date).calendar()}</span>
+            <span className="activity-item__date">{formatDate(this.props.date)}</span>
           </div>
         </div>
       </div>
