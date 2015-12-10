@@ -1,6 +1,7 @@
 package controllers.api
 
 import com.google.inject.Inject
+import controllers.BaseController
 import models.{API, ActivityResponse, ActivityTag}
 import org.joda.time.DateTime
 import play.api.libs.json.{JsString, JsValue, Json, Writes}
@@ -10,7 +11,7 @@ import services.{ActivityService, SecurityService}
 class UserActivitiesController @Inject()(
   activityService: ActivityService,
   securityService: SecurityService
-) extends Controller {
+) extends BaseController {
 
   import securityService._
 

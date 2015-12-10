@@ -3,6 +3,7 @@ package controllers.api
 import java.io.IOException
 
 import com.google.inject.Inject
+import controllers.BaseController
 import models.API.Response
 import models.{API, UserTile}
 import play.api.libs.json._
@@ -27,7 +28,7 @@ class TilesController @Inject()(
   securityService: SecurityService,
   tileService: TileService,
   tileContentService: TileContentService
-) extends Controller {
+) extends BaseController {
 
   import securityService._
 
