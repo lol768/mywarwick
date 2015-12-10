@@ -6,7 +6,6 @@ import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject}
 import models._
-import org.joda.time.DateTime
 import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[TileDaoImpl])
@@ -32,21 +31,14 @@ class TileDaoImpl @Inject()() extends TileDao {
   override def getTilesForUser(usercode: String, groups: Set[String])(implicit c: Connection): Seq[TileInstance] =
     getUsersAndDefaultTiles(usercode, Nil, groups)
 
+  override def getTilesForAnonymousUser(implicit c: Connection): Seq[TileInstance] =
+    getDefaultTilesForGroups(Nil, Set("anonymous"))
+
   private def getUsersAndDefaultTiles(usercode: String, ids: Seq[String], groups: Set[String])(implicit c: Connection): Seq[TileInstance] = {
 
     val idRestriction = if (ids.isEmpty) "" else "AND ID IN ({ids})"
 
-    val defaultTiles = SQL(
-      s"""
-         |SELECT ID, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL, DEFAULT_POSITION AS TILE_POSITION, DEFAULT_SIZE AS TILE_SIZE, 0 AS REMOVED
-         |FROM TILE
-         |WHERE EXISTS (SELECT * FROM TILE_GROUP WHERE TILE_ID = ID and "GROUP" in ({groups})) $idRestriction
-         |ORDER BY TILE_POSITION ASC
-      """.stripMargin)
-      .on(
-        'groups -> groups,
-        'ids -> ids
-      ).as(userTileParser.*)
+    val defaultTiles = getDefaultTilesForGroups(ids, groups)
 
     val userTiles = SQL(
       s"""
@@ -63,13 +55,18 @@ class TileDaoImpl @Inject()() extends TileDao {
     (defaultsNotOverridden ++ userTiles.filterNot(_.removed)).sortBy(_.tileConfig.position)
   }
 
-  override def getTilesForAnonymousUser(implicit c: Connection): Seq[TileInstance] =
-    SQL(
-      """SELECT T.ID, T.DEFAULT_SIZE, T.DEFAULT_POSITION, T.FETCH_URL, T.DEFAULT_POSITION AS TILE_POSITION, T.DEFAULT_SIZE AS TILE_SIZE, 0 AS REMOVED
-        |FROM TILE T
-        |WHERE EXISTS (SELECT * FROM TILE_GROUP WHERE TILE_ID = T.ID AND "GROUP" = 'anonymous')
-        |""".stripMargin)
-      .as(userTileParser.*)
+  private def getDefaultTilesForGroups(ids: Seq[String], groups: Set[String])(implicit c: Connection): Seq[TileInstance] = {
+    val idRestriction = if (ids.isEmpty) "" else "AND ID IN ({ids})"
+    SQL(s"""
+      |SELECT ID, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL, DEFAULT_POSITION AS TILE_POSITION, DEFAULT_SIZE AS TILE_SIZE, 0 AS REMOVED
+      |FROM TILE
+      |WHERE EXISTS (SELECT * FROM TILE_GROUP WHERE TILE_ID = ID and "GROUP" in ({groups})) $idRestriction
+      |ORDER BY DEFAULT_POSITION ASC
+    """.stripMargin).on(
+      'ids -> ids,
+      'groups -> groups
+    ).as(userTileParser.*)
+  }
 
   def userTileParser: RowParser[TileInstance] = {
       get[String]("ID") ~

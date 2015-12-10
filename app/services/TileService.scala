@@ -38,10 +38,4 @@ class TileServiceImpl @Inject()(
     isStaff ++ isStudent ++ user.department.flatMap(_.shortName).toSet
   }
 
-
-}
-
-object TileGroup extends Enumeration {
-  type TileGroup = Value
-  val staff, student, anonymous = Value
 }
