@@ -37,16 +37,16 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
     }
   }
 
-  def userPrinterTile(url: String) = UserTile(
+  def userPrinterTile(url: String) = TileInstance(
     tile = Tile(
       id = "printcredits",
       defaultSize = TileSize.small,
+      defaultPosition = 0,
       fetchUrl = url
     ),
     tileConfig = TileConfig(1, TileSize.small),
     options = None,
-    createdAt = new DateTime(),
-    updatedAt = new DateTime()
+    removed = false
   )
 
   "TileContentService" should {
