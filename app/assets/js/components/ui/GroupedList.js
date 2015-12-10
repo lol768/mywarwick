@@ -19,7 +19,9 @@ export default class GroupedList extends ReactComponent {
     // Group the child nodes using the object passed to the groupBy property
     let groups = _(this.props.children)
       .groupBy(this.props.groupBy.groupForItem)
-      .map((items, group) => (
+      .pairs()
+      .sortBy(([group, items]) => group)
+      .map(([group, items]) => (
         // Title the group with a list header
         <div key={'group-' + group} className="list-group">
           <ListHeader key={'group-header-' + group} title={this.props.groupBy.titleForGroup(group)}/>
