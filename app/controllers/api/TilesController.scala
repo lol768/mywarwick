@@ -5,7 +5,7 @@ import java.io.IOException
 import com.google.inject.Inject
 import controllers.BaseController
 import models.API.Response
-import models.{API, UserTile}
+import models.{API, TileInstance}
 import play.api.libs.json._
 import play.api.mvc.{Controller, Result}
 import services.{SecurityService, TileContentService, TileService}
@@ -14,7 +14,7 @@ import warwick.sso.User
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class TileAndContent(tile: UserTile, content: JsObject)
+case class TileAndContent(tile: TileInstance, content: JsObject)
 object TileAndContent {
   implicit val format = Json.format[TileAndContent]
 }
@@ -40,13 +40,13 @@ class TilesController @Inject()(
 
   def tilesById(ids: Seq[String]) = RequiredUserAction.async { request =>
     request.context.user.map { user =>
-      val tiles = tileService.getTilesByIds(user.usercode, ids)
+      val tiles = tileService.getTilesByIds(user, ids)
 
       getTileResult(Option(user), tiles)
     }.get // RequiredUserAction
   }
 
-  private def getTileResult(user: Option[User], tiles: Seq[UserTile]): Future[Result] = {
+  private def getTileResult(user: Option[User], tiles: Seq[TileInstance]): Future[Result] = {
     val futures = tiles.map { t =>
       tileContentService.getTileContent(user, t).map {
         // replicates current behaviour of aborting the whole thing.
