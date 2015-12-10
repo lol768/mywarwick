@@ -1,7 +1,7 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject}
-import models.{TileLayout, TileInstance$}
+import models.{TileLayout, TileInstance}
 import play.api.db.{Database, NamedDatabase}
 import services.dao.TileDao
 import warwick.sso.User
