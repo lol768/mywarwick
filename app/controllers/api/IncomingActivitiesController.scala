@@ -1,20 +1,17 @@
 package controllers.api
 
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat
 import com.google.inject.Inject
 import controllers.BaseController
 import models._
 import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
-import play.api.data.validation.ValidationError
-import play.api.i18n.{Messages, MessagesApi, I18nSupport}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import play.api.mvc.{Controller, Result}
-import services.{ActivityService, ProviderPermissionService, NoRecipientsException, SecurityService}
+import play.api.mvc.Result
+import services.{ActivityService, NoRecipientsException, ProviderPermissionService, SecurityService}
 import warwick.sso.{AuthenticatedRequest, User}
 
-import scala.util.{Try, Failure, Success}
+import scala.util.{Failure, Success}
 
 class IncomingActivitiesController @Inject()(
   securityService: SecurityService,
@@ -24,14 +21,7 @@ class IncomingActivitiesController @Inject()(
 ) extends BaseController with I18nSupport {
 
   import securityService._
-
-  implicit val isoDateReads: Reads[DateTime] = new Reads[DateTime] {
-    override def reads(json: JsValue): JsResult[DateTime] =
-      Try(ISODateTimeFormat.dateTime().parseDateTime(json.as[String]))
-        .orElse(Try(ISODateTimeFormat.dateTimeNoMillis().parseDateTime(json.as[String])))
-        .map(JsSuccess(_))
-        .getOrElse(JsError(Seq(JsPath() -> Seq(ValidationError("error.expected.date.format", "iso8601")))))
-  }
+  import controllers.Reads.isoDateReads
 
   def readsPostedActivity(providerId: String, shouldNotify: Boolean): Reads[ActivityPrototype] =
     (Reads.pure(providerId) and
