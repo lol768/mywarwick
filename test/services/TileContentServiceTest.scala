@@ -19,7 +19,7 @@ import uk.ac.warwick.sso.client.trusted.CurrentApplication
 class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSugar {
 
   override implicit def patienceConfig =
-    PatienceConfig(timeout = Span(1, Seconds), interval = Span(20, Millis))
+    PatienceConfig(timeout = Span(5, Seconds), interval = Span(50, Millis))
 
   val response: API.Response[JsObject] = API.Success("ok", Json.obj(
     "href" -> "https://printcredits.example.com/api.json",
