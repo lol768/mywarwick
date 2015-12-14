@@ -27,10 +27,6 @@ class IncomingActivitiesController @Inject()(
     postItem(providerId, shouldNotify = false)
   }
 
-  def postNotification(providerId: String) = APIAction(parse.json) { implicit request =>
-    postItem(providerId, shouldNotify = true)
-  }
-
   def postItem(providerId: String, shouldNotify: Boolean)(implicit request: AuthenticatedRequest[JsValue]): Result =
     request.context.user.map { user =>
       if (providerPermissionService.canUserPostForProvider(providerId, user)) {
@@ -109,5 +105,9 @@ class IncomingActivitiesController @Inject()(
           )
       }
     ))
+
+  def postNotification(providerId: String) = APIAction(parse.json) { implicit request =>
+    postItem(providerId, shouldNotify = true)
+  }
 
 }

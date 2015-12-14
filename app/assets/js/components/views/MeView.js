@@ -59,7 +59,6 @@ class MeView extends ReactComponent {
   }
 
   renderTile(tile, zoomed = false) {
-    console.log(`rendering tile id: ${tile.id}`);
     let onTileClick = this.onTileClick.bind(this);
 
     let baseTile = tileElements[tile.tileType];

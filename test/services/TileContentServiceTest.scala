@@ -18,9 +18,6 @@ import uk.ac.warwick.sso.client.trusted.CurrentApplication
 
 class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSugar {
 
-  override implicit def patienceConfig =
-    PatienceConfig(timeout = Span(5, Seconds), interval = Span(50, Millis))
-
   val response: API.Response[JsObject] = API.Success("ok", Json.obj(
     "href" -> "https://printcredits.example.com/api.json",
     "items" -> Seq(
@@ -30,16 +27,19 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
       )
     )
   ))
-
   val routes: Router.Routes = {
     case POST(p"/content/printcredits") => Action { request =>
       Ok(Json.toJson(response))
     }
   }
 
+  override implicit def patienceConfig =
+    PatienceConfig(timeout = Span(5, Seconds), interval = Span(50, Millis))
+
   def userPrinterTile(url: String) = TileInstance(
     tile = Tile(
       id = "printcredits",
+      tileType = "count",
       defaultSize = TileSize.small,
       defaultPosition = 0,
       fetchUrl = url
@@ -60,11 +60,10 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
     "fetch a Tile's URL" in {
       ExternalServers.runServer(routes) { port =>
         val ut = userPrinterTile(s"http://localhost:${port}/content/printcredits")
-        service.getTileContent(Some(user), ut).futureValue must be (response)
+        service.getTileContent(Some(user), ut).futureValue must be(response)
       }
     }
   }
-
 
 
 }

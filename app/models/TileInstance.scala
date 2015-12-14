@@ -1,37 +1,33 @@
 package models
 
-import org.joda.time.DateTime
 import play.api.libs.json._
 
-case class UserTile(
+case class TileInstance(
   tile: Tile,
   tileConfig: TileConfig,
   options: Option[JsObject],
-  createdAt: DateTime,
-  updatedAt: DateTime
+  removed: Boolean
 )
 
-object UserTile {
-  implicit val userTileFormat = Format(Json.reads[UserTile], clientFriendlyWrites)
+object TileInstance {
+  implicit val tileInstanceFormat = Json.format[TileInstance]
 
   // custom Writes omits some values we don't use and makes json more readable to client
-  def clientFriendlyWrites: Writes[UserTile] =
-    new Writes[UserTile] {
-      override def writes(userTile: UserTile): JsValue =
+  def clientFriendlyWrites: Writes[TileInstance] =
+    new Writes[TileInstance] {
+      override def writes(tileInstance: TileInstance): JsValue =
         Json.obj(
-          "id" -> userTile.tile.id,
-          "tileType" -> userTile.tile.tileType,
-          "defaultSize" -> userTile.tile.defaultSize,
-          "size" -> userTile.tileConfig.size,
-          "createdAt" -> userTile.createdAt,
-          "updatedAt" -> userTile.updatedAt,
-          "options" -> userTile.options
+          "id" -> tileInstance.tile.id,
+          "tileType" -> tileInstance.tile.tileType,
+          "defaultSize" -> tileInstance.tile.defaultSize,
+          "size" -> tileInstance.tileConfig.size,
+          "options" -> tileInstance.options
         )
     }
 }
 
 case class TileLayout(
-  tiles: Seq[UserTile]
+  tiles: Seq[TileInstance]
 )
 
 object TileLayout {

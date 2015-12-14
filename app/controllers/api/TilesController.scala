@@ -3,17 +3,17 @@ package controllers.api
 import java.io.IOException
 
 import com.google.inject.Inject
-import models.API.Response
-import models.{TileLayout, API, UserTile}
+import controllers.BaseController
+import models.{API, TileInstance, TileLayout}
 import play.api.libs.json._
-import play.api.mvc.{Controller, Result}
+import play.api.mvc.Result
 import services.{SecurityService, TileContentService, TileService}
 import warwick.sso.User
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class TileAndContent(tile: UserTile, content: JsObject)
+case class TileAndContent(tile: TileInstance, content: JsObject)
 
 object TileAndContent {
   implicit val format = Json.format[TileAndContent]
@@ -30,7 +30,7 @@ class TilesController @Inject()(
   securityService: SecurityService,
   tileService: TileService,
   tileContentService: TileContentService
-) extends Controller {
+) extends BaseController {
 
   import securityService._
 
@@ -44,15 +44,8 @@ class TilesController @Inject()(
     tilesContent(request.context.user, tileLayout.tiles)
   }
 
-  def tilesContentById(ids: Seq[String]) = RequiredUserAction.async { request =>
-    request.context.user.map { user =>
-      val tiles = tileService.getTilesByIds(user.usercode, ids)
+  def tilesContent(user: Option[User], tiles: Seq[TileInstance]): Future[Result] = {
 
-      tilesContent(Option(user), tiles)
-    }.get // RequiredUserAction
-  }
-
-  def tilesContent(user: Option[User], tiles: Seq[UserTile]): Future[Result] = {
     val futures = tiles.map { t =>
       tileContentService.getTileContent(user, t).map {
         // replicates current behaviour of aborting the whole thing.
@@ -69,6 +62,14 @@ class TilesController @Inject()(
       }
       Ok(Json.toJson(API.Success[Seq[JsObject]]("ok", tileResult)))
     }
+  }
+
+  def tilesContentById(ids: Seq[String]) = RequiredUserAction.async { request =>
+    request.context.user.map { user =>
+      val tiles = tileService.getTilesByIds(user, ids)
+
+      tilesContent(Option(user), tiles)
+    }.get // RequiredUserAction
   }
 }
 

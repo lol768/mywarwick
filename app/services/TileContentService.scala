@@ -1,24 +1,16 @@
 package services
 
-import java.io.IOException
-import java.nio.charset.Charset
 import javax.inject.Inject
 
-import akka.event.slf4j.Logger
 import com.fasterxml.jackson.core.JsonParseException
-import com.google.common.base.Charsets
 import com.google.inject.ImplementedBy
-import models.TileInstance$
-import play.api.libs.json.{Json, JsObject}
 import models.{API, TileInstance}
-import org.apache.http.client.methods.{HttpUriRequest, HttpPost}
+import org.apache.http.client.methods.{HttpPost, HttpUriRequest}
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
-import org.apache.http.util.EntityUtils
-import play.api.libs.json._
-import play.api.libs.ws.{WSAPI, WS}
+import play.api.libs.json.{JsObject, _}
 import system.Threadpools
-import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils, TrustedApplicationsManager}
+import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils}
 import warwick.sso.User
 
 import scala.concurrent.Future
@@ -35,10 +27,11 @@ class TileContentServiceImpl @Inject()(
   trustedApp: CurrentApplication
 ) extends TileContentService {
 
-  override def getTileContent(tileInstance: TileInstance): Future[JsObject] =
-    Future.successful(Json.obj())
   // TODO inject a client properly
   val client = HttpClients.createDefault()
+
+  override def getTileContent(tileInstance: TileInstance): Future[JsObject] =
+    Future.successful(Json.obj())
 
   import Threadpools.tileData
 

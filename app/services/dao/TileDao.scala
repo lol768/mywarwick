@@ -31,9 +31,6 @@ class TileDaoImpl @Inject()() extends TileDao {
   override def getTilesForUser(usercode: String, groups: Set[String])(implicit c: Connection): Seq[TileInstance] =
     getUsersAndDefaultTiles(usercode, Nil, groups)
 
-  override def getTilesForAnonymousUser(implicit c: Connection): Seq[TileInstance] =
-    getDefaultTilesForGroups(Nil, Set("anonymous"))
-
   private def getUsersAndDefaultTiles(usercode: String, ids: Seq[String], groups: Set[String])(implicit c: Connection): Seq[TileInstance] = {
 
     val idRestriction = if (ids.isEmpty) "" else "AND ID IN ({ids})"
@@ -70,19 +67,23 @@ class TileDaoImpl @Inject()() extends TileDao {
 
   def userTileParser: RowParser[TileInstance] = {
       get[String]("ID") ~
+      get[String]("TILE_TYPE") ~
       get[String]("DEFAULT_SIZE") ~
       get[Int]("DEFAULT_POSITION") ~
       get[String]("FETCH_URL") ~
       get[Int]("TILE_POSITION") ~
       get[String]("TILE_SIZE") ~
       get[Boolean]("REMOVED") map {
-      case tileId ~ defaultSize ~ defaultPosition ~ fetchUrl ~ position ~ size ~ removed  =>
+      case tileId ~ tileType ~ defaultSize ~ defaultPosition ~ fetchUrl ~ position ~ size ~ removed  =>
         TileInstance(
-          Tile(tileId, TileSize.withName(defaultSize), defaultPosition, fetchUrl),
+          Tile(tileId, tileType, TileSize.withName(defaultSize), defaultPosition, fetchUrl),
           TileConfig(position, TileSize.withName(size)),
           None,
           removed
         )
     }
   }
+
+  override def getTilesForAnonymousUser(implicit c: Connection): Seq[TileInstance] =
+    getDefaultTilesForGroups(Nil, Set("anonymous"))
 }
