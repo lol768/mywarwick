@@ -3,18 +3,18 @@ package actors
 import akka.actor._
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{SubscribeAck, Subscribe}
-import models.{ActivityResponse, Activity, ActivityType}
-import org.joda.time.DateTime
+import com.codahale.metrics.{Timer, Meter}
+import models.ActivityResponse
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
+import system.AppMetrics.RequestTracker
 import warwick.sso.LoginContext
 
-import scala.concurrent.duration._
-
 object WebsocketActor {
+
   implicit val clientDataFormat = Json.format[ClientData]
 
-  def props(loginContext: LoginContext)(out: ActorRef) = Props(classOf[WebsocketActor], out, loginContext)
+  def props(loginContext: LoginContext, tracker: RequestTracker)(out: ActorRef) = Props(classOf[WebsocketActor], out, loginContext, tracker)
 
   /**
     * This is the format of the JSON that client web pages will send to
@@ -53,7 +53,7 @@ object WebsocketActor {
   * @param out this output will be attached to the websocket and will send
   *            messages back to the client.
   */
-class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor with ActorLogging {
+class WebsocketActor(out: ActorRef, loginContext: LoginContext, tracker: RequestTracker) extends Actor with ActorLogging {
 
   import WebsocketActor._
   import context.dispatcher
@@ -72,6 +72,10 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext) extends Actor wi
   val who = loginContext.user.flatMap(_.name.full).getOrElse("nobody")
 
   import ActivityResponse.writes
+
+  override def postStop(): Unit = {
+    tracker.stop()
+  }
 
   override def receive = {
     case Notification(activity) => out ! Json.obj(
