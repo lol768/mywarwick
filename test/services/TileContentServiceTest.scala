@@ -1,10 +1,9 @@
 package services
 
-import helpers.{ExternalServers, Fixtures}
 import helpers.ExternalServers._
+import helpers.{ExternalServers, Fixtures}
 import models._
 import org.apache.http.client.methods.HttpUriRequest
-import org.joda.time.DateTime
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.time.{Seconds, Span, Millis}
@@ -15,7 +14,7 @@ import uk.ac.warwick.sso.client.trusted.CurrentApplication
 class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSugar {
 
   override implicit def patienceConfig =
-    PatienceConfig(timeout = Span(1, Seconds), interval = Span(20, Millis))
+    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
   val response: API.Response[JsObject] = API.Success("ok", Json.obj(
     "href" -> "https://printcredits.example.com/api.json",
@@ -31,17 +30,16 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
     case ("POST", "/content/printcredits") => Response.json(Json.toJson(response))
   }
 
-
-  def userPrinterTile(url: String) = UserTile(
+  def userPrinterTile(url: String) = TileInstance(
     tile = Tile(
       id = "printcredits",
       defaultSize = TileSize.small,
+      defaultPosition = 0,
       fetchUrl = url
     ),
     tileConfig = TileConfig(1, TileSize.small),
     options = None,
-    createdAt = new DateTime(),
-    updatedAt = new DateTime()
+    removed = false
   )
 
   "TileContentService" should {

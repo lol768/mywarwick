@@ -3,20 +3,19 @@ package models
 import org.joda.time.DateTime
 import play.api.libs.json.{JsObject, Json}
 
-case class UserTile(
+case class TileInstance(
   tile: Tile,
   tileConfig: TileConfig,
   options: Option[JsObject],
-  createdAt: DateTime,
-  updatedAt: DateTime
+  removed: Boolean
 )
 
-object UserTile {
-  implicit val userTileFormat = Json.format[UserTile]
+object TileInstance {
+  implicit val userTileFormat = Json.format[TileInstance]
 }
 
 case class TileLayout(
-  tiles: Seq[UserTile]
+  tiles: Seq[TileInstance]
 )
 
 object TileLayout {

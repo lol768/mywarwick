@@ -24,7 +24,7 @@ val appDeps = Seq(
   "com.typesafe.play" %% "anorm" % "2.4.0",
   "com.oracle" % "ojdbc6" % "11.2.0.3.0",
   "uk.ac.warwick.sso" %% "sso-client-play" % "2.11-SNAPSHOT",
-  "uk.ac.warwick.play-utils" %% "anorm" % "1.1",
+  "uk.ac.warwick.play-utils" %% "anorm" % "1.2",
   "com.typesafe.akka" %% "akka-cluster" % "2.4.0",
   "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.0",
   "com.kenshoo" %% "metrics-play" % "2.4.0_0.4.1"

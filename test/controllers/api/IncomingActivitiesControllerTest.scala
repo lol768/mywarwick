@@ -6,7 +6,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.cache.CacheApi
 import play.api.i18n.MessagesApi
-import play.api.libs.json.{JsArray, Json}
+import play.api.libs.json.{JsString, JsArray, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
@@ -38,7 +38,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
   )
 
   "ActivitiesController#postNotification" should {
-    val request = FakeRequest().withJsonBody(Json.obj(
+    val body = Json.obj(
       "type" -> "due",
       "title" -> "Coursework due soon",
       "url" -> "http://tabula.warwick.ac.uk",
@@ -48,12 +48,12 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
           "someone"
         )
       )
-    ))
+    )
 
     "return forbidden when user is not authorised to post for app" in {
       when(providerPermissionService.canUserPostForProvider(tabula, ron)).thenReturn(false)
 
-      val result = call(controller.postNotification(tabula), request)
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
 
       status(result) mustBe FORBIDDEN
       val json = contentAsJson(result)
@@ -67,7 +67,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
       when(providerPermissionService.canUserPostForProvider(tabula, ron)).thenReturn(true)
       when(activityService.save(any())).thenReturn(Success("created-activity-id"))
 
-      val result = call(controller.postNotification(tabula), request)
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
 
       status(result) mustBe CREATED
       val json = contentAsJson(result)
@@ -75,6 +75,31 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
       (json \ "success").as[Boolean] mustBe true
       (json \ "status").as[String] mustBe "ok"
       (json \ "data" \ "id").as[String] mustBe "created-activity-id"
+    }
+
+    "accept generated_at date in the correct format" in {
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(
+        body + ("generated_at" -> JsString("2016-01-01T09:00:00.000Z"))
+      ))
+
+      status(result) mustBe CREATED
+
+      val otherResult = call(controller.postNotification(tabula), FakeRequest().withJsonBody(
+        body + ("generated_at" -> JsString("2016-01-01T09:00:00Z"))
+      ))
+
+      status(otherResult) mustBe CREATED
+    }
+
+    "reject an incorrectly-formatted generated_at date" in {
+      when(providerPermissionService.canUserPostForProvider(tabula, ron)).thenReturn(true)
+      when(activityService.save(any())).thenReturn(Success("created-activity-id"))
+
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(
+        body + ("generated_at" -> JsString("yesterday"))
+      ))
+
+      status(result) mustBe BAD_REQUEST
     }
   }
 }
