@@ -7,6 +7,8 @@ import com.google.inject.ImplementedBy
 import models.{API, TileInstance}
 import org.apache.http.client.methods.{HttpPost, HttpUriRequest}
 import org.apache.http.entity.StringEntity
+import org.apache.http.client.methods.{HttpUriRequest, HttpPost}
+import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.impl.client.HttpClients
 import play.api.libs.json.{JsObject, _}
 import system.Threadpools
@@ -71,7 +73,7 @@ class TileContentServiceImpl @Inject()(
 
   private def jsonPost(url: String, postData: JsObject) = {
     val request = new HttpPost(url)
-    request.setEntity(new StringEntity(Json.stringify(postData)))
+    request.setEntity(new StringEntity(Json.stringify(postData), ContentType.APPLICATION_JSON));
     request
   }
 

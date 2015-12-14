@@ -12,6 +12,12 @@ import warwick.sso.{MockSSOClient, SSOClient, User, LoginContext}
 
 object TestApplications {
 
+  def testConfig(environment: Environment) =
+    config("test/test.conf", environment)
+
+  def config(file: String, environment: Environment) =
+    Configuration.load(environment, Map("config.file" -> file))
+
   /**
     * As minimal an Application as can be created. Use for any tests
     * where you just can't do without an Application, like something that
@@ -21,22 +27,6 @@ object TestApplications {
     new GuiceApplicationBuilder(loadConfiguration = e => config("test/minimal.conf", e))
       .in(Environment.simple())
       .build()
-
-  /**
-   * Minimal application that overrides the Router - useful to pass to
-   * TestServer to fake up an external service.
-   */
-  def miniserver(router: Router) =
-    new GuiceApplicationBuilder(
-        loadConfiguration = e => config("test/minimal.conf", e))
-      .in(Environment.simple())
-      .overrides(
-        bind[Router].toInstance(router)
-      )
-      .build()
-
-  def config(file: String, environment: Environment) =
-    Configuration.load(environment, Map("config.file" -> file))
 
   /**
     * As full an Application as can be created while still talking to
@@ -60,8 +50,5 @@ object TestApplications {
         bind[DatabaseDialect].to[H2DatabaseDialect]
       )
       .build()
-
-  def testConfig(environment: Environment) =
-    config("test/test.conf", environment)
 
 }
