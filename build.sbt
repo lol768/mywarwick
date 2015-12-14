@@ -26,7 +26,8 @@ val appDeps = Seq(
   "uk.ac.warwick.sso" %% "sso-client-play" % "2.11-SNAPSHOT",
   "uk.ac.warwick.play-utils" %% "anorm" % "1.1",
   "com.typesafe.akka" %% "akka-cluster" % "2.4.0",
-  "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.0"
+  "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.0",
+  "com.kenshoo" %% "metrics-play" % "2.4.0_0.4.1"
 )
 
 val testDeps = Seq(
@@ -34,7 +35,8 @@ val testDeps = Seq(
   "org.scalatest" %% "scalatest" % "2.2.5",
   "org.scalatestplus" %% "play" % "1.4.0-M4",
   "com.typesafe.akka" %% "akka-testkit" % "2.4.0",
-  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.10"
+  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.10",
+  "org.eclipse.jetty" % "jetty-server" % "9.3.6.v20151106"
 ).map(_ % Test)
 
 libraryDependencies ++= (appDeps ++ testDeps).map(_.excludeAll(

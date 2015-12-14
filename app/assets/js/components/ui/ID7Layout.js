@@ -47,8 +47,8 @@ class ID7Layout extends ReactComponent {
             <nav className="id7-utility-bar" id="utility-bar-container">
               {this.props.utilityBar}
             </nav>
-
             <div className="id7-masthead">
+
               <div className="id7-masthead-contents">
                 <div className="clearfix">
                   <div className="id7-logo-column">

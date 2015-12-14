@@ -29,19 +29,6 @@ object TestApplications {
       .build()
 
   /**
-   * Minimal application that overrides the Router - useful to pass to
-   * TestServer to fake up an external service.
-   */
-  def miniserver(router: Router) =
-    new GuiceApplicationBuilder(
-        loadConfiguration = e => config("test/minimal.conf", e))
-      .in(Environment.simple())
-      .overrides(
-        bind[Router].toInstance(router)
-      )
-      .build()
-
-  /**
     * As full an Application as can be created while still talking to
     * mock external services only, and an in-memory database. Used for
     * DAO tests and integration tests.

@@ -1,5 +1,7 @@
 package controllers
 
+import javax.inject.Singleton
+
 import com.google.inject.Inject
 import models.NewsItem
 import play.api.libs.json._
@@ -9,6 +11,7 @@ import services.{FeedService, NewsService}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+@Singleton
 class NewsController @Inject()(
   newsService: NewsService,
   feedService: FeedService
