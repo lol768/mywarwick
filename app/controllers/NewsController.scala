@@ -12,7 +12,7 @@ import scala.concurrent.Future
 class NewsController @Inject()(
   newsService: NewsService,
   feedService: FeedService
-) extends Controller {
+) extends BaseController {
 
   def feed = Action.async {
     val futures = newsService.allSources

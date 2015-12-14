@@ -1,14 +1,14 @@
 package controllers.api
 
 import com.google.inject.Inject
+import controllers.BaseController
 import models._
 import org.joda.time.DateTime
-import play.api.i18n.{Messages, MessagesApi, I18nSupport}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.functional.syntax._
-import play.api.libs.json.Reads._
 import play.api.libs.json._
-import play.api.mvc.{Controller, Result}
-import services.{ActivityService, ProviderPermissionService, NoRecipientsException, SecurityService}
+import play.api.mvc.Result
+import services.{ActivityService, NoRecipientsException, ProviderPermissionService, SecurityService}
 import warwick.sso.{AuthenticatedRequest, User}
 
 import scala.util.{Failure, Success}
@@ -18,9 +18,10 @@ class IncomingActivitiesController @Inject()(
   activityService: ActivityService,
   providerPermissionService: ProviderPermissionService,
   val messagesApi: MessagesApi
-) extends Controller with I18nSupport {
+) extends BaseController with I18nSupport {
 
   import securityService._
+  import controllers.Reads.isoDateReads
 
   def postActivity(providerId: String) = APIAction(parse.json) { implicit request =>
     postItem(providerId, shouldNotify = false)

@@ -13,22 +13,28 @@ let groupItemsByDate = {
     var date = moment(item.props.date).startOf('day');
 
     if (date.isSame(moment(), 'day')) {
-      return 'Today';
+      return 0;
     } else if (date.isSame(moment().subtract(1, 'day'), 'day')) {
-      return 'Yesterday';
+      return 1;
     } else if (date.isSame(moment(), 'week')) {
-      return 'This Week';
+      return 2;
     } else if (date.isSame(moment().subtract(1, 'week'), 'week')) {
-      return 'Last Week';
+      return 3;
     } else {
-      return 'Older';
+      return 4;
     }
   },
 
   // The title to be displayed for items in the group
   // Return a nice title for the user to look at, from the group identifier
   titleForGroup(group) {
-    return group;
+    return [
+      'Today',
+      'Yesterday',
+      'This Week',
+      'Last Week',
+      'Older'
+    ][group];
   }
 
 };

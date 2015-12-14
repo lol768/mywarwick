@@ -16,7 +16,7 @@ import scala.concurrent.Future
 class HomeController @Inject()(
   security: SecurityService,
   ssoClient: SSOClient
-) extends Controller with Logging {
+) extends BaseController {
 
   import security._
 

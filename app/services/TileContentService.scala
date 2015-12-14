@@ -8,7 +8,9 @@ import akka.event.slf4j.Logger
 import com.fasterxml.jackson.core.JsonParseException
 import com.google.common.base.Charsets
 import com.google.inject.ImplementedBy
-import models.{API, UserTile}
+import models.TileInstance$
+import play.api.libs.json.{Json, JsObject}
+import models.{API, TileInstance}
 import org.apache.http.client.methods.{HttpUriRequest, HttpPost}
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
@@ -24,7 +26,8 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[TileContentServiceImpl])
 trait TileContentService {
 
-  def getTileContent(user: Option[User], userTile: UserTile): Future[API.Response[JsObject]]
+  def getTileContent(tileInstance: TileInstance): Future[JsObject]
+  def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]]
 
 }
 
@@ -32,14 +35,16 @@ class TileContentServiceImpl @Inject()(
   trustedApp: CurrentApplication
 ) extends TileContentService {
 
+  override def getTileContent(tileInstance: TileInstance): Future[JsObject] =
+    Future.successful(Json.obj())
   // TODO inject a client properly
   val client = HttpClients.createDefault()
 
   import Threadpools.tileData
 
   // TODO cache
-  override def getTileContent(user: Option[User], userTile: UserTile): Future[API.Response[JsObject]] = Future {
-    val request = jsonPost(userTile.tile.fetchUrl, userTile.options.getOrElse(Json.obj()))
+  override def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]] = Future {
+    val request = jsonPost(tileInstance.tile.fetchUrl, tileInstance.options.getOrElse(Json.obj()))
     val usercode = user.map(_.usercode.string).orNull
     signRequest(trustedApp, usercode, request)
     val response = client.execute(request)
