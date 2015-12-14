@@ -59,7 +59,6 @@ class TileContentServiceImpl @Inject() (
     TrustedApplicationUtils.signRequest(trustedApp, usercode, request)
 
   private def jsonPost(url: String, postData: JsObject) = {
-    System.out.println("jsonPost " + url + " " + Json.stringify(postData))
     val request = new HttpPost(url)
     request.setEntity(new StringEntity(Json.stringify(postData), ContentType.APPLICATION_JSON));
     request
