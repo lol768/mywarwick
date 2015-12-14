@@ -45,7 +45,7 @@ export function fetchTileData() {
 
     return fetchWithCredentials('/api/tiles')
       .then(response => response.json())
-      .then(json => dispatch(receivedTileData(json.tiles)))
+      .then(json => dispatch(receivedTileData(json.data.tiles)))
       .catch(err => dispatch({type: TILES_FETCH_FAILURE}));
   }
 }
