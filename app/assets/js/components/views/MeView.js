@@ -69,6 +69,7 @@ class MeView extends ReactComponent {
       },
       view: this,
       zoomed: zoomed,
+      content: this.props.tilesContent[tile.id],
       key: zoomed ? tile.id + '-zoomed' : tile.id,
       ref: zoomed ? tile.id + '-zoomed' : tile.id,
       originalRef: tile.id,
@@ -262,7 +263,8 @@ registerReducer('me', (state = initialState, action) => {
 
 let select = (state) => ({
   zoomedTile: state.get('me').get('zoomedTile'),
-  tiles: state.get('tiles').toJS()
+  tiles: state.get('tiles').toJS(),
+  tilesContent: state.get('tile-data').toJS()
 });
 
 export default connect(select)(MeView);

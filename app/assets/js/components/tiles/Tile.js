@@ -22,8 +22,6 @@ let sizeClasses = {
 export default class Tile extends ReactComponent {
 
   render() {
-    console.log(this.props.content);
-
     let props = this.props;
 
     let icon = props.icon ? <i className={classNames('fa', 'fa-fw', 'fa-' + props.icon)}></i> : null;
@@ -63,9 +61,3 @@ export default class Tile extends ReactComponent {
   }
 
 }
-
-let select = (state) => ({
-  content: state.get('tile-data')
-});
-
-export default connect(select)(Tile);

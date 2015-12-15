@@ -63,11 +63,8 @@ registerReducer('tiles', (state = Immutable.List(), action) => {
 registerReducer('tile-data', (state = Immutable.Map(), action) => {
   switch (action.type) {
     case TILES_CONTENT_RECEIVE:
-      // TODO: merge new tile content data into state like {"tabula" -> tabulaContent}
-      let newMap = action.tilesContent.map((content) =>
-        this[content.id] = content
-      );
-      console.log(newMap);
-      return state.merge(Immutable.Map(newMap));
+      return state.merge(Immutable.fromJS(action.tilesContent));
+    default:
+      return state
   }
 });

@@ -10,7 +10,7 @@ case class TileInstance(
 )
 
 object TileInstance {
-  implicit val tileInstanceFormat = Json.format[TileInstance]
+  implicit val tileInstanceFormat = Format(Json.reads[TileInstance], clientFriendlyWrites)
 
   // custom Writes omits some values we don't use and makes json more readable to client
   def clientFriendlyWrites: Writes[TileInstance] =

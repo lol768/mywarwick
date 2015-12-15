@@ -5,6 +5,7 @@ import java.io.IOException
 import com.google.inject.Inject
 import controllers.BaseController
 import models.{API, TileInstance, TileLayout}
+import play.api.libs.json
 import play.api.libs.json._
 import play.api.mvc.Result
 import services.{SecurityService, TileContentService, TileService}
@@ -58,9 +59,10 @@ class TilesController @Inject()(
 
     Future.sequence(futures).map { result =>
       val tileResult = result.map {
-        case (tile, content) => content
+        case (tile, content) =>
+          (content \ "id").as[String] -> content
       }
-      Ok(Json.toJson(API.Success[Seq[JsObject]]("ok", tileResult)))
+      Ok(Json.toJson(API.Success[JsObject]("ok", JsObject(tileResult))))
     }
   }
 

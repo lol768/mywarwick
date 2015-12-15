@@ -47,20 +47,7 @@ class TileContentServiceImpl @Inject()(
       Json.parse(response.getEntity.getContent).as[API.Response[JsObject]]
     } catch {
       // TODO: gracefully handle dodgy fetch urls
-      //      case jpe: JsonParseException => API.Failure("", Seq(API.Error("0", "Could not parse json from Tile fetch url")))
-
-      // TODO: WARNING, VERY SKETCHY TEST CODE, WILL REMOVE
-      case jpe: JsonParseException =>
-        API.Success("ok", Json.obj(
-          "id" -> JsString("tabula"),
-          "type" -> JsString("count"),
-          "title" -> JsString("Tabula"),
-          "href" -> JsString("https://tabula.warwick.ac.uk"),
-          "backgroundColor" -> JsString("#239b92"),
-          "icon" -> JsString("cog"),
-          "count" -> JsNumber(3),
-          "word" -> JsString("actions required")
-        ))
+            case jpe: JsonParseException => API.Failure("", Seq(API.Error("0", "Could not parse json from Tile fetch url")))
     } finally {
       response.close()
     }
