@@ -60,7 +60,7 @@ class TilesController @Inject()(
     Future.sequence(futures).map { result =>
       val tileResult = result.map {
         case (tile, content) =>
-          (content \ "id").as[String] -> content
+          tile.tile.id -> content
       }
       Ok(Json.toJson(API.Success[JsObject]("ok", JsObject(tileResult))))
     }
