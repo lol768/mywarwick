@@ -28,21 +28,6 @@ class ActivityDaoImpl @Inject()(
   dialect: DatabaseDialect
 ) extends ActivityDao {
 
-  private def activityParser: RowParser[Activity] = {
-    get[String]("ID") ~
-      get[String]("PROVIDER_ID") ~
-      get[String]("TYPE") ~
-      get[String]("TITLE") ~
-      get[String]("TEXT") ~
-      get[Option[String]]("REPLACED_BY_ID") ~
-      get[DateTime]("GENERATED_AT") ~
-      get[DateTime]("CREATED_AT") ~
-      get[Boolean]("SHOULD_NOTIFY") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify =>
-        Activity(id, providerId, activityType, title, text, replacedById, generatedAt, createdAt, shouldNotify)
-    }
-  }
-
   override def save(activity: ActivityPrototype, replaces: Seq[String])(implicit c: Connection): String = {
     import activity._
     val id = UUID.randomUUID().toString
@@ -121,24 +106,32 @@ class ActivityDaoImpl @Inject()(
       .toSeq
   }
 
-  def activityResponseParser: RowParser[ActivityResponse] = {
+  private lazy val activityParser: RowParser[Activity] =
     get[String]("ID") ~
-      get[String]("PROVIDER_ID") ~
-      get[String]("TYPE") ~
-      get[String]("TITLE") ~
-      get[String]("TEXT") ~
-      get[Option[String]]("REPLACED_BY_ID") ~
-      get[DateTime]("GENERATED_AT") ~
-      get[DateTime]("CREATED_AT") ~
-      get[Boolean]("SHOULD_NOTIFY") ~
-      get[Option[String]]("TAG_NAME") ~ // Option because an activity can have no tags
-      get[Option[String]]("TAG_VALUE") ~
-      get[Option[String]]("TAG_DISPLAY_VALUE") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify ~ tagName ~ tagValue ~ tagDisplayValue =>
-        ActivityResponse(
-          Activity(id, providerId, activityType, title, text, replacedById, generatedAt, createdAt, shouldNotify),
-          (for (name <- tagName; value <- tagValue) yield ActivityTag(name, TagValue(value, tagDisplayValue))).toSeq
-        )
+    get[String]("PROVIDER_ID") ~
+    get[String]("TYPE") ~
+    get[String]("TITLE") ~
+    get[String]("TEXT") ~
+    get[Option[String]]("REPLACED_BY_ID") ~
+    get[DateTime]("GENERATED_AT") ~
+    get[DateTime]("CREATED_AT") ~
+    get[Boolean]("SHOULD_NOTIFY") map {
+      case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify =>
+        Activity(id, providerId, activityType, title, text, replacedById, generatedAt, createdAt, shouldNotify)
     }
-  }
+
+  private lazy val tagParser: RowParser[Option[ActivityTag]] =
+    get[Option[String]]("TAG_NAME") ~ // Option because an activity can have no tags
+    get[Option[String]]("TAG_VALUE") ~
+    get[Option[String]]("TAG_DISPLAY_VALUE") map {
+      case name ~ value ~ display =>
+        (for (name <- name; value <- value) yield ActivityTag(name, TagValue(value, display)))
+    }
+
+
+  lazy val activityResponseParser: RowParser[ActivityResponse] =
+    activityParser ~ tagParser map {
+      case activity ~ tag => ActivityResponse(activity, tag.toSeq)
+    }
+
 }
