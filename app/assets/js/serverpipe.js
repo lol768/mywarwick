@@ -78,8 +78,8 @@ export function fetchActivities() {
   fetchWithCredentials('/api/streams/user')
     .then(response => response.json())
     .then(json => {
-      let notifications = _.filter(json.activites, (a) => a.notification);
-      let activities = _.filter(json.activites, (a) => !a.notification);
+      let notifications = _.filter(json.data.activities, (a) => a.notification);
+      let activities = _.filter(json.data.activities, (a) => !a.notification);
 
       store.dispatch(fetchedNotifications(notifications));
       store.dispatch(fetchedActivities(activities));

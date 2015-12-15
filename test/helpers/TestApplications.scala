@@ -1,11 +1,13 @@
 package helpers
 
+import play.Routes
 import play.api.inject._
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.routing.Router
 import play.api.test.Helpers._
-import play.api.{Configuration, Environment}
-import system.{DatabaseDialect, H2DatabaseDialect}
-import warwick.sso.{LoginContext, MockSSOClient, SSOClient, User}
+import play.api.{Environment, Configuration}
+import system.{H2DatabaseDialect, DatabaseDialect}
+import warwick.sso.{MockSSOClient, SSOClient, User, LoginContext}
 
 
 object TestApplications {

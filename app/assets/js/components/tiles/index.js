@@ -56,7 +56,7 @@ export class text extends ReactComponent {
   onInterval() {
     let oldItemIndex = this.state.itemIndex;
 
-    let itemIndex = (oldItemIndex == this.props.items.length - 1) ? 0 : oldItemIndex + 1;
+    let itemIndex = (oldItemIndex == this.props.content.items.length - 1) ? 0 : oldItemIndex + 1;
 
     this.setState({
       itemIndex: itemIndex
