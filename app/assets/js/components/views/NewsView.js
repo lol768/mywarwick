@@ -12,11 +12,23 @@ import { fetchNews } from '../../serverpipe';
 class NewsView extends ReactComponent {
 
   componentDidMount() {
-    if (this.props.items.length == 0)
+    if (this.props.items.length == 0 && !this.props.failed)
       this.props.dispatch(fetchNews());
   }
 
   render() {
+    if (this.props.fetching) {
+      return <i className="fa fa-refresh fa-spin"></i>;
+    }
+
+    if (this.props.failed) {
+      return (
+        <div className="alert alert-warning">
+          Unable to fetch news.
+        </div>
+      );
+    }
+
     let html = (content) => ({__html: content.replace(/<br[ /]+?>/g, '')});
 
     let items = _.take(this.props.items, 5).map((item) =>
