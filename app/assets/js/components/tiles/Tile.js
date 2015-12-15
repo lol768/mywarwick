@@ -45,7 +45,7 @@ export default class Tile extends ReactComponent {
             <header className="tile__title">
               <h1>
                 {icon}
-                {props.id}
+                {props.title}
               </h1>
               { props.zoomed ?
                 <i className="fa fa-fw fa-lg fa-times tile__dismiss" onClick={this.props.onDismiss}></i>

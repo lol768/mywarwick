@@ -3,6 +3,7 @@ import ReactComponent from 'react/lib/ReactComponent';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 import Tile from './Tile';
+import classNames from 'classnames';
 
 import moment from 'moment';
 import _ from 'lodash';
@@ -107,7 +108,7 @@ export class count extends ReactComponent {
         content = <div className="tile__item">
           <span className="tile__callout">{this.props.content.count || (this.props.content.items.length)}</span>
           <span className="tile__text">{this.props.content.word}</span></div>
-      } else content = <em>loading tile data...</em>;
+      } else content = <i className={classNames('fa', 'fa-spinner', 'fa-pulse', 'fa-3x')}></i>;
       return (
         <Tile ref="tile" {...this.props} className={"tile--text-btm " + this.props.className}>
           {content}

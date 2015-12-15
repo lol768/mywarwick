@@ -20,7 +20,6 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[TileContentServiceImpl])
 trait TileContentService {
 
-  def getTileContent(tileInstance: TileInstance): Future[JsObject]
   def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]]
 
 }
@@ -31,9 +30,6 @@ class TileContentServiceImpl @Inject()(
 
   // TODO inject a client properly
   val client = HttpClients.createDefault()
-
-  override def getTileContent(tileInstance: TileInstance): Future[JsObject] =
-    Future.successful(Json.obj())
 
   import Threadpools.tileData
 

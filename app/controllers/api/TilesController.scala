@@ -37,6 +37,8 @@ class TilesController @Inject()(
 
   def tilesConfig = UserAction { request =>
     val tileLayout = tileService.getTilesForUser(request.context.user)
+    import TileLayout.tileLayoutWritesDigest
+    implicit val tileLayoutWrites = tileLayoutWritesDigest
     Ok(Json.toJson(API.Success[TileLayout]("ok", tileLayout)))
   }
 

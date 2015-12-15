@@ -1,6 +1,7 @@
 import store from './store';
 import SocketDatapipe from './SocketDatapipe';
 
+import $ from 'jquery';
 import fetch from 'isomorphic-fetch';
 import { polyfill } from 'es6-promise';
 polyfill();
@@ -45,7 +46,7 @@ export function fetchTilesConfig() {
 
     return fetchWithCredentials('/api/tiles/config')
       .then(response => response.json())
-      .then(json => dispatch(receivedTilesConfig(json.data.tiles)))
+      .then(json => dispatch(receivedTilesConfig(json.data)))
       .catch(err => dispatch({type: TILES_FETCH_FAILURE}));
   }
 }
@@ -56,7 +57,7 @@ export function fetchTilesContentById(tileIds) {
   return dispatch => {
     dispatch({type: TILES_FETCH});
 
-    let queryStr = tileIds.map((id) => `id=${id}`).join('');
+    let queryStr = $.param(tileIds);
     fetchWithCredentials(`/api/tiles/contentbyid?${queryStr}`)
       .then(response => response.json())
       .then(json => dispatch(receivedTilesContent(json.data)))

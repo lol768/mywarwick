@@ -10,7 +10,11 @@ case class TileInstance(
 )
 
 object TileInstance {
-  implicit val tileInstanceFormat = Format(Json.reads[TileInstance], clientFriendlyWrites)
+  //  implicit val format = Json.format[TileInstance]
+  implicit val tileInstanceReads = Json.reads[TileInstance]
+  implicit val tileInstanceWrites = Json.writes[TileInstance]
+
+  lazy val tileInstanceWritesDigest: Writes[TileInstance] = clientFriendlyWrites
 
   // custom Writes omits some values we don't use and makes json more readable to client
   def clientFriendlyWrites: Writes[TileInstance] =
@@ -31,5 +35,14 @@ case class TileLayout(
 )
 
 object TileLayout {
-  implicit val format = Json.format[TileLayout]
+  implicit val tileLayoutReads = Json.reads[TileLayout]
+  implicit val tileLayoutWrites = Json.writes[TileLayout]
+
+  lazy val tileLayoutWritesDigest: Writes[TileLayout] = new Writes[TileLayout] {
+    def writes(tileLayout: TileLayout): JsValue = {
+      import TileInstance.tileInstanceWritesDigest
+      implicit val tileInstanceWrites = tileInstanceWritesDigest
+      JsArray(tileLayout.tiles.map(tileInstance => Json.toJson(tileInstance)))
+    }
+  }
 }
