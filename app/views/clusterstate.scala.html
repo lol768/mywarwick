@@ -1,0 +1,32 @@
+@import akka.cluster.ClusterEvent.CurrentClusterState
+@import akka.actor.Address
+@(state: CurrentClusterState, selfAddress: Address)
+
+@views.html.admin.layout() {
+  <h1>Cluster members</h1>
+  @if(state.unreachable.nonEmpty) {
+    <div class="alert alert-danger">
+      Some nodes are unreachable. The leader will not add any new nodes into the
+      cluster until all unreachable nodes become reachable or are marked Down.
+    </div>
+  }
+  <ul>
+    @state.members.map { member =>
+      <li>
+      @member.address.toString
+      @member.roles.map { role =>
+        <span class="label label-default">@role</span>
+      }
+      @if(state.leader == Some(member.address)) {
+        <strong class="cluster-leader">(Leader)</strong>
+      }
+      @if(state.unreachable.contains(member)) {
+        <strong class="cluster-unreachable">(Unreachable)</strong>
+      }
+      @if(member.address == selfAddress) {
+        <strong class="cluster-self">(This node)</strong>
+      }
+      </li>
+    }
+  </ul>
+}
