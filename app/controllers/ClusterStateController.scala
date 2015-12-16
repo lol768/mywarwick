@@ -32,9 +32,8 @@ class ClusterStateController @Inject() (
   def get = Action {
     val state = cluster.state
     Ok(Json.obj(
-      // I don't know if a leader is required.
-      "unreachable" -> render(state.unreachable),
       "leader" -> JsString(state.leader.map(_.toString).orNull),
+      "unreachable" -> render(state.unreachable),
       "members" -> render(state.members)
     ))
   }

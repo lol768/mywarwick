@@ -29,6 +29,9 @@ class ClusterStateServiceImpl @Inject() (
 ) extends ClusterStateService {
   val cluster = Cluster(akka)
 
+  // FIXME this doesn't appear to work
+  // - app might be shutting down before the message can be sent
+  // - listen to cluster events and wait for a confirmation?
   life.addStopHook(() => {
     Future.successful(cluster.leave(cluster.selfAddress))
   })
