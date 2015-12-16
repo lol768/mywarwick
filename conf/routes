@@ -23,6 +23,7 @@ GET         /news/feed                                    @controllers.NewsContr
 
 GET         /service/metrics                              @controllers.MetricsController.metrics
 GET         /service/gtg                                  @controllers.ServiceCheckController.gtg
+GET         /service/healthcheck                          @controllers.ServiceCheckController.healthcheck
 GET         /service/cluster/state                        @controllers.ClusterStateController.get
 
 GET         /api/streams/user                             @controllers.api.UserActivitiesController.get
