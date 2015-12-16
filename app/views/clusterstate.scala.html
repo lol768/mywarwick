@@ -17,14 +17,14 @@
       @member.roles.map { role =>
         <span class="label label-default">@role</span>
       }
-      @if(member.address == selfAddress) {
-        <strong class="self">(This node)</strong>
-      }
       @if(state.leader == Some(member.address)) {
-        <strong class="leader">(Leader)</strong>
+        <strong class="cluster-leader">(Leader)</strong>
       }
       @if(state.unreachable.contains(member)) {
-        <strong class="unreachable">(Unreachable)</strong>
+        <strong class="cluster-unreachable">(Unreachable)</strong>
+      }
+      @if(member.address == selfAddress) {
+        <strong class="cluster-self">(This node)</strong>
       }
       </li>
     }
