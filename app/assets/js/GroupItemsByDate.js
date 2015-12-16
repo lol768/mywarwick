@@ -7,18 +7,22 @@ let groupItemsByDate = {
   // Exposed as a CSS class on the grouped list
   description: 'by-date',
 
+  today() {
+    return moment();
+  },
+
   // Which group an item belongs in
   // Return an arbitrary identifier that is the same for all items in the same group
   groupForItem(item) {
     var date = moment(item.props.date).startOf('day');
 
-    if (date.isSame(moment(), 'day')) {
+    if (date.isSame(this.today(), 'day')) {
       return 0;
-    } else if (date.isSame(moment().subtract(1, 'day'), 'day')) {
+    } else if (date.isSame(this.today().subtract(1, 'day'), 'day')) {
       return 1;
-    } else if (date.isSame(moment(), 'week')) {
+    } else if (date.isSame(this.today(), 'isoWeek')) {
       return 2;
-    } else if (date.isSame(moment().subtract(1, 'week'), 'week')) {
+    } else if (date.isSame(this.today().subtract(1, 'week'), 'isoWeek')) {
       return 3;
     } else {
       return 4;
