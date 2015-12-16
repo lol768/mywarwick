@@ -1,22 +1,18 @@
 package services
 
-import java.io.IOException
-import java.nio.charset.Charset
 import javax.inject.Inject
 
-import com.google.common.base.Charsets
+import com.fasterxml.jackson.core.JsonParseException
 import com.google.inject.ImplementedBy
-import models.TileInstance$
-import play.api.libs.json.{Json, JsObject}
 import models.{API, TileInstance}
+import org.apache.http.client.methods.{HttpPost, HttpUriRequest}
+import org.apache.http.entity.StringEntity
 import org.apache.http.client.methods.{HttpUriRequest, HttpPost}
 import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.impl.client.HttpClients
-import org.apache.http.util.EntityUtils
-import play.api.libs.json.{Writes, Json, JsObject}
-import play.api.libs.ws.{WSAPI, WS}
+import play.api.libs.json.{JsObject, _}
 import system.Threadpools
-import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils, TrustedApplicationsManager}
+import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils}
 import warwick.sso.User
 
 import scala.concurrent.Future
@@ -24,17 +20,14 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[TileContentServiceImpl])
 trait TileContentService {
 
-  def getTileContent(tileInstance: TileInstance): Future[JsObject]
   def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]]
 
 }
 
-class TileContentServiceImpl @Inject() (
+class TileContentServiceImpl @Inject()(
   trustedApp: CurrentApplication
 ) extends TileContentService {
 
-  override def getTileContent(tileInstance: TileInstance): Future[JsObject] =
-    Future.successful(Json.obj())
   // TODO inject a client properly
   val client = HttpClients.createDefault()
 
@@ -48,6 +41,9 @@ class TileContentServiceImpl @Inject() (
     val response = client.execute(request)
     try {
       Json.parse(response.getEntity.getContent).as[API.Response[JsObject]]
+    } catch {
+      // TODO: gracefully handle dodgy fetch urls
+            case jpe: JsonParseException => API.Failure("", Seq(API.Error("0", "Could not parse json from Tile fetch url")))
     } finally {
       response.close()
     }

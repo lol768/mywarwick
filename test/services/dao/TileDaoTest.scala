@@ -14,9 +14,9 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       anorm.SQL(
         """
-      INSERT INTO TILE (ID, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
-        ('tile', 'large', 0, 'http://provider'),
-        ('other-tile', 'wide', 1, 'http://provider');
+      INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
+        ('tile', 'count', 'large', 0, 'http://provider'),
+        ('other-tile', 'count', 'wide', 1, 'http://provider');
       INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
         ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE),
         ('someone', 'other-tile', 0, 'large', SYSDATE, SYSDATE);
@@ -32,9 +32,9 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       anorm.SQL(
         """
-      INSERT INTO TILE (ID, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
-        ('tile', 'large', 0, 'http://provider'),
-        ('other-tile', 'wide', 1, 'http://provider');
+      INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
+        ('tile', 'count', 'large', 0, 'http://provider'),
+        ('other-tile', 'count', 'wide', 1, 'http://provider');
       INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
         ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE),
         ('someone', 'other-tile', 0, 'large', SYSDATE, SYSDATE);
@@ -48,30 +48,32 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
     }
 
-    "get default tiles when the user has none"  in transaction { implicit c =>
-      anorm.SQL("""
-        INSERT INTO TILE (ID, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
-          ('tile', 'large', 0, 'http://provider'),
-          ('other-tile', 'wide', 1, 'http://provider'),
-          ('heron-tile', 'tall', 2, 'http://herons-eat-ducklings');
+    "get default tiles when the user has none" in transaction { implicit c =>
+      anorm.SQL(
+        """
+        INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
+          ('tile', 'count', 'large', 0, 'http://provider'),
+          ('other-tile', 'count', 'wide', 1, 'http://provider'),
+          ('heron-tile', 'count', 'tall', 2, 'http://herons-eat-ducklings');
 
         INSERT INTO TILE_GROUP (TILE_ID, "GROUP") VALUES
           ('tile', 'staff'),
           ('tile', 'student'),
           ('other-tile', 'staff'),
           ('heron-tile', 'student');
-      """).execute()
+        """).execute()
 
       val tiles = tileDao.getTilesForUser("someone", Set("staff"))
       tiles.map(_.tile.id).toSet must equal(Set("tile", "other-tile"))
     }
 
     "don't fetch tiles that the user has removed" in transaction { implicit c =>
-      anorm.SQL("""
-        INSERT INTO TILE (ID, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
-          ('tile', 'large', 0, 'http://provider'),
-          ('other-tile', 'wide', 1, 'http://provider'),
-          ('heron-tile', 'tall', 2, 'http://herons-eat-ducklings');
+      anorm.SQL(
+        """
+        INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
+          ('tile', 'count', 'large', 0, 'http://provider'),
+          ('other-tile', 'count', 'wide', 1, 'http://provider'),
+          ('heron-tile', 'count', 'tall', 2, 'http://herons-eat-ducklings');
 
         INSERT INTO TILE_GROUP (TILE_ID, "GROUP") VALUES
           ('tile', 'staff'),
@@ -81,24 +83,25 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
         INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, REMOVED, CREATED_AT, UPDATED_AT) VALUES
          ('someone', 'tile', 1, 'large', true, SYSDATE, SYSDATE)
-      """).execute()
+        """).execute()
 
       val tiles = tileDao.getTilesForUser("someone", Set("staff"))
       tiles.map(_.tile.id).toSet must equal(Set("other-tile"))
     }
 
     "fetch tiles for anonymous users " in transaction { implicit c =>
-      anorm.SQL("""
-        INSERT INTO TILE (ID, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
-          ('tile', 'large', 0, 'http://provider'),
-          ('other-tile', 'wide', 1, 'http://provider'),
-          ('open-day-tile', 'tall', 2, 'http://open-for-dayz');
+      anorm.SQL(
+        """
+        INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
+          ('tile', 'count', 'large', 0, 'http://provider'),
+          ('croco-tile', 'count', 'wide', 1, 'http://provider'),
+          ('open-day-tile', 'count', 'tall', 2, 'http://open-for-dayz');
         INSERT INTO TILE_GROUP (TILE_ID, "GROUP") VALUES
           ('tile', 'staff'),
           ('tile', 'student'),
-          ('other-tile', 'staff'),
+          ('croco-tile', 'staff'),
           ('open-day-tile', 'anonymous');
-      """).execute()
+        """).execute()
 
       val tiles = tileDao.getTilesForAnonymousUser
       tiles.map(_.tile.id).toSet must equal(Set("open-day-tile"))

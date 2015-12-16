@@ -1,13 +1,14 @@
 import store from './store';
 import SocketDatapipe from './SocketDatapipe';
 
+import $ from 'jquery';
 import fetch from 'isomorphic-fetch';
 import { polyfill } from 'es6-promise';
 polyfill();
 
 import { userReceive } from './user';
 import { NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './news';
-import { TILES_FETCH, TILES_RECEIVE, TILES_FETCH_FAILURE, receivedTileData } from './tiles';
+import { TILES_FETCH, TILES_CONFIG_RECEIVE, TILES_CONTENT_RECEIVE, TILES_FETCH_FAILURE, receivedTilesConfig, receivedTilesContent } from './tiles';
 import { receivedActivity, fetchedActivities, receivedNotification, fetchedNotifications } from './notifications';
 
 //                       //
@@ -39,18 +40,39 @@ function fetchWithCredentials(url) {
   });
 }
 
-export function fetchTileData() {
+export function fetchTilesConfig() {
   return dispatch => {
     dispatch({type: TILES_FETCH});
 
-    return fetchWithCredentials('/api/tiles')
+    return fetchWithCredentials('/api/tiles/config')
       .then(response => response.json())
-      .then(json => dispatch(receivedTileData(json.data.tiles)))
+      .then(json => dispatch(receivedTilesConfig(json.data)))
       .catch(err => dispatch({type: TILES_FETCH_FAILURE}));
   }
 }
 
 import _ from 'lodash';
+
+export function fetchTilesContentById(tileIds) {
+  return dispatch => {
+    dispatch({type: TILES_FETCH});
+
+    let queryStr = $.param(tileIds);
+    fetchWithCredentials(`/api/tiles/contentbyid?${queryStr}`)
+      .then(response => response.json())
+      .then(json => dispatch(receivedTilesContent(json.data)))
+  }
+}
+
+export function fetchTilesContent() {
+  return dispatch => {
+    dispatch({type: TILES_FETCH});
+
+    fetchWithCredentials('/api/tiles/content')
+      .then(response => response.json())
+      .then(json => dispatch(receivedTilesContent(json.data)))
+  }
+}
 
 export function fetchActivities() {
   fetchWithCredentials('/api/streams/user')

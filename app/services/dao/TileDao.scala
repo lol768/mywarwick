@@ -45,7 +45,7 @@ class TileDaoImpl @Inject()() extends TileDao {
 
     val userTiles = SQL(
       s"""
-        |SELECT ID, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL, TILE_POSITION, TILE_SIZE, REMOVED, PREFERENCES
+        |SELECT ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL, TILE_POSITION, TILE_SIZE, REMOVED, PREFERENCES
         |FROM USER_TILE JOIN TILE ON ID = TILE_ID
         |WHERE USERCODE = {usercode} $idRestriction ORDER BY TILE_POSITION ASC
       """.stripMargin)
@@ -61,7 +61,7 @@ class TileDaoImpl @Inject()() extends TileDao {
   private def getDefaultTilesForGroups(ids: Seq[String], groups: Set[String])(implicit c: Connection): Seq[TileInstance] = {
     val idRestriction = if (ids.isEmpty) "" else "AND ID IN ({ids})"
     SQL(s"""
-      |SELECT ID, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL, DEFAULT_POSITION AS TILE_POSITION, DEFAULT_SIZE AS TILE_SIZE, 0 AS REMOVED, NULL AS PREFERENCES
+      |SELECT ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL, DEFAULT_POSITION AS TILE_POSITION, DEFAULT_SIZE AS TILE_SIZE, 0 AS REMOVED, NULL AS PREFERENCES
       |FROM TILE
       |WHERE EXISTS (SELECT * FROM TILE_GROUP WHERE TILE_ID = ID and "GROUP" in ({groups})) $idRestriction
       |ORDER BY DEFAULT_POSITION ASC
@@ -73,6 +73,7 @@ class TileDaoImpl @Inject()() extends TileDao {
 
   def userTileParser: RowParser[TileInstance] = {
     get[String]("ID") ~
+    get[String]("TILE_TYPE") ~
       get[String]("DEFAULT_SIZE") ~
       get[Int]("DEFAULT_POSITION") ~
       get[String]("FETCH_URL") ~
@@ -80,9 +81,9 @@ class TileDaoImpl @Inject()() extends TileDao {
       get[String]("TILE_SIZE") ~
       get[Boolean]("REMOVED") ~
       get[Option[String]]("PREFERENCES") map {
-      case tileId ~ defaultSize ~ defaultPosition ~ fetchUrl ~ position ~ size ~ removed ~ preferences =>
+      case tileId ~ tileType ~ defaultSize ~ defaultPosition ~ fetchUrl ~ position ~ size ~ removed ~ preferences =>
         TileInstance(
-          Tile(tileId, TileSize.withName(defaultSize), defaultPosition, fetchUrl),
+          Tile(tileId, tileType, TileSize.withName(defaultSize), defaultPosition, fetchUrl),
           TileConfig(position, TileSize.withName(size)),
           preferences.map(Json.parse(_).as[JsObject]),
           removed
