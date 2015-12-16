@@ -43,6 +43,7 @@ object TileConfig {
 
 case class Tile(
   id: String,
+  tileType: String,
   defaultSize: TileSize,
   defaultPosition: Int,
   fetchUrl: String

@@ -1,16 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
+import store from '../../store';
 import classNames from 'classnames';
+
+import { connect } from 'react-redux';
 
 import $ from 'jquery';
 
+import { fetchTilesContent } from '../../serverpipe'
 const DEFAULT_TILE_COLOR = '#8c6e96'; // Default ID7 theme colour
 const DEFAULT_TEXT_COLOR = 'white';
 
 let sizeClasses = {
-  normal: 'col-xs-6 col-md-3',
-  wide: 'col-xs-12 col-sm-6'
+  small: 'col-xs-6 col-md-3',
+  large: 'col-xs-12 col-sm-6',
+  wide: 'col-xs-12 col-sm-6',
+  tall: 'col-xs-12 col-sm-6'
 };
 
 export default class Tile extends ReactComponent {
@@ -22,11 +28,11 @@ export default class Tile extends ReactComponent {
     let backgroundColor = props.backgroundColor ? props.backgroundColor : DEFAULT_TILE_COLOR;
     let color = props.color ? props.color : DEFAULT_TEXT_COLOR;
 
-    let sizeClass = sizeClasses[props.size || 'normal'];
+    let sizeClass = sizeClasses[props.size || props.defaultSize];
     let outerClassName = classNames({
       'tile--normal': !props.zoomed,
       [sizeClass]: !props.zoomed,
-      'tile--zoomed': props.zoomed,
+      'tile--zoomed': props.zoomed
     });
 
     return (

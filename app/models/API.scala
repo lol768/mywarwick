@@ -37,11 +37,27 @@ trait APIWriters {
   */
 object API extends APIWriters {
 
-  case class Error(id: String, message: String)
+  /**
+    * Standard format for a successful API response.
+    */
+  @deprecated("Use the API.Success object", "0")
+  def success(data: (String, JsValueWrapper)*): JsValue =
+    Json.obj(
+      "success" -> true,
+      "status" -> "ok",
+      "data" -> Json.obj(data : _*)
+    )
 
-  object Error {
-    implicit val format = Json.format[Error]
-  }
+  /**
+    * Standard format for a failed API response.
+    */
+  @deprecated("Use the API.Failure object", "0")
+  def failure(status: String, data: (String, JsValueWrapper)*): JsValue =
+    Json.obj(data : _*) ++
+      Json.obj(
+        "success" -> false,
+        "status" -> status
+      )
 
   sealed abstract class Response[A : Reads : Writes](val success: Boolean, status: String) {
     implicit def reads = Response.reads[A]
@@ -50,11 +66,20 @@ object API extends APIWriters {
     // Maybe this is useful, if you like using Either
     def either: Either[Failure[A], Success[A]]
   }
+
+  case class Error(id: String, message: String)
+
   case class Success[A : Reads : Writes](status: String = "ok", data: A) extends Response[A](true, status) {
     def either = Right(this)
   }
+
   case class Failure[A : Reads : Writes](status: String, errors: Seq[Error]) extends Response[A](false, status) {
     def either = Left(this)
+  }
+
+
+  object Error {
+    implicit val format = Json.format[Error]
   }
 
   object Response {
@@ -88,28 +113,5 @@ object API extends APIWriters {
       }
     }
   }
-
-
-  /**
-    * Standard format for a successful API response.
-    */
-  @deprecated("Use the API.Success object", "0")
-  def success(data: (String, JsValueWrapper)*): JsValue =
-    Json.obj(
-      "success" -> true,
-      "status" -> "ok",
-      "data" -> Json.obj(data : _*)
-    )
-
-  /**
-    * Standard format for a failed API response.
-    */
-  @deprecated("Use the API.Failure object", "0")
-  def failure(status: String, data: (String, JsValueWrapper)*): JsValue =
-    Json.obj(data : _*) ++
-      Json.obj(
-        "success" -> false,
-        "status" -> status
-      )
 
 }
