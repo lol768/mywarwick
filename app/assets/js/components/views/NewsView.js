@@ -23,8 +23,8 @@ class NewsView extends ReactComponent {
 
     if (this.props.failed) {
       return (
-        <div className="alert alert-warning">
-          Unable to fetch news.
+        <div className="alert alert-warning" onClick={() => this.props.dispatch(fetchNews())}>
+          Unable to fetch news.  Click to retry.
         </div>
       );
     }
