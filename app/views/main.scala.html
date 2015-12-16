@@ -39,10 +39,10 @@
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
 
     <script>
-      window.SSO = {
-        LOGIN_URL: '@Html(linkGenerator.getLoginUrl)',
-        LOGOUT_URL: '@Html(linkGenerator.getLogoutUrl)'
-      };
+        window.SSO = {
+          LOGIN_URL: '@Html(linkGenerator.getLoginUrl)',
+          LOGOUT_URL: '@Html(linkGenerator.getLogoutUrl)'
+        };
     </script>
     @*<script src="@routes.Assets.versioned("lib/id7/js/id7-bundle.js")"></script>*@
     <script src="/assets/lib/id7/js/id7-bundle.js"></script>
@@ -51,71 +51,73 @@
   </head>
   <body>
     <div class="id7-left-border"></div>
-    <div class="id7-fixed-width-container" id="app-container">
-      <a class="sr-only sr-only-focusable" href="#main">Skip to main content</a>
+    <div id="app-container">
+      <div class="id7-fixed-width-container">
+        <a class="sr-only sr-only-focusable" href="#main">Skip to main content</a>
 
-      <header class="id7-page-header">
-        <div class="id7-utility-masthead">
-          <nav class="id7-utility-bar" id="utility-bar-container">
-            <ul>
-              <li>
+        <header class="id7-page-header">
+          <div class="id7-utility-masthead">
+            <nav class="id7-utility-bar" id="utility-bar-container">
+              <ul>
+                <li>
 
-              </li>
-            </ul>
-          </nav>
+                </li>
+              </ul>
+            </nav>
 
-          <div class="id7-masthead">
-            <div class="id7-masthead-contents">
-              <div class="clearfix">
-                <div class="id7-logo-column">
-                    <!-- Don't include the logo row on non-branded sites -->
-                  <div class="id7-logo-row">
-                    <div class="id7-logo">
-                      <a href="http://warwick.ac.uk" title="Warwick homepage">
-                        <img src="@routes.Assets.versioned("lib/id7/images/shim.gif")" alt="Warwick">
-                      </a>
+            <div class="id7-masthead">
+              <div class="id7-masthead-contents">
+                <div class="clearfix">
+                  <div class="id7-logo-column">
+                      <!-- Don't include the logo row on non-branded sites -->
+                    <div class="id7-logo-row">
+                      <div class="id7-logo">
+                        <a href="http://warwick.ac.uk" title="Warwick homepage">
+                          <img src="@routes.Assets.versioned("lib/id7/images/shim.gif")" alt="Warwick">
+                        </a>
+                      </div>
+                      <nav class="id7-site-links">
+                        <ul>
+                          <li><a href="http://warwick.ac.uk/study">Study</a></li>
+                          <li><a href="http://warwick.ac.uk/research">Research</a></li>
+                          <li><a href="http://warwick.ac.uk/business">Business</a></li>
+                          <li><a href="http://warwick.ac.uk/alumni">Alumni</a></li>
+                          <li><a href="http://warwick.ac.uk/news">News</a></li>
+                          <li><a href="http://warwick.ac.uk/about">About</a></li>
+                        </ul>
+                      </nav>
                     </div>
-                    <nav class="id7-site-links">
-                      <ul>
-                        <li><a href="http://warwick.ac.uk/study">Study</a></li>
-                        <li><a href="http://warwick.ac.uk/research">Research</a></li>
-                        <li><a href="http://warwick.ac.uk/business">Business</a></li>
-                        <li><a href="http://warwick.ac.uk/alumni">Alumni</a></li>
-                        <li><a href="http://warwick.ac.uk/news">News</a></li>
-                        <li><a href="http://warwick.ac.uk/about">About</a></li>
-                      </ul>
-                    </nav>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-          <!-- Docs master nav -->
-        <div class="id7-navigation" data-affixHeader="false" data-affixNav="false">
-            <!-- Include the navigation component here if used -->
-        </div>
-      </header>
-
-        <!-- Page content of course! -->
-      <main class="id7-main-content-area" id="main">
-        <header class="id7-main-content-header">
-          <div class="id7-horizontal-divider">
-            <svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" version="1.1" width="1130" height="40" viewBox="0, 0, 1130, 40">
-              <path d="m 0,0 1030.48, 0 22.8,40 16.96,-31.4 16.96,31.4 22.8,-40 20,0" class="divider" stroke="#383838" fill="none" />
-            </svg>
+            <!-- Docs master nav -->
+          <div class="id7-navigation" data-affixHeader="false" data-affixNav="false">
+              <!-- Include the navigation component here if used -->
           </div>
-          @*<div class="id7-page-title">
-          <h1>@title</h1>
-          </div>*@
         </header>
 
-        <div class="id7-main-content">
-        @content
-        </div>
-      </main>
+          <!-- Page content of course! -->
+        <main class="id7-main-content-area" id="main">
+          <header class="id7-main-content-header">
+            <div class="id7-horizontal-divider">
+              <svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" version="1.1" width="1130" height="40" viewBox="0, 0, 1130, 40">
+                <path d="m 0,0 1030.48, 0 22.8,40 16.96,-31.4 16.96,31.4 22.8,-40 20,0" class="divider" stroke="#383838" fill="none" />
+              </svg>
+            </div>
+            @*<div class="id7-page-title">
+            <h1>@title</h1>
+            </div>*@
+          </header>
 
+          <div class="id7-main-content">
+          @content
+          </div>
+        </main>
+
+      </div>
     </div>
     <div class="id7-right-border"></div>
   </body>
