@@ -7,6 +7,7 @@ export const NEWS_FETCH_FAILURE = 'news.fetch.failure';
 
 let initialState = Immutable.fromJS({
   fetching: false,
+  failed: false,
   items: []
 });
 
@@ -14,16 +15,19 @@ registerReducer('news', (state = initialState, action) => {
   switch (action.type) {
     case NEWS_FETCH:
       return state.mergeDeep({
-        fetching: true
+        fetching: true,
+        failed: false
       });
     case NEWS_FETCH_SUCCESS:
       return state.mergeDeep({
         fetching: false,
+        failed: false,
         items: action.items
       });
     case NEWS_FETCH_FAILURE:
       return state.mergeDeep({
-        fetching: false
+        fetching: false,
+        failed: true
       });
     default:
       return state;

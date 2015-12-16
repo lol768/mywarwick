@@ -29,7 +29,12 @@ export function fetchNews() {
     dispatch({type: NEWS_FETCH});
     return fetch('/news/feed')
       .then(response => response.json())
-      .then(json => dispatch({type: NEWS_FETCH_SUCCESS, items: json.items}))
+      .then(json => {
+        if (json.items !== undefined)
+          dispatch({type: NEWS_FETCH_SUCCESS, items: json.items});
+        else
+          throw new Error('Invalid response returned from news feed');
+      })
       .catch(err => dispatch({type: NEWS_FETCH_FAILURE}));
   }
 }
