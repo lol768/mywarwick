@@ -263,7 +263,7 @@ registerReducer('me', (state = initialState, action) => {
 
 let select = (state) => ({
   zoomedTile: state.get('me').get('zoomedTile'),
-  tiles: state.get('tiles').toJS(),
+  tiles: state.get('tiles').get('items').toJS(),
   tilesContent: state.get('tile-data').toJS()
 });
 
