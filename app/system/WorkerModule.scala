@@ -12,7 +12,7 @@ class WorkerModule extends AbstractModule with AkkaGuiceSupport {
 
   def configure = {
     // bindActor is eager so this creates the actor straight away
-    bindActor[WorkerActor]("worker-actor")
+    bindActor[WorkerActor]("worker")
   }
 
 }

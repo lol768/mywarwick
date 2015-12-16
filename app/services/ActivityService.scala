@@ -6,6 +6,7 @@ import models.{Activity, ActivityPrototype, ActivityResponse}
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
+import services.messaging.MessagingService
 import warwick.sso.{User, Usercode}
 
 import scala.util.{Failure, Success, Try}
@@ -24,6 +25,7 @@ class ActivityServiceImpl @Inject()(
   activityCreationDao: ActivityCreationDao,
   activityDao: ActivityDao,
   activityTagDao: ActivityTagDao,
+  messaging: MessagingService,
   pubsub: PubSub,
   @NamedDatabase("default") db: Database
 ) extends ActivityService {
@@ -47,6 +49,8 @@ class ActivityServiceImpl @Inject()(
         val replaceIds = activityTagDao.getActivitiesWithTags(activity.replace, activity.providerId)
 
         val result = activityCreationDao.createActivity(activity, recipients, replaceIds)
+
+        messaging.send(recipients, result.activity)
 
         recipients.foreach(usercode => pubsub.publish(usercode.string, Notification(result)))
 

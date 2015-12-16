@@ -14,7 +14,7 @@ import org.apache.http.client.methods.{HttpUriRequest, HttpPost}
 import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.impl.client.HttpClients
 import play.api.libs.json.{JsObject, _}
-import system.{Logging, Threadpools}
+import system.{Logging, ThreadPools}
 import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils}
 import warwick.sso.User
 
@@ -34,7 +34,7 @@ class TileContentServiceImpl @Inject()(
   // TODO inject a client properly
   val client = HttpClients.createDefault()
 
-  import Threadpools.tileData
+  import ThreadPools.tileData
 
   // TODO cache
   override def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]] = Future {
