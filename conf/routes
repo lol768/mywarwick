@@ -11,8 +11,8 @@ GET         /search                                       @controllers.HomeContr
 
 ->          /sso                                          sso.Routes
 
+GET         /admin/cluster                                @controllers.ClusterStateController.html
 ->          /admin                                        admin.Routes
-
 
 GET         /websockets/page                              @controllers.HomeController.socket
 
@@ -23,6 +23,7 @@ GET         /news/feed                                    @controllers.NewsContr
 
 GET         /service/metrics                              @controllers.MetricsController.metrics
 GET         /service/gtg                                  @controllers.ServiceCheckController.gtg
+GET         /service/cluster/status                       @controllers.ClusterStateController.get
 
 GET         /api/streams/user                             @controllers.api.UserActivitiesController.get
 
