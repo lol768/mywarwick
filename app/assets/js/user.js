@@ -17,6 +17,13 @@ registerReducer('user', (state = Immutable.Map(), action) => {
   }
 });
 
+function userReceiveAction(data) {
+  return {
+    type: USER_RECEIVE,
+    data: data
+  };
+}
+
 export function userReceive(data) {
   return dispatch => {
     localforage.getItem('usercode', (err, currentUsercode) => {
@@ -25,12 +32,9 @@ export function userReceive(data) {
       if (currentUsercode !== data.usercode) {
         dispatch(resetStore())
           .then(() => localforage.setItem('usercode', data.usercode))
-          .then(() =>
-            dispatch({
-              type: USER_RECEIVE,
-              data: data
-            })
-          );
+          .then(() => dispatch(userReceiveAction(data)));
+      } else {
+        dispatch(userReceiveAction(data));
       }
     });
   };

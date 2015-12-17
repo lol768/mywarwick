@@ -10,24 +10,35 @@ import { makeStream, takeFromStream } from './stream';
 import SocketDatapipe from './SocketDatapipe';
 
 export const TILES_FETCH = 'tiles.fetch';
-export const TILES_RECEIVE = 'tiles.receive';
+export const TILES_CONFIG_RECEIVE = 'tiles.config.receive';
+export const TILES_CONTENT_RECEIVE = 'tile.content.receive';
 export const TILES_FETCH_FAILURE = 'tiles.fetch.failure';
 
-export function receivedTileData(data) {
+export function receivedTilesConfig(data) {
   return {
-    type: TILES_RECEIVE,
+    type: TILES_CONFIG_RECEIVE,
     tiles: data
   };
 }
 
+export function receivedTilesContent(data) {
+  return {
+    type: TILES_CONTENT_RECEIVE,
+    tilesContent: data
+  };
+}
+
+// TODO: should local storage keep tile config and tile content
 localforage.getItem('tiles').then(
   (value) => {
-    if (value != null) store.dispatch(receivedTileData(value));
+    if (value != null && store.getState().get('tiles').get('fetched') == false) {
+      store.dispatch(receivedTilesConfig(value));
+    }
   },
   (err) => log.warn('Problem loading tiles from local storage', err)
 );
 
-const tilesSelector = (state) => state.get('tiles');
+const tilesSelector = (state) => state.get('tiles').get('items');
 
 const persistTilesSelect = createSelector([tilesSelector], (tiles) => {
   // Persist tile data to local storage on change
@@ -36,17 +47,44 @@ const persistTilesSelect = createSelector([tilesSelector], (tiles) => {
 
 store.subscribe(() => persistTilesSelect(store.getState()));
 
-registerReducer('tiles', (state = Immutable.List(), action) => {
+let initialState = Immutable.fromJS({
+  fetching: false,
+  fetched: false,
+  failed: false,
+  items: []
+});
+
+registerReducer('tiles', (state = initialState, action) => {
   switch (action.type) {
     case TILES_FETCH:
-      // Could set `fetching: true` and display a loading indicator on the UI
-      return state;
+      return state.mergeDeep({
+        fetching: true,
+        fetched: false,
+        failed: false
+      });
     case TILES_FETCH_FAILURE:
-      // Could set `error: true` and display an error message and/or retry
-      return state;
-    case TILES_RECEIVE:
-      return Immutable.fromJS(action.tiles);
+      return state.mergeDeep({
+        fetching: false,
+        fetched: false,
+        failed: true
+      });
+    case TILES_CONFIG_RECEIVE:
+      return state.mergeDeep({
+        fetching: false,
+        fetched: true,
+        failed: false,
+        items: Immutable.List(action.tiles)
+      });
     default:
       return state;
+  }
+});
+
+registerReducer('tile-data', (state = Immutable.Map(), action) => {
+  switch (action.type) {
+    case TILES_CONTENT_RECEIVE:
+      return state.merge(Immutable.fromJS(action.tilesContent));
+    default:
+      return state
   }
 });

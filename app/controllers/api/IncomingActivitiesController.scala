@@ -21,7 +21,7 @@ class IncomingActivitiesController @Inject()(
 ) extends BaseController with I18nSupport {
 
   import securityService._
-  import controllers.Reads.isoDateReads
+  import controllers.DateFormats.isoDateReads
 
   def readsPostedActivity(providerId: String, shouldNotify: Boolean): Reads[ActivityPrototype] =
     (Reads.pure(providerId) and

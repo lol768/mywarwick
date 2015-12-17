@@ -15,7 +15,7 @@ import Immutable from 'immutable';
 import { connect } from 'react-redux';
 
 import { registerReducer } from '../../reducers';
-import { fetchTileData } from '../../serverpipe';
+import { fetchTilesConfig, fetchTilesContent } from '../../serverpipe';
 
 const ZOOM_ANIMATION_DURATION = 500;
 
@@ -39,8 +39,10 @@ var tileZoomAnimating = false;
 
 class MeView extends ReactComponent {
 
-  componentWillMount() {
-    this.props.dispatch(fetchTileData());
+  constructor(props) {
+    super(props);
+    this.props.dispatch(fetchTilesConfig());
+    this.props.dispatch(fetchTilesContent());
   }
 
   onTileClick(tile) {
@@ -59,8 +61,7 @@ class MeView extends ReactComponent {
   renderTile(tile, zoomed = false) {
     let onTileClick = this.onTileClick.bind(this);
 
-    let view = this;
-    let baseTile = tileElements[tile.type];
+    let baseTile = tileElements[tile.tileType];
 
     let props = _.merge({}, tile, {
       onClick(e) {
@@ -68,23 +69,14 @@ class MeView extends ReactComponent {
       },
       view: this,
       zoomed: zoomed,
-      key: zoomed ? tile.key + '-zoomed' : tile.key,
-      ref: zoomed ? tile.key + '-zoomed' : tile.key,
-      originalRef: tile.key,
+      content: this.props.tilesContent[tile.id],
+      key: zoomed ? tile.id + '-zoomed' : tile.id,
+      ref: zoomed ? tile.id + '-zoomed' : tile.id,
+      originalRef: tile.id,
       onDismiss: this.onTileDismiss.bind(this)
     });
 
-    let element = class extends baseTile {
-      componentWillEnter(callback) {
-        view.componentWillEnter(props, callback);
-      }
-
-      componentWillLeave(callback) {
-        view.componentWillLeave(props, callback);
-      }
-    };
-
-    return React.createElement(element, props);
+    return React.createElement(baseTile, props);
   }
 
   animateTileZoomOut(tileComponent, zoomComponent, callback) {
@@ -271,7 +263,8 @@ registerReducer('me', (state = initialState, action) => {
 
 let select = (state) => ({
   zoomedTile: state.get('me').get('zoomedTile'),
-  tiles: state.get('tiles').toJS()
+  tiles: state.get('tiles').get('items').toJS(),
+  tilesContent: state.get('tile-data').toJS()
 });
 
 export default connect(select)(MeView);
