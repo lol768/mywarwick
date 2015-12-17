@@ -24,7 +24,7 @@ export function receivedTilesConfig(data) {
 export function receivedTilesContent(data) {
   return {
     type: TILES_CONTENT_RECEIVE,
-    tilesContent: data
+    tilesContent: data.tiles
   };
 }
 
