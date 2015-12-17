@@ -24,7 +24,7 @@ class HomeController @Inject()(
 
   import security._
 
-  def index = UserAction { request =>
+  def index = Action { request =>
     implicit val links = ssoClient.linkGenerator(request)
     Ok(views.html.index())
   }
