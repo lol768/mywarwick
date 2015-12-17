@@ -75,7 +75,12 @@ export function fetchTilesContent() {
 
     fetchWithCredentials('/api/tiles/content')
       .then(response => response.json())
-      .then(json => dispatch(receivedTilesContent(json.data)))
+      .then(json => {
+        if (json.success)
+          dispatch(receivedTilesContent(json.data));
+        else
+          dispatch(receivedTilesContent({errors: json.errors}));
+      })
   }
 }
 
