@@ -24,7 +24,8 @@ export function receivedTilesConfig(data) {
 export function receivedTilesContent(data) {
   return {
     type: TILES_CONTENT_RECEIVE,
-    tilesContent: data
+    content: data.tiles,
+    errors: data.errors
   };
 }
 
@@ -80,11 +81,19 @@ registerReducer('tiles', (state = initialState, action) => {
   }
 });
 
-registerReducer('tile-data', (state = Immutable.Map(), action) => {
+let contentInitialState = Immutable.fromJS({
+  items: [],
+  errors: []
+});
+
+registerReducer('tileContent', (state = contentInitialState, action) => {
   switch (action.type) {
     case TILES_CONTENT_RECEIVE:
-      return state.merge(Immutable.fromJS(action.tilesContent));
+      return Immutable.fromJS({
+        items: action.content || {},
+        errors: action.errors || {}
+      });
     default:
-      return state
+      return state;
   }
 });

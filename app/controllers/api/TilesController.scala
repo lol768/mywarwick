@@ -1,11 +1,8 @@
 package controllers.api
 
-import java.io.IOException
-
 import com.google.inject.Inject
 import controllers.BaseController
-import models.{API, TileInstance, TileLayout}
-import play.api.libs.json
+import models.{API, TileInstance}
 import play.api.libs.json._
 import play.api.mvc.Result
 import services.{SecurityService, TileContentService, TileService}
@@ -13,19 +10,6 @@ import warwick.sso.User
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
-case class TileAndContent(tile: TileInstance, content: JsObject)
-
-object TileAndContent {
-  implicit val format = Json.format[TileAndContent]
-}
-
-case class TileResult(tiles: Seq[TileAndContent])
-
-object TileResult {
-  implicit val format = Json.format[TileResult]
-}
-
 
 class TilesController @Inject()(
   securityService: SecurityService,
@@ -37,9 +21,7 @@ class TilesController @Inject()(
 
   def tilesConfig = UserAction { request =>
     val tileLayout = tileService.getTilesForUser(request.context.user)
-    import TileLayout.tileLayoutWritesDigest
-    implicit val tileLayoutWrites = tileLayoutWritesDigest
-    Ok(Json.toJson(API.Success[TileLayout]("ok", tileLayout)))
+    Ok(Json.toJson(API.Success("ok", tileLayout)))
   }
 
   def allTilesContent = UserAction.async { request =>
@@ -48,23 +30,31 @@ class TilesController @Inject()(
   }
 
   def tilesContent(user: Option[User], tiles: Seq[TileInstance]): Future[Result] = {
-
-    val futures = tiles.map { t =>
-      tileContentService.getTileContent(user, t).map {
-        // replicates current behaviour of aborting the whole thing.
-        // TODO return tiles that worked, don't bail out completely
-        case s: API.Success[JsObject] => s.data
-        case API.Failure(status, errors) =>
-          throw new IOException(errors.map(_.message).mkString("; "))
-      }.map((t, _))
+    val futures = tiles.map { tile =>
+      tileContentService.getTileContent(user, tile).map(content => (tile, content))
     }
 
     Future.sequence(futures).map { result =>
-      val tileResult = result.map {
-        case (tile, content) =>
-          tile.tile.id -> content
+      val tileResult = for ((tile, API.Success(_, content)) <- result) yield tile.tile.id -> content
+      val errorResult = for ((tile, API.Failure(_, errors)) <- result) yield tile.tile.id -> Json.toJson(errors)
+
+      if (tileResult.isEmpty) {
+        InternalServerError(Json.obj(
+          "success" -> false,
+          "status" -> "Internal Server Error",
+          "errors" -> JsObject(errorResult)
+        ))
+      } else {
+        val allOk = tileResult.length == futures.length
+
+        val (status, response) = if (allOk) {
+          ("ok", Json.obj("tiles" -> JsObject(tileResult)))
+        } else {
+          ("some-ok", Json.obj("tiles" -> JsObject(tileResult), "errors" -> JsObject(errorResult)))
+        }
+
+        Ok(Json.toJson(API.Success(status, response)))
       }
-      Ok(Json.toJson(API.Success[JsObject]("ok", JsObject(tileResult))))
     }
   }
 
