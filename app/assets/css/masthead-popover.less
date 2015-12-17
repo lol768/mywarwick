@@ -41,3 +41,31 @@
     }
   }
 }
+
+ul.settings-list {
+  i {
+    margin-left: 16px;
+  }
+
+  .active, .inactive {
+    cursor: pointer;
+  }
+  .active, .inactive {
+    cursor: pointer;
+  }
+  i.active {
+    color: #5b3069
+  }
+  i.inactive {
+    color: #9c9c9c
+  }
+
+  li.settings-list-item {
+    list-style: none;
+
+    &.disabled {
+      pointer-events: none;
+      opacity: 0.4;
+    }
+  }
+}
