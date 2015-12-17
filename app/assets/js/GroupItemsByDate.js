@@ -6,22 +6,18 @@ import moment from 'moment';
 // Exposed as a CSS class on the grouped list
 export const description = 'by-date';
 
-export function today() {
-  return moment();
-}
-
 // Which group an item belongs in
 // Return an arbitrary identifier that is the same for all items in the same group
-export function groupForItem(item) {
+export function groupForItem(item, now = moment()) {
   var date = moment(item.props.date).startOf('day');
 
-  if (date.isSame(today(), 'day')) {
+  if (date.isSame(now, 'day')) {
     return 0;
-  } else if (date.isSame(today().subtract(1, 'day'), 'day')) {
+  } else if (date.isSame(now.clone().subtract(1, 'day'), 'day')) {
     return 1;
-  } else if (date.isSame(today(), 'isoWeek')) {
+  } else if (date.isSame(now, 'isoWeek')) {
     return 2;
-  } else if (date.isSame(today().subtract(1, 'week'), 'isoWeek')) {
+  } else if (date.isSame(now.clone().subtract(1, 'week'), 'isoWeek')) {
     return 3;
   } else {
     return 4;
