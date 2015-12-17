@@ -4,6 +4,7 @@ import java.io.InputStreamReader
 import javax.inject.Inject
 
 import com.fasterxml.jackson.core.JsonParseException
+import com.google.common.base.Charsets
 import com.google.common.io.CharStreams
 import com.google.inject.ImplementedBy
 import models.{API, TileInstance}
@@ -43,7 +44,7 @@ class TileContentServiceImpl @Inject()(
     val response = client.execute(request)
 
     try {
-      val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent))
+      val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
       val apiResponse = Json.parse(body).as[API.Response[JsObject]]
 
       if (!apiResponse.success) {
