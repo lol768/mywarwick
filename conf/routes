@@ -35,3 +35,4 @@ GET         /api/tiles/config                             @controllers.api.Tiles
 GET         /api/tiles/content                            @controllers.api.TilesController.allTilesContent
 GET         /api/tiles/contentbyid                        @controllers.api.TilesController.tilesContentById(ids: Seq[String])
 
+GET         /ssotest                                      @controllers.HomeController.ssotest
