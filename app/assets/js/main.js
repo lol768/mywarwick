@@ -40,6 +40,10 @@ import './notifications-glue';
 
 })();
 
+$.getJSON('/ssotest', (shouldRedirect) => {
+  if (shouldRedirect) window.location = SSO.LOGIN_URL;
+});
+
 var currentPath = '/';
 
 $(function () {

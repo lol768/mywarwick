@@ -39,10 +39,6 @@ var tileZoomAnimating = false;
 
 class MeView extends ReactComponent {
 
-  constructor(props) {
-    super(props);
-  }
-
   componentDidMount() {
     this.props.dispatch(fetchTilesConfig());
     this.props.dispatch(fetchTilesContent());
@@ -72,7 +68,8 @@ class MeView extends ReactComponent {
       },
       view: this,
       zoomed: zoomed,
-      content: this.props.tilesContent[tile.id],
+      content: this.props.tileContent[tile.id],
+      errors: this.props.tileErrors[tile.id],
       key: zoomed ? tile.id + '-zoomed' : tile.id,
       ref: zoomed ? tile.id + '-zoomed' : tile.id,
       originalRef: tile.id,
@@ -267,7 +264,8 @@ registerReducer('me', (state = initialState, action) => {
 let select = (state) => ({
   zoomedTile: state.get('me').get('zoomedTile'),
   tiles: state.get('tiles').get('items').toJS(),
-  tilesContent: state.get('tile-data').toJS()
+  tileContent: state.get('tileContent').get('items').toJS(),
+  tileErrors: state.get('tileContent').get('errors').toJS()
 });
 
 export default connect(select)(MeView);

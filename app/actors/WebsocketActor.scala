@@ -56,7 +56,6 @@ object WebsocketActor {
 class WebsocketActor(out: ActorRef, loginContext: LoginContext, tracker: RequestTracker) extends Actor with ActorLogging {
 
   import WebsocketActor._
-  import context.dispatcher
 
   loginContext.user.foreach { user =>
     val mediator = DistributedPubSub(context.system).mediator

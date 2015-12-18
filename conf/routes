@@ -40,3 +40,5 @@ GET         /api/tiles/contentbyid                        @controllers.api.Tiles
 POST        /api/push/subscribe                           @controllers.api.PushNotificationsController.subscribe
 POST        /api/push/notification                        @controllers.api.PushNotificationsController.fetchNotification
 
+
+GET         /ssotest                                      @controllers.HomeController.ssotest

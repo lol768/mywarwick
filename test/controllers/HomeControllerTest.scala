@@ -7,6 +7,7 @@ import play.api.test.Helpers._
 import play.api.test._
 import services.NullSecurityService
 import system.AppMetrics
+import uk.ac.warwick.sso.client.SSOConfiguration
 import warwick.sso._
 
 class HomeControllerTest extends PlaySpec with MockitoSugar with Results {
@@ -28,8 +29,9 @@ class HomeControllerTest extends PlaySpec with MockitoSugar with Results {
   val metrics = mock[AppMetrics]
   val ssoClient = new MockSSOClient(loginContext)
   val securityService = new NullSecurityService(loginContext)
+  val ssoConfig = mock[SSOConfiguration]
 
-  val controller = new HomeController(securityService, ssoClient, metrics)
+  val controller = new HomeController(securityService, ssoClient, metrics, ssoConfig)
 
   "ApplicationController#index" should {
     "render" in {

@@ -288,7 +288,7 @@ definitions:
             items:
               type: string
               format: groupname
-              example: in-elab
+              example: ch-students
   ActivityTag:
     type: object
     properties:

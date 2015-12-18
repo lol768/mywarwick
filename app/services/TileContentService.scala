@@ -1,8 +1,11 @@
 package services
 
+import java.io.InputStreamReader
 import javax.inject.Inject
 
 import com.fasterxml.jackson.core.JsonParseException
+import com.google.common.base.Charsets
+import com.google.common.io.CharStreams
 import com.google.inject.ImplementedBy
 import models.{API, TileInstance}
 import org.apache.http.client.methods.{HttpPost, HttpUriRequest}
@@ -11,7 +14,7 @@ import org.apache.http.client.methods.{HttpUriRequest, HttpPost}
 import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.impl.client.HttpClients
 import play.api.libs.json.{JsObject, _}
-import system.Threadpools
+import system.{Logging, ThreadPools}
 import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils}
 import warwick.sso.User
 
@@ -26,24 +29,29 @@ trait TileContentService {
 
 class TileContentServiceImpl @Inject()(
   trustedApp: CurrentApplication
-) extends TileContentService {
+) extends TileContentService with Logging {
 
   // TODO inject a client properly
   val client = HttpClients.createDefault()
 
-  import Threadpools.tileData
+  import ThreadPools.tileData
 
   // TODO cache
   override def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]] = Future {
-    val request = jsonPost(tileInstance.tile.fetchUrl, tileInstance.options.getOrElse(Json.obj()))
-    val usercode = user.map(_.usercode.string).orNull
-    signRequest(trustedApp, usercode, request)
+    val request = jsonPost(tileInstance.tile.fetchUrl, tileInstance.options)
+    user.foreach(user => signRequest(trustedApp, user.usercode.string, request))
+
     val response = client.execute(request)
+
     try {
-      Json.parse(response.getEntity.getContent).as[API.Response[JsObject]]
-    } catch {
-      // TODO: gracefully handle dodgy fetch urls
-            case jpe: JsonParseException => API.Failure("", Seq(API.Error("0", "Could not parse json from Tile fetch url")))
+      val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
+      val apiResponse = Json.parse(body).as[API.Response[JsObject]]
+
+      if (!apiResponse.success) {
+        logger.warn(s"Content provider returned Failure: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}, response=$body")
+      }
+
+      apiResponse
     } finally {
       response.close()
     }
@@ -54,9 +62,9 @@ class TileContentServiceImpl @Inject()(
   def signRequest(trustedApp: CurrentApplication, usercode: String, request: HttpUriRequest) =
     TrustedApplicationUtils.signRequest(trustedApp, usercode, request)
 
-  private def jsonPost(url: String, postData: JsObject) = {
+  private def jsonPost(url: String, postData: Option[JsObject]) = {
     val request = new HttpPost(url)
-    request.setEntity(new StringEntity(Json.stringify(postData), ContentType.APPLICATION_JSON));
+    postData.foreach(data => request.setEntity(new StringEntity(Json.stringify(data), ContentType.APPLICATION_JSON)))
     request
   }
 

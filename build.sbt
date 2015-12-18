@@ -27,7 +27,8 @@ val appDeps = Seq(
   "uk.ac.warwick.play-utils" %% "anorm" % "1.2",
   "com.typesafe.akka" %% "akka-cluster" % "2.4.0",
   "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.0",
-  "com.kenshoo" %% "metrics-play" % "2.4.0_0.4.1"
+  "com.kenshoo" %% "metrics-play" % "2.4.0_0.4.1",
+  "com.typesafe.play" %% "play-mailer" % "3.0.1"
 )
 
 val testDeps = Seq(
