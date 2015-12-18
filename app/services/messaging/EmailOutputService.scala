@@ -28,18 +28,14 @@ class EmailOutputService @Inject() (
             .orElse(config.getString("start.mail.from"))
             .getOrElse(throw new IllegalStateException("No From address - set start.mail[.notifications].from"))
 
-  override def send(message: MessageSend): Future[ProcessingResult] = Future {
-    activities.getActivityById(message.activityID).map { activity =>
-      val user = users.getUsers(Seq(message.usercode)).get(message.usercode)
-      user.email.map { address =>
-        val email = build(address, user, activity)
-        val id = mailer.send(email)
-        ProcessingResult(success = true, message=s"Sent email ${id} to user ${message.usercode.string}")
-      }.getOrElse {
-        ProcessingResult(success = false, message=s"No email address for user ${message.usercode.string}")
-      }
+  override def send(message: MessageSend.Heavy): Future[ProcessingResult] = Future {
+    val (user, activity) = (message.user, message.activity)
+    message.user.email.map { address =>
+      val email = build(address, user, activity)
+      val id = mailer.send(email)
+      ProcessingResult(success = true, message = s"Sent email ${id} to user ${user.usercode.string}")
     }.getOrElse {
-      ProcessingResult(success = false, message=s"Activity ${message.activityID} not found")
+      ProcessingResult(success = false, message = s"No email address for user ${user.usercode.string}")
     }
   }
 
@@ -53,9 +49,9 @@ class EmailOutputService @Inject() (
         s""" You have a new notification.
             | ---
             |
-              | ${activity.text}
+            | ${activity.text}
             |
-              | ---
+            | ---
             | This notification was generated automatically by Warwick University.
             """.stripMargin)
     )

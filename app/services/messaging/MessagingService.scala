@@ -9,9 +9,9 @@ import com.google.inject.ImplementedBy
 import models.Activity
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
+import services.ActivityService
 import system.Logging
-import warwick.anorm.converters.ColumnConversions._
-import warwick.sso.Usercode
+import warwick.sso.{UserLookupService, Usercode}
 
 import scala.concurrent.Future
 
@@ -26,25 +26,28 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[MessagingServiceImpl])
 trait MessagingService {
   def send(recipients: Set[Usercode], activity: Activity): Unit
-  def lockRecord(): Option[MessageSend]
+  def lockRecord(): Option[MessageSend.Light]
 
-  def success(message: MessageSend): Unit
-  def failure(message: MessageSend): Unit
+  def success(message: MessageSend.Light): Unit
+  def failure(message: MessageSend.Light): Unit
 
-  def processNow(message: MessageSend): Future[ProcessingResult]
+  def processNow(message: MessageSend.Light): Future[ProcessingResult]
 }
 
 class MessagingServiceImpl @Inject() (
   @NamedDatabase("default") db: Database,
+  activities: ActivityService,
+  users: UserLookupService,
   @Named("email") emailer: OutputService
 ) extends MessagingService with Logging {
 
   import anorm._
+  import warwick.anorm.converters.ColumnConversions._
 
   override def send(recipients: Set[Usercode], activity: Activity): Unit = {
     def save(output: Output, user: Usercode)(implicit c: Connection) = {
       if (logger.isDebugEnabled) logger.logger.debug(s"Sending ${output.name} to ${user} about ${activity.id}")
-      SQL"""INSERT INTO MESSAGE_SEND (ID, NOTIFICATION_ID, USERCODE, OUTPUT, UPDATED_AT) VALUES
+      SQL"""INSERT INTO MESSAGE_SEND (ID, ACTIVITY_ID, USERCODE, OUTPUT, UPDATED_AT) VALUES
             ( ${UUID.randomUUID().toString}, ${activity.id}, ${user.string}, ${Output.Email.name}, ${new DateTime()} )
           """.execute()
     }
@@ -70,7 +73,7 @@ class MessagingServiceImpl @Inject() (
     * to send, but it is also possible when a number of other workers are locking
     * messages at once.
     */
-  def lockRecord(): Option[MessageSend] = {
+  def lockRecord(): Option[MessageSend.Light] = {
     db.withTransaction { implicit connection =>
       // 4 is arbitrary but any number > number of workers is good
       val select = SQL("SELECT * FROM MESSAGE_SEND WHERE STATE='A' AND ROWNUM <= 4 FOR UPDATE")
@@ -86,10 +89,10 @@ class MessagingServiceImpl @Inject() (
     }
   }
 
-  def success(message: MessageSend): Unit = complete("S", message)
-  def failure(message: MessageSend): Unit = complete("F", message)
+  def success(message: MessageSend.Light): Unit = complete("S", message)
+  def failure(message: MessageSend.Light): Unit = complete("F", message)
 
-  private def complete(newState: String, message: MessageSend): Unit = {
+  private def complete(newState: String, message: MessageSend.Light): Unit = {
     db.withTransaction { implicit c =>
       SQL"UPDATE MESSAGE_SEND SET STATE=${newState}, UPDATED_AT=${new DateTime()} WHERE ID=${message.id}".executeUpdate()
     }
@@ -100,10 +103,21 @@ class MessagingServiceImpl @Inject() (
   def sendSmsFor(user: Usercode, activity: Activity): Boolean = false
   def sendMobileFor(user: Usercode, activity: Activity): Boolean = false
 
-  override def processNow(message: MessageSend): Future[ProcessingResult] = message.output match {
-    case Output.Email => emailer.send(message)
-    case Output.SMS => Future.successful(ProcessingResult(success=false, "SMS not yet supported"))
-    case Output.Mobile => Future.successful(ProcessingResult(success=false, "Mobile not yet supported"))
+  override def processNow(message: MessageSend.Light): Future[ProcessingResult] = {
+    activities.getActivityById(message.activity).map { activity =>
+      users.getUsers(Seq(message.user)).get.get(message.user).map { user =>
+        val heavyMessage = message.fill(user, activity)
+        heavyMessage.output match {
+          case Output.Email => emailer.send(heavyMessage)
+          case Output.SMS => Future.successful(ProcessingResult(success = false, "SMS not yet supported"))
+          case Output.Mobile => Future.successful(ProcessingResult(success = false, "Mobile not yet supported"))
+        }
+      }.getOrElse {
+        Future.successful(ProcessingResult(success=false, s"User ${message.user} not found"))
+      }
+    }.getOrElse {
+      Future.successful(ProcessingResult(success=false, s"Activity ${message.activity} not found"))
+    }
   }
 }
 

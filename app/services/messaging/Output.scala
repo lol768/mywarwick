@@ -1,5 +1,8 @@
 package services.messaging
 
+import anorm.RowParser
+import anorm.SqlParser._
+
 /**
   * Case object enum for how a message is to be sent out.
   */
