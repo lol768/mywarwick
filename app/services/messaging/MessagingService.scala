@@ -38,7 +38,8 @@ class MessagingServiceImpl @Inject() (
   @NamedDatabase("default") db: Database,
   activities: ActivityService,
   users: UserLookupService,
-  @Named("email") emailer: OutputService
+  @Named("email") emailer: OutputService,
+  @Named("apns") apns: OutputService
 ) extends MessagingService with Logging {
 
   import anorm._
@@ -48,7 +49,7 @@ class MessagingServiceImpl @Inject() (
     def save(output: Output, user: Usercode)(implicit c: Connection) = {
       if (logger.isDebugEnabled) logger.logger.debug(s"Sending ${output.name} to ${user} about ${activity.id}")
       SQL"""INSERT INTO MESSAGE_SEND (ID, ACTIVITY_ID, USERCODE, OUTPUT, UPDATED_AT) VALUES
-            ( ${UUID.randomUUID().toString}, ${activity.id}, ${user.string}, ${Output.Email.name}, ${new DateTime()} )
+            ( ${UUID.randomUUID().toString}, ${activity.id}, ${user.string}, ${output.name}, ${new DateTime()} )
           """.execute()
     }
 
@@ -99,9 +100,9 @@ class MessagingServiceImpl @Inject() (
   }
 
   // TODO actually decide whether this user should receive this sort of notification
-  def sendEmailFor(user: Usercode, activity: Activity): Boolean = true
+  def sendEmailFor(user: Usercode, activity: Activity): Boolean = false
   def sendSmsFor(user: Usercode, activity: Activity): Boolean = false
-  def sendMobileFor(user: Usercode, activity: Activity): Boolean = false
+  def sendMobileFor(user: Usercode, activity: Activity): Boolean = true
 
   override def processNow(message: MessageSend.Light): Future[ProcessingResult] = {
     activities.getActivityById(message.activity).map { activity =>
@@ -110,7 +111,7 @@ class MessagingServiceImpl @Inject() (
         heavyMessage.output match {
           case Output.Email => emailer.send(heavyMessage)
           case Output.SMS => Future.successful(ProcessingResult(success = false, "SMS not yet supported"))
-          case Output.Mobile => Future.successful(ProcessingResult(success = false, "Mobile not yet supported"))
+          case Output.Mobile => apns.send(heavyMessage)
         }
       }.getOrElse {
         Future.successful(ProcessingResult(success=false, s"User ${message.user} not found"))
