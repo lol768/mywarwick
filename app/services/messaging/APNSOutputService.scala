@@ -55,7 +55,7 @@ class APNSOutputService @Inject()(
 
   def makePayload(activity: Activity): String = {
     APNS.newPayload()
-      .alertBody(s"${activity.providerId}: ${activity.title}")
+      .alertBody(activity.title)
       .sound("default")
       .build()
   }
