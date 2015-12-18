@@ -29,8 +29,8 @@ class EmailOutputService @Inject() (
             .getOrElse(throw new IllegalStateException("No From address - set start.mail[.notifications].from"))
 
   override def send(message: MessageSend.Heavy): Future[ProcessingResult] = Future {
-    val (user, activity) = (message.user, message.activity)
-    message.user.email.map { address =>
+    import message.{user, activity}
+    user.email.map { address =>
       val email = build(address, user, activity)
       val id = mailer.send(email)
       ProcessingResult(success = true, message = s"Sent email ${id} to user ${user.usercode.string}")
