@@ -24,11 +24,11 @@ export class ToggleSwitch extends ReactComponent {
       <div>
         {this.props.buttonText}
         {this.state.switchOn ?
-          <i className={classNames('fa', 'fa-toggle-on', 'fa-2x', 'active')}
+          <i className={classNames('fa', 'fa-toggle-on', 'fa-2x', 'active', 'pull-right')}
              onClick={this.handleClick.bind(this)}>
           </i>
           :
-          <i className={classNames('fa', 'fa-toggle-on', 'fa-rotate-180', 'fa-2x', 'inactive')}
+          <i className={classNames('fa', 'fa-toggle-on', 'fa-rotate-180', 'fa-2x', 'inactive', 'pull-right')}
              onClick={this.handleClick.bind(this)}>
           </i>
         }
@@ -52,11 +52,11 @@ export class SettingsView extends ReactComponent {
   render() {
     return (
       <div>
-        <ul className={classNames('settings-list','well')}>
+        <ul className={classNames('settings-list')}>
           {this.props.settings.map((item) => {
               let disabled = item.props.isDisabled ? 'disabled' : '';
               return (
-                <li className={classNames("settings-list-item", disabled)}>
+                <li key={item.id} className={classNames("settings-list-item", 'well', disabled)}>
                   {item}
                 </li>
               )
@@ -70,7 +70,7 @@ export class SettingsView extends ReactComponent {
 
 // TODO: implement settings props fed in from top of app
 let appSettings = [
-  <ToggleSwitch buttonText="Push notifications" handleToggle={handlePushSubscribe}/>
+  <ToggleSwitch id="push-notifications" buttonText="Push notifications" handleToggle={handlePushSubscribe}/>
 ];
 
 SettingsView.defaultProps = {

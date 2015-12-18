@@ -24,6 +24,7 @@ class ActivityServiceImpl @Inject()(
   activityCreationDao: ActivityCreationDao,
   activityDao: ActivityDao,
   activityTagDao: ActivityTagDao,
+  pushNotificationsService: PushNotificationsService,
   pubsub: PubSub,
   @NamedDatabase("default") db: Database
 ) extends ActivityService {
@@ -48,7 +49,9 @@ class ActivityServiceImpl @Inject()(
 
         val result = activityCreationDao.createActivity(activity, recipients, replaceIds)
 
-        recipients.foreach(usercode => pubsub.publish(usercode.string, Notification(result)))
+        recipients.foreach(usercode =>
+          pubsub.publish(usercode.string, Notification(result))
+        )
 
         Success(result.activity.id)
       }

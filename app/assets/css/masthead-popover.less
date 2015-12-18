@@ -45,19 +45,14 @@
 ul.settings-list {
   i {
     margin-left: 16px;
-  }
+    cursor: pointer;
 
-  .active, .inactive {
-    cursor: pointer;
-  }
-  .active, .inactive {
-    cursor: pointer;
-  }
-  i.active {
-    color: #5b3069
-  }
-  i.inactive {
-    color: #9c9c9c
+    &.active {
+      color: #5b3069
+    }
+    &.inactive {
+      color: #9c9c9c
+    }
   }
 
   li.settings-list-item {

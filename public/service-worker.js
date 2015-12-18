@@ -1,25 +1,34 @@
-
 // Set the callback for the install step
-self.addEventListener('install', function(event) {
+self.addEventListener('install', function (event) {
   // Perform install steps
 });
 
 self.addEventListener('push', function(event) {
-  console.log('Received a push message', event);
-
-  var title = 'Yay a message.';
-  var body = 'We have received a push message.';
-  var icon = '/images/icon-192x192.png';
-  var tag = 'simple-push-demo-notification-tag';
-
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body: body,
-      icon: icon,
-      tag: tag
+    self.registration.pushManager.getSubscription().then(function(subscription) {
+      fetch('/api/push/notification', {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(subscription),
+        credentials: 'same-origin'
+      })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+          self.registration.showNotification(data.title, {
+            body: data.body,
+            icon: data.icon || 'favicon-196x196.png'
+          });
+        })
+        .catch(function(err) {
+          console.log(`Error: ${err}`);
+        });
     })
   );
 });
 
-//Proj num: 322372754464
-//API key:  AIzaSyAmgkYWgUKgMnPa8Cw1N7-rBHN61MupSvw
+self.addEventListener('message', function(event) {
+  self.token = event.data.token;
+});
