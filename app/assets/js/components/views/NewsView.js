@@ -47,13 +47,6 @@ class NewsView extends ReactComponent {
 
     return (
       <div>
-        <div className="list-group">
-          <CheckableListItem color="#3f5c98" text="Computer Science"/>
-          <CheckableListItem color="#7ecbb6" text="Insite" checked/>
-          <CheckableListItem color="#b03865" text="Warwick Arts Centre"/>
-          <CheckableListItem color="#e73f97" text="Warwick Retail"/>
-          <CheckableListItem color="#410546" text="Warwick SU"/>
-        </div>
         {items}
       </div>
     );
