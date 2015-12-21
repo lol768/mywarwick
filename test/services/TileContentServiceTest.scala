@@ -3,6 +3,7 @@ package services
 import helpers.ExternalServers._
 import helpers.{ExternalServers, Fixtures}
 import models._
+import oracle.net.aso.e
 import org.apache.http.client.methods.HttpUriRequest
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
@@ -36,7 +37,9 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
       tileType = "count",
       defaultSize = TileSize.small,
       defaultPosition = 0,
-      fetchUrl = url
+      fetchUrl = url,
+      title = "Printer Credit",
+      icon = "print"
     ),
     tileConfig = TileConfig(1, TileSize.small),
     options = None,
