@@ -38,7 +38,8 @@ class MessagingServiceImpl @Inject() (
   @NamedDatabase("default") db: Database,
   activities: ActivityService,
   users: UserLookupService,
-  @Named("email") emailer: OutputService
+  @Named("email") emailer: OutputService,
+  @Named("mobile") mobile: OutputService
 ) extends MessagingService with Logging {
 
   import anorm._
@@ -101,7 +102,7 @@ class MessagingServiceImpl @Inject() (
   // TODO actually decide whether this user should receive this sort of notification
   def sendEmailFor(user: Usercode, activity: Activity): Boolean = true
   def sendSmsFor(user: Usercode, activity: Activity): Boolean = false
-  def sendMobileFor(user: Usercode, activity: Activity): Boolean = false
+  def sendMobileFor(user: Usercode, activity: Activity): Boolean = true
 
   override def processNow(message: MessageSend.Light): Future[ProcessingResult] = {
     activities.getActivityById(message.activity).map { activity =>
@@ -110,7 +111,7 @@ class MessagingServiceImpl @Inject() (
         heavyMessage.output match {
           case Output.Email => emailer.send(heavyMessage)
           case Output.SMS => Future.successful(ProcessingResult(success = false, "SMS not yet supported"))
-          case Output.Mobile => Future.successful(ProcessingResult(success = false, "Mobile not yet supported"))
+          case Output.Mobile => mobile.send(heavyMessage)
         }
       }.getOrElse {
         Future.successful(ProcessingResult(success=false, s"User ${message.user} not found"))

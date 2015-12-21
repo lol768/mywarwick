@@ -1,13 +1,5 @@
 var isPushEnabled = false;
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js')
-    .then(initialiseState);
-} else {
-  console.warn('Service workers aren\'t supported in this browser.');
-}
-
-
 // Once the service worker is registered set the initial state
 function initialiseState() {
   // Are Notifications supported in the service worker?
@@ -33,7 +25,7 @@ function initialiseState() {
     serviceWorkerRegistration.pushManager.getSubscription()
       .then(subscription => {
         // TODO: subscribe button should be disabled while we check status of subscription
-
+console.log(subscription.endpoint);
         if (!subscription) {
           // TODO: subscribe button should be set to FALSE
           return;
@@ -102,8 +94,8 @@ function unsubscribe() {
         // inform the user that you have done so
 
         console.log('Unsubscription error: ', e);
-        pushButton.disabled = false;
-        pushButton.textContent = 'Enable Push Messages';
+        //pushButton.disabled = false;
+        //pushButton.textContent = 'Enable Push Messages';
       });
     }).catch(function (e) {
       console.error('Error thrown while unsubscribing from push messaging.', e);

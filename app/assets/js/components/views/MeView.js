@@ -39,6 +39,10 @@ var tileZoomAnimating = false;
 
 class MeView extends ReactComponent {
 
+  constructor(props) {
+    super(props);
+  }
+
   componentDidMount() {
     this.props.dispatch(fetchTilesConfig());
     this.props.dispatch(fetchTilesContent());

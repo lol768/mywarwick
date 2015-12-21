@@ -3,7 +3,8 @@ package controllers.api
 import com.google.inject.Inject
 import controllers.BaseController
 import play.api.libs.json.Json
-import services.{PushNotificationsService, SecurityService}
+import services.SecurityService
+import services.messaging.PushNotificationsService
 
 class PushNotificationsController @Inject()(
   securityService: SecurityService,

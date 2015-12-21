@@ -1,28 +1,36 @@
-package services
+package services.messaging
 
-import com.google.inject.{ImplementedBy, Inject}
+import actors.MessageProcessing.ProcessingResult
+import com.google.inject.Inject
+import com.google.inject.name.Named
 import play.api.db._
 import play.api.libs.json.Json
 import play.api.libs.ws.WS
 import services.dao.PushNotificationsDao
 
-@ImplementedBy(classOf[PushNotificationsServiceImpl])
-trait PushNotificationsService {
-  def subscribe(usercode: String, platform: String, regId: String): Boolean
-  def sendNotification(regId: String, usercode: String): Unit
-}
+import scala.concurrent.Future
 
-// TODO: should extend OutputService
-class PushNotificationsServiceImpl @Inject()(
+@Named("mobile")
+class PushNotificationsService @Inject()(
   pushNotificationsDao: PushNotificationsDao,
   @NamedDatabase("default") db: Database
-) extends PushNotificationsService {
+) extends OutputService {
 
-  override def subscribe(usercode: String, platform: String, regId: String): Boolean = {
+  def send(message: MessageSend.Heavy): Future[ProcessingResult] = {
+    val usercode = message.user.usercode.string
+    db.withConnection(implicit c =>
+      pushNotificationsDao.getRegistrationsFor(usercode) map { registration =>
+        sendNotification(registration.registrationId, usercode)
+      }
+    )
+    Future.successful(ProcessingResult(success = true, "yay"))
+  }
+
+  def subscribe(usercode: String, platform: String, regId: String): Boolean = {
     db.withConnection(implicit c => pushNotificationsDao.saveSubscription(usercode, platform, regId))
   }
 
-  override def sendNotification(regId: String, usercode: String): Unit = {
+  def sendNotification(regId: String, usercode: String): Unit = {
     import play.api.Play.current
     val gcmApiKey = current.configuration.getString("gcm.apiKey").get
 
