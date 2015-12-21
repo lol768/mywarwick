@@ -3,11 +3,10 @@ package services
 import helpers.ExternalServers._
 import helpers.{ExternalServers, Fixtures}
 import models._
-import oracle.net.aso.e
 import org.apache.http.client.methods.HttpUriRequest
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.time.{Seconds, Span, Millis}
+import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsObject, Json}
 import uk.ac.warwick.sso.client.trusted.CurrentApplication
