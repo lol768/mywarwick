@@ -7,35 +7,11 @@ import play.api.libs.json.Writes._
 import play.api.libs.functional.syntax._
 import warwick.sso.User
 
-trait APIWriters {
-
-  implicit val userWrite = Writes { user: User =>
-    Json.obj(
-      "@type" -> "Person",
-      "@id" -> user.usercode.string,
-      "displayName" -> user.name.full
-    )
-  }
-
-  implicit val writes = Writes { item: NewsItem =>
-    Json.obj(
-      "id" -> item.id,
-      "title" -> item.title,
-      "url" -> Json.obj(
-        "href" -> item.url
-      ),
-      "content" -> item.content,
-      "publicationDate" -> item.publicationDate.getMillis,
-      "source" -> item.source
-    )
-  }
-
-}
 
 /**
   * Builder for API response objects.
   */
-object API extends APIWriters {
+object API {
 
   /**
     * Standard format for a successful API response.
