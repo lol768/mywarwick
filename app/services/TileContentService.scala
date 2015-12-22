@@ -45,7 +45,7 @@ class TileContentServiceImpl @Inject()(
     try {
       response = client.execute(request)
       val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
-      val apiResponse = Json.parse(body).as[API.Response[JsObject]]
+      val apiResponse  = Json.parse(body).as[API.Response[JsObject]]
 
       if (!apiResponse.success) {
         logger.logger.warn(s"Content provider returned Failure: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}, response=$body")
@@ -54,7 +54,7 @@ class TileContentServiceImpl @Inject()(
       apiResponse
     } catch {
       case e: HttpHostConnectException => API.Failure("error", Seq(API.Error("io", "Couldn't connect to provider")))
-      case e: JsonParseException => API.Failure("error", Seq(API.Error("parse", s"Parse error: ${e.getMessage}")))
+      case e @ (_:JsonParseException | _:JsResultException) => API.Failure("error", Seq(API.Error("parse", s"Parse error: ${e.getMessage}")))
       case e: IOException => API.Failure("error", Seq(API.Error("io", s"I/O error: ${e.getClass.getName}")))
     } finally {
       if (response != null) response.close()
