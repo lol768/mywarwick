@@ -18,6 +18,7 @@ export default class GroupedList extends ReactComponent {
 
     // Group the child nodes using the object passed to the groupBy property
     let groups = _(this.props.children)
+      // don't pass directly to groupBy - tramples on your default args.
       .groupBy((obj) => this.props.groupBy.groupForItem(obj))
       .pairs()
       .sortBy(([group, items]) => group)
