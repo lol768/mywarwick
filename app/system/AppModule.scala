@@ -3,7 +3,7 @@ package system
 import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Provides}
 import play.api.libs.concurrent.AkkaGuiceSupport
-import services.messaging.{PushNotificationsService, EmailOutputService, OutputService}
+import services.messaging.{APNSOutputService, EmailOutputService, OutputService}
 import uk.ac.warwick.sso.client.trusted.TrustedApplicationsManager
 
 
@@ -14,8 +14,8 @@ class AppModule extends AbstractModule with AkkaGuiceSupport {
       .to(classOf[EmailOutputService])
 
     bind(classOf[OutputService])
-      .annotatedWith(Names.named("mobile"))
-      .to(classOf[PushNotificationsService])
+      .annotatedWith(Names.named("apns"))
+      .to(classOf[APNSOutputService])
   }
 
   @Provides

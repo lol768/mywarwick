@@ -46,7 +46,9 @@ case class Tile(
   tileType: String,
   defaultSize: TileSize,
   defaultPosition: Int,
-  fetchUrl: String
+  fetchUrl: String,
+  title: String,
+  icon: String
 )
 
 

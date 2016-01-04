@@ -39,7 +39,7 @@ class MessagingServiceImpl @Inject() (
   activities: ActivityService,
   users: UserLookupService,
   @Named("email") emailer: OutputService,
-  @Named("mobile") mobile: OutputService
+  @Named("apns") apns: OutputService
 ) extends MessagingService with Logging {
 
   import anorm._
@@ -49,7 +49,7 @@ class MessagingServiceImpl @Inject() (
     def save(output: Output, user: Usercode)(implicit c: Connection) = {
       if (logger.isDebugEnabled) logger.logger.debug(s"Sending ${output.name} to ${user} about ${activity.id}")
       SQL"""INSERT INTO MESSAGE_SEND (ID, ACTIVITY_ID, USERCODE, OUTPUT, UPDATED_AT) VALUES
-            ( ${UUID.randomUUID().toString}, ${activity.id}, ${user.string}, ${Output.Email.name}, ${new DateTime()} )
+            ( ${UUID.randomUUID().toString}, ${activity.id}, ${user.string}, ${output.name}, ${new DateTime()} )
           """.execute()
     }
 
@@ -111,7 +111,7 @@ class MessagingServiceImpl @Inject() (
         heavyMessage.output match {
           case Output.Email => emailer.send(heavyMessage)
           case Output.SMS => Future.successful(ProcessingResult(success = false, "SMS not yet supported"))
-          case Output.Mobile => mobile.send(heavyMessage)
+          case Output.Mobile => apns.send(heavyMessage)
         }
       }.getOrElse {
         Future.successful(ProcessingResult(success=false, s"User ${message.user} not found"))

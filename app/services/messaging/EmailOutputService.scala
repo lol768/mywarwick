@@ -6,8 +6,7 @@ import actors.MessageProcessing.ProcessingResult
 import models.{DateFormats, Activity}
 import play.api.Configuration
 import play.api.libs.mailer.{Email, MailerClient}
-import services.ActivityService
-import warwick.sso.{User, UserLookupService}
+import warwick.sso.User
 
 import scala.concurrent.Future
 
@@ -17,8 +16,6 @@ import scala.concurrent.Future
 @Named("email")
 class EmailOutputService @Inject() (
   mailer: MailerClient,
-  users: UserLookupService,
-  activities: ActivityService,
   config: Configuration
 ) extends OutputService {
 
