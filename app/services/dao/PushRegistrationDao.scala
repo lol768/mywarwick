@@ -15,6 +15,9 @@ trait PushRegistrationDao {
 
   def getPushRegistrationsForUser(usercode: Usercode)(implicit c: Connection): Seq[PushRegistration]
 
+  def saveSubscription(usercode: Usercode, platform: Platform, token: String)(implicit c: Connection): Boolean
+  def registrationExists(token: String)(implicit c: Connection): Boolean
+
 }
 
 class PushRegistrationDaoImpl extends PushRegistrationDao {
@@ -34,5 +37,27 @@ class PushRegistrationDaoImpl extends PushRegistrationDao {
         'usercode -> usercode.string
       )
       .as(pushRegistrationParser.*)
+
+  override def registrationExists(token: String)(implicit c: Connection): Boolean = {
+    SQL("SELECT COUNT(*) FROM PUSH_REGISTRATION WHERE token = {token}")
+      .on(
+        'token -> token
+      ).as(scalar[Int].single) > 0
+  }
+
+  override def saveSubscription(usercode: Usercode, platform: Platform, token: String)(implicit c: Connection): Boolean = {
+    if (!registrationExists(token)) {
+      SQL("INSERT INTO PUSH_REGISTRATION (TOKEN, usercode, platform, CREATED_AT) VALUES ({token}, {usercode}, {platform}, {now})")
+        .on(
+          'token -> token,
+          'usercode -> usercode.string,
+          'platform -> platform.dbValue,
+          'now -> DateTime.now
+        )
+        .execute()
+    } else {
+      true
+    }
+  }
 
 }

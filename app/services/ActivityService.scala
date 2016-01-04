@@ -6,7 +6,7 @@ import models.{Activity, ActivityPrototype, ActivityResponse}
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
-import services.messaging.{PushNotificationsService, MessagingService}
+import services.messaging.{GCMOutputService, MessagingService}
 import warwick.sso.{User, Usercode}
 
 import scala.util.{Failure, Success, Try}
