@@ -48,7 +48,7 @@ case class Tile(
   defaultPosition: Int,
   fetchUrl: String,
   title: String,
-  icon: String
+  icon: Option[String]
 )
 
 
