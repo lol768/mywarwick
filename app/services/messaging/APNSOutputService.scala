@@ -4,7 +4,8 @@ import actors.MessageProcessing.ProcessingResult
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.notnoop.apns.APNS
-import models.Activity
+import models.Platform._
+import models.{Platform, Activity}
 import play.api.Configuration
 import play.api.db.{Database, NamedDatabase}
 import services.dao.PushRegistrationDao
@@ -38,14 +39,14 @@ class APNSOutputService @Inject()(
       builder.withSandboxDestination().build()
   }
 
-  override def send(message: Heavy): Future[ProcessingResult] = Future {
+  override def send(message: MessageSend.Heavy): Future[ProcessingResult] = Future {
     import message._
 
     val payload = makePayload(activity)
 
     db.withConnection { implicit c =>
-      val appleDevices = pushRegistrationDao.getPushRegistrationsForUser(user.usercode.string)
-        .filter(_.platform == "a")
+      val appleDevices = pushRegistrationDao.getPushRegistrationsForUser(user.usercode)
+        .filter(_.platform == Apple)
 
       appleDevices.foreach(device => apns.push(device.token, payload))
 
