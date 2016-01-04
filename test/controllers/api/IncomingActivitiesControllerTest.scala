@@ -6,7 +6,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.cache.CacheApi
 import play.api.i18n.MessagesApi
-import play.api.libs.json.{JsString, JsArray, Json}
+import play.api.libs.json.{JsString, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
