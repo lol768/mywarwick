@@ -28,6 +28,12 @@ trait PushNotificationsDao {
 class PushNotificationsDaoImpl @Inject()(
 ) extends PushNotificationsDao {
 
+  def pushRegistrationParser: RowParser[PushRegistration] = {
+    get[String]("registration_id") ~
+      get[String]("platform") map {
+      case regId ~ platform => PushRegistration(regId, platform)
+    }
+  }
   override def getRegistrationsFor(usercode: String)(implicit c: Connection): Seq[PushRegistration] = {
     SQL("SELECT registration_id, platform FROM push_subscription WHERE usercode = {usercode}")
       .on('usercode -> usercode)
@@ -37,18 +43,18 @@ class PushNotificationsDaoImpl @Inject()(
   override def registrationExists(regId: String)(implicit c: Connection): Boolean = {
     SQL("SELECT COUNT(*) FROM push_subscription WHERE registration_id = {regId}")
       .on(
-        'regId -> regId
-      ).as(scalar[Int].single) > 0
+    'regId -> regId
+    ).as(scalar[Int].single) > 0
   }
 
   override def saveSubscription(usercode: String, platform: String, regId: String)(implicit c: Connection): Boolean = {
     if (!registrationExists(regId)) {
       SQL("INSERT INTO PUSH_SUBSCRIPTION (registration_id, usercode, platform) VALUES ({regId}, {usercode}, {platform})")
         .on(
-          'regId -> regId,
-          'usercode -> usercode,
-          'platform -> platform
-        )
+      'regId -> regId,
+      'usercode -> usercode,
+      'platform -> platform
+      )
         .execute()
     } else {
       true
@@ -56,10 +62,4 @@ class PushNotificationsDaoImpl @Inject()(
   }
 
 
-  def pushRegistrationParser: RowParser[PushRegistration] = {
-    get[String]("registration_id") ~
-      get[String]("platform") map {
-      case regId ~ platform => PushRegistration(regId, platform)
-    }
-  }
 }
