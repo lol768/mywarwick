@@ -81,7 +81,7 @@ class TileDaoImpl @Inject()() extends TileDao {
       get[Int]("TILE_POSITION") ~
       get[String]("TILE_SIZE") ~
       get[String]("TITLE") ~
-      get[String]("ICON") ~
+      get[Option[String]]("ICON") ~
       get[Boolean]("REMOVED") ~
       get[Option[String]]("PREFERENCES") map {
       case tileId ~ tileType ~ defaultSize ~ defaultPosition ~ fetchUrl ~ position ~ size ~ title ~ icon ~ removed ~ preferences =>

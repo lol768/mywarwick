@@ -39,7 +39,7 @@ class MessagingServiceImpl @Inject() (
   activities: ActivityService,
   users: UserLookupService,
   @Named("email") emailer: OutputService,
-  @Named("apns") apns: OutputService
+  @Named("mobile") mobile: OutputService
 ) extends MessagingService with Logging {
 
   import anorm._
@@ -111,7 +111,7 @@ class MessagingServiceImpl @Inject() (
         heavyMessage.output match {
           case Output.Email => emailer.send(heavyMessage)
           case Output.SMS => Future.successful(ProcessingResult(success = false, "SMS not yet supported"))
-          case Output.Mobile => apns.send(heavyMessage)
+          case Output.Mobile => mobile.send(heavyMessage)
         }
       }.getOrElse {
         Future.successful(ProcessingResult(success=false, s"User ${message.user} not found"))

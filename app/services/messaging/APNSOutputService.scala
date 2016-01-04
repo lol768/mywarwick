@@ -2,18 +2,15 @@ package services.messaging
 
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.Inject
-import com.google.inject.name.Named
 import com.notnoop.apns.APNS
+import models.Activity
 import models.Platform._
-import models.{Platform, Activity}
 import play.api.Configuration
 import play.api.db.{Database, NamedDatabase}
 import services.dao.PushRegistrationDao
-import services.messaging.MessageSend.Heavy
 
 import scala.concurrent.Future
 
-@Named("apns")
 class APNSOutputService @Inject()(
   @NamedDatabase("default") db: Database,
   pushRegistrationDao: PushRegistrationDao,
