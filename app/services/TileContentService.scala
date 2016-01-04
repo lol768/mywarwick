@@ -1,6 +1,6 @@
 package services
 
-import java.io.InputStreamReader
+import java.io.{IOException, InputStreamReader}
 import javax.inject.Inject
 
 import com.fasterxml.jackson.core.JsonParseException
@@ -8,9 +8,8 @@ import com.google.common.base.Charsets
 import com.google.common.io.CharStreams
 import com.google.inject.ImplementedBy
 import models.{API, TileInstance}
-import org.apache.http.client.methods.{HttpPost, HttpUriRequest}
-import org.apache.http.entity.StringEntity
-import org.apache.http.client.methods.{HttpUriRequest, HttpPost}
+import org.apache.http.client.methods._
+import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.impl.client.HttpClients
 import play.api.libs.json.{JsObject, _}
@@ -41,19 +40,24 @@ class TileContentServiceImpl @Inject()(
     val request = jsonPost(tileInstance.tile.fetchUrl, tileInstance.options)
     user.foreach(user => signRequest(trustedApp, user.usercode.string, request))
 
-    val response = client.execute(request)
+    var response: CloseableHttpResponse = null
 
     try {
+      response = client.execute(request)
       val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
-      val apiResponse = Json.parse(body).as[API.Response[JsObject]]
+      val apiResponse  = Json.parse(body).as[API.Response[JsObject]]
 
       if (!apiResponse.success) {
-        logger.warn(s"Content provider returned Failure: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}, response=$body")
+        logger.logger.warn(s"Content provider returned Failure: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}, response=$body")
       }
 
       apiResponse
+    } catch {
+      case e: HttpHostConnectException => API.Failure("error", Seq(API.Error("io", "Couldn't connect to provider")))
+      case e @ (_:JsonParseException | _:JsResultException) => API.Failure("error", Seq(API.Error("parse", s"Parse error: ${e.getMessage}")))
+      case e: IOException => API.Failure("error", Seq(API.Error("io", s"I/O error: ${e.getClass.getName}")))
     } finally {
-      response.close()
+      if (response != null) response.close()
     }
   }
 

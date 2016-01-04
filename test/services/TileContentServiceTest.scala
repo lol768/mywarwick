@@ -6,7 +6,7 @@ import models._
 import org.apache.http.client.methods.HttpUriRequest
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.time.{Seconds, Span, Millis}
+import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsObject, Json}
 import uk.ac.warwick.sso.client.trusted.CurrentApplication
@@ -36,7 +36,9 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
       tileType = "count",
       defaultSize = TileSize.small,
       defaultPosition = 0,
-      fetchUrl = url
+      fetchUrl = url,
+      title = "Printer Credit",
+      icon = "print"
     ),
     tileConfig = TileConfig(1, TileSize.small),
     options = None,

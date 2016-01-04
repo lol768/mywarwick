@@ -3,6 +3,10 @@
 DIRNAME=`dirname $0`
 cd $DIRNAME/..
 
+if [[ $PRODUCTION != true ]]; then
+  export PRODUCTION=false
+fi
+
 if [[ ! -f node_modules/.bin/gulp ]]; then
   "No gulp script found, have you run `npm install`?"
   exit 1

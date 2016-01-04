@@ -73,6 +73,10 @@ $(function () {
   $(window).on('scroll', updateFixedHeaderAtTop);
   updateFixedHeaderAtTop();
 
+  if (window.navigator.userAgent.indexOf('Mobile') >= 0) {
+    $('html').addClass('mobile');
+  }
+
 });
 
 store.subscribe(() => {

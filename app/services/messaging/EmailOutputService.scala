@@ -3,7 +3,7 @@ package services.messaging
 import javax.inject.{Inject, Named}
 
 import actors.MessageProcessing.ProcessingResult
-import models.Activity
+import models.{DateFormats, Activity}
 import play.api.Configuration
 import play.api.libs.mailer.{Email, MailerClient}
 import warwick.sso.User
@@ -38,19 +38,12 @@ class EmailOutputService @Inject() (
 
   def build(address: String, user: User, activity: Activity): Email = {
     val fullAddress = user.name.full.map(full => s"${full} <${address}>").getOrElse(address)
+    val date = DateFormats.emailDateTime(activity.generatedAt)
     Email(
       subject = activity.title,
       from = from,
       to = Seq(fullAddress),
-      bodyText = Some(
-        s""" You have a new notification.
-            | ---
-            |
-            | ${activity.text}
-            |
-            | ---
-            | This notification was generated automatically by Warwick University.
-            """.stripMargin)
+      bodyText = Some(views.txt.email(user, activity, date).body)
     )
   }
 }
