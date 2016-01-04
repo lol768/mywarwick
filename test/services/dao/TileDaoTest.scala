@@ -14,9 +14,9 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       anorm.SQL(
         """
-      INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
-        ('tile', 'count', 'large', 0, 'http://provider'),
-        ('other-tile', 'count', 'wide', 1, 'http://provider');
+      INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL, TITLE, ICON) VALUES
+        ('tile', 'count', 'large', 0, 'http://provider', 'Printer Credit', 'print'),
+        ('other-tile', 'count', 'wide', 1, 'http://provider', 'Mail', 'envelope-o');
       INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
         ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE),
         ('someone', 'other-tile', 0, 'large', SYSDATE, SYSDATE);
@@ -32,9 +32,9 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       anorm.SQL(
         """
-      INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
-        ('tile', 'count', 'large', 0, 'http://provider'),
-        ('other-tile', 'count', 'wide', 1, 'http://provider');
+      INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL, TITLE, ICON) VALUES
+        ('tile', 'count', 'large', 0, 'http://provider', 'Printer Credit', 'print'),
+        ('other-tile', 'count', 'wide', 1, 'http://provider', 'Mail', 'envelope-o');
       INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
         ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE),
         ('someone', 'other-tile', 0, 'large', SYSDATE, SYSDATE);
@@ -51,10 +51,10 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
     "get default tiles when the user has none" in transaction { implicit c =>
       anorm.SQL(
         """
-        INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
-          ('tile', 'count', 'large', 0, 'http://provider'),
-          ('other-tile', 'count', 'wide', 1, 'http://provider'),
-          ('heron-tile', 'count', 'tall', 2, 'http://herons-eat-ducklings');
+        INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL, TITLE, ICON) VALUES
+          ('tile', 'count', 'large', 0, 'http://provider', 'Printer Credit', 'print'),
+          ('other-tile', 'count', 'wide', 1, 'http://provider', 'Mail', 'envelope-o'),
+          ('heron-tile', 'count', 'tall', 2, 'http://herons-eat-ducklings', 'Mail', 'envelope-o');
 
         INSERT INTO TILE_GROUP (TILE_ID, "GROUP") VALUES
           ('tile', 'staff'),
@@ -70,10 +70,10 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
     "don't fetch tiles that the user has removed" in transaction { implicit c =>
       anorm.SQL(
         """
-        INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
-          ('tile', 'count', 'large', 0, 'http://provider'),
-          ('other-tile', 'count', 'wide', 1, 'http://provider'),
-          ('heron-tile', 'count', 'tall', 2, 'http://herons-eat-ducklings');
+        INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL, TITLE, ICON) VALUES
+          ('tile', 'count', 'large', 0, 'http://provider', 'Printer Credit', 'print'),
+          ('other-tile', 'count', 'wide', 1, 'http://provider', 'Printer Credit', 'print'),
+          ('heron-tile', 'count', 'tall', 2, 'http://herons-eat-ducklings', 'Printer Credit', 'print');
 
         INSERT INTO TILE_GROUP (TILE_ID, "GROUP") VALUES
           ('tile', 'staff'),
@@ -92,10 +92,10 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
     "fetch tiles for anonymous users " in transaction { implicit c =>
       anorm.SQL(
         """
-        INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL) VALUES
-          ('tile', 'count', 'large', 0, 'http://provider'),
-          ('croco-tile', 'count', 'wide', 1, 'http://provider'),
-          ('open-day-tile', 'count', 'tall', 2, 'http://open-for-dayz');
+        INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL, TITLE, ICON) VALUES
+          ('tile', 'count', 'large', 0, 'http://provider', 'Printer Credit', 'print'),
+          ('croco-tile', 'count', 'wide', 1, 'http://provider', 'Printer Credit', 'print'),
+          ('open-day-tile', 'count', 'tall', 2, 'http://open-for-dayz', 'Printer Credit', 'print');
         INSERT INTO TILE_GROUP (TILE_ID, "GROUP") VALUES
           ('tile', 'staff'),
           ('tile', 'student'),
@@ -110,8 +110,8 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
     "save and retrieve tile preferences" in transaction { implicit c =>
       anorm.SQL(
         """
-      INSERT INTO TILE (ID, DEFAULT_SIZE, FETCH_URL) VALUES
-        ('tile', 'large', 'http://provider');
+      INSERT INTO TILE (ID, DEFAULT_SIZE, FETCH_URL, TITLE, ICON) VALUES
+        ('tile', 'large', 'http://provider', 'Printer Credit', 'print');
       INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
         ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE);
         """).execute()
@@ -127,8 +127,8 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
     "return None for non-existent preferences" in transaction { implicit c =>
       anorm.SQL(
         """
-      INSERT INTO TILE (ID, DEFAULT_SIZE, FETCH_URL) VALUES
-        ('tile', 'large', 'http://provider');
+      INSERT INTO TILE (ID, DEFAULT_SIZE, FETCH_URL, TITLE, ICON) VALUES
+        ('tile', 'large', 'http://provider', 'Printer Credit', 'print');
       INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
         ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE);
         """).execute()
