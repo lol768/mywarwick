@@ -50,7 +50,7 @@ class ActivityServiceImpl @Inject()(
 
         val result = activityCreationDao.createActivity(activity, recipients, replaceIds)
 
-//        messaging.send(recipients, result.activity)
+        messaging.send(recipients, result.activity)
 
         recipients.foreach(usercode => pubsub.publish(usercode.string, Notification(result)))
 
