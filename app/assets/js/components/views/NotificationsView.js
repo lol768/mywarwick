@@ -5,7 +5,7 @@ import $ from 'jquery';
 
 import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
-import groupItemsByDate from '../../GroupItemsByDate';
+import * as groupItemsByDate from '../../GroupItemsByDate';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 
 import { connect } from 'react-redux';

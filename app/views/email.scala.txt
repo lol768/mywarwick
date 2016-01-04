@@ -1,0 +1,10 @@
+@import warwick.sso.User
+@import models.Activity
+@(user: User, activity: Activity, date: String)
+Hi@user.name.first.map(" "+_).getOrElse(""), you have a new notification from Start.Warwick:
+---
+
+@activity.text
+
+---
+This notification was generated automatically by Start.Warwick at @date.

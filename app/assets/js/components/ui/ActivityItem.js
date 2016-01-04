@@ -15,8 +15,9 @@ export default class ActivityItem extends ReactComponent {
             <AppIcon app={this.props.provider} size="lg"/>
           </div>
           <div className="media-body">
+            <span className="activity-item__title">{this.props.title}</span>
             <span className="activity-item__text">{this.props.text}</span>
-            <span className="activity-item__source">{this.props.provider}</span>
+            {/*<span className="activity-item__source">{this.props.provider}</span>*/}
             <span className="activity-item__date">{formatDate(this.props.date)}</span>
           </div>
         </div>
