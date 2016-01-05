@@ -15,7 +15,7 @@ import scala.util.{Failure, Success, Try}
 trait ActivityService {
   def getActivityById(id: String): Option[Activity]
 
-  def getActivitiesForUser(user: User, limit: Int = 50, before: Option[DateTime] = None): Seq[ActivityResponse]
+  def getActivitiesForUser(user: User, limit: Int = 50, before: Option[DateTime] = None, after: Option[DateTime] = None, shouldNotify: Int = 0): Seq[ActivityResponse]
 
   def save(activity: ActivityPrototype): Try[String]
 }
@@ -60,8 +60,8 @@ class ActivityServiceImpl @Inject()(
 
   }
 
-  override def getActivitiesForUser(user: User, limit: Int, before: Option[DateTime]): Seq[ActivityResponse] =
-    db.withConnection(implicit c => activityDao.getActivitiesForUser(user.usercode.string, limit.min(50), before))
+  override def getActivitiesForUser(user: User, limit: Int, before: Option[DateTime], after: Option[DateTime] = None, shouldNotify: Int = 0): Seq[ActivityResponse] =
+    db.withConnection(implicit c => activityDao.getActivitiesForUser(user.usercode.string, limit.min(50), before, after, shouldNotify))
 }
 
 object NoRecipientsException extends Throwable

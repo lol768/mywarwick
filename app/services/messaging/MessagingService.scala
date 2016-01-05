@@ -111,7 +111,11 @@ class MessagingServiceImpl @Inject() (
         heavyMessage.output match {
           case Output.Email => emailer.send(heavyMessage)
           case Output.SMS => Future.successful(ProcessingResult(success = false, "SMS not yet supported"))
-          case Output.Mobile => mobile.send(heavyMessage)
+          case Output.Mobile => {
+            System.out.println("mobile case called")
+            mobile.send(heavyMessage)
+          }
+
         }
       }.getOrElse {
         Future.successful(ProcessingResult(success=false, s"User ${message.user} not found"))

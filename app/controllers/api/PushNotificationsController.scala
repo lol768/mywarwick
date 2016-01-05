@@ -2,13 +2,13 @@ package controllers.api
 
 import com.google.inject.Inject
 import controllers.BaseController
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, JsObject, Json}
 import services.SecurityService
 import services.messaging.GCMOutputService
 
-class PushNotificationsController @Inject()(
+class GCMPushNotificationsController @Inject()(
   securityService: SecurityService,
-  pushNotificationsService: GCMOutputService
+  gcmOutputService: GCMOutputService
 ) extends BaseController {
 
   import securityService._
@@ -17,8 +17,8 @@ class PushNotificationsController @Inject()(
     request.context.user.map { user =>
       request.body.asJson.map { json =>
         val endpoint = (json \ "endpoint").as[String]
-        val regId = endpoint.split("/").last
-        pushNotificationsService.subscribe(user.usercode, regId) match {
+        val token = endpoint.split("/").last
+        gcmOutputService.subscribe(user.usercode, token) match {
           case true => Created("subscribed to push notifications")
           case false => InternalServerError("oh dear there's been an error")
         }
@@ -27,16 +27,12 @@ class PushNotificationsController @Inject()(
   }
 
 
-  def fetchNotification = UserAction { request =>
-    // get the registration
-    // get all notifications since last check
-    // update last check to now
-    request.context.user.map { user =>
-      Ok(Json.obj(
-        "title" -> s"Hello ${user.name.first.get}",
-        "body" -> "You have subscribed to push notifications",
-        "icon" -> "/assets/images/notification-icon.png"
-      ))
+  def fetchNotifications = RequiredUserAction { request =>
+    request.body.asJson.map { json =>
+      val endpoint = (json \ "endpoint").as[String]
+      val token = endpoint.split("/").last
+      val notifications: JsValue = gcmOutputService.fetchNotifications(token)
+      Ok(notifications)
     }.get
   }
 }

@@ -15,7 +15,9 @@ self.addEventListener('push', function(event) {
         body: JSON.stringify(subscription),
         credentials: 'same-origin'
       })
-        .then(function(response) { return response.json(); })
+        .then(function(response) {
+          console.log(response);
+          return response.json(); })
         .then(function(data) {
           self.registration.showNotification(data.title, {
             body: data.body,

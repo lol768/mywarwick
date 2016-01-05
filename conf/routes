@@ -37,8 +37,8 @@ GET         /api/tiles/config                             @controllers.api.Tiles
 GET         /api/tiles/content                            @controllers.api.TilesController.allTilesContent
 GET         /api/tiles/contentbyid                        @controllers.api.TilesController.tilesContentById(ids: Seq[String])
 
-POST        /api/push/subscribe                           @controllers.api.PushNotificationsController.subscribe
-POST        /api/push/notification                        @controllers.api.PushNotificationsController.fetchNotification
+POST        /api/push/subscribe                           @controllers.api.GCMPushNotificationsController.subscribe
+POST        /api/push/notification                        @controllers.api.GCMPushNotificationsController.fetchNotifications
 
 
 GET         /ssotest                                      @controllers.HomeController.ssotest

@@ -6,7 +6,8 @@ case class PushRegistration(
   usercode: String,
   platform: Platform,
   token: String,
-  createdAt: DateTime
+  createdAt: DateTime,
+  lastFetchedAt: DateTime
 )
 
 sealed abstract class Platform(val dbValue: String)
