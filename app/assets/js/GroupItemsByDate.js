@@ -1,4 +1,4 @@
-import moment from 'moment';
+import { localMoment } from './dateFormatter';
 
 // A way to describe a grouping strategy
 
@@ -8,8 +8,8 @@ export const description = 'by-date';
 
 // Which group an item belongs in
 // Return an arbitrary identifier that is the same for all items in the same group
-export function groupForItem(item, now = moment()) {
-  var date = moment(item.props.date).startOf('day');
+export function groupForItem(item, now = localMoment()) {
+  var date = localMoment(item.props.date).startOf('day');
 
   if (date.isSame(now, 'day')) {
     return 0;

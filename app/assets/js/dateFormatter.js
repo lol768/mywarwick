@@ -1,8 +1,11 @@
 import moment from 'moment';
+import 'moment-timezone';
+
+export let localMoment = date => moment(date).tz('Europe/London');
 
 export default function formatDate(d, nowDate = new Date()) {
-  let date = moment(d);
-  let now = moment(nowDate);
+  let date = localMoment(d);
+  let now = localMoment(nowDate);
 
   if (date.isSame(now, 'day') || date.isSame(now.subtract(1, 'day'), 'day')) {
     return date.format('H:mm');

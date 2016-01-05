@@ -4,7 +4,7 @@ import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 import Tile from './Tile';
 
-import moment from 'moment';
+import formatDate from '../../dateFormatter';
 import _ from 'lodash';
 
 export class list extends ReactComponent {
@@ -162,7 +162,7 @@ let ListTileItem = (props) => (
   <li className="list-tile-item">
     <a href={props.href} target="_blank">
       <span className="list-tile-item__title">{props.title}</span>
-      { props.date ? <span className="list-tile-item__date">{moment(props.date).fromNow()}</span> : null }
+      { props.date ? <span className="list-tile-item__date">{formatDate(props.date)}</span> : null }
       <span className="list-tile-item__text">{props.text}</span>
     </a>
   </li>
