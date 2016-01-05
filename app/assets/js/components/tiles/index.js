@@ -53,23 +53,17 @@ export class text extends ReactComponent {
   }
 
   setTransitionInterval() {
-    clearInterval(this.state.transitionInterval);
+    clearInterval(this.transitionInterval);
 
     if (this.props.content) {
-      let interval = setInterval(this.onInterval.bind(this), 5000);
-
-      this.setState({
-        transitionInterval: interval
-      });
+      this.transitionInterval = setInterval(this.onInterval.bind(this), 5000);
     }
   }
 
   clearTransitionInterval() {
-    clearInterval(this.state.transitionInterval);
+    clearInterval(this.transitionInterval);
 
-    this.setState({
-      transitionInterval: null
-    });
+    this.transitionInterval = null;
   }
 
   onInterval() {
