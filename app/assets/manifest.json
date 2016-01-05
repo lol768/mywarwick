@@ -5,7 +5,7 @@
   "display": "standalone",
   "icons": [
     {
-      "src": "/assets/lib/id7/images/apple-touch-icon-144x144.png",
+      "src": "/assets/lib/id7/images/android-chrome-144x144.png",
       "sizes": "144x144",
       "type": "image/png"
     },
