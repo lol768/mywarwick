@@ -22,7 +22,7 @@ case class Activity(
 
 object ActivityResponse {
 
-  import ActivityTag.{writes => activityTagWrites}
+  import DateFormats.isoDateWrites
 
   implicit val writes: Writes[ActivityResponse] = new Writes[ActivityResponse] {
     override def writes(o: ActivityResponse): JsValue = Json.obj(
