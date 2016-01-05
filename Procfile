@@ -1,2 +1,3 @@
 web: ./activator "run $PORT"
-#worker: ./activator "runMain tasks.EatFood"
+worker: ./activator "run $PORT" -Dconfig.resource=worker.conf
+scheduler: ./activator "run $PORT" -Dconfig.resource=scheduler.conf
