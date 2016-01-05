@@ -3,9 +3,9 @@ self.addEventListener('install', function (event) {
   // Perform install steps
 });
 
-self.addEventListener('push', function(event) {
+self.addEventListener('push', function (event) {
   event.waitUntil(
-    self.registration.pushManager.getSubscription().then(function(subscription) {
+    self.registration.pushManager.getSubscription().then(function (subscription) {
       fetch('/api/push/notification', {
         method: 'post',
         headers: {
@@ -15,22 +15,24 @@ self.addEventListener('push', function(event) {
         body: JSON.stringify(subscription),
         credentials: 'same-origin'
       })
-        .then(function(response) {
-          console.log(response);
-          return response.json(); })
-        .then(function(data) {
-          self.registration.showNotification(data.title, {
-            body: data.body,
-            icon: data.icon || 'favicon-196x196.png'
-          });
+        .then(function (response) {
+          return response.json();
         })
-        .catch(function(err) {
+        .then(function (data) {
+          data.map((notification) =>
+            self.registration.showNotification(notification.title, {
+              body: notification.body,
+              icon: notification.icon || '/assets/images/notification-icon.png'
+            })
+          )
+        })
+        .catch(function (err) {
           console.log(`Error: ${err}`);
         });
     })
   );
 });
 
-self.addEventListener('message', function(event) {
+self.addEventListener('message', function (event) {
   self.token = event.data.token;
 });

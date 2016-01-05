@@ -39,7 +39,7 @@ class PushRegistrationDaoImpl @Inject()(
     }
 
   override def getPushRegistrationByToken(token: String)(implicit c: Connection): PushRegistration = {
-    SQL("SELECT last_fetched_at FROM push_registration WHERE token = {token}")
+    SQL("SELECT * FROM push_registration WHERE token = {token}")
       .on(
         'token -> token
       ).as(pushRegistrationParser.single)

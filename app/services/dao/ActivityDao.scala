@@ -15,7 +15,10 @@ import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
-  def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None, after: Option[DateTime] = None, shouldNotify: Int = 0)(implicit c: Connection): Seq[ActivityResponse]
+
+  def getNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity]
+
+  def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse]
 
   def save(activity: ActivityPrototype, replaces: Seq[String])(implicit c: Connection): String
 
@@ -71,8 +74,17 @@ class ActivityDaoImpl @Inject()(
         .as(activityParser.*)
     }.toSeq
 
-  override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None, after: Option[DateTime] = None, shouldNotify: Int = 0)(implicit c: Connection): Seq[ActivityResponse] = {
-    val maybeBetweenDates = if (before.isDefined || after.isDefined) "AND ACTIVITY_RECIPIENT.GENERATED_AT BETWEEN {before} AND {after}" else ""
+  override def getNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity] = {
+    SQL("SELECT ACTIVITY.* FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.GENERATED_AT > {sinceDate}")
+      .on(
+        'usercode -> usercode,
+        'sinceDate -> sinceDate
+      )
+      .as(activityParser.*)
+  }
+
+  override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse] = {
+    val maybeBefore = if (before.isDefined) "AND ACTIVITY_RECIPIENT.GENERATED_AT < {before}" else ""
     val activities = SQL(
       s"""
         SELECT
@@ -88,17 +100,14 @@ class ActivityDaoImpl @Inject()(
             JOIN ACTIVITY ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
           WHERE USERCODE = {usercode}
                 AND REPLACED_BY_ID IS NULL
-                $maybeBetweenDates
+                $maybeBefore
           ORDER BY ACTIVITY_RECIPIENT.GENERATED_AT DESC
           ${dialect.limit("{limit}")})
-          AND SHOULD_NOTIFY = {shouldNotify}
         """)
       .on(
         'usercode -> usercode,
         'before -> before.getOrElse(DateTime.now),
-        'after -> after.getOrElse(DateTime.now.withYear(1970)),
-        'limit -> limit,
-        'shouldNotify -> shouldNotify
+        'limit -> limit
       )
       .as(activityResponseParser.*)
 

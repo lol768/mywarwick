@@ -8,9 +8,8 @@ import org.joda.time.DateTime
 import play.api.Configuration
 import play.api.Play.current
 import play.api.db._
-import play.api.libs.json.{JsValue, JsObject, Json}
+import play.api.libs.json._
 import play.api.libs.ws.WS
-import services.ActivityService
 import services.dao.{ActivityDao, PushRegistrationDao}
 import warwick.sso.Usercode
 
@@ -28,7 +27,6 @@ class GCMOutputService @Inject()(
     .getOrElse(throw new IllegalStateException("Missing GCM API key - set start.gcm.apiKey"))
 
   def send(message: MessageSend.Heavy): Future[ProcessingResult] = {
-    System.out.println("Send was called")
     val usercode = message.user.usercode
     db.withConnection(implicit c =>
       pushRegistrationDao.getPushRegistrationsForUser(usercode) foreach { registration =>
@@ -49,20 +47,32 @@ class GCMOutputService @Inject()(
     )
 
     db.withConnection(implicit c =>
-      activityDao.getActivitiesForUser(registration.usercode, 50, Some(DateTime.now), Some(registration.lastFetchedAt), shouldNotify = 1).map(activityResponse => {
-        activityResponse.activity
+      activityDao.getNotificationsSinceDate(registration.usercode, registration.lastFetchedAt).map(activity => {
+        activity
       })
     )
   }
 
   def fetchNotifications(token: String): JsValue = {
-    Json.toJson(getNotificationsSinceLastFetch(token))
+    //    val list = test.map(notification =>
+    //    val test = Seq(
+    //      Activity("1", "tabula", "coursework due", "This is title", "This is text", None, DateTime.now, DateTime.now, shouldNotify = true),
+    //      Activity("12", "tabula", "coursework due", "This is title", "This is text2", None, DateTime.now, DateTime.now, shouldNotify = true)
+    //    )
+
+
+    val list = getNotificationsSinceLastFetch(token).map(notification =>
+      Json.obj(
+        "title" -> JsString(notification.title),
+        "body" -> JsString(notification.text)
+      )
+    )
+    list.foldLeft(JsArray())((acc, x) => acc ++ Json.arr(x))
 
     // update last check to now
   }
 
   def sendNotification(token: String): Unit = {
-    System.out.println(s"sending notification to $token")
     val body = Json.obj(
       "to" -> token
       // This is where to put payload for native iOS and Android clients

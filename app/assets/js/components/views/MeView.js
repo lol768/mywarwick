@@ -45,7 +45,7 @@ class MeView extends ReactComponent {
 
   componentDidMount() {
     this.props.dispatch(fetchTilesConfig());
-    this.props.dispatch(fetchTilesContent());
+    //this.props.dispatch(fetchTilesContent());
   }
 
   onTileClick(tile) {
