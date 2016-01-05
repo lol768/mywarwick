@@ -6,8 +6,6 @@ import GroupedList from '../ui/GroupedList';
 import * as groupItemsByDate from '../../GroupItemsByDate';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 
-import moment from 'moment'
-
 import { connect } from 'react-redux';
 
 import { takeFromStream, getStreamSize } from '../../stream';
