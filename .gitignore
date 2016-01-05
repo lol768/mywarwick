@@ -1,6 +1,5 @@
 /conf/application.conf
 /conf/worker.conf
-/conf/scheduler.conf
 logback.xml
 logs
 target
