@@ -68,11 +68,9 @@ $(function () {
   });
 
   let $fixedHeader = $('.fixed-header');
-
   function updateFixedHeaderAtTop() {
     $fixedHeader.toggleClass('at-top', $(window).scrollTop() < 10);
   }
-
   $(window).on('scroll', updateFixedHeaderAtTop);
   updateFixedHeaderAtTop();
 
@@ -100,7 +98,7 @@ store.subscribe(() => {
  Attempt to register service worker, to handle push notifications
  */
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js')
+  navigator.serviceWorker.register('/assets/js/service-worker.js')
     .then(initialiseState);
 } else {
   console.warn('Service workers aren\'t supported in this browser.');

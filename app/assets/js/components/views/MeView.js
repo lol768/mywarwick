@@ -5,7 +5,6 @@ import ReactTransitionGroup from 'react/lib/ReactTransitionGroup';
 
 import * as tileElements from '../tiles';
 
-import moment from 'moment';
 import _ from 'lodash';
 
 import jQuery from 'jquery';

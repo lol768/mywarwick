@@ -4,11 +4,12 @@ import com.google.inject.Inject
 import controllers.BaseController
 import play.api.libs.json.{JsValue, JsObject, Json}
 import services.SecurityService
-import services.messaging.GCMOutputService
+import services.messaging.{FetchNotificationsService, GCMOutputService}
 
 class GCMPushNotificationsController @Inject()(
   securityService: SecurityService,
-  gcmOutputService: GCMOutputService
+  gcmOutputService: GCMOutputService,
+  fetchNotificationsService: FetchNotificationsService
 ) extends BaseController {
 
   import securityService._
@@ -26,12 +27,11 @@ class GCMPushNotificationsController @Inject()(
     }.get
   }
 
-
   def fetchPushNotifications = RequiredUserAction { request =>
     request.body.asJson.map { json =>
       val endpoint = (json \ "endpoint").as[String]
       val token = endpoint.split("/").last
-      val notifications: JsValue = gcmOutputService.fetchPushNotifications(token)
+      val notifications: JsValue = fetchNotificationsService.fetchPushNotifications(token)
       Ok(notifications)
     }.get
   }

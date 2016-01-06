@@ -4,7 +4,7 @@ import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 import Tile from './Tile';
 
-import moment from 'moment';
+import formatDate from '../../dateFormatter';
 import _ from 'lodash';
 
 export class list extends ReactComponent {
@@ -53,23 +53,17 @@ export class text extends ReactComponent {
   }
 
   setTransitionInterval() {
-    clearInterval(this.state.transitionInterval);
+    clearInterval(this.transitionInterval);
 
     if (this.props.content) {
-      let interval = setInterval(this.onInterval.bind(this), 5000);
-
-      this.setState({
-        transitionInterval: interval
-      });
+      this.transitionInterval = setInterval(this.onInterval.bind(this), 5000);
     }
   }
 
   clearTransitionInterval() {
-    clearInterval(this.state.transitionInterval);
+    clearInterval(this.transitionInterval);
 
-    this.setState({
-      transitionInterval: null
-    });
+    this.transitionInterval = null;
   }
 
   onInterval() {
@@ -168,7 +162,7 @@ let ListTileItem = (props) => (
   <li className="list-tile-item">
     <a href={props.href} target="_blank">
       <span className="list-tile-item__title">{props.title}</span>
-      { props.date ? <span className="list-tile-item__date">{moment(props.date).fromNow()}</span> : null }
+      { props.date ? <span className="list-tile-item__date">{formatDate(props.date)}</span> : null }
       <span className="list-tile-item__text">{props.text}</span>
     </a>
   </li>

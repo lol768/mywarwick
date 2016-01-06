@@ -29,7 +29,8 @@ val appDeps = Seq(
   "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.0",
   "com.kenshoo" %% "metrics-play" % "2.4.0_0.4.1",
   "com.typesafe.play" %% "play-mailer" % "3.0.1",
-  "com.notnoop.apns" % "apns" % "1.0.0.Beta6"
+  "com.notnoop.apns" % "apns" % "1.0.0.Beta6",
+  "org.quartz-scheduler" % "quartz" % "2.2.1"
 )
 
 val testDeps = Seq(

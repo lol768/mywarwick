@@ -27,7 +27,6 @@ trait PushRegistrationDao {
 }
 
 class PushRegistrationDaoImpl @Inject()(
-  activityDao: ActivityDao
 ) extends PushRegistrationDao {
 
   val pushRegistrationParser: RowParser[PushRegistration] =
