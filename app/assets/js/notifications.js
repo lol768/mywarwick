@@ -1,7 +1,5 @@
 import Immutable from 'immutable';
-import _ from 'lodash';
 
-import store from './store';
 import { registerReducer } from './reducers';
 import { makeStream, onStreamReceive } from './stream';
 

@@ -1,10 +1,7 @@
 import Immutable from 'immutable';
-
 import localforage from 'localforage';
 
 import { registerReducer, resetStore } from './reducers';
-import SocketDatapipe from './SocketDatapipe';
-import store from './store';
 
 export const USER_RECEIVE = 'user.receive';
 

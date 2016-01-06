@@ -1,5 +1,6 @@
-import { registerReducer } from './reducers';
 import Immutable from 'immutable';
+
+import { registerReducer } from './reducers';
 
 export const NEWS_FETCH = 'news.fetch';
 export const NEWS_FETCH_SUCCESS = 'news.fetch.success';
