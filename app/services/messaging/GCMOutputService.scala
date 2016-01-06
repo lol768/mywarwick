@@ -4,7 +4,6 @@ import actors.MessageProcessing.ProcessingResult
 import com.google.inject.Inject
 import models.Activity
 import models.Platform.Google
-import org.joda.time.DateTime
 import play.api.Configuration
 import play.api.Play.current
 import play.api.db._
@@ -30,7 +29,7 @@ class GCMOutputService @Inject()(
     val usercode = message.user.usercode
     db.withConnection(implicit c =>
       pushRegistrationDao.getPushRegistrationsForUser(usercode) foreach { registration =>
-        sendNotification(registration.token)
+        sendGCMNotification(registration.token)
       }
     )
     Future.successful(ProcessingResult(success = true, "yay"))
@@ -46,36 +45,27 @@ class GCMOutputService @Inject()(
       pushRegistrationDao.getPushRegistrationByToken(token)
     )
 
-    db.withConnection(implicit c =>
-      activityDao.getNotificationsSinceDate(registration.usercode, registration.lastFetchedAt).map(activity => {
-        activity
-      })
-    )
+    db.withConnection(implicit c => activityDao.getNotificationsSinceDate(registration.usercode, registration.lastFetchedAt))
   }
 
-  def fetchNotifications(token: String): JsValue = {
-    //    val list = test.map(notification =>
-    //    val test = Seq(
-    //      Activity("1", "tabula", "coursework due", "This is title", "This is text", None, DateTime.now, DateTime.now, shouldNotify = true),
-    //      Activity("12", "tabula", "coursework due", "This is title", "This is text2", None, DateTime.now, DateTime.now, shouldNotify = true)
-    //    )
+  def fetchPushNotifications(token: String): JsValue = {
 
-
-    val list = getNotificationsSinceLastFetch(token).map(notification =>
+    val pushNotifications = getNotificationsSinceLastFetch(token).map(notification =>
       Json.obj(
         "title" -> JsString(notification.title),
         "body" -> JsString(notification.text)
       )
     )
-    list.foldLeft(JsArray())((acc, x) => acc ++ Json.arr(x))
 
-    // update last check to now
+    db.withConnection(implicit c => pushRegistrationDao.updateLastFetched(token))
+
+    Json.toJson(pushNotifications)
   }
 
-  def sendNotification(token: String): Unit = {
+  def sendGCMNotification(token: String): Unit = {
     val body = Json.obj(
       "to" -> token
-      // This is where to put payload for native iOS and Android clients
+      // This is where to put payload readable by native Android clients
     )
 
     WS.url("https://android.googleapis.com/gcm/send")

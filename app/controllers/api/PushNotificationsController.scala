@@ -27,11 +27,11 @@ class GCMPushNotificationsController @Inject()(
   }
 
 
-  def fetchNotifications = RequiredUserAction { request =>
+  def fetchPushNotifications = RequiredUserAction { request =>
     request.body.asJson.map { json =>
       val endpoint = (json \ "endpoint").as[String]
       val token = endpoint.split("/").last
-      val notifications: JsValue = gcmOutputService.fetchNotifications(token)
+      val notifications: JsValue = gcmOutputService.fetchPushNotifications(token)
       Ok(notifications)
     }.get
   }

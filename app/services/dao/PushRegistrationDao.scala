@@ -18,6 +18,8 @@ trait PushRegistrationDao {
 
   def getPushRegistrationByToken(token: String)(implicit c: Connection): PushRegistration
 
+  def updateLastFetched(token: String)(implicit c: Connection): Unit
+
   def saveRegistration(usercode: Usercode, platform: Platform, token: String)(implicit c: Connection): Boolean
 
   def registrationExists(token: String)(implicit c: Connection): Boolean
@@ -37,6 +39,15 @@ class PushRegistrationDaoImpl @Inject()(
       case usercode ~ platform ~ token ~ createdAt ~ lastFetchedAt =>
         PushRegistration(usercode, Platform(platform), token, createdAt, lastFetchedAt)
     }
+
+  override def updateLastFetched(token: String)(implicit c: Connection) = {
+    SQL("UPDATE push_registration SET last_fetched_at = {now} WHERE token = {token}")
+      .on(
+        'now -> DateTime.now,
+        'token -> token
+      )
+      .execute()
+  }
 
   override def getPushRegistrationByToken(token: String)(implicit c: Connection): PushRegistration = {
     SQL("SELECT * FROM push_registration WHERE token = {token}")
