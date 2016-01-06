@@ -40,9 +40,7 @@ export function getTilesFromLocalStorage() {
   };
 }
 
-const tilesSelector = (state) => state.get('tiles').get('items');
-
-export const persistTilesSelect = createSelector([tilesSelector], (tiles) => {
+export const persistTiles = createSelector(state => state.get('tiles').get('items'), (tiles) => {
   // Persist tile data to local storage on change
   localforage.setItem('tiles', tiles.toJS());
 });

@@ -5,10 +5,10 @@ import { registerReducer, resetStore } from './reducers';
 
 export const USER_RECEIVE = 'user.receive';
 
-registerReducer('user', (state = Immutable.Map(), action) => {
+registerReducer('user', (state = Immutable.Map({loaded: false}), action) => {
   switch (action.type) {
     case USER_RECEIVE:
-      return Immutable.Map(action.data);
+      return Immutable.Map(action.data).set('loaded', true);
     default:
       return state;
   }

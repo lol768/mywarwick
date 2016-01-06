@@ -26,15 +26,12 @@ export function getActivitiesFromLocalStorage() {
   };
 }
 
-const notificationsSelector = (state) => state.get('notifications');
-const activitiesSelector = (state) => state.get('activities');
-
-export const persistActivitiesSelect = createSelector([activitiesSelector], (activities) => {
+export const persistActivities = createSelector(state => state.get('activities'), (activities) => {
   // Persist the current set of activities to local storage on change
   localforage.setItem('activities', activities.valueSeq().flatten().toJS());
 });
 
-export const persistNotificationsSelect = createSelector([notificationsSelector], (notifications) => {
+export const persistNotifications = createSelector(state => state.get('notifications'), (notifications) => {
   // Persist the current set of notifications to local storage on change
   localforage.setItem('notifications', notifications.valueSeq().flatten().toJS());
 });

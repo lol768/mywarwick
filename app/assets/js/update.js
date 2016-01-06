@@ -54,29 +54,27 @@ registerReducer('update', (state = initialState, action) => {
   }
 });
 
-export function displayUpdateProgress() {
-  return dispatch => {
-    if ('applicationCache' in window) {
-      function onDownloading() {
-        dispatch(updateStart());
-      }
-
-      function onProgress(e) {
-        dispatch(updateProgress(e.loaded, e.total));
-      }
-
-      function onUpdateReady() {
-        dispatch(updateReady());
-      }
-
-      window.applicationCache.addEventListener('progress', onProgress);
-      window.applicationCache.addEventListener('downloading', onDownloading);
-      window.applicationCache.addEventListener('updateready', onUpdateReady);
-
-      if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
-        onUpdateReady();
-      }
+export function displayUpdateProgress(dispatch) {
+  if ('applicationCache' in window) {
+    function onDownloading() {
+      dispatch(updateStart());
     }
-  };
+
+    function onProgress(e) {
+      dispatch(updateProgress(e.loaded, e.total));
+    }
+
+    function onUpdateReady() {
+      dispatch(updateReady());
+    }
+
+    window.applicationCache.addEventListener('progress', onProgress);
+    window.applicationCache.addEventListener('downloading', onDownloading);
+    window.applicationCache.addEventListener('updateready', onUpdateReady);
+
+    if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+      onUpdateReady();
+    }
+  }
 }
 

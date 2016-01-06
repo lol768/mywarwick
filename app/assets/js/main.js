@@ -1,4 +1,5 @@
 import attachFastClick from 'fastclick';
+import { createSelector } from 'reselect';
 import $ from 'jquery';
 import localforage from 'localforage';
 import log from 'loglevel';
@@ -10,19 +11,26 @@ import React from 'react';
 log.enableAll(false);
 polyfill();
 
-import Application from './components/Application';
-import UtilityBar from './components/ui/UtilityBar';
-import ID7Layout from './components/ui/ID7Layout';
-
 import store from './store';
 window.Store = store;
-import { navigate } from './navigate';
 
-import './update';
-import './user';
+import Application from './components/Application';
+import ID7Layout from './components/ui/ID7Layout';
+import UtilityBar from './components/ui/UtilityBar';
 
 import './notifications';
 import './notifications-glue';
+import './update';
+import './user';
+
+import { displayUpdateProgress } from './update';
+import { fetchUserIdentity, fetchActivities } from './serverpipe';
+import { getNotificationsFromLocalStorage, getActivitiesFromLocalStorage, persistActivities, persistNotifications } from './notifications-glue';
+import { getTilesFromLocalStorage, persistTiles } from './tiles';
+import { navigate } from './navigate';
+import { receivedNotification, receivedActivity } from './serverpipe';
+import SocketDatapipe from './SocketDatapipe';
+import { userReceive } from './user';
 
 localforage.config({
   name: 'Start'
@@ -88,9 +96,6 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js');
 }
 
-import { receivedNotification, receivedActivity } from './serverpipe';
-import { userReceive } from './user';
-import SocketDatapipe from './SocketDatapipe';
 SocketDatapipe.getUpdateStream().subscribe((data) => {
   switch (data.type) {
     case 'activity':
@@ -104,24 +109,25 @@ SocketDatapipe.getUpdateStream().subscribe((data) => {
   }
 });
 
-// TODO these initial fetches might happen someplace more appropriate
-import { fetchWhoAmI, fetchActivities } from './serverpipe';
-store.dispatch(fetchWhoAmI());
-store.dispatch(fetchActivities());
+displayUpdateProgress(store.dispatch);
 
-import { getNotificationsFromLocalStorage, getActivitiesFromLocalStorage, persistActivitiesSelect, persistNotificationsSelect } from './notifications-glue';
+const loadPersonalisedData = _.once(() => {
+  store.dispatch(fetchActivities());
 
-store.subscribe(() => persistActivitiesSelect(store.getState()));
-store.subscribe(() => persistNotificationsSelect(store.getState()));
+  store.subscribe(() => persistActivities(store.getState()));
+  store.subscribe(() => persistNotifications(store.getState()));
+  store.dispatch(getActivitiesFromLocalStorage());
+  store.dispatch(getNotificationsFromLocalStorage());
 
-store.dispatch(getNotificationsFromLocalStorage());
-store.dispatch(getActivitiesFromLocalStorage());
+  store.subscribe(() => persistTiles(store.getState()));
+  store.dispatch(getTilesFromLocalStorage());
+});
 
-import { getTilesFromLocalStorage, persistTilesSelect } from './tiles';
+store.subscribe(() => {
+  let user = store.getState().get('user');
 
-store.dispatch(getTilesFromLocalStorage());
-store.subscribe(() => persistTilesSelect(store.getState()));
+  if (user && user.get('loaded') === true)
+    loadPersonalisedData();
+});
 
-import { displayUpdateProgress } from './update';
-
-store.dispatch(displayUpdateProgress());
+store.dispatch(fetchUserIdentity());

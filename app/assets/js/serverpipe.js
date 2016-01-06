@@ -14,7 +14,7 @@ import { receivedActivity, fetchedActivities, receivedNotification, fetchedNotif
 //     MESSAGE SEND      //
 //                       //
 
-export function fetchWhoAmI() {
+export function fetchUserIdentity() {
   return () => {
     SocketDatapipe.send({
       tileId: "1",
