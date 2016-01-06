@@ -1,3 +1,5 @@
+import store from './store';
+
 var isPushEnabled = false;
 
 // Once the service worker is registered set the initial state
@@ -10,7 +12,7 @@ function initialiseState() {
 
 // If the user has disabled notifications
   if (Notification.permission === 'denied') {
-    console.warn('The user has blocked notifications.');
+    console.warn('The user has disabled notifications.');
     return;
   }
 
@@ -25,7 +27,7 @@ function initialiseState() {
     serviceWorkerRegistration.pushManager.getSubscription()
       .then(subscription => {
         // TODO: subscribe button should be disabled while we check status of subscription
-console.log(subscription.endpoint);
+        console.log(subscription.endpoint);
         if (!subscription) {
           // TODO: subscribe button should be set to FALSE
           return;
