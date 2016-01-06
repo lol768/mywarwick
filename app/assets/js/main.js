@@ -1,44 +1,43 @@
-import log from 'loglevel';
-// only 'warn' otherwise
-log.enableAll(false);
-
-import $ from 'jquery';
-
-import localforage from 'localforage';
-
-import React from 'react';
-import ReactDOM from 'react-dom';
-
 import attachFastClick from 'fastclick';
+import { createSelector } from 'reselect';
+import $ from 'jquery';
+import localforage from 'localforage';
+import log from 'loglevel';
+import { polyfill } from 'es6-promise';
+import { Provider } from 'react-redux';
+import ReactDOM from 'react-dom';
+import React from 'react';
 
-import Application from './components/Application';
-import UtilityBar from './components/ui/UtilityBar';
-import ID7Layout from './components/ui/ID7Layout';
+log.enableAll(false);
+polyfill();
 
 import store from './store';
 window.Store = store;
-import { navigate } from './navigate';
 
-import { Provider } from 'react-redux';
-
-import './update';
-import './user';
+import Application from './components/Application';
+import ID7Layout from './components/ui/ID7Layout';
+import UtilityBar from './components/ui/UtilityBar';
 
 import './notifications';
 import './notifications-glue';
+import './update';
+import './user';
 
-(()=> {
+import { displayUpdateProgress } from './update';
+import { fetchUserIdentity, fetchActivities } from './serverpipe';
+import { getNotificationsFromLocalStorage, getActivitiesFromLocalStorage, persistActivities, persistNotifications } from './notifications-glue';
+import { getTilesFromLocalStorage, persistTiles } from './tiles';
+import { navigate } from './navigate';
+import { receivedNotification, receivedActivity } from './serverpipe';
+import SocketDatapipe from './SocketDatapipe';
+import { userReceive } from './user';
 
-  localforage.config({
-    name: 'Start'
-  });
+localforage.config({
+  name: 'Start'
+});
 
-  // String replaced by Gulp build.
-  const BUILD_TIME = "$$BUILDTIME$$";
-
-  log.info("Scripts built at:", BUILD_TIME);
-
-})();
+// String replaced by Gulp build.
+log.info("Scripts built at: $$BUILDTIME$$");
 
 $.getJSON('/ssotest', (shouldRedirect) => {
   if (shouldRedirect) window.location = SSO.LOGIN_URL;
@@ -67,9 +66,11 @@ $(function () {
   });
 
   let $fixedHeader = $('.fixed-header');
+
   function updateFixedHeaderAtTop() {
     $fixedHeader.toggleClass('at-top', $(window).scrollTop() < 10);
   }
+
   $(window).on('scroll', updateFixedHeaderAtTop);
   updateFixedHeaderAtTop();
 
@@ -85,10 +86,9 @@ store.subscribe(() => {
   if (path != currentPath) {
     currentPath = path;
 
-    if (window.history.pushState) {
+    if ('pushState' in window.history) {
       window.history.pushState(null, null, currentPath);
     }
-
   }
 });
 
@@ -96,3 +96,38 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js');
 }
 
+SocketDatapipe.getUpdateStream().subscribe((data) => {
+  switch (data.type) {
+    case 'activity':
+      store.dispatch(data.activity.notification ? receivedNotification(data.activity) : receivedActivity(data.activity));
+      break;
+    case 'who-am-i':
+      store.dispatch(userReceive(data['user-info']));
+      break;
+    default:
+    // nowt
+  }
+});
+
+displayUpdateProgress(store.dispatch);
+
+const loadPersonalisedData = _.once(() => {
+  store.dispatch(fetchActivities());
+
+  store.subscribe(() => persistActivities(store.getState()));
+  store.subscribe(() => persistNotifications(store.getState()));
+  store.dispatch(getActivitiesFromLocalStorage());
+  store.dispatch(getNotificationsFromLocalStorage());
+
+  store.subscribe(() => persistTiles(store.getState()));
+  store.dispatch(getTilesFromLocalStorage());
+});
+
+store.subscribe(() => {
+  let user = store.getState().get('user');
+
+  if (user && user.get('loaded') === true)
+    loadPersonalisedData();
+});
+
+store.dispatch(fetchUserIdentity());

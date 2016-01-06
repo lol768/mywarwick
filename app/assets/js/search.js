@@ -1,6 +1,7 @@
 import $ from 'jquery';
-
+import _ from 'lodash';
 import Immutable from 'immutable';
+
 import { registerReducer } from './reducers';
 
 export const SEARCH_QUERY_START = 'search.query.start';
@@ -10,8 +11,6 @@ export const SEARCH_QUERY_FAILURE = 'search.query.failure';
 export const SEARCH_RESULT_CLICK = 'search.result.click';
 
 const SITEBUILDER_GO_QUERY_URL = 'https://sitebuilder.warwick.ac.uk/sitebuilder2/api/go/redirects.json';
-
-import _ from 'lodash';
 
 export function fetchSearchResults(query) {
   if (_.trim(query).length == 0) {

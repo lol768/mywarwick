@@ -1,17 +1,14 @@
 import Immutable from 'immutable';
-
 import localforage from 'localforage';
 
 import { registerReducer, resetStore } from './reducers';
-import SocketDatapipe from './SocketDatapipe';
-import store from './store';
 
 export const USER_RECEIVE = 'user.receive';
 
-registerReducer('user', (state = Immutable.Map(), action) => {
+registerReducer('user', (state = Immutable.Map({loaded: false}), action) => {
   switch (action.type) {
     case USER_RECEIVE:
-      return Immutable.Map(action.data);
+      return Immutable.Map(action.data).set('loaded', true);
     default:
       return state;
   }

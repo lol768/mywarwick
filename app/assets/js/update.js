@@ -1,6 +1,5 @@
 import Immutable from 'immutable';
 
-import store from './store';
 import { registerReducer } from './reducers';
 
 const UPDATE_START = 'update.start';
@@ -55,24 +54,27 @@ registerReducer('update', (state = initialState, action) => {
   }
 });
 
-if (window.applicationCache) {
-  function onDownloading() {
-    store.dispatch(updateStart());
-  }
+export function displayUpdateProgress(dispatch) {
+  if ('applicationCache' in window) {
+    function onDownloading() {
+      dispatch(updateStart());
+    }
 
-  function onProgress(e) {
-    store.dispatch(updateProgress(e.loaded, e.total));
-  }
+    function onProgress(e) {
+      dispatch(updateProgress(e.loaded, e.total));
+    }
 
-  function onUpdateReady() {
-    store.dispatch(updateReady());
-  }
+    function onUpdateReady() {
+      dispatch(updateReady());
+    }
 
-  window.applicationCache.addEventListener('progress', onProgress);
-  window.applicationCache.addEventListener('downloading', onDownloading);
-  window.applicationCache.addEventListener('updateready', onUpdateReady);
+    window.applicationCache.addEventListener('progress', onProgress);
+    window.applicationCache.addEventListener('downloading', onDownloading);
+    window.applicationCache.addEventListener('updateready', onUpdateReady);
 
-  if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
-    onUpdateReady();
+    if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+      onUpdateReady();
+    }
   }
 }
+
