@@ -4,14 +4,19 @@ import helpers.{Fixtures, OneStartAppPerSuite}
 import models.{ActivityTag, TagValue}
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
+import services.messaging.Output.Mobile
 import warwick.anorm.converters.ColumnConversions._
+import warwick.sso.Usercode
 
 class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
   val activityDao = app.injector.instanceOf[ActivityDao]
   val activityTagDao = app.injector.instanceOf[ActivityTagDao]
   val activityRecipientDao = app.injector.instanceOf[ActivityRecipientDao]
+  val messagingDao = app.injector.instanceOf[MessagingDao]
+
   val activityPrototype = Fixtures.activityPrototype.submissionDue
+
 
   "ActivityDao" should {
 
@@ -60,7 +65,7 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
     }
 
     "get notifications since date" in transaction { implicit c =>
-      val usercode = "someone"
+      val usercode = Usercode("someone")
       val nowDate = DateTime.now
       val oldDate = nowDate.minusMonths(1)
       val lastFetchedDate = nowDate.minusDays(1)
@@ -79,12 +84,14 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
         .on(
           'oldActivityId -> oldActivityId,
           'newActivityId -> newActivityId,
-          'usercode -> usercode,
+          'usercode -> usercode.string,
           'oldDate -> oldDate,
           'nowDate -> nowDate
         ).execute()
 
-      activityDao.getNotificationsSinceDate(usercode, lastFetchedDate) mustBe Seq(newActivity)
+      messagingDao.save(newActivity, usercode, Mobile)
+
+      activityDao.getPushNotificationsSinceDate(usercode.string, lastFetchedDate) mustBe Seq(newActivity)
     }
   }
 }

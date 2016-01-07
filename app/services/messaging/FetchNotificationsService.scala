@@ -17,7 +17,7 @@ class FetchNotificationsService @Inject()(
 
     db.withTransaction { implicit c =>
       val registration = pushRegistrationDao.getPushRegistrationByToken(token)
-      val notifications = activityDao.getNotificationsSinceDate(registration.usercode, registration.lastFetchedAt)
+      val notifications = activityDao.getPushNotificationsSinceDate(registration.usercode, registration.lastFetchedAt)
       pushRegistrationDao.updateLastFetched(token)
       notifications
     }

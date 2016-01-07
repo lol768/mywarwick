@@ -10,13 +10,14 @@ import models._
 import oracle.net.aso.e
 import org.joda.time.DateTime
 import play.api.db
+import services.messaging.Output.Mobile
 import system.DatabaseDialect
 import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
 
-  def getNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity]
+  def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity]
 
   def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse]
 
@@ -74,15 +75,17 @@ class ActivityDaoImpl @Inject()(
         .as(activityParser.*)
     }.toSeq
 
-  override def getNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity] = {
+  override def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity] = {
     SQL(
       """
       SELECT ACTIVITY.* FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
-      WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.GENERATED_AT > {sinceDate}
+      WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.GENERATED_AT > {sinceDate} AND ACTIVITY.ID IN (
+      SELECT ACTIVITY.ID FROM MESSAGE_SEND WHERE USERCODE = {usercode} AND OUTPUT = {mobile})
       """)
       .on(
         'usercode -> usercode,
-        'sinceDate -> sinceDate
+        'sinceDate -> sinceDate,
+        'mobile -> Mobile.name
       )
       .as(activityParser.*)
   }
