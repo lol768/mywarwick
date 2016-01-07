@@ -27,8 +27,9 @@ import { displayUpdateProgress } from './update';
 import { fetchUserIdentity, fetchActivities } from './serverpipe';
 import { getNotificationsFromLocalStorage, getActivitiesFromLocalStorage, persistActivities, persistNotifications } from './notifications-glue';
 import { getTilesFromLocalStorage, persistTiles } from './tiles';
+import { initialiseState } from './push-notifications';
 import { navigate } from './navigate';
-import { receivedNotification, receivedActivity } from './serverpipe';
+import { receivedNotification, receivedActivity } from './notifications';
 import SocketDatapipe from './SocketDatapipe';
 import { userReceive } from './user';
 
@@ -92,8 +93,15 @@ store.subscribe(() => {
   }
 });
 
+
+/*
+ Attempt to register service worker, to handle push notifications
+ */
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js');
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(initialiseState);
+} else {
+  console.warn('Service workers aren\'t supported in this browser.');
 }
 
 SocketDatapipe.getUpdateStream().subscribe((data) => {

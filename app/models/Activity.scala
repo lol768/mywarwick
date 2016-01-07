@@ -7,6 +7,7 @@ import play.api.libs.functional.syntax._
 case class Activity(
   id: String,
   providerId: String,
+
   /**
     * > Some sort of filterable name for what sort of thing the activity is about, e.g `coursework-due` or `squash-court-reserved`
     * > (I think)
@@ -19,6 +20,11 @@ case class Activity(
   createdAt: DateTime,
   shouldNotify: Boolean
 )
+
+object Activity {
+  implicit val writes = Json.writes[Activity]
+}
+
 
 object ActivityResponse {
 

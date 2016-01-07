@@ -7,6 +7,7 @@ import UtilityBar from './UtilityBar';
 import MastheadIcon from './MastheadIcon';
 import NotificationsView from '../views/NotificationsView';
 import ActivityView from '../views/ActivityView';
+import { SettingsView } from '../views/SettingsView';
 import LinkBlock from './LinkBlock';
 import Link from './Link';
 import NewsView from '../views/NewsView';
@@ -71,6 +72,11 @@ class ID7Layout extends ReactComponent {
                                             popoverTitle="Activity"
                                             onMore={() => this.props.dispatch(navigate('/activity'))}>
                                 <ActivityView grouped={false}/>
+                              </MastheadIcon>
+                              <MastheadIcon icon="cogs" key="settings"
+                                            popoverTitle="Settings"
+                                            onMore={() => this.props.dispatch(navigate('/settings'))}>
+                                <SettingsView />
                               </MastheadIcon>
                               <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
                                 <LinkBlock columns="1">

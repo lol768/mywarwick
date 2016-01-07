@@ -2,7 +2,9 @@ package services.dao
 
 import helpers.{Fixtures, OneStartAppPerSuite}
 import models.{ActivityTag, TagValue}
+import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
+import warwick.anorm.converters.ColumnConversions._
 
 class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
@@ -57,6 +59,32 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
     }
 
-  }
+    "get notifications since date" in transaction { implicit c =>
+      val usercode = "someone"
+      val nowDate = DateTime.now
+      val oldDate = nowDate.minusMonths(1)
+      val lastFetchedDate = nowDate.minusDays(1)
 
+      val oldActivityId = activityDao.save(activityPrototype, Seq.empty)
+      val newActivityId = activityDao.save(activityPrototype, Seq.empty)
+
+      val newActivity = activityDao.getActivityById(newActivityId).get
+
+      anorm.SQL(
+        """
+      INSERT INTO activity_recipient VALUES
+      ({oldActivityId}, {usercode}, {oldDate}, null, null, null, {oldDate}),
+      ({newActivityId}, {usercode}, {nowDate}, null, null, null, {nowDate})
+        """)
+        .on(
+          'oldActivityId -> oldActivityId,
+          'newActivityId -> newActivityId,
+          'usercode -> usercode,
+          'oldDate -> oldDate,
+          'nowDate -> nowDate
+        ).execute()
+
+      activityDao.getNotificationsSinceDate(usercode, lastFetchedDate) mustBe Seq(newActivity)
+    }
+  }
 }
