@@ -29,7 +29,7 @@ import { getNotificationsFromLocalStorage, getActivitiesFromLocalStorage, persis
 import { getTilesFromLocalStorage, persistTiles } from './tiles';
 import { initialiseState } from './push-notifications';
 import { navigate } from './navigate';
-import { receivedNotification, receivedActivity } from './serverpipe';
+import { receivedNotification, receivedActivity } from './notifications';
 import SocketDatapipe from './SocketDatapipe';
 import { userReceive } from './user';
 

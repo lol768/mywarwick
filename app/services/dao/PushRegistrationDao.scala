@@ -2,11 +2,10 @@ package services.dao
 
 import java.sql.Connection
 
-import actors.WebsocketActor.Notification
 import anorm.SqlParser._
 import anorm._
-import com.google.inject.{Inject, ImplementedBy}
-import models.{Activity, Platform, PushRegistration}
+import com.google.inject.{ImplementedBy, Inject}
+import models.{Platform, PushRegistration}
 import org.joda.time.DateTime
 import warwick.anorm.converters.ColumnConversions._
 import warwick.sso.Usercode
@@ -21,6 +20,8 @@ trait PushRegistrationDao {
   def updateLastFetched(token: String)(implicit c: Connection): Unit
 
   def saveRegistration(usercode: Usercode, platform: Platform, token: String)(implicit c: Connection): Boolean
+
+  def removeRegistration(token: String)(implicit c: Connection): Boolean
 
   def registrationExists(token: String)(implicit c: Connection): Boolean
 
@@ -44,8 +45,7 @@ class PushRegistrationDaoImpl @Inject()(
       .on(
         'now -> DateTime.now,
         'token -> token
-      )
-      .execute()
+      ).execute()
   }
 
   override def getPushRegistrationByToken(token: String)(implicit c: Connection): PushRegistration = {
@@ -86,5 +86,12 @@ class PushRegistrationDaoImpl @Inject()(
     catch {
       case e: Exception => false
     }
+  }
+
+  override def removeRegistration(token: String)(implicit c: Connection): Boolean = {
+    SQL("DELETE FROM push_registration WHERE token = {token}")
+      .on(
+        'token -> token
+      ).execute()
   }
 }

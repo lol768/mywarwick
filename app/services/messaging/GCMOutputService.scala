@@ -16,7 +16,6 @@ import scala.concurrent.Future
 
 class GCMOutputService @Inject()(
   pushRegistrationDao: PushRegistrationDao,
-  activityDao: ActivityDao,
   @NamedDatabase("default") db: Database,
   configuration: Configuration
 ) extends OutputService {
@@ -36,6 +35,10 @@ class GCMOutputService @Inject()(
 
   def subscribe(usercode: Usercode, token: String): Boolean = {
     db.withConnection(implicit c => pushRegistrationDao.saveRegistration(usercode, Google, token))
+  }
+
+  def unSubscribe(token: String): Boolean = {
+    db.withConnection(implicit c => pushRegistrationDao.removeRegistration(token))
   }
 
   def sendGCMNotification(token: String): Unit = {

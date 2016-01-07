@@ -15,11 +15,8 @@ class FetchNotificationsService @Inject()(
 
   def getNotificationsSinceLastFetch(token: String): Seq[Activity] = {
 
-    val registration = db.withConnection(implicit c =>
-      pushRegistrationDao.getPushRegistrationByToken(token)
-    )
-
     db.withTransaction { implicit c =>
+      val registration = pushRegistrationDao.getPushRegistrationByToken(token)
       val notifications = activityDao.getNotificationsSinceDate(registration.usercode, registration.lastFetchedAt)
       pushRegistrationDao.updateLastFetched(token)
       notifications
