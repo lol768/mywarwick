@@ -6,7 +6,7 @@ self.addEventListener('install', function (event) {
 self.addEventListener('push', function (event) {
   event.waitUntil(
     self.registration.pushManager.getSubscription().then(function (subscription) {
-      fetch('/api/push/notification', {
+      fetch('/api/push/gcm/notification', {
         method: 'post',
         headers: {
           'Accept': 'application/json',

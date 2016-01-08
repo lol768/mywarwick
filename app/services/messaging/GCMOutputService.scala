@@ -2,14 +2,12 @@ package services.messaging
 
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.Inject
-import models.Platform.Google
 import play.api.Configuration
 import play.api.Play.current
 import play.api.db._
 import play.api.libs.json._
 import play.api.libs.ws.WS
-import services.dao.{ActivityDao, PushRegistrationDao}
-import warwick.sso.Usercode
+import services.dao.PushRegistrationDao
 
 import scala.concurrent.Future
 
@@ -31,14 +29,6 @@ class GCMOutputService @Inject()(
       }
     )
     Future.successful(ProcessingResult(success = true, "yay"))
-  }
-
-  def subscribe(usercode: Usercode, token: String): Boolean = {
-    db.withConnection(implicit c => pushRegistrationDao.saveRegistration(usercode, Google, token))
-  }
-
-  def unSubscribe(token: String): Boolean = {
-    db.withConnection(implicit c => pushRegistrationDao.removeRegistration(token))
   }
 
   def sendGCMNotification(token: String): Unit = {

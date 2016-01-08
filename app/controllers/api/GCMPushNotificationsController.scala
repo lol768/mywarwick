@@ -2,13 +2,14 @@ package controllers.api
 
 import com.google.inject.Inject
 import controllers.BaseController
-import play.api.libs.json.{JsValue, JsObject, Json}
-import services.SecurityService
-import services.messaging.{FetchNotificationsService, GCMOutputService}
+import models.Platform.Google
+import play.api.libs.json.JsValue
+import services.messaging.FetchNotificationsService
+import services.{PushRegistrationService, SecurityService}
 
 class GCMPushNotificationsController @Inject()(
   securityService: SecurityService,
-  gcmOutputService: GCMOutputService,
+  pushRegistrationService: PushRegistrationService,
   fetchNotificationsService: FetchNotificationsService
 ) extends BaseController {
 
@@ -19,7 +20,7 @@ class GCMPushNotificationsController @Inject()(
       request.body.asJson.map { json =>
         val endpoint = (json \ "endpoint").as[String]
         val token = endpoint.split("/").last
-        gcmOutputService.subscribe(user.usercode, token) match {
+        pushRegistrationService.save(user.usercode, Google, token) match {
           case true => Created("subscribed to push notifications")
           case false => InternalServerError("oh dear there's been an error")
         }
