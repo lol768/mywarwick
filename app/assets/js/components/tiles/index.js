@@ -11,8 +11,9 @@ export class list extends ReactComponent {
 
   getContent() {
     if (this.props.content) {
-      // only show the first three items if not zoomed
-      let itemsToDisplay = this.props.zoomed ? this.props.content.items : this.props.content.items.slice(0,3);
+      // only show the first maxItemsToDisplay items (defaults to 3) if not zoomed
+      let maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : 3;
+      let itemsToDisplay = this.props.zoomed ? this.props.content.items : this.props.content.items.slice(0,maxItemsToDisplay);
       return <ul>
         {itemsToDisplay.map((item) => <ListTileItem {...item} />)}
       </ul>;
