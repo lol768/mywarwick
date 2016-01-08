@@ -2,11 +2,10 @@ package controllers.api
 
 import com.google.inject.Inject
 import controllers.BaseController
-import models.Platform
 import models.Platform.Google
-import play.api.libs.json.{JsValue, JsObject, Json}
+import play.api.libs.json.JsValue
+import services.messaging.FetchNotificationsService
 import services.{PushRegistrationService, SecurityService}
-import services.messaging.{FetchNotificationsService, GCMOutputService}
 
 class GCMPushNotificationsController @Inject()(
   securityService: SecurityService,
