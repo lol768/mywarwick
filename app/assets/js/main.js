@@ -79,6 +79,9 @@ $(function () {
     $('html').addClass('mobile');
   }
 
+  if (window.navigator.userAgent.indexOf('Start/1.0') >= 0) {
+    $('html').addClass('app standalone');
+  }
 });
 
 store.subscribe(() => {
