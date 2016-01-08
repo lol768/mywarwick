@@ -24,7 +24,7 @@ const TILE_ZOOM_OUT = 'me.zoom-out';
 function zoomInOn(tile) {
   return {
     type: TILE_ZOOM_IN,
-    tile: tile.key
+    tile: tile.id
   };
 }
 
@@ -61,17 +61,22 @@ class MeView extends ReactComponent {
   }
 
   renderTile(tile, zoomed = false) {
+
+    let content = this.props.tileContent[tile.id];
+    let canZoom = (content && content.items.length > 1);
     let onTileClick = this.onTileClick.bind(this);
 
     let baseTile = tileElements[tile.tileType];
 
     let props = _.merge({}, tile, {
+
       onClick(e) {
-        onTileClick(tile, e);
+        if(canZoom) onTileClick(tile, e);
       },
       view: this,
       zoomed: zoomed,
-      content: this.props.tileContent[tile.id],
+      canZoom: canZoom,
+      content: content,
       errors: this.props.tileErrors[tile.id],
       key: zoomed ? tile.id + '-zoomed' : tile.id,
       ref: zoomed ? tile.id + '-zoomed' : tile.id,
@@ -223,7 +228,7 @@ class MeView extends ReactComponent {
     let tiles = this.props.tiles.map((tile) => this.renderTile(tile));
 
     if (zoomedTileKey) {
-      let zoomedTile = _.find(this.props.tiles, (tile) => tile.key == zoomedTileKey);
+      let zoomedTile = _.find(this.props.tiles, (tile) => tile.id == zoomedTileKey);
       tiles.push(this.renderTile(zoomedTile, true));
     }
 

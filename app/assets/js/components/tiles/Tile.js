@@ -32,7 +32,8 @@ export default class Tile extends ReactComponent {
     let outerClassName = classNames({
       'tile--normal': !props.zoomed,
       [sizeClass]: !props.zoomed,
-      'tile--zoomed': props.zoomed
+      'tile--zoomed': props.zoomed,
+      'tile--canZoom': !!props.canZoom
     });
 
     return (
@@ -49,7 +50,7 @@ export default class Tile extends ReactComponent {
               </h1>
               { props.zoomed ?
                 <i className="fa fa-fw fa-lg fa-times tile__dismiss" onClick={this.props.onDismiss}></i>
-                : null }
+                : props.canZoom ? <i className="fa fa-fw fa-lg fa-expand tile__expand" ></i> : null }
             </header>
             <div className="tile__body">
               {props.children}

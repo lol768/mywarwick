@@ -11,8 +11,11 @@ export class list extends ReactComponent {
 
   getContent() {
     if (this.props.content) {
+      // only show the first maxItemsToDisplay items (defaults to 3) if not zoomed
+      let maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : 3;
+      let itemsToDisplay = this.props.zoomed ? this.props.content.items : this.props.content.items.slice(0,maxItemsToDisplay);
       return <ul>
-        {this.props.content.items.map((item) => <ListTileItem {...item} />)}
+        {itemsToDisplay.map((item) => <ListTileItem {...item} />)}
       </ul>;
     } else if (this.props.errors) {
       return <em>error: {this.props.errors[0].message}</em>;
@@ -84,12 +87,17 @@ export class text extends ReactComponent {
         <ReactCSSTransitionGroup transitionName="text-tile"
                                  transitionEnterTimeout={1000}
                                  transitionLeaveTimeout={1000}>
-          {itemsToDisplay.map((item) => (
-            <div className="tile__item" key={item.key}>
+          {itemsToDisplay.map((item) => {
+
+            let tileItem = <div className="tile__item" key={item.key}>
               <span className="tile__callout">{item.callout}</span>
               <span className="tile__text">{item.text}</span>
-            </div>
-          ))}
+            </div>;
+
+            return (item.href) ?
+              <a href={item.href} target="_blank" onClick={function(e){e.stopPropagation();}}>{tileItem}</a>
+              : tileItem;
+          })}
         </ReactCSSTransitionGroup>
       );
     } else if (this.props.errors) {
@@ -160,7 +168,7 @@ export class count extends ReactComponent {
 
 let ListTileItem = (props) => (
   <li className="list-tile-item">
-    <a href={props.href} target="_blank">
+    <a href={props.href} target="_blank" onClick={function(e){e.stopPropagation();}}>
       <span className="list-tile-item__title">{props.title}</span>
       { props.date ? <span className="list-tile-item__date">{formatDate(props.date)}</span> : null }
       <span className="list-tile-item__text">{props.text}</span>
