@@ -1,14 +1,13 @@
 package services
 
 import actors.WebsocketActor.Notification
-import helpers.{Fixtures, OneStartAppPerSuite}
+import helpers.Fixtures
 import models._
 import org.mockito.Matchers
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.db.Database
 import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
 import services.messaging.MessagingService
 import warwick.sso.Usercode

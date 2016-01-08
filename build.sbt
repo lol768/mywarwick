@@ -4,7 +4,7 @@ version := "1.0-SNAPSHOT"
 
 scalaVersion := Common.scalaVersion
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala)
   .dependsOn(admin, servicechecks)
   .aggregate(admin, servicechecks)
   .settings(
@@ -27,6 +27,7 @@ val appDeps = Seq(
   "uk.ac.warwick.play-utils" %% "anorm" % "1.2",
   "com.typesafe.akka" %% "akka-cluster" % "2.4.0",
   "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.0",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.4.0",
   "com.kenshoo" %% "metrics-play" % "2.4.0_0.4.1",
   "com.typesafe.play" %% "play-mailer" % "3.0.1",
   "com.notnoop.apns" % "apns" % "1.0.0.Beta6",
@@ -52,10 +53,6 @@ dependencyOverrides += "xml-apis" % "xml-apis" % "1.4.01"
 // Make gulp output available as Play assets.
 unmanagedResourceDirectories in Assets <+= baseDirectory { _ / "target" / "gulp" }
 
-// Configure the tar.gz generation how we like it
-packagingSettings
-
-resolvers += WarwickNexus
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
 // Run Gulp when Play runs

@@ -6,16 +6,18 @@ case class PushRegistration(
   usercode: String,
   platform: Platform,
   token: String,
-  createdAt: DateTime
+  createdAt: DateTime,
+  lastFetchedAt: DateTime
 )
 
 sealed abstract class Platform(val dbValue: String)
 
 object Platform {
 
-  val values = Set(Apple)
+  val values = Set(Apple, Google)
 
   case object Apple extends Platform("a")
+  case object Google extends Platform("g")
 
   def apply(dbValue: String): Platform = unapply(dbValue).getOrElse(throw new IllegalArgumentException(dbValue))
 

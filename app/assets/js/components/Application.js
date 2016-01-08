@@ -8,6 +8,7 @@ import NotificationsView from './views/NotificationsView';
 import ActivityView from './views/ActivityView';
 import NewsView from './views/NewsView';
 import SearchView from './views/SearchView';
+import {SettingsView, ToggleSwitch} from './views/SettingsView';
 import Immutable from 'immutable';
 
 import _ from 'lodash';
@@ -62,10 +63,11 @@ class Application extends ReactComponent {
 
     let views = {
       '/': <MeView />,
-      '/notifications': <NotificationsView grouped={true} />,
-      '/activity': <ActivityView grouped={true} />,
+      '/notifications': <NotificationsView grouped={true}/>,
+      '/activity': <ActivityView grouped={true}/>,
       '/news': <NewsView />,
-      '/search': <SearchView />
+      '/search': <SearchView />,
+      '/settings': <SettingsView />
     };
 
     return (

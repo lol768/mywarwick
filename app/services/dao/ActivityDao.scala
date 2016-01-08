@@ -7,12 +7,18 @@ import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject}
 import models._
+import oracle.net.aso.e
 import org.joda.time.DateTime
+import play.api.db
+import services.messaging.Output.Mobile
 import system.DatabaseDialect
 import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
+
+  def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity]
+
   def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse]
 
   def save(activity: ActivityPrototype, replaces: Seq[String])(implicit c: Connection): String
@@ -27,6 +33,7 @@ trait ActivityDao {
 class ActivityDaoImpl @Inject()(
   dialect: DatabaseDialect
 ) extends ActivityDao {
+
 
   override def save(activity: ActivityPrototype, replaces: Seq[String])(implicit c: Connection): String = {
     import activity._
@@ -68,6 +75,21 @@ class ActivityDaoImpl @Inject()(
         .as(activityParser.*)
     }.toSeq
 
+  override def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity] = {
+    SQL(
+      """
+      SELECT ACTIVITY.* FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
+      WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.GENERATED_AT > {sinceDate} AND ACTIVITY.ID IN (
+      SELECT ACTIVITY.ID FROM MESSAGE_SEND WHERE USERCODE = {usercode} AND OUTPUT = {mobile})
+      """)
+      .on(
+        'usercode -> usercode,
+        'sinceDate -> sinceDate,
+        'mobile -> Mobile.name
+      )
+      .as(activityParser.*)
+  }
+
   override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse] = {
     val maybeBefore = if (before.isDefined) "AND ACTIVITY_RECIPIENT.GENERATED_AT < {before}" else ""
     val activities = SQL(
@@ -108,22 +130,22 @@ class ActivityDaoImpl @Inject()(
 
   private lazy val activityParser: RowParser[Activity] =
     get[String]("ID") ~
-    get[String]("PROVIDER_ID") ~
-    get[String]("TYPE") ~
-    get[String]("TITLE") ~
-    get[String]("TEXT") ~
-    get[Option[String]]("REPLACED_BY_ID") ~
-    get[DateTime]("GENERATED_AT") ~
-    get[DateTime]("CREATED_AT") ~
-    get[Boolean]("SHOULD_NOTIFY") map {
+      get[String]("PROVIDER_ID") ~
+      get[String]("TYPE") ~
+      get[String]("TITLE") ~
+      get[String]("TEXT") ~
+      get[Option[String]]("REPLACED_BY_ID") ~
+      get[DateTime]("GENERATED_AT") ~
+      get[DateTime]("CREATED_AT") ~
+      get[Boolean]("SHOULD_NOTIFY") map {
       case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify =>
         Activity(id, providerId, activityType, title, text, replacedById, generatedAt, createdAt, shouldNotify)
     }
 
   private lazy val tagParser: RowParser[Option[ActivityTag]] =
     get[Option[String]]("TAG_NAME") ~ // Option because an activity can have no tags
-    get[Option[String]]("TAG_VALUE") ~
-    get[Option[String]]("TAG_DISPLAY_VALUE") map {
+      get[Option[String]]("TAG_VALUE") ~
+      get[Option[String]]("TAG_DISPLAY_VALUE") map {
       case name ~ value ~ display =>
         (for (name <- name; value <- value) yield ActivityTag(name, TagValue(value, display)))
     }
