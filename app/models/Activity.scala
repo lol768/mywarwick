@@ -15,6 +15,7 @@ case class Activity(
   `type`: String,
   title: String,
   text: String,
+  url: Option[String],
   replacedBy: Option[String],
   generatedAt: DateTime,
   createdAt: DateTime,
@@ -38,6 +39,7 @@ object ActivityResponse {
       "type" -> o.activity.`type`,
       "title" -> o.activity.title,
       "text" -> o.activity.text,
+      "url" -> o.activity.url,
       "tags" -> o.tags,
       "date" -> o.activity.generatedAt
     )
@@ -79,6 +81,7 @@ case class ActivityPrototype(
   `type`: String,
   title: String,
   text: String,
+  url: Option[String],
   tags: Seq[ActivityTag],
   replace: Map[String, String],
   generatedAt: Option[DateTime],

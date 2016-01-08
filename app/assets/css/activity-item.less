@@ -9,16 +9,26 @@
   &__title {
     display: block;
     font-weight: bold;
+    color: @text-color;
   }
 
   &__text {
     display: block;
     font-weight: normal;
+    color: @text-color;
   }
 
   &__date {
     float: right;
+    color: @gray-light;
   }
 
+  &--with-url {
+    cursor: pointer;
+  }
+
+  a:hover {
+    text-decoration: none;
+  }
 }
 

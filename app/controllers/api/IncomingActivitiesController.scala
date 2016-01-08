@@ -28,6 +28,7 @@ class IncomingActivitiesController @Inject()(
       (__ \ "type").read[String] and
       (__ \ "title").read[String] and
       (__ \ "text").read[String] and
+      (__ \ "url").readNullable[String] and
       (__ \ "tags").read[Seq[ActivityTag]].orElse(Reads.pure(Seq.empty)) and
       (__ \ "replace").read[Map[String, String]].orElse(Reads.pure(Map.empty)) and
       (__ \ "generated_at").readNullable[DateTime] and
