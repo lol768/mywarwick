@@ -31,8 +31,9 @@ class NotificationsView extends ReactComponent {
   }
 
   render() {
+
     let notifications = takeFromStream(this.props.notifications, this.state.numberToShow)
-      .map(n => <ActivityItem key={n.id} {...n} />);
+      .map(n => <ActivityItem key={n.id} forceDisplayDay={!this.props.grouped} {...n} />);
 
     let hasMore = this.state.numberToShow < getStreamSize(this.props.notifications);
 
