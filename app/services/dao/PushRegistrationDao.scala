@@ -1,12 +1,13 @@
 package services.dao
 
-import java.sql.Connection
+import java.sql.{SQLIntegrityConstraintViolationException, Connection}
 
 import anorm.SqlParser._
 import anorm._
-import com.google.inject.{ImplementedBy, Inject}
+import com.google.inject.ImplementedBy
 import models.{Platform, PushRegistration}
 import org.joda.time.DateTime
+import system.Logging
 import warwick.anorm.converters.ColumnConversions._
 import warwick.sso.Usercode
 
@@ -27,8 +28,7 @@ trait PushRegistrationDao {
 
 }
 
-class PushRegistrationDaoImpl @Inject()(
-) extends PushRegistrationDao {
+class PushRegistrationDaoImpl extends PushRegistrationDao with Logging {
 
   val pushRegistrationParser: RowParser[PushRegistration] =
     get[String]("USERCODE") ~
@@ -71,20 +71,22 @@ class PushRegistrationDaoImpl @Inject()(
 
   override def saveRegistration(usercode: Usercode, platform: Platform, token: String)(implicit c: Connection): Boolean = {
     try {
-      if (!registrationExists(token)) {
-        SQL("INSERT INTO PUSH_REGISTRATION (TOKEN, usercode, platform, CREATED_AT, LAST_FETCHED_AT) VALUES ({token}, {usercode}, {platform}, {now}, {now})")
-          .on(
-            'token -> token,
-            'usercode -> usercode.string,
-            'platform -> platform.dbValue,
-            'now -> DateTime.now
-          )
-          .execute()
-      }
+      SQL("INSERT INTO PUSH_REGISTRATION (TOKEN, usercode, platform, CREATED_AT, LAST_FETCHED_AT) VALUES ({token}, {usercode}, {platform}, {now}, {now})")
+        .on(
+          'token -> token,
+          'usercode -> usercode.string,
+          'platform -> platform.dbValue,
+          'now -> DateTime.now
+        )
+        .execute()
       true
-    }
-    catch {
-      case e: Exception => false
+    } catch {
+      case _: SQLIntegrityConstraintViolationException =>
+        // Token is already registered for this usercode
+        true
+      case e: Exception =>
+        logger.error("Exception when saving push registration", e)
+        false
     }
   }
 

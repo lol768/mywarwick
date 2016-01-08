@@ -111,7 +111,7 @@ function unsubscriptionToServer(subscription) {
 
 function subscriptionToServer(subscription) {
 
-  fetch('/api/push/subscribe', {
+  fetch('/api/push/gcm/subscribe', {
     method: 'post',
     headers: {
       'Accept': 'application/json',
