@@ -92,6 +92,7 @@ store.subscribe(() => {
 
     if ('pushState' in window.history) {
       window.history.pushState(null, null, currentPath);
+      $(window).scrollTop(0);
     }
   }
 });
