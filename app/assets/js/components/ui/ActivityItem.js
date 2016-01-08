@@ -19,7 +19,7 @@ export default class ActivityItem extends ReactComponent {
             <span className="activity-item__text">{this.props.text}</span>
             {/*<span className="activity-item__source">{this.props.provider}</span>*/}
 
-            /* Pass undefined so function is called with default param */
+            {/* Pass undefined so function is called with default param */}
             <span className="activity-item__date">{formatDate(this.props.date, undefined, this.props.forceDisplayDay)}</span>
           </div>
         </div>
