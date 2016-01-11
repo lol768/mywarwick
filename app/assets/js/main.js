@@ -102,7 +102,7 @@ store.subscribe(() => {
  Attempt to register service worker, to handle push notifications
  */
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js')
+  navigator.serviceWorker.register('/assets/js/service-worker.js')
     .then(initialiseState);
 } else {
   console.warn('Service workers aren\'t supported in this browser.');

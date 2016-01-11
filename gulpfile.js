@@ -32,7 +32,6 @@ var lessCompiler = require('less');
 var paths = {
   assetPath: 'app/assets',
 
-  scriptIn: ['app/assets/js/main.js'],
   scriptOut: 'target/gulp/js',
 
   assetsOut: 'target/gulp',
@@ -62,13 +61,13 @@ if (PRODUCTION) {
 
 // Function for running Browserify on JS, since
 // we reuse it a couple of times.
-var bundle = function (browserify) {
+var bundle = function (browserify, outputFile) {
   browserify.bundle()
     .on('error', function (e) {
       gutil.log(gutil.colors.red(e.toString()));
     })
     .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, 'app', 'assets', 'js')))
-    .pipe(source('bundle.js'))
+    .pipe(source(outputFile))
     .pipe(buffer())
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(replace('$$BUILDTIME$$', (new Date()).toString()))
@@ -84,8 +83,11 @@ var browserifyFlags = function(b) {
 }
 
 gulp.task('scripts', [], function () {
-  var b = browserifyFlags(browserify(browserifyOptions));
-  return bundle(b);
+  var mainBundle = browserifyFlags(browserify(browserifyOptions));
+  bundle(mainBundle, 'bundle.js');
+
+  var serviceWorker = browserifyFlags(browserify(Object.assign({}, browserifyOptions, {entries: 'service-worker-main.js'})));
+  bundle(serviceWorker, 'service-worker.js');
 });
 
 // Recompile scripts on changes. Watchify is more efficient than
@@ -93,10 +95,10 @@ gulp.task('scripts', [], function () {
 gulp.task('watch-scripts', [], function () {
   var bw = watchify(browserifyFlags(browserify(_.assign({}, watchify.args, browserifyOptions))));
   bw.on('update', function () {
-    bundle(bw);
+    bundle(bw, 'bundle.js');
   });
   bw.on('log', gutil.log);
-  return bundle(bw);
+  return bundle(bw, 'bundle.js');
 });
 
 /**
