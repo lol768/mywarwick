@@ -10,17 +10,32 @@ export const description = 'by-date';
 // Return an arbitrary identifier that is the same for all items in the same group
 export function groupForItem(item, now = localMoment()) {
   var date = localMoment(item.props.date).startOf('day');
+  var tomorrow = now.clone().add(1, 'day');
 
-  if (date.isSame(now, 'day')) {
+  // date is next week but not tomorrow
+  if (date.isSame(now.clone().add(1, 'week'), 'isoWeek') && date.isAfter(tomorrow)) {
     return 0;
-  } else if (date.isSame(now.clone().subtract(1, 'day'), 'day')) {
+    // later this week but not tomorrow
+  } else if (date.isSame(now, 'isoWeek') && date.isAfter(tomorrow)) {
     return 1;
-  } else if (date.isSame(now, 'isoWeek')) {
+    // tomorrow
+  } else if (date.isSame(now.clone().add(1, 'day'), 'day')) {
     return 2;
-  } else if (date.isSame(now.clone().subtract(1, 'week'), 'isoWeek')) {
+    // today
+  } else if (date.isSame(now, 'day')) {
     return 3;
-  } else {
+    // yesterday
+  } else if (date.isSame(now.clone().subtract(1, 'day'), 'day')) {
     return 4;
+    // earlier this week
+  } else if (date.isSame(now, 'isoWeek')) {
+    return 5;
+    // last week
+  } else if (date.isSame(now.clone().subtract(1, 'week'), 'isoWeek')) {
+    return 6;
+    // older
+  } else {
+    return 7;
   }
 }
 
@@ -28,9 +43,12 @@ export function groupForItem(item, now = localMoment()) {
 // Return a nice title for the user to look at, from the group identifier
 export function titleForGroup(group) {
   return [
+    'Next Week',
+    'Later This Week',
+    'Tomorrow',
     'Today',
     'Yesterday',
-    'This Week',
+    'Earlier This Week',
     'Last Week',
     'Older'
   ][group];

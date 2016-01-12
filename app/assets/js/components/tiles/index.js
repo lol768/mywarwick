@@ -5,7 +5,44 @@ import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import Tile from './Tile';
 
 import formatDate from '../../dateFormatter';
+import classNames from 'classnames';
+import GroupedList from '../ui/GroupedList';
+import * as groupItemsByDate from '../../GroupItemsByDate';
 import _ from 'lodash';
+
+export class agenda extends ReactComponent {
+
+  getContent() {
+    if (this.props.content) {
+      let maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : 3;
+      let itemsToDisplay = this.props.zoomed ? this.props.content.items : this.props.content.items.slice(0, maxItemsToDisplay);
+
+      let events = itemsToDisplay.map((event) => {
+        return (
+          <AgendaItem {...event}/>
+        );
+      });
+
+      return (
+        <GroupedList orderDescending={true} groupBy={groupItemsByDate}>
+          {events}
+        </GroupedList>
+      )
+    } else if (this.props.errors) {
+      return <em>error: {this.props.errors[0].message}</em>;
+    } else {
+      return <em>loading tile data...</em>;
+    }
+  }
+
+  render() {
+    return (
+      <Tile ref="tile" {...this.props}>
+        {this.getContent()}
+      </Tile>
+    )
+  }
+}
 
 export class list extends ReactComponent {
 
@@ -13,7 +50,7 @@ export class list extends ReactComponent {
     if (this.props.content) {
       // only show the first maxItemsToDisplay items (defaults to 3) if not zoomed
       let maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : 3;
-      let itemsToDisplay = this.props.zoomed ? this.props.content.items : this.props.content.items.slice(0,maxItemsToDisplay);
+      let itemsToDisplay = this.props.zoomed ? this.props.content.items : this.props.content.items.slice(0, maxItemsToDisplay);
       return <ul>
         {itemsToDisplay.map((item) => <ListTileItem {...item} />)}
       </ul>;
@@ -165,6 +202,17 @@ export class count extends ReactComponent {
   }
 
 }
+
+let AgendaItem = (props) => (
+  <div className={classNames("agenda-item", "row")}>
+    <div className="col-sm-3">
+      {formatDate(props.date)}
+    </div>
+    <div className="col-sm-9">
+      {props.title}
+    </div>
+  </div>
+);
 
 let ListTileItem = (props) => (
   <li className="list-tile-item">
