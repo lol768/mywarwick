@@ -21,6 +21,8 @@ GET         /assets/manifest.json                         @controllers.AppManife
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                                 @controllers.Assets.versioned(path="/public", file: Asset)
 
+GET         /service-worker.js                            @controllers.Assets.at(path="/public", file="js/service-worker.js")
+
 GET         /news/feed                                    @controllers.NewsController.feed
 
 GET         /service/metrics                              @controllers.MetricsController.metrics
