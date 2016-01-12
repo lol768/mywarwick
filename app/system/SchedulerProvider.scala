@@ -11,7 +11,7 @@ import org.quartz._
 import org.quartz.impl.StdSchedulerFactory
 import play.api.Logger
 import play.api.inject.ApplicationLifecycle
-import services.job.MessageSendCleanupJob
+import services.job.{APNSInactiveDeviceCleanupJob, MessageSendCleanupJob}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -30,6 +30,12 @@ class SchedulerProvider @Inject()(jobFactory: GuiceJobFactory, lifecycle: Applic
       "MessageSendCleanupJob",
       newJob(classOf[MessageSendCleanupJob]),
       dailyAtHourAndMinute(1, 0)
+    )
+
+    configureScheduledJob(
+      "APNSInactiveDeviceCleanupJob",
+      newJob(classOf[APNSInactiveDeviceCleanupJob]),
+      dailyAtHourAndMinute(1, 30)
     )
 
     scheduler.start()

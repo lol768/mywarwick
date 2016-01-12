@@ -1,6 +1,6 @@
 package services.dao
 
-import java.sql.{SQLIntegrityConstraintViolationException, Connection}
+import java.sql.{Connection, SQLIntegrityConstraintViolationException}
 
 import anorm.SqlParser._
 import anorm._
@@ -13,7 +13,6 @@ import warwick.sso.Usercode
 
 @ImplementedBy(classOf[PushRegistrationDaoImpl])
 trait PushRegistrationDao {
-
   def getPushRegistrationsForUser(usercode: Usercode)(implicit c: Connection): Seq[PushRegistration]
 
   def getPushRegistrationByToken(token: String)(implicit c: Connection): PushRegistration
@@ -22,9 +21,11 @@ trait PushRegistrationDao {
 
   def saveRegistration(usercode: Usercode, platform: Platform, token: String)(implicit c: Connection): Boolean
 
+  def registrationExists(token: String)(implicit c: Connection): Boolean
+
   def removeRegistration(token: String)(implicit c: Connection): Boolean
 
-  def registrationExists(token: String)(implicit c: Connection): Boolean
+  def removeRegistrationIfNotRegisteredSince(token: String, date: DateTime)(implicit c: Connection): Boolean
 
 }
 
@@ -95,5 +96,14 @@ class PushRegistrationDaoImpl extends PushRegistrationDao with Logging {
       .on(
         'token -> token
       ).execute()
+  }
+
+  override def removeRegistrationIfNotRegisteredSince(token: String, date: DateTime)(implicit c: Connection): Boolean = {
+    SQL("DELETE FROM PUSH_REGISTRATIONS WHERE TOKEN = {token} AND CREATED_AT < {date}")
+      .on(
+        'token -> token,
+        'date -> date
+      )
+      .execute()
   }
 }
