@@ -4,17 +4,17 @@ import com.google.inject.Inject
 import org.joda.time.DateTime
 import org.quartz.{Job, JobExecutionContext}
 import services.PushRegistrationService
-import services.messaging.APNSOutputService
+import services.messaging.APNSProvider
 import system.Logging
 
 import scala.collection.JavaConversions._
 
 class APNSInactiveDeviceCleanupJob @Inject()(
   pushRegistrationService: PushRegistrationService,
-  apnsOutputService: APNSOutputService
+  apnsProvider: APNSProvider
 ) extends Job with Logging {
 
-  import apnsOutputService.apns
+  import apnsProvider.apns
 
   override def execute(jobExecutionContext: JobExecutionContext): Unit = {
     val itemsDeleted = apns.getInactiveDevices.map {
