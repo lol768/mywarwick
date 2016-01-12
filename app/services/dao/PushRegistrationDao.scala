@@ -99,7 +99,7 @@ class PushRegistrationDaoImpl extends PushRegistrationDao with Logging {
   }
 
   override def removeRegistrationIfNotRegisteredSince(token: String, date: DateTime)(implicit c: Connection): Boolean = {
-    SQL("DELETE FROM PUSH_REGISTRATIONS WHERE TOKEN = {token} AND CREATED_AT < {date}")
+    SQL("DELETE FROM PUSH_REGISTRATION WHERE TOKEN = {token} AND CREATED_AT < {date}")
       .on(
         'token -> token,
         'date -> date

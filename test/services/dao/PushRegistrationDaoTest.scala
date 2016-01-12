@@ -9,7 +9,7 @@ import warwick.anorm.converters.ColumnConversions._
 
 class PushRegistrationDaoTest extends PlaySpec with OneStartAppPerSuite {
 
-  val pushRegistrationDao = app.injector.instanceOf[PushRegistrationDao]
+  val dao = app.injector.instanceOf[PushRegistrationDao]
 
   "PushNotificationDao" should {
 
@@ -26,7 +26,7 @@ class PushRegistrationDaoTest extends PlaySpec with OneStartAppPerSuite {
           'usercode -> usercode.string
         ).execute()
 
-      pushRegistrationDao.getPushRegistrationsForUser(usercode) mustBe Seq(PushRegistration("cusjau", Platform("g"), token, now, now))
+      dao.getPushRegistrationsForUser(usercode) mustBe Seq(PushRegistration("cusjau", Platform("g"), token, now, now))
     }
 
     "retrieve all push registrations by token" in transaction { implicit c =>
@@ -38,14 +38,24 @@ class PushRegistrationDaoTest extends PlaySpec with OneStartAppPerSuite {
           'usercode -> usercode.string
         ).execute()
 
-      pushRegistrationDao.getPushRegistrationByToken(token) mustBe PushRegistration("cusjau", Platform("a"), token, now, now)
+      dao.getPushRegistrationByToken(token) mustBe PushRegistration("cusjau", Platform("a"), token, now, now)
     }
 
     "remove registration" in transaction { implicit c =>
-      pushRegistrationDao.saveRegistration(usercode, Platform("a"), token)
-      pushRegistrationDao.removeRegistration(token)
+      dao.saveRegistration(usercode, Platform("a"), token)
+      dao.removeRegistration(token)
 
-      pushRegistrationDao.getPushRegistrationsForUser(usercode) mustBe Seq()
+      dao.getPushRegistrationsForUser(usercode) mustBe Seq()
+    }
+
+    "remove registration if older than x" in transaction { implicit c =>
+      dao.saveRegistration(usercode, Platform("a"), token)
+
+      dao.removeRegistrationIfNotRegisteredSince(token, DateTime.now.minusHours(1))
+      dao.getPushRegistrationsForUser(usercode).length mustBe 1
+
+      dao.removeRegistrationIfNotRegisteredSince(token, DateTime.now.plusHours(1))
+      dao.getPushRegistrationsForUser(usercode) mustBe Seq()
     }
   }
 }
