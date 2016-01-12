@@ -146,7 +146,7 @@ export class text extends ReactComponent {
 
   render() {
     return (
-      <Tile ref="tile" {...this.props} className={this.props.className + " tile--text-btm"}>
+      <Tile ref="tile" {...this.props} className={"tile--text-btm"}>
         {this.getContent()}
       </Tile>
     );
@@ -194,7 +194,7 @@ export class count extends ReactComponent {
       );
     } else {
       return (
-        <Tile ref="tile" {...this.props} className={"tile--text-btm " + this.props.className}>
+        <Tile ref="tile" {...this.props} className={"tile--text-btm"}>
           {this.getContent()}
         </Tile>
       );

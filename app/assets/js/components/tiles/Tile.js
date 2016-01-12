@@ -39,7 +39,7 @@ export default class Tile extends ReactComponent {
 
     return (
       <div className={outerClassName}>
-        <article className={classNames('tile', props.className || props.originalRef, size)}
+        <article className={classNames('tile', props.tileType, size)}
                  style={{backgroundColor: backgroundColor, color: color}}
                  onClick={props.onClick}
                  ref="tile">
