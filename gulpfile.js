@@ -45,11 +45,13 @@ var paths = {
   ]
 };
 
-var browserifyOptions = {
-  entries: 'main.js',
-  basedir: 'app/assets/js',
-  debug: true, // confusingly, this enables sourcemaps
-  transform: [babelify] // Transforms ES6 + JSX into normal JS
+var browserifyOptions = function (entries) {
+  return {
+    entries: entries,
+    basedir: 'app/assets/js',
+    debug: true, // confusingly, this enables sourcemaps
+    transform: [babelify] // Transforms ES6 + JSX into normal JS
+  }
 };
 
 var PRODUCTION = (process.env.PRODUCTION !== 'false');
@@ -80,25 +82,32 @@ var browserifyFlags = function(b) {
   b.exclude('jquery');
   b.transform({global:true}, browserifyShim);
   return b;
-}
+};
+
+var SCRIPTS = {
+  // Mapping from bundle name to entry point
+  'bundle.js': 'main.js',
+  'service-worker.js': 'service-worker-main.js'
+};
 
 gulp.task('scripts', [], function () {
-  var mainBundle = browserifyFlags(browserify(browserifyOptions));
-  bundle(mainBundle, 'bundle.js');
-
-  var serviceWorker = browserifyFlags(browserify(Object.assign({}, browserifyOptions, {entries: 'service-worker-main.js'})));
-  bundle(serviceWorker, 'service-worker.js');
+  return _.map(SCRIPTS, function(entries, output) {
+    var b = browserifyFlags(browserify(browserifyOptions(entries)));
+    return bundle(b, output);
+  });
 });
 
 // Recompile scripts on changes. Watchify is more efficient than
 // grunt.watch as it knows how to do incremental rebuilds.
 gulp.task('watch-scripts', [], function () {
-  var bw = watchify(browserifyFlags(browserify(_.assign({}, watchify.args, browserifyOptions))));
-  bw.on('update', function () {
-    bundle(bw, 'bundle.js');
+  return _.map(SCRIPTS, function(entries, output) {
+    var bw = watchify(browserifyFlags(browserify(_.assign({}, watchify.args, browserifyOptions(entries)))));
+    bw.on('update', function () {
+      bundle(bw, output);
+    });
+    bw.on('log', gutil.log);
+    return bundle(bw, output);
   });
-  bw.on('log', gutil.log);
-  return bundle(bw, 'bundle.js');
 });
 
 /**
