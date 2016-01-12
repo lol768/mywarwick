@@ -30,7 +30,7 @@ self.addEventListener('push', event => {
         } else if (response.status === 401) {
           // Unauthorized; user is no longer signed in so unregister the service worker
           // Must still show a notification to avoid update message
-          showNotification('Start.Warwick', 'Your Start.Warwick session has expired');
+          showNotification('Start.Warwick', 'You are no longer signed in to Start.Warwick');
           self.registration.unregister();
           throw new Error('User session expired');
         } else {
