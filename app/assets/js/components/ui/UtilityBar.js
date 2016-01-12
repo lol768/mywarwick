@@ -1,9 +1,23 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
 
 import { connect } from 'react-redux';
 
 class UtilityBar extends ReactComponent {
+
+  componentDidMount() {
+    this.attachAccountPopover();
+  }
+
+  componentDidUpdate() {
+    this.attachAccountPopover();
+  }
+
+  attachAccountPopover() {
+    var element = ReactDOM.findDOMNode(this.refs.accountLink);
+    $(element).accountPopover();
+  }
 
   render() {
     let signInLink = (
@@ -12,7 +26,7 @@ class UtilityBar extends ReactComponent {
       </a>
     );
     let accountLink = (
-      <a href="//warwick.ac.uk/myaccount" data-toggle="id7:account-popover" data-name={this.props.name}>
+      <a ref="accountLink" href="//warwick.ac.uk/myaccount" data-toggle="id7:account-popover" data-name={this.props.name}>
         {this.props.name}
         <span className="caret"></span>
       </a>
