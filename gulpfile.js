@@ -32,7 +32,6 @@ var lessCompiler = require('less');
 var paths = {
   assetPath: 'app/assets',
 
-  scriptIn: ['app/assets/js/main.js'],
   scriptOut: 'target/gulp/js',
 
   assetsOut: 'target/gulp',
@@ -46,11 +45,13 @@ var paths = {
   ]
 };
 
-var browserifyOptions = {
-  entries: 'main.js',
-  basedir: 'app/assets/js',
-  debug: true, // confusingly, this enables sourcemaps
-  transform: [babelify] // Transforms ES6 + JSX into normal JS
+var browserifyOptions = function (entries) {
+  return {
+    entries: entries,
+    basedir: 'app/assets/js',
+    debug: true, // confusingly, this enables sourcemaps
+    transform: [babelify] // Transforms ES6 + JSX into normal JS
+  }
 };
 
 var PRODUCTION = (process.env.PRODUCTION !== 'false');
@@ -62,13 +63,13 @@ if (PRODUCTION) {
 
 // Function for running Browserify on JS, since
 // we reuse it a couple of times.
-var bundle = function (browserify) {
+var bundle = function (browserify, outputFile) {
   browserify.bundle()
     .on('error', function (e) {
       gutil.log(gutil.colors.red(e.toString()));
     })
     .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, 'app', 'assets', 'js')))
-    .pipe(source('bundle.js'))
+    .pipe(source(outputFile))
     .pipe(buffer())
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(replace('$$BUILDTIME$$', (new Date()).toString()))
@@ -81,22 +82,32 @@ var browserifyFlags = function(b) {
   b.exclude('jquery');
   b.transform({global:true}, browserifyShim);
   return b;
-}
+};
+
+var SCRIPTS = {
+  // Mapping from bundle name to entry point
+  'bundle.js': 'main.js',
+  'service-worker.js': 'service-worker-main.js'
+};
 
 gulp.task('scripts', [], function () {
-  var b = browserifyFlags(browserify(browserifyOptions));
-  return bundle(b);
+  return _.map(SCRIPTS, function(entries, output) {
+    var b = browserifyFlags(browserify(browserifyOptions(entries)));
+    return bundle(b, output);
+  });
 });
 
 // Recompile scripts on changes. Watchify is more efficient than
 // grunt.watch as it knows how to do incremental rebuilds.
 gulp.task('watch-scripts', [], function () {
-  var bw = watchify(browserifyFlags(browserify(_.assign({}, watchify.args, browserifyOptions))));
-  bw.on('update', function () {
-    bundle(bw);
+  return _.map(SCRIPTS, function(entries, output) {
+    var bw = watchify(browserifyFlags(browserify(_.assign({}, watchify.args, browserifyOptions(entries)))));
+    bw.on('update', function () {
+      bundle(bw, output);
+    });
+    bw.on('log', gutil.log);
+    return bundle(bw, output);
   });
-  bw.on('log', gutil.log);
-  return bundle(bw);
 });
 
 /**

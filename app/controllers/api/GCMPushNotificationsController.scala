@@ -28,7 +28,7 @@ class GCMPushNotificationsController @Inject()(
     }.get
   }
 
-  def fetchPushNotifications = RequiredUserAction { request =>
+  def fetchPushNotifications = APIAction { request =>
     request.body.asJson.map { json =>
       val endpoint = (json \ "endpoint").as[String]
       val token = endpoint.split("/").last
