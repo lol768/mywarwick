@@ -36,6 +36,7 @@ class ActivityCreationDaoImpl @Inject()(
         `type` = activity.`type`,
         title = activity.title,
         text = activity.text,
+        url = activity.url,
         replacedBy = None,
         generatedAt = activity.generatedAt.getOrElse(DateTime.now),
         createdAt = DateTime.now,

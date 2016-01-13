@@ -7,9 +7,7 @@ import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject}
 import models._
-import oracle.net.aso.e
 import org.joda.time.DateTime
-import play.api.db
 import services.messaging.Output.Mobile
 import system.DatabaseDialect
 import warwick.anorm.converters.ColumnConversions._
@@ -40,13 +38,14 @@ class ActivityDaoImpl @Inject()(
     val id = UUID.randomUUID().toString
     val now = new DateTime()
 
-    SQL("INSERT INTO ACTIVITY (id, provider_id, type, title, text, generated_at, created_at, should_notify) VALUES ({id}, {providerId}, {type}, {title}, {text}, {generatedAt}, {createdAt}, {shouldNotify})")
+    SQL("INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, generated_at, created_at, should_notify) VALUES ({id}, {providerId}, {type}, {title}, {text}, {url}, {generatedAt}, {createdAt}, {shouldNotify})")
       .on(
         'id -> id,
         'providerId -> providerId,
         'type -> `type`,
         'title -> title,
         'text -> text,
+        'url -> url,
         'generatedAt -> generatedAt.getOrElse(now),
         'createdAt -> now,
         'shouldNotify -> shouldNotify
@@ -134,12 +133,13 @@ class ActivityDaoImpl @Inject()(
       get[String]("TYPE") ~
       get[String]("TITLE") ~
       get[String]("TEXT") ~
+      get[Option[String]]("URL") ~
       get[Option[String]]("REPLACED_BY_ID") ~
       get[DateTime]("GENERATED_AT") ~
       get[DateTime]("CREATED_AT") ~
       get[Boolean]("SHOULD_NOTIFY") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify =>
-        Activity(id, providerId, activityType, title, text, replacedById, generatedAt, createdAt, shouldNotify)
+      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify =>
+        Activity(id, providerId, activityType, title, text, url, replacedById, generatedAt, createdAt, shouldNotify)
     }
 
   private lazy val tagParser: RowParser[Option[ActivityTag]] =
