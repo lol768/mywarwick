@@ -34,7 +34,7 @@ trait MessagingService {
 
   def processNow(message: MessageSend.Light): Future[ProcessingResult]
 
-  def queueStatus: Seq[QueueStatus]
+  def getQueueStatus(): Seq[QueueStatus]
 }
 
 class MessagingServiceImpl @Inject()(
@@ -113,8 +113,10 @@ class MessagingServiceImpl @Inject()(
     }
   }
 
-  override def queueStatus: Seq[QueueStatus] =
+  override def getQueueStatus(): Seq[QueueStatus] = {
+    System.out.println("getQueueStatus invoked")
     db.withConnection(implicit c => messagingDao.getQueueStatus())
+  }
 }
 
 

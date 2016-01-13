@@ -2,23 +2,24 @@ package controllers
 
 import javax.inject.Inject
 
-import models.MessageState.{Success, Available}
-import models.{MessageState, QueueStatus, DateFormats}
+import models.MessageState.{Available, Success}
+import models.{DateFormats, QueueStatus}
 import org.joda.time.DateTime
 import play.api.inject.ApplicationLifecycle
 import play.api.libs.json.Json
 import play.api.mvc._
-import services.messaging.MessagingService
-import services.{ClusterStateService, SecurityService}
+import services.{ClusterStateService, HealthCheckService, SecurityService}
 
 import scala.concurrent.Future
 
-class ServiceCheckController @Inject() (
+class ServiceCheckController @Inject()(
   cluster: ClusterStateService,
   security: SecurityService,
   life: ApplicationLifecycle,
-  messagingService: MessagingService
+  healthCheckService: HealthCheckService
 ) extends Controller {
+
+  import healthCheckService._
 
   var stopping = false
   life.addStopHook(() => {
@@ -39,7 +40,6 @@ class ServiceCheckController @Inject() (
     val state = cluster.state
     val members = state.members
     val unreachable = state.unreachable
-    val messagingQueueStatus = messagingService.queueStatus
     val messagesWaiting = messagingQueueStatus.filter(_.state == Available).map(_.count).sum
 
     Ok(obj(
@@ -56,7 +56,7 @@ class ServiceCheckController @Inject() (
               s"${output}_queue_${status.dbValue}=$count".toLowerCase
           },
           "message" -> s"$messagesWaiting messages in queue",
-          "testedAt" -> new DateTime
+          "testedAt" -> healthCheckLastRunAt
         ),
         obj(
           "name" -> "cluster-reachable",
