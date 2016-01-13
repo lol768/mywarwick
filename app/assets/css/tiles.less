@@ -41,7 +41,11 @@
   margin-bottom: 10px;
   overflow: hidden;
 
-  &.tile--canZoom{
+  &.large, &.tall {
+    min-height: 260px;
+  }
+
+  &.tile--canZoom {
     cursor: pointer;
   }
 
@@ -68,11 +72,26 @@
   }
 }
 
-.tile--normal .tile--text-btm {
-  .tile__item {
-    position: absolute;
-    left: 10px;
-    bottom: 10px;
+.tile--normal {
+  .agenda {
+    .list-header {
+      padding: 0px 4px;
+      border: none;
+      margin-bottom: -2px;
+      line-height: 1.4em;
+      font-weight: bold;
+    }
+    .list-group {
+      margin-bottom: 6px;
+    }
+  }
+
+  &.tile--text-btm {
+    .tile__item {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+    }
   }
 }
 

@@ -28,7 +28,8 @@ export default class Tile extends ReactComponent {
     let backgroundColor = props.backgroundColor ? props.backgroundColor : DEFAULT_TILE_COLOR;
     let color = props.color ? props.color : DEFAULT_TEXT_COLOR;
 
-    let sizeClass = sizeClasses[props.size || props.defaultSize];
+    let size = props.size || props.defaultSize;
+    let sizeClass = sizeClasses[size];
     let outerClassName = classNames({
       'tile--normal': !props.zoomed,
       [sizeClass]: !props.zoomed,
@@ -38,7 +39,7 @@ export default class Tile extends ReactComponent {
 
     return (
       <div className={outerClassName}>
-        <article className={classNames('tile', props.className)}
+        <article className={classNames('tile', props.tileType, size)}
                  style={{backgroundColor: backgroundColor, color: color}}
                  onClick={props.onClick}
                  ref="tile">
@@ -50,7 +51,7 @@ export default class Tile extends ReactComponent {
               </h1>
               { props.zoomed ?
                 <i className="fa fa-fw fa-lg fa-times tile__dismiss" onClick={this.props.onDismiss}></i>
-                : props.canZoom ? <i className="fa fa-fw fa-lg fa-expand tile__expand" ></i> : null }
+                : props.canZoom ? <i className="fa fa-fw fa-lg fa-expand tile__expand"></i> : null }
             </header>
             <div className="tile__body">
               {props.children}
