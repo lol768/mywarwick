@@ -13,28 +13,12 @@ import scala.concurrent.Future
 
 class APNSOutputService @Inject()(
   @NamedDatabase("default") db: Database,
-  pushRegistrationDao: PushRegistrationDao,
-  configuration: Configuration
+  apnsProvider: APNSProvider,
+  pushRegistrationDao: PushRegistrationDao
 ) extends OutputService {
 
   import system.ThreadPools.mobile
-
-  val certFile = configuration.getString("start.apns.cert.file")
-    .getOrElse(throw new IllegalStateException("Missing APNs certificate file - set start.apns.cert.file"))
-
-  val certPassword = configuration.getString("start.apns.cert.password")
-    .getOrElse(throw new IllegalStateException("Missing APNs certificate password - set start.apns.cert.password"))
-
-  val isProductionDestination = configuration.getBoolean("start.apns.production").getOrElse(false)
-
-  val apns = {
-    val builder = APNS.newService().withCert(certFile, certPassword)
-
-    if (isProductionDestination)
-      builder.withProductionDestination().build()
-    else
-      builder.withSandboxDestination().build()
-  }
+  import apnsProvider.apns
 
   override def send(message: MessageSend.Heavy): Future[ProcessingResult] = Future {
     import message._
