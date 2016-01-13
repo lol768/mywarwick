@@ -2,11 +2,13 @@ package controllers
 
 import javax.inject.Inject
 
-import models.DateFormats
+import models.MessageState.{Success, Available}
+import models.{MessageState, QueueStatus, DateFormats}
 import org.joda.time.DateTime
 import play.api.inject.ApplicationLifecycle
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.Json
 import play.api.mvc._
+import services.messaging.MessagingService
 import services.{ClusterStateService, SecurityService}
 
 import scala.concurrent.Future
@@ -14,7 +16,8 @@ import scala.concurrent.Future
 class ServiceCheckController @Inject() (
   cluster: ClusterStateService,
   security: SecurityService,
-  life: ApplicationLifecycle
+  life: ApplicationLifecycle,
+  messagingService: MessagingService
 ) extends Controller {
 
   var stopping = false
@@ -31,13 +34,30 @@ class ServiceCheckController @Inject() (
   }
 
   def healthcheck = Action {
-    import Json._
     import DateFormats.isoDateWrites
+    import Json._
     val state = cluster.state
     val members = state.members
     val unreachable = state.unreachable
+    val messagingQueueStatus = messagingService.queueStatus
+    val messagesWaiting = messagingQueueStatus.filter(_.state == Available).map(_.count).sum
+
     Ok(obj(
       "data" -> arr(
+        obj(
+          "name" -> "messaging-queue",
+          "status" -> (
+            if (messagesWaiting < 100) "okay"
+            else if (messagesWaiting < 300) "warning"
+            else "critical"
+          ),
+          "perfData" -> messagingQueueStatus.filterNot(_.state == Success).map {
+            case QueueStatus(status, output, count) =>
+              s"${output}_queue_${status.dbValue}=$count".toLowerCase
+          },
+          "message" -> s"$messagesWaiting messages in queue",
+          "testedAt" -> new DateTime
+        ),
         obj(
           "name" -> "cluster-reachable",
           "status" -> (

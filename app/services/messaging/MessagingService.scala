@@ -5,7 +5,7 @@ import javax.inject.{Inject, Named}
 
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.ImplementedBy
-import models.Activity
+import models._
 import play.api.db.{Database, NamedDatabase}
 import services.ActivityService
 import services.dao.MessagingDao
@@ -33,6 +33,8 @@ trait MessagingService {
   def failure(message: MessageSend.Light): Unit
 
   def processNow(message: MessageSend.Light): Future[ProcessingResult]
+
+  def queueStatus: Seq[QueueStatus]
 }
 
 class MessagingServiceImpl @Inject()(
@@ -77,11 +79,11 @@ class MessagingServiceImpl @Inject()(
     }
   }
 
-  def success(message: MessageSend.Light): Unit = complete("S", message)
+  def success(message: MessageSend.Light): Unit = complete(MessageState.Success, message)
 
-  def failure(message: MessageSend.Light): Unit = complete("F", message)
+  def failure(message: MessageSend.Light): Unit = complete(MessageState.Failure, message)
 
-  private def complete(newState: String, message: MessageSend.Light): Unit = {
+  private def complete(newState: MessageState, message: MessageSend.Light): Unit = {
     db.withTransaction { implicit c =>
       messagingDao.complete(message.id, newState)
     }
@@ -110,6 +112,9 @@ class MessagingServiceImpl @Inject()(
       Future.successful(ProcessingResult(success = false, s"Activity ${message.activity} not found"))
     }
   }
+
+  override def queueStatus: Seq[QueueStatus] =
+    db.withConnection(implicit c => messagingDao.getQueueStatus())
 }
 
 

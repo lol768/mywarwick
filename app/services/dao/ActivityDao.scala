@@ -8,7 +8,7 @@ import anorm._
 import com.google.inject.{ImplementedBy, Inject}
 import models._
 import org.joda.time.DateTime
-import services.messaging.Output.Mobile
+import Output.Mobile
 import system.DatabaseDialect
 import warwick.anorm.converters.ColumnConversions._
 

@@ -3,6 +3,7 @@ package services.messaging
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.Inject
 import com.google.inject.name.Named
+import models.MessageSend
 
 import scala.concurrent.Future
 
