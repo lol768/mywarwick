@@ -113,10 +113,9 @@ class MessagingServiceImpl @Inject()(
     }
   }
 
-  override def getQueueStatus(): Seq[QueueStatus] = {
-    System.out.println("getQueueStatus invoked")
+  override def getQueueStatus(): Seq[QueueStatus] =
     db.withConnection(implicit c => messagingDao.getQueueStatus())
-  }
+
 }
 
 
