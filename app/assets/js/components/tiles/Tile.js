@@ -1,14 +1,8 @@
-import React from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import ReactComponent from 'react/lib/ReactComponent';
-import store from '../../store';
+
 import classNames from 'classnames';
 
-import { connect } from 'react-redux';
-
-import $ from 'jquery';
-
-import { fetchTilesContent } from '../../serverpipe'
 const DEFAULT_TILE_COLOR = '#8c6e96'; // Default ID7 theme colour
 const DEFAULT_TEXT_COLOR = 'white';
 
@@ -19,7 +13,35 @@ let sizeClasses = {
   tall: 'col-xs-12 col-sm-6'
 };
 
-export default class Tile extends ReactComponent {
+export default class Tile extends Component {
+
+  getContent() {
+    throw new TypeError("Must implement getContent");
+  }
+
+  canZoom() {
+    return false;
+  }
+
+  getZoomedContent() {
+    return this.getContent();
+  }
+
+  getBody() {
+    if (this.props.content) {
+      return this.props.zoomed ? this.getZoomedContent(this.props.content) : this.getContent(this.props.content);
+    } else if (this.props.errors) {
+      return (
+        <div>
+          <i className="fa fa-exclamation-triangle fa-lg"></i>
+          <br/>
+          {this.props.errors[0].message}
+        </div>
+      );
+    } else {
+      return <i className="fa fa-refresh fa-spin fa-lg"></i>;
+    }
+  }
 
   render() {
     let props = this.props;
@@ -30,19 +52,16 @@ export default class Tile extends ReactComponent {
 
     let size = props.size || props.defaultSize;
     let sizeClass = sizeClasses[size];
-    let outerClassName = classNames({
-      'tile--normal': !props.zoomed,
-      [sizeClass]: !props.zoomed,
+    let outerClassName = classNames(sizeClass, {
       'tile--zoomed': props.zoomed,
-      'tile--canZoom': !!props.canZoom
+      'tile--canZoom': props.canZoom,
+      'tile--text-btm': true
     });
 
     return (
       <div className={outerClassName}>
-        <article className={classNames('tile', props.tileType, size)}
-                 style={{backgroundColor: backgroundColor, color: color}}
-                 onClick={props.onClick}
-                 ref="tile">
+        <article className={classNames('tile', props.tileType, 'tile--' + size)}
+                 style={{backgroundColor: backgroundColor, color: color}}>
           <div className="tile__wrap">
             <header className="tile__title">
               <h1>
@@ -50,11 +69,12 @@ export default class Tile extends ReactComponent {
                 {props.title}
               </h1>
               { props.zoomed ?
-                <i className="fa fa-fw fa-lg fa-times tile__dismiss" onClick={this.props.onDismiss}></i>
-                : props.canZoom ? <i className="fa fa-fw fa-lg fa-expand tile__expand"></i> : null }
+                <i className="fa fa-fw fa-lg fa-times tile__dismiss" onClick={props.onDismiss}></i>
+                : this.canZoom() ?
+                <i className="fa fa-fw fa-lg fa-expand tile__expand" onClick={props.onClick}></i> : null }
             </header>
             <div className="tile__body">
-              {props.children}
+              {this.getBody()}
             </div>
           </div>
         </article>
