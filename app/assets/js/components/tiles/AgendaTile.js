@@ -11,11 +11,7 @@ export default class AgendaTile extends Tile {
     let maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : 3;
     let itemsToDisplay = this.props.zoomed ? this.props.content.items : this.props.content.items.slice(0, maxItemsToDisplay);
 
-    let events = itemsToDisplay.map((event) => {
-      return (
-        <AgendaTileItem {...event}/>
-      );
-    });
+    let events = itemsToDisplay.map(event => <AgendaTileItem {...event}/>);
 
     return (
       <GroupedList orderDescending={true} groupBy={groupItemsByDate}>

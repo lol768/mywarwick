@@ -43,6 +43,16 @@ export default class Tile extends Component {
     }
   }
 
+  componentWillEnter(callback) {
+    if ('componentWillEnter' in this.props)
+      this.props.componentWillEnter(callback);
+  }
+
+  componentWillLeave(callback) {
+    if ('componentWillLeave' in this.props)
+      this.props.componentWillLeave(callback);
+  }
+
   render() {
     let props = this.props;
 
@@ -60,8 +70,9 @@ export default class Tile extends Component {
 
     return (
       <div className={outerClassName}>
-        <article className={classNames('tile', props.tileType, 'tile--' + size)}
-                 style={{backgroundColor: backgroundColor, color: color}}>
+        <article className={classNames('tile', 'tile--' + props.tileType, 'tile--' + size)}
+                 style={{backgroundColor: backgroundColor, color: color}}
+                 ref="tile">
           <div className="tile__wrap">
             <header className="tile__title">
               <h1>
@@ -71,7 +82,7 @@ export default class Tile extends Component {
               { props.zoomed ?
                 <i className="fa fa-fw fa-lg fa-times tile__dismiss" onClick={props.onDismiss}></i>
                 : this.canZoom() ?
-                <i className="fa fa-fw fa-lg fa-expand tile__expand" onClick={props.onClick}></i> : null }
+                <i className="fa fa-fw fa-lg fa-expand tile__expand" onClick={props.onExpand}></i> : null }
             </header>
             <div className="tile__body">
               {this.getBody()}
