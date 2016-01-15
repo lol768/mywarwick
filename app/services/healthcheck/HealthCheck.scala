@@ -5,6 +5,8 @@ import org.joda.time.DateTime
 import play.api.libs.json.{JsObject, Json}
 import services.healthcheck.HealthCheckStatus.{Critical, Okay, Warn}
 
+import scala.annotation.StaticAnnotation
+
 case class HealthCheckStatus(string: String)
 
 case class PerfData[T](name: String, value: T, warn: Option[T] = None, critical: Option[T] = None, min: Option[T] = None, max: Option[T] = None) {
@@ -29,14 +31,16 @@ abstract class HealthCheck[T](implicit num: Numeric[T]) {
   def name: String
 
   def status: HealthCheckStatus = {
-    var sorted = Seq(value, warn, critical).sorted
+    val higherIsBetter = num.lt(critical, warn)
 
-    if (num.lt(critical, warn)) sorted = sorted.reverse
-
-    sorted.indexOf(value) match {
-      case 0 => Okay
-      case 1 => Warn
-      case 2 => Critical
+    if (higherIsBetter) {
+      if (num.gt(value, warn)) Okay
+      else if (num.gt(value, critical)) Warn
+      else Critical
+    } else {
+      if (num.lt(value, warn)) Okay
+      else if (num.lt(value, critical)) Warn
+      else Critical
     }
   }
 
