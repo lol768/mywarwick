@@ -37,7 +37,7 @@ class MessagingDaoImpl extends MessagingDao {
     }
 
   override def getQueueStatus()(implicit c: Connection): Seq[QueueStatus] =
-    SQL("SELECT OUTPUT, STATE, COUNT(*) AS COUNT FROM MESSAGE_SEND GROUP BY OUTPUT, STATE")
+    SQL("SELECT OUTPUT, STATE, COUNT(*) AS COUNT FROM MESSAGE_SEND WHERE (STATE = 'F' AND UPDATED_AT > SYSDATE - 1) OR STATE != 'F' GROUP BY OUTPUT, STATE")
       .as(queueParser.*)
 
   override def save(activity: Activity, usercode: Usercode, output: Output)(implicit c: Connection): Unit = {
