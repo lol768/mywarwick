@@ -73,18 +73,6 @@
 }
 
 .tile--normal {
-  .agenda {
-    .list-header {
-      padding: 0px 4px;
-      border: none;
-      margin-bottom: -2px;
-      line-height: 1.4em;
-      font-weight: bold;
-    }
-    .list-group {
-      margin-bottom: 6px;
-    }
-  }
 
   &.tile--text-btm {
     .tile__item {
@@ -159,4 +147,21 @@
 .text-tile-leave-active {
   bottom: -80px !important;
   transition: bottom 500ms ease-in;
+}
+
+// AGENDA
+.agenda {
+  .list-header {
+    padding: 0px 4px;
+    border: none;
+    line-height: 1.4em;
+    font-weight: bold;
+  }
+  .list-group {
+    margin-bottom: 6px;
+  }
+}
+
+.agenda-item__date {
+  margin-bottom: -0.5em;
 }

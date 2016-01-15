@@ -204,13 +204,9 @@ export class count extends ReactComponent {
 }
 
 let AgendaItem = (props) => (
-  <div className={classNames("agenda-item", "row")}>
-    <div className="col-sm-3">
-      {formatDate(props.date)}
-    </div>
-    <div className="col-sm-9">
-      {props.title}
-    </div>
+  <div className={classNames("agenda-item")}>
+    <div className="agenda-item__date">{formatDate(props.date)}</div>
+    <div className="agenda-item__title">{props.title}</div>
   </div>
 );
 
