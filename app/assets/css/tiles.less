@@ -94,9 +94,6 @@
 }
 
 .tile--zoomed {
-  .tile__wrap {
-    .container-fluid;
-  }
   .tile__body {
     display: block;
     .row;
@@ -117,9 +114,12 @@
 
 .tile__dismiss, .tile__expand {
   position: absolute;
-  top: 12px;
-  right: 10px;
+  display: block;
+  top: 0;
+  right: 0;
+  padding: 10px 12px;
   cursor: pointer;
+  font-size: 16px;
 }
 
 .list-tile-item {

@@ -5,11 +5,13 @@ import GroupedList from '../ui/GroupedList';
 import * as groupItemsByDate from '../../GroupItemsByDate';
 import Tile from './Tile';
 
+import _ from 'lodash';
+
 export default class AgendaTile extends Tile {
 
-  getContent() {
+  getBody(content) {
     let maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : 3;
-    let itemsToDisplay = this.props.zoomed ? this.props.content.items : this.props.content.items.slice(0, maxItemsToDisplay);
+    let itemsToDisplay = this.isZoomed() ? content.items : _.take(content.items, maxItemsToDisplay);
 
     let events = itemsToDisplay.map(event => <AgendaTileItem {...event}/>);
 

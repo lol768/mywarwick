@@ -15,32 +15,20 @@ let sizeClasses = {
 
 export default class Tile extends Component {
 
-  getContent() {
-    throw new TypeError("Must implement getContent");
+  getBody(content) {
+    throw new TypeError("Must implement getBody");
   }
 
   canZoom() {
     return false;
   }
 
-  getZoomedContent() {
-    return this.getContent();
+  isZoomed() {
+    return this.props.zoomed;
   }
 
-  getBody() {
-    if (this.props.content) {
-      return this.props.zoomed ? this.getZoomedContent(this.props.content) : this.getContent(this.props.content);
-    } else if (this.props.errors) {
-      return (
-        <div>
-          <i className="fa fa-exclamation-triangle fa-lg"></i>
-          <br/>
-          {this.props.errors[0].message}
-        </div>
-      );
-    } else {
-      return <i className="fa fa-refresh fa-spin fa-lg"></i>;
-    }
+  getZoomedBody(content) {
+    return this.getBody(content);
   }
 
   componentWillEnter(callback) {
@@ -64,7 +52,7 @@ export default class Tile extends Component {
     let sizeClass = sizeClasses[size];
     let outerClassName = classNames(sizeClass, {
       'tile--zoomed': props.zoomed,
-      'tile--canZoom': props.canZoom,
+      'tile--canZoom': this.canZoom(),
       'tile--text-btm': true
     });
 
@@ -79,18 +67,34 @@ export default class Tile extends Component {
                 {icon}
                 {props.title}
               </h1>
-              { props.zoomed ?
-                <i className="fa fa-fw fa-lg fa-times tile__dismiss" onClick={props.onDismiss}></i>
+              { this.isZoomed() ?
+                <i className="fa fa-times tile__dismiss" onClick={props.onDismiss}></i>
                 : this.canZoom() ?
-                <i className="fa fa-fw fa-lg fa-expand tile__expand" onClick={props.onExpand}></i> : null }
+                <i className="fa fa-expand tile__expand" onClick={props.onExpand}></i> : null }
             </header>
             <div className="tile__body">
-              {this.getBody()}
+              {this.getOuterBody()}
             </div>
           </div>
         </article>
       </div>
     );
+  }
+
+  getOuterBody() {
+    if (this.props.content) {
+      return this.isZoomed() ? this.getZoomedBody(this.props.content) : this.getBody(this.props.content);
+    } else if (this.props.errors) {
+      return (
+        <div>
+          <i className="fa fa-exclamation-triangle fa-lg"></i>
+          <br/>
+          {this.props.errors[0].message}
+        </div>
+      );
+    } else {
+      return <i className="fa fa-refresh fa-spin fa-lg"></i>;
+    }
   }
 
 }

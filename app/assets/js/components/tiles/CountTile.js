@@ -4,19 +4,19 @@ import Tile from './Tile';
 
 export default class CountView extends Tile {
 
-  getContent() {
+  getBody(content) {
     return (
       <div className="tile__item">
-        <span className="tile__callout">{this.props.content.count || (this.props.content.items.length)}</span>
-        <span className="tile__text">{this.props.content.word}</span>
+        <span className="tile__callout">{content.count || content.items.length}</span>
+        <span className="tile__text">{content.word}</span>
       </div>
     );
   }
 
-  getZoomedContent() {
+  getZoomedBody(content) {
     return (
       <ul>
-        {this.props.content.items.map((item) => <ListTileItem {...item} />)}
+        {content.items.map(item => <ListTileItem {...item} />)}
       </ul>
     );
   }

@@ -67,18 +67,17 @@ class MeView extends ReactComponent {
       return null;
     }
 
-    var id = props.id;
+    let id = props.id;
     let content = this.props.tileContent[id];
     let errors = this.props.tileErrors[id];
-    let canZoom = true; // content && content.items.length > 1;
+    let ref = zoomed ? id + '-zoomed' : id;
 
     let config = Object.assign({}, props, {
       zoomed: zoomed,
-      canZoom: canZoom,
       content: content,
       errors: errors,
-      key: zoomed ? id + '-zoomed' : id,
-      ref: zoomed ? id + '-zoomed' : id,
+      key: ref,
+      ref: ref,
       originalRef: id
     });
 

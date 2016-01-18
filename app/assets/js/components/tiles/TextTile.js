@@ -49,22 +49,21 @@ export default class TextTile extends Tile {
     });
   }
 
-  getContent() {
-    let itemsToDisplay = this.props.zoomed ? this.props.content.items : [this.props.content.items[this.state.itemIndex]];
+  getBody(content) {
+    let itemsToDisplay = this.isZoomed() ? content.items : [content.items[this.state.itemIndex]];
 
     return (
       <ReactCSSTransitionGroup transitionName="text-tile"
                                transitionEnterTimeout={1000}
                                transitionLeaveTimeout={1000}>
-        {itemsToDisplay.map((item) => {
-
+        {itemsToDisplay.map(item => {
           let tileItem = <div className="tile__item" key={item.key}>
             <span className="tile__callout">{item.callout}</span>
             <span className="tile__text">{item.text}</span>
           </div>;
 
-          return (item.href) ?
-            <a href={item.href} target="_blank" onClick={function(e){e.stopPropagation();}}>{tileItem}</a>
+          return item.href ?
+            <a href={item.href} target="_blank" onClick={e => e.stopPropagation()}>{tileItem}</a>
             : tileItem;
         })}
       </ReactCSSTransitionGroup>
