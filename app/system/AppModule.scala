@@ -18,6 +18,9 @@ class AppModule extends AbstractModule with AkkaGuiceSupport {
       .annotatedWith(Names.named("mobile"))
       .to(classOf[MobileOutputService])
 
+    // Start this up straight away so we always manage the cluster.
+    bind(classOf[ClusterLifecycle]).asEagerSingleton()
+
     bindHealthChecks()
   }
 

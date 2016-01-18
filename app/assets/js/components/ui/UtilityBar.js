@@ -16,7 +16,7 @@ class UtilityBar extends ReactComponent {
 
   attachAccountPopover() {
     var element = ReactDOM.findDOMNode(this.refs.accountLink);
-    $(element).accountPopover();
+    $(element).accountPopover({logoutlink: window.SSO.LOGOUT_URL});
   }
 
   render() {
