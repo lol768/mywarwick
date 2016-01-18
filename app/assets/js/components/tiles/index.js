@@ -4,9 +4,9 @@ import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 import Tile from './Tile';
 
-import formatDate from '../../dateFormatter';
+import { formatDate, localMoment } from '../../dateFormatter';
 import classNames from 'classnames';
-import GroupedList from '../ui/GroupedList';
+import GroupedAgendaList from '../ui/GroupedAgendaList';
 import * as groupItemsByDate from '../../GroupItemsByDate';
 import _ from 'lodash';
 
@@ -24,9 +24,9 @@ export class agenda extends ReactComponent {
       });
 
       return (
-        <GroupedList orderDescending={true} groupBy={groupItemsByDate}>
-          {events}
-        </GroupedList>
+        <GroupedAgendaList orderDescending={true}>
+            {events}
+        </GroupedAgendaList>
       )
     } else if (this.props.errors) {
       return <em>error: {this.props.errors[0].message}</em>;
@@ -204,10 +204,10 @@ export class count extends ReactComponent {
 }
 
 let AgendaItem = (props) => (
-  <div className={classNames("agenda-item")}>
-    <div className="agenda-item__date">{formatDate(props.date)}</div>
-    <div className="agenda-item__title">{props.title}</div>
-  </div>
+  <li className={classNames("agenda-item")}>
+    <span className="agenda-item__title">{props.title}</span>
+    <span className="agenda-item__date">{localMoment(props.date).format("HH:mm")}</span>
+  </li>
 );
 
 let ListTileItem = (props) => (

@@ -42,7 +42,7 @@
   overflow: hidden;
 
   &.large, &.tall {
-    min-height: 260px;
+    height: 260px;
   }
 
   &.tile--canZoom {
@@ -151,17 +151,31 @@
 
 // AGENDA
 .agenda {
+  .tile__body {
+    height: 222px;
+    overflow-y: auto;
+  }
   .list-header {
     padding: 0px 4px;
     border: none;
-    line-height: 1.4em;
-    font-weight: bold;
+    color: white;
+    font-weight: 100;
+    background-color: transparent;
   }
   .list-group {
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
+}
+
+.agenda-item {
+  background-color: #dcdcdc;
+  color: black;
+  padding: 0px 6px;
+  border-radius: 6px;
+  margin-bottom: 2px;
 }
 
 .agenda-item__date {
   margin-bottom: -0.5em;
+  float: right;
 }
