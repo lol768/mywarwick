@@ -12,6 +12,7 @@ import LinkBlock from './LinkBlock';
 import Link from './Link';
 import NewsView from '../views/NewsView';
 import MastheadSearch from './MastheadSearch';
+import PermissionRequest from './PermissionRequest';
 
 import { navigate } from '../../navigate';
 
@@ -63,7 +64,9 @@ class ID7Layout extends ReactComponent {
                           </div>
                           { isDesktop ?
                             <div className="masthead-popover-icons">
-                              <MastheadIcon icon="inbox" badge={this.props.notificationsCount} key="notifications"
+                              <MastheadIcon icon="inbox"
+                                            badge={this.props.notificationsCount}
+                                            key="notifications"
                                             popoverTitle="Notifications"
                                             onMore={() => this.props.dispatch(navigate('/notifications'))}>
                                 <NotificationsView grouped={false}/>
@@ -72,11 +75,6 @@ class ID7Layout extends ReactComponent {
                                             popoverTitle="Activity"
                                             onMore={() => this.props.dispatch(navigate('/activity'))}>
                                 <ActivityView grouped={false}/>
-                              </MastheadIcon>
-                              <MastheadIcon icon="cogs" key="settings"
-                                            popoverTitle="Settings"
-                                            onMore={() => this.props.dispatch(navigate('/settings'))}>
-                                <SettingsView />
                               </MastheadIcon>
                               <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
                                 <LinkBlock columns="1">
@@ -105,6 +103,7 @@ class ID7Layout extends ReactComponent {
 
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
+              { Notification.permission === "default" ? <PermissionRequest /> : null }
               <div className="id7-horizontal-divider">
                 <svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" version="1.1" width="1130" height="40"
                      viewBox="0, 0, 1130, 40">
