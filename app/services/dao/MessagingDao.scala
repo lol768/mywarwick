@@ -3,11 +3,11 @@ package services.dao
 import java.sql.Connection
 import java.util.UUID
 
+import anorm.SqlParser._
 import anorm._
 import com.google.inject.ImplementedBy
-import models.Activity
+import models._
 import org.joda.time.DateTime
-import services.messaging.{MessageSend, Output}
 import warwick.anorm.converters.ColumnConversions._
 import warwick.sso.Usercode
 
@@ -16,15 +16,29 @@ trait MessagingDao {
 
   def save(activity: Activity, usercode: Usercode, output: Output)(implicit c: Connection): Unit
 
-  def complete(messageId: String, state: String)(implicit c: Connection): Unit
+  def complete(messageId: String, state: MessageState)(implicit c: Connection): Unit
 
   def deleteMessagesSuccessfullySentBefore(date: DateTime)(implicit c: Connection): Int
 
   def lockRecord()(implicit c: Connection): Option[MessageSend.Light]
 
+  def getQueueStatus()(implicit c: Connection): Seq[QueueStatus]
+
 }
 
 class MessagingDaoImpl extends MessagingDao {
+
+  val queueParser: RowParser[QueueStatus] =
+    get[String]("OUTPUT") ~
+      get[String]("STATE") ~
+      get[Int]("COUNT") map {
+      case (output ~ state ~ count) =>
+        QueueStatus(MessageState.parse(state), Output.parse(output), count)
+    }
+
+  override def getQueueStatus()(implicit c: Connection): Seq[QueueStatus] =
+    SQL("SELECT OUTPUT, STATE, COUNT(*) AS COUNT FROM MESSAGE_SEND WHERE (STATE = 'F' AND UPDATED_AT > SYSDATE - 1) OR STATE != 'F' GROUP BY OUTPUT, STATE")
+      .as(queueParser.*)
 
   override def save(activity: Activity, usercode: Usercode, output: Output)(implicit c: Connection): Unit = {
     SQL("INSERT INTO MESSAGE_SEND (ID, ACTIVITY_ID, USERCODE, OUTPUT, UPDATED_AT) VALUES ({id}, {activityId}, {usercode}, {output}, {updatedAt})")
@@ -38,11 +52,11 @@ class MessagingDaoImpl extends MessagingDao {
       .execute()
   }
 
-  override def complete(messageId: String, state: String)(implicit c: Connection): Unit = {
+  override def complete(messageId: String, state: MessageState)(implicit c: Connection): Unit = {
     SQL("UPDATE MESSAGE_SEND SET STATE = {state}, UPDATED_AT = {updatedAt} WHERE ID = {id}")
       .on(
         'id -> messageId,
-        'state -> state,
+        'state -> state.dbValue,
         'updatedAt -> DateTime.now
       )
       .execute()
@@ -51,7 +65,7 @@ class MessagingDaoImpl extends MessagingDao {
   override def deleteMessagesSuccessfullySentBefore(date: DateTime)(implicit c: Connection): Int = {
     SQL("DELETE FROM MESSAGE_SEND WHERE STATE = {state} AND UPDATED_AT < {date}")
       .on(
-        'state -> "S",
+        'state -> MessageState.Success.dbValue,
         'date -> date
       )
       .executeUpdate()
