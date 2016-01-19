@@ -72,15 +72,19 @@
 
 :not(.tile--zoomed) {
   .tile--agenda {
+    .tile__body {
+      height: 222px;
+      overflow-y: auto;
+    }
     .list-header {
       padding: 0px 4px;
       border: none;
-      margin-bottom: -2px;
-      line-height: 1.4em;
-      font-weight: bold;
+      color: white;
+      font-weight: 100;
+      background-color: transparent;
     }
     .list-group {
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
   }
 
@@ -157,4 +161,19 @@
 .text-tile-leave-active {
   bottom: -100% !important;
   transition: bottom 500ms ease-in;
+}
+
+// AGENDA
+.agenda-item {
+  background-color: #dcdcdc;
+  display: block;
+  color: black;
+  padding: 0px 6px;
+  border-radius: 6px;
+  margin-bottom: 2px;
+}
+
+.agenda-item__date {
+  margin-bottom: -0.5em;
+  float: right;
 }
