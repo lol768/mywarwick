@@ -30,6 +30,8 @@ var rename = require('gulp-rename');
 var insert = require('gulp-insert');
 var oghliner = require('oghliner');
 var filenames = require('gulp-filenames');
+var concat = require('gulp-concat');
+var es = require('event-stream');
 
 var lessCompiler = require('less');
 
@@ -90,8 +92,7 @@ var browserifyFlags = function (b) {
 
 var SCRIPTS = {
   // Mapping from bundle name to entry point
-  'bundle.js': 'main.js',
-  'service-worker.js': 'service-worker-main.js'
+  'bundle.js': 'main.js'
 };
 
 gulp.task('scripts', [], function () {
@@ -157,7 +158,7 @@ gulp.task('watch-styles', ['styles'], function () {
   return gulp.watch(paths.assetPath + '/css/**/*.less', ['styles']);
 });
 
-gulp.task('pre-offline-worker', ['scripts', 'styles'], function () {
+gulp.task('pre-service-worker', ['scripts', 'styles'], function () {
   return gulp.src([
       paths.assetsOut + '/**/*',
       '!' + paths.assetsOut + '/**/*.map', // don't cache source maps
@@ -168,25 +169,34 @@ gulp.task('pre-offline-worker', ['scripts', 'styles'], function () {
     .pipe(filenames('offline-cache'));
 });
 
-gulp.task('offline-worker', ['pre-offline-worker'], function () {
+gulp.task('service-worker', ['pre-service-worker'], function () {
   if (PRODUCTION) {
     return oghliner.offline({
         rootDir: paths.assetsOut,
-        fileGlobs: filenames.get('offline-cache'),
-        importScripts: ['/service-worker.js']
+        fileGlobs: filenames.get('offline-cache')
       })
       .then(function () {
-        return gulp.src(paths.assetsOut + '/offline-worker.js')
+        var offlineWorker = gulp.src(paths.assetsOut + '/offline-worker.js')
           .pipe(insert.transform(function (contents) {
-            return contents.replace(/^ {6}'.\/([a-z])/gm, function(str, group1) {
+            return contents.replace(/^ {6}'.\/([a-z])/gm, function (str, group1) {
               return "'./assets/" + group1;
             });
-          }))
+          }));
+
+        var pushWorker = browserifyFlags(browserify(browserifyOptions('push-worker.js'))).bundle()
+          .on('error', e => gutil.log(gutil.colors.red(e.toString())))
+          .pipe(source('push-worker.js'))
+          .pipe(buffer());
+
+        return es.merge(offlineWorker, pushWorker)
+          .pipe(concat('service-worker.js'))
           .pipe(uglify())
           .pipe(gulp.dest(paths.assetsOut));
       });
   } else {
-    return fs.writeFileSync(paths.assetsOut + '/offline-worker.js', '');
+    return gulp.src(paths.assetsOut + '/js/push-worker.js')
+      .pipe(rename('service-worker.js'))
+      .pipe(gulp.dest(paths.assetsOut));
   }
 });
 
@@ -228,7 +238,7 @@ gulp.task('manifest', ['scripts', 'styles'], function () {
 });
 
 // Shortcuts for building all asset types at once
-gulp.task('assets', ['scripts', 'styles', 'manifest', 'offline-worker']);
+gulp.task('assets', ['scripts', 'styles', 'manifest', 'service-worker']);
 gulp.task('watch-assets', ['watch-scripts', 'watch-styles']);
 gulp.task('wizard', ['watch-assets']);
 
