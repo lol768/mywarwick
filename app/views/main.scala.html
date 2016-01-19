@@ -1,5 +1,6 @@
 @import uk.ac.warwick.sso.client.core.LinkGenerator
-@(title: String)(content: Html)(implicit linkGenerator: LinkGenerator)
+@import warwick.sso.LoginContext
+@(title: String)(content: Html)(implicit linkGenerator: LinkGenerator, loginContext: LoginContext)
 <!DOCTYPE html>
 <html lang="en-GB" class="no-js" manifest="@routes.Assets.versioned("app.manifest")"> <!-- class="id7-non-branded" to remove Warwick branding -->
   <head>
@@ -45,7 +46,8 @@
     <script>
         window.SSO = {
           LOGIN_URL: '@Html(linkGenerator.getLoginUrl)',
-          LOGOUT_URL: '@Html(linkGenerator.getLogoutUrl)'
+          LOGOUT_URL: '@Html(linkGenerator.getLogoutUrl)',
+          isAuthenticated: loginContext.user.isDefined
         };
     </script>
     @*<script src="@routes.Assets.versioned("lib/id7/js/id7-bundle.js")"></script>*@

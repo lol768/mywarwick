@@ -76,8 +76,10 @@ class Application extends ReactComponent {
         { layoutClassName == 'mobile' ?
           <TabBar selectedItem={path} onSelectItem={path => dispatch(navigate(path))}>
             <TabBarItem title="Me" icon="user" path="/"/>
-            <TabBarItem title="Notifications" icon="inbox" path="/notifications" badge={notificationsCount}/>
-            <TabBarItem title="Activity" icon="dashboard" path="/activity" badge={activitiesCount}/>
+            <TabBarItem title="Notifications" icon="inbox" path="/notifications" badge={notificationsCount}
+                        isDisabled={ !window.SSO.isAuthenticated } />
+            <TabBarItem title="Activity" icon="dashboard" path="/activity" badge={activitiesCount}
+                        isDisabled={ !window.SSO.isAuthenticated } />
             <TabBarItem title="News" icon="mortar-board" path="/news"/>
             <TabBarItem title="Search" icon="search" path="/search"/>
           </TabBar>

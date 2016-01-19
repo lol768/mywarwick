@@ -1,5 +1,6 @@
 @import uk.ac.warwick.sso.client.core.LinkGenerator
-@()(implicit linkGenerator: LinkGenerator)
+@import warwick.sso.LoginContext
+@()(implicit linkGenerator: LinkGenerator, loginContext: LoginContext)
 
 @main("Start.Warwick") {
 
