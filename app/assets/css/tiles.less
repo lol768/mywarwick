@@ -18,7 +18,7 @@
   .tile {
     height: 100%;
     cursor: default;
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 }
 
@@ -41,14 +41,6 @@
   margin-bottom: 10px;
   overflow: hidden;
 
-  &.large, &.tall {
-    height: 260px;
-  }
-
-  &.tile--canZoom {
-    cursor: pointer;
-  }
-
   a {
     color: inherit;
     text-decoration: none;
@@ -59,6 +51,8 @@
   }
 
   > .tile__wrap > header {
+    margin: -10px -10px 0;
+    padding: 10px 10px 0;
     > h1 {
       color: inherit;
       border: 0;
@@ -72,7 +66,27 @@
   }
 }
 
-.tile--normal {
+.tile--large, .tile--tall {
+  min-height: 260px;
+}
+
+:not(.tile--zoomed) {
+  .tile--agenda {
+    .tile__body {
+      height: 222px;
+      overflow-y: auto;
+    }
+    .list-header {
+      padding: 0px 4px;
+      border: none;
+      color: white;
+      font-weight: 100;
+      background-color: transparent;
+    }
+    .list-group {
+      margin-bottom: 8px;
+    }
+  }
 
   &.tile--text-btm {
     .tile__item {
@@ -84,9 +98,6 @@
 }
 
 .tile--zoomed {
-  .tile__wrap {
-    .container-fluid;
-  }
   .tile__body {
     display: block;
     .row;
@@ -107,9 +118,12 @@
 
 .tile__dismiss, .tile__expand {
   position: absolute;
-  top: 12px;
-  right: 10px;
+  display: block;
+  top: 0;
+  right: 0;
+  padding: 10px 12px;
   cursor: pointer;
+  font-size: 16px;
 }
 
 .list-tile-item {
@@ -131,13 +145,13 @@
 }
 
 .text-tile-enter {
-  bottom: -80px !important;
+  bottom: -100% !important;
 }
 
 .text-tile-enter-active {
   bottom: 10px !important;
   transition: bottom 500ms ease-out;
-  transition-delay: 500ms;
+  transition-delay: 400ms;
 }
 
 .text-tile-leave {
@@ -145,30 +159,14 @@
 }
 
 .text-tile-leave-active {
-  bottom: -80px !important;
+  bottom: -100% !important;
   transition: bottom 500ms ease-in;
 }
 
 // AGENDA
-.agenda {
-  .tile__body {
-    height: 222px;
-    overflow-y: auto;
-  }
-  .list-header {
-    padding: 0px 4px;
-    border: none;
-    color: white;
-    font-weight: 100;
-    background-color: transparent;
-  }
-  .list-group {
-    margin-bottom: 8px;
-  }
-}
-
 .agenda-item {
   background-color: #dcdcdc;
+  display: block;
   color: black;
   padding: 0px 6px;
   border-radius: 6px;

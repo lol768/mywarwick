@@ -8,16 +8,25 @@ import com.google.common.base.Charsets
 import com.google.common.io.CharStreams
 import com.google.inject.ImplementedBy
 import models.{API, TileInstance}
+import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods._
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.{ContentType, StringEntity}
-import org.apache.http.impl.client.HttpClients
+import org.apache.http.impl.client.HttpClientBuilder
 import play.api.libs.json.{JsObject, _}
 import system.{Logging, ThreadPools}
 import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils}
 import warwick.sso.User
+import scala.concurrent.duration._
 
 import scala.concurrent.Future
+
+object TileContentService {
+
+  val connectTimeout = 5.seconds
+  val socketTimeout = 5.seconds
+
+}
 
 @ImplementedBy(classOf[TileContentServiceImpl])
 trait TileContentService {
@@ -30,8 +39,17 @@ class TileContentServiceImpl @Inject()(
   trustedApp: CurrentApplication
 ) extends TileContentService with Logging {
 
+  import TileContentService._
+
+  val requestConfig = RequestConfig.custom()
+    .setConnectTimeout(connectTimeout.toMillis.toInt)
+    .setSocketTimeout(socketTimeout.toMillis.toInt)
+    .build()
+
   // TODO inject a client properly
-  val client = HttpClients.createDefault()
+  val client = HttpClientBuilder.create()
+    .setDefaultRequestConfig(requestConfig)
+    .build()
 
   import ThreadPools.tileData
 
@@ -45,7 +63,7 @@ class TileContentServiceImpl @Inject()(
     try {
       response = client.execute(request)
       val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
-      val apiResponse  = Json.parse(body).as[API.Response[JsObject]]
+      val apiResponse = Json.parse(body).as[API.Response[JsObject]]
 
       if (!apiResponse.success) {
         logger.logger.warn(s"Content provider returned Failure: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}, response=$body")
@@ -54,7 +72,7 @@ class TileContentServiceImpl @Inject()(
       apiResponse
     } catch {
       case e: HttpHostConnectException => API.Failure("error", Seq(API.Error("io", "Couldn't connect to provider")))
-      case e @ (_:JsonParseException | _:JsResultException) => API.Failure("error", Seq(API.Error("parse", s"Parse error: ${e.getMessage}")))
+      case e@(_: JsonParseException | _: JsResultException) => API.Failure("error", Seq(API.Error("parse", s"Parse error: ${e.getMessage}")))
       case e: IOException => API.Failure("error", Seq(API.Error("io", s"I/O error: ${e.getClass.getName}")))
     } finally {
       if (response != null) response.close()
