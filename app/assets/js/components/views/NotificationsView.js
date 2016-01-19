@@ -54,7 +54,7 @@ class NotificationsView extends ReactComponent {
       <div>
         { this.state.browserPushDisabled ?
           <div className="permission-warning">
-            You have blocked start from sending notifications. You'll need to open your browser preferences to change that.
+            You have blocked Start from sending notifications. You'll need to open your browser preferences to change that.
           </div>
           : null
         }
