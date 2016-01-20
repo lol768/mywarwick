@@ -26,7 +26,7 @@ export default class PermissionRequest extends ReactComponent {
 
   render() {
     return (
-      this.state.visible ?
+      window.Notification && this.state.visible ?
       <div className={classNames('permission-request')}>
         Start needs your permission to <a onClick={this.requestPermission.bind(this)}>send notifications</a>
         <i className={classNames('fa', 'fa-fw', 'fa-times', 'permission__dismiss')} onClick={this.hide.bind(this)}> </i>
