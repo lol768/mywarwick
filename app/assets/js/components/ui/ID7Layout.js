@@ -105,7 +105,8 @@ class ID7Layout extends ReactComponent {
 
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
-              { Notification && Notification.permission === "default" ? <PermissionRequest /> : null }
+              { Notification && Notification.permission === "default" ?
+                <PermissionRequest isDisabled={ !this.props.user.authenticated } /> : null }
               <div className="id7-horizontal-divider">
                 <svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" version="1.1" width="1130" height="40"
                      viewBox="0, 0, 1130, 40">

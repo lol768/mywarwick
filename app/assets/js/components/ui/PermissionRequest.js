@@ -8,7 +8,7 @@ export default class PermissionRequest extends ReactComponent {
     super(props);
 
     this.state = {
-      visible: this.props.visible || true
+      visible: true
     };
   }
 
@@ -26,10 +26,14 @@ export default class PermissionRequest extends ReactComponent {
 
   render() {
     return (
-      window.Notification && this.state.visible ?
+      window.Notification && !this.props.isDisabled && this.state.visible ?
       <div className={classNames('permission-request')}>
-        Start needs your permission to <a onClick={this.requestPermission.bind(this)}>send notifications</a>
-        <i className={classNames('fa', 'fa-fw', 'fa-times', 'permission__dismiss')} onClick={this.hide.bind(this)}> </i>
+        <div className="permission-notice">
+          Start needs your permission to <a onClick={this.requestPermission.bind(this)}>send notifications</a>
+        </div>
+        <div className="permission-dismiss">
+          <i className={classNames('fa', 'fa-fw', 'fa-times')} onClick={this.hide.bind(this)}> </i>
+        </div>
       </div> : null
     )
   }
