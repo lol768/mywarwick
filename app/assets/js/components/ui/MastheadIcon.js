@@ -25,7 +25,7 @@ export default class MastheadIcon extends ReactComponent {
 
     if (this.state.popover) {
       this.dismissPopover();
-    } else {
+    } else if (!this.props.isDisabled) {
       this.presentPopover();
     }
   }
@@ -61,23 +61,23 @@ export default class MastheadIcon extends ReactComponent {
 
   render() {
     return (
-      <span>
-      <a href="#" onClick={this.onClick.bind(this)} ref="icon"
-         className={classNames({
-          'masthead-popover-icon': true,
-          'popover-active': this.state.popover
-         })}>
-        <i className={classNames('fa', 'fa-' + this.props.icon)}>
-          <span className="badge">{formatBadgeCount(this.props.badge)}</span>
-        </i>
-      </a>
+      <span className={ classNames({ 'disabled' : this.props.isDisabled }) }>
+        <a href="#" onClick={this.onClick.bind(this)} ref="icon"
+           className={classNames({
+            'masthead-popover-icon': true,
+            'popover-active': this.state.popover
+           })}>
+          <i className={classNames('fa', 'fa-' + this.props.icon)}>
+            <span className="badge">{formatBadgeCount(this.props.badge)}</span>
+          </i>
+        </a>
         { this.state.popover ?
           <Popover arrow attachTo={this.refs.icon} placement="bottom" height={300} width={300} top={-10}
                    title={this.props.popoverTitle} onMore={this.props.onMore ? this.onMore.bind(this) : null}>
             {this.props.children}
           </Popover>
           : null }
-        </span>
+      </span>
     );
   }
 

@@ -76,8 +76,10 @@ class Application extends ReactComponent {
         { layoutClassName == 'mobile' ?
           <TabBar selectedItem={path} onSelectItem={path => dispatch(navigate(path))}>
             <TabBarItem title="Me" icon="user" path="/"/>
-            <TabBarItem title="Notifications" icon="inbox" path="/notifications" badge={notificationsCount}/>
-            <TabBarItem title="Activity" icon="dashboard" path="/activity" badge={activitiesCount}/>
+            <TabBarItem title="Notifications" icon="inbox" path="/notifications" badge={notificationsCount}
+                        isDisabled = { !this.props.user.authenticated } />
+            <TabBarItem title="Activity" icon="dashboard" path="/activity" badge={activitiesCount}
+                        isDisabled = { !this.props.user.authenticated } />
             <TabBarItem title="News" icon="mortar-board" path="/news"/>
             <TabBarItem title="Search" icon="search" path="/search"/>
           </TabBar>
@@ -93,7 +95,8 @@ function mapStateToProps(state) {
     path: state.get('path'),
     notificationsCount: getStreamSize(state.get('notifications')),
     activitiesCount: getStreamSize(state.get('activities')),
-    layoutClassName: state.get('ui').get('className')
+    layoutClassName: state.get('ui').get('className'),
+    user: state.get('user').toJS()
   };
 }
 
