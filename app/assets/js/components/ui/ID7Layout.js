@@ -136,17 +136,12 @@ class ID7Layout extends ReactComponent {
 }
 
 let select = (state) => {
-
-  let select = {
+  return {
     layoutClassName: state.get('ui').get('className'),
     notificationsCount: getStreamSize(state.get('notifications')),
     activitiesCount: getStreamSize(state.get('activities')),
     user: state.get('user').toJS()
   };
-
-  console.log(select);
-
-  return select;
 };
 
 export default connect(select)(ID7Layout);
