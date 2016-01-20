@@ -5,10 +5,12 @@ import $ from 'jquery';
 import classNames from 'classnames';
 
 import Popover from './Popover';
+import { connect } from 'react-redux';
+import RequireUser from '../helpers/RequireUser';
 
 let formatBadgeCount = (n) => n > 99 ? '99+' : n;
 
-export default class MastheadIcon extends ReactComponent {
+class MastheadIcon extends ReactComponent {
 
   constructor(props) {
     super(props);
@@ -16,8 +18,7 @@ export default class MastheadIcon extends ReactComponent {
     this.boundClickOffPopover = this.clickOffPopover.bind(this);
 
     this.state = {
-      popover: false,
-      disabled: this.props.isDisabled || false
+      popover: false
     };
   }
 
@@ -26,7 +27,7 @@ export default class MastheadIcon extends ReactComponent {
 
     if (this.state.popover) {
       this.dismissPopover();
-    } else if (!this.state.disabled) {
+    } else if (!this.props.isDisabled) {
       this.presentPopover();
     }
   }
@@ -62,7 +63,7 @@ export default class MastheadIcon extends ReactComponent {
 
   render() {
     return (
-      <span className={ classNames({ 'disabled' : this.state.disabled }) }>
+      <span className={ classNames({ 'disabled' : this.props.isDisabled }) }>
         <a href="#" onClick={this.onClick.bind(this)} ref="icon"
            className={classNames({
             'masthead-popover-icon': true,
@@ -83,3 +84,7 @@ export default class MastheadIcon extends ReactComponent {
   }
 
 }
+
+let select = (state) => state.get('user').toJS();
+
+export default connect(select)(RequireUser(MastheadIcon));

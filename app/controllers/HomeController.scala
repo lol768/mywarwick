@@ -9,7 +9,7 @@ import play.api.mvc._
 import services.SecurityService
 import system.AppMetrics
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl._
-import uk.ac.warwick.sso.client.{SSOClientHandlerImpl, SSOConfiguration}
+import uk.ac.warwick.sso.client.{SSOConfiguration}
 import warwick.sso._
 
 import scala.concurrent.Future
@@ -24,9 +24,8 @@ class HomeController @Inject()(
 
   import security._
 
-  def index = UserAction { request =>
+  def index = Action { request =>
     implicit val links = ssoClient.linkGenerator(request)
-    implicit val loginContext = request.context
     Ok(views.html.index())
   }
 

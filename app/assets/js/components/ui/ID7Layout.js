@@ -68,13 +68,13 @@ class ID7Layout extends ReactComponent {
                                             badge={this.props.notificationsCount}
                                             key="notifications"
                                             popoverTitle="Notifications"
-                                            isDisabled = { !window.SSO.isAuthenticated }
+                                            requireUser = {true}
                                             onMore={() => this.props.dispatch(navigate('/notifications'))}>
                                 <NotificationsView grouped={false}/>
                               </MastheadIcon>
                               <MastheadIcon icon="dashboard" key="activity" badge={this.props.activitiesCount}
                                             popoverTitle="Activity"
-                                            isDisabled = { !window.SSO.isAuthenticated }
+                                            requireUser = {true}
                                             onMore={() => this.props.dispatch(navigate('/activity'))}>
                                 <ActivityView grouped={false}/>
                               </MastheadIcon>
