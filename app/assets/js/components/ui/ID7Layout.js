@@ -68,13 +68,13 @@ class ID7Layout extends ReactComponent {
                                             badge={this.props.notificationsCount}
                                             key="notifications"
                                             popoverTitle="Notifications"
-                                            requireUser = {true}
+                                            isDisabled = { !this.props.user.authenticated }
                                             onMore={() => this.props.dispatch(navigate('/notifications'))}>
                                 <NotificationsView grouped={false}/>
                               </MastheadIcon>
                               <MastheadIcon icon="dashboard" key="activity" badge={this.props.activitiesCount}
                                             popoverTitle="Activity"
-                                            requireUser = {true}
+                                            isDisabled = { !this.props.user.authenticated }
                                             onMore={() => this.props.dispatch(navigate('/activity'))}>
                                 <ActivityView grouped={false}/>
                               </MastheadIcon>
@@ -136,11 +136,17 @@ class ID7Layout extends ReactComponent {
 }
 
 let select = (state) => {
-  return {
+
+  let select = {
     layoutClassName: state.get('ui').get('className'),
     notificationsCount: getStreamSize(state.get('notifications')),
-    activitiesCount: getStreamSize(state.get('activities'))
+    activitiesCount: getStreamSize(state.get('activities')),
+    user: state.get('user').toJS()
   };
+
+  console.log(select);
+
+  return select;
 };
 
 export default connect(select)(ID7Layout);

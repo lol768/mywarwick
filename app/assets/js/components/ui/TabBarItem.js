@@ -1,12 +1,10 @@
 import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 import classNames from 'classnames';
-import { connect } from 'react-redux';
-import RequireUser from '../helpers/RequireUser';
 
 let formatBadgeCount = (n) => n > 99 ? '99+' : n;
 
-class TabBarItem extends ReactComponent {
+export default class TabBarItem extends ReactComponent {
 
   onClick() {
     if (!this.props.isDisabled) this.props.onClick(this);
@@ -29,7 +27,3 @@ class TabBarItem extends ReactComponent {
   }
 
 }
-
-let select = (state) => state.get('user').toJS();
-
-export default connect(select)(RequireUser(TabBarItem));

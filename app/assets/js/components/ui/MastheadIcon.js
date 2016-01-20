@@ -5,12 +5,10 @@ import $ from 'jquery';
 import classNames from 'classnames';
 
 import Popover from './Popover';
-import { connect } from 'react-redux';
-import RequireUser from '../helpers/RequireUser';
 
 let formatBadgeCount = (n) => n > 99 ? '99+' : n;
 
-class MastheadIcon extends ReactComponent {
+export default class MastheadIcon extends ReactComponent {
 
   constructor(props) {
     super(props);
@@ -84,7 +82,3 @@ class MastheadIcon extends ReactComponent {
   }
 
 }
-
-let select = (state) => state.get('user').toJS();
-
-export default connect(select)(RequireUser(MastheadIcon));
