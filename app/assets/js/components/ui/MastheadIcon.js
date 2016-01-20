@@ -68,7 +68,7 @@ export default class MastheadIcon extends ReactComponent {
             'popover-active': this.state.popover
            })}>
           <i className={classNames('fa', 'fa-' + this.props.icon)}>
-            <span className="badge">{formatBadgeCount(this.props.badge)}</span>
+            { (this.props.badge > 0) ? <span className="badge">{formatBadgeCount(this.props.badge)}</span> : null }
           </i>
         </a>
         { this.state.popover ?

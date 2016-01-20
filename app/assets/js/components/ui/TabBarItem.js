@@ -19,7 +19,7 @@ export default class TabBarItem extends ReactComponent {
           }) }
           onClick={this.onClick.bind(this)} ref="li">
         <i className={"fa fa-" + this.props.icon}>
-          <span className="badge">{formatBadgeCount(this.props.badge)}</span>
+          { (this.props.badge > 0) ?  <span className="badge">{formatBadgeCount(this.props.badge)}</span> : null }
         </i>
         <span className="tab-label">{this.props.title}</span>
       </li>
