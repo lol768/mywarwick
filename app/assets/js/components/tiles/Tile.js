@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom';
 
 import classNames from 'classnames';
 
-const DEFAULT_COLOUR_THEME = 'default';
-
 let sizeClasses = {
   small: 'col-xs-6 col-md-3',
   large: 'col-xs-12 col-sm-6',
@@ -44,7 +42,6 @@ export default class Tile extends Component {
     let props = this.props;
 
     let icon = props.icon ? <i className={classNames('fa', 'fa-fw', 'fa-' + props.icon)}></i> : null;
-    let colourTheme = DEFAULT_COLOUR_THEME;
 
     let size = props.size || props.defaultSize;
     let sizeClass = sizeClasses[size];
@@ -57,7 +54,7 @@ export default class Tile extends Component {
     return (
       <div className={outerClassName}>
         <article
-          className={classNames('tile', 'tile--' + props.tileType, 'tile--' + size, colourTheme + '-' + props.defaultColour)}
+          className={classNames('tile', 'tile--' + props.tileType, 'tile--' + size, 'colour-' + props.colour)}
           ref="tile">
           <div className="tile__wrap">
             <header className="tile__title">
