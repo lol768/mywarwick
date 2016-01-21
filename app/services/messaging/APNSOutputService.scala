@@ -3,7 +3,7 @@ package services.messaging
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.Inject
 import com.notnoop.apns.APNS
-import models.Activity
+import models.{MessageSend, Activity}
 import models.Platform._
 import play.api.Configuration
 import play.api.db.{Database, NamedDatabase}

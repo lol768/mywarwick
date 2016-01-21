@@ -12,6 +12,7 @@ import LinkBlock from './LinkBlock';
 import Link from './Link';
 import NewsView from '../views/NewsView';
 import MastheadSearch from './MastheadSearch';
+import PermissionRequest from './PermissionRequest';
 
 import { navigate } from '../../navigate';
 
@@ -63,20 +64,19 @@ class ID7Layout extends ReactComponent {
                           </div>
                           { isDesktop ?
                             <div className="masthead-popover-icons">
-                              <MastheadIcon icon="inbox" badge={this.props.notificationsCount} key="notifications"
+                              <MastheadIcon icon="inbox"
+                                            badge={this.props.notificationsCount}
+                                            key="notifications"
                                             popoverTitle="Notifications"
+                                            isDisabled = { !this.props.user.authenticated }
                                             onMore={() => this.props.dispatch(navigate('/notifications'))}>
                                 <NotificationsView grouped={false}/>
                               </MastheadIcon>
                               <MastheadIcon icon="dashboard" key="activity" badge={this.props.activitiesCount}
                                             popoverTitle="Activity"
+                                            isDisabled = { !this.props.user.authenticated }
                                             onMore={() => this.props.dispatch(navigate('/activity'))}>
                                 <ActivityView grouped={false}/>
-                              </MastheadIcon>
-                              <MastheadIcon icon="cogs" key="settings"
-                                            popoverTitle="Settings"
-                                            onMore={() => this.props.dispatch(navigate('/settings'))}>
-                                <SettingsView />
                               </MastheadIcon>
                               <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
                                 <LinkBlock columns="1">
@@ -105,6 +105,8 @@ class ID7Layout extends ReactComponent {
 
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
+              { Notification && Notification.permission === "default" ?
+                <PermissionRequest isDisabled={ !this.props.user.authenticated } /> : null }
               <div className="id7-horizontal-divider">
                 <svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" version="1.1" width="1130" height="40"
                      viewBox="0, 0, 1130, 40">
@@ -138,7 +140,8 @@ let select = (state) => {
   return {
     layoutClassName: state.get('ui').get('className'),
     notificationsCount: getStreamSize(state.get('notifications')),
-    activitiesCount: getStreamSize(state.get('activities'))
+    activitiesCount: getStreamSize(state.get('activities')),
+    user: state.get('user').toJS()
   };
 };
 

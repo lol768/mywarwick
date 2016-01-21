@@ -9,7 +9,7 @@ import play.api.mvc._
 import services.SecurityService
 import system.AppMetrics
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl._
-import uk.ac.warwick.sso.client.{SSOClientHandlerImpl, SSOConfiguration}
+import uk.ac.warwick.sso.client.{SSOConfiguration}
 import warwick.sso._
 
 import scala.concurrent.Future

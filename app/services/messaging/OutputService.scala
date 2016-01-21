@@ -1,6 +1,7 @@
 package services.messaging
 
 import actors.MessageProcessing.ProcessingResult
+import models.MessageSend
 
 import scala.concurrent.Future
 

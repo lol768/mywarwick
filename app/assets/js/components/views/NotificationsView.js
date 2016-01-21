@@ -20,8 +20,14 @@ class NotificationsView extends ReactComponent {
     super(props);
 
     this.state = {
-      numberToShow: SOME_MORE
+      numberToShow: SOME_MORE,
+      browserPushDisabled: window.Notification.permission === "denied"
     };
+
+    navigator.permissions.query({name:'notifications'})
+      .then(notificationPermissions => {
+        notificationPermissions.onchange = this.onBrowserPermissionChange.bind(this);
+      });
   }
 
   loadMore() {
@@ -29,6 +35,13 @@ class NotificationsView extends ReactComponent {
       numberToShow: this.state.numberToShow + SOME_MORE
     });
   }
+
+  onBrowserPermissionChange() {
+    this.setState({
+      browserPushDisabled: window.Notification.permission === "denied"
+    });
+  }
+
 
   render() {
 
@@ -38,11 +51,19 @@ class NotificationsView extends ReactComponent {
     let hasMore = this.state.numberToShow < getStreamSize(this.props.notifications);
 
     return (
-      <InfiniteScrollable hasMore={hasMore} onLoadMore={this.loadMore.bind(this)}>
-        <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
-          {notifications.toJS()}
-        </GroupedList>
-      </InfiniteScrollable>
+      <div>
+        { this.state.browserPushDisabled ?
+          <div className="permission-warning">
+            You have blocked Start.Warwick from sending notifications. You'll need to open your browser preferences to change that.
+          </div>
+          : null
+        }
+        <InfiniteScrollable hasMore={hasMore} onLoadMore={this.loadMore.bind(this)}>
+          <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
+            {notifications.toJS()}
+          </GroupedList>
+        </InfiniteScrollable>
+      </div>
     )
   }
 

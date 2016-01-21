@@ -26,7 +26,7 @@ describe('dateFormatter', () => {
     let date = localMoment().isoWeekday(1).hour(10).minute(30).toDate();
     let now = localMoment().isoWeekday(4).toDate();
 
-    expect(formatDate(date, now)).to.equal('Mon 10:30');
+    expect(formatDate(date, now)).to.equal('Mon 18 Jan, 10:30');
 
   });
 

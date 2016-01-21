@@ -1,10 +1,10 @@
 package services.dao
 
 import helpers.{Fixtures, OneStartAppPerSuite}
-import models.{ActivityTag, TagValue}
+import models.{Output, ActivityTag, TagValue}
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
-import services.messaging.Output.Mobile
+import Output.Mobile
 import warwick.anorm.converters.ColumnConversions._
 import warwick.sso.Usercode
 

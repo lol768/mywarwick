@@ -1,8 +1,7 @@
-package services.messaging
+package models
 
 import anorm._
 import anorm.SqlParser._
-import models.Activity
 import org.joda.time.DateTime
 import warwick.sso.{User, Usercode}
 

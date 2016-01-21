@@ -3,7 +3,7 @@ package services.messaging
 import javax.inject.{Inject, Named}
 
 import actors.MessageProcessing.ProcessingResult
-import models.{DateFormats, Activity}
+import models.{MessageSend, DateFormats, Activity}
 import play.api.Configuration
 import play.api.libs.mailer.{Email, MailerClient}
 import warwick.sso.User

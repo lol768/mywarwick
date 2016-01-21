@@ -2,6 +2,7 @@ package services.messaging
 
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.Inject
+import models.MessageSend
 import play.api.Configuration
 import play.api.Play.current
 import play.api.db._

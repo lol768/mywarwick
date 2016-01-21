@@ -1,11 +1,12 @@
 package system
 
+import com.google.inject.multibindings.Multibinder
 import com.google.inject.name.Names
-import com.google.inject.{AbstractModule, Provides}
+import com.google.inject.{AbstractModule, Provides, TypeLiteral}
 import play.api.libs.concurrent.AkkaGuiceSupport
-import services.messaging.{MobileOutputService, APNSOutputService, EmailOutputService, OutputService}
+import services.healthcheck._
+import services.messaging.{EmailOutputService, MobileOutputService, OutputService}
 import uk.ac.warwick.sso.client.trusted.TrustedApplicationsManager
-
 
 class AppModule extends AbstractModule with AkkaGuiceSupport {
   override def configure(): Unit = {
@@ -19,6 +20,16 @@ class AppModule extends AbstractModule with AkkaGuiceSupport {
 
     // Start this up straight away so we always manage the cluster.
     bind(classOf[ClusterLifecycle]).asEagerSingleton()
+
+    bindHealthChecks()
+  }
+
+  def bindHealthChecks(): Unit = {
+    val multibinder = Multibinder.newSetBinder(binder(), new TypeLiteral[HealthCheck[_]] {})
+    multibinder.addBinding().to(classOf[ClusterSizeHealthCheck])
+    multibinder.addBinding().to(classOf[ClusterUnreachableHealthCheck])
+    multibinder.addBinding().to(classOf[MessageQueueLengthHealthCheck])
+    multibinder.addBinding().to(classOf[FailedMessageSendHealthCheck])
   }
 
   @Provides
