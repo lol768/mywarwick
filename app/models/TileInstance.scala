@@ -18,6 +18,7 @@ object TileInstance {
         "id" -> tileInstance.tile.id,
         "tileType" -> tileInstance.tile.tileType,
         "defaultSize" -> tileInstance.tile.defaultSize,
+        "defaultColour" -> tileInstance.tile.defaultColour,
         "size" -> tileInstance.tileConfig.size,
         "options" -> tileInstance.options,
         "title" -> tileInstance.tile.title,

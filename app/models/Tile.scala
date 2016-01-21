@@ -1,5 +1,6 @@
 package models
 
+import models.TileColour.TileColour
 import models.TileSize.TileSize
 import play.api.libs.json._
 
@@ -31,6 +32,11 @@ object TileSize extends Enumeration {
   val small, tall, large, wide = Value
 }
 
+object TileColour extends Enumeration {
+  type TileColour = Value
+  val primaryOne, primaryTwo, primaryThree, primaryFour, secondaryOne, secondaryTwo = Value
+}
+
 case class TileConfig(
   position: Int,
   size: TileSize
@@ -46,6 +52,7 @@ case class Tile(
   tileType: String,
   defaultSize: TileSize,
   defaultPosition: Int,
+  defaultColour: TileColour,
   fetchUrl: String,
   title: String,
   icon: Option[String]
@@ -54,6 +61,7 @@ case class Tile(
 
 object Tile {
   implicit val tileSizeFormat = EnumUtils.enumFormat(TileSize)
+  implicit val tileColourFormat = EnumUtils.enumFormat(TileColour)
   implicit val tileFormat = Json.format[Tile]
 }
 
