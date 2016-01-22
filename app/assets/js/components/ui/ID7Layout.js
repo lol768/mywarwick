@@ -41,7 +41,7 @@ class ID7Layout extends ReactComponent {
     let isDesktop = this.props.layoutClassName == 'desktop';
 
     return (
-      <div>
+      <div className={'theme-' + this.props.colourTheme}>
         <a className="sr-only sr-only-focusable" href="#main">Skip to main content</a>
 
         <div className="fixed-header at-top">
@@ -141,7 +141,8 @@ let select = (state) => {
     layoutClassName: state.get('ui').get('className'),
     notificationsCount: getStreamSize(state.get('notifications')),
     activitiesCount: getStreamSize(state.get('activities')),
-    user: state.get('user').toJS()
+    user: state.get('user').toJS(),
+    colourTheme: state.get('ui').get('colourTheme')
   };
 };
 

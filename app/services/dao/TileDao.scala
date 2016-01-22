@@ -6,7 +6,7 @@ import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject}
 import models._
-import play.api.libs.json.{Json, JsObject}
+import play.api.libs.json.{JsObject, Json}
 import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[TileDaoImpl])
@@ -45,7 +45,7 @@ class TileDaoImpl @Inject()() extends TileDao {
 
     val userTiles = SQL(
       s"""
-         |SELECT ID, TILE_TYPE, TITLE, ICON, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL, TILE_POSITION, TILE_SIZE, REMOVED, PREFERENCES
+         |SELECT ID, TILE_TYPE, TITLE, ICON, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, TILE_POSITION, TILE_SIZE, REMOVED, PREFERENCES
          |FROM USER_TILE JOIN TILE ON ID = TILE_ID
          |WHERE USERCODE = {usercode} $idRestriction ORDER BY TILE_POSITION ASC
       """.stripMargin)
@@ -62,7 +62,7 @@ class TileDaoImpl @Inject()() extends TileDao {
     val idRestriction = if (ids.isEmpty) "" else "AND ID IN ({ids})"
     SQL(
       s"""
-         |SELECT ID, TILE_TYPE, TITLE, ICON, DEFAULT_SIZE, DEFAULT_POSITION, FETCH_URL, DEFAULT_POSITION AS TILE_POSITION, DEFAULT_SIZE AS TILE_SIZE, 0 AS REMOVED, NULL AS PREFERENCES
+         |SELECT ID, TILE_TYPE, TITLE, ICON, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, DEFAULT_POSITION AS TILE_POSITION, DEFAULT_SIZE AS TILE_SIZE, 0 AS REMOVED, NULL AS PREFERENCES
          |FROM TILE
          |WHERE EXISTS (SELECT * FROM TILE_GROUP WHERE TILE_ID = ID and "GROUP" in ({groups})) $idRestriction
          |ORDER BY DEFAULT_POSITION ASC
@@ -77,6 +77,7 @@ class TileDaoImpl @Inject()() extends TileDao {
       get[String]("TILE_TYPE") ~
       get[String]("DEFAULT_SIZE") ~
       get[Int]("DEFAULT_POSITION") ~
+      get[Int]("COLOUR") ~
       get[String]("FETCH_URL") ~
       get[Int]("TILE_POSITION") ~
       get[String]("TILE_SIZE") ~
@@ -84,9 +85,9 @@ class TileDaoImpl @Inject()() extends TileDao {
       get[Option[String]]("ICON") ~
       get[Boolean]("REMOVED") ~
       get[Option[String]]("PREFERENCES") map {
-      case tileId ~ tileType ~ defaultSize ~ defaultPosition ~ fetchUrl ~ position ~ size ~ title ~ icon ~ removed ~ preferences =>
+      case tileId ~ tileType ~ defaultSize ~ defaultPosition ~ colour ~ fetchUrl ~ position ~ size ~ title ~ icon ~ removed ~ preferences =>
         TileInstance(
-          Tile(tileId, tileType, TileSize.withName(defaultSize), defaultPosition, fetchUrl, title, icon),
+          Tile(tileId, tileType, TileSize.withName(defaultSize), defaultPosition, colour, fetchUrl, title, icon),
           TileConfig(position, TileSize.withName(size)),
           preferences.map(Json.parse(_).as[JsObject]),
           removed
