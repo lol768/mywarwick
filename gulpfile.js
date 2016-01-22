@@ -28,7 +28,6 @@ var autoprefix = require('autoprefixer-core');
 var manifest = require('gulp-manifest');
 var rename = require('gulp-rename');
 var filenames = require('gulp-filenames');
-var concat = require('gulp-concat');
 var insert = require('gulp-insert');
 var swPrecache = require('sw-precache');
 
