@@ -15,7 +15,6 @@
     "browserify": "^10.2.4",
     "browserify-shim": "^3.8.11",
     "chai": "~3.3.0",
-    "event-stream": "^3.3.2",
     "gulp": "^3.9.0",
     "gulp-babel": "^5.1.0",
     "gulp-concat": "^2.6.0",
@@ -36,9 +35,9 @@
     "mold-source-map": "^0.4.0",
     "node-libs-browser": "^0.5.2",
     "node-notifier": "^4.2.3",
-    "oghliner": "^1.0.4",
     "react-addons-test-utils": "^0.14.0",
     "sinon": "~1.17.1",
+    "sw-precache": "^2.3.0",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.2.3"

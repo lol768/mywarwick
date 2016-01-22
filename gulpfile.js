@@ -27,11 +27,10 @@ var watchify = require('watchify');
 var autoprefix = require('autoprefixer-core');
 var manifest = require('gulp-manifest');
 var rename = require('gulp-rename');
-var insert = require('gulp-insert');
-var oghliner = require('oghliner');
 var filenames = require('gulp-filenames');
 var concat = require('gulp-concat');
-var es = require('event-stream');
+var insert = require('gulp-insert');
+var swPrecache = require('sw-precache');
 
 var lessCompiler = require('less');
 
@@ -164,40 +163,31 @@ gulp.task('pre-service-worker', ['scripts', 'styles'], function () {
       '!' + paths.assetsOut + '/**/*.map', // don't cache source maps
       '!' + paths.assetsOut + '/app.manifest' // don't cache appcache manifest
     ], {
-      base: paths.assetsOut
+      base: './'
     })
     .pipe(filenames('offline-cache'));
 });
 
 gulp.task('service-worker', ['pre-service-worker'], function () {
-  if (PRODUCTION) {
-    return oghliner.offline({
-        rootDir: paths.assetsOut,
-        fileGlobs: filenames.get('offline-cache')
-      })
-      .then(function () {
-        var offlineWorker = gulp.src(paths.assetsOut + '/offline-worker.js')
-          .pipe(insert.transform(function (contents) {
-            return contents.replace(/^ {6}'.\/([a-z])/gm, function (str, group1) {
-              return "'./assets/" + group1;
-            });
-          }));
-
-        var pushWorker = browserifyFlags(browserify(browserifyOptions('push-worker.js'))).bundle()
-          .on('error', e => gutil.log(gutil.colors.red(e.toString())))
-          .pipe(source('push-worker.js'))
-          .pipe(buffer());
-
-        return es.merge(offlineWorker, pushWorker)
-          .pipe(concat('service-worker.js'))
-          .pipe(uglify())
-          .pipe(gulp.dest(paths.assetsOut));
-      });
-  } else {
-    return gulp.src(paths.assetsOut + '/js/push-worker.js')
-      .pipe(rename('service-worker.js'))
-      .pipe(gulp.dest(paths.assetsOut));
-  }
+  console.log(filenames.get('offline-cache'));
+  return swPrecache.generate({
+      cacheId: 'start',
+      handleFetch: PRODUCTION,
+      staticFileGlobs: filenames.get('offline-cache'),
+      stripPrefix: 'target/gulp',
+      replacePrefix: 'assets',
+      ignoreUrlParametersMatching: [/^v$/],
+      logger: gutil.log
+    })
+    .then(function (offlineWorker) {
+      return browserifyFlags(browserify(browserifyOptions('push-worker.js'))).bundle()
+        .on('error', e => gutil.log(gutil.colors.red(e.toString())))
+        .pipe(source('service-worker.js'))
+        .pipe(buffer())
+        .pipe(insert.prepend(offlineWorker))
+        .pipe(uglify())
+        .pipe(gulp.dest(paths.assetsOut));
+    });
 });
 
 // Run once the scripts and styles are in place
