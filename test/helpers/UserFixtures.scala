@@ -1,8 +1,6 @@
 package helpers
 
-import models.{ActivityPrototype, ActivityRecipients}
 import org.joda.time.DateTime
-import services.{Group, GroupName}
 import warwick.sso._
 
 /** Access via Fixtures.user */
@@ -21,7 +19,6 @@ private[helpers] object UserFixtures {
 
   def makeFoundUser(usercode: String = "user"): User =
     Users.create(Usercode(usercode), student = true)
-
 
   def makeNotFoundUser(usercode: String = "user"): User =
     Users.create(Usercode(usercode), found = false)
