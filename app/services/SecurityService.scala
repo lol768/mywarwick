@@ -18,11 +18,15 @@ trait SecurityService {
 
   def RequiredUserAction: ActionBuilder[AuthenticatedRequest]
 
+  def RequiredRoleAction(role: RoleName): ActionBuilder[AuthenticatedRequest]
+
+  def RequiredActualUserRoleAction(role: RoleName): ActionBuilder[AuthenticatedRequest]
+
   def APIAction: ActionBuilder[AuthenticatedRequest]
 
   type TryAccept[A] = Future[Either[Result, A]]
 
-  def SecureWebsocket[A](request : play.api.mvc.RequestHeader)(block : warwick.sso.LoginContext => TryAccept[A]) : TryAccept[A]
+  def SecureWebsocket[A](request: play.api.mvc.RequestHeader)(block: warwick.sso.LoginContext => TryAccept[A]): TryAccept[A]
 
 }
 
@@ -42,10 +46,14 @@ class SecurityServiceImpl @Inject()(
   val UserAction = ssoClient.Lenient
   val RequiredUserAction = ssoClient.Strict
 
+  def RequiredRoleAction(role: RoleName) = ssoClient.RequireRole(role, otherwise = showForbidden)
+
+  def RequiredActualUserRoleAction(role: RoleName) = ssoClient.RequireActualUserRole(role, otherwise = showForbidden)
+
   // TODO this always returns a forbidden result if no user found. We might want API calls for anonymous users.
   val APIAction = ssoClient.Lenient andThen BasicAuthFallback
 
-  override def SecureWebsocket[A](request : play.api.mvc.RequestHeader)(block : warwick.sso.LoginContext => TryAccept[A]) =
+  override def SecureWebsocket[A](request: play.api.mvc.RequestHeader)(block: warwick.sso.LoginContext => TryAccept[A]) =
     ssoClient.withUser(request)(block)
 
   /**
@@ -69,6 +77,21 @@ class SecurityServiceImpl @Inject()(
         )
       )
     ))
+  }
+
+  def showForbidden(request: AuthenticatedRequest[_]) = {
+    import request.context._
+    val identity = for {
+      name <- user.flatMap(_.name.first)
+      actualName <- actualUser.flatMap(_.name.first)
+    } yield {
+      if (isMasquerading)
+        s"$name (really $actualName)"
+      else
+        name
+    }
+
+    Forbidden(views.html.errors.forbidden(identity))
   }
 
 }

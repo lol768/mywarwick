@@ -44,3 +44,5 @@ GET         /ssotest                                      @controllers.HomeContr
 POST        /api/push/apns/subscribe                      @controllers.api.APNSPushNotificationsController.subscribe
 POST        /api/push/gcm/subscribe                       @controllers.api.GCMPushNotificationsController.subscribe
 POST        /api/push/gcm/notification                    @controllers.api.GCMPushNotificationsController.fetchPushNotifications
+
+GET         /sysadmin/masquerade                          @controllers.SysadminController.masquerade

@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
 import services.messaging.{GCMOutputService, MessagingService}
-import warwick.sso.{User, Usercode}
+import warwick.sso.{GroupName, User, Usercode}
 
 import scala.util.{Failure, Success, Try}
 
