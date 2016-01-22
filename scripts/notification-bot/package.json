@@ -1,0 +1,12 @@
+{
+  "name": "NewStart Notification Bot",
+  "decription": "bot for pushing notificaitons to newstart api",
+  "version": "1.0.0",
+  "author": "nic",
+  "bin": {
+    "start": "app.js"
+  },
+  "dependencies": {
+    "node-fetch": "^1.3.3"
+  }
+}
