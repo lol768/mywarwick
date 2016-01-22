@@ -26,6 +26,7 @@ class HomeController @Inject()(
 
   def index = Action { request =>
     implicit val links = ssoClient.linkGenerator(request)
+    links.setTarget("https://" + request.host + request.path)
     Ok(views.html.index())
   }
 

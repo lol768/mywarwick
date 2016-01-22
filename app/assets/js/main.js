@@ -99,7 +99,7 @@ store.subscribe(() => {
 
 
 /*
- Attempt to register service worker, to handle push notifications
+ Attempt to register service worker, to handle push notifications and offline
  */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js')

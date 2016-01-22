@@ -7,6 +7,7 @@
 'use strict';
 
 var gulp = require('gulp');
+var fs = require('fs');
 var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
 var replace = require('gulp-replace');
@@ -26,6 +27,10 @@ var watchify = require('watchify');
 var autoprefix = require('autoprefixer-core');
 var manifest = require('gulp-manifest');
 var rename = require('gulp-rename');
+var filenames = require('gulp-filenames');
+var concat = require('gulp-concat');
+var insert = require('gulp-insert');
+var swPrecache = require('sw-precache');
 
 var lessCompiler = require('less');
 
@@ -64,7 +69,7 @@ if (PRODUCTION) {
 // Function for running Browserify on JS, since
 // we reuse it a couple of times.
 var bundle = function (browserify, outputFile) {
-  browserify.bundle()
+  return browserify.bundle()
     .on('error', function (e) {
       gutil.log(gutil.colors.red(e.toString()));
     })
@@ -75,23 +80,22 @@ var bundle = function (browserify, outputFile) {
     .pipe(replace('$$BUILDTIME$$', (new Date()).toString()))
     .pipe(PRODUCTION ? uglify() : gutil.noop())
     .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(paths.scriptOut))
+    .pipe(gulp.dest(paths.scriptOut));
 };
 
-var browserifyFlags = function(b) {
+var browserifyFlags = function (b) {
   b.exclude('jquery');
-  b.transform({global:true}, browserifyShim);
+  b.transform({global: true}, browserifyShim);
   return b;
 };
 
 var SCRIPTS = {
   // Mapping from bundle name to entry point
-  'bundle.js': 'main.js',
-  'service-worker.js': 'service-worker-main.js'
+  'bundle.js': 'main.js'
 };
 
 gulp.task('scripts', [], function () {
-  return _.map(SCRIPTS, function(entries, output) {
+  return _.map(SCRIPTS, function (entries, output) {
     var b = browserifyFlags(browserify(browserifyOptions(entries)));
     return bundle(b, output);
   });
@@ -100,7 +104,7 @@ gulp.task('scripts', [], function () {
 // Recompile scripts on changes. Watchify is more efficient than
 // grunt.watch as it knows how to do incremental rebuilds.
 gulp.task('watch-scripts', [], function () {
-  return _.map(SCRIPTS, function(entries, output) {
+  return _.map(SCRIPTS, function (entries, output) {
     var bw = watchify(browserifyFlags(browserify(_.assign({}, watchify.args, browserifyOptions(entries)))));
     bw.on('update', function () {
       bundle(bw, output);
@@ -153,47 +157,91 @@ gulp.task('watch-styles', ['styles'], function () {
   return gulp.watch(paths.assetPath + '/css/**/*.less', ['styles']);
 });
 
+gulp.task('pre-service-worker', ['scripts', 'styles'], function () {
+  return gulp.src([
+      paths.assetsOut + '/**/*',
+      '!' + paths.assetsOut + '/**/*.map', // don't cache source maps
+      '!' + paths.assetsOut + '/app.manifest' // don't cache appcache manifest
+    ], {
+      base: './'
+    })
+    .pipe(filenames('offline-cache'));
+});
+
+gulp.task('service-worker', ['pre-service-worker'], function () {
+  console.log(filenames.get('offline-cache'));
+  return swPrecache.generate({
+      cacheId: 'start',
+      handleFetch: PRODUCTION,
+      staticFileGlobs: filenames.get('offline-cache'),
+      stripPrefix: 'target/gulp',
+      replacePrefix: 'assets',
+      ignoreUrlParametersMatching: [/^v$/],
+      logger: gutil.log
+    })
+    .then(function (offlineWorker) {
+      return browserifyFlags(browserify(browserifyOptions('push-worker.js'))).bundle()
+        .on('error', e => gutil.log(gutil.colors.red(e.toString())))
+        .pipe(source('service-worker.js'))
+        .pipe(buffer())
+        .pipe(insert.prepend(offlineWorker))
+        .pipe(uglify())
+        .pipe(gulp.dest(paths.assetsOut));
+    });
+});
+
 // Run once the scripts and styles are in place
 gulp.task('manifest', ['scripts', 'styles'], function () {
   if (PRODUCTION) {
-    getFontAwesomeVersion(function (fontAwesomeVersion) {
-      return gulp.src([
-        paths.assetsOut + '/**/*',
-        '!' + paths.assetsOut + '/**/*.map' // don't cache source maps
-      ], {base: path.assetsOut})
-        .pipe(rename(function (path) {
-          if (path.basename == 'fontawesome-webfont') {
-            path.extname += '?v=' + fontAwesomeVersion;
-          }
-
-          return path;
-        }))
-        .pipe(manifest({
-          cache: ['/', '/activity', '/notifications', '/news', '/search'],
-          hash: true,
-          exclude: 'app.manifest',
-          prefix: '/assets/'
-        }))
-        .pipe(gulp.dest(paths.assetsOut));
+    var cacheableAssets = gulp.src([
+      paths.assetsOut + '/**/*',
+      '!' + paths.assetsOut + '/**/*.map', // don't cache source maps
+      '!' + paths.assetsOut + '/**/*-worker.js' // don't cache service workers
+    ], {
+      base: paths.assetsOut
     });
+
+    return getFontAwesomeVersion()
+      .then(function (fontAwesomeVersion) {
+        return cacheableAssets
+          .pipe(rename(function (path) {
+            if (path.basename == 'fontawesome-webfont') {
+              path.extname += '?v=' + fontAwesomeVersion;
+            }
+
+            return path;
+          }))
+          .pipe(manifest({
+            cache: ['/', '/activity', '/notifications', '/news', '/search'],
+            hash: true,
+            exclude: 'app.manifest',
+            prefix: '/assets/'
+          }))
+          .pipe(gulp.dest(paths.assetsOut));
+      });
   } else {
     // Produce an empty manifest file
-    gulp.src([])
+    return gulp.src([])
       .pipe(manifest())
       .pipe(gulp.dest(paths.assetsOut));
   }
 });
 
 // Shortcuts for building all asset types at once
-gulp.task('assets', ['scripts', 'styles', 'manifest']);
+gulp.task('assets', ['scripts', 'styles', 'manifest', 'service-worker']);
 gulp.task('watch-assets', ['watch-scripts', 'watch-styles']);
 gulp.task('wizard', ['watch-assets']);
 
 // Get the current FA version for use in the cache manifest
-function getFontAwesomeVersion(cb) {
-  lessCompiler.render('@import "node_modules/id7/less/font-awesome/variables.less"; @{fa-version} { a: a; }', {},
-    function (e, output) {
-      var version = output.css.match(/"([0-9\.]+)"/)[1];
-      cb(version);
-    });
+function getFontAwesomeVersion() {
+  return new Promise(function (resolve, reject) {
+    lessCompiler.render('@import "node_modules/id7/less/font-awesome/variables.less"; @{fa-version} { a: a; }', {},
+      function (e, output) {
+        var version = output.css.match(/"([0-9\.]+)"/)[1];
+        if (version)
+          resolve(version);
+        else
+          reject();
+      });
+  });
 }
