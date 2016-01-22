@@ -28,14 +28,27 @@ import store from '../store';
 
 import { registerReducer } from '../reducers';
 
-registerReducer('ui', (state = Immutable.Map(), action) => {
+let initialState = Immutable.fromJS({
+  colourTheme: 'default'
+});
+
+registerReducer('ui', (state = initialState, action) => {
   switch (action.type) {
     case 'ui.class':
       return state.set('className', action.className);
+    case 'ui.theme':
+      return state.set('colourTheme', action.theme);
     default:
       return state;
   }
 });
+
+export function updateColourTheme(theme) {
+  return {
+    type: 'ui.theme',
+    theme: theme
+  };
+}
 
 export function updateLayoutClass() {
   return {
@@ -77,9 +90,9 @@ class Application extends ReactComponent {
           <TabBar selectedItem={path} onSelectItem={path => dispatch(navigate(path))}>
             <TabBarItem title="Me" icon="user" path="/"/>
             <TabBarItem title="Notifications" icon="inbox" path="/notifications" badge={notificationsCount}
-                        isDisabled = { !this.props.user.authenticated } />
+                        isDisabled={ !this.props.user.authenticated }/>
             <TabBarItem title="Activity" icon="dashboard" path="/activity" badge={activitiesCount}
-                        isDisabled = { !this.props.user.authenticated } />
+                        isDisabled={ !this.props.user.authenticated }/>
             <TabBarItem title="News" icon="mortar-board" path="/news"/>
             <TabBarItem title="Search" icon="search" path="/search"/>
           </TabBar>

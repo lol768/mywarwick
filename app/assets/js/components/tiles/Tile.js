@@ -3,9 +3,6 @@ import ReactDOM from 'react-dom';
 
 import classNames from 'classnames';
 
-const DEFAULT_TILE_COLOR = '#8c6e96'; // Default ID7 theme colour
-const DEFAULT_TEXT_COLOR = 'white';
-
 let sizeClasses = {
   small: 'col-xs-6 col-md-3',
   large: 'col-xs-12 col-sm-6',
@@ -45,8 +42,6 @@ export default class Tile extends Component {
     let props = this.props;
 
     let icon = props.icon ? <i className={classNames('fa', 'fa-fw', 'fa-' + props.icon)}></i> : null;
-    let backgroundColor = props.backgroundColor ? props.backgroundColor : DEFAULT_TILE_COLOR;
-    let color = props.color ? props.color : DEFAULT_TEXT_COLOR;
 
     let size = props.size || props.defaultSize;
     let sizeClass = sizeClasses[size];
@@ -58,9 +53,9 @@ export default class Tile extends Component {
 
     return (
       <div className={outerClassName}>
-        <article className={classNames('tile', 'tile--' + props.tileType, 'tile--' + size)}
-                 style={{backgroundColor: backgroundColor, color: color}}
-                 ref="tile">
+        <article
+          className={classNames('tile', 'tile--' + props.tileType, 'tile--' + size, 'colour-' + props.colour)}
+          ref="tile">
           <div className="tile__wrap">
             <header className="tile__title">
               <h1>
