@@ -3,7 +3,7 @@ import localforage from 'localforage';
 import { createSelector } from 'reselect';
 
 import { fetchedActivities, fetchedNotifications } from './notifications';
-import { readNotifications, readActivitys } from './notification-metadata';
+import { readNotifications, readActivities } from './notification-metadata';
 
 export function getNotificationsFromLocalStorage() {
   return dispatch => {
@@ -28,7 +28,7 @@ export function getActivitiesFromLocalStorage() {
 
     localforage.getItem('activitiesLastRead').then(
       (value) => {
-        if (value != null) dispatch(readActivitys(moment(value)));
+        if (value != null) dispatch(readActivities(moment(value)));
       },
       (err) => log.warn('Problem reading activitiesLastRead from local storage', err)
     );

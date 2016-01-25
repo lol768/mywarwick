@@ -39,7 +39,7 @@ class ID7Layout extends ReactComponent {
 
   render() {
 
-    const { layoutClassName, notifications, notificationsLastRead, activities, activitiesLastRead, user, dispatch }
+    const { layoutClassName, notificationsCount, activitiesCount, user, dispatch }
       = this.props;
 
     let isDesktop = layoutClassName == 'desktop';
@@ -69,7 +69,7 @@ class ID7Layout extends ReactComponent {
                           { isDesktop ?
                             <div className="masthead-popover-icons">
                               <MastheadIcon icon="inbox"
-                                            badge={ getNumItemsSince(notifications, notificationsLastRead) }
+                                            badge={ notificationsCount }
                                             key="notifications"
                                             popoverTitle="Notifications"
                                             isDisabled = { !user.authenticated }
@@ -77,7 +77,7 @@ class ID7Layout extends ReactComponent {
                                 <NotificationsView grouped={false}/>
                               </MastheadIcon>
                               <MastheadIcon icon="dashboard" key="activity"
-                                            badge={ getNumItemsSince(activities, activitiesLastRead) }
+                                            badge={ activitiesCount }
                                             popoverTitle="Activity"
                                             isDisabled = { !user.authenticated }
                                             onMore={() => dispatch(navigate('/activity'))}>
@@ -144,10 +144,8 @@ class ID7Layout extends ReactComponent {
 let select = (state) => {
   return {
     layoutClassName: state.get('ui').get('className'),
-    notifications: state.get('notifications'),
-    notificationsLastRead: state.get('notifications-metadata').lastRead,
-    activities: state.get('activities'),
-    activitiesLastRead: state.get('activities-metadata').lastRead,
+    notificationsCount: getNumItemsSince(state.get('notifications'), state.get('notifications-metadata').lastRead),
+    activitiesCount: getNumItemsSince(state.get('activities'), state.get('activities-metadata').lastRead),
     user: state.get('user').toJS(),
     colourTheme: state.get('ui').get('colourTheme')
   };

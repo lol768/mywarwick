@@ -5,7 +5,7 @@ import { registerReducer } from './reducers';
 export const NOTIFICATIONS_READ = 'notifications.read';
 export const ACTIVITIES_READ = 'activities.read';
 
-export function readActivitys(date) {
+export function readActivities(date) {
   return {
     type: ACTIVITIES_READ,
     date: date

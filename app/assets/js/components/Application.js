@@ -72,7 +72,7 @@ $(() => {
 class Application extends ReactComponent {
 
   render() {
-    const { dispatch, path, notifications, notificationsLastRead, activities, activitiesLastRead, layoutClassName } = this.props;
+    const { dispatch, path, notificationsCount, activitiesCount, layoutClassName, user } = this.props;
 
     let views = {
       '/': <MeView />,
@@ -90,11 +90,11 @@ class Application extends ReactComponent {
           <TabBar selectedItem={path} onSelectItem={path => dispatch(navigate(path))}>
             <TabBarItem title="Me" icon="user" path="/"/>
             <TabBarItem title="Notifications" icon="inbox" path="/notifications"
-                        badge={ getNumItemsSince(notifications, notificationsLastRead) }
-                        isDisabled = { !this.props.user.authenticated } />
+                        badge={ notificationsCount }
+                        isDisabled = { !user.authenticated } />
             <TabBarItem title="Activity" icon="dashboard" path="/activity"
-                        badge={ getNumItemsSince(activities, activitiesLastRead) }
-                        isDisabled = { !this.props.user.authenticated } />
+                        badge={ activitiesCount }
+                        isDisabled = { !user.authenticated } />
             <TabBarItem title="News" icon="mortar-board" path="/news"/>
             <TabBarItem title="Search" icon="search" path="/search"/>
           </TabBar>
@@ -108,10 +108,8 @@ class Application extends ReactComponent {
 function mapStateToProps(state) {
   return {
     path: state.get('path'),
-    notifications: state.get('notifications'),
-    notificationsLastRead: state.get('notifications-metadata').lastRead,
-    activities: state.get('activities'),
-    activitiesLastRead: state.get('activities-metadata').lastRead,
+    notificationsCount: getNumItemsSince(state.get('notifications'), state.get('notifications-metadata').lastRead),
+    activitiesCount: getNumItemsSince(state.get('activities'), state.get('activities-metadata').lastRead),
     layoutClassName: state.get('ui').get('className'),
     user: state.get('user').toJS()
   };

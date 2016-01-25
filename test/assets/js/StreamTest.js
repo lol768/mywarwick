@@ -1,6 +1,6 @@
 import Immutable from 'immutable';
 import moment from 'moment'
-import formatDate from '../../../app/assets/js/dateFormatter'
+import formatDate from 'dateFormatter'
 import { onStreamReceive, getStreamPartition, mergeReceivedItems, takeFromStream, getStreamSize, getNumItemsSince } from '../../../app/assets/js/stream';
 
 let item = (id, date) => ({id: id, date: moment('2015-01-01').add(date, 'd').format()});
