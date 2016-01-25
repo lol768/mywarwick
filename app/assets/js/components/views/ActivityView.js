@@ -9,6 +9,7 @@ import InfiniteScrollable from '../ui/InfiniteScrollable';
 import { connect } from 'react-redux';
 
 import { takeFromStream, getStreamSize } from '../../stream';
+import { readActivitys } from '../../notification-metadata'
 
 const SOME_MORE = 20;
 
@@ -26,6 +27,18 @@ export default class ActivityView extends ReactComponent {
     this.setState({
       numberToShow: this.state.numberToShow + SOME_MORE
     });
+  }
+
+  markActivitysRead() {
+    this.props.dispatch(readActivitys(moment()));
+  }
+
+  componentDidMount() {
+    this.markActivitysRead();
+  }
+
+  componentDidUpdate() {
+    this.markActivitysRead();
   }
 
   render() {

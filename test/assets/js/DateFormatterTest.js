@@ -23,10 +23,10 @@ describe('dateFormatter', () => {
 
   it('formats day name and time in current week', () => {
 
-    let date = localMoment().isoWeekday(1).hour(10).minute(30).toDate();
-    let now = localMoment().isoWeekday(4).toDate();
+    let date = localMoment().year(2016).week(2).isoWeekday(1).hour(10).minute(30).toDate();
+    let now = localMoment().year(2016).week(2).isoWeekday(4).toDate();
 
-    expect(formatDate(date, now)).to.equal('Mon 18 Jan, 10:30');
+    expect(formatDate(date, now)).to.equal('Mon 4 Jan, 10:30');
 
   });
 

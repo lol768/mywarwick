@@ -2,6 +2,7 @@ import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
+import moment from 'moment'
 
 import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
@@ -11,6 +12,7 @@ import InfiniteScrollable from '../ui/InfiniteScrollable';
 import { connect } from 'react-redux';
 
 import { takeFromStream, getStreamSize } from '../../stream';
+import { readNotifications } from '../../notification-metadata'
 
 const SOME_MORE = 20;
 
@@ -42,9 +44,20 @@ class NotificationsView extends ReactComponent {
     });
   }
 
+  markNotificationsRead() {
+    this.props.dispatch(readNotifications(moment()));
+  }
+
+  componentDidMount() {
+    this.markNotificationsRead();
+  }
+
+  componentDidUpdate() {
+    this.markNotificationsRead();
+  }
+
 
   render() {
-
     let notifications = takeFromStream(this.props.notifications, this.state.numberToShow)
       .map(n => <ActivityItem key={n.id} forceDisplayDay={!this.props.grouped} {...n} />);
 

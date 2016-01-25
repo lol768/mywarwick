@@ -13,6 +13,7 @@ polyfill();
 
 import store from './store';
 window.Store = store;
+window.localforage = localforage;
 
 import Application from './components/Application';
 import ID7Layout from './components/ui/ID7Layout';
@@ -25,7 +26,7 @@ import './user';
 
 import { displayUpdateProgress } from './update';
 import { fetchUserIdentity, fetchActivities } from './serverpipe';
-import { getNotificationsFromLocalStorage, getActivitiesFromLocalStorage, persistActivities, persistNotifications } from './notifications-glue';
+import { getNotificationsFromLocalStorage, getActivitiesFromLocalStorage, persistActivities, persistNotifications, persistNotificationsMetadata, persistActivitiesMetadata } from './notifications-glue';
 import { getTilesFromLocalStorage, persistTiles } from './tiles';
 import { initialiseState } from './push-notifications';
 import { navigate } from './navigate';
@@ -127,7 +128,9 @@ const loadPersonalisedData = _.once(() => {
   store.dispatch(fetchActivities());
 
   store.subscribe(() => persistActivities(store.getState()));
+  store.subscribe(() => persistActivitiesMetadata(store.getState()));
   store.subscribe(() => persistNotifications(store.getState()));
+  store.subscribe(() => persistNotificationsMetadata(store.getState()));
   store.dispatch(getActivitiesFromLocalStorage());
   store.dispatch(getNotificationsFromLocalStorage());
 
