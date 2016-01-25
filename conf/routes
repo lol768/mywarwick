@@ -12,8 +12,7 @@ GET         /settings                                     @controllers.HomeContr
 
 ->          /sso                                          sso.Routes
 
-GET         /admin/cluster                                @controllers.ClusterStateController.html
-->          /admin                                        admin.Routes
+GET         /admin/cluster                                @controllers.admin.ClusterStateController.html
 
 GET         /websockets/page                              @controllers.HomeController.socket
 
@@ -28,7 +27,7 @@ GET         /news/feed                                    @controllers.NewsContr
 GET         /service/metrics                              @controllers.MetricsController.metrics
 GET         /service/gtg                                  @controllers.ServiceCheckController.gtg
 GET         /service/healthcheck                          @controllers.ServiceCheckController.healthcheck
-GET         /service/cluster/state                        @controllers.ClusterStateController.get
+GET         /service/cluster/state                        @controllers.admin.ClusterStateController.get
 
 GET         /api/streams/user                             @controllers.api.UserActivitiesController.get
 
@@ -45,4 +44,4 @@ POST        /api/push/apns/subscribe                      @controllers.api.APNSP
 POST        /api/push/gcm/subscribe                       @controllers.api.GCMPushNotificationsController.subscribe
 POST        /api/push/gcm/notification                    @controllers.api.GCMPushNotificationsController.fetchPushNotifications
 
-GET         /sysadmin/masquerade                          @controllers.SysadminController.masquerade
+GET         /admin/masquerade                             @controllers.admin.MasqueradeController.masquerade

@@ -5,15 +5,11 @@ version := "1.0-SNAPSHOT"
 scalaVersion := Common.scalaVersion
 
 lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala)
-  .dependsOn(admin, servicechecks)
-  .aggregate(admin, servicechecks)
   .settings(
     gulpAssetsTask := Gulp(baseDirectory.value).buildAssets(),
     // Package up assets before we build tar.gz
     packageZipTarball in Universal <<= (packageZipTarball in Universal).dependsOn(gulpAssetsTask)
   )
-lazy val admin = (project in file("modules/admin")).enablePlugins(PlayScala)
-lazy val servicechecks = (project in file("modules/servicechecks")).enablePlugins(PlayScala)
 val gulpAssetsTask = TaskKey[Unit]("gulp-assets")
 val appDeps = Seq(
   jdbc,
