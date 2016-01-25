@@ -6,7 +6,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import system.{DatabaseDialect, H2DatabaseDialect}
-import warwick.sso.{LoginContext, MockSSOClient, SSOClient, User}
+import warwick.sso._
 
 
 object TestApplications {
@@ -42,6 +42,9 @@ object TestApplications {
           override val actualUser: Option[User] = None
 
           override def loginUrl(target: Option[String]): String = "https://example.com/login"
+
+          override def userHasRole(role: RoleName) = false
+          override def actualUserHasRole(role: RoleName) = false
         })
       )
       .overrides(

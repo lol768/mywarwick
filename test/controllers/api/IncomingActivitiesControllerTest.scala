@@ -25,6 +25,9 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
     override val actualUser: Option[User] = None
 
     override def loginUrl(target: Option[String]): String = "https://app.example.com/login"
+
+    override def userHasRole(role: RoleName) = false
+    override def actualUserHasRole(role: RoleName) = false
   })
 
   val providerPermissionService = mock[ProviderPermissionService]
