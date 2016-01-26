@@ -214,16 +214,17 @@ gulp.task('manifest', ['scripts', 'styles'], function () {
             cache: ['/', '/activity', '/notifications', '/news', '/search'],
             hash: true,
             exclude: 'appcache.manifest',
-            prefix: '/assets/'
+            prefix: '/assets/',
+            filename: 'appcache.manifest'
           }))
-          .pipe(rename('appcache.manifest'))
           .pipe(gulp.dest(paths.assetsOut));
       });
   } else {
     // Produce an empty manifest file
     return gulp.src([])
-      .pipe(manifest())
-      .pipe(rename('appcache.manifest'))
+      .pipe(manifest({
+        filename: 'appcache.manifest'
+      }))
       .pipe(gulp.dest(paths.assetsOut));
   }
 });
