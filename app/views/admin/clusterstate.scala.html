@@ -2,7 +2,7 @@
 @import akka.actor.Address
 @(state: CurrentClusterState, selfAddress: Address)
 
-@views.html.admin.layout() {
+@main("Cluster State") {
   <h1>Cluster members</h1>
   @if(state.unreachable.nonEmpty) {
     <div class="alert alert-danger">
@@ -17,7 +17,7 @@
       @member.roles.map { role =>
         <span class="label label-default">@role</span>
       }
-      @if(state.leader == Some(member.address)) {
+      @if(state.leader.contains(member.address)) {
         <strong class="cluster-leader">(Leader)</strong>
       }
       @if(state.unreachable.contains(member)) {

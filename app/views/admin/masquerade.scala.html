@@ -1,0 +1,40 @@
+@import warwick.sso.{AuthenticatedRequest, MasqueradeController}
+@()(implicit request: AuthenticatedRequest[_])
+
+@main("Masquerade") {
+
+  <h1>Masquerade as a different user</h1>
+
+  @if(request.context.isMasquerading) {
+    <p>
+      You're currently masquerading as
+      @request.context.user.get.name.full.get
+      (@request.context.user.get.usercode.string).
+    </p>
+    <form action="/sso/unmask" method="post">
+      <p>
+        <button class="btn btn-default">Unmask</button>
+      </p>
+    </form>
+    <hr>
+  }
+
+  @request.flash.get(MasqueradeController.ErrorFlashKey).map { masqueradeError =>
+    <div class="alert alert-danger">@masqueradeError</div>
+  }
+
+  <p>Masquerading allows you to see the site exactly as another user would see it.</p>
+
+  <form action="/sso/masquerade" method="post">
+    <div class="input-group" style="max-width: 300px">
+      <input type="text" class="form-control" name="usercode" placeholder="Type a usercode" autofocus autocomplete="off">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="submit">
+          <i class="fa fa-fw fa-user-secret"></i>
+          Mask
+        </button>
+      </span>
+    </div>
+  </form>
+
+}

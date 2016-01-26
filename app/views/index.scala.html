@@ -1,7 +1,15 @@
 @import uk.ac.warwick.sso.client.core.LinkGenerator
 @()(implicit linkGenerator: LinkGenerator)
 
-@main("Start.Warwick") {
+@main() {
+
+  <script>
+      window.SSO = {
+        LOGIN_URL: '@Html(linkGenerator.getLoginUrl)',
+        LOGOUT_URL: '@Html(linkGenerator.getLogoutUrl)'
+      };
+  </script>
+  <script src="@routes.Assets.versioned("js/bundle.js")"></script>
 
 }
 
