@@ -24,51 +24,24 @@ class UserMessageHandler(loginContext: LoginContext) extends Actor with ActorLog
       logger.debug(s"Received message type ${msgType}")
 
       msgType match {
-        case "fetch-notifications" =>
-          sender ! JsObject(Seq(
-            "type" -> JsString("fetch-notifications"),
-            "notifications" -> JsArray(
-              Seq(JsObject(Seq(
-                "id" -> JsString("999"),
-                "text" -> JsString("This notification happened since you last logged in"),
-                "source" -> JsString("Tabula"),
-                "date" -> JsString("2015-10-14T15:00")
-              )),
-                JsObject(Seq(
-                  "id" -> JsString("998"),
-                  "text" -> JsString("This notification happened since you last logged in"),
-                  "source" -> JsString("Tabula"),
-                  "date" -> JsString("2015-10-17T18:00")
-                )),
-                JsObject(Seq(
-                  "id" -> JsString("997"),
-                  "text" -> JsString("This notification happened since you last logged in"),
-                  "source" -> JsString("Tabula"),
-                  "date" -> JsString("2015-10-18T12:00")
-                ))
-              )
-            )
-          ))
         case "who-am-i" =>
           sender ! JsObject(Seq(
             "type" -> JsString("who-am-i"),
-            "notice" -> JsString("This is very not-production"),
-            "user-info" -> userInfo(loginContext)
+            "userIdentity" -> userInfo(loginContext)
           ))
       }
 
     }
   }
 
-  def userInfo(loginContext: LoginContext) = loginContext.user.filter(_.isFound).map { user =>
-    JsObject(Seq(
-      "authenticated" -> JsBoolean(true),
-      "usercode" -> JsString(user.usercode.string),
-      "name" -> JsString(user.name.full.orNull)
-    ))
-  }.getOrElse {
-    JsObject(Seq(
-      "authenticated" -> JsBoolean(false)
-    ))
+  def userInfo(context: LoginContext) = {
+    context.user.map { user =>
+      Json.obj(
+        "authenticated" -> true,
+        "usercode" -> user.usercode.string,
+        "name" -> user.name.full,
+        "masquerading" -> context.isMasquerading
+      )
+    }.getOrElse(Json.obj("authenticated" -> false))
   }
 }

@@ -1,11 +1,14 @@
-package controllers
+package controllers.admin
 
 import javax.inject.Inject
 
 import akka.cluster.Member
+import controllers.BaseController
 import play.api.libs.json.{JsString, Json}
 import play.api.mvc.Action
-import services.{SecurityService, ClusterStateService}
+import services.{ClusterStateService, SecurityService}
+import system.Roles
+import system.Roles.Sysadmin
 
 /**
   * Experimental.
@@ -25,8 +28,8 @@ class ClusterStateController @Inject() (
 
   import security._
 
-  def html = UserAction { implicit req =>
-    Ok(views.html.clusterstate(cluster.state, cluster.selfAddress))
+  def html = RequiredActualUserRoleAction(Sysadmin) { implicit req =>
+    Ok(views.html.admin.clusterstate(cluster.state, cluster.selfAddress))
   }
 
   def get = Action {

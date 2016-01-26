@@ -160,7 +160,7 @@ gulp.task('pre-service-worker', ['scripts', 'styles'], function () {
   return gulp.src([
       paths.assetsOut + '/**/*',
       '!' + paths.assetsOut + '/**/*.map', // don't cache source maps
-      '!' + paths.assetsOut + '/app.manifest' // don't cache appcache manifest
+      '!' + paths.assetsOut + '/appcache.manifest' // don't cache appcache manifest
     ], {
       base: './'
     })
@@ -213,15 +213,17 @@ gulp.task('manifest', ['scripts', 'styles'], function () {
           .pipe(manifest({
             cache: ['/', '/activity', '/notifications', '/news', '/search'],
             hash: true,
-            exclude: 'app.manifest',
+            exclude: 'appcache.manifest',
             prefix: '/assets/'
           }))
+          .pipe(rename('appcache.manifest'))
           .pipe(gulp.dest(paths.assetsOut));
       });
   } else {
     // Produce an empty manifest file
     return gulp.src([])
       .pipe(manifest())
+      .pipe(rename('appcache.manifest'))
       .pipe(gulp.dest(paths.assetsOut));
   }
 });

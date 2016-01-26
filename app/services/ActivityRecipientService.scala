@@ -1,7 +1,7 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject}
-import warwick.sso.{UserLookupService, Usercode}
+import warwick.sso.{GroupName, GroupService, UserLookupService, Usercode}
 
 @ImplementedBy(classOf[ActivityRecipientServiceImpl])
 trait ActivityRecipientService {

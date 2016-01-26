@@ -1,7 +1,6 @@
-@import uk.ac.warwick.sso.client.core.LinkGenerator
-@(title: String)(content: Html)(implicit linkGenerator: LinkGenerator)
+@(title: String = "")(content: Html)
 <!DOCTYPE html>
-<html lang="en-GB" class="no-js" manifest="@routes.Assets.versioned("app.manifest")"> <!-- class="id7-non-branded" to remove Warwick branding -->
+<html lang="en-GB" class="no-js" manifest="@routes.Assets.versioned("appcache.manifest")"> <!-- class="id7-non-branded" to remove Warwick branding -->
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -33,7 +32,7 @@
     <meta name="msapplication-TileColor" content="#5b3069">
     <meta name="msapplication-TileImage" content="/assets/lib/id7/images/mstile-144x144.png">
 
-    <title>@title</title>
+    <title>@Seq("Start.Warwick", title).filter(_.nonEmpty).mkString(" - ")</title>
 
       <!-- Lato web font -->
     <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic&amp;subset=latin,latin-ext"
@@ -42,15 +41,8 @@
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("css/main.css")">
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
 
-    <script>
-        window.SSO = {
-          LOGIN_URL: '@Html(linkGenerator.getLoginUrl)',
-          LOGOUT_URL: '@Html(linkGenerator.getLogoutUrl)'
-        };
-    </script>
     @*<script src="@routes.Assets.versioned("lib/id7/js/id7-bundle.js")"></script>*@
     <script src="/assets/lib/id7/js/id7-bundle.js"></script>
-    <script src="@routes.Assets.versioned("js/bundle.js")"></script>
 
   </head>
   <body>
@@ -93,6 +85,14 @@
                     </div>
                   </div>
                 </div>
+                @if(title.nonEmpty) {
+                  <div class="id7-header-text clearfix">
+                    <h1>
+                        <!-- Parent site link often excluded -->
+                      <span class="id7-current-site-link"><a href="/">Start</a></span>
+                    </h1>
+                  </div>
+                }
               </div>
             </div>
           </div>
