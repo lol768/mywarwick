@@ -115,7 +115,7 @@ SocketDatapipe.getUpdateStream().subscribe((data) => {
       store.dispatch(data.activity.notification ? notifications.receivedNotification(data.activity) : notifications.receivedActivity(data.activity));
       break;
     case 'who-am-i':
-      store.dispatch(userReceive(data['user-info']));
+      store.dispatch(userReceive(data.userIdentity));
       break;
     default:
     // nowt

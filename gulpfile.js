@@ -160,7 +160,7 @@ gulp.task('pre-service-worker', ['scripts', 'styles'], function () {
   return gulp.src([
       paths.assetsOut + '/**/*',
       '!' + paths.assetsOut + '/**/*.map', // don't cache source maps
-      '!' + paths.assetsOut + '/app.manifest' // don't cache appcache manifest
+      '!' + paths.assetsOut + '/appcache.manifest' // don't cache appcache manifest
     ], {
       base: './'
     })
@@ -180,7 +180,9 @@ gulp.task('service-worker', ['pre-service-worker'], function () {
     })
     .then(function (offlineWorker) {
       return browserifyFlags(browserify(browserifyOptions('push-worker.js'))).bundle()
-        .on('error', e => gutil.log(gutil.colors.red(e.toString())))
+        .on('error', function (e) {
+          gutil.log(gutil.colors.red(e.toString()));
+        })
         .pipe(source('service-worker.js'))
         .pipe(buffer())
         .pipe(insert.prepend(offlineWorker))
@@ -213,15 +215,18 @@ gulp.task('manifest', ['scripts', 'styles'], function () {
           .pipe(manifest({
             cache: ['/', '/activity', '/notifications', '/news', '/search'],
             hash: true,
-            exclude: 'app.manifest',
-            prefix: '/assets/'
+            exclude: 'appcache.manifest',
+            prefix: '/assets/',
+            filename: 'appcache.manifest'
           }))
           .pipe(gulp.dest(paths.assetsOut));
       });
   } else {
     // Produce an empty manifest file
     return gulp.src([])
-      .pipe(manifest())
+      .pipe(manifest({
+        filename: 'appcache.manifest'
+      }))
       .pipe(gulp.dest(paths.assetsOut));
   }
 });

@@ -2,6 +2,7 @@ import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactDOM from 'react-dom';
 
+import $ from 'jquery';
 import UtilityBar from './UtilityBar';
 
 import MastheadIcon from './MastheadIcon';
@@ -13,6 +14,7 @@ import Link from './Link';
 import NewsView from '../views/NewsView';
 import MastheadSearch from './MastheadSearch';
 import PermissionRequest from './PermissionRequest';
+import MasqueradeNotice from './MasqueradeNotice';
 
 import { navigate } from '../../navigate';
 
@@ -29,6 +31,12 @@ class ID7Layout extends ReactComponent {
 
   componentWillReceiveProps() {
     this.props.dispatch(updateLayoutClass());
+  }
+
+  componentDidUpdate() {
+    var headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
+
+    $(document.body).css('margin-top', headerHeight);
   }
 
   goToHome(e) {
@@ -50,7 +58,8 @@ class ID7Layout extends ReactComponent {
 
         <div className="fixed-header at-top">
           <div className="id7-fixed-width-container">
-            <header className="id7-page-header">
+            <header className="id7-page-header" ref="header">
+              { this.props.user.masquerading ? <MasqueradeNotice masqueradingAs={this.props.user} /> : null}
               <div className="id7-utility-masthead">
                 <nav className="id7-utility-bar" id="utility-bar-container">
                   {this.props.utilityBar}

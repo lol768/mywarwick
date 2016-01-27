@@ -1,0 +1,16 @@
+@(identity: Option[String])
+
+@main("Permission Denied") {
+
+  <h1>Permission denied</h1>
+
+  <p>
+    @identity.map { name =>
+      Sorry @name, you don't have permission to see that.
+    }.getOrElse {
+      Sorry, you don't have permission to see that.
+    }
+  </p>
+
+}
+
