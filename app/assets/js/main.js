@@ -18,20 +18,15 @@ import Application from './components/Application';
 import ID7Layout from './components/ui/ID7Layout';
 import UtilityBar from './components/ui/UtilityBar';
 
-import './notifications';
-import './notifications-glue';
-import './update';
-import './user';
-
-import { displayUpdateProgress } from './update';
-import { fetchUserIdentity, fetchActivities } from './serverpipe';
-import { getNotificationsFromLocalStorage, getActivitiesFromLocalStorage, persistActivities, persistNotifications } from './notifications-glue';
-import { getTilesFromLocalStorage, persistTiles } from './tiles';
-import { initialiseState } from './push-notifications';
 import { navigate } from './navigate';
-import { receivedNotification, receivedActivity } from './notifications';
+import * as notifications from './notifications';
+import persisted from './persisted';
+import * as pushNotifications from './push-notifications';
+import * as serverpipe from './serverpipe';
 import SocketDatapipe from './SocketDatapipe';
-import { userReceive } from './user';
+import * as tiles from './tiles';
+import * as update from './update';
+import * as user from './user';
 
 localforage.config({
   name: 'Start'
@@ -40,7 +35,7 @@ localforage.config({
 // String replaced by Gulp build.
 log.info("Scripts built at: $$BUILDTIME$$");
 
-$.getJSON('/ssotest', (shouldRedirect) => {
+$.getJSON('/ssotest', shouldRedirect => {
   if (shouldRedirect) window.location = SSO.LOGIN_URL;
 });
 
@@ -61,7 +56,7 @@ $(function () {
     </Provider>,
     document.getElementById('app-container'));
 
-  window.addEventListener('popstate', function () {
+  window.addEventListener('popstate', () => {
     currentPath = window.location.pathname;
     store.dispatch(navigate(window.location.pathname));
   });
@@ -103,36 +98,33 @@ store.subscribe(() => {
  */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js')
-    .then(initialiseState);
-} else {
-  console.warn('Service workers aren\'t supported in this browser.');
+    .then(pushNotifications.init);
 }
 
-SocketDatapipe.getUpdateStream().subscribe((data) => {
+SocketDatapipe.getUpdateStream().subscribe(data => {
   switch (data.type) {
     case 'activity':
-      store.dispatch(data.activity.notification ? receivedNotification(data.activity) : receivedActivity(data.activity));
+      store.dispatch(data.activity.notification ? notification.receivedNotification(data.activity) : notification.receivedActivity(data.activity));
       break;
     case 'who-am-i':
-      store.dispatch(userReceive(data.userIdentity));
+      store.dispatch(user.userReceive(data.userIdentity));
       break;
     default:
     // nowt
   }
 });
 
-displayUpdateProgress(store.dispatch);
+update.displayUpdateProgress(store.dispatch);
 
-const loadPersonalisedData = _.once(() => {
-  store.dispatch(fetchActivities());
+let freezeStream = stream => stream.valueSeq().flatten().toJS();
 
-  store.subscribe(() => persistActivities(store.getState()));
-  store.subscribe(() => persistNotifications(store.getState()));
-  store.dispatch(getActivitiesFromLocalStorage());
-  store.dispatch(getNotificationsFromLocalStorage());
+let loadPersonalisedData = _.once(() => {
+  store.dispatch(serverpipe.fetchActivities());
 
-  store.subscribe(() => persistTiles(store.getState()));
-  store.dispatch(getTilesFromLocalStorage());
+  persisted('activities', notifications.fetchedActivities, freezeStream);
+  persisted('notifications', notifications.fetchedNotifications, freezeStream);
+  persisted('tiles.items', tiles.receivedTilesConfig);
+  persisted('tileContent', tiles.receivedTilesContent);
 });
 
 store.subscribe(() => {
@@ -142,4 +134,4 @@ store.subscribe(() => {
     loadPersonalisedData();
 });
 
-store.dispatch(fetchUserIdentity());
+store.dispatch(serverpipe.fetchUserIdentity());

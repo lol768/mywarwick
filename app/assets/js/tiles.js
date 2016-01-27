@@ -21,29 +21,10 @@ export function receivedTilesConfig(data) {
 export function receivedTilesContent(data) {
   return {
     type: TILES_CONTENT_RECEIVE,
-    content: data.tiles,
+    content: data.content,
     errors: data.errors
   };
 }
-
-// TODO: should local storage keep tile config and tile content
-export function getTilesFromLocalStorage() {
-  return (dispatch, getState) => {
-    localforage.getItem('tiles').then(
-      (value) => {
-        if (value != null && getState().get('tiles').get('fetched') == false) {
-          dispatch(receivedTilesConfig(value));
-        }
-      },
-      (err) => log.warn('Problem loading tiles from local storage', err)
-    );
-  };
-}
-
-export const persistTiles = createSelector(state => state.get('tiles').get('items'), (tiles) => {
-  // Persist tile data to local storage on change
-  localforage.setItem('tiles', tiles.toJS());
-});
 
 let initialState = Immutable.fromJS({
   fetching: false,
@@ -79,7 +60,7 @@ registerReducer('tiles', (state = initialState, action) => {
 });
 
 let contentInitialState = Immutable.fromJS({
-  items: [],
+  content: [],
   errors: []
 });
 
@@ -87,7 +68,7 @@ registerReducer('tileContent', (state = contentInitialState, action) => {
   switch (action.type) {
     case TILES_CONTENT_RECEIVE:
       return Immutable.fromJS({
-        items: action.content || {},
+        content: action.content || {},
         errors: action.errors || {}
       });
     default:

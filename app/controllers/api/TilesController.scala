@@ -48,9 +48,9 @@ class TilesController @Inject()(
         val allOk = tileResult.length == futures.length
 
         val (status, response) = if (allOk) {
-          ("ok", Json.obj("tiles" -> JsObject(tileResult)))
+          ("ok", Json.obj("content" -> JsObject(tileResult)))
         } else {
-          ("some-ok", Json.obj("tiles" -> JsObject(tileResult), "errors" -> JsObject(errorResult)))
+          ("some-ok", Json.obj("content" -> JsObject(tileResult), "errors" -> JsObject(errorResult)))
         }
 
         Ok(Json.toJson(API.Success(status, response)))
