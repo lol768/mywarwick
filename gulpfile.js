@@ -180,7 +180,9 @@ gulp.task('service-worker', ['pre-service-worker'], function () {
     })
     .then(function (offlineWorker) {
       return browserifyFlags(browserify(browserifyOptions('push-worker.js'))).bundle()
-        .on('error', e => gutil.log(gutil.colors.red(e.toString())))
+        .on('error', function (e) {
+          gutil.log(gutil.colors.red(e.toString()));
+        })
         .pipe(source('service-worker.js'))
         .pipe(buffer())
         .pipe(insert.prepend(offlineWorker))
