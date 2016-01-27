@@ -14,8 +14,16 @@ object Gulp {
 
   class GulpProcess(base: File) extends PlayRunHook {
     def buildAssets(): Unit = {
-      Process("npm install").!
-      Process("node_modules/.bin/gulp assets").!
+      runSuccessfully("npm install")
+      runSuccessfully("node_modules/.bin/gulp assets")
+    }
+
+    private def runSuccessfully(command: String, expectedExitCode: Int = 0): Unit = {
+      val exitCode = Process(command).!
+
+      if (exitCode != expectedExitCode) {
+        throw new Exception(s"""Command "$command" failed (exit code was $exitCode, expected $expectedExitCode)""")
+      }
     }
 
     override def beforeStarted() = buildAssets
