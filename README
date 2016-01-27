@@ -12,7 +12,7 @@ Building
 --------
 
 To build assets, run `node_modules/.bin/gulp assets`.
-To continually build assets when they change, run `node_modules/.bin/gulp watch-assets`.
+To continually build assets when they change, run `scripts/watch-assets`.
 
 To start the app, run `./activator "run 8080"`. You can choose a different port but using 8080 might make it simpler
 to re-use your Apache/Nginx proxy config that you have working for Tomcat.
