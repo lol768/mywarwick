@@ -5,7 +5,6 @@ import play.api.libs.json.Json._
 import play.api.libs.json.Reads._
 import play.api.libs.json.Writes._
 import play.api.libs.functional.syntax._
-import warwick.sso.User
 
 
 /**
@@ -56,6 +55,16 @@ object API {
 
   object Error {
     implicit val format = Json.format[Error]
+
+    def fromJsError(jsError: JsError): Seq[Error] = JsError.toFlatForm(jsError).map {
+      case (field, errors) =>
+        val propertyName = field.substring(4) // Remove 'obj.' from start of field name
+        Error(
+          s"invalid-$propertyName",
+          errors.flatMap(_.messages).mkString(", ")
+        )
+    }
+
   }
 
   object Response {

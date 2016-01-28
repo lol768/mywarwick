@@ -99,3 +99,14 @@ object ActivityRecipients {
 
   implicit val readsActivityRecipients = Json.reads[ActivityRecipients]
 }
+
+case class LastRead(usercode: String, notificationsRead: Option[DateTime], activitiesRead: Option[DateTime])
+
+object LastRead {
+  import DateFormats.isoDateReads
+
+  implicit val lastReadFormatter: Format[LastRead] =
+    ((__ \ "usercode").format[String] and
+      (__ \ "notificationsRead").formatNullable[DateTime] and
+      (__ \ "activitiesRead").formatNullable[DateTime])(LastRead.apply, unlift(LastRead.unapply))
+}

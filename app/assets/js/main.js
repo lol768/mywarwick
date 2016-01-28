@@ -13,6 +13,7 @@ polyfill();
 
 import store from './store';
 window.Store = store;
+window.localforage = localforage;
 
 import Application from './components/Application';
 import ID7Layout from './components/ui/ID7Layout';
@@ -25,11 +26,11 @@ import './user';
 
 import { displayUpdateProgress } from './update';
 import { fetchUserIdentity, fetchActivities } from './serverpipe';
-import { getNotificationsFromLocalStorage, getActivitiesFromLocalStorage, persistActivities, persistNotifications } from './notifications-glue';
+import * as notificationsGlue from './notifications-glue';
 import { getTilesFromLocalStorage, persistTiles } from './tiles';
 import { initialiseState } from './push-notifications';
 import { navigate } from './navigate';
-import { receivedNotification, receivedActivity } from './notifications';
+import * as notifications from './notifications';
 import SocketDatapipe from './SocketDatapipe';
 import { userReceive } from './user';
 
@@ -111,7 +112,7 @@ if ('serviceWorker' in navigator) {
 SocketDatapipe.getUpdateStream().subscribe((data) => {
   switch (data.type) {
     case 'activity':
-      store.dispatch(data.activity.notification ? receivedNotification(data.activity) : receivedActivity(data.activity));
+      store.dispatch(data.activity.notification ? notifications.receivedNotification(data.activity) : notifications.receivedActivity(data.activity));
       break;
     case 'who-am-i':
       store.dispatch(userReceive(data.userIdentity));
@@ -126,10 +127,12 @@ displayUpdateProgress(store.dispatch);
 const loadPersonalisedData = _.once(() => {
   store.dispatch(fetchActivities());
 
-  store.subscribe(() => persistActivities(store.getState()));
-  store.subscribe(() => persistNotifications(store.getState()));
-  store.dispatch(getActivitiesFromLocalStorage());
-  store.dispatch(getNotificationsFromLocalStorage());
+  store.subscribe(() => notificationsGlue.persistActivities(store.getState()));
+  store.subscribe(() => notificationsGlue.persistActivitiesMetadata(store.getState()));
+  store.subscribe(() => notificationsGlue.persistNotifications(store.getState()));
+  store.subscribe(() => notificationsGlue.persistNotificationsMetadata(store.getState()));
+  store.dispatch(notificationsGlue.getActivitiesFromLocalStorage());
+  store.dispatch(notificationsGlue.getNotificationsFromLocalStorage());
 
   store.subscribe(() => persistTiles(store.getState()));
   store.dispatch(getTilesFromLocalStorage());

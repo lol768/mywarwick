@@ -1,5 +1,6 @@
 import { List, Map } from 'immutable';
 import _ from 'lodash';
+import moment from 'moment';
 
 export const DATE_KEY = 'date';
 export const ID_KEY = 'id';
@@ -61,6 +62,15 @@ export function takeFromStream(stream, n) {
  */
 export function getStreamSize(stream) {
   return stream.valueSeq().reduce((sum, part) => sum + part.size, 0);
+}
+
+/*
+ * Return the total number of items in the stream with a date after the given date.
+ */
+export function getNumItemsSince(stream, date) {
+  return stream.valueSeq().reduce((sum, part) =>
+    sum + part.filter(item => moment(item.date).isAfter(date)).size, 0
+  );
 }
 
 /*
