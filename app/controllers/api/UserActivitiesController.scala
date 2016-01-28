@@ -29,22 +29,14 @@ class UserActivitiesController @Inject()(
   }
 
   def getLastRead = RequiredUserAction { implicit request =>
-    val response =request.context.user
-      .flatMap(activityService.getLastReadDate)
+    val response = request.context.user
+      .map(u => activityService.getLastReadDate(u).getOrElse(LastRead(u.usercode.string, None, None)))
       .map(lr => API.Success[LastRead](data = lr))
-      .getOrElse(API.Failure[LastRead]("forbidden", Seq(Error(
-        "no-permission",
-        s"Cannot fetch last read for anonymous users."
-      ))))
-
+      .getOrElse(apiFailure("forbidden","Cannot fetch last read for anonymous users."))
     Ok(Json.toJson(response))
   }
 
-
   def markAsRead = APIAction(parse.json) { implicit request =>
-
-    def apiFailure(id: String, message: String) = API.Failure[JsObject](id, Seq(Error(id, message)))
-
     request.body.validate[LastRead](LastRead.lastReadFormatter)
       .map( data => {
         request.context.user
@@ -63,7 +55,8 @@ class UserActivitiesController @Inject()(
           )))
       })
       .recoverTotal(e => BadRequest(Json.toJson(API.Failure[JsObject]("error", API.Error.fromJsError(e)))))
-
   }
+
+  private def apiFailure(id: String, message: String) = API.Failure[JsObject](id, Seq(Error(id, message)))
 
 }
