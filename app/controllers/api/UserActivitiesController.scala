@@ -2,7 +2,7 @@ package controllers.api
 
 import com.google.inject.Inject
 import controllers.BaseController
-import models.{LastRead, API}
+import models.{API, LastRead}
 import models.API.Error
 import org.joda.time.DateTime
 import play.api.libs.json._
@@ -32,7 +32,9 @@ class UserActivitiesController @Inject()(
     val response = request.context.user
       .map(u => activityService.getLastReadDate(u).getOrElse(LastRead(u.usercode.string, None, None)))
       .map(lr => API.Success[LastRead](data = lr))
-      .getOrElse(apiFailure("forbidden","Cannot fetch last read for anonymous users."))
+      .getOrElse(
+        API.Failure[LastRead]("forbidden", Seq(Error("forbidden", "Cannot fetch last read for anonymous users.")))
+      )
     Ok(Json.toJson(response))
   }
 
