@@ -4,11 +4,13 @@ import SocketDatapipe from './SocketDatapipe';
 
 import $ from 'jquery';
 import fetch from 'isomorphic-fetch';
+import moment from 'moment';
 
 import { userReceive } from './user';
 import { NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './news';
 import { TILES_FETCH, TILES_FETCH_SUCCESS, TILE_CONTENT_FETCH, TILE_CONTENT_FETCH_SUCCESS, TILES_FETCH_FAILURE, TILE_CONTENT_FETCH_FAILURE, fetchedTiles, fetchedTileContent, failedTileContentFetch } from './tiles';
 import { receivedActivity, fetchedActivities, receivedNotification, fetchedNotifications } from './notifications';
+import * as notificationMetadata from './notification-metadata'
 
 //                       //
 //     MESSAGE SEND      //
@@ -107,6 +109,13 @@ export function fetchActivities() {
 
         dispatch(fetchedNotifications(notifications));
         dispatch(fetchedActivities(activities));
+      });
+
+    fetchWithCredentials('/api/streams/read')
+      .then(response => response.json())
+      .then(json => {
+        if(json.data.notificationsRead) dispatch(notificationMetadata.readNotifications(moment(json.data.notificationsRead)));
+        if(json.data.activitiesRead) dispatch(notificationMetadata.readActivities(moment(json.data.activitiesRead)));
       });
   }
 }

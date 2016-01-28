@@ -13,20 +13,22 @@ polyfill();
 
 import store from './store';
 window.Store = store;
+window.localforage = localforage;
 
 import Application from './components/Application';
 import ID7Layout from './components/ui/ID7Layout';
 import UtilityBar from './components/ui/UtilityBar';
 
-import { navigate } from './navigate';
 import * as notifications from './notifications';
-import persisted from './persisted';
+import * as notificationsGlue from './notifications-glue';
 import * as pushNotifications from './push-notifications';
 import * as serverpipe from './serverpipe';
-import SocketDatapipe from './SocketDatapipe';
 import * as tiles from './tiles';
 import * as update from './update';
 import * as user from './user';
+import { navigate } from './navigate';
+import persisted from './persisted';
+import SocketDatapipe from './SocketDatapipe';
 
 localforage.config({
   name: 'Start'
@@ -104,7 +106,7 @@ if ('serviceWorker' in navigator) {
 SocketDatapipe.getUpdateStream().subscribe(data => {
   switch (data.type) {
     case 'activity':
-      store.dispatch(data.activity.notification ? notification.receivedNotification(data.activity) : notification.receivedActivity(data.activity));
+      store.dispatch(data.activity.notification ? notifications.receivedNotification(data.activity) : notifications.receivedActivity(data.activity));
       break;
     case 'who-am-i':
       store.dispatch(user.userReceive(data.userIdentity));
@@ -120,6 +122,8 @@ let freezeStream = stream => stream.valueSeq().flatten().toJS();
 
 let loadPersonalisedData = _.once(() => {
   store.dispatch(serverpipe.fetchActivities());
+  store.subscribe(() => notificationsGlue.persistActivitiesMetadata(store.getState()));
+  store.subscribe(() => notificationsGlue.persistNotificationsMetadata(store.getState()));
 
   persisted('activities', notifications.fetchedActivities, freezeStream);
   persisted('notifications', notifications.fetchedNotifications, freezeStream);
