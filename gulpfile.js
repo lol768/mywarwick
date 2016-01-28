@@ -168,7 +168,8 @@ gulp.task('pre-service-worker', ['scripts', 'styles'], function () {
 });
 
 gulp.task('service-worker', ['pre-service-worker'], function () {
-  console.log(filenames.get('offline-cache'));
+  var jsBundle = ['target/gulp/js/bundle.js'];
+
   return swPrecache.generate({
       cacheId: 'start',
       handleFetch: PRODUCTION,
@@ -176,7 +177,14 @@ gulp.task('service-worker', ['pre-service-worker'], function () {
       stripPrefix: 'target/gulp',
       replacePrefix: 'assets',
       ignoreUrlParametersMatching: [/^v$/],
-      logger: gutil.log
+      logger: gutil.log,
+      dynamicUrlToDependencies: {
+        '/': jsBundle,
+        '/notifications': jsBundle,
+        '/activity': jsBundle,
+        '/news': jsBundle,
+        '/search': jsBundle
+      }
     })
     .then(function (offlineWorker) {
       return browserifyFlags(browserify(browserifyOptions('push-worker.js'))).bundle()
