@@ -22,6 +22,7 @@ import { connect } from 'react-redux';
 import { getStreamSize } from '../../stream';
 
 import { updateLayoutClass } from '../Application';
+import { fetchTileContent } from '../../serverpipe';
 
 class ID7Layout extends ReactComponent {
 
@@ -43,6 +44,8 @@ class ID7Layout extends ReactComponent {
     e.preventDefault();
 
     this.props.dispatch(navigate('/'));
+
+    this.props.dispatch(fetchTileContent());
   }
 
   render() {

@@ -123,8 +123,8 @@ let loadPersonalisedData = _.once(() => {
 
   persisted('activities', notifications.fetchedActivities, freezeStream);
   persisted('notifications', notifications.fetchedNotifications, freezeStream);
-  persisted('tiles.items', tiles.receivedTilesConfig);
-  persisted('tileContent', tiles.receivedTilesContent);
+  persisted('tiles.items', tiles.fetchedTiles);
+  persisted('tileContent', tiles.loadedAllTileContent);
 });
 
 store.subscribe(() => {

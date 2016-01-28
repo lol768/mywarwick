@@ -1,30 +1,53 @@
 import Immutable from 'immutable';
 import localforage from 'localforage';
 import log from 'loglevel';
+import _ from 'lodash';
 
 import { createSelector } from 'reselect';
 import { registerReducer } from './reducers';
 import { makeStream, takeFromStream } from './stream';
 
 export const TILES_FETCH = 'tiles.fetch';
-export const TILES_CONFIG_RECEIVE = 'tiles.config.receive';
-export const TILES_CONTENT_RECEIVE = 'tile.content.receive';
+export const TILES_FETCH_SUCCESS = 'tiles.fetch.success';
 export const TILES_FETCH_FAILURE = 'tiles.fetch.failure';
 
-export function receivedTilesConfig(data) {
+export const TILE_CONTENT_FETCH = 'tiles.content.fetch';
+export const TILE_CONTENT_FETCH_SUCCESS = 'tiles.content.fetch.success';
+export const TILE_CONTENT_FETCH_FAILURE = 'tiles.content.fetch.failure';
+
+// Used for bringing back tile content from local storage
+export const TILE_CONTENT_LOAD_ALL = 'tiles.content.load';
+
+export function fetchedTiles(tiles) {
   return {
-    type: TILES_CONFIG_RECEIVE,
-    tiles: data
+    type: TILES_FETCH_SUCCESS,
+    tiles
   };
 }
 
-export function receivedTilesContent(data) {
+export function loadedAllTileContent(content) {
   return {
-    type: TILES_CONTENT_RECEIVE,
-    content: data.content,
-    errors: data.errors
+    type: TILE_CONTENT_LOAD_ALL,
+    content
   };
 }
+
+export function fetchedTileContent(tile, content) {
+  return {
+    type: TILE_CONTENT_FETCH_SUCCESS,
+    tile,
+    content,
+    fetchedAt: new Date().getTime()
+  };
+}
+
+export function failedTileContentFetch(tile, errors) {
+  return {
+    type: TILE_CONTENT_FETCH_FAILURE,
+    tile,
+    errors
+  };
+};
 
 let initialState = Immutable.fromJS({
   fetching: false,
@@ -36,19 +59,19 @@ let initialState = Immutable.fromJS({
 registerReducer('tiles', (state = initialState, action) => {
   switch (action.type) {
     case TILES_FETCH:
-      return state.mergeDeep({
+      return state.merge({
         fetching: true,
         fetched: false,
         failed: false
       });
     case TILES_FETCH_FAILURE:
-      return state.mergeDeep({
+      return state.merge({
         fetching: false,
         fetched: false,
         failed: true
       });
-    case TILES_CONFIG_RECEIVE:
-      return state.mergeDeep({
+    case TILES_FETCH_SUCCESS:
+      return state.merge({
         fetching: false,
         fetched: true,
         failed: false,
@@ -59,18 +82,51 @@ registerReducer('tiles', (state = initialState, action) => {
   }
 });
 
-let contentInitialState = Immutable.fromJS({
-  content: [],
-  errors: []
-});
-
-registerReducer('tileContent', (state = contentInitialState, action) => {
+registerReducer('tileContent', (state = Immutable.Map(), action) => {
   switch (action.type) {
-    case TILES_CONTENT_RECEIVE:
-      return Immutable.fromJS({
-        content: action.content || {},
-        errors: action.errors || {}
+    case TILE_CONTENT_FETCH: {
+      let update = tile => tile.delete('errors').set('fetching', true);
+
+      if (action.tile) {
+        return state.update(action.tile, update(Immutable.Map()), update);
+      } else {
+        return state.map(update);
+      }
+    }
+    case TILE_CONTENT_FETCH_SUCCESS: {
+      let update = tile => tile.merge({
+        fetching: false,
+        fetchedAt: action.fetchedAt,
+        content: action.content
+      }).delete('errors');
+
+      return state.update(action.tile, update(Immutable.Map()), update);
+    }
+    case TILE_CONTENT_FETCH_FAILURE: {
+      let update = tile => tile.merge({
+        fetching: false,
+        errors: action.errors
       });
+
+      if (action.tile) {
+        return state.update(action.tile, Immutable.Map({fetching: false, errors: action.errors}), update);
+      } else {
+        return state.map(update);
+      }
+    }
+    case TILE_CONTENT_LOAD_ALL:
+      let merger = (prev, next) => {
+        if (next.has('content') && !prev.has('content')) {
+          return prev.merge({
+            content: next.get('content'),
+            fetchedAt: next.get('fetchedAt')
+          });
+        } else {
+          return prev;
+        }
+      }
+
+      return state.mergeWith(merger, action.content);
     default:
       return state;
   }
