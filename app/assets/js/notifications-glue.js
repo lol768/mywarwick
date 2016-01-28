@@ -1,5 +1,6 @@
 import log from 'loglevel';
 import localforage from 'localforage';
+import moment from 'moment';
 import { createSelector } from 'reselect';
 
 import { fetchedActivities, fetchedNotifications } from './notifications';
@@ -42,13 +43,18 @@ export function getActivitiesFromLocalStorage() {
   };
 }
 
+const notificationsMetadataSelector = state => state.get("notifications-metadata");
+const activitiesMetadataSelector = state => state.get("activities-metadata");
+const userSelector = state => state.get("user");
+
 export const persistActivities = createSelector(state => state.get('activities'), (activities) => {
   // Persist the current set of activities to local storage on change
   localforage.setItem('activities', activities.valueSeq().flatten().toJS());
 });
 
-export const persistActivitiesMetadata = createSelector(state => state.get('activities-metadata'), (metadata) => {
-  localforage.setItem('activitiesLastRead', metadata.lastRead.format());
+export const persistActivitiesMetadata = createSelector([activitiesMetadataSelector, userSelector], (metadata, user) => {
+  let data = { usercode: user.get("usercode"), activitiesRead: metadata.lastRead.format() };
+  persistLastRead('activitiesLastRead', data, metadata.lastRead);
 });
 
 export const persistNotifications = createSelector(state => state.get('notifications'), (notifications) => {
@@ -56,6 +62,25 @@ export const persistNotifications = createSelector(state => state.get('notificat
   localforage.setItem('notifications', notifications.valueSeq().flatten().toJS());
 });
 
-export const persistNotificationsMetadata = createSelector(state => state.get('notifications-metadata'), (metadata) => {
-  localforage.setItem('notificationsLastRead', metadata.lastRead.format());
+export const persistNotificationsMetadata = createSelector([notificationsMetadataSelector, userSelector], (metadata, user) => {
+  let data = { usercode: user.get("usercode"), notificationsRead: metadata.lastRead.format() };
+  persistLastRead('notificationsLastRead', data, metadata.lastRead);
 });
+
+const persistLastRead = (field, data, lastRead) => {
+  localforage.getItem(field).then(lastReadLocal => {
+    if (moment(lastReadLocal).isBefore(lastRead)) {
+      localforage.setItem(field, lastRead.format()).then(() =>
+        fetch('/api/streams/read', {
+          method: 'post',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data),
+          credentials: 'same-origin'
+        })
+      );
+    }
+  });
+};

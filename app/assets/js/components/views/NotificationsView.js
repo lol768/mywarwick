@@ -2,7 +2,7 @@ import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
-import moment from 'moment'
+import moment from 'moment';
 
 import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';

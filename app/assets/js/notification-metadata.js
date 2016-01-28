@@ -22,7 +22,7 @@ export function readNotifications(date) {
 registerReducer('notifications-metadata', (state = {lastRead: moment('2015-01-01')}, action) => {
   switch (action.type) {
     case NOTIFICATIONS_READ:
-      return { lastRead: action.date };
+      return { lastRead: moment.max(state.lastRead, action.date) };
     default:
       return state;
   }
@@ -31,7 +31,7 @@ registerReducer('notifications-metadata', (state = {lastRead: moment('2015-01-01
 registerReducer('activities-metadata', (state ={lastRead: moment('2015-01-01')}, action) => {
   switch (action.type) {
     case ACTIVITIES_READ:
-      return { lastRead: action.date };
+      return { lastRead: moment.max(state.lastRead, action.date) };
     default:
       return state;
   }

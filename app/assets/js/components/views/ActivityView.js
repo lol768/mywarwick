@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
+import moment from 'moment';
 
 import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
@@ -29,16 +30,16 @@ export default class ActivityView extends ReactComponent {
     });
   }
 
-  markActivitysRead() {
+  markActivitiesRead() {
     this.props.dispatch(readActivities(moment()));
   }
 
   componentDidMount() {
-    this.markActivitysRead();
+    this.markActivitiesRead();
   }
 
   componentDidUpdate() {
-    this.markActivitysRead();
+    this.markActivitiesRead();
   }
 
   render() {
