@@ -122,6 +122,9 @@ let freezeStream = stream => stream.valueSeq().flatten().toJS();
 
 let loadPersonalisedData = _.once(() => {
   store.dispatch(serverpipe.fetchActivities());
+  store.dispatch(serverpipe.fetchTiles());
+  store.dispatch(serverpipe.fetchTileContent());
+
   store.subscribe(() => notificationsGlue.persistActivitiesMetadata(store.getState()));
   store.subscribe(() => notificationsGlue.persistNotificationsMetadata(store.getState()));
 

@@ -14,7 +14,6 @@ import Immutable from 'immutable';
 import { connect } from 'react-redux';
 
 import { registerReducer } from '../../reducers';
-import { fetchTiles, fetchTileContent } from '../../serverpipe';
 
 const ZOOM_ANIMATION_DURATION = 500;
 
@@ -40,11 +39,6 @@ class MeView extends ReactComponent {
 
   constructor(props) {
     super(props);
-  }
-
-  componentDidMount() {
-    this.props.dispatch(fetchTiles());
-    this.props.dispatch(fetchTileContent());
   }
 
   onTileClick(tile) {
