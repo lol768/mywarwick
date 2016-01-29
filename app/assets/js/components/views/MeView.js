@@ -39,9 +39,11 @@ class MeView extends ReactComponent {
 
   constructor(props) {
     super(props);
+
+    this.state = {};
   }
 
-  onTileClick(tile) {
+  onTileExpand(tile) {
     if (tile.href) {
       window.open(tile.href);
     } else if (!this.props.zoomedTile) {
@@ -54,6 +56,32 @@ class MeView extends ReactComponent {
       this.props.dispatch(zoomOut());
   }
 
+  onBeginEditing(tile) {
+    this.setState({
+      editing: tile.id
+    });
+
+    let el = $(ReactDOM.findDOMNode(this));
+
+    el.stop().transition({
+      scale: 0.8
+    }, 600, 'snap');
+  }
+
+  onFinishEditing() {
+    this.setState({
+      editing: null
+    });
+
+    let el = $(ReactDOM.findDOMNode(this));
+
+    el.stop().transition({
+      scale: 1
+    }, 600, 'snap', () => {
+      el.removeAttr('style'); // transform creates positioning context
+    });
+  }
+
   renderTile(props, zoomed = false) {
     let tileComponent = TILES[props.tileType];
     if (tileComponent === undefined) {
@@ -63,6 +91,7 @@ class MeView extends ReactComponent {
 
     let id = props.id;
     let { content, errors, fetching } = this.props.tileContent[id] || {};
+    let editing = this.state.editing === id;
     let ref = zoomed ? id + '-zoomed' : id;
 
     let config = Object.assign({}, props, {
@@ -72,14 +101,17 @@ class MeView extends ReactComponent {
       originalRef: id,
       content,
       errors,
-      fetching
+      fetching,
+      editing
     });
 
     config.onDismiss = () => this.onTileDismiss();
-    config.onExpand = () => this.onTileClick(config);
+    config.onExpand = () => this.onTileExpand(config);
     config.componentWillEnter = callback => this.componentWillEnter(config, callback);
     config.componentWillLeave = callback => this.componentWillLeave(config, callback);
     config.onClickRefresh = () => this.props.dispatch(fetchTileContent(id));
+    config.onBeginEditing = () => this.onBeginEditing(config);
+    config.onFinishEditing = () => this.onFinishEditing(config);
 
     return React.createElement(tileComponent, config);
   }
@@ -94,7 +126,7 @@ class MeView extends ReactComponent {
     let x = $zoom.offset().left - $tile.offset().left;
     let y = $zoom.offset().top - $tile.offset().top;
 
-    $tile.css({
+    $tile.stop().css({
       x: x,
       y: y,
       transformOriginX: 0,
@@ -118,7 +150,7 @@ class MeView extends ReactComponent {
       });
     });
 
-    $zoom.css({
+    $zoom.stop().css({
       transformOriginX: 0,
       transformOriginY: 0,
       zIndex: 1002
@@ -230,7 +262,7 @@ class MeView extends ReactComponent {
     }
 
     return (
-      <div>
+      <div className={this.state.editing ? 'me-view--editing' : ''}>
         { zoomedTileKey ?
           <div className="tile-zoom-backdrop" onClick={this.onTileDismiss.bind(this)}></div>
           : null}
