@@ -43,7 +43,7 @@ export const persistNotificationsMetadata = createSelector([notificationsMetadat
 
 const persistLastRead = (field, data, lastRead) => {
   localforage.getItem(field).then(lastReadLocal => {
-    if (moment(lastReadLocal).isBefore(lastRead)) {
+    if (lastReadLocal == null || moment(lastReadLocal).isBefore(lastRead)) {
       localforage.setItem(field, lastRead.format()).then(() =>
         fetch('/api/streams/read', {
           method: 'post',
