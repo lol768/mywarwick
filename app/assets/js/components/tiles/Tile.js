@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 
+import { localMoment } from '../../dateFormatter.js';
 import classNames from 'classnames';
 
 let sizeClasses = {
@@ -38,10 +39,36 @@ export default class Tile extends Component {
       this.props.componentWillLeave(callback);
   }
 
+  getIcon() {
+    let { fetching, errors, icon } = this.props;
+
+    if (fetching) {
+      return 'fa-refresh fa-spin';
+    } else if (errors) {
+      return 'fa-exclamation-triangle';
+    } else if (icon) {
+      return `fa-${icon}`;
+    } else {
+      return 'fa-question-circle';
+    }
+  }
+
+  getIconTitle() {
+    const { fetching, errors, title } = this.props;
+
+    if (fetching) {
+      return `Refreshing ${title}`;
+    } else if (errors) {
+      return `An error occurred while refreshing the ${title} tile. The error was: ${errors[0].message}`;
+    } else {
+      return `Refresh ${title}`;
+    }
+  }
+
   render() {
     let props = this.props;
 
-    let icon = props.icon ? <i className={classNames('fa', 'fa-fw', 'fa-' + props.icon)}></i> : null;
+    let icon = <i className={'tile__icon fa fa-fw ' + this.getIcon()} title={this.getIconTitle()} onClick={this.props.onClickRefresh}></i>;
 
     let size = props.size || props.defaultSize;
     let sizeClass = sizeClasses[size];
@@ -57,10 +84,12 @@ export default class Tile extends Component {
           className={classNames('tile', 'tile--' + props.tileType, 'tile--' + size, 'colour-' + props.colour)}
           ref="tile">
           <div className="tile__wrap">
-            <header className="tile__title">
+            <header>
               <h1>
                 {icon}
-                {props.title}
+                <span className="tile__title">
+                  {props.title}
+                </span>
               </h1>
               { this.isZoomed() ?
                 <i className="fa fa-times tile__dismiss" onClick={props.onDismiss}></i>
@@ -77,18 +106,30 @@ export default class Tile extends Component {
   }
 
   getOuterBody() {
-    if (this.props.content) {
-      return this.isZoomed() ? this.getZoomedBody(this.props.content) : this.getBody(this.props.content);
-    } else if (this.props.errors) {
-      return (
-        <div>
-          <i className="fa fa-exclamation-triangle fa-lg"></i>
-          <br/>
-          {this.props.errors[0].message}
-        </div>
-      );
+    const { content, errors, zoomed, fetchedAt } = this.props;
+
+    if (content) {
+      let body = zoomed ? this.getZoomedBody(content) : this.getBody(content);
+
+      if (errors) {
+        return (
+          <div>
+            <div className="tile__last-updated">
+              Last updated {localMoment(fetchedAt).calendar()}
+            </div>
+            {body}
+          </div>
+        );
+      } else {
+        return (
+          <div>
+            {body}
+          </div>
+        );
+      }
     } else {
-      return <i className="fa fa-refresh fa-spin fa-lg"></i>;
+      // Initial load
+      return null;
     }
   }
 
