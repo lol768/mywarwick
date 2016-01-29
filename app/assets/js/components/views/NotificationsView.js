@@ -23,7 +23,7 @@ class NotificationsView extends ReactComponent {
 
     this.state = {
       numberToShow: SOME_MORE,
-      browserPushDisabled: window.Notification.permission === "denied"
+      browserPushDisabled: 'Notification' in window && Notification.permission === "denied"
     };
 
     navigator.permissions.query({name:'notifications'})
@@ -40,7 +40,7 @@ class NotificationsView extends ReactComponent {
 
   onBrowserPermissionChange() {
     this.setState({
-      browserPushDisabled: window.Notification.permission === "denied"
+      browserPushDisabled: 'Notification' in window && Notification.permission === "denied"
     });
   }
 

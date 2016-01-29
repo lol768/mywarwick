@@ -11,7 +11,7 @@ export class SettingsView extends ReactComponent {
     super(props);
 
     this.state = {
-      browserPushDisabled: window.Notification.permission === "denied"
+      browserPushDisabled: 'Notification' in window && Notification.permission === "denied"
     };
 
     navigator.permissions.query({name:'notifications'})
@@ -22,7 +22,7 @@ export class SettingsView extends ReactComponent {
 
   onBrowserPermissionChange() {
     this.setState({
-      browserPushDisabled: window.Notification.permission === "denied"
+      browserPushDisabled: 'Notification' in window && Notification.permission === "denied"
     });
   }
 
