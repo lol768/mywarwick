@@ -57,7 +57,7 @@ export default class Tile extends Component {
     const { fetching, errors, title } = this.props;
 
     if (fetching) {
-      return 'Refreshing ${title}';
+      return `Refreshing ${title}`;
     } else if (errors) {
       return `An error occurred while refreshing the ${title} tile. The error was: ${errors[0].message}`;
     } else {
