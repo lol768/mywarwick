@@ -1,12 +1,12 @@
 {
-  "pushUrl": "https://finn.warwick.ac.uk",
+  "pushUrl": "local or start-dev, or whatever",
   "pushNotifications": true,
   "pushActivities": true,
-  "username": "user with api push permissions for below apps",
-  "password": "changeme",
-  "recipient": "single usercode to direct notifications at",
-  "interval": number of seconds to wait between pushes,
-  "bodyText": {
+  "username": "user account with permissions to push on behalf of all providers mentioned below",
+  "password": "CHANGEME",
+  "recipient": "single usercode as recipient",
+  "interval": time in seconds between each push,
+  "notificationProviders": {
     "tabula": [
       {
         "title": "2000 word essay for module EN101 is due tomorrow",
@@ -35,7 +35,7 @@
         "text": "The following book(s) are due back today by 17:30: 'How to tame your Dragon', 'I'm ok, you're ok'"
       }
     ],
-    "hear-now": [
+    "hearnow": [
       {
         "title": "A new survey awaits you",
         "text": "You have been invited to take part in the survey: 'Exactly how bad is the coffee served at the University?'"
@@ -48,7 +48,9 @@
         "title": "You have an incomplete survey ending soon",
         "text": "You are yet to participate in the survey, 'Yes no maybe, I don't know'"
       }
-    ],
+    ]
+  },
+  "activityProviders": {
     "sports-centre": [
       {
         "title": "You have booked squash court 2 for 21/01/2016 at 18:05",
