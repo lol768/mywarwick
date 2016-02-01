@@ -23,7 +23,6 @@ export default class PermissionRequest extends ReactComponent {
     window.Notification.requestPermission();
   }
 
-
   render() {
     return (
       window.Notification && !this.props.isDisabled && this.state.visible ?

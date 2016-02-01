@@ -19,12 +19,12 @@ class TilesController @Inject()(
 
   import securityService._
 
-  def tilesConfig = UserAction { request =>
+  def tiles = UserAction { request =>
     val tileLayout = tileService.getTilesForUser(request.context.user)
     Ok(Json.toJson(API.Success("ok", tileLayout)))
   }
 
-  def allTilesContent = UserAction.async { request =>
+  def content = UserAction.async { request =>
     val tileLayout = tileService.getTilesForUser(request.context.user)
     tilesContent(request.context.user, tileLayout.tiles)
   }
@@ -35,32 +35,16 @@ class TilesController @Inject()(
     }
 
     Future.sequence(futures).map { result =>
-      val tileResult = for ((tile, API.Success(_, content)) <- result) yield tile.tile.id -> content
-      val errorResult = for ((tile, API.Failure(_, errors)) <- result) yield tile.tile.id -> Json.toJson(errors)
+      val tileResult = for ((tile, API.Success(_, content)) <- result) yield tile.tile.id -> Map("content" -> content)
+      val errorResult = for ((tile, API.Failure(_, errors)) <- result) yield tile.tile.id -> Map("errors" -> Json.toJson(errors))
 
-      if (tileResult.isEmpty) {
-        InternalServerError(Json.obj(
-          "success" -> false,
-          "status" -> "Internal Server Error",
-          "errors" -> JsObject(errorResult)
-        ))
-      } else {
-        val allOk = tileResult.length == futures.length
-
-        val (status, response) = if (allOk) {
-          ("ok", Json.obj("tiles" -> JsObject(tileResult)))
-        } else {
-          ("some-ok", Json.obj("tiles" -> JsObject(tileResult), "errors" -> JsObject(errorResult)))
-        }
-
-        Ok(Json.toJson(API.Success(status, response)))
-      }
+      Ok(Json.toJson(API.Success(data = (tileResult ++ errorResult).toMap)))
     }
   }
 
-  def tilesContentById(ids: Seq[String]) = RequiredUserAction.async { request =>
+  def contentById(id: String) = RequiredUserAction.async { request =>
     request.context.user.map { user =>
-      val tiles = tileService.getTilesByIds(user, ids)
+      val tiles = tileService.getTilesByIds(user, Seq(id))
 
       tilesContent(Option(user), tiles)
     }.get // RequiredUserAction

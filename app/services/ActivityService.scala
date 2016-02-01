@@ -2,11 +2,11 @@ package services
 
 import actors.WebsocketActor.Notification
 import com.google.inject.{ImplementedBy, Inject}
-import models.{Activity, ActivityPrototype, ActivityResponse}
+import models.{LastRead, Activity, ActivityPrototype, ActivityResponse}
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
-import services.messaging.{GCMOutputService, MessagingService}
+import services.messaging.MessagingService
 import warwick.sso.{GroupName, User, Usercode}
 
 import scala.util.{Failure, Success, Try}
@@ -18,6 +18,12 @@ trait ActivityService {
   def getActivitiesForUser(user: User, limit: Int = 50, before: Option[DateTime] = None): Seq[ActivityResponse]
 
   def save(activity: ActivityPrototype): Try[String]
+
+  def getLastReadDate(user: User): Option[LastRead]
+
+  def setNotificationsReadDate(user: User, dateTime: DateTime): Boolean
+
+  def setActivitiesReadDate(user: User, dateTime: DateTime): Boolean
 }
 
 class ActivityServiceImpl @Inject()(
@@ -62,6 +68,15 @@ class ActivityServiceImpl @Inject()(
 
   override def getActivitiesForUser(user: User, limit: Int, before: Option[DateTime]): Seq[ActivityResponse] =
     db.withConnection(implicit c => activityDao.getActivitiesForUser(user.usercode.string, limit.min(50), before))
+
+  override def getLastReadDate(user: User): Option[LastRead] =
+    db.withConnection(implicit c => activityDao.getLastReadDate(user.usercode.string))
+
+  override def setNotificationsReadDate(user: User, dateTime: DateTime): Boolean =
+    db.withConnection(implicit c => activityDao.saveNotificationsReadDate(user.usercode.string, dateTime))
+
+  override def setActivitiesReadDate(user: User, dateTime: DateTime): Boolean =
+    db.withConnection(implicit c => activityDao.saveActivitiesReadDate(user.usercode.string, dateTime))
 }
 
 object NoRecipientsException extends Throwable

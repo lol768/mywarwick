@@ -3,4 +3,4 @@
 DIRNAME=`dirname $0`
 cd $DIRNAME/..
 
-./activator "runMain tasks.Worker"
+./activator "run 8080" -Dconfig.resource=worker.conf

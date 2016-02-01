@@ -17,7 +17,7 @@ import { connect } from 'react-redux';
 
 import { navigate } from '../navigate';
 
-import { getStreamSize } from '../stream';
+import { getStreamSize, getNumItemsSince } from '../stream';
 
 import { mq } from 'modernizr';
 
@@ -72,7 +72,7 @@ $(() => {
 class Application extends ReactComponent {
 
   render() {
-    const { dispatch, path, notificationsCount, activitiesCount, layoutClassName } = this.props;
+    const { dispatch, path, notificationsCount, activitiesCount, layoutClassName, user } = this.props;
 
     let views = {
       '/': <MeView />,
@@ -89,10 +89,12 @@ class Application extends ReactComponent {
         { layoutClassName == 'mobile' ?
           <TabBar selectedItem={path} onSelectItem={path => dispatch(navigate(path))}>
             <TabBarItem title="Me" icon="user" path="/"/>
-            <TabBarItem title="Notifications" icon="inbox" path="/notifications" badge={notificationsCount}
-                        isDisabled={ !this.props.user.authenticated }/>
-            <TabBarItem title="Activity" icon="dashboard" path="/activity" badge={activitiesCount}
-                        isDisabled={ !this.props.user.authenticated }/>
+            <TabBarItem title="Notifications" icon="inbox" path="/notifications"
+                        badge={ notificationsCount }
+                        isDisabled = { !user.authenticated } />
+            <TabBarItem title="Activity" icon="dashboard" path="/activity"
+                        badge={ activitiesCount }
+                        isDisabled = { !user.authenticated } />
             <TabBarItem title="News" icon="mortar-board" path="/news"/>
             <TabBarItem title="Search" icon="search" path="/search"/>
           </TabBar>
@@ -106,8 +108,8 @@ class Application extends ReactComponent {
 function mapStateToProps(state) {
   return {
     path: state.get('path'),
-    notificationsCount: getStreamSize(state.get('notifications')),
-    activitiesCount: getStreamSize(state.get('activities')),
+    notificationsCount: getNumItemsSince(state.get('notifications'), state.get('notifications-metadata').lastRead),
+    activitiesCount: getNumItemsSince(state.get('activities'), state.get('activities-metadata').lastRead),
     layoutClassName: state.get('ui').get('className'),
     user: state.get('user').toJS()
   };

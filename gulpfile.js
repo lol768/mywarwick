@@ -168,7 +168,8 @@ gulp.task('pre-service-worker', ['scripts', 'styles'], function () {
 });
 
 gulp.task('service-worker', ['pre-service-worker'], function () {
-  console.log(filenames.get('offline-cache'));
+  var jsBundle = ['target/gulp/js/bundle.js'];
+
   return swPrecache.generate({
       cacheId: 'start',
       handleFetch: PRODUCTION,
@@ -176,11 +177,20 @@ gulp.task('service-worker', ['pre-service-worker'], function () {
       stripPrefix: 'target/gulp',
       replacePrefix: 'assets',
       ignoreUrlParametersMatching: [/^v$/],
-      logger: gutil.log
+      logger: gutil.log,
+      dynamicUrlToDependencies: {
+        '/': jsBundle,
+        '/notifications': jsBundle,
+        '/activity': jsBundle,
+        '/news': jsBundle,
+        '/search': jsBundle
+      }
     })
     .then(function (offlineWorker) {
       return browserifyFlags(browserify(browserifyOptions('push-worker.js'))).bundle()
-        .on('error', e => gutil.log(gutil.colors.red(e.toString())))
+        .on('error', function (e) {
+          gutil.log(gutil.colors.red(e.toString()));
+        })
         .pipe(source('service-worker.js'))
         .pipe(buffer())
         .pipe(insert.prepend(offlineWorker))
@@ -214,16 +224,17 @@ gulp.task('manifest', ['scripts', 'styles'], function () {
             cache: ['/', '/activity', '/notifications', '/news', '/search'],
             hash: true,
             exclude: 'appcache.manifest',
-            prefix: '/assets/'
+            prefix: '/assets/',
+            filename: 'appcache.manifest'
           }))
-          .pipe(rename('appcache.manifest'))
           .pipe(gulp.dest(paths.assetsOut));
       });
   } else {
     // Produce an empty manifest file
     return gulp.src([])
-      .pipe(manifest())
-      .pipe(rename('appcache.manifest'))
+      .pipe(manifest({
+        filename: 'appcache.manifest'
+      }))
       .pipe(gulp.dest(paths.assetsOut));
   }
 });

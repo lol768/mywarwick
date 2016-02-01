@@ -2,6 +2,7 @@ import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
+import moment from 'moment';
 
 import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
@@ -11,6 +12,7 @@ import InfiniteScrollable from '../ui/InfiniteScrollable';
 import { connect } from 'react-redux';
 
 import { takeFromStream, getStreamSize } from '../../stream';
+import { readNotifications } from '../../notification-metadata'
 
 const SOME_MORE = 20;
 
@@ -21,7 +23,7 @@ class NotificationsView extends ReactComponent {
 
     this.state = {
       numberToShow: SOME_MORE,
-      browserPushDisabled: window.Notification.permission === "denied"
+      browserPushDisabled: 'Notification' in window && Notification.permission === "denied"
     };
 
     navigator.permissions.query({name:'notifications'})
@@ -38,13 +40,24 @@ class NotificationsView extends ReactComponent {
 
   onBrowserPermissionChange() {
     this.setState({
-      browserPushDisabled: window.Notification.permission === "denied"
+      browserPushDisabled: 'Notification' in window && Notification.permission === "denied"
     });
+  }
+
+  markNotificationsRead() {
+    this.props.dispatch(readNotifications(moment()));
+  }
+
+  componentDidMount() {
+    this.markNotificationsRead();
+  }
+
+  componentDidUpdate() {
+    this.markNotificationsRead();
   }
 
 
   render() {
-
     let notifications = takeFromStream(this.props.notifications, this.state.numberToShow)
       .map(n => <ActivityItem key={n.id} forceDisplayDay={!this.props.grouped} {...n} />);
 

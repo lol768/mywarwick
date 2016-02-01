@@ -4,11 +4,13 @@ import SocketDatapipe from './SocketDatapipe';
 
 import $ from 'jquery';
 import fetch from 'isomorphic-fetch';
+import moment from 'moment';
 
 import { userReceive } from './user';
 import { NEWS_FETCH, NEWS_FETCH_SUCCESS, NEWS_FETCH_FAILURE } from './news';
-import { TILES_FETCH, TILES_CONFIG_RECEIVE, TILES_CONTENT_RECEIVE, TILES_FETCH_FAILURE, receivedTilesConfig, receivedTilesContent } from './tiles';
+import { TILES_FETCH, TILES_FETCH_SUCCESS, TILE_CONTENT_FETCH, TILE_CONTENT_FETCH_SUCCESS, TILES_FETCH_FAILURE, TILE_CONTENT_FETCH_FAILURE, fetchedTiles, fetchedTileContent, failedTileContentFetch } from './tiles';
 import { receivedActivity, fetchedActivities, receivedNotification, fetchedNotifications } from './notifications';
+import * as notificationMetadata from './notification-metadata'
 
 //                       //
 //     MESSAGE SEND      //
@@ -46,40 +48,54 @@ function fetchWithCredentials(url) {
   });
 }
 
-export function fetchTilesConfig() {
+export function fetchTiles() {
   return dispatch => {
     dispatch({type: TILES_FETCH});
 
-    return fetchWithCredentials('/api/tiles/config')
+    return fetchWithCredentials('/api/tiles')
       .then(response => response.json())
-      .then(json => dispatch(receivedTilesConfig(json.data)))
+      .then(json => dispatch(fetchedTiles(json.data)))
       .catch(err => dispatch({type: TILES_FETCH_FAILURE}));
   }
 }
 
-export function fetchTilesContentById(tileIds) {
-  return dispatch => {
-    dispatch({type: TILES_FETCH});
-
-    let queryStr = $.param(tileIds);
-    fetchWithCredentials(`/api/tiles/contentbyid?${queryStr}`)
-      .then(response => response.json())
-      .then(json => dispatch(receivedTilesContent(json.data)))
+const NETWORK_ERRORS = [
+  {
+    id: 'network',
+    message: 'Unable to contact the server.'
   }
-}
+];
 
-export function fetchTilesContent() {
+const ALL_TILES = undefined;
+
+export function fetchTileContent(tileId = ALL_TILES) {
   return dispatch => {
-    dispatch({type: TILES_FETCH});
+    dispatch({
+      type: TILE_CONTENT_FETCH,
+      tile: tileId
+    });
 
-    fetchWithCredentials('/api/tiles/content')
+    let endpoint = tileId ? `/api/tiles/content/${tileId}` : '/api/tiles/content';
+
+    fetchWithCredentials(endpoint)
       .then(response => response.json())
       .then(json => {
-        if (json.success)
-          dispatch(receivedTilesContent(json.data));
-        else
-          dispatch(receivedTilesContent({errors: json.errors}));
+        _.each(json.data, (result, tile) => {
+          if (result.content) {
+            dispatch(fetchedTileContent(tile, result.content));
+          } else {
+            dispatch(failedTileContentFetch(tile, result.errors));
+          }
+        });
       })
+      .catch(err => {
+        console.warn('Tile fetch failed because', err);
+        dispatch({
+          type: TILE_CONTENT_FETCH_FAILURE,
+          tile: tileId,
+          errors: NETWORK_ERRORS
+        })
+      });
   }
 }
 
@@ -93,6 +109,13 @@ export function fetchActivities() {
 
         dispatch(fetchedNotifications(notifications));
         dispatch(fetchedActivities(activities));
+      });
+
+    fetchWithCredentials('/api/streams/read')
+      .then(response => response.json())
+      .then(json => {
+        if(json.data.notificationsRead) dispatch(notificationMetadata.readNotifications(moment(json.data.notificationsRead)));
+        if(json.data.activitiesRead) dispatch(notificationMetadata.readActivities(moment(json.data.activitiesRead)));
       });
   }
 }

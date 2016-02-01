@@ -19,9 +19,10 @@ import MasqueradeNotice from './MasqueradeNotice';
 import { navigate } from '../../navigate';
 
 import { connect } from 'react-redux';
-import { getStreamSize } from '../../stream';
+import { getStreamSize, getNumItemsSince } from '../../stream';
 
 import { updateLayoutClass } from '../Application';
+import { fetchTileContent } from '../../serverpipe';
 
 class ID7Layout extends ReactComponent {
 
@@ -43,10 +44,16 @@ class ID7Layout extends ReactComponent {
     e.preventDefault();
 
     this.props.dispatch(navigate('/'));
+
+    this.props.dispatch(fetchTileContent());
   }
 
   render() {
-    let isDesktop = this.props.layoutClassName == 'desktop';
+
+    const { layoutClassName, notificationsCount, activitiesCount, user, dispatch }
+      = this.props;
+
+    let isDesktop = layoutClassName == 'desktop';
 
     return (
       <div className={'theme-' + this.props.colourTheme}>
@@ -74,17 +81,18 @@ class ID7Layout extends ReactComponent {
                           { isDesktop ?
                             <div className="masthead-popover-icons">
                               <MastheadIcon icon="inbox"
-                                            badge={this.props.notificationsCount}
+                                            badge={ notificationsCount }
                                             key="notifications"
                                             popoverTitle="Notifications"
-                                            isDisabled = { !this.props.user.authenticated }
-                                            onMore={() => this.props.dispatch(navigate('/notifications'))}>
+                                            isDisabled = { !user.authenticated }
+                                            onMore={() => dispatch(navigate('/notifications'))}>
                                 <NotificationsView grouped={false}/>
                               </MastheadIcon>
-                              <MastheadIcon icon="dashboard" key="activity" badge={this.props.activitiesCount}
+                              <MastheadIcon icon="dashboard" key="activity"
+                                            badge={ activitiesCount }
                                             popoverTitle="Activity"
-                                            isDisabled = { !this.props.user.authenticated }
-                                            onMore={() => this.props.dispatch(navigate('/activity'))}>
+                                            isDisabled = { !user.authenticated }
+                                            onMore={() => dispatch(navigate('/activity'))}>
                                 <ActivityView grouped={false}/>
                               </MastheadIcon>
                               <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
@@ -114,8 +122,8 @@ class ID7Layout extends ReactComponent {
 
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
-              { Notification && Notification.permission === "default" ?
-                <PermissionRequest isDisabled={ !this.props.user.authenticated } /> : null }
+              { 'Notification' in window && Notification.permission === "default" ?
+                <PermissionRequest isDisabled={ !user.authenticated } /> : null }
               <div className="id7-horizontal-divider">
                 <svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" version="1.1" width="1130" height="40"
                      viewBox="0, 0, 1130, 40">
@@ -148,8 +156,8 @@ class ID7Layout extends ReactComponent {
 let select = (state) => {
   return {
     layoutClassName: state.get('ui').get('className'),
-    notificationsCount: getStreamSize(state.get('notifications')),
-    activitiesCount: getStreamSize(state.get('activities')),
+    notificationsCount: getNumItemsSince(state.get('notifications'), state.get('notifications-metadata').lastRead),
+    activitiesCount: getNumItemsSince(state.get('activities'), state.get('activities-metadata').lastRead),
     user: state.get('user').toJS(),
     colourTheme: state.get('ui').get('colourTheme')
   };

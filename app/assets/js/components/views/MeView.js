@@ -14,7 +14,6 @@ import Immutable from 'immutable';
 import { connect } from 'react-redux';
 
 import { registerReducer } from '../../reducers';
-import { fetchTilesConfig, fetchTilesContent } from '../../serverpipe';
 
 const ZOOM_ANIMATION_DURATION = 500;
 
@@ -42,11 +41,6 @@ class MeView extends ReactComponent {
     super(props);
   }
 
-  componentDidMount() {
-    this.props.dispatch(fetchTilesConfig());
-    this.props.dispatch(fetchTilesContent());
-  }
-
   onTileClick(tile) {
     if (tile.href) {
       window.open(tile.href);
@@ -68,23 +62,24 @@ class MeView extends ReactComponent {
     }
 
     let id = props.id;
-    let content = this.props.tileContent[id];
-    let errors = this.props.tileErrors[id];
+    let { content, errors, fetching } = this.props.tileContent[id] || {};
     let ref = zoomed ? id + '-zoomed' : id;
 
     let config = Object.assign({}, props, {
       zoomed: zoomed,
-      content: content,
-      errors: errors,
       key: ref,
       ref: ref,
-      originalRef: id
+      originalRef: id,
+      content,
+      errors,
+      fetching
     });
 
     config.onDismiss = () => this.onTileDismiss();
     config.onExpand = () => this.onTileClick(config);
     config.componentWillEnter = callback => this.componentWillEnter(config, callback);
     config.componentWillLeave = callback => this.componentWillLeave(config, callback);
+    config.onClickRefresh = () => this.props.dispatch(fetchTileContent(id));
 
     return React.createElement(tileComponent, config);
   }
@@ -274,8 +269,7 @@ registerReducer('me', (state = initialState, action) => {
 let select = (state) => ({
   zoomedTile: state.get('me').get('zoomedTile'),
   tiles: state.get('tiles').get('items').toJS(),
-  tileContent: state.get('tileContent').get('items').toJS(),
-  tileErrors: state.get('tileContent').get('errors').toJS()
+  tileContent: state.get('tileContent').toJS()
 });
 
 export default connect(select)(MeView);
