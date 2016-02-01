@@ -9,18 +9,20 @@ export class SettingsView extends ReactComponent {
     super(props);
 
     this.state = {
-      browserPushDisabled: 'Notification' in window && Notification.permission === 'denied'
+      browserPushDisabled: 'Notification' in window && Notification.permission === 'denied',
     };
 
-    navigator.permissions.query({ name:'notifications' })
+    navigator.permissions.query({ name: 'notifications' })
       .then(notificationPermissions => {
-        notificationPermissions.onchange = this.onBrowserPermissionChange.bind(this);
+        // param property reassignment is valid here. See the Permissions API docs ...
+        // https://developers.google.com/web/updates/2015/04/permissions-api-for-the-web?hl=en
+        notificationPermissions.onchange = this.onBrowserPermissionChange.bind(this); // eslint-disable-line no-param-reassign max-len
       });
   }
 
   onBrowserPermissionChange() {
     this.setState({
-      browserPushDisabled: 'Notification' in window && Notification.permission === 'denied'
+      browserPushDisabled: 'Notification' in window && Notification.permission === 'denied',
     });
   }
 
@@ -36,20 +38,19 @@ export class SettingsView extends ReactComponent {
         }
         <ul className={ classNames('settings-list') }>
           { this.props.settings.map((item) => {
-              const disabled = item.props.isDisabled ? 'disabled' : '';
-              return (
-                <li
-                  key={ item.id }
-                  className={ classNames("settings-list-item", 'well', disabled) }
-                >
-                  {item}
-                </li>
-              )
-            }
-          )}
+            const disabled = item.props.isDisabled ? 'disabled' : '';
+            return (
+              <li
+                key={ item.id }
+                className={ classNames('settings-list-item', 'well', disabled) }
+              >
+                {item}
+              </li>
+            );
+          }) }
         </ul>
       </div>
-    )
+    );
   }
 }
 

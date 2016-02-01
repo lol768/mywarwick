@@ -6,7 +6,7 @@ import classNames from 'classnames';
 
 import Popover from './Popover';
 
-let formatBadgeCount = (n) => n > 99 ? '99+' : n;
+const formatBadgeCount = (n) => n > 99 ? '99+' : n;
 
 export default class MastheadIcon extends ReactComponent {
 
@@ -16,7 +16,7 @@ export default class MastheadIcon extends ReactComponent {
     this.boundClickOffPopover = this.clickOffPopover.bind(this);
 
     this.state = {
-      popover: false
+      popover: false,
     };
   }
 
@@ -31,16 +31,16 @@ export default class MastheadIcon extends ReactComponent {
   }
 
   clickOffPopover(e) {
-    let node = $(ReactDOM.findDOMNode(this));
+    const node = $(ReactDOM.findDOMNode(this));
 
-    if (node.has(e.target).length == 0) {
+    if (node.has(e.target).length === 0) {
       this.dismissPopover();
     }
   }
 
   presentPopover() {
     this.setState({
-      popover: true
+      popover: true,
     });
 
     $(document).on('click', this.boundClickOffPopover);
@@ -48,7 +48,7 @@ export default class MastheadIcon extends ReactComponent {
 
   dismissPopover() {
     this.setState({
-      popover: false
+      popover: false,
     });
 
     $(document).off('click', this.boundClickOffPopover);
@@ -61,19 +61,29 @@ export default class MastheadIcon extends ReactComponent {
 
   render() {
     return (
-      <span className={ classNames({ 'disabled' : this.props.isDisabled }) }>
-        <a href="#" onClick={this.onClick.bind(this)} ref="icon"
-           className={classNames({
+      <span className={ classNames({ disabled: this.props.isDisabled }) }>
+        <a
+          href="#"
+          onClick={this.onClick.bind(this)}
+          ref="icon"
+          className={classNames({
             'masthead-popover-icon': true,
-            'popover-active': this.state.popover
-           })}>
-          <i className={classNames('fa', 'fa-' + this.props.icon)}>
-            { (this.props.badge > 0) ? <span className="badge">{formatBadgeCount(this.props.badge)}</span> : null }
+            'popover-active': this.state.popover,
+          })}
+        >
+          <i className={classNames('fa', `fa-${this.props.icon}`)}>
+            { (this.props.badge > 0) ?
+              <span className="badge">{formatBadgeCount(this.props.badge)}</span> :
+              null
+            }
           </i>
         </a>
         { this.state.popover ?
-          <Popover arrow attachTo={this.refs.icon} placement="bottom" height={300} width={300} top={-10}
-                   title={this.props.popoverTitle} onMore={this.props.onMore ? this.onMore.bind(this) : null}>
+          <Popover
+            arrow attachTo={this.refs.icon} placement="bottom" height={300} width={300} top={-10}
+            title={this.props.popoverTitle}
+            onMore={this.props.onMore ? this.onMore.bind(this) : null}
+          >
             {this.props.children}
           </Popover>
           : null }
