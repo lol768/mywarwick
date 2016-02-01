@@ -1,7 +1,6 @@
 import React, { cloneElement } from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 
-import TabBarItem from './TabBarItem';
 
 export default class TabBar extends ReactComponent {
 
@@ -10,10 +9,10 @@ export default class TabBar extends ReactComponent {
       cloneElement(el, {
         key: el.props.title,
         ref: el.props.title.toLowerCase(),
-        active: el.props.path == this.props.selectedItem,
-        onClick: (() => this.props.onSelectItem(el.props.path)),
+        active: el.props.path === this.props.selectedItem,
+        onClick: () => this.props.onSelectItem(el.props.path),
         badge: el.props.badge,
-        icon: el.props.icon
+        icon: el.props.icon,
       })
     ));
   }
@@ -22,11 +21,10 @@ export default class TabBar extends ReactComponent {
     return (
       <nav className="tab-bar">
         <ul className="tab-bar__tabs">
-          {this.getChildren()}
+          { this.getChildren() }
         </ul>
       </nav>
     );
   }
 
 }
-
