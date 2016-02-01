@@ -1,9 +1,7 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 import classNames from 'classnames';
 
-import { handlePushSubscribe } from '../../push-notifications';
-import ToggleSwitch from '../ui/ToggleSwitch';
 
 export class SettingsView extends ReactComponent {
 
@@ -11,10 +9,10 @@ export class SettingsView extends ReactComponent {
     super(props);
 
     this.state = {
-      browserPushDisabled: 'Notification' in window && Notification.permission === "denied"
+      browserPushDisabled: 'Notification' in window && Notification.permission === 'denied'
     };
 
-    navigator.permissions.query({name:'notifications'})
+    navigator.permissions.query({ name:'notifications' })
       .then(notificationPermissions => {
         notificationPermissions.onchange = this.onBrowserPermissionChange.bind(this);
       });
@@ -22,7 +20,7 @@ export class SettingsView extends ReactComponent {
 
   onBrowserPermissionChange() {
     this.setState({
-      browserPushDisabled: 'Notification' in window && Notification.permission === "denied"
+      browserPushDisabled: 'Notification' in window && Notification.permission === 'denied'
     });
   }
 
@@ -31,15 +29,19 @@ export class SettingsView extends ReactComponent {
       <div>
         { this.state.browserPushDisabled ?
           <div className="permission-warning">
-            You have blocked Start.Warwick from sending notifications. You'll need to open your browser preferences to change that.
+            You have blocked Start.Warwick from sending desktop notifications. You'll need to open
+            your browser preferences to change that.
           </div>
           : null
         }
-        <ul className={classNames('settings-list')}>
-          {this.props.settings.map((item) => {
-              let disabled = item.props.isDisabled ? 'disabled' : '';
+        <ul className={ classNames('settings-list') }>
+          { this.props.settings.map((item) => {
+              const disabled = item.props.isDisabled ? 'disabled' : '';
               return (
-                <li key={item.id} className={classNames("settings-list-item", 'well', disabled)}>
+                <li
+                  key={ item.id }
+                  className={ classNames("settings-list-item", 'well', disabled) }
+                >
                   {item}
                 </li>
               )
@@ -52,13 +54,12 @@ export class SettingsView extends ReactComponent {
 }
 
 // TODO: implement settings props fed in from top of app
-let appSettings = [
+const appSettings = [
   // TODO: If your adding the first settings to the app remember to ...
-      // Remove the notification permissions stuff from NotificationsView. It will live here instead.
-      // Put the settings MastheadIcon back in ID7Layout
+  // Remove the notification permissions stuff from NotificationsView. It will live here instead.
+  // Put the settings MastheadIcon back in ID7Layout
 ];
 
 SettingsView.defaultProps = {
-  settings: appSettings
+  settings: appSettings,
 };
-

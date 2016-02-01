@@ -242,7 +242,7 @@ gulp.task('manifest', ['scripts', 'styles'], function () {
 
 gulp.task('lint', function () {
   return gulp.src([paths.assetPath+'/js/**/*.js'])
-    .pipe(eslint('.eslintrc'))
+    .pipe(eslint('.eslintrc.json'))
     .pipe(eslint.format())
     .pipe(eslint.failAfterError());
 });
