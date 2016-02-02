@@ -6,9 +6,9 @@ import java.util.UUID
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject}
+import models.Output.Mobile
 import models._
 import org.joda.time.DateTime
-import Output.Mobile
 import system.DatabaseDialect
 import warwick.anorm.converters.ColumnConversions._
 
@@ -28,9 +28,11 @@ trait ActivityDao {
 
   def getLastReadDate(usercode: String)(implicit c: Connection): Option[LastRead]
 
-  def saveNotificationsReadDate(usercode: String, read:DateTime)(implicit c: Connection): Boolean
+  def saveNotificationsReadDate(usercode: String, read: DateTime)(implicit c: Connection): Boolean
 
-  def saveActivitiesReadDate(usercode: String, read:DateTime)(implicit c: Connection): Boolean
+  def saveActivitiesReadDate(usercode: String, read: DateTime)(implicit c: Connection): Boolean
+
+  def countNotificationsSinceDate(usercode: String, date: DateTime)(implicit c: Connection): Int
 
 }
 
@@ -134,20 +136,23 @@ class ActivityDaoImpl @Inject()(
   }
 
   sealed abstract class ReadField(val name: String)
+
   case object Notifications extends ReadField("NOTIFICATIONS_LAST_READ")
+
   case object Activities extends ReadField("ACTIVITIES_LAST_READ")
 
   override def getLastReadDate(usercode: String)(implicit c: Connection): Option[LastRead] = {
-    SQL("""
+    SQL(
+      """
         SELECT USERCODE, NOTIFICATIONS_LAST_READ, ACTIVITIES_LAST_READ
         FROM ACTIVITY_RECIPIENT_READ
         WHERE USERCODE = {usercode}
-    """)
+      """)
       .on('usercode -> usercode)
       .as(lastReadParser.singleOpt)
   }
 
-  private def setReadDate(usercode: String, read:DateTime, field: ReadField)(implicit c: Connection): Boolean = {
+  private def setReadDate(usercode: String, read: DateTime, field: ReadField)(implicit c: Connection): Boolean = {
     // attempt the update first as this is likely to be the most common op
     val updated = SQL(s"UPDATE ACTIVITY_RECIPIENT_READ SET ${field.name} = {read} WHERE USERCODE = {usercode}")
       .on('usercode -> usercode, 'read -> read)
@@ -158,10 +163,18 @@ class ActivityDaoImpl @Inject()(
       .execute()
   }
 
-  override def saveNotificationsReadDate(usercode: String, read:DateTime)(implicit c: Connection): Boolean =
+  override def countNotificationsSinceDate(usercode: String, date: DateTime)(implicit c: Connection): Int =
+    SQL("SELECT COUNT(ACTIVITY.ID) FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.GENERATED_AT > {date}")
+      .on(
+        'usercode -> usercode,
+        'date -> date
+      )
+      .as(scalar[Int].single)
+
+  override def saveNotificationsReadDate(usercode: String, read: DateTime)(implicit c: Connection): Boolean =
     setReadDate(usercode, read, Notifications)
 
-  override def saveActivitiesReadDate(usercode: String, read:DateTime)(implicit c: Connection): Boolean =
+  override def saveActivitiesReadDate(usercode: String, read: DateTime)(implicit c: Connection): Boolean =
     setReadDate(usercode, read, Activities)
 
   private lazy val activityParser: RowParser[Activity] =

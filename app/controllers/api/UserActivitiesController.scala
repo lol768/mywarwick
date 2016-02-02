@@ -6,11 +6,13 @@ import models.{API, LastRead}
 import models.API.Error
 import org.joda.time.DateTime
 import play.api.libs.json._
+import services.messaging.APNSOutputService
 import services.{ActivityService, SecurityService}
 
 class UserActivitiesController @Inject()(
   activityService: ActivityService,
-  securityService: SecurityService
+  securityService: SecurityService,
+  apns: APNSOutputService
 ) extends BaseController {
 
   import securityService._
@@ -46,10 +48,14 @@ class UserActivitiesController @Inject()(
           .map(u => {
             val success = data.activitiesRead.map(activityService.setActivitiesReadDate(u, _)).getOrElse(true) &&
               data.notificationsRead.map(activityService.setNotificationsReadDate(u, _)).getOrElse(true)
-            if (success) Ok(Json.toJson(API.Success[JsObject](data=Json.obj())))
-            else InternalServerError(Json.toJson(
-              apiFailure("last-read-noupdate", "The last read date was not updated")
-            ))
+            if (success) {
+              apns.clearAppIconBadge(u.usercode)
+              Ok(Json.toJson(API.Success[JsObject](data=Json.obj())))
+            } else {
+              InternalServerError(Json.toJson(
+                apiFailure("last-read-noupdate", "The last read date was not updated")
+              ))
+            }
           })
           .getOrElse(Forbidden(Json.toJson(apiFailure(
             "forbidden",
