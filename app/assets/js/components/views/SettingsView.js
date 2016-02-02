@@ -12,16 +12,18 @@ export class SettingsView extends ReactComponent {
       browserPushDisabled: 'Notification' in window && Notification.permission === 'denied',
     };
 
-    navigator.permissions.query({ name: 'notifications' })
-      .then(notificationPermissions => {
-        /* eslint-disable no-param-reassign */
-        /*
-         * function parameter reassignment is valid here. See the Permissions API docs ...
-         * https://developers.google.com/web/updates/2015/04/permissions-api-for-the-web?hl=en
-         */
-        notificationPermissions.onchange = this.onBrowserPermissionChange.bind(this);
-        /* eslint-enable no-param-reassign */
-      });
+    if ('permissions' in navigator) {
+      navigator.permissions.query({name: 'notifications'})
+        .then(notificationPermissions => {
+          /* eslint-disable no-param-reassign */
+          /*
+           * function parameter reassignment is valid here. See the Permissions API docs ...
+           * https://developers.google.com/web/updates/2015/04/permissions-api-for-the-web?hl=en
+           */
+          notificationPermissions.onchange = this.onBrowserPermissionChange.bind(this);
+          /* eslint-enable no-param-reassign */
+        });
+    }
   }
 
   onBrowserPermissionChange() {
