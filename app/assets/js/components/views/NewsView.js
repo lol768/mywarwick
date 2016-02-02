@@ -2,7 +2,6 @@ import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 
 import NewsItem from '../ui/NewsItem';
-import CheckableListItem from '../ui/CheckableListItem';
 
 import { connect } from 'react-redux';
 import _ from 'lodash';
@@ -12,8 +11,9 @@ import { fetchNews } from '../../serverpipe';
 class NewsView extends ReactComponent {
 
   componentDidMount() {
-    if (this.props.items.length == 0 && !this.props.failed)
+    if (this.props.items.length === 0 && !this.props.failed) {
       this.props.dispatch(fetchNews());
+    }
   }
 
   render() {
@@ -37,9 +37,9 @@ class NewsView extends ReactComponent {
       );
     }
 
-    let html = (content) => ({__html: content.replace(/<br[ /]+?>/g, '')});
+    const html = (content) => ({ __html: content.replace(/<br[ /]+?>/g, '') });
 
-    let items = _.take(this.props.items, 5).map((item) =>
+    const items = _.take(this.props.items, 5).map((item) =>
       <NewsItem key={item.id} title={item.title} source={item.source} url={item.url.href}>
         <div dangerouslySetInnerHTML={html(item.content)}></div>
       </NewsItem>
@@ -54,6 +54,6 @@ class NewsView extends ReactComponent {
 
 }
 
-let select = (state) => state.get('news').toJS();
+const select = (state) => state.get('news').toJS();
 
 export default connect(select)(NewsView);
