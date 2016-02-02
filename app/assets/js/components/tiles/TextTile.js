@@ -9,7 +9,7 @@ export default class TextTile extends Tile {
     super(props);
 
     this.state = {
-      itemIndex: 0
+      itemIndex: 0,
     };
   }
 
@@ -40,32 +40,34 @@ export default class TextTile extends Tile {
   }
 
   onInterval() {
-    let oldItemIndex = this.state.itemIndex;
+    const oldItemIndex = this.state.itemIndex;
 
-    let itemIndex = (oldItemIndex >= this.props.content.items.length - 1) ? 0 : oldItemIndex + 1;
+    const itemIndex = (oldItemIndex >= this.props.content.items.length - 1) ? 0 : oldItemIndex + 1;
 
     this.setState({
-      itemIndex: itemIndex
+      itemIndex,
     });
   }
 
   getBody(content) {
-    let itemsToDisplay = this.isZoomed() ? content.items : [content.items[this.state.itemIndex]];
+    const itemsToDisplay = this.isZoomed() ? content.items : [content.items[this.state.itemIndex]];
 
     return (
-      <ReactCSSTransitionGroup transitionName="text-tile"
-                               transitionEnterTimeout={1000}
-                               transitionLeaveTimeout={1000}>
-        {itemsToDisplay.map(item => {
-          let tileItem = <div className="tile__item" key={item.key}>
+      <ReactCSSTransitionGroup
+        transitionName="text-tile"
+        transitionEnterTimeout={1000}
+        transitionLeaveTimeout={1000}
+      >
+        { itemsToDisplay.map(item => {
+          const tileItem = (<div className="tile__item" key={item.key}>
             <span className="tile__callout">{item.callout}</span>
             <span className="tile__text">{item.text}</span>
-          </div>;
+          </div>);
 
           return item.href ?
             <a href={item.href} target="_blank" onClick={e => e.stopPropagation()}>{tileItem}</a>
             : tileItem;
-        })}
+        }) }
       </ReactCSSTransitionGroup>
     );
   }
