@@ -111,7 +111,7 @@ function mapStateToProps(state) {
     notificationsCount: getNumItemsSince(state.get('notifications'), state.get('notifications-metadata').lastRead),
     activitiesCount: getNumItemsSince(state.get('activities'), state.get('activities-metadata').lastRead),
     layoutClassName: state.get('ui').get('className'),
-    user: state.get('user').toJS()
+    user: state.getIn(['user', 'data']).toJS()
   };
 }
 

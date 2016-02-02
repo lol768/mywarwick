@@ -1,37 +1,76 @@
+import _ from 'lodash';
 import Immutable from 'immutable';
 import localforage from 'localforage';
 
+import store from './store';
+
 import { registerReducer, resetStore } from './reducers';
 
+export const USER_LOAD = 'user.load';
 export const USER_RECEIVE = 'user.receive';
 
-registerReducer('user', (state = Immutable.Map({loaded: false}), action) => {
+const initialState = Immutable.fromJS({
+  data: {},
+  authoritative: false
+});
+
+registerReducer('user', (state = initialState, action) => {
   switch (action.type) {
+    case USER_LOAD:
+      return state.merge({
+        data: action.data
+      });
     case USER_RECEIVE:
-      return Immutable.Map(action.data).set('loaded', true);
+      return state.merge({
+        data: action.data,
+        authoritative: true
+      });
+      return state;
     default:
       return state;
   }
 });
 
-function userReceiveAction(data) {
+function loadCachedUserIdentity(data) {
   return {
-    type: USER_RECEIVE,
-    data: data
+    type: USER_LOAD,
+    data
   };
 }
 
-export function userReceive(data) {
-  return dispatch => {
-    localforage.getItem('usercode', (err, currentUsercode) => {
-      // If we are a different user than we were before (incl. anonymous),
-      // nuke the store, which also clears local storage
-      if (currentUsercode !== data.usercode) {
+function receiveUserIdentity(data) {
+  return {
+    type: USER_RECEIVE,
+    data
+  };
+}
+
+const loadUserFromLocalStorage = localforage.getItem('user')
+  .then(user => {
+    if (user) {
+      store.dispatch(loadCachedUserIdentity(user));
+
+      return user;
+    } else {
+      return {};
+    }
+  })
+  .catch(err => {
+    console.warn('Could not load user from local storage', err);
+    return {};
+  });
+
+export function userReceive(currentUser) {
+  return (dispatch) => {
+    // If we are a different user than we were before (incl. anonymous),
+    // nuke the store, which also clears local storage
+    loadUserFromLocalStorage.then(previousUser => {
+      if (previousUser.usercode != currentUser.usercode) {
         dispatch(resetStore())
-          .then(() => localforage.setItem('usercode', data.usercode))
-          .then(() => dispatch(userReceiveAction(data)));
+          .then(() => localforage.setItem('user', currentUser))
+          .then(() => dispatch(receiveUserIdentity(currentUser)));
       } else {
-        dispatch(userReceiveAction(data));
+        dispatch(receiveUserIdentity(currentUser));
       }
     });
   };
