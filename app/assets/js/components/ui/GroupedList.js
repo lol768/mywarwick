@@ -21,15 +21,19 @@ export default class GroupedList extends ReactComponent {
     // don't pass directly to groupBy - tramples on your default args.
       .groupBy((obj) => this.props.groupBy.groupForItem(obj))
       .pairs()
-      .sortBy(([group, items]) => group);
+      .sortBy(([group, item]) => group); // eslint-disable-line no-unused-vars
 
-    if (this.props.orderDescending)
+    if (this.props.orderDescending) {
       groups = groups.reverse();
+    }
 
-    let orderedGroups = groups.map(([group, items]) => (
+    const orderedGroups = groups.map(([group, items]) => (
         // Title the group with a list header
-        <div key={'group-' + group} className="list-group">
-          <ListHeader key={'group-header-' + group} title={this.props.groupBy.titleForGroup(group)}/>
+        <div key={`group-${group}`} className="list-group">
+          <ListHeader
+            key={`group-header-${group}`}
+            title={this.props.groupBy.titleForGroup(group)}
+          />
           {items}
         </div>
       ))
@@ -37,11 +41,13 @@ export default class GroupedList extends ReactComponent {
 
     return (
       <div
-        className={"list-group list-group--grouped list-group--grouped-" + this.props.groupBy.description}>
+        className={
+          `list-group list-group--grouped list-group--grouped-${this.props.groupBy.description}`
+        }
+      >
         {orderedGroups}
       </div>
     );
   }
 
 }
-

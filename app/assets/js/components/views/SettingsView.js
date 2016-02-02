@@ -14,9 +14,13 @@ export class SettingsView extends ReactComponent {
 
     navigator.permissions.query({ name: 'notifications' })
       .then(notificationPermissions => {
-        // param property reassignment is valid here. See the Permissions API docs ...
-        // https://developers.google.com/web/updates/2015/04/permissions-api-for-the-web?hl=en
-        notificationPermissions.onchange = this.onBrowserPermissionChange.bind(this); // eslint-disable-line no-param-reassign max-len
+        /* eslint-disable no-param-reassign */
+        /*
+         * function parameter reassignment is valid here. See the Permissions API docs ...
+         * https://developers.google.com/web/updates/2015/04/permissions-api-for-the-web?hl=en
+         */
+        notificationPermissions.onchange = this.onBrowserPermissionChange.bind(this);
+        /* eslint-enable no-param-reassign */
       });
   }
 

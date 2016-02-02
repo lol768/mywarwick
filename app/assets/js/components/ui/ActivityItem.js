@@ -10,24 +10,26 @@ import AppIcon from './AppIcon';
 export default class ActivityItem extends ReactComponent {
 
   render() {
-    let content = (
+    const content = (
       <div className="media">
         <div className="media-left">
           <AppIcon app={this.props.provider} size="lg"/>
         </div>
         <div className="media-body">
-          <span className="activity-item__date">{formatDate(this.props.date, undefined, this.props.forceDisplayDay)}</span>
+          <span className="activity-item__date">
+            { formatDate(this.props.date, undefined, this.props.forceDisplayDay) }
+          </span>
 
-          <span className="activity-item__title">{this.props.title}</span>
-          <span className="activity-item__text">{this.props.text}</span>
+          <span className="activity-item__title">{ this.props.title }</span>
+          <span className="activity-item__text">{ this.props.text }</span>
         </div>
       </div>
     );
 
     return (
-      <div className={classnames('activity-item', {'activity-item--with-url': this.props.url})}>
+      <div className={ classnames('activity-item', { 'activity-item--with-url': this.props.url }) }>
         { this.props.url ?
-          <a href={this.props.url}>{content}</a>
+          <a href={ this.props.url }>{content}</a>
           : content }
       </div>
     );

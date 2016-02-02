@@ -28,7 +28,8 @@ export default class InfiniteScrollable extends ReactComponent {
 
     if (this.props.hasMore) {
       $(window).on('scroll resize', this.boundScrollListener);
-      $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]').on('scroll', this.boundScrollListener);
+      $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]')
+        .on('scroll', this.boundScrollListener);
 
       this.onScroll();
     }
@@ -37,19 +38,20 @@ export default class InfiniteScrollable extends ReactComponent {
   detachScrollListener() {
     $(window).off('scroll resize', this.boundScrollListener);
 
-    $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]').off('scroll', this.boundScrollListener);
+    $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]')
+      .off('scroll', this.boundScrollListener);
   }
 
   onScroll() {
-    var $this = $(ReactDOM.findDOMNode(this));
+    const $this = $(ReactDOM.findDOMNode(this));
 
-    let offsetTop = $this.offset().top;
-    let height = $this.height();
+    const offsetTop = $this.offset().top;
+    const height = $this.height();
 
-    let windowHeight = $(window).height();
-    let scrollTop = $(window).scrollTop();
+    const windowHeight = $(window).height();
+    const scrollTop = $(window).scrollTop();
 
-    let loadMoreThreshold = offsetTop + height - (windowHeight * 1.5);
+    const loadMoreThreshold = offsetTop + height - (windowHeight * 1.5);
 
     if (scrollTop >= loadMoreThreshold) {
       this.detachScrollListener();
