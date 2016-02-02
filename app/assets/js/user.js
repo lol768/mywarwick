@@ -5,7 +5,8 @@ import { registerReducer, resetStore } from './reducers';
 
 export const USER_RECEIVE = 'user.receive';
 
-registerReducer('user', (state = Immutable.Map({loaded: false}), action) => {
+/* eslint-disable new-cap */
+registerReducer('user', (state = Immutable.Map({ loaded: false }), action) => {
   switch (action.type) {
     case USER_RECEIVE:
       return Immutable.Map(action.data).set('loaded', true);
@@ -13,11 +14,12 @@ registerReducer('user', (state = Immutable.Map({loaded: false}), action) => {
       return state;
   }
 });
+/* eslint-enable new-cap */
 
 function userReceiveAction(data) {
   return {
     type: USER_RECEIVE,
-    data: data
+    data,
   };
 }
 

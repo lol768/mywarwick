@@ -1,7 +1,4 @@
-"use strict";
-
-import log from 'loglevel';
-
+/* eslint no-unused-vars:0 */
 export default class DataPipe {
 
   /**
@@ -13,15 +10,15 @@ export default class DataPipe {
    * the data for one).
    */
   requestData(info) {
-    throw new TypeError("Must implement requestData");
+    throw new TypeError('Must implement requestData');
   }
 
   send(obj) {
-    throw new TypeError("Must implement send");
+    throw new TypeError('Must implement send');
   }
 
-  getUpdateStream():Rx.Observable {
-    throw new TypeError("Must implement getUpdateStream");
+  getUpdateStream() {
+    throw new TypeError('Must implement getUpdateStream');
   }
 
 }

@@ -1,6 +1,5 @@
 import Rx from 'rx';
 import log from 'loglevel';
-import DataPipe from '../datapipe';
 
 /**
  * Simple binary backoff for retrying failed connections.
@@ -32,7 +31,7 @@ class BinaryBackoff {
     // Reset timer back to min after a short period.
     // If we have to `retry()` straight away, this party gets cancelled.
     this.resetTimer = setTimeout(() => {
-      this.current = this.min
+      this.current = this.min;
     }, this.reset);
   }
 }
@@ -46,17 +45,15 @@ class BinaryBackoff {
  */
 export default class RestartableWebSocket {
   constructor(url) {
-    this.url = url
+    this.url = url;
     this.connected = false;
-    this.onmessage = function () {
-    };
-    this.onopen = function () {
-    };
+    this.onmessage = function onmessage() {};
+    this.onopen = function onopen() {};
 
     this.backoff = new BinaryBackoff(500, 30000, 2000);
 
     this.backoff.retries.subscribe((ms) => {
-      log.info("WS retrying connection in", ms, "ms");
+      log.info('WS retrying connection in', ms, 'ms');
     });
 
     this.ensureConnection();
@@ -64,8 +61,8 @@ export default class RestartableWebSocket {
     this.buffer = [];
   }
 
-  send(msg:String) {
-    if (this.ws.readyState == 1) {
+  send(msg) {
+    if (this.ws.readyState === 1) {
       this.ws.send(msg);
     } else {
       // Send message once we're reconnected
@@ -75,13 +72,13 @@ export default class RestartableWebSocket {
 
   ensureConnection() {
     if (!this.connected) {
-      let ws = new WebSocket(this.url);
+      const ws = new WebSocket(this.url);
       this.ws = ws;
       ws.onopen = () => {
-        log.info("WS open")
+        log.info('WS open');
         this.connected = true;
         if (this.buffer.length) {
-          log.debug(this.buffer.length + " messages were waiting to be sent. Sending...");
+          log.debug(`${this.buffer.length} messages were waiting to be sent. Sending...`);
         }
         this.buffer.forEach((m) => this.send(m));
         this.buffer = [];
@@ -90,11 +87,11 @@ export default class RestartableWebSocket {
         this.onopen();
       };
       ws.onclose = () => {
-        log.info("WS closed");
+        log.info('WS closed');
         this.connected = false;
 
         if (this.explicitlyClosed) {
-          log.info("Socket explicitly closed, not reopening.");
+          log.info('Socket explicitly closed, not reopening.');
         } else {
           this.backoff.retry(() => {
             this.ensureConnection();
@@ -102,11 +99,11 @@ export default class RestartableWebSocket {
         }
       };
       ws.onerror = (e) => {
-        log.warn("WS error", e);
+        log.warn('WS error', e);
       };
       ws.onmessage = (msg) => {
         this.onmessage(msg);
-      }
+      };
     }
   }
 
