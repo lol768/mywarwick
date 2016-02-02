@@ -20,10 +20,15 @@ class UtilityBar extends ReactComponent {
   }
 
   render() {
+    // Wrap Sign in link in a <span> so React does not use the same <a> element
+    // as for the account link.  This causes the account popover to be attached
+    // to the sign in link if the user signs out.
     let signInLink = (
-      <a href={window.SSO.LOGIN_URL}>
-        Sign in
-      </a>
+      <span>
+        <a href={window.SSO.LOGIN_URL}>
+          Sign in
+        </a>
+      </span>
     );
     let accountLink = (
       <a ref="accountLink" href="//warwick.ac.uk/myaccount" data-toggle="id7:account-popover" data-name={this.props.name}>
@@ -43,6 +48,6 @@ class UtilityBar extends ReactComponent {
 
 }
 
-let select = (state) => state.get('user').toJS();
+let select = (state) => state.getIn(['user', 'data']).toJS();
 
 export default connect(select)(UtilityBar);
