@@ -11,7 +11,7 @@ export default class ListTile extends Tile {
     let maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : 3;
     let itemsToDisplay = this.isZoomed() ? content.items : _.take(content.items, maxItemsToDisplay);
     return <ul>
-      {itemsToDisplay.map(item => <ListTileItem {...item} />)}
+      {itemsToDisplay.map(item => <ListTileItem key={item.id} {...item} />)}
     </ul>;
   }
 
