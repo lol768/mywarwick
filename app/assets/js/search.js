@@ -10,44 +10,44 @@ export const SEARCH_QUERY_FAILURE = 'search.query.failure';
 
 export const SEARCH_RESULT_CLICK = 'search.result.click';
 
-const SITEBUILDER_GO_QUERY_URL = 'https://sitebuilder.warwick.ac.uk/sitebuilder2/api/go/redirects.json';
-
-export function fetchSearchResults(query) {
-  if (_.trim(query).length == 0) {
-    return {type: SEARCH_QUERY_SUCCESS, query: query, results: []};
-  } else {
-    return dispatch => debouncedSearchGoRedirects(dispatch, query);
-  }
-}
+const SITEBUILDER_GO_QUERY_URL =
+  'https://sitebuilder.warwick.ac.uk/sitebuilder2/api/go/redirects.json';
 
 function searchGoRedirects(dispatch, query) {
-  dispatch({type: SEARCH_QUERY_START, query: query});
+  dispatch({ type: SEARCH_QUERY_START, query });
   $.ajax({
     url: SITEBUILDER_GO_QUERY_URL,
     data: {
       maxResults: 5,
-      prefix: query
+      prefix: query,
     },
     dataType: 'jsonp',
     success: (response) => {
-      dispatch({type: SEARCH_QUERY_SUCCESS, query: query, results: response});
+      dispatch({ type: SEARCH_QUERY_SUCCESS, query, results: response });
     },
     error: () => {
-      dispatch({type: SEARCH_QUERY_FAILURE});
-    }
+      dispatch({ type: SEARCH_QUERY_FAILURE });
+    },
   });
 }
 
-let debouncedSearchGoRedirects = _.debounce(searchGoRedirects, 300);
+const debouncedSearchGoRedirects = _.debounce(searchGoRedirects, 300);
+
+export function fetchSearchResults(query) {
+  if (_.trim(query).length === 0) {
+    return { type: SEARCH_QUERY_SUCCESS, query, results: [] };
+  }
+  return dispatch => debouncedSearchGoRedirects(dispatch, query);
+}
 
 export function clickSearchResult(result) {
   return {
     type: SEARCH_RESULT_CLICK,
-    result: result
+    result,
   };
 }
 
-let initialState = Immutable.fromJS({
+const initialState = Immutable.fromJS({
   fetching: false,
   query: undefined,
   results: [],
@@ -56,25 +56,24 @@ let initialState = Immutable.fromJS({
       count: 0,
       value: {
         path: 'webteam',
-        description: 'Web Team'
-      }
-    }
-  ]
+        description: 'Web Team',
+      },
+    },
+  ],
 });
 
 const NOT_FOUND = -1;
 
 function pushRecentItem(list, item) {
-  let index = list.findIndex((i) => Immutable.fromJS(item).equals(i.get('value')));
+  const index = list.findIndex((i) => Immutable.fromJS(item).equals(i.get('value')));
 
-  if (index == NOT_FOUND) {
+  if (index === NOT_FOUND) {
     return list.push(Immutable.fromJS({
       count: 1,
-      value: item
+      value: item,
     }));
-  } else {
-    return list.update(index, (recent) => recent.update('count', (count) => count + 1));
   }
+  return list.update(index, (recent) => recent.update('count', (count) => count + 1));
 }
 
 export function getRecentItemsOrderedByFrequency(list) {

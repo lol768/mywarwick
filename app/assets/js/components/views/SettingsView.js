@@ -13,7 +13,7 @@ export class SettingsView extends ReactComponent {
     };
 
     if ('permissions' in navigator) {
-      navigator.permissions.query({name: 'notifications'})
+      navigator.permissions.query({ name: 'notifications' })
         .then(notificationPermissions => {
           /* eslint-disable no-param-reassign */
           /*
