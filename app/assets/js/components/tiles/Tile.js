@@ -1,4 +1,6 @@
-import React, { Component, PropTypes } from 'react';
+// TODO - include prop validation for Tile that doesn't break the extending tile types
+/* eslint react/prop-types:0 */
+import React, { Component } from 'react';
 
 import { localMoment } from '../../dateFormatter.js';
 import classNames from 'classnames';
@@ -12,34 +14,39 @@ const sizeClasses = {
 
 export default class Tile extends Component {
 
-  /* eslint-disable no-unused-vars */
-  getBody(content) {
-    throw new TypeError('Must implement getBody');
-  }
-  /* eslint-enable no-unused-vars */
-
-  getZoomedBody(content) {
-    return this.getBody(content);
+  contentOrDefault(content, contentFunction) {
+    const defaultText = (content.defaultText === undefined) ?
+      'Nothing to show.' : content.defaultText;
+    if (!content.items || content.items.length === 0) {
+      return <span>{defaultText}</span>;
+    }
+    return contentFunction.call(this, content);
   }
 
   getBodyInternal(content) {
     return this.contentOrDefault(content, this.getBody);
   }
 
+  /* eslint-disable no-unused-vars */
+  getBody(content) {
+    throw new TypeError('Must implement getBody');
+  }
+  /* eslint-enable no-unused-vars */
+
+  canZoom() {
+    return false;
+  }
+
+  isZoomed() {
+    return this.props.zoomed;
+  }
+
   getZoomedBodyInternal(content) {
     return this.contentOrDefault(content, this.getZoomedBody);
   }
 
-  getIconTitle() {
-    const { fetching, errors, title } = this.props;
-
-    if (fetching) {
-      return `Refreshing ${title}`;
-    } else if (errors) {
-      return `An error occurred while refreshing the ${title} tile. The error was:
-        ${errors[0].message}`;
-    }
-    return `Refresh ${title}`;
+  getZoomedBody(content) {
+    return this.getBody(content);
   }
 
   componentWillEnter(callback) {
@@ -54,12 +61,37 @@ export default class Tile extends Component {
     }
   }
 
+  getIcon() {
+    const { fetching, errors, icon } = this.props;
+
+    if (fetching) {
+      return 'fa-refresh fa-spin';
+    } else if (errors) {
+      return 'fa-exclamation-triangle';
+    } else if (icon) {
+      return `fa-${icon}`;
+    }
+    return 'fa-question-circle';
+  }
+
+  getIconTitle() {
+    const { fetching, errors, title } = this.props;
+
+    if (fetching) {
+      return `Refreshing ${title}`;
+    } else if (errors) {
+      return `An error occurred while refreshing the ${title} tile.
+        The error was: ${errors[0].message}`;
+    }
+    return `Refresh ${title}`;
+  }
+
   render() {
     const props = this.props;
 
     const icon = (<i
-      className={ `tile__icon fa fa-fw ${this.getIcon()}` } title={ this.getIconTitle() }
-      onClick={ this.props.onClickRefresh }
+      className={`tile__icon fa fa-fw ${this.getIcon()}`} title={ this.getIconTitle() }
+      onClick={this.props.onClickRefresh}
     > </i>);
 
     const size = props.size || props.defaultSize;
@@ -69,7 +101,6 @@ export default class Tile extends Component {
       'tile--canZoom': this.canZoom(),
       'tile--text-btm': true,
     });
-
     const zoomIcon = () => {
       if (this.isZoomed()) {
         return <i className="fa fa-times tile__dismiss" onClick={props.onDismiss}> </i>;
@@ -93,12 +124,12 @@ export default class Tile extends Component {
                 {icon}
                 <span className="tile__title">
                   {props.title}
-                </span> { PropTypes }
+                </span>
               </h1>
               { zoomIcon() }
             </header>
             <div className="tile__body">
-              {this.getOuterBody()}
+              { this.getOuterBody() }
             </div>
           </div>
         </article>
@@ -116,34 +147,16 @@ export default class Tile extends Component {
         return (
           <div>
             <div className="tile__last-updated">
-              Last updated { localMoment(fetchedAt).calendar() }
+              Last updated {localMoment(fetchedAt).calendar()}
             </div>
             {body}
           </div>
         );
       }
-      return (
-        <div>
-          {body}
-        </div>
-      );
+      return <div>{body}</div>;
     }
-
     // Initial load
     return null;
   }
 
 }
-
-Tile.propTypes = {
-  componentWillEnter: PropTypes.function,
-  componentWillLeave: PropTypes.function,
-  content: PropTypes.object,
-  errors: PropTypes.object,
-  fetchedAt: PropTypes.string,
-  fetching: PropTypes.boolean,
-  icon: PropTypes.string,
-  onClickRefresh: PropTypes.function,
-  title: PropTypes.string,
-  zoomed: PropTypes.boolean,
-};
