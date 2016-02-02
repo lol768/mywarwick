@@ -29,6 +29,7 @@ import * as user from './user';
 import { navigate } from './navigate';
 import persisted from './persisted';
 import SocketDatapipe from './SocketDatapipe';
+import './bridge';
 
 localforage.config({
   name: 'Start'
@@ -74,10 +75,6 @@ $(function () {
 
   if (window.navigator.userAgent.indexOf('Mobile') >= 0) {
     $('html').addClass('mobile');
-  }
-
-  if (window.navigator.userAgent.indexOf('Start/1.0') >= 0) {
-    $('html').addClass('app standalone');
   }
 });
 
