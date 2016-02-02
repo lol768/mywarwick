@@ -51,6 +51,8 @@ const loadUserFromLocalStorage = localforage.getItem('user')
       store.dispatch(loadCachedUserIdentity(user));
 
       return user;
+    } else {
+      return {};
     }
   })
   .catch(err => {

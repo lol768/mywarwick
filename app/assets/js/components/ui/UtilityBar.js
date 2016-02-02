@@ -20,18 +20,13 @@ class UtilityBar extends ReactComponent {
   }
 
   render() {
-    // Wrap Sign in link in a <span> so React does not use the same <a> element
-    // as for the account link.  This causes the account popover to be attached
-    // to the sign in link if the user signs out.
     let signInLink = (
-      <span>
-        <a href={window.SSO.LOGIN_URL}>
-          Sign in
-        </a>
-      </span>
+      <a href={window.SSO.LOGIN_URL} key="signInLink">
+        Sign in
+      </a>
     );
     let accountLink = (
-      <a ref="accountLink" href="//warwick.ac.uk/myaccount" data-toggle="id7:account-popover" data-name={this.props.name}>
+      <a key="accountLink" ref="accountLink" href="//warwick.ac.uk/myaccount" data-toggle="id7:account-popover" data-name={this.props.name}>
         {this.props.name}
         <span className="caret"></span>
       </a>
