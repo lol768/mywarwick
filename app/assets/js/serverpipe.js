@@ -48,6 +48,26 @@ function fetchWithCredentials(url) {
   });
 }
 
+export function persistTiles() {
+  return (dispatch, getState) => {
+    let tiles = getState().getIn(['tiles', 'items']).map(item => ({
+      id: item.get('id'),
+      size: item.get('size'),
+      preferences: item.get('preferences'),
+      removed: false
+    })).toJS();
+
+    fetch('/api/tiles', {
+      credentials: 'same-origin',
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({tiles: tiles})
+    });
+  };
+}
+
 export function fetchTiles() {
   return dispatch => {
     dispatch({ type: tiles.TILES_FETCH });
@@ -114,12 +134,12 @@ export function fetchActivities() {
     fetchWithCredentials('/api/streams/read')
       .then(response => response.json())
       .then(json => {
-        if (json.data.notificationsRead) {
+        if (json.data.notificationsRead){
           dispatch(notificationMetadata.readNotifications(moment(json.data.notificationsRead)));
         }
-        if (json.data.activitiesRead) {
+        if (json.data.activitiesRead){
           dispatch(notificationMetadata.readActivities(moment(json.data.activitiesRead)));
         }
       });
-  };
+  }
 }

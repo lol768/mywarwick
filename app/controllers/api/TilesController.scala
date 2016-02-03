@@ -2,8 +2,8 @@ package controllers.api
 
 import com.google.inject.Inject
 import controllers.BaseController
-import models.{API, TileInstance}
-import play.api.libs.json._
+import models._
+import play.api.libs.json.{JsError, JsSuccess, JsObject, Json}
 import play.api.mvc.Result
 import services.{SecurityService, TileContentService, TileService}
 import warwick.sso.User
@@ -19,9 +19,23 @@ class TilesController @Inject()(
 
   import securityService._
 
-  def tiles = UserAction { request =>
+  def getLayout = UserAction { request =>
     val tileLayout = tileService.getTilesForUser(request.context.user)
     Ok(Json.toJson(API.Success("ok", tileLayout)))
+  }
+
+  def saveLayout = RequiredUserAction { request =>
+    request.context.user.map { user =>
+      request.body.asJson.map { body =>
+        body.validate[UserTileLayout] match {
+          case JsSuccess(tileLayout, _) =>
+            tileService.saveTileLayoutForUser(user, tileLayout)
+            Ok(Json.toJson(API.Success("ok", "saved")))
+          case error: JsError =>
+            BadRequest(Json.toJson(API.Failure[JsObject]("error", API.Error.fromJsError(error))))
+        }
+      }.getOrElse(BadRequest(Json.toJson(API.Failure[JsObject]("bad request", Seq(API.Error("invalid-body", "Body must be JSON-formatted tile layout"))))))
+    }.get // RequiredUserAction
   }
 
   def content = UserAction.async { request =>

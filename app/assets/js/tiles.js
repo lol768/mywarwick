@@ -12,6 +12,9 @@ export const TILE_CONTENT_FETCH_FAILURE = 'tiles.content.fetch.failure';
 // Used for bringing back tile content from local storage
 export const TILE_CONTENT_LOAD_ALL = 'tiles.content.load';
 
+export const TILE_HIDE = 'tiles.hide';
+export const TILE_RESIZE = 'tiles.resize';
+
 export function fetchedTiles(tiles) {
   return {
     type: TILES_FETCH_SUCCESS,
@@ -43,6 +46,21 @@ export function failedTileContentFetch(tile, errors) {
   };
 }
 
+export function hideTile(tile) {
+  return {
+    type: TILE_HIDE,
+    tile
+  };
+}
+
+export function resizeTile(tile, size) {
+  return {
+    type: TILE_RESIZE,
+    tile,
+    size
+  }
+}
+
 const initialState = Immutable.fromJS({
   fetching: false,
   fetched: false,
@@ -69,7 +87,17 @@ registerReducer('tiles', (state = initialState, action) => {
         fetching: false,
         fetched: true,
         failed: false,
-        items: Immutable.List(action.tiles),
+        items: Immutable.fromJS(action.tiles)
+      });
+    case TILE_HIDE:
+      return state.update('items', items => (
+        items.filterNot(tile => tile.get('id') === action.tile.id)
+      ));
+    case TILE_RESIZE:
+      return state.update('items', items => {
+        let index = items.findIndex(tile => tile.get('id') === action.tile.id);
+
+        return items.update(index, tile => tile.set('size', action.size));
       });
     default:
       return state;

@@ -33,13 +33,25 @@
   opacity: 0.35;
 }
 
+.me-view--editing .tile:not(.tile--editing) {
+  opacity: .7;
+}
+
+.me-view--editing {
+  .tile {
+    transition: min-height .3s, height .3s;
+  }
+
+  .tile__container {
+    transition: width .3s;
+  }
+}
+
 .tile {
   min-height: 125px;
-  padding: 10px 10px 20px;
   position: relative;
   font-size: 15px;
   margin-bottom: 10px;
-  overflow: hidden;
 
   a {
     color: inherit;
@@ -48,6 +60,16 @@
 
   ul, ol {
     .list-unstyled;
+  }
+
+  .tile__wrap {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px 10px 20px;
   }
 
   > .tile__wrap > header {
@@ -66,7 +88,7 @@
   }
 }
 
-.tile--large, .tile--tall {
+.tile--large {
   min-height: 260px;
 }
 
@@ -101,6 +123,58 @@
   .small;
   text-align: center;
   opacity: .8;
+}
+
+.tile__edit-control {
+  @size: 36px;
+  @outside: -@size * 1/2;
+
+  display: none;
+  position: absolute;
+  z-index: 10;
+
+  background-color: #000;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 100%;
+  width: @size;
+  height: @size;
+  text-align: center;
+  line-height: @size * 5/6;
+
+  cursor: pointer;
+
+  &:hover {
+    background-color: #444;
+  }
+
+  &.top-left {
+    top: @outside;
+    left: @outside;
+  }
+
+  &.top-right {
+    top: @outside;
+    right: @outside;
+  }
+
+  &.bottom-left {
+    bottom: @outside;
+    left: @outside;
+  }
+
+  &.bottom-right {
+    bottom: @outside;
+    right: @outside;
+  }
+}
+
+.tile--editing {
+  z-index: 10;
+
+  .tile__edit-control {
+    display: inline-block;
+  }
 }
 
 .tile--zoomed {

@@ -17,7 +17,7 @@ export default class CountView extends Tile {
   getZoomedBody(content) {
     return (
       <ul>
-        {content.items.map(item => <ListTileItem {...item} />)}
+        {content.items.map(item => <ListTileItem key={item.id} {...item} />)}
       </ul>
     );
   }

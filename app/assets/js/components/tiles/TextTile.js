@@ -62,8 +62,8 @@ export default class TextTile extends Tile {
         transitionEnterTimeout={1000}
         transitionLeaveTimeout={1000}
       >
-        { itemsToDisplay.map(item => {
-          const tileItem = (<div className="tile__item" key={item.key}>
+        {itemsToDisplay.map(item => {
+          let tileItem = <div key={item.id} className="tile__item">
             <span className="tile__callout">{item.callout}</span>
             <span className="tile__text">{item.text}</span>
           </div>);

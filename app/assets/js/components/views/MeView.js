@@ -16,7 +16,11 @@ import { connect } from 'react-redux';
 
 import { registerReducer } from '../../reducers';
 
+import * as tiles from '../../tiles';
+import * as serverpipe from '../../serverpipe';
+
 const ZOOM_ANIMATION_DURATION = 500;
+export const EDITING_ANIMATION_DURATION = 700;
 
 const TILE_ZOOM_IN = 'me.zoom-in';
 const TILE_ZOOM_OUT = 'me.zoom-out';
@@ -40,10 +44,12 @@ class MeView extends ReactComponent {
 
   constructor(props) {
     super(props);
+    this.state = {};
     this.onTileDismiss = this.onTileDismiss.bind(this);
+    this.boundOnBodyClick = this.onBodyClick.bind(this);
   }
 
-  onTileClick(tile) {
+  onTileExpand(tile) {
     if (tile.href) {
       window.open(tile.href);
     } else if (!this.props.zoomedTile) {
@@ -57,15 +63,58 @@ class MeView extends ReactComponent {
     }
   }
 
+  onBeginEditing(tile) {
+    this.setState({
+      editing: tile.id
+    });
+
+    let el = $(ReactDOM.findDOMNode(this));
+
+    el.stop().transition({
+      scale: 0.8
+    }, EDITING_ANIMATION_DURATION, 'snap');
+
+    // Ensure first release of the mouse button/finger is not interpreted as
+    // exiting the editing mode
+    $('body').one('mouseup touchend', () => {
+      _.defer(() => $('body').on('click', this.boundOnBodyClick));
+    });
+  }
+
+  onFinishEditing() {
+    this.setState({
+      editing: null
+    });
+
+    let el = $(ReactDOM.findDOMNode(this));
+
+    el.stop().transition({
+      scale: 1
+    }, EDITING_ANIMATION_DURATION, 'snap', () => {
+      el.removeAttr('style'); // transform creates positioning context
+    });
+
+    $('body').off('click', this.boundOnBodyClick);
+
+    this.props.dispatch(serverpipe.persistTiles());
+  }
+
+  onBodyClick(e) {
+    if (this.state.editing && $(e.target).parents('.tile--editing').length == 0) {
+      this.onFinishEditing();
+    }
+  }
+
   renderTile(props, zoomed = false) {
-    const tileComponent = TILES[props.tileType];
+    const tileComponent = TILES[props.type];
     if (tileComponent === undefined) {
-      log.error(`No component available for tile type ${props.tileType}`);
+      log.error(`No component available for tile type ${props.type}`);
       return null;
     }
 
     const id = props.id;
     const { content, errors, fetching } = this.props.tileContent[id] || {};
+    const editing = this.state.editing === id;
     const ref = zoomed ? `${id}-zoomed` : id;
 
     const config = Object.assign({}, props, {
@@ -76,15 +125,33 @@ class MeView extends ReactComponent {
       content,
       errors,
       fetching,
+      editing,
     });
 
     config.onDismiss = () => this.onTileDismiss();
-    config.onExpand = () => this.onTileClick(config);
+    config.onExpand = () => this.onTileExpand(config);
     config.componentWillEnter = callback => this.componentWillEnter(config, callback);
     config.componentWillLeave = callback => this.componentWillLeave(config, callback);
     config.onClickRefresh = () => this.props.dispatch(fetchTileContent(id));
+    config.onBeginEditing = () => this.onBeginEditing(config);
+    config.onFinishEditing = () => this.onFinishEditing(config);
+    config.onHide = () => this.onHideTile(config);
+    config.onResize = () => this.onResizeTile(config);
 
     return React.createElement(tileComponent, config);
+  }
+
+  onHideTile(tile) {
+    this.props.dispatch(tiles.hideTile(tile));
+
+    this.onFinishEditing();
+  }
+
+  onResizeTile(tile) {
+    const sizes = ['small', 'wide', 'large'];
+    let nextSize = sizes[(sizes.indexOf(tile.size || tile.defaultSize) + 1) % sizes.length];
+
+    this.props.dispatch(tiles.resizeTile(tile, nextSize));
   }
 
   animateTileZoomOut(tileComponent, zoomComponent, callback) {
@@ -97,9 +164,9 @@ class MeView extends ReactComponent {
     const x = $zoom.offset().left - $tile.offset().left;
     const y = $zoom.offset().top - $tile.offset().top;
 
-    $tile.css({
-      x,
-      y,
+    $tile.stop().css({
+      x: x,
+      y: y,
       transformOriginX: 0,
       transformOriginY: 0,
       zIndex: 1001,
@@ -121,7 +188,7 @@ class MeView extends ReactComponent {
       });
     });
 
-    $zoom.css({
+    $zoom.stop().css({
       transformOriginX: 0,
       transformOriginY: 0,
       zIndex: 1002,
@@ -201,7 +268,7 @@ class MeView extends ReactComponent {
       setTimeout(() => this.animateTileZoom(tileComponent, zoomComponent, callback), 0);
     } else {
       callback();
-    }
+    }this.onTileDismiss = this.onTileDismiss.bind(this);
   }
 
   componentWillLeave(props, callback) {
@@ -233,7 +300,7 @@ class MeView extends ReactComponent {
     }
 
     return (
-      <div>
+      <div className={this.state.editing ? 'me-view--editing' : ''}>
         { zoomedTileKey ?
           <div className="tile-zoom-backdrop" onClick={ this.onTileDismiss }></div>
           : null}
@@ -271,8 +338,8 @@ registerReducer('me', (state = initialState, action) => {
 
 const select = (state) => ({
   zoomedTile: state.get('me').get('zoomedTile'),
-  tiles: state.get('tiles').get('items').toJS(),
-  tileContent: state.get('tileContent').toJS(),
+  tiles: state.get('tiles').get('items').filterNot(tile => tile.get('removed') === true).toJS(),
+  tileContent: state.get('tileContent').toJS()
 });
 
 export default connect(select)(MeView);

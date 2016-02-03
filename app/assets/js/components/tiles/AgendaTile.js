@@ -40,8 +40,7 @@ export default class AgendaTile extends Tile {
     const itemsToDisplay = this.isZoomed() ?
       content.items : _.take(content.items, maxItemsToDisplay);
 
-    const events = itemsToDisplay
-      .map(event => <AgendaTileItem key={`${event.title}-${event.date}`} {...event}/>);
+    const events = itemsToDisplay.map(event => <AgendaTileItem key={event.id} {...event}/>);
 
     return (
       <GroupedList groupBy={groupItemsForAgendaTile}>
