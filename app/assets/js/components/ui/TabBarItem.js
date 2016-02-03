@@ -6,6 +6,11 @@ const formatBadgeCount = (n) => n > 99 ? '99+' : n;
 
 export default class TabBarItem extends ReactComponent {
 
+  constructor() {
+    super();
+    this.onClick = this.onClick.bind(this);
+  }
+
   onClick() {
     if (!this.props.isDisabled) this.props.onClick(this);
   }
@@ -18,7 +23,7 @@ export default class TabBarItem extends ReactComponent {
           'tab-bar-item--active': this.props.active,
           disabled: this.props.isDisabled,
         }) }
-        onClick={ this.onClick.bind(this) }
+        onClick={ this.onClick }
         ref="li"
       >
         <i className={ `fa fa-${this.props.icon}` }>

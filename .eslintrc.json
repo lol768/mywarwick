@@ -1,7 +1,6 @@
 {
   "extends": "airbnb",
   "rules": {
-    "no-unused-vars": [2, {"args": "none"}],
-    "react/jsx-no-bind": 0
+    "no-unused-vars": [2, {"args": "none"}]
   }
 }

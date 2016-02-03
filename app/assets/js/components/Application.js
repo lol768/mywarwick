@@ -69,8 +69,17 @@ $(() => {
 
 class Application extends ReactComponent {
 
+  constructor() {
+    super();
+    this.onSelectItem = this.onSelectItem.bind(this);
+  }
+
+  onSelectItem(p) {
+    this.props.dispatch(navigate(p));
+  }
+
   render() {
-    const { dispatch, path, notificationsCount, activitiesCount, layoutClassName, user }
+    const { path, notificationsCount, activitiesCount, layoutClassName, user }
       = this.props;
 
     const views = {
@@ -86,7 +95,7 @@ class Application extends ReactComponent {
       <div>
         {views[path]}
         { layoutClassName === 'mobile' ?
-          <TabBar selectedItem={path} onSelectItem={p => dispatch(navigate(p))}>
+          <TabBar selectedItem={ path } onSelectItem={ this.onSelectItem }>
             <TabBarItem title="Me" icon="user" path="/"/>
             <TabBarItem
               title="Notifications" icon="inbox" path="/notifications"

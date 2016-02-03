@@ -10,10 +10,19 @@ import { fetchNews } from '../../serverpipe';
 
 class NewsView extends ReactComponent {
 
+  constructor(props) {
+    super(props);
+    this.onClick = this.onClick.bind(this);
+  }
+
   componentDidMount() {
     if (this.props.items.length === 0 && !this.props.failed) {
       this.props.dispatch(fetchNews());
     }
+  }
+
+  onClick() {
+    this.props.dispatch(fetchNews());
   }
 
   render() {
@@ -28,7 +37,7 @@ class NewsView extends ReactComponent {
             Unable to fetch news.
           </p>
           <p>
-            <button onClick={() => this.props.dispatch(fetchNews())} className="btn btn-default">
+            <button onClick={ this.onClick } className="btn btn-default">
               <i className="fa fa-refresh fa-fw"></i>
               Retry
             </button>

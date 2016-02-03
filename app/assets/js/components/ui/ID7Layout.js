@@ -24,6 +24,13 @@ import { fetchTileContent } from '../../serverpipe';
 
 class ID7Layout extends ReactComponent {
 
+  constructor(props) {
+    super(props);
+    this.goToHome = this.goToHome.bind(this);
+    this.goToNotification = this.goToNotification.bind(this);
+    this.goToActivity = this.goToActivity.bind(this);
+  }
+
   componentWillMount() {
     this.props.dispatch(updateLayoutClass());
   }
@@ -43,11 +50,20 @@ class ID7Layout extends ReactComponent {
     this.props.dispatch(fetchTileContent());
   }
 
+  goToNotification() {
+    this.props.dispatch(navigate('/notifications'));
+  }
+
+  goToActivity() {
+    this.props.dispatch(navigate('/activity'));
+  }
+
   render() {
-    const { layoutClassName, notificationsCount, activitiesCount, user, dispatch }
+    const { layoutClassName, notificationsCount, activitiesCount, user }
       = this.props;
 
     const isDesktop = layoutClassName === 'desktop';
+
 
     return (
       <div className={`theme-${this.props.colourTheme}`}>
@@ -70,7 +86,7 @@ class ID7Layout extends ReactComponent {
                       <div className="id7-logo-column">
                         <div className="id7-logo-row">
                           <div className="id7-logo">
-                            <a href="/" title="Warwick homepage" onClick={this.goToHome.bind(this)}>
+                            <a href="/" title="Warwick homepage" onClick={ this.goToHome }>
                               <img src="" alt="Warwick"/>
                             </a>
                           </div>
@@ -82,7 +98,7 @@ class ID7Layout extends ReactComponent {
                                 key="notifications"
                                 popoverTitle="Notifications"
                                 isDisabled = { !user.authenticated }
-                                onMore={() => dispatch(navigate('/notifications'))}
+                                onMore={ this.goToNotification }
                               >
                                 <NotificationsView grouped={false}/>
                               </MastheadIcon>
@@ -91,7 +107,7 @@ class ID7Layout extends ReactComponent {
                                 badge={ activitiesCount }
                                 popoverTitle="Activity"
                                 isDisabled = { !user.authenticated }
-                                onMore={() => dispatch(navigate('/activity'))}
+                                onMore={ this.goToActivity }
                               >
                                 <ActivityView grouped={false}/>
                               </MastheadIcon>

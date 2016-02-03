@@ -40,6 +40,7 @@ class MeView extends ReactComponent {
 
   constructor(props) {
     super(props);
+    this.onTileDismiss = this.onTileDismiss.bind(this);
   }
 
   onTileClick(tile) {
@@ -234,7 +235,7 @@ class MeView extends ReactComponent {
     return (
       <div>
         { zoomedTileKey ?
-          <div className="tile-zoom-backdrop" onClick={this.onTileDismiss.bind(this)}></div>
+          <div className="tile-zoom-backdrop" onClick={ this.onTileDismiss }></div>
           : null}
         <ReactTransitionGroup ref="group">
           {tiles}

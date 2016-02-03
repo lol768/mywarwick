@@ -20,13 +20,15 @@ export default class ListTile extends Tile {
 
 export const ListTileItem = (props) => (
   <li className="list-tile-item">
-    <a href={props.href} target="_blank" onClick={e => e.stopPropagation()}>
+    <a href={props.href} target="_blank" onClick={ ListTileItem.onclick }>
       <span className="list-tile-item__title">{props.title}</span>
       { props.date ? <span className="list-tile-item__date">{formatDate(props.date)}</span> : null }
       <span className="list-tile-item__text">{props.text}</span>
     </a>
   </li>
 );
+
+ListTileItem.onclick = e => e.stopPropagation();
 
 ListTileItem.propTypes = {
   date: PropTypes.string,

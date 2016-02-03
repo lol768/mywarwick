@@ -24,6 +24,8 @@ class NotificationsView extends ReactComponent {
       browserPushDisabled: 'Notification' in window && Notification.permission === 'denied',
     };
 
+    this.loadMore = this.loadMore.bind(this);
+
     if ('permissions' in navigator) {
       navigator.permissions.query({ name: 'notifications' })
         .then(notificationPermissions => {
@@ -78,7 +80,7 @@ class NotificationsView extends ReactComponent {
           </div>
           : null
         }
-        <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore.bind(this) }>
+        <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore }>
           <GroupedList groupBy={ this.props.grouped ? groupItemsByDate : undefined }>
             { notifications.toJS() }
           </GroupedList>

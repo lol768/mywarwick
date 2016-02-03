@@ -3,6 +3,11 @@ import ReactComponent from 'react/lib/ReactComponent';
 
 export default class SearchField extends ReactComponent {
 
+  constructor() {
+    super();
+    this.onChange = this.onChange.bind(this);
+  }
+
   onChange() {
     if (this.props.onChange) {
       this.props.onChange(this.refs.input.value);
@@ -21,11 +26,11 @@ export default class SearchField extends ReactComponent {
             <div className="search-container">
               <input
                 ref="input" type="search" className="form-control input-lg"
-                value={ this.props.value } onChange={ this.onChange.bind(this) }
-                onFocus={ this.props.onFocus } onBlur={this.props.onBlur}
+                value={ this.props.value } onChange={ this.onChange }
+                onFocus={ this.props.onFocus } onBlur={ this.props.onBlur }
                 placeholder="Search Warwick"
               />
-              <i className="fa fa-search fa-2x"></i>
+              <i className="fa fa-search fa-2x"> </i>
             </div>
           </div>
         </div>

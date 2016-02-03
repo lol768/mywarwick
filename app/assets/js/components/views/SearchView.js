@@ -21,6 +21,8 @@ export class SearchView extends ReactComponent {
     };
 
     this.boundOnReflow = this.onReflow.bind(this);
+    this.onChange = this.onChange.bind(this);
+    this.onFocus = this.onFocus.bind(this);
   }
 
   onFocus() {
@@ -61,8 +63,8 @@ export class SearchView extends ReactComponent {
 
     return items.map((result) =>
       <Link
-        key={result.path} href={ `http://warwick.ac.uk/${result.path}` } subtitle={ result.path }
-        onClick={() => this.onResultClick(result)}
+        key={ result.path } href={ `http://warwick.ac.uk/${result.path}` } subtitle={ result.path }
+        result={ result } onClick={ this.onResultClick }
       >
         { result.description }
       </Link>
@@ -80,7 +82,7 @@ export class SearchView extends ReactComponent {
   searchField() {
     return (
       <SearchField
-        onChange={this.onChange.bind(this)} onFocus={this.onFocus.bind(this)} ref="field"
+        onChange={ this.onChange } onFocus={ this.onFocus } ref="field"
       />
     );
   }

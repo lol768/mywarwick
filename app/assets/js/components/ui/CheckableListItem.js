@@ -9,6 +9,7 @@ export default class CheckableListItem extends ReactComponent {
     this.state = {
       checked: this.props.checked || false,
     };
+    this.toggle = this.toggle.bind(this);
   }
 
   toggle(e) {
@@ -21,7 +22,7 @@ export default class CheckableListItem extends ReactComponent {
 
   render() {
     return (
-      <a href="#" className="list-group-item" onClick={this.toggle.bind(this)}>
+      <a href="#" className="list-group-item" onClick={ this.toggle }>
         <span className="media">
           <span className="media-left">
             <i

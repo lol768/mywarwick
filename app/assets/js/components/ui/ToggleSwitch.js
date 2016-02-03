@@ -9,6 +9,7 @@ export default class ToggleSwitch extends ReactComponent {
     this.state = {
       switchOn: (props.defaultToggleState || false),
     };
+    this.handleClick = this.handleClick.bind(this);
   }
 
   handleClick() {
@@ -25,7 +26,7 @@ export default class ToggleSwitch extends ReactComponent {
         { this.state.switchOn ?
           <i
             className={ classNames('fa', 'fa-toggle-on', 'fa-2x', 'active', 'pull-right') }
-            onClick={ this.handleClick.bind(this) }
+            onClick={ this.handleClick }
           >
           </i>
           :
@@ -33,7 +34,7 @@ export default class ToggleSwitch extends ReactComponent {
             className={
               classNames('fa', 'fa-toggle-on', 'fa-rotate-180', 'fa-2x', 'inactive', 'pull-right')
             }
-            onClick={ this.handleClick.bind(this) }
+            onClick={ this.handleClick}
           >
           </i>
         }

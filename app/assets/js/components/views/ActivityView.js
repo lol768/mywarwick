@@ -22,6 +22,7 @@ export default class ActivityView extends ReactComponent {
     this.state = {
       numberToShow: SOME_MORE,
     };
+    this.loadMore = this.loadMore.bind(this);
   }
 
   loadMore() {
@@ -49,7 +50,7 @@ export default class ActivityView extends ReactComponent {
     const hasMore = this.state.numberToShow < getStreamSize(this.props.activities);
 
     return (
-      <InfiniteScrollable hasMore={hasMore} onLoadMore={this.loadMore.bind(this)}>
+      <InfiniteScrollable hasMore={hasMore} onLoadMore={ this.loadMore }>
         <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
           {activities.toJS()}
         </GroupedList>
