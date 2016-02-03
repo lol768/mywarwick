@@ -38,7 +38,7 @@ export function fetchNews() {
           throw new Error('Invalid response returned from news feed');
         }
       })
-      .catch(err => dispatch({ type: NEWS_FETCH_FAILURE }));
+      .catch(() => dispatch({ type: NEWS_FETCH_FAILURE }));
   };
 }
 
@@ -55,7 +55,7 @@ export function fetchTiles() {
     return fetchWithCredentials('/api/tiles')
       .then(response => response.json())
       .then(json => dispatch(tiles.fetchedTiles(json.data)))
-      .catch(err => dispatch({ type: tiles.TILES_FETCH_FAILURE }));
+      .catch(() => dispatch({ type: tiles.TILES_FETCH_FAILURE }));
   };
 }
 

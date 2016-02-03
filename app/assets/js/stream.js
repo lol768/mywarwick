@@ -90,7 +90,10 @@ export function onStreamReceive(
 }
 
 function getOrderedStreamPartitions(stream) {
-  return stream.entrySeq().sortBy(([k, v]) => k).map(([k, v]) => v).reverse();
+  return stream
+    .entrySeq()
+    .sortBy(([k]) => k).map(([, v]) => v) // eslint-disable-line no-unused-vars
+    .reverse();
 }
 
 /*

@@ -2,7 +2,7 @@ import log from 'loglevel';
 
 let isPushEnabled = false;
 
-function unsubscriptionToServer(subscription) {
+function unsubscriptionToServer() {
 
 }
 
@@ -101,7 +101,7 @@ function unsubscribe() {
       unsubscriptionToServer(subscriptionId);
 
       // We have a subscription, so call unsubscribe() on it
-      pushSubscription.unsubscribe().then(successful => {
+      pushSubscription.unsubscribe().then(() => {
         // TODO: enable subscribe button a set FALSE
         isPushEnabled = false;
       }).catch(e => {

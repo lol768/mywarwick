@@ -1,7 +1,7 @@
 import log from 'loglevel';
 
 // Set the callback for the install step
-self.addEventListener('install', event => {
+self.addEventListener('install', () => {
   // Perform install steps
 });
 
