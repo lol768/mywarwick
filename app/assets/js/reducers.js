@@ -93,14 +93,14 @@ export default function app(state = initialState, action = undefined) {
     return state;
   }
 
+  let stateToReturn = state;
   if (action.type === RESET) {
-    state = initialState;
+    stateToReturn = initialState;
   }
 
   return mutableGlobalReducers.reduce(
     (s, reducers, namespace) =>
-      s.update(namespace, (subtree) => composeReducers(reducers)(subtree, action)),
-    state
+      s.update(namespace, (subtree) => composeReducers(reducers)(subtree, action)), stateToReturn
   );
 }
 

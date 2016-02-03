@@ -34,8 +34,7 @@ export default class SocketDataPipe extends DataPipe {
    */
   send(obj) {
     const messageId = this.messageId++;
-    obj.messageId = messageId;
-    this.ws.send(JSON.stringify(obj));
+    this.ws.send(JSON.stringify(Object.assign(obj, { messageId })));
     return messageId;
   }
 

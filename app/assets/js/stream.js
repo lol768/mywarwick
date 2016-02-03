@@ -28,19 +28,19 @@ export function makeStream() {
 export function mergeReceivedItems(stream = [], rx = []) {
   // Preconditions: stream has no duplicates, stream is in reverse date order
 
-  rx = uniqStream(rx);
+  const uniqRx = uniqStream(rx);
 
   const newest = _(stream).first();
-  const oldestRx = _(rx).min((x) => x[DATE_KEY]);
+  const oldestRx = _(uniqRx).min((x) => x[DATE_KEY]);
 
   // Short circuit if existing stream is empty
   if (stream.length === 0) {
-    return sortStream(rx);
+    return sortStream(uniqRx);
   }
 
   // Short circuit if all received things are newer than the newest we have
   if (newest[DATE_KEY] < oldestRx[DATE_KEY]) {
-    stream.unshift(...sortStream(rx));
+    stream.unshift(...sortStream(uniqRx));
 
     return uniqStream(stream);
   }
@@ -51,7 +51,7 @@ export function mergeReceivedItems(stream = [], rx = []) {
 
   if (mergeStart >= 0) {
     const toMerge = stream.splice(0, mergeStart + 1);
-    toMerge.push(...rx);
+    toMerge.push(...uniqRx);
 
     stream.unshift(...sortStream(uniqStream(toMerge)));
 
@@ -59,7 +59,7 @@ export function mergeReceivedItems(stream = [], rx = []) {
   }
 
   // If all rx items older than all stream items, merge whole array
-  stream.push(...rx);
+  stream.push(...uniqRx);
 
   return sortStream(uniqStream(stream));
 }
@@ -74,15 +74,17 @@ export function mergeReceivedItems(stream = [], rx = []) {
  * long as it's the same for all items that belong in the same partition.
  */
 export function onStreamReceive(stream = Map(), grouper = (item) => item.date, rx = List()) {
+  let result = stream;
+
   rx.groupBy(grouper).mapEntries(([k, v]) => {
-    stream = stream.update(
+    result = result.update(
       k,
       List(),
       (str) => List(mergeReceivedItems(str.toJS(), v.toList().toJS()))
     );
   });
 
-  return stream;
+  return result;
 }
 
 function getOrderedStreamPartitions(stream) {
