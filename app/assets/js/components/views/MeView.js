@@ -250,7 +250,7 @@ class MeView extends ReactComponent {
 
 }
 
-const initialState = Immutable.Map({ // eslint-disable-line new-cap
+const initialState = Immutable.Map({
   zoomedTile: null,
 });
 

@@ -42,7 +42,6 @@ export function mergeNotifications(stream, newNotifications) {
   return onStreamReceive(stream, partitionByYearAndMonth, newNotifications);
 }
 
-/* eslint-disable new-cap */
 registerReducer('notifications', (state = makeStream(), action) => {
   switch (action.type) {
     case NOTIFICATION_RECEIVE:
@@ -64,4 +63,3 @@ registerReducer('activities', (state = makeStream(), action) => {
       return state;
   }
 });
-/* eslint-enable new-cap */

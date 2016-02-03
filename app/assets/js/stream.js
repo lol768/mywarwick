@@ -1,6 +1,4 @@
-/* eslint new-cap: 0 */ // lots of immutable makes this rule annoying
-
-import { List, Map } from 'immutable';
+import Immutable from 'immutable';
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -14,7 +12,7 @@ const sortStream = (stream) => _.sortByOrder(stream, [DATE_KEY, ID_KEY], [DESC, 
 const uniqStream = (stream) => _.uniq(stream, ID_KEY);
 
 export function makeStream() {
-  return Map();
+  return Immutable.Map();
 }
 
 /*
@@ -73,14 +71,18 @@ export function mergeReceivedItems(stream = [], rx = []) {
  * be sortable. Aside from that, it doesn't really matter what it is, as
  * long as it's the same for all items that belong in the same partition.
  */
-export function onStreamReceive(stream = Map(), grouper = (item) => item.date, rx = List()) {
+export function onStreamReceive(
+  stream = Immutable.Map(),
+  grouper = (item) => item.date,
+  rx = Immutable.List()
+) {
   let result = stream;
 
   rx.groupBy(grouper).mapEntries(([k, v]) => {
     result = result.update(
       k,
-      List(),
-      (str) => List(mergeReceivedItems(str.toJS(), v.toList().toJS()))
+      Immutable.List(),
+      (str) => Immutable.List(mergeReceivedItems(str.toJS(), v.toList().toJS()))
     );
   });
 
@@ -98,7 +100,7 @@ function getOrderedStreamPartitions(stream) {
  * If the partition does not exist, return an empty list.
  */
 export function getStreamPartition(stream, i) {
-  return getOrderedStreamPartitions(stream).get(i) || List();
+  return getOrderedStreamPartitions(stream).get(i) || Immutable.List();
 }
 
 /*
@@ -108,7 +110,7 @@ export function takeFromStream(stream, n) {
   return getOrderedStreamPartitions(stream)
     .reduce(
       (result, part) => result.concat(part.take(n - result.size)),
-      List()
+      Immutable.List()
     );
 }
 

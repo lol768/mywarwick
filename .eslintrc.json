@@ -1,6 +1,7 @@
 {
   "extends": "airbnb",
   "rules": {
-    "no-unused-vars": [2, {"args": "none"}]
+    "no-unused-vars": [2, {"args": "none"}],
+    "new-cap": [2, {"capIsNewExceptions": ["Immutable.Map", "Immutable.List"]}]
   }
 }

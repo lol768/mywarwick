@@ -69,14 +69,14 @@ registerReducer('tiles', (state = initialState, action) => {
         fetching: false,
         fetched: true,
         failed: false,
-        items: Immutable.List(action.tiles), // eslint-disable-line new-cap
+        items: Immutable.List(action.tiles),
       });
     default:
       return state;
   }
 });
 
-registerReducer('tileContent', (state = Immutable.Map(), action) => { // eslint-disable-line new-cap
+registerReducer('tileContent', (state = Immutable.Map(), action) => {
   switch (action.type) {
     case TILE_CONTENT_FETCH: {
       const update = tile => tile.delete('errors').set('fetching', true);
@@ -84,7 +84,7 @@ registerReducer('tileContent', (state = Immutable.Map(), action) => { // eslint-
       if (action.tile) {
         return state.update(
           action.tile,
-          update(Immutable.Map()), // eslint-disable-line new-cap
+          update(Immutable.Map()),
           update
         );
       }
@@ -99,7 +99,7 @@ registerReducer('tileContent', (state = Immutable.Map(), action) => { // eslint-
 
       return state.update(
         action.tile,
-        update(Immutable.Map()), // eslint-disable-line new-cap
+        update(Immutable.Map()),
         update
       );
     }
@@ -112,7 +112,7 @@ registerReducer('tileContent', (state = Immutable.Map(), action) => { // eslint-
       if (action.tile) {
         return state.update(
           action.tile,
-          Immutable.Map({ fetching: false, errors: action.errors }), // eslint-disable-line new-cap
+          Immutable.Map({ fetching: false, errors: action.errors }),
           update
         );
       }

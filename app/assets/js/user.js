@@ -13,7 +13,6 @@ const initialState = Immutable.fromJS({
   authoritative: false,
 });
 
-/* eslint-disable new-cap */
 registerReducer('user', (state = initialState, action) => {
   switch (action.type) {
     case USER_LOAD:
@@ -29,7 +28,6 @@ registerReducer('user', (state = initialState, action) => {
       return state;
   }
 });
-/* eslint-enable new-cap */
 
 function loadCachedUserIdentity(data) {
   return {

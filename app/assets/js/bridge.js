@@ -3,7 +3,7 @@ import Immutable from 'immutable';
 import store from './store';
 import * as stream from './stream';
 
-let appState = Immutable.Map(); // eslint-disable-line new-cap
+let appState = Immutable.Map();
 
 function update(state) {
   appState = appState.merge(state);

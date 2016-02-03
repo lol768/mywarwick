@@ -2,7 +2,7 @@ import Immutable from 'immutable';
 
 import store from './store';
 
-const initialState = Immutable.Map(); // eslint-disable-line new-cap
+const initialState = Immutable.Map();
 
 export const RESET = 'RESET';
 const INIT = 'INIT';
@@ -12,7 +12,7 @@ const INIT = 'INIT';
  * caring what it is
  */
 export function makeReducers() {
-  return Immutable.Map(); // eslint-disable-line new-cap
+  return Immutable.Map();
 }
 
 /*
@@ -39,7 +39,7 @@ export function mutateReducers(value) {
 export function appendReducer(reducers, name, reducer) {
   return reducers.has(name) ?
     reducers.update(name, (list) => list.push(reducer)) :
-    reducers.set(name, Immutable.List().push(reducer)); // eslint-disable-line new-cap
+    reducers.set(name, Immutable.List().push(reducer));
 }
 
 export function registerReducer(name, reducer) {
