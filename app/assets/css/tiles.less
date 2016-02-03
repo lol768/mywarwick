@@ -42,6 +42,10 @@
     transition: min-height .4s, height .4s;
   }
 
+  .tile, a {
+    cursor: default;
+  }
+
   .tile__container {
     transition: width .4s;
   }
@@ -187,6 +191,10 @@
     bottom: @outside;
     right: @outside;
   }
+}
+
+.tile--clickable {
+  cursor: pointer;
 }
 
 .tile--editing {

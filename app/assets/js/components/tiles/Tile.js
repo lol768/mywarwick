@@ -113,6 +113,12 @@ export default class Tile extends Component {
     }
   }
 
+  onClick() {
+    if (this.props.content && this.props.content.href && !this.props.editingAny) {
+      window.open(this.props.content.href);
+    }
+  }
+
   componentDidUpdate(prevProps) {
     if (this.props.editing && !prevProps.editing) {
       let el = $(ReactDOM.findDOMNode(this.refs.tile));
@@ -147,14 +153,15 @@ export default class Tile extends Component {
     return (
       <div className={outerClassName}>
         <article
-          className={classNames('tile', 'tile--' + props.type, 'tile--' + this.getSize(), 'colour-' + props.colour, {'tile--editing': props.editing})}
+          className={classNames('tile', 'tile--' + props.type, 'tile--' + this.getSize(), 'colour-' + props.colour, {'tile--editing': props.editing, 'tile--clickable': props.content && props.content.href})}
           onMouseDown={this.onMouseDown.bind(this)} onMouseUp={this.onMouseUp.bind(this)} onMouseOut={this.onMouseUp.bind(this)}
           onTouchStart={this.onMouseDown.bind(this)} onTouchEnd={this.onMouseUp.bind(this)} onTouchCancel={this.onMouseUp.bind(this)}
+          onClick={this.onClick.bind(this)}
           ref="tile">
           <div className="tile__edit-control top-left" onClick={this.props.onHide.bind(this)} title="Hide tile">
             <i className="fa fa-fw fa-minus"></i>
           </div>
-          <div className="tile__edit-control bottom-right" onClick={this.props.onResize.bind(this)} title={`Make tile ${this.getSize() === 'small' ? 'bigger' : 'smaller'}`}>
+          <div className="tile__edit-control bottom-right" onClick={this.props.onResize.bind(this)} title={`Make tile ${this.getSize() === 'small' ? 'larger' : 'smaller'}`}>
             <i className="fa fa-fw fa-arrow-up"></i>
           </div>
           <div className="tile__wrap">

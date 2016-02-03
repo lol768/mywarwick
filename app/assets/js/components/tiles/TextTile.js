@@ -63,11 +63,19 @@ export default class TextTile extends Tile {
           </div>;
 
           return item.href ?
-            <a href={item.href} target="_blank" onClick={e => e.stopPropagation()}>{tileItem}</a>
+            <a href={item.href} target="_blank" onClick={this.onClickLink.bind(this)}>{tileItem}</a>
             : tileItem;
         })}
       </ReactCSSTransitionGroup>
     );
+  }
+
+  onClickLink(e) {
+    e.stopPropagation();
+
+    if (this.props.editingAny) {
+      e.preventDefault();
+    }
   }
 
   canZoom() {
