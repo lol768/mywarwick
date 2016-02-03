@@ -9,6 +9,9 @@ import play.api.libs.json._
 import services.messaging.APNSOutputService
 import services.{ActivityService, SecurityService}
 
+import scala.concurrent.Future
+import system.ThreadPools.mobile
+
 class UserActivitiesController @Inject()(
   activityService: ActivityService,
   securityService: SecurityService,
@@ -49,7 +52,7 @@ class UserActivitiesController @Inject()(
             val success = data.activitiesRead.map(activityService.setActivitiesReadDate(u, _)).getOrElse(true) &&
               data.notificationsRead.map(activityService.setNotificationsReadDate(u, _)).getOrElse(true)
             if (success) {
-              apns.clearAppIconBadge(u.usercode)
+              Future(apns.clearAppIconBadge(u.usercode))
               Ok(Json.toJson(API.Success[JsObject](data=Json.obj())))
             } else {
               InternalServerError(Json.toJson(
