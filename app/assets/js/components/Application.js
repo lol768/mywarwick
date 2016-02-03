@@ -114,7 +114,7 @@ function mapStateToProps(state) {
     activitiesCount:
       getNumItemsSince(state.get('activities'), state.get('activities-metadata').lastRead),
     layoutClassName: state.get('ui').get('className'),
-    user: state.get('user').toJS(),
+    user: state.getIn(['user', 'data']).toJS(),
   };
 }
 

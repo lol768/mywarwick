@@ -175,7 +175,7 @@ const select = (state) => { // eslint-disable-line arrow-body-style
       getNumItemsSince(state.get('notifications'), state.get('notifications-metadata').lastRead),
     activitiesCount:
       getNumItemsSince(state.get('activities'), state.get('activities-metadata').lastRead),
-    user: state.get('user').toJS(),
+    user: state.getIn(['user', 'data']).toJS(),
     colourTheme: state.get('ui').get('colourTheme'),
   };
 };

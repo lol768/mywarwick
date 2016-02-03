@@ -27,9 +27,9 @@ export function getActivitiesFromLocalStorage() {
   };
 }
 
-const notificationsMetadataSelector = state => state.get('notifications-metadata');
-const activitiesMetadataSelector = state => state.get('activities-metadata');
-const userSelector = state => state.get('user');
+const notificationsMetadataSelector = state => state.get("notifications-metadata");
+const activitiesMetadataSelector = state => state.get("activities-metadata");
+const userSelector = state => state.getIn(['user', 'data']);
 
 const persistLastRead = (field, data, lastRead) => {
   localforage.getItem(field).then(lastReadLocal => {
@@ -49,14 +49,12 @@ const persistLastRead = (field, data, lastRead) => {
   });
 };
 
-export const persistActivitiesMetadata =
-  createSelector([activitiesMetadataSelector, userSelector], (metadata, user) => {
-    const data = { usercode: user.get('usercode'), activitiesRead: metadata.lastRead.format() };
-    persistLastRead('activitiesLastRead', data, metadata.lastRead);
-  });
+export const persistActivitiesMetadata = createSelector([activitiesMetadataSelector, userSelector], (metadata, user) => {
+  const data = { usercode: user.get("usercode"), activitiesRead: metadata.lastRead.format() };
+  persistLastRead('activitiesLastRead', data, metadata.lastRead);
+});
 
-export const persistNotificationsMetadata =
-  createSelector([notificationsMetadataSelector, userSelector], (metadata, user) => {
-    const data = { usercode: user.get('usercode'), notificationsRead: metadata.lastRead.format() };
-    persistLastRead('notificationsLastRead', data, metadata.lastRead);
-  });
+export const persistNotificationsMetadata = createSelector([notificationsMetadataSelector, userSelector], (metadata, user) => {
+  const data = { usercode: user.get("usercode"), notificationsRead: metadata.lastRead.format() };
+  persistLastRead('notificationsLastRead', data, metadata.lastRead);
+});
