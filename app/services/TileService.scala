@@ -40,7 +40,7 @@ class TileServiceImpl @Inject()(
 
     val tiles = tileLayout.tiles ++ removedTiles.map(UserTileSetting.removed)
 
-    tileDao.saveTileLayoutForUser(user.usercode.string, UserTileLayout(tiles))
+    tileDao.saveTileLayout(user.usercode.string, UserTileLayout(tiles))
   }
 
   // TODO - add undergrad / postgrad groups - review isStaff (should it include PGRs?)

@@ -21,7 +21,7 @@ trait TileDao {
 
   def saveTilePreferences(usercode: String, tileId: String, preferences: JsObject)(implicit c: Connection): Unit
 
-  def saveTileLayoutForUser(usercode: String, tileLayout: UserTileLayout)(implicit c: Connection): Unit
+  def saveTileLayout(usercode: String, tileLayout: UserTileLayout)(implicit c: Connection): Unit
 
   def getDefaultTilesForGroups(groups: Set[String], ids: Seq[String] = Nil)(implicit c: Connection): Seq[TileInstance]
 
@@ -109,7 +109,7 @@ class TileDaoImpl @Inject()() extends TileDao {
       )
       .execute()
 
-  override def saveTileLayoutForUser(usercode: String, tileLayout: UserTileLayout)(implicit c: Connection): Unit = {
+  override def saveTileLayout(usercode: String, tileLayout: UserTileLayout)(implicit c: Connection): Unit = {
     val updateRemoved = "UPDATE USER_TILE SET REMOVED = {removed}, UPDATED_AT = {now} WHERE USERCODE = {usercode} AND TILE_ID = {id}"
     val update = "UPDATE USER_TILE SET TILE_POSITION = {position}, TILE_SIZE = {size}, PREFERENCES = {preferences}, REMOVED = {removed}, UPDATED_AT = {now} WHERE USERCODE = {usercode} AND TILE_ID = {id}"
     val insert = "INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, PREFERENCES, REMOVED, CREATED_AT, UPDATED_AT) VALUES ({usercode}, {id}, {position}, {size}, {preferences}, {removed}, {now}, {now})"
