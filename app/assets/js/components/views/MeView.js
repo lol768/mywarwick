@@ -65,13 +65,13 @@ class MeView extends ReactComponent {
 
   onBeginEditing(tile) {
     this.setState({
-      editing: tile.id
+      editing: tile.id,
     });
 
-    let el = $(ReactDOM.findDOMNode(this));
+    const el = $(ReactDOM.findDOMNode(this));
 
     el.stop().transition({
-      scale: 0.8
+      scale: 0.8,
     }, EDITING_ANIMATION_DURATION, 'snap');
 
     // Ensure first release of the mouse button/finger is not interpreted as
@@ -83,13 +83,13 @@ class MeView extends ReactComponent {
 
   onFinishEditing() {
     this.setState({
-      editing: null
+      editing: null,
     });
 
-    let el = $(ReactDOM.findDOMNode(this));
+    const el = $(ReactDOM.findDOMNode(this));
 
     el.stop().transition({
-      scale: 1
+      scale: 1,
     }, EDITING_ANIMATION_DURATION, 'snap', () => {
       el.removeAttr('style'); // transform creates positioning context
     });
@@ -100,7 +100,7 @@ class MeView extends ReactComponent {
   }
 
   onBodyClick(e) {
-    if (this.state.editing && $(e.target).parents('.tile--editing').length == 0) {
+    if (this.state.editing && $(e.target).parents('.tile--editing').length === 0) {
       this.onFinishEditing();
     }
   }
@@ -149,7 +149,7 @@ class MeView extends ReactComponent {
 
   onResizeTile(tile) {
     const sizes = ['small', 'wide', 'large'];
-    let nextSize = sizes[(sizes.indexOf(tile.size || tile.defaultSize) + 1) % sizes.length];
+    const nextSize = sizes[(sizes.indexOf(tile.size || tile.defaultSize) + 1) % sizes.length];
 
     this.props.dispatch(tiles.resizeTile(tile, nextSize));
   }
@@ -165,8 +165,8 @@ class MeView extends ReactComponent {
     const y = $zoom.offset().top - $tile.offset().top;
 
     $tile.stop().css({
-      x: x,
-      y: y,
+      x,
+      y,
       transformOriginX: 0,
       transformOriginY: 0,
       zIndex: 1001,
@@ -292,11 +292,11 @@ class MeView extends ReactComponent {
   renderTiles() {
     const zoomedTileKey = this.props.zoomedTile;
 
-    const tiles = this.props.tiles.map((tile) => this.renderTile(tile));
+    const theseTiles = this.props.tiles.map((tile) => this.renderTile(tile));
 
     if (zoomedTileKey) {
       const zoomedTile = _.find(this.props.tiles, (tile) => tile.id === zoomedTileKey);
-      tiles.push(this.renderTile(zoomedTile, true));
+      theseTiles.push(this.renderTile(zoomedTile, true));
     }
 
     return (
@@ -305,7 +305,7 @@ class MeView extends ReactComponent {
           <div className="tile-zoom-backdrop" onClick={ this.onTileDismiss }></div>
           : null}
         <ReactTransitionGroup ref="group">
-          {tiles}
+          {theseTiles}
         </ReactTransitionGroup>
       </div>
     );
@@ -339,7 +339,7 @@ registerReducer('me', (state = initialState, action) => {
 const select = (state) => ({
   zoomedTile: state.get('me').get('zoomedTile'),
   tiles: state.get('tiles').get('items').filterNot(tile => tile.get('removed') === true).toJS(),
-  tileContent: state.get('tileContent').toJS()
+  tileContent: state.get('tileContent').toJS(),
 });
 
 export default connect(select)(MeView);

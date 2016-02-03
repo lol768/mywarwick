@@ -49,7 +49,7 @@ export function failedTileContentFetch(tile, errors) {
 export function hideTile(tile) {
   return {
     type: TILE_HIDE,
-    tile
+    tile,
   };
 }
 
@@ -57,8 +57,8 @@ export function resizeTile(tile, size) {
   return {
     type: TILE_RESIZE,
     tile,
-    size
-  }
+    size,
+  };
 }
 
 const initialState = Immutable.fromJS({
@@ -87,7 +87,7 @@ registerReducer('tiles', (state = initialState, action) => {
         fetching: false,
         fetched: true,
         failed: false,
-        items: Immutable.fromJS(action.tiles)
+        items: Immutable.fromJS(action.tiles),
       });
     case TILE_HIDE:
       return state.update('items', items => (
@@ -95,7 +95,7 @@ registerReducer('tiles', (state = initialState, action) => {
       ));
     case TILE_RESIZE:
       return state.update('items', items => {
-        let index = items.findIndex(tile => tile.get('id') === action.tile.id);
+        const index = items.findIndex(tile => tile.get('id') === action.tile.id);
 
         return items.update(index, tile => tile.set('size', action.size));
       });

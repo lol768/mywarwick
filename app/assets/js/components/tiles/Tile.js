@@ -1,23 +1,36 @@
 // react/sort-comp goes crazy in this file - disable it
 /* eslint react/prop-types: 0, react/sort-comp: 0 */
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 
 import { localMoment } from '../../dateFormatter.js';
 import classNames from 'classnames';
 
-import {EDITING_ANIMATION_DURATION} from '../views/MeView';
+import { EDITING_ANIMATION_DURATION } from '../views/MeView';
 
 import $ from 'jquery';
 
 const SIZE_CLASSES = {
   small: 'col-xs-6 col-sm-6 col-md-3',
   wide: 'col-xs-12 col-sm-12 col-md-6',
-  large: 'col-xs-12 col-sm-12 col-md-6'
+  large: 'col-xs-12 col-sm-12 col-md-6',
 };
 
 const LONG_PRESS_DURATION_MS = 600;
 
 export default class Tile extends Component {
+
+  constructor(props) {
+    super(props);
+    this.onMouseDown = this.onMouseDown.bind(this);
+    this.onMouseUp = this.onMouseUp.bind(this);
+    this.onMouseOut = this.onMouseUp.bind(this);
+    this.onTouchStart = this.onMouseDown.bind(this);
+    this.onTouchEnd = this.onMouseUp.bind(this);
+    this.onTouchCancel = this.onMouseUp.bind(this);
+    this.onHide = this.props.onHide.bind(this);
+    this.onResize = this.props.onResize.bind(this);
+  }
 
   contentOrDefault(content, contentFunction) {
     const defaultText = (content.defaultText === undefined) ?
@@ -97,9 +110,9 @@ export default class Tile extends Component {
 
   onMouseDown() {
     if (!this.props.editing && !this.isZoomed()) {
-      let el = $(ReactDOM.findDOMNode(this.refs.tile));
+      const el = $(ReactDOM.findDOMNode(this.refs.tile));
       el.stop().transition({
-        scale: 0.97
+        scale: 0.97,
       }, 200);
 
       this.timeout = setTimeout(this.props.onBeginEditing, LONG_PRESS_DURATION_MS);
@@ -108,9 +121,9 @@ export default class Tile extends Component {
 
   onMouseUp() {
     if (!this.props.editing && !this.isZoomed()) {
-      let el = $(ReactDOM.findDOMNode(this.refs.tile));
+      const el = $(ReactDOM.findDOMNode(this.refs.tile));
       el.stop().transition({
-        scale: 1
+        scale: 1,
       }, 200);
 
       this.timeout = clearTimeout(this.timeout);
@@ -119,16 +132,16 @@ export default class Tile extends Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.editing && !prevProps.editing) {
-      let el = $(ReactDOM.findDOMNode(this.refs.tile));
+      const el = $(ReactDOM.findDOMNode(this.refs.tile));
 
       el.stop().transition({
-        scale: 1.15
+        scale: 1.15,
       }, EDITING_ANIMATION_DURATION, 'snap');
     } else if (prevProps.editing && !this.props.editing) {
-      let el = $(ReactDOM.findDOMNode(this.refs.tile));
+      const el = $(ReactDOM.findDOMNode(this.refs.tile));
 
       el.stop().transition({
-        scale: 1
+        scale: 1,
       }, EDITING_ANIMATION_DURATION, 'snap');
     }
   }
@@ -137,7 +150,7 @@ export default class Tile extends Component {
     return {
       small: 'right',
       wide: 'down',
-      large: 'up'
+      large: 'up',
     }[this.getSize()];
   }
 
@@ -156,7 +169,7 @@ export default class Tile extends Component {
     const sizeClass = SIZE_CLASSES[this.getSize()];
     const outerClassName = classNames(sizeClass, 'tile__container', {
       'tile--zoomed': props.zoomed,
-      'tile--text-btm': true
+      'tile--text-btm': true,
     });
     const zoomIcon = () => {
       if (this.isZoomed()) {
@@ -170,15 +183,33 @@ export default class Tile extends Component {
     return (
       <div className={outerClassName}>
         <article
-          className={classNames('tile', 'tile--' + props.type, 'tile--' + this.getSize(), 'colour-' + props.colour, {'tile--editing': props.editing})}
-          onMouseDown={this.onMouseDown.bind(this)} onMouseUp={this.onMouseUp.bind(this)} onMouseOut={this.onMouseUp.bind(this)}
-          onTouchStart={this.onMouseDown.bind(this)} onTouchEnd={this.onMouseUp.bind(this)} onTouchCancel={this.onMouseUp.bind(this)}
-          ref="tile">
-          <div className="tile__edit-control top-left" onClick={this.props.onHide.bind(this)} title="Hide tile">
-            <i className="fa fa-fw fa-minus"></i>
+          className={
+            classNames(
+              'tile', `tile--${props.type}`, `tile--${this.getSize()}`,
+              `colour-${props.colour}`, { 'tile--editing': props.editing }
+            )
+          }
+          onMouseDown={ this.onMouseDown }
+          onMouseUp={ this.onMouseUp }
+          onMouseOut={ this.onMouseUp }
+          onTouchStart={ this.onMouseDown }
+          onTouchEnd={ this.onMouseUp }
+          onTouchCancel={ this.onMouseUp }
+          ref="tile"
+        >
+          <div
+            className="tile__edit-control top-left"
+            onClick={ this.onHide }
+            title="Hide tile"
+          >
+            <i className="fa fa-fw fa-minus"> </i>
           </div>
-          <div className="tile__edit-control bottom-right" onClick={this.props.onResize.bind(this)} title={`Make tile ${this.getSize() === 'small' ? 'bigger' : 'smaller'}`}>
-            <i className={`fa fa-fw fa-arrow-${this.getResizeControlIcon()}`}></i>
+          <div
+            className="tile__edit-control bottom-right"
+            onClick={ this.onResize }
+            title={`Make tile ${this.getSize() === 'small' ? 'bigger' : 'smaller'}`}
+          >
+            <i className={`fa fa-fw fa-arrow-${this.getResizeControlIcon()}`}> </i>
           </div>
           <div className="tile__wrap">
             <header>
