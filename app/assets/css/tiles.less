@@ -39,11 +39,15 @@
 
 .me-view--editing {
   .tile {
-    transition: min-height .3s, height .3s;
+    transition: min-height .4s, height .4s;
+  }
+
+  .tile, a {
+    cursor: default;
   }
 
   .tile__container {
-    transition: width .3s;
+    transition: width .4s;
   }
 }
 
@@ -125,6 +129,22 @@
   opacity: .8;
 }
 
+.tile--small {
+  .tile__edit-control .fa-arrow-up {
+    transform: rotate(90deg);
+  }
+}
+.tile--wide {
+  .tile__edit-control .fa-arrow-up {
+    transform: rotate(180deg);
+  }
+}
+.tile--large {
+  .tile__edit-control .fa-arrow-up {
+    transform: rotate(315deg);
+  }
+}
+
 .tile__edit-control {
   @size: 36px;
   @outside: -@size * 1/2;
@@ -143,6 +163,10 @@
   line-height: @size * 5/6;
 
   cursor: pointer;
+
+  .fa-arrow-up {
+    transition: transform .4s;
+  }
 
   &:hover {
     background-color: #444;
@@ -167,6 +191,10 @@
     bottom: @outside;
     right: @outside;
   }
+}
+
+.tile--clickable {
+  cursor: pointer;
 }
 
 .tile--editing {

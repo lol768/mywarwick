@@ -50,9 +50,7 @@ class MeView extends ReactComponent {
   }
 
   onTileExpand(tile) {
-    if (tile.href) {
-      window.open(tile.href);
-    } else if (!this.props.zoomedTile) {
+    if (!this.props.zoomedTile) {
       this.props.dispatch(zoomInOn(tile));
     }
   }
@@ -101,7 +99,7 @@ class MeView extends ReactComponent {
 
   onBodyClick(e) {
     if (this.state.editing && $(e.target).parents('.tile--editing').length === 0) {
-      this.onFinishEditing();
+      _.defer(() => this.onFinishEditing());
     }
   }
 
@@ -126,13 +124,14 @@ class MeView extends ReactComponent {
       errors,
       fetching,
       editing,
+      editingAny: !!this.state.editing,
     });
 
     config.onDismiss = () => this.onTileDismiss();
     config.onExpand = () => this.onTileExpand(config);
     config.componentWillEnter = callback => this.componentWillEnter(config, callback);
     config.componentWillLeave = callback => this.componentWillLeave(config, callback);
-    config.onClickRefresh = () => this.props.dispatch(fetchTileContent(id));
+    config.onClickRefresh = () => this.props.dispatch(serverpipe.fetchTileContent(id));
     config.onBeginEditing = () => this.onBeginEditing(config);
     config.onFinishEditing = () => this.onFinishEditing(config);
     config.onHide = () => this.onHideTile(config);

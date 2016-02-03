@@ -130,6 +130,12 @@ export default class Tile extends Component {
     }
   }
 
+  onClick() {
+    if (this.props.content && this.props.content.href && !this.props.editingAny) {
+      window.open(this.props.content.href);
+    }
+  }
+
   componentDidUpdate(prevProps) {
     if (this.props.editing && !prevProps.editing) {
       const el = $(ReactDOM.findDOMNode(this.refs.tile));
@@ -144,14 +150,6 @@ export default class Tile extends Component {
         scale: 1,
       }, EDITING_ANIMATION_DURATION, 'snap');
     }
-  }
-
-  getResizeControlIcon() {
-    return {
-      small: 'right',
-      wide: 'down',
-      large: 'up',
-    }[this.getSize()];
   }
 
   getSize() {
@@ -185,8 +183,11 @@ export default class Tile extends Component {
         <article
           className={
             classNames(
-              'tile', `tile--${props.type}`, `tile--${this.getSize()}`,
-              `colour-${props.colour}`, { 'tile--editing': props.editing }
+              'tile', `tile--${props.type}`, `tile--${this.getSize()}`, `colour-${props.colour}`,
+              {
+                'tile--editing': props.editing,
+                'tile--clickable': props.content && props.content.href
+              }
             )
           }
           onMouseDown={ this.onMouseDown }
@@ -209,7 +210,7 @@ export default class Tile extends Component {
             onClick={ this.onResize }
             title={`Make tile ${this.getSize() === 'small' ? 'bigger' : 'smaller'}`}
           >
-            <i className={`fa fa-fw fa-arrow-${this.getResizeControlIcon()}`}> </i>
+            <i className="fa fa-fw fa-arrow-up"> </i>
           </div>
           <div className="tile__wrap">
             <header>
@@ -230,7 +231,7 @@ export default class Tile extends Component {
     );
   }
 
-  getOuterBody() {
+  getOuterBody.bind(this)() {
     const { content, errors, zoomed, fetchedAt } = this.props;
 
     if (content) {

@@ -11,6 +11,8 @@ export default class TextTile extends Tile {
     this.state = {
       itemIndex: 0,
     };
+
+    this.onClickLink = this.onClickLink.bind(this);
   }
 
   componentWillUnmount() {
@@ -69,11 +71,19 @@ export default class TextTile extends Tile {
           </div>);
 
           return item.href ?
-            <a href={item.href} target="_blank" onClick={ this.onClick }>{tileItem}</a>
+            <a href={item.href} target="_blank" onClick={ this.onClickLink }>{tileItem}</a>
             : tileItem;
         }) }
       </ReactCSSTransitionGroup>
     );
+  }
+
+  onClickLink(e) {
+    e.stopPropagation();
+
+    if (this.props.editingAny) {
+      e.preventDefault();
+    }
   }
 
   canZoom() {
