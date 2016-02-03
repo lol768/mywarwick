@@ -1,5 +1,5 @@
-// TODO - include prop validation for Tile that doesn't break the extending tile types
-/* eslint react/prop-types:0 */
+// react/sort-comp goes crazy in this file - disable it
+/* eslint react/prop-types: 0, react/sort-comp: 0 */
 import React, { Component } from 'react';
 
 import { localMoment } from '../../dateFormatter.js';
@@ -160,3 +160,18 @@ export default class Tile extends Component {
   }
 
 }
+
+/* TODO - include prop validation for Tile that doesn't cause warnings in the extending classes
+Tile.propTypes = {
+  componentWillEnter: PropTypes.function,
+  componentWillLeave: PropTypes.function,
+  content: PropTypes.object,
+  errors: PropTypes.object,
+  fetchedAt: PropTypes.string,
+  fetching: PropTypes.boolean,
+  icon: PropTypes.string,
+  onClickRefresh: PropTypes.function,
+  title: PropTypes.string,
+  zoomed: PropTypes.boolean,
+};
+*/
