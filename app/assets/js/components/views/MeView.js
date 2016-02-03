@@ -73,9 +73,9 @@ class MeView extends ReactComponent {
       scale: 0.8
     }, EDITING_ANIMATION_DURATION, 'snap');
 
-    // Ensure first release of the mouse button is not interpreted as clicking
-    // out of the editing mode
-    $('body').one('mouseup', () => {
+    // Ensure first release of the mouse button/finger is not interpreted as
+    // exiting the editing mode
+    $('body').one('mouseup touchend', () => {
       _.defer(() => $('body').on('click', this.boundOnBodyClick));
     });
   }
