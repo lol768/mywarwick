@@ -75,9 +75,8 @@ export default class TextTile extends Tile {
   canZoom() {
     if (this.props.content && this.props.content.items) {
       return this.props.content.items.length > 1;
-    } else {
-      return false;
     }
+    return false;
   }
 
 }

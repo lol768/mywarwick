@@ -124,10 +124,11 @@ const loadPersonalisedDataFromServer = _.once(() => {
 });
 
 store.subscribe(() => {
-  let user = store.getState().get('user');
+  const u = store.getState().get('user');
 
-  if (user && user.get('authoritative') === true)
+  if (u && u.get('authoritative') === true) {
     loadPersonalisedDataFromServer();
+  }
 });
 
 store.dispatch(serverpipe.fetchUserIdentity());
