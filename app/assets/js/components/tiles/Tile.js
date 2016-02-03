@@ -39,7 +39,7 @@ export default class Tile extends Component {
     return false;
   }
 
-  canReallyZoom() {
+  shouldDisplayExpandIcon() {
     return this.props.editing ? false : this.canZoom();
   }
 
@@ -149,7 +149,6 @@ export default class Tile extends Component {
     let sizeClass = SIZE_CLASSES[this.getSize()];
     let outerClassName = classNames(sizeClass, 'tile__container', {
       'tile--zoomed': props.zoomed,
-      'tile--canZoom': this.canReallyZoom(),
       'tile--text-btm': true
     });
 
@@ -176,7 +175,7 @@ export default class Tile extends Component {
               </h1>
               { this.isZoomed() ?
                 <i className="fa fa-times tile__dismiss" onClick={props.onDismiss}></i>
-                : this.canReallyZoom() ?
+                : this.shouldDisplayExpandIcon() ?
                 <i className="fa fa-expand tile__expand" onClick={props.onExpand}></i> : null }
             </header>
             <div className="tile__body">
