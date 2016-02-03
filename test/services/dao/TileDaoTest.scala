@@ -1,6 +1,9 @@
 package services.dao
 
+import anorm.SQL
+import anorm.SqlParser.scalar
 import helpers.OneStartAppPerSuite
+import models.{TileSize, UserTileLayout, UserTileSetting}
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 
@@ -12,7 +15,7 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
     "get tiles for user ordered by position" in transaction { implicit c =>
 
-      anorm.SQL(
+      SQL(
         """
       INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, TITLE, ICON) VALUES
         ('tile', 'count', 'large', 0, 1, 'http://provider', 'Printer Credit', 'print'),
@@ -30,7 +33,7 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
     "get user tiles by id" in transaction { implicit c =>
 
-      anorm.SQL(
+      SQL(
         """
       INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, TITLE, ICON) VALUES
         ('tile', 'count', 'large', 0, 1, 'http://provider', 'Printer Credit', 'print'),
@@ -49,12 +52,12 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
     }
 
     "get default tiles when the user has none" in transaction { implicit c =>
-      anorm.SQL(
+      SQL(
         """
         INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, TITLE, ICON) VALUES
           ('tile', 'count', 'large', 0, 1, 'http://provider', 'Printer Credit', 'print'),
           ('other-tile', 'count', 'wide', 1, 2, 'http://provider', 'Mail', 'envelope-o'),
-          ('heron-tile', 'count', 'tall', 2, 3, 'http://herons-eat-ducklings', 'Mail', 'envelope-o');
+          ('heron-tile', 'count', 'small', 2, 3, 'http://herons-eat-ducklings', 'Mail', 'envelope-o');
 
         INSERT INTO TILE_GROUP (TILE_ID, "GROUP") VALUES
           ('tile', 'staff'),
@@ -68,12 +71,12 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
     }
 
     "don't fetch tiles that the user has removed" in transaction { implicit c =>
-      anorm.SQL(
+      SQL(
         """
         INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, TITLE, ICON) VALUES
           ('tile', 'count', 'large', 0, 1, 'http://provider', 'Printer Credit', 'print'),
           ('other-tile', 'count', 'wide', 1, 2, 'http://provider', 'Printer Credit', 'print'),
-          ('heron-tile', 'count', 'tall', 2, 3, 'http://herons-eat-ducklings', 'Printer Credit', 'print');
+          ('heron-tile', 'count', 'small', 2, 3, 'http://herons-eat-ducklings', 'Printer Credit', 'print');
 
         INSERT INTO TILE_GROUP (TILE_ID, "GROUP") VALUES
           ('tile', 'staff'),
@@ -90,12 +93,12 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
     }
 
     "fetch tiles for anonymous users " in transaction { implicit c =>
-      anorm.SQL(
+      SQL(
         """
         INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, TITLE, ICON) VALUES
           ('tile', 'count', 'large', 0, 1, 'http://provider', 'Printer Credit', 'print'),
           ('croco-tile', 'count', 'wide', 1, 2, 'http://provider', 'Printer Credit', 'print'),
-          ('open-day-tile', 'count', 'tall', 2, 3, 'http://open-for-dayz', 'Printer Credit', 'print');
+          ('open-day-tile', 'count', 'small', 2, 3, 'http://open-for-dayz', 'Printer Credit', 'print');
         INSERT INTO TILE_GROUP (TILE_ID, "GROUP") VALUES
           ('tile', 'staff'),
           ('tile', 'student'),
@@ -108,7 +111,7 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
     }
 
     "save and retrieve tile preferences" in transaction { implicit c =>
-      anorm.SQL(
+      SQL(
         """
       INSERT INTO TILE (ID, DEFAULT_SIZE, FETCH_URL, TITLE, ICON) VALUES
         ('tile', 'large', 'http://provider', 'Printer Credit', 'print');
@@ -119,13 +122,13 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
       val preferenceObject = Json.obj("count" -> 3)
       tileDao.saveTilePreferences("someone", "tile", preferenceObject)
 
-      val tiles = tileDao.getTilesByIds("someone", Seq("tile"), Set.empty[String])
+      val tiles = tileDao.getTilesByIds("someone", Seq("tile"), Set.empty)
 
-      tiles.head.options mustBe Some(preferenceObject)
+      tiles.head.preferences mustBe Some(preferenceObject)
     }
 
     "return None for non-existent preferences" in transaction { implicit c =>
-      anorm.SQL(
+      SQL(
         """
       INSERT INTO TILE (ID, DEFAULT_SIZE, FETCH_URL, TITLE, ICON) VALUES
         ('tile', 'large', 'http://provider', 'Printer Credit', 'print');
@@ -133,9 +136,43 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
         ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE);
         """).execute()
 
-      val tiles = tileDao.getTilesByIds("someone", Seq("tile"), Set.empty[String])
+      val tiles = tileDao.getTilesByIds("someone", Seq("tile"), Set.empty)
 
-      tiles.head.options mustBe None
+      tiles.head.preferences mustBe None
+    }
+
+    "save tile layout" in transaction { implicit c =>
+
+      SQL(
+        """
+      INSERT INTO TILE (ID, DEFAULT_SIZE, FETCH_URL, TITLE, ICON) VALUES
+        ('tile', 'large', 'http://provider', 'Printer Credit', 'print');
+        """
+      ).execute()
+
+      // INSERT removed tiles
+
+      tileDao.saveTileLayout("usercode", UserTileLayout(Seq(UserTileSetting.removed("tile"))))
+
+      SQL("SELECT COUNT(*) FROM USER_TILE WHERE USERCODE = 'usercode' AND TILE_ID = 'tile' AND REMOVED = 1")
+        .as(scalar[Int].single) mustBe 1
+
+      // UPDATE non-removed tiles
+
+      tileDao.saveTileLayout("usercode", UserTileLayout(Seq(UserTileSetting("tile", TileSize.wide, None, removed = false))))
+
+      val tiles = tileDao.getTilesForUser("usercode", Set.empty)
+
+      tiles.length mustBe 1
+      tiles.head.size mustBe TileSize.wide
+
+      // UPDATE removed tiles, keeping previous column values
+
+      tileDao.saveTileLayout("usercode", UserTileLayout(Seq(UserTileSetting.removed("tile"))))
+
+      SQL("SELECT COUNT(*) FROM USER_TILE WHERE USERCODE = 'usercode' AND TILE_ID = 'tile' AND REMOVED = 1 AND TILE_SIZE = 'wide'")
+        .as(scalar[Int].single) mustBe 1
+
     }
 
   }
