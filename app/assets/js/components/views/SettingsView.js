@@ -14,10 +14,12 @@ export class SettingsView extends ReactComponent {
       browserPushDisabled: 'Notification' in window && Notification.permission === "denied"
     };
 
-    navigator.permissions.query({name:'notifications'})
-      .then(notificationPermissions => {
-        notificationPermissions.onchange = this.onBrowserPermissionChange.bind(this);
-      });
+    if ('permissions' in navigator) {
+      navigator.permissions.query({name: 'notifications'})
+        .then(notificationPermissions => {
+          notificationPermissions.onchange = this.onBrowserPermissionChange.bind(this);
+        });
+    }
   }
 
   onBrowserPermissionChange() {

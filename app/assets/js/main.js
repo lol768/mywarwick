@@ -29,6 +29,7 @@ import * as user from './user';
 import { navigate } from './navigate';
 import persisted from './persisted';
 import SocketDatapipe from './SocketDatapipe';
+import './bridge';
 
 localforage.config({
   name: 'Start'
@@ -75,10 +76,6 @@ $(function () {
   if (window.navigator.userAgent.indexOf('Mobile') >= 0) {
     $('html').addClass('mobile');
   }
-
-  if (window.navigator.userAgent.indexOf('Start/1.0') >= 0) {
-    $('html').addClass('app standalone');
-  }
 });
 
 store.subscribe(() => {
@@ -120,25 +117,25 @@ update.displayUpdateProgress(store.dispatch);
 
 let freezeStream = stream => stream.valueSeq().flatten().toJS();
 
-let loadPersonalisedData = _.once(() => {
+let loadPersonalisedDataFromServer = _.once(() => {
   store.dispatch(serverpipe.fetchActivities());
   store.dispatch(serverpipe.fetchTiles());
   store.dispatch(serverpipe.fetchTileContent());
-
-  store.subscribe(() => notificationsGlue.persistActivitiesMetadata(store.getState()));
-  store.subscribe(() => notificationsGlue.persistNotificationsMetadata(store.getState()));
-
-  persisted('activities', notifications.fetchedActivities, freezeStream);
-  persisted('notifications', notifications.fetchedNotifications, freezeStream);
-  persisted('tiles.items', tiles.fetchedTiles);
-  persisted('tileContent', tiles.loadedAllTileContent);
 });
 
 store.subscribe(() => {
   let user = store.getState().get('user');
 
-  if (user && user.get('loaded') === true)
-    loadPersonalisedData();
+  if (user && user.get('authoritative') === true)
+    loadPersonalisedDataFromServer();
 });
 
 store.dispatch(serverpipe.fetchUserIdentity());
+
+persisted('activities', notifications.fetchedActivities, freezeStream);
+persisted('notifications', notifications.fetchedNotifications, freezeStream);
+persisted('tiles.items', tiles.fetchedTiles);
+persisted('tileContent', tiles.loadedAllTileContent);
+
+store.subscribe(() => notificationsGlue.persistActivitiesMetadata(store.getState()));
+store.subscribe(() => notificationsGlue.persistNotificationsMetadata(store.getState()));

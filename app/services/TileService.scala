@@ -34,7 +34,7 @@ class TileServiceImpl @Inject()(
   // TODO - add undergrad / postgrad groups - review isStaff (should it include PGRs?)
   private def getGroups(user:User): Set[String] = {
     val isStaff = if (user.isStaffOrPGR) Set("staff") else Set()
-    val isStudent = if (user.isStaffOrPGR) Set("student") else Set()
+    val isStudent = if (user.isStudent) Set("student") else Set()
     isStaff ++ isStudent ++ user.department.flatMap(_.shortName).toSet
   }
 

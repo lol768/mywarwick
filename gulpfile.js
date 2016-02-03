@@ -30,6 +30,7 @@ var rename = require('gulp-rename');
 var filenames = require('gulp-filenames');
 var insert = require('gulp-insert');
 var swPrecache = require('sw-precache');
+var eslint = require('gulp-eslint');
 
 var lessCompiler = require('less');
 
@@ -237,6 +238,13 @@ gulp.task('manifest', ['scripts', 'styles'], function () {
       }))
       .pipe(gulp.dest(paths.assetsOut));
   }
+});
+
+gulp.task('lint', function () {
+  return gulp.src([paths.assetPath+'/js/**/*.js'])
+    .pipe(eslint('.eslintrc'))
+    .pipe(eslint.format())
+    .pipe(eslint.failAfterError());
 });
 
 // Shortcuts for building all asset types at once

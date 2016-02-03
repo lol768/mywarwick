@@ -21,12 +21,12 @@ class UtilityBar extends ReactComponent {
 
   render() {
     let signInLink = (
-      <a href={window.SSO.LOGIN_URL}>
+      <a href={window.SSO.LOGIN_URL} key="signInLink">
         Sign in
       </a>
     );
     let accountLink = (
-      <a ref="accountLink" href="//warwick.ac.uk/myaccount" data-toggle="id7:account-popover" data-name={this.props.name}>
+      <a key="accountLink" ref="accountLink" href="//warwick.ac.uk/myaccount" data-toggle="id7:account-popover" data-name={this.props.name}>
         {this.props.name}
         <span className="caret"></span>
       </a>
@@ -43,6 +43,6 @@ class UtilityBar extends ReactComponent {
 
 }
 
-let select = (state) => state.get('user').toJS();
+let select = (state) => state.getIn(['user', 'data']).toJS();
 
 export default connect(select)(UtilityBar);

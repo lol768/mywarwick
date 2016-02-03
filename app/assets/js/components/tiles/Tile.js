@@ -17,6 +17,19 @@ const LONG_PRESS_DURATION_MS = 600;
 
 export default class Tile extends Component {
 
+  contentOrDefault(content, contentFunction) {
+    const defaultText = (content.defaultText === undefined) ? 'Nothing to show.' : content.defaultText;
+    if(!content.items || content.items.length === 0) {
+      return <span>{defaultText}</span>
+    } else {
+      return contentFunction.call(this, content);
+    }
+  }
+
+  getBodyInternal(content) {
+    return this.contentOrDefault(content, this.getBody);
+  }
+
   getBody(content) {
     throw new TypeError("Must implement getBody");
   }
@@ -31,6 +44,10 @@ export default class Tile extends Component {
 
   isZoomed() {
     return this.props.zoomed;
+  }
+
+  getZoomedBodyInternal(content) {
+    return this.contentOrDefault(content, this.getZoomedBody);
   }
 
   getZoomedBody(content) {
@@ -174,7 +191,7 @@ export default class Tile extends Component {
     const { content, errors, zoomed, fetchedAt } = this.props;
 
     if (content) {
-      let body = zoomed ? this.getZoomedBody(content) : this.getBody(content);
+      let body = zoomed ? this.getZoomedBodyInternal(content) : this.getBodyInternal(content);
 
       if (errors) {
         return (

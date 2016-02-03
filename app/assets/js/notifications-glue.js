@@ -29,7 +29,7 @@ export function getActivitiesFromLocalStorage() {
 
 const notificationsMetadataSelector = state => state.get("notifications-metadata");
 const activitiesMetadataSelector = state => state.get("activities-metadata");
-const userSelector = state => state.get("user");
+const userSelector = state => state.getIn(['user', 'data']);
 
 export const persistActivitiesMetadata = createSelector([activitiesMetadataSelector, userSelector], (metadata, user) => {
   let data = { usercode: user.get("usercode"), activitiesRead: metadata.lastRead.format() };
