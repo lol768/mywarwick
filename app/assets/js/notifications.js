@@ -11,37 +11,38 @@ export const ACTIVITIES_FETCH = 'activities.fetch';
 export function receivedActivity(activity) {
   return {
     type: ACTIVITY_RECEIVE,
-    activity: activity
+    activity,
   };
 }
 
 export function fetchedActivities(activities) {
   return {
     type: ACTIVITIES_FETCH,
-    activities: activities
+    activities,
   };
 }
 
 export function receivedNotification(notification) {
   return {
     type: NOTIFICATION_RECEIVE,
-    notification: notification
+    notification,
   };
 }
 
 export function fetchedNotifications(notifications) {
   return {
     type: NOTIFICATION_FETCH,
-    notifications: notifications
+    notifications,
   };
 }
 
-let partitionByYearAndMonth = (n) => n.date.toString().substr(0, 7);
+const partitionByYearAndMonth = (n) => n.date.toString().substr(0, 7);
 
 export function mergeNotifications(stream, newNotifications) {
   return onStreamReceive(stream, partitionByYearAndMonth, newNotifications);
 }
 
+/* eslint-disable new-cap */
 registerReducer('notifications', (state = makeStream(), action) => {
   switch (action.type) {
     case NOTIFICATION_RECEIVE:
@@ -63,3 +64,4 @@ registerReducer('activities', (state = makeStream(), action) => {
       return state;
   }
 });
+/* eslint-enable new-cap */

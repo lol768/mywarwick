@@ -9,8 +9,8 @@ export const description = 'by-date';
 // Which group an item belongs in
 // Return an arbitrary identifier that is the same for all items in the same group
 export function groupForItem(item, now = localMoment()) {
-  var date = localMoment(item.props.date).startOf('day');
-  var tomorrow = now.clone().add(1, 'day');
+  const date = localMoment(item.props.date).startOf('day');
+  const tomorrow = now.clone().add(1, 'day');
 
   // date is next week but not tomorrow
   if (date.isSame(now.clone().add(1, 'week'), 'isoWeek') && date.isAfter(tomorrow)) {
@@ -34,9 +34,8 @@ export function groupForItem(item, now = localMoment()) {
   } else if (date.isSame(now.clone().subtract(1, 'week'), 'isoWeek')) {
     return 6;
     // older
-  } else {
-    return 7;
   }
+  return 7;
 }
 
 // The title to be displayed for items in the group
@@ -50,6 +49,6 @@ export function titleForGroup(group) {
     'Yesterday',
     'Earlier This Week',
     'Last Week',
-    'Older'
+    'Older',
   ][group];
 }

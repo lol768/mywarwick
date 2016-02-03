@@ -1,4 +1,3 @@
-import Immutable from 'immutable';
 import moment from 'moment';
 import { registerReducer } from './reducers';
 
@@ -8,18 +7,18 @@ export const ACTIVITIES_READ = 'activities.read';
 export function readActivities(date) {
   return {
     type: ACTIVITIES_READ,
-    date: date
+    date,
   };
 }
 
 export function readNotifications(date) {
   return {
     type: NOTIFICATIONS_READ,
-    date: date
+    date,
   };
 }
 
-registerReducer('notifications-metadata', (state = {lastRead: moment('2015-01-01')}, action) => {
+registerReducer('notifications-metadata', (state = { lastRead: moment('2015-01-01') }, action) => {
   switch (action.type) {
     case NOTIFICATIONS_READ:
       return { lastRead: moment.max(state.lastRead, action.date) };
@@ -28,7 +27,7 @@ registerReducer('notifications-metadata', (state = {lastRead: moment('2015-01-01
   }
 });
 
-registerReducer('activities-metadata', (state ={lastRead: moment('2015-01-01')}, action) => {
+registerReducer('activities-metadata', (state = { lastRead: moment('2015-01-01') }, action) => {
   switch (action.type) {
     case ACTIVITIES_READ:
       return { lastRead: moment.max(state.lastRead, action.date) };
