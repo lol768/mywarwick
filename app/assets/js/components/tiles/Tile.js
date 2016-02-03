@@ -129,14 +129,6 @@ export default class Tile extends Component {
     }
   }
 
-  getResizeControlIcon() {
-    return {
-      small: 'right',
-      wide: 'down',
-      large: 'up'
-    }[this.getSize()];
-  }
-
   getSize() {
     return this.props.size || this.props.defaultSize;
   }
@@ -163,7 +155,7 @@ export default class Tile extends Component {
             <i className="fa fa-fw fa-minus"></i>
           </div>
           <div className="tile__edit-control bottom-right" onClick={this.props.onResize.bind(this)} title={`Make tile ${this.getSize() === 'small' ? 'bigger' : 'smaller'}`}>
-            <i className={`fa fa-fw fa-arrow-${this.getResizeControlIcon()}`}></i>
+            <i className="fa fa-fw fa-arrow-up"></i>
           </div>
           <div className="tile__wrap">
             <header>
