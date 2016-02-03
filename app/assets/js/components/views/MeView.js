@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactTransitionGroup from 'react/lib/ReactTransitionGroup';
 import log from 'loglevel';
-import { fetchTileContent } from '../../serverpipe';
 
 import * as TILES from '../tiles';
 

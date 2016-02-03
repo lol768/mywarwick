@@ -186,7 +186,7 @@ export default class Tile extends Component {
               'tile', `tile--${props.type}`, `tile--${this.getSize()}`, `colour-${props.colour}`,
               {
                 'tile--editing': props.editing,
-                'tile--clickable': props.content && props.content.href
+                'tile--clickable': props.content && props.content.href,
               }
             )
           }
@@ -231,7 +231,7 @@ export default class Tile extends Component {
     );
   }
 
-  getOuterBody.bind(this)() {
+  getOuterBody() {
     const { content, errors, zoomed, fetchedAt } = this.props;
 
     if (content) {
