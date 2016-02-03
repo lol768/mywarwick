@@ -1,28 +1,56 @@
 package models
 
+import models.TileSize.TileSize
 import play.api.libs.json._
 
 case class TileInstance(
   tile: Tile,
-  tileConfig: TileConfig,
-  options: Option[JsObject],
+  position: Int,
+  size: TileSize,
+  preferences: Option[JsObject],
   removed: Boolean
 )
+
+case class UserTileSetting(
+  tileId: String,
+  size: TileSize,
+  preferences: Option[JsObject],
+  removed: Boolean = false
+)
+
+object UserTileSetting {
+  implicit val format = Json.format[UserTileSetting]
+
+  def removed(tileId: String): UserTileSetting = {
+    UserTileSetting(
+      tileId,
+      TileSize.small,
+      None,
+      removed = true
+    )
+  }
+}
+
+case class UserTileLayout(tiles: Seq[UserTileSetting])
+
+object UserTileLayout {
+  implicit val format = Json.format[UserTileLayout]
+}
 
 object TileInstance {
   implicit val reads = Json.reads[TileInstance]
 
   implicit val writes: Writes[TileInstance] = new Writes[TileInstance] {
-    override def writes(tileInstance: TileInstance): JsValue =
+    override def writes(o: TileInstance): JsValue =
       Json.obj(
-        "id" -> tileInstance.tile.id,
-        "tileType" -> tileInstance.tile.tileType,
-        "defaultSize" -> tileInstance.tile.defaultSize,
-        "colour" -> tileInstance.tile.colour,
-        "size" -> tileInstance.tileConfig.size,
-        "options" -> tileInstance.options,
-        "title" -> tileInstance.tile.title,
-        "icon" -> tileInstance.tile.icon
+        "id" -> o.tile.id,
+        "colour" -> o.tile.colour,
+        "defaultSize" -> o.tile.defaultSize,
+        "icon" -> o.tile.icon,
+        "preferences" -> o.preferences,
+        "size" -> o.size,
+        "title" -> o.tile.title,
+        "type" -> o.tile.tileType
       )
   }
 }

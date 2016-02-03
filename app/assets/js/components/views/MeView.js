@@ -15,7 +15,11 @@ import { connect } from 'react-redux';
 
 import { registerReducer } from '../../reducers';
 
+import * as tiles from '../../tiles';
+import * as serverpipe from '../../serverpipe';
+
 const ZOOM_ANIMATION_DURATION = 500;
+export const EDITING_ANIMATION_DURATION = 700;
 
 const TILE_ZOOM_IN = 'me.zoom-in';
 const TILE_ZOOM_OUT = 'me.zoom-out';
@@ -41,6 +45,8 @@ class MeView extends ReactComponent {
     super(props);
 
     this.state = {};
+
+    this.boundOnBodyClick = this.onBodyClick.bind(this);
   }
 
   onTileExpand(tile) {
@@ -65,7 +71,13 @@ class MeView extends ReactComponent {
 
     el.stop().transition({
       scale: 0.8
-    }, 600, 'snap');
+    }, EDITING_ANIMATION_DURATION, 'snap');
+
+    // Ensure first release of the mouse button is not interpreted as clicking
+    // out of the editing mode
+    $('body').one('mouseup', () => {
+      _.defer(() => $('body').on('click', this.boundOnBodyClick));
+    });
   }
 
   onFinishEditing() {
@@ -77,15 +89,25 @@ class MeView extends ReactComponent {
 
     el.stop().transition({
       scale: 1
-    }, 600, 'snap', () => {
+    }, EDITING_ANIMATION_DURATION, 'snap', () => {
       el.removeAttr('style'); // transform creates positioning context
     });
+
+    $('body').off('click', this.boundOnBodyClick);
+
+    this.props.dispatch(serverpipe.persistTiles());
+  }
+
+  onBodyClick(e) {
+    if (this.state.editing && $(e.target).parents('.tile--editing').length == 0) {
+      this.onFinishEditing();
+    }
   }
 
   renderTile(props, zoomed = false) {
-    let tileComponent = TILES[props.tileType];
+    let tileComponent = TILES[props.type];
     if (tileComponent === undefined) {
-      console.error("No component available for tile type " + props.tileType);
+      console.error("No component available for tile type " + props.type);
       return null;
     }
 
@@ -112,8 +134,23 @@ class MeView extends ReactComponent {
     config.onClickRefresh = () => this.props.dispatch(fetchTileContent(id));
     config.onBeginEditing = () => this.onBeginEditing(config);
     config.onFinishEditing = () => this.onFinishEditing(config);
+    config.onHide = () => this.onHideTile(config);
+    config.onResize = () => this.onResizeTile(config);
 
     return React.createElement(tileComponent, config);
+  }
+
+  onHideTile(tile) {
+    this.props.dispatch(tiles.hideTile(tile));
+
+    this.onFinishEditing();
+  }
+
+  onResizeTile(tile) {
+    const sizes = ['small', 'wide', 'large'];
+    let nextSize = sizes[(sizes.indexOf(tile.size || tile.defaultSize) + 1) % sizes.length];
+
+    this.props.dispatch(tiles.resizeTile(tile, nextSize));
   }
 
   animateTileZoomOut(tileComponent, zoomComponent, callback) {
@@ -300,7 +337,7 @@ registerReducer('me', (state = initialState, action) => {
 
 let select = (state) => ({
   zoomedTile: state.get('me').get('zoomedTile'),
-  tiles: state.get('tiles').get('items').toJS(),
+  tiles: state.get('tiles').get('items').filterNot(tile => tile.get('removed') === true).toJS(),
   tileContent: state.get('tileContent').toJS()
 });
 

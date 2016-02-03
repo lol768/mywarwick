@@ -4,13 +4,14 @@ import ReactDOM from 'react-dom';
 import { localMoment } from '../../dateFormatter.js';
 import classNames from 'classnames';
 
+import {EDITING_ANIMATION_DURATION} from '../views/MeView';
+
 import $ from 'jquery';
 
-let sizeClasses = {
-  small: 'col-xs-6 col-md-3',
-  large: 'col-xs-12 col-sm-6',
-  wide: 'col-xs-12 col-sm-6',
-  tall: 'col-xs-12 col-sm-6'
+const SIZE_CLASSES = {
+  small: 'col-xs-6 col-sm-6 col-md-3',
+  wide: 'col-xs-12 col-sm-12 col-md-6',
+  large: 'col-xs-12 col-sm-12 col-md-6'
 };
 
 const LONG_PRESS_DURATION_MS = 600;
@@ -118,13 +119,13 @@ export default class Tile extends Component {
 
       el.stop().transition({
         scale: 1.15
-      }, 600, 'snap');
+      }, EDITING_ANIMATION_DURATION, 'snap');
     } else if (prevProps.editing && !this.props.editing) {
       let el = $(ReactDOM.findDOMNode(this.refs.tile));
 
       el.stop().transition({
         scale: 1
-      }, 600, 'snap');
+      }, EDITING_ANIMATION_DURATION, 'snap');
     }
   }
 
@@ -133,7 +134,11 @@ export default class Tile extends Component {
       small: 'right',
       wide: 'down',
       large: 'up'
-    }[this.props.size || this.props.defaultSize];
+    }[this.getSize()];
+  }
+
+  getSize() {
+    return this.props.size || this.props.defaultSize;
   }
 
   render() {
@@ -141,9 +146,8 @@ export default class Tile extends Component {
 
     let icon = <i className={'tile__icon fa fa-fw ' + this.getIcon()} title={this.getIconTitle()} onClick={this.props.onClickRefresh}></i>;
 
-    let size = props.size || props.defaultSize;
-    let sizeClass = sizeClasses[size];
-    let outerClassName = classNames(sizeClass, {
+    let sizeClass = SIZE_CLASSES[this.getSize()];
+    let outerClassName = classNames(sizeClass, 'tile__container', {
       'tile--zoomed': props.zoomed,
       'tile--canZoom': this.canReallyZoom(),
       'tile--text-btm': true
@@ -152,17 +156,14 @@ export default class Tile extends Component {
     return (
       <div className={outerClassName}>
         <article
-          className={classNames('tile', 'tile--' + props.tileType, 'tile--' + size, 'colour-' + props.colour, {'tile--editing': props.editing})}
+          className={classNames('tile', 'tile--' + props.type, 'tile--' + this.getSize(), 'colour-' + props.colour, {'tile--editing': props.editing})}
           onMouseDown={this.onMouseDown.bind(this)} onMouseUp={this.onMouseUp.bind(this)} onMouseOut={this.onMouseUp.bind(this)}
           onTouchStart={this.onMouseDown.bind(this)} onTouchEnd={this.onMouseUp.bind(this)} onTouchCancel={this.onMouseUp.bind(this)}
           ref="tile">
-          <div className="tile__edit-control top-left" onClick={this.props.onFinishEditing.bind(this)}>
-            <i className="fa fa-fw fa-times"></i>
+          <div className="tile__edit-control top-left" onClick={this.props.onHide.bind(this)} title="Hide tile">
+            <i className="fa fa-fw fa-minus"></i>
           </div>
-          <div className="tile__edit-control top-right">
-            <i className="fa fa-fw fa-ellipsis-v"></i>
-          </div>
-          <div className="tile__edit-control bottom-right">
+          <div className="tile__edit-control bottom-right" onClick={this.props.onResize.bind(this)} title={`Make tile ${this.getSize() === 'small' ? 'bigger' : 'smaller'}`}>
             <i className={`fa fa-fw fa-arrow-${this.getResizeControlIcon()}`}></i>
           </div>
           <div className="tile__wrap">

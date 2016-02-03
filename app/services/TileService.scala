@@ -1,7 +1,7 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject}
-import models.{TileLayout, TileInstance}
+import models._
 import play.api.db.{Database, NamedDatabase}
 import services.dao.TileDao
 import warwick.sso.User
@@ -12,6 +12,8 @@ trait TileService {
   def getTilesByIds(user: User, ids: Seq[String]): Seq[TileInstance]
 
   def getTilesForUser(user: Option[User]): TileLayout
+
+  def saveTileLayoutForUser(user: User, tileLayout: UserTileLayout): Unit
 
 }
 
@@ -31,8 +33,18 @@ class TileServiceImpl @Inject()(
       }
     }
 
+  override def saveTileLayoutForUser(user: User, tileLayout: UserTileLayout): Unit = db.withConnection { implicit c =>
+    val defaultTiles = tileDao.getDefaultTilesForGroups(getGroups(user)).map(_.tile.id)
+    val currentTiles = tileLayout.tiles.map(_.tileId)
+    val removedTiles = defaultTiles.toSet -- currentTiles
+
+    val tiles = tileLayout.tiles ++ removedTiles.map(UserTileSetting.removed)
+
+    tileDao.saveTileLayoutForUser(user.usercode.string, UserTileLayout(tiles))
+  }
+
   // TODO - add undergrad / postgrad groups - review isStaff (should it include PGRs?)
-  private def getGroups(user:User): Set[String] = {
+  private def getGroups(user: User): Set[String] = {
     val isStaff = if (user.isStaffOrPGR) Set("staff") else Set()
     val isStudent = if (user.isStudent) Set("student") else Set()
     isStaff ++ isStudent ++ user.department.flatMap(_.shortName).toSet

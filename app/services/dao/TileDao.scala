@@ -6,6 +6,7 @@ import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject}
 import models._
+import org.joda.time.DateTime
 import play.api.libs.json.{JsObject, Json}
 import warwick.anorm.converters.ColumnConversions._
 
@@ -19,6 +20,10 @@ trait TileDao {
   def getTilesForAnonymousUser(implicit c: Connection): Seq[TileInstance]
 
   def saveTilePreferences(usercode: String, tileId: String, preferences: JsObject)(implicit c: Connection): Unit
+
+  def saveTileLayoutForUser(usercode: String, tileLayout: UserTileLayout)(implicit c: Connection): Unit
+
+  def getDefaultTilesForGroups(groups: Set[String], ids: Seq[String] = Nil)(implicit c: Connection): Seq[TileInstance]
 
 }
 
@@ -35,13 +40,13 @@ class TileDaoImpl @Inject()() extends TileDao {
     getUsersAndDefaultTiles(usercode, Nil, groups)
 
   override def getTilesForAnonymousUser(implicit c: Connection): Seq[TileInstance] =
-    getDefaultTilesForGroups(Nil, Set("anonymous"))
+    getDefaultTilesForGroups(Set("anonymous"))
 
   private def getUsersAndDefaultTiles(usercode: String, ids: Seq[String], groups: Set[String])(implicit c: Connection): Seq[TileInstance] = {
 
     val idRestriction = if (ids.isEmpty) "" else "AND ID IN ({ids})"
 
-    val defaultTiles = getDefaultTilesForGroups(ids, groups)
+    val defaultTiles = getDefaultTilesForGroups(groups, ids)
 
     val userTiles = SQL(
       s"""
@@ -55,10 +60,10 @@ class TileDaoImpl @Inject()() extends TileDao {
       ).as(userTileParser.*)
 
     val defaultsNotOverridden = defaultTiles.filterNot(dt => userTiles.map(_.tile.id).contains(dt.tile.id))
-    (defaultsNotOverridden ++ userTiles.filterNot(_.removed)).sortBy(_.tileConfig.position)
+    (defaultsNotOverridden ++ userTiles.filterNot(_.removed)).sortBy(_.position)
   }
 
-  private def getDefaultTilesForGroups(ids: Seq[String], groups: Set[String])(implicit c: Connection): Seq[TileInstance] = {
+  override def getDefaultTilesForGroups(groups: Set[String], ids: Seq[String] = Nil)(implicit c: Connection): Seq[TileInstance] = {
     val idRestriction = if (ids.isEmpty) "" else "AND ID IN ({ids})"
     SQL(
       s"""
@@ -88,7 +93,7 @@ class TileDaoImpl @Inject()() extends TileDao {
       case tileId ~ tileType ~ defaultSize ~ defaultPosition ~ colour ~ fetchUrl ~ position ~ size ~ title ~ icon ~ removed ~ preferences =>
         TileInstance(
           Tile(tileId, tileType, TileSize.withName(defaultSize), defaultPosition, colour, fetchUrl, title, icon),
-          TileConfig(position, TileSize.withName(size)),
+          position, TileSize.withName(size),
           preferences.map(Json.parse(_).as[JsObject]),
           removed
         )
@@ -103,4 +108,26 @@ class TileDaoImpl @Inject()() extends TileDao {
         'tileId -> tileId
       )
       .execute()
+
+  override def saveTileLayoutForUser(usercode: String, tileLayout: UserTileLayout)(implicit c: Connection): Unit = {
+    SQL("DELETE USER_TILE WHERE USERCODE = {usercode}")
+      .on('usercode -> usercode)
+      .execute()
+
+    tileLayout.tiles.zipWithIndex.foreach {
+      case (tile, index) =>
+        SQL("INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, PREFERENCES, REMOVED, CREATED_AT, UPDATED_AT) VALUES ({usercode}, {tileId}, {tilePosition}, {tileSize}, {preferences}, {removed}, {createdAt}, {updatedAt})")
+          .on(
+            'usercode -> usercode,
+            'tileId -> tile.tileId,
+            'tilePosition -> index,
+            'tileSize -> tile.size.toString,
+            'preferences -> tile.preferences.map(_.toString).orNull,
+            'removed -> tile.removed,
+            'createdAt -> DateTime.now,
+            'updatedAt -> DateTime.now
+          )
+          .execute()
+    }
+  }
 }

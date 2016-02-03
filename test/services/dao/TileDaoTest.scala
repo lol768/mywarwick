@@ -54,7 +54,7 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
         INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, TITLE, ICON) VALUES
           ('tile', 'count', 'large', 0, 1, 'http://provider', 'Printer Credit', 'print'),
           ('other-tile', 'count', 'wide', 1, 2, 'http://provider', 'Mail', 'envelope-o'),
-          ('heron-tile', 'count', 'tall', 2, 3, 'http://herons-eat-ducklings', 'Mail', 'envelope-o');
+          ('heron-tile', 'count', 'small', 2, 3, 'http://herons-eat-ducklings', 'Mail', 'envelope-o');
 
         INSERT INTO TILE_GROUP (TILE_ID, "GROUP") VALUES
           ('tile', 'staff'),
@@ -73,7 +73,7 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
         INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, TITLE, ICON) VALUES
           ('tile', 'count', 'large', 0, 1, 'http://provider', 'Printer Credit', 'print'),
           ('other-tile', 'count', 'wide', 1, 2, 'http://provider', 'Printer Credit', 'print'),
-          ('heron-tile', 'count', 'tall', 2, 3, 'http://herons-eat-ducklings', 'Printer Credit', 'print');
+          ('heron-tile', 'count', 'small', 2, 3, 'http://herons-eat-ducklings', 'Printer Credit', 'print');
 
         INSERT INTO TILE_GROUP (TILE_ID, "GROUP") VALUES
           ('tile', 'staff'),
@@ -95,7 +95,7 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
         INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, TITLE, ICON) VALUES
           ('tile', 'count', 'large', 0, 1, 'http://provider', 'Printer Credit', 'print'),
           ('croco-tile', 'count', 'wide', 1, 2, 'http://provider', 'Printer Credit', 'print'),
-          ('open-day-tile', 'count', 'tall', 2, 3, 'http://open-for-dayz', 'Printer Credit', 'print');
+          ('open-day-tile', 'count', 'small', 2, 3, 'http://open-for-dayz', 'Printer Credit', 'print');
         INSERT INTO TILE_GROUP (TILE_ID, "GROUP") VALUES
           ('tile', 'staff'),
           ('tile', 'student'),
@@ -121,7 +121,7 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       val tiles = tileDao.getTilesByIds("someone", Seq("tile"), Set.empty[String])
 
-      tiles.head.options mustBe Some(preferenceObject)
+      tiles.head.preferences mustBe Some(preferenceObject)
     }
 
     "return None for non-existent preferences" in transaction { implicit c =>
@@ -135,7 +135,7 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       val tiles = tileDao.getTilesByIds("someone", Seq("tile"), Set.empty[String])
 
-      tiles.head.options mustBe None
+      tiles.head.preferences mustBe None
     }
 
   }
