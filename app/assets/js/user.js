@@ -1,7 +1,6 @@
-import _ from 'lodash';
 import Immutable from 'immutable';
 import localforage from 'localforage';
-
+import log from 'loglevel';
 import store from './store';
 
 import { registerReducer, resetStore } from './reducers';
@@ -11,21 +10,20 @@ export const USER_RECEIVE = 'user.receive';
 
 const initialState = Immutable.fromJS({
   data: {},
-  authoritative: false
+  authoritative: false,
 });
 
 registerReducer('user', (state = initialState, action) => {
   switch (action.type) {
     case USER_LOAD:
       return state.merge({
-        data: action.data
+        data: action.data,
       });
     case USER_RECEIVE:
       return state.merge({
         data: action.data,
-        authoritative: true
+        authoritative: true,
       });
-      return state;
     default:
       return state;
   }
@@ -34,14 +32,14 @@ registerReducer('user', (state = initialState, action) => {
 function loadCachedUserIdentity(data) {
   return {
     type: USER_LOAD,
-    data
+    data,
   };
 }
 
 function receiveUserIdentity(data) {
   return {
     type: USER_RECEIVE,
-    data
+    data,
   };
 }
 
@@ -51,12 +49,11 @@ const loadUserFromLocalStorage = localforage.getItem('user')
       store.dispatch(loadCachedUserIdentity(user));
 
       return user;
-    } else {
-      return {};
     }
+    return {};
   })
   .catch(err => {
-    console.warn('Could not load user from local storage', err);
+    log.warn('Could not load user from local storage', err);
     return {};
   });
 
@@ -65,7 +62,7 @@ export function userReceive(currentUser) {
     // If we are a different user than we were before (incl. anonymous),
     // nuke the store, which also clears local storage
     loadUserFromLocalStorage.then(previousUser => {
-      if (previousUser.usercode != currentUser.usercode) {
+      if (previousUser.usercode !== currentUser.usercode) {
         dispatch(resetStore())
           .then(() => localforage.setItem('user', currentUser))
           .then(() => dispatch(receiveUserIdentity(currentUser)));

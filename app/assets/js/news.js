@@ -6,10 +6,10 @@ export const NEWS_FETCH = 'news.fetch';
 export const NEWS_FETCH_SUCCESS = 'news.fetch.success';
 export const NEWS_FETCH_FAILURE = 'news.fetch.failure';
 
-let initialState = Immutable.fromJS({
+const initialState = Immutable.fromJS({
   fetching: false,
   failed: false,
-  items: []
+  items: [],
 });
 
 registerReducer('news', (state = initialState, action) => {
@@ -17,21 +17,20 @@ registerReducer('news', (state = initialState, action) => {
     case NEWS_FETCH:
       return state.mergeDeep({
         fetching: true,
-        failed: false
+        failed: false,
       });
     case NEWS_FETCH_SUCCESS:
       return state.mergeDeep({
         fetching: false,
         failed: false,
-        items: action.items
+        items: action.items,
       });
     case NEWS_FETCH_FAILURE:
       return state.mergeDeep({
         fetching: false,
-        failed: true
+        failed: true,
       });
     default:
       return state;
   }
 });
-

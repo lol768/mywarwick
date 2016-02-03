@@ -7,30 +7,33 @@ export default class CheckableListItem extends ReactComponent {
     super(props);
 
     this.state = {
-      checked: this.props.checked || false
+      checked: this.props.checked || false,
     };
+    this.toggle = this.toggle.bind(this);
   }
 
   toggle(e) {
     e.preventDefault();
 
     this.setState({
-      checked: !this.state.checked
+      checked: !this.state.checked,
     });
   }
 
   render() {
     return (
-      <a href="#" className="list-group-item" onClick={this.toggle.bind(this)}>
-                <span className="media">
-                    <span className="media-left">
-                        <i className={"fa fa-fw fa-" + (this.state.checked ? 'check-square' : 'square')}
-                           style={{color: this.props.color}}></i>
-                    </span>
-                    <span className="media-body">
-                        {this.props.text}
-                    </span>
-                </span>
+      <a href="#" className="list-group-item" onClick={ this.toggle }>
+        <span className="media">
+          <span className="media-left">
+            <i
+              className={ `fa fa-fw fa-${this.state.checked ? 'check-square' : 'square'}` }
+              style={{ color: this.props.color }}
+            > </i>
+          </span>
+          <span className="media-body">
+            {this.props.text}
+          </span>
+        </span>
       </a>
     );
   }

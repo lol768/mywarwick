@@ -10,7 +10,7 @@ import InfiniteScrollable from '../ui/InfiniteScrollable';
 import { connect } from 'react-redux';
 
 import { takeFromStream, getStreamSize } from '../../stream';
-import { readActivities } from '../../notification-metadata'
+import { readActivities } from '../../notification-metadata';
 
 const SOME_MORE = 20;
 
@@ -20,13 +20,14 @@ export default class ActivityView extends ReactComponent {
     super(props);
 
     this.state = {
-      numberToShow: SOME_MORE
+      numberToShow: SOME_MORE,
     };
+    this.loadMore = this.loadMore.bind(this);
   }
 
   loadMore() {
     this.setState({
-      numberToShow: this.state.numberToShow + SOME_MORE
+      numberToShow: this.state.numberToShow + SOME_MORE,
     });
   }
 
@@ -43,14 +44,13 @@ export default class ActivityView extends ReactComponent {
   }
 
   render() {
-
-    let activities = takeFromStream(this.props.activities, this.state.numberToShow)
+    const activities = takeFromStream(this.props.activities, this.state.numberToShow)
       .map(n => <ActivityItem key={n.id} {...n} />);
 
-    let hasMore = this.state.numberToShow < getStreamSize(this.props.activities);
+    const hasMore = this.state.numberToShow < getStreamSize(this.props.activities);
 
     return (
-      <InfiniteScrollable hasMore={hasMore} onLoadMore={this.loadMore.bind(this)}>
+      <InfiniteScrollable hasMore={hasMore} onLoadMore={ this.loadMore }>
         <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
           {activities.toJS()}
         </GroupedList>
@@ -61,7 +61,7 @@ export default class ActivityView extends ReactComponent {
 
 function select(state) {
   return {
-    activities: state.get('activities')
+    activities: state.get('activities'),
   };
 }
 

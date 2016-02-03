@@ -1,24 +1,40 @@
-import store from './store';
+import log from 'loglevel';
 
-var isPushEnabled = false;
+let isPushEnabled = false;
+
+function unsubscriptionToServer() {
+
+}
+
+function subscriptionToServer(subscription) {
+  fetch('/api/push/gcm/subscribe', {
+    method: 'post',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(subscription),
+    credentials: 'same-origin',
+  });
+}
 
 // Once the service worker is registered set the initial state
 export function init() {
   // Are Notifications supported in the service worker?
   if (!('Notification' in window || 'showNotification' in ServiceWorkerRegistration.prototype)) {
-    console.warn('Notifications aren\'t supported.');
+    log.warn('Notifications aren\'t supported.');
     return;
   }
 
 // If the user has disabled notifications
   if (Notification.permission === 'denied') {
-    console.warn('The user has disabled notifications.');
+    log.warn('The user has disabled notifications.');
     return;
   }
 
   // Check if push messaging is supported
   if (!('PushManager' in window)) {
-    console.warn('Push messaging isn\'t supported.');
+    log.warn('Push messaging isn\'t supported.');
     return;
   }
 
@@ -27,7 +43,7 @@ export function init() {
     serviceWorkerRegistration.pushManager.getSubscription()
       .then(subscription => {
         // TODO: subscribe button should be disabled while we check status of subscription
-        console.log(subscription.endpoint);
+        log.log(subscription.endpoint);
         if (!subscription) {
           // TODO: subscribe button should be set to FALSE
           return;
@@ -39,17 +55,16 @@ export function init() {
         // TODO: subscribe button should be set to TRUE
       })
       .catch(err => {
-        console.warn('Error during getSubscription()', err);
+        log.warn('Error during getSubscription()', err);
       });
   });
 }
-
 
 function subscribe() {
   // TODO: disable subscription button so it can't be changed while processing subscription
 
   navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
-    serviceWorkerRegistration.pushManager.subscribe({userVisibleOnly: true})
+    serviceWorkerRegistration.pushManager.subscribe({ userVisibleOnly: true })
       .then(subscription => {
         // The subscription was successful
         isPushEnabled = true;
@@ -59,10 +74,10 @@ function subscribe() {
       })
       .catch(e => {
         if (Notification.permission === 'denied') {
-          console.warn('Permission for Notifications was denied');
+          log.warn('Permission for Notifications was denied');
           // TODO: subscribe button should be disabled
         } else {
-          console.error('Unable to subscribe to push.', e);
+          log.error('Unable to subscribe to push.', e);
           // TODO: subscribe button should be enabled
         }
       });
@@ -82,11 +97,11 @@ function unsubscribe() {
         return;
       }
 
-      var subscriptionId = pushSubscription.subscriptionId;
+      const subscriptionId = pushSubscription.subscriptionId;
       unsubscriptionToServer(subscriptionId);
 
       // We have a subscription, so call unsubscribe() on it
-      pushSubscription.unsubscribe().then(successful => {
+      pushSubscription.unsubscribe().then(() => {
         // TODO: enable subscribe button a set FALSE
         isPushEnabled = false;
       }).catch(e => {
@@ -95,39 +110,20 @@ function unsubscribe() {
         // the users data from your data store and
         // inform the user that you have done so
 
-        console.log('Unsubscription error: ', e);
-        //pushButton.disabled = false;
-        //pushButton.textContent = 'Enable Push Messages';
+        log.info('Unsubscription error: ', e);
+        // pushButton.disabled = false;
+        // pushButton.textContent = 'Enable Push Messages';
       });
-    }).catch(function (e) {
-      console.error('Error thrown while unsubscribing from push messaging.', e);
+    }).catch((e) => {
+      log.error('Error thrown while unsubscribing from push messaging.', e);
     });
   });
 }
 
-function unsubscriptionToServer(subscription) {
-
-}
-
-function subscriptionToServer(subscription) {
-
-  fetch('/api/push/gcm/subscribe', {
-    method: 'post',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(subscription),
-    credentials: 'same-origin'
-  })
-}
-
-
 export function handlePushSubscribe() {
-  if (isPushEnabled)
+  if (isPushEnabled) {
     unsubscribe();
-  else {
+  } else {
     subscribe();
   }
 }
-

@@ -5,7 +5,7 @@ export const NAVIGATE = 'path.navigate';
 export function navigate(path) {
   return {
     type: NAVIGATE,
-    path: path
+    path,
   };
 }
 

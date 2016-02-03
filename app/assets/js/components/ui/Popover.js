@@ -10,8 +10,8 @@ export default class Popover extends ReactComponent {
     this.state = {
       attachPosition: {
         left: 0,
-        top: 0
-      }
+        top: 0,
+      },
     };
 
     this.repositionWithProps = () => this.reposition(this.props);
@@ -34,40 +34,48 @@ export default class Popover extends ReactComponent {
   // Reposition the popover adjacent to the attached element
   reposition(props) {
     if (props.attachTo) {
-      let el = $(props.attachTo);
+      const el = $(props.attachTo);
 
       this.setState({
         attachPosition: {
           left: el.position().left + (el.outerWidth() - props.width) / 2,
-          top: el.position().top + el.outerHeight()
-        }
+          top: el.position().top + el.outerHeight(),
+        },
       });
     }
   }
 
   render() {
-    let style = {
+    const style = {
       display: 'block',
       left: this.state.attachPosition.left + (this.props.left || 0),
       top: this.state.attachPosition.top + (this.props.top || 0),
       width: this.props.width,
-      maxWidth: this.props.width
+      maxWidth: this.props.width,
     };
 
-    let contentStyle = {
+    const contentStyle = {
       maxHeight: this.props.height,
       overflowY: this.props.height ? 'auto' : undefined,
       overflowX: 'hidden',
-      padding: 0
+      padding: 0,
     };
 
     return (
-      <div className={"popover " + this.props.placement} style={style}>
+      <div
+        className={`popover ${this.props.placement}`} style={style}
+      >
         { this.props.arrow ? <div className="arrow"></div> : null }
-        { this.props.title ? <div className="popover-title">{this.props.title}</div> : null }
-        <div className="popover-content" style={contentStyle} data-scrollable>{this.props.children}</div>
+        { this.props.title ? <div className="popover-title">{ this.props.title }</div> : null }
+        <div className="popover-content" style={contentStyle} data-scrollable>
+          {this.props.children}
+        </div>
         { this.props.onMore ?
-          <div className="popover-title" style={{borderBottom: 'none', cursor: 'pointer'}} onClick={this.props.onMore}>
+          <div
+            className="popover-title"
+            style={{ borderBottom: 'none', cursor: 'pointer' }}
+            onClick={this.props.onMore}
+          >
             View All
           </div>
           : null }

@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Tile from './Tile';
+import { ListTileItem } from './ListTile';
 
 export default class CountView extends Tile {
 

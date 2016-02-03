@@ -4,22 +4,22 @@
  */
 
 const $ = window.jQuery;
-export var socket = null;
-export var ajaxUrl = '/error/js';
-
-export function init() {
-  window.onerror = error;
-}
+export const socket = null;
+export const ajaxUrl = '/error/js';
 
 export function error(event) {
-  let msg = {
+  const msg = {
     type: 'js-error',
     time: (new Date().getTime()),
-    text: event.toString() // TODO bad?
+    text: event.toString(), // TODO bad?
   };
   if (socket) {
     socket.send(msg);
   } else {
     $.post(ajaxUrl, msg);
   }
+}
+
+export function init() {
+  window.onerror = error;
 }

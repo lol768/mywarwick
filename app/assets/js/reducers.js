@@ -8,18 +8,6 @@ export const RESET = 'RESET';
 const INIT = 'INIT';
 
 /*
- * Named to make it super clear when you're not being totally functional
- */
-var mutableGlobalReducers = makeReducers();
-
-/*
- * Update the reducers that are registered with the global reducer
- */
-export function mutateReducers(value) {
-  mutableGlobalReducers = value;
-}
-
-/*
  * Create a data structure suitable for holding namespaced reducers, without
  * caring what it is
  */
@@ -27,29 +15,16 @@ export function makeReducers() {
   return Immutable.Map();
 }
 
-export function registerReducer(name, reducer) {
-  mutateReducers(appendReducer(mutableGlobalReducers, name, reducer));
-
-  // Dispatch an initialisation action to add the initial state to
-  // the store immediately
-  store.dispatch({
-    type: INIT
-  });
-}
+/*
+ * Named to make it super clear when you're not being totally functional
+ */
+let mutableGlobalReducers = makeReducers();
 
 /*
- * Unregister all reducers for a certain namespace
+ * Update the reducers that are registered with the global reducer
  */
-export function unregisterAllReducers(name) {
-  mutateReducers(mutableGlobalReducers.delete(name));
-}
-
-/*
- * Unregister a specific reducer within a namespace
- */
-export function unregisterReducer(name, reducer) {
-  if (mutableGlobalReducers.has(name))
-    mutateReducers(mutableGlobalReducers.get(name).filterNot((r) => r == reducer));
+export function mutateReducers(value) {
+  mutableGlobalReducers = value;
 }
 
 /*
@@ -67,6 +42,32 @@ export function appendReducer(reducers, name, reducer) {
     reducers.set(name, Immutable.List().push(reducer));
 }
 
+export function registerReducer(name, reducer) {
+  mutateReducers(appendReducer(mutableGlobalReducers, name, reducer));
+
+  // Dispatch an initialisation action to add the initial state to
+  // the store immediately
+  store.dispatch({
+    type: INIT,
+  });
+}
+
+/*
+ * Unregister all reducers for a certain namespace
+ */
+export function unregisterAllReducers(name) {
+  mutateReducers(mutableGlobalReducers.delete(name));
+}
+
+/*
+ * Unregister a specific reducer within a namespace
+ */
+export function unregisterReducer(name, reducer) {
+  if (mutableGlobalReducers.has(name)) {
+    mutateReducers(mutableGlobalReducers.get(name).filterNot((r) => r === reducer));
+  }
+}
+
 /*
  * Create the (state, action) function that results from running each of the
  * reducer functions in sequence.
@@ -78,31 +79,33 @@ export function appendReducer(reducers, name, reducer) {
  * function, so the state remains unchanged.
  */
 export function composeReducers(reducers) {
-  if (reducers === undefined || reducers.count() == 0) {
+  if (reducers === undefined || reducers.count() === 0) {
     return (state) => state;
-  } else {
-    return (state, action) => reducers.reduce((state, reducer) => reducer(state, action), state);
   }
+  return (state, action) => reducers.reduce((s, reducer) => reducer(s, action), state);
 }
 
 /*
  * Primary reducer for the application
  */
 export default function app(state = initialState, action = undefined) {
-  if (mutableGlobalReducers === undefined || action == undefined)
+  if (mutableGlobalReducers === undefined || action === undefined) {
     return state;
+  }
 
-  if (action.type === RESET)
-    state = initialState;
+  let stateToReturn = state;
+  if (action.type === RESET) {
+    stateToReturn = initialState;
+  }
 
   return mutableGlobalReducers.reduce(
-    (state, reducers, namespace) => state.update(namespace, (subtree) => composeReducers(reducers)(subtree, action)),
-    state
+    (s, reducers, namespace) =>
+      s.update(namespace, (subtree) => composeReducers(reducers)(subtree, action)), stateToReturn
   );
 }
 
 import localforage from 'localforage';
 
 export function resetStore() {
-  return dispatch => localforage.clear().then(() => dispatch({type: RESET}));
+  return dispatch => localforage.clear().then(() => dispatch({ type: RESET }));
 }

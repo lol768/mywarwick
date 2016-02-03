@@ -1,7 +1,6 @@
 #! /usr/bin/env node
-'use strict';
-
-var fetch = require('node-fetch');
+/* eslint no-console: 0 */
+const fetch = require('node-fetch');
 
 const CONFIG = require('./config.json');
 
@@ -14,46 +13,46 @@ const pushActivities = CONFIG.pushActivities;
 const activityProviders = Object.keys(CONFIG.activityProviders);
 const notificationProviders = Object.keys(CONFIG.notificationProviders);
 
-const basicAuthHash = 'Basic ' + new Buffer(CONFIG.username + ':' + CONFIG.password).toString('base64');
+const hash = new Buffer(`${CONFIG.username}:${CONFIG.password}`).toString('base64');
+const basicAuthHash = `Basic ${hash}`;
 
 function getRandom(arr) {
   const MIN = 0;
   const MAX = arr.length - 1;
-  let i = Math.floor(Math.random() * (MAX - MIN + 1) + MIN);
+  const i = Math.floor(Math.random() * (MAX - MIN + 1) + MIN);
   return arr[i];
 }
 
 function buildJsonBody(contentArr) {
-
-  let data = getRandom(contentArr);
+  const data = getRandom(contentArr);
 
   return {
-    type: "api-testing",
+    type: 'api-testing',
     title: data.title,
     text: data.text,
     tags: [],
     replace: {},
     recipients: {
       users: [
-        recipient
+        recipient,
       ],
-      groups: []
-    }
-  }
+      groups: [],
+    },
+  };
 }
 
 function notificationsPusher() {
-  let providerName = getRandom(notificationProviders);
-  let url = `${pushUrl}/api/streams/${providerName}/notifications`;
-  let contentArr = CONFIG.notificationProviders[providerName];
+  const providerName = getRandom(notificationProviders);
+  const url = `${pushUrl}/api/streams/${providerName}/notifications`;
+  const contentArr = CONFIG.notificationProviders[providerName];
 
   fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': basicAuthHash
+      Authorization: basicAuthHash,
     },
-    body: JSON.stringify(buildJsonBody(contentArr))
+    body: JSON.stringify(buildJsonBody(contentArr)),
   })
     .then(res =>
       res.json()
@@ -65,17 +64,17 @@ function notificationsPusher() {
 }
 
 function activitiesPusher() {
-  let providerName = getRandom(activityProviders);
-  let url = `${pushUrl}/api/streams/${providerName}/activities`;
-  let contentArr = CONFIG.activityProviders[providerName];
+  const providerName = getRandom(activityProviders);
+  const url = `${pushUrl}/api/streams/${providerName}/activities`;
+  const contentArr = CONFIG.activityProviders[providerName];
 
   fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': basicAuthHash
+      Authorization: basicAuthHash,
     },
-    body: JSON.stringify(buildJsonBody(contentArr))
+    body: JSON.stringify(buildJsonBody(contentArr)),
   })
     .then(res =>
       res.json()
@@ -86,8 +85,10 @@ function activitiesPusher() {
   );
 }
 
-if (pushNotifications)
+if (pushNotifications) {
   setInterval(notificationsPusher, interval);
+}
 
-if (pushActivities)
+if (pushActivities) {
   setInterval(activitiesPusher, interval);
+}

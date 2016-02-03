@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import Immutable from 'immutable';
 import store from './store';
 import * as stream from './stream';
