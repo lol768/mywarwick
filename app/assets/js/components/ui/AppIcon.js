@@ -34,7 +34,7 @@ const ICONS = _({
   library: 'orange book',
   'sports-centre': 'blue futbol-o',
   'IT Services': 'servicenow question-circle',
-  'hearnow': 'orange pie-chart',
+  hearnow: 'orange pie-chart',
   Printing: 'its print',
   eating: 'green cutlery',
   SiteBuilder: 'red globe',
