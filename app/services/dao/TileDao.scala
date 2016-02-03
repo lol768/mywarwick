@@ -110,24 +110,23 @@ class TileDaoImpl @Inject()() extends TileDao {
       .execute()
 
   override def saveTileLayoutForUser(usercode: String, tileLayout: UserTileLayout)(implicit c: Connection): Unit = {
-    SQL("DELETE USER_TILE WHERE USERCODE = {usercode}")
-      .on('usercode -> usercode)
-      .execute()
+    val updateRemoved = "UPDATE USER_TILE SET REMOVED = {removed}, UPDATED_AT = {now} WHERE USERCODE = {usercode} AND TILE_ID = {id}"
+    val update = "UPDATE USER_TILE SET TILE_POSITION = {position}, TILE_SIZE = {size}, PREFERENCES = {preferences}, REMOVED = {removed}, UPDATED_AT = {now} WHERE USERCODE = {usercode} AND TILE_ID = {id}"
+    val insert = "INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, PREFERENCES, REMOVED, CREATED_AT, UPDATED_AT) VALUES ({usercode}, {id}, {position}, {size}, {preferences}, {removed}, {now}, {now})"
 
     tileLayout.tiles.zipWithIndex.foreach {
       case (tile, index) =>
-        SQL("INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, PREFERENCES, REMOVED, CREATED_AT, UPDATED_AT) VALUES ({usercode}, {tileId}, {tilePosition}, {tileSize}, {preferences}, {removed}, {createdAt}, {updatedAt})")
-          .on(
-            'usercode -> usercode,
-            'tileId -> tile.tileId,
-            'tilePosition -> index,
-            'tileSize -> tile.size.toString,
-            'preferences -> tile.preferences.map(_.toString).orNull,
-            'removed -> tile.removed,
-            'createdAt -> DateTime.now,
-            'updatedAt -> DateTime.now
-          )
-          .execute()
+        val params = Seq[NamedParameter](
+          'id -> tile.id,
+          'now -> DateTime.now,
+          'position -> index,
+          'preferences -> tile.preferences.map(_.toString).orNull,
+          'removed -> tile.removed,
+          'size -> tile.size.toString,
+          'usercode -> usercode
+        )
+
+        SQL(if (tile.removed) updateRemoved else update).on(params: _*).executeUpdate() > 0 || SQL(insert).on(params: _*).execute()
     }
   }
 }

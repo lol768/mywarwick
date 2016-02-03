@@ -12,7 +12,7 @@ case class TileInstance(
 )
 
 case class UserTileSetting(
-  tileId: String,
+  id: String,
   size: TileSize,
   preferences: Option[JsObject],
   removed: Boolean = false

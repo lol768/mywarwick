@@ -35,7 +35,7 @@ class TileServiceImpl @Inject()(
 
   override def saveTileLayoutForUser(user: User, tileLayout: UserTileLayout): Unit = db.withConnection { implicit c =>
     val defaultTiles = tileDao.getDefaultTilesForGroups(getGroups(user)).map(_.tile.id)
-    val currentTiles = tileLayout.tiles.map(_.tileId)
+    val currentTiles = tileLayout.tiles.map(_.id)
     val removedTiles = defaultTiles.toSet -- currentTiles
 
     val tiles = tileLayout.tiles ++ removedTiles.map(UserTileSetting.removed)

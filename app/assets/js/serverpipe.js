@@ -50,7 +50,7 @@ function fetchWithCredentials(url) {
 export function persistTiles() {
   return (dispatch, getState) => {
     let tiles = getState().getIn(['tiles', 'items']).map(item => ({
-      tileId: item.get('id'),
+      id: item.get('id'),
       size: item.get('size'),
       preferences: item.get('preferences'),
       removed: false
