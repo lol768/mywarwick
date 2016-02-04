@@ -248,7 +248,7 @@ gulp.task('lint', function () {
 });
 
 // Shortcuts for building all asset types at once
-gulp.task('assets', ['scripts', 'styles', 'manifest', 'service-worker']);
+gulp.task('assets', ['lint', 'scripts', 'styles', 'manifest', 'service-worker']);
 gulp.task('watch-assets', ['watch-scripts', 'watch-styles']);
 gulp.task('wizard', ['watch-assets']);
 
