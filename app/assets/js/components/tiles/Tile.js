@@ -24,10 +24,6 @@ export default class Tile extends Component {
     super(props);
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
-    this.onMouseOut = this.onMouseOut.bind(this);
-    this.onTouchStart = this.onTouchStart.bind(this);
-    this.onTouchEnd = this.onTouchEnd.bind(this);
-    this.onTouchCancel = this.onTouchCancel.bind(this);
     this.onHide = this.props.onHide.bind(this);
     this.onResize = this.props.onResize.bind(this);
   }
