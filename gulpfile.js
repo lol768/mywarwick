@@ -65,7 +65,7 @@ if (PRODUCTION) {
 
 // Function for running Browserify on JS, since
 // we reuse it a couple of times.
-const bundle = (browserifyInstance, outputFile) => {
+const bundle = (browserifyInstance, outputFile) => (
   browserifyInstance.bundle()
     .on('error', (e) => {
       gutil.log(gutil.colors.red(e.toString()));
@@ -77,8 +77,8 @@ const bundle = (browserifyInstance, outputFile) => {
     .pipe(replace('$$BUILDTIME$$', (new Date()).toString()))
     .pipe(PRODUCTION ? uglify() : gutil.noop())
     .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(paths.scriptOut));
-};
+    .pipe(gulp.dest(paths.scriptOut))
+);
 
 const browserifyFlags = (b) => {
   b.exclude('jquery');
@@ -100,7 +100,7 @@ gulp.task('scripts', [], () => {
 
 // Recompile scripts on changes. Watchify is more efficient than
 // grunt.watch as it knows how to do incremental rebuilds.
-gulp.task('watch-scripts', [], () => {
+gulp.task('watch-scripts', [], () => (
   _.map(SCRIPTS, (entries, output) => {
     const bw = watchify(
       browserifyFlags(browserify(_.assign({}, watchify.args, browserifyOptions(entries))))
@@ -110,8 +110,8 @@ gulp.task('watch-scripts', [], () => {
     });
     bw.on('log', gutil.log);
     return bundle(bw, output);
-  });
-});
+  })
+));
 
 /**
  * Copies static resources out of an NPM module, and into
@@ -134,37 +134,37 @@ function exportAssetModule(name, taskName, baseDir, extraExtensions) {
 
 exportAssetModule('id7', 'id7-static', 'dist');
 
-gulp.task('styles', ['id7-static'], () => {
+gulp.task('styles', ['id7-static'], () => (
   gulp.src(paths.styleIn)
     .pipe(sourcemaps.init())
     .pipe(less({
       // Allow requiring less relative to node_modules, plus any other dir under node_modules
       // that's in styleModules.
-      paths: [path.join(__dirname, 'node_modules')].concat(paths.styleModules.map((modulePath) => {
-        path.join(__dirname, 'node_modules', modulePath);
-      })),
+      paths: [path.join(__dirname, 'node_modules')].concat(paths.styleModules.map((modulePath) => (
+        path.join(__dirname, 'node_modules', modulePath)
+      ))),
     }))
     .pipe(postcss([
       autoprefix({ browsers: 'last 1 version' }),
     ]))
     .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(paths.styleOut));
-});
+    .pipe(gulp.dest(paths.styleOut))
+));
 
 // Recompile LESS on changes
-gulp.task('watch-styles', ['styles'], () => {
-  gulp.watch(`${paths.assetPath}/css/**/*.less`, ['styles']);
-});
+gulp.task('watch-styles', ['styles'], () => (
+  gulp.watch(`${paths.assetPath}/css/**/*.less`, ['styles']))
+);
 
-gulp.task('pre-service-worker', ['scripts', 'styles'], () => {
+gulp.task('pre-service-worker', ['scripts', 'styles'], () => (
   gulp.src([
     `${paths.assetsOut}/**/*`,
     `!${paths.assetsOut}/**/*.map`, // don't cache source maps
     `!${paths.assetsOut}/appcache.manifest`, // don't cache appcache manifest
   ], {
     base: './',
-  }).pipe(filenames('offline-cache'));
-});
+  }).pipe(filenames('offline-cache'))
+));
 
 gulp.task('service-worker', ['pre-service-worker'], () => {
   const jsBundle = ['target/gulp/js/bundle.js'];
@@ -184,7 +184,7 @@ gulp.task('service-worker', ['pre-service-worker'], () => {
       '/news': jsBundle,
       '/search': jsBundle,
     },
-  }).then((offlineWorker) => {
+  }).then((offlineWorker) => (
     browserifyFlags(browserify(browserifyOptions('push-worker.js'))).bundle()
       .on('error', (e) => {
         gutil.log(gutil.colors.red(e.toString()));
@@ -193,8 +193,8 @@ gulp.task('service-worker', ['pre-service-worker'], () => {
       .pipe(buffer())
       .pipe(insert.prepend(offlineWorker))
       .pipe(uglify())
-      .pipe(gulp.dest(paths.assetsOut));
-  });
+      .pipe(gulp.dest(paths.assetsOut))
+  ));
 });
 
 // Get the current FA version for use in the cache manifest
@@ -227,7 +227,7 @@ gulp.task('manifest', ['scripts', 'styles'], () => {
     });
 
     return getFontAwesomeVersion()
-      .then((fontAwesomeVersion) => {
+      .then((fontAwesomeVersion) => (
         cacheableAssets
           .pipe(rename((p) => {
             const result = p;
@@ -245,8 +245,8 @@ gulp.task('manifest', ['scripts', 'styles'], () => {
             prefix: '/assets/',
             filename: 'appcache.manifest',
           }))
-          .pipe(gulp.dest(paths.assetsOut));
-      });
+          .pipe(gulp.dest(paths.assetsOut))
+      ));
   }
   // Produce an empty manifest file
   return gulp.src([])
@@ -256,12 +256,12 @@ gulp.task('manifest', ['scripts', 'styles'], () => {
     .pipe(gulp.dest(paths.assetsOut));
 });
 
-gulp.task('lint', () => {
+gulp.task('lint', () => (
   gulp.src(['gulpfile.js', `${paths.assetPath}/js/**/*.js`])
     .pipe(eslint('.eslintrc.json'))
     .pipe(eslint.format())
-    .pipe(eslint.failAfterError());
-});
+    .pipe(eslint.failAfterError())
+));
 
 // Shortcuts for building all asset types at once
 gulp.task('assets', ['scripts', 'styles', 'manifest', 'service-worker']);
