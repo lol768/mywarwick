@@ -54,7 +54,7 @@ export function init() {
         // TODO: subscribe button should be set to TRUE
       })
       .catch(err => {
-        log.warn('Error during getSubscription()', err);
+        log.warn('Error during getSubscription()', err.stack);
       });
   });
 }

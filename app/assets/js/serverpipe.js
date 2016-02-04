@@ -109,7 +109,7 @@ export function fetchTileContent(tileId = ALL_TILES) {
         });
       })
       .catch(err => {
-        log.warn('Tile fetch failed because', err);
+        log.warn('Tile fetch failed because', err.stack);
         dispatch({
           type: tiles.TILE_CONTENT_FETCH_FAILURE,
           tile: tileId,
@@ -136,9 +136,6 @@ export function fetchActivities() {
       .then(json => {
         if (json.data.notificationsRead) {
           dispatch(notificationMetadata.readNotifications(moment(json.data.notificationsRead)));
-        }
-        if (json.data.activitiesRead) {
-          dispatch(notificationMetadata.readActivities(moment(json.data.activitiesRead)));
         }
       });
   };

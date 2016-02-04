@@ -30,7 +30,7 @@ class UserActivitiesController @Inject()(
 
   def getLastRead = RequiredUserAction { implicit request =>
     val response = request.context.user
-      .map(u => activityService.getLastReadDate(u).getOrElse(LastRead(u.usercode.string, None, None)))
+      .map(u => LastRead(u.usercode.string, activityService.getLastReadDate(u)))
       .map(lr => API.Success[LastRead](data = lr))
       .getOrElse(
         API.Failure[LastRead]("forbidden", Seq(Error("forbidden", "Cannot fetch last read for anonymous users.")))
@@ -44,8 +44,7 @@ class UserActivitiesController @Inject()(
         request.context.user
           .filter(_.usercode.string == data.usercode)
           .map(u => {
-            val success = data.activitiesRead.map(activityService.setActivitiesReadDate(u, _)).getOrElse(true) &&
-              data.notificationsRead.map(activityService.setNotificationsReadDate(u, _)).getOrElse(true)
+            val success = data.notificationsRead.map(activityService.setLastReadDate(u, _)).getOrElse(true)
             if (success) Ok(Json.toJson(API.Success[JsObject](data=Json.obj())))
             else InternalServerError(Json.toJson(
               apiFailure("last-read-noupdate", "The last read date was not updated")
