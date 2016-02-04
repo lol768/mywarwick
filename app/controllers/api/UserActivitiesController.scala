@@ -30,7 +30,7 @@ class UserActivitiesController @Inject()(
 
   def getLastRead = RequiredUserAction { implicit request =>
     val response = request.context.user
-      .map(u => activityService.getLastReadDate(u).getOrElse(LastRead(u.usercode.string, None, None)))
+      .map(u => LastRead(u.usercode.string, activityService.getLastReadDate(u)))
       .map(lr => API.Success[LastRead](data = lr))
       .getOrElse(
         API.Failure[LastRead]("forbidden", Seq(Error("forbidden", "Cannot fetch last read for anonymous users.")))
@@ -38,23 +38,20 @@ class UserActivitiesController @Inject()(
     Ok(Json.toJson(response))
   }
 
+  import models.DateFormats.isoDateReads
+
   def markAsRead = APIAction(parse.json) { implicit request =>
-    request.body.validate[LastRead](LastRead.lastReadFormatter)
+    request.body.validate[Option[DateTime]]((__ \ "lastRead").formatNullable[DateTime])
       .map( data => {
         request.context.user
-          .filter(_.usercode.string == data.usercode)
           .map(u => {
-            val success = data.activitiesRead.map(activityService.setActivitiesReadDate(u, _)).getOrElse(true) &&
-              data.notificationsRead.map(activityService.setNotificationsReadDate(u, _)).getOrElse(true)
+            val success = data.map(activityService.setLastReadDate(u, _)).getOrElse(true)
             if (success) Ok(Json.toJson(API.Success[JsObject](data=Json.obj())))
             else InternalServerError(Json.toJson(
               apiFailure("last-read-noupdate", "The last read date was not updated")
             ))
           })
-          .getOrElse(Forbidden(Json.toJson(apiFailure(
-            "forbidden",
-            s"Cannot mark last read for '${data.usercode}'. You can only mark last read for yourself.")
-          )))
+          .get // APIAction - must be logged in
       })
       .recoverTotal(e => BadRequest(Json.toJson(API.Failure[JsObject]("error", API.Error.fromJsError(e)))))
   }

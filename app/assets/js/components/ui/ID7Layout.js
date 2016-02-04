@@ -59,7 +59,7 @@ class ID7Layout extends ReactComponent {
   }
 
   render() {
-    const { layoutClassName, notificationsCount, activitiesCount, user }
+    const { layoutClassName, notificationsCount, user }
       = this.props;
 
     const isDesktop = layoutClassName === 'desktop';
@@ -104,7 +104,6 @@ class ID7Layout extends ReactComponent {
                               </MastheadIcon>
                               <MastheadIcon
                                 icon="dashboard" key="activity"
-                                badge={ activitiesCount }
                                 popoverTitle="Activity"
                                 isDisabled = { !user.authenticated }
                                 onMore={ this.goToActivity }
@@ -188,9 +187,7 @@ const select = (state) => { // eslint-disable-line arrow-body-style
   return {
     layoutClassName: state.get('ui').get('className'),
     notificationsCount:
-      getNumItemsSince(state.get('notifications'), state.get('notifications-metadata').lastRead),
-    activitiesCount:
-      getNumItemsSince(state.get('activities'), state.get('activities-metadata').lastRead),
+      getNumItemsSince(state.get('notifications'), state.get('notifications-lastRead')),
     user: state.getIn(['user', 'data']).toJS(),
     colourTheme: state.get('ui').get('colourTheme'),
   };

@@ -79,7 +79,7 @@ class Application extends ReactComponent {
   }
 
   render() {
-    const { path, notificationsCount, activitiesCount, layoutClassName, user }
+    const { path, notificationsCount, layoutClassName, user }
       = this.props;
 
     const views = {
@@ -102,7 +102,7 @@ class Application extends ReactComponent {
               badge={ notificationsCount } isDisabled = { !user.authenticated }
             />
             <TabBarItem
-              title="Activity" icon="dashboard" path="/activity" badge={ activitiesCount }
+              title="Activity" icon="dashboard" path="/activity"
               isDisabled = { !user.authenticated }
             />
             <TabBarItem title="News" icon="mortar-board" path="/news"/>
@@ -119,9 +119,7 @@ function mapStateToProps(state) {
   return {
     path: state.get('path'),
     notificationsCount:
-      getNumItemsSince(state.get('notifications'), state.get('notifications-metadata').lastRead),
-    activitiesCount:
-      getNumItemsSince(state.get('activities'), state.get('activities-metadata').lastRead),
+      getNumItemsSince(state.get('notifications'), state.get('notifications-lastRead')),
     layoutClassName: state.get('ui').get('className'),
     user: state.getIn(['user', 'data']).toJS(),
   };
