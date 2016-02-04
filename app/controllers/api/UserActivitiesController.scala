@@ -38,22 +38,20 @@ class UserActivitiesController @Inject()(
     Ok(Json.toJson(response))
   }
 
+  import models.DateFormats.isoDateReads
+
   def markAsRead = APIAction(parse.json) { implicit request =>
-    request.body.validate[LastRead](LastRead.lastReadFormatter)
+    request.body.validate[Option[DateTime]]((__ \ "lastRead").formatNullable[DateTime])
       .map( data => {
         request.context.user
-          .filter(_.usercode.string == data.usercode)
           .map(u => {
-            val success = data.notificationsRead.map(activityService.setLastReadDate(u, _)).getOrElse(true)
+            val success = data.map(activityService.setLastReadDate(u, _)).getOrElse(true)
             if (success) Ok(Json.toJson(API.Success[JsObject](data=Json.obj())))
             else InternalServerError(Json.toJson(
               apiFailure("last-read-noupdate", "The last read date was not updated")
             ))
           })
-          .getOrElse(Forbidden(Json.toJson(apiFailure(
-            "forbidden",
-            s"Cannot mark last read for '${data.usercode}'. You can only mark last read for yourself.")
-          )))
+          .get // APIAction - must be logged in
       })
       .recoverTotal(e => BadRequest(Json.toJson(API.Failure[JsObject]("error", API.Error.fromJsError(e)))))
   }

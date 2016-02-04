@@ -33,7 +33,7 @@ export default function persisted(keyPath, action, freeze = defaultFreeze, thaw 
         store.dispatch(action(thaw(value)));
       }
     })
-    .catch(err => log.warn(`Unable to load ${keyPath} from local storage`, err.stack))
+    .catch(err => log.warn(`Unable to load ${keyPath} from local storage`, err))
     .then(() => {
       // Whenever the value at this key path changes
       const selector = createSelector(

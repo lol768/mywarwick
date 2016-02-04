@@ -17,8 +17,7 @@ export const persistNotificationsMetadata =
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              usercode: user.get('usercode'),
-              notificationsRead: lastRead.format(),
+              lastRead: lastRead.format(),
             }),
             credentials: 'same-origin',
           });

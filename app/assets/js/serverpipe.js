@@ -109,7 +109,7 @@ export function fetchTileContent(tileId = ALL_TILES) {
         });
       })
       .catch(err => {
-        log.warn('Tile fetch failed because', err.stack);
+        log.warn('Tile fetch failed because', err);
         dispatch({
           type: tiles.TILE_CONTENT_FETCH_FAILURE,
           tile: tileId,
