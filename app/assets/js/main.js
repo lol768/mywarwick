@@ -2,6 +2,7 @@ import attachFastClick from 'fastclick';
 import $ from 'jquery';
 import _ from 'lodash';
 import localforage from 'localforage';
+import moment from 'moment';
 import log from 'loglevel';
 import { polyfill } from 'es6-promise';
 import { Provider } from 'react-redux';
@@ -20,6 +21,7 @@ import ID7Layout from './components/ui/ID7Layout';
 import UtilityBar from './components/ui/UtilityBar';
 
 import * as notifications from './notifications';
+import * as notificationMetadata from './notification-metadata';
 import * as notificationsGlue from './notifications-glue';
 import * as pushNotifications from './push-notifications';
 import * as serverpipe from './serverpipe';
@@ -133,10 +135,16 @@ store.subscribe(() => {
 
 store.dispatch(serverpipe.fetchUserIdentity());
 
+const freezeDate = (d) => (d !== undefined && 'format' in d) ? d.format() : d;
+const thawDate = (d) => (d !== undefined) ? moment(d) : d;
+
+persisted('activities-lastRead', notificationMetadata.readActivities, freezeDate, thawDate);
+persisted('notifications-lastRead', notificationMetadata.readNotifications, freezeDate, thawDate);
+
 persisted('activities', notifications.fetchedActivities, freezeStream);
 persisted('notifications', notifications.fetchedNotifications, freezeStream);
+
 persisted('tiles.items', tiles.fetchedTiles);
 persisted('tileContent', tiles.loadedAllTileContent);
 
-store.subscribe(() => notificationsGlue.persistActivitiesMetadata(store.getState()));
 store.subscribe(() => notificationsGlue.persistNotificationsMetadata(store.getState()));

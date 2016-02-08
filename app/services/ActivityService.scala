@@ -19,11 +19,9 @@ trait ActivityService {
 
   def save(activity: ActivityPrototype): Try[String]
 
-  def getLastReadDate(user: User): Option[LastRead]
+  def getLastReadDate(user: User): Option[DateTime]
 
-  def setNotificationsReadDate(user: User, dateTime: DateTime): Boolean
-
-  def setActivitiesReadDate(user: User, dateTime: DateTime): Boolean
+  def setLastReadDate(user: User, dateTime: DateTime): Boolean
 }
 
 class ActivityServiceImpl @Inject()(
@@ -69,14 +67,12 @@ class ActivityServiceImpl @Inject()(
   override def getActivitiesForUser(user: User, limit: Int, before: Option[DateTime]): Seq[ActivityResponse] =
     db.withConnection(implicit c => activityDao.getActivitiesForUser(user.usercode.string, limit.min(50), before))
 
-  override def getLastReadDate(user: User): Option[LastRead] =
+  override def getLastReadDate(user: User): Option[DateTime] =
     db.withConnection(implicit c => activityDao.getLastReadDate(user.usercode.string))
 
-  override def setNotificationsReadDate(user: User, dateTime: DateTime): Boolean =
-    db.withConnection(implicit c => activityDao.saveNotificationsReadDate(user.usercode.string, dateTime))
+  override def setLastReadDate(user: User, dateTime: DateTime): Boolean =
+    db.withConnection(implicit c => activityDao.saveLastReadDate(user.usercode.string, dateTime))
 
-  override def setActivitiesReadDate(user: User, dateTime: DateTime): Boolean =
-    db.withConnection(implicit c => activityDao.saveActivitiesReadDate(user.usercode.string, dateTime))
 }
 
 object NoRecipientsException extends Throwable

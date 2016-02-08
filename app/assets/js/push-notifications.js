@@ -43,7 +43,6 @@ export function init() {
     serviceWorkerRegistration.pushManager.getSubscription()
       .then(subscription => {
         // TODO: subscribe button should be disabled while we check status of subscription
-        log.log(subscription.endpoint);
         if (!subscription) {
           // TODO: subscribe button should be set to FALSE
           return;

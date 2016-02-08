@@ -137,9 +137,6 @@ export function fetchActivities() {
         if (json.data.notificationsRead) {
           dispatch(notificationMetadata.readNotifications(moment(json.data.notificationsRead)));
         }
-        if (json.data.activitiesRead) {
-          dispatch(notificationMetadata.readActivities(moment(json.data.activitiesRead)));
-        }
       });
   };
 }
