@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Tile from './Tile';
-import Skycons from 'react-skycons';
+import Skycon from '../ui/Skycon';
 import moment from 'moment';
 
 const DEFAULT_ICON_COLOUR = 'white';
@@ -28,7 +28,7 @@ export default class WeatherTile extends Tile {
         {itemsToDisplay.map(item => (
             <div key={item.id} className="tile__item">
               <span className="tile__callout">{`${Math.ceil(item.temp)}°C`}</span>
-              <Skycons className="skycon" color={DEFAULT_ICON_COLOUR}
+              <Skycon className="skycon" color={DEFAULT_ICON_COLOUR}
                 icon={formatIconString(item.icon)}
               />
               <span className="tile__text">
