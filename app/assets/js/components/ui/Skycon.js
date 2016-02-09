@@ -8,7 +8,7 @@ export default class Skycon extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      skycons: new Skycons({'color': this.props.color, 'resizeClear': true})
+      skycons: new Skycons({ color: this.props.color, resizeClear: true }),
     };
   }
 
@@ -37,9 +37,11 @@ export default class Skycon extends React.Component {
   }
 
   render() {
-    var props = {};
-    for (var prop in this.props) {
-      props[prop] = this.props[prop];
+    const props = {};
+    for (const prop in this.props) {
+      if (this.props.hasOwnProperty(prop)) {
+        props[prop] = this.props[prop];
+      }
     }
     delete props.autoplay;
     return (
@@ -53,11 +55,21 @@ Skycon.displayName = 'ReactSkycons';
 Skycon.propTypes = {
   color: PropTypes.string,
   autoplay: PropTypes.bool,
-  icon: PropTypes.oneOf(['CLEAR_DAY', 'CLEAR_NIGHT', 'PARTLY_CLOUDY_DAY', 'PARTLY_CLOUDY_NIGHT', 'CLOUDY', 'RAIN', 'SLEET', 'SNOW', 'WIND', 'FOG'])
+  icon: PropTypes.oneOf([
+    'CLEAR_DAY',
+    'CLEAR_NIGHT',
+    'PARTLY_CLOUDY_DAY',
+    'PARTLY_CLOUDY_NIGHT',
+    'CLOUDY',
+    'RAIN',
+    'SLEET',
+    'SNOW',
+    'WIND',
+    'FOG',
+  ]),
 };
 
 Skycon.defaultProps = {
   color: null,
-  autoplay: true
+  autoplay: true,
 };
-

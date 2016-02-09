@@ -58,7 +58,7 @@ const AgendaTileItem = (props) => (
   </li>
 );
 
-AgendaTile.propTypes = {
+AgendaTileItem.propTypes = {
   id: PropTypes.string,
   start: PropTypes.string,
   end: PropTypes.string,
