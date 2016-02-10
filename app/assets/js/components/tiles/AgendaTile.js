@@ -38,7 +38,8 @@ const groupItemsForAgendaTile = {
 export default class AgendaTile extends Tile {
 
   getBody(content) {
-    const maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : DEFAULT_MAX_ITEMS;
+    const maxItemsToDisplay = this.props.maxItemsToDisplay ?
+      this.props.maxItemsToDisplay : DEFAULT_MAX_ITEMS;
     const itemsToDisplay = this.isZoomed() ?
       content.items : _.take(content.items, maxItemsToDisplay);
 
