@@ -26,14 +26,11 @@ trait ActivityDao {
 
   def getActivitiesByIds(ids: Seq[String])(implicit c: Connection): Seq[Activity]
 
-  def getLastReadDate(usercode: String)(implicit c: Connection): Option[LastRead]
-
-  def saveNotificationsReadDate(usercode: String, read: DateTime)(implicit c: Connection): Boolean
-
-  def saveActivitiesReadDate(usercode: String, read: DateTime)(implicit c: Connection): Boolean
+  def getLastReadDate(usercode: String)(implicit c: Connection): Option[DateTime]
 
   def countNotificationsSinceDate(usercode: String, date: DateTime)(implicit c: Connection): Int
 
+  def saveLastReadDate(usercode: String, read:DateTime)(implicit c: Connection): Boolean
 }
 
 class ActivityDaoImpl @Inject()(
@@ -141,25 +138,31 @@ class ActivityDaoImpl @Inject()(
 
   case object Activities extends ReadField("ACTIVITIES_LAST_READ")
 
-  override def getLastReadDate(usercode: String)(implicit c: Connection): Option[LastRead] = {
-    SQL(
-      """
-        SELECT USERCODE, NOTIFICATIONS_LAST_READ, ACTIVITIES_LAST_READ
+  override def getLastReadDate(usercode: String)(implicit c: Connection): Option[DateTime] = {
+    SQL("""
+        SELECT NOTIFICATIONS_LAST_READ
+>>>>>>> develop
         FROM ACTIVITY_RECIPIENT_READ
         WHERE USERCODE = {usercode}
       """)
       .on('usercode -> usercode)
-      .as(lastReadParser.singleOpt)
+      .as(get[DateTime]("NOTIFICATIONS_LAST_READ").singleOpt)
   }
 
-  private def setReadDate(usercode: String, read: DateTime, field: ReadField)(implicit c: Connection): Boolean = {
+  override def saveLastReadDate(usrcode: String, read:DateTime)(implicit c: Connection): Boolean = {
     // attempt the update first as this is likely to be the most common op
-    val updated = SQL(s"UPDATE ACTIVITY_RECIPIENT_READ SET ${field.name} = {read} WHERE USERCODE = {usercode}")
-      .on('usercode -> usercode, 'read -> read)
+    val updated = SQL("""
+         UPDATE ACTIVITY_RECIPIENT_READ SET NOTIFICATIONS_LAST_READ = {read}
+         WHERE USERCODE = {usercode}
+      """)
+      .on('usercode -> usrcode, 'read -> read)
       .executeUpdate()
 
-    updated > 0 || SQL(s"INSERT INTO ACTIVITY_RECIPIENT_READ (USERCODE, ${field.name}) VALUES ({usercode}, {read})")
-      .on('usercode -> usercode, 'read -> read)
+    updated > 0 || SQL("""
+        INSERT INTO ACTIVITY_RECIPIENT_READ (USERCODE, NOTIFICATIONS_LAST_READ)
+        VALUES ({usercode}, {read})
+    """)
+      .on('usercode -> usrcode, 'read -> read)
       .execute()
   }
 
@@ -170,12 +173,6 @@ class ActivityDaoImpl @Inject()(
         'date -> date
       )
       .as(scalar[Int].single)
-
-  override def saveNotificationsReadDate(usercode: String, read: DateTime)(implicit c: Connection): Boolean =
-    setReadDate(usercode, read, Notifications)
-
-  override def saveActivitiesReadDate(usercode: String, read: DateTime)(implicit c: Connection): Boolean =
-    setReadDate(usercode, read, Activities)
 
   private lazy val activityParser: RowParser[Activity] =
     get[String]("ID") ~
@@ -204,14 +201,6 @@ class ActivityDaoImpl @Inject()(
   lazy val activityResponseParser: RowParser[ActivityResponse] =
     activityParser ~ tagParser map {
       case activity ~ tag => ActivityResponse(activity, tag.toSeq)
-    }
-
-  private lazy val lastReadParser: RowParser[LastRead] =
-    get[String]("USERCODE") ~ // Option because an activity can have no tags
-      get[Option[DateTime]]("NOTIFICATIONS_LAST_READ") ~
-      get[Option[DateTime]]("ACTIVITIES_LAST_READ") map {
-      case usercode ~ notificationsLastRead ~ activitiesLastRead =>
-        LastRead(usercode, notificationsLastRead, activitiesLastRead)
     }
 
 }

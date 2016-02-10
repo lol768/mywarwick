@@ -8,12 +8,15 @@ export default class LinkBlock extends ReactComponent {
   render() {
     const TOTAL_COLUMNS = 12;
 
-    let cols = parseInt(this.props.columns);
-    let chunked = _.chunk(this.props.children, Math.ceil(this.props.children.length / cols));
+    const cols = parseInt(this.props.columns, 10);
+    const chunked = _.chunk(this.props.children, Math.ceil(this.props.children.length / cols));
 
-    let columns = chunked.map((items, i) => {
+    const columns = chunked.map((items, i) => { // eslint-disable-line arrow-body-style
       return (
-        <ul key={"col-" + i} className={"list-unstyled link-block__column col-xs-" + (TOTAL_COLUMNS / cols)}>
+        <ul
+          key={`col-${i}`}
+          className={`list-unstyled link-block__column col-xs-${TOTAL_COLUMNS / cols}`}
+        >
           {items}
         </ul>
       );

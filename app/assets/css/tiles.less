@@ -33,13 +33,29 @@
   opacity: 0.35;
 }
 
+.me-view--editing .tile:not(.tile--editing) {
+  opacity: .7;
+}
+
+.me-view--editing {
+  .tile {
+    transition: min-height .4s, height .4s;
+  }
+
+  .tile, a {
+    cursor: default;
+  }
+
+  .tile__container {
+    transition: width .4s;
+  }
+}
+
 .tile {
   min-height: 125px;
-  padding: 10px 10px 20px;
   position: relative;
   font-size: 15px;
   margin-bottom: 10px;
-  overflow: hidden;
 
   a {
     color: inherit;
@@ -48,6 +64,16 @@
 
   ul, ol {
     .list-unstyled;
+  }
+
+  .tile__wrap {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px 10px 20px;
   }
 
   > .tile__wrap > header {
@@ -66,7 +92,7 @@
   }
 }
 
-.tile--large, .tile--tall {
+.tile--large {
   min-height: 260px;
 }
 
@@ -101,6 +127,84 @@
   .small;
   text-align: center;
   opacity: .8;
+}
+
+.tile--small {
+  .tile__edit-control .fa-arrow-up {
+    transform: rotate(90deg);
+  }
+}
+
+.tile--wide {
+  .tile__edit-control .fa-arrow-up {
+    transform: rotate(180deg);
+  }
+}
+
+.tile--large {
+  .tile__edit-control .fa-arrow-up {
+    transform: rotate(315deg);
+  }
+}
+
+.tile__edit-control {
+  @size: 36px;
+  @outside: -@size * 1/2;
+
+  display: none;
+  position: absolute;
+  z-index: 10;
+
+  background-color: #000;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 100%;
+  width: @size;
+  height: @size;
+  text-align: center;
+  line-height: @size * 5/6;
+
+  cursor: pointer;
+
+  .fa-arrow-up {
+    transition: transform .4s;
+  }
+
+  &:hover {
+    background-color: #444;
+  }
+
+  &.top-left {
+    top: @outside;
+    left: @outside;
+  }
+
+  &.top-right {
+    top: @outside;
+    right: @outside;
+  }
+
+  &.bottom-left {
+    bottom: @outside;
+    left: @outside;
+  }
+
+  &.bottom-right {
+    bottom: @outside;
+    right: @outside;
+  }
+}
+
+.tile--clickable {
+  cursor: pointer;
+}
+
+.tile--editing {
+  z-index: 10;
+
+  .tile__edit-control {
+    display: inline-block;
+  }
 }
 
 .tile--zoomed {
@@ -186,4 +290,14 @@
 .agenda-item__date {
   margin-bottom: -0.5em;
   float: right;
+}
+
+// WEATHER {
+.tile--weather {
+  .tile__callout {
+    display: inline;
+  }
+  .skycon {
+    max-width: 118px;
+  }
 }

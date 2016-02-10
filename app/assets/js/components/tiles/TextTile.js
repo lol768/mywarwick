@@ -9,8 +9,10 @@ export default class TextTile extends Tile {
     super(props);
 
     this.state = {
-      itemIndex: 0
+      itemIndex: 0,
     };
+
+    this.onClickLink = this.onClickLink.bind(this);
   }
 
   componentWillUnmount() {
@@ -40,42 +42,55 @@ export default class TextTile extends Tile {
   }
 
   onInterval() {
-    let oldItemIndex = this.state.itemIndex;
+    const oldItemIndex = this.state.itemIndex;
 
-    let itemIndex = (oldItemIndex >= this.props.content.items.length - 1) ? 0 : oldItemIndex + 1;
+    const itemIndex = (oldItemIndex >= this.props.content.items.length - 1) ? 0 : oldItemIndex + 1;
 
     this.setState({
-      itemIndex: itemIndex
+      itemIndex,
     });
   }
 
+  onClick(e) {
+    e.stopPropagation();
+  }
+
   getBody(content) {
-    let itemsToDisplay = this.isZoomed() ? content.items : [content.items[this.state.itemIndex]];
+    const itemsToDisplay = this.isZoomed() ? content.items : [content.items[this.state.itemIndex]];
 
     return (
-      <ReactCSSTransitionGroup transitionName="text-tile"
-                               transitionEnterTimeout={1000}
-                               transitionLeaveTimeout={1000}>
+      <ReactCSSTransitionGroup
+        transitionName="text-tile"
+        transitionEnterTimeout={1000}
+        transitionLeaveTimeout={1000}
+      >
         {itemsToDisplay.map(item => {
-          let tileItem = <div className="tile__item" key={item.key}>
+          const tileItem = (<div key={item.id} className="tile__item">
             <span className="tile__callout">{item.callout}</span>
             <span className="tile__text">{item.text}</span>
-          </div>;
+          </div>);
 
           return item.href ?
-            <a href={item.href} target="_blank" onClick={e => e.stopPropagation()}>{tileItem}</a>
+            <a href={item.href} target="_blank" onClick={ this.onClickLink }>{tileItem}</a>
             : tileItem;
-        })}
+        }) }
       </ReactCSSTransitionGroup>
     );
+  }
+
+  onClickLink(e) {
+    e.stopPropagation();
+
+    if (this.props.editingAny) {
+      e.preventDefault();
+    }
   }
 
   canZoom() {
     if (this.props.content && this.props.content.items) {
       return this.props.content.items.length > 1;
-    } else {
-      return false;
     }
+    return false;
   }
 
 }

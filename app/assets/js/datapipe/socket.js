@@ -7,25 +7,26 @@ import RestartableWebSocket from './restartable-websocket';
 export default class SocketDataPipe extends DataPipe {
   constructor(options) {
     super();
-    this.url = options.url || ("wss://" + window.location.hostname + (window.location.port ? ':' + location.port : '') + options.path);
+    const port = window.location.port ? `:${location.port}` : '';
+    this.url = options.url || (`wss://${window.location.hostname}${port}${options.path}`);
     this.stream = new Rx.ReplaySubject(1);
     this.ws = new RestartableWebSocket(this.url);
     this.ws.onmessage = this.messageReceived.bind(this);
     this.ws.onopen = () => {
       this.onopen();
     };
-    this.onopen = () => {
-    };
-
+    this.onopen = () => ({});
     this.messageId = 0;
   }
 
+  /* eslint-disable no-unused-vars */
   requestData(info) {
-    /*this.send({
+    /* this.send({
      type: 'request-data',
 
-     });*/
+     }); */
   }
+  /* eslint-enable no-unused-vars */
 
   /**
    * Sends an object up the pipe. Returns a unique messageId that
@@ -33,9 +34,8 @@ export default class SocketDataPipe extends DataPipe {
    */
   send(obj) {
     const messageId = this.messageId++;
-    obj.messageId = messageId;
-    this.ws.send(JSON.stringify(obj));
-    return messageId
+    this.ws.send(JSON.stringify(Object.assign(obj, { messageId })));
+    return messageId;
   }
 
   /**
@@ -47,16 +47,16 @@ export default class SocketDataPipe extends DataPipe {
    */
   ask(obj) {
     const messageId = this.send(obj);
-    return this.getUpdateStream().first(msg => msg.replyTo == messageId);
+    return this.getUpdateStream().first(msg => msg.replyTo === messageId);
   }
 
   messageReceived(event) {
-    log.debug("Message event received:", event);
-    let data = JSON.parse(event.data);
+    log.debug('Message event received:', event);
+    const data = JSON.parse(event.data);
     this.stream.onNext(data);
   }
 
-  getUpdateStream():Rx.Observable {
+  getUpdateStream() {
     return this.stream.asObservable();
   }
 

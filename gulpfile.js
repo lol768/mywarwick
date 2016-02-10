@@ -242,13 +242,13 @@ gulp.task('manifest', ['scripts', 'styles'], function () {
 
 gulp.task('lint', function () {
   return gulp.src([paths.assetPath+'/js/**/*.js'])
-    .pipe(eslint('.eslintrc'))
+    .pipe(eslint('.eslintrc.json'))
     .pipe(eslint.format())
     .pipe(eslint.failAfterError());
 });
 
 // Shortcuts for building all asset types at once
-gulp.task('assets', ['scripts', 'styles', 'manifest', 'service-worker']);
+gulp.task('assets', ['lint', 'scripts', 'styles', 'manifest', 'service-worker']);
 gulp.task('watch-assets', ['watch-scripts', 'watch-styles']);
 gulp.task('wizard', ['watch-assets']);
 

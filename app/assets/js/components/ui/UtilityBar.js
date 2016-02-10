@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
+import $ from 'jquery';
 
 import { connect } from 'react-redux';
 
@@ -15,18 +16,24 @@ class UtilityBar extends ReactComponent {
   }
 
   attachAccountPopover() {
-    var element = ReactDOM.findDOMNode(this.refs.accountLink);
-    $(element).accountPopover({logoutlink: window.SSO.LOGOUT_URL});
+    const element = ReactDOM.findDOMNode(this.refs.accountLink);
+    $(element).accountPopover({ logoutlink: window.SSO.LOGOUT_URL });
   }
 
   render() {
-    let signInLink = (
+    const signInLink = (
       <a href={window.SSO.LOGIN_URL} key="signInLink">
         Sign in
       </a>
     );
-    let accountLink = (
-      <a key="accountLink" ref="accountLink" href="//warwick.ac.uk/myaccount" data-toggle="id7:account-popover" data-name={this.props.name}>
+    const accountLink = (
+      <a
+        key="accountLink"
+        ref="accountLink"
+        href="//warwick.ac.uk/myaccount"
+        data-toggle="id7:account-popover"
+        data-name={this.props.name}
+      >
         {this.props.name}
         <span className="caret"></span>
       </a>
@@ -35,7 +42,7 @@ class UtilityBar extends ReactComponent {
     return (
       <ul>
         <li>
-          {this.props.authenticated ? accountLink : signInLink}
+          { this.props.authenticated ? accountLink : signInLink }
         </li>
       </ul>
     );
@@ -43,6 +50,6 @@ class UtilityBar extends ReactComponent {
 
 }
 
-let select = (state) => state.getIn(['user', 'data']).toJS();
+const select = (state) => state.getIn(['user', 'data']).toJS();
 
 export default connect(select)(UtilityBar);

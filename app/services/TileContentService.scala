@@ -55,7 +55,7 @@ class TileContentServiceImpl @Inject()(
 
   // TODO cache
   override def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]] = Future {
-    val request = jsonPost(tileInstance.tile.fetchUrl, tileInstance.options)
+    val request = jsonPost(tileInstance.tile.fetchUrl, tileInstance.preferences)
     user.foreach(user => signRequest(trustedApp, user.usercode.string, request))
 
     var response: CloseableHttpResponse = null

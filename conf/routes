@@ -14,7 +14,7 @@ GET         /settings                                     @controllers.HomeContr
 
 GET         /admin/cluster                                @controllers.admin.ClusterStateController.html
 
-GET         /websockets/page                              @controllers.HomeController.socket
+GET         /websockets/page/                             @controllers.HomeController.socket
 
 GET         /assets/manifest.json                         @controllers.AppManifestController.getAppManifest
 # Map static resources from the /public folder to the /assets URL path
@@ -37,9 +37,10 @@ POST        /api/streams/read                             @controllers.api.UserA
 POST        /api/streams/:providerId/notifications        @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
 POST        /api/streams/:providerId/activities           @controllers.api.IncomingActivitiesController.postActivity(providerId: String)
 
-GET         /api/tiles                                    @controllers.api.TilesController.tiles
+GET         /api/tiles                                    @controllers.api.TilesController.getLayout
 GET         /api/tiles/content                            @controllers.api.TilesController.content
 GET         /api/tiles/content/:id                        @controllers.api.TilesController.contentById(id: String)
+PUT         /api/tiles                                    @controllers.api.TilesController.saveLayout
 
 GET         /ssotest                                      @controllers.HomeController.ssotest
 

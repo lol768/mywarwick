@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import Immutable from 'immutable';
 import store from './store';
 import * as stream from './stream';
@@ -26,13 +27,10 @@ if (window.navigator.userAgent.indexOf('Start/1.0') >= 0) {
       unreadNotificationCount:
         stream.getNumItemsSince(
           state.get('notifications'),
-          state.get('notifications-metadata').lastRead
+          state.get('notifications-lastRead')
         ),
-      unreadActivityCount:
-        stream.getNumItemsSince(
-          state.get('activities'),
-          state.get('activities-metadata').lastRead
-        ),
+      // FIXME - remove this once app has been updated to have no unreadActivityCount
+      unreadActivityCount: 0,
       unreadNewsCount: 0,
       currentPath: state.get('path'),
       isUserLoggedIn: state.getIn(['user', 'data', 'usercode']) !== undefined,

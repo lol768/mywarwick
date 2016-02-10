@@ -44,7 +44,7 @@ class APNSOutputService @Inject()(
   }
 
   def getUnreadNotificationCount(usercode: Usercode): Int = db.withConnection { implicit c =>
-    val lastReadNotification = activityDao.getLastReadDate(usercode.string).flatMap(_.notificationsRead).getOrElse(new DateTime(0))
+    val lastReadNotification = activityDao.getLastReadDate(usercode.string).getOrElse(new DateTime(0))
 
     activityDao.countNotificationsSinceDate(usercode.string, lastReadNotification)
   }
@@ -54,10 +54,8 @@ class APNSOutputService @Inject()(
       .filter(_.platform == Apple)
   }
 
-  def clearAppIconBadge(usercode: Usercode): Unit = {
-    db.withConnection { implicit c =>
-      getApplePushRegistrations(usercode).foreach(device => apns.push(device.token, zeroBadgePayload))
-    }
+  def clearAppIconBadge(usercode: Usercode): Unit = db.withConnection { implicit c =>
+    getApplePushRegistrations(usercode).foreach(device => apns.push(device.token, zeroBadgePayload))
   }
 
   val zeroBadgePayload = APNS.newPayload().badge(0).build()

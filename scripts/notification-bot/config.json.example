@@ -1,0 +1,83 @@
+{
+  "pushUrl": "local or start-dev, or whatever",
+  "pushNotifications": true,
+  "pushActivities": true,
+  "username": "user account with permissions to push on behalf of all providers mentioned below",
+  "password": "CHANGEME",
+  "recipient": "single usercode as recipient",
+  "interval": time in seconds between each push,
+  "notificationProviders": {
+    "tabula": [
+      {
+        "title": "2000 word essay for module EN101 is due tomorrow",
+        "text": "Your assignment '200 word essay' for module EN101, is due to be submitted tomorrow at 29:59"
+      },
+      {
+        "title": "A new meeting record needs your approval",
+        "text": "A new meeting record was created by your supervisor, Samuel Clemens, for your module EN109"
+      },
+      {
+        "title": "New assignment created for EN107",
+        "text": "New assignment, 'Examining thanatourism in \"The New Pilgrims' Progress\"' has been created for your module EN107"
+      }
+    ],
+    "library": [
+      {
+        "title": "You have a book due back tomorrow",
+        "text": "The following book(s) are due back tomorrow by 17:30: 'Ultimate Frisbee, for Dummies'"
+      },
+      {
+        "title": "You have 2 books due back today",
+        "text": "The following books are due back today by 17:30: (1) 'How to tame your Dragon' (2) 'I'm ok, you're ok'"
+      },
+      {
+        "title": "You have 2 books due back today",
+        "text": "The following book(s) are due back today by 17:30: 'How to tame your Dragon', 'I'm ok, you're ok'"
+      }
+    ],
+    "hearnow": [
+      {
+        "title": "A new survey awaits you",
+        "text": "You have been invited to take part in the survey: 'Exactly how bad is the coffee served at the University?'"
+      },
+      {
+        "title": "You have an incomplete survey ending soon",
+        "text": "You are yet to participate in the survey, 'Yes no maybe, I don't know'"
+      },
+      {
+        "title": "You have an incomplete survey ending soon",
+        "text": "You are yet to participate in the survey, 'Yes no maybe, I don't know'"
+      }
+    ]
+  },
+  "activityProviders": {
+    "sports-centre": [
+      {
+        "title": "You have booked squash court 2 for 21/01/2016 at 18:05",
+        "text": "You have booked squash court 2 for 21/01/2016 at 18:05"
+      },
+      {
+        "title": "Your Warwick Sport membership has expired",
+        "text": "Your Warwick Sport membership expired on 05/01/2016. Good luck being unfit"
+      },
+      {
+        "title": "You renewed your Warwick Sport membership",
+        "text": "Your Warwick Sport membership is now valid until 30/09/2016"
+      }
+    ],
+    "eating": [
+      {
+        "title": "You spent 3.95 at Humanaties Cafe",
+        "text": "You spent 3.95 at Humanaties Cafe. We hope you enjoyed your lunch"
+      },
+      {
+        "title": "You spent 6.00 at University House cafe",
+        "text": "You spent 6.00 at University House cafe buying a round of coffees, you generous person"
+      },
+      {
+        "title": "Your Eating at Warwick card has been refunded 3.95",
+        "text": "Your Eating at Warwick card has been refunded 3.95. Sorry for your bad sandwich!"
+      }
+    ]
+  }
+}

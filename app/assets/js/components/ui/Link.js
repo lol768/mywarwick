@@ -3,10 +3,17 @@ import ReactComponent from 'react/lib/ReactComponent';
 
 export default class Link extends ReactComponent {
 
+  onClick() {
+    this.props.onClick(this.props.result);
+  }
+
   render() {
     return (
       <li>
-        <a className="link-block__item" href={this.props.href} target="_blank" onClick={this.props.onClick}>
+        <a
+          className="link-block__item" href={this.props.href} target="_blank"
+          onClick={this.onClick}
+        >
           {
             this.props.subtitle ?
               <span>

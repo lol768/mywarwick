@@ -1,7 +1,8 @@
 import attachFastClick from 'fastclick';
-import { createSelector } from 'reselect';
 import $ from 'jquery';
+import _ from 'lodash';
 import localforage from 'localforage';
+import moment from 'moment';
 import log from 'loglevel';
 import { polyfill } from 'es6-promise';
 import { Provider } from 'react-redux';
@@ -20,6 +21,7 @@ import ID7Layout from './components/ui/ID7Layout';
 import UtilityBar from './components/ui/UtilityBar';
 
 import * as notifications from './notifications';
+import * as notificationMetadata from './notification-metadata';
 import * as notificationsGlue from './notifications-glue';
 import * as pushNotifications from './push-notifications';
 import * as serverpipe from './serverpipe';
@@ -32,20 +34,19 @@ import SocketDatapipe from './SocketDatapipe';
 import './bridge';
 
 localforage.config({
-  name: 'Start'
+  name: 'Start',
 });
 
 // String replaced by Gulp build.
-log.info("Scripts built at: $$BUILDTIME$$");
+log.info('Scripts built at: $$BUILDTIME$$');
 
 $.getJSON('/ssotest', shouldRedirect => {
-  if (shouldRedirect) window.location = SSO.LOGIN_URL;
+  if (shouldRedirect) window.location = window.SSO.LOGIN_URL;
 });
 
-var currentPath = '/';
+let currentPath = '/';
 
-$(function () {
-
+$(() => {
   attachFastClick(document.body);
 
   currentPath = window.location.pathname.match(/(\/[^/]*)/)[0];
@@ -64,7 +65,7 @@ $(function () {
     store.dispatch(navigate(window.location.pathname));
   });
 
-  let $fixedHeader = $('.fixed-header');
+  const $fixedHeader = $('.fixed-header');
 
   function updateFixedHeaderAtTop() {
     $fixedHeader.toggleClass('at-top', $(window).scrollTop() < 10);
@@ -79,9 +80,9 @@ $(function () {
 });
 
 store.subscribe(() => {
-  var path = store.getState().get('path');
+  const path = store.getState().get('path');
 
-  if (path != currentPath) {
+  if (path !== currentPath) {
     currentPath = path;
 
     if ('pushState' in window.history) {
@@ -103,7 +104,8 @@ if ('serviceWorker' in navigator) {
 SocketDatapipe.getUpdateStream().subscribe(data => {
   switch (data.type) {
     case 'activity':
-      store.dispatch(data.activity.notification ? notifications.receivedNotification(data.activity) : notifications.receivedActivity(data.activity));
+      store.dispatch(data.activity.notification ? notifications.receivedNotification(data.activity)
+        : notifications.receivedActivity(data.activity));
       break;
     case 'who-am-i':
       store.dispatch(user.userReceive(data.userIdentity));
@@ -115,27 +117,34 @@ SocketDatapipe.getUpdateStream().subscribe(data => {
 
 update.displayUpdateProgress(store.dispatch);
 
-let freezeStream = stream => stream.valueSeq().flatten().toJS();
+const freezeStream = stream => stream.valueSeq().flatten().toJS();
 
-let loadPersonalisedDataFromServer = _.once(() => {
+const loadPersonalisedDataFromServer = _.once(() => {
   store.dispatch(serverpipe.fetchActivities());
   store.dispatch(serverpipe.fetchTiles());
   store.dispatch(serverpipe.fetchTileContent());
 });
 
 store.subscribe(() => {
-  let user = store.getState().get('user');
+  const u = store.getState().get('user');
 
-  if (user && user.get('authoritative') === true)
+  if (u && u.get('authoritative') === true) {
     loadPersonalisedDataFromServer();
+  }
 });
 
 store.dispatch(serverpipe.fetchUserIdentity());
 
+const freezeDate = (d) => (d !== undefined && 'format' in d) ? d.format() : d;
+const thawDate = (d) => (d !== undefined) ? moment(d) : d;
+
+persisted('activities-lastRead', notificationMetadata.readActivities, freezeDate, thawDate);
+persisted('notifications-lastRead', notificationMetadata.readNotifications, freezeDate, thawDate);
+
 persisted('activities', notifications.fetchedActivities, freezeStream);
 persisted('notifications', notifications.fetchedNotifications, freezeStream);
+
 persisted('tiles.items', tiles.fetchedTiles);
 persisted('tileContent', tiles.loadedAllTileContent);
 
-store.subscribe(() => notificationsGlue.persistActivitiesMetadata(store.getState()));
 store.subscribe(() => notificationsGlue.persistNotificationsMetadata(store.getState()));
