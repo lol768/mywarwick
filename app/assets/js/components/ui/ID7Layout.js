@@ -13,6 +13,7 @@ import NewsView from '../views/NewsView';
 import MastheadSearch from './MastheadSearch';
 import PermissionRequest from './PermissionRequest';
 import MasqueradeNotice from './MasqueradeNotice';
+import UpdatePopup from './UpdatePopup';
 
 import { navigate } from '../../navigate';
 
@@ -151,6 +152,7 @@ class ID7Layout extends ReactComponent {
             <header className="id7-main-content-header">
               { 'Notification' in window && Notification.permission === 'default' ?
                 <PermissionRequest isDisabled={ !user.authenticated } /> : null }
+              <UpdatePopup />
               <div className="id7-horizontal-divider">
                 <svg
                   xmlns="http://www.w3.org/2000/svg" x="0" y="0" version="1.1" width="1130"
