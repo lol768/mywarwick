@@ -6,9 +6,9 @@ import java.util.UUID
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject}
+import models.Output.Mobile
 import models._
 import org.joda.time.DateTime
-import Output.Mobile
 import system.DatabaseDialect
 import warwick.anorm.converters.ColumnConversions._
 
@@ -27,6 +27,8 @@ trait ActivityDao {
   def getActivitiesByIds(ids: Seq[String])(implicit c: Connection): Seq[Activity]
 
   def getLastReadDate(usercode: String)(implicit c: Connection): Option[DateTime]
+
+  def countNotificationsSinceDate(usercode: String, date: DateTime)(implicit c: Connection): Int
 
   def saveLastReadDate(usercode: String, read:DateTime)(implicit c: Connection): Boolean
 }
@@ -131,7 +133,9 @@ class ActivityDaoImpl @Inject()(
   }
 
   sealed abstract class ReadField(val name: String)
+
   case object Notifications extends ReadField("NOTIFICATIONS_LAST_READ")
+
   case object Activities extends ReadField("ACTIVITIES_LAST_READ")
 
   override def getLastReadDate(usercode: String)(implicit c: Connection): Option[DateTime] = {
@@ -161,8 +165,13 @@ class ActivityDaoImpl @Inject()(
       .execute()
   }
 
-
-
+  override def countNotificationsSinceDate(usercode: String, date: DateTime)(implicit c: Connection): Int =
+    SQL("SELECT COUNT(ACTIVITY.ID) FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.GENERATED_AT > {date}")
+      .on(
+        'usercode -> usercode,
+        'date -> date
+      )
+      .as(scalar[Int].single)
 
   private lazy val activityParser: RowParser[Activity] =
     get[String]("ID") ~

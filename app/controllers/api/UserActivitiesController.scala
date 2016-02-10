@@ -2,15 +2,20 @@ package controllers.api
 
 import com.google.inject.Inject
 import controllers.BaseController
-import models.{API, LastRead}
 import models.API.Error
+import models.{API, LastRead}
 import org.joda.time.DateTime
 import play.api.libs.json._
+import services.messaging.APNSOutputService
 import services.{ActivityService, SecurityService}
+import system.ThreadPools.mobile
+
+import scala.concurrent.Future
 
 class UserActivitiesController @Inject()(
   activityService: ActivityService,
-  securityService: SecurityService
+  securityService: SecurityService,
+  apns: APNSOutputService
 ) extends BaseController {
 
   import securityService._
@@ -42,11 +47,15 @@ class UserActivitiesController @Inject()(
 
   def markAsRead = APIAction(parse.json) { implicit request =>
     request.body.validate[Option[DateTime]]((__ \ "lastRead").formatNullable[DateTime])
-      .map( data => {
+      .map(data => {
         request.context.user
           .map(u => {
             val success = data.map(activityService.setLastReadDate(u, _)).getOrElse(true)
-            if (success) Ok(Json.toJson(API.Success[JsObject](data=Json.obj())))
+            if (success) {
+              Future(apns.clearAppIconBadge(u.usercode))
+                .onFailure { case e => logger.warn("apns.clearAppIconBadge failure", e) }
+              Ok(Json.toJson(API.Success[JsObject](data = Json.obj())))
+            }
             else InternalServerError(Json.toJson(
               apiFailure("last-read-noupdate", "The last read date was not updated")
             ))
