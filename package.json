@@ -67,7 +67,8 @@
     "redux": "~3.0.2",
     "redux-thunk": "~1.0.0",
     "reselect": "~2.0.0",
-    "rx": "^4.0.2"
+    "rx": "^4.0.2",
+    "skycons": "^1.0.0"
   },
   "scripts": {
     "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha --compilers js:babel/register -r TestHelper --recursive test/assets/js",

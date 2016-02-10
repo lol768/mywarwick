@@ -7,12 +7,14 @@ import Tile from './Tile';
 
 import _ from 'lodash';
 
+const DEFAULT_MAX_ITEMS = 6;
+
 const groupItemsForAgendaTile = {
 
   description: 'by-date--agenda',
 
   groupForItem(item, now = localMoment()) {
-    const date = localMoment(item.props.date).startOf('day');
+    const date = localMoment(item.props.start).startOf('day');
 
     if (date.isSame(now, 'day')) {
       return 0; // today
@@ -36,7 +38,8 @@ const groupItemsForAgendaTile = {
 export default class AgendaTile extends Tile {
 
   getBody(content) {
-    const maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : 3;
+    const maxItemsToDisplay = this.props.maxItemsToDisplay ?
+      this.props.maxItemsToDisplay : DEFAULT_MAX_ITEMS;
     const itemsToDisplay = this.isZoomed() ?
       content.items : _.take(content.items, maxItemsToDisplay);
 
@@ -54,11 +57,14 @@ export default class AgendaTile extends Tile {
 const AgendaTileItem = (props) => (
   <li className="agenda-item">
     <span className="agenda-item__title">{props.title}</span>
-    <span className="agenda-item__date">{localMoment(props.date).format('HH:mm')}</span>
+    <span className="agenda-item__date">{localMoment(props.start).format('HH:mm')}</span>
   </li>
 );
 
 AgendaTileItem.propTypes = {
-  date: PropTypes.string,
+  id: PropTypes.string,
+  start: PropTypes.string,
+  end: PropTypes.string,
   title: PropTypes.string,
+  location: PropTypes.string,
 };
