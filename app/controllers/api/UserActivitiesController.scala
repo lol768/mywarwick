@@ -53,6 +53,7 @@ class UserActivitiesController @Inject()(
             val success = data.map(activityService.setLastReadDate(u, _)).getOrElse(true)
             if (success) {
               Future(apns.clearAppIconBadge(u.usercode))
+                .onFailure { case e => logger.warn("apns.clearAppIconBadge failure", e) }
               Ok(Json.toJson(API.Success[JsObject](data = Json.obj())))
             }
             else InternalServerError(Json.toJson(
