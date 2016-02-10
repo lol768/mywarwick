@@ -14,7 +14,7 @@ GET         /settings                                     @controllers.HomeContr
 
 GET         /admin/cluster                                @controllers.admin.ClusterStateController.html
 
-GET         /websockets/page                              @controllers.HomeController.socket
+GET         /websockets/page/                             @controllers.HomeController.socket
 
 GET         /assets/manifest.json                         @controllers.AppManifestController.getAppManifest
 # Map static resources from the /public folder to the /assets URL path
