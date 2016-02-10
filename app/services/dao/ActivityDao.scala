@@ -141,10 +141,9 @@ class ActivityDaoImpl @Inject()(
   override def getLastReadDate(usercode: String)(implicit c: Connection): Option[DateTime] = {
     SQL("""
         SELECT NOTIFICATIONS_LAST_READ
->>>>>>> develop
         FROM ACTIVITY_RECIPIENT_READ
         WHERE USERCODE = {usercode}
-      """)
+    """)
       .on('usercode -> usercode)
       .as(get[DateTime]("NOTIFICATIONS_LAST_READ").singleOpt)
   }
