@@ -7,6 +7,8 @@ import Tile from './Tile';
 
 import _ from 'lodash';
 
+const DEFAULT_MAX_ITEMS = 6;
+
 const groupItemsForAgendaTile = {
 
   description: 'by-date--agenda',
@@ -36,7 +38,7 @@ const groupItemsForAgendaTile = {
 export default class AgendaTile extends Tile {
 
   getBody(content) {
-    const maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : 3;
+    const maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : DEFAULT_MAX_ITEMS;
     const itemsToDisplay = this.isZoomed() ?
       content.items : _.take(content.items, maxItemsToDisplay);
 
