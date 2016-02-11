@@ -34,6 +34,7 @@ if (window.navigator.userAgent.indexOf('Start/1.0') >= 0) {
       unreadNewsCount: 0,
       currentPath: state.get('path'),
       isUserLoggedIn: state.getIn(['user', 'data', 'usercode']) !== undefined,
+      tabBarHidden: state.getIn(['ui', 'className']) !== 'mobile',
     });
 
     if ('applicationCache' in window) {
