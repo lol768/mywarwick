@@ -7,7 +7,7 @@ import Tile from './Tile';
 
 import _ from 'lodash';
 
-const DEFAULT_MAX_ITEMS = 6;
+const DEFAULT_MAX_ITEMS = 4;
 
 const groupItemsForAgendaTile = {
 
@@ -43,7 +43,8 @@ export default class AgendaTile extends Tile {
     const itemsToDisplay = this.isZoomed() ?
       content.items : _.take(content.items, maxItemsToDisplay);
 
-    const events = itemsToDisplay.map(event => <AgendaTileItem key={event.id} {...event}/>);
+    const events = itemsToDisplay.map(event =>
+      <AgendaTileItem key={event.id} onClickLink={ this.onClickLink.bind(this) } {...event}/>);
 
     return (
       <GroupedList groupBy={groupItemsForAgendaTile}>
@@ -52,14 +53,31 @@ export default class AgendaTile extends Tile {
     );
   }
 
+  onClickLink(e) {
+    e.stopPropagation();
+    if (this.props.editingAny) {
+      e.preventDefault();
+    }
+  }
 }
 
-const AgendaTileItem = (props) => (
-  <li className="agenda-item">
-    <span className="agenda-item__title">{props.title}</span>
-    <span className="agenda-item__date">{localMoment(props.start).format('HH:mm')}</span>
-  </li>
-);
+class AgendaTileItem extends React.Component {
+
+  render() {
+    const { title, start, href, onClickLink } = this.props;
+    return (
+      <li className="agenda-item">
+        { href ?
+          <a href={ href } target="_blank" onClick={ onClickLink }>
+            <span title={ title } className="agenda-item__title">{ title }</span>
+          </a> :
+          <span title={ title } className="agenda-item__title">{ title }</span>
+        }
+        <span className="agenda-item__date">{localMoment(start).format('HH:mm')}</span>
+      </li>
+    );
+  }
+}
 
 AgendaTileItem.propTypes = {
   id: PropTypes.string,
@@ -67,4 +85,6 @@ AgendaTileItem.propTypes = {
   end: PropTypes.string,
   title: PropTypes.string,
   location: PropTypes.string,
+  href: PropTypes.string,
+  onClickLink: PropTypes.func,
 };

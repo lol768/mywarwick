@@ -98,14 +98,9 @@
 
 :not(.tile--zoomed) {
   .tile--agenda {
-    .tile__body {
-      height: 222px;
-      overflow-y: auto;
-    }
     .list-header {
       padding: 0px 4px;
       border: none;
-      color: white;
       font-weight: 100;
       background-color: transparent;
     }
@@ -281,10 +276,19 @@
 .agenda-item {
   background-color: #dcdcdc;
   display: block;
-  color: black;
+  color: #383838;
   padding: 0px 6px;
   border-radius: 6px;
   margin-bottom: 2px;
+}
+
+.agenda-item__title {
+  max-width: 85%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  vertical-align: top;
 }
 
 .agenda-item__date {
