@@ -14,6 +14,8 @@ GET         /settings                                     @controllers.HomeContr
 
 GET         /admin/cluster                                @controllers.admin.ClusterStateController.html
 
+# DEPRECATED no-slash version 2016-02-11
+GET         /websockets/page                              @controllers.HomeController.socket
 GET         /websockets/page/                             @controllers.HomeController.socket
 
 GET         /assets/manifest.json                         @controllers.AppManifestController.getAppManifest

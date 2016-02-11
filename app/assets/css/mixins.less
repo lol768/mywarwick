@@ -1,0 +1,15 @@
+/**
+  Less mixins using detached rulesets. Useful to package a complex selector for re-use.
+  http://lesscss.org/features/#detached-rulesets-feature
+*/
+
+// Screen size mixins
+
+// Applies rules to screens that are sm or smaller (i.e. xs, sm)
+.screen-sm-orless(@rules) {
+  @media screen and (max-width: @screen-sm-max) { @rules(); }
+}
+
+.screen-xs-orless(@rules) {
+  @media screen and (max-width: @screen-xs-max) { @rules(); }
+}
