@@ -7,7 +7,7 @@ import Tile from './Tile';
 
 import _ from 'lodash';
 
-const DEFAULT_MAX_ITEMS = 4;
+const DEFAULT_MAX_ITEMS = 5;
 
 const groupItemsForAgendaTile = {
 
@@ -37,6 +37,11 @@ const groupItemsForAgendaTile = {
 
 export default class AgendaTile extends Tile {
 
+  constructor(props) {
+    super(props);
+    this.onClickLink = this.onClickLink.bind(this);
+  }
+
   getBody(content) {
     const maxItemsToDisplay = this.props.maxItemsToDisplay ?
       this.props.maxItemsToDisplay : DEFAULT_MAX_ITEMS;
@@ -44,7 +49,7 @@ export default class AgendaTile extends Tile {
       content.items : _.take(content.items, maxItemsToDisplay);
 
     const events = itemsToDisplay.map(event =>
-      <AgendaTileItem key={event.id} onClickLink={ this.onClickLink.bind(this) } {...event}/>);
+      <AgendaTileItem key={event.id} onClickLink={ this.onClickLink } {...event}/>);
 
     return (
       <GroupedList groupBy={groupItemsForAgendaTile}>
