@@ -3,19 +3,18 @@
   float: right;
   margin-top: 42px;
 
-  .disabled .masthead-popover-icon {
-    color: #9c9c9c;
-
-    &:hover {
-      color: #9c9c9c;
-    }
-  }
-
   .masthead-popover-icon {
     padding: 10px;
 
     &:hover, &.popover-active {
       color: #8c6e96;
+    }
+
+    .disabled & {
+      color: #9c9c9c;
+      &:hover {
+        color: #9c9c9c;
+      }
     }
 
     > i {

@@ -27,6 +27,7 @@ import store from '../store';
 import { registerReducer } from '../reducers';
 
 const initialState = Immutable.fromJS({
+  className: undefined,
   colourTheme: 'default',
 });
 

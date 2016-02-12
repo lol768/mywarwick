@@ -1,3 +1,5 @@
+@import 'mixins';
+
 .fixed-header {
   position: fixed;
   top: 0;
@@ -36,10 +38,6 @@ body {
   min-height: 0;
 }
 
-.id7-fixed-width-container,
-.id7-main-content-area {
-  background: #f9f9f9 !important;
-}
 
 .id7-fixed-width-container {
   z-index: auto !important;
@@ -49,23 +47,31 @@ body {
   padding-bottom: 14px;
 }
 
-@media screen and (max-width: @screen-sm-max) {
+.screen-sm-orless({
 
   .id7-fixed-width-container,
   .id7-main-content-area {
     background: none;
   }
 
-}
+});
 
-@media screen and (max-width: @screen-xs-max) {
-
-  body {
-    background-color: #f9f9f9;
-  }
+.screen-xs-orless({
 
   main {
     padding-bottom: 34px;
   }
 
-}
+  .id7-main-content-area .id7-main-content {
+    padding: 0;
+  }
+  .id7-fixed-width-container, .id7-main-content-area {
+    // On mobile we make tile content flush with the edges, which causes
+    // a couple of pixels of nothing to overlap the side which causes an annoying
+    // scroll. There's no legitimate need for sideways scrolling in Start, so
+    // just turn it off.
+    // (however this seems to cause some z-index problems, so keep an eye on it.)
+    overflow-x: hidden;
+  }
+
+});

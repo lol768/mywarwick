@@ -111,7 +111,7 @@ export class SearchView extends ReactComponent {
 
   render() {
     return (
-      <div>
+      <div className="search-view">
         { this.searchField() }
         { this.state.searchFocus ? this.suggestions() : this.quickLinks() }
       </div>
