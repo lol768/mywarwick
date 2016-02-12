@@ -25,7 +25,7 @@ class UpdatePopup extends ReactComponent {
       );
     }
 
-    return <div></div>;
+    return null;
   }
 
   reload(e) {
