@@ -3,18 +3,14 @@ import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactTransitionGroup from 'react/lib/ReactTransitionGroup';
 import log from 'loglevel';
-
-import * as TILES from '../tiles';
-
 import _ from 'lodash';
-
 import $ from 'jquery.transit';
-
 import Immutable from 'immutable';
 import { connect } from 'react-redux';
+import classNames from 'classnames';
 
 import { registerReducer } from '../../reducers';
-
+import * as TILES from '../tiles';
 import * as tiles from '../../tiles';
 import * as serverpipe from '../../serverpipe';
 
@@ -301,7 +297,7 @@ class MeView extends ReactComponent {
     }
 
     return (
-      <div className={this.state.editing ? 'me-view--editing' : ''}>
+      <div>
         { zoomedTileKey ?
           <div className="tile-zoom-backdrop" onClick={ this.onTileDismiss }></div>
           : null}
@@ -313,7 +309,8 @@ class MeView extends ReactComponent {
   }
 
   render() {
-    return <div className="row">{this.renderTiles()}</div>;
+    const classes = classNames('row', 'me-view', { 'me-view--editing': this.state.editing });
+    return <div className={classes}>{this.renderTiles()}</div>;
   }
 
 }

@@ -33,15 +33,26 @@ class ID7Layout extends ReactComponent {
 
   componentWillMount() {
     this.props.dispatch(updateLayoutClass());
+    this.setBodyTheme(this.props.colourTheme);
   }
 
   componentWillReceiveProps() {
     this.props.dispatch(updateLayoutClass());
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
     $(document.body).css('margin-top', headerHeight);
+    if (prevProps.colourTheme !== this.props.colourTheme) {
+      this.setBodyTheme(this.props.colourTheme, prevProps.colourTheme);
+    }
+  }
+
+  /** Set the theme on the body element, so that we can style everything. */
+  setBodyTheme(newTheme, oldTheme = '') {
+    $(document.body)
+      .removeClass(`theme-${oldTheme}`)
+      .addClass(`theme-${newTheme}`);
   }
 
   goToHome(e) {
@@ -66,7 +77,7 @@ class ID7Layout extends ReactComponent {
 
 
     return (
-      <div className={`theme-${this.props.colourTheme}`}>
+      <div>
         <a className="sr-only sr-only-focusable" href="#main">Skip to main content</a>
 
         <div className="fixed-header at-top">
