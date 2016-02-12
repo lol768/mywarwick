@@ -45,7 +45,7 @@ class MeView extends ReactComponent {
     super(props);
     this.state = {};
     this.onTileDismiss = this.onTileDismiss.bind(this);
-    this.boundOnBodyClick = this.onBodyClick.bind(this);
+    this.onBodyClick = this.onBodyClick.bind(this);
   }
 
   onTileExpand(tile) {
@@ -74,7 +74,7 @@ class MeView extends ReactComponent {
     // Ensure first release of the mouse button/finger is not interpreted as
     // exiting the editing mode
     $('body').one('mouseup touchend', () => {
-      _.defer(() => $('body').on('click', this.boundOnBodyClick));
+      _.defer(() => $('body').on('click', this.onBodyClick));
     });
   }
 
@@ -91,7 +91,7 @@ class MeView extends ReactComponent {
       el.removeAttr('style'); // transform creates positioning context
     });
 
-    $('body').off('click', this.boundOnBodyClick);
+    $('body').off('click', this.onBodyClick);
 
     this.props.dispatch(serverpipe.persistTiles());
   }
@@ -126,13 +126,16 @@ class MeView extends ReactComponent {
       editingAny: !!this.state.editing,
     });
 
-    config.onDismiss = () => this.onTileDismiss();
-    config.onExpand = () => this.onTileExpand(config);
+    // Zooming
+    config.onZoomIn = () => this.onTileExpand(config);
+    config.onZoomOut = () => this.onTileDismiss();
+
+    // Delegate ReactTransitionGroup methods to self
     config.componentWillEnter = callback => this.componentWillEnter(config, callback);
     config.componentWillLeave = callback => this.componentWillLeave(config, callback);
-    config.onClickRefresh = () => this.props.dispatch(serverpipe.fetchTileContent(id));
+
+    // Editing
     config.onBeginEditing = () => this.onBeginEditing(config);
-    config.onFinishEditing = () => this.onFinishEditing(config);
     config.onHide = () => this.onHideTile(config);
     config.onResize = () => this.onResizeTile(config);
 

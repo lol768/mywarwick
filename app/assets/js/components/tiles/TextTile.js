@@ -51,10 +51,6 @@ export default class TextTile extends Tile {
     });
   }
 
-  onClick(e) {
-    e.stopPropagation();
-  }
-
   getBody(content) {
     const itemsToDisplay = this.isZoomed() ? content.items : [content.items[this.state.itemIndex]];
 

@@ -22,10 +22,11 @@ export default class Tile extends Component {
 
   constructor(props) {
     super(props);
-    this.onMouseDown = this.onMouseDown.bind(this);
-    this.onMouseUp = this.onMouseUp.bind(this);
-    this.onHide = this.props.onHide.bind(this);
-    this.onResize = this.props.onResize.bind(this);
+    this.onTouchStart = this.onTouchStart.bind(this);
+    this.onTouchEnd = this.onTouchEnd.bind(this);
+    this.onTouchMove = this.onTouchMove.bind(this);
+    this.onClickExpand = this.onClickExpand.bind(this);
+    this.onClick = this.onClick.bind(this);
   }
 
   contentOrDefault(content, contentFunction) {
@@ -104,8 +105,14 @@ export default class Tile extends Component {
     return `Refresh ${title}`;
   }
 
-  onMouseDown() {
+  onTouchStart(e) {
     if (!this.props.editing && !this.isZoomed()) {
+      if (e.changedTouches) {
+        const touch = e.changedTouches[0];
+        this.startX = touch.clientX;
+        this.startY = touch.clientY;
+      }
+
       const el = $(ReactDOM.findDOMNode(this.refs.tile));
       el.stop().transition({
         scale: 0.97,
@@ -115,20 +122,48 @@ export default class Tile extends Component {
     }
   }
 
-  onMouseUp() {
-    if (!this.props.editing && !this.isZoomed()) {
-      const el = $(ReactDOM.findDOMNode(this.refs.tile));
-      el.stop().transition({
-        scale: 1,
-      }, 200);
+  onTouchMove(e) {
+    if (this.startX !== null) {
+      const touch = e.changedTouches[0];
 
-      this.timeout = clearTimeout(this.timeout);
+      if (Math.abs(touch.clientX - this.startX) > 10
+        || Math.abs(touch.clientY - this.startY) > 10) {
+        this.release();
+      }
     }
   }
 
+  release() {
+    this.timeout = clearTimeout(this.timeout);
+    this.startX = null;
+    this.startY = null;
+
+    const el = $(ReactDOM.findDOMNode(this.refs.tile));
+    el.stop().transition({
+      scale: 1,
+    }, 200);
+  }
+
+  onTouchEnd(e) {
+    if (!this.props.editing && !this.isZoomed() && this.timeout) {
+      this.release();
+    }
+  }
+
+  onClickExpand(e) {
+    this.timeout = clearTimeout(this.timeout);
+    this.props.onZoomIn(e);
+  }
+
   onClick() {
-    if (this.props.content && this.props.content.href && !this.props.editingAny) {
-      window.open(this.props.content.href);
+    const { content, editingAny } = this.props;
+
+    if (!editingAny && content && content.href) {
+      if (window.navigator.userAgent.indexOf('Start/') >= 0) {
+        window.location = content.href;
+      } else {
+        window.open(content.href);
+      }
     }
   }
 
@@ -157,7 +192,6 @@ export default class Tile extends Component {
 
     const icon = (<i
       className={`tile__icon fa fa-fw ${this.getIcon()}`} title={ this.getIconTitle() }
-      onClick={this.props.onClickRefresh}
     > </i>);
 
     const sizeClass = SIZE_CLASSES[this.getSize()];
@@ -167,9 +201,9 @@ export default class Tile extends Component {
     });
     const zoomIcon = () => {
       if (this.isZoomed()) {
-        return <i className="fa fa-times tile__dismiss" onClick={props.onDismiss}> </i>;
+        return <i className="fa fa-times tile__dismiss" onClick={props.onZoomOut}> </i>;
       } else if (this.shouldDisplayExpandIcon()) {
-        return <i className="fa fa-expand tile__expand" onClick={props.onExpand}> </i>;
+        return <i className="fa fa-expand tile__expand" onClick={this.onClickExpand}> </i>;
       }
       return null;
     };
@@ -186,24 +220,26 @@ export default class Tile extends Component {
               }
             )
           }
-          onMouseDown={ this.onMouseDown }
-          onMouseUp={ this.onMouseUp }
-          onMouseOut={ this.onMouseUp }
-          onTouchStart={ this.onMouseDown }
-          onTouchEnd={ this.onMouseUp }
-          onTouchCancel={ this.onMouseUp }
+          onTouchStart={ this.onTouchStart }
+          onTouchMove={ this.onTouchMove }
+          onTouchEnd={ this.onTouchEnd }
+          onTouchCancel={ this.onTouchEnd }
+          onMouseDown={ this.onTouchStart }
+          onMouseUp={ this.onTouchEnd }
+          onMouseOut={ this.onTouchEnd }
+          onClick={ this.onClick }
           ref="tile"
         >
           <div
             className="tile__edit-control top-left"
-            onClick={ this.onHide }
+            onClick={ this.props.onHide }
             title="Hide tile"
           >
             <i className="fa fa-fw fa-minus"> </i>
           </div>
           <div
             className="tile__edit-control bottom-right"
-            onClick={ this.onResize }
+            onClick={ this.props.onResize }
             title={`Make tile ${this.getSize() === 'small' ? 'bigger' : 'smaller'}`}
           >
             <i className="fa fa-fw fa-arrow-up"> </i>
@@ -260,7 +296,6 @@ Tile.propTypes = {
   fetchedAt: PropTypes.string,
   fetching: PropTypes.boolean,
   icon: PropTypes.string,
-  onClickRefresh: PropTypes.function,
   title: PropTypes.string,
   zoomed: PropTypes.boolean,
 };

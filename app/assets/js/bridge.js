@@ -17,7 +17,7 @@ function setAppCached() {
   });
 }
 
-if (window.navigator.userAgent.indexOf('Start/1.0') >= 0) {
+if (window.navigator.userAgent.indexOf('Start/') >= 0) {
   $('html').addClass('app standalone');
 
   store.subscribe(() => {
