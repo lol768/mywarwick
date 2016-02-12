@@ -64,6 +64,13 @@ export default class AgendaTile extends Tile {
       e.preventDefault();
     }
   }
+
+  canZoom() {
+    if (this.props.content && this.props.content.items) {
+      return this.props.content.items.length > 1;
+    }
+    return false;
+  }
 }
 
 class AgendaTileItem extends React.Component {
