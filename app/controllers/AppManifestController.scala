@@ -21,6 +21,8 @@ class AppManifestController @Inject()(
         "short_name" -> "Start.Warwick",
         "start_url" -> "/",
         "display" -> "standalone",
+        "background_color" -> "#8C6E96",
+        "theme_color" -> "#8C6E96",
         "icons" -> Json.arr(
           Json.obj(
             "src" -> "/assets/lib/id7/images/android-chrome-144x144.png",
