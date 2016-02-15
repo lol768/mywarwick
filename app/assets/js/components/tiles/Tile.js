@@ -123,7 +123,7 @@ export default class Tile extends Component {
   }
 
   onTouchMove(e) {
-    if (this.startX !== null) {
+    if (!this.props.editing && this.startX !== null) {
       const touch = e.changedTouches[0];
 
       if (Math.abs(touch.clientX - this.startX) > 10
