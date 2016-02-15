@@ -7,7 +7,7 @@ export default class HiddenTile extends React.Component {
   }
 
   render() {
-    const { icon, title } = this.props;
+    const { icon, title, onShow } = this.props;
 
     return (
       <div className="tile__container col-xs-6 col-sm-6 col-md-3 tile--text-btm">
@@ -15,17 +15,15 @@ export default class HiddenTile extends React.Component {
           <div
             className="tile__edit-control top-left"
             title="Show tile"
-            onClick={ this.props.onAdd }
+            onClick={ onShow }
           >
             <i className="fa fa-fw fa-plus"> </i>
           </div>
 
           <div className="tile__wrap">
-            <div className="tile__body" style={{ textAlign: 'center', marginTop: 22 }}>
-              <i className={`fa fa-fw fa-${icon}`} style={{ fontSize: 36 }}> </i>
-              <div className="tile__item">
-                { title }
-              </div>
+            <div className="tile__body">
+              <i className={`fa fa-fw fa-${icon}`}> </i>
+              <div className="tile__item">{ title }</div>
             </div>
           </div>
         </article>
@@ -38,5 +36,5 @@ export default class HiddenTile extends React.Component {
 HiddenTile.propTypes = {
   icon: PropTypes.string,
   title: PropTypes.string,
-  onAdd: PropTypes.function,
+  onShow: PropTypes.function,
 };
