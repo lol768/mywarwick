@@ -70,7 +70,7 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
       tiles.map(_.tile.id).toSet must equal(Set("tile", "other-tile"))
     }
 
-    "don't fetch tiles that the user has removed" in transaction { implicit c =>
+    "also fetch tiles that the user has removed" in transaction { implicit c =>
       SQL(
         """
         INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, TITLE, ICON) VALUES
@@ -89,7 +89,7 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
         """).execute()
 
       val tiles = tileDao.getTilesForUser("someone", Set("staff"))
-      tiles.map(_.tile.id).toSet must equal(Set("other-tile"))
+      tiles.map(_.tile.id).toSet must equal(Set("tile", "other-tile"))
     }
 
     "fetch tiles for anonymous users " in transaction { implicit c =>
