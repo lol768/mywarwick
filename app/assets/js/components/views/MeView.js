@@ -301,11 +301,13 @@ class MeView extends ReactComponent {
     const { editing } = this.state;
     const zoomedTileKey = this.props.zoomedTile;
 
-    const tiles = this.props.tiles.map((tile) => this.renderTile(tile));
-    const hiddenTiles = this.props.hiddenTiles.map(tile => <HiddenTile {...tile} onAdd={() => this.onShowTile(tile)} />);
+    const tileComponents = this.props.tiles.map((tile) => this.renderTile(tile));
+    const hiddenTiles = this.props.hiddenTiles.map(
+      tile => <HiddenTile {...tile} onAdd={() => this.onShowTile(tile)} /> // eslint-disable-line react/jsx-no-bind, max-len
+    );
 
     // Show hidden tiles (if any) when editing, or if there are no visible tiles
-    const showHiddenTiles = hiddenTiles.length > 0 && (editing || tiles.length === 0);
+    const showHiddenTiles = hiddenTiles.length > 0 && (editing || tileComponents.length === 0);
 
     if (zoomedTileKey) {
       const zoomedTile = _.find(this.props.tiles, (tile) => tile.id === zoomedTileKey);
@@ -319,7 +321,7 @@ class MeView extends ReactComponent {
           : null}
         <div>
           <ReactTransitionGroup ref="group">
-            {tiles}
+            {tileComponents}
           </ReactTransitionGroup>
         </div>
         { showHiddenTiles ?

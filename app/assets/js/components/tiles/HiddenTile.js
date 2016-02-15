@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 
 export default class HiddenTile extends React.Component {
 
@@ -34,3 +34,9 @@ export default class HiddenTile extends React.Component {
   }
 
 }
+
+HiddenTile.propTypes = {
+  icon: PropTypes.string,
+  title: PropTypes.string,
+  onAdd: PropTypes.function,
+};

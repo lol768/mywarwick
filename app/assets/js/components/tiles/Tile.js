@@ -144,7 +144,7 @@ export default class Tile extends Component {
     }, 200);
   }
 
-  onTouchEnd(e) {
+  onTouchEnd() {
     if (!this.props.editing && !this.isZoomed() && this.timeout) {
       this.release();
     }
