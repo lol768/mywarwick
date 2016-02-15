@@ -4,8 +4,6 @@ import Tile from './Tile';
 import Skycon from '../ui/Skycon';
 import moment from 'moment';
 
-const DEFAULT_ICON_COLOUR = 'white';
-
 function formatIconString(str) {
   return str.toUpperCase().replace(/-/g, '_');
 }
@@ -28,9 +26,7 @@ export default class WeatherTile extends Tile {
         {itemsToDisplay.map(item => (
             <div key={item.id} className="tile__item">
               <span className="tile__callout">{`${Math.ceil(item.temp)}°C`}</span>
-              <Skycon className="skycon" color={DEFAULT_ICON_COLOUR}
-                icon={formatIconString(item.icon)}
-              />
+              <Skycon className="skycon" icon={formatIconString(item.icon)}/>
               <span className="tile__text">
                 {`${formatWeatherTime(item.time)}: ${item.text}`}
               </span>
