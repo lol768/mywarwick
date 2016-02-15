@@ -36,5 +36,5 @@ export default class HiddenTile extends React.Component {
 HiddenTile.propTypes = {
   icon: PropTypes.string,
   title: PropTypes.string,
-  onShow: PropTypes.function,
+  onShow: PropTypes.func,
 };
