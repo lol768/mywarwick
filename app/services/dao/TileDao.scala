@@ -46,7 +46,7 @@ class TileDaoImpl @Inject()() extends TileDao {
 
     val idRestriction = if (ids.isEmpty) "" else "AND ID IN ({ids})"
 
-    val defaultTiles = getDefaultTilesForGroups(groups, ids)
+    val defaultTiles = getDefaultTilesForGroups(groups, ids).toSet
 
     val userTiles = SQL(
       s"""
@@ -57,10 +57,9 @@ class TileDaoImpl @Inject()() extends TileDao {
       .on(
         'usercode -> usercode,
         'ids -> ids
-      ).as(userTileParser.*)
+      ).as(userTileParser.*).toSet
 
-    val defaultsNotOverridden = defaultTiles.filterNot(dt => userTiles.map(_.tile.id).contains(dt.tile.id))
-    (defaultsNotOverridden ++ userTiles.filterNot(_.removed)).sortBy(_.position)
+    (userTiles ++ defaultTiles).toSeq.sortBy(_.position)
   }
 
   override def getDefaultTilesForGroups(groups: Set[String], ids: Seq[String] = Nil)(implicit c: Connection): Seq[TileInstance] = {

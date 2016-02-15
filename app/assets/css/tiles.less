@@ -45,7 +45,7 @@
   }
 }
 
-.me-view--editing .tile:not(.tile--editing) {
+.me-view--editing .tile:not(.tile--editing):not(.tile--hidden) {
   opacity: .7;
 }
 
@@ -155,13 +155,14 @@
 }
 
 .tile__edit-control {
-  @size: 36px;
+  @size: 44px;
   @outside: -@size * 1/2;
 
   display: none;
   position: absolute;
   z-index: 10;
 
+  font-size: 18px;
   background-color: #000;
   color: #fff;
   border: 2px solid #fff;
@@ -321,5 +322,15 @@
   }
   .skycon {
     max-width: 118px;
+  }
+}
+
+.tile--hidden {
+  .tile__body {
+    text-align: center;
+    margin-top: 22px;
+    .fa {
+      font-size: 36px;
+    }
   }
 }

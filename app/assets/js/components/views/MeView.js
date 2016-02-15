@@ -17,6 +17,8 @@ import * as serverpipe from '../../serverpipe';
 const ZOOM_ANIMATION_DURATION = 500;
 export const EDITING_ANIMATION_DURATION = 700;
 
+import HiddenTile from '../tiles/HiddenTile';
+
 const TILE_ZOOM_IN = 'me.zoom-in';
 const TILE_ZOOM_OUT = 'me.zoom-out';
 
@@ -41,7 +43,7 @@ class MeView extends ReactComponent {
     super(props);
     this.state = {};
     this.onTileDismiss = this.onTileDismiss.bind(this);
-    this.boundOnBodyClick = this.onBodyClick.bind(this);
+    this.onBodyClick = this.onBodyClick.bind(this);
   }
 
   onTileExpand(tile) {
@@ -70,7 +72,7 @@ class MeView extends ReactComponent {
     // Ensure first release of the mouse button/finger is not interpreted as
     // exiting the editing mode
     $('body').one('mouseup touchend', () => {
-      _.defer(() => $('body').on('click', this.boundOnBodyClick));
+      _.defer(() => $('body').on('click', this.onBodyClick));
     });
   }
 
@@ -87,7 +89,7 @@ class MeView extends ReactComponent {
       el.removeAttr('style'); // transform creates positioning context
     });
 
-    $('body').off('click', this.boundOnBodyClick);
+    $('body').off('click', this.onBodyClick);
 
     this.props.dispatch(serverpipe.persistTiles());
   }
@@ -122,13 +124,16 @@ class MeView extends ReactComponent {
       editingAny: !!this.state.editing,
     });
 
-    config.onDismiss = () => this.onTileDismiss();
-    config.onExpand = () => this.onTileExpand(config);
+    // Zooming
+    config.onZoomIn = () => this.onTileExpand(config);
+    config.onZoomOut = () => this.onTileDismiss();
+
+    // Delegate ReactTransitionGroup methods to self
     config.componentWillEnter = callback => this.componentWillEnter(config, callback);
     config.componentWillLeave = callback => this.componentWillLeave(config, callback);
-    config.onClickRefresh = () => this.props.dispatch(serverpipe.fetchTileContent(id));
+
+    // Editing
     config.onBeginEditing = () => this.onBeginEditing(config);
-    config.onFinishEditing = () => this.onFinishEditing(config);
     config.onHide = () => this.onHideTile(config);
     config.onResize = () => this.onResizeTile(config);
 
@@ -283,14 +288,30 @@ class MeView extends ReactComponent {
     }
   }
 
+  onShowTile(tile) {
+    this.props.dispatch(tiles.showTile(tile));
+
+    this.props.dispatch(serverpipe.persistTiles());
+    this.props.dispatch(serverpipe.fetchTileContent(tile.id));
+
+    this.onFinishEditing();
+  }
+
   renderTiles() {
+    const { editing } = this.state;
     const zoomedTileKey = this.props.zoomedTile;
 
-    const theseTiles = this.props.tiles.map((tile) => this.renderTile(tile));
+    const tileComponents = this.props.tiles.map((tile) => this.renderTile(tile));
+    const hiddenTiles = this.props.hiddenTiles.map(
+      tile => <HiddenTile {...tile} onShow={() => this.onShowTile(tile)} /> // eslint-disable-line react/jsx-no-bind, max-len
+    );
+
+    // Show hidden tiles (if any) when editing, or if there are no visible tiles
+    const showHiddenTiles = hiddenTiles.length > 0 && (editing || tileComponents.length === 0);
 
     if (zoomedTileKey) {
       const zoomedTile = _.find(this.props.tiles, (tile) => tile.id === zoomedTileKey);
-      theseTiles.push(this.renderTile(zoomedTile, true));
+      tiles.push(this.renderTile(zoomedTile, true));
     }
 
     return (
@@ -298,9 +319,22 @@ class MeView extends ReactComponent {
         { zoomedTileKey ?
           <div className="tile-zoom-backdrop" onClick={ this.onTileDismiss }></div>
           : null}
-        <ReactTransitionGroup ref="group">
-          {theseTiles}
-        </ReactTransitionGroup>
+        <div>
+          <ReactTransitionGroup ref="group">
+            {tileComponents}
+          </ReactTransitionGroup>
+        </div>
+        { showHiddenTiles ?
+          <div>
+            <div style={{ clear: 'both' }}> </div>
+            <div>
+              <h3 style={{ marginTop: 30 }}>More tiles</h3>
+              <div>
+                {hiddenTiles}
+              </div>
+            </div>
+          </div>
+          : null }
       </div>
     );
   }
@@ -333,7 +367,8 @@ registerReducer('me', (state = initialState, action) => {
 
 const select = (state) => ({
   zoomedTile: state.get('me').get('zoomedTile'),
-  tiles: state.get('tiles').get('items').filterNot(tile => tile.get('removed') === true).toJS(),
+  tiles: state.get('tiles').get('items').filterNot(tile => tile.get('removed')).toJS(),
+  hiddenTiles: state.get('tiles').get('items').filter(tile => tile.get('removed')).toJS(),
   tileContent: state.get('tileContent').toJS(),
 });
 
