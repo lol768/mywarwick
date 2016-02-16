@@ -9,14 +9,7 @@ case class TileInstance(
   size: TileSize,
   preferences: Option[JsObject],
   removed: Boolean
-) {
-
-  override def equals(o: Any) = o match {
-    case t: TileInstance if t.tile.id == tile.id => true
-    case _ => false
-  }
-
-}
+)
 
 case class UserTileSetting(
   id: String,
@@ -57,8 +50,7 @@ object TileInstance {
         "preferences" -> o.preferences,
         "size" -> o.size,
         "title" -> o.tile.title,
-        "type" -> o.tile.tileType,
-        "removed" -> o.removed
+        "type" -> o.tile.tileType
       )
   }
 }
