@@ -311,7 +311,7 @@ class MeView extends ReactComponent {
 
     if (zoomedTileKey) {
       const zoomedTile = _.find(this.props.tiles, (tile) => tile.id === zoomedTileKey);
-      tiles.push(this.renderTile(zoomedTile, true));
+      tileComponents.push(this.renderTile(zoomedTile, true));
     }
 
     return (

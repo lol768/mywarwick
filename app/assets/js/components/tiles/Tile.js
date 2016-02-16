@@ -151,7 +151,8 @@ export default class Tile extends Component {
   }
 
   onClickExpand(e) {
-    this.timeout = clearTimeout(this.timeout);
+    this.release();
+
     this.props.onZoomIn(e);
   }
 
