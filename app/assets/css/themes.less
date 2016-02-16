@@ -5,12 +5,10 @@
 // DEFAULT COLOUR THEME
 .theme-default {
   .tile-theme(
-    #8c6e96,
-    #8c6e96,
-    #8c6e96,
-    #8c6e96,
-    #8c6e96,
-    #8c6e96
+    #551919,
+    #553419,
+    #0F3333,
+    #144414
   );
 
   .behind-tiles({
@@ -18,9 +16,36 @@
   });
 }
 
+.theme-tropicthunder {
+  .tile-theme(
+    #5F858F,
+    #A18058,
+    #A8625C,
+    #963E3E
+  );
+}
+
+.theme-dodgeball {
+  .tile-theme(
+    #2C2C74,
+    #584269,
+    #730402,
+    #8C4300
+  )
+}
+
+.theme-orangery {
+  .tile-theme(
+    #BD7426,
+    #AB5C24,
+    #9C4A21,
+    #85351B
+  )
+}
+
 // Just for testing, obvs. This must never see the light of day
 .theme-nightmare {
-  .tile-theme(cyan, yellow, magenta, limegreen, purple, blue);
+  .tile-theme(cyan, yellow, magenta, limegreen);
 
   // Themes now applied to body, so this is on the body
 
@@ -45,7 +70,7 @@
 
 // Mixin to generate classes for tiles. Uses contrast() to choose a readable text colour -
 // that may work most of the time but we may want to be more selective with some themes.
-.tile-theme(@c0, @c1, @c2, @c3, @c4, @c5) {
+.tile-theme(@c0, @c1, @c2, @c3) {
   .do-tile(@i) {
     .colour-@{i} {
       background-color: ~"@{c@{i}";
@@ -67,13 +92,5 @@
   .colour-3 {
     background-color: @c3;
     color: contrast(@c3);
-  }
-  .colour-4 {
-    background-color: @c4;
-    color: contrast(@c4);
-  }
-  .colour-5 {
-    background-color: @c5;
-    color: contrast(@c5);
   }
 }
