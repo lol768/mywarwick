@@ -50,7 +50,8 @@ object TileInstance {
         "preferences" -> o.preferences,
         "size" -> o.size,
         "title" -> o.tile.title,
-        "type" -> o.tile.tileType
+        "type" -> o.tile.tileType,
+        "removed" -> o.removed
       )
   }
 }
