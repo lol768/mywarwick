@@ -44,7 +44,7 @@ GET         /api/tiles/content                            @controllers.api.Tiles
 GET         /api/tiles/content/:id                        @controllers.api.TilesController.contentById(id: String)
 PUT         /api/tiles                                    @controllers.api.TilesController.saveLayout
 
-GET         /ssotest                                      @controllers.HomeController.ssotest
+GET         /ssotest                                      @controllers.SSOController.ssotest
 
 POST        /api/push/apns/subscribe                      @controllers.api.APNSPushNotificationsController.subscribe
 POST        /api/push/gcm/subscribe                       @controllers.api.GCMPushNotificationsController.subscribe
