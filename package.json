@@ -72,6 +72,7 @@
   },
   "scripts": {
     "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha --compilers js:babel/register -r TestHelper --recursive test/assets/js",
+    "lint": "gulp lint",
     "bamboo": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" /usr/nodejs/4.2/bin/node node_modules/mocha/bin/mocha -R mocha-bamboo-reporter --compilers js:babel/register -r TestHelper --recursive test/assets/js"
   },
   "repository": {
