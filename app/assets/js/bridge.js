@@ -17,6 +17,17 @@ function setAppCached() {
   });
 }
 
+function registerForAPNs(deviceToken) {
+  fetch('/api/push/apns/subscribe', {
+    credentials: 'same-origin',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ deviceToken }),
+  });
+}
+
 if (window.navigator.userAgent.indexOf('Start/') >= 0) {
   $('html').addClass('app standalone');
 
@@ -47,4 +58,6 @@ if (window.navigator.userAgent.indexOf('Start/') >= 0) {
       }
     }
   });
+
+  window.registerForAPNs = registerForAPNs;
 }
