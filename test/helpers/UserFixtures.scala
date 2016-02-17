@@ -23,4 +23,11 @@ private[helpers] object UserFixtures {
   def makeNotFoundUser(usercode: String = "user"): User =
     Users.create(Usercode(usercode), found = false)
 
+  def loginContext(u: Option[User]) = new LoginContext {
+    override val user: Option[User] = u
+    override val actualUser: Option[User] = None
+    override def loginUrl(target: Option[String]): String = "https://app.example.com/login"
+    override def userHasRole(role: RoleName) = false
+    override def actualUserHasRole(role: RoleName) = false
+  }
 }

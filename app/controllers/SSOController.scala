@@ -3,7 +3,7 @@ package controllers
 import javax.inject.Inject
 
 import play.api.libs.json.Json
-import play.api.mvc.Action
+import play.api.mvc.{Cookie, Action}
 import uk.ac.warwick.sso.client.{SSOToken, SSOConfiguration}
 import uk.ac.warwick.sso.client.cache.UserCache
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl._
@@ -17,7 +17,6 @@ import warwick.sso.SSOClient
   * SSO Client as an optional behaviour.
   */
 class SSOController @Inject()(
-  ssoClient: SSOClient,
   ssoConfig: SSOConfiguration,
   userCache: UserCache
 ) extends BaseController {
@@ -31,16 +30,13 @@ class SSOController @Inject()(
     * Normal SSOClient will refresh if you have an LTC but no SSC cookie, because
     * we set the cookies to expire at the same time as the session. We are expecting
     * the SSC to hang around forever, so instead we check that our local cached copy
-    * the SSC to hang around forever, so instead we check that our local cached copy
     * of the user's session is missing (meaning it probably expired away).
     */
   def ssotest = Action { request =>
-    val hasGlobalCookie = request.cookies.get(GLOBAL_LOGIN_COOKIE_NAME).isDefined
-
-    val ssc = request.cookies.get(SERVICE_SPECIFIC_COOKIE_NAME)
-    val refresh = ssc.filter {
+    val ssc: Option[Cookie] = request.cookies.get(SERVICE_SPECIFIC_COOKIE_NAME)
+    val refresh: Boolean = ssc.filter {
       cookie => StringUtils.hasText(cookie.value)
-    }.map { cookie =>
+    }.exists { cookie =>
       userCache.get(new SSOToken(cookie.value, SSOToken.SSC_TICKET_TYPE)) == null
     }
 
