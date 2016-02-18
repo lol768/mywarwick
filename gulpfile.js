@@ -31,6 +31,7 @@ var filenames = require('gulp-filenames');
 var insert = require('gulp-insert');
 var swPrecache = require('sw-precache');
 var eslint = require('gulp-eslint');
+var envify = require('loose-envify/custom');
 
 var lessCompiler = require('less');
 
@@ -50,15 +51,6 @@ var paths = {
   ]
 };
 
-var browserifyOptions = function (entries) {
-  return {
-    entries: entries,
-    basedir: 'app/assets/js',
-    debug: true, // confusingly, this enables sourcemaps
-    transform: [babelify] // Transforms ES6 + JSX into normal JS
-  }
-};
-
 var PRODUCTION = (process.env.PRODUCTION !== 'false');
 if (PRODUCTION) {
   gutil.log(gutil.colors.yellow('Production build (use PRODUCTION=false in development).'));
@@ -66,12 +58,32 @@ if (PRODUCTION) {
   gutil.log(gutil.colors.yellow('Development build.'));
 }
 
+var browserifyOptions = function (entries) {
+  return {
+    entries: entries,
+    basedir: 'app/assets/js',
+    debug: true, // confusingly, this enables sourcemaps
+    transform: [
+      babelify,
+      [
+        envify({
+          _: 'purge',
+          NODE_ENV: PRODUCTION ? 'production' : 'development'
+        }),
+        {
+          global: true
+        }
+      ]
+    ]
+  }
+};
+
 // Function for running Browserify on JS, since
 // we reuse it a couple of times.
 var bundle = function (browserify, outputFile) {
   return browserify.bundle()
     .on('error', function (e) {
-      gutil.log(gutil.colors.red(e.toString()));
+      gutil.log(gutil.colors.red(e.stack));
     })
     .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, 'app', 'assets', 'js')))
     .pipe(source(outputFile))
@@ -241,7 +253,7 @@ gulp.task('manifest', ['scripts', 'styles'], function () {
 });
 
 gulp.task('lint', function () {
-  return gulp.src([paths.assetPath+'/js/**/*.js'])
+  return gulp.src([paths.assetPath + '/js/**/*.js'])
     .pipe(eslint('.eslintrc.json'))
     .pipe(eslint.format())
     .pipe(eslint.failAfterError());
