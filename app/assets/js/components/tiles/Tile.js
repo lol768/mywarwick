@@ -60,8 +60,8 @@ export default class Tile extends Component {
     return this.props.zoomed;
   }
 
-  getZoomedBodyInternal(content) {
-    return this.contentOrDefault(content, this.getZoomedBody);
+  getZoomedBodyInternal(content, fetchedAt) {
+    return this.contentOrDefault(content, fetchedAt, this.getZoomedBody);
   }
 
   getZoomedBody(content, fetchedAt) {
