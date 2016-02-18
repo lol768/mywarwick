@@ -122,7 +122,7 @@ function exportAssetModule(name, taskName, baseDir, extraExtensions) {
   gulp.task(taskName, function () {
     var base = 'node_modules/' + name + '/' + baseDir;
 
-    var baseExtensions = ['otf', 'eot', 'woff', 'woff2', 'ttf', 'js', 'js.map', 'gif', 'png', 'jpg', 'svg'];
+    var baseExtensions = ['otf', 'eot', 'woff', 'woff2', 'ttf', 'js', 'js.map', 'gif', 'png', 'jpg', 'svg', 'ico'];
     var srcs = (extraExtensions || []).concat(baseExtensions);
     var srcPaths = srcs.map(function (s) {
       return base + '/**/*.' + s;
