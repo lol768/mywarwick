@@ -303,7 +303,7 @@ class MeView extends ReactComponent {
 
     const tileComponents = this.props.tiles.map((tile) => this.renderTile(tile));
     const hiddenTiles = this.props.hiddenTiles.map(
-      tile => <HiddenTile {...tile} onShow={() => this.onShowTile(tile)} /> // eslint-disable-line react/jsx-no-bind, max-len
+      tile => <HiddenTile key={ tile.id } {...tile} onShow={() => this.onShowTile(tile)} /> // eslint-disable-line react/jsx-no-bind, max-len
     );
 
     // Show hidden tiles (if any) when editing, or if there are no visible tiles

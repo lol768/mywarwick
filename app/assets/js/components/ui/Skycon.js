@@ -70,6 +70,6 @@ Skycon.propTypes = {
 };
 
 Skycon.defaultProps = {
-  color: null,
+  color: 'white',
   autoplay: true,
 };

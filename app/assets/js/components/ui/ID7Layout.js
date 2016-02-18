@@ -43,7 +43,7 @@ class ID7Layout extends ReactComponent {
 
   componentDidUpdate(prevProps) {
     const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
-    $(document.body).css('margin-top', headerHeight);
+    $('.id7-main-content-area').css('padding-top', headerHeight);
     if (prevProps.colourTheme !== this.props.colourTheme) {
       this.setBodyTheme(this.props.colourTheme, prevProps.colourTheme);
     }
