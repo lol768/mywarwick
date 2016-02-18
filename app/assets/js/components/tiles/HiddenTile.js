@@ -10,7 +10,7 @@ export default class HiddenTile extends React.Component {
     const { icon, title, onShow, colour } = this.props;
 
     return (
-      <div className="tile__container col-xs-6 col-sm-6 col-md-3 tile--text-btm">
+      <div className="tile__container col-xs-6 col-sm-6 col-md-3">
         <article className={`tile tile--hidden tile--editing tile--small colour-${colour}`}>
           <div
             className="tile__edit-control top-left"

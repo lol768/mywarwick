@@ -1,4 +1,3 @@
-// react/sort-comp goes crazy in this file - disable it
 /* eslint react/prop-types: 0, react/sort-comp: 0 */
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
@@ -16,17 +15,18 @@ const SIZE_CLASSES = {
   large: 'col-xs-12 col-sm-12 col-md-6',
 };
 
-const LONG_PRESS_DURATION_MS = 600;
+const LONG_PRESS_DURATION_MS = 500;
 
 export default class Tile extends Component {
 
   constructor(props) {
     super(props);
-    this.onTouchStart = this.onTouchStart.bind(this);
+
+    this.onClick = this.onClick.bind(this);
+    this.onClickExpand = this.onClickExpand.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
-    this.onClickExpand = this.onClickExpand.bind(this);
-    this.onClick = this.onClick.bind(this);
+    this.onTouchStart = this.onTouchStart.bind(this);
   }
 
   contentOrDefault(content, contentFunction) {
@@ -94,15 +94,11 @@ export default class Tile extends Component {
   }
 
   getIconTitle() {
-    const { fetching, errors, title } = this.props;
+    const { errors, fetchedAt } = this.props;
 
-    if (fetching) {
-      return `Refreshing ${title}`;
-    } else if (errors) {
-      return `An error occurred while refreshing the ${title} tile.
-        The error was: ${errors[0].message}`;
+    if (errors) {
+      return `Last updated ${localMoment(fetchedAt).calendar()}. ${errors[0].message}`;
     }
-    return `Refresh ${title}`;
   }
 
   onTouchStart(e) {
@@ -112,11 +108,6 @@ export default class Tile extends Component {
         this.startX = touch.clientX;
         this.startY = touch.clientY;
       }
-
-      const el = $(ReactDOM.findDOMNode(this.refs.tile));
-      el.stop().transition({
-        scale: 0.97,
-      }, 200);
 
       this.timeout = setTimeout(this.props.onBeginEditing, LONG_PRESS_DURATION_MS);
     }
@@ -137,11 +128,6 @@ export default class Tile extends Component {
     this.timeout = clearTimeout(this.timeout);
     this.startX = null;
     this.startY = null;
-
-    const el = $(ReactDOM.findDOMNode(this.refs.tile));
-    el.stop().transition({
-      scale: 1,
-    }, 200);
   }
 
   onTouchEnd() {
@@ -169,40 +155,34 @@ export default class Tile extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.editing && !prevProps.editing) {
-      const el = $(ReactDOM.findDOMNode(this.refs.tile));
+    const $tile = $(ReactDOM.findDOMNode(this.refs.tile));
 
-      el.stop().transition({
+    if (this.props.editing && !prevProps.editing) {
+      // Begin editing
+      $tile.stop().transition({
         scale: 1.15,
       }, EDITING_ANIMATION_DURATION, 'snap');
     } else if (prevProps.editing && !this.props.editing) {
-      const el = $(ReactDOM.findDOMNode(this.refs.tile));
-
-      el.stop().transition({
+      // Finish editing
+      $tile.stop().transition({
         scale: 1,
       }, EDITING_ANIMATION_DURATION, 'snap');
     }
   }
 
-  getSize() {
-    return this.props.size || this.props.defaultSize;
-  }
-
   render() {
-    const props = this.props;
+    const { type, title, size, colour, content, editing, zoomed } = this.props;
 
     const icon = (<i
-      className={`tile__icon fa fa-fw ${this.getIcon()}`} title={ this.getIconTitle() }
+      className={`tile__icon fa fa-fw ${this.getIcon()}`} ref="icon" title={ this.getIconTitle() }
+      data-toggle="tooltip"
     > </i>);
 
-    const sizeClass = SIZE_CLASSES[this.getSize()];
-    const outerClassName = classNames(sizeClass, 'tile__container', {
-      'tile--zoomed': props.zoomed,
-      'tile--text-btm': true,
-    });
+    const sizeClass = SIZE_CLASSES[size];
+    const outerClassName = classNames(sizeClass, 'tile__container', { 'tile--zoomed': zoomed });
     const zoomIcon = () => {
       if (this.isZoomed()) {
-        return <i className="fa fa-times tile__dismiss" onClick={props.onZoomOut}> </i>;
+        return <i className="fa fa-times tile__dismiss" onClick={this.props.onZoomOut}> </i>;
       } else if (this.shouldDisplayExpandIcon()) {
         return <i className="fa fa-expand tile__expand" onClick={this.onClickExpand}> </i>;
       }
@@ -214,10 +194,10 @@ export default class Tile extends Component {
         <article
           className={
             classNames(
-              'tile', `tile--${props.type}`, `tile--${this.getSize()}`, `colour-${props.colour}`,
+              'tile', `tile--${type}`, `tile--${size}`, `colour-${colour}`,
               {
-                'tile--editing': props.editing,
-                'tile--clickable': props.content && props.content.href,
+                'tile--editing': editing,
+                'tile--clickable': content && content.href,
               }
             )
           }
@@ -241,7 +221,7 @@ export default class Tile extends Component {
           <div
             className="tile__edit-control bottom-right"
             onClick={ this.props.onResize }
-            title={`Make tile ${this.getSize() === 'small' ? 'bigger' : 'smaller'}`}
+            title={`Make tile ${size === 'small' ? 'bigger' : 'smaller'}`}
           >
             <i className="fa fa-fw fa-arrow-up"> </i>
           </div>
@@ -250,7 +230,7 @@ export default class Tile extends Component {
               <h1>
                 {icon}
                 <span className="tile__title">
-                  {props.title}
+                  {title}
                 </span>
               </h1>
               { zoomIcon() }
@@ -265,39 +245,11 @@ export default class Tile extends Component {
   }
 
   getOuterBody() {
-    const { content, errors, zoomed, fetchedAt } = this.props;
+    const { content, zoomed } = this.props;
 
     if (content) {
-      const body = zoomed ? this.getZoomedBodyInternal(content) : this.getBodyInternal(content);
-
-      if (errors) {
-        return (
-          <div>
-            <div className="tile__last-updated">
-              Last updated {localMoment(fetchedAt).calendar()}
-            </div>
-            {body}
-          </div>
-        );
-      }
-      return <div>{body}</div>;
+      return zoomed ? this.getZoomedBodyInternal(content) : this.getBodyInternal(content);
     }
-    // Initial load
-    return null;
   }
 
 }
-
-/* TODO - include prop validation for Tile that doesn't cause warnings in the extending classes
-Tile.propTypes = {
-  componentWillEnter: PropTypes.function,
-  componentWillLeave: PropTypes.function,
-  content: PropTypes.object,
-  errors: PropTypes.object,
-  fetchedAt: PropTypes.string,
-  fetching: PropTypes.boolean,
-  icon: PropTypes.string,
-  title: PropTypes.string,
-  zoomed: PropTypes.boolean,
-};
-*/
