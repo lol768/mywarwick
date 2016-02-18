@@ -5,7 +5,7 @@ import $ from 'jquery';
 
 import { connect } from 'react-redux';
 
-class UtilityBar extends ReactComponent {
+export class UtilityBar extends ReactComponent {
 
   componentDidMount() {
     this.attachAccountPopover();
