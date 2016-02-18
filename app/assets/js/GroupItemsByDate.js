@@ -52,3 +52,42 @@ export function titleForGroup(group) {
     'Older',
   ][group];
 }
+
+// Speed things up by assuming that items on the same date are in the same group
+// (which they are!)
+export function getGroupedItems(items) {
+  // Precondition: items are sorted by date (direction doesn't matter)
+
+  const groups = [];
+
+  let currentDate = null;
+  let currentGroup = null;
+  let currentGroupItems = null;
+
+  items.forEach(item => {
+    const dateString = item.props.date.substr(0, 10); // YYYY-MM-DD
+
+    if (dateString !== currentDate) {
+      // This item has a different date to the one before it
+      currentDate = dateString;
+
+      if (currentGroup) {
+        // The previous group is finished; add it to the list
+        groups.push([currentGroup, currentGroupItems]);
+      }
+
+      // Start putting items into a new group
+      currentGroup = groupForItem(item);
+      currentGroupItems = [];
+    }
+
+    currentGroupItems.push(item);
+  });
+
+  if (currentGroup) {
+    // The previous group is finished; add it to the list
+    groups.push([currentGroup, currentGroupItems]);
+  }
+
+  return groups;
+}
