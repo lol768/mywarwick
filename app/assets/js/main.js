@@ -108,7 +108,7 @@ if ('serviceWorker' in navigator) {
     .then(pushNotifications.init);
 }
 
-SocketDatapipe.getUpdateStream().subscribe(data => {
+SocketDatapipe.subscribe(data => {
   switch (data.type) {
     case 'activity':
       store.dispatch(data.activity.notification ? notifications.receivedNotification(data.activity)

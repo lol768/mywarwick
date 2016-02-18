@@ -17,8 +17,8 @@ export default class DataPipe {
     throw new TypeError('Must implement send');
   }
 
-  getUpdateStream() {
-    throw new TypeError('Must implement getUpdateStream');
+  subscribe() {
+    throw new TypeError('Must implement subscribe');
   }
 
 }

@@ -1,4 +1,3 @@
-import Rx from 'rx';
 import log from 'loglevel';
 
 /**
@@ -14,15 +13,12 @@ class BinaryBackoff {
     this.max = max;
     this.reset = reset;
     this.current = min;
-
-    this.retries = new Rx.Subject();
   }
 
   /** On failure, do the given callback function some time later. */
   retry(fn) {
     clearTimeout(this.resetTimer);
     this.timer = setTimeout(fn, this.current);
-    this.retries.onNext(this.current);
     this.current = Math.min(this.current * 2, this.max);
   }
 
@@ -51,10 +47,6 @@ export default class RestartableWebSocket {
     this.onopen = function onopen() {};
 
     this.backoff = new BinaryBackoff(500, 30000, 2000);
-
-    this.backoff.retries.subscribe((ms) => {
-      log.info('WS retrying connection in', ms, 'ms');
-    });
 
     this.ensureConnection();
 
