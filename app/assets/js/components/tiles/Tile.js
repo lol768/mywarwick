@@ -155,19 +155,20 @@ export default class Tile extends Component {
   }
 
   componentDidUpdate(prevProps) {
+    const nowEditing = this.props.editing;
+    const wasEditing = prevProps.editing;
+
+    if (nowEditing && !wasEditing) {
+      this.animateToScale(1.15);
+    } else if (wasEditing && !nowEditing) {
+      this.animateToScale(1);
+    }
+  }
+
+  animateToScale(scale) {
     const $tile = $(ReactDOM.findDOMNode(this.refs.tile));
 
-    if (this.props.editing && !prevProps.editing) {
-      // Begin editing
-      $tile.stop().transition({
-        scale: 1.15,
-      }, EDITING_ANIMATION_DURATION, 'snap');
-    } else if (prevProps.editing && !this.props.editing) {
-      // Finish editing
-      $tile.stop().transition({
-        scale: 1,
-      }, EDITING_ANIMATION_DURATION, 'snap');
-    }
+    $tile.stop().transition({ scale }, EDITING_ANIMATION_DURATION, 'snap');
   }
 
   render() {
