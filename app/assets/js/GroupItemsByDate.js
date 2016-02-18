@@ -65,11 +65,11 @@ export function getGroupedItems(items) {
   let currentGroupItems = null;
 
   items.forEach(item => {
-    const dateString = item.props.date.substr(0, 10); // YYYY-MM-DD
+    const date = localMoment(item.props.date);
 
-    if (dateString !== currentDate) {
+    if (!date.isSame(currentDate, 'day')) {
       // This item has a different date to the one before it
-      currentDate = dateString;
+      currentDate = date;
 
       if (currentGroup) {
         // The previous group is finished; add it to the list
