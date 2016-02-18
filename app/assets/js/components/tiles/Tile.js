@@ -29,21 +29,21 @@ export default class Tile extends Component {
     this.onTouchStart = this.onTouchStart.bind(this);
   }
 
-  contentOrDefault(content, contentFunction) {
+  contentOrDefault(content, fetchedAt, contentFunction) {
     const defaultText = (content.defaultText === undefined) ?
       'Nothing to show.' : content.defaultText;
     if (!content.items || content.items.length === 0) {
       return <span>{defaultText}</span>;
     }
-    return contentFunction.call(this, content);
+    return contentFunction.call(this, content, fetchedAt);
   }
 
-  getBodyInternal(content) {
-    return this.contentOrDefault(content, this.getBody);
+  getBodyInternal(content, fetchedAt) {
+    return this.contentOrDefault(content, fetchedAt, this.getBody);
   }
 
   /* eslint-disable no-unused-vars */
-  getBody(content) {
+  getBody(content, fetchedAt) {
     throw new TypeError('Must implement getBody');
   }
   /* eslint-enable no-unused-vars */
@@ -64,8 +64,8 @@ export default class Tile extends Component {
     return this.contentOrDefault(content, this.getZoomedBody);
   }
 
-  getZoomedBody(content) {
-    return this.getBody(content);
+  getZoomedBody(content, fetchedAt) {
+    return this.getBody(content, fetchedAt);
   }
 
   componentWillEnter(callback) {
@@ -246,10 +246,11 @@ export default class Tile extends Component {
   }
 
   getOuterBody() {
-    const { content, zoomed } = this.props;
+    const { content, zoomed, fetchedAt } = this.props;
 
     if (content) {
-      return zoomed ? this.getZoomedBodyInternal(content) : this.getBodyInternal(content);
+      return zoomed ? this.getZoomedBodyInternal(content, fetchedAt) :
+        this.getBodyInternal(content, fetchedAt);
     }
   }
 

@@ -108,7 +108,7 @@ class MeView extends ReactComponent {
     }
 
     const id = props.id;
-    const { content, errors, fetching } = this.props.tileContent[id] || {};
+    const { content, errors, fetching, fetchedAt } = this.props.tileContent[id] || {};
     const editing = this.state.editing === id;
     const ref = zoomed ? `${id}-zoomed` : id;
 
@@ -120,6 +120,7 @@ class MeView extends ReactComponent {
       content,
       errors,
       fetching,
+      fetchedAt,
       editing,
       editingAny: !!this.state.editing,
     });
