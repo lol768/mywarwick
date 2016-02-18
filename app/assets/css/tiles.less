@@ -64,7 +64,7 @@
 }
 
 .tile {
-  min-height: 125px;
+  height: @tile-height;
   position: relative;
   font-size: 15px;
   margin-bottom: @tile-gutter;
@@ -105,7 +105,7 @@
 }
 
 .tile--large {
-  min-height: 260px;
+  height: @tile-height * 2 + @tile-gutter;
 }
 
 :not(.tile--zoomed) {
@@ -121,12 +121,10 @@
     }
   }
 
-  &.tile--text-btm {
-    .tile__item {
-      position: absolute;
-      left: 10px;
-      bottom: 10px;
-    }
+  .tile__item {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
   }
 }
 

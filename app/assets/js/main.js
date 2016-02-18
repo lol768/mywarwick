@@ -77,6 +77,13 @@ $(() => {
   if (window.navigator.userAgent.indexOf('Mobile') >= 0) {
     $('html').addClass('mobile');
   }
+
+  $('body').click((e) => {
+    const $target = $(e.target);
+    if ($target.data('toggle') !== 'tooltip' && $target.parents('.tooltip.in').length === 0) {
+      $('[data-toggle="tooltip"]').tooltip('hide');
+    }
+  });
 });
 
 store.subscribe(() => {
