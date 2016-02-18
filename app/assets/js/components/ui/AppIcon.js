@@ -58,7 +58,7 @@ const AppIcon = (props) => {
 
 AppIcon.propTypes = {
   app: PropTypes.string,
-  size: PropTypes.int,
+  size: PropTypes.string,
 };
 
 export default AppIcon;
