@@ -68,7 +68,6 @@
     "redux": "~3.0.2",
     "redux-thunk": "~1.0.0",
     "reselect": "~2.0.0",
-    "rx": "^4.0.2",
     "skycons": "^1.0.0"
   },
   "scripts": {

@@ -59,6 +59,6 @@ export class UtilityBar extends ReactComponent {
  * user.data contains most of the info about the user.
  * user.authoritative is true if we've had a response from the server.
  */
-const select = (state) => state.getIn(['user']).toObject();
+const select = (state) => state.getIn(['user']).toJS();
 
 export default connect(select)(UtilityBar);
