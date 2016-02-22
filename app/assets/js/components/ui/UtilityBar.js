@@ -5,7 +5,7 @@ import $ from 'jquery';
 
 import { connect } from 'react-redux';
 
-class UtilityBar extends ReactComponent {
+export class UtilityBar extends ReactComponent {
 
   componentDidMount() {
     this.attachAccountPopover();
@@ -20,36 +20,45 @@ class UtilityBar extends ReactComponent {
     $(element).accountPopover({ logoutlink: window.SSO.LOGOUT_URL });
   }
 
-  render() {
-    const signInLink = (
-      <a href={window.SSO.LOGIN_URL} key="signInLink">
-        Sign in
-      </a>
-    );
-    const accountLink = (
+  signInLink() {
+    return (<a href={window.SSO.LOGIN_URL} key="signInLink">
+      Sign in
+    </a>);
+  }
+
+  accountLink(user) {
+    return (
       <a
         key="accountLink"
         ref="accountLink"
         href="//warwick.ac.uk/myaccount"
         data-toggle="id7:account-popover"
-        data-name={this.props.name}
+        data-name={user.name}
       >
-        {this.props.name}
+        {user.name}
         <span className="caret"></span>
       </a>
     );
+  }
 
+  render() {
+    const data = this.props.data || {};
     return (
       <ul>
-        <li>
-          { this.props.authenticated ? accountLink : signInLink }
-        </li>
+        {!this.props.empty ?
+          <li>{ data.authenticated ? this.accountLink(data) : this.signInLink() }</li>
+          : null}
       </ul>
     );
   }
 
 }
 
-const select = (state) => state.getIn(['user', 'data']).toJS();
+/**
+ * user.empty is true before we've loaded anything
+ * user.data contains most of the info about the user.
+ * user.authoritative is true if we've had a response from the server.
+ */
+const select = (state) => state.getIn(['user']).toJS();
 
 export default connect(select)(UtilityBar);

@@ -11,6 +11,7 @@ export const USER_RECEIVE = 'user.receive';
 const initialState = Immutable.fromJS({
   data: {},
   authoritative: false,
+  empty: true,
 });
 
 registerReducer('user', (state = initialState, action) => {
@@ -18,11 +19,13 @@ registerReducer('user', (state = initialState, action) => {
     case USER_LOAD:
       return state.merge({
         data: action.data,
+        empty: false,
       });
     case USER_RECEIVE:
       return state.merge({
         data: action.data,
         authoritative: true,
+        empty: false,
       });
     default:
       return state;
