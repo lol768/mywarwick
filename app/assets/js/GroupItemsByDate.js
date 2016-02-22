@@ -71,14 +71,18 @@ export function getGroupedItems(items) {
       // This item has a different date to the one before it
       currentDate = date;
 
-      if (currentGroup) {
-        // The previous group is finished; add it to the list
-        groups.push([currentGroup, currentGroupItems]);
-      }
+      const newGroup = groupForItem(item);
 
-      // Start putting items into a new group
-      currentGroup = groupForItem(item);
-      currentGroupItems = [];
+      if (newGroup != currentGroup) {
+        if (currentGroup) {
+          // The previous group is finished; add it to the list
+          groups.push([currentGroup, currentGroupItems]);
+        }
+
+        // Start putting items into a new group
+        currentGroup = groupForItem(item);
+        currentGroupItems = [];
+      }
     }
 
     currentGroupItems.push(item);
@@ -88,6 +92,8 @@ export function getGroupedItems(items) {
     // The previous group is finished; add it to the list
     groups.push([currentGroup, currentGroupItems]);
   }
+
+  console.log(groups);
 
   return groups;
 }
