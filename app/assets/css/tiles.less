@@ -2,7 +2,7 @@
 
 .tile--zoomed {
   position: fixed;
-  top: 90px;
+  top: 92px;
   left: 0;
   right: 0;
   bottom: 44px;
@@ -25,14 +25,16 @@
 }
 
 .tile-zoom-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 99;
-  background-color: black;
-  opacity: 0.35;
+  @media (min-width: @screen-sm-min) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99;
+    background-color: black;
+    opacity: 0.35;
+  }
 }
 
 .me-view {
@@ -334,4 +336,44 @@
       font-size: 36px;
     }
   }
+}
+
+.slider-appear, .slider-enter {
+  margin-left: -100%;
+  visibility: hidden;
+}
+
+.slider-appear.slider-appear-active, .slider-enter.slider-enter-active {
+  margin-left: 0;
+  visibility: initial;
+  min-width: 100%;
+  min-height: 100%;
+  position: fixed;
+  top: 0;
+  -webkit-transition: all 0.3s ease-out;
+  -moz-transition: all 0.3s ease-out;
+  -o-transition: all 0.3s ease-out;
+  transition: all 0.3s ease-out;
+  will-change: transform;
+  z-index: 100
+}
+
+.slider-leave {
+  margin-left: 0;
+  min-width: 100%;
+  min-height: 100%;
+  position: fixed;
+  top: 0;
+  visibility: initial;
+  will-change: transform;
+  z-index: 100
+}
+
+.slider-leave.slider-leave-active {
+  margin-left: -100%;
+  visibility: hidden;
+  -webkit-transition: all 0.3s ease-in;
+  -moz-transition: all 0.3s ease-in;
+  -o-transition: all 0.3s ease-in;
+  transition: all 0.3s ease-in;
 }

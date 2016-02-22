@@ -196,7 +196,7 @@ export default class Tile extends Component {
     > </i>);
 
     const sizeClass = SIZE_CLASSES[this.getSize()];
-    const outerClassName = classNames(sizeClass, 'tile__container', {
+    const outerClassName = classNames({ [`${sizeClass}`]: !this.isZoomed() }, 'tile__container', {
       'tile--zoomed': props.zoomed,
       'tile--text-btm': true,
     });

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
-import ReactTransitionGroup from 'react/lib/ReactTransitionGroup';
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import log from 'loglevel';
 import _ from 'lodash';
 import $ from 'jquery.transit';
@@ -14,15 +14,12 @@ import * as TILES from '../tiles';
 import * as tiles from '../../tiles';
 import * as serverpipe from '../../serverpipe';
 
-const ZOOM_ANIMATION_DURATION = 500;
 export const EDITING_ANIMATION_DURATION = 700;
 
 import HiddenTile from '../tiles/HiddenTile';
 
 const TILE_ZOOM_IN = 'me.zoom-in';
 const TILE_ZOOM_OUT = 'me.zoom-out';
-
-let tileZoomAnimating = false;
 
 function zoomInOn(tile) {
   return {
@@ -53,9 +50,7 @@ class MeView extends ReactComponent {
   }
 
   onTileDismiss() {
-    if (!tileZoomAnimating) {
-      this.props.dispatch(zoomOut());
-    }
+    this.props.dispatch(zoomOut());
   }
 
   onBeginEditing(tile) {
@@ -128,10 +123,6 @@ class MeView extends ReactComponent {
     config.onZoomIn = () => this.onTileExpand(config);
     config.onZoomOut = () => this.onTileDismiss();
 
-    // Delegate ReactTransitionGroup methods to self
-    config.componentWillEnter = callback => this.componentWillEnter(config, callback);
-    config.componentWillLeave = callback => this.componentWillLeave(config, callback);
-
     // Editing
     config.onBeginEditing = () => this.onBeginEditing(config);
     config.onHide = () => this.onHideTile(config);
@@ -153,141 +144,6 @@ class MeView extends ReactComponent {
     this.props.dispatch(tiles.resizeTile(tile, nextSize));
   }
 
-  animateTileZoomOut(tileComponent, zoomComponent, callback) {
-    const $tile = $(ReactDOM.findDOMNode(tileComponent.refs.tile));
-    const $zoom = $(ReactDOM.findDOMNode(zoomComponent.refs.tile));
-
-    const scaleX = $tile.outerWidth() / ($zoom.outerWidth() - 5);
-    const scaleY = $tile.outerHeight() / $zoom.outerHeight();
-
-    const x = $zoom.offset().left - $tile.offset().left;
-    const y = $zoom.offset().top - $tile.offset().top;
-
-    $tile.stop().css({
-      x,
-      y,
-      transformOriginX: 0,
-      transformOriginY: 0,
-      zIndex: 1001,
-      scaleX: 1 / scaleX,
-      scaleY: 1 / scaleY,
-      opacity: 0,
-      visibility: '',
-    }).transition({
-      x: 0,
-      y: 0,
-      scaleX: 1,
-      scaleY: 1,
-      opacity: 1,
-    }, ZOOM_ANIMATION_DURATION, () => {
-      $tile.css({
-        transformOriginX: '',
-        transformOriginY: '',
-        zIndex: '',
-      });
-    });
-
-    $zoom.stop().css({
-      transformOriginX: 0,
-      transformOriginY: 0,
-      zIndex: 1002,
-    }).transition({
-      x: -x,
-      y: -y,
-      scaleX,
-      scaleY,
-    }, ZOOM_ANIMATION_DURATION, () => {
-      tileZoomAnimating = false;
-      callback();
-    });
-  }
-
-  animateTileZoom(tileComponent, zoomComponent, callback) {
-    const $tile = $(ReactDOM.findDOMNode(tileComponent.refs.tile));
-    const $zoom = $(ReactDOM.findDOMNode(zoomComponent.refs.tile));
-
-    $zoom.parent().show();
-
-    const scaleX = $tile.outerWidth() / ($zoom.outerWidth() - 5);
-    const scaleY = $tile.outerHeight() / $zoom.outerHeight();
-
-    const x = $zoom.offset().left - $tile.offset().left;
-    const y = $zoom.offset().top - $tile.offset().top;
-
-    $tile.stop().css({
-      transformOriginX: 0,
-      transformOriginY: 0,
-      zIndex: 99,
-    }).transition({
-      x,
-      y,
-      scaleX: 1 / scaleX,
-      scaleY: 1 / scaleY,
-    }, ZOOM_ANIMATION_DURATION, () => {
-      $tile.css({
-        zIndex: '',
-        transformOriginX: '',
-        transformOriginY: '',
-        x: '',
-        y: '',
-        transform: '',
-        visibility: 'hidden',
-      });
-      tileZoomAnimating = false;
-      callback();
-    });
-
-    $zoom.stop().show().css({
-      transformOriginX: 0,
-      transformOriginY: 0,
-      x: -x,
-      y: -y,
-      scaleX,
-      scaleY,
-      opacity: 0,
-    }).transition({
-      x: 0,
-      y: 0,
-      scaleX: 1,
-      scaleY: 1,
-      opacity: 1,
-    }, ZOOM_ANIMATION_DURATION);
-  }
-
-  componentWillEnter(props, callback) {
-    if (props.zoomed) {
-      const tileComponent = this.refs.group.refs[`.$${props.originalRef}`];
-      const zoomComponent = this.refs.group.refs[`.$${props.ref}`];
-
-      tileZoomAnimating = true;
-
-      $(ReactDOM.findDOMNode(zoomComponent)).hide();
-
-      // have to do this otherwise the zoomComponent doesn't have its sizing information
-      setTimeout(() => this.animateTileZoom(tileComponent, zoomComponent, callback), 0);
-    } else {
-      callback();
-    }this.onTileDismiss = this.onTileDismiss.bind(this);
-  }
-
-  componentWillLeave(props, callback) {
-    if (props.zoomed) {
-      const tileComponent = this.refs.group.refs[`.$${props.originalRef}`];
-      const zoomComponent = this.refs.group.refs[`.$${props.ref}`];
-
-      tileZoomAnimating = true;
-
-      $(tileComponent.refs.tile).css({
-        visibility: 'hidden',
-      });
-
-      // have to do this otherwise the tileComponent doesn't have its sizing information
-      setTimeout(() => this.animateTileZoomOut(tileComponent, zoomComponent, callback), 0);
-    } else {
-      callback();
-    }
-  }
-
   onShowTile(tile) {
     this.props.dispatch(tiles.showTile(tile));
 
@@ -299,34 +155,22 @@ class MeView extends ReactComponent {
 
   renderTiles() {
     const { editing } = this.state;
-    const zoomedTileKey = this.props.zoomedTile;
-
     const tileComponents = this.props.tiles.map((tile) => this.renderTile(tile));
     const hiddenTiles = this.props.hiddenTiles.map(
-      tile => <HiddenTile key={ tile.id } {...tile} onShow={() => this.onShowTile(tile)} /> // eslint-disable-line react/jsx-no-bind, max-len
+      tile => <HiddenTile key={ tile.id } {...tile} onShow={() => this.onShowTile(tile)}/> // eslint-disable-line react/jsx-no-bind, max-len
     );
 
     // Show hidden tiles (if any) when editing, or if there are no visible tiles
     const showHiddenTiles = hiddenTiles.length > 0 && (editing || tileComponents.length === 0);
 
-    if (zoomedTileKey) {
-      const zoomedTile = _.find(this.props.tiles, (tile) => tile.id === zoomedTileKey);
-      tileComponents.push(this.renderTile(zoomedTile, true));
-    }
-
     return (
       <div>
-        { zoomedTileKey ?
-          <div className="tile-zoom-backdrop" onClick={ this.onTileDismiss }></div>
-          : null}
         <div>
-          <ReactTransitionGroup ref="group">
-            {tileComponents}
-          </ReactTransitionGroup>
+          {tileComponents}
         </div>
         { showHiddenTiles ?
           <div>
-            <div style={{ clear: 'both' }}> </div>
+            <div style={{ clear: 'both' }}></div>
             <div>
               <h3 style={{ marginTop: 30 }}>More tiles</h3>
               <div>
@@ -341,9 +185,33 @@ class MeView extends ReactComponent {
 
   render() {
     const classes = classNames('row', 'me-view', { 'me-view--editing': this.state.editing });
-    return <div className={classes}>{this.renderTiles()}</div>;
-  }
+    const isDesktop = this.props.layoutClassName === 'desktop';
+    const transitionProps = {
+      transitionName: 'slider',
+      transitionEnterTimeout: 300,
+      transitionLeaveTimeout: 300,
+      transitionEnter: !isDesktop,
+      transitionLeave: !isDesktop,
+    };
 
+    return (
+      <div className={classes}>
+        { this.props.zoomedTile && isDesktop ?
+          <div className="tile-zoom-backdrop" onClick={ this.onTileDismiss }></div>
+          : null}
+        {this.renderTiles()}
+        <ReactCSSTransitionGroup {...transitionProps}>
+          {this.props.zoomedTile ?
+            <div>
+              {this.renderTile(
+                _.find(this.props.tiles, (tile) => tile.id === this.props.zoomedTile), true
+              )}
+            </div>
+            : null }
+        </ReactCSSTransitionGroup>
+      </div>
+    );
+  }
 }
 
 const initialState = Immutable.Map({
@@ -367,6 +235,7 @@ registerReducer('me', (state = initialState, action) => {
 
 const select = (state) => ({
   zoomedTile: state.get('me').get('zoomedTile'),
+  layoutClassName: state.get('ui').get('className'),
   tiles: state.get('tiles').get('items').filterNot(tile => tile.get('removed')).toJS(),
   hiddenTiles: state.get('tiles').get('items').filter(tile => tile.get('removed')).toJS(),
   tileContent: state.get('tileContent').toJS(),

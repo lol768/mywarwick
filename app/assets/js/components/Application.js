@@ -8,7 +8,6 @@ import NotificationsView from './views/NotificationsView';
 import ActivityView from './views/ActivityView';
 import NewsView from './views/NewsView';
 import SearchView from './views/SearchView';
-import { SettingsView } from './views/SettingsView';
 import Immutable from 'immutable';
 
 import { connect } from 'react-redux';
@@ -89,7 +88,6 @@ class Application extends ReactComponent {
       '/activity': <ActivityView grouped />,
       '/news': <NewsView />,
       '/search': <SearchView />,
-      '/settings': <SettingsView />,
     };
 
     return (
