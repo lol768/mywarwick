@@ -93,7 +93,5 @@ export function getGroupedItems(items) {
     groups.push([currentGroup, currentGroupItems]);
   }
 
-  console.log(groups);
-
   return groups;
 }
