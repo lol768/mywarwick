@@ -73,7 +73,7 @@ export function getGroupedItems(items) {
 
       const newGroup = groupForItem(item);
 
-      if (newGroup != currentGroup) {
+      if (newGroup !== currentGroup) {
         if (currentGroup) {
           // The previous group is finished; add it to the list
           groups.push([currentGroup, currentGroupItems]);
