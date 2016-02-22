@@ -5,7 +5,7 @@ export default class TrafficAlert extends React.Component {
   render() {
     const { title, href } = this.props;
     return (
-      <div>
+      <div className="traffic-alert">
         <i className={classNames('fa', 'fa-exclamation-triangle')}> </i>
         <a href={href}>{title}</a>
       </div>

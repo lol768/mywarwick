@@ -15,7 +15,7 @@ import * as tiles from '../../tiles';
 import * as serverpipe from '../../serverpipe';
 
 const ZOOM_ANIMATION_DURATION = 500;
-export const EDITING_ANIMATION_DURATION = 700;
+const EDITING_ANIMATION_DURATION = 700;
 
 import HiddenTile from '../tiles/HiddenTile';
 
@@ -137,6 +137,7 @@ class MeView extends ReactComponent {
     config.onBeginEditing = () => this.onBeginEditing(config);
     config.onHide = () => this.onHideTile(config);
     config.onResize = () => this.onResizeTile(config);
+    config.editAnimationDuration = EDITING_ANIMATION_DURATION;
 
     return React.createElement(tileComponent, config);
   }

@@ -7,7 +7,7 @@ import TrafficCondition from './TrafficCondition';
 
 // at what hour of the day we assume most users will be heading away from campus
 const HOME_TIME = 15;
-// we consider the information on the tile as stale after 20 mins
+// we consider the information on the tile as stale after 20 minutes
 const STALE_AFTER = 1200000;
 
 export default class TrafficTile extends Tile {
@@ -47,7 +47,10 @@ export default class TrafficTile extends Tile {
             <div className="tile__item">
               <i className={classNames('fa', 'fa-exclamation-triangle')}> </i>
               <a href="http://www2.warwick.ac.uk/insite/kcm/news/">
-                <strong>{content.alerts.items.length} traffic alerts</strong>
+                <strong className="alert-count">
+                  {`${content.alerts.items.length} traffic alert` +
+                   `${content.alerts.items.length > 1 ? 's' : ''}`}
+                </strong>
               </a>
             </div>
             : null
@@ -71,7 +74,9 @@ export default class TrafficTile extends Tile {
             <TrafficAlert key={a.title} title={a.title} href={a.url.href} />
           )}
           {
-            content.alerts.items.length > 2 ? <a href={content.alerts.href}>See more ...</a> : null
+            content.alerts.items.length > 2 ?
+              <a className="more-alerts" href={content.alerts.href}>See more ...</a>
+              : null
           }
         </div>
       </div>

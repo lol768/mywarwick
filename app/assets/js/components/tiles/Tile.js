@@ -4,9 +4,6 @@ import ReactDOM from 'react-dom';
 
 import { localMoment } from '../../dateFormatter.js';
 import classNames from 'classnames';
-
-import { EDITING_ANIMATION_DURATION } from '../views/MeView';
-
 import $ from 'jquery';
 
 const SIZE_CLASSES = {
@@ -168,7 +165,7 @@ export default class Tile extends Component {
   animateToScale(scale) {
     const $tile = $(ReactDOM.findDOMNode(this.refs.tile));
 
-    $tile.stop().transition({ scale }, EDITING_ANIMATION_DURATION, 'snap');
+    $tile.stop().transition({ scale }, this.props.editAnimationDuration, 'snap');
   }
 
   render() {

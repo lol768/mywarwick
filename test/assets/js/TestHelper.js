@@ -1,4 +1,5 @@
 global.expect = require('chai').expect;
+global.should = require('chai').should();
 global.assert = require('chai').assert;
 global.sinon = require('sinon');
 
