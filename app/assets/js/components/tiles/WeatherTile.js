@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Tile from './Tile';
+import TileContent from './TileContent';
 import Skycon from '../ui/Skycon';
 import moment from 'moment';
 
@@ -14,13 +14,14 @@ function formatWeatherTime(d) {
   return date.isSame(now, 'hour') ? 'Now' : date.format('ha');
 }
 
-export default class WeatherTile extends Tile {
-  canZoom() {
+export default class WeatherTile extends TileContent {
+
+  static canZoom() {
     return true;
   }
 
   getBody(content) {
-    const itemsToDisplay = this.isZoomed() ? content.items : [content.items[0]];
+    const itemsToDisplay = this.props.zoomed ? content.items : [content.items[0]];
     return (
       <div>
         {itemsToDisplay.map(item => (

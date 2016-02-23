@@ -7,9 +7,9 @@ describe('TrafficTile', () => {
 
   let props;
 
-  function renderAtMs(now, fetchedAt = now) {
+  function renderAtMs(now) {
     tk.freeze(new Date(now));
-    props.fetchedAt = fetchedAt;
+    props.fetchedAt = now;
     return ReactTestUtils.renderIntoDocument(<TrafficTile {... props} />);
   }
 
@@ -54,10 +54,11 @@ describe('TrafficTile', () => {
   });
 
   it('Shows an error message rather than stale data', () => {
-    const html = renderAtMs(1440289200001, 1440288000000);
-    const tileHtml = ReactTestUtils.findRenderedDOMComponentWithClass(html, 'tile__body');
-    tileHtml.tagName.should.equal('DIV');
-    expect(tileHtml.textContent).to.equal('Unable to show recent traffic information.');
+    tk.freeze(new Date(1440289200001));
+    props.fetchedAt = 1440288000000;
+    const html = shallowRender(<TrafficTile {... props} />);
+    html.type.should.equal('div');
+    html.props.children.should.equal('Unable to show recent traffic information.');
   });
 
   it('Shows inboud Traffic conditions before home time', () => {

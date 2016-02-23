@@ -26,45 +26,6 @@ export default class Tile extends Component {
     this.onTouchStart = this.onTouchStart.bind(this);
   }
 
-  contentOrDefault(content, fetchedAt, contentFunction) {
-    const defaultText = (content.defaultText === undefined) ?
-      'Nothing to show.' : content.defaultText;
-    if (!content.items || content.items.length === 0) {
-      return <span>{defaultText}</span>;
-    }
-    return contentFunction.call(this, content, fetchedAt);
-  }
-
-  getBodyInternal(content, fetchedAt) {
-    return this.contentOrDefault(content, fetchedAt, this.getBody);
-  }
-
-  /* eslint-disable no-unused-vars */
-  getBody(content, fetchedAt) {
-    throw new TypeError('Must implement getBody');
-  }
-  /* eslint-enable no-unused-vars */
-
-  canZoom() {
-    return false;
-  }
-
-  shouldDisplayExpandIcon() {
-    return this.props.editing ? false : this.canZoom();
-  }
-
-  isZoomed() {
-    return this.props.zoomed;
-  }
-
-  getZoomedBodyInternal(content, fetchedAt) {
-    return this.contentOrDefault(content, fetchedAt, this.getZoomedBody);
-  }
-
-  getZoomedBody(content, fetchedAt) {
-    return this.getBody(content, fetchedAt);
-  }
-
   componentWillEnter(callback) {
     if ('componentWillEnter' in this.props) {
       this.props.componentWillEnter(callback);
@@ -99,7 +60,7 @@ export default class Tile extends Component {
   }
 
   onTouchStart(e) {
-    if (!this.props.editing && !this.isZoomed()) {
+    if (!this.props.editing && !this.props.zoomed) {
       if (e.changedTouches) {
         const touch = e.changedTouches[0];
         this.startX = touch.clientX;
@@ -128,7 +89,7 @@ export default class Tile extends Component {
   }
 
   onTouchEnd() {
-    if (!this.props.editing && !this.isZoomed() && this.timeout) {
+    if (!this.props.editing && !this.props.zoomed && this.timeout) {
       this.release();
     }
   }
@@ -168,6 +129,10 @@ export default class Tile extends Component {
     $tile.stop().transition({ scale }, this.props.editAnimationDuration, 'snap');
   }
 
+  shouldDisplayExpandIcon() {
+    return this.props.editing ? false : this.props.canZoom;
+  }
+
   render() {
     const { type, title, size, colour, content, editing, zoomed } = this.props;
 
@@ -179,7 +144,7 @@ export default class Tile extends Component {
     const sizeClass = SIZE_CLASSES[size];
     const outerClassName = classNames(sizeClass, 'tile__container', { 'tile--zoomed': zoomed });
     const zoomIcon = () => {
-      if (this.isZoomed()) {
+      if (zoomed) {
         return <i className="fa fa-times tile__dismiss" onClick={this.props.onZoomOut}> </i>;
       } else if (this.shouldDisplayExpandIcon()) {
         return <i className="fa fa-expand tile__expand" onClick={this.onClickExpand}> </i>;
@@ -234,21 +199,12 @@ export default class Tile extends Component {
               { zoomIcon() }
             </header>
             <div className="tile__body">
-              { this.getOuterBody() }
+              { this.props.children }
             </div>
           </div>
         </article>
       </div>
     );
-  }
-
-  getOuterBody() {
-    const { content, zoomed, fetchedAt } = this.props;
-
-    if (content) {
-      return zoomed ? this.getZoomedBodyInternal(content, fetchedAt) :
-        this.getBodyInternal(content, fetchedAt);
-    }
   }
 
 }
