@@ -15,7 +15,11 @@ object Gulp {
   class GulpProcess(base: File) extends PlayRunHook {
     def buildAssets(): Unit = {
       runSuccessfully("npm install")
-      runSuccessfully("node_modules/.bin/gulp assets")
+      gulp(Seq("assets"))
+    }
+
+    def gulp(args: Seq[String]): Unit = {
+      runSuccessfully("node_modules/.bin/gulp " + args.mkString(" "))
     }
 
     private def runSuccessfully(command: String, expectedExitCode: Int = 0): Unit = {

@@ -4,13 +4,20 @@ version := "1.0-SNAPSHOT"
 
 scalaVersion := Common.scalaVersion
 
+val gulpAssets = taskKey[Unit]("Builds static assets using Gulp.")
+val gulp = inputKey[Unit]("Runs Gulp, passing any arguments.")
+
 lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala)
   .settings(
-    gulpAssetsTask := Gulp(baseDirectory.value).buildAssets(),
+    gulpAssets := Gulp(baseDirectory.value).buildAssets(),
+    gulp := {
+      val yeezy = Def.spaceDelimited("<arg>").parsed
+      Gulp(baseDirectory.value).gulp(yeezy)
+    },
     // Package up assets before we build tar.gz
-    packageZipTarball in Universal <<= (packageZipTarball in Universal).dependsOn(gulpAssetsTask)
+    packageZipTarball in Universal <<= (packageZipTarball in Universal).dependsOn(gulpAssets)
   )
-val gulpAssetsTask = TaskKey[Unit]("gulp-assets")
+
 val appDeps = Seq(
   jdbc,
   cache,
