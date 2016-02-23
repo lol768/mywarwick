@@ -43,6 +43,7 @@
     "react-addons-test-utils": "^0.14.0",
     "sinon": "~1.17.1",
     "sw-precache": "^2.3.0",
+    "timekeeper": "0.0.5",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.2.3"

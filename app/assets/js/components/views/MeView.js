@@ -15,7 +15,7 @@ import * as tiles from '../../tiles';
 import * as serverpipe from '../../serverpipe';
 
 const ZOOM_ANIMATION_DURATION = 500;
-export const EDITING_ANIMATION_DURATION = 700;
+const EDITING_ANIMATION_DURATION = 700;
 
 import HiddenTile from '../tiles/HiddenTile';
 
@@ -108,7 +108,7 @@ class MeView extends ReactComponent {
     }
 
     const id = props.id;
-    const { content, errors, fetching } = this.props.tileContent[id] || {};
+    const { content, errors, fetching, fetchedAt } = this.props.tileContent[id] || {};
     const editing = this.state.editing === id;
     const ref = zoomed ? `${id}-zoomed` : id;
 
@@ -120,6 +120,7 @@ class MeView extends ReactComponent {
       content,
       errors,
       fetching,
+      fetchedAt,
       editing,
       editingAny: !!this.state.editing,
     });
@@ -136,6 +137,7 @@ class MeView extends ReactComponent {
     config.onBeginEditing = () => this.onBeginEditing(config);
     config.onHide = () => this.onHideTile(config);
     config.onResize = () => this.onResizeTile(config);
+    config.editAnimationDuration = EDITING_ANIMATION_DURATION;
 
     return React.createElement(tileComponent, config);
   }
