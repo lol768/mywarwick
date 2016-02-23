@@ -10,7 +10,8 @@ import { connect } from 'react-redux';
 import classNames from 'classnames';
 
 import { registerReducer } from '../../reducers';
-import * as TILES from '../tiles';
+import Tile from '../tiles/Tile';
+import * as TILE_TYPES from '../tiles';
 import * as tiles from '../../tiles';
 import * as serverpipe from '../../serverpipe';
 
@@ -101,8 +102,8 @@ class MeView extends ReactComponent {
   }
 
   renderTile(props, zoomed = false) {
-    const tileComponent = TILES[props.type];
-    if (tileComponent === undefined) {
+    const tileContentComponent = TILE_TYPES[props.type];
+    if (tileContentComponent === undefined) {
       log.error(`No component available for tile type ${props.type}`);
       return null;
     }
@@ -114,6 +115,7 @@ class MeView extends ReactComponent {
 
     const config = Object.assign({}, props, {
       zoomed,
+      canZoom: tileContentComponent.canZoom(content),
       key: ref,
       ref,
       originalRef: id,
@@ -139,7 +141,19 @@ class MeView extends ReactComponent {
     config.onResize = () => this.onResizeTile(config);
     config.editAnimationDuration = EDITING_ANIMATION_DURATION;
 
-    return React.createElement(tileComponent, config);
+    // subset of config needed by TileContent subclasses
+    const contentConfig = {
+      content,
+      zoomed,
+      editingAny: config.editingAny,
+      fetchedAt,
+    };
+
+    return (
+      <Tile { ... config }>
+        { React.createElement(tileContentComponent, contentConfig) }
+      </Tile>
+    );
   }
 
   onHideTile(tile) {

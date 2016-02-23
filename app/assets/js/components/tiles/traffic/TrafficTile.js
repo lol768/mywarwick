@@ -1,5 +1,5 @@
 import React from 'react';
-import Tile from './../Tile';
+import TileContent from '../TileContent';
 import classNames from 'classnames';
 
 import TrafficAlert from './TrafficAlert';
@@ -10,7 +10,7 @@ const HOME_TIME = 15;
 // we consider the information on the tile as stale after 20 minutes
 const STALE_AFTER = 1200000;
 
-export default class TrafficTile extends Tile {
+export default class TrafficTile extends TileContent {
 
   conditionList(content) {
     const itsHomeTime = new Date().getHours() >= HOME_TIME;
@@ -34,7 +34,7 @@ export default class TrafficTile extends Tile {
     return renderFunc.call(this, content);
   }
 
-  canZoom() {
+  static canZoom() {
     return true;
   }
 

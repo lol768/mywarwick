@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
-import Tile from './Tile';
+import TileContent from './TileContent';
 
-export default class TextTile extends Tile {
+export default class TextTile extends TileContent {
 
   constructor(props) {
     super(props);
@@ -52,7 +52,8 @@ export default class TextTile extends Tile {
   }
 
   getBody(content) {
-    const itemsToDisplay = this.isZoomed() ? content.items : [content.items[this.state.itemIndex]];
+    const itemsToDisplay = this.props.zoomed ?
+      content.items : [content.items[this.state.itemIndex]];
 
     return (
       <ReactCSSTransitionGroup
@@ -82,9 +83,9 @@ export default class TextTile extends Tile {
     }
   }
 
-  canZoom() {
-    if (this.props.content && this.props.content.items) {
-      return this.props.content.items.length > 1;
+  static canZoom(content) {
+    if (content && content.items) {
+      return content.items.length > 1;
     }
     return false;
   }

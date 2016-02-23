@@ -1,15 +1,15 @@
 import React, { PropTypes } from 'react';
-import Tile from './Tile';
+import TileContent from './TileContent';
 
 import formatDate from '../../dateFormatter';
 import _ from 'lodash';
 
-export default class ListTile extends Tile {
+export default class ListTile extends TileContent {
 
   getBody(content) {
     // only show the first maxItemsToDisplay items (defaults to 3) if not zoomed
     const maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : 3;
-    const itemsToDisplay = this.isZoomed() ?
+    const itemsToDisplay = this.props.zoomed ?
       content.items : _.take(content.items, maxItemsToDisplay);
     return (<ul>
       {itemsToDisplay.map(item => <ListTileItem key={item.id} {...item} />)}
