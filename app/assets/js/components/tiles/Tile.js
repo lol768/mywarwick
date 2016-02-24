@@ -142,7 +142,8 @@ export default class Tile extends Component {
     > </i>);
 
     const sizeClass = SIZE_CLASSES[size];
-    const outerClassName = classNames(sizeClass, 'tile__container', { 'tile--zoomed': zoomed });
+    const outerClassName =
+      classNames({ [`${sizeClass}`]: !zoomed }, 'tile__container', { 'tile--zoomed': zoomed });
     const zoomIcon = () => {
       if (zoomed) {
         return <i className="fa fa-times tile__dismiss" onClick={this.props.onZoomOut}> </i>;
