@@ -23,7 +23,6 @@
   background-color: #8c6e96;
   position: relative;
   z-index: 40;
-  height: initial;
   font-size: 1.5em;
   line-height: 44px;
 
@@ -38,25 +37,20 @@
     }
   }
 
-  ul {
-    list-style: none;
-    float: right !important;
-    padding: 0 4px;
-    display: inline-block;
-    position: fixed;
-    right: 0;
-    top: 0;
+  .id7-utility-bar {
+    height: initial;
+    line-height: inherit;
 
-    li {
-      margin: inherit;
+    ul {
+      padding-right: 4px;
+      display: inline-block;
+      position: fixed;
+      right: 0;
+      top: 0;
 
-      a {
-        color: white;
-
-        img {
-          max-width: 30px;
-          max-height: 30px;
-        }
+      img {
+        max-width: 30px;
+        max-height: 30px;
       }
     }
   }

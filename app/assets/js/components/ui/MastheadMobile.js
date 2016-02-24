@@ -7,16 +7,16 @@ export default class MastheadMobile extends React.Component {
 
   render() {
     return (
-      <div className="id7-utility-bar start-masthead">
+      <div className="start-masthead">
         <div className="masthead-title">
           <span className="light">
           START.
           </span>
           WARWICK
-          <nav>
-            { this.props.utilityBar}
-          </nav>
         </div>
+        <nav className="id7-utility-bar">
+          { this.props.utilityBar}
+        </nav>
       </div>
     );
   }
