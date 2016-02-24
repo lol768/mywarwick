@@ -44,8 +44,7 @@ try {
   gutil.log(gutil.colors.yellow('No gulpopts.json'));
 }
 function option(name) {
-  if (gulpOpts.env[name] !== undefined) return gulpOpts.env[name];
-  else return process.env[name];
+  return process.env[name] || gulpOpts.env[name];
 }
 
 
