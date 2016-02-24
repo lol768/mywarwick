@@ -1,5 +1,5 @@
 // non-redux version
-import { UtilityBar } from 'components/ui/UtilityBar';
+import UtilityBar from 'components/ui/UtilityBar';
 import sinon from 'sinon';
 
 describe('UtilityBar', () => {
@@ -31,7 +31,7 @@ describe('UtilityBar', () => {
 
   it('renders name when we are signed in', () => {
     const data = { name: 'Ron Swanson', authenticated: true };
-    const bar = <UtilityBar user={{data: data}} />;
+    const bar = <UtilityBar user={{data}} />;
     const result = shallowRender(bar);
     expect(result).to.have.property('type', 'ul');
     const link = result.props.children.props.children;

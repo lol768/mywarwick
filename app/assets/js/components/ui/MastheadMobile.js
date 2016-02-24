@@ -1,4 +1,5 @@
 import React from 'react';
+import UtilityBar from './UtilityBar';
 
 export default class MastheadMobile extends React.Component {
   constructor(props) {
@@ -15,13 +16,9 @@ export default class MastheadMobile extends React.Component {
           WARWICK
         </div>
         <nav className="id7-utility-bar">
-          { this.props.utilityBar}
+          <UtilityBar {...this.props} />
         </nav>
       </div>
     );
   }
 }
-
-MastheadMobile.propTypes = {
-  utilityBar: React.PropTypes.element,
-};

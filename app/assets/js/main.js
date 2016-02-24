@@ -18,7 +18,6 @@ window.localforage = localforage;
 
 import Application from './components/Application';
 import ID7Layout from './components/ui/ID7Layout';
-import UtilityBar from './components/ui/UtilityBar';
 
 import * as notifications from './notifications';
 import * as notificationMetadata from './notification-metadata';
@@ -54,7 +53,7 @@ $(() => {
 
   ReactDOM.render(
     <Provider store={store}>
-      <ID7Layout utilityBar={<UtilityBar />}>
+      <ID7Layout>
         <Application />
       </ID7Layout>
     </Provider>,

@@ -3,9 +3,7 @@ import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
 import $ from 'jquery';
 
-import { connect } from 'react-redux';
-
-export class UtilityBar extends ReactComponent {
+export default class UtilityBar extends ReactComponent {
 
   componentDidMount() {
     this.attachAccountPopover();
@@ -60,18 +58,4 @@ export class UtilityBar extends ReactComponent {
       </ul>
     );
   }
-
 }
-
-/**
- * user.empty is true before we've loaded anything
- * user.data contains most of the info about the user.
- * user.authoritative is true if we've had a response from the server.
- */
-const select = state =>
-  ({
-    user: state.get('user').toJS(),
-    layoutClassName: state.get('ui').get('className'),
-  });
-
-export default connect(select)(UtilityBar);

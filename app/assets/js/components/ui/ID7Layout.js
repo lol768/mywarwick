@@ -15,6 +15,7 @@ import MastheadMobile from './MastheadMobile';
 import PermissionRequest from './PermissionRequest';
 import MasqueradeNotice from './MasqueradeNotice';
 import UpdatePopup from './UpdatePopup';
+import UtilityBar from './UtilityBar';
 
 import { navigate } from '../../navigate';
 
@@ -76,6 +77,7 @@ class ID7Layout extends ReactComponent {
       = this.props;
 
     const isMobile = layoutClassName === 'mobile';
+    const userData = this.props.user.data;
 
 
     return (
@@ -85,13 +87,15 @@ class ID7Layout extends ReactComponent {
         <div className="fixed-header at-top">
           <div className="id7-fixed-width-container">
             <header className="id7-page-header" ref="header">
-              { this.props.user.masquerading ?
-                <MasqueradeNotice masqueradingAs={this.props.user}/> : null
+              { userData.masquerading ?
+                <MasqueradeNotice masqueradingAs={userData}/> : null
               }
               { !isMobile ?
                 <div className="id7-utility-masthead">
                   <nav className="id7-utility-bar" id="utility-bar-container">
-                    { this.props.utilityBar }
+                    <UtilityBar user={this.props.user}
+                      layoutClassName={this.props.layoutClassName}
+                    />
                   </nav>
                   <div className="id7-masthead">
                     <div className="id7-masthead-contents">
@@ -153,7 +157,9 @@ class ID7Layout extends ReactComponent {
                   </div>
                 </div>
                 :
-              <MastheadMobile utilityBar={this.props.utilityBar} />}
+              <MastheadMobile user={this.props.user}
+                layoutClassName={this.props.layoutClassName}
+              />}
             </header>
           </div>
         </div>
@@ -202,7 +208,7 @@ const select = (state) => { // eslint-disable-line arrow-body-style
     layoutClassName: state.get('ui').get('className'),
     notificationsCount:
       getNumItemsSince(state.get('notifications'), state.get('notifications-lastRead')),
-    user: state.getIn(['user', 'data']).toJS(),
+    user: state.get('user').toJS(),
     colourTheme: state.get('ui').get('colourTheme'),
   };
 };

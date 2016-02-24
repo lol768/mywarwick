@@ -1,14 +1,12 @@
 package controllers
 
-import java.security.MessageDigest
 import javax.inject.{Inject, Singleton}
 
 import actors.WebsocketActor
-import play.api.Configuration
 import play.api.Play.current
 import play.api.libs.json._
 import play.api.mvc._
-import services.SecurityService
+import services.{PhotoService, SecurityService}
 import system.AppMetrics
 import warwick.sso._
 
@@ -19,7 +17,7 @@ class HomeController @Inject()(
   security: SecurityService,
   ssoClient: SSOClient,
   metrics: AppMetrics,
-  configuration: Configuration
+  photoService: PhotoService
 ) extends BaseController {
 
   import security._
@@ -39,19 +37,11 @@ class HomeController @Inject()(
   }
 
   def photo = RequiredUserAction { request =>
-    val universityId = request.context.user.get.universityId.map { id =>
-      id.string
-    }.getOrElse("")
-
-    val photosHost = configuration.getString("start.photos.host")
-      .getOrElse(throw new IllegalStateException("Missing Photos host - set start.photos.host"))
-
-    val photosKey = configuration.getString("start.photos.apiKey")
-      .getOrElse(throw new IllegalStateException("Missing Photos API Key - set start.photos.apiKey"))
-
-    val photosKeyIdHash = MessageDigest.getInstance("MD5").digest(s"$photosKey$universityId".getBytes)
-      .map("%02x".format(_)).mkString
-
-    Redirect(s"https://$photosHost/start/photo/$photosKeyIdHash/$universityId")
+    request.context.user.get.universityId.map { id =>
+      val photoUrl = photoService.photo(id)
+      Redirect(photoUrl)
+    }.getOrElse(
+      NotFound
+    )
   }
 }
