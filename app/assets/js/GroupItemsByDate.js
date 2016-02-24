@@ -19,7 +19,7 @@ export function groupForItem(item, now = localMoment()) {
   } else if (date.isSame(now, 'isoWeek') && date.isAfter(tomorrow)) {
     return 1;
     // tomorrow
-  } else if (date.isSame(now.clone().add(1, 'day'), 'day')) {
+  } else if (date.isSame(tomorrow, 'day')) {
     return 2;
     // today
   } else if (date.isSame(now, 'day')) {
@@ -51,4 +51,47 @@ export function titleForGroup(group) {
     'Last Week',
     'Older',
   ][group];
+}
+
+// Speed things up by assuming that items on the same date are in the same group
+// (which they are!)
+export function getGroupedItems(items, now) {
+  // Precondition: items are sorted by date (direction doesn't matter)
+
+  const groups = [];
+
+  let currentDate = null;
+  let currentGroup = null;
+  let currentGroupItems = null;
+
+  items.forEach(item => {
+    const date = localMoment(item.props.date);
+
+    if (!date.isSame(currentDate, 'day')) {
+      // This item has a different date to the one before it
+      currentDate = date;
+
+      const newGroup = groupForItem(item, now);
+
+      if (newGroup !== currentGroup) {
+        if (currentGroup !== null) {
+          // The previous group is finished; add it to the list
+          groups.push([currentGroup, currentGroupItems]);
+        }
+
+        // Start putting items into a new group
+        currentGroup = newGroup;
+        currentGroupItems = [];
+      }
+    }
+
+    currentGroupItems.push(item);
+  });
+
+  if (currentGroup !== null) {
+    // The previous group is finished; add it to the list
+    groups.push([currentGroup, currentGroupItems]);
+  }
+
+  return groups;
 }
