@@ -14,7 +14,7 @@ describe('UtilityBar', () => {
   });
 
   it('renders nothing when empty', () => {
-    let bar = <UtilityBar empty={true} />;
+    let bar = <UtilityBar user={{empty:true}} />;
     let result = shallowRender(bar);
     expect(result.type).to.equal('ul');
     expect(result.props.children).to.be.null;
@@ -31,7 +31,7 @@ describe('UtilityBar', () => {
 
   it('renders name when we are signed in', () => {
     const data = { name: 'Ron Swanson', authenticated: true };
-    const bar = <UtilityBar data={data} />;
+    const bar = <UtilityBar user={{data: data}} />;
     const result = shallowRender(bar);
     expect(result).to.have.property('type', 'ul');
     const link = result.props.children.props.children;

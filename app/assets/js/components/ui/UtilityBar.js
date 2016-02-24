@@ -27,26 +27,35 @@ export class UtilityBar extends ReactComponent {
   }
 
   accountLink(user) {
+    const isMobile = this.props.layoutClassName === 'mobile';
+    const noPhoto = 'https://websignon.warwick.ac.uk/origin/static/images/no-photo.png';
+    const link = isMobile ?
+      `<img src="/photo" class="img-circle" alt=${user.name} onError="this.onerror=null;this.src=
+      ${noPhoto};"/>`
+      : user.name;
+
     return (
       <a
         key="accountLink"
         ref="accountLink"
         href="//warwick.ac.uk/myaccount"
         data-toggle="id7:account-popover"
-        data-name={user.name}
+        data-name={link}
       >
-        {user.name}
+        {link}
         <span className="caret"></span>
       </a>
     );
   }
 
   render() {
-    const data = this.props.data || {};
+    const user = this.props.user || {};
+    const userData = user.data || {};
+
     return (
       <ul>
-        {!this.props.empty ?
-          <li>{ data.authenticated ? this.accountLink(data) : this.signInLink() }</li>
+        {!user.empty ?
+          <li>{ userData.authenticated ? this.accountLink(userData) : this.signInLink() }</li>
           : null}
       </ul>
     );
@@ -59,6 +68,10 @@ export class UtilityBar extends ReactComponent {
  * user.data contains most of the info about the user.
  * user.authoritative is true if we've had a response from the server.
  */
-const select = (state) => state.getIn(['user']).toJS();
+const select = state =>
+  ({
+    user: state.get('user').toJS(),
+    layoutClassName: state.get('ui').get('className'),
+  });
 
 export default connect(select)(UtilityBar);
