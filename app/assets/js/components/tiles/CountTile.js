@@ -1,9 +1,20 @@
 import React from 'react';
 
-import Tile from './Tile';
+import TileContent from './TileContent';
 import { ListTileItem } from './ListTile';
 
-export default class CountView extends Tile {
+export default class CountView extends TileContent {
+
+  static canZoom(content) {
+    if (content && content.items) {
+      return content.items.length > 1;
+    }
+    return false;
+  }
+
+  isEmpty(content) {
+    return !content.count && (!content.items || content.items.length === 0);
+  }
 
   getBody(content) {
     return (

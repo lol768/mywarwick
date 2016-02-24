@@ -66,5 +66,53 @@ describe('grouper', () => {
     expect(groupForItemSun('2015-12-21')).to.equal(2);
   });
 
+  it('gets grouped items', () => {
+    const items = [
+      item('2015-12-21'),
+      item('2015-12-18'),
+      item('2015-12-17'),
+      item('2015-12-16'),
+      item('2015-12-15'),
+      item('2015-12-14'),
+      item('2015-12-12'),
+      item('2015-12-07'),
+      item('2015-12-06'),
+      item('2015-01-01')
+    ];
+
+    const expectedGroupings = [
+      [0, [
+        item('2015-12-21')
+      ]],
+      [1, [
+        item('2015-12-18')
+      ]],
+      [2, [
+        item('2015-12-17')
+      ]],
+      [3, [
+        item('2015-12-16')
+      ]],
+      [4, [
+        item('2015-12-15')
+      ]],
+      [5, [
+        item('2015-12-14')
+      ]],
+      [6, [
+        item('2015-12-12'),
+        item('2015-12-07')
+      ]],
+      [7, [
+        item('2015-12-06'),
+        item('2015-01-01')
+      ]]
+    ];
+
+    const groupedItems = grouper.getGroupedItems(items, now);
+
+    expect(groupedItems).to.deep.equal(expectedGroupings);
+  });
+
 
 });

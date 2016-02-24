@@ -10,12 +10,13 @@ import { connect } from 'react-redux';
 import classNames from 'classnames';
 
 import { registerReducer } from '../../reducers';
-import * as TILES from '../tiles';
+import Tile from '../tiles/Tile';
+import * as TILE_TYPES from '../tiles';
 import * as tiles from '../../tiles';
 import * as serverpipe from '../../serverpipe';
 
 const ZOOM_ANIMATION_DURATION = 500;
-export const EDITING_ANIMATION_DURATION = 700;
+const EDITING_ANIMATION_DURATION = 700;
 
 import HiddenTile from '../tiles/HiddenTile';
 
@@ -101,25 +102,27 @@ class MeView extends ReactComponent {
   }
 
   renderTile(props, zoomed = false) {
-    const tileComponent = TILES[props.type];
-    if (tileComponent === undefined) {
+    const tileContentComponent = TILE_TYPES[props.type];
+    if (tileContentComponent === undefined) {
       log.error(`No component available for tile type ${props.type}`);
       return null;
     }
 
     const id = props.id;
-    const { content, errors, fetching } = this.props.tileContent[id] || {};
+    const { content, errors, fetching, fetchedAt } = this.props.tileContent[id] || {};
     const editing = this.state.editing === id;
     const ref = zoomed ? `${id}-zoomed` : id;
 
     const config = Object.assign({}, props, {
       zoomed,
+      canZoom: tileContentComponent.canZoom(content),
       key: ref,
       ref,
       originalRef: id,
       content,
       errors,
       fetching,
+      fetchedAt,
       editing,
       editingAny: !!this.state.editing,
     });
@@ -136,8 +139,21 @@ class MeView extends ReactComponent {
     config.onBeginEditing = () => this.onBeginEditing(config);
     config.onHide = () => this.onHideTile(config);
     config.onResize = () => this.onResizeTile(config);
+    config.editAnimationDuration = EDITING_ANIMATION_DURATION;
 
-    return React.createElement(tileComponent, config);
+    // subset of config needed by TileContent subclasses
+    const contentConfig = {
+      content,
+      zoomed,
+      editingAny: config.editingAny,
+      fetchedAt,
+    };
+
+    return (
+      <Tile { ... config }>
+        { React.createElement(tileContentComponent, contentConfig) }
+      </Tile>
+    );
   }
 
   onHideTile(tile) {

@@ -42,7 +42,7 @@ describe('dateFormatter', () => {
   it('formats as date with year in other years', () => {
 
     let date = localMoment().year(1999).dayOfYear(365).hour(23).minute(59).toDate();
-    let now = localMoment().year(2001);
+    let now = localMoment().year(2001).toDate();
 
     expect(formatDate(date, now)).to.equal('Fri 31 Dec 1999, 23:59');
 

@@ -3,7 +3,7 @@ import React, { PropTypes } from 'react';
 import { localMoment } from '../../dateFormatter';
 import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
-import Tile from './Tile';
+import TileContent from './TileContent';
 
 import _ from 'lodash';
 
@@ -35,7 +35,7 @@ const groupItemsForAgendaTile = {
   },
 };
 
-export default class AgendaTile extends Tile {
+export default class AgendaTile extends TileContent {
 
   constructor(props) {
     super(props);
@@ -45,7 +45,7 @@ export default class AgendaTile extends Tile {
   getBody(content) {
     const maxItemsToDisplay = this.props.maxItemsToDisplay ?
       this.props.maxItemsToDisplay : DEFAULT_MAX_ITEMS;
-    const itemsToDisplay = this.isZoomed() ?
+    const itemsToDisplay = this.props.zoomed ?
       content.items : _.take(content.items, maxItemsToDisplay);
 
     const events = itemsToDisplay.map(event =>
@@ -65,9 +65,9 @@ export default class AgendaTile extends Tile {
     }
   }
 
-  canZoom() {
-    if (this.props.content && this.props.content.items) {
-      return this.props.content.items.length > 1;
+  static canZoom(content) {
+    if (content && content.items) {
+      return content.items.length > 1;
     }
     return false;
   }
