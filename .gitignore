@@ -10,6 +10,7 @@ target
 /.settings
 /RUNNING_PID
 /data
+gulpopts.json
 
 /node_modules
 /mocha.json
