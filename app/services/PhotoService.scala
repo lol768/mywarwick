@@ -25,6 +25,6 @@ class PhotoServiceImpl @Inject()(
     val photosKeyIdHash = MessageDigest.getInstance("MD5").digest(s"$photosKey${uniId.string}".getBytes)
       .map("%02x".format(_)).mkString
 
-    s"https://$photosHost/start/photo/$photosKeyIdHash/${uniId.string}?s=60"
+    s"$photosHost/start/photo/$photosKeyIdHash/${uniId.string}?s=60"
   }
 }
