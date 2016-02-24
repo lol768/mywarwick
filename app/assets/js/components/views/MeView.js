@@ -15,7 +15,6 @@ import * as TILE_TYPES from '../tiles';
 import * as tiles from '../../tiles';
 import * as serverpipe from '../../serverpipe';
 
-const ZOOM_ANIMATION_DURATION = 500;
 const EDITING_ANIMATION_DURATION = 700;
 
 import HiddenTile from '../tiles/HiddenTile';
