@@ -50,3 +50,5 @@ POST        /api/push/gcm/subscribe                       @controllers.api.GCMPu
 POST        /api/push/gcm/notification                    @controllers.api.GCMPushNotificationsController.fetchPushNotifications
 
 GET         /admin/masquerade                             @controllers.admin.MasqueradeController.masquerade
+
+GET         /photo                                        @controllers.HomeController.photo

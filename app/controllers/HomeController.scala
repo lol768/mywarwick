@@ -6,7 +6,7 @@ import actors.WebsocketActor
 import play.api.Play.current
 import play.api.libs.json._
 import play.api.mvc._
-import services.SecurityService
+import services.{PhotoService, SecurityService}
 import system.AppMetrics
 import warwick.sso._
 
@@ -16,7 +16,8 @@ import scala.concurrent.Future
 class HomeController @Inject()(
   security: SecurityService,
   ssoClient: SSOClient,
-  metrics: AppMetrics
+  metrics: AppMetrics,
+  photoService: PhotoService
 ) extends BaseController {
 
   import security._
@@ -35,4 +36,12 @@ class HomeController @Inject()(
     }
   }
 
+  def photo = RequiredUserAction { request =>
+    request.context.user.get.universityId.map { id =>
+      val photoUrl = photoService.photo(id)
+      Redirect(photoUrl)
+    }.getOrElse(
+      NotFound
+    )
+  }
 }

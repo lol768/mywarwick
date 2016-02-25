@@ -12,9 +12,11 @@ import LinkBlock from './LinkBlock';
 import Link from './Link';
 import NewsView from '../views/NewsView';
 import MastheadSearch from './MastheadSearch';
+import MastheadMobile from './MastheadMobile';
 import PermissionRequest from './PermissionRequest';
 import MasqueradeNotice from './MasqueradeNotice';
 import UpdatePopup from './UpdatePopup';
+import UtilityBar from './UtilityBar';
 
 import { navigate } from '../../navigate';
 
@@ -75,7 +77,8 @@ class ID7Layout extends ReactComponent {
     const { layoutClassName, notificationsCount, user }
       = this.props;
 
-    const isDesktop = layoutClassName === 'desktop';
+    const isMobile = layoutClassName === 'mobile';
+    const userData = this.props.user.data;
 
 
     return (
@@ -85,32 +88,33 @@ class ID7Layout extends ReactComponent {
         <div className="fixed-header at-top">
           <div className="id7-fixed-width-container">
             <header className="id7-page-header" ref="header">
-              { this.props.user.masquerading ?
-                <MasqueradeNotice masqueradingAs={this.props.user} /> : null
+              { userData.masquerading ?
+                <MasqueradeNotice masqueradingAs={userData}/> : null
               }
-              <div className="id7-utility-masthead">
-                <nav className="id7-utility-bar" id="utility-bar-container">
-                  { this.props.utilityBar }
-                </nav>
-                <div className="id7-masthead">
-
-                  <div className="id7-masthead-contents">
-                    <div className="clearfix">
-                      <div className="id7-logo-column">
-                        <div className="id7-logo-row">
-                          <div className="id7-logo">
-                            <a href="/" title="Warwick homepage" onClick={ this.goToHome }>
-                              <img src="" alt="Warwick"/>
-                            </a>
-                          </div>
-                          { isDesktop ?
+              { !isMobile ?
+                <div className="id7-utility-masthead">
+                  <nav className="id7-utility-bar" id="utility-bar-container">
+                    <UtilityBar user={this.props.user}
+                      layoutClassName={this.props.layoutClassName}
+                    />
+                  </nav>
+                  <div className="id7-masthead">
+                    <div className="id7-masthead-contents">
+                      <div className="clearfix">
+                        <div className="id7-logo-column">
+                          <div className="id7-logo-row">
+                            <div className="id7-logo">
+                              <a href="/" title="Warwick homepage" onClick={ this.goToHome }>
+                                <img src="" alt="Warwick"/>
+                              </a>
+                            </div>
                             <div className="masthead-popover-icons">
                               <MastheadIcon
                                 icon="inbox"
                                 badge={ notificationsCount }
                                 key="notifications"
                                 popoverTitle="Notifications"
-                                isDisabled = { !user.authenticated }
+                                isDisabled={ !user.authenticated }
                                 onMore={ this.goToNotification }
                               >
                                 <NotificationsView grouped={false}/>
@@ -118,7 +122,7 @@ class ID7Layout extends ReactComponent {
                               <MastheadIcon
                                 icon="dashboard" key="activity"
                                 popoverTitle="Activity"
-                                isDisabled = { !user.authenticated }
+                                isDisabled={ !user.authenticated }
                                 onMore={ this.goToActivity }
                               >
                                 <ActivityView grouped={false}/>
@@ -146,14 +150,17 @@ class ID7Layout extends ReactComponent {
                                 </LinkBlock>
                               </MastheadIcon>
                             </div>
-                            : null }
+                          </div>
                         </div>
+                        <MastheadSearch />
                       </div>
-                      { isDesktop ? <MastheadSearch /> : null }
                     </div>
                   </div>
                 </div>
-              </div>
+                :
+              <MastheadMobile user={this.props.user}
+                layoutClassName={this.props.layoutClassName}
+              />}
             </header>
           </div>
         </div>
@@ -165,7 +172,7 @@ class ID7Layout extends ReactComponent {
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
               { 'Notification' in window && Notification.permission === 'default' ?
-                <PermissionRequest isDisabled={ !user.authenticated } /> : null }
+                <PermissionRequest isDisabled={ !user.authenticated }/> : null }
               <UpdatePopup />
               <div className="id7-horizontal-divider">
                 <svg
@@ -181,7 +188,7 @@ class ID7Layout extends ReactComponent {
             </header>
 
             <div className="id7-main-content">
-              { isDesktop ?
+              { !isMobile ?
                 <div className="row">
                   <div className="col-sm-8 col-lg-9">
                     {this.props.children}
@@ -204,7 +211,7 @@ const select = (state) => { // eslint-disable-line arrow-body-style
     layoutClassName: state.get('ui').get('className'),
     notificationsCount:
       getNumItemsSince(state.get('notifications'), state.get('notifications-lastRead')),
-    user: state.getIn(['user', 'data']).toJS(),
+    user: state.get('user').toJS(),
     colourTheme: state.get('ui').get('colourTheme'),
     zoomedTile: state.getIn(['me', 'zoomedTile']),
   };

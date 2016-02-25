@@ -35,6 +35,19 @@ var envify = require('loose-envify/custom');
 
 var lessCompiler = require('less');
 
+gulpOpts = {env:{}};
+try {
+  fs.accessSync('./gulpopts.json', fs.R_OK);
+  var gulpOpts = require('./gulpopts.json');
+  gutil.log('Got opts');
+} catch (e) {
+  gutil.log(gutil.colors.yellow('No gulpopts.json'));
+}
+function option(name) {
+  return process.env[name] || gulpOpts.env[name];
+}
+
+
 var paths = {
   assetPath: 'app/assets',
 
@@ -51,7 +64,7 @@ var paths = {
   ]
 };
 
-var PRODUCTION = (process.env.PRODUCTION !== 'false');
+var PRODUCTION = ((''+option('PRODUCTION')) !== 'false');
 if (PRODUCTION) {
   gutil.log(gutil.colors.yellow('Production build (use PRODUCTION=false in development).'));
 } else {
