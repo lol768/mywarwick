@@ -16,12 +16,17 @@
     width: @screen-sm-min - 100px;
     margin-left: -(@screen-sm-min - 100px) / 2;
     bottom: auto;
+    height: 100%;
   }
 
   .tile {
+
+    .tile__wrap {
+      overflow-y: auto;
+    }
+
     height: 100%;
     cursor: default;
-    overflow-y: auto;
   }
 }
 
@@ -82,7 +87,7 @@
   }
 
   .tile__wrap {
-    overflow-x: hidden;
+    overflow: hidden;
     position: absolute;
     top: 0;
     left: 0;
@@ -228,8 +233,9 @@
     }
   }
   .tile__item {
-    .make-xs-column(6);
+    .make-xs-column(12);
     .make-sm-column(6);
+    width: initial;
     margin-top: 10px;
     margin-bottom: 5px;
   }

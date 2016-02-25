@@ -3,6 +3,7 @@ import ReactComponent from 'react/lib/ReactComponent';
 import ReactDOM from 'react-dom';
 
 import $ from 'jquery';
+import classNames from 'classnames';
 
 import MastheadIcon from './MastheadIcon';
 import NotificationsView from '../views/NotificationsView';
@@ -157,7 +158,9 @@ class ID7Layout extends ReactComponent {
           </div>
         </div>
 
-        <div className="id7-fixed-width-container">
+        <div className=
+               {classNames('id7-fixed-width-container', { ['no-scroll']: this.props.zoomedTile })}
+        >
 
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
@@ -203,6 +206,7 @@ const select = (state) => { // eslint-disable-line arrow-body-style
       getNumItemsSince(state.get('notifications'), state.get('notifications-lastRead')),
     user: state.getIn(['user', 'data']).toJS(),
     colourTheme: state.get('ui').get('colourTheme'),
+    zoomedTile: state.getIn(['me', 'zoomedTile']),
   };
 };
 
