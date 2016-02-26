@@ -24,7 +24,7 @@ GET         /assets/*file                                 @controllers.Assets.ve
 
 GET         /service-worker.js                            @controllers.Assets.at(path="/public", file="service-worker.js")
 
-GET         /news/feed                                    @controllers.NewsController.feed
+GET         /api/news/feed                                @controllers.NewsController.feed
 
 GET         /service/metrics                              @controllers.MetricsController.metrics
 GET         /service/gtg                                  @controllers.ServiceCheckController.gtg

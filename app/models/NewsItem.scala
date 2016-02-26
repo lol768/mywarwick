@@ -1,10 +1,10 @@
 package models
 
 import org.joda.time.DateTime
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.Json
 
 case class NewsItem(
-  source: String,
+  source: NewsSource,
   id: String,
   title: String,
   url: String,
@@ -13,16 +13,5 @@ case class NewsItem(
 )
 
 object NewsItem {
-  implicit val writes = Writes { item: NewsItem =>
-    Json.obj(
-      "id" -> item.id,
-      "title" -> item.title,
-      "url" -> Json.obj(
-        "href" -> item.url
-      ),
-      "content" -> item.content,
-      "publicationDate" -> item.publicationDate.getMillis,
-      "source" -> item.source
-    )
-  }
+  implicit val writes = Json.writes[NewsItem]
 }

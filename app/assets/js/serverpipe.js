@@ -29,7 +29,7 @@ export function fetchUserIdentity() {
 export function fetchNews() {
   return dispatch => {
     dispatch({ type: NEWS_FETCH });
-    return fetch('/news/feed')
+    return fetch('/api/news/feed')
       .then(response => response.json())
       .then(json => {
         if (json.items !== undefined) {
