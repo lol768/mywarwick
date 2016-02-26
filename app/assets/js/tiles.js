@@ -16,6 +16,22 @@ export const TILE_SHOW = 'tiles.show';
 export const TILE_HIDE = 'tiles.hide';
 export const TILE_RESIZE = 'tiles.resize';
 
+export const TILE_ZOOM_IN = 'me.zoom-in';
+export const TILE_ZOOM_OUT = 'me.zoom-out';
+
+export function zoomInOn(tile) {
+  return {
+    type: TILE_ZOOM_IN,
+    tile: tile.id,
+  };
+}
+
+export function zoomOut() {
+  return {
+    type: TILE_ZOOM_OUT,
+  };
+}
+
 export function fetchedTiles(tiles) {
   return {
     type: TILES_FETCH_SUCCESS,

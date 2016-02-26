@@ -1,23 +1,17 @@
 import React from 'react';
 import UtilityBar from './UtilityBar';
-import store from '../../store';
-import { zoomOut } from '../views/MeView';
 
 export default class MastheadMobile extends React.Component {
   constructor(props) {
     super(props);
   }
 
-  tileZoomOut() {
-    store.dispatch(zoomOut());
-  }
-
   render() {
     return (
       <div className="start-masthead">
         {this.props.zoomedTile ?
-          <div className="backBtn" onClick={this.tileZoomOut}>
-            <i className="fa fa-chevron-left"></i>
+          <div className="back-btn" onClick={this.props.onBackClick}>
+            <i className="fa fa-chevron-left" />
             Back
           </div>
           : null }
@@ -37,4 +31,5 @@ export default class MastheadMobile extends React.Component {
 
 MastheadMobile.propTypes = {
   zoomedTile: React.PropTypes.string,
+  onBackClick: React.PropTypes.func,
 };

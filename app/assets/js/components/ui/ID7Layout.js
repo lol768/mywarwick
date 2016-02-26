@@ -25,6 +25,7 @@ import { getNumItemsSince } from '../../stream';
 
 import { updateLayoutClass } from '../Application';
 import { fetchTileContent } from '../../serverpipe';
+import { zoomOut } from '../../tiles';
 
 class ID7Layout extends ReactComponent {
 
@@ -33,6 +34,7 @@ class ID7Layout extends ReactComponent {
     this.goToHome = this.goToHome.bind(this);
     this.goToNotification = this.goToNotification.bind(this);
     this.goToActivity = this.goToActivity.bind(this);
+    this.onBackClick = this.onBackClick.bind(this);
   }
 
   componentWillMount() {
@@ -71,6 +73,10 @@ class ID7Layout extends ReactComponent {
 
   goToActivity() {
     this.props.dispatch(navigate('/activity'));
+  }
+
+  onBackClick() {
+    this.props.dispatch(zoomOut());
   }
 
   render() {
@@ -161,7 +167,7 @@ class ID7Layout extends ReactComponent {
             <MastheadMobile user={this.props.user}
               layoutClassName={this.props.layoutClassName}
               zoomedTile={this.props.zoomedTile}
-              dispatch={this.props.dispatch}
+              onBackClick={this.onBackClick}
             />}
             </header>
           </div>

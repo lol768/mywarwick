@@ -19,22 +19,6 @@ const EDITING_ANIMATION_DURATION = 700;
 
 import HiddenTile from '../tiles/HiddenTile';
 
-const TILE_ZOOM_IN = 'me.zoom-in';
-const TILE_ZOOM_OUT = 'me.zoom-out';
-
-function zoomInOn(tile) {
-  return {
-    type: TILE_ZOOM_IN,
-    tile: tile.id,
-  };
-}
-
-export function zoomOut() {
-  return {
-    type: TILE_ZOOM_OUT,
-  };
-}
-
 class MeView extends ReactComponent {
 
   constructor(props) {
@@ -46,12 +30,12 @@ class MeView extends ReactComponent {
 
   onTileExpand(tile) {
     if (!this.props.zoomedTile) {
-      this.props.dispatch(zoomInOn(tile));
+      this.props.dispatch(tiles.zoomInOn(tile));
     }
   }
 
   onTileDismiss() {
-    this.props.dispatch(zoomOut());
+    this.props.dispatch(tiles.zoomOut());
   }
 
   onBeginEditing(tile) {
@@ -98,7 +82,6 @@ class MeView extends ReactComponent {
 
   renderTile(props, zoomed = false) {
     const tileContentComponent = TILE_TYPES[props.type];
-    const isDesktop = this.props.layoutClassName === 'desktop';
     if (tileContentComponent === undefined) {
       log.error(`No component available for tile type ${props.type}`);
       return null;
@@ -121,7 +104,7 @@ class MeView extends ReactComponent {
       fetchedAt,
       editing,
       editingAny: !!this.state.editing,
-      isDesktop,
+      isDesktop: this.props.isDesktop,
     });
 
     // Zooming
@@ -203,7 +186,7 @@ class MeView extends ReactComponent {
 
   render() {
     const classes = classNames('row', 'me-view', { 'me-view--editing': this.state.editing });
-    const isDesktop = this.props.layoutClassName === 'desktop';
+    const isDesktop = this.props.isDesktop;
     const transitionProps = {
       transitionName: 'slider',
       transitionEnterTimeout: 300,
@@ -238,11 +221,11 @@ const initialState = Immutable.Map({
 
 registerReducer('me', (state = initialState, action) => {
   switch (action.type) {
-    case TILE_ZOOM_IN:
+    case tiles.TILE_ZOOM_IN:
       return state.merge({
         zoomedTile: action.tile,
       });
-    case TILE_ZOOM_OUT:
+    case tiles.TILE_ZOOM_OUT:
       return state.merge({
         zoomedTile: null,
       });
@@ -253,7 +236,7 @@ registerReducer('me', (state = initialState, action) => {
 
 const select = (state) => ({
   zoomedTile: state.get('me').get('zoomedTile'),
-  layoutClassName: state.get('ui').get('className'),
+  isDesktop: state.get('ui').get('className') === 'desktop',
   tiles: state.get('tiles').get('items').filterNot(tile => tile.get('removed')).toJS(),
   hiddenTiles: state.get('tiles').get('items').filter(tile => tile.get('removed')).toJS(),
   tileContent: state.get('tileContent').toJS(),
