@@ -29,7 +29,7 @@ function zoomInOn(tile) {
   };
 }
 
-function zoomOut() {
+export function zoomOut() {
   return {
     type: TILE_ZOOM_OUT,
   };
@@ -98,6 +98,7 @@ class MeView extends ReactComponent {
 
   renderTile(props, zoomed = false) {
     const tileContentComponent = TILE_TYPES[props.type];
+    const isDesktop = this.props.layoutClassName === 'desktop';
     if (tileContentComponent === undefined) {
       log.error(`No component available for tile type ${props.type}`);
       return null;
@@ -120,6 +121,7 @@ class MeView extends ReactComponent {
       fetchedAt,
       editing,
       editingAny: !!this.state.editing,
+      isDesktop,
     });
 
     // Zooming

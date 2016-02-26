@@ -158,9 +158,11 @@ class ID7Layout extends ReactComponent {
                   </div>
                 </div>
                 :
-              <MastheadMobile user={this.props.user}
-                layoutClassName={this.props.layoutClassName}
-              />}
+            <MastheadMobile user={this.props.user}
+              layoutClassName={this.props.layoutClassName}
+              zoomedTile={this.props.zoomedTile}
+              dispatch={this.props.dispatch}
+            />}
             </header>
           </div>
         </div>
