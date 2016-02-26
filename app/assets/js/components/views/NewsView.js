@@ -51,10 +51,7 @@ class NewsView extends ReactComponent {
     const items = _.take(this.props.items, 10).map((item) =>
       <NewsItem
         key={item.id}
-        title={item.title}
-        url={item.url.href}
-        publicationDate={item.publicationDate}
-        source={item.source}
+        {...item}
       >
         <div dangerouslySetInnerHTML={html(item.content)}></div>
       </NewsItem>

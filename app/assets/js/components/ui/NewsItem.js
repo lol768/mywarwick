@@ -6,7 +6,7 @@ import formatDate from '../../dateFormatter';
 export default class NewsItem extends ReactComponent {
 
   render() {
-    const { url, title, children, publicationDate, source } = this.props;
+    const { url, title, publicationDate, source, children } = this.props;
 
     return (
       <article className="news-item">
