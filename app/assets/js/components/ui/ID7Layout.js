@@ -3,6 +3,7 @@ import ReactComponent from 'react/lib/ReactComponent';
 import ReactDOM from 'react-dom';
 
 import $ from 'jquery';
+import classNames from 'classnames';
 
 import MastheadIcon from './MastheadIcon';
 import NotificationsView from '../views/NotificationsView';
@@ -24,6 +25,7 @@ import { getNumItemsSince } from '../../stream';
 
 import { updateLayoutClass } from '../Application';
 import { fetchTileContent } from '../../serverpipe';
+import { zoomOut } from '../../tiles';
 
 class ID7Layout extends ReactComponent {
 
@@ -32,6 +34,7 @@ class ID7Layout extends ReactComponent {
     this.goToHome = this.goToHome.bind(this);
     this.goToNotification = this.goToNotification.bind(this);
     this.goToActivity = this.goToActivity.bind(this);
+    this.onBackClick = this.onBackClick.bind(this);
   }
 
   componentWillMount() {
@@ -70,6 +73,10 @@ class ID7Layout extends ReactComponent {
 
   goToActivity() {
     this.props.dispatch(navigate('/activity'));
+  }
+
+  onBackClick() {
+    this.props.dispatch(zoomOut());
   }
 
   render() {
@@ -157,14 +164,18 @@ class ID7Layout extends ReactComponent {
                   </div>
                 </div>
                 :
-              <MastheadMobile user={this.props.user}
-                layoutClassName={this.props.layoutClassName}
-              />}
+            <MastheadMobile user={this.props.user}
+              layoutClassName={this.props.layoutClassName}
+              zoomedTile={this.props.zoomedTile}
+              onBackClick={this.onBackClick}
+            />}
             </header>
           </div>
         </div>
 
-        <div className="id7-fixed-width-container">
+        <div className=
+               {classNames('id7-fixed-width-container', { ['no-scroll']: this.props.zoomedTile })}
+        >
 
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
@@ -210,6 +221,7 @@ const select = (state) => { // eslint-disable-line arrow-body-style
       getNumItemsSince(state.get('notifications'), state.get('notifications-lastRead')),
     user: state.get('user').toJS(),
     colourTheme: state.get('ui').get('colourTheme'),
+    zoomedTile: state.getIn(['me', 'zoomedTile']),
   };
 };
 
