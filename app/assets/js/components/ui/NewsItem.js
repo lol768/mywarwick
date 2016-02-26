@@ -1,31 +1,33 @@
 import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 
+import formatDate from '../../dateFormatter';
+
 export default class NewsItem extends ReactComponent {
 
   render() {
-    const image = this.props.imgSrc ?
-      <img className="news-item__image" src={this.props.imgSrc} alt={this.props.title}/> : null;
+    const { url, title, children, publicationDate, source } = this.props;
 
     return (
       <article className="news-item">
-        {image}
-
         <div className="news-item__body">
           <h1 className="news-item__title">
-            <a href={this.props.url} target="_blank">
-              {this.props.title}
+            <a href={url} target="_blank">
+              {title}
             </a>
           </h1>
 
           <div className="news-item__content">
-            {this.props.children}
+            {children}
           </div>
 
           <div className="news-item__footer">
             <p>
-              <i className="fa fa-fw fa-circle" style={{ color: '#7ecbb6' }}> </i>
-              {this.props.source}
+              {formatDate(publicationDate, new Date(), true)}
+            </p>
+            <p>
+              <i className="fa fa-fw fa-circle" style={{ color: source.colour }}> </i>
+              {source.title}
             </p>
           </div>
         </div>

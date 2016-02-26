@@ -4,6 +4,7 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import models.NewsItem
+import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
 import services.{FeedService, NewsService}
@@ -22,10 +23,12 @@ class NewsController @Inject()(
       .map(source => feedService.fetch(source).map(feed => (source, feed)))
 
     Future.sequence(futures).map { results =>
-      val items = results.flatMap { case (source, feed) => feed.items.map(_.asNewsItem(source)) }
+      val items = results.flatMap { case (source, feed) => feed.items.map(_.asNewsItem(source)) }.sortBy(_.publicationDate)
 
       Ok(Json.obj("items" -> items))
     }
   }
+
+  implicit def newestFirst: Ordering[DateTime] = Ordering.fromLessThan(_ isAfter _)
 
 }

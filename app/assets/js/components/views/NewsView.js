@@ -27,7 +27,7 @@ class NewsView extends ReactComponent {
 
   render() {
     if (this.props.fetching) {
-      return <i className="fa fa-refresh fa-spin"></i>;
+      return <i className="fa fa-refresh fa-spin"> </i>;
     }
 
     if (this.props.failed) {
@@ -38,7 +38,7 @@ class NewsView extends ReactComponent {
           </p>
           <p>
             <button onClick={ this.onClick } className="btn btn-default">
-              <i className="fa fa-refresh fa-fw"></i>
+              <i className="fa fa-refresh fa-fw"> </i>
               Retry
             </button>
           </p>
@@ -48,17 +48,19 @@ class NewsView extends ReactComponent {
 
     const html = (content) => ({ __html: content.replace(/<br[ /]+?>/g, '') });
 
-    const items = _.take(this.props.items, 5).map((item) =>
-      <NewsItem key={item.id} title={item.title} source={item.source} url={item.url.href}>
+    const items = _.take(this.props.items, 10).map((item) =>
+      <NewsItem
+        key={item.id}
+        title={item.title}
+        url={item.url.href}
+        publicationDate={item.publicationDate}
+        source={item.source}
+      >
         <div dangerouslySetInnerHTML={html(item.content)}></div>
       </NewsItem>
     );
 
-    return (
-      <div>
-        {items}
-      </div>
-    );
+    return <div>{items}</div>;
   }
 
 }
