@@ -15,7 +15,7 @@ export default class UtilityBar extends ReactComponent {
 
   attachAccountPopover() {
     const element = ReactDOM.findDOMNode(this.refs.accountLink);
-    $(element).accountPopover({ logoutlink: window.SSO.LOGOUT_URL });
+    $(element).accountPopover();
   }
 
   signInLink() {
@@ -38,6 +38,8 @@ export default class UtilityBar extends ReactComponent {
         ref="accountLink"
         href="//warwick.ac.uk/myaccount"
         data-toggle="id7:account-popover"
+        data-logoutlink={window.SSO.LOGOUT_URL}
+        data-loginlink={window.SSO.LOGIN_URL}
         data-name={link}
       >
         {link}
