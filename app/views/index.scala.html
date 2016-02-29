@@ -1,15 +1,21 @@
 @import uk.ac.warwick.sso.client.core.LinkGenerator
 @()(implicit linkGenerator: LinkGenerator)
 
-@main() {
+@common.htmlelement {
+  <head>
+    @common.head(title = "")
+  </head>
+  <body>
 
-  <script>
+    <div id="app-container"></div>
+    <script>
+      // FIXME refactor this away
       window.SSO = {
         LOGIN_URL: '@Html(linkGenerator.getLoginUrl)',
         LOGOUT_URL: '@Html(linkGenerator.getLogoutUrl)'
       };
-  </script>
-  <script src="@routes.Assets.versioned("js/bundle.js")"></script>
-
+    </script>
+    <script src="@routes.Assets.versioned("js/bundle.js")"></script>
+  </body>
 }
 
