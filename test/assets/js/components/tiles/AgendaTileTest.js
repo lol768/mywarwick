@@ -36,7 +36,8 @@ describe('AgendaTileItem', () => {
     const html = shallowRender(<AgendaTileItem zoomed={ true } { ...props } />);
     html.type.should.equal('li');
     html.props.className.should.equal('agenda-item');
-    const [ title, date ] = html.props.children;
+    const a = html.props.children;
+    const [ title, date ] = a.props.children;
     title.props.className.should.equal('agenda-item__title');
     title.props.title.should.equal(props.title);
     title.props.children.should.equal(props.title);
@@ -47,7 +48,7 @@ describe('AgendaTileItem', () => {
   it('renders with a href. clicking it calls the onClick prop', () => {
     const tileItem = <AgendaTileItem zoomed={ true } href={ 'href' } { ...props } />;
     const html = shallowRender(tileItem);
-    const [ a, ] = html.props.children;
+    const a = html.props.children;
     a.props.href.should.equal('href');
     a.props.children.type.should.equal('span');
 
