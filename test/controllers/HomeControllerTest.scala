@@ -25,7 +25,7 @@ class HomeControllerTest extends PlaySpec with MockitoSugar with Results {
     "render" in {
       val result = controller.index(FakeRequest())
       status(result) must be(200)
-      contentAsString(result) must include("warwick")
+      contentAsString(result) must include("id=\"app-container\"")
     }
   }
 }
