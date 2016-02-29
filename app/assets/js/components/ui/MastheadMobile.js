@@ -7,10 +7,11 @@ export default class MastheadMobile extends React.Component {
   }
 
   render() {
+    const { zoomedTile, onBackClick, path } = this.props;
     return (
       <div className="start-masthead">
-        {this.props.zoomedTile ?
-          <div className="back-btn" onClick={this.props.onBackClick}>
+        {zoomedTile && path === '/' ?
+          <div className="back-btn" onClick={onBackClick}>
             <i className="fa fa-chevron-left" />
             Back
           </div>
@@ -31,5 +32,6 @@ export default class MastheadMobile extends React.Component {
 
 MastheadMobile.propTypes = {
   zoomedTile: React.PropTypes.string,
+  path: React.PropTypes.string,
   onBackClick: React.PropTypes.func,
 };
