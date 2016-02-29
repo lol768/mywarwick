@@ -168,6 +168,7 @@ class ID7Layout extends ReactComponent {
               layoutClassName={this.props.layoutClassName}
               zoomedTile={this.props.zoomedTile}
               onBackClick={this.onBackClick}
+              path={this.props.path}
             />}
             </header>
           </div>
@@ -222,6 +223,7 @@ const select = (state) => { // eslint-disable-line arrow-body-style
     user: state.get('user').toJS(),
     colourTheme: state.get('ui').get('colourTheme'),
     zoomedTile: state.getIn(['me', 'zoomedTile']),
+    path: state.get('path'),
   };
 };
 
