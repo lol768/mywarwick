@@ -68,8 +68,14 @@ export default class TextTile extends TileContent {
           </div>);
 
           return item.href ?
-            <a href={item.href} target="_blank" onClick={ this.onClickLink }>{tileItem}</a>
-            : tileItem;
+            <a
+              key={`${item.id}-a`}
+              href={item.href}
+              target="_blank"
+              onClick={ this.onClickLink }
+            >
+              {tileItem}
+            </a> : tileItem;
         }) }
       </ReactCSSTransitionGroup>
     );

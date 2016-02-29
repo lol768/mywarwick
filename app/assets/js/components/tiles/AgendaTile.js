@@ -73,8 +73,7 @@ export default class AgendaTile extends TileContent {
   }
 }
 
-class AgendaTileItem extends React.Component {
-
+export class AgendaTileItem extends React.Component {
   render() {
     const { title, start, href, onClickLink } = this.props;
     return (
