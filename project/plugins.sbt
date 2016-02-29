@@ -27,3 +27,5 @@ addSbtPlugin("de.johoop" % "jacoco4sbt" % "2.1.6")
 //addSbtPlugin("com.typesafe.sbt" % "sbt-mocha" % "1.1.0")
 
 //addSbtPlugin("com.github.ddispaltro" % "sbt-reactjs" % "0.5.2")
+
+addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "4.0.0")
