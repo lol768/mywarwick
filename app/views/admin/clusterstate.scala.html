@@ -2,7 +2,7 @@
 @import akka.actor.Address
 @(state: CurrentClusterState, selfAddress: Address)
 
-@main("Cluster State") {
+@common.id7layout("Cluster State") {
   <h1>Cluster members</h1>
   @if(state.unreachable.nonEmpty) {
     <div class="alert alert-danger">
