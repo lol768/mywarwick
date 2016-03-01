@@ -1,12 +1,17 @@
-import React, { cloneElement } from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
+import React, { Component } from 'react';
 
+import $ from 'jquery';
+import ReactDOM from 'react-dom';
 
-export default class TabBar extends ReactComponent {
+export default class TabBar extends Component {
+
+  componentDidMount() {
+    $(ReactDOM.findDOMNode(this)).on('touchmove', (e) => e.preventDefault());
+  }
 
   getChildren() {
     return this.props.children.map((el) => (
-      cloneElement(el, {
+      React.cloneElement(el, {
         key: el.props.title,
         ref: el.props.title.toLowerCase(),
         active: el.props.path === this.props.selectedItem,

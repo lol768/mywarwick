@@ -1,7 +1,14 @@
 import React from 'react';
 import UtilityBar from './UtilityBar';
 
+import $ from 'jquery';
+import ReactDOM from 'react-dom';
+
 export default class MastheadMobile extends React.Component {
+
+  componentDidMount() {
+    $(ReactDOM.findDOMNode(this)).on('touchmove', (e) => e.preventDefault());
+  }
 
   render() {
     return (
