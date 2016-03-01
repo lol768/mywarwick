@@ -20,8 +20,11 @@ export default class UtilityBar extends ReactComponent {
   }
 
   attachAccountPopover() {
-    const element = ReactDOM.findDOMNode(this.refs.accountLink);
-    $(element).accountPopover();
+    const $element = $(ReactDOM.findDOMNode(this.refs.accountLink));
+
+    if ($element.data('id7.account-popover') === undefined) {
+      $element.accountPopover();
+    }
   }
 
   signInLink() {
