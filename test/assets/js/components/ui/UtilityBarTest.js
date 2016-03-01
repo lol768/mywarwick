@@ -37,7 +37,6 @@ describe('UtilityBar', () => {
     const link = result.props.children.props.children;
     expect(link).to.have.property('key', 'accountLink');
     expect(link).to.have.deep.property('props.data-toggle', 'id7:account-popover');
-    expect(link).to.have.deep.property('props.data-name', 'Ron Swanson');
     expect(link).to.have.deep.property('props.children[0]', 'Ron Swanson');
   });
 
@@ -51,9 +50,8 @@ describe('UtilityBar', () => {
     expect(result).to.have.property('type', 'ul');
     const link = result.props.children.props.children;
     expect(link).to.have.property('type', 'a');
-    const imgHTML = link.props.children[0];
-    expect(imgHTML).to.have.string('<img');
-    expect(imgHTML).to.have.string('alt=Ron Swanson');
+    const [ img ] = link.props.children;
+    expect(img).to.have.deep.property('props.alt', 'Ron Swanson');
   })
 
 });

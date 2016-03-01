@@ -77,10 +77,17 @@ $(() => {
     $('html').addClass('mobile');
   }
 
-  $('body').click((e) => {
+  const $body = $('body');
+  $body.click((e) => {
     const $target = $(e.target);
     if ($target.data('toggle') !== 'tooltip' && $target.parents('.tooltip.in').length === 0) {
       $('[data-toggle="tooltip"]').tooltip('hide');
+    }
+  });
+
+  $body.on('touchmove', (e) => {
+    if ($(this).hasClass('has-zoomed-tile')) {
+      e.preventDefault();
     }
   });
 });

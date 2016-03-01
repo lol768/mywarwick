@@ -44,10 +44,10 @@ export default class UtilityBar extends ReactComponent {
   renderPhoto(user) {
     return (
       <img src="/photo"
-           ref="photo"
-           className="img-circle"
-           alt={ user.name }
-           onError={ this.onPhotoError }
+        ref="photo"
+        className="img-circle"
+        alt={ user.name }
+        onError={ this.onPhotoError }
       />
     );
   }

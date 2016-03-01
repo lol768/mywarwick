@@ -44,7 +44,7 @@ class ID7Layout extends ReactComponent {
   componentWillReceiveProps(nextProps) {
     nextProps.dispatch(updateLayoutClass());
 
-    const hasZoomedTile = nextProps.path == '/' && !!nextProps.zoomedTile;
+    const hasZoomedTile = nextProps.path === '/' && !!nextProps.zoomedTile;
     $('body').toggleClass('has-zoomed-tile', hasZoomedTile);
   }
 

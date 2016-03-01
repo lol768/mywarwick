@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 import $ from 'jquery';
 import ReactDOM from 'react-dom';
@@ -33,3 +33,9 @@ export default class TabBar extends Component {
   }
 
 }
+
+TabBar.propTypes = {
+  children: PropTypes.element,
+  onSelectItem: PropTypes.func,
+  selectedItem: PropTypes.string,
+};
