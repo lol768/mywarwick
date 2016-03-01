@@ -42,7 +42,7 @@
     "node-notifier": "^4.2.3",
     "react-addons-test-utils": "^0.14.0",
     "sinon": "~1.17.1",
-    "sw-precache": "^2.3.0",
+    "sw-precache": "UniversityofWarwick/sw-precache#3.1.0-warwick",
     "timekeeper": "0.0.5",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
