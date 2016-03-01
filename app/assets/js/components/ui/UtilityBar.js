@@ -26,10 +26,10 @@ export default class UtilityBar extends ReactComponent {
 
   accountLink(user) {
     const isMobile = this.props.layoutClassName === 'mobile';
-    const noPhoto = 'https://websignon.warwick.ac.uk/origin/static/images/no-photo.png';
+    const noPhoto = '/assets/images/no-photo.png';
     const link = isMobile ?
       `<img src="/photo" class="img-circle" alt=${user.name} onError="this.onerror=null;this.src=
-      ${noPhoto};"/>`
+      '${noPhoto}';"/>`
       : user.name;
 
     return (

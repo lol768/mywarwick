@@ -182,7 +182,12 @@ gulp.task('watch-styles', ['styles'], function () {
   return gulp.watch(paths.assetPath + '/css/**/*.less', ['styles']);
 });
 
-gulp.task('pre-service-worker', ['scripts', 'styles'], function () {
+gulp.task('copy-imgs', function () {
+  gulp.src([paths.assetPath + '/images/**/*'])
+    .pipe(gulp.dest(paths.assetsOut + '/images'))
+});
+
+gulp.task('pre-service-worker', ['scripts', 'styles', 'copy-imgs'], function () {
   return gulp.src([
       paths.assetsOut + '/**/*',
       '!' + paths.assetsOut + '/**/*.map', // don't cache source maps
@@ -198,7 +203,7 @@ gulp.task('service-worker', ['pre-service-worker'], function () {
 
   return swPrecache.generate({
       cacheId: 'start',
-      handleFetch: PRODUCTION,
+      handleFetch: true,
       staticFileGlobs: filenames.get('offline-cache'),
       stripPrefix: 'target/gulp',
       replacePrefix: 'assets',
@@ -247,7 +252,8 @@ gulp.task('manifest', ['scripts', 'styles'], function () {
             return path;
           }))
           .pipe(manifest({
-            cache: ['/', '/activity', '/notifications', '/news', '/search'],
+            cache: ['/', '/activity', '/notifications', '/news', '/search', '/assets/images/no-photo.png'],
+            fallback: ['/photo /assets/images/no-photo.png'],
             hash: true,
             exclude: 'appcache.manifest',
             prefix: '/assets/',
