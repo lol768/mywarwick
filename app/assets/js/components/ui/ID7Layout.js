@@ -3,7 +3,6 @@ import ReactComponent from 'react/lib/ReactComponent';
 import ReactDOM from 'react-dom';
 
 import $ from 'jquery';
-import classNames from 'classnames';
 
 import MastheadIcon from './MastheadIcon';
 import NotificationsView from '../views/NotificationsView';
@@ -42,8 +41,11 @@ class ID7Layout extends ReactComponent {
     this.setBodyTheme(this.props.colourTheme);
   }
 
-  componentWillReceiveProps() {
-    this.props.dispatch(updateLayoutClass());
+  componentWillReceiveProps(nextProps) {
+    nextProps.dispatch(updateLayoutClass());
+
+    const hasZoomedTile = nextProps.path === '/' && !!nextProps.zoomedTile;
+    $('body').toggleClass('has-zoomed-tile', hasZoomedTile);
   }
 
   componentDidUpdate(prevProps) {
@@ -111,10 +113,7 @@ class ID7Layout extends ReactComponent {
           </div>
         </div>
 
-        <div className=
-               {classNames('id7-fixed-width-container', { ['no-scroll']: this.props.zoomedTile })}
-        >
-
+        <div className="id7-fixed-width-container">
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
               { this.renderNotificationPermissionRequest() }
@@ -219,10 +218,7 @@ class ID7Layout extends ReactComponent {
           </div>
         </div>
 
-        <div className=
-               {classNames('id7-fixed-width-container', { ['no-scroll']: this.props.zoomedTile })}
-        >
-
+        <div className="id7-fixed-width-container">
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
               { this.renderNotificationPermissionRequest() }
