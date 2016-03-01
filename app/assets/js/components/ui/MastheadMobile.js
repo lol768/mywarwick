@@ -23,7 +23,7 @@ export default class MastheadMobile extends React.Component {
           WARWICK
         </div>
         <nav className="id7-utility-bar">
-          <UtilityBar {...this.props} />
+          <UtilityBar {...this.props} layoutClassName="mobile" />
         </nav>
       </div>
     );
