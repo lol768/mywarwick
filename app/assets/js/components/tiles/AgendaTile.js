@@ -81,7 +81,7 @@ export class AgendaTileItem extends React.Component {
       <span>
         <span title={ title } className="agenda-item__title">{ title }</span>
         <span className="agenda-item__date">
-          { end ? localMoment(start).format('HH:mm') : 'all day' }
+          { end ? localMoment(start).format('HH:mm') : 'all-day' }
         </span>
       </span>
     );

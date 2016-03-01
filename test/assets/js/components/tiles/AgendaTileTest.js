@@ -63,7 +63,7 @@ describe('AgendaTileItem', () => {
     const html = shallowRender(<AgendaTileItem zoomed={ true } { ...props } end={ undefined }/>);
     const a = html.props.children;
     const [ , date ] = a.props.children;
-    date.props.children.should.equal('all day');
+    date.props.children.should.equal('all-day');
   });
 
 });
