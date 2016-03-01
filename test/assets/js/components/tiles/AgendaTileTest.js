@@ -28,6 +28,7 @@ describe('AgendaTile', () => {
 describe('AgendaTileItem', () => {
   const props = {
     start: '2014-08-04T17:00:00',
+    end: '2014-08-04T18:00:00',
     title: 'Heron hunting',
     onClick: sinon.spy()
   };
@@ -55,6 +56,14 @@ describe('AgendaTileItem', () => {
     const node = ReactTestUtils.renderIntoDocument(tileItem);
     ReactTestUtils.Simulate.click(node);
     props.onClick.should.have.been.called;
+  });
+
+
+  it('renders time for all-day events', () => {
+    const html = shallowRender(<AgendaTileItem zoomed={ true } { ...props } end={ undefined }/>);
+    const a = html.props.children;
+    const [ , date ] = a.props.children;
+    date.props.children.should.equal('all day');
   });
 
 });
