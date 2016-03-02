@@ -84,15 +84,14 @@ export default class TextTile extends TileContent {
   }
 
   getWideBody(content) {
-    const itemsToDisplay = [content.items[this.state.itemIndex]];
-
     return (
       <ReactCSSTransitionGroup
+        className="text-tile-transition-group"
         transitionName="text-tile"
         transitionEnterTimeout={1000}
         transitionLeaveTimeout={1000}
       >
-        {this.mapTextItems(itemsToDisplay)}
+        {this.mapTextItems([content.items[this.state.itemIndex]])}
       </ReactCSSTransitionGroup>
     );
   }
