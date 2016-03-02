@@ -16,14 +16,6 @@ export default class ListTile extends TileContent {
     </ul>);
   }
 
-  getWideBody(content) {
-    return this.getLargeBody(content);
-  }
-
-  getSmallBody(content) {
-    return this.getLargeBody(content);
-  }
-
 }
 
 export const ListTileItem = (props) => (

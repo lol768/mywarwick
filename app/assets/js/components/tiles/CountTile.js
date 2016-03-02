@@ -25,14 +25,6 @@ export default class CountView extends TileContent {
     );
   }
 
-  getWideBody(content) {
-    return this.getLargeBody(content);
-  }
-
-  getSmallBody(content) {
-    return this.getLargeBody(content);
-  }
-
   getZoomedBody(content) {
     return (
       <ul>

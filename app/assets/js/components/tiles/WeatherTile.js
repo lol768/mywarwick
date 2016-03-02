@@ -51,10 +51,6 @@ export default class WeatherTile extends TileContent {
     );
   }
 
-  getWideBody(content) {
-    return (this.getLargeBody(content));
-  }
-
   getSmallBody(content) {
     return (
       <div>
