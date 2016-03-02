@@ -44,12 +44,12 @@ export default class TileContent extends Component {
     throw new TypeError('Must implement getLargeBody');
   }
 
-  getWideBody() {
-    return this.getLargeBody();
+  getWideBody(content) {
+    return this.getLargeBody(content);
   }
 
-  getSmallBody() {
-    return this.getLargeBody();
+  getSmallBody(content) {
+    return this.getLargeBody(content);
   }
 
   static canZoom() {
