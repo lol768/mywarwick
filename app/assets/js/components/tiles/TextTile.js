@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
+import _ from 'lodash';
+
 import TileContent from './TileContent';
 
 export default class TextTile extends TileContent {
@@ -51,9 +53,38 @@ export default class TextTile extends TileContent {
     });
   }
 
-  getBody(content) {
+  mapTextItems(itemsToDisplay) {
+    return itemsToDisplay.map(item => {
+      const tileItem = (<div key={item.id} className="tile__item">
+        <span className="tile__callout">{item.callout}</span>
+        <span className="tile__text">{item.text}</span>
+      </div>);
+
+      return item.href ?
+        <a
+          key={`${item.id}-a`}
+          href={item.href}
+          target="_blank"
+          onClick={ this.onClickLink }
+        >
+          {tileItem}
+        </a> : tileItem;
+    });
+  }
+
+  getLargeBody(content) {
     const itemsToDisplay = this.props.zoomed ?
-      content.items : [content.items[this.state.itemIndex]];
+      content.items : _.take(content.items, this.props.maxItemsToDisplay || 4);
+
+    return (
+      <div>
+        {this.mapTextItems(itemsToDisplay)}
+      </div>
+    );
+  }
+
+  getWideBody(content) {
+    const itemsToDisplay = [content.items[this.state.itemIndex]];
 
     return (
       <ReactCSSTransitionGroup
@@ -61,24 +92,13 @@ export default class TextTile extends TileContent {
         transitionEnterTimeout={1000}
         transitionLeaveTimeout={1000}
       >
-        {itemsToDisplay.map(item => {
-          const tileItem = (<div key={item.id} className="tile__item">
-            <span className="tile__callout">{item.callout}</span>
-            <span className="tile__text">{item.text}</span>
-          </div>);
-
-          return item.href ?
-            <a
-              key={`${item.id}-a`}
-              href={item.href}
-              target="_blank"
-              onClick={ this.onClickLink }
-            >
-              {tileItem}
-            </a> : tileItem;
-        }) }
+        {this.mapTextItems(itemsToDisplay)}
       </ReactCSSTransitionGroup>
     );
+  }
+
+  getSmallBody(content) {
+    return this.getWideBody(content);
   }
 
   onClickLink(e) {

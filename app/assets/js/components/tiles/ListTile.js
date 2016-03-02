@@ -6,7 +6,7 @@ import _ from 'lodash';
 
 export default class ListTile extends TileContent {
 
-  getBody(content) {
+  getLargeBody(content) {
     // only show the first maxItemsToDisplay items (defaults to 3) if not zoomed
     const maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : 3;
     const itemsToDisplay = this.props.zoomed ?
@@ -14,6 +14,14 @@ export default class ListTile extends TileContent {
     return (<ul>
       {itemsToDisplay.map(item => <ListTileItem key={item.id} {...item} />)}
     </ul>);
+  }
+
+  getWideBody(content) {
+    return this.getLargeBody(content);
+  }
+
+  getSmallBody(content) {
+    return this.getLargeBody(content);
   }
 
 }

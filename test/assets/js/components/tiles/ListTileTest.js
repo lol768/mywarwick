@@ -7,6 +7,7 @@ describe('ListTile', () => {
       items: [{id: 1}, {id: 2}, {id: 3}, {id: 4}],
       word: 'objects',
     },
+    size: 'small',
   };
 
   it('should show only three items when not zoomed', () => {

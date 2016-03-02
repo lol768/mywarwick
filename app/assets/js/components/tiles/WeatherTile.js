@@ -20,7 +20,7 @@ export default class WeatherTile extends TileContent {
     return true;
   }
 
-  getBody(content) {
+  getLargeBody(content) {
     const itemsToDisplay = this.props.zoomed ? content.items : [content.items[0]];
     return (
       <div>
@@ -36,5 +36,13 @@ export default class WeatherTile extends TileContent {
         )}
       </div>
     );
+  }
+
+  getWideBody(content) {
+    return this.getLargeBody(content);
+  }
+
+  getSmallBody(content) {
+    return this.getLargeBody(content);
   }
 }

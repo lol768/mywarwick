@@ -25,6 +25,10 @@
       overflow-y: auto;
     }
 
+    .tile__text {
+      font-size: inherit;
+    }
+
     height: 100%;
     cursor: default;
   }
@@ -77,6 +81,11 @@
   font-size: 15px;
   margin-bottom: @tile-gutter;
 
+  .tile__text {
+    font-size: 0.8em;
+    line-height: 1.4em;
+  }
+
   a {
     color: inherit;
     text-decoration: none;
@@ -126,12 +135,6 @@
     .list-group {
       margin-bottom: 8px;
     }
-  }
-
-  .tile__item {
-    position: absolute;
-    left: 10px;
-    bottom: 10px;
   }
 }
 
@@ -244,6 +247,9 @@
   display: block;
   font-size: 2em;
   line-height: 1.1;
+  small {
+    font-size: 0.5em;
+  }
 }
 
 .tile__dismiss, .tile__expand {
@@ -283,6 +289,8 @@
 }
 
 .text-tile-enter-active {
+  position: absolute;
+  left: 10px;
   bottom: 10px !important;
   transition: bottom 500ms ease-out;
   transition-delay: 400ms;
@@ -309,6 +317,10 @@
   text-overflow: ellipsis;
   display: inline-block;
   vertical-align: top;
+}
+
+.agenda-item__text {
+
 }
 
 .agenda-item__date {

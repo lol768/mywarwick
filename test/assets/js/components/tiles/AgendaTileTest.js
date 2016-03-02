@@ -6,7 +6,8 @@ describe('AgendaTile', () => {
   const props = {
     "content":{
       "items":[{ id: '1' }, { id: '2' }, { id: '3' }]
-    }
+    },
+    size: 'large',
   };
 
   it('Displays a limited number of items when not zoomed', () => {

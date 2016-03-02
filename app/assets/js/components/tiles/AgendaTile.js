@@ -4,7 +4,6 @@ import { localMoment } from '../../dateFormatter';
 import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';
-
 import _ from 'lodash';
 
 const DEFAULT_MAX_ITEMS = 5;
@@ -42,7 +41,13 @@ export default class AgendaTile extends TileContent {
     this.onClickLink = this.onClickLink.bind(this);
   }
 
-  getBody(content) {
+  numEventsToday(events) {
+    const now = new Date().toISOString().slice(0, 10);
+    const todayEvents = _.takeWhile(events, (e) => e.start.slice(0, 10) === now);
+    return todayEvents.length;
+  }
+
+  getLargeBody(content) {
     const maxItemsToDisplay = this.props.maxItemsToDisplay ?
       this.props.maxItemsToDisplay : DEFAULT_MAX_ITEMS;
     const itemsToDisplay = this.props.zoomed ?
@@ -55,6 +60,34 @@ export default class AgendaTile extends TileContent {
       <GroupedList groupBy={groupItemsForAgendaTile}>
         {events}
       </GroupedList>
+    );
+  }
+
+  getWideBody(content) {
+    return this.getLargeBody(content);
+  }
+
+  getSmallBody(content) {
+    const nextEvent = content.items[0];
+    const truncTitle = _.trunc(nextEvent.title, { length: 30 });
+    const text = (
+      <span className="tile__text">
+          Next: {truncTitle} at {localMoment(nextEvent.start).format('HH:mm')}
+      </span>
+    );
+
+    return (
+      <div className="tile__item">
+        <span className="tile__callout">{this.numEventsToday(content.items)}
+          <small> events today</small>
+        </span>
+        { nextEvent.href ?
+          <a href={ nextEvent.href } target="_blank" onClick={ this.onClickLink }>
+            { text }
+          </a> :
+          text
+        }
+      </div>
     );
   }
 

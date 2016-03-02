@@ -1,5 +1,10 @@
 /* eslint react/prop-types: 0, react/sort-comp: 0 */
 import React, { Component } from 'react';
+export const TILE_SIZES = {
+  SMALL: 'small',
+  WIDE: 'wide',
+  LARGE: 'large',
+};
 
 export default class TileContent extends Component {
 
@@ -22,8 +27,29 @@ export default class TileContent extends Component {
   }
 
   // when overriding arguments are - content, fetchedAt
-  getBody() {
-    throw new TypeError('Must implement getBody');
+  getBody(content) {
+    switch (this.props.size.toLowerCase()) {
+      case TILE_SIZES.LARGE:
+        return this.getLargeBody(content);
+      case TILE_SIZES.WIDE:
+        return this.getWideBody(content);
+      case TILE_SIZES.SMALL:
+        return this.getSmallBody(content);
+      default:
+        throw new ReferenceError('Tile props.size is not one of [ large, wide, small ]');
+    }
+  }
+
+  getLargeBody() {
+    throw new TypeError('Must implement getLargeBody');
+  }
+
+  getWideBody() {
+    throw new TypeError('Must implement getWideBody');
+  }
+
+  getSmallBody() {
+    throw new TypeError('Must implement getSmallBody');
   }
 
   static canZoom() {
@@ -35,7 +61,7 @@ export default class TileContent extends Component {
   }
 
   getZoomedBody(content, fetchedAt) {
-    return this.getBody(content, fetchedAt);
+    return this.getLargeBody(content, fetchedAt);
   }
 
   render() {

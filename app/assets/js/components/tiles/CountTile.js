@@ -16,13 +16,21 @@ export default class CountView extends TileContent {
     return !content.count && (!content.items || content.items.length === 0);
   }
 
-  getBody(content) {
+  getLargeBody(content) {
     return (
       <div className="tile__item">
         <span className="tile__callout">{content.count || content.items.length}</span>
         <span className="tile__text">{content.word}</span>
       </div>
     );
+  }
+
+  getWideBody(content) {
+    return this.getLargeBody(content);
+  }
+
+  getSmallBody(content) {
+    return this.getLargeBody(content);
   }
 
   getZoomedBody(content) {
