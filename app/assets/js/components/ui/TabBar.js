@@ -35,7 +35,7 @@ export default class TabBar extends Component {
 }
 
 TabBar.propTypes = {
-  children: PropTypes.element,
+  children: PropTypes.arrayOf(PropTypes.element),
   onSelectItem: PropTypes.func,
   selectedItem: PropTypes.string,
 };
