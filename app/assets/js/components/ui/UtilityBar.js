@@ -5,6 +5,12 @@ import $ from 'jquery';
 
 export default class UtilityBar extends ReactComponent {
 
+  constructor(props) {
+    super(props);
+
+    this.onPhotoError = this.onPhotoError.bind(this);
+  }
+
   componentDidMount() {
     this.attachAccountPopover();
   }
@@ -14,35 +20,54 @@ export default class UtilityBar extends ReactComponent {
   }
 
   attachAccountPopover() {
-    const element = ReactDOM.findDOMNode(this.refs.accountLink);
-    $(element).accountPopover();
+    const $element = $(ReactDOM.findDOMNode(this.refs.accountLink));
+
+    if ($element.data('id7.account-popover') === undefined) {
+      $element.accountPopover();
+    }
   }
 
   signInLink() {
-    return (<a href={window.SSO.LOGIN_URL} key="signInLink">
-      Sign in
-    </a>);
+    return (
+      <a href={window.SSO.LOGIN_URL} key="signInLink" className="sign-in-link">
+        Sign in
+      </a>
+    );
+  }
+
+  onPhotoError() {
+    const photo = ReactDOM.findDOMNode(this.refs.photo);
+
+    photo.src = 'https://websignon.warwick.ac.uk/origin/static/images/no-photo.png';
+  }
+
+  renderPhoto(user) {
+    return (
+      <img src="/photo"
+        ref="photo"
+        className="img-circle"
+        alt={ user.name }
+        onError={ this.onPhotoError }
+      />
+    );
   }
 
   accountLink(user) {
     const isMobile = this.props.layoutClassName === 'mobile';
-    const noPhoto = 'https://websignon.warwick.ac.uk/origin/static/images/no-photo.png';
-    const link = isMobile ?
-      `<img src="/photo" class="img-circle" alt=${user.name} onError="this.onerror=null;this.src=
-      ${noPhoto};"/>`
-      : user.name;
+
+    const link = isMobile ? this.renderPhoto(user) : user.name;
 
     return (
       <a
         key="accountLink"
         ref="accountLink"
+        className="account-link"
         href="//warwick.ac.uk/myaccount"
         data-toggle="id7:account-popover"
         data-logoutlink={window.SSO.LOGOUT_URL}
         data-loginlink={window.SSO.LOGIN_URL}
-        data-name={link}
       >
-        {link}
+        { link }
         <span className="caret"></span>
       </a>
     );

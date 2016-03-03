@@ -186,7 +186,7 @@ export default class Tile extends Component {
           <div
             className="tile__edit-control bottom-right"
             onClick={ this.props.onResize }
-            title={`Make tile ${size === 'small' ? 'bigger' : 'smaller'}`}
+            title={`Make tile ${size !== 'large' ? 'bigger' : 'smaller'}`}
           >
             <i className="fa fa-fw fa-arrow-up"> </i>
           </div>
