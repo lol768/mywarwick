@@ -42,16 +42,15 @@ export default class AgendaTile extends TileContent {
   }
 
   numEventsToday(events) {
-    const now = new Date().toISOString().slice(0, 10);
-    const todayEvents = _.takeWhile(events, (e) => e.start.slice(0, 10) === now);
+    const now = localMoment();
+    const todayEvents = _.takeWhile(events, (e) => localMoment(e.start).isSame(now, 'day'));
     return todayEvents.length;
   }
 
   getLargeBody() {
     const { content } = this.props;
 
-    const maxItemsToDisplay = this.props.maxItemsToDisplay ?
-      this.props.maxItemsToDisplay : DEFAULT_MAX_ITEMS;
+    const maxItemsToDisplay = this.props.maxItemsToDisplay || DEFAULT_MAX_ITEMS;
     const itemsToDisplay = this.props.zoomed ?
       content.items : _.take(content.items, maxItemsToDisplay);
 
@@ -76,11 +75,26 @@ export default class AgendaTile extends TileContent {
       </span>
     );
 
+    const numEventsToday = this.numEventsToday(content.items);
+
+    const callout = (
+      <span className="tile__callout">
+        {numEventsToday}
+        <small> events today</small>
+      </span>
+    );
+
+    if (numEventsToday === 0) {
+      return (
+        <div className="tile__item">
+          { callout }
+        </div>
+      );
+    }
+
     return (
       <div className="tile__item">
-        <span className="tile__callout">{this.numEventsToday(content.items)}
-          <small> events today</small>
-        </span>
+        { callout }
         { nextEvent.href ?
           <a href={ nextEvent.href } target="_blank" onClick={ this.onClickLink }>
             { text }
