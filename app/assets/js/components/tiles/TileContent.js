@@ -9,32 +9,28 @@ export const TILE_SIZES = {
 export default class TileContent extends Component {
 
   // when do we consider the tile to have no valid content
-  isEmpty(content) {
+  isEmpty() {
+    const { content } = this.props;
+
     return !content.items || content.items.length === 0;
   }
 
-  contentOrDefault(content, fetchedAt, contentFunction) {
-    const defaultText = (content.defaultText === undefined) ?
-      'Nothing to show.' : content.defaultText;
-    if (this.isEmpty(content)) {
-      return <span>{defaultText}</span>;
+  contentOrDefault(contentFunction) {
+    if (this.isEmpty()) {
+      return <span>{ this.props.content.defaultText || 'Nothing to show.' }</span>;
     }
-    return contentFunction.call(this, content, fetchedAt);
+
+    return contentFunction.call(this);
   }
 
-  getBodyInternal(content, fetchedAt) {
-    return this.contentOrDefault(content, fetchedAt, this.getBody);
-  }
-
-  // when overriding arguments are - content, fetchedAt
-  getBody(content) {
+  getBody() {
     switch (this.props.size.toLowerCase()) {
       case TILE_SIZES.LARGE:
-        return this.getLargeBody(content);
+        return this.getLargeBody();
       case TILE_SIZES.WIDE:
-        return this.getWideBody(content);
+        return this.getWideBody();
       case TILE_SIZES.SMALL:
-        return this.getSmallBody(content);
+        return this.getSmallBody();
       default:
         throw new ReferenceError('Tile props.size is not one of [ large, wide, small ]');
     }
@@ -44,31 +40,26 @@ export default class TileContent extends Component {
     throw new TypeError('Must implement getLargeBody');
   }
 
-  getWideBody(content) {
-    return this.getLargeBody(content);
+  getWideBody() {
+    return this.getLargeBody();
   }
 
-  getSmallBody(content) {
-    return this.getLargeBody(content);
+  getSmallBody() {
+    return this.getLargeBody();
   }
 
   static canZoom() {
     return false;
   }
 
-  getZoomedBodyInternal(content, fetchedAt) {
-    return this.contentOrDefault(content, fetchedAt, this.getZoomedBody);
-  }
-
-  getZoomedBody(content, fetchedAt) {
-    return this.getLargeBody(content, fetchedAt);
+  getZoomedBody() {
+    return this.getLargeBody();
   }
 
   render() {
-    const { content, zoomed, fetchedAt } = this.props;
+    const { content, zoomed } = this.props;
     if (content) {
-      return zoomed ?
-        this.getZoomedBodyInternal(content, fetchedAt) : this.getBodyInternal(content, fetchedAt);
+      return this.contentOrDefault(zoomed ? this.getZoomedBody : this.getBody);
     }
     return null;
   }

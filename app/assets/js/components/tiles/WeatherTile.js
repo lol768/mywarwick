@@ -43,7 +43,9 @@ export default class WeatherTile extends TileContent {
     ));
   }
 
-  getLargeBody(content) {
+  getLargeBody() {
+    const { content } = this.props;
+
     return (
       <div>
         {this.mapToTableRow(content.items)}
@@ -51,7 +53,9 @@ export default class WeatherTile extends TileContent {
     );
   }
 
-  getSmallBody(content) {
+  getSmallBody() {
+    const { content } = this.props;
+
     return (
       <div>
         {this.mapToItems([content.items[0]])}

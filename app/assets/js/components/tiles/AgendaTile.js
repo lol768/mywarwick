@@ -47,7 +47,9 @@ export default class AgendaTile extends TileContent {
     return todayEvents.length;
   }
 
-  getLargeBody(content) {
+  getLargeBody() {
+    const { content } = this.props;
+
     const maxItemsToDisplay = this.props.maxItemsToDisplay ?
       this.props.maxItemsToDisplay : DEFAULT_MAX_ITEMS;
     const itemsToDisplay = this.props.zoomed ?
@@ -63,16 +65,14 @@ export default class AgendaTile extends TileContent {
     );
   }
 
-  getWideBody(content) {
-    return this.getLargeBody(content);
-  }
+  getSmallBody() {
+    const { content } = this.props;
 
-  getSmallBody(content) {
     const nextEvent = content.items[0];
     const truncTitle = _.trunc(nextEvent.title, { length: 30 });
     const text = (
       <span className="tile__text">
-          Next: {truncTitle} at {localMoment(nextEvent.start).format('HH:mm')}
+        Next: {truncTitle} at {localMoment(nextEvent.start).format('HH:mm')}
       </span>
     );
 
@@ -102,6 +102,7 @@ export default class AgendaTile extends TileContent {
     if (content && content.items) {
       return content.items.length > 1;
     }
+
     return false;
   }
 }

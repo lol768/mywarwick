@@ -72,7 +72,9 @@ export default class TextTile extends TileContent {
     });
   }
 
-  getLargeBody(content) {
+  getLargeBody() {
+    const { content } = this.props;
+
     const itemsToDisplay = this.props.zoomed ?
       content.items : _.take(content.items, this.props.maxItemsToDisplay || 4);
 
@@ -83,7 +85,9 @@ export default class TextTile extends TileContent {
     );
   }
 
-  getWideBody(content) {
+  getWideBody() {
+    const { content } = this.props;
+
     return (
       <ReactCSSTransitionGroup
         className="text-tile-transition-group"
@@ -96,8 +100,8 @@ export default class TextTile extends TileContent {
     );
   }
 
-  getSmallBody(content) {
-    return this.getWideBody(content);
+  getSmallBody() {
+    return this.getWideBody();
   }
 
   onClickLink(e) {
@@ -112,6 +116,7 @@ export default class TextTile extends TileContent {
     if (content && content.items) {
       return content.items.length > 1;
     }
+
     return false;
   }
 
