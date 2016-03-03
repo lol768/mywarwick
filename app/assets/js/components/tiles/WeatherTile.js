@@ -35,7 +35,7 @@ export default class WeatherTile extends TileContent {
 
   mapToTableRow(itemsToDisplay) {
     return itemsToDisplay.map(item => (
-      <div className="col-xs-2 table__item">
+      <div className="col-xs-2 table__item" key={item.id}>
         <Skycon className="skycon--small" icon={formatIconString(item.icon)}/>
         <span className="tile__callout">{`${Math.round(item.temp)}°`}</span>
         <span className="tile__text">{formatWeatherTime(item.time)}</span>
