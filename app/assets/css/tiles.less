@@ -82,17 +82,9 @@
 .tile {
   height: @tile-height;
   position: relative;
-  font-size: 15px;
   margin-bottom: @tile-gutter;
-
-  .tile__text {
-    font-size: 0.8em;
-    line-height: 1.4em;
-  }
-
-  .tile__item {
-    //display: inline-block;
-  }
+  font-size: 13px;
+  line-height: 1.2em;
 
   a {
     color: inherit;
@@ -128,6 +120,17 @@
     }
   }
 }
+
+.tile__callout {
+  display: block;
+  font-size: 2em;
+  margin-bottom: .3em;
+
+  small {
+    font-size: 0.5em;
+  }
+}
+
 
 .tile--large {
   height: @tile-height * 2 + @tile-gutter;
@@ -251,15 +254,6 @@
   }
 }
 
-.tile__callout {
-  display: block;
-  font-size: 2em;
-  line-height: 1.1;
-  small {
-    font-size: 0.5em;
-  }
-}
-
 .tile__dismiss, .tile__expand {
   position: absolute;
   display: block;
@@ -330,10 +324,6 @@
   text-overflow: ellipsis;
   display: inline-block;
   vertical-align: top;
-}
-
-.agenda-item__text {
-
 }
 
 .agenda-item__date {

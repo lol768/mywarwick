@@ -141,7 +141,7 @@ class MeView extends ReactComponent {
   }
 
   onResizeTile(tile) {
-    const sizes = _.map(TILE_SIZES, size => size);
+    const sizes = _.values(TILE_SIZES);
     const nextSize = sizes[(sizes.indexOf(tile.size || tile.defaultSize) + 1) % sizes.length];
 
     this.props.dispatch(tiles.resizeTile(tile, nextSize));
