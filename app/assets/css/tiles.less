@@ -140,8 +140,9 @@
   .tile--agenda {
     .list-header {
       border: none;
-      font-weight: 100;
+      font-weight: bold;
       background-color: transparent;
+      padding: 0 0 .4em;
     }
     .list-group {
       margin-bottom: 8px;
@@ -235,6 +236,10 @@
 }
 
 .tile--zoomed {
+  .tile {
+    font-size: 1.1em;
+  }
+
   .tile__body {
     display: block;
     .row;
@@ -249,8 +254,14 @@
     .make-xs-column(12);
     .make-sm-column(6);
     width: initial;
-    margin-top: 10px;
-    margin-bottom: 5px;
+  }
+}
+
+.tile__item {
+  margin-bottom: 1.25em;
+
+  &:last-of-type {
+    margin-bottom: 0;
   }
 }
 
@@ -313,9 +324,19 @@
 }
 
 // AGENDA
-.agenda-item, .agenda-item a {
+.agenda-item {
   display: block;
 }
+
+.agenda-item a {
+  display: block;
+  padding: .2em 0;
+
+  .tile-zoomed & {
+    padding: .4em 0;
+  }
+}
+
 
 .agenda-item__title {
   max-width: 85%;
