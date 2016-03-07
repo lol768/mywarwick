@@ -25,6 +25,10 @@
       -webkit-overflow-scrolling: touch;
     }
 
+    .tile__text {
+      font-size: inherit;
+    }
+
     height: 100%;
     cursor: default;
   }
@@ -78,8 +82,9 @@
 .tile {
   height: @tile-height;
   position: relative;
-  font-size: 15px;
   margin-bottom: @tile-gutter;
+  font-size: 13px;
+  line-height: 1.2em;
 
   a {
     color: inherit;
@@ -116,6 +121,17 @@
   }
 }
 
+.tile__callout {
+  display: block;
+  font-size: 2em;
+  margin-bottom: .3em;
+
+  small {
+    font-size: 0.5em;
+  }
+}
+
+
 .tile--large {
   height: @tile-height * 2 + @tile-gutter;
 }
@@ -124,18 +140,13 @@
   .tile--agenda {
     .list-header {
       border: none;
-      font-weight: 100;
+      font-weight: bold;
       background-color: transparent;
+      padding: 0 0 .4em;
     }
     .list-group {
       margin-bottom: 8px;
     }
-  }
-
-  .tile__item {
-    position: absolute;
-    left: 10px;
-    bottom: 10px;
   }
 }
 
@@ -225,6 +236,10 @@
 }
 
 .tile--zoomed {
+  .tile {
+    font-size: 1.1em;
+  }
+
   .tile__body {
     display: block;
     .row;
@@ -239,15 +254,15 @@
     .make-xs-column(12);
     .make-sm-column(6);
     width: initial;
-    margin-top: 10px;
-    margin-bottom: 5px;
   }
 }
 
-.tile__callout {
-  display: block;
-  font-size: 2em;
-  line-height: 1.1;
+.tile__item {
+  margin-bottom: 1.25em;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
 }
 
 .tile__dismiss, .tile__expand {
@@ -282,6 +297,13 @@
   display: block;
 }
 
+.text-tile-transition-group {
+  .tile__item {
+    position: absolute;
+    bottom: 10px;
+  }
+}
+
 .text-tile-enter {
   bottom: -100% !important;
 }
@@ -302,9 +324,19 @@
 }
 
 // AGENDA
-.agenda-item, .agenda-item a {
+.agenda-item {
   display: block;
 }
+
+.agenda-item a {
+  display: block;
+  padding: .2em 0;
+
+  .tile-zoomed & {
+    padding: .4em 0;
+  }
+}
+
 
 .agenda-item__title {
   max-width: 85%;
@@ -332,6 +364,15 @@
     max-width: 80px;
     margin-left: 18px;
   }
+  .skycon--small {
+    max-width: 50px;
+    margin-left: 0;
+  }
+  .table__item {
+    .tile__callout, .tile__text {
+      margin-left: 8px;
+    }
+  }
 }
 
 .tile--hidden {
@@ -346,12 +387,12 @@
 
 // TRAFFIC
 
-.tile--zoomed .traffic--tile ul {
+.tile--zoomed .tile--traffic ul {
   margin-right: 10px;
   margin-left: 10px;
 }
 
-.traffic--tile {
+.tile--traffic {
   i {
     margin-right: 5px;
   }

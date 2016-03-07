@@ -9,14 +9,19 @@ export default class CountView extends TileContent {
     if (content && content.items) {
       return content.items.length > 1;
     }
+
     return false;
   }
 
-  isEmpty(content) {
+  isEmpty() {
+    const { content } = this.props;
+
     return !content.count && (!content.items || content.items.length === 0);
   }
 
-  getBody(content) {
+  getLargeBody() {
+    const { content } = this.props;
+
     return (
       <div className="tile__item">
         <span className="tile__callout">{content.count || content.items.length}</span>
@@ -25,7 +30,9 @@ export default class CountView extends TileContent {
     );
   }
 
-  getZoomedBody(content) {
+  getZoomedBody() {
+    const { content } = this.props;
+
     return (
       <ul>
         {content.items.map(item => <ListTileItem key={item.id} {...item} />)}

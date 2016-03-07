@@ -13,10 +13,11 @@ describe('WeatherTile', () => {
         {"id": 1456329600, "time": 1456329600, "temp": 6.39, "icon": "clear-day", "text": "Clear"},
         {"id": 1456333200, "time": 1456333200, "temp": 5.47, "icon": "clear-day", "text": "Clear"}
       ]
-    }
+    },
+    size: 'small',
   };
 
-  it('displays a single weather item when not zoomed', () => {
+  it('displays a single weather item when size small', () => {
     const html = shallowRender(<WeatherTile { ...props } />);
     html.type.should.equal('div');
     const [ weather ] = html.props.children;

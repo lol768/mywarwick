@@ -4,7 +4,6 @@ import { localMoment } from '../../dateFormatter';
 import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';
-
 import _ from 'lodash';
 
 const DEFAULT_MAX_ITEMS = 5;
@@ -42,9 +41,16 @@ export default class AgendaTile extends TileContent {
     this.onClickLink = this.onClickLink.bind(this);
   }
 
-  getBody(content) {
-    const maxItemsToDisplay = this.props.maxItemsToDisplay ?
-      this.props.maxItemsToDisplay : DEFAULT_MAX_ITEMS;
+  numEventsToday(events) {
+    const now = localMoment();
+    const todayEvents = _.takeWhile(events, (e) => localMoment(e.start).isSame(now, 'day'));
+    return todayEvents.length;
+  }
+
+  getLargeBody() {
+    const { content } = this.props;
+
+    const maxItemsToDisplay = this.props.maxItemsToDisplay || DEFAULT_MAX_ITEMS;
     const itemsToDisplay = this.props.zoomed ?
       content.items : _.take(content.items, maxItemsToDisplay);
 
@@ -55,6 +61,47 @@ export default class AgendaTile extends TileContent {
       <GroupedList groupBy={groupItemsForAgendaTile}>
         {events}
       </GroupedList>
+    );
+  }
+
+  getSmallBody() {
+    const { content } = this.props;
+
+    const nextEvent = content.items[0];
+    const truncTitle = _.trunc(nextEvent.title, { length: 30 });
+    const text = (
+      <span className="tile__text">
+        Next: {truncTitle} at {localMoment(nextEvent.start).format('HH:mm')}
+      </span>
+    );
+
+    const numEventsToday = this.numEventsToday(content.items);
+
+    const callout = (
+      <span className="tile__callout">
+        {numEventsToday}
+        <small> events today</small>
+      </span>
+    );
+
+    if (numEventsToday === 0) {
+      return (
+        <div className="tile__item">
+          { callout }
+        </div>
+      );
+    }
+
+    return (
+      <div className="tile__item">
+        { callout }
+        { nextEvent.href ?
+          <a href={ nextEvent.href } target="_blank" onClick={ this.onClickLink }>
+            { text }
+          </a> :
+          text
+        }
+      </div>
     );
   }
 
@@ -69,6 +116,7 @@ export default class AgendaTile extends TileContent {
     if (content && content.items) {
       return content.items.length > 1;
     }
+
     return false;
   }
 }

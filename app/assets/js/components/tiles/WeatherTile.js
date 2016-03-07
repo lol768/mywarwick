@@ -20,20 +20,45 @@ export default class WeatherTile extends TileContent {
     return true;
   }
 
-  getBody(content) {
-    const itemsToDisplay = this.props.zoomed ? content.items : [content.items[0]];
-    return (
-      <div>
-        {itemsToDisplay.map(item => (
-            <div key={item.id} className="tile__item">
-              <span className="tile__callout">{`${Math.round(item.temp)}°`}</span>
-              <Skycon className="skycon" icon={formatIconString(item.icon)}/>
+  mapToItems(itemsToDisplay) {
+    return itemsToDisplay.map(item => (
+        <div key={item.id} className="tile__item">
+          <span className="tile__callout">{`${Math.round(item.temp)}°`}</span>
+          <Skycon className="skycon" icon={formatIconString(item.icon)}/>
               <span className="tile__text">
                 {`${formatWeatherTime(item.time)}: ${item.text}`}
               </span>
-            </div>
-          )
-        )}
+        </div>
+      )
+    );
+  }
+
+  mapToTableRow(itemsToDisplay) {
+    return itemsToDisplay.map(item => (
+      <div className="col-xs-2 table__item" key={item.id}>
+        <Skycon className="skycon--small" icon={formatIconString(item.icon)}/>
+        <span className="tile__callout">{`${Math.round(item.temp)}°`}</span>
+        <span className="tile__text">{formatWeatherTime(item.time)}</span>
+      </div>
+    ));
+  }
+
+  getLargeBody() {
+    const { content } = this.props;
+
+    return (
+      <div>
+        {this.mapToTableRow(content.items)}
+      </div>
+    );
+  }
+
+  getSmallBody() {
+    const { content } = this.props;
+
+    return (
+      <div>
+        {this.mapToItems([content.items[0]])}
       </div>
     );
   }

@@ -14,6 +14,7 @@ import Tile from '../tiles/Tile';
 import * as TILE_TYPES from '../tiles';
 import * as tiles from '../../tiles';
 import * as serverpipe from '../../serverpipe';
+import { TILE_SIZES } from '../tiles/TileContent';
 
 const EDITING_ANIMATION_DURATION = 700;
 
@@ -121,12 +122,13 @@ class MeView extends ReactComponent {
     const contentConfig = {
       content,
       zoomed,
+      size: props.size,
       editingAny: config.editingAny,
       fetchedAt,
     };
 
     return (
-      <Tile { ... config }>
+      <Tile { ...config }>
         { React.createElement(tileContentComponent, contentConfig) }
       </Tile>
     );
@@ -139,7 +141,7 @@ class MeView extends ReactComponent {
   }
 
   onResizeTile(tile) {
-    const sizes = ['small', 'wide', 'large'];
+    const sizes = _.values(TILE_SIZES);
     const nextSize = sizes[(sizes.indexOf(tile.size || tile.defaultSize) + 1) % sizes.length];
 
     this.props.dispatch(tiles.resizeTile(tile, nextSize));
