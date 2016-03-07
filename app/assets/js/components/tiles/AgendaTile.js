@@ -6,8 +6,6 @@ import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';
 import _ from 'lodash';
 
-const DEFAULT_MAX_ITEMS = 5;
-
 const groupItemsForAgendaTile = {
 
   description: 'by-date--agenda',
@@ -39,6 +37,15 @@ export default class AgendaTile extends TileContent {
   constructor(props) {
     super(props);
     this.onClickLink = this.onClickLink.bind(this);
+    this.state = {
+      defaultMaxItems: { small: null, wide: 2, large: 5 }[props.size],
+    };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      defaultMaxItems: { small: null, wide: 2, large: 5 }[nextProps.size],
+    });
   }
 
   numEventsToday(events) {
@@ -50,7 +57,7 @@ export default class AgendaTile extends TileContent {
   getLargeBody() {
     const { content } = this.props;
 
-    const maxItemsToDisplay = this.props.maxItemsToDisplay || DEFAULT_MAX_ITEMS;
+    const maxItemsToDisplay = this.props.maxItemsToDisplay || this.state.defaultMaxItems;
     const itemsToDisplay = this.props.zoomed ?
       content.items : _.take(content.items, maxItemsToDisplay);
 
@@ -80,7 +87,7 @@ export default class AgendaTile extends TileContent {
     const callout = (
       <span className="tile__callout">
         {numEventsToday}
-        <small> events today</small>
+        <small> event{numEventsToday === 1 ? null : 's'} today</small>
       </span>
     );
 
