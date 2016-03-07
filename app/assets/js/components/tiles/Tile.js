@@ -134,7 +134,7 @@ export default class Tile extends Component {
   }
 
   render() {
-    const { type, title, size, colour, content, editing, zoomed } = this.props;
+    const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
     const icon = (<i
       className={`tile__icon fa fa-fw ${this.getIcon()}`} ref="icon" title={ this.getIconTitle() }
@@ -142,10 +142,12 @@ export default class Tile extends Component {
     > </i>);
 
     const sizeClass = SIZE_CLASSES[size];
-    const outerClassName = classNames(sizeClass, 'tile__container', { 'tile--zoomed': zoomed });
+    const outerClassName =
+      classNames({ [`${sizeClass}`]: !zoomed }, 'tile__container', { 'tile--zoomed': zoomed });
     const zoomIcon = () => {
       if (zoomed) {
-        return <i className="fa fa-times tile__dismiss" onClick={this.props.onZoomOut}> </i>;
+        return isDesktop ?
+          <i className="fa fa-times tile__dismiss" onClick={this.props.onZoomOut}> </i> : null;
       } else if (this.shouldDisplayExpandIcon()) {
         return <i className="fa fa-expand tile__expand" onClick={this.onClickExpand}> </i>;
       }
@@ -184,7 +186,7 @@ export default class Tile extends Component {
           <div
             className="tile__edit-control bottom-right"
             onClick={ this.props.onResize }
-            title={`Make tile ${size === 'small' ? 'bigger' : 'smaller'}`}
+            title={`Make tile ${size !== 'large' ? 'bigger' : 'smaller'}`}
           >
             <i className="fa fa-fw fa-arrow-up"> </i>
           </div>

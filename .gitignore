@@ -11,6 +11,8 @@ target
 /RUNNING_PID
 /data
 gulpopts.json
+/.cache-*
+/bin
 
 /node_modules
 /mocha.json

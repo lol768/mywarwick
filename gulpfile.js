@@ -189,6 +189,7 @@ gulp.task('copy-imgs', function () {
 
 gulp.task('pre-service-worker', ['scripts', 'styles', 'copy-imgs'], function () {
   return gulp.src([
+      'public/**/*',
       paths.assetsOut + '/**/*',
       '!' + paths.assetsOut + '/**/*.map', // don't cache source maps
       '!' + paths.assetsOut + '/appcache.manifest' // don't cache appcache manifest
@@ -205,8 +206,8 @@ gulp.task('service-worker', ['pre-service-worker'], function () {
       cacheId: 'start',
       handleFetch: true,
       staticFileGlobs: filenames.get('offline-cache'),
-      stripPrefix: 'target/gulp',
-      replacePrefix: 'assets',
+      stripPrefixRegex: '(target/gulp|public)',
+      replacePrefix: '/assets',
       ignoreUrlParametersMatching: [/^v$/],
       logger: gutil.log,
       dynamicUrlToDependencies: {

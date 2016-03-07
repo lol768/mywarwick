@@ -73,19 +73,27 @@ export default class AgendaTile extends TileContent {
   }
 }
 
-class AgendaTileItem extends React.Component {
-
+export class AgendaTileItem extends React.Component {
   render() {
-    const { title, start, href, onClickLink } = this.props;
+    const { title, start, end, href, onClickLink } = this.props;
+
+    const content = (
+      <span>
+        <span title={ title } className="agenda-item__title">{ title }</span>
+        <span className="agenda-item__date">
+          { end ? localMoment(start).format('HH:mm') : 'all-day' }
+        </span>
+      </span>
+    );
+
     return (
       <li className="agenda-item">
         { href ?
           <a href={ href } target="_blank" onClick={ onClickLink }>
-            <span title={ title } className="agenda-item__title">{ title }</span>
+            { content }
           </a> :
-          <span title={ title } className="agenda-item__title">{ title }</span>
+          content
         }
-        <span className="agenda-item__date">{localMoment(start).format('HH:mm')}</span>
       </li>
     );
   }

@@ -47,17 +47,17 @@ if (window.navigator.userAgent.indexOf('Start/') >= 0) {
       isUserLoggedIn: state.getIn(['user', 'data', 'usercode']) !== undefined,
       tabBarHidden: state.getIn(['ui', 'className']) !== 'mobile',
     });
-
-    if ('applicationCache' in window) {
-      window.applicationCache.addEventListener('cached', setAppCached);
-      window.applicationCache.addEventListener('noupdate', setAppCached);
-      window.applicationCache.addEventListener('updateready', setAppCached);
-
-      if (window.applicationCache.status === window.applicationCache.IDLE) {
-        setAppCached();
-      }
-    }
   });
+
+  if ('applicationCache' in window) {
+    window.applicationCache.addEventListener('cached', setAppCached);
+    window.applicationCache.addEventListener('noupdate', setAppCached);
+    window.applicationCache.addEventListener('updateready', setAppCached);
+
+    if (window.applicationCache.status === window.applicationCache.IDLE) {
+      setAppCached();
+    }
+  }
 
   window.registerForAPNs = registerForAPNs;
 }

@@ -1,5 +1,11 @@
 @import 'mixins';
 
+.mobile {
+  .fixed-header {
+   z-index: 101;
+  }
+}
+
 .fixed-header {
   position: fixed;
   top: 0;
@@ -10,21 +16,6 @@
   .id7-fixed-width-container {
     height: auto !important;
     background: transparent !important;
-  }
-
-  .id7-page-header::after {
-    content: '';
-    display: block;
-    width: 100%;
-    height: 3px;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0));
-    opacity: 0;
-  }
-
-  &:not(.at-top) {
-    .id7-page-header::after {
-      opacity: 1;
-    }
   }
 }
 

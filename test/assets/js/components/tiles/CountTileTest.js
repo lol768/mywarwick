@@ -39,7 +39,7 @@ describe('CountTile', () => {
     const props = {
       zoomed: true,
       content: {
-        items: [{}, {}],
+        items: [{id: 1}, {id: 2}],
         word: 'objects',
       },
     };

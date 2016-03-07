@@ -1,24 +1,36 @@
 import React from 'react';
 import UtilityBar from './UtilityBar';
 
+import $ from 'jquery';
+import ReactDOM from 'react-dom';
+
 export default class MastheadMobile extends React.Component {
-  constructor(props) {
-    super(props);
+
+  componentDidMount() {
+    $(ReactDOM.findDOMNode(this)).on('touchmove', (e) => e.preventDefault());
   }
 
   render() {
     return (
-      <div className="start-masthead">
+      <div className="start-masthead use-popover">
+        <div className="back-btn" onClick={this.props.onBackClick}>
+          <i className="fa fa-chevron-left"/>
+          Back
+        </div>
         <div className="masthead-title">
-          <span className="light">
-          START.
-          </span>
-          WARWICK
+          <span className="light">Start.</span>Warwick
         </div>
         <nav className="id7-utility-bar">
-          <UtilityBar {...this.props} />
+          <UtilityBar {...this.props} layoutClassName="mobile" />
         </nav>
       </div>
     );
   }
+
 }
+
+MastheadMobile.propTypes = {
+  zoomedTile: React.PropTypes.string,
+  path: React.PropTypes.string,
+  onBackClick: React.PropTypes.func,
+};

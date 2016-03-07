@@ -24,6 +24,7 @@ import { getNumItemsSince } from '../../stream';
 
 import { updateLayoutClass } from '../Application';
 import { fetchTileContent } from '../../serverpipe';
+import { zoomOut } from '../../tiles';
 
 class ID7Layout extends ReactComponent {
 
@@ -32,6 +33,7 @@ class ID7Layout extends ReactComponent {
     this.goToHome = this.goToHome.bind(this);
     this.goToNotification = this.goToNotification.bind(this);
     this.goToActivity = this.goToActivity.bind(this);
+    this.onBackClick = this.onBackClick.bind(this);
   }
 
   componentWillMount() {
@@ -39,8 +41,11 @@ class ID7Layout extends ReactComponent {
     this.setBodyTheme(this.props.colourTheme);
   }
 
-  componentWillReceiveProps() {
-    this.props.dispatch(updateLayoutClass());
+  componentWillReceiveProps(nextProps) {
+    nextProps.dispatch(updateLayoutClass());
+
+    const hasZoomedTile = nextProps.path === '/' && !!nextProps.zoomedTile;
+    $('body').toggleClass('has-zoomed-tile', hasZoomedTile);
   }
 
   componentDidUpdate(prevProps) {
@@ -72,30 +77,83 @@ class ID7Layout extends ReactComponent {
     this.props.dispatch(navigate('/activity'));
   }
 
-  render() {
-    const { layoutClassName, notificationsCount, user }
-      = this.props;
+  onBackClick() {
+    this.props.dispatch(zoomOut());
+  }
 
-    const isMobile = layoutClassName === 'mobile';
-    const userData = this.props.user.data;
+  renderMasqueradeNotice() {
+    const user = this.props.user.data;
 
+    if (user.masquerading) {
+      return <MasqueradeNotice masqueradingAs={user} />;
+    }
+  }
+
+  renderNotificationPermissionRequest() {
+    if ('Notification' in window && Notification.permission === 'default') {
+      return <PermissionRequest isDisabled={ !this.props.user.authenticated } />;
+    }
+  }
+
+  renderMobile() {
+    return (
+      <div>
+        <a className="sr-only sr-only-focusable" href="#main">Skip to main content</a>
+        <div className="fixed-header at-top">
+          <div className="id7-fixed-width-container">
+            <header className="id7-page-header" ref="header">
+              { this.renderMasqueradeNotice() }
+
+              <MastheadMobile user={this.props.user}
+                zoomedTile={this.props.zoomedTile}
+                onBackClick={this.onBackClick}
+                path={this.props.path}
+              />
+            </header>
+          </div>
+        </div>
+
+        <div className="id7-fixed-width-container">
+          <main className="id7-main-content-area" id="main">
+            <header className="id7-main-content-header">
+              { this.renderNotificationPermissionRequest() }
+              <UpdatePopup />
+              <div className="id7-horizontal-divider">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg" x="0" y="0" version="1.1" width="1130"
+                  height="40" viewBox="0, 0, 1130, 40"
+                >
+                  <path
+                    d="m 0,0 1030.48, 0 22.8,40 16.96,-31.4 16.96,31.4 22.8,-40 20,0"
+                    className="divider" stroke="#383838" fill="none"
+                  />
+                </svg>
+              </div>
+            </header>
+
+            <div className="id7-main-content">
+              { this.props.children }
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  renderDesktop() {
+    const { notificationsCount, user } = this.props;
 
     return (
       <div>
         <a className="sr-only sr-only-focusable" href="#main">Skip to main content</a>
-
+        <div className="id7-left-border"></div>
         <div className="fixed-header at-top">
           <div className="id7-fixed-width-container">
             <header className="id7-page-header" ref="header">
-              { userData.masquerading ?
-                <MasqueradeNotice masqueradingAs={userData}/> : null
-              }
-              { !isMobile ?
+              { this.renderMasqueradeNotice() }
                 <div className="id7-utility-masthead">
                   <nav className="id7-utility-bar" id="utility-bar-container">
-                    <UtilityBar user={this.props.user}
-                      layoutClassName={this.props.layoutClassName}
-                    />
+                    <UtilityBar user={this.props.user} layoutClassName="desktop" />
                   </nav>
                   <div className="id7-masthead">
                     <div className="id7-masthead-contents">
@@ -156,20 +214,14 @@ class ID7Layout extends ReactComponent {
                     </div>
                   </div>
                 </div>
-                :
-              <MastheadMobile user={this.props.user}
-                layoutClassName={this.props.layoutClassName}
-              />}
             </header>
           </div>
         </div>
 
         <div className="id7-fixed-width-container">
-
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
-              { 'Notification' in window && Notification.permission === 'default' ?
-                <PermissionRequest isDisabled={ !user.authenticated }/> : null }
+              { this.renderNotificationPermissionRequest() }
               <UpdatePopup />
               <div className="id7-horizontal-divider">
                 <svg
@@ -185,21 +237,28 @@ class ID7Layout extends ReactComponent {
             </header>
 
             <div className="id7-main-content">
-              { !isMobile ?
-                <div className="row">
-                  <div className="col-sm-8 col-lg-9">
-                    {this.props.children}
-                  </div>
-                  <div className="col-sm-4 col-lg-3">
-                    <NewsView />
-                  </div>
+              <div className="row">
+                <div className="col-sm-8 col-lg-9">
+                  {this.props.children}
                 </div>
-                : this.props.children }
+                <div className="col-sm-4 col-lg-3">
+                  <NewsView />
+                </div>
+              </div>
             </div>
           </main>
         </div>
+        <div className="id7-right-border"></div>
       </div>
     );
+  }
+
+  render() {
+    if (this.props.layoutClassName === 'mobile') {
+      return this.renderMobile();
+    }
+
+    return this.renderDesktop();
   }
 }
 
@@ -210,6 +269,8 @@ const select = (state) => { // eslint-disable-line arrow-body-style
       getNumItemsSince(state.get('notifications'), state.get('notifications-lastRead')),
     user: state.get('user').toJS(),
     colourTheme: state.get('ui').get('colourTheme'),
+    zoomedTile: state.getIn(['me', 'zoomedTile']),
+    path: state.get('path'),
   };
 };
 

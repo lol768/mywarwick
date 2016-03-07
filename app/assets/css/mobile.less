@@ -19,41 +19,61 @@
 
 // MASTHEAD MOBILE
 .start-masthead {
-  font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   background-color: #8c6e96;
   position: relative;
   z-index: 40;
-  font-size: 1.5em;
-  line-height: 44px;
+  color: #fff;
+  height: 44px;
+  line-height: 42px;
+
+  .back-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    line-height: 44px;
+    font-size: 1.25em;
+    transform: translate3d(25px, 0, 0);
+    opacity: 0;
+    padding: 0 5px;
+    transition: all .3s ease-in-out;
+    cursor: pointer;
+
+    i {
+      padding: 0 5px;
+    }
+  }
 
   .masthead-title {
-    margin: auto;
-    font-weight: 100;
-    width: 52%;
-    color: white;
+    font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 1.5em;
     text-align: center;
+    letter-spacing: -.2px;
+    text-transform: uppercase;
 
     span.light {
       opacity: 0.6;
     }
   }
 
+  .sign-in-link {
+    line-height: 44px;
+    font-size: 1.25em;
+  }
+
   .id7-utility-bar {
     height: initial;
-    line-height: inherit;
+    line-height: 40px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 0 10px 0 0;
 
-    ul {
-      padding-right: 6px;
-      display: inline-block;
-      position: fixed;
-      right: 0;
-      top: 0;
-      font-size: initial;
-
-      img {
-        max-width: 30px;
-        max-height: 30px;
-      }
+    a {
+      display: block;
+    }
+    img {
+      width: 30px;
+      height: 30px;
     }
   }
 
@@ -62,5 +82,11 @@
   }
 }
 
+.has-zoomed-tile {
+  overflow: hidden;
 
-
+  .back-btn {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
