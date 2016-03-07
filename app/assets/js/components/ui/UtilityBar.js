@@ -38,7 +38,7 @@ export default class UtilityBar extends ReactComponent {
   onPhotoError() {
     const photo = ReactDOM.findDOMNode(this.refs.photo);
 
-    photo.src = 'https://websignon.warwick.ac.uk/origin/static/images/no-photo.png';
+    photo.src = '/assets/images/no-photo.png';
   }
 
   renderPhoto(user) {
