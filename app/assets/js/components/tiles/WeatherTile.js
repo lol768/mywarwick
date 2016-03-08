@@ -20,45 +20,65 @@ export default class WeatherTile extends TileContent {
     return true;
   }
 
-  mapToItems(itemsToDisplay) {
-    return itemsToDisplay.map(item => (
-        <div key={item.id} className="tile__item">
-          <span className="tile__callout">{`${Math.round(item.temp)}°`}</span>
-          <Skycon className="skycon" icon={formatIconString(item.icon)}/>
-              <span className="tile__text">
-                {`${formatWeatherTime(item.time)}: ${item.text}`}
-              </span>
-        </div>
-      )
-    );
+  static oneWordWeather(icon) {
+    return icon.replace(/.*(clear|rain|snow|sleet|wind|fog|cloudy).*/, '$1');
   }
 
   mapToTableRow(itemsToDisplay) {
     return itemsToDisplay.map(item => (
-      <div className="col-xs-2 table__item" key={item.id}>
-        <Skycon className="skycon--small" icon={formatIconString(item.icon)}/>
-        <span className="tile__callout">{`${Math.round(item.temp)}°`}</span>
+      <div className="col-xs-2 table__item text--light" key={item.id}>
         <span className="tile__text">{formatWeatherTime(item.time)}</span>
+        <span className="tile__text">{WeatherTile.oneWordWeather(item.icon)}</span>
+        <span className="tile__text">
+          <i className="fa fa-tint"/> {item.precipProbability * 100}%
+        </span>
       </div>
     ));
   }
 
+  getCallout() {
+    const { content } = this.props;
+    const hour = content.items[0];
+    return (
+      <span className="tile__callout">{`${Math.round(hour.temp)}°`}
+        <small> {hour.text.toLowerCase()}</small>
+      </span>
+    );
+  }
+
+  getCaption() {
+    const { content } = this.props;
+    const nextHour = content.items[1];
+    const mins = moment.unix(nextHour.time).diff(moment(), 'minutes');
+    return (
+      <span className="tile__text--caption">
+            <span className="text--light">Next:</span> {nextHour.text}, in {mins} mins
+            <br/>
+            <span className="text--light">24 hrs:</span> {content.daily.summary}
+      </span>
+    );
+  }
+
   getLargeBody() {
     const { content } = this.props;
-
+    const hour = content.items[0];
     return (
       <div>
+        <div className="col-xs-5">{this.getCallout()}</div>
+        <div className="col-xs-7">{this.getCaption()}</div>
         {this.mapToTableRow(content.items)}
+        <Skycon className="skycon" icon={formatIconString(hour.icon)}/>
       </div>
     );
   }
 
   getSmallBody() {
-    const { content } = this.props;
-
+    const hour = this.props.content.items[0];
     return (
       <div>
-        {this.mapToItems([content.items[0]])}
+        {this.getCallout()}
+        {this.getCaption()}
+        <Skycon className="skycon" icon={formatIconString(hour.icon)}/>
       </div>
     );
   }
