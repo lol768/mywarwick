@@ -1,6 +1,7 @@
 import moment from 'moment-timezone';
 
 export const localMoment = date => moment(date).tz('Europe/London');
+export const localMomentUnix = date => moment.unix(date).tz('Europe/London');
 
 export default function formatDate(d, nowDate = new Date(), alwaysDisplayWeekday = false) {
   const date = localMoment(d);
