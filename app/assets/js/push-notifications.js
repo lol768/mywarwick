@@ -18,47 +18,6 @@ function subscriptionToServer(subscription) {
   });
 }
 
-// Once the service worker is registered set the initial state
-export function init() {
-  // Are Notifications supported in the service worker?
-  if (!('Notification' in window || 'showNotification' in ServiceWorkerRegistration.prototype)) {
-    log.warn('Notifications aren\'t supported.');
-    return;
-  }
-
-// If the user has disabled notifications
-  if (Notification.permission === 'denied') {
-    log.warn('The user has disabled notifications.');
-    return;
-  }
-
-  // Check if push messaging is supported
-  if (!('PushManager' in window)) {
-    log.warn('Push messaging isn\'t supported.');
-    return;
-  }
-
-  navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
-    // Do we already have a push message subscription?
-    serviceWorkerRegistration.pushManager.getSubscription()
-      .then(subscription => {
-        // TODO: subscribe button should be disabled while we check status of subscription
-        if (!subscription) {
-          // TODO: subscribe button should be set to FALSE
-          return;
-        }
-
-        // Found a subscription, send to server to keep up to date
-        subscriptionToServer(subscription);
-
-        // TODO: subscribe button should be set to TRUE
-      })
-      .catch(err => {
-        log.warn('Error during getSubscription()', err);
-      });
-  });
-}
-
 function subscribe() {
   // TODO: disable subscription button so it can't be changed while processing subscription
 
@@ -118,6 +77,47 @@ function unsubscribe() {
     });
   });
 }
+
+// Once the service worker is registered set the initial state
+export function init() {
+  // Are Notifications supported in the service worker?
+  if (!('Notification' in window || 'showNotification' in ServiceWorkerRegistration.prototype)) {
+    log.warn('Notifications aren\'t supported.');
+    return;
+  }
+
+// If the user has disabled notifications
+  if (Notification.permission === 'denied') {
+    log.warn('The user has disabled notifications.');
+    return;
+  }
+
+  // Check if push messaging is supported
+  if (!('PushManager' in window)) {
+    log.warn('Push messaging isn\'t supported.');
+    return;
+  }
+
+  navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
+    // Do we already have a push message subscription?
+    serviceWorkerRegistration.pushManager.getSubscription()
+      .then(subscription => {
+        // TODO: subscribe button should be disabled while we check status of subscription
+        if (!subscription) {
+          subscribe();
+        }
+
+        // Found a subscription, send to server to keep up to date
+        subscriptionToServer(subscription);
+
+        // TODO: subscribe button should be set to TRUE
+      })
+      .catch(err => {
+        log.warn('Error during getSubscription()', err);
+      });
+  });
+}
+
 
 export function handlePushSubscribe() {
   if (isPushEnabled) {
