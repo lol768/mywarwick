@@ -67,6 +67,10 @@ const WeatherTable = (content) =>
     ))}
   </div>;
 
+function plural(i, one, many = `${one}s`) {
+  const word = i === 1 ? one : many;
+  return `${i} ${word}`;
+}
 
 const Callout = (content) => {
   const hour = content.items[0];
@@ -81,15 +85,9 @@ const Caption = (content) => {
   const nextHour = content.items[1];
   const mins = localMomentUnix(nextHour.time).diff(moment(), 'minutes');
   return (
-    <span className="tile__text--caption">
-      <div className="col-xs-3 text--light">
-        Next:<br/>
-        24 hrs:
-      </div>
-       <div className="col-xs-9">
-         {nextHour.text}, in {mins} mins<br/>
-         {content.daily.summary}
-       </div>
-    </span>
+    <div className="tile__text--caption">
+       <p>{nextHour.text}, in {plural(mins, 'min')}</p>
+       <p>{content.daily.summary}</p>
+    </div>
   );
 };

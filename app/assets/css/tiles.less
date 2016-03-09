@@ -82,8 +82,8 @@
 .tile {
   height: @tile-height;
   position: relative;
-  margin-bottom: @tile-gutter;
-  font-size: 13px;
+  margin-top: @tile-gutter;
+  font-size: 12px;
   line-height: 1.2em;
 
   .text--light {
@@ -106,12 +106,12 @@
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 10px 10px 20px;
+    padding: @tile-padding;
   }
 
   > .tile__wrap > header {
-    margin: -10px -10px 0;
-    padding: 10px 10px 0;
+    margin: -@tile-padding -@tile-padding 0;
+    padding: @tile-padding @tile-padding 0;
     > h1 {
       color: inherit;
       border: 0;
@@ -273,7 +273,7 @@
   display: block;
   top: 0;
   right: 0;
-  padding: 10px 12px;
+  padding: @tile-padding (@tile-padding + 2);
   cursor: pointer;
   font-size: 16px;
 }
@@ -303,27 +303,26 @@
 .text-tile-transition-group {
   .tile__item {
     position: absolute;
-    bottom: 10px;
   }
 }
 
 .text-tile-enter {
-  bottom: -100% !important;
+  transform: translate(130%, 0) !important;
 }
 
 .text-tile-enter-active {
-  bottom: 10px !important;
-  transition: bottom 500ms ease-out;
+  transform: translate(0, 0) !important;
+  transition: transform 500ms ease-out;
   transition-delay: 400ms;
 }
 
 .text-tile-leave {
-  bottom: 10px !important;
+  transform: translate(0, 0) !important;
 }
 
 .text-tile-leave-active {
-  bottom: -100% !important;
-  transition: bottom 500ms ease-in;
+  transform: translate(130%, 0) !important;
+  transition: transform 500ms ease-in;
 }
 
 // AGENDA
