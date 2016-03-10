@@ -68,16 +68,15 @@ self.addEventListener('notificationclick', event => {
   event.waitUntil(
     clients.matchAll({ //eslint-disable-line
       type: 'window',
-    })
-      .then(clientList => {
-        clientList.map(client => {
-          if (client.url === '/notifications' && 'focus' in client) {
-            return client.focus();
-          }
-        });
-        if (clients.openWindow) { //eslint-disable-line
-          return clients.openWindow('/notifications'); //eslint-disable-line
+    }).then(clientList => {
+      clientList.forEach(client => {
+        if (/\/notifications$/i.test(client.url) && 'focus' in client) {
+          return client.focus();
         }
-      })
+      });
+      if (clients.openWindow) { //eslint-disable-line
+        return clients.openWindow('/notifications'); //eslint-disable-line
+      }
+    })
   );
 });
