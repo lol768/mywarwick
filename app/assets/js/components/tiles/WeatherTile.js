@@ -25,7 +25,19 @@ export default class WeatherTile extends TileContent {
     return icon.replace(/.*(clear|rain|snow|sleet|wind|fog|cloudy).*/, '$1');
   }
 
+  renderIfFresh(contentFunc) {
+    const nextHour = this.props.content.items[1];
+    if (localMomentUnix(nextHour.time).isSameOrBefore()) {
+      return <div>Unable to show recent weather information.</div>;
+    }
+    return contentFunc.call(this);
+  }
+
   getLargeBody() {
+    return this.renderIfFresh(this._getLargeBody);
+  }
+
+  _getLargeBody() {
     const { content } = this.props;
     const hour = content.items[0];
     return (
@@ -43,6 +55,10 @@ export default class WeatherTile extends TileContent {
   }
 
   getSmallBody() {
+    return this.renderIfFresh(this._getSmallBody);
+  }
+
+  _getSmallBody() {
     const hour = this.props.content.items[0];
     return (
       <div>
@@ -86,8 +102,8 @@ const Caption = (content) => {
   const mins = localMomentUnix(nextHour.time).diff(moment(), 'minutes');
   return (
     <div className="tile__text--caption">
-       <p>{nextHour.text}, in {plural(mins, 'min')}</p>
-       <p>{content.daily.summary}</p>
+      <div>{nextHour.text}, in {plural(mins, 'min')}</div>
+      <div>{content.daily.summary}</div>
     </div>
   );
 };
