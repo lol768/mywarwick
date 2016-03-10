@@ -46,8 +46,8 @@ describe('WeatherTile', () => {
     const caption = renderAtMoment(html.props.children[1]);
     caption.type.should.equal('div');
     caption.props.className.should.equal('tile__text--caption');
-    caption.props.children
-      .props.children[4].should.equal('all of today is going to suck!');
+    caption.props.children[1]
+      .props.children.should.equal('all of today is going to suck!');
   });
 
   it('displays large layout when zoomed', () => {
