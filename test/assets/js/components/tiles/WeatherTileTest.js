@@ -1,9 +1,18 @@
 import WeatherTile from 'components/tiles/WeatherTile';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { localMomentUnix } from 'dateFormatter';
+import tk from 'timekeeper';
 
 describe('WeatherTile', () => {
 
+  const oldDate = new Date(1989, 1, 7);
+
+  function renderAtMoment(component, now = oldDate) {
+    tk.freeze(new Date(now));
+    return shallowRender(component);
+  }
+
+  // all unix times here should be after oldDate
   const data = {
       icon: 'clear-day',
       temp: 4.13,
@@ -26,15 +35,15 @@ describe('WeatherTile', () => {
     };
 
   it('displays a single weather item when size small', () => {
-    const html = shallowRender(<WeatherTile { ...props } />);
+    const html = renderAtMoment(<WeatherTile { ...props } />);
     html.type.should.equal('div');
 
-    const callout = shallowRender(html.props.children[0]);
+    const callout = renderAtMoment(html.props.children[0]);
     callout.type.should.equal('span');
     callout.props.className.should.equal('tile__callout');
     callout.props.children[0].should.equal(4); // the ° falls into the next child component
 
-    const caption = shallowRender(html.props.children[1]);
+    const caption = renderAtMoment(html.props.children[1]);
     caption.type.should.equal('div');
     caption.props.className.should.equal('tile__text--caption');
     caption.props.children[1]
@@ -42,13 +51,13 @@ describe('WeatherTile', () => {
   });
 
   it('displays large layout when zoomed', () => {
-    const html = shallowRender(<WeatherTile zoomed={ true } { ...props } />);
+    const html = renderAtMoment(<WeatherTile zoomed={ true } { ...props } />);
     const [calloutContainer, captionContainer, weatherTable] = html.props.children;
-    const callout = shallowRender(calloutContainer.props.children);
+    const callout = renderAtMoment(calloutContainer.props.children);
     callout.props.className.should.equal('tile__callout');
-    const caption = shallowRender(captionContainer.props.children);
+    const caption = renderAtMoment(captionContainer.props.children);
     caption.props.className.should.equal('tile__text--caption');
-    const table = shallowRender(weatherTable);
+    const table = renderAtMoment(weatherTable);
     table.props.children.length.should.equal(6);
     table.props.children[0]
       .props.children[2]
@@ -70,5 +79,10 @@ describe('WeatherTile', () => {
     const hour = localMomentUnix(unix).format('HH:mm');
     assert.equal(hour, '13:00'); // assert one hour ahead
   });
+
+  it('renders message for stale data', () => {
+    const html = renderAtMoment(<WeatherTile {...props} />, new Date(2030, 1, 7));
+    html.props.children.should.equal('Unable to show recent weather information.');
+  })
 
 });
