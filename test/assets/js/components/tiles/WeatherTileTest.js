@@ -83,6 +83,17 @@ describe('WeatherTile', () => {
   it('renders message for stale data', () => {
     const html = renderAtMoment(<WeatherTile {...props} />, new Date(2030, 1, 7));
     html.props.children.should.equal('Unable to show recent weather information.');
-  })
+  });
 
+  it('does not render skycon in event of tile content fetch error', () => {
+    const extProps = Object.assign({}, props, {
+      errors: [{
+        id: 'Internal Server Error',
+        message: `There's been a murder!`,
+      }]
+    });
+    const html = renderAtMoment(<WeatherTile {...extProps}/>);
+    console.log(html.props.children);
+    expect(html.props.children[2]).to.be.null;
+  });
 });
