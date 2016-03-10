@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 import classNames from 'classnames';
+import * as pushNotifications from '../../push-notifications';
 
 export default class PermissionRequest extends ReactComponent {
 
@@ -21,7 +22,8 @@ export default class PermissionRequest extends ReactComponent {
   requestPermission(e) {
     e.preventDefault();
     this.setState({ visible: false });
-    window.Notification.requestPermission();
+    // FIXME: a new subscription is saved every time user re-enables push notifications
+    pushNotifications.subscribe();
   }
 
   render() {
