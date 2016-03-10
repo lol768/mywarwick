@@ -37,7 +37,10 @@ export default class WeatherTile extends TileContent {
           <Caption {...content}/>
         </div>
         <WeatherTable items={content.items}/>
-        <Skycon className="skycon" icon={formatIconString(hour.icon)}/>
+        {!this.props.errors ?
+          <Skycon className="skycon" icon={formatIconString(hour.icon)}/>
+          : null
+        }
       </div>
     );
   }
@@ -48,7 +51,10 @@ export default class WeatherTile extends TileContent {
       <div>
         <Callout {...this.props.content}/>
         <Caption {...this.props.content}/>
-        <Skycon className="skycon" icon={formatIconString(hour.icon)}/>
+        {!this.props.errors ?
+          <Skycon className="skycon" icon={formatIconString(hour.icon)}/>
+          : null
+        }
       </div>
     );
   }
@@ -86,8 +92,8 @@ const Caption = (content) => {
   const mins = localMomentUnix(nextHour.time).diff(moment(), 'minutes');
   return (
     <div className="tile__text--caption">
-       <p>{nextHour.text}, in {plural(mins, 'min')}</p>
-       <p>{content.daily.summary}</p>
+      <p>{nextHour.text}, in {plural(mins, 'min')}</p>
+      <p>{content.daily.summary}</p>
     </div>
   );
 };
