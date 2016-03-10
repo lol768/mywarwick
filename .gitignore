@@ -13,8 +13,9 @@ target
 gulpopts.json
 /.cache-*
 /bin
+/scripts/notification-bot/config.json
 
-/node_modules
+node_modules
 /mocha.json
 
 /.idea/*

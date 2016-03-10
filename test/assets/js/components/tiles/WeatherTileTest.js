@@ -35,10 +35,10 @@ describe('WeatherTile', () => {
     callout.props.children[0].should.equal(4); // the ° falls into the next child component
 
     const caption = shallowRender(html.props.children[1]);
-    caption.type.should.equal('span');
+    caption.type.should.equal('div');
     caption.props.className.should.equal('tile__text--caption');
     caption.props.children[1]
-      .props.children[5].should.equal('all of today is going to suck!');
+      .props.children.should.equal('all of today is going to suck!');
   });
 
   it('displays large layout when zoomed', () => {

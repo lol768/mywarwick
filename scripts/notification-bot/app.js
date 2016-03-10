@@ -42,6 +42,7 @@ function buildJsonBody(contentArr) {
 }
 
 function notificationsPusher() {
+  if (!notificationProviders.length) return;
   const providerName = getRandom(notificationProviders);
   const url = `${pushUrl}/api/streams/${providerName}/notifications`;
   const contentArr = CONFIG.notificationProviders[providerName];
@@ -64,6 +65,7 @@ function notificationsPusher() {
 }
 
 function activitiesPusher() {
+  if (!activityProviders.length) return;
   const providerName = getRandom(activityProviders);
   const url = `${pushUrl}/api/streams/${providerName}/activities`;
   const contentArr = CONFIG.activityProviders[providerName];
