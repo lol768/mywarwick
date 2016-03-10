@@ -91,7 +91,7 @@ class ID7Layout extends ReactComponent {
 
   renderNotificationPermissionRequest() {
     if ('Notification' in window && Notification.permission === 'default') {
-      return <PermissionRequest isDisabled={ !this.props.user.authenticated } />;
+      return <PermissionRequest isDisabled={ !this.props.user.data.authenticated } />;
     }
   }
 
@@ -171,7 +171,7 @@ class ID7Layout extends ReactComponent {
                                 badge={ notificationsCount }
                                 key="notifications"
                                 popoverTitle="Notifications"
-                                isDisabled={ !user.authenticated }
+                                isDisabled={ !user.data.authenticated }
                                 onMore={ this.goToNotification }
                               >
                                 <NotificationsView grouped={false}/>
@@ -179,7 +179,7 @@ class ID7Layout extends ReactComponent {
                               <MastheadIcon
                                 icon="dashboard" key="activity"
                                 popoverTitle="Activity"
-                                isDisabled={ !user.authenticated }
+                                isDisabled={ !user.data.authenticated }
                                 onMore={ this.goToActivity }
                               >
                                 <ActivityView grouped={false}/>

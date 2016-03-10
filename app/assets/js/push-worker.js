@@ -61,3 +61,23 @@ self.addEventListener('push', event => {
 self.addEventListener('message', event => {
   self.token = event.data.token;
 });
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+
+  event.waitUntil(
+    clients.matchAll({ //eslint-disable-line
+      type: 'window',
+    })
+      .then(clientList => {
+        clientList.map(client => {
+          if (client.url === '/notifications' && 'focus' in client) {
+            return client.focus();
+          }
+        });
+        if (clients.openWindow) { //eslint-disable-line
+          return clients.openWindow('/notifications'); //eslint-disable-line
+        }
+      })
+  );
+});
