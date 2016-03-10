@@ -102,8 +102,8 @@ const Caption = (content) => {
   const mins = localMomentUnix(nextHour.time).diff(moment(), 'minutes');
   return (
     <div className="tile__text--caption">
-      <p className="no-margin">{nextHour.text}, in {plural(mins, 'min')}</p>
-      <p>{content.daily.summary}</p>
+      <div>{nextHour.text}, in {plural(mins, 'min')}</div>
+      <div>{content.daily.summary}</div>
     </div>
   );
 };
