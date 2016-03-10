@@ -3,10 +3,10 @@
 .tile--zoomed {
   position: fixed;
   padding: 0;
-  top: 44px;
+  top: @start-masthead-height;
   left: 0;
   right: 0;
-  bottom: 44px;
+  bottom: @start-tabbar-height;
   z-index: 100;
 
   @media (min-width: @screen-sm-min) {
@@ -20,6 +20,8 @@
   }
 
   .tile {
+    margin: 0;
+
     .tile__wrap {
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
