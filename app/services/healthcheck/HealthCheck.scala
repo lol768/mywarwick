@@ -22,7 +22,7 @@ case class PerfData[T](name: String, value: T, warn: Option[T] = None, critical:
 
 object HealthCheckStatus {
   val Okay = HealthCheckStatus("okay")
-  val Warn = HealthCheckStatus("warn")
+  val Warn = HealthCheckStatus("warning")
   val Critical = HealthCheckStatus("critical")
 }
 
