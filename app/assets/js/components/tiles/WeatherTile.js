@@ -49,7 +49,10 @@ export default class WeatherTile extends TileContent {
           <Caption {...content}/>
         </div>
         <WeatherTable items={content.items}/>
-        <Skycon className="skycon" icon={formatIconString(hour.icon)}/>
+        {!this.props.errors ?
+          <Skycon className="skycon" icon={formatIconString(hour.icon)}/>
+          : null
+        }
       </div>
     );
   }
@@ -64,7 +67,10 @@ export default class WeatherTile extends TileContent {
       <div>
         <Callout {...this.props.content}/>
         <Caption {...this.props.content}/>
-        <Skycon className="skycon" icon={formatIconString(hour.icon)}/>
+        {!this.props.errors ?
+          <Skycon className="skycon" icon={formatIconString(hour.icon)}/>
+          : null
+        }
       </div>
     );
   }
