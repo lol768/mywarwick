@@ -27,7 +27,7 @@ export default class WeatherTile extends TileContent {
 
   renderIfFresh(contentFunc) {
     const nextHour = this.props.content.items[1];
-    if (localMomentUnix(nextHour.time).isSameOrBefore()) {
+    if (localMomentUnix(nextHour.time).isBefore()) {
       return <div>Unable to show recent weather information.</div>;
     }
     return contentFunc.call(this);
