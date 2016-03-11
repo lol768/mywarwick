@@ -28,7 +28,12 @@ export default class WeatherTile extends TileContent {
   renderIfFresh(contentFunc) {
     const nextHour = this.props.content.items[1];
     if (localMomentUnix(nextHour.time).isBefore()) {
-      return <div>Unable to show recent weather information.</div>;
+      return (
+        <div>
+          <Skycon className="skycon" icon={formatIconString(nextHour.icon)}/>
+          <div>Unable to show recent weather information.</div>
+        </div>
+      );
     }
     return contentFunc.call(this);
   }
