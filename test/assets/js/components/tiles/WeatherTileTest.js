@@ -86,14 +86,13 @@ describe('WeatherTile', () => {
   });
 
   it('does not render skycon in event of tile content fetch error', () => {
-    const extProps = Object.assign({}, props, {
+    const extProps = {...props,
       errors: [{
         id: 'Internal Server Error',
         message: `There's been a murder!`,
       }]
-    });
+    };
     const html = renderAtMoment(<WeatherTile {...extProps}/>);
-    console.log(html.props.children);
     expect(html.props.children[2]).to.be.null;
   });
 });
