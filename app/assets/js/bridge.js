@@ -1,13 +1,19 @@
 import $ from 'jquery';
 import Immutable from 'immutable';
 import store from './store';
+import { fetchTileContent } from './serverpipe';
 import * as stream from './stream';
 
 let appState = Immutable.Map();
 
+window.Start.appToForeground = () => {
+  store.dispatch(fetchTileContent());
+  window.applicationCache.update();
+};
+
 function update(state) {
   appState = appState.merge(state);
-  window.APP = appState.toJS();
+  window.Start.APP = appState.toJS();
   window.location = 'start://';
 }
 
@@ -59,5 +65,5 @@ if (window.navigator.userAgent.indexOf('Start/') >= 0) {
     }
   }
 
-  window.registerForAPNs = registerForAPNs;
+  window.Start.registerForAPNs = registerForAPNs;
 }

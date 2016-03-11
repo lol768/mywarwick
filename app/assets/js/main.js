@@ -13,7 +13,9 @@ log.enableAll(false);
 polyfill();
 
 import store from './store';
-window.Store = store;
+window.Start = {
+  store,
+};
 window.localforage = localforage;
 
 import Application from './components/Application';
