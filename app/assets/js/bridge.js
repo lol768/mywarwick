@@ -6,6 +6,8 @@ import * as stream from './stream';
 
 let appState = Immutable.Map();
 
+window.Start = {};
+
 window.Start.appToForeground = () => {
   store.dispatch(fetchTileContent());
   if ('applicationCache' in window) {
