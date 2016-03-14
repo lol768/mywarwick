@@ -8,7 +8,9 @@ let appState = Immutable.Map();
 
 window.Start.appToForeground = () => {
   store.dispatch(fetchTileContent());
-  window.applicationCache.update();
+  if ('applicationCache' in window) {
+    window.applicationCache.update();
+  }
 };
 
 function update(state) {
