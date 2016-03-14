@@ -3,23 +3,28 @@
  * server for reporting purposes.
  */
 
-const $ = window.jQuery;
-export const socket = null;
-export const ajaxUrl = '/error/js';
+import fetch from 'isomorphic-fetch';
 
-export function error(event) {
-  const msg = {
-    type: 'js-error',
-    time: (new Date().getTime()),
-    text: event.toString(), // TODO bad?
+function onError(message, source, line, column, error) {
+  const body = {
+    time: new Date().getTime(),
+    message,
+    source,
+    line,
+    column,
+    stack: error.stack || error,
   };
-  if (socket) {
-    socket.send(msg);
-  } else {
-    $.post(ajaxUrl, msg);
-  }
+
+  fetch('/api/errors/js', {
+    credentials: 'same-origin',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
 }
 
-export function init() {
-  window.onerror = error;
+export default function init() {
+  window.onerror = onError;
 }

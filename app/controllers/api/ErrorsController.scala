@@ -1,0 +1,18 @@
+package controllers.api
+
+import controllers.BaseController
+import play.api.libs.json.JsValue
+import play.api.mvc.Action
+
+class ErrorsController extends BaseController {
+
+  def js = Action { implicit request =>
+    request.body.asJson.flatMap(_.validate[Map[String, JsValue]].asOpt).foreach { error =>
+      val values = error.map { case (k, v) => s"$k=$v" }.mkString(" ")
+
+      logger.error(s"JAVASCRIPT_ERROR $values")
+    }
+    Ok("")
+  }
+
+}

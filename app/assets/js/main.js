@@ -31,6 +31,9 @@ import persisted from './persisted';
 import SocketDatapipe from './SocketDatapipe';
 import './bridge';
 
+import initErrorReporter from './errorreporter';
+initErrorReporter();
+
 localforage.config({
   name: 'Start',
 });
