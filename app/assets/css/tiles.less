@@ -95,6 +95,7 @@
   a {
     color: inherit;
     text-decoration: none;
+    border-bottom: 1px dotted rgba(255, 255, 255, .4);
   }
 
   ul, ol {
@@ -142,13 +143,7 @@
 }
 
 :not(.tile--zoomed) {
-  .tile--agenda {
-    .list-header {
-      border: none;
-      font-weight: bold;
-      background-color: transparent;
-      padding: 0 0 .4em;
-    }
+  > .tile--agenda {
     .list-group {
       margin-bottom: 8px;
     }
@@ -332,9 +327,18 @@
   display: block;
 }
 
+.tile--agenda {
+  .list-header {
+    border: none;
+    font-weight: bold;
+    background-color: transparent;
+    padding: 0 0 .4em;
+  }
+}
+
 .agenda-item a {
   display: block;
-  padding: .2em 0;
+  padding: .4em 0 0;
 
   .tile-zoomed & {
     padding: .4em 0;
@@ -361,6 +365,11 @@
     margin-right: 0 !important;
     min-width: 36px;
   }
+  .tile__body {
+    margin-left: inherit;
+    margin-right: inherit;
+  }
+
   .skycon {
     max-width: 40px;
     margin: 0;

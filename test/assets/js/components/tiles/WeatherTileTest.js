@@ -82,7 +82,8 @@ describe('WeatherTile', () => {
 
   it('renders message for stale data', () => {
     const html = renderAtMoment(<WeatherTile {...props} />, new Date(2030, 1, 7));
-    html.props.children.should.equal('Unable to show recent weather information.');
+    html.props.children[0].props.className.should.equal('skycon');
+    html.props.children[1].props.children.should.equal('Unable to show recent weather information.');
   });
 
   it('does not render skycon in event of tile content fetch error', () => {
