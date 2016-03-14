@@ -26,10 +26,16 @@ export function fetchUserIdentity() {
   };
 }
 
+function fetchWithCredentials(url) {
+  return fetch(url, {
+    credentials: 'same-origin',
+  });
+}
+
 export function fetchNews() {
   return dispatch => {
     dispatch({ type: NEWS_FETCH });
-    return fetch('/api/news/feed')
+    return fetchWithCredentials('/api/news/feed')
       .then(response => response.json())
       .then(json => {
         if (json.items !== undefined) {
@@ -40,12 +46,6 @@ export function fetchNews() {
       })
       .catch(() => dispatch({ type: NEWS_FETCH_FAILURE }));
   };
-}
-
-function fetchWithCredentials(url) {
-  return fetch(url, {
-    credentials: 'same-origin',
-  });
 }
 
 export function persistTiles() {
