@@ -143,13 +143,7 @@
 }
 
 :not(.tile--zoomed) {
-  .tile--agenda {
-    .list-header {
-      border: none;
-      font-weight: bold;
-      background-color: transparent;
-      padding: 0 0 .4em;
-    }
+  > .tile--agenda {
     .list-group {
       margin-bottom: 8px;
     }
@@ -331,6 +325,15 @@
 // AGENDA
 .agenda-item {
   display: block;
+}
+
+.tile--agenda {
+  .list-header {
+    border: none;
+    font-weight: bold;
+    background-color: transparent;
+    padding: 0 0 .4em;
+  }
 }
 
 .agenda-item a {
