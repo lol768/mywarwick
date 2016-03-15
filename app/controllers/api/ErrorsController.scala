@@ -10,7 +10,7 @@ class ErrorsController extends BaseController {
   override lazy val logger = Logger("JAVASCRIPT_ERROR")
 
   def js = Action { implicit request =>
-    request.body.asJson.flatMap(_.validate[Map[String, JsValue]].asOpt).foreach { error =>
+    request.body.asJson.flatMap(_.validate[Seq[Map[String, JsValue]]].asOpt).toSeq.flatten.foreach { error =>
       val values = error.map { case (k, v) => s"$k=$v" }.mkString(" ")
 
       logger.error(values)
