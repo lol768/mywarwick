@@ -7,12 +7,26 @@ import { connect } from 'react-redux';
 import _ from 'lodash';
 
 import { fetchNews } from '../../serverpipe';
+import InfiniteScrollable from '../ui/InfiniteScrollable';
+
+const SOME_MORE = 10;
 
 class NewsView extends ReactComponent {
 
   constructor(props) {
     super(props);
     this.onClick = this.onClick.bind(this);
+
+    this.state = {
+      numberToShow: SOME_MORE,
+    };
+    this.loadMore = this.loadMore.bind(this);
+  }
+
+  loadMore() {
+    this.setState({
+      numberToShow: this.state.numberToShow + SOME_MORE,
+    });
   }
 
   componentDidMount() {
@@ -48,7 +62,7 @@ class NewsView extends ReactComponent {
 
     const html = (content) => ({ __html: content.replace(/<br[ /]+?>/g, '') });
 
-    const items = _.take(this.props.items, 10).map((item) =>
+    const items = _.take(this.props.items, this.state.numberToShow).map((item) =>
       <NewsItem
         key={item.id}
         {...item}
@@ -57,7 +71,13 @@ class NewsView extends ReactComponent {
       </NewsItem>
     );
 
-    return <div>{items}</div>;
+    const hasMore = this.state.numberToShow < this.props.items.length;
+
+    return (
+      <InfiniteScrollable hasMore={hasMore} onLoadMore={this.loadMore}>
+        {items}
+      </InfiniteScrollable>
+    );
   }
 
 }
