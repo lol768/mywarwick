@@ -3,12 +3,12 @@ package controllers
 import javax.inject.Inject
 
 import play.api.libs.json.Json
-import play.api.mvc.{Cookie, Action}
-import uk.ac.warwick.sso.client.{SSOToken, SSOConfiguration}
+import play.api.mvc.{Action, Cookie}
+import uk.ac.warwick.sso.client.SSOClientHandlerImpl.GLOBAL_LOGIN_COOKIE_NAME
+import uk.ac.warwick.sso.client.SSOToken.SSC_TICKET_TYPE
 import uk.ac.warwick.sso.client.cache.UserCache
-import uk.ac.warwick.sso.client.SSOClientHandlerImpl._
+import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import uk.ac.warwick.util.core.StringUtils
-import warwick.sso.SSOClient
 
 /**
   * This is some weird SSO stuff for Start, while we're still working out
@@ -33,14 +33,18 @@ class SSOController @Inject()(
     * of the user's session is missing (meaning it probably expired away).
     */
   def ssotest = Action { request =>
-    val ssc: Option[Cookie] = request.cookies.get(SERVICE_SPECIFIC_COOKIE_NAME)
-    val refresh: Boolean = ssc.filter {
-      cookie => StringUtils.hasText(cookie.value)
-    }.exists { cookie =>
-      userCache.get(new SSOToken(cookie.value, SSOToken.SSC_TICKET_TYPE)) == null
-    }
+    val ltc = request.cookies.get(GLOBAL_LOGIN_COOKIE_NAME).filter(hasValue)
+    val ssc = request.cookies.get(SERVICE_SPECIFIC_COOKIE_NAME).filter(hasValue)
+
+    val refresh = ssc.exists(tokenNotInUserCache) || (ssc.isEmpty && ltc.nonEmpty)
 
     Ok(Json.toJson(refresh))
   }
+
+  private def hasValue(cookie: Cookie): Boolean =
+    StringUtils.hasText(cookie.value)
+
+  private def tokenNotInUserCache(cookie: Cookie): Boolean =
+    userCache.get(new SSOToken(cookie.value, SSC_TICKET_TYPE)) == null
 
 }
