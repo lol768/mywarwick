@@ -12,7 +12,7 @@ class ClusterSizeHealthCheck @Inject()(
 
   override def value = cluster.state.members.size
 
-  override def warn = 1
+  override def warning = 1
 
   override def critical = 0
 

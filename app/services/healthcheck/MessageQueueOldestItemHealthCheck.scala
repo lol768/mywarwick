@@ -23,7 +23,7 @@ class MessageQueueOldestItemHealthCheck @Inject()(
 
   override def message = s"Oldest unsent message $value minutes old"
 
-  override def warn = 20
+  override def warning = 20
 
   override def critical = 30
 
