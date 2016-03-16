@@ -36,7 +36,7 @@ class SSOController @Inject()(
     val ltc = request.cookies.get(GLOBAL_LOGIN_COOKIE_NAME).filter(hasValue)
     val ssc = request.cookies.get(SERVICE_SPECIFIC_COOKIE_NAME).filter(hasValue)
 
-    val refresh = ssc.exists(tokenNotInUserCache) || ssc.isEmpty && ltc.isDefined
+    val refresh = ssc.exists(tokenNotInUserCache) || (ssc.isEmpty && ltc.isDefined)
 
     Ok(Json.toJson(refresh))
   }
