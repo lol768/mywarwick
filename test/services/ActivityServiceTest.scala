@@ -59,6 +59,21 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
       verify(pubsub).publish("cusebr", Notification(response))
     }
 
+    "not notify when shouldNotify is false" in new Scope {
+      val createdActivity = Fixtures.activity.fromPrototype("1234", proto.copy(shouldNotify = false))
+      val response = ActivityResponse(createdActivity, Nil)
+      val recipients = Set(Usercode("cusebr"))
+
+      when(activityRecipientService.getRecipientUsercodes(Nil, Nil)) thenReturn recipients
+      when(activityTagDao.getActivitiesWithTags(Matchers.eq(Map()), Matchers.eq("tabula"))(any())) thenReturn Nil
+      when(activityCreationDao.createActivity(Matchers.eq(proto), Matchers.eq(Set(Usercode("cusebr"))), Matchers.eq(Nil))(any())) thenReturn response
+
+      service.save(proto) must be (Success("1234"))
+
+      verifyZeroInteractions(messaging)
+      verify(pubsub).publish("cusebr", Notification(response))
+    }
+
     // TODO test when there are activities to replace
 
   }
