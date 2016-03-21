@@ -4,8 +4,8 @@ import _ from 'lodash';
 import localforage from 'localforage';
 import moment from 'moment';
 import log from 'loglevel';
-import { polyfill} from 'es6-promise';
-import { Provider} from 'react-redux';
+import { polyfill } from 'es6-promise';
+import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import store from './store';
@@ -20,12 +20,13 @@ import * as update from './update';
 import * as user from './user';
 import persisted from './persisted';
 import SocketDatapipe from './SocketDatapipe';
-import { Router, Route, IndexRoute, browserHistory} from 'react-router';
-import { syncHistoryWithStore, routerReducer} from 'react-router-redux';
+import { Router, Route, IndexRoute, browserHistory } from 'react-router';
+import { syncHistoryWithStore, routerReducer } from 'react-router-redux';
 import initErrorReporter from './errorreporter';
-import { registerReducer} from './reducers';
+import { registerReducer } from './reducers';
 import NewsView from './components/views/NewsView';
 import MeView from './components/views/MeView';
+import TileView from './components/views/TileView';
 import ActivityView from './components/views/ActivityView';
 import NotificationsView from './components/views/NotificationsView';
 import SearchView from './components/views/SearchView';
@@ -63,10 +64,13 @@ $(() => {
       <Router history={history}>
         <Route path="/" component={Application}>
           <IndexRoute component={MeView}/>
-          <Route path="/notifications" component={NotificationsView}/>
-          <Route path="/activity" component={ActivityView}/>
-          <Route path="/news" component={NewsView}/>
-          <Route path="/search" component={SearchView}/>
+          <Route path="tiles" component={MeView}>
+            <Route path=":id" component={TileView}/>
+          </Route>
+          <Route path="notifications" component={NotificationsView}/>
+          <Route path="activity" component={ActivityView}/>
+          <Route path="news" component={NewsView}/>
+          <Route path="search" component={SearchView}/>
         </Route>
       </Router>
     </Provider>,

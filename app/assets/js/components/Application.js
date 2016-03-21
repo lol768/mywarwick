@@ -5,12 +5,12 @@ import TabBarItem from './ui/TabBarItem';
 import ID7Layout from './ui/ID7Layout';
 import Immutable from 'immutable';
 import { connect } from 'react-redux';
-import { navigate } from '../navigate';
 import { getNumItemsSince } from '../stream';
 import { mq } from 'modernizr';
 import $ from 'jquery';
 import store from '../store';
 import { registerReducer } from '../reducers';
+import { push } from 'react-router-redux';
 
 const isDesktop = () => mq('only all and (min-width: 768px)');
 
@@ -64,7 +64,7 @@ class Application extends ReactComponent {
   }
 
   onSelectItem(p) {
-    this.props.dispatch(navigate(p));
+    this.props.dispatch(push(p));
   }
 
   render() {

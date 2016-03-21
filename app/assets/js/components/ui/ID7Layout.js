@@ -2,6 +2,7 @@ import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
+import _ from 'lodash';
 import MastheadIcon from './MastheadIcon';
 import NotificationsView from '../views/NotificationsView';
 import ActivityView from '../views/ActivityView';
@@ -14,12 +15,11 @@ import PermissionRequest from './PermissionRequest';
 import MasqueradeNotice from './MasqueradeNotice';
 import UpdatePopup from './UpdatePopup';
 import UtilityBar from './UtilityBar';
-import { navigate } from '../../navigate';
 import { connect } from 'react-redux';
 import { getNumItemsSince } from '../../stream';
 import { updateLayoutClass } from '../Application';
 import { fetchTileContent } from '../../serverpipe';
-import { zoomOut } from '../../tiles';
+import { push, goBack } from 'react-router-redux';
 
 class ID7Layout extends ReactComponent {
 
@@ -39,7 +39,7 @@ class ID7Layout extends ReactComponent {
   componentWillReceiveProps(nextProps) {
     nextProps.dispatch(updateLayoutClass());
 
-    const hasZoomedTile = nextProps.path === '/' && !!nextProps.zoomedTile;
+    const hasZoomedTile = _(nextProps.path).startsWith('/tiles/');
     $('body').toggleClass('has-zoomed-tile', hasZoomedTile);
   }
 
@@ -60,20 +60,20 @@ class ID7Layout extends ReactComponent {
 
   goToHome(e) {
     e.preventDefault();
-    this.props.dispatch(navigate('/'));
+    this.props.dispatch(push('/'));
     this.props.dispatch(fetchTileContent());
   }
 
   goToNotification() {
-    this.props.dispatch(navigate('/notifications'));
+    this.props.dispatch(push('/notifications'));
   }
 
   goToActivity() {
-    this.props.dispatch(navigate('/activity'));
+    this.props.dispatch(push('/activity'));
   }
 
   onBackClick() {
-    this.props.dispatch(zoomOut());
+    this.props.dispatch(goBack());
   }
 
   renderMasqueradeNotice() {

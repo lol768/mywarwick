@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 
 import $ from 'jquery';
 import ReactDOM from 'react-dom';
+import _ from 'lodash';
 
 export default class TabBar extends Component {
 
@@ -14,12 +15,20 @@ export default class TabBar extends Component {
       React.cloneElement(el, {
         key: el.props.title,
         ref: el.props.title.toLowerCase(),
-        active: el.props.path === this.props.selectedItem,
+        active: this.itemIsActive(el.props, this.props.selectedItem),
         onClick: () => this.props.onSelectItem(el.props.path),
         badge: el.props.badge,
         icon: el.props.icon,
       })
     ));
+  }
+
+  itemIsActive(item, currentPath) {
+    if (item.path === '/' && (currentPath === '/' || _(currentPath).startsWith('/tiles/'))) {
+      return true;
+    }
+
+    return item.path === currentPath;
   }
 
   render() {

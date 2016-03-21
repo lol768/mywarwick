@@ -28,6 +28,8 @@ class HomeController @Inject()(
     Ok(views.html.index())
   }
 
+  def indexTile(id: String) = index
+
   def socket = WebSocket.tryAcceptWithActor[JsValue, JsValue] { request =>
     SecureWebsocket(request) { loginContext: LoginContext =>
       val who = loginContext.user.map(_.usercode).getOrElse("nobody")

@@ -2,21 +2,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
-import log from 'loglevel';
 import _ from 'lodash';
 import $ from 'jquery.transit';
-import Immutable from 'immutable';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 
-import { registerReducer } from '../../reducers';
-import Tile from '../tiles/Tile';
-import * as TILE_TYPES from '../tiles';
 import * as tiles from '../../tiles';
 import * as serverpipe from '../../serverpipe';
 import { TILE_SIZES } from '../tiles/TileContent';
+import TileView from './TileView';
 
-const EDITING_ANIMATION_DURATION = 700;
+import { EDITING_ANIMATION_DURATION } from '../tiles/Tile';
 
 import HiddenTile from '../tiles/HiddenTile';
 
@@ -25,18 +21,7 @@ class MeView extends ReactComponent {
   constructor(props) {
     super(props);
     this.state = {};
-    this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onBodyClick = this.onBodyClick.bind(this);
-  }
-
-  onTileExpand(tile) {
-    if (!this.props.zoomedTile) {
-      this.props.dispatch(tiles.zoomInOn(tile));
-    }
-  }
-
-  onTileDismiss() {
-    this.props.dispatch(tiles.zoomOut());
   }
 
   onBeginEditing(tile) {
@@ -81,56 +66,15 @@ class MeView extends ReactComponent {
     }
   }
 
-  renderTile(props, zoomed = false) {
-    const tileContentComponent = TILE_TYPES[props.type];
-    if (tileContentComponent === undefined) {
-      log.error(`No component available for tile type ${props.type}`);
-      return null;
-    }
-
-    const id = props.id;
-    const { content, errors, fetching, fetchedAt } = this.props.tileContent[id] || {};
-    const editing = this.state.editing === id;
-    const ref = zoomed ? `${id}-zoomed` : id;
-
-    const config = Object.assign({}, props, {
-      zoomed,
-      canZoom: tileContentComponent.canZoom(content),
-      key: ref,
-      ref,
-      originalRef: id,
-      content,
-      errors,
-      fetching,
-      fetchedAt,
-      editing,
-      editingAny: !!this.state.editing,
-      isDesktop: this.props.isDesktop,
-    });
-
-    // Zooming
-    config.onZoomIn = () => this.onTileExpand(config);
-    config.onZoomOut = () => this.onTileDismiss();
-
-    // Editing
-    config.onBeginEditing = () => this.onBeginEditing(config);
-    config.onHide = () => this.onHideTile(config);
-    config.onResize = () => this.onResizeTile(config);
-    config.editAnimationDuration = EDITING_ANIMATION_DURATION;
-
-    // subset of config needed by TileContent subclasses
-    const contentConfig = {
-      content,
-      zoomed,
-      size: props.size,
-      editingAny: config.editingAny,
-      fetchedAt,
-    };
-
+  renderTile(props) {
     return (
-      <Tile { ...config }>
-        { React.createElement(tileContentComponent, contentConfig) }
-      </Tile>
+      <TileView
+        key={props.id}
+        id={props.id}
+        view={this}
+        editing={this.state.editing === props.id}
+        editingAny={!!this.state.editing}
+      />
     );
   }
 
@@ -204,44 +148,21 @@ class MeView extends ReactComponent {
           : null}
         {this.renderTiles()}
         <ReactCSSTransitionGroup {...transitionProps}>
-          {this.props.zoomedTile ?
-            <div>
-              {this.renderTile(
-                _.find(this.props.tiles, (tile) => tile.id === this.props.zoomedTile), true
-              )}
-            </div>
-            : null }
+          { this.props.children }
         </ReactCSSTransitionGroup>
       </div>
     );
   }
 }
 
-const initialState = Immutable.Map({
-  zoomedTile: null,
-});
+const select = (state) => {
+  const items = state.getIn(['tiles', 'items']);
 
-registerReducer('me', (state = initialState, action) => {
-  switch (action.type) {
-    case tiles.TILE_ZOOM_IN:
-      return state.merge({
-        zoomedTile: action.tile,
-      });
-    case tiles.TILE_ZOOM_OUT:
-      return state.merge({
-        zoomedTile: null,
-      });
-    default:
-      return state;
-  }
-});
-
-const select = (state) => ({
-  zoomedTile: state.get('me').get('zoomedTile'),
-  isDesktop: state.get('ui').get('className') === 'desktop',
-  tiles: state.get('tiles').get('items').filterNot(tile => tile.get('removed')).toJS(),
-  hiddenTiles: state.get('tiles').get('items').filter(tile => tile.get('removed')).toJS(),
-  tileContent: state.get('tileContent').toJS(),
-});
+  return {
+    isDesktop: state.getIn(['ui', 'className']) === 'desktop',
+    tiles: items.filterNot(tile => tile.get('removed')).toJS(),
+    hiddenTiles: items.filter(tile => tile.get('removed')).toJS(),
+  };
+};
 
 export default connect(select)(MeView);
