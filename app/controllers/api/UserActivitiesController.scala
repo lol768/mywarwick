@@ -1,5 +1,7 @@
 package controllers.api
 
+import javax.inject.Singleton
+
 import com.google.inject.Inject
 import controllers.BaseController
 import models.API.Error
@@ -12,6 +14,7 @@ import system.ThreadPools.mobile
 
 import scala.concurrent.Future
 
+@Singleton
 class UserActivitiesController @Inject()(
   activityService: ActivityService,
   securityService: SecurityService,

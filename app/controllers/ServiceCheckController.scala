@@ -1,5 +1,7 @@
 package controllers
 
+import javax.inject.Singleton
+
 import com.google.inject.Inject
 
 import play.api.inject.ApplicationLifecycle
@@ -10,6 +12,7 @@ import services.healthcheck.HealthCheck
 import scala.collection.JavaConversions._
 import scala.concurrent.Future
 
+@Singleton
 class ServiceCheckController @Inject()(
   life: ApplicationLifecycle,
   healthChecks: java.util.Set[HealthCheck[_]]

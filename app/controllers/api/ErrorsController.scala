@@ -1,10 +1,13 @@
 package controllers.api
 
+import javax.inject.Singleton
+
 import controllers.BaseController
 import play.api.Logger
 import play.api.libs.json.JsValue
 import play.api.mvc.Action
 
+@Singleton
 class ErrorsController extends BaseController {
 
   override lazy val logger = Logger("JAVASCRIPT_ERROR")
