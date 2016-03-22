@@ -35,7 +35,9 @@ class HomeController @Inject()(
     Ok(views.html.index())
   }
 
-  def indexTile(id: String) = index
+  def redirectToIndex = Action(Redirect(routes.HomeController.index()))
+
+  def tile(id: String) = index
 
   def socket = WebSocket.tryAcceptWithActor[JsValue, JsValue] { request =>
     SecureWebsocket(request) { loginContext: LoginContext =>

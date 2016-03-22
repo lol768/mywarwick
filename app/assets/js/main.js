@@ -20,7 +20,7 @@ import * as update from './update';
 import * as user from './user';
 import persisted from './persisted';
 import SocketDatapipe from './SocketDatapipe';
-import { Router, Route, IndexRoute, browserHistory } from 'react-router';
+import { Router, Route, IndexRoute, IndexRedirect, browserHistory } from 'react-router';
 import { syncHistoryWithStore, routerReducer } from 'react-router-redux';
 import initErrorReporter from './errorreporter';
 import { registerReducer } from './reducers';
@@ -65,6 +65,7 @@ $(() => {
         <Route path="/" component={Application}>
           <IndexRoute component={MeView}/>
           <Route path="tiles" component={MeView}>
+            <IndexRedirect to="/"/>
             <Route path=":id" component={TileView}/>
           </Route>
           <Route path="notifications" component={NotificationsView}/>

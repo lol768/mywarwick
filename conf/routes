@@ -8,8 +8,8 @@ GET         /notifications                                @controllers.HomeContr
 GET         /activity                                     @controllers.HomeController.index
 GET         /news                                         @controllers.HomeController.index
 GET         /search                                       @controllers.HomeController.index
-GET         /tiles                                        @controllers.HomeController.index
-GET         /tiles/:id                                    @controllers.HomeController.indexTile(id: String)
+GET         /tiles                                        @controllers.HomeController.redirectToIndex
+GET         /tiles/:id                                    @controllers.HomeController.tile(id: String)
 
 ->          /sso                                          sso.Routes
 
