@@ -24,7 +24,7 @@ securityDefinitions:
     type: basic
     description: 'Authenticate with Web-Sign On by providing a valid username and password, preferably belonging to a External User account dedicated for Start.Warwick API access.  Accounts must be authorised to write to user streams on behalf of a provider.'
 paths:
-  /api/tiles:
+  /tiles:
     get:
       description: Retrieves the tile loadout for the logged-in user
       responses:
@@ -32,7 +32,7 @@ paths:
           $ref: '#/responses/getTiles'
         401:
           $ref: '#/responses/unauthorized'
-  /api/tiles/by_id:
+  /tiles/by_id:
     get:
       description: Retrieves one or more tiles belonging to the logged-in user
       parameters:
@@ -72,27 +72,14 @@ paths:
               status:
                 type: string
               data:
-                activities:
-                  type: array
-                  items:
-                    $ref: '#/definitions/StreamItem'
+                properties:
+                  activities:
+                    type: array
+                    items:
+                      $ref: '#/definitions/StreamItem'
         401:
           $ref: '#/responses/unauthorized'
   /streams/{provider_id}/activity:
-    $ref: '#/x-pathItems/streamPost'
-  /streams/{provider_id}/notifications:
-    $ref: '#/x-pathItems/streamPost'
-responses:
-  getTiles:
-    description: OK
-    schema:
-      $ref: '#/definitions/TilesResponse'
-  unauthorized:
-    description: Unauthorized
-    schema:
-      $ref: '#/definitions/ErrorResponse'
-x-pathItems:
-  streamPost:
     post:
       security:
         - basicAuth: []
@@ -128,6 +115,51 @@ x-pathItems:
           description: Forbidden
           schema:
             $ref: '#/definitions/ErrorResponse'
+  /streams/{provider_id}/notifications:
+    post:
+      security:
+        - basicAuth: []
+      description: Adds an item to the stream for the specified recipients
+      parameters:
+        - name: provider_id
+          in: path
+          type: string
+          description: "The identifier assigned to the application providing the notification, e.g. 'tabula'"
+          required: true
+        - name: item
+          in: body
+          description: The item to be added to the stream
+          required: true
+          schema:
+            $ref: '#/definitions/PostedStreamItem'
+      responses:
+        201:
+          description: Item created
+          schema:
+            $ref: '#/definitions/CreatedResult'
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          $ref: '#/responses/unauthorized'
+        402:
+          description: No valid recipients
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+responses:
+  getTiles:
+    description: OK
+    schema:
+      $ref: '#/definitions/TilesResponse'
+  unauthorized:
+    description: Unauthorized
+    schema:
+      $ref: '#/definitions/ErrorResponse'
 definitions:
   TilesResponse:
     type: object
@@ -137,16 +169,17 @@ definitions:
       status:
         type: string
       data:
-        tiles:
-          type: array
-          items:
-            type: object
-            properties:
-              tile:
-                $ref: '#/definitions/Tile'
-              content:
-                type: object
-                description: Document representing the information for display on the associated tile
+        properties:
+          tiles:
+            type: array
+            items:
+              type: object
+              properties:
+                tile:
+                  $ref: '#/definitions/Tile'
+                content:
+                  type: object
+                  description: Document representing the information for display on the associated tile
   ErrorResponse:
     readOnly: true
     type: object
@@ -244,9 +277,10 @@ definitions:
         type: string
         example: ok
       data:
-        id:
-          type: string
-          example: 9e71b33b-debd-40e5-8e6c-989c9de8c547
+        properties:
+          id:
+            type: string
+            example: 9e71b33b-debd-40e5-8e6c-989c9de8c547
   PostedStreamItem:
     type: object
     required:
