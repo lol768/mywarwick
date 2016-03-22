@@ -44,6 +44,10 @@ function getTimeSpentInQueue(timeQueued) {
 }
 
 function postNextItem() {
+  if (!navigator.onLine || analyticsQueue.isEmpty()) {
+    return;
+  }
+
   const { args: [command, fields], time } = analyticsQueue.first();
   analyticsQueue = analyticsQueue.shift();
 
@@ -56,6 +60,10 @@ function postNextItem() {
     postNextItemThrottled();
   }
 }
+
+$(() => {
+  $(window).on('online', postNextItemThrottled);
+});
 
 postNextItemThrottled = _.throttle(postNextItem, 500);
 
