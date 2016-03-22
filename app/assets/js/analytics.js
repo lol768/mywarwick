@@ -2,6 +2,8 @@
 
 import $ from 'jquery';
 import log from 'loglevel';
+import Immutable from 'immutable';
+import _ from 'lodash';
 
 /* eslint-disable */
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -17,13 +19,48 @@ if (trackingId === undefined) {
     'start.analytics.tracking-id to the tracking ID for this property, e.g. UA-XXXXXXXX-X.');
 } else {
   log.info(`Google Analytics tracker created with tracking ID ${trackingId}`);
-  ga('create', trackingId, 'auto');
+
+  ga('create', {
+    trackingId,
+    cookieDomain: 'auto',
+  });
 }
+
+let analyticsQueue = Immutable.List();
+
+let postNextItemThrottled;
+
+function queue(...args) {
+  const time = new Date().getTime();
+  analyticsQueue = analyticsQueue.push({ args, time });
+
+  postNextItemThrottled();
+}
+
+function getTimeSpentInQueue(timeQueued) {
+  const time = new Date().getTime();
+
+  return time - timeQueued;
+}
+
+function postNextItem() {
+  const { args: [command, fields], time } = analyticsQueue.first();
+  analyticsQueue = analyticsQueue.shift();
+
+  ga(command, {
+    ...fields,
+    queueTime: getTimeSpentInQueue(time),
+  });
+
+  if (!analyticsQueue.isEmpty()) {
+    postNextItemThrottled();
+  }
+}
+
+postNextItemThrottled = _.throttle(postNextItem, 500);
 
 export function track(page) {
   if (trackingId) {
-    log.debug(`Tracking pageview for ${page}`);
-    ga('set', 'page', page);
-    ga('send', 'pageview');
+    queue('send', { hitType: 'pageview', page });
   }
 }
