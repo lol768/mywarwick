@@ -140,11 +140,10 @@ store.subscribe(() => {
 
 store.dispatch(serverpipe.fetchUserIdentity());
 
-const freezeDate = (d) => (d !== undefined && 'format' in d) ? d.format() : d;
-const thawDate = (d) => (d !== undefined) ? moment(d) : d;
+const freezeDate = (d) => (!!d && 'format' in d) ? d.format() : d;
+const thawDate = (d) => !!d ? moment(d) : d;
 
-persisted('activities-lastRead', notificationMetadata.readActivities, freezeDate, thawDate);
-persisted('notifications-lastRead', notificationMetadata.readNotifications, freezeDate, thawDate);
+persisted('notificationsLastRead', notificationMetadata.readNotifications, freezeDate, thawDate);
 
 persisted('activities', notifications.fetchedActivities, freezeStream);
 persisted('notifications', notifications.fetchedNotifications, freezeStream);
@@ -152,4 +151,4 @@ persisted('notifications', notifications.fetchedNotifications, freezeStream);
 persisted('tiles.items', tiles.fetchedTiles);
 persisted('tileContent', tiles.loadedAllTileContent);
 
-store.subscribe(() => notificationsGlue.persistNotificationsMetadata(store.getState()));
+store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));

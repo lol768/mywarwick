@@ -3,10 +3,9 @@ package controllers
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import models.NewsItem
 import org.joda.time.DateTime
 import play.api.libs.json._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.Action
 import services.{FeedService, NewsService}
 
 import scala.concurrent.ExecutionContext.Implicits.global

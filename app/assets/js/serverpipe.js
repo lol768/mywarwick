@@ -127,16 +127,12 @@ export function fetchActivities() {
         const notifications = _.filter(json.data.activities, (a) => a.notification);
         const activities = _.filter(json.data.activities, (a) => !a.notification);
 
-        dispatch(notification.fetchedNotifications(notifications));
-        dispatch(notification.fetchedActivities(activities));
-      });
-
-    fetchWithCredentials('/api/streams/read')
-      .then(response => response.json())
-      .then(json => {
         if (json.data.notificationsRead) {
           dispatch(notificationMetadata.readNotifications(moment(json.data.notificationsRead)));
         }
+
+        dispatch(notification.fetchedNotifications(notifications));
+        dispatch(notification.fetchedActivities(activities));
       });
   };
 }
