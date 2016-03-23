@@ -150,19 +150,12 @@ class ActivityDaoImpl @Inject()(
   }
 
   override def saveLastReadDate(usercode: String, newDate: DateTime)(implicit c: Connection): Boolean = {
-    getLastReadDate(usercode) match {
-      case Some(currentDate) if newDate.isBefore(currentDate) =>
-        // Last-read date cannot be decreased
-        false
-      case Some(_) =>
-        SQL("UPDATE ACTIVITY_RECIPIENT_READ SET NOTIFICATIONS_LAST_READ = {read} WHERE USERCODE = {usercode}")
-          .on('usercode -> usercode, 'read -> newDate)
-          .executeUpdate() > 0
-      case None =>
-        SQL("INSERT INTO ACTIVITY_RECIPIENT_READ (USERCODE, NOTIFICATIONS_LAST_READ) VALUES ({usercode}, {read})")
-          .on('usercode -> usercode, 'read -> newDate)
-          .executeUpdate() > 0
-    }
+    SQL("UPDATE ACTIVITY_RECIPIENT_READ SET NOTIFICATIONS_LAST_READ = GREATEST(NOTIFICATIONS_LAST_READ, {read}) WHERE USERCODE = {usercode}")
+      .on('usercode -> usercode, 'read -> newDate)
+      .executeUpdate() > 0 ||
+      SQL("INSERT INTO ACTIVITY_RECIPIENT_READ (USERCODE, NOTIFICATIONS_LAST_READ) VALUES ({usercode}, {read})")
+        .on('usercode -> usercode, 'read -> newDate)
+        .executeUpdate() > 0
   }
 
   override def countNotificationsSinceDate(usercode: String, date: DateTime)(implicit c: Connection): Int =

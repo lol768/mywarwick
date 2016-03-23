@@ -1,12 +1,14 @@
 package services.dao
 
 import helpers.{Fixtures, OneStartAppPerSuite}
-import models.{Output, ActivityTag, TagValue}
+import models.{ActivityTag, Output, TagValue}
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
 import Output.Mobile
+import anorm.SQL
 import warwick.anorm.converters.ColumnConversions._
 import warwick.sso.Usercode
+import anorm.SqlParser._
 
 class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
@@ -75,7 +77,7 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       val newActivity = activityDao.getActivityById(newActivityId).get
 
-      anorm.SQL(
+      SQL(
         """
       INSERT INTO activity_recipient VALUES
       ({oldActivityId}, {usercode}, {oldDate}, null, null, null, {oldDate}),
@@ -92,6 +94,29 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
       messagingDao.save(newActivity, usercode, Mobile)
 
       activityDao.getPushNotificationsSinceDate(usercode.string, lastFetchedDate) mustBe Seq(newActivity)
+    }
+
+    "update last-read date" in transaction { implicit c =>
+      val usercode = "someone"
+
+      def lastReadDate: DateTime =
+        SQL("SELECT NOTIFICATIONS_LAST_READ FROM ACTIVITY_RECIPIENT_READ WHERE USERCODE={usercode}")
+          .on('usercode -> usercode)
+          .as(scalar[DateTime].singleOpt).orNull
+
+      val now = DateTime.now
+      val yesterday = now.minusDays(1)
+
+      lastReadDate mustBe null
+
+      activityDao.saveLastReadDate(usercode, yesterday)
+      lastReadDate mustBe yesterday
+
+      activityDao.saveLastReadDate(usercode, now)
+      lastReadDate mustBe now
+
+      activityDao.saveLastReadDate(usercode, yesterday)
+      lastReadDate mustBe now
     }
   }
 }
