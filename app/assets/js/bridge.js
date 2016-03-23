@@ -55,7 +55,7 @@ if (window.navigator.userAgent.indexOf('Start/') >= 0) {
       // FIXME - remove this once app has been updated to have no unreadActivityCount
       unreadActivityCount: 0,
       unreadNewsCount: 0,
-      currentPath: state.get('path'),
+      currentPath: window.location.pathname,
       isUserLoggedIn: state.getIn(['user', 'data', 'usercode']) !== undefined,
       tabBarHidden: state.getIn(['ui', 'className']) !== 'mobile',
     });

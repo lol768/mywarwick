@@ -1,9 +1,8 @@
 import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactDOM from 'react-dom';
-
 import $ from 'jquery';
-
+import _ from 'lodash';
 import MastheadIcon from './MastheadIcon';
 import NotificationsView from '../views/NotificationsView';
 import ActivityView from '../views/ActivityView';
@@ -16,15 +15,11 @@ import PermissionRequest from './PermissionRequest';
 import MasqueradeNotice from './MasqueradeNotice';
 import UpdatePopup from './UpdatePopup';
 import UtilityBar from './UtilityBar';
-
-import { navigate } from '../../navigate';
-
 import { connect } from 'react-redux';
 import { getNumItemsSince } from '../../stream';
-
 import { updateLayoutClass } from '../Application';
 import { fetchTileContent } from '../../serverpipe';
-import { zoomOut } from '../../tiles';
+import { push, goBack } from 'react-router-redux';
 
 class ID7Layout extends ReactComponent {
 
@@ -44,7 +39,7 @@ class ID7Layout extends ReactComponent {
   componentWillReceiveProps(nextProps) {
     nextProps.dispatch(updateLayoutClass());
 
-    const hasZoomedTile = nextProps.path === '/' && !!nextProps.zoomedTile;
+    const hasZoomedTile = _(nextProps.path).startsWith('/tiles/');
     $('body').toggleClass('has-zoomed-tile', hasZoomedTile);
   }
 
@@ -65,33 +60,33 @@ class ID7Layout extends ReactComponent {
 
   goToHome(e) {
     e.preventDefault();
-    this.props.dispatch(navigate('/'));
+    this.props.dispatch(push('/'));
     this.props.dispatch(fetchTileContent());
   }
 
   goToNotification() {
-    this.props.dispatch(navigate('/notifications'));
+    this.props.dispatch(push('/notifications'));
   }
 
   goToActivity() {
-    this.props.dispatch(navigate('/activity'));
+    this.props.dispatch(push('/activity'));
   }
 
   onBackClick() {
-    this.props.dispatch(zoomOut());
+    this.props.dispatch(goBack());
   }
 
   renderMasqueradeNotice() {
     const user = this.props.user.data;
 
     if (user.masquerading) {
-      return <MasqueradeNotice masqueradingAs={user} />;
+      return <MasqueradeNotice masqueradingAs={user}/>;
     }
   }
 
   renderNotificationPermissionRequest() {
     if ('Notification' in window && Notification.permission === 'default') {
-      return <PermissionRequest isDisabled={ !this.props.user.data.authenticated } />;
+      return <PermissionRequest isDisabled={ !this.props.user.data.authenticated }/>;
     }
   }
 
@@ -151,69 +146,69 @@ class ID7Layout extends ReactComponent {
           <div className="id7-fixed-width-container">
             <header className="id7-page-header" ref="header">
               { this.renderMasqueradeNotice() }
-                <div className="id7-utility-masthead">
-                  <nav className="id7-utility-bar" id="utility-bar-container">
-                    <UtilityBar user={this.props.user} layoutClassName="desktop" />
-                  </nav>
-                  <div className="id7-masthead">
-                    <div className="id7-masthead-contents">
-                      <div className="clearfix">
-                        <div className="id7-logo-column">
-                          <div className="id7-logo-row">
-                            <div className="id7-logo">
-                              <a href="/" title="Warwick homepage" onClick={ this.goToHome }>
-                                <img src="" alt="Warwick"/>
-                              </a>
-                            </div>
-                            <div className="masthead-popover-icons">
-                              <MastheadIcon
-                                icon="inbox"
-                                badge={ notificationsCount }
-                                key="notifications"
-                                popoverTitle="Notifications"
-                                isDisabled={ !user.data.authenticated }
-                                onMore={ this.goToNotification }
-                              >
-                                <NotificationsView grouped={false}/>
-                              </MastheadIcon>
-                              <MastheadIcon
-                                icon="dashboard" key="activity"
-                                popoverTitle="Activity"
-                                isDisabled={ !user.data.authenticated }
-                                onMore={ this.goToActivity }
-                              >
-                                <ActivityView grouped={false}/>
-                              </MastheadIcon>
-                              <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
-                                <LinkBlock columns="1">
-                                  <Link key="bpm" href="http://warwick.ac.uk/bpm">
-                                    Course Transfers
-                                  </Link>
-                                  <Link key="ett" href="http://warwick.ac.uk/ett">
-                                    Exam Timetable
-                                  </Link>
-                                  <Link key="massmail" href="http://warwick.ac.uk/massmail">
-                                    Mass Mailing
-                                  </Link>
-                                  <Link key="mrm" href="http://warwick.ac.uk/mrm">
-                                    Module Registration
-                                  </Link>
-                                  <Link
-                                    key="printercredits"
-                                    href="http://warwick.ac.uk/printercredits"
-                                  >
-                                    Printer Credits
-                                  </Link>
-                                </LinkBlock>
-                              </MastheadIcon>
-                            </div>
+              <div className="id7-utility-masthead">
+                <nav className="id7-utility-bar" id="utility-bar-container">
+                  <UtilityBar user={this.props.user} layoutClassName="desktop"/>
+                </nav>
+                <div className="id7-masthead">
+                  <div className="id7-masthead-contents">
+                    <div className="clearfix">
+                      <div className="id7-logo-column">
+                        <div className="id7-logo-row">
+                          <div className="id7-logo">
+                            <a href="/" title="Warwick homepage" onClick={ this.goToHome }>
+                              <img src="" alt="Warwick"/>
+                            </a>
+                          </div>
+                          <div className="masthead-popover-icons">
+                            <MastheadIcon
+                              icon="inbox"
+                              badge={ notificationsCount }
+                              key="notifications"
+                              popoverTitle="Notifications"
+                              isDisabled={ !user.data.authenticated }
+                              onMore={ this.goToNotification }
+                            >
+                              <NotificationsView grouped={false}/>
+                            </MastheadIcon>
+                            <MastheadIcon
+                              icon="dashboard" key="activity"
+                              popoverTitle="Activity"
+                              isDisabled={ !user.data.authenticated }
+                              onMore={ this.goToActivity }
+                            >
+                              <ActivityView grouped={false}/>
+                            </MastheadIcon>
+                            <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
+                              <LinkBlock columns="1">
+                                <Link key="bpm" href="http://warwick.ac.uk/bpm">
+                                  Course Transfers
+                                </Link>
+                                <Link key="ett" href="http://warwick.ac.uk/ett">
+                                  Exam Timetable
+                                </Link>
+                                <Link key="massmail" href="http://warwick.ac.uk/massmail">
+                                  Mass Mailing
+                                </Link>
+                                <Link key="mrm" href="http://warwick.ac.uk/mrm">
+                                  Module Registration
+                                </Link>
+                                <Link
+                                  key="printercredits"
+                                  href="http://warwick.ac.uk/printercredits"
+                                >
+                                  Printer Credits
+                                </Link>
+                              </LinkBlock>
+                            </MastheadIcon>
                           </div>
                         </div>
-                        <MastheadSearch />
                       </div>
+                      <MastheadSearch />
                     </div>
                   </div>
                 </div>
+              </div>
             </header>
           </div>
         </div>
@@ -262,16 +257,13 @@ class ID7Layout extends ReactComponent {
   }
 }
 
-const select = (state) => { // eslint-disable-line arrow-body-style
-  return {
-    layoutClassName: state.get('ui').get('className'),
-    notificationsCount:
-      getNumItemsSince(state.get('notifications'), state.get('notifications-lastRead')),
-    user: state.get('user').toJS(),
-    colourTheme: state.get('ui').get('colourTheme'),
-    zoomedTile: state.getIn(['me', 'zoomedTile']),
-    path: state.get('path'),
-  };
-};
+const select = (state) => ({
+  layoutClassName: state.get('ui').get('className'),
+  notificationsCount:
+    getNumItemsSince(state.get('notifications'), state.get('notifications-lastRead')),
+  user: state.get('user').toJS(),
+  colourTheme: state.get('ui').get('colourTheme'),
+  zoomedTile: state.getIn(['me', 'zoomedTile']),
+});
 
 export default connect(select)(ID7Layout);

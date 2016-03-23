@@ -1,29 +1,18 @@
 import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
-
 import TabBar from './ui/TabBar';
 import TabBarItem from './ui/TabBarItem';
-import MeView from './views/MeView';
-import NotificationsView from './views/NotificationsView';
-import ActivityView from './views/ActivityView';
-import NewsView from './views/NewsView';
-import SearchView from './views/SearchView';
+import ID7Layout from './ui/ID7Layout';
 import Immutable from 'immutable';
-
 import { connect } from 'react-redux';
-
-import { navigate } from '../navigate';
-
 import { getNumItemsSince } from '../stream';
-
 import { mq } from 'modernizr';
+import $ from 'jquery';
+import store from '../store';
+import { registerReducer } from '../reducers';
+import { push } from 'react-router-redux';
 
 const isDesktop = () => mq('only all and (min-width: 768px)');
-import $ from 'jquery';
-
-import store from '../store';
-
-import { registerReducer } from '../reducers';
 
 const initialState = Immutable.fromJS({
   className: undefined,
@@ -75,26 +64,18 @@ class Application extends ReactComponent {
   }
 
   onSelectItem(p) {
-    this.props.dispatch(navigate(p));
+    this.props.dispatch(push(p));
   }
 
   render() {
-    const { path, notificationsCount, layoutClassName, user }
+    const { location, notificationsCount, layoutClassName, user, children }
       = this.props;
 
-    const views = {
-      '/': <MeView />,
-      '/notifications': <NotificationsView grouped />,
-      '/activity': <ActivityView grouped />,
-      '/news': <NewsView />,
-      '/search': <SearchView />,
-    };
-
     return (
-      <div>
-        {views[path]}
+      <ID7Layout path={ location.pathname }>
+        { children }
         { layoutClassName === 'mobile' ?
-          <TabBar selectedItem={ path } onSelectItem={ this.onSelectItem }>
+          <TabBar selectedItem={ location.pathname } onSelectItem={ this.onSelectItem }>
             <TabBarItem title="Me" icon="user" path="/"/>
             <TabBarItem
               title="Notifications" icon="inbox" path="/notifications"
@@ -108,7 +89,7 @@ class Application extends ReactComponent {
             <TabBarItem title="Search" icon="search" path="/search"/>
           </TabBar>
           : null}
-      </div>
+      </ID7Layout>
     );
   }
 
@@ -116,7 +97,6 @@ class Application extends ReactComponent {
 
 function mapStateToProps(state) {
   return {
-    path: state.get('path'),
     notificationsCount:
       getNumItemsSince(state.get('notifications'), state.get('notifications-lastRead')),
     layoutClassName: state.get('ui').get('className'),
