@@ -33,9 +33,7 @@ GET         /service/healthcheck                          @controllers.ServiceCh
 GET         /service/cluster/state                        @controllers.admin.ClusterStateController.get
 
 GET         /api/streams/user                             @controllers.api.UserActivitiesController.get
-GET         /api/streams/read                             @controllers.api.UserActivitiesController.getLastRead
 POST        /api/streams/read                             @controllers.api.UserActivitiesController.markAsRead
-
 
 POST        /api/streams/:providerId/notifications        @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
 POST        /api/streams/:providerId/activities           @controllers.api.IncomingActivitiesController.postActivity(providerId: String)

@@ -50,7 +50,7 @@ if (window.navigator.userAgent.indexOf('Start/') >= 0) {
       unreadNotificationCount:
         stream.getNumItemsSince(
           state.get('notifications'),
-          state.get('notifications-lastRead')
+          state.get('notificationsLastRead')
         ),
       // FIXME - remove this once app has been updated to have no unreadActivityCount
       unreadActivityCount: 0,
