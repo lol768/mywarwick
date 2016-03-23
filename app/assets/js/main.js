@@ -50,6 +50,10 @@ let currentPath = '/';
 $(() => {
   attachFastClick(document.body);
 
+  window.addEventListener('online', () =>
+    store.dispatch(serverpipe.fetchActivities())
+  );
+
   currentPath = window.location.pathname.match(/(\/[^/]*)/)[0];
   store.dispatch(navigate(currentPath));
 
