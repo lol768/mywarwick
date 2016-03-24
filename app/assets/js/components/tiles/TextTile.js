@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
+import _ from 'lodash';
+
 import TileContent from './TileContent';
 
 export default class TextTile extends TileContent {
@@ -51,34 +53,55 @@ export default class TextTile extends TileContent {
     });
   }
 
-  getBody(content) {
+  mapTextItems(itemsToDisplay) {
+    return itemsToDisplay.map(item => {
+      const tileItem = (<div key={item.id} className="tile__item">
+        <span className="tile__callout">{item.callout}</span>
+        <span className="tile__text">{item.text}</span>
+      </div>);
+
+      return item.href ?
+        <a
+          key={`${item.id}-a`}
+          href={item.href}
+          target="_blank"
+          onClick={ this.onClickLink }
+        >
+          {tileItem}
+        </a> : tileItem;
+    });
+  }
+
+  getLargeBody() {
+    const { content } = this.props;
+
     const itemsToDisplay = this.props.zoomed ?
-      content.items : [content.items[this.state.itemIndex]];
+      content.items : _.take(content.items, this.props.maxItemsToDisplay || 4);
+
+    return (
+      <div>
+        {this.mapTextItems(itemsToDisplay)}
+      </div>
+    );
+  }
+
+  getWideBody() {
+    const { content } = this.props;
 
     return (
       <ReactCSSTransitionGroup
+        className="text-tile-transition-group"
         transitionName="text-tile"
         transitionEnterTimeout={1000}
         transitionLeaveTimeout={1000}
       >
-        {itemsToDisplay.map(item => {
-          const tileItem = (<div key={item.id} className="tile__item">
-            <span className="tile__callout">{item.callout}</span>
-            <span className="tile__text">{item.text}</span>
-          </div>);
-
-          return item.href ?
-            <a
-              key={`${item.id}-a`}
-              href={item.href}
-              target="_blank"
-              onClick={ this.onClickLink }
-            >
-              {tileItem}
-            </a> : tileItem;
-        }) }
+        {this.mapTextItems([content.items[this.state.itemIndex]])}
       </ReactCSSTransitionGroup>
     );
+  }
+
+  getSmallBody() {
+    return this.getWideBody();
   }
 
   onClickLink(e) {
@@ -93,6 +116,7 @@ export default class TextTile extends TileContent {
     if (content && content.items) {
       return content.items.length > 1;
     }
+
     return false;
   }
 

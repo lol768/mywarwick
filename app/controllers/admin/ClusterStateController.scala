@@ -1,6 +1,6 @@
 package controllers.admin
 
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 
 import akka.cluster.Member
 import controllers.BaseController
@@ -21,6 +21,7 @@ import system.Roles.Sysadmin
   * If any members are "unreachable", then no new members can
   * be brought into
   */
+@Singleton
 class ClusterStateController @Inject() (
   cluster: ClusterStateService,
   security: SecurityService

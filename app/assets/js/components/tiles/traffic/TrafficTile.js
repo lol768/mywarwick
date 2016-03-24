@@ -12,10 +12,11 @@ const STALE_AFTER = 1200000;
 
 export default class TrafficTile extends TileContent {
 
-  conditionList(content) {
+  conditionList() {
     const itsHomeTime = new Date().getHours() >= HOME_TIME;
-    const trafficConditions = content.items.filter(r => r.route.inbound !== itsHomeTime)
+    const trafficConditions = this.props.content.items.filter(r => r.route.inbound !== itsHomeTime)
       .map(condition => <TrafficCondition key={condition.route.name} {...condition} />);
+
     if (trafficConditions.length > 0) {
       return (
         <ul className="traffic--conditions">
@@ -23,25 +24,27 @@ export default class TrafficTile extends TileContent {
         </ul>
       );
     }
-    return null;
   }
 
-  checkFresh(content, fetchedAt, renderFunc) {
-    const msSinceFetch = new Date().getTime() - fetchedAt;
+  renderIfFresh(contentFunction) {
+    const msSinceFetch = new Date().getTime() - this.props.fetchedAt;
     if (msSinceFetch > STALE_AFTER) {
-      return (<div>Unable to show recent traffic information.</div>);
+      return <div>Unable to show recent traffic information.</div>;
     }
-    return renderFunc.call(this, content);
+
+    return contentFunction.call(this);
   }
 
   static canZoom() {
     return true;
   }
 
-  _getBody(content) {
+  _getBody() {
+    const { content } = this.props;
+
     return (
-      <div className="traffic--tile">
-        {this.conditionList(content)}
+      <div className="tile--traffic">
+        {this.conditionList()}
         {
           content.alerts.items.length > 0 ?
             <div className="tile__item">
@@ -59,15 +62,17 @@ export default class TrafficTile extends TileContent {
     );
   }
 
-  getBody(content, fetchedAt) {
-    return this.checkFresh(content, fetchedAt, this._getBody);
+  getBody() {
+    return this.renderIfFresh(this._getBody);
   }
 
-  _getZoomedBody(content) {
+  _getZoomedBody() {
+    const { content } = this.props;
+
     return (
-      <div className="traffic--tile">
+      <div className="tile--traffic">
         <div className={classNames('col-xs-12', 'col-sm-4')}>
-          {this.conditionList(content)}
+          {this.conditionList()}
         </div>
         <div className={classNames('col-xs-12', 'col-sm-8')}>
           { content.alerts.items.slice(0, 2).map(a =>
@@ -83,7 +88,7 @@ export default class TrafficTile extends TileContent {
     );
   }
 
-  getZoomedBody(content, fetchedAt) {
-    return this.checkFresh(content, fetchedAt, this._getZoomedBody);
+  getZoomedBody() {
+    return this.renderIfFresh(this._getZoomedBody);
   }
 }

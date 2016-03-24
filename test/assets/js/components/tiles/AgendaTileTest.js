@@ -6,7 +6,8 @@ describe('AgendaTile', () => {
   const props = {
     "content":{
       "items":[{ id: '1' }, { id: '2' }, { id: '3' }]
-    }
+    },
+    size: 'large',
   };
 
   it('Displays a limited number of items when not zoomed', () => {
@@ -28,6 +29,7 @@ describe('AgendaTile', () => {
 describe('AgendaTileItem', () => {
   const props = {
     start: '2014-08-04T17:00:00',
+    end: '2014-08-04T18:00:00',
     title: 'Heron hunting',
     onClick: sinon.spy()
   };
@@ -38,7 +40,7 @@ describe('AgendaTileItem', () => {
     html.props.className.should.equal('agenda-item');
     const a = html.props.children;
     const [ title, date ] = a.props.children;
-    title.props.className.should.equal('agenda-item__title');
+    title.props.className.should.equal('agenda-item__title text--underline');
     title.props.title.should.equal(props.title);
     title.props.children.should.equal(props.title);
     date.props.className.should.equal('agenda-item__date');
@@ -55,6 +57,14 @@ describe('AgendaTileItem', () => {
     const node = ReactTestUtils.renderIntoDocument(tileItem);
     ReactTestUtils.Simulate.click(node);
     props.onClick.should.have.been.called;
+  });
+
+
+  it('renders time for all-day events', () => {
+    const html = shallowRender(<AgendaTileItem zoomed={ true } { ...props } end={ undefined }/>);
+    const a = html.props.children;
+    const [ , date ] = a.props.children;
+    date.props.children.should.equal('all-day');
   });
 
 });

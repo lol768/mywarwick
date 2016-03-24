@@ -18,7 +18,7 @@ class MessageQueueLengthHealthCheck @Inject()(
 
   override def value = queueAvailableStatus.map(_.count).sum
 
-  override val warn = 100
+  override val warning = 100
 
   override val critical = 300
 

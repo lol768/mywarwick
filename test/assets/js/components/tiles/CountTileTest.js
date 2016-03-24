@@ -21,6 +21,7 @@ describe('CountTile', () => {
         count: 53,
         word: 'herons',
       },
+      size: 'small',
     };
     checkCountBehaviour(props, props.content.count);
   });
@@ -31,6 +32,7 @@ describe('CountTile', () => {
         items: ['a', 'b', 'c'],
         word: 'letters',
       },
+      size: 'small',
     };
     checkCountBehaviour(props, 3);
   });

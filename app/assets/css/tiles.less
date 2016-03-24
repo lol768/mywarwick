@@ -3,10 +3,10 @@
 .tile--zoomed {
   position: fixed;
   padding: 0;
-  top: 44px;
+  top: @start-masthead-height;
   left: 0;
   right: 0;
-  bottom: 44px;
+  bottom: @start-tabbar-height;
   z-index: 100;
 
   @media (min-width: @screen-sm-min) {
@@ -20,14 +20,24 @@
   }
 
   .tile {
+    margin: 0;
 
     .tile__wrap {
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tile__text {
+      font-size: inherit;
     }
 
     height: 100%;
     cursor: default;
   }
+}
+
+.standalone.app .tile--zoomed {
+  bottom: 0;
 }
 
 .tile-zoom-backdrop {
@@ -74,12 +84,21 @@
 .tile {
   height: @tile-height;
   position: relative;
-  font-size: 15px;
-  margin-bottom: @tile-gutter;
+  margin-top: @tile-gutter;
+  font-size: 12px;
+  line-height: 1.2em;
+
+  .text--light {
+    font-weight: 100;
+  }
 
   a {
     color: inherit;
     text-decoration: none;
+
+    .text--underline {
+      border-bottom: 1px dotted rgba(255, 255, 255, .4);
+    }
   }
 
   ul, ol {
@@ -93,12 +112,12 @@
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 10px 10px 20px;
+    padding: @tile-padding;
   }
 
   > .tile__wrap > header {
-    margin: -10px -10px 0;
-    padding: 10px 10px 0;
+    margin: -@tile-padding -@tile-padding 0;
+    padding: @tile-padding @tile-padding 0;
     > h1 {
       color: inherit;
       border: 0;
@@ -112,26 +131,25 @@
   }
 }
 
+.tile__callout {
+  display: block;
+  font-size: 2em;
+  margin-bottom: .3em;
+
+  small {
+    font-size: 0.5em;
+  }
+}
+
 .tile--large {
   height: @tile-height * 2 + @tile-gutter;
 }
 
 :not(.tile--zoomed) {
-  .tile--agenda {
-    .list-header {
-      border: none;
-      font-weight: 100;
-      background-color: transparent;
-    }
+  > .tile--agenda {
     .list-group {
       margin-bottom: 8px;
     }
-  }
-
-  .tile__item {
-    position: absolute;
-    left: 10px;
-    bottom: 10px;
   }
 }
 
@@ -221,6 +239,10 @@
 }
 
 .tile--zoomed {
+  .tile {
+    font-size: 1.1em;
+  }
+
   .tile__body {
     display: block;
     .row;
@@ -235,15 +257,15 @@
     .make-xs-column(12);
     .make-sm-column(6);
     width: initial;
-    margin-top: 10px;
-    margin-bottom: 5px;
   }
 }
 
-.tile__callout {
-  display: block;
-  font-size: 2em;
-  line-height: 1.1;
+.tile__item {
+  margin-bottom: 1.25em;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
 }
 
 .tile__dismiss, .tile__expand {
@@ -251,7 +273,7 @@
   display: block;
   top: 0;
   right: 0;
-  padding: 10px 12px;
+  padding: @tile-padding (@tile-padding + 2);
   cursor: pointer;
   font-size: 16px;
 }
@@ -278,28 +300,56 @@
   display: block;
 }
 
+.text-tile-transition-group {
+  .tile__item {
+    position: absolute;
+    width: 100%;
+  }
+}
+
 .text-tile-enter {
-  bottom: -100% !important;
+  transform: translate(130%, 0) !important;
 }
 
 .text-tile-enter-active {
-  bottom: 10px !important;
-  transition: bottom 500ms ease-out;
+  transform: translate(0, 0) !important;
+  transition: transform 500ms ease-out;
   transition-delay: 400ms;
 }
 
 .text-tile-leave {
-  bottom: 10px !important;
+  transform: translate(0, 0) !important;
 }
 
 .text-tile-leave-active {
-  bottom: -100% !important;
-  transition: bottom 500ms ease-in;
+  transform: translate(130%, 0) !important;
+  transition: transform 500ms ease-in;
 }
 
 // AGENDA
-.agenda-item, .agenda-item a {
+.agenda-item {
   display: block;
+
+  a {
+    display: block;
+    .tile-zoomed & {
+      padding: .4em 0;
+    }
+  }
+
+  li {
+    padding: .4em 0 0;
+  }
+
+}
+
+.tile--agenda {
+  .list-header {
+    border: none;
+    font-weight: bold;
+    background-color: transparent;
+    padding: 0 0 .4em;
+  }
 }
 
 .agenda-item__title {
@@ -318,15 +368,37 @@
 
 // WEATHER {
 .tile--weather {
+  header > h1 > .fa {
+    margin-right: 0 !important;
+    min-width: 36px;
+  }
+  .tile__body {
+    margin-left: inherit;
+    margin-right: inherit;
+  }
+
+  .skycon {
+    max-width: 40px;
+    margin: 0;
+    position: absolute;
+    top: 4px;
+    left: 2px;
+  }
   .tile__callout {
     display: inline-block;
   }
   .tile__text {
     display: block;
   }
-  .skycon {
-    max-width: 80px;
-    margin-left: 18px;
+  .tile__text--caption {
+    display: inline-block;
+    margin-bottom: .4em;
+    width: 100%;
+  }
+  .table__item {
+    .tile__callout, .tile__text {
+      margin-left: 8px;
+    }
   }
 }
 
@@ -342,12 +414,12 @@
 
 // TRAFFIC
 
-.tile--zoomed .traffic--tile ul {
+.tile--zoomed .tile--traffic ul {
   margin-right: 10px;
   margin-left: 10px;
 }
 
-.traffic--tile {
+.tile--traffic {
   i {
     margin-right: 5px;
   }
@@ -357,20 +429,30 @@
   }
 }
 
-.slider-leave.slider-leave-active, .slider-appear, .slider-enter {
-  transform: translate3d(100%, 0, 0);
-  visibility: hidden;
-}
-
-.slider-leave, .slider-appear.slider-appear-active, .slider-enter.slider-enter-active {
-  transform: translate3d(0%, 0, 0);
-  visibility: initial;
-  min-width: 100%;
-  min-height: 100%;
+.slider-enter, .slider-leave {
   position: fixed;
-  top: 0;
+  top: @start-masthead-height;
+  left: 0;
+  right: 0;
+  bottom: 0;
   will-change: transform;
   z-index: 100;
-  transition: transform 0.3s ease-in-out, visibility 0.3s ease-in-out;
 }
 
+.slider-enter {
+  transform: translate3d(100%, 0, 0);
+}
+
+.slider-enter.slider-enter-active {
+  transform: translate3d(0%, 0, 0);
+  transition: transform .3s ease-out;
+}
+
+.slider-leave {
+  transform: translate3d(0%, 0, 0);
+}
+
+.slider-leave.slider-leave-active {
+  transform: translate3d(100%, 0, 0);
+  transition: transform .3s ease-out;
+}

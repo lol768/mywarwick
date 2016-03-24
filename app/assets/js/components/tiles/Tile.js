@@ -12,7 +12,7 @@ const SIZE_CLASSES = {
   large: 'col-xs-12 col-sm-12 col-md-6',
 };
 
-const LONG_PRESS_DURATION_MS = 500;
+export const EDITING_ANIMATION_DURATION = 600;
 
 export default class Tile extends Component {
 
@@ -67,7 +67,7 @@ export default class Tile extends Component {
         this.startY = touch.clientY;
       }
 
-      this.timeout = setTimeout(this.props.onBeginEditing, LONG_PRESS_DURATION_MS);
+      this.timeout = setTimeout(this.props.onBeginEditing, EDITING_ANIMATION_DURATION);
     }
   }
 
@@ -126,7 +126,7 @@ export default class Tile extends Component {
   animateToScale(scale) {
     const $tile = $(ReactDOM.findDOMNode(this.refs.tile));
 
-    $tile.stop().transition({ scale }, this.props.editAnimationDuration, 'snap');
+    $tile.stop().transition({ scale }, EDITING_ANIMATION_DURATION, 'snap');
   }
 
   shouldDisplayExpandIcon() {
@@ -186,7 +186,7 @@ export default class Tile extends Component {
           <div
             className="tile__edit-control bottom-right"
             onClick={ this.props.onResize }
-            title={`Make tile ${size === 'small' ? 'bigger' : 'smaller'}`}
+            title={`Make tile ${size !== 'large' ? 'bigger' : 'smaller'}`}
           >
             <i className="fa fa-fw fa-arrow-up"> </i>
           </div>

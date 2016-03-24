@@ -9,7 +9,8 @@ describe('TextTile', () => {
         { "id":'1', "callout":"Big text", "text":"Little text" },
         { "id":'2', "callout":"Heron", "text":"an evil creature" }
       ]
-    }
+    },
+    size: 'small',
   };
 
   it('initially renders the first item', () => {
@@ -33,7 +34,8 @@ describe('TextTile', () => {
         "items":[
           { "id":"1", "callout":"Big text", "text":"Little text", "href":"http://warwick.ac.uk/" },
         ]
-      }
+      },
+      size: 'small',
     };
     const html = shallowRender(<TextTile { ...props } />);
     const [ a ] = html.props.children;

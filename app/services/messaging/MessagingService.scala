@@ -6,6 +6,7 @@ import javax.inject.{Inject, Named}
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.ImplementedBy
 import models._
+import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.ActivityService
 import services.dao.MessagingDao
@@ -35,6 +36,8 @@ trait MessagingService {
   def processNow(message: MessageSend.Light): Future[ProcessingResult]
 
   def getQueueStatus(): Seq[QueueStatus]
+
+  def getOldestUnsentMessageCreatedAt(): Option[DateTime]
 }
 
 class MessagingServiceImpl @Inject()(
@@ -115,6 +118,9 @@ class MessagingServiceImpl @Inject()(
 
   override def getQueueStatus(): Seq[QueueStatus] =
     db.withConnection(implicit c => messagingDao.getQueueStatus())
+
+  override def getOldestUnsentMessageCreatedAt() =
+    db.withConnection(implicit c => messagingDao.getOldestUnsentMessageCreatedAt())
 
 }
 

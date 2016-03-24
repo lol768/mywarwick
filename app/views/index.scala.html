@@ -1,13 +1,16 @@
 @import uk.ac.warwick.sso.client.core.LinkGenerator
-@()(implicit linkGenerator: LinkGenerator)
+@()(implicit linkGenerator: LinkGenerator, analyticsTrackingId: Option[AnalyticsTrackingID])
 
 @common.htmlelement {
   <head>
     @common.head(title = "")
   </head>
   <body>
-
-    <div id="app-container"></div>
+    <div id="app-container"
+      @for(trackingId <- analyticsTrackingId) {
+        data-analytics-tracking-id="@{trackingId.string}"
+        }
+    ></div>
     <script>
       // FIXME refactor this away
       window.SSO = {

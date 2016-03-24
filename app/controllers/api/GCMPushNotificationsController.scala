@@ -1,5 +1,7 @@
 package controllers.api
 
+import javax.inject.Singleton
+
 import com.google.inject.Inject
 import controllers.BaseController
 import models.Platform.Google
@@ -7,6 +9,7 @@ import play.api.libs.json.JsValue
 import services.messaging.FetchNotificationsService
 import services.{PushRegistrationService, SecurityService}
 
+@Singleton
 class GCMPushNotificationsController @Inject()(
   securityService: SecurityService,
   pushRegistrationService: PushRegistrationService,

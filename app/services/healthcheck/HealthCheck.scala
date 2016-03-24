@@ -3,7 +3,7 @@ package services.healthcheck
 import models.DateFormats.isoDateWrites
 import org.joda.time.DateTime
 import play.api.libs.json.{JsObject, Json}
-import services.healthcheck.HealthCheckStatus.{Critical, Okay, Warn}
+import services.healthcheck.HealthCheckStatus.{Critical, Okay, Warning}
 
 import scala.annotation.StaticAnnotation
 
@@ -22,7 +22,7 @@ case class PerfData[T](name: String, value: T, warn: Option[T] = None, critical:
 
 object HealthCheckStatus {
   val Okay = HealthCheckStatus("okay")
-  val Warn = HealthCheckStatus("warn")
+  val Warning = HealthCheckStatus("warning")
   val Critical = HealthCheckStatus("critical")
 }
 
@@ -31,15 +31,15 @@ abstract class HealthCheck[T](implicit num: Numeric[T]) {
   def name: String
 
   def status: HealthCheckStatus = {
-    val higherIsBetter = num.lt(critical, warn)
+    val higherIsBetter = num.lt(critical, warning)
 
     if (higherIsBetter) {
-      if (num.gt(value, warn)) Okay
-      else if (num.gt(value, critical)) Warn
+      if (num.gt(value, warning)) Okay
+      else if (num.gt(value, critical)) Warning
       else Critical
     } else {
-      if (num.lt(value, warn)) Okay
-      else if (num.lt(value, critical)) Warn
+      if (num.lt(value, warning)) Okay
+      else if (num.lt(value, critical)) Warning
       else Critical
     }
   }
@@ -48,7 +48,7 @@ abstract class HealthCheck[T](implicit num: Numeric[T]) {
 
   def value: T
 
-  def warn: T
+  def warning: T
 
   def critical: T
 
@@ -59,8 +59,8 @@ abstract class HealthCheck[T](implicit num: Numeric[T]) {
   def toJson: JsObject = Json.obj(
     "name" -> name,
     "status" -> status.string,
-    "perfData" -> (Seq(PerfData(name.replace("-", "_"), value, Some(warn), Some(critical)).formatted) ++ perfData.map(_.formatted)),
-    "message" -> s"$message (warn: $warn, critical: $critical)",
+    "perfData" -> (Seq(PerfData(name.replace("-", "_"), value, Some(warning), Some(critical)).formatted) ++ perfData.map(_.formatted)),
+    "message" -> s"$message (warning: $warning, critical: $critical)",
     "testedAt" -> testedAt
   )
 

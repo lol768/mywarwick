@@ -24,6 +24,8 @@ trait MessagingDao {
 
   def getQueueStatus()(implicit c: Connection): Seq[QueueStatus]
 
+  def getOldestUnsentMessageCreatedAt()(implicit c: Connection): Option[DateTime]
+
 }
 
 class MessagingDaoImpl extends MessagingDao {
@@ -39,6 +41,10 @@ class MessagingDaoImpl extends MessagingDao {
   override def getQueueStatus()(implicit c: Connection): Seq[QueueStatus] =
     SQL("SELECT OUTPUT, STATE, COUNT(*) AS COUNT FROM MESSAGE_SEND WHERE (STATE = 'F' AND UPDATED_AT > SYSDATE - 1) OR STATE != 'F' GROUP BY OUTPUT, STATE")
       .as(queueParser.*)
+
+  override def getOldestUnsentMessageCreatedAt()(implicit c: Connection): Option[DateTime] =
+    SQL("SELECT UPDATED_AT FROM MESSAGE_SEND WHERE STATE = 'A' AND ROWNUM = 1 ORDER BY UPDATED_AT ASC")
+      .as(scalar[DateTime].singleOpt)
 
   override def save(activity: Activity, usercode: Usercode, output: Output)(implicit c: Connection): Unit = {
     SQL("INSERT INTO MESSAGE_SEND (ID, ACTIVITY_ID, USERCODE, OUTPUT, UPDATED_AT) VALUES ({id}, {activityId}, {usercode}, {output}, {updatedAt})")

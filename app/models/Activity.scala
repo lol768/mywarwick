@@ -1,8 +1,8 @@
 package models
 
 import org.joda.time.DateTime
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 case class Activity(
   id: String,
@@ -100,12 +100,3 @@ object ActivityRecipients {
   implicit val readsActivityRecipients = Json.reads[ActivityRecipients]
 }
 
-case class LastRead(usercode: String, notificationsRead: Option[DateTime])
-
-object LastRead {
-  import DateFormats.isoDateReads
-
-  implicit val lastReadFormatter: Format[LastRead] =
-    ((__ \ "usercode").format[String] and
-      (__ \ "notificationsRead").formatNullable[DateTime])(LastRead.apply, unlift(LastRead.unapply))
-}

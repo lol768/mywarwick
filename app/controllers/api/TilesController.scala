@@ -1,5 +1,7 @@
 package controllers.api
 
+import javax.inject.Singleton
+
 import com.google.inject.Inject
 import controllers.BaseController
 import models._
@@ -11,6 +13,7 @@ import warwick.sso.User
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+@Singleton
 class TilesController @Inject()(
   securityService: SecurityService,
   tileService: TileService,
