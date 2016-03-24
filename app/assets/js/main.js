@@ -8,16 +8,8 @@ import { polyfill } from 'es6-promise';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
 import React from 'react';
-
-log.enableAll(false);
-polyfill();
-
 import store from './store';
-window.localforage = localforage;
-
 import Application from './components/Application';
-import ID7Layout from './components/ui/ID7Layout';
-
 import * as notifications from './notifications';
 import * as notificationMetadata from './notification-metadata';
 import * as notificationsGlue from './notifications-glue';
@@ -26,17 +18,36 @@ import * as serverpipe from './serverpipe';
 import * as tiles from './tiles';
 import * as update from './update';
 import * as user from './user';
-import { navigate } from './navigate';
 import persisted from './persisted';
 import SocketDatapipe from './SocketDatapipe';
-import './bridge';
-
+import { Router, Route, IndexRoute, IndexRedirect, browserHistory } from 'react-router';
+import { syncHistoryWithStore, routerReducer } from 'react-router-redux';
 import initErrorReporter from './errorreporter';
+import { registerReducer } from './reducers';
+import NewsView from './components/views/NewsView';
+import MeView from './components/views/MeView';
+import TileView from './components/views/TileView';
+import ActivityView from './components/views/ActivityView';
+import NotificationsView from './components/views/NotificationsView';
+import SearchView from './components/views/SearchView';
+import './bridge';
+import * as analytics from './analytics';
+
+log.enableAll(false);
+polyfill();
 initErrorReporter();
 
 localforage.config({
   name: 'Start',
 });
+
+registerReducer('routing', routerReducer);
+
+const history = syncHistoryWithStore(browserHistory, store, {
+  selectLocationState: state => state.get('routing'),
+});
+
+history.listen(location => analytics.track(location.pathname));
 
 // String replaced by Gulp build.
 log.info('Scripts built at: $$BUILDTIME$$');
@@ -45,8 +56,6 @@ $.getJSON('/ssotest', shouldRedirect => {
   if (shouldRedirect) window.location = window.SSO.LOGIN_URL;
 });
 
-let currentPath = '/';
-
 $(() => {
   attachFastClick(document.body);
 
@@ -54,21 +63,23 @@ $(() => {
     store.dispatch(serverpipe.fetchActivities())
   );
 
-  currentPath = window.location.pathname.match(/(\/[^/]*)/)[0];
-  store.dispatch(navigate(currentPath));
-
   ReactDOM.render(
     <Provider store={store}>
-      <ID7Layout>
-        <Application />
-      </ID7Layout>
+      <Router history={history}>
+        <Route path="/" component={Application}>
+          <IndexRoute component={MeView}/>
+          <Route path="tiles" component={MeView}>
+            <IndexRedirect to="/"/>
+            <Route path=":id" component={TileView}/>
+          </Route>
+          <Route path="notifications" component={NotificationsView}/>
+          <Route path="activity" component={ActivityView}/>
+          <Route path="news" component={NewsView}/>
+          <Route path="search" component={SearchView}/>
+        </Route>
+      </Router>
     </Provider>,
     document.getElementById('app-container'));
-
-  window.addEventListener('popstate', () => {
-    currentPath = window.location.pathname;
-    store.dispatch(navigate(window.location.pathname));
-  });
 
   const $fixedHeader = $('.fixed-header');
 
@@ -90,20 +101,6 @@ $(() => {
     }
   });
 });
-
-store.subscribe(() => {
-  const path = store.getState().get('path');
-
-  if (path !== currentPath) {
-    currentPath = path;
-
-    if ('pushState' in window.history) {
-      window.history.pushState(null, null, currentPath);
-      $(window).scrollTop(0);
-    }
-  }
-});
-
 
 /*
  Attempt to register service worker, to handle push notifications and offline
@@ -147,11 +144,10 @@ store.subscribe(() => {
 
 store.dispatch(serverpipe.fetchUserIdentity());
 
-const freezeDate = (d) => (d !== undefined && 'format' in d) ? d.format() : d;
-const thawDate = (d) => (d !== undefined) ? moment(d) : d;
+const freezeDate = (d) => (!!d && 'format' in d) ? d.format() : d;
+const thawDate = (d) => !!d ? moment(d) : d;
 
-persisted('activities-lastRead', notificationMetadata.readActivities, freezeDate, thawDate);
-persisted('notifications-lastRead', notificationMetadata.readNotifications, freezeDate, thawDate);
+persisted('notificationsLastRead', notificationMetadata.readNotifications, freezeDate, thawDate);
 
 persisted('activities', notifications.fetchedActivities, freezeStream);
 persisted('notifications', notifications.fetchedNotifications, freezeStream);
@@ -159,4 +155,4 @@ persisted('notifications', notifications.fetchedNotifications, freezeStream);
 persisted('tiles.items', tiles.fetchedTiles);
 persisted('tileContent', tiles.loadedAllTileContent);
 
-store.subscribe(() => notificationsGlue.persistNotificationsMetadata(store.getState()));
+store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));

@@ -126,8 +126,14 @@ export function getStreamSize(stream) {
 
 /*
  * Return the total number of items in the stream with a date after the given date.
+ *
+ * If date is falsy, return the total number of items in the stream.
  */
 export function getNumItemsSince(stream, date) {
+  if (!date) {
+    return getStreamSize(stream);
+  }
+
   return stream.valueSeq().reduce((sum, part) =>
     sum + part.filter(item => moment(item.date).isAfter(date)).size, 0
   );

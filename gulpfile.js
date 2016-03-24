@@ -17,25 +17,27 @@ var _ = require('lodash');
 var path = require('path');
 var mold = require('mold-source-map');
 
-var postcss = require('gulp-postcss');
-var less = require('gulp-less');
-var uglify = require('gulp-uglify');
+var autoprefix = require('autoprefixer-core');
+var babelify = require('babelify');
 var browserify = require('browserify');
 var browserifyShim = require('browserify-shim');
-var babelify = require('babelify');
-var watchify = require('watchify');
-var autoprefix = require('autoprefixer-core');
-var manifest = require('gulp-manifest');
-var rename = require('gulp-rename');
+var envify = require('loose-envify/custom');
+var eslint = require('gulp-eslint');
 var filenames = require('gulp-filenames');
 var insert = require('gulp-insert');
+var less = require('gulp-less');
+var manifest = require('gulp-manifest');
+var postcss = require('gulp-postcss');
+var rename = require('gulp-rename');
+var swagger = require('gulp-swagger');
 var swPrecache = require('sw-precache');
-var eslint = require('gulp-eslint');
-var envify = require('loose-envify/custom');
+var uglify = require('gulp-uglify');
+var watchify = require('watchify');
+
 
 var lessCompiler = require('less');
 
-gulpOpts = {env:{}};
+gulpOpts = { env: {} };
 try {
   fs.accessSync('./gulpopts.json', fs.R_OK);
   var gulpOpts = require('./gulpopts.json');
@@ -64,7 +66,7 @@ var paths = {
   ]
 };
 
-var PRODUCTION = ((''+option('PRODUCTION')) !== 'false');
+var PRODUCTION = (('' + option('PRODUCTION')) !== 'false');
 if (PRODUCTION) {
   gutil.log(gutil.colors.yellow('Production build (use PRODUCTION=false in development).'));
 } else {
@@ -101,7 +103,7 @@ var bundle = function (browserify, outputFile) {
     .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, 'app', 'assets', 'js')))
     .pipe(source(outputFile))
     .pipe(buffer())
-    .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(sourcemaps.init({ loadMaps: true }))
     .pipe(replace('$$BUILDTIME$$', (new Date()).toString()))
     .pipe(PRODUCTION ? uglify() : gutil.noop())
     .pipe(sourcemaps.write('.'))
@@ -110,7 +112,7 @@ var bundle = function (browserify, outputFile) {
 
 var browserifyFlags = function (b) {
   b.exclude('jquery');
-  b.transform({global: true}, browserifyShim);
+  b.transform({ global: true }, browserifyShim);
   return b;
 };
 
@@ -153,7 +155,7 @@ function exportAssetModule(name, taskName, baseDir, extraExtensions) {
       return base + '/**/*.' + s;
     });
 
-    return gulp.src(srcPaths, {base: base})
+    return gulp.src(srcPaths, { base: base })
       .pipe(gulp.dest(paths.assetsOut + '/lib/' + name))
   });
 }
@@ -171,7 +173,7 @@ gulp.task('styles', ['id7-static'], function () {
       }))
     }))
     .pipe(postcss([
-      autoprefix({browsers: 'last 1 version'})
+      autoprefix({ browsers: 'last 1 version' })
     ]))
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.styleOut))
@@ -280,8 +282,15 @@ gulp.task('lint', function () {
     .pipe(eslint.failAfterError());
 });
 
+gulp.task('swagger', function() {
+  gulp.src([paths.assetPath + '/swagger.yml'])
+    .pipe(swagger('swagger.json'))
+    .pipe(gulp.dest(paths.assetsOut));
+});
+
+
 // Shortcuts for building all asset types at once
-gulp.task('assets', ['lint', 'scripts', 'styles', 'manifest', 'service-worker']);
+gulp.task('assets', ['lint', 'scripts', 'styles', 'manifest', 'service-worker', 'swagger']);
 gulp.task('watch-assets', ['watch-scripts', 'watch-styles']);
 gulp.task('wizard', ['watch-assets']);
 

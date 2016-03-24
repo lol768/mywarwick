@@ -12,7 +12,8 @@ const SIZE_CLASSES = {
   large: 'col-xs-12 col-sm-12 col-md-6',
 };
 
-const LONG_PRESS_DURATION_MS = 500;
+export const EDITING_ANIMATION_DURATION = 700;
+const LONG_PRESS_DURATION = 500;
 
 export default class Tile extends Component {
 
@@ -67,7 +68,7 @@ export default class Tile extends Component {
         this.startY = touch.clientY;
       }
 
-      this.timeout = setTimeout(this.props.onBeginEditing, LONG_PRESS_DURATION_MS);
+      this.timeout = setTimeout(this.props.onBeginEditing, LONG_PRESS_DURATION);
     }
   }
 
@@ -126,7 +127,7 @@ export default class Tile extends Component {
   animateToScale(scale) {
     const $tile = $(ReactDOM.findDOMNode(this.refs.tile));
 
-    $tile.stop().transition({ scale }, this.props.editAnimationDuration, 'snap');
+    $tile.stop().transition({ scale }, EDITING_ANIMATION_DURATION, 'snap');
   }
 
   shouldDisplayExpandIcon() {
