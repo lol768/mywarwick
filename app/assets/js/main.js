@@ -59,6 +59,10 @@ $.getJSON('/ssotest', shouldRedirect => {
 $(() => {
   attachFastClick(document.body);
 
+  window.addEventListener('online', () =>
+    store.dispatch(serverpipe.fetchActivities())
+  );
+
   ReactDOM.render(
     <Provider store={store}>
       <Router history={history}>
