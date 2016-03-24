@@ -137,7 +137,8 @@ export default class Tile extends Component {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
     const icon = (<i
-      className={`tile__icon fa fa-fw ${this.getIcon()}`} ref="icon" title={ this.getIconTitle() }
+      className={`tile__icon fa fa-fw ${this.getIcon()} toggle-tooltip`}
+      ref="icon" title={ this.getIconTitle() }
       data-toggle="tooltip"
     > </i>);
 
