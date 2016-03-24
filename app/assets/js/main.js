@@ -83,6 +83,12 @@ $(() => {
       $('[data-toggle="tooltip"]').tooltip('hide');
     }
   });
+
+  $(document).tooltip({
+    selector: '[data-toggle="tooltip"]',
+    container: 'body',
+    trigger: 'hover click',
+  });
 });
 
 store.subscribe(() => {
