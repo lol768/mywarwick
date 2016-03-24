@@ -137,7 +137,7 @@ export default class Tile extends Component {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
     const icon = (<i
-      className={`fa fa-fw ${this.getIcon()} toggle-tooltip`}
+      className={`fa ${this.getIcon()} toggle-tooltip`}
       ref="icon" title={ this.getIconTitle() }
       data-toggle="tooltip"
     > </i>);
@@ -195,8 +195,8 @@ export default class Tile extends Component {
           <div className="tile__wrap">
             <header className="tile__header">
               <div className="tile__icon tile__icon--left">{icon}</div>
-              <div className="tile__title">{title}</div>
               <div className="tile__icon tile__icon--right">{zoomIcon()}</div>
+              <div className="tile__title">{title}</div>
             </header>
             <div className="tile__body">
               { this.props.children }
