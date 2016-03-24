@@ -12,8 +12,7 @@ const SIZE_CLASSES = {
   large: 'col-xs-12 col-sm-12 col-md-6',
 };
 
-export const EDITING_ANIMATION_DURATION = 700;
-const LONG_PRESS_DURATION = 500;
+export const EDITING_ANIMATION_DURATION = 600;
 
 export default class Tile extends Component {
 
@@ -68,7 +67,7 @@ export default class Tile extends Component {
         this.startY = touch.clientY;
       }
 
-      this.timeout = setTimeout(this.props.onBeginEditing, LONG_PRESS_DURATION);
+      this.timeout = setTimeout(this.props.onBeginEditing, EDITING_ANIMATION_DURATION);
     }
   }
 
