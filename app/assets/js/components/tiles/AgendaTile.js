@@ -134,7 +134,9 @@ export class AgendaTileItem extends React.Component {
 
     const content = (
       <span>
-        <span title={ title } className="tile-list-item__title text--dotted-underline">{ title }</span>
+        <span title={ title } className="tile-list-item__title text--dotted-underline">
+          { title }
+        </span>
         <span className="tile-list-item__date">
           { end ? localMoment(start).format('HH:mm') : 'all-day' }
         </span>
