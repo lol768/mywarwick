@@ -1,5 +1,7 @@
 package controllers.api
 
+import javax.inject.Singleton
+
 import com.google.inject.Inject
 import controllers.BaseController
 import models._
@@ -13,6 +15,7 @@ import warwick.sso.{AuthenticatedRequest, User}
 
 import scala.util.{Failure, Success}
 
+@Singleton
 class IncomingActivitiesController @Inject()(
   securityService: SecurityService,
   activityService: ActivityService,

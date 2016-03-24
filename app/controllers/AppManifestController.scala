@@ -1,11 +1,14 @@
 package controllers
 
+import javax.inject.Singleton
+
 import com.google.inject.Inject
 import play.api.Configuration
 import play.api.cache.Cached
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
+@Singleton
 class AppManifestController @Inject()(
   configuration: Configuration,
   cached: Cached

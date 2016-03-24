@@ -30,6 +30,7 @@ class AppModule extends AbstractModule with AkkaGuiceSupport {
     multibinder.addBinding().to(classOf[ClusterUnreachableHealthCheck])
     multibinder.addBinding().to(classOf[MessageQueueLengthHealthCheck])
     multibinder.addBinding().to(classOf[FailedMessageSendHealthCheck])
+    multibinder.addBinding().to(classOf[MessageQueueOldestItemHealthCheck])
   }
 
   @Provides

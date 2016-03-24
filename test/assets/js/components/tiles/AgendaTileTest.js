@@ -40,7 +40,7 @@ describe('AgendaTileItem', () => {
     html.props.className.should.equal('agenda-item');
     const a = html.props.children;
     const [ title, date ] = a.props.children;
-    title.props.className.should.equal('agenda-item__title');
+    title.props.className.should.equal('agenda-item__title text--underline');
     title.props.title.should.equal(props.title);
     title.props.children.should.equal(props.title);
     date.props.className.should.equal('agenda-item__date');

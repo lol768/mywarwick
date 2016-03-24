@@ -39,7 +39,7 @@ class APNSOutputService @Inject()(
     APNS.newPayload()
       .alertBody(title)
       .badge(badge)
-      .sound("default")
+      .sound("Alert.wav")
       .build()
   }
 

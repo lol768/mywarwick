@@ -12,7 +12,7 @@ class ClusterUnreachableHealthCheck @Inject()(
 
   override def value = cluster.state.unreachable.size
 
-  override def warn = 1
+  override def warning = 1
 
   override def critical = 2
 

@@ -18,7 +18,7 @@ class FailedMessageSendHealthCheck @Inject()(
 
   override def value = queueFailureStatus.map(_.count).sum
 
-  override val warn = 50
+  override val warning = 50
 
   override val critical = 100
 

@@ -1,9 +1,11 @@
 package controllers.api
 
+import javax.inject.Singleton
+
 import com.google.inject.Inject
 import controllers.BaseController
 import models.API.Error
-import models.{API, LastRead}
+import models.{API, DateFormats}
 import org.joda.time.DateTime
 import play.api.libs.json._
 import services.messaging.APNSOutputService
@@ -12,45 +14,38 @@ import system.ThreadPools.mobile
 
 import scala.concurrent.Future
 
+@Singleton
 class UserActivitiesController @Inject()(
   activityService: ActivityService,
   securityService: SecurityService,
   apns: APNSOutputService
 ) extends BaseController {
 
+  import DateFormats.{isoDateReads, isoDateWrites}
   import securityService._
 
   def get = RequiredUserAction { implicit request =>
-
     val before = request.getQueryString("before").map(date => new DateTime(date.toLong))
     val limit = request.getQueryString("limit").map(_.toInt).getOrElse(20)
 
     val activities = request.context.user
-      .map(user => activityService.getActivitiesForUser(user, limit = limit, before = before))
+      .map(user => activityService.getActivitiesForUser(user, limit, before))
       .getOrElse(Seq.empty)
 
-    Ok(Json.toJson(API.Success[JsObject](data = Json.obj("activities" -> activities))))
+    val data = Json.obj(
+      "activities" -> activities,
+      "notificationsRead" -> request.context.user.flatMap(activityService.getLastReadDate)
+    )
 
+    Ok(Json.toJson(API.Success[JsObject](data = data)))
   }
-
-  def getLastRead = RequiredUserAction { implicit request =>
-    val response = request.context.user
-      .map(u => LastRead(u.usercode.string, activityService.getLastReadDate(u)))
-      .map(lr => API.Success[LastRead](data = lr))
-      .getOrElse(
-        API.Failure[LastRead]("forbidden", Seq(Error("forbidden", "Cannot fetch last read for anonymous users.")))
-      )
-    Ok(Json.toJson(response))
-  }
-
-  import models.DateFormats.isoDateReads
 
   def markAsRead = APIAction(parse.json) { implicit request =>
     request.body.validate[Option[DateTime]]((__ \ "lastRead").formatNullable[DateTime])
       .map(data => {
         request.context.user
           .map(u => {
-            val success = data.map(activityService.setLastReadDate(u, _)).getOrElse(true)
+            val success = data.forall(activityService.setLastReadDate(u, _))
             if (success) {
               Future(apns.clearAppIconBadge(u.usercode))
                 .onFailure { case e => logger.warn("apns.clearAppIconBadge failure", e) }

@@ -1,6 +1,6 @@
 package controllers
 
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Cookie}
@@ -16,6 +16,7 @@ import uk.ac.warwick.util.core.StringUtils
   * Play app but DON'T copy and paste this into Search. Better to move it into
   * SSO Client as an optional behaviour.
   */
+@Singleton
 class SSOController @Inject()(
   ssoConfig: SSOConfiguration,
   userCache: UserCache

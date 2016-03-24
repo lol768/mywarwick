@@ -15,7 +15,7 @@ class NewsView extends ReactComponent {
 
   constructor(props) {
     super(props);
-    this.onClick = this.onClick.bind(this);
+    this.onClickRefresh = this.onClickRefresh.bind(this);
 
     this.state = {
       numberToShow: SOME_MORE,
@@ -35,13 +35,13 @@ class NewsView extends ReactComponent {
     }
   }
 
-  onClick() {
+  onClickRefresh() {
     this.props.dispatch(fetchNews());
   }
 
   render() {
     if (this.props.fetching) {
-      return <i className="fa fa-refresh fa-spin"> </i>;
+      return <i className="centered fa fa-lg fa-refresh fa-spin"> </i>;
     }
 
     if (this.props.failed) {
@@ -51,7 +51,7 @@ class NewsView extends ReactComponent {
             Unable to fetch news.
           </p>
           <p>
-            <button onClick={ this.onClick } className="btn btn-default">
+            <button onClick={ this.onClickRefresh } className="btn btn-default">
               <i className="fa fa-refresh fa-fw"> </i>
               Retry
             </button>

@@ -2,7 +2,7 @@ package services
 
 import actors.WebsocketActor.Notification
 import com.google.inject.{ImplementedBy, Inject}
-import models.{LastRead, Activity, ActivityPrototype, ActivityResponse}
+import models.{Activity, ActivityPrototype, ActivityResponse}
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
@@ -54,7 +54,9 @@ class ActivityServiceImpl @Inject()(
 
         val result = activityCreationDao.createActivity(activity, recipients, replaceIds)
 
-        messaging.send(recipients, result.activity)
+        if (result.activity.shouldNotify) {
+          messaging.send(recipients, result.activity)
+        }
 
         recipients.foreach(usercode => pubsub.publish(usercode.string, Notification(result)))
 
