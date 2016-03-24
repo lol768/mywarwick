@@ -134,22 +134,22 @@ export class AgendaTileItem extends React.Component {
 
     const content = (
       <span>
-        <span title={ title } className="agenda-item__title text--underline">{ title }</span>
-        <span className="agenda-item__date">
+        <span title={ title } className="tile-list-item__title text--underline">{ title }</span>
+        <span className="tile-list-item__date">
           { end ? localMoment(start).format('HH:mm') : 'all-day' }
         </span>
       </span>
     );
 
     return (
-      <li className="agenda-item">
+      <div className="tile-list-item">
         { href ?
           <a href={ href } target="_blank" onClick={ onClickLink }>
             { content }
           </a> :
           content
         }
-      </li>
+      </div>
     );
   }
 }

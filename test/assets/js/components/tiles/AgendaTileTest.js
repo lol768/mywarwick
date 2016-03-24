@@ -36,14 +36,14 @@ describe('AgendaTileItem', () => {
 
   it('renders correctly without a href', () => {
     const html = shallowRender(<AgendaTileItem zoomed={ true } { ...props } />);
-    html.type.should.equal('li');
-    html.props.className.should.equal('agenda-item');
+    html.type.should.equal('div');
+    html.props.className.should.equal('tile-list-item');
     const a = html.props.children;
     const [ title, date ] = a.props.children;
-    title.props.className.should.equal('agenda-item__title text--underline');
+    title.props.className.should.equal('tile-list-item__title text--underline');
     title.props.title.should.equal(props.title);
     title.props.children.should.equal(props.title);
-    date.props.className.should.equal('agenda-item__date');
+    date.props.className.should.equal('tile-list-item__date');
     date.props.children.should.equal('17:00');
   });
 

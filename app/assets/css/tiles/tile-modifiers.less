@@ -1,0 +1,42 @@
+.tile--large {
+  height: @tile-height * 2 + @tile-gutter;
+}
+
+.tile--editing {
+  z-index: 10;
+
+  .tile__edit-control {
+    display: inline-block;
+  }
+}
+
+.tile--zoomed {
+  position: fixed;
+  margin: 0;
+  top: @start-masthead-height;
+  left: 0;
+  right: 0;
+  bottom: @start-tab-bar-height;
+  z-index: 100;
+  height: auto;
+  cursor: default;
+
+  @media (min-width: @screen-sm-min) {
+    top: 25%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    margin-left: -(@screen-sm-min - 100px) / 2;
+    width: @screen-sm-min - 100px;
+    height: 50%;
+  }
+
+  .tile__wrap {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+
+
+

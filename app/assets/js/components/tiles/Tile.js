@@ -137,19 +137,19 @@ export default class Tile extends Component {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
     const icon = (<i
-      className={`tile__icon fa fa-fw ${this.getIcon()}`} ref="icon" title={ this.getIconTitle() }
+      className={`fa ${this.getIcon()}`} ref="icon" title={ this.getIconTitle() }
       data-toggle="tooltip"
     > </i>);
 
     const sizeClass = SIZE_CLASSES[size];
     const outerClassName =
-      classNames({ [`${sizeClass}`]: !zoomed }, 'tile__container', { 'tile--zoomed': zoomed });
+      classNames({ [`${sizeClass}`]: !zoomed }, 'tile__container');
     const zoomIcon = () => {
       if (zoomed) {
         return isDesktop ?
-          <i className="fa fa-times tile__dismiss" onClick={this.props.onZoomOut}> </i> : null;
+          <i className="fa fa-times" onClick={this.props.onZoomOut}> </i> : null;
       } else if (this.shouldDisplayExpandIcon()) {
-        return <i className="fa fa-expand tile__expand" onClick={this.onClickExpand}> </i>;
+        return <i className="fa fa-expand" onClick={this.onClickExpand}> </i>;
       }
       return null;
     };
@@ -162,7 +162,8 @@ export default class Tile extends Component {
               'tile', `tile--${type}`, `tile--${size}`, `colour-${colour}`,
               {
                 'tile--editing': editing,
-                'tile--clickable': content && content.href,
+                'tile--zoomed': zoomed,
+                'cursor-pointer': content && content.href,
               }
             )
           }
@@ -191,14 +192,10 @@ export default class Tile extends Component {
             <i className="fa fa-fw fa-arrow-up"> </i>
           </div>
           <div className="tile__wrap">
-            <header>
-              <h1>
-                {icon}
-                <span className="tile__title">
-                  {title}
-                </span>
-              </h1>
-              { zoomIcon() }
+            <header className="tile__header">
+              <div className="tile__icon tile__icon--left">{icon}</div>
+              <div className="tile__title">{title}</div>
+              <div className="tile__icon tile__icon--right">{zoomIcon()}</div>
             </header>
             <div className="tile__body">
               { this.props.children }

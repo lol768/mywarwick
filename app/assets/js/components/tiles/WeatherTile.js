@@ -46,12 +46,14 @@ export default class WeatherTile extends TileContent {
     const { content } = this.props;
     const hour = content.items[0];
     return (
-      <div>
-        <div className="col-xs-5">
-          <Callout {...content}/>
-        </div>
-        <div className="col-xs-7">
-          <Caption {...content}/>
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col-xs-5">
+            <Callout {...content}/>
+          </div>
+          <div className="col-xs-7">
+            <Caption {...content}/>
+          </div>
         </div>
         <WeatherTable items={content.items}/>
         {!this.props.errors ?
@@ -82,14 +84,14 @@ export default class WeatherTile extends TileContent {
 }
 
 const WeatherTable = (content) =>
-  <div>
+  <div className="row text--light">
     {content.items.map(item => (
-      <div className="col-xs-2 table__item text--light" key={item.id}>
-        <span className="tile__text">{formatWeatherTime(item.time)}</span>
-        <span className="tile__text">{WeatherTile.oneWordWeather(item.icon)}</span>
-        <span className="tile__text">
+      <div className="col-xs-2" key={item.id}>
+        <div>{formatWeatherTime(item.time)}</div>
+        <div>{WeatherTile.oneWordWeather(item.icon)}</div>
+        <div>
           <i className="fa fa-tint"/> {Math.round(item.precipProbability * 100)}%
-        </span>
+        </div>
       </div>
     ))}
   </div>;
@@ -112,7 +114,7 @@ const Caption = (content) => {
   const nextHour = content.items[1];
   const mins = localMomentUnix(nextHour.time).diff(moment(), 'minutes');
   return (
-    <div className="tile__text--caption">
+    <div>
       <div>{nextHour.text}, in {plural(mins, 'min')}</div>
       <div>{content.daily.summary}</div>
     </div>

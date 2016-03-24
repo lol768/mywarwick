@@ -6,6 +6,7 @@ import _ from 'lodash';
 import $ from 'jquery.transit';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
+import { goBack } from 'react-router-redux';
 
 import * as tiles from '../../tiles';
 import * as serverpipe from '../../serverpipe';
@@ -22,6 +23,7 @@ class MeView extends ReactComponent {
     super(props);
     this.state = {};
     this.onBodyClick = this.onBodyClick.bind(this);
+    this.onTileDismiss = this.onTileDismiss.bind(this);
   }
 
   onBeginEditing(tile) {
@@ -130,6 +132,10 @@ class MeView extends ReactComponent {
     );
   }
 
+  onTileDismiss() {
+    this.props.dispatch(goBack());
+  }
+
   render() {
     const classes = classNames('row', 'me-view', { 'me-view--editing': this.state.editing });
     const isDesktop = this.props.isDesktop;
@@ -143,7 +149,7 @@ class MeView extends ReactComponent {
 
     return (
       <div className={classes}>
-        { this.props.zoomedTile && isDesktop ?
+        { this.props.children && isDesktop ?
           <div className="tile-zoom-backdrop" onClick={ this.onTileDismiss }></div>
           : null}
         {this.renderTiles()}

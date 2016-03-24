@@ -34,7 +34,7 @@ export default class CountView extends TileContent {
     const { content } = this.props;
 
     return (
-      <ul>
+      <ul className="list-unstyled">
         {content.items.map(item => <ListTileItem key={item.id} {...item} />)}
       </ul>
     );
