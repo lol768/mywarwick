@@ -45,18 +45,19 @@ describe('WeatherTile', () => {
 
     const caption = renderAtMoment(html.props.children[1]);
     caption.type.should.equal('div');
-    caption.props.className.should.equal('tile__text--caption');
     caption.props.children[1]
       .props.children.should.equal('all of today is going to suck!');
   });
 
   it('displays large layout when zoomed', () => {
     const html = renderAtMoment(<WeatherTile zoomed={ true } { ...props } />);
-    const [calloutContainer, captionContainer, weatherTable] = html.props.children;
+    console.log(html.props.children);
+    const [{ props: { children: [calloutContainer, captionContainer] } }, weatherTable] = html.props.children;
     const callout = renderAtMoment(calloutContainer.props.children);
     callout.props.className.should.equal('tile__callout');
     const caption = renderAtMoment(captionContainer.props.children);
-    caption.props.className.should.equal('tile__text--caption');
+    caption.props.children[1]
+      .props.children.should.equal('all of today is going to suck!');
     const table = renderAtMoment(weatherTable);
     table.props.children.length.should.equal(6);
     table.props.children[0]

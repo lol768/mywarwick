@@ -81,15 +81,6 @@ $(() => {
     </Provider>,
     document.getElementById('app-container'));
 
-  const $fixedHeader = $('.fixed-header');
-
-  function updateFixedHeaderAtTop() {
-    $fixedHeader.toggleClass('at-top', $(window).scrollTop() < 10);
-  }
-
-  $(window).on('scroll', updateFixedHeaderAtTop);
-  updateFixedHeaderAtTop();
-
   if (window.navigator.userAgent.indexOf('Mobile') >= 0) {
     $('html').addClass('mobile');
   }

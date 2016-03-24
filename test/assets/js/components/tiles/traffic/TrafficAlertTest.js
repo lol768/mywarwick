@@ -17,7 +17,7 @@ describe('TrafficAlert', () => {
 
     const [ i, a ] = html.props.children;
     i.type.should.equal('i');
-    i.props.className.should.equal('fa fa-exclamation-triangle');
+    i.props.className.should.equal('fa fa-fw fa-exclamation-triangle');
     a.type.should.equal('a');
     a.props.href.should.equal(props.href);
     a.props.children.should.equal(props.title);

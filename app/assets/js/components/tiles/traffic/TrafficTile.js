@@ -19,7 +19,7 @@ export default class TrafficTile extends TileContent {
 
     if (trafficConditions.length > 0) {
       return (
-        <ul className="traffic--conditions">
+        <ul className="list-unstyled traffic--conditions">
           {trafficConditions}
         </ul>
       );
