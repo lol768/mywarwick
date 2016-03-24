@@ -14,7 +14,7 @@ describe('TextTile', () => {
   };
 
   it('initially renders the first item', () => {
-    const html = shallowRender(<TextTile zoomed={ true } { ...props } />);
+    const html = shallowRender(<TextTile zoomed={ false } { ...props } />);
     const [ item ] = html.props.children;
     item.type.should.equal('div');
     item.props.className.should.equal('tile__item');
@@ -45,7 +45,7 @@ describe('TextTile', () => {
 
   it('displays all items when zoomed', () => {
     const html = shallowRender(<TextTile zoomed={ true } { ...props } />);
-    html.props.children.length.should.equal(2);
+    html.props.children[0].props.children.length.should.equal(2);
   });
 
 });

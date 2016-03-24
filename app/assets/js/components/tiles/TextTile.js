@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
+import classNames from 'classnames';
 
 import _ from 'lodash';
 
@@ -55,7 +56,7 @@ export default class TextTile extends TileContent {
 
   mapTextItems(itemsToDisplay, className) {
     return itemsToDisplay.map(item => {
-      const tileItem = (<div key={item.id} className={`tile__item ${className}`}>
+      const tileItem = (<div key={item.id} className={classNames('tile__item', className)}>
         <span className="tile__callout">{item.callout}</span>
         <span className="tile__text">{item.text}</span>
       </div>);
