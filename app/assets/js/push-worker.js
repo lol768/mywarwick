@@ -5,7 +5,7 @@ self.addEventListener('install', () => {
   // Perform install steps
 });
 
-function handlePushNotification(event) {
+self.addEventListener('push', event => {
   function showNotification(title, body) {
     self.registration.showNotification(title, {
       body,
@@ -56,10 +56,7 @@ function handlePushNotification(event) {
       })
       .catch(err => log.error(err))
   );
-}
-
-self.addEventListener('push', handlePushNotification);
-self.addEventListener('online', handlePushNotification);
+});
 
 self.addEventListener('message', event => {
   self.token = event.data.token;
