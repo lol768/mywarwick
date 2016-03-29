@@ -3,18 +3,35 @@ import Immutable from 'immutable';
 import store from './store';
 import { fetchTileContent } from './serverpipe';
 import * as stream from './stream';
+import { push } from 'react-router-redux';
 
 let appState = Immutable.Map();
 
 window.Start = {
-  store,
-};
 
-window.Start.appToForeground = () => {
-  store.dispatch(fetchTileContent());
-  if ('applicationCache' in window) {
-    window.applicationCache.update();
-  }
+  APP: {},
+
+  navigate: (path) => store.dispatch(push(path)),
+
+  appToForeground() {
+    store.dispatch(fetchTileContent());
+
+    if ('applicationCache' in window) {
+      window.applicationCache.update();
+    }
+  },
+
+  registerForAPNs(deviceToken) {
+    fetch('/api/push/apns/subscribe', {
+      credentials: 'same-origin',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ deviceToken }),
+    });
+  },
+
 };
 
 function update(state) {
@@ -26,17 +43,6 @@ function update(state) {
 function setAppCached() {
   update({
     isAppCached: true,
-  });
-}
-
-function registerForAPNs(deviceToken) {
-  fetch('/api/push/apns/subscribe', {
-    credentials: 'same-origin',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ deviceToken }),
   });
 }
 
@@ -70,6 +76,4 @@ if (window.navigator.userAgent.indexOf('Start/') >= 0) {
       setAppCached();
     }
   }
-
-  window.Start.registerForAPNs = registerForAPNs;
 }
