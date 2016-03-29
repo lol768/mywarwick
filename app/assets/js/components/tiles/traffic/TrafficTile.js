@@ -40,19 +40,19 @@ export default class TrafficTile extends TileContent {
   }
 
   _getBody() {
-    const { content } = this.props;
+    const { content, content: { alerts: { items } } } = this.props;
 
     return (
       <div className="tile--traffic">
         {this.conditionList()}
         {
-          content.alerts.items.length > 0 ?
+          items.length > 0 ?
             <div className="tile__item">
               <i className={classNames('fa', 'fa-exclamation-triangle')}> </i>
-              <a href="http://www2.warwick.ac.uk/insite/kcm/news/">
+              <a href={items.length === 1 ? items[0].url.href : content.alerts.href}>
                 <strong className="alert-count">
                   {`${content.alerts.items.length} traffic alert` +
-                   `${content.alerts.items.length > 1 ? 's' : ''}`}
+                  `${content.alerts.items.length > 1 ? 's' : ''}`}
                 </strong>
               </a>
             </div>
@@ -76,7 +76,7 @@ export default class TrafficTile extends TileContent {
         </div>
         <div className={classNames('col-xs-12', 'col-sm-8')}>
           { content.alerts.items.slice(0, 2).map(a =>
-            <TrafficAlert key={a.title} title={a.title} href={a.url.href} />
+            <TrafficAlert key={a.title} title={a.title} href={a.url.href}/>
           )}
           {
             content.alerts.items.length > 2 ?
