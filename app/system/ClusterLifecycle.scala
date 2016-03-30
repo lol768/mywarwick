@@ -32,18 +32,25 @@ class ClusterLifecycle @Inject() (
     lifecycle.addStopHook(() => {
       logger.info("Leaving cluster because app is shutting down.")
       val p = Promise[Unit]
-      cluster.leave(cluster.selfAddress)
-      cluster.registerOnMemberRemoved {
-        logger.info("Left cluster cleanly, okay to continue shutdown.")
-        p.complete(Try(Unit))
-      }
 
-      // Give up waiting after a decent amount of time so there's no chance of us
-      // blocking shutdown forever.
-      Future.firstCompletedOf(Seq(
-        p.future,
-        after(shutdownWait, akka.scheduler)(Future.failed(new TimeoutException(s"Waited ${shutdownWait} to leave cluster, timed out")))
-      ))
+      if (cluster.state.members.isEmpty) {
+        // This mainly happens in functional tests - node might not have had time to join itself.
+        logger.info("Cluster is empty, okay to continue shutdown.")
+        Future.successful[Unit]()
+      } else {
+        cluster.leave(cluster.selfAddress)
+        cluster.registerOnMemberRemoved {
+          logger.info("Left cluster cleanly, okay to continue shutdown.")
+          p.complete(Try(Unit))
+        }
+
+        // Give up waiting after a decent amount of time so there's no chance of us
+        // blocking shutdown forever.
+        Future.firstCompletedOf(Seq(
+          p.future,
+          after(shutdownWait, akka.scheduler)(Future.failed(new TimeoutException(s"Waited ${shutdownWait} to leave cluster, timed out")))
+        ))
+      }
     })
 
   }

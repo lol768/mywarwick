@@ -44,11 +44,16 @@ val testDeps = Seq(
   "org.scalatestplus" %% "play" % "1.4.0-M4",
   "com.typesafe.akka" %% "akka-testkit" % "2.4.0",
   "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.14",
-  "org.eclipse.jetty" % "jetty-server" % "9.3.6.v20151106"
+  "org.eclipse.jetty" % "jetty-server" % "9.3.6.v20151106",
+  // Note - from 2.53 selenium-htmlunit is not bundled so will need to
+  // play with dependencies if you need to upgrade.
+  "org.seleniumhq.selenium" % "selenium-java" % "2.52.0"
 ).map(_ % Test)
 
 libraryDependencies ++= (appDeps ++ testDeps).map(_.excludeAll(
-  ExclusionRule(organization = "commons-logging")
+  ExclusionRule(organization = "commons-logging"),
+  // ehcache renamed ehcache-core, don't load in the old version
+  ExclusionRule(organization = "net.sf.ehcache", name="ehcache")
 ))
 
 // https://bugs.elab.warwick.ac.uk/browse/SSO-1653

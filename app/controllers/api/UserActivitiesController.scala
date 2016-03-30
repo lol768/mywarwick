@@ -1,6 +1,6 @@
 package controllers.api
 
-import javax.inject.Singleton
+import javax.inject.{Named, Singleton}
 
 import com.google.inject.Inject
 import controllers.BaseController
@@ -8,7 +8,7 @@ import models.API.Error
 import models.{API, DateFormats}
 import org.joda.time.DateTime
 import play.api.libs.json._
-import services.messaging.APNSOutputService
+import services.messaging.{APNSOutputService, MobileOutputService}
 import services.{ActivityService, SecurityService}
 import system.ThreadPools.mobile
 
@@ -18,24 +18,34 @@ import scala.concurrent.Future
 class UserActivitiesController @Inject()(
   activityService: ActivityService,
   securityService: SecurityService,
-  apns: APNSOutputService
+  mobileOutput: MobileOutputService
 ) extends BaseController {
 
   import DateFormats.{isoDateReads, isoDateWrites}
   import securityService._
 
-  def get = RequiredUserAction { implicit request =>
-    val before = request.getQueryString("before").map(date => new DateTime(date.toLong))
-    val limit = request.getQueryString("limit").map(_.toInt).getOrElse(20)
+  def get = APIAction { implicit request =>
+    val data = request.context.user.map { user =>
+      val before = request.getQueryString("before").map(date => new DateTime(date.toLong))
+      val limit = request.getQueryString("limit").map(_.toInt).getOrElse(20)
 
-    val activities = request.context.user
-      .map(user => activityService.getActivitiesForUser(user, limit, before))
-      .getOrElse(Seq.empty)
+      val activities = request.context.user
+        .map(user => activityService.getActivitiesForUser(user, limit, before))
+        .getOrElse(Seq.empty)
 
-    val data = Json.obj(
-      "activities" -> activities,
-      "notificationsRead" -> request.context.user.flatMap(activityService.getLastReadDate)
-    )
+      Json.obj(
+        "activities" -> activities,
+        "notificationsRead" -> request.context.user.flatMap(activityService.getLastReadDate)
+      )
+    } getOrElse {
+      // It looks like this might handle anonymous users okay,
+      // but APIAction above currently doesn't support them so
+      // we will never reach here.
+      Json.obj(
+        "activities" -> Nil,
+        "notificationsRead" -> None
+      )
+    }
 
     Ok(Json.toJson(API.Success[JsObject](data = data)))
   }
@@ -47,8 +57,8 @@ class UserActivitiesController @Inject()(
           .map(u => {
             val success = data.forall(activityService.setLastReadDate(u, _))
             if (success) {
-              Future(apns.clearAppIconBadge(u.usercode))
-                .onFailure { case e => logger.warn("apns.clearAppIconBadge failure", e) }
+              Future(mobileOutput.clearUnreadCount(u.usercode))
+                .onFailure { case e => logger.warn("clearUnreadCount failure", e) }
               Ok(Json.toJson(API.Success[JsObject](data = Json.obj())))
             }
             else InternalServerError(Json.toJson(

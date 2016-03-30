@@ -17,7 +17,7 @@ class APNSOutputService @Inject()(
   apnsProvider: APNSProvider,
   pushRegistrationDao: PushRegistrationDao,
   activityDao: ActivityDao
-) extends OutputService {
+) extends MobileOutputService {
 
   import apnsProvider.apns
   import system.ThreadPools.mobile
@@ -54,9 +54,8 @@ class APNSOutputService @Inject()(
       .filter(_.platform == Apple)
   }
 
-  def clearAppIconBadge(usercode: Usercode): Unit = db.withConnection { implicit c =>
+  override def clearUnreadCount(usercode: Usercode): Unit =
     getApplePushRegistrations(usercode).foreach(device => apns.push(device.token, zeroBadgePayload))
-  }
 
   val zeroBadgePayload = APNS.newPayload().badge(0).build()
 

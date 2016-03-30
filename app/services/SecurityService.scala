@@ -69,10 +69,11 @@ class SecurityServiceImpl @Inject()(
 
   def basicAuthDenied(request: RequestHeader) = Future {
     Unauthorized(Json.obj(
-      "success" -> true,
+      "success" -> false,
       "status" -> "unauthorized",
       "errors" -> Json.arr(
         Json.obj(
+          "id" -> "unauthorized",
           "message" -> "Authentication failed.  You may authenticate through Single Sign-On or HTTP Basic authentication."
         )
       )
