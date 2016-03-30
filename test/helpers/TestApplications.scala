@@ -14,13 +14,13 @@ import warwick.sso._
 object TestApplications {
 
   def testConfig(environment: Environment) =
-    config("test/test.conf", environment)
+    config("test.conf", environment)
 
   def functionalConfig(environment: Environment) =
-    config("test/functional.conf", environment)
+    config("functional.conf", environment)
 
   def config(file: String, environment: Environment) =
-    Configuration.load(environment, Map("config.file" -> file))
+    Configuration.load(environment, Map("config.resource" -> file))
 
   /**
     * As minimal an Application as can be created. Use for any tests
@@ -28,7 +28,7 @@ object TestApplications {
     * requires WSAPI which is a pain to build by hand.
     */
   def minimal() =
-    new GuiceApplicationBuilder(loadConfiguration = e => config("test/minimal.conf", e))
+    new GuiceApplicationBuilder(loadConfiguration = e => config("minimal.conf", e))
       .in(Environment.simple())
       .build()
 

@@ -26,6 +26,8 @@ object Testing {
       // trying to add .java sources and getting confused.
       scalaSource := baseDirectory.value / "functional-test",
 
+      unmanagedResourceDirectories := Seq(baseDirectory.value / "functional-test" / "resources"),
+
       // Allow access to resources under test, for things like
       // database migrations.
       unmanagedResourceDirectories ++= (unmanagedResourceDirectories in Test).value
