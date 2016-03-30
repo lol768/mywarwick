@@ -1,22 +1,13 @@
-package functional
-
-import java.io.InputStreamReader
-import java.util.Scanner
 import java.util.logging.Level
 
-import com.google.common.base.Charsets
-import controllers.api.UserActivitiesController
 import helpers.TestApplications
 import models.API
-import org.fluentlenium.core.FluentAdapter
-import org.junit.{After, Before}
-import org.openqa.selenium.logging.LogEntry
 import org.scalatest.concurrent.{ScalaFutures, ScaledTimeSpans}
 import org.scalatest.time.Span._
 import org.scalatestplus.play._
 import play.api.db.Database
 import play.api.libs.json._
-import play.api.test.{Helpers, TestBrowser}
+import play.api.test.TestBrowser
 import services.dao.TileDao
 
 import scala.collection.JavaConverters._

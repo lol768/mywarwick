@@ -1,5 +1,3 @@
-package functional
-
 import java.io.InputStreamReader
 import java.sql.Connection
 import java.util.Scanner

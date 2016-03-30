@@ -1,6 +1,6 @@
 import play.sbt.PlayRunHook
 import com.typesafe.sbt.jse.SbtJsTask
-
+import sbt.Keys._
 import sbt._
 
 import scala.sys.process.ProcessLogger
@@ -11,6 +11,17 @@ import scala.sys.process.ProcessLogger
  * Requires an installation of `node`.
  */
 object Gulp {
+
+  lazy val gulpAssets = taskKey[Unit]("Builds static assets using Gulp.")
+  lazy val gulp = inputKey[Unit]("Runs Gulp, passing any arguments.")
+
+  lazy val settings = Seq(
+    gulpAssets := Gulp(baseDirectory.value).buildAssets(),
+    gulp := {
+      val yeezy = Def.spaceDelimited("<arg>").parsed
+      Gulp(baseDirectory.value).gulp(yeezy)
+    }
+  )
 
   class GulpProcess(base: File) extends PlayRunHook {
     def buildAssets(): Unit = {

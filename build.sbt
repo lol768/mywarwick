@@ -1,21 +1,19 @@
+import Testing._
+
 name := """start"""
 
 version := "1.0-SNAPSHOT"
 
 scalaVersion := Common.scalaVersion
 
-val gulpAssets = taskKey[Unit]("Builds static assets using Gulp.")
-val gulp = inputKey[Unit]("Runs Gulp, passing any arguments.")
-
 lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala)
+  .configs(FunTest)
   .settings(
-    gulpAssets := Gulp(baseDirectory.value).buildAssets(),
-    gulp := {
-      val yeezy = Def.spaceDelimited("<arg>").parsed
-      Gulp(baseDirectory.value).gulp(yeezy)
-    },
+    Gulp.settings,
     // Package up assets before we build tar.gz
-    packageZipTarball in Universal <<= (packageZipTarball in Universal).dependsOn(gulpAssets)
+    packageZipTarball in Universal <<= (packageZipTarball in Universal).dependsOn(Gulp.gulpAssets),
+
+    funSettings
   )
 
 val appDeps = Seq(
