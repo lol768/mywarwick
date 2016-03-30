@@ -104,9 +104,14 @@ function plural(i, one, many = `${one}s`) {
 const Callout = (content) => {
   const hour = content.items[0];
   return (
-    <span className="tile__callout">{Math.round(hour.temp)}°
-      <small> {hour.text.toLowerCase()}</small>
-    </span>
+    <div className="tile__callout">
+      <div className="col-xs-4">
+        {Math.round(hour.temp)}°
+      </div>
+      <div className="col-xs-7">
+        <small className="table-cell">{hour.text.toLowerCase()}</small>
+      </div>
+    </div>
   );
 };
 

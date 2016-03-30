@@ -39,9 +39,9 @@ describe('WeatherTile', () => {
     html.type.should.equal('div');
 
     const callout = renderAtMoment(html.props.children[0]);
-    callout.type.should.equal('span');
+    callout.type.should.equal('div');
     callout.props.className.should.equal('tile__callout');
-    callout.props.children[0].should.equal(4); // the ° falls into the next child component
+    callout.props.children[0].props.children[0].should.equal(4); // the ° falls into the next child component
 
     const caption = renderAtMoment(html.props.children[1]);
     caption.type.should.equal('div');
