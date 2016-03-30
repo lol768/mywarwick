@@ -25,12 +25,21 @@ export default class WeatherTile extends TileContent {
     return icon.replace(/.*(clear|rain|snow|sleet|wind|fog|cloudy).*/, '$1');
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { content, setIcon } = nextProps;
+    // if content has just arrived in props received
+    if (!this.props.content && content) {
+      const icon = formatIconString(content.items[0].icon);
+      return setIcon(<Skycon className="skycon" icon={icon}/>);
+    }
+  }
+
   renderIfFresh(contentFunc) {
-    const nextHour = this.props.content.items[1];
+    const { content } = this.props;
+    const nextHour = content.items[1];
     if (localMomentUnix(nextHour.time).isBefore()) {
       return (
         <div>
-          <Skycon className="skycon" icon={formatIconString(nextHour.icon)}/>
           <div>Unable to show recent weather information.</div>
         </div>
       );
@@ -44,7 +53,6 @@ export default class WeatherTile extends TileContent {
 
   _getLargeBody() {
     const { content } = this.props;
-    const hour = content.items[0];
     return (
       <div className="container-fluid">
         <div className="row">
@@ -56,10 +64,6 @@ export default class WeatherTile extends TileContent {
           </div>
         </div>
         <WeatherTable items={content.items}/>
-        {!this.props.errors ?
-          <Skycon className="skycon" icon={formatIconString(hour.icon)}/>
-          : null
-        }
       </div>
     );
   }
@@ -69,15 +73,10 @@ export default class WeatherTile extends TileContent {
   }
 
   _getSmallBody() {
-    const hour = this.props.content.items[0];
     return (
       <div>
         <Callout {...this.props.content}/>
         <Caption {...this.props.content}/>
-        {!this.props.errors ?
-          <Skycon className="skycon" icon={formatIconString(hour.icon)}/>
-          : null
-        }
       </div>
     );
   }

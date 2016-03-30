@@ -205,6 +205,7 @@ gulp.task('service-worker', ['pre-service-worker'], function () {
       staticFileGlobs: filenames.get('offline-cache'),
       stripPrefixRegex: '(target/gulp|public)',
       replacePrefix: '/assets',
+      maximumFileSizeToCacheInBytes: 3145728, // 3MB
       ignoreUrlParametersMatching: [/^v$/],
       logger: gutil.log,
       dynamicUrlToDependencies: {
