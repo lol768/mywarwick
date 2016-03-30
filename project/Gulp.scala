@@ -1,9 +1,6 @@
 import play.sbt.PlayRunHook
-import com.typesafe.sbt.jse.SbtJsTask
 import sbt.Keys._
 import sbt._
-
-import scala.sys.process.ProcessLogger
 
 /**
  * Assists with running Gulp from an SBT build.
