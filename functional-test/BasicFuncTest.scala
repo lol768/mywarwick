@@ -7,7 +7,7 @@ import play.api.test.TestBrowser
 
 import scala.collection.JavaConversions._
 
-class BasicFuncTest extends FuncTest {
+class BasicFuncTest extends FuncTestBase {
 
   override def foreachBrowser(browser: TestBrowser, info: BrowserInfo): Unit = {
 
