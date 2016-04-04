@@ -26,8 +26,16 @@ export default class ActivityItem extends ReactComponent {
       </div>
     );
 
+    const classNames = classnames(
+      'activity-item',
+      {
+        'activity-item--with-url': this.props.url,
+        'activity-item--unread': this.props.unread,
+      }
+    );
+
     return (
-      <div className={ classnames('activity-item', { 'activity-item--with-url': this.props.url }) }>
+      <div className={ classNames }>
         { this.props.url ?
           <a href={ this.props.url }>{content}</a>
           : content }

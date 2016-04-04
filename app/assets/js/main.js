@@ -137,7 +137,8 @@ store.dispatch(serverpipe.fetchUserIdentity());
 const freezeDate = (d) => (!!d && 'format' in d) ? d.format() : d;
 const thawDate = (d) => !!d ? moment(d) : d;
 
-persisted('notificationsLastRead', notificationMetadata.readNotifications, freezeDate, thawDate);
+persisted('notificationsLastRead.date', notificationMetadata.loadedNotificationsLastRead,
+  freezeDate, thawDate);
 
 persisted('activities', notifications.fetchedActivities, freezeStream);
 persisted('notifications', notifications.fetchedNotifications, freezeStream);
