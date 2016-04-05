@@ -1,5 +1,6 @@
 import sbt.Keys._
 import sbt._
+import com.typesafe.sbt.web.Import._
 
 /**
   * All the annoying bits of SBT config to allow us to
@@ -27,6 +28,11 @@ object Testing {
       scalaSource := baseDirectory.value / "functional-test",
 
       unmanagedResourceDirectories := Seq(baseDirectory.value / "functional-test" / "resources"),
+
+      // expose the web-assets jar that has js and stuff in it,
+      // including Gulp stuff if that has been added to
+      // `(unmanagedResourceDirectories in Assets)`.
+      managedClasspath += (packageBin in Assets).value,
 
       // Allow access to resources under test, for things like
       // database migrations.

@@ -8,7 +8,8 @@ export default class SocketDataPipe extends DataPipe {
   constructor(options) {
     super();
     const port = window.location.port ? `:${location.port}` : '';
-    this.url = options.url || (`wss://${window.location.hostname}${port}${options.path}`);
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    this.url = options.url || (`${protocol}//${window.location.hostname}${port}${options.path}`);
     this.ws = new RestartableWebSocket(this.url);
     this.ws.onmessage = this.messageReceived.bind(this);
     this.ws.onopen = () => {

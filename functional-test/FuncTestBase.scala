@@ -1,6 +1,6 @@
 import helpers.TestApplications
 import org.junit.AfterClass
-import org.scalatest.Suite
+import org.scalatest._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures, ScaledTimeSpans}
 import org.scalatestplus.play.{BrowserInfo, _}
 import play.api.db.Database
@@ -31,10 +31,17 @@ trait FunctionalAppPerSuite
   * for the lifetime of the test suite (class), and runs a list
   * of tests against them.
   *
+  * By default, runs against a small subset of browsers. Set envvar
+  * TEST_BROWSERS or system property test.browsers to a comma-separated
+  * list of names from browserMappings.keys
   *
+  * (envvar probably works best through activator/SBT - system properties
+  * don't seem to be passed through.)
   */
 abstract class FuncTestBase
-  extends PlaySpec
+  extends FreeSpec
+    with Matchers
+    with OptionValues
     with FunctionalAppPerSuite
     with AllBrowsersPerSuite
     with WsScalaTestClient
@@ -42,22 +49,15 @@ abstract class FuncTestBase
     with ScaledTimeSpans
     with IntegrationPatience {
 
-  // Called by AllBrowsersPerSuite
-  override def sharedTests(info: BrowserInfo): Unit = {
-    // FluentLenium-based wrapper
-    val browser = TestBrowser(info.createWebDriver(), Some(s"http://localhost:${port}"))
-    foreachBrowser(browser, info)
-  }
-
   lazy val browserMappings: Map[String, BrowserInfo] = Map(
     "firefox" -> FirefoxInfo(firefoxProfile),
     "htmlunit" -> HtmlUnitInfo(true),
     "chrome" -> ChromeInfo
-  ).withDefault { key =>
+  ) withDefault { key =>
     throw new Error(s"There is no browser called ${key} - valid options are [${browserMappings.keys.mkString(", ")}]")
   }
 
-  lazy val defaultBrowserNames = List("firefox", "htmlunit")
+  lazy val defaultBrowserNames = List("firefox")
 
   // Tell AllBrowsersPerSuite what "all browsers" means
   override lazy val browsers: IndexedSeq[BrowserInfo] =
@@ -76,10 +76,14 @@ abstract class FuncTestBase
     */
   def foreachBrowser(browser: TestBrowser, info: BrowserInfo): Unit
 
-  private def browserOption(info: BrowserInfo, option: String, default: Boolean) =
-    if (Try(System.getProperty(option).toBoolean).getOrElse(default)) {
-      Some(info)
-    } else {
-      None
+  // Called by AllBrowsersPerSuite
+  override def sharedTests(info: BrowserInfo): Unit = {
+    // FluentLenium-based wrapper
+    val browser = TestBrowser(info.createWebDriver(), Some(s"http://localhost:${port}"))
+
+    s"Using browser ${info.name}:" - {
+      foreachBrowser(browser, info)
     }
+  }
+
 }
