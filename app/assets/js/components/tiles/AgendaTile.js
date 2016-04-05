@@ -130,15 +130,15 @@ export default class AgendaTile extends TileContent {
 
 export class AgendaTileItem extends React.Component {
   render() {
-    const { title, start, end, href, onClickLink } = this.props;
+    const { title, start, end, href, location, onClickLink } = this.props;
 
     const content = (
       <span>
-        <span title={ title } className="tile-list-item__title text--dotted-underline">
-          { title }
-        </span>
-        <span className="tile-list-item__date">
+        <span className="tile-list-item__date--left">
           { end ? localMoment(start).format('HH:mm') : 'all-day' }
+        </span>
+        <span title={ title } className="tile-list-item__title text--dotted-underline">
+          { _.trunc(title, { length: 42 }) } - <em className="location">{ location }</em>
         </span>
       </span>
     );
