@@ -25,13 +25,9 @@ export default class WeatherTile extends TileContent {
     return icon.replace(/.*(clear|rain|snow|sleet|wind|fog|cloudy).*/, '$1');
   }
 
-  componentWillReceiveProps(nextProps) {
-    const { content, setIcon } = nextProps;
-    // if content has just arrived in props received
-    if (!this.props.content && content) {
-      const icon = formatIconString(content.items[0].icon);
-      return setIcon(<Skycon className="skycon" icon={icon}/>);
-    }
+  getIcon(content) {
+    const icon = formatIconString(content.items[0].icon);
+    return <Skycon className="skycon" icon={icon}/>;
   }
 
   renderIfFresh(contentFunc) {

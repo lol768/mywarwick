@@ -24,11 +24,6 @@ export default class Tile extends Component {
     this.onTouchEnd = this.onTouchEnd.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
     this.onTouchStart = this.onTouchStart.bind(this);
-    this.setIcon = this.setIcon.bind(this);
-
-    this.state = {
-      customIcon: null,
-    };
   }
 
   componentWillEnter(callback) {
@@ -44,7 +39,9 @@ export default class Tile extends Component {
   }
 
   getIcon() {
-    const { fetching, errors, icon } = this.props;
+    const { fetching, errors, icon, content } = this.props;
+    const customIcon = content ? this.refs.content.getIcon(content) : null;
+
     const iconJsx = iconName => (
       <i className={`fa ${iconName} toggle-tooltip`} ref="icon" title={ this.getIconTitle() }
         data-toggle="tooltip"
@@ -54,18 +51,12 @@ export default class Tile extends Component {
       return iconJsx('fa-refresh fa-spin');
     } else if (errors) {
       return iconJsx('fa-exclamation-triangle');
-    } else if (this.state.customIcon) {
-      return this.state.customIcon;
+    } else if (customIcon) {
+      return customIcon;
     } else if (icon) {
       return iconJsx(`fa-${icon}`);
     }
     return iconJsx('fa-question-circle');
-  }
-
-  setIcon(customIcon) {
-    this.setState({
-      customIcon,
-    });
   }
 
   getIconTitle() {
@@ -210,7 +201,9 @@ export default class Tile extends Component {
               <div className="tile__title">{title}</div>
             </header>
             <div className="tile__body">
-              { React.cloneElement(this.props.children, { setIcon: this.setIcon }) }
+              { React.cloneElement(
+                React.Children.only(this.props.children), { ref: 'content' }
+              )}
             </div>
           </div>
         </article>
