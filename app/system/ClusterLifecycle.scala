@@ -36,7 +36,7 @@ class ClusterLifecycle @Inject() (
       if (cluster.state.members.isEmpty) {
         // This mainly happens in functional tests - node might not have had time to join itself.
         logger.info("Cluster is empty, okay to continue shutdown.")
-        Future.successful[Unit]()
+        Future.successful[Unit](())
       } else {
         cluster.leave(cluster.selfAddress)
         cluster.registerOnMemberRemoved {
