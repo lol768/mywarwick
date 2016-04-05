@@ -41,5 +41,7 @@ global.shallowRender = function shallowRender(component) {
 
 global.renderAtMoment = function (component, now = new Date(1989, 1, 7)) {
   tk.freeze(new Date(now));
-  return shallowRender(component);
+  const renderedComponent = shallowRender(component);
+  tk.reset();
+  return renderedComponent;
 };
