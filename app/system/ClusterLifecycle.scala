@@ -46,6 +46,8 @@ class ClusterLifecycle @Inject() (
       ))
     })
 
+  } else {
+    logger.info("ClusterActorRefProvider not in use, so I'll do nothing.")
   }
 
 
