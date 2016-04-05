@@ -11,6 +11,9 @@ GET         /search                                       @controllers.HomeContr
 GET         /tiles                                        @controllers.HomeController.redirectToIndex
 GET         /tiles/:id                                    @controllers.HomeController.tile(id: String)
 
+# NEWSTART-253
+POST        /                                             @controllers.HomeController.index
+
 ->          /sso                                          sso.Routes
 
 GET         /admin/cluster                                @controllers.admin.ClusterStateController.html
