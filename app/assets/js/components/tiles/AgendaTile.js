@@ -55,14 +55,19 @@ export default class AgendaTile extends TileContent {
   }
 
   getLargeBody() {
-    const { content } = this.props;
+    const { content, zoomed } = this.props;
 
     const maxItemsToDisplay = this.props.maxItemsToDisplay || this.state.defaultMaxItems;
     const itemsToDisplay = this.props.zoomed ?
       content.items : _.take(content.items, maxItemsToDisplay);
 
     const events = itemsToDisplay.map(event =>
-      <AgendaTileItem key={event.id} onClickLink={ this.onClickLink } {...event}/>);
+      <AgendaTileItem key={event.id}
+        zoomed={ zoomed }
+        onClickLink={ this.onClickLink }
+        {...event}
+      />
+    );
 
     return (
       <GroupedList groupBy={groupItemsForAgendaTile}>
@@ -129,18 +134,29 @@ export default class AgendaTile extends TileContent {
 }
 
 export class AgendaTileItem extends React.Component {
+
+  trunc(str, length) {
+    return !this.props.zoomed ?
+      _.trunc(str, { length })
+      : str;
+  }
+
   render() {
     const { title, start, end, href, location, onClickLink } = this.props;
 
     const content = (
-      <span>
-        <span className="tile-list-item__date--left">
+      <div>
+        <div className="col-xs-2">
           { end ? localMoment(start).format('HH:mm') : 'all-day' }
+        </div>
+        <div className="col-xs-10">
+          <span title={title} className="tile-list-item__title text--dotted-underline">
+          { this.trunc(title, 56) }
+         </span> - <span className="tile-list-item__location">
+          { this.trunc(location, 56) }
         </span>
-        <span title={ title } className="tile-list-item__title text--dotted-underline">
-          { _.trunc(title, { length: 42 }) } - <em className="location">{ location }</em>
-        </span>
-      </span>
+        </div>
+      </div>
     );
 
     return (
@@ -163,5 +179,6 @@ AgendaTileItem.propTypes = {
   title: PropTypes.string,
   location: PropTypes.string,
   href: PropTypes.string,
+  zoomed: PropTypes.bool,
   onClickLink: PropTypes.func,
 };
