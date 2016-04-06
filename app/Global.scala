@@ -6,6 +6,9 @@ import play.api.{GlobalSettings, Play}
 
 object Global extends GlobalSettings {
 
+  lazy private val metrics = Play.application.injector.instanceOf[Metrics]
+  lazy private val internalServerErrorMeter = metrics.defaultRegistry.meter(name(classOf[MetricsFilter], "500"))
+
   override def onRequestReceived(request: RequestHeader): (RequestHeader, Handler) = {
     try {
       super.onRequestReceived(request)
@@ -15,8 +18,5 @@ object Global extends GlobalSettings {
         (request, Action.async(onError(request, e)))
     }
   }
-
-  lazy private val metrics = Play.application.injector.instanceOf[Metrics]
-  lazy private val internalServerErrorMeter = metrics.defaultRegistry.meter(name(classOf[MetricsFilter], "500"))
 
 }
