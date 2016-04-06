@@ -3,15 +3,9 @@ package helpers
 import org.openqa.selenium
 import org.openqa.selenium.WebDriver
 import org.scalatest.{Matchers, OptionValues, WordSpec}
-import org.scalatest.selenium._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures, ScaledTimeSpans}
 import org.scalatestplus.play.{BrowserInfo, WsScalaTestClient}
 
-trait UserCookieHandling {
-  def clearUserCookies(): Unit
-
-  def setUserCookie(usercode: String)
-}
 
 protected abstract class CommonFuncTestBase
   extends WordSpec
@@ -39,7 +33,7 @@ abstract class FuncTestBase
   extends CommonFuncTestBase
   with SelectBrowsersPerSuite {
 
-  def setSize(d: Dimension)(implicit webDriver: WebDriver): Unit = {
+  def resizeWindow(d: Dimension)(implicit webDriver: WebDriver): Unit = {
     webDriver.manage.window.setSize(new selenium.Dimension(d.width, d.height))
   }
 

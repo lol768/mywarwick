@@ -19,7 +19,7 @@ class BasicFuncTest extends FuncTestBase with BeforeAndAfter {
     "An anonymous user" should {
 
       s"see a cool home page ${info.name}" in withScreenshot {
-        setSize(standardSize)
+        resizeWindow(standardSize)
 
         go to homepage
 
@@ -42,7 +42,7 @@ class BasicFuncTest extends FuncTestBase with BeforeAndAfter {
 
     "A real user" should {
       s"see a cool home page ${info.name}" in withScreenshot {
-        setSize(standardSize)
+        resizeWindow(standardSize)
 
         add cookie ("insecure-fake-user", "cusebr")
 
