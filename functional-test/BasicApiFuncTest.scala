@@ -5,23 +5,23 @@ import helpers.ApiFuncTestBase
 
 
 class BasicApiFuncTest extends ApiFuncTestBase {
-  "A generic user agent" - {
-    "should be able to access the Web App Manifest" in {
+  "A generic user agent" should {
+    "be able to access the Web App Manifest" in {
       val manifest = wsUrl("/assets/manifest.json").get.futureValue
       manifest.status should be(Status.OK)
       (manifest.json \ "name").get should be(JsString("Start.Warwick"))
       (manifest.json \ "display").get should be(JsString("standalone"))
     }
 
-    "should be able to access the script bundle" in {
+    "be able to access the script bundle" in {
       val bundle = wsUrl("/assets/js/bundle.js").get.futureValue
       bundle.status should be (Status.OK)
     }
   }
 
-  "The API" - {
-    "when signed out" - {
-      "should return the anonymous tile set" in {
+  "The API" when {
+    "signed out" should {
+      "return the anonymous tile set" in {
         val testHeronTile = Json.obj(
           "id" -> "heron-tile",
           "colour" -> 3,

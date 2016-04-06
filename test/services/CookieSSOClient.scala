@@ -28,6 +28,10 @@ class CookieLoginContext(linkGenerator: LinkGenerator, u: Option[User], r: Optio
   } yield RoleName(s)
 }
 
+/**
+  * Completely insecure SSO client for functional tests to become a particular
+  * user by setting a cookie. Also allows setting roles via a different cookie.
+  */
 class CookieSSOClient @Inject() (
   configuration: SSOConfiguration,
   users: UserLookupService
@@ -57,8 +61,11 @@ class CookieSSOClient @Inject() (
     block(ctx)
   }
 
-  private def getLoginContext(request: RequestHeader) =
-    new CookieLoginContext(linkGenerator(request), getUser(request), None)
+  // Could support the masquerade cookie here.
+  private def getLoginContext(request: RequestHeader) = {
+    val user = getUser(request)
+    new CookieLoginContext(linkGenerator(request), user, user)
+  }
 
   private def getUser(request: RequestHeader) =
     request.cookies.get("insecure-fake-user").map { _.value }

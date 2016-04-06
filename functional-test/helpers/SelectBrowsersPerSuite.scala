@@ -11,20 +11,6 @@ import play.api.test.TestBrowser
 trait SelectBrowsersPerSuite extends AllBrowsersPerSuite {
   self: Suite with ServerProvider =>
 
-  /**
-    *  Your base func test class should implement this to add
-    *  a description around the test.
-    */
-  def describeBrowser(info: BrowserInfo)(block: => Unit): Unit
-
-  /**
-    * Concrete classes should implement this and place all of their
-    * specs inside it. The test names should be qualified by browser
-    * name, otherwise the test runner will likely complain about
-    * duplicate tests.
-    */
-  def foreachBrowser(browser: TestBrowser, info: BrowserInfo): Unit
-
   lazy val browserMappings: Map[String, BrowserInfo] = Map(
     "firefox" -> FirefoxInfo(firefoxProfile),
     "htmlunit" -> HtmlUnitInfo(true),
@@ -46,13 +32,4 @@ trait SelectBrowsersPerSuite extends AllBrowsersPerSuite {
       .map(browserMappings)
       .toIndexedSeq
 
-  // Called by AllBrowsersPerSuite
-  override def sharedTests(info: BrowserInfo): Unit = {
-    // FluentLenium-based wrapper
-    val browser = TestBrowser(info.createWebDriver(), Some(s"http://localhost:${port}"))
-
-    describeBrowser(info) {
-      foreachBrowser(browser, info)
-    }
-  }
 }

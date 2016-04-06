@@ -1,6 +1,8 @@
 import java.util.logging.Level
 
 import helpers.FuncTestBase
+
+import org.scalatest.BeforeAndAfter
 import org.scalatestplus.play.BrowserInfo
 import play.api.test.TestBrowser
 
@@ -11,26 +13,46 @@ import scala.collection.JavaConversions._
   * until the basics are actually working and we can split them up
   * better.
   */
-class BasicFuncTest extends FuncTestBase {
+class BasicFuncTest extends FuncTestBase with BeforeAndAfter {
 
-  override def foreachBrowser(browser: TestBrowser, info: BrowserInfo): Unit = {
+  override def sharedTests(info: BrowserInfo): Unit = {
+    "An anonymous user" should {
 
-    "An anonymous user" - {
+      s"see a cool home page ${info.name}" in withScreenshot {
+        setSize(standardSize)
 
-      "should see a cool home page" in {
-        browser.goTo("/")
-        browser.findFirst("#app-container") shouldNot be(null)
-        browser.title should be("Start.Warwick")
+        go to homepage
 
-        browser.findFirst(".sign-in-link").getText should be ("Sign in")
+        find("app-container") should be('defined)
+        pageTitle should be ("Start.Warwick")
 
-        browser.waitUntil {
-          !browser.find(".id7-main-content .tile").isEmpty
+        eventually {
+          find(className("sign-in-link")).get.text should be ("Sign in")
+          findAll(cssSelector(".id7-main-content .tile")) shouldNot be (empty)
         }
 
-        val tiles = browser.find(".id7-main-content .tile")
+        capture to browserScreenshot(info, "Anonymous homepage")
+
+        val tiles = findAll(cssSelector(".id7-main-content .tile")).toList
         tiles.length should be (1)
-        tiles.get(0).findFirst(".tile__title").getText should be ("Mail")
+        tiles.head.text should be ("Mail")
+      }
+
+    }
+
+    "A real user" should {
+      s"see a cool home page ${info.name}" in withScreenshot {
+        setSize(standardSize)
+
+        add cookie ("insecure-fake-user", "cusebr")
+
+        go to homepage
+
+        eventually {
+          find(className("account-link")).get.text should be ("Nick Howes")
+        }
+
+        capture to browserScreenshot(info, "Signed in homepage")
       }
     }
 
@@ -46,4 +68,5 @@ class BasicFuncTest extends FuncTestBase {
       }
     }
   }
+
 }
