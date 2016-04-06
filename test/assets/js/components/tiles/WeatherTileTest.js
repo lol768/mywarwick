@@ -51,7 +51,6 @@ describe('WeatherTile', () => {
 
   it('displays large layout when zoomed', () => {
     const html = renderAtMoment(<WeatherTile zoomed={ true } { ...props } />);
-    console.log(html.props.children);
     const [{ props: { children: [calloutContainer, captionContainer] } }, weatherTable] = html.props.children;
     const callout = renderAtMoment(calloutContainer.props.children);
     callout.props.className.should.equal('tile__callout');
@@ -85,6 +84,16 @@ describe('WeatherTile', () => {
     const html = renderAtMoment(<WeatherTile {...props} />, new Date(2030, 1, 7));
     html.props.children[0].props.className.should.equal('skycon');
     html.props.children[1].props.children.should.equal('Unable to show recent weather information.');
+  });
+
+  it('accounts for cached weather data being five minutes old', () => {
+    const fiveMinsLater = new Date(Date.UTC(2016, 1, 24, 13, 5)); // next hour +5mins
+    const htmlFive = renderAtMoment(<WeatherTile zoomed={ true } {...props} />, fiveMinsLater);
+    expect(htmlFive.props.children[1].props.items).to.exist;
+
+    const sixMinsLater = new Date(Date.UTC(2016, 1, 24, 13, 6)); // next hour +6mins
+    const htmlSix = renderAtMoment(<WeatherTile zoomed={ true } {...props} />, sixMinsLater);
+    expect(htmlSix.props.children[1].props.items).to.not.exist;
   });
 
   it('does not render skycon in event of tile content fetch error', () => {

@@ -27,7 +27,9 @@ export default class WeatherTile extends TileContent {
 
   renderIfFresh(contentFunc) {
     const nextHour = this.props.content.items[1];
-    if (localMomentUnix(nextHour.time).isBefore()) {
+    const fiveMinsAgo = moment().subtract(5, 'minutes');
+    // check against fiveMinsAgo to account for server cached data being this old
+    if (localMomentUnix(nextHour.time).isBefore(fiveMinsAgo)) {
       return (
         <div>
           <Skycon className="skycon" icon={formatIconString(nextHour.icon)}/>
