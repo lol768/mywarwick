@@ -33,6 +33,7 @@ var swagger = require('gulp-swagger');
 var swPrecache = require('sw-precache');
 var uglify = require('gulp-uglify');
 var watchify = require('watchify');
+var merge = require('merge-stream');
 
 
 var lessCompiler = require('less');
@@ -122,23 +123,23 @@ var SCRIPTS = {
 };
 
 gulp.task('scripts', [], function () {
-  return _.map(SCRIPTS, function (entries, output) {
+  return merge(_.map(SCRIPTS, function (entries, output) {
     var b = browserifyFlags(browserify(browserifyOptions(entries)));
     return bundle(b, output);
-  });
+  }));
 });
 
 // Recompile scripts on changes. Watchify is more efficient than
 // grunt.watch as it knows how to do incremental rebuilds.
 gulp.task('watch-scripts', [], function () {
-  return _.map(SCRIPTS, function (entries, output) {
+  return merge(_.map(SCRIPTS, function (entries, output) {
     var bw = watchify(browserifyFlags(browserify(_.assign({}, watchify.args, browserifyOptions(entries)))));
     bw.on('update', function () {
       bundle(bw, output);
     });
     bw.on('log', gutil.log);
     return bundle(bw, output);
-  });
+  }));
 });
 
 /**
