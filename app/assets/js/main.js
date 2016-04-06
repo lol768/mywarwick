@@ -1,4 +1,4 @@
-import 'core-js/shim';
+import 'core-js/modules/es6.object.assign';
 
 import attachFastClick from 'fastclick';
 import $ from 'jquery';
