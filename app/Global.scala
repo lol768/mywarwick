@@ -11,14 +11,12 @@ object Global extends GlobalSettings {
       super.onRequestReceived(request)
     } catch {
       case e: Exception =>
-        markInternalServerError()
+        internalServerErrorMeter.mark()
         (request, Action.async(onError(request, e)))
     }
   }
 
-  private def markInternalServerError() = {
-    val metrics = Play.application.injector.instanceOf[Metrics]
-    metrics.defaultRegistry.meter(name(classOf[MetricsFilter], "500")).mark()
-  }
+  lazy private val metrics = Play.application.injector.instanceOf[Metrics]
+  lazy private val internalServerErrorMeter = metrics.defaultRegistry.meter(name(classOf[MetricsFilter], "500"))
 
 }
