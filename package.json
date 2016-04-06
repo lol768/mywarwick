@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "classnames": "^2.2.0",
+    "core-js": "^2.2.1",
     "es6-promise": "~3.0.2",
     "fastclick": "^1.0.6",
     "id7": "UniversityofWarwick/id7#v1.1.15",
