@@ -1,3 +1,5 @@
+import 'core-js/shim';
+
 import attachFastClick from 'fastclick';
 import $ from 'jquery';
 import _ from 'lodash';
