@@ -43,7 +43,9 @@ describe('AgendaTileItem', () => {
     const [ date, title ] = a.props.children;
     const titleInner = title.props.children[0],
       dateInner = date.props.children;
-    titleInner.props.className.should.equal('tile-list-item__title text--dotted-underline');
+    titleInner.props.className.should.equal(
+      'tile-list-item__title text--align-bottom text--dotted-underline'
+    );
     titleInner.props.title.should.equal(props.title);
     titleInner.props.children.should.equal(props.title);
     dateInner.should.equal('17:00');
@@ -73,7 +75,9 @@ describe('AgendaTileItem', () => {
     const html = shallowRender(<AgendaTileItem zoomed={ true } { ...props } />);
     const locationInner = html.props.children
       .props.children[1].props.children[2];
-    locationInner.props.className.should.equal('tile-list-item__location');
+    locationInner.props.className.should.equal(
+      'tile-list-item__location text--align-bottom text--light'
+    );
     locationInner.props.children.should.equal('Heronbank');
   })
 

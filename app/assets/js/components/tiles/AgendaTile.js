@@ -135,12 +135,6 @@ export default class AgendaTile extends TileContent {
 
 export class AgendaTileItem extends React.Component {
 
-  trunc(str, length) {
-    return !this.props.zoomed ?
-      _.trunc(str, { length })
-      : str;
-  }
-
   render() {
     const { title, start, end, href, location, onClickLink } = this.props;
 
@@ -150,10 +144,12 @@ export class AgendaTileItem extends React.Component {
           { end ? localMoment(start).format('HH:mm') : 'all-day' }
         </div>
         <div className="col-xs-10">
-          <span title={title} className="tile-list-item__title text--dotted-underline">
-          { this.trunc(title, 56) }
-         </span> - <span className="tile-list-item__location">
-          { this.trunc(location, 56) }
+          <span title={title}
+            className="tile-list-item__title text--align-bottom text--dotted-underline"
+          >
+            { title }
+         </span> - <span className="tile-list-item__location text--align-bottom text--light">
+          { location }
         </span>
         </div>
       </div>

@@ -14,10 +14,10 @@
 }
 
 .tile-list-item{
-  &__title {
-    max-width: 85%;
+  &__title, &__location {
+    max-width: 95%;
     white-space: nowrap;
-    /*overflow: hidden;*/
+    overflow: hidden;
     text-overflow: ellipsis;
     display: inline-block;
   }
@@ -33,11 +33,6 @@
   
   &__text {
     display: block;
-  }
-  
-  &__location {
-    .text--light;
-    display: inline-block;
   }
 
   &--header {
