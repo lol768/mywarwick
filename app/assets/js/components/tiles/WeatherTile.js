@@ -9,10 +9,10 @@ function formatIconString(str) {
   return str.toUpperCase().replace(/-/g, '_');
 }
 
-function formatWeatherTime(d) {
+function formatTime(d, withContext = true) {
   const date = localMomentUnix(d);
   const now = moment();
-  return date.isSame(now, 'hour') ? 'Now' : date.format('ha');
+  return (date.isSame(now, 'hour') && withContext) ? 'Now' : date.format('ha');
 }
 
 export default class WeatherTile extends TileContent {
@@ -87,9 +87,9 @@ export default class WeatherTile extends TileContent {
 
 const WeatherTable = (content) =>
   <div className="row text--light">
-    {content.items.map(item => (
+    {content.items.map((item, i) => (
       <div className="col-xs-2" key={item.id}>
-        <div>{formatWeatherTime(item.time)}</div>
+        <div>{formatTime(item.time, !i)}</div>
         <div>{WeatherTile.oneWordWeather(item.icon)}</div>
         <div>
           <i className="fa fa-tint"/> {Math.round(item.precipProbability * 100)}%
