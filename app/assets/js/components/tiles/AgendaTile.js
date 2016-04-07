@@ -55,7 +55,7 @@ export default class AgendaTile extends TileContent {
   }
 
   getLargeBody() {
-    const { content, zoomed } = this.props;
+    const { content } = this.props;
 
     const maxItemsToDisplay = this.props.maxItemsToDisplay || this.state.defaultMaxItems;
     const itemsToDisplay = this.props.zoomed ?
@@ -63,7 +63,6 @@ export default class AgendaTile extends TileContent {
 
     const events = itemsToDisplay.map(event =>
       <AgendaTileItem key={event.id}
-        zoomed={ zoomed }
         onClickLink={ this.onClickLink }
         {...event}
       />
@@ -175,6 +174,5 @@ AgendaTileItem.propTypes = {
   title: PropTypes.string,
   location: PropTypes.string,
   href: PropTypes.string,
-  zoomed: PropTypes.bool,
   onClickLink: PropTypes.func,
 };
