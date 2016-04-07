@@ -40,6 +40,8 @@ export default class Tile extends Component {
 
   getIcon() {
     const { fetching, errors, icon, content } = this.props;
+
+    // FIXME: shouldn't have to pass content here, the TileContent component has its own content
     const customIcon = content ? this.refs.content.getIcon(content) : null;
 
     const iconJsx = iconName => (
