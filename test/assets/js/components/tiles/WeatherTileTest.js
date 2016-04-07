@@ -1,16 +1,8 @@
 import WeatherTile from 'components/tiles/WeatherTile';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { localMomentUnix } from 'dateFormatter';
-import tk from 'timekeeper';
 
 describe('WeatherTile', () => {
-
-  const oldDate = new Date(1989, 1, 7);
-
-  function renderAtMoment(component, now = oldDate) {
-    tk.freeze(new Date(now));
-    return shallowRender(component);
-  }
 
   // all unix times here should be after oldDate
   const data = {
@@ -82,18 +74,6 @@ describe('WeatherTile', () => {
 
   it('renders message for stale data', () => {
     const html = renderAtMoment(<WeatherTile {...props} />, new Date(2030, 1, 7));
-    html.props.children[0].props.className.should.equal('skycon');
-    html.props.children[1].props.children.should.equal('Unable to show recent weather information.');
-  });
-
-  it('does not render skycon in event of tile content fetch error', () => {
-    const extProps = {...props,
-      errors: [{
-        id: 'Internal Server Error',
-        message: `There's been a murder!`,
-      }]
-    };
-    const html = renderAtMoment(<WeatherTile {...extProps}/>);
-    expect(html.props.children[2]).to.be.null;
+    html.props.children.props.children.should.equal('Unable to show recent weather information.');
   });
 });
