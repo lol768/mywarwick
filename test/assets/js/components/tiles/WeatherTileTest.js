@@ -51,7 +51,6 @@ describe('WeatherTile', () => {
 
   it('displays large layout when zoomed', () => {
     const html = renderAtMoment(<WeatherTile zoomed={ true } { ...props } />);
-    console.log(html.props.children);
     const [{ props: { children: [calloutContainer, captionContainer] } }, weatherTable] = html.props.children;
     const callout = renderAtMoment(calloutContainer.props.children);
     callout.props.className.should.equal('tile__callout');

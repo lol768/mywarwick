@@ -1,5 +1,5 @@
 .tile-list-group {
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .tile-list-item {
@@ -13,25 +13,32 @@
   border-bottom: 1px solid rgba(255, 255, 255, .3);
 }
 
-.tile-list-item__title {
-  font-weight: bold;
-  max-width: 85%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: inline-block;
-}
+.tile-list-item{
+  &__title, &__location {
+    max-width: 95%;
+    max-width: calc(100% - @tile-gutter);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+  }
 
-.tile-list-item__date {
-  float: right;
-}
+  &__date {
+    float: right;
+    
+    &--left {
+      margin-right: 8px;
+      margin-left: 4px;
+    }
+  }
+  
+  &__text {
+    display: block;
+  }
 
-.tile-list-item__text {
-  display: block;
-}
-
-.tile-list-item--header {
-  padding-left: 0;
-  padding-right: 0;
-  font-weight: bold;
+  &--header {
+    padding-left: 0;
+    padding-right: 0;
+    font-weight: bold;
+  }
 }
