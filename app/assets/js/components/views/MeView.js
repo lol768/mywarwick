@@ -2,6 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
+
+const WidthProvider = require('react-grid-layout').WidthProvider;
+let ReactGridLayout = require('react-grid-layout');
+ReactGridLayout = WidthProvider(ReactGridLayout);
+
 import _ from 'lodash';
 import $ from 'jquery.transit';
 import { connect } from 'react-redux';
@@ -112,11 +117,15 @@ class MeView extends ReactComponent {
     // Show hidden tiles (if any) when editing, or if there are no visible tiles
     const showHiddenTiles = hiddenTiles.length > 0 && (editing || tileComponents.length === 0);
 
+    const layout = this.props.tiles.map((tile, i) => (
+      {i: ('' + i), x: (i % 4), y: i, w: 1, h: 1}
+    ));
+
     return (
       <div>
-        <div>
-          {tileComponents}
-        </div>
+        <ReactGridLayout layout={layout} isDraggable={!!editing} isResizable={false} cols={4} rowHeight={125}>
+          {tileComponents.map((component, i) => <div key={i}>{component}</div>)}
+        </ReactGridLayout>
         { showHiddenTiles ?
           <div>
             <div style={{ clear: 'both' }}></div>

@@ -147,8 +147,8 @@ export default class Tile extends Component {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
     const sizeClass = SIZE_CLASSES[size];
-    const outerClassName =
-      classNames({ [`${sizeClass}`]: !zoomed }, 'tile__container');
+    const outerClassName = 'tile__container';
+      // classNames({ [`${sizeClass}`]: !zoomed }, 'tile__container');
     const zoomIcon = () => {
       if (zoomed) {
         return isDesktop ?
@@ -180,6 +180,57 @@ export default class Tile extends Component {
           onMouseUp={ this.onTouchEnd }
           onMouseOut={ this.onTouchEnd }
           onClick={ this.onClick }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          
           ref="tile"
         >
           <div
