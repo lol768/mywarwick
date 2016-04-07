@@ -39,16 +39,26 @@ export default class Tile extends Component {
   }
 
   getIcon() {
-    const { fetching, errors, icon } = this.props;
+    const { fetching, errors, icon, content } = this.props;
+
+    // FIXME: shouldn't have to pass content here, the TileContent component has its own content
+    const customIcon = content ? this.refs.content.getIcon(content) : null;
+
+    const iconJsx = iconName => (
+      <i className={`fa ${iconName} toggle-tooltip`} ref="icon" title={ this.getIconTitle() }
+        data-toggle="tooltip"
+      />);
 
     if (fetching) {
-      return 'fa-refresh fa-spin';
+      return iconJsx('fa-refresh fa-spin');
     } else if (errors) {
-      return 'fa-exclamation-triangle';
+      return iconJsx('fa-exclamation-triangle');
+    } else if (customIcon) {
+      return customIcon;
     } else if (icon) {
-      return `fa-${icon}`;
+      return iconJsx(`fa-${icon}`);
     }
-    return 'fa-question-circle';
+    return iconJsx('fa-question-circle');
   }
 
   getIconTitle() {
@@ -136,12 +146,6 @@ export default class Tile extends Component {
   render() {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
-    const icon = (<i
-      className={`fa ${this.getIcon()} toggle-tooltip`}
-      ref="icon" title={ this.getIconTitle() }
-      data-toggle="tooltip"
-    > </i>);
-
     const sizeClass = SIZE_CLASSES[size];
     const outerClassName =
       classNames({ [`${sizeClass}`]: !zoomed }, 'tile__container');
@@ -194,17 +198,18 @@ export default class Tile extends Component {
           </div>
           <div className="tile__wrap">
             <header className="tile__header">
-              <div className="tile__icon tile__icon--left">{icon}</div>
+              <div className="tile__icon tile__icon--left">{this.getIcon()}</div>
               <div className="tile__icon tile__icon--right">{zoomIcon()}</div>
               <div className="tile__title">{title}</div>
             </header>
             <div className="tile__body">
-              { this.props.children }
+              { React.cloneElement(
+                React.Children.only(this.props.children), { ref: 'content' }
+              )}
             </div>
           </div>
         </article>
       </div>
     );
   }
-
 }

@@ -56,6 +56,10 @@ export default class TileContent extends Component {
     return this.getLargeBody();
   }
 
+  getIcon() {
+    return null;
+  }
+
   render() {
     const { content, zoomed } = this.props;
     if (content) {

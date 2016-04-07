@@ -1,3 +1,5 @@
+import tk from 'timekeeper';
+
 global.expect = require('chai').expect;
 global.should = require('chai').should();
 global.assert = require('chai').assert;
@@ -35,4 +37,11 @@ global.shallowRender = function shallowRender(component) {
   renderer.render(component);
 
   return renderer.getRenderOutput();
+};
+
+global.renderAtMoment = function (component, now = new Date(1989, 1, 7)) {
+  tk.freeze(new Date(now));
+  const renderedComponent = shallowRender(component);
+  tk.reset();
+  return renderedComponent;
 };

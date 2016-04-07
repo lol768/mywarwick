@@ -11,6 +11,7 @@ import play.api.libs.json._
 import play.api.libs.ws.WS
 import services.dao.PushRegistrationDao
 import system.Logging
+import warwick.sso.Usercode
 
 import scala.concurrent.Future
 
@@ -19,7 +20,7 @@ class GCMOutputService @Inject()(
   pushRegistrationDao: PushRegistrationDao,
   @NamedDatabase("default") db: Database,
   configuration: Configuration
-) extends OutputService with Logging {
+) extends MobileOutputService with Logging {
 
   import system.ThreadPools.mobile
 
@@ -58,5 +59,9 @@ class GCMOutputService @Inject()(
           }
         }
       }
+  }
+
+  override def clearUnreadCount(user: Usercode): Unit = {
+    // Not a thing on GCM, do nothing.
   }
 }
