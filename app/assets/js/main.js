@@ -99,7 +99,21 @@ $(() => {
  */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js')
-    .then(pushNotifications.init);
+    .then((reg) => {
+      pushNotifications.init();
+
+      reg.onupdatefound = () => { // eslint-disable-line no-param-reassign
+        const installingWorker = reg.installing;
+
+        installingWorker.onstatechange = () => {
+          if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // The new service worker is ready to go, but there's an old service worker
+            // handling network operations.  Notify the user to refresh.
+            store.dispatch(update.updateReady());
+          }
+        };
+      };
+    });
 }
 
 SocketDatapipe.subscribe(data => {
