@@ -42,7 +42,7 @@ export default class Tile extends Component {
     const { fetching, errors, icon, content } = this.props;
 
     // FIXME: shouldn't have to pass content here, the TileContent component has its own content
-    const customIcon = content ? this.refs.content.getIcon(content) : null;
+    const customIcon = (content && this.refs.content) ? this.refs.content.getIcon(content) : null;
 
     const iconJsx = iconName => (
       <i className={`fa ${iconName} toggle-tooltip`} ref="icon" title={ this.getIconTitle() }
