@@ -89,7 +89,7 @@ const WeatherTable = (content) =>
   <div className="row text--light">
     {content.items.map((item, i) => (
       <div className="col-xs-2" key={item.id}>
-        <div>{formatTime(item.time, !i)}</div>
+        <div>{formatTime(item.time, i === 0)}</div>
         <div>{WeatherTile.oneWordWeather(item.icon)}</div>
         <div>
           <i className="fa fa-tint"/> {Math.round(item.precipProbability * 100)}%
