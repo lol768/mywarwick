@@ -74,11 +74,11 @@ describe('AgendaTileItem', () => {
   it('renders location text', () => {
     const html = shallowRender(<AgendaTileItem zoomed={ true } { ...props } />);
     const locationInner = html.props.children
-      .props.children[1].props.children[2];
+      .props.children[1].props.children[1];
     locationInner.props.className.should.equal(
       'tile-list-item__location text--align-bottom text--light'
     );
-    locationInner.props.children.should.equal('Heronbank');
+    locationInner.props.children[1].should.equal('Heronbank');
   })
 
 });

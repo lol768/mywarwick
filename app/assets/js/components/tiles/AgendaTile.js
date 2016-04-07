@@ -147,9 +147,12 @@ export class AgendaTileItem extends React.Component {
             className="tile-list-item__title text--align-bottom text--dotted-underline"
           >
             { title }
-         </span> - <span className="tile-list-item__location text--align-bottom text--light">
-          { location }
-        </span>
+         </span>
+          {location ?
+            <span className="tile-list-item__location text--align-bottom text--light">
+           - { location }
+            </span>
+            : null}
         </div>
       </div>
     );
