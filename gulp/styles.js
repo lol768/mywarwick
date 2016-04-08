@@ -1,34 +1,29 @@
-var gulp = require('gulp');
-var gutil = require('gulp-util');
-var path = require('path');
+'use strict';
 
-var sourcemaps = require('gulp-sourcemaps');
-var less = require('gulp-less');
+const gulp = require('gulp');
+const gutil = require('gulp-util');
+const path = require('path');
 
-var autoprefix = require('autoprefixer-core');
-var filenames = require('gulp-filenames');
-var insert = require('gulp-insert');
-var manifest = require('gulp-manifest');
-var postcss = require('gulp-postcss');
-var swagger = require('gulp-swagger');
-var watchify = require('watchify');
-var merge = require('merge-stream');
+const sourcemaps = require('gulp-sourcemaps');
+const less = require('gulp-less');
 
-var bundleEvents = require('./events');
+const postcss = require('gulp-postcss');
+const autoprefix = require('autoprefixer-core');
+const swagger = require('gulp-swagger');
+
+const bundleEvents = require('./events');
 
 /**
  * Copies static resources out of an NPM module, and into
  * the asset output directory.
  */
 function exportAssetModule(name, taskName, baseDir, extraExtensions) {
-  gulp.task(taskName, function () {
-    var base = 'node_modules/' + name + '/' + baseDir;
+  gulp.task(taskName, () => {
+    const base = 'node_modules/' + name + '/' + baseDir;
 
-    var baseExtensions = ['otf', 'eot', 'woff', 'woff2', 'ttf', 'js', 'js.map', 'gif', 'png', 'jpg', 'svg', 'ico'];
-    var srcs = (extraExtensions || []).concat(baseExtensions);
-    var srcPaths = srcs.map(function (s) {
-      return base + '/**/*.' + s;
-    });
+    const baseExtensions = ['otf', 'eot', 'woff', 'woff2', 'ttf', 'js', 'js.map', 'gif', 'png', 'jpg', 'svg', 'ico'];
+    const srcs = (extraExtensions || []).concat(baseExtensions);
+    const srcPaths = srcs.map( s => `${base}/**/*.${s}` );
 
     return gulp.src(srcPaths, { base: base })
       .pipe(gulp.dest(paths.assetsOut + '/lib/' + name))
@@ -37,35 +32,36 @@ function exportAssetModule(name, taskName, baseDir, extraExtensions) {
 
 exportAssetModule('id7', 'id7-static', 'dist');
 
-gulp.task('styles', function () {
-  var styleJob = gulp.src(paths.styleIn)
+gulp.task('styles', () => {
+  const styleJob = gulp.src(paths.styleIn)
     .pipe(sourcemaps.init())
     .pipe(less({
       // Allow requiring less relative to node_modules, plus any other dir under node_modules
       // that's in styleModules.
-      paths: [path.join(__dirname, '..', 'node_modules')].concat(paths.styleModules.map(function (modulePath) {
-        return path.join(__dirname, '..', 'node_modules', modulePath)
-      }))
+      paths: [path.join(__dirname, '..', 'node_modules')]
+        .concat(paths.styleModules.map(modulePath =>
+          path.join(__dirname, '..', 'node_modules', modulePath)
+        )),
     }))
     .pipe(postcss([
-      autoprefix({ browsers: 'last 1 version' })
+      autoprefix({ browsers: 'last 1 version' }),
     ]))
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.styleOut));
 
-  styleJob.on('finish', function () {
+  styleJob.on('finish', () => {
     bundleEvents.emit('styles-updated');
   });
-  
+
   return styleJob;
 });
 
 // Recompile LESS on changes
-gulp.task('watch-styles', ['styles'], function () {
+gulp.task('watch-styles', ['styles'], () => {
   return gulp.watch(paths.assetPath + '/css/**/*.less', ['styles']);
 });
 
-gulp.task('swagger', function() {
+gulp.task('swagger', () => {
   gulp.src([paths.assetPath + '/swagger.yml'])
     .pipe(swagger('swagger.json'))
     .pipe(gulp.dest(paths.assetsOut));

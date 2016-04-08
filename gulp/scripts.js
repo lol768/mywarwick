@@ -1,181 +1,180 @@
-var paths = global.paths;
+'use strict';
 
-var gulp = require('gulp');
-var fs = require('fs');
-var gutil = require('gulp-util');
-var sourcemaps = require('gulp-sourcemaps');
-var replace = require('gulp-replace');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
-var _ = require('lodash');
-var path = require('path');
-var mold = require('mold-source-map');
+const gulp = require('gulp');
+const fs = require('fs');
+const gutil = require('gulp-util');
+const sourcemaps = require('gulp-sourcemaps');
+const replace = require('gulp-replace');
+const source = require('vinyl-source-stream');
+const buffer = require('vinyl-buffer');
+const _ = require('lodash');
+const path = require('path');
+const mold = require('mold-source-map');
 
-var babelify = require('babelify');
-var browserify = require('browserify');
-var browserifyInc = require('browserify-incremental');
-var browserifyShim = require('browserify-shim');
-var envify = require('loose-envify/custom');
-var eslint = require('gulp-eslint');
-var filenames = require('gulp-filenames');
-var insert = require('gulp-insert');
-var less = require('gulp-less');
-var manifest = require('gulp-manifest');
-var rename = require('gulp-rename');
-var swagger = require('gulp-swagger');
-var swPrecache = require('sw-precache');
-var uglify = require('gulp-uglify');
-var watchify = require('watchify');
-var merge = require('merge-stream');
+const babelify = require('babelify');
+const browserify = require('browserify');
+const browserifyInc = require('browserify-incremental');
+const browserifyShim = require('browserify-shim');
+const envify = require('loose-envify/custom');
+const eslint = require('gulp-eslint');
+const insert = require('gulp-insert');
+const manifest = require('gulp-manifest');
+const rename = require('gulp-rename');
+const uglify = require('gulp-uglify');
+const watchify = require('watchify');
+const merge = require('merge-stream');
 
-var bundleEvents = require('./events');
+const bundleEvents = require('./events');
 
-var browserifyOptions = function (cacheName, entries) {
+function browserifyOptions(cacheName, entries) {
   return {
     entries: entries,
     basedir: 'app/assets/js',
-    cacheFile: './browserify-cache-'+cacheName+'.json',
+    cacheFile: `./target/browserify-cache-${cacheName}.json`,
     debug: true, // confusingly, this enables sourcemaps
     transform: [
       babelify,
       [
-        envify({
-          _: 'purge',
-          NODE_ENV: PRODUCTION ? 'production' : 'development'
-        }),
-        {
-          global: true
-        }
-      ]
-    ]
-  }
-};
+        envify({ _: 'purge', NODE_ENV: PRODUCTION ? 'production' : 'development' }),
+        { global: true },
+      ],
+      [browserifyShim, { global: true }],
+    ],
+    // Excluded from bundle, then browserify-shim hooks up require('jquery') to point
+    // at the global version.
+    // TODO use standalone id7 js and be masters of our own jquery
+    excludes: ['jquery'],
+  };
+}
 
-var browserifyFlags = function (b) {
-  b.exclude('jquery');
-  b.transform({ global: true }, browserifyShim);
+function createBrowserify(options) {
+  var factory = browserifyInc;
+  if (options.incremental === false) {
+    factory = browserify;
+  }
+  const b = factory(options);
+  (options.excludes || []).forEach((el) => b.exclude(el));
   return b;
-};
+}
 
 // Function for running Browserify on JS, since
 // we reuse it a couple of times.
-var bundle = function (browserify, outputFile) {
-  return browserify.bundle()
-    .on('error', function (e) {
+function bundle(b, outputFile) {
+  return b.bundle()
+    .on('error', (e) => {
       gutil.log(gutil.colors.red(e.stack));
     })
     .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, '..', 'app', 'assets', 'js')))
     .pipe(source(outputFile))
     .pipe(buffer())
     .pipe(sourcemaps.init({ loadMaps: true }))
-    .pipe(replace('$$BUILDTIME$$', (new Date()).toString()))
-    .pipe(UGLIFY ? uglify() : gutil.noop())
+      .pipe(UGLIFY ? uglify() : gutil.noop())
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.scriptOut));
-};
+}
 
-
-
-var SCRIPTS = {
+const SCRIPTS = {
   // Mapping from bundle name to entry point
-  'bundle.js': 'main.js'
+  'bundle.js': 'main.js',
 };
 
 function cacheName(name) {
-  return name.replace('.js','');
+  return name.replace('.js', '');
 }
 
-gulp.task('scripts', [], function () {
-  return merge(_.map(SCRIPTS, function (entries, output) {
-    var b = browserifyInc(browserifyOptions(cacheName(output), entries));
-    browserifyFlags(b);
+gulp.task('scripts', [], () =>
+  merge(_.map(SCRIPTS, (entries, output) => {
+    const bopts = browserifyOptions(cacheName(output), entries);
+    const b = createBrowserify(bopts);
     return bundle(b, output);
-  }));
-});
+  }))
+);
 
 // Recompile scripts on changes. Watchify is more efficient than
 // grunt.watch as it knows how to do incremental rebuilds.
-gulp.task('watch-scripts', [], function () {
-  return merge(_.map(SCRIPTS, function (entries, output) {
-    var opts = _.extend({}, watchify.args, browserifyOptions(cacheName(output), entries));
-    var bw = watchify(browserify(opts));
-    browserifyFlags(bw);
-    bw.on('update', function () {
-      gutil.log("Browserify update");
+gulp.task('watch-scripts', [], () =>
+  merge(_.map(SCRIPTS, (entries, output) => {
+    // incremental doesn't play nice with watchify, so disable
+    const bopts = _.extend({ incremental: false }, watchify.args, browserifyOptions(cacheName(output), entries));
+    const b = watchify(createBrowserify(bopts));
+    b.on('update', () => {
       bundleEvents.emit('scripts-updating');
-      bundle(bw, output).on('end', function () {
-        gutil.log("Browserify updated");
+      bundle(b, output).on('end', () => {
         bundleEvents.emit('scripts-updated');
       });
     });
-    bw.on('log', gutil.log);
-    return bundle(bw, output);
-  }));
-});
+    b.on('log', gutil.log);
+    return bundle(b, output);
+  }))
+);
 
-gulp.task('lint', function () {
-  return gulp.src([paths.assetPath + '/js/**/*.js'])
+gulp.task('lint', () => {
+  return gulp.src([`${paths.assetPath}/js/**/*.js`])
     .pipe(eslint('.eslintrc.json'))
     .pipe(eslint.format())
     .pipe(eslint.failAfterError());
 });
 
 function generateServiceWorker(watch) {
-  var swPrecache = require('sw-precache');
-  var jsBundle = ['target/gulp/js/bundle.js'];
+  const swPrecache = require('sw-precache');
+  const jsBundle = ['target/gulp/js/bundle.js'];
 
   return swPrecache.generate({
-      cacheId: 'start',
-      handleFetch: OFFLINE_WORKERS,
-      staticFileGlobs: [
-        'public/**/*',
-        paths.assetsOut + '/**/!(*.map|appcache.manifest)',
-      ],
-      stripPrefixRegex: '(target/gulp|public)',
-      replacePrefix: '/assets',
-      ignoreUrlParametersMatching: [/^v$/],
-      logger: gutil.log,
-      dynamicUrlToDependencies: {
-        '/': jsBundle,
-        '/notifications': jsBundle,
-        '/activity': jsBundle,
-        '/news': jsBundle,
-        '/search': jsBundle
-      },
-      maximumFileSizeToCacheInBytes: 3 * 1024 * 1024
-    })
-    .then(function (offlineWorker) {
-      return browserifyFlags(browserifyInc(browserifyOptions(cacheName('push-worker'), 'push-worker.js'))).bundle()
-        .on('error', function (e) {
-          gutil.log(gutil.colors.red(e.toString()));
-        })
-        .pipe(source('service-worker.js'))
-        .pipe(buffer())
-        .pipe(insert.prepend(offlineWorker))
-        .pipe(UGLIFY ? uglify() : gutil.noop())
-        .pipe(gulp.dest(paths.assetsOut));
-    });
+    cacheId: 'start',
+    handleFetch: OFFLINE_WORKERS,
+    staticFileGlobs: [
+      'public/**/*',
+      `${paths.assetsOut}/**/!(*.map|appcache.manifest|*-worker.js|swagger.json)`,
+    ],
+    stripPrefixRegex: '(target/gulp|public)',
+    replacePrefix: '/assets',
+    ignoreUrlParametersMatching: [/^v$/],
+    logger: gutil.log,
+    dynamicUrlToDependencies: {
+      '/': jsBundle,
+      '/notifications': jsBundle,
+      '/activity': jsBundle,
+      '/news': jsBundle,
+      '/search': jsBundle,
+    },
+    maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+  })
+  .then((offlineWorker) => {
+    const bopts = browserifyOptions(cacheName('push-worker'), 'push-worker.js');
+    bopts.debug = false; // no sourcemaps, uglify removes them and they're broken here anyway.
+    const b = createBrowserify(bopts);
+    return b.bundle()
+      .on('error', (e) => {
+        gutil.log(gutil.colors.red(e.toString()));
+      })
+      .pipe(source('service-worker.js'))
+      .pipe(buffer())
+      .pipe(insert.prepend(offlineWorker))
+      .pipe(UGLIFY ? uglify() : gutil.noop())
+      .pipe(gulp.dest(paths.assetsOut));
+  });
 }
 
 // Not strictly a script thing, but here it is in scripts.js.
 function generateManifest() {
   if (OFFLINE_WORKERS) {
-    var cacheableAssets = gulp.src([
-      paths.assetsOut + '/**/*',
-      '!' + paths.assetsOut + '/**/*.map', // don't cache source maps
-      '!' + paths.assetsOut + '/**/*-worker.js' // don't cache service workers
+    const cacheableAssets = gulp.src([
+      `${paths.assetsOut}/**/*`,
+      `!${paths.assetsOut}/**/*.map`, // don't cache source maps
+      `!${paths.assetsOut}/**/*-worker.js`, // don't cache service workers
+      `!${paths.assetsOut}/**/swagger.json`,
     ], {
-      base: paths.assetsOut
+      base: paths.assetsOut,
     });
 
     return getFontAwesomeVersion()
-      .then(function (fontAwesomeVersion) {
+      .then((fontAwesomeVersion) => {
         return cacheableAssets
-          .pipe(rename(function (path) {
-            if (path.basename == 'fontawesome-webfont') {
-              path.extname += '?v=' + fontAwesomeVersion;
+          .pipe(rename(p => {
+            if (p.basename === 'fontawesome-webfont') {
+              p.extname += `?v=${fontAwesomeVersion}`;
             }
-            return path;
+            return p;
           }))
           .pipe(manifest({
             cache: [
@@ -197,7 +196,7 @@ function generateManifest() {
     // Produce an empty manifest file
     return gulp.src([])
       .pipe(manifest({
-        filename: 'appcache.manifest'
+        filename: 'appcache.manifest',
       }))
       .pipe(gulp.dest(paths.assetsOut));
   }
@@ -209,26 +208,24 @@ gulp.task('manifest', ['all-static'], generateManifest);
 
 /* The other watchers have been set up to emit some events that we can listen to */
 
-gulp.task('watch-service-worker', ['watch-styles','watch-scripts'], function () {
-  //gulp.watch(paths.assetPath + '/css/**', generateServiceWorker);
+gulp.task('watch-service-worker', ['watch-styles', 'watch-scripts'], () => {
   bundleEvents.on('styles-updated', generateServiceWorker);
   bundleEvents.on('scripts-updated', generateServiceWorker);
 });
 
-gulp.task('watch-manifest', ['watch-styles','watch-scripts'], function () {
-  //gulp.watch(paths.assetPath + '/css/**', ['manifest']);
+gulp.task('watch-manifest', ['watch-styles', 'watch-scripts'], () => {
   bundleEvents.on('styles-updated', generateManifest);
   bundleEvents.on('scripts-updated', generateManifest);
 });
 
 // Get the current FA version for use in the cache manifest
 function getFontAwesomeVersion() {
-  return new Promise(function (resolve, reject) {
-    fs.readFile('node_modules/id7/less/font-awesome/variables.less', function(e, data) {
+  return new Promise((resolve, reject) => {
+    fs.readFile('node_modules/id7/less/font-awesome/variables.less', (e, data) => {
       if (e) {
         reject(e);
       } else {
-        var match = data.toString().match(/fa-version:\s+"(.+)";/);
+        const match = data.toString().match(/fa-version:\s+"(.+)";/);
         if (match) {
           resolve(match[1]);
         } else {

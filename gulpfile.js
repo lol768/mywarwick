@@ -1,15 +1,13 @@
+'use strict';
 /*
  * Build file for JS and CSS assets.
  *
  *     npm install
  *     node_modules/.bin/gulp watch-assets
  */
-'use strict';
-
-var gulp = require('gulp');
-var fs = require('fs');
-var gutil = require('gulp-util');
-var eslint = require('gulp-eslint');
+const gulp = require('gulp');
+const fs = require('fs');
+const gutil = require('gulp-util');
 
 /* Recommended gulpopts.json:
 
@@ -20,7 +18,7 @@ var eslint = require('gulp-eslint');
  }
 
  */
-var gulpOpts = { env: {} };
+let gulpOpts = { env: {} };
 try {
   fs.accessSync('./gulpopts.json', fs.R_OK);
   gulpOpts = require('./gulpopts.json');
@@ -29,10 +27,12 @@ try {
   gutil.log(gutil.colors.yellow('No gulpopts.json ('+e.message+')'));
 }
 function option(name, fallback) {
-  var value = process.env[name] || gulpOpts.env[name];
+  const value = process.env[name] || gulpOpts.env[name];
   if (value === undefined) return fallback;
   return (value === 'true' || value === true);
 }
+
+// Some naughty globals
 
 global.paths = {
   assetPath: 'app/assets',
@@ -42,8 +42,8 @@ global.paths = {
   styleOut: 'target/gulp/css',
   // Paths under node_modules that will be searched when @import-ing in your LESS.
   styleModules: [
-    'id7/less'
-  ]
+    'id7/less',
+  ],
 };
 
 global.PRODUCTION = option('PRODUCTION', true);
