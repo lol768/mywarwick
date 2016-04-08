@@ -32,7 +32,7 @@ describe('AgendaTileItem', () => {
     end: '2014-08-04T18:00:00',
     title: 'Heron hunting',
     location: 'Heronbank',
-    onClickLink: sinon.spy()
+    onClick: sinon.spy()
   };
 
   it('renders correctly without a href', () => {
@@ -51,7 +51,7 @@ describe('AgendaTileItem', () => {
     dateInner.should.equal('17:00');
   });
 
-  it('renders with a href. clicking it calls the onClickLink prop', () => {
+  it('renders with a href. clicking it calls the onClick prop', () => {
     const tileItem = <AgendaTileItem zoomed={ true } href={ 'href' } { ...props } />;
     const html = shallowRender(tileItem);
     const a = html.props.children;
@@ -59,9 +59,10 @@ describe('AgendaTileItem', () => {
     a.props.children.type.should.equal('div');
 
     const node = ReactTestUtils.renderIntoDocument(tileItem);
-    ReactTestUtils.Simulate.click(node.refs.a);
-    props.onClickLink.should.have.been.called;
+    ReactTestUtils.Simulate.click(node);
+    props.onClick.should.have.been.called;
   });
+
 
   it('renders time for all-day events', () => {
     const html = shallowRender(<AgendaTileItem zoomed={ true } { ...props } end={ undefined }/>);

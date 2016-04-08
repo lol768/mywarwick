@@ -27,7 +27,7 @@ export default class WeatherTile extends TileContent {
 
   getIcon(content) {
     const icon = formatIconString(content.items[0].icon);
-    return <Skycon className="skycon" icon={icon} />;
+    return <Skycon className="skycon" icon={icon}/>;
   }
 
   renderIfFresh(contentFunc) {
@@ -54,13 +54,13 @@ export default class WeatherTile extends TileContent {
       <div className="container-fluid">
         <div className="row">
           <div className="col-xs-5">
-            <Callout {...content} />
+            <Callout {...content}/>
           </div>
           <div className="col-xs-7">
-            <Caption {...content} />
+            <Caption {...content}/>
           </div>
         </div>
-        <WeatherTable items={content.items} />
+        <WeatherTable items={content.items}/>
       </div>
     );
   }
@@ -72,8 +72,8 @@ export default class WeatherTile extends TileContent {
   _getSmallBody() {
     return (
       <div>
-        <Callout {...this.props.content} />
-        <Caption {...this.props.content} />
+        <Callout {...this.props.content}/>
+        <Caption {...this.props.content}/>
       </div>
     );
   }
@@ -86,7 +86,7 @@ const WeatherTable = (content) =>
         <div>{formatTime(item.time, i === 0)}</div>
         <div>{WeatherTile.oneWordWeather(item.icon)}</div>
         <div>
-          <i className="fa fa-tint" /> { Math.round(item.precipProbability * 100) }%
+          <i className="fa fa-tint"/> {Math.round(item.precipProbability * 100)}%
         </div>
       </div>
     ))}

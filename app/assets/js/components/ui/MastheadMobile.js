@@ -14,7 +14,7 @@ export default class MastheadMobile extends React.Component {
     return (
       <div className="start-masthead use-popover">
         <div className="back-btn" onClick={this.props.onBackClick}>
-          <i className="fa fa-chevron-left" />
+          <i className="fa fa-chevron-left"/>
           Back
         </div>
         <div className="masthead-title">

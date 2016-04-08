@@ -24,8 +24,6 @@ export default class TrafficTile extends TileContent {
         </ul>
       );
     }
-
-    return null;
   }
 
   renderIfFresh(contentFunction) {
@@ -78,7 +76,7 @@ export default class TrafficTile extends TileContent {
         </div>
         <div className={classNames('col-xs-12', 'col-sm-8')}>
           { content.alerts.items.slice(0, 2).map(a =>
-            <TrafficAlert key={a.title} title={a.title} href={a.url.href} />
+            <TrafficAlert key={a.title} title={a.title} href={a.url.href}/>
           )}
           {
             content.alerts.items.length > 2 ?

@@ -67,8 +67,6 @@ export default class Tile extends Component {
     if (errors) {
       return `Last updated ${localMoment(fetchedAt).calendar()}. ${errors[0].message}`;
     }
-
-    return null;
   }
 
   onTouchStart(e) {

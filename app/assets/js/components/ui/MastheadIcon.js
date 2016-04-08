@@ -6,7 +6,7 @@ import classNames from 'classnames';
 
 import Popover from './Popover';
 
-const formatBadgeCount = (n) => (n > 99 ? '99+' : n);
+const formatBadgeCount = (n) => n > 99 ? '99+' : n;
 
 export default class MastheadIcon extends ReactComponent {
 

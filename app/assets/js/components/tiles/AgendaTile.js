@@ -79,7 +79,7 @@ export default class AgendaTile extends TileContent {
     const { content } = this.props;
 
     const nextEvent = content.items[0];
-    const truncTitle = _.truncate(nextEvent.title, { length: 30 });
+    const truncTitle = _.trunc(nextEvent.title, { length: 30 });
     const text = (
       <span className="tile__text">
         Next: {truncTitle} at {localMoment(nextEvent.start).format('HH:mm')}
@@ -160,7 +160,7 @@ export class AgendaTileItem extends React.Component {
     return (
       <div className="tile-list-item">
         { href ?
-          <a href={ href } target="_blank" onClick={ onClickLink } ref="a">
+          <a href={ href } target="_blank" onClick={ onClickLink }>
             { content }
           </a> :
           content

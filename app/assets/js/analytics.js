@@ -65,7 +65,7 @@ $(() => {
   $(window).on('online', postNextItemThrottled);
 });
 
-postNextItemThrottled = _.throttle(postNextItem, 500); // eslint-disable-line prefer-const
+postNextItemThrottled = _.throttle(postNextItem, 500);
 
 export function track(page) {
   if (trackingId) {
