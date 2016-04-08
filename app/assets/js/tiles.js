@@ -180,7 +180,7 @@ registerReducer('tileContent', (state = Immutable.Map(), action) => {
       }
       return state.map(update);
     }
-    case TILE_CONTENT_LOAD_ALL:
+    case TILE_CONTENT_LOAD_ALL: {
       const merger = (prev, next) => {
         if (next.has('content') && !prev.has('content')) {
           return prev.merge({
@@ -192,6 +192,7 @@ registerReducer('tileContent', (state = Immutable.Map(), action) => {
       };
 
       return state.mergeWith(merger, action.content);
+    }
     default:
       return state;
   }
