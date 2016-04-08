@@ -17,7 +17,7 @@ var _ = require('lodash');
 var path = require('path');
 var mold = require('mold-source-map');
 
-var autoprefix = require('autoprefixer-core');
+var autoprefix = require('autoprefixer');
 var babelify = require('babelify');
 var browserify = require('browserify');
 var browserifyShim = require('browserify-shim');

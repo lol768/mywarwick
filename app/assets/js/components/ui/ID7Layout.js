@@ -80,14 +80,18 @@ class ID7Layout extends ReactComponent {
     const user = this.props.user.data;
 
     if (user.masquerading) {
-      return <MasqueradeNotice masqueradingAs={user}/>;
+      return <MasqueradeNotice masqueradingAs={user} />;
     }
+
+    return null;
   }
 
   renderNotificationPermissionRequest() {
     if ('Notification' in window && Notification.permission === 'default') {
-      return <PermissionRequest isDisabled={ !this.props.user.data.authenticated }/>;
+      return <PermissionRequest isDisabled={ !this.props.user.data.authenticated } />;
     }
+
+    return null;
   }
 
   renderMobile() {
@@ -148,7 +152,7 @@ class ID7Layout extends ReactComponent {
               { this.renderMasqueradeNotice() }
               <div className="id7-utility-masthead">
                 <nav className="id7-utility-bar" id="utility-bar-container">
-                  <UtilityBar user={this.props.user} layoutClassName="desktop"/>
+                  <UtilityBar user={this.props.user} layoutClassName="desktop" />
                 </nav>
                 <div className="id7-masthead">
                   <div className="id7-masthead-contents">
@@ -157,7 +161,7 @@ class ID7Layout extends ReactComponent {
                         <div className="id7-logo-row">
                           <div className="id7-logo">
                             <a href="/" title="Warwick homepage" onClick={ this.goToHome }>
-                              <img src="" alt="Warwick"/>
+                              <img src="" alt="Warwick" />
                             </a>
                           </div>
                           <div className="masthead-popover-icons">
@@ -169,7 +173,7 @@ class ID7Layout extends ReactComponent {
                               isDisabled={ !user.data.authenticated }
                               onMore={ this.goToNotification }
                             >
-                              <NotificationsView grouped={false}/>
+                              <NotificationsView grouped={false} />
                             </MastheadIcon>
                             <MastheadIcon
                               icon="dashboard" key="activity"
@@ -177,7 +181,7 @@ class ID7Layout extends ReactComponent {
                               isDisabled={ !user.data.authenticated }
                               onMore={ this.goToActivity }
                             >
-                              <ActivityView grouped={false}/>
+                              <ActivityView grouped={false} />
                             </MastheadIcon>
                             <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
                               <LinkBlock columns="1">

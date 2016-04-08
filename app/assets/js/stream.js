@@ -7,9 +7,9 @@ export const ID_KEY = 'id';
 
 const DESC = 'desc';
 
-const sortStream = (stream) => _.sortByOrder(stream, [DATE_KEY, ID_KEY], [DESC, DESC]);
+const sortStream = (stream) => _.orderBy(stream, [DATE_KEY, ID_KEY], [DESC, DESC]);
 
-const uniqStream = (stream) => _.uniq(stream, ID_KEY);
+const uniqStream = (stream) => _.uniqBy(stream, ID_KEY);
 
 export function makeStream() {
   return Immutable.Map();

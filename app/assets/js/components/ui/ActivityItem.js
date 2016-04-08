@@ -13,7 +13,7 @@ export default class ActivityItem extends ReactComponent {
     const content = (
       <div className="media">
         <div className="media-left">
-          <AppIcon app={this.props.provider} size="lg"/>
+          <AppIcon app={this.props.provider} size="lg" />
         </div>
         <div className="media-body">
           <span className="activity-item__date">

@@ -73,10 +73,14 @@ self.addEventListener('notificationclick', event => {
         if (/\/notifications$/i.test(client.url) && 'focus' in client) {
           return client.focus();
         }
+
+        return null;
       });
       if (clients.openWindow) { //eslint-disable-line
         return clients.openWindow('/notifications'); //eslint-disable-line
       }
+
+      return null;
     })
   );
 });

@@ -1,9 +1,11 @@
 import tk from 'timekeeper';
 
-global.expect = require('chai').expect;
-global.should = require('chai').should();
-global.assert = require('chai').assert;
+const chai = require('chai');
+global.expect = chai.expect;
+global.should = chai.should();
+global.assert = chai.assert;
 global.sinon = require('sinon');
+chai.use(require('sinon-chai'));
 
 global.document = require('jsdom').jsdom();
 global.window = global.document.defaultView;
