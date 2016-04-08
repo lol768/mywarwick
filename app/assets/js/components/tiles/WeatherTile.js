@@ -9,10 +9,10 @@ function formatIconString(str) {
   return str.toUpperCase().replace(/-/g, '_');
 }
 
-function formatWeatherTime(d) {
+function formatTime(d, withContext = true) {
   const date = localMomentUnix(d);
   const now = moment();
-  return date.isSame(now, 'hour') ? 'Now' : date.format('ha');
+  return (date.isSame(now, 'hour') && withContext) ? 'Now' : date.format('ha');
 }
 
 export default class WeatherTile extends TileContent {
@@ -31,9 +31,10 @@ export default class WeatherTile extends TileContent {
   }
 
   renderIfFresh(contentFunc) {
-    const { content } = this.props;
-    const nextHour = content.items[1];
-    if (localMomentUnix(nextHour.time).isBefore()) {
+    const nextHour = this.props.content.items[1];
+    const fiveMinsAgo = moment().subtract(5, 'minutes');
+    // check against fiveMinsAgo to account for server cached data being this old
+    if (localMomentUnix(nextHour.time).isBefore(fiveMinsAgo)) {
       return (
         <div>
           <div>Unable to show recent weather information.</div>
@@ -80,9 +81,9 @@ export default class WeatherTile extends TileContent {
 
 const WeatherTable = (content) =>
   <div className="row text--light">
-    {content.items.map(item => (
+    {content.items.map((item, i) => (
       <div className="col-xs-2" key={item.id}>
-        <div>{formatWeatherTime(item.time)}</div>
+        <div>{formatTime(item.time, i === 0)}</div>
         <div>{WeatherTile.oneWordWeather(item.icon)}</div>
         <div>
           <i className="fa fa-tint"/> {Math.round(item.precipProbability * 100)}%
