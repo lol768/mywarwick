@@ -63,7 +63,7 @@ require('./gulp/styles');
 gulp.task('all-static', ['id7-static','scripts','styles']);
 
 // Shortcuts for building all asset types at once
-gulp.task('assets', ['lint', 'all-static', 'manifest', 'service-worker', 'swagger']);
+gulp.task('assets', ['lint', 'all-static', 'appcache', 'service-worker', 'swagger']);
 gulp.task('watch-assets', ['watch-scripts', 'watch-styles']);
-gulp.task('wizard', ['manifest','service-worker','watch-assets','watch-service-worker', 'watch-manifest']);
+gulp.task('wizard', ['appcache','service-worker','watch-assets','watch-service-worker', 'watch-appcache']);
 

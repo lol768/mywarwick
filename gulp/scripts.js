@@ -156,7 +156,7 @@ function generateServiceWorker(watch) {
 }
 
 // Not strictly a script thing, but here it is in scripts.js.
-function generateManifest() {
+function generateAppcache() {
   if (OFFLINE_WORKERS) {
     const cacheableAssets = gulp.src([
       `${paths.assetsOut}/**/*`,
@@ -167,31 +167,30 @@ function generateManifest() {
       base: paths.assetsOut,
     });
 
-    return getFontAwesomeVersion()
-      .then((fontAwesomeVersion) => {
-        return cacheableAssets
-          .pipe(rename(p => {
-            if (p.basename === 'fontawesome-webfont') {
-              p.extname += `?v=${fontAwesomeVersion}`;
-            }
-            return p;
-          }))
-          .pipe(manifest({
-            cache: [
-              '/',
-              '/activity',
-              '/notifications',
-              '/news',
-              '/search',
-              '/assets/images/no-photo.png'
-            ],
-            hash: true,
-            exclude: 'appcache.manifest',
-            prefix: '/assets/',
-            filename: 'appcache.manifest'
-          }))
-          .pipe(gulp.dest(paths.assetsOut));
-      });
+    return getFontAwesomeVersion().then(faVersion =>
+      cacheableAssets
+        .pipe(rename(p => {
+          if (p.basename === 'fontawesome-webfont') {
+            p.extname += `?v=${faVersion}`;
+          }
+          return p;
+        }))
+        .pipe(manifest({
+          cache: [
+            '/',
+            '/activity',
+            '/notifications',
+            '/news',
+            '/search',
+            '/assets/images/no-photo.png'
+          ],
+          hash: true,
+          exclude: 'appcache.manifest',
+          prefix: '/assets/',
+          filename: 'appcache.manifest'
+        }))
+        .pipe(gulp.dest(paths.assetsOut))
+    );
   } else {
     // Produce an empty manifest file
     return gulp.src([])
@@ -204,7 +203,7 @@ function generateManifest() {
 
 gulp.task('service-worker', ['all-static'], generateServiceWorker);
 // Run once the scripts and styles are in place
-gulp.task('manifest', ['all-static'], generateManifest);
+gulp.task('appcache', ['all-static'], generateAppcache);
 
 /* The other watchers have been set up to emit some events that we can listen to */
 
@@ -213,9 +212,9 @@ gulp.task('watch-service-worker', ['watch-styles', 'watch-scripts'], () => {
   bundleEvents.on('scripts-updated', generateServiceWorker);
 });
 
-gulp.task('watch-manifest', ['watch-styles', 'watch-scripts'], () => {
-  bundleEvents.on('styles-updated', generateManifest);
-  bundleEvents.on('scripts-updated', generateManifest);
+gulp.task('watch-appcache', ['watch-styles', 'watch-scripts'], () => {
+  bundleEvents.on('styles-updated', generateAppcache);
+  bundleEvents.on('scripts-updated', generateAppcache);
 });
 
 // Get the current FA version for use in the cache manifest
