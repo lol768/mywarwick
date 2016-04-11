@@ -50,9 +50,9 @@ class TileDaoImpl @Inject()() extends TileDao {
 
     val userTiles = SQL(
       s"""
-         |SELECT ID, TILE_TYPE, TITLE, ICON, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, TILE_POSITION, TILE_SIZE, REMOVED, PREFERENCES
+         |SELECT ID, TILE_TYPE, TITLE, ICON, DEFAULT_SIZE, DEFAULT_POSITION_MOBILE, DEFAULT_POSITION_DESKTOP, COLOUR, FETCH_URL, TILE_POSITION_MOBILE, TILE_POSITION_DESKTOP, TILE_SIZE, REMOVED, PREFERENCES
          |FROM USER_TILE JOIN TILE ON ID = TILE_ID
-         |WHERE USERCODE = {usercode} $idRestriction ORDER BY TILE_POSITION ASC
+         |WHERE USERCODE = {usercode} $idRestriction ORDER BY TILE_POSITION_MOBILE ASC
       """.stripMargin)
       .on(
         'usercode -> usercode,
@@ -60,17 +60,17 @@ class TileDaoImpl @Inject()() extends TileDao {
       ).as(userTileParser.*)
 
     val defaultsNotOverridden = defaultTiles.filterNot(dt => userTiles.map(_.tile.id).contains(dt.tile.id))
-    (defaultsNotOverridden ++ userTiles).sortBy(_.position)
+    (defaultsNotOverridden ++ userTiles).sortBy(_.positionMobile)
   }
 
   override def getDefaultTilesForGroups(groups: Set[String], ids: Seq[String] = Nil)(implicit c: Connection): Seq[TileInstance] = {
     val idRestriction = if (ids.isEmpty) "" else "AND ID IN ({ids})"
     SQL(
       s"""
-         |SELECT ID, TILE_TYPE, TITLE, ICON, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, DEFAULT_POSITION AS TILE_POSITION, DEFAULT_SIZE AS TILE_SIZE, 0 AS REMOVED, NULL AS PREFERENCES
+         |SELECT ID, TILE_TYPE, TITLE, ICON, DEFAULT_SIZE, DEFAULT_POSITION_MOBILE, DEFAULT_POSITION_DESKTOP, COLOUR, FETCH_URL, DEFAULT_POSITION_MOBILE AS TILE_POSITION_MOBILE, DEFAULT_POSITION_DESKTOP AS TILE_POSITION_DESKTOP, DEFAULT_SIZE AS TILE_SIZE, 0 AS REMOVED, NULL AS PREFERENCES
          |FROM TILE
          |WHERE EXISTS (SELECT * FROM TILE_GROUP WHERE TILE_ID = ID and "GROUP" in ({groups})) $idRestriction
-         |ORDER BY DEFAULT_POSITION ASC
+         |ORDER BY DEFAULT_POSITION_MOBILE ASC
     """.stripMargin).on(
       'ids -> ids,
       'groups -> groups
@@ -81,19 +81,21 @@ class TileDaoImpl @Inject()() extends TileDao {
     get[String]("ID") ~
       get[String]("TILE_TYPE") ~
       get[String]("DEFAULT_SIZE") ~
-      get[Int]("DEFAULT_POSITION") ~
+      get[Int]("DEFAULT_POSITION_MOBILE") ~
+      get[Int]("DEFAULT_POSITION_DESKTOP") ~
       get[Int]("COLOUR") ~
       get[String]("FETCH_URL") ~
-      get[Int]("TILE_POSITION") ~
+      get[Int]("TILE_POSITION_MOBILE") ~
+      get[Int]("TILE_POSITION_DESKTOP") ~
       get[String]("TILE_SIZE") ~
       get[String]("TITLE") ~
       get[Option[String]]("ICON") ~
       get[Boolean]("REMOVED") ~
       get[Option[String]]("PREFERENCES") map {
-      case tileId ~ tileType ~ defaultSize ~ defaultPosition ~ colour ~ fetchUrl ~ position ~ size ~ title ~ icon ~ removed ~ preferences =>
+      case tileId ~ tileType ~ defaultSize ~ defaultPositionMobile ~ defaultPositionDesktop ~ colour ~ fetchUrl ~ positionMobile ~ positionDesktop ~ size ~ title ~ icon ~ removed ~ preferences =>
         TileInstance(
-          Tile(tileId, tileType, TileSize.withName(defaultSize), defaultPosition, colour, fetchUrl, title, icon),
-          position, TileSize.withName(size),
+          Tile(tileId, tileType, TileSize.withName(defaultSize), defaultPositionMobile, defaultPositionDesktop, colour, fetchUrl, title, icon),
+          positionMobile, positionDesktop, TileSize.withName(size),
           preferences.map(Json.parse(_).as[JsObject]),
           removed
         )
@@ -111,15 +113,16 @@ class TileDaoImpl @Inject()() extends TileDao {
 
   override def saveTileLayout(usercode: String, tileLayout: UserTileLayout)(implicit c: Connection): Unit = {
     val updateRemoved = "UPDATE USER_TILE SET REMOVED = {removed}, UPDATED_AT = {now} WHERE USERCODE = {usercode} AND TILE_ID = {id}"
-    val update = "UPDATE USER_TILE SET TILE_POSITION = {position}, TILE_SIZE = {size}, PREFERENCES = {preferences}, REMOVED = {removed}, UPDATED_AT = {now} WHERE USERCODE = {usercode} AND TILE_ID = {id}"
-    val insert = "INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, PREFERENCES, REMOVED, CREATED_AT, UPDATED_AT) VALUES ({usercode}, {id}, {position}, {size}, {preferences}, {removed}, {now}, {now})"
+    val update = "UPDATE USER_TILE SET TILE_POSITION_MOBILE = {position}, TILE_SIZE = {size}, PREFERENCES = {preferences}, REMOVED = {removed}, UPDATED_AT = {now} WHERE USERCODE = {usercode} AND TILE_ID = {id}"
+    val insert = "INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION_MOBILE, TILE_SIZE, PREFERENCES, REMOVED, CREATED_AT, UPDATED_AT) VALUES ({usercode}, {id}, {position}, {size}, {preferences}, {removed}, {now}, {now})"
 
-    tileLayout.tiles.zipWithIndex.foreach {
-      case (tile, index) =>
+    tileLayout.tiles.foreach {
+      tile =>
         val params = Seq[NamedParameter](
           'id -> tile.id,
           'now -> DateTime.now,
-          'position -> index,
+          'positionMobile -> tile.positionMobile,
+          'positionDesktop -> tile.positionDesktop,
           'preferences -> tile.preferences.map(_.toString).orNull,
           'removed -> tile.removed,
           'size -> tile.size.toString,

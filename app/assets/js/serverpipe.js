@@ -55,6 +55,8 @@ export function persistTiles() {
       size: item.get('size'),
       preferences: item.get('preferences'),
       removed: item.get('removed'),
+      positionMobile: item.get('positionMobile'),
+      positionDesktop: item.get('positionDesktop'),
     })).toJS();
 
     fetch('/api/tiles', {

@@ -35,10 +35,11 @@ export function zoomOut() {
   };
 }
 
-export function tileLayoutChange(layout) {
+export function tileLayoutChange(layout, isDesktop) {
   return {
     type: TILE_LAYOUT_CHANGE,
     layout,
+    isDesktop,
   };
 }
 
@@ -95,34 +96,11 @@ export function resizeTile(tile, size) {
   };
 }
 
-// FIXME: dodgy af. Try to find more reliable way of doing tileOrder => layout
-function calcTileLayout(tiles) {
-  // FIXME: better way of finding cols, currently is 4 for small desktop display
-  const cols = window.navigator.userAgent.indexOf('Mobile') >= 0 ? 2 : 4;
-
-  let x = 0;
-  let y = 0;
-  return tiles.filter(tile => !tile.removed).map(tile => {
-    const layout = {
-      i: tile.id,
-      x: (x % cols),
-      y,
-      w: tile.size === 'small' ? 1 : 2,
-      h: (tile.size === 'large' ? 2 : 1),
-    };
-
-    x += tile.size === 'small' ? 1 : 2;
-    y += (x % cols) === 0 ? 1 : 0;
-    return layout;
-  });
-}
-
 const initialState = Immutable.fromJS({
   fetching: false,
   fetched: false,
   failed: false,
   items: [],
-  layout: [],
 });
 
 registerReducer('tiles', (state = initialState, action) => {
@@ -145,7 +123,6 @@ registerReducer('tiles', (state = initialState, action) => {
         fetched: true,
         failed: false,
         items: Immutable.fromJS(action.tiles),
-        layout: Immutable.fromJS(calcTileLayout(action.tiles)),
       });
     case TILE_HIDE:
       return state.update('items', items => {
@@ -166,23 +143,25 @@ registerReducer('tiles', (state = initialState, action) => {
         const index = items.findIndex(tile => tile.get('id') === action.tile.id);
         return items.update(index, tile => tile.set('size', action.size));
       });
-      return state.merge({
-        layout: Immutable.fromJS(calcTileLayout(updatedState.get('items').toJS())),
-      });
+      return updatedState;
     }
     case TILE_LAYOUT_CHANGE:
-      const cols = window.navigator.userAgent.indexOf('Mobile') >= 0 ? 2 : 4;
       const jsItems = state.get('items').toJS();
-      // calc tile order from layout then sort tiles using order
-      const sortedLayout = _.sortBy(action.layout, l => l.y * cols + l.x);
-      // more than likely a better way to sort jsItems
-      const sortedItems = sortedLayout.map(layout =>
-        jsItems.filter(item => item.id === layout.i)[0]
-      );
+      const sortedItems = action.layout.map(tile => {
+          let item = jsItems.filter(i => i.id === tile.i)[0];
+        const pos = tile.y * 10 + tile.x;
+
+        if (action.isDesktop) {
+          item.desktopPosition = pos;
+        } else {
+          item.mobilePosition = pos;
+        }
+
+        return item;
+      });
       // update state with new item order
       return state.merge({
         items: Immutable.fromJS(sortedItems),
-        layout: Immutable.fromJS(action.layout),
       });
     default:
       return state;

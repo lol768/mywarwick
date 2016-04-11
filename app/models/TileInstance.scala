@@ -5,7 +5,8 @@ import play.api.libs.json._
 
 case class TileInstance(
   tile: Tile,
-  position: Int,
+  positionMobile: Int,
+  positionDesktop: Int,
   size: TileSize,
   preferences: Option[JsObject],
   removed: Boolean
@@ -15,7 +16,9 @@ case class UserTileSetting(
   id: String,
   size: TileSize,
   preferences: Option[JsObject],
-  removed: Boolean = false
+  removed: Boolean = false,
+  positionMobile: Int,
+  positionDesktop: Int
 )
 
 object UserTileSetting {
@@ -26,7 +29,9 @@ object UserTileSetting {
       tileId,
       TileSize.small,
       None,
-      removed = true
+      removed = true,
+      0,
+      0
     )
   }
 }
@@ -51,7 +56,9 @@ object TileInstance {
         "size" -> o.size,
         "title" -> o.tile.title,
         "type" -> o.tile.tileType,
-        "removed" -> o.removed
+        "removed" -> o.removed,
+        "positionMobile" -> o.positionMobile,
+        "positionDesktop" -> o.positionDesktop
       )
   }
 }

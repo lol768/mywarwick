@@ -26,7 +26,9 @@ class MeView extends ReactComponent {
 
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      layout: [],
+    };
     this.onBodyClick = this.onBodyClick.bind(this);
     this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
@@ -74,8 +76,57 @@ class MeView extends ReactComponent {
     }
   }
 
+  // FIXME: dodgy af. Try to find more reliable way of doing tileOrder => layout
+  calcTileLayout(tiles, isDesktop) {
+    function position(tile) {
+      if (isDesktop) {
+        return tile.positionDesktop;
+      }
+
+      return tile.positionMobile;
+    }
+
+    return tiles.filter(tile => !tile.removed).map(tile => {
+
+      let y = Math.floor(position(tile) / 10);
+      let x = position(tile) % 10;
+
+      // FIXME code of a madman
+      if (!this.props.isDesktop) {
+        y *= 2;
+        if (x >= 2) {
+          x -= 2;
+          y += 1;
+        }
+      }
+
+      const layout = {
+        i: tile.id,
+        y,
+        x,
+        w: tile.size === 'small' ? 1 : 2,
+        h: (tile.size === 'large' ? 2 : 1),
+      };
+
+      return layout;
+    });
+  }
+
+  componentWillReceiveProps(newProps) {
+    if (!this.didTriggerTileLayoutChange) {
+      // fine to re-render stuff
+      this.setState({
+        layout: this.calcTileLayout(newProps.tiles, newProps.isDesktop),
+      });
+    } else {
+      // don't re-render stuff because it will infinite loop
+    }
+  }
+
   onLayoutChange(layout) {
-    return this.props.dispatch(tiles.tileLayoutChange(layout));
+    this.didTriggerTileLayoutChange = true;
+    this.props.dispatch(tiles.tileLayoutChange(layout, this.props.isDesktop));
+    delete this.didTriggerTileLayoutChange;
   }
 
   renderTile(props) {
@@ -124,13 +175,14 @@ class MeView extends ReactComponent {
 
     return (
       <div>
-        <ReactGridLayout layout={this.props.layout}
+        <ReactGridLayout layout={this.state.layout}
                          isDraggable={!!editing}
                          isResizable={false}
                          cols={this.props.isDesktop ? 4 : 2}
                          rowHeight={125}
+                         margin={[4, 4]}
                          useCSSTransformations={true}
-                         onLayoutChange={this.onLayoutChange}
+                         onDragStop={this.onLayoutChange}
                          verticalCompact={true}
         >
           {tileComponents.map(component => <div key={component.props.id}>{component}</div>)}
@@ -181,13 +233,11 @@ class MeView extends ReactComponent {
 
 const select = (state) => {
   const items = state.getIn(['tiles', 'items']);
-  const layout = state.getIn(['tiles', 'layout']);
 
   return {
     isDesktop: state.getIn(['ui', 'className']) === 'desktop',
     tiles: items.filterNot(tile => tile.get('removed')).toJS(),
     hiddenTiles: items.filter(tile => tile.get('removed')).toJS(),
-    layout: layout.toJS(),
   };
 };
 
