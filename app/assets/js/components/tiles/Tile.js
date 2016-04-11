@@ -6,11 +6,11 @@ import { localMoment } from '../../dateFormatter.js';
 import classNames from 'classnames';
 import $ from 'jquery';
 
-const SIZE_CLASSES = {
-  small: 'col-xs-6 col-sm-6 col-md-3',
-  wide: 'col-xs-12 col-sm-12 col-md-6',
-  large: 'col-xs-12 col-sm-12 col-md-6',
-};
+// const SIZE_CLASSES = {
+//   small: 'col-xs-6 col-sm-6 col-md-3',
+//   wide: 'col-xs-12 col-sm-12 col-md-6',
+//   large: 'col-xs-12 col-sm-12 col-md-6',
+// };
 
 export const EDITING_ANIMATION_DURATION = 600;
 
@@ -42,7 +42,7 @@ export default class Tile extends Component {
     const { fetching, errors, icon, content } = this.props;
 
     // FIXME: shouldn't have to pass content here, the TileContent component has its own content
-    const customIcon = content ? this.refs.content.getIcon(content) : null;
+    const customIcon = (content && this.refs.content) ? this.refs.content.getIcon(content) : null;
 
     const iconJsx = iconName => (
       <i className={`fa ${iconName} toggle-tooltip`} ref="icon" title={ this.getIconTitle() }
@@ -146,9 +146,9 @@ export default class Tile extends Component {
   render() {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
-    const sizeClass = SIZE_CLASSES[size];
+    // const sizeClass = SIZE_CLASSES[size];
     const outerClassName = 'tile__container';
-      // classNames({ [`${sizeClass}`]: !zoomed }, 'tile__container');
+    // classNames({ [`${sizeClass}`]: !zoomed },
     const zoomIcon = () => {
       if (zoomed) {
         return isDesktop ?
@@ -180,57 +180,6 @@ export default class Tile extends Component {
           onMouseUp={ this.onTouchEnd }
           onMouseOut={ this.onTouchEnd }
           onClick={ this.onClick }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          
           ref="tile"
         >
           <div

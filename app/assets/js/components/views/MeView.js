@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
-const WidthProvider = require('react-grid-layout').WidthProvider;
+const widthProvider = require('react-grid-layout').WidthProvider;
 let ReactGridLayout = require('react-grid-layout');
-ReactGridLayout = WidthProvider(ReactGridLayout);
+ReactGridLayout = widthProvider(ReactGridLayout);
 
 import _ from 'lodash';
 import $ from 'jquery.transit';
@@ -29,6 +29,7 @@ class MeView extends ReactComponent {
     this.state = {};
     this.onBodyClick = this.onBodyClick.bind(this);
     this.onTileDismiss = this.onTileDismiss.bind(this);
+    this.onLayoutChange = this.onLayoutChange.bind(this);
   }
 
   onBeginEditing(tile) {
@@ -73,6 +74,10 @@ class MeView extends ReactComponent {
     }
   }
 
+  onLayoutChange(layout) {
+    return this.props.dispatch(tiles.tileLayoutChange(layout));
+  }
+
   renderTile(props) {
     return (
       <TileView
@@ -91,10 +96,10 @@ class MeView extends ReactComponent {
     this.onFinishEditing();
   }
 
+  // FIXME: this should fire action to update tile w/h in layout
   onResizeTile(tile) {
     const sizes = _.values(TILE_SIZES);
     const nextSize = sizes[(sizes.indexOf(tile.size || tile.defaultSize) + 1) % sizes.length];
-
     this.props.dispatch(tiles.resizeTile(tile, nextSize));
   }
 
@@ -117,14 +122,18 @@ class MeView extends ReactComponent {
     // Show hidden tiles (if any) when editing, or if there are no visible tiles
     const showHiddenTiles = hiddenTiles.length > 0 && (editing || tileComponents.length === 0);
 
-    const layout = this.props.tiles.map((tile, i) => (
-      {i: ('' + i), x: (i % 4), y: i, w: 1, h: 1}
-    ));
-
     return (
       <div>
-        <ReactGridLayout layout={layout} isDraggable={!!editing} isResizable={false} cols={4} rowHeight={125}>
-          {tileComponents.map((component, i) => <div key={i}>{component}</div>)}
+        <ReactGridLayout layout={this.props.layout}
+                         isDraggable={!!editing}
+                         isResizable={false}
+                         cols={this.props.isDesktop ? 4 : 2}
+                         rowHeight={125}
+                         useCSSTransformations={true}
+                         onLayoutChange={this.onLayoutChange}
+                         verticalCompact={true}
+        >
+          {tileComponents.map(component => <div key={component.props.id}>{component}</div>)}
         </ReactGridLayout>
         { showHiddenTiles ?
           <div>
@@ -172,11 +181,13 @@ class MeView extends ReactComponent {
 
 const select = (state) => {
   const items = state.getIn(['tiles', 'items']);
+  const layout = state.getIn(['tiles', 'layout']);
 
   return {
     isDesktop: state.getIn(['ui', 'className']) === 'desktop',
     tiles: items.filterNot(tile => tile.get('removed')).toJS(),
     hiddenTiles: items.filter(tile => tile.get('removed')).toJS(),
+    layout: layout.toJS(),
   };
 };
 

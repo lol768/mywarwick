@@ -1,5 +1,6 @@
 import Immutable from 'immutable';
 import { registerReducer } from './reducers';
+import _ from 'lodash';
 
 export const TILES_FETCH = 'tiles.fetch';
 export const TILES_FETCH_SUCCESS = 'tiles.fetch.success';
@@ -19,6 +20,8 @@ export const TILE_RESIZE = 'tiles.resize';
 export const TILE_ZOOM_IN = 'me.zoom-in';
 export const TILE_ZOOM_OUT = 'me.zoom-out';
 
+export const TILE_LAYOUT_CHANGE = 'me.tile-layout-change';
+
 export function zoomInOn(tile) {
   return {
     type: TILE_ZOOM_IN,
@@ -29,6 +32,13 @@ export function zoomInOn(tile) {
 export function zoomOut() {
   return {
     type: TILE_ZOOM_OUT,
+  };
+}
+
+export function tileLayoutChange(layout) {
+  return {
+    type: TILE_LAYOUT_CHANGE,
+    layout,
   };
 }
 
@@ -85,11 +95,34 @@ export function resizeTile(tile, size) {
   };
 }
 
+// FIXME: dodgy af. Try to find more reliable way of doing tileOrder => layout
+function calcTileLayout(tiles) {
+  // FIXME: better way of finding cols, currently is 4 for small desktop display
+  const cols = window.navigator.userAgent.indexOf('Mobile') >= 0 ? 2 : 4;
+
+  let x = 0;
+  let y = 0;
+  return tiles.filter(tile => !tile.removed).map(tile => {
+    const layout = {
+      i: tile.id,
+      x: (x % cols),
+      y,
+      w: tile.size === 'small' ? 1 : 2,
+      h: (tile.size === 'large' ? 2 : 1),
+    };
+
+    x += tile.size === 'small' ? 1 : 2;
+    y += (x % cols) === 0 ? 1 : 0;
+    return layout;
+  });
+}
+
 const initialState = Immutable.fromJS({
   fetching: false,
   fetched: false,
   failed: false,
   items: [],
+  layout: [],
 });
 
 registerReducer('tiles', (state = initialState, action) => {
@@ -112,6 +145,7 @@ registerReducer('tiles', (state = initialState, action) => {
         fetched: true,
         failed: false,
         items: Immutable.fromJS(action.tiles),
+        layout: Immutable.fromJS(calcTileLayout(action.tiles)),
       });
     case TILE_HIDE:
       return state.update('items', items => {
@@ -127,11 +161,28 @@ registerReducer('tiles', (state = initialState, action) => {
         // place new tile at the head of the list
         return items.delete(index).push(item);
       });
-    case TILE_RESIZE:
-      return state.update('items', items => {
+    case TILE_RESIZE: {
+      const updatedState = state.update('items', items => {
         const index = items.findIndex(tile => tile.get('id') === action.tile.id);
-
         return items.update(index, tile => tile.set('size', action.size));
+      });
+      return state.merge({
+        layout: Immutable.fromJS(calcTileLayout(updatedState.get('items').toJS())),
+      });
+    }
+    case TILE_LAYOUT_CHANGE:
+      const cols = window.navigator.userAgent.indexOf('Mobile') >= 0 ? 2 : 4;
+      const jsItems = state.get('items').toJS();
+      // calc tile order from layout then sort tiles using order
+      const sortedLayout = _.sortBy(action.layout, l => l.y * cols + l.x);
+      // more than likely a better way to sort jsItems
+      const sortedItems = sortedLayout.map(layout =>
+        jsItems.filter(item => item.id === layout.i)[0]
+      );
+      // update state with new item order
+      return state.merge({
+        items: Immutable.fromJS(sortedItems),
+        layout: Immutable.fromJS(action.layout),
       });
     default:
       return state;
@@ -140,7 +191,8 @@ registerReducer('tiles', (state = initialState, action) => {
 
 registerReducer('tileContent', (state = Immutable.Map(), action) => {
   switch (action.type) {
-    case TILE_CONTENT_FETCH: {
+    case TILE_CONTENT_FETCH:
+    {
       const update = tile => tile.delete('errors').set('fetching', true);
 
       if (action.tile) {
@@ -152,7 +204,8 @@ registerReducer('tileContent', (state = Immutable.Map(), action) => {
       }
       return state.map(update);
     }
-    case TILE_CONTENT_FETCH_SUCCESS: {
+    case TILE_CONTENT_FETCH_SUCCESS:
+    {
       const update = tile => tile.merge({
         fetching: false,
         fetchedAt: action.fetchedAt,
@@ -165,7 +218,8 @@ registerReducer('tileContent', (state = Immutable.Map(), action) => {
         update
       );
     }
-    case TILE_CONTENT_FETCH_FAILURE: {
+    case TILE_CONTENT_FETCH_FAILURE:
+    {
       const update = tile => tile.merge({
         fetching: false,
         errors: action.errors,
