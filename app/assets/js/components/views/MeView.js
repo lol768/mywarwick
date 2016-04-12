@@ -2,10 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
-
-const widthProvider = require('react-grid-layout').WidthProvider;
-let ReactGridLayout = require('react-grid-layout');
-ReactGridLayout = widthProvider(ReactGridLayout);
+import ReactGridLayoutBase, { WidthProvider } from 'react-grid-layout';
 
 import _ from 'lodash';
 import $ from 'jquery.transit';
@@ -22,6 +19,8 @@ import { EDITING_ANIMATION_DURATION } from '../tiles/Tile';
 
 import HiddenTile from '../tiles/HiddenTile';
 
+const ReactGridLayout = WidthProvider(ReactGridLayoutBase);
+
 class MeView extends ReactComponent {
 
   constructor(props) {
@@ -37,16 +36,20 @@ class MeView extends ReactComponent {
       editing: tile.id,
     });
 
+    /*
     const el = $(ReactDOM.findDOMNode(this));
 
     el.stop().transition({
       scale: 0.8,
     }, EDITING_ANIMATION_DURATION, 'snap');
+    */
 
     // Ensure first release of the mouse button/finger is not interpreted as
     // exiting the editing mode
     $('body').one('mouseup touchend', () => {
-      _.defer(() => $('body').on('click', this.onBodyClick));
+      _.defer(() => {
+        $('body').off('click', this.onBodyClick).on('click', this.onBodyClick);
+      });
     });
   }
 
@@ -55,6 +58,7 @@ class MeView extends ReactComponent {
       editing: null,
     });
 
+    /*
     const el = $(ReactDOM.findDOMNode(this));
 
     el.stop().transition({
@@ -62,6 +66,7 @@ class MeView extends ReactComponent {
     }, EDITING_ANIMATION_DURATION, 'snap', () => {
       el.removeAttr('style'); // transform creates positioning context
     });
+    */
 
     $('body').off('click', this.onBodyClick);
 
@@ -69,14 +74,18 @@ class MeView extends ReactComponent {
   }
 
   onBodyClick(e) {
-    if (this.state.editing && $(e.target).parents('.tile--editing').length === 0) {
+    if (this.state.editing && $(e.target).parents('.tile').length === 0) {
       _.defer(() => this.onFinishEditing());
     }
   }
+  
+  onDragStart(layout, item) {
+    this.onBeginEditing({ id: item.i });
+  }
 
-  calcTileLayout(allTiles, isDesktop) {
+  calcTileLayout(allTiles, isFourColumnLayout) {
     function position(tile) {
-      return isDesktop ? tile.positionDesktop : tile.positionMobile;
+      return isFourColumnLayout ? tile.positionDesktop : tile.positionMobile;
     }
 
     return allTiles.filter(tile => !tile.removed).map(tile => ({
@@ -90,18 +99,21 @@ class MeView extends ReactComponent {
 
   onLayoutChange(layout) {
     if (this.previousLayout === undefined || !_.isEqual(layout, this.previousLayout)) {
-      this.props.dispatch(tiles.tileLayoutChange(layout, this.props.isDesktop));
+      this.props.dispatch(tiles.tileLayoutChange(layout, this.props.isFourColumnLayout));
       this.previousLayout = _.cloneDeep(layout);
     }
   }
 
   renderTile(props) {
+    const { id } = props;
+
     return (
       <TileView
-        key={props.id}
-        id={props.id}
+        ref={id}
+        key={id}
+        id={id}
         view={this}
-        editing={this.state.editing === props.id}
+        editing={this.state.editing === id}
         editingAny={!!this.state.editing}
       />
     );
@@ -138,7 +150,7 @@ class MeView extends ReactComponent {
     // Show hidden tiles (if any) when editing, or if there are no visible tiles
     const showHiddenTiles = hiddenTiles.length > 0 && (editing || tileComponents.length === 0);
 
-    const layout = this.calcTileLayout(this.props.tiles, this.props.isDesktop);
+    const layout = this.calcTileLayout(this.props.tiles, this.props.isFourColumnLayout);
 
     return (
       <div>
@@ -146,15 +158,22 @@ class MeView extends ReactComponent {
           layout={layout}
           isDraggable={!!editing}
           isResizable={false}
-          cols={this.props.isDesktop ? 4 : 2}
+          cols={this.props.isFourColumnLayout ? 4 : 2}
           rowHeight={125}
           margin={[4, 4]}
           useCSSTransformations
           onLayoutChange={this.onLayoutChange}
           verticalCompact
           draggableCancel=".tile__edit-control"
+          onDragStart={this.onDragStart.bind(this)}
         >
-          {tileComponents.map(component => <div key={component.props.id}>{component}</div>)}
+          {tileComponents.map(component =>
+            <div
+              key={component.props.id}
+              className={this.state.editing === component.props.id ? 'react-grid-item--editing' : ''}
+            >
+              {component}
+            </div>)}
         </ReactGridLayout>
         { showHiddenTiles ?
           <div>
@@ -176,8 +195,8 @@ class MeView extends ReactComponent {
   }
 
   render() {
-    const classes = classNames('row', 'me-view', { 'me-view--editing': this.state.editing });
-    const isDesktop = this.props.isDesktop;
+    const classes = classNames('me-view', { 'me-view--editing': this.state.editing });
+    const { isDesktop } = this.props;
     const transitionProps = {
       transitionName: 'slider',
       transitionEnterTimeout: 300,
@@ -205,6 +224,7 @@ const select = (state) => {
 
   return {
     isDesktop: state.getIn(['ui', 'className']) === 'desktop',
+    isFourColumnLayout: state.getIn(['ui', 'isFourColumnLayout']) === true,
     tiles: items.filterNot(tile => tile.get('removed')).toJS(),
     hiddenTiles: items.filter(tile => tile.get('removed')).toJS(),
   };

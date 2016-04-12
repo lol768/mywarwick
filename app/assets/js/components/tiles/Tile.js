@@ -6,12 +6,6 @@ import { localMoment } from '../../dateFormatter.js';
 import classNames from 'classnames';
 import $ from 'jquery';
 
-// const SIZE_CLASSES = {
-//   small: 'col-xs-6 col-sm-6 col-md-3',
-//   wide: 'col-xs-12 col-sm-12 col-md-6',
-//   large: 'col-xs-12 col-sm-12 col-md-6',
-// };
-
 export const EDITING_ANIMATION_DURATION = 600;
 
 export default class Tile extends Component {
@@ -70,7 +64,7 @@ export default class Tile extends Component {
   }
 
   onTouchStart(e) {
-    if (!this.props.editing && !this.props.zoomed) {
+    if (!this.props.editingAny && !this.props.zoomed) {
       if (e.changedTouches) {
         const touch = e.changedTouches[0];
         this.startX = touch.clientX;
@@ -121,6 +115,12 @@ export default class Tile extends Component {
       }
     }
   }
+  
+  componentDidMount() {
+    if (this.props.editing) {
+      this.animateToScale(1.15);
+    }
+  }
 
   componentDidUpdate(prevProps) {
     const nowEditing = this.props.editing;
@@ -134,9 +134,11 @@ export default class Tile extends Component {
   }
 
   animateToScale(scale) {
+    /*
     const $tile = $(ReactDOM.findDOMNode(this.refs.tile));
 
     $tile.stop().transition({ scale }, EDITING_ANIMATION_DURATION, 'snap');
+    */
   }
 
   shouldDisplayExpandIcon() {
@@ -146,9 +148,6 @@ export default class Tile extends Component {
   render() {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
-    // const sizeClass = SIZE_CLASSES[size];
-    const outerClassName = 'tile__container';
-    // classNames({ [`${sizeClass}`]: !zoomed },
     const zoomIcon = () => {
       if (zoomed) {
         return isDesktop ?
@@ -160,7 +159,7 @@ export default class Tile extends Component {
     };
 
     return (
-      <div className={outerClassName}>
+      <div className="tile__container">
         <article
           className={
             classNames(

@@ -1,7 +1,6 @@
 .tile {
   height: @tile-height;
   position: relative;
-  margin-top: @tile-gutter;
   font-size: 13px;
   line-height: 1.2em;
 
@@ -21,6 +20,6 @@
   }
 }
 
-.react-grid-item:not(.react-draggable-dragging) {
-  transition: transform .4s;
+.react-grid-item--editing {
+  z-index: 100;
 }

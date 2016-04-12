@@ -14,15 +14,22 @@ import { push } from 'react-router-redux';
 
 const isDesktop = () => mq('only all and (min-width: 768px)');
 
+const isFourColumnLayout = () => mq('only all and (min-width: 992px)');
+
 const initialState = Immutable.fromJS({
   className: undefined,
+  isFourColumnLayout: false,
   colourTheme: 'default',
 });
+
+window.Store = store;
 
 registerReducer('ui', (state = initialState, action) => {
   switch (action.type) {
     case 'ui.class':
       return state.set('className', action.className);
+    case 'ui.layout':
+      return state.set('isFourColumnLayout', action.isFourColumnLayout);
     case 'ui.theme':
       return state.set('colourTheme', action.theme);
     default:
@@ -37,24 +44,26 @@ export function updateColourTheme(theme) {
   };
 }
 
-export function updateLayoutClass() {
-  return {
-    type: 'ui.class',
-    className: isDesktop() ? 'desktop' : 'mobile',
+export function updateUIContext() {
+  return (dispatch, getState) => {
+    if (isDesktop() !== (getState().getIn(['ui', 'className']) === 'desktop')) {
+      dispatch({
+        type: 'ui.class',
+        className: isDesktop() ? 'desktop' : 'mobile',
+      });
+    }
+
+    if (isFourColumnLayout() !== getState().getIn(['ui', 'isFourColumnLayout'])) {
+      dispatch({
+        type: 'ui.layout',
+        isFourColumnLayout: isFourColumnLayout(),
+      });
+    }
   };
 }
 
-let wasDesktop = isDesktop();
-store.dispatch(updateLayoutClass());
-
-$(() => {
-  $(window).on('resize', () => {
-    if (wasDesktop !== isDesktop()) {
-      wasDesktop = isDesktop();
-      store.dispatch(updateLayoutClass());
-    }
-  });
-});
+store.dispatch(updateUIContext());
+$(() => $(window).on('resize', () => store.dispatch(updateUIContext())));
 
 class Application extends ReactComponent {
 
