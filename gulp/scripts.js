@@ -117,7 +117,7 @@ gulp.task('lint', () => {
 
 function generateServiceWorker(watch) {
   const swPrecache = require('sw-precache');
-  const jsBundle = ['target/gulp/js/bundle.js'];
+  const jsBundle = ['target/gulp/js/bundle.js','app/assets/js/push-worker.js'];
 
   return swPrecache.generate({
     cacheId: 'start',
