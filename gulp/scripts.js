@@ -189,6 +189,7 @@ function generateAppcache() {
           prefix: '/assets/',
           filename: 'appcache.manifest'
         }))
+        .pipe(insert.append('\n# extra cache buster: 1\n'))
         .pipe(gulp.dest(paths.assetsOut))
     );
   } else {
