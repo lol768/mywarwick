@@ -146,12 +146,10 @@ registerReducer('tiles', (state = initialState, action) => {
       return state.update('items', items =>
         items.map(tile => {
           const layoutItem = action.layout.filter(item => item.i === tile.get('id'))[0];
-
           if (!layoutItem) {
             // Tile is not in the layout, i.e. hidden
             return tile;
           }
-
           const position = layoutItem.y * 10 + layoutItem.x;
           return action.isDesktop ?
             tile.set('positionDesktop', position) :

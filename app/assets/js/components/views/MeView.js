@@ -26,9 +26,7 @@ class MeView extends ReactComponent {
 
   constructor(props) {
     super(props);
-    this.state = {
-      layout: [],
-    };
+    this.state = {};
     this.onBodyClick = this.onBodyClick.bind(this);
     this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
@@ -76,7 +74,6 @@ class MeView extends ReactComponent {
     }
   }
 
-  // FIXME: dodgy af. Try to find more reliable way of doing tileOrder => layout
   calcTileLayout(allTiles, isDesktop) {
     function position(tile) {
       return isDesktop ? tile.positionDesktop : tile.positionMobile;
@@ -91,21 +88,11 @@ class MeView extends ReactComponent {
     }));
   }
 
-  componentWillReceiveProps(newProps) {
-    if (!this.didTriggerTileLayoutChange) {
-      // fine to re-render stuff
-      this.setState({
-        layout: this.calcTileLayout(newProps.tiles, newProps.isDesktop),
-      });
-    } else {
-      // don't re-render stuff because it will infinite loop
-    }
-  }
-
   onLayoutChange(layout) {
-    this.didTriggerTileLayoutChange = true;
-    this.props.dispatch(tiles.tileLayoutChange(layout, this.props.isDesktop));
-    delete this.didTriggerTileLayoutChange;
+    if (this.previousLayout === undefined || !_.isEqual(layout, this.previousLayout)) {
+      this.props.dispatch(tiles.tileLayoutChange(layout, this.props.isDesktop));
+      this.previousLayout = _.cloneDeep(layout);
+    }
   }
 
   renderTile(props) {
@@ -126,7 +113,6 @@ class MeView extends ReactComponent {
     this.onFinishEditing();
   }
 
-  // FIXME: this should fire action to update tile w/h in layout
   onResizeTile(tile) {
     const sizes = _.values(TILE_SIZES);
     const nextSize = sizes[(sizes.indexOf(tile.size || tile.defaultSize) + 1) % sizes.length];
@@ -152,18 +138,21 @@ class MeView extends ReactComponent {
     // Show hidden tiles (if any) when editing, or if there are no visible tiles
     const showHiddenTiles = hiddenTiles.length > 0 && (editing || tileComponents.length === 0);
 
+    const layout = this.calcTileLayout(this.props.tiles, this.props.isDesktop);
+
     return (
       <div>
         <ReactGridLayout
-          layout={this.state.layout}
+          layout={layout}
           isDraggable={!!editing}
           isResizable={false}
           cols={this.props.isDesktop ? 4 : 2}
           rowHeight={125}
           margin={[4, 4]}
           useCSSTransformations
-          onDragStop={this.onLayoutChange}
+          onLayoutChange={this.onLayoutChange}
           verticalCompact
+          draggableCancel=".tile__edit-control"
         >
           {tileComponents.map(component => <div key={component.props.id}>{component}</div>)}
         </ReactGridLayout>
