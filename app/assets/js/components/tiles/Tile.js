@@ -135,7 +135,7 @@ export default class Tile extends Component {
 
   animateToScale(scale) {
     const $tile = $(ReactDOM.findDOMNode(this.refs.tile));
-    
+
     $tile.stop().transition({ scale }, EDITING_ANIMATION_DURATION, 'snap');
   }
 

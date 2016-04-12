@@ -1,6 +1,5 @@
 import Immutable from 'immutable';
 import { registerReducer } from './reducers';
-import _ from 'lodash';
 
 export const TILES_FETCH = 'tiles.fetch';
 export const TILES_FETCH_SUCCESS = 'tiles.fetch.success';
@@ -138,31 +137,27 @@ registerReducer('tiles', (state = initialState, action) => {
         // place new tile at the head of the list
         return items.delete(index).push(item);
       });
-    case TILE_RESIZE: {
-      const updatedState = state.update('items', items => {
+    case TILE_RESIZE:
+      return state.update('items', items => {
         const index = items.findIndex(tile => tile.get('id') === action.tile.id);
         return items.update(index, tile => tile.set('size', action.size));
       });
-      return updatedState;
-    }
     case TILE_LAYOUT_CHANGE:
-      const jsItems = state.get('items').toJS();
-      const sortedItems = action.layout.map(tile => {
-          let item = jsItems.filter(i => i.id === tile.i)[0];
-        const pos = tile.y * 10 + tile.x;
+      return state.update('items', items =>
+        items.map(tile => {
+          const layoutItem = action.layout.filter(item => item.i === tile.get('id'))[0];
 
-        if (action.isDesktop) {
-          item.desktopPosition = pos;
-        } else {
-          item.mobilePosition = pos;
-        }
+          if (!layoutItem) {
+            // Tile is not in the layout, i.e. hidden
+            return tile;
+          }
 
-        return item;
-      });
-      // update state with new item order
-      return state.merge({
-        items: Immutable.fromJS(sortedItems),
-      });
+          const position = layoutItem.y * 10 + layoutItem.x;
+          return action.isDesktop ?
+            tile.set('positionDesktop', position) :
+            tile.set('positionMobile', position);
+        })
+      );
     default:
       return state;
   }
@@ -170,8 +165,7 @@ registerReducer('tiles', (state = initialState, action) => {
 
 registerReducer('tileContent', (state = Immutable.Map(), action) => {
   switch (action.type) {
-    case TILE_CONTENT_FETCH:
-    {
+    case TILE_CONTENT_FETCH: {
       const update = tile => tile.delete('errors').set('fetching', true);
 
       if (action.tile) {
@@ -183,8 +177,7 @@ registerReducer('tileContent', (state = Immutable.Map(), action) => {
       }
       return state.map(update);
     }
-    case TILE_CONTENT_FETCH_SUCCESS:
-    {
+    case TILE_CONTENT_FETCH_SUCCESS: {
       const update = tile => tile.merge({
         fetching: false,
         fetchedAt: action.fetchedAt,
@@ -197,8 +190,7 @@ registerReducer('tileContent', (state = Immutable.Map(), action) => {
         update
       );
     }
-    case TILE_CONTENT_FETCH_FAILURE:
-    {
+    case TILE_CONTENT_FETCH_FAILURE: {
       const update = tile => tile.merge({
         fetching: false,
         errors: action.errors,
@@ -213,7 +205,7 @@ registerReducer('tileContent', (state = Immutable.Map(), action) => {
       }
       return state.map(update);
     }
-    case TILE_CONTENT_LOAD_ALL:
+    case TILE_CONTENT_LOAD_ALL: {
       const merger = (prev, next) => {
         if (next.has('content') && !prev.has('content')) {
           return prev.merge({
@@ -225,6 +217,7 @@ registerReducer('tileContent', (state = Immutable.Map(), action) => {
       };
 
       return state.mergeWith(merger, action.content);
+    }
     default:
       return state;
   }

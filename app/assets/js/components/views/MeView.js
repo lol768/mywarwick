@@ -77,39 +77,18 @@ class MeView extends ReactComponent {
   }
 
   // FIXME: dodgy af. Try to find more reliable way of doing tileOrder => layout
-  calcTileLayout(tiles, isDesktop) {
+  calcTileLayout(allTiles, isDesktop) {
     function position(tile) {
-      if (isDesktop) {
-        return tile.positionDesktop;
-      }
-
-      return tile.positionMobile;
+      return isDesktop ? tile.positionDesktop : tile.positionMobile;
     }
 
-    return tiles.filter(tile => !tile.removed).map(tile => {
-
-      let y = Math.floor(position(tile) / 10);
-      let x = position(tile) % 10;
-
-      // FIXME code of a madman
-      if (!this.props.isDesktop) {
-        y *= 2;
-        if (x >= 2) {
-          x -= 2;
-          y += 1;
-        }
-      }
-
-      const layout = {
-        i: tile.id,
-        y,
-        x,
-        w: tile.size === 'small' ? 1 : 2,
-        h: (tile.size === 'large' ? 2 : 1),
-      };
-
-      return layout;
-    });
+    return allTiles.filter(tile => !tile.removed).map(tile => ({
+      i: tile.id,
+      x: position(tile) % 10,
+      y: Math.floor(position(tile) / 10),
+      w: tile.size === 'small' ? 1 : 2,
+      h: (tile.size === 'large' ? 2 : 1),
+    }));
   }
 
   componentWillReceiveProps(newProps) {
@@ -175,15 +154,16 @@ class MeView extends ReactComponent {
 
     return (
       <div>
-        <ReactGridLayout layout={this.state.layout}
-                         isDraggable={!!editing}
-                         isResizable={false}
-                         cols={this.props.isDesktop ? 4 : 2}
-                         rowHeight={125}
-                         margin={[4, 4]}
-                         useCSSTransformations={true}
-                         onDragStop={this.onLayoutChange}
-                         verticalCompact={true}
+        <ReactGridLayout
+          layout={this.state.layout}
+          isDraggable={!!editing}
+          isResizable={false}
+          cols={this.props.isDesktop ? 4 : 2}
+          rowHeight={125}
+          margin={[4, 4]}
+          useCSSTransformations
+          onDragStop={this.onLayoutChange}
+          verticalCompact
         >
           {tileComponents.map(component => <div key={component.props.id}>{component}</div>)}
         </ReactGridLayout>
