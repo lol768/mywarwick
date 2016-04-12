@@ -1,16 +1,8 @@
 import WeatherTile from 'components/tiles/WeatherTile';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { localMomentUnix } from 'dateFormatter';
-import tk from 'timekeeper';
 
 describe('WeatherTile', () => {
-
-  const oldDate = new Date(1989, 1, 7);
-
-  function renderAtMoment(component, now = oldDate) {
-    tk.freeze(new Date(now));
-    return shallowRender(component);
-  }
 
   // all unix times here should be after oldDate
   const data = {
@@ -39,24 +31,24 @@ describe('WeatherTile', () => {
     html.type.should.equal('div');
 
     const callout = renderAtMoment(html.props.children[0]);
-    callout.type.should.equal('span');
-    callout.props.className.should.equal('tile__callout');
-    callout.props.children[0].should.equal(4); // the ° falls into the next child component
+    callout.type.should.equal('div');
+    callout.props.className.should.equal('tile__callout row no-margins');
+    callout.props.children[0].props.children[0].should.equal(4); // the ° falls into the next child component
 
     const caption = renderAtMoment(html.props.children[1]);
     caption.type.should.equal('div');
-    caption.props.className.should.equal('tile__text--caption');
     caption.props.children[1]
       .props.children.should.equal('all of today is going to suck!');
   });
 
   it('displays large layout when zoomed', () => {
     const html = renderAtMoment(<WeatherTile zoomed={ true } { ...props } />);
-    const [calloutContainer, captionContainer, weatherTable] = html.props.children;
+    const [{ props: { children: [calloutContainer, captionContainer] } }, weatherTable] = html.props.children;
     const callout = renderAtMoment(calloutContainer.props.children);
-    callout.props.className.should.equal('tile__callout');
+    callout.props.className.should.equal('tile__callout row no-margins');
     const caption = renderAtMoment(captionContainer.props.children);
-    caption.props.className.should.equal('tile__text--caption');
+    caption.props.children[1]
+      .props.children.should.equal('all of today is going to suck!');
     const table = renderAtMoment(weatherTable);
     table.props.children.length.should.equal(6);
     table.props.children[0]
@@ -82,18 +74,16 @@ describe('WeatherTile', () => {
 
   it('renders message for stale data', () => {
     const html = renderAtMoment(<WeatherTile {...props} />, new Date(2030, 1, 7));
-    html.props.children[0].props.className.should.equal('skycon');
-    html.props.children[1].props.children.should.equal('Unable to show recent weather information.');
+    html.props.children.props.children.should.equal('Unable to show recent weather information.');
   });
 
-  it('does not render skycon in event of tile content fetch error', () => {
-    const extProps = {...props,
-      errors: [{
-        id: 'Internal Server Error',
-        message: `There's been a murder!`,
-      }]
-    };
-    const html = renderAtMoment(<WeatherTile {...extProps}/>);
-    expect(html.props.children[2]).to.be.null;
+  it('accounts for cached weather data being five minutes old', () => {
+    const fiveMinsLater = new Date(Date.UTC(2016, 1, 24, 13, 5)); // next hour +5mins
+    const htmlFive = renderAtMoment(<WeatherTile zoomed={ true } {...props} />, fiveMinsLater);
+    expect(htmlFive.props.children[1].props.items).to.exist;
+
+    const sixMinsLater = new Date(Date.UTC(2016, 1, 24, 13, 6)); // next hour +6mins
+    const htmlSix = renderAtMoment(<WeatherTile zoomed={ true } {...props} />, sixMinsLater);
+    expect(htmlSix.props.children.props.items).to.not.exist;
   });
 });

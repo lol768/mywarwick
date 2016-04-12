@@ -98,7 +98,7 @@ class Application extends ReactComponent {
 function mapStateToProps(state) {
   return {
     notificationsCount:
-      getNumItemsSince(state.get('notifications'), state.get('notificationsLastRead')),
+      getNumItemsSince(state.get('notifications'), state.getIn(['notificationsLastRead', 'date'])),
     layoutClassName: state.get('ui').get('className'),
     user: state.getIn(['user', 'data']).toJS(),
   };

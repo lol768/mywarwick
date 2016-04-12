@@ -1,5 +1,6 @@
 /conf/application.conf
 /conf/worker.conf
+/conf/ehcache.properties
 logback.xml
 logback-access.xml
 logs
@@ -14,6 +15,8 @@ gulpopts.json
 /.cache-*
 /bin
 /scripts/notification-bot/config.json
+/${*
+browserify-cache*.json
 
 node_modules
 /mocha.json

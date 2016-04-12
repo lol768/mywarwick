@@ -62,7 +62,11 @@ export default class AgendaTile extends TileContent {
       content.items : _.take(content.items, maxItemsToDisplay);
 
     const events = itemsToDisplay.map(event =>
-      <AgendaTileItem key={event.id} onClickLink={ this.onClickLink } {...event}/>);
+      <AgendaTileItem key={event.id}
+        onClickLink={ this.onClickLink }
+        {...event}
+      />
+    );
 
     return (
       <GroupedList groupBy={groupItemsForAgendaTile}>
@@ -129,27 +133,39 @@ export default class AgendaTile extends TileContent {
 }
 
 export class AgendaTileItem extends React.Component {
+
   render() {
-    const { title, start, end, href, onClickLink } = this.props;
+    const { title, start, end, href, location, onClickLink } = this.props;
 
     const content = (
-      <span>
-        <span title={ title } className="agenda-item__title text--underline">{ title }</span>
-        <span className="agenda-item__date">
+      <div>
+        <div className="col-xs-2">
           { end ? localMoment(start).format('HH:mm') : 'all-day' }
-        </span>
-      </span>
+        </div>
+        <div className="col-xs-10">
+          <span title={title}
+            className="tile-list-item__title text--align-bottom text--dotted-underline"
+          >
+            { title }
+         </span>
+          {location ?
+            <span className="tile-list-item__location text--align-bottom text--light">
+           - { location }
+            </span>
+            : null}
+        </div>
+      </div>
     );
 
     return (
-      <li className="agenda-item">
+      <div className="tile-list-item">
         { href ?
           <a href={ href } target="_blank" onClick={ onClickLink }>
             { content }
           </a> :
           content
         }
-      </li>
+      </div>
     );
   }
 }

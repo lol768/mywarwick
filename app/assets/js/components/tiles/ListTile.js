@@ -13,7 +13,7 @@ export default class ListTile extends TileContent {
     const maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : 3;
     const itemsToDisplay = this.props.zoomed ?
       content.items : _.take(content.items, maxItemsToDisplay);
-    return (<ul>
+    return (<ul className="list-unstyled">
       {itemsToDisplay.map(item => <ListTileItem key={item.id} {...item} />)}
     </ul>);
   }
@@ -21,11 +21,11 @@ export default class ListTile extends TileContent {
 }
 
 export const ListTileItem = (props) => (
-  <li className="list-tile-item">
+  <li className="tile-list-item tile-list-item--with-separator">
     <a href={props.href} target="_blank" onClick={ ListTileItem.onclick }>
-      <span className="list-tile-item__title">{props.title}</span>
-      { props.date ? <span className="list-tile-item__date">{formatDate(props.date)}</span> : null }
-      <span className="list-tile-item__text">{props.text}</span>
+      { props.title ? <span className="tile-list-item__title">{props.title}</span> : null }
+      { props.date ? <span className="tile-list-item__date">{formatDate(props.date)}</span> : null }
+      <span className="tile-list-item__text">{props.text}</span>
     </a>
   </li>
 );

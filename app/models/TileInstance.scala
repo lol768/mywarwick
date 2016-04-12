@@ -61,7 +61,12 @@ case class TileLayout(
 )
 
 object TileLayout {
-  implicit val reads = Json.reads[TileLayout]
+  /**
+    * The JSON serialization for TileLayout just reads and writes the tiles array,
+    * so I'm not sure why it's a separate object. It would be difficult to add new
+    * properties to TileLayout from here.
+    */
+  implicit val reads = JsPath.read[Seq[TileInstance]].map(TileLayout.apply)
 
   implicit val writes: Writes[TileLayout] = new Writes[TileLayout] {
     def writes(tileLayout: TileLayout): JsValue = Json.toJson(tileLayout.tiles)

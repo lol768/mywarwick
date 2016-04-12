@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
+import classNames from 'classnames';
 
 import _ from 'lodash';
 
@@ -53,9 +54,9 @@ export default class TextTile extends TileContent {
     });
   }
 
-  mapTextItems(itemsToDisplay) {
+  mapTextItems(itemsToDisplay, className) {
     return itemsToDisplay.map(item => {
-      const tileItem = (<div key={item.id} className="tile__item">
+      const tileItem = (<div key={item.id} className={classNames('tile__item', className)}>
         <span className="tile__callout">{item.callout}</span>
         <span className="tile__text">{item.text}</span>
       </div>);
@@ -70,6 +71,16 @@ export default class TextTile extends TileContent {
           {tileItem}
         </a> : tileItem;
     });
+  }
+
+  getZoomedBody() {
+    const chunkedItems = _.chunk(this.mapTextItems(this.props.content.items, 'col-xs-6'), 2);
+
+    return (
+      <div className="container-fluid">
+        {chunkedItems.map(children => <div className="row">{children}</div>)}
+      </div>
+    );
   }
 
   getLargeBody() {

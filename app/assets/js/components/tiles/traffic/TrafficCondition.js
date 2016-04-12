@@ -31,7 +31,7 @@ export default class TrafficCondition extends React.Component {
     }
 
     return (<li>
-      <i className={classNames('fa', status)}> </i>
+      <i className={classNames('fa', 'fa-fw', status)}> </i>
       <span className="route-name">{route.name}</span>{message}
     </li>);
   }

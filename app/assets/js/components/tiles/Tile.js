@@ -12,8 +12,7 @@ const SIZE_CLASSES = {
   large: 'col-xs-12 col-sm-12 col-md-6',
 };
 
-export const EDITING_ANIMATION_DURATION = 700;
-const LONG_PRESS_DURATION = 500;
+export const EDITING_ANIMATION_DURATION = 600;
 
 export default class Tile extends Component {
 
@@ -40,16 +39,26 @@ export default class Tile extends Component {
   }
 
   getIcon() {
-    const { fetching, errors, icon } = this.props;
+    const { fetching, errors, icon, content } = this.props;
+
+    // FIXME: shouldn't have to pass content here, the TileContent component has its own content
+    const customIcon = (content && this.refs.content) ? this.refs.content.getIcon(content) : null;
+
+    const iconJsx = iconName => (
+      <i className={`fa ${iconName} toggle-tooltip`} ref="icon" title={ this.getIconTitle() }
+        data-toggle="tooltip"
+      />);
 
     if (fetching) {
-      return 'fa-refresh fa-spin';
+      return iconJsx('fa-refresh fa-spin');
     } else if (errors) {
-      return 'fa-exclamation-triangle';
+      return iconJsx('fa-exclamation-triangle');
+    } else if (customIcon) {
+      return customIcon;
     } else if (icon) {
-      return `fa-${icon}`;
+      return iconJsx(`fa-${icon}`);
     }
-    return 'fa-question-circle';
+    return iconJsx('fa-question-circle');
   }
 
   getIconTitle() {
@@ -68,7 +77,7 @@ export default class Tile extends Component {
         this.startY = touch.clientY;
       }
 
-      this.timeout = setTimeout(this.props.onBeginEditing, LONG_PRESS_DURATION);
+      this.timeout = setTimeout(this.props.onBeginEditing, EDITING_ANIMATION_DURATION);
     }
   }
 
@@ -137,20 +146,15 @@ export default class Tile extends Component {
   render() {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
-    const icon = (<i
-      className={`tile__icon fa fa-fw ${this.getIcon()}`} ref="icon" title={ this.getIconTitle() }
-      data-toggle="tooltip"
-    > </i>);
-
     const sizeClass = SIZE_CLASSES[size];
     const outerClassName =
-      classNames({ [`${sizeClass}`]: !zoomed }, 'tile__container', { 'tile--zoomed': zoomed });
+      classNames({ [`${sizeClass}`]: !zoomed }, 'tile__container');
     const zoomIcon = () => {
       if (zoomed) {
         return isDesktop ?
-          <i className="fa fa-times tile__dismiss" onClick={this.props.onZoomOut}> </i> : null;
+          <i className="fa fa-times" onClick={this.props.onZoomOut}> </i> : null;
       } else if (this.shouldDisplayExpandIcon()) {
-        return <i className="fa fa-expand tile__expand" onClick={this.onClickExpand}> </i>;
+        return <i className="fa fa-expand" onClick={this.onClickExpand}> </i>;
       }
       return null;
     };
@@ -163,7 +167,8 @@ export default class Tile extends Component {
               'tile', `tile--${type}`, `tile--${size}`, `colour-${colour}`,
               {
                 'tile--editing': editing,
-                'tile--clickable': content && content.href,
+                'tile--zoomed': zoomed,
+                'cursor-pointer': content && content.href,
               }
             )
           }
@@ -192,22 +197,19 @@ export default class Tile extends Component {
             <i className="fa fa-fw fa-arrow-up"> </i>
           </div>
           <div className="tile__wrap">
-            <header>
-              <h1>
-                {icon}
-                <span className="tile__title">
-                  {title}
-                </span>
-              </h1>
-              { zoomIcon() }
+            <header className="tile__header">
+              <div className="tile__icon tile__icon--left">{this.getIcon()}</div>
+              <div className="tile__icon tile__icon--right">{zoomIcon()}</div>
+              <div className="tile__title">{title}</div>
             </header>
             <div className="tile__body">
-              { this.props.children }
+              { React.cloneElement(
+                React.Children.only(this.props.children), { ref: 'content' }
+              )}
             </div>
           </div>
         </article>
       </div>
     );
   }
-
 }

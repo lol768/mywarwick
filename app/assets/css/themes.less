@@ -60,7 +60,11 @@
   .id7-main-content-area {
     @rules();
   }
-  .screen-xs-orless(@rules);
+  .screen-xs-orless({
+    body {
+      @rules();
+    }
+  });
 }
 
 // Mixin to generate classes for tiles. Uses contrast() to choose a readable text colour -

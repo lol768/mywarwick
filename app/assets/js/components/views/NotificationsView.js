@@ -10,7 +10,7 @@ import InfiniteScrollable from '../ui/InfiniteScrollable';
 import { connect } from 'react-redux';
 
 import { takeFromStream, getStreamSize } from '../../stream';
-import { readNotifications } from '../../notification-metadata';
+import { markNotificationsRead } from '../../notification-metadata';
 
 const SOME_MORE = 20;
 
@@ -53,21 +53,55 @@ class NotificationsView extends ReactComponent {
   }
 
   markNotificationsRead() {
-    this.props.dispatch(readNotifications(moment()));
+    this.props.dispatch(markNotificationsRead(moment()));
+  }
+
+  componentWillMount() {
+    const { notificationsLastRead } = this.props;
+
+    // Store the current notifications last-read time so we can highlight new
+    // notifications as they arrive
+    this.setState({ notificationsLastRead });
+  }
+
+  componentWillReceiveProps(newProps) {
+    const was = this.state.notificationsLastRead;
+    const is = newProps.notificationsLastRead;
+
+    if (!was.fetched && is.fetched) {
+      // Only update cached last-read time upon fetch.  Otherwise retain the
+      // same value as long as this component is mounted
+      this.setState({ notificationsLastRead: is });
+    }
+
+    if (getStreamSize(newProps.notifications) !== getStreamSize(this.props.notifications)) {
+      // If there are new notifications (while the view is mounted), mark them
+      // as read
+      this.markNotificationsRead();
+    }
   }
 
   componentDidMount() {
     this.markNotificationsRead();
   }
 
-  componentDidUpdate() {
-    this.markNotificationsRead();
-  }
+  isUnread(notification) {
+    const { notificationsLastRead } = this.state;
 
+    return notificationsLastRead.date === null
+      || moment(notification.date).isAfter(notificationsLastRead.date);
+  }
 
   render() {
     const notifications = takeFromStream(this.props.notifications, this.state.numberToShow)
-      .map(n => <ActivityItem key={n.id} forceDisplayDay={!this.props.grouped} {...n} />);
+      .map(n =>
+        <ActivityItem
+          key={ n.id }
+          forceDisplayDay={ !this.props.grouped }
+          unread={ this.isUnread(n) }
+          {...n}
+        />
+      );
 
     const hasMore = this.state.numberToShow < getStreamSize(this.props.notifications);
 
@@ -94,6 +128,7 @@ class NotificationsView extends ReactComponent {
 function select(state) {
   return {
     notifications: state.get('notifications'),
+    notificationsLastRead: state.get('notificationsLastRead').toJS(),
   };
 }
 

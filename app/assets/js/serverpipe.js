@@ -127,9 +127,8 @@ export function fetchActivities() {
         const notifications = _.filter(json.data.activities, (a) => a.notification);
         const activities = _.filter(json.data.activities, (a) => !a.notification);
 
-        if (json.data.notificationsRead) {
-          dispatch(notificationMetadata.readNotifications(moment(json.data.notificationsRead)));
-        }
+        const date = json.data.notificationsRead ? moment(json.data.notificationsRead) : null;
+        dispatch(notificationMetadata.fetchedNotificationsLastRead(date));
 
         dispatch(notification.fetchedNotifications(notifications));
         dispatch(notification.fetchedActivities(activities));

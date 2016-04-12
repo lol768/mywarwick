@@ -1,0 +1,22 @@
+.tile {
+  height: @tile-height;
+  position: relative;
+  margin-top: @tile-gutter;
+  font-size: 13px;
+  line-height: 1.2em;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+.tile--hidden {
+  .tile__body {
+    text-align: center;
+    margin-top: 22px;
+    .fa {
+      font-size: 36px;
+    }
+  }
+}
