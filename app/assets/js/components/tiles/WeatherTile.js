@@ -100,7 +100,7 @@ function plural(i, one, many = `${one}s`) {
 const Callout = (content) => {
   const hour = content.items[0];
   return (
-    <div className="tile__callout">
+    <div className="tile__callout row no-margins">
       <div className="col-xs-4">
         {Math.round(hour.temp)}°
       </div>
@@ -113,7 +113,8 @@ const Callout = (content) => {
 
 const Caption = (content) => {
   const nextHour = content.items[1];
-  const mins = localMomentUnix(nextHour.time).diff(moment(), 'minutes');
+  const diff = localMomentUnix(nextHour.time).diff(moment(), 'minutes');
+  const mins = diff < 0 ? 0 : diff;
   return (
     <div>
       <div>{nextHour.text}, in {plural(mins, 'min')}</div>
