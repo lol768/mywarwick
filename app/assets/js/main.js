@@ -6,7 +6,7 @@ import _ from 'lodash';
 import localforage from 'localforage';
 import moment from 'moment';
 import log from 'loglevel';
-import { polyfill } from 'es6-promise';
+import * as es6Promise from 'es6-promise';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
 import React from 'react';
@@ -36,7 +36,7 @@ import './bridge';
 import * as analytics from './analytics';
 
 log.enableAll(false);
-polyfill();
+es6Promise.polyfill();
 initErrorReporter();
 
 localforage.config({
@@ -50,9 +50,6 @@ const history = syncHistoryWithStore(browserHistory, store, {
 });
 
 history.listen(location => analytics.track(location.pathname));
-
-// String replaced by Gulp build.
-log.info('Scripts built at: $$BUILDTIME$$');
 
 $.getJSON('/ssotest', shouldRedirect => {
   if (shouldRedirect) window.location = window.SSO.LOGIN_URL;
