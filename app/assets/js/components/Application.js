@@ -46,7 +46,8 @@ export function updateColourTheme(theme) {
 
 export function updateUIContext() {
   return (dispatch, getState) => {
-    if (isDesktop() !== (getState().getIn(['ui', 'className']) === 'desktop')) {
+    const currentClassName = getState().getIn(['ui', 'className']);
+    if (currentClassName === undefined || isDesktop() !== (currentClassName === 'desktop')) {
       dispatch({
         type: 'ui.class',
         className: isDesktop() ? 'desktop' : 'mobile',
