@@ -1,10 +1,8 @@
 /* eslint react/prop-types: 0, react/sort-comp: 0 */
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 
 import { localMoment } from '../../dateFormatter.js';
 import classNames from 'classnames';
-import $ from 'jquery';
 
 export const EDITING_ANIMATION_DURATION = 600;
 
@@ -115,7 +113,7 @@ export default class Tile extends Component {
       }
     }
   }
-  
+
   componentDidMount() {
     if (this.props.editing) {
       this.animateToScale(1.15);
@@ -133,7 +131,7 @@ export default class Tile extends Component {
     }
   }
 
-  animateToScale(scale) {
+  animateToScale() {
     /*
     const $tile = $(ReactDOM.findDOMNode(this.refs.tile));
 

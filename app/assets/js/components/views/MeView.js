@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import ReactGridLayoutBase, { WidthProvider } from 'react-grid-layout';
@@ -15,11 +14,9 @@ import * as serverpipe from '../../serverpipe';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
 
-import { EDITING_ANIMATION_DURATION } from '../tiles/Tile';
-
 import HiddenTile from '../tiles/HiddenTile';
 
-const ReactGridLayout = WidthProvider(ReactGridLayoutBase);
+const ReactGridLayout = WidthProvider(ReactGridLayoutBase); // eslint-disable-line new-cap
 
 class MeView extends ReactComponent {
 
@@ -29,6 +26,9 @@ class MeView extends ReactComponent {
     this.onBodyClick = this.onBodyClick.bind(this);
     this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
+    this.onTouchMove = this.onTouchMove.bind(this);
+    this.onDragStart = this.onDragStart.bind(this);
+    this.onDragStop = this.onDragStop.bind(this);
   }
 
   onBeginEditing(tile) {
@@ -78,9 +78,28 @@ class MeView extends ReactComponent {
       _.defer(() => this.onFinishEditing());
     }
   }
-  
+
   onDragStart(layout, item) {
+    this.dragging = true;
     this.onBeginEditing({ id: item.i });
+  }
+
+  onDragStop() {
+    this.dragging = false;
+  }
+
+  componentDidMount() {
+    $(window).on('touchmove', this.onTouchMove);
+  }
+
+  componentWillUnmount() {
+    $(window).off('touchmove', this.onTouchMove);
+  }
+
+  onTouchMove(e) {
+    if (this.dragging) {
+      e.preventDefault();
+    }
   }
 
   calcTileLayout(allTiles, isFourColumnLayout) {
@@ -165,12 +184,13 @@ class MeView extends ReactComponent {
           onLayoutChange={this.onLayoutChange}
           verticalCompact
           draggableCancel=".tile__edit-control"
-          onDragStart={this.onDragStart.bind(this)}
+          onDragStart={this.onDragStart}
+          onDragStop={this.onDragStop}
         >
           {tileComponents.map(component =>
             <div
               key={component.props.id}
-              className={this.state.editing === component.props.id ? 'react-grid-item--editing' : ''}
+              className={this.state.editing === component.props.id ? 'react-grid-item--editing' : ''} // eslint-disable-line max-len
             >
               {component}
             </div>)}

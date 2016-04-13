@@ -22,8 +22,6 @@ const initialState = Immutable.fromJS({
   colourTheme: 'default',
 });
 
-window.Store = store;
-
 registerReducer('ui', (state = initialState, action) => {
   switch (action.type) {
     case 'ui.class':
