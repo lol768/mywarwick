@@ -31,7 +31,10 @@ describe('AgendaTileItem', () => {
     start: '2014-08-04T17:00:00',
     end: '2014-08-04T18:00:00',
     title: 'Heron hunting',
-    location: 'Heronbank',
+    location: {
+      name: 'Heronbank',
+      href: 'https://campus.warwick.ac.uk/?slid=29129',
+    },
     onClick: sinon.spy()
   };
 
@@ -44,7 +47,7 @@ describe('AgendaTileItem', () => {
     const titleInner = title.props.children[0],
       dateInner = date.props.children;
     titleInner.props.className.should.equal(
-      'tile-list-item__title text--align-bottom text--dotted-underline'
+      'tile-list-item__title text--align-bottom'
     );
     titleInner.props.title.should.equal(props.title);
     titleInner.props.children.should.equal(props.title);
@@ -54,31 +57,32 @@ describe('AgendaTileItem', () => {
   it('renders with a href. clicking it calls the onClick prop', () => {
     const tileItem = <AgendaTileItem zoomed={ true } href={ 'href' } { ...props } />;
     const html = shallowRender(tileItem);
-    const a = html.props.children;
+    const a = html.props.children.props.children[1].props.children[0].props.children;
     a.props.href.should.equal('href');
-    a.props.children.type.should.equal('div');
-
+    a.type.should.equal('a');
     const node = ReactTestUtils.renderIntoDocument(tileItem);
     ReactTestUtils.Simulate.click(node);
     props.onClick.should.have.been.called;
   });
 
 
-  it('renders time for all-day events', () => {
+  it('renders time for All day events', () => {
     const html = shallowRender(<AgendaTileItem zoomed={ true } { ...props } end={ undefined }/>);
     const a = html.props.children;
     const [ date , ] = a.props.children;
-    date.props.children.should.equal('all-day');
+    date.props.children.should.equal('All day');
   });
 
-  it('renders location text', () => {
+  it('renders location text with hyperlink', () => {
     const html = shallowRender(<AgendaTileItem zoomed={ true } { ...props } />);
     const locationInner = html.props.children
       .props.children[1].props.children[1];
     locationInner.props.className.should.equal(
       'tile-list-item__location text--align-bottom text--light'
     );
-    locationInner.props.children[1].should.equal('Heronbank');
+    console.log(locationInner.props.children[1]);
+    locationInner.props.children[1].props.children.should.equal('Heronbank');
+    locationInner.props.children[1].props.href.should.equal('https://campus.warwick.ac.uk/?slid=29129');
   })
 
 });
