@@ -32,7 +32,7 @@ describe('WeatherTile', () => {
 
     const callout = renderAtMoment(html.props.children[0]);
     callout.type.should.equal('div');
-    callout.props.className.should.equal('tile__callout');
+    callout.props.className.should.equal('tile__callout row no-margins');
     callout.props.children[0].props.children[0].should.equal(4); // the ° falls into the next child component
 
     const caption = renderAtMoment(html.props.children[1]);
@@ -45,7 +45,7 @@ describe('WeatherTile', () => {
     const html = renderAtMoment(<WeatherTile zoomed={ true } { ...props } />);
     const [{ props: { children: [calloutContainer, captionContainer] } }, weatherTable] = html.props.children;
     const callout = renderAtMoment(calloutContainer.props.children);
-    callout.props.className.should.equal('tile__callout');
+    callout.props.className.should.equal('tile__callout row no-margins');
     const caption = renderAtMoment(captionContainer.props.children);
     caption.props.children[1]
       .props.children.should.equal('all of today is going to suck!');
@@ -75,5 +75,15 @@ describe('WeatherTile', () => {
   it('renders message for stale data', () => {
     const html = renderAtMoment(<WeatherTile {...props} />, new Date(2030, 1, 7));
     html.props.children.props.children.should.equal('Unable to show recent weather information.');
+  });
+
+  it('accounts for cached weather data being five minutes old', () => {
+    const fiveMinsLater = new Date(Date.UTC(2016, 1, 24, 13, 5)); // next hour +5mins
+    const htmlFive = renderAtMoment(<WeatherTile zoomed={ true } {...props} />, fiveMinsLater);
+    expect(htmlFive.props.children[1].props.items).to.exist;
+
+    const sixMinsLater = new Date(Date.UTC(2016, 1, 24, 13, 6)); // next hour +6mins
+    const htmlSix = renderAtMoment(<WeatherTile zoomed={ true } {...props} />, sixMinsLater);
+    expect(htmlSix.props.children.props.items).to.not.exist;
   });
 });

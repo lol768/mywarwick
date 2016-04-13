@@ -6,7 +6,7 @@ import _ from 'lodash';
 import localforage from 'localforage';
 import moment from 'moment';
 import log from 'loglevel';
-import { polyfill } from 'es6-promise';
+import * as es6Promise from 'es6-promise';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
 import React from 'react';
@@ -36,7 +36,7 @@ import './bridge';
 import * as analytics from './analytics';
 
 log.enableAll(false);
-polyfill();
+es6Promise.polyfill();
 initErrorReporter();
 
 localforage.config({
@@ -50,9 +50,6 @@ const history = syncHistoryWithStore(browserHistory, store, {
 });
 
 history.listen(location => analytics.track(location.pathname));
-
-// String replaced by Gulp build.
-log.info('Scripts built at: $$BUILDTIME$$');
 
 $.getJSON('/ssotest', shouldRedirect => {
   if (shouldRedirect) window.location = window.SSO.LOGIN_URL;
@@ -99,7 +96,21 @@ $(() => {
  */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js')
-    .then(pushNotifications.init);
+    .then((reg) => {
+      pushNotifications.init();
+
+      reg.onupdatefound = () => { // eslint-disable-line no-param-reassign
+        const installingWorker = reg.installing;
+
+        installingWorker.onstatechange = () => {
+          if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // The new service worker is ready to go, but there's an old service worker
+            // handling network operations.  Notify the user to refresh.
+            store.dispatch(update.updateReady());
+          }
+        };
+      };
+    });
 }
 
 SocketDatapipe.subscribe(data => {
