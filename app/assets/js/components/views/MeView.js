@@ -2,7 +2,6 @@ import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import ReactGridLayoutBase, { WidthProvider } from 'react-grid-layout';
-import ReactDOM from 'react-dom';
 
 import _ from 'lodash';
 import $ from 'jquery.transit';
@@ -16,8 +15,6 @@ import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
 
 import HiddenTile from '../tiles/HiddenTile';
-
-import { EDITING_ANIMATION_DURATION } from '../tiles/Tile';
 
 const ReactGridLayout = WidthProvider(ReactGridLayoutBase); // eslint-disable-line new-cap
 
@@ -39,11 +36,13 @@ class MeView extends ReactComponent {
       editing: tile.id,
     });
 
+    /*
     const el = $(ReactDOM.findDOMNode(this));
 
     el.stop().transition({
       scale: 0.8,
     }, EDITING_ANIMATION_DURATION, 'snap');
+    */
 
     // Ensure first release of the mouse button/finger is not interpreted as
     // exiting the editing mode
@@ -59,6 +58,7 @@ class MeView extends ReactComponent {
       editing: null,
     });
 
+    /*
     const el = $(ReactDOM.findDOMNode(this));
 
     el.stop().transition({
@@ -66,6 +66,7 @@ class MeView extends ReactComponent {
     }, EDITING_ANIMATION_DURATION, 'snap', () => {
       el.removeAttr('style'); // transform creates positioning context
     });
+    */
 
     $('body').off('click', this.onBodyClick);
 

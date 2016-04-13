@@ -1,7 +1,5 @@
 /* eslint react/prop-types: 0, react/sort-comp: 0 */
 import React, { Component } from 'react';
-import $ from 'jquery.transit';
-import ReactDOM from 'react-dom';
 
 import { localMoment } from '../../dateFormatter.js';
 import classNames from 'classnames';
@@ -133,10 +131,12 @@ export default class Tile extends Component {
     }
   }
 
-  animateToScale(scale) {
+  animateToScale() {
+    /*
     const $tile = $(ReactDOM.findDOMNode(this.refs.tile));
 
     $tile.stop().transition({ scale }, EDITING_ANIMATION_DURATION, 'snap');
+    */
   }
 
   shouldDisplayExpandIcon() {
