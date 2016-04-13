@@ -23,3 +23,22 @@
 .react-grid-item--editing {
   z-index: 100;
 }
+
+.me-view {
+  // So MeView is offsetParent of react-grid-items
+  position: relative;
+  margin: -@tile-gutter;
+
+  @media screen and (max-width: @screen-xs-max) {
+    margin-top: 0;
+  }
+  @media screen and (min-width: @screen-lg-min) {
+    width: 840px;
+  }
+  @media screen and (min-width: @screen-md-min) and (max-width: @screen-md-max) {
+    width: 612px;
+  }
+  @media screen and (min-width: @screen-sm-min) and (max-width: @screen-sm-max) {
+    width: 464px;
+  }
+}
