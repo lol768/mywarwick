@@ -114,7 +114,7 @@ class TileDaoImpl @Inject()() extends TileDao {
   override def saveTileLayout(usercode: String, tileLayout: UserTileLayout)(implicit c: Connection): Unit = {
     val updateRemoved = "UPDATE USER_TILE SET REMOVED = {removed}, UPDATED_AT = {now} WHERE USERCODE = {usercode} AND TILE_ID = {id}"
     val update = "UPDATE USER_TILE SET TILE_POSITION_MOBILE = {positionMobile}, TILE_POSITION_DESKTOP = {positionDesktop}, TILE_SIZE = {size}, PREFERENCES = {preferences}, REMOVED = {removed}, UPDATED_AT = {now} WHERE USERCODE = {usercode} AND TILE_ID = {id}"
-    val insert = "INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION_MOBILE, TILE_SIZE, PREFERENCES, REMOVED, CREATED_AT, UPDATED_AT) VALUES ({usercode}, {id}, {position}, {size}, {preferences}, {removed}, {now}, {now})"
+    val insert = "INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION_MOBILE, TILE_POSITION_DESKTOP, TILE_SIZE, PREFERENCES, REMOVED, CREATED_AT, UPDATED_AT) VALUES ({usercode}, {id}, {positionMobile}, {positionDesktop}, {size}, {preferences}, {removed}, {now}, {now})"
 
     tileLayout.tiles.foreach {
       tile =>
