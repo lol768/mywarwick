@@ -78,9 +78,11 @@ class MeView extends ReactComponent {
   }
 
   onFinishEditing() {
-    this.setState({
-      editing: null,
-    });
+    if (!this.unmounted) {
+      this.setState({
+        editing: null,
+      });
+    }
 
     /*
     const el = $(ReactDOM.findDOMNode(this));
@@ -118,6 +120,7 @@ class MeView extends ReactComponent {
 
   componentWillUnmount() {
     $(window).off('touchmove', this.onTouchMove);
+    this.unmounted = true;
   }
 
   onTouchMove(e) {
