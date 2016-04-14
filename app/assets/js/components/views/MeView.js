@@ -191,7 +191,7 @@ class MeView extends ReactComponent {
     )[0];
 
     if (!layout) {
-      return getSizeFromSizeName(TILE_SIZES.WIDE);
+      return TILE_SIZES.SMALL;
     }
 
     return getSizeNameFromSize(layout);
