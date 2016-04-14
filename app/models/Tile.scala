@@ -1,15 +1,11 @@
 package models
 
-import models.TileSize.TileSize
 import play.api.libs.json._
 import system.EnumUtils
 
 case class Tile(
   id: String,
   tileType: String,
-  defaultSize: TileSize,
-  defaultPositionMobile: Int,
-  defaultPositionDesktop: Int,
   colour: Int,
   fetchUrl: String,
   title: String,

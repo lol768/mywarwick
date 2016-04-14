@@ -156,7 +156,9 @@ persisted('notificationsLastRead.date', notificationMetadata.loadedNotifications
 persisted('activities', notifications.fetchedActivities, freezeStream);
 persisted('notifications', notifications.fetchedNotifications, freezeStream);
 
-persisted('tiles.items', tiles.fetchedTiles);
+persisted('tiles.data', tiles.fetchedTiles);
 persisted('tileContent', tiles.loadedAllTileContent);
 
 store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));
+
+window.Store = store;

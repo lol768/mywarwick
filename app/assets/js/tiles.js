@@ -34,18 +34,19 @@ export function zoomOut() {
   };
 }
 
-export function tileLayoutChange(layout, isDesktop) {
+export function tileLayoutChange(layout, layoutWidth) {
   return {
     type: TILE_LAYOUT_CHANGE,
     layout,
-    isDesktop,
+    layoutWidth,
   };
 }
 
-export function fetchedTiles(tiles) {
+export function fetchedTiles({ tiles, layout }) {
   return {
     type: TILES_FETCH_SUCCESS,
     tiles,
+    layout,
   };
 }
 
@@ -87,11 +88,13 @@ export function hideTile(tile) {
   };
 }
 
-export function resizeTile(tile, size) {
+export function resizeTile(tile, layoutWidth, width, height) {
   return {
     type: TILE_RESIZE,
     tile,
-    size,
+    layoutWidth,
+    width,
+    height,
   };
 }
 
@@ -99,7 +102,10 @@ const initialState = Immutable.fromJS({
   fetching: false,
   fetched: false,
   failed: false,
-  items: [],
+  data: {
+    tiles: [],
+    layout: [],
+  },
 });
 
 registerReducer('tiles', (state = initialState, action) => {
@@ -121,41 +127,44 @@ registerReducer('tiles', (state = initialState, action) => {
         fetching: false,
         fetched: true,
         failed: false,
-        items: Immutable.fromJS(action.tiles),
+        data: {
+          tiles: action.tiles,
+          layout: action.layout,
+        },
       });
     case TILE_HIDE:
-      return state.update('items', items => {
+      return state.updateIn(['data', 'tiles'], items => {
         const index = items.findIndex(tile => tile.get('id') === action.tile.id);
 
         return items.update(index, tile => tile.set('removed', true));
       });
     case TILE_SHOW:
-      return state.update('items', items => {
+      return state.updateIn(['data', 'tiles'], items => {
         const index = items.findIndex(tile => tile.get('id') === action.tile.id);
-        const item = items.get(index).set('removed', false);
 
-        // place new tile at the head of the list
-        return items.delete(index).push(item);
+        return items.update(index, tile => tile.set('removed', false));
       });
     case TILE_RESIZE:
-      return state.update('items', items => {
-        const index = items.findIndex(tile => tile.get('id') === action.tile.id);
-        return items.update(index, tile => tile.set('size', action.size));
+      return state.updateIn(['data', 'layout'], layout => {
+        const index = layout.findIndex(i =>
+          i.get('layoutWidth') === action.layoutWidth && i.get('tile') === action.tile.id
+        );
+        return layout.update(index, i => i.set('width', action.width).set('height', action.height));
       });
-    case TILE_LAYOUT_CHANGE:
-      return state.update('items', items =>
-        items.map(tile => {
-          const layoutItem = action.layout.filter(item => item.i === tile.get('id'))[0];
-          if (!layoutItem) {
-            // Tile is not in the layout, i.e. hidden
-            return tile;
-          }
-          const position = layoutItem.y * 10 + layoutItem.x;
-          return action.isDesktop ?
-            tile.set('positionDesktop', position) :
-            tile.set('positionMobile', position);
-        })
+    case TILE_LAYOUT_CHANGE: {
+      const thisLayout = action.layout.map(i => Immutable.Map({
+        layoutWidth: action.layoutWidth,
+        tile: i.i,
+        x: i.x,
+        y: i.y,
+        width: i.w,
+        height: i.h,
+      }));
+
+      return state.updateIn(['data', 'layout'], layout =>
+        layout.filter(i => i.get('layoutWidth') !== action.layoutWidth).concat(thisLayout)
       );
+    }
     default:
       return state;
   }

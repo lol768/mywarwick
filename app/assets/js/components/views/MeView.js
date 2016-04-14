@@ -18,6 +18,30 @@ import HiddenTile from '../tiles/HiddenTile';
 
 const ReactGridLayout = WidthProvider(ReactGridLayoutBase); // eslint-disable-line new-cap
 
+function getSizeFromSizeName(name) {
+  const sizes = {
+    [TILE_SIZES.SMALL]: { width: 1, height: 1 },
+    [TILE_SIZES.WIDE]: { width: 2, height: 1 },
+    [TILE_SIZES.LARGE]: { width: 2, height: 2 },
+  };
+
+  return sizes[name];
+}
+
+function getSizeNameFromSize(size) {
+  const { width, height } = size;
+
+  if (width === 1 && height === 1) {
+    return TILE_SIZES.SMALL;
+  }
+
+  if (width === 2 && height === 1) {
+    return TILE_SIZES.WIDE;
+  }
+
+  return TILE_SIZES.LARGE;
+}
+
 class MeView extends ReactComponent {
 
   constructor(props) {
@@ -102,23 +126,21 @@ class MeView extends ReactComponent {
     }
   }
 
-  calcTileLayout(allTiles, isFourColumnLayout) {
-    function position(tile) {
-      return isFourColumnLayout ? tile.positionDesktop : tile.positionMobile;
-    }
-
-    return allTiles.filter(tile => !tile.removed).map(tile => ({
-      i: tile.id,
-      x: position(tile) % 10,
-      y: Math.floor(position(tile) / 10),
-      w: tile.size === 'small' ? 1 : 2,
-      h: (tile.size === 'large' ? 2 : 1),
-    }));
+  getTileLayout(layout) {
+    return layout
+      .filter(tile => tile.layoutWidth === this.props.layoutWidth)
+      .map(item => ({
+        i: item.tile,
+        x: item.x,
+        y: item.y,
+        w: item.width,
+        h: item.height,
+      }));
   }
 
   onLayoutChange(layout) {
     if (this.previousLayout === undefined || !_.isEqual(layout, this.previousLayout)) {
-      this.props.dispatch(tiles.tileLayoutChange(layout, this.props.isFourColumnLayout));
+      this.props.dispatch(tiles.tileLayoutChange(layout, this.props.layoutWidth));
       this.previousLayout = _.cloneDeep(layout);
     }
   }
@@ -134,6 +156,7 @@ class MeView extends ReactComponent {
         view={this}
         editing={this.state.editing === id}
         editingAny={!!this.state.editing}
+        size={this.getTileSize(id)}
       />
     );
   }
@@ -147,7 +170,10 @@ class MeView extends ReactComponent {
   onResizeTile(tile) {
     const sizes = _.values(TILE_SIZES);
     const nextSize = sizes[(sizes.indexOf(tile.size || tile.defaultSize) + 1) % sizes.length];
-    this.props.dispatch(tiles.resizeTile(tile, nextSize));
+
+    const { width, height } = getSizeFromSizeName(nextSize);
+
+    this.props.dispatch(tiles.resizeTile(tile, this.props.layoutWidth, width, height));
   }
 
   onShowTile(tile) {
@@ -157,6 +183,18 @@ class MeView extends ReactComponent {
     this.props.dispatch(serverpipe.fetchTileContent(tile.id));
 
     this.onFinishEditing();
+  }
+
+  getTileSize(id) {
+    const layout = this.props.layout.filter(i =>
+      i.tile === id && i.layoutWidth === this.props.layoutWidth
+    )[0];
+
+    if (!layout) {
+      return getSizeFromSizeName(TILE_SIZES.WIDE);
+    }
+
+    return getSizeNameFromSize(layout);
   }
 
   renderTiles() {
@@ -169,7 +207,7 @@ class MeView extends ReactComponent {
     // Show hidden tiles (if any) when editing, or if there are no visible tiles
     const showHiddenTiles = hiddenTiles.length > 0 && (editing || tileComponents.length === 0);
 
-    const layout = this.calcTileLayout(this.props.tiles, this.props.isFourColumnLayout);
+    const layout = this.getTileLayout(this.props.layout, this.props.layoutWidth);
 
     return (
       <div>
@@ -177,7 +215,7 @@ class MeView extends ReactComponent {
           layout={layout}
           isDraggable={!!editing}
           isResizable={false}
-          cols={this.props.isFourColumnLayout ? 4 : 2}
+          cols={this.props.layoutWidth}
           rowHeight={125}
           margin={[4, 4]}
           useCSSTransformations
@@ -240,13 +278,14 @@ class MeView extends ReactComponent {
 }
 
 const select = (state) => {
-  const items = state.getIn(['tiles', 'items']);
+  const items = state.getIn(['tiles', 'data', 'tiles']);
 
   return {
     isDesktop: state.getIn(['ui', 'className']) === 'desktop',
-    isFourColumnLayout: state.getIn(['ui', 'isFourColumnLayout']) === true,
+    layoutWidth: state.getIn(['ui', 'isFourColumnLayout']) === true ? 4 : 2,
     tiles: items.filterNot(tile => tile.get('removed')).toJS(),
     hiddenTiles: items.filter(tile => tile.get('removed')).toJS(),
+    layout: state.getIn(['tiles', 'data', 'layout']).toJS(),
   };
 };
 
