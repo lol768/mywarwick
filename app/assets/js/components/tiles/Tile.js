@@ -10,6 +10,9 @@ export default class Tile extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      contentRef: null,
+    };
 
     this.onClick = this.onClick.bind(this);
     this.onClickExpand = this.onClickExpand.bind(this);
@@ -34,7 +37,9 @@ export default class Tile extends Component {
     const { fetching, errors, icon, content } = this.props;
 
     // FIXME: shouldn't have to pass content here, the TileContent component has its own content
-    const customIcon = (content && this.refs.content) ? this.refs.content.getIcon(content) : null;
+    const customIcon = (content && this.state.contentRef) ?
+      this.state.contentRef.getIcon(content)
+      : null;
 
     const iconJsx = iconName => (
       <i className={`fa ${iconName} toggle-tooltip`} ref="icon" title={ this.getIconTitle() }
@@ -118,6 +123,9 @@ export default class Tile extends Component {
     if (this.props.editing) {
       this.animateToScale(1.15);
     }
+    this.setState({ //eslint-disable-line
+      contentRef: this.refs.content,
+    });
   }
 
   componentDidUpdate(prevProps) {
