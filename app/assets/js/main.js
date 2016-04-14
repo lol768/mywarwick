@@ -89,6 +89,17 @@ $(() => {
     container: 'body',
     trigger: 'hover click',
   });
+
+  $('body').on('click.tooltip', (e) => {
+    if ($(e.target).data('toggle') === 'tooltip') {
+      $('.tooltip-active').tooltip('hide').removeClass('tooltip-active');
+      $(e.target).addClass('tooltip-active');
+    } else {
+      $('[data-toggle="tooltip"]').each((i, o) => {
+        $(o).tooltip('hide').removeClass('tooltip-active');
+      });
+    }
+  });
 });
 
 /*
