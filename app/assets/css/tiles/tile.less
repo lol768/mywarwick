@@ -33,12 +33,17 @@
     margin-top: 0;
   }
   @media screen and (min-width: @screen-lg-min) {
-    width: 840px;
+    .me-view-width(@container-lg, 9);
   }
   @media screen and (min-width: @screen-md-min) and (max-width: @screen-md-max) {
-    width: 612px;
+    .me-view-width(@container-md, 8);
   }
   @media screen and (min-width: @screen-sm-min) and (max-width: @screen-sm-max) {
-    width: 464px;
+    .me-view-width(@container-sm, 8);
   }
+}
+
+.me-view-width(@container-width, @cols) {
+  // Width must be a multiple of the tile gutter width
+  width: floor(((@container-width - @grid-gutter-width) * (@cols / @grid-columns) - @grid-gutter-width) / @tile-gutter) * @tile-gutter;
 }
