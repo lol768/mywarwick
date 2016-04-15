@@ -32,7 +32,7 @@ describe('WeatherTile', () => {
 
     const callout = renderAtMoment(html.props.children[0]);
     callout.type.should.equal('div');
-    callout.props.className.should.equal('tile__callout');
+    callout.props.className.should.equal('tile__callout row no-margins');
     callout.props.children[0].props.children[0].should.equal(4); // the ° falls into the next child component
 
     const caption = renderAtMoment(html.props.children[1]);
@@ -45,7 +45,7 @@ describe('WeatherTile', () => {
     const html = renderAtMoment(<WeatherTile zoomed={ true } { ...props } />);
     const [{ props: { children: [calloutContainer, captionContainer] } }, weatherTable] = html.props.children;
     const callout = renderAtMoment(calloutContainer.props.children);
-    callout.props.className.should.equal('tile__callout');
+    callout.props.className.should.equal('tile__callout row no-margins');
     const caption = renderAtMoment(captionContainer.props.children);
     caption.props.children[1]
       .props.children.should.equal('all of today is going to suck!');

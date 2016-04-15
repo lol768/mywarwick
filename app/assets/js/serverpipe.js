@@ -50,12 +50,13 @@ export function fetchNews() {
 
 export function persistTiles() {
   return (dispatch, getState) => {
-    const result = getState().getIn(['tiles', 'items']).map(item => ({
+    const tileData = getState().getIn(['tiles', 'data', 'tiles']).map(item => ({
       id: item.get('id'),
-      size: item.get('size'),
       preferences: item.get('preferences'),
       removed: item.get('removed'),
     })).toJS();
+
+    const layout = getState().getIn(['tiles', 'data', 'layout']).toJS();
 
     fetch('/api/tiles', {
       credentials: 'same-origin',
@@ -63,7 +64,7 @@ export function persistTiles() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ tiles: result }),
+      body: JSON.stringify({ tiles: tileData, layout }),
     });
   };
 }

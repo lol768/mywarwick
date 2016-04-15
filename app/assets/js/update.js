@@ -4,7 +4,7 @@ import { registerReducer } from './reducers';
 
 const UPDATE_READY = 'update.ready';
 
-function updateReady() {
+export function updateReady() {
   return {
     type: UPDATE_READY,
   };
@@ -30,7 +30,7 @@ export function displayUpdateProgress(dispatch) {
     dispatch(updateReady());
   }
 
-  if ('applicationCache' in window) {
+  if ('applicationCache' in window && !('serviceWorker' in navigator)) {
     window.applicationCache.addEventListener('updateready', onUpdateReady);
 
     if (window.applicationCache.status === window.applicationCache.UPDATEREADY) {

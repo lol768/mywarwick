@@ -30,7 +30,7 @@ function postErrors() {
   });
 }
 
-postErrorsThrottled = _.throttle(postErrors, 5000); // eslint-disable-line prefer-const
+postErrorsThrottled = _.throttle(postErrors, 5000);
 
 function onError(message, source, line, column, error) {
   errors = errors.push({

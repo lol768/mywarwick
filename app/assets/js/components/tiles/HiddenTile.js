@@ -2,6 +2,10 @@ import React, { PropTypes } from 'react';
 
 export default class HiddenTile extends React.Component {
 
+  constructor(props) {
+    super(props);
+  }
+
   render() {
     const { icon, title, onShow, colour } = this.props;
 

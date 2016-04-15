@@ -63,7 +63,7 @@ export default class TextTile extends TileContent {
 
       return item.href ?
         <a
-          key={item.id}
+          key={`${item.id}-a`}
           href={item.href}
           target="_blank"
           onClick={ this.onClickLink }
@@ -78,7 +78,7 @@ export default class TextTile extends TileContent {
 
     return (
       <div className="container-fluid">
-        {chunkedItems.map((children, i) => <div key={i} className="row">{children}</div>)}
+        {chunkedItems.map(children => <div className="row">{children}</div>)}
       </div>
     );
   }
