@@ -84,7 +84,7 @@ class Application extends ReactComponent {
         { children }
         { layoutClassName === 'mobile' ?
           <TabBar selectedItem={ location.pathname } onSelectItem={ this.onSelectItem }>
-            <TabBarItem title="Me" icon="user" path="/"/>
+            <TabBarItem title="Me" icon="user" path="/" />
             <TabBarItem
               title="Notifications" icon="inbox" path="/notifications"
               badge={ notificationsCount } isDisabled = { !user.authenticated }
@@ -93,8 +93,8 @@ class Application extends ReactComponent {
               title="Activity" icon="dashboard" path="/activity"
               isDisabled = { !user.authenticated }
             />
-            <TabBarItem title="News" icon="mortar-board" path="/news"/>
-            <TabBarItem title="Search" icon="search" path="/search"/>
+            <TabBarItem title="News" icon="mortar-board" path="/news" />
+            <TabBarItem title="Search" icon="search" path="/search" />
           </TabBar>
           : null}
       </ID7Layout>
