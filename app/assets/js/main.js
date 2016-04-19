@@ -66,15 +66,15 @@ $(() => {
     <Provider store={store}>
       <Router history={history}>
         <Route path="/" component={Application}>
-          <IndexRoute component={MeView}/>
+          <IndexRoute component={MeView} />
           <Route path="tiles" component={MeView}>
-            <IndexRedirect to="/"/>
-            <Route path=":id" component={TileView}/>
+            <IndexRedirect to="/" />
+            <Route path=":id" component={TileView} />
           </Route>
-          <Route path="notifications" component={NotificationsView}/>
-          <Route path="activity" component={ActivityView}/>
-          <Route path="news" component={NewsView}/>
-          <Route path="search" component={SearchView}/>
+          <Route path="notifications" component={NotificationsView} />
+          <Route path="activity" component={ActivityView} />
+          <Route path="news" component={NewsView} />
+          <Route path="search" component={SearchView} />
         </Route>
       </Router>
     </Provider>,
@@ -147,8 +147,8 @@ store.subscribe(() => {
 
 store.dispatch(serverpipe.fetchUserIdentity());
 
-const freezeDate = (d) => (!!d && 'format' in d) ? d.format() : d;
-const thawDate = (d) => !!d ? moment(d) : d;
+const freezeDate = (d) => ((!!d && 'format' in d) ? d.format() : d);
+const thawDate = (d) => (!!d ? moment(d) : d);
 
 persisted('notificationsLastRead.date', notificationMetadata.loadedNotificationsLastRead,
   freezeDate, thawDate);
@@ -156,7 +156,9 @@ persisted('notificationsLastRead.date', notificationMetadata.loadedNotifications
 persisted('activities', notifications.fetchedActivities, freezeStream);
 persisted('notifications', notifications.fetchedNotifications, freezeStream);
 
-persisted('tiles.items', tiles.fetchedTiles);
+persisted('tiles.data', tiles.fetchedTiles);
 persisted('tileContent', tiles.loadedAllTileContent);
 
 store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));
+
+window.Store = store;

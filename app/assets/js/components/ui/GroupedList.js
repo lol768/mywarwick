@@ -16,7 +16,7 @@ export default class GroupedList extends ReactComponent {
 
     return _(this.props.children).chain()
       .groupBy((obj) => this.props.groupBy.groupForItem(obj))
-      .pairs()
+      .toPairs()
       .sortBy(([group]) => group)
       .value();
   }

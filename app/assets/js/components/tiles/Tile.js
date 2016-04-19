@@ -1,16 +1,8 @@
 /* eslint react/prop-types: 0, react/sort-comp: 0 */
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 
 import { localMoment } from '../../dateFormatter.js';
 import classNames from 'classnames';
-import $ from 'jquery';
-
-const SIZE_CLASSES = {
-  small: 'col-xs-6 col-sm-6 col-md-3',
-  wide: 'col-xs-12 col-sm-12 col-md-6',
-  large: 'col-xs-12 col-sm-12 col-md-6',
-};
 
 export const EDITING_ANIMATION_DURATION = 600;
 
@@ -18,6 +10,9 @@ export default class Tile extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      contentRef: null,
+    };
 
     this.onClick = this.onClick.bind(this);
     this.onClickExpand = this.onClickExpand.bind(this);
@@ -42,7 +37,9 @@ export default class Tile extends Component {
     const { fetching, errors, icon, content } = this.props;
 
     // FIXME: shouldn't have to pass content here, the TileContent component has its own content
-    const customIcon = (content && this.refs.content) ? this.refs.content.getIcon(content) : null;
+    const customIcon = (content && this.state.contentRef) ?
+      this.state.contentRef.getIcon(content)
+      : null;
 
     const iconJsx = iconName => (
       <i className={`fa ${iconName} toggle-tooltip`} ref="icon" title={ this.getIconTitle() }
@@ -67,10 +64,12 @@ export default class Tile extends Component {
     if (errors) {
       return `Last updated ${localMoment(fetchedAt).calendar()}. ${errors[0].message}`;
     }
+
+    return null;
   }
 
   onTouchStart(e) {
-    if (!this.props.editing && !this.props.zoomed) {
+    if (!this.props.editingAny && !this.props.zoomed) {
       if (e.changedTouches) {
         const touch = e.changedTouches[0];
         this.startX = touch.clientX;
@@ -122,6 +121,15 @@ export default class Tile extends Component {
     }
   }
 
+  componentDidMount() {
+    if (this.props.editing) {
+      this.animateToScale(1.15);
+    }
+    this.setState({ //eslint-disable-line
+      contentRef: this.refs.content,
+    });
+  }
+
   componentDidUpdate(prevProps) {
     const nowEditing = this.props.editing;
     const wasEditing = prevProps.editing;
@@ -133,10 +141,12 @@ export default class Tile extends Component {
     }
   }
 
-  animateToScale(scale) {
+  animateToScale() {
+    /*
     const $tile = $(ReactDOM.findDOMNode(this.refs.tile));
 
     $tile.stop().transition({ scale }, EDITING_ANIMATION_DURATION, 'snap');
+    */
   }
 
   shouldDisplayExpandIcon() {
@@ -146,9 +156,6 @@ export default class Tile extends Component {
   render() {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
-    const sizeClass = SIZE_CLASSES[size];
-    const outerClassName =
-      classNames({ [`${sizeClass}`]: !zoomed }, 'tile__container');
     const zoomIcon = () => {
       if (zoomed) {
         return isDesktop ?
@@ -160,7 +167,7 @@ export default class Tile extends Component {
     };
 
     return (
-      <div className={outerClassName}>
+      <div className="tile__container">
         <article
           className={
             classNames(

@@ -35,7 +35,7 @@ const groupItemsForAgendaTile = {
 
 function hyperlinkText(text, href, onClickLink) {
   return href ?
-    <a href={ href } target="_blank" onClick={ onClickLink }>{ text }</a>
+    <a href={ href } target="_blank" onClick={ onClickLink } ref="a">{ text }</a>
     : text;
 }
 
@@ -86,7 +86,7 @@ export default class AgendaTile extends TileContent {
     const { content } = this.props;
 
     const nextEvent = content.items[0];
-    const truncTitle = _.trunc(nextEvent.title, { length: 30 });
+    const truncTitle = _.truncate(nextEvent.title, { length: 30 });
     const text = (
       <span className="tile__text">
         Next: {truncTitle} at {localMoment(nextEvent.start).format('HH:mm')}

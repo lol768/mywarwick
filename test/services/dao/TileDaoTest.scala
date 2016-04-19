@@ -20,9 +20,9 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
       INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, TITLE, ICON) VALUES
         ('tile', 'count', 'large', 0, 1, 'http://provider', 'Printer Credit', 'print'),
         ('other-tile', 'count', 'wide', 1, 2, 'http://provider', 'Mail', 'envelope-o');
-      INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
-        ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE),
-        ('someone', 'other-tile', 0, 'large', SYSDATE, SYSDATE);
+      INSERT INTO USER_TILE (USERCODE, TILE_ID, CREATED_AT, UPDATED_AT) VALUES
+        ('someone', 'tile', SYSDATE, SYSDATE),
+        ('someone', 'other-tile', SYSDATE, SYSDATE);
         """).execute()
 
       val tiles = tileDao.getTilesForUser("someone", Set("staff"))
@@ -38,9 +38,9 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
       INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, TITLE, ICON) VALUES
         ('tile', 'count', 'large', 0, 1, 'http://provider', 'Printer Credit', 'print'),
         ('other-tile', 'count', 'wide', 1, 2, 'http://provider', 'Mail', 'envelope-o');
-      INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
-        ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE),
-        ('someone', 'other-tile', 0, 'large', SYSDATE, SYSDATE);
+      INSERT INTO USER_TILE (USERCODE, TILE_ID, CREATED_AT, UPDATED_AT) VALUES
+        ('someone', 'tile', SYSDATE, SYSDATE),
+        ('someone', 'other-tile', SYSDATE, SYSDATE);
         """).execute()
 
       tileDao.getTilesByIds("someone", Seq.empty, Set("staff")) mustBe Seq.empty
@@ -84,8 +84,8 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
           ('other-tile', 'staff'),
           ('heron-tile', 'student');
 
-        INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, REMOVED, CREATED_AT, UPDATED_AT) VALUES
-         ('someone', 'tile', 1, 'large', true, SYSDATE, SYSDATE)
+        INSERT INTO USER_TILE (USERCODE, TILE_ID, REMOVED, CREATED_AT, UPDATED_AT) VALUES
+         ('someone', 'tile', true, SYSDATE, SYSDATE)
         """).execute()
 
       val tiles = tileDao.getTilesForUser("someone", Set("staff"))
@@ -115,8 +115,8 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
         """
       INSERT INTO TILE (ID, DEFAULT_SIZE, FETCH_URL, TITLE, ICON) VALUES
         ('tile', 'large', 'http://provider', 'Printer Credit', 'print');
-      INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
-        ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE);
+      INSERT INTO USER_TILE (USERCODE, TILE_ID, CREATED_AT, UPDATED_AT) VALUES
+        ('someone', 'tile', SYSDATE, SYSDATE);
         """).execute()
 
       val preferenceObject = Json.obj("count" -> 3)
@@ -132,8 +132,8 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
         """
       INSERT INTO TILE (ID, DEFAULT_SIZE, FETCH_URL, TITLE, ICON) VALUES
         ('tile', 'large', 'http://provider', 'Printer Credit', 'print');
-      INSERT INTO USER_TILE (USERCODE, TILE_ID, TILE_POSITION, TILE_SIZE, CREATED_AT, UPDATED_AT) VALUES
-        ('someone', 'tile', 1, 'large', SYSDATE, SYSDATE);
+      INSERT INTO USER_TILE (USERCODE, TILE_ID, CREATED_AT, UPDATED_AT) VALUES
+        ('someone', 'tile', SYSDATE, SYSDATE);
         """).execute()
 
       val tiles = tileDao.getTilesByIds("someone", Seq("tile"), Set.empty)
@@ -152,25 +152,24 @@ class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       // INSERT removed tiles
 
-      tileDao.saveTileLayout("usercode", UserTileLayout(Seq(UserTileSetting.removed("tile"))))
+      tileDao.saveTileConfiguration("usercode", Seq(UserTileSetting.removed("tile")))
 
       SQL("SELECT COUNT(*) FROM USER_TILE WHERE USERCODE = 'usercode' AND TILE_ID = 'tile' AND REMOVED = 1")
         .as(scalar[Int].single) mustBe 1
 
       // UPDATE non-removed tiles
 
-      tileDao.saveTileLayout("usercode", UserTileLayout(Seq(UserTileSetting("tile", TileSize.wide, None, removed = false))))
+      tileDao.saveTileConfiguration("usercode", Seq(UserTileSetting("tile", None, removed = false)))
 
       val tiles = tileDao.getTilesForUser("usercode", Set.empty)
 
       tiles.length mustBe 1
-      tiles.head.size mustBe TileSize.wide
 
       // UPDATE removed tiles, keeping previous column values
 
-      tileDao.saveTileLayout("usercode", UserTileLayout(Seq(UserTileSetting.removed("tile"))))
+      tileDao.saveTileConfiguration("usercode", Seq(UserTileSetting.removed("tile")))
 
-      SQL("SELECT COUNT(*) FROM USER_TILE WHERE USERCODE = 'usercode' AND TILE_ID = 'tile' AND REMOVED = 1 AND TILE_SIZE = 'wide'")
+      SQL("SELECT COUNT(*) FROM USER_TILE WHERE USERCODE = 'usercode' AND TILE_ID = 'tile' AND REMOVED = 1")
         .as(scalar[Int].single) mustBe 1
 
     }

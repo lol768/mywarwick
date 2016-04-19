@@ -14,8 +14,11 @@ import { push } from 'react-router-redux';
 
 const isDesktop = () => mq('only all and (min-width: 768px)');
 
+const isFourColumnLayout = () => mq('only all and (min-width: 992px)');
+
 const initialState = Immutable.fromJS({
   className: undefined,
+  isFourColumnLayout: false,
   colourTheme: 'default',
 });
 
@@ -23,6 +26,8 @@ registerReducer('ui', (state = initialState, action) => {
   switch (action.type) {
     case 'ui.class':
       return state.set('className', action.className);
+    case 'ui.layout':
+      return state.set('isFourColumnLayout', action.isFourColumnLayout);
     case 'ui.theme':
       return state.set('colourTheme', action.theme);
     default:
@@ -37,24 +42,27 @@ export function updateColourTheme(theme) {
   };
 }
 
-export function updateLayoutClass() {
-  return {
-    type: 'ui.class',
-    className: isDesktop() ? 'desktop' : 'mobile',
+export function updateUIContext() {
+  return (dispatch, getState) => {
+    const currentClassName = getState().getIn(['ui', 'className']);
+    if (currentClassName === undefined || isDesktop() !== (currentClassName === 'desktop')) {
+      dispatch({
+        type: 'ui.class',
+        className: isDesktop() ? 'desktop' : 'mobile',
+      });
+    }
+
+    if (isFourColumnLayout() !== getState().getIn(['ui', 'isFourColumnLayout'])) {
+      dispatch({
+        type: 'ui.layout',
+        isFourColumnLayout: isFourColumnLayout(),
+      });
+    }
   };
 }
 
-let wasDesktop = isDesktop();
-store.dispatch(updateLayoutClass());
-
-$(() => {
-  $(window).on('resize', () => {
-    if (wasDesktop !== isDesktop()) {
-      wasDesktop = isDesktop();
-      store.dispatch(updateLayoutClass());
-    }
-  });
-});
+store.dispatch(updateUIContext());
+$(() => $(window).on('resize', () => store.dispatch(updateUIContext())));
 
 class Application extends ReactComponent {
 
@@ -76,7 +84,7 @@ class Application extends ReactComponent {
         { children }
         { layoutClassName === 'mobile' ?
           <TabBar selectedItem={ location.pathname } onSelectItem={ this.onSelectItem }>
-            <TabBarItem title="Me" icon="user" path="/"/>
+            <TabBarItem title="Me" icon="user" path="/" />
             <TabBarItem
               title="Notifications" icon="inbox" path="/notifications"
               badge={ notificationsCount } isDisabled = { !user.authenticated }
@@ -85,8 +93,8 @@ class Application extends ReactComponent {
               title="Activity" icon="dashboard" path="/activity"
               isDisabled = { !user.authenticated }
             />
-            <TabBarItem title="News" icon="mortar-board" path="/news"/>
-            <TabBarItem title="Search" icon="search" path="/search"/>
+            <TabBarItem title="News" icon="mortar-board" path="/news" />
+            <TabBarItem title="Search" icon="search" path="/search" />
           </TabBar>
           : null}
       </ID7Layout>

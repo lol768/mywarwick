@@ -5,7 +5,7 @@ import log from 'loglevel';
 import store from './store';
 
 // Immutable object => plain JS object
-const defaultFreeze = x => (x !== undefined /* (or null) */ && 'toJS' in x) ? x.toJS() : x;
+const defaultFreeze = x => ((x !== undefined /* (or null) */ && 'toJS' in x) ? x.toJS() : x);
 
 // Identity function
 const defaultThaw = x => x;
