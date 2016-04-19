@@ -5,6 +5,7 @@ import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';
 import _ from 'lodash';
+import classNames from 'classnames';
 
 const groupItemsForAgendaTile = {
 
@@ -31,6 +32,12 @@ const groupItemsForAgendaTile = {
     return moment.unix(group).tz('Europe/London').format('ddd DD/MM/YY');
   },
 };
+
+function hyperlinkText(text, href, onClickLink) {
+  return href ?
+    <a href={ href } target="_blank" onClick={ onClickLink } ref="a">{ text }</a>
+    : text;
+}
 
 export default class AgendaTile extends TileContent {
 
@@ -106,12 +113,7 @@ export default class AgendaTile extends TileContent {
     return (
       <div className="tile__item">
         { callout }
-        { nextEvent.href ?
-          <a href={ nextEvent.href } target="_blank" onClick={ this.onClickLink }>
-            { text }
-          </a> :
-          text
-        }
+        { hyperlinkText(text, nextEvent.href, this.onClickLink) }
       </div>
     );
   }
@@ -140,17 +142,18 @@ export class AgendaTileItem extends React.Component {
     const content = (
       <div>
         <div className="col-xs-2">
-          { end ? localMoment(start).format('HH:mm') : 'all-day' }
+          { end ? localMoment(start).format('HH:mm') : 'All day' }
         </div>
         <div className="col-xs-10">
           <span title={title}
-            className="tile-list-item__title text--align-bottom text--dotted-underline"
+            className={classNames('tile-list-item__title', 'text--align-bottom',
+            { 'text--dotted-underline': href })}
           >
-            { title }
+            { hyperlinkText(title, href, onClickLink) }
          </span>
           {location ?
             <span className="tile-list-item__location text--align-bottom text--light">
-           - { location }
+           &nbsp;- { hyperlinkText(location.name, location.href, onClickLink) }
             </span>
             : null}
         </div>
@@ -159,12 +162,7 @@ export class AgendaTileItem extends React.Component {
 
     return (
       <div className="tile-list-item">
-        { href ?
-          <a href={ href } target="_blank" onClick={ onClickLink } ref="a">
-            { content }
-          </a> :
-          content
-        }
+        { content }
       </div>
     );
   }
@@ -175,7 +173,10 @@ AgendaTileItem.propTypes = {
   start: PropTypes.string,
   end: PropTypes.string,
   title: PropTypes.string,
-  location: PropTypes.string,
+  location: React.PropTypes.shape({
+    name: React.PropTypes.string,
+    href: React.PropTypes.string,
+  }),
   href: PropTypes.string,
   onClickLink: PropTypes.func,
 };
