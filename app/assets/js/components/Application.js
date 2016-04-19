@@ -11,6 +11,7 @@ import $ from 'jquery';
 import store from '../store';
 import { registerReducer } from '../reducers';
 import { push } from 'react-router-redux';
+import log from 'loglevel';
 
 const isDesktop = () => mq('only all and (min-width: 768px)');
 
@@ -78,6 +79,8 @@ class Application extends ReactComponent {
   render() {
     const { location, notificationsCount, layoutClassName, user, children }
       = this.props;
+
+    log.debug('Application.render');
 
     return (
       <ID7Layout path={ location.pathname }>

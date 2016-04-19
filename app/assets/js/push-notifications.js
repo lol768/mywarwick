@@ -1,7 +1,7 @@
 import log from 'loglevel';
 
-function subscriptionToServer(subscription) {
-  fetch('/api/push/gcm/subscribe', {
+function uploadSubscription(subscription) {
+  return fetch('/api/push/gcm/subscribe', {
     method: 'post',
     headers: {
       Accept: 'application/json',
@@ -35,29 +35,32 @@ export function init() {
   navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
     // Do we already have a push message subscription?
     serviceWorkerRegistration.pushManager.getSubscription()
-      .then(subscription => {
-        if (!subscription) {
-          return;
-        }
-        // found subscription, send update to server for fresh timez
-        subscriptionToServer(subscription);
-      })
-      .catch(err => {
-        log.warn('Error during getSubscription()', err);
-      });
+      .then(
+        subscription => {
+          if (!subscription) {
+            return null;
+          }
+          // found subscription, send update to server for fresh timez
+          return uploadSubscription(subscription);
+        },
+        err => {
+          log.warn('Error during getSubscription()', err);
+        });
   });
 }
 
 export function subscribe() {
   navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
     serviceWorkerRegistration.pushManager.subscribe({ userVisibleOnly: true })
-      .then(subscriptionToServer)
-      .catch(e => {
-        if (Notification.permission === 'denied') {
-          log.warn('Permission for Notifications was denied');
-        } else {
-          log.error('Unable to subscribe to push.', e);
+      .then(
+        uploadSubscription,
+        e => {
+          if (Notification.permission === 'denied') {
+            log.warn('Permission for Notifications was denied');
+          } else {
+            log.error('Unable to subscribe to push.', e);
+          }
         }
-      });
+      );
   });
 }

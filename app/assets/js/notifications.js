@@ -2,6 +2,7 @@ import Immutable from 'immutable';
 
 import { registerReducer } from './reducers';
 import { makeStream, onStreamReceive } from './stream';
+import { USER_CLEAR } from './user';
 
 export const NOTIFICATION_RECEIVE = 'notifications.receive';
 export const NOTIFICATION_FETCH = 'notifications.fetch';
@@ -44,6 +45,8 @@ export function mergeNotifications(stream, newNotifications) {
 
 registerReducer('notifications', (state = makeStream(), action) => {
   switch (action.type) {
+    case USER_CLEAR:
+      return makeStream();
     case NOTIFICATION_RECEIVE:
       return mergeNotifications(state, Immutable.List([action.notification]));
     case NOTIFICATION_FETCH:
@@ -55,6 +58,8 @@ registerReducer('notifications', (state = makeStream(), action) => {
 
 registerReducer('activities', (state = makeStream(), action) => {
   switch (action.type) {
+    case USER_CLEAR:
+      return makeStream();
     case ACTIVITY_RECEIVE:
       return mergeNotifications(state, Immutable.List([action.activity]));
     case ACTIVITIES_FETCH:

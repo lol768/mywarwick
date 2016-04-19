@@ -1,5 +1,6 @@
 import Immutable from 'immutable';
 import { registerReducer } from './reducers';
+import { USER_CLEAR } from './user';
 
 export const NOTIFICATIONS_READ = 'notifications.read';
 export const NOTIFICATIONS_READ_LOADED = 'notifications.read.loaded';
@@ -36,6 +37,8 @@ registerReducer('notificationsLastRead', (state = initialState, { type, date }) 
   const isNewer = !currentDate || !date || date.isAfter(currentDate);
 
   switch (type) {
+    case USER_CLEAR:
+      return initialState;
     case NOTIFICATIONS_READ_LOADED:
       if (state.get('fetched') === false && isNewer) {
         // Do not overwrite a fetched value with a loaded one

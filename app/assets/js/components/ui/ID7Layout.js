@@ -3,6 +3,7 @@ import ReactComponent from 'react/lib/ReactComponent';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import _ from 'lodash';
+import log from 'loglevel';
 import MastheadIcon from './MastheadIcon';
 import NotificationsView from '../views/NotificationsView';
 import ActivityView from '../views/ActivityView';
@@ -254,19 +255,24 @@ class ID7Layout extends ReactComponent {
 
   render() {
     if (this.props.layoutClassName === 'mobile') {
+      log.debug('ID7Layout.render:mobile');
       return this.renderMobile();
     }
+    if (!this.props.layoutClassName) {
+      log.warn('props.layoutClassName not set');
+    }
 
+    log.debug('ID7Layout.render:desktop');
     return this.renderDesktop();
   }
 }
 
 const select = (state) => ({
-  layoutClassName: state.get('ui').get('className'),
+  layoutClassName: state.getIn(['ui', 'className']),
   notificationsCount:
     getNumItemsSince(state.get('notifications'), state.getIn(['notificationsLastRead', 'date'])),
   user: state.get('user').toJS(),
-  colourTheme: state.get('ui').get('colourTheme'),
+  colourTheme: state.getIn(['ui', 'colourTheme']),
   zoomedTile: state.getIn(['me', 'zoomedTile']),
 });
 

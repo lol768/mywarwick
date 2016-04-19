@@ -1,5 +1,6 @@
 import Immutable from 'immutable';
 import { registerReducer } from './reducers';
+import { USER_CLEAR } from './user';
 
 export const TILES_FETCH = 'tiles.fetch';
 export const TILES_FETCH_SUCCESS = 'tiles.fetch.success';
@@ -98,6 +99,8 @@ export function resizeTile(tile, layoutWidth, width, height) {
   };
 }
 
+const initialContentState = Immutable.Map();
+
 const initialState = Immutable.fromJS({
   fetching: false,
   fetched: false,
@@ -110,6 +113,8 @@ const initialState = Immutable.fromJS({
 
 registerReducer('tiles', (state = initialState, action) => {
   switch (action.type) {
+    case USER_CLEAR:
+      return initialState;
     case TILES_FETCH:
       return state.merge({
         fetching: true,
@@ -170,8 +175,10 @@ registerReducer('tiles', (state = initialState, action) => {
   }
 });
 
-registerReducer('tileContent', (state = Immutable.Map(), action) => {
+registerReducer('tileContent', (state = initialContentState, action) => {
   switch (action.type) {
+    case USER_CLEAR:
+      return initialContentState;
     case TILE_CONTENT_FETCH: {
       const update = tile => tile.delete('errors').set('fetching', true);
 
