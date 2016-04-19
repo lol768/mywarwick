@@ -11,7 +11,10 @@ window.Start = {
 
   APP: {},
 
-  navigate: (path) => store.dispatch(push(path)),
+  navigate(path) {
+    document.dispatchEvent(new Event('click'));
+    store.dispatch(push(path));
+  },
 
   appToForeground() {
     store.dispatch(fetchTileContent());

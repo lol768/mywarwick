@@ -87,17 +87,17 @@ $(() => {
   $(document).tooltip({
     selector: '.toggle-tooltip',
     container: 'body',
-    trigger: 'hover click',
+    trigger: 'click',
   });
 
-  $('body').on('click.tooltip', (e) => {
+  $(document).on('click', (e) => {
     if ($(e.target).data('toggle') === 'tooltip') {
-      $('.tooltip-active').tooltip('hide').removeClass('tooltip-active');
-      $(e.target).addClass('tooltip-active');
+      if (!$(e.target).hasClass('tooltip-active')) {
+        $('.tooltip-active').tooltip('hide').toggleClass('tooltip-active');
+        $(e.target).toggleClass('tooltip-active').tooltip('toggle');
+      }
     } else {
-      $('[data-toggle="tooltip"]').each((i, o) => {
-        $(o).tooltip('hide').removeClass('tooltip-active');
-      });
+      $('[data-toggle="tooltip"]').tooltip('hide').removeClass('tooltip-active');
     }
   });
 });
