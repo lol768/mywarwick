@@ -43,7 +43,6 @@ export default class AgendaTile extends TileContent {
 
   constructor(props) {
     super(props);
-    this.onClickLink = this.onClickLink.bind(this);
     this.state = {
       defaultMaxItems: { small: null, wide: 2, large: 5 }[props.size],
     };
@@ -116,13 +115,6 @@ export default class AgendaTile extends TileContent {
         { hyperlinkText(text, nextEvent.href, this.onClickLink) }
       </div>
     );
-  }
-
-  onClickLink(e) {
-    e.stopPropagation();
-    if (this.props.editingAny) {
-      e.preventDefault();
-    }
   }
 
   static canZoom(content) {
