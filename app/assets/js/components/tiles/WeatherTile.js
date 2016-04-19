@@ -12,7 +12,7 @@ function formatIconString(str) {
 
 const formatTime = (d) => localMomentUnix(d).format('ha');
 
-function oneWordWeather(icon) {
+export function oneWordWeather(icon) {
   return icon.replace(/.*(clear|rain|snow|sleet|wind|fog|cloudy).*/, '$1');
 }
 
@@ -73,7 +73,7 @@ export default class WeatherTile extends TileContent {
 
 const WeatherTable = ({ items }) =>
   <div className="row text--light">
-    {_.take(items, 6).map((item, i) => (
+    {_.take(items, 6).map(item => (
       <div className="col-xs-2" key={item.id}>
         <div>{formatTime(item.time)}</div>
         <div>{oneWordWeather(item.icon)}</div>
