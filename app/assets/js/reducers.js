@@ -1,6 +1,6 @@
 import Immutable from 'immutable';
-
 import store from './store';
+import log from 'loglevel';
 
 const initialState = Immutable.Map();
 
@@ -93,6 +93,8 @@ export default function app(state = initialState, action = undefined) {
     return state;
   }
 
+  log.debug(`app.reduce(action.type=${action.type})`);
+
   let stateToReturn = state;
   if (action.type === RESET) {
     stateToReturn = initialState;
@@ -102,10 +104,4 @@ export default function app(state = initialState, action = undefined) {
     (s, reducers, namespace) =>
       s.update(namespace, (subtree) => composeReducers(reducers)(subtree, action)), stateToReturn
   );
-}
-
-import localforage from 'localforage';
-
-export function resetStore() {
-  return dispatch => localforage.clear().then(() => dispatch({ type: RESET }));
 }

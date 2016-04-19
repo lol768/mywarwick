@@ -3,10 +3,11 @@ import localforage from 'localforage';
 import log from 'loglevel';
 import store from './store';
 
-import { registerReducer, resetStore } from './reducers';
+import { registerReducer } from './reducers';
 
 export const USER_LOAD = 'user.load';
 export const USER_RECEIVE = 'user.receive';
+export const USER_CLEAR = 'user.clear';
 
 const initialState = Immutable.fromJS({
   data: {},
@@ -27,6 +28,8 @@ registerReducer('user', (state = initialState, action) => {
         authoritative: true,
         empty: false,
       });
+    case USER_CLEAR:
+      return initialState;
     default:
       return state;
   }
@@ -60,13 +63,18 @@ const loadUserFromLocalStorage = localforage.getItem('user')
     return {};
   });
 
+function clearUserData() {
+  return dispatch =>
+    localforage.clear().then(() => dispatch({ type: USER_CLEAR }));
+}
+
 export function userReceive(currentUser) {
   return (dispatch) => {
     // If we are a different user than we were before (incl. anonymous),
     // nuke the store, which also clears local storage
     loadUserFromLocalStorage.then(previousUser => {
       if (previousUser.usercode !== currentUser.usercode) {
-        dispatch(resetStore())
+        dispatch(clearUserData())
           .then(() => localforage.setItem('user', currentUser))
           .then(() => dispatch(receiveUserIdentity(currentUser)));
       } else {

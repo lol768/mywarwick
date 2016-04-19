@@ -25,10 +25,8 @@ class BasicApiFuncTest extends ApiFuncTestBase {
         val testHeronTile = Json.obj(
           "id" -> "heron-tile",
           "colour" -> 3,
-          "defaultSize" -> "small",
           "icon" -> "envelope-o",
           "preferences" -> JsNull,
-          "size" -> "small",
           "title" -> "Mail",
           "type" -> "count",
           "removed" -> false
@@ -36,7 +34,10 @@ class BasicApiFuncTest extends ApiFuncTestBase {
 
         val activities = wsCall(controllers.api.routes.TilesController.getLayout).get.futureValue
         val response = activities.json.as[API.Response[JsValue]]
-        response should be(API.Success("ok", Json.arr(testHeronTile)))
+        response should be(API.Success("ok", Json.obj(
+          "tiles" -> Json.arr(testHeronTile),
+          "layout" -> Json.arr()
+        )))
       }
     }
   }
