@@ -98,7 +98,20 @@ $(() => {
   $(document).tooltip({
     selector: '.toggle-tooltip',
     container: 'body',
-    trigger: 'hover click',
+    trigger: 'click',
+  });
+
+  $(document).on('click', (e) => {
+    if ($(e.target).data('toggle') === 'tooltip') {
+      if (!$(e.target).hasClass('tooltip-active')) {
+        // hide active tooltips after clicking on a non-active tooltip
+        $('.tooltip-active').tooltip('hide').toggleClass('tooltip-active');
+        $(e.target).toggleClass('tooltip-active').tooltip('toggle');
+      }
+    } else {
+      // click elsewhere on body, dismiss all open tooltips
+      $('.toggle-tooltip').tooltip('hide').removeClass('tooltip-active');
+    }
   });
 });
 
