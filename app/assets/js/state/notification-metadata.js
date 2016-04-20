@@ -1,5 +1,4 @@
 import Immutable from 'immutable';
-import { registerReducer } from './reducers';
 import { USER_CLEAR } from './user';
 
 export const NOTIFICATIONS_READ = 'notifications.read';
@@ -32,7 +31,7 @@ export function loadedNotificationsLastRead(date) {
 
 const initialState = Immutable.Map({ fetched: false, date: null });
 
-registerReducer('notificationsLastRead', (state = initialState, { type, date }) => {
+export function reducer(state = initialState, { type, date }) {
   const currentDate = state.get('date');
   const isNewer = !currentDate || !date || date.isAfter(currentDate);
 
@@ -61,4 +60,4 @@ registerReducer('notificationsLastRead', (state = initialState, { type, date }) 
     default:
       return state;
   }
-});
+}

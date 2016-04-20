@@ -2,8 +2,6 @@ import $ from 'jquery';
 import _ from 'lodash';
 import Immutable from 'immutable';
 
-import { registerReducer } from './reducers';
-
 export const SEARCH_QUERY_START = 'search.query.start';
 export const SEARCH_QUERY_SUCCESS = 'search.query.success';
 export const SEARCH_QUERY_FAILURE = 'search.query.failure';
@@ -83,7 +81,7 @@ export function getRecentItemsOrderedByFrequency(list) {
     .toJS();
 }
 
-registerReducer('search', (state = initialState, action) => {
+export function reducer(state = initialState, action) {
   switch (action.type) {
     case SEARCH_RESULT_CLICK:
       return state.update('recentItems', (list) => pushRecentItem(list, action.result));
@@ -96,4 +94,4 @@ registerReducer('search', (state = initialState, action) => {
     default:
       return state;
   }
-});
+}

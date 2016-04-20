@@ -7,8 +7,6 @@ export default function formatDate(d, nowDate = new Date(), alwaysDisplayWeekday
   const date = localMoment(d);
   const now = localMoment(nowDate);
 
-  const isThisYear = date.year() === now.year();
-
   if (
     date.isSame(now, 'day') ||
     date.isSame(now.subtract(1, 'day'), 'day') ||
@@ -16,6 +14,8 @@ export default function formatDate(d, nowDate = new Date(), alwaysDisplayWeekday
   ) {
     return alwaysDisplayWeekday ? date.format('ddd H:mm') : date.format('H:mm');
   }
+
+  const isThisYear = date.year() === now.year();
 
   if (isThisYear) {
     return date.format('ddd D MMM, H:mm');

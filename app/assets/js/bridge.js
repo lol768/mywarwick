@@ -1,3 +1,7 @@
+/**
+ * API for native (iOS) app.
+ */
+
 import $ from 'jquery';
 import Immutable from 'immutable';
 import store from './store';

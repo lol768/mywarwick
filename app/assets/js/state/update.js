@@ -1,8 +1,10 @@
 import Immutable from 'immutable';
 
-import { registerReducer } from './reducers';
+const UPDATE_READY = 'UPDATE_READY';
 
-const UPDATE_READY = 'update.ready';
+const initialState = Immutable.fromJS({
+  isUpdateReady: false,
+});
 
 export function updateReady() {
   return {
@@ -10,11 +12,7 @@ export function updateReady() {
   };
 }
 
-const initialState = Immutable.fromJS({
-  isUpdateReady: false,
-});
-
-registerReducer('update', (state = initialState, action) => {
+export function reducer(state = initialState, action) {
   switch (action.type) {
     case UPDATE_READY:
       return state.merge({
@@ -23,7 +21,7 @@ registerReducer('update', (state = initialState, action) => {
     default:
       return state;
   }
-});
+}
 
 export function displayUpdateProgress(dispatch) {
   function onUpdateReady() {

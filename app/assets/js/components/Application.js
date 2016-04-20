@@ -3,67 +3,12 @@ import ReactComponent from 'react/lib/ReactComponent';
 import TabBar from './ui/TabBar';
 import TabBarItem from './ui/TabBarItem';
 import ID7Layout from './ui/ID7Layout';
-import Immutable from 'immutable';
+
 import { connect } from 'react-redux';
-import { getNumItemsSince } from '../stream';
-import { mq } from 'modernizr';
-import $ from 'jquery';
-import store from '../store';
-import { registerReducer } from '../reducers';
 import { push } from 'react-router-redux';
 import log from 'loglevel';
 
-const isDesktop = () => mq('only all and (min-width: 768px)');
-
-const isFourColumnLayout = () => mq('only all and (min-width: 992px)');
-
-const initialState = Immutable.fromJS({
-  className: undefined,
-  isFourColumnLayout: false,
-  colourTheme: 'default',
-});
-
-registerReducer('ui', (state = initialState, action) => {
-  switch (action.type) {
-    case 'ui.class':
-      return state.set('className', action.className);
-    case 'ui.layout':
-      return state.set('isFourColumnLayout', action.isFourColumnLayout);
-    case 'ui.theme':
-      return state.set('colourTheme', action.theme);
-    default:
-      return state;
-  }
-});
-
-export function updateColourTheme(theme) {
-  return {
-    type: 'ui.theme',
-    theme,
-  };
-}
-
-export function updateUIContext() {
-  return (dispatch, getState) => {
-    const currentClassName = getState().getIn(['ui', 'className']);
-    if (currentClassName === undefined || isDesktop() !== (currentClassName === 'desktop')) {
-      dispatch({
-        type: 'ui.class',
-        className: isDesktop() ? 'desktop' : 'mobile',
-      });
-    }
-
-    if (isFourColumnLayout() !== getState().getIn(['ui', 'isFourColumnLayout'])) {
-      dispatch({
-        type: 'ui.layout',
-        isFourColumnLayout: isFourColumnLayout(),
-      });
-    }
-  };
-}
-
-store.dispatch(updateUIContext());
-$(() => $(window).on('resize', () => store.dispatch(updateUIContext())));
+import { getNumItemsSince } from '../stream';
 
 class Application extends ReactComponent {
 

@@ -79,6 +79,8 @@
     "react-router": "^2.2.2",
     "react-router-redux": "^4.0.2",
     "redux": "~3.4.0",
+    "redux-actions": "^0.9.1",
+    "redux-immutable": "^3.0.6",
     "redux-thunk": "~2.0.1",
     "reselect": "~2.3.0",
     "skycons": "^1.0.0"

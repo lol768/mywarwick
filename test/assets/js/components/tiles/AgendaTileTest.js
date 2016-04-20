@@ -79,7 +79,6 @@ describe('AgendaTileItem', () => {
     locationInner.props.className.should.equal(
       'tile-list-item__location text--align-bottom text--light'
     );
-    console.log(locationInner.props.children[1]);
     locationInner.props.children[1].props.children.should.equal('Heronbank');
     locationInner.props.children[1].props.href.should.equal('https://campus.warwick.ac.uk/?slid=29129');
   })

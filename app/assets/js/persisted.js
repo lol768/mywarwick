@@ -25,6 +25,9 @@ const defaultThaw = x => x;
  */
 export default function persisted(keyPath, action, freeze = defaultFreeze, thaw = defaultThaw) {
   const keyPathArray = keyPath.split('.');
+  if (!action) {
+    throw new Error(`Action passed to persisted for ${keyPath} was undefined`);
+  }
 
   // Load whatever we have in local storage
   return localforage.getItem(keyPath)

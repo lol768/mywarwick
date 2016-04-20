@@ -1,5 +1,8 @@
 import 'core-js/modules/es6.object.assign';
 
+import initErrorReporter from './errorreporter';
+initErrorReporter();
+
 import attachFastClick from 'fastclick';
 import $ from 'jquery';
 import _ from 'lodash';
@@ -12,44 +15,51 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import store from './store';
 import Application from './components/Application';
-import * as notifications from './notifications';
-import * as notificationMetadata from './notification-metadata';
 import * as notificationsGlue from './notifications-glue';
 import * as pushNotifications from './push-notifications';
 import * as serverpipe from './serverpipe';
-import * as tiles from './tiles';
-import * as update from './update';
-import * as user from './user';
+
+import * as notifications from './state/notifications';
+import * as notificationMetadata from './state/notification-metadata';
+import * as tiles from './state/tiles';
+import * as update from './state/update';
+import * as user from './state/user';
+import * as ui from './state/ui';
+
 import persisted from './persisted';
 import SocketDatapipe from './SocketDatapipe';
 import { Router, Route, IndexRoute, IndexRedirect, browserHistory } from 'react-router';
-import { syncHistoryWithStore, routerReducer } from 'react-router-redux';
-import initErrorReporter from './errorreporter';
-import { registerReducer } from './reducers';
+import { syncHistoryWithStore } from 'react-router-redux';
+
 import NewsView from './components/views/NewsView';
 import MeView from './components/views/MeView';
 import TileView from './components/views/TileView';
 import ActivityView from './components/views/ActivityView';
 import NotificationsView from './components/views/NotificationsView';
 import SearchView from './components/views/SearchView';
-import './bridge';
 import * as analytics from './analytics';
+
+import './bridge';
 
 log.enableAll(false);
 es6Promise.polyfill();
-initErrorReporter();
 
 localforage.config({
   name: 'Start',
 });
 
-registerReducer('routing', routerReducer);
-
 const history = syncHistoryWithStore(browserHistory, store, {
-  selectLocationState: state => state.get('routing'),
+  selectLocationState(state) {
+    return state.get('routing').toJS();
+  },
 });
 
 history.listen(location => analytics.track(location.pathname));
+
+store.dispatch(ui.updateUIContext());
+$(() => {
+  $(window).on('resize', () => store.dispatch(ui.updateUIContext()));
+});
 
 $.getJSON('/ssotest', shouldRedirect => {
   if (shouldRedirect) window.location = window.SSO.LOGIN_URL;
@@ -59,7 +69,7 @@ $(() => {
   attachFastClick(document.body);
 
   window.addEventListener('online', () =>
-    store.dispatch(serverpipe.fetchActivities())
+    store.dispatch(notifications.fetch())
   );
 
   ReactDOM.render(
@@ -123,7 +133,7 @@ SocketDatapipe.subscribe(data => {
       store.dispatch(user.userReceive(data.userIdentity));
       break;
     default:
-    // nowt
+      // nowt
   }
 });
 
@@ -132,9 +142,9 @@ update.displayUpdateProgress(store.dispatch);
 const freezeStream = stream => stream.valueSeq().flatten().toJS();
 
 const loadPersonalisedDataFromServer = _.once(() => {
-  store.dispatch(serverpipe.fetchActivities());
-  store.dispatch(serverpipe.fetchTiles());
-  store.dispatch(serverpipe.fetchTileContent());
+  store.dispatch(notifications.fetch());
+  store.dispatch(tiles.fetchTiles());
+  store.dispatch(tiles.fetchTileContent());
 });
 
 store.subscribe(() => {
