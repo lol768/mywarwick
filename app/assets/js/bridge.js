@@ -12,6 +12,7 @@ window.Start = {
   APP: {},
 
   navigate(path) {
+    // click event to dismiss active tooltips
     document.dispatchEvent(new Event('click'));
     store.dispatch(push(path));
   },
