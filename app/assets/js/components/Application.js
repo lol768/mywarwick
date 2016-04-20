@@ -10,15 +10,11 @@ import log from 'loglevel';
 
 import { getNumItemsSince } from '../stream';
 
-class Application extends ReactComponent {
+export class Application extends ReactComponent {
 
-  constructor() {
+  constructor(props) {
     super();
-    this.onSelectItem = this.onSelectItem.bind(this);
-  }
-
-  onSelectItem(p) {
-    this.props.dispatch(push(p));
+    this.onSelectItem = props.onSelectItem.bind(this);
   }
 
   render() {
@@ -60,4 +56,14 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(Application);
+// do all dispatching in here rather than referencing props.dispatch from the component,
+// so that the plain component doesn't depend on redux.
+function mapDispatchToProps(dispatch) {
+  return {
+    onSelectItem: (p) => {
+      dispatch(push(p));
+    },
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Application);

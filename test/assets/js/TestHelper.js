@@ -1,4 +1,5 @@
 import tk from 'timekeeper';
+import jsxChai from 'jsx-chai';
 
 const chai = require('chai');
 global.expect = chai.expect;
@@ -6,10 +7,14 @@ global.should = chai.should();
 global.assert = chai.assert;
 global.sinon = require('sinon');
 chai.use(require('sinon-chai'));
+chai.use(jsxChai);
 
 global.document = require('jsdom').jsdom();
 global.window = global.document.defaultView;
 global.navigator = global.window.navigator;
+
+class WebSocket {}
+global.WebSocket = WebSocket;
 
 global.React = require('react');
 global.ReactTestUtils = require('react-addons-test-utils');

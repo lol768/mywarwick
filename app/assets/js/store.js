@@ -1,4 +1,5 @@
 import * as Immutable from 'immutable';
+import log from 'loglevel';
 
 import thunk from 'redux-thunk';
 import { createStore, applyMiddleware } from 'redux';
@@ -16,11 +17,18 @@ const reducer = combineReducers({
   router: routerReducer,
 });
 
+const logger = (/* store */) => next => action => {
+  log.debug('store.dispatch(action=', action, ')');
+  const result = next(action);
+  return result;
+}
+
 export default createStore(
   reducer,
   initialState,
   applyMiddleware(
     thunk,
+    logger,
     routerMiddleware(browserHistory)
   )
 );

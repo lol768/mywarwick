@@ -26,7 +26,7 @@ import * as update from './state/update';
 import * as user from './state/user';
 import * as ui from './state/ui';
 
-import persisted from './persisted';
+import persistedLib from './persisted';
 import SocketDatapipe from './SocketDatapipe';
 import { Router, Route, IndexRoute, IndexRedirect, browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
@@ -39,7 +39,8 @@ import NotificationsView from './components/views/NotificationsView';
 import SearchView from './components/views/SearchView';
 import * as analytics from './analytics';
 
-import './bridge';
+import bridge from './bridge';
+bridge({ store, tiles });
 
 log.enableAll(false);
 es6Promise.polyfill();
@@ -159,6 +160,8 @@ store.dispatch(serverpipe.fetchUserIdentity());
 
 const freezeDate = (d) => ((!!d && 'format' in d) ? d.format() : d);
 const thawDate = (d) => (!!d ? moment(d) : d);
+
+const persisted = persistedLib({ store });
 
 persisted('notificationsLastRead.date', notificationMetadata.loadedNotificationsLastRead,
   freezeDate, thawDate);
