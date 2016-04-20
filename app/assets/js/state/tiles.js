@@ -105,7 +105,7 @@ export function persistTiles() {
 
     const layout = getState().getIn(['tiles', 'data', 'layout']).toJS();
 
-    fetch('/api/tiles', {
+    return fetch('/api/tiles', {
       credentials: 'same-origin',
       method: 'PUT',
       headers: {
@@ -137,7 +137,7 @@ export function fetchTileContent(tileId = ALL_TILES) {
 
     const endpoint = tileId ? `/api/tiles/content/${tileId}` : '/api/tiles/content';
 
-    fetchWithCredentials(endpoint)
+    return fetchWithCredentials(endpoint)
       .then(response => response.json())
       .then(json => {
         _.each(json.data, (result, tile) => {

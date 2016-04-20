@@ -42,7 +42,7 @@ export function fetchedNotifications(notifications) {
 }
 
 export function fetch() {
-  return dispatch => {
+  return dispatch =>
     fetchWithCredentials('/api/streams/user')
       .then(response => response.json())
       .then(json => {
@@ -58,7 +58,6 @@ export function fetch() {
       .catch(err => {
         log.info('Failed to fetch notifications:', err);
       });
-  };
 }
 
 const partitionByYearAndMonth = (n) => n.date.toString().substr(0, 7);

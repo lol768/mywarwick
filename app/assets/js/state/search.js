@@ -13,19 +13,27 @@ const SITEBUILDER_GO_QUERY_URL =
 
 function searchGoRedirects(dispatch, query) {
   dispatch({ type: SEARCH_QUERY_START, query });
-  $.ajax({
-    url: SITEBUILDER_GO_QUERY_URL,
-    data: {
-      maxResults: 5,
-      prefix: query,
-    },
-    dataType: 'jsonp',
-    success: (response) => {
-      dispatch({ type: SEARCH_QUERY_SUCCESS, query, results: response });
-    },
-    error: () => {
-      dispatch({ type: SEARCH_QUERY_FAILURE });
-    },
+  // don't really use the result of dispatching this, but I've made it
+  // return a promise anyway.
+  return new Promise((res, rej) => {
+    // using jQuery as fetch() won't do jsonp for us. This
+    // is going away soon so don't really care.
+    $.ajax({
+      url: SITEBUILDER_GO_QUERY_URL,
+      data: {
+        maxResults: 5,
+        prefix: query,
+      },
+      dataType: 'jsonp',
+      success: (response) => {
+        dispatch({ type: SEARCH_QUERY_SUCCESS, query, results: response });
+        res();
+      },
+      error: (e) => {
+        dispatch({ type: SEARCH_QUERY_FAILURE });
+        rej(e);
+      },
+    });
   });
 }
 

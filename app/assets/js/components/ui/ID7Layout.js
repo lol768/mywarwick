@@ -19,7 +19,7 @@ import UtilityBar from './UtilityBar';
 import { connect } from 'react-redux';
 import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
-import { fetchTileContent } from '../../serverpipe';
+import * as tiles from '../../state/tiles';
 import { push, goBack } from 'react-router-redux';
 
 class ID7Layout extends ReactComponent {
@@ -62,7 +62,7 @@ class ID7Layout extends ReactComponent {
   goToHome(e) {
     e.preventDefault();
     this.props.dispatch(push('/'));
-    this.props.dispatch(fetchTileContent());
+    this.props.dispatch(tiles.fetchTileContent());
   }
 
   goToNotification() {
