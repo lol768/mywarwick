@@ -54,15 +54,12 @@ describe('AgendaTileItem', () => {
     dateInner.should.equal('17:00');
   });
 
-  it('renders with a href. clicking it calls the onClickLink prop', () => {
+  it('renders with a href', () => {
     const tileItem = <AgendaTileItem zoomed={ true } href={ 'href' } { ...props } />;
     const html = shallowRender(tileItem);
     const a = html.props.children.props.children[1].props.children[0].props.children;
     a.props.href.should.equal('href');
     a.type.should.equal('a');
-    const node = ReactTestUtils.renderIntoDocument(tileItem);
-    ReactTestUtils.Simulate.click(node.refs.a);
-    props.onClickLink.should.have.been.called;
   });
 
   it('renders time for All day events', () => {
@@ -79,7 +76,6 @@ describe('AgendaTileItem', () => {
     locationInner.props.className.should.equal(
       'tile-list-item__location text--align-bottom text--light'
     );
-    console.log(locationInner.props.children[1]);
     locationInner.props.children[1].props.children.should.equal('Heronbank');
     locationInner.props.children[1].props.href.should.equal('https://campus.warwick.ac.uk/?slid=29129');
   })

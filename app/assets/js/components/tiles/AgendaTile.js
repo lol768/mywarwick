@@ -33,9 +33,9 @@ const groupItemsForAgendaTile = {
   },
 };
 
-function hyperlinkText(text, href, onClickLink) {
+function hyperlinkText(text, href) {
   return href ?
-    <a href={ href } target="_blank" onClick={ onClickLink } ref="a">{ text }</a>
+    <a href={ href } target="_blank" ref="a">{ text }</a>
     : text;
 }
 
@@ -69,7 +69,6 @@ export default class AgendaTile extends TileContent {
 
     const events = itemsToDisplay.map(event =>
       <AgendaTileItem key={event.id}
-        onClickLink={ this.onClickLink }
         {...event}
       />
     );
@@ -112,7 +111,7 @@ export default class AgendaTile extends TileContent {
     return (
       <div className="tile__item">
         { callout }
-        { hyperlinkText(text, nextEvent.href, this.onClickLink) }
+        { hyperlinkText(text, nextEvent.href) }
       </div>
     );
   }
@@ -129,7 +128,7 @@ export default class AgendaTile extends TileContent {
 export class AgendaTileItem extends React.Component {
 
   render() {
-    const { title, start, end, href, location, onClickLink } = this.props;
+    const { title, start, end, href, location } = this.props;
 
     const content = (
       <div>
@@ -141,11 +140,11 @@ export class AgendaTileItem extends React.Component {
             className={classNames('tile-list-item__title', 'text--align-bottom',
             { 'text--dotted-underline': href })}
           >
-            { hyperlinkText(title, href, onClickLink) }
+            { hyperlinkText(title, href) }
          </span>
           {location ?
             <span className="tile-list-item__location text--align-bottom text--light">
-           &nbsp;- { hyperlinkText(location.name, location.href, onClickLink) }
+           &nbsp;- { hyperlinkText(location.name, location.href) }
             </span>
             : null}
         </div>
@@ -170,5 +169,4 @@ AgendaTileItem.propTypes = {
     href: React.PropTypes.string,
   }),
   href: PropTypes.string,
-  onClickLink: PropTypes.func,
 };

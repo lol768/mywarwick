@@ -64,7 +64,6 @@ export default class TextTile extends TileContent {
           key={item.id}
           href={item.href}
           target="_blank"
-          onClick={ this.onClickLink }
         >
           {tileItem}
         </a> : tileItem;

@@ -8,11 +8,6 @@ export const TILE_SIZES = {
 
 export default class TileContent extends Component {
 
-  constructor(props) {
-    super(props);
-    this.onClickLink = this.onClickLink.bind(this);
-  }
-
   // when do we consider the tile to have no valid content
   isEmpty() {
     const { content } = this.props;
@@ -63,13 +58,6 @@ export default class TileContent extends Component {
 
   getIcon() {
     return null;
-  }
-
-  onClickLink(e) {
-    e.stopPropagation();
-    if (this.props.editingAny) {
-      e.preventDefault();
-    }
   }
 
   render() {
