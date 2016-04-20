@@ -11,7 +11,11 @@ window.Start = {
 
   APP: {},
 
-  navigate: (path) => store.dispatch(push(path)),
+  navigate(path) {
+    // click event to dismiss active tooltips
+    document.dispatchEvent(new Event('click'));
+    store.dispatch(push(path));
+  },
 
   appToForeground() {
     store.dispatch(fetchTileContent());
