@@ -4,7 +4,7 @@ import store from 'store';
 describe('store', () => {
 
   it('has initial state', () => {
-    store.getState().getIn(['routing','location']).should.equal(Immutable.Map());
+    store.getState().getIn(['news','items']).should.equal(Immutable.List());
   });
 
   it('handles a basic action', () => {
