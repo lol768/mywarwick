@@ -2,10 +2,11 @@ import { createSelector } from 'reselect';
 import log from 'loglevel';
 
 // Immutable object => plain JS object
-const defaultFreeze = x =>
+const defaultFreeze = x => (
   (x !== undefined && x !== null && (typeof x === 'object') && 'toJS' in x)
     ? x.toJS()
-    : x;
+    : x
+);
 
 // Identity function
 const defaultThaw = x => x;
