@@ -19,9 +19,8 @@ const reducer = combineReducers({
 
 const logger = (/* store */) => next => action => {
   log.debug('store.dispatch(action=', action, ')');
-  const result = next(action);
-  return result;
-}
+  return next(action);
+};
 
 export default createStore(
   reducer,

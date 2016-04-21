@@ -25,6 +25,3 @@ export function fetchWithCredentials(url) {
     credentials: 'same-origin',
   });
 }
-
-
-
