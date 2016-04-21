@@ -1,9 +1,10 @@
 import Immutable from 'immutable';
 
-import { registerReducer } from './reducers';
-import store from './store';
+const UPDATE_READY = 'UPDATE_READY';
 
-const UPDATE_READY = 'update.ready';
+const initialState = Immutable.fromJS({
+  isUpdateReady: false,
+});
 
 export function updateReady() {
   return {
@@ -11,11 +12,7 @@ export function updateReady() {
   };
 }
 
-const initialState = Immutable.fromJS({
-  isUpdateReady: false,
-});
-
-registerReducer('update', (state = initialState, action) => {
+export function reducer(state = initialState, action) {
   switch (action.type) {
     case UPDATE_READY:
       return state.merge({
@@ -24,28 +21,28 @@ registerReducer('update', (state = initialState, action) => {
     default:
       return state;
   }
-});
+}
 
 let updateTimerInterval;
 
-function onUpdateReady() {
-  clearInterval(updateTimerInterval);
-  store.dispatch(updateReady());
-}
-
-function updateTimer() {
-  const { status, IDLE, UPDATEREADY } = window.applicationCache;
-
-  if (status === IDLE) {
+export function displayUpdateProgress(dispatch) {
+  function onUpdateReady() {
     clearInterval(updateTimerInterval);
+    dispatch(updateReady());
   }
 
-  if (status === UPDATEREADY) {
-    onUpdateReady();
-  }
-}
+  function updateTimer() {
+    const { status, IDLE, UPDATEREADY } = window.applicationCache;
 
-export function displayUpdateProgress() {
+    if (status === IDLE) {
+      clearInterval(updateTimerInterval);
+    }
+
+    if (status === UPDATEREADY) {
+      onUpdateReady();
+    }
+  }
+
   if ('applicationCache' in window && !('serviceWorker' in navigator)) {
     const cache = window.applicationCache;
 

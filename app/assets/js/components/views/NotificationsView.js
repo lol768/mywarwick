@@ -10,7 +10,7 @@ import InfiniteScrollable from '../ui/InfiniteScrollable';
 import { connect } from 'react-redux';
 
 import { takeFromStream, getStreamSize } from '../../stream';
-import { markNotificationsRead } from '../../notification-metadata';
+import { markNotificationsRead } from '../../state/notification-metadata';
 
 const SOME_MORE = 20;
 

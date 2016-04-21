@@ -5,7 +5,7 @@ import { onStreamReceive, getStreamPartition, mergeReceivedItems, takeFromStream
 
 let item = (id, date) => ({id: id, date: moment('2015-01-01').add(date, 'd').format()});
 
-describe('Stream', () => {
+describe('stream', () => {
 
   let grouper = (n) => n.date.toString().substr(0, 7);
 

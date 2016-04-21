@@ -1,39 +1,35 @@
 import Immutable from 'immutable';
-import { registerReducer } from './reducers';
+import log from 'loglevel';
+import _ from 'lodash';
+
 import { USER_CLEAR } from './user';
+import { fetchWithCredentials } from '../serverpipe';
 
-export const TILES_FETCH = 'tiles.fetch';
-export const TILES_FETCH_SUCCESS = 'tiles.fetch.success';
-export const TILES_FETCH_FAILURE = 'tiles.fetch.failure';
+const TILES_FETCH = 'tiles.fetch';
+const TILES_FETCH_SUCCESS = 'tiles.fetch.success';
+const TILES_FETCH_FAILURE = 'tiles.fetch.failure';
 
-export const TILE_CONTENT_FETCH = 'tiles.content.fetch';
-export const TILE_CONTENT_FETCH_SUCCESS = 'tiles.content.fetch.success';
-export const TILE_CONTENT_FETCH_FAILURE = 'tiles.content.fetch.failure';
+const TILE_CONTENT_FETCH = 'tiles.content.fetch';
+const TILE_CONTENT_FETCH_SUCCESS = 'tiles.content.fetch.success';
+const TILE_CONTENT_FETCH_FAILURE = 'tiles.content.fetch.failure';
 
-// Used for bringing back tile content from local storage
-export const TILE_CONTENT_LOAD_ALL = 'tiles.content.load';
+// for bringing back tile content from local storage
+const TILE_CONTENT_LOAD_ALL = 'tiles.content.load';
 
-export const TILE_SHOW = 'tiles.show';
-export const TILE_HIDE = 'tiles.hide';
-export const TILE_RESIZE = 'tiles.resize';
+const TILE_SHOW = 'tiles.show';
+const TILE_HIDE = 'tiles.hide';
+const TILE_RESIZE = 'tiles.resize';
 
-export const TILE_ZOOM_IN = 'me.zoom-in';
-export const TILE_ZOOM_OUT = 'me.zoom-out';
+const TILE_LAYOUT_CHANGE = 'me.tile-layout-change';
 
-export const TILE_LAYOUT_CHANGE = 'me.tile-layout-change';
+const NETWORK_ERRORS = [
+  {
+    id: 'network',
+    message: 'Unable to contact the server.',
+  },
+];
 
-export function zoomInOn(tile) {
-  return {
-    type: TILE_ZOOM_IN,
-    tile: tile.id,
-  };
-}
-
-export function zoomOut() {
-  return {
-    type: TILE_ZOOM_OUT,
-  };
-}
+// Action creators
 
 export function tileLayoutChange(layout, layoutWidth) {
   return {
@@ -99,6 +95,67 @@ export function resizeTile(tile, layoutWidth, width, height) {
   };
 }
 
+export function persistTiles() {
+  return (dispatch, getState) => {
+    const tileData = getState().getIn(['tiles', 'data', 'tiles']).map(item => ({
+      id: item.get('id'),
+      preferences: item.get('preferences'),
+      removed: item.get('removed'),
+    })).toJS();
+
+    const layout = getState().getIn(['tiles', 'data', 'layout']).toJS();
+
+    return fetch('/api/tiles', {
+      credentials: 'same-origin',
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ tiles: tileData, layout }),
+    });
+  };
+}
+
+export function fetchTiles() {
+  return dispatch => {
+    dispatch({ type: TILES_FETCH });
+
+    return fetchWithCredentials('/api/tiles')
+      .then(response => response.json())
+      .then(json => dispatch(fetchedTiles(json.data)))
+      .catch(() => dispatch({ type: TILES_FETCH_FAILURE }));
+  };
+}
+
+const ALL_TILES = undefined;
+export function fetchTileContent(tileId = ALL_TILES) {
+  return dispatch => {
+    dispatch({
+      type: TILE_CONTENT_FETCH,
+      tile: tileId,
+    });
+
+    const endpoint = tileId ? `/api/tiles/content/${tileId}` : '/api/tiles/content';
+
+    return fetchWithCredentials(endpoint)
+      .then(response => response.json())
+      .then(json => {
+        _.each(json.data, (result, tile) => {
+          if (result.content) {
+            dispatch(fetchedTileContent(tile, result.content));
+          } else {
+            dispatch(failedTileContentFetch(tile, result.errors));
+          }
+        });
+      })
+      .catch(err => {
+        log.warn('Tile fetch failed because', err);
+        return dispatch(failedTileContentFetch(tileId, NETWORK_ERRORS));
+      });
+  };
+}
+
+
 const initialContentState = Immutable.Map();
 
 const initialState = Immutable.fromJS({
@@ -111,7 +168,7 @@ const initialState = Immutable.fromJS({
   },
 });
 
-registerReducer('tiles', (state = initialState, action) => {
+export function tilesReducer(state = initialState, action) {
   switch (action.type) {
     case USER_CLEAR:
       return initialState;
@@ -173,9 +230,9 @@ registerReducer('tiles', (state = initialState, action) => {
     default:
       return state;
   }
-});
+}
 
-registerReducer('tileContent', (state = initialContentState, action) => {
+export function tileContentReducer(state = initialContentState, action) {
   switch (action.type) {
     case USER_CLEAR:
       return initialContentState;
@@ -235,4 +292,5 @@ registerReducer('tileContent', (state = initialContentState, action) => {
     default:
       return state;
   }
-});
+}
+
