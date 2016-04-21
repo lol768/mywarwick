@@ -151,7 +151,7 @@ SocketDatapipe.subscribe(data => {
   }
 });
 
-update.displayUpdateProgress(store.dispatch);
+store.dispatch(update.displayUpdateProgress);
 
 const freezeStream = stream => stream.valueSeq().flatten().toJS();
 

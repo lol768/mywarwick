@@ -23,16 +23,41 @@ export function reducer(state = initialState, action) {
   }
 }
 
+let updateTimerInterval;
+
 export function displayUpdateProgress(dispatch) {
   function onUpdateReady() {
+    clearInterval(updateTimerInterval);
     dispatch(updateReady());
   }
 
-  if ('applicationCache' in window && !('serviceWorker' in navigator)) {
-    window.applicationCache.addEventListener('updateready', onUpdateReady);
+  function updateTimer() {
+    const { status, IDLE, UPDATEREADY } = window.applicationCache;
 
-    if (window.applicationCache.status === window.applicationCache.UPDATEREADY) {
+    if (status === IDLE) {
+      clearInterval(updateTimerInterval);
+    }
+
+    if (status === UPDATEREADY) {
       onUpdateReady();
+    }
+  }
+
+  if ('applicationCache' in window && !('serviceWorker' in navigator)) {
+    const cache = window.applicationCache;
+
+    cache.addEventListener('updateready', onUpdateReady);
+
+    // NEWSTART-269 :disapproval:
+    if (updateTimerInterval) {
+      clearInterval(updateTimerInterval);
+    }
+    updateTimerInterval = setInterval(updateTimer, 1000);
+
+    if (cache.status === cache.UPDATEREADY) {
+      onUpdateReady();
+    } else if (cache.status === cache.IDLE) {
+      cache.update();
     }
   }
 }

@@ -6,6 +6,7 @@ import $ from 'jquery';
 import Immutable from 'immutable';
 import * as stream from './stream';
 import { push } from 'react-router-redux';
+import { displayUpdateProgress } from './state/update';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -26,12 +27,10 @@ export default function init(opts) {
       store.dispatch(push(path));
     },
 
+
     appToForeground() {
       store.dispatch(tiles.fetchTileContent());
-
-      if ('applicationCache' in window) {
-        window.applicationCache.update();
-      }
+      store.dispatch(displayUpdateProgress);
     },
 
     registerForAPNs(deviceToken) {
