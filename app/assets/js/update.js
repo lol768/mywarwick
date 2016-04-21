@@ -1,6 +1,7 @@
 import Immutable from 'immutable';
 
 import { registerReducer } from './reducers';
+import store from './store';
 
 const UPDATE_READY = 'update.ready';
 
@@ -25,16 +26,41 @@ registerReducer('update', (state = initialState, action) => {
   }
 });
 
-export function displayUpdateProgress(dispatch) {
-  function onUpdateReady() {
-    dispatch(updateReady());
+let updateTimerInterval;
+
+function onUpdateReady() {
+  clearInterval(updateTimerInterval);
+  store.dispatch(updateReady());
+}
+
+function updateTimer() {
+  const { status, IDLE, UPDATEREADY } = window.applicationCache;
+
+  if (status === IDLE) {
+    clearInterval(updateTimerInterval);
   }
 
-  if ('applicationCache' in window && !('serviceWorker' in navigator)) {
-    window.applicationCache.addEventListener('updateready', onUpdateReady);
+  if (status === UPDATEREADY) {
+    onUpdateReady();
+  }
+}
 
-    if (window.applicationCache.status === window.applicationCache.UPDATEREADY) {
+export function displayUpdateProgress() {
+  if ('applicationCache' in window && !('serviceWorker' in navigator)) {
+    const cache = window.applicationCache;
+
+    cache.addEventListener('updateready', onUpdateReady);
+
+    // NEWSTART-269 :disapproval:
+    if (updateTimerInterval) {
+      clearInterval(updateTimerInterval);
+    }
+    updateTimerInterval = setInterval(updateTimer, 1000);
+
+    if (cache.status === cache.UPDATEREADY) {
       onUpdateReady();
+    } else if (cache.status === cache.IDLE) {
+      cache.update();
     }
   }
 }

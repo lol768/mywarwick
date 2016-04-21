@@ -4,6 +4,7 @@ import store from './store';
 import { fetchTileContent } from './serverpipe';
 import * as stream from './stream';
 import { push } from 'react-router-redux';
+import { displayUpdateProgress } from './update';
 
 let appState = Immutable.Map();
 
@@ -20,9 +21,7 @@ window.Start = {
   appToForeground() {
     store.dispatch(fetchTileContent());
 
-    if ('applicationCache' in window) {
-      window.applicationCache.update();
-    }
+    displayUpdateProgress();
   },
 
   registerForAPNs(deviceToken) {
