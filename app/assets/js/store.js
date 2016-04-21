@@ -14,7 +14,7 @@ const initialState = Immutable.Map();
 // build a combined reducer, adding in any weird 3rd party reducers we need.
 const reducer = combineReducers({
   ...allReducers,
-  router: routerReducer,
+  routing: routerReducer,
 });
 
 const logger = (/* store */) => next => action => {

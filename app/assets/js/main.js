@@ -50,9 +50,7 @@ localforage.config({
 });
 
 const history = syncHistoryWithStore(browserHistory, store, {
-  selectLocationState(state) {
-    return state.get('routing').toJS();
-  },
+  selectLocationState: state => state.get('routing'),
 });
 
 history.listen(location => analytics.track(location.pathname));
