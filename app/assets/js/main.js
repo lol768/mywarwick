@@ -174,7 +174,7 @@ store.dispatch(serverpipe.fetchUserIdentity());
 const freezeDate = (d) => ((!!d && 'format' in d) ? d.format() : d);
 const thawDate = (d) => (!!d ? moment(d) : d);
 
-const persisted = persistedLib({ store });
+const persisted = persistedLib({ store, localforage });
 
 persisted('notificationsLastRead.date', notificationMetadata.loadedNotificationsLastRead,
   freezeDate, thawDate);

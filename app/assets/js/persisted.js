@@ -1,9 +1,8 @@
 import { createSelector } from 'reselect';
-import localforage from 'localforage';
 import log from 'loglevel';
 
 // Immutable object => plain JS object
-const defaultFreeze = x => ((x !== undefined /* (or null) */ && 'toJS' in x) ? x.toJS() : x);
+const defaultFreeze = x => ((x !== undefined /* (or null) */ && (typeof x === 'object') && 'toJS' in x) ? x.toJS() : x);
 
 // Identity function
 const defaultThaw = x => x;
@@ -12,7 +11,7 @@ const defaultThaw = x => x;
  * Factory method for injection of interesting dependencies.
  */
 export default function init(opts) {
-  const { store } = opts;
+  const { store, localforage } = opts;
 
   /**
    * Declare that a portion of the store should be persisted to local storage.
@@ -37,10 +36,10 @@ export default function init(opts) {
     return localforage.getItem(keyPath)
       .then(value => {
         if (value !== null) {
-          this.store.dispatch(action(thaw(value)));
+          store.dispatch(action(thaw(value)));
         }
       })
-      .catch(err => log.warn(`Unable to load ${keyPath} from local storage`, err.stack || err))
+      .catch(err => log.warn(`Unable to load ${keyPath} from local storage: `, err.stack || err))
       .then(() => {
         // Whenever the value at this key path changes
         const selector = createSelector(
@@ -48,7 +47,7 @@ export default function init(opts) {
           value => localforage.setItem(keyPath, freeze(value))
         );
 
-        this.store.subscribe(() => selector(store.getState()));
+        store.subscribe(() => selector(store.getState()));
       });
   };
 }
