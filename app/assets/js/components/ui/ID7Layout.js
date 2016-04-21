@@ -78,7 +78,7 @@ class ID7Layout extends ReactComponent {
   }
 
   renderMasqueradeNotice() {
-    const user = this.props.user.data;
+    const user = this.user.data;
 
     if (user.masquerading) {
       return <MasqueradeNotice masqueradingAs={user} />;
@@ -89,7 +89,7 @@ class ID7Layout extends ReactComponent {
 
   renderNotificationPermissionRequest() {
     if ('Notification' in window && Notification.permission === 'default') {
-      return <PermissionRequest isDisabled={ !this.props.user.data.authenticated } />;
+      return <PermissionRequest isDisabled={ !this.user.data.authenticated } />;
     }
 
     return null;
@@ -104,7 +104,7 @@ class ID7Layout extends ReactComponent {
             <header className="id7-page-header" ref="header">
               { this.renderMasqueradeNotice() }
 
-              <MastheadMobile user={this.props.user}
+              <MastheadMobile user={this.user}
                 zoomedTile={this.props.zoomedTile}
                 onBackClick={this.onBackClick}
                 path={this.props.path}
@@ -141,7 +141,8 @@ class ID7Layout extends ReactComponent {
   }
 
   renderDesktop() {
-    const { notificationsCount, user } = this.props;
+    const { notificationsCount } = this.props;
+    const user = this.user;
 
     return (
       <div>
@@ -153,7 +154,7 @@ class ID7Layout extends ReactComponent {
               { this.renderMasqueradeNotice() }
               <div className="id7-utility-masthead">
                 <nav className="id7-utility-bar" id="utility-bar-container">
-                  <UtilityBar user={this.props.user} layoutClassName="desktop" />
+                  <UtilityBar user={user} layoutClassName="desktop" />
                 </nav>
                 <div className="id7-masthead">
                   <div className="id7-masthead-contents">
@@ -254,6 +255,7 @@ class ID7Layout extends ReactComponent {
   }
 
   render() {
+    this.user = this.props.user.toJS();
     if (this.props.layoutClassName === 'mobile') {
       log.debug('ID7Layout.render:mobile');
       return this.renderMobile();
@@ -271,7 +273,7 @@ const select = (state) => ({
   layoutClassName: state.getIn(['ui', 'className']),
   notificationsCount:
     getNumItemsSince(state.get('notifications'), state.getIn(['notificationsLastRead', 'date'])),
-  user: state.get('user').toJS(),
+  user: state.get('user'),
   colourTheme: state.getIn(['ui', 'colourTheme']),
   zoomedTile: state.getIn(['me', 'zoomedTile']),
 });

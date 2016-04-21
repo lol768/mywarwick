@@ -18,8 +18,10 @@ export class Application extends ReactComponent {
   }
 
   render() {
-    const { location, notificationsCount, layoutClassName, user, children }
+    const { location, notificationsCount, layoutClassName, children }
       = this.props;
+
+    const user = this.props.user.toJS();
 
     log.debug('Application.render');
 
@@ -52,7 +54,7 @@ function mapStateToProps(state) {
     notificationsCount:
       getNumItemsSince(state.get('notifications'), state.getIn(['notificationsLastRead', 'date'])),
     layoutClassName: state.get('ui').get('className'),
-    user: state.getIn(['user', 'data']).toJS(),
+    user: state.getIn(['user', 'data']),
   };
 }
 
