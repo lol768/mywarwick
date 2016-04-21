@@ -1,24 +1,7 @@
 import persistedLib from 'persisted';
 import * as redux from 'redux';
 import Immutable from 'immutable';
-
-/** Pretend localforage API. */
-class LerkelFerj {
-  constructor() {
-    this.data = {};
-  }
-  getItem(key) {
-    return Promise.resolve(this.data[key]);
-  }
-  setItem(key, value) {
-    this.data[key] = value;
-    return Promise.resolve(value);
-  }
-  clear() {
-    this.data = {};
-    return Promise.resolve();
-  }
-}
+import MemoryLocalForage from './testhelpers/MemoryLocalForage';
 
 describe('persisted', () => {
 
@@ -38,7 +21,7 @@ describe('persisted', () => {
     }
   };
   const store = redux.createStore(reducer);
-  const localforage = new LerkelFerj();
+  const localforage = new MemoryLocalForage();
   const persisted = persistedLib({ store, localforage });
 
   spy(store, 'subscribe');
