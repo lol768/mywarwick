@@ -18,8 +18,8 @@ import UpdatePopup from './UpdatePopup';
 import UtilityBar from './UtilityBar';
 import { connect } from 'react-redux';
 import { getNumItemsSince } from '../../stream';
-import { updateUIContext } from '../Application';
-import { fetchTileContent } from '../../serverpipe';
+import * as ui from '../../state/ui';
+import * as tiles from '../../state/tiles';
 import { push, goBack } from 'react-router-redux';
 
 class ID7Layout extends ReactComponent {
@@ -33,12 +33,12 @@ class ID7Layout extends ReactComponent {
   }
 
   componentWillMount() {
-    this.props.dispatch(updateUIContext());
+    this.props.dispatch(ui.updateUIContext());
     this.setBodyTheme(this.props.colourTheme);
   }
 
   componentWillReceiveProps(nextProps) {
-    nextProps.dispatch(updateUIContext());
+    nextProps.dispatch(ui.updateUIContext());
 
     const hasZoomedTile = _(nextProps.path).startsWith('/tiles/');
     $('body').toggleClass('has-zoomed-tile', hasZoomedTile);
@@ -62,7 +62,7 @@ class ID7Layout extends ReactComponent {
   goToHome(e) {
     e.preventDefault();
     this.props.dispatch(push('/'));
-    this.props.dispatch(fetchTileContent());
+    this.props.dispatch(tiles.fetchTileContent());
   }
 
   goToNotification() {

@@ -7,7 +7,7 @@ import React, { PropTypes } from 'react';
  */
 export const Hyperlink = ({ child, href }) => (
   href ?
-    <a href={ href } target="_blank" ref="a">{ child }</a>
+    <a href={ href } target="_blank" >{ child }</a>
     : child
 );
 

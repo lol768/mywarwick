@@ -9,8 +9,7 @@ import { connect } from 'react-redux';
 import classNames from 'classnames';
 import { goBack } from 'react-router-redux';
 
-import * as tiles from '../../tiles';
-import * as serverpipe from '../../serverpipe';
+import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
 
@@ -96,7 +95,7 @@ class MeView extends ReactComponent {
 
     $('body').off('click', this.onBodyClick);
 
-    this.props.dispatch(serverpipe.persistTiles());
+    this.props.dispatch(tiles.persistTiles());
   }
 
   onBodyClick(e) {
@@ -181,9 +180,8 @@ class MeView extends ReactComponent {
 
   onShowTile(tile) {
     this.props.dispatch(tiles.showTile(tile));
-
-    this.props.dispatch(serverpipe.persistTiles());
-    this.props.dispatch(serverpipe.fetchTileContent(tile.id));
+    this.props.dispatch(tiles.persistTiles());
+    this.props.dispatch(tiles.fetchTileContent(tile.id));
 
     this.onFinishEditing();
   }

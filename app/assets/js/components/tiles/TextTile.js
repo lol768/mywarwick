@@ -15,8 +15,6 @@ export default class TextTile extends TileContent {
     this.state = {
       itemIndex: 0,
     };
-
-    this.onClickLink = this.onClickLink.bind(this);
   }
 
   componentWillUnmount() {
@@ -106,14 +104,6 @@ export default class TextTile extends TileContent {
 
   getSmallBody() {
     return this.getWideBody();
-  }
-
-  onClickLink(e) {
-    e.stopPropagation();
-
-    if (this.props.editingAny) {
-      e.preventDefault();
-    }
   }
 
   static canZoom(content) {

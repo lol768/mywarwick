@@ -1,13 +1,10 @@
 import Immutable from 'immutable';
 import localforage from 'localforage';
 import log from 'loglevel';
-import store from './store';
 
-import { registerReducer } from './reducers';
-
-export const USER_LOAD = 'user.load';
-export const USER_RECEIVE = 'user.receive';
-export const USER_CLEAR = 'user.clear';
+export const USER_LOAD = 'USER_LOAD';
+export const USER_RECEIVE = 'USER_RECEIVE';
+export const USER_CLEAR = 'USER_CLEAR';
 
 const initialState = Immutable.fromJS({
   data: {},
@@ -15,7 +12,7 @@ const initialState = Immutable.fromJS({
   empty: true,
 });
 
-registerReducer('user', (state = initialState, action) => {
+export function reducer(state = initialState, action) {
   switch (action.type) {
     case USER_LOAD:
       return state.merge({
@@ -33,7 +30,7 @@ registerReducer('user', (state = initialState, action) => {
     default:
       return state;
   }
-});
+}
 
 function loadCachedUserIdentity(data) {
   return {
@@ -49,19 +46,20 @@ function receiveUserIdentity(data) {
   };
 }
 
-const loadUserFromLocalStorage = localforage.getItem('user')
-  .then(user => {
-    if (user) {
-      store.dispatch(loadCachedUserIdentity(user));
-
-      return user;
-    }
-    return {};
-  })
-  .catch(err => {
-    log.warn('Could not load user from local storage', err);
-    return {};
-  });
+function loadUserFromLocalStorage(dispatch) {
+  return localforage.getItem('user')
+    .then(user => {
+      if (user) {
+        dispatch(loadCachedUserIdentity(user));
+        return user;
+      }
+      return {};
+    })
+    .catch(err => {
+      log.warn('Could not load user from local storage', err);
+      return {};
+    });
+}
 
 function clearUserData() {
   return dispatch =>
@@ -72,7 +70,7 @@ export function userReceive(currentUser) {
   return (dispatch) => {
     // If we are a different user than we were before (incl. anonymous),
     // nuke the store, which also clears local storage
-    loadUserFromLocalStorage.then(previousUser => {
+    loadUserFromLocalStorage(dispatch).then(previousUser => {
       if (previousUser.usercode !== currentUser.usercode) {
         dispatch(clearUserData())
           .then(() => localforage.setItem('user', currentUser))

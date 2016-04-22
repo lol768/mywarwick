@@ -54,7 +54,7 @@ describe('AgendaTileItem', () => {
     dateInner.should.equal('17:00');
   });
 
-  it('renders with a href. clicking it calls the onClickLink prop', () => {
+  it('renders with a href', () => {
     const tileItem = <AgendaTileItem zoomed={ true } href={ 'href' } { ...props } />;
     const html = shallowRender(tileItem);
     const hyperlink = html.props.children.props.children[1].props.children[0].props.children;

@@ -3,77 +3,18 @@ import ReactComponent from 'react/lib/ReactComponent';
 import TabBar from './ui/TabBar';
 import TabBarItem from './ui/TabBarItem';
 import ID7Layout from './ui/ID7Layout';
-import Immutable from 'immutable';
+
 import { connect } from 'react-redux';
-import { getNumItemsSince } from '../stream';
-import { mq } from 'modernizr';
-import $ from 'jquery';
-import store from '../store';
-import { registerReducer } from '../reducers';
 import { push } from 'react-router-redux';
 import log from 'loglevel';
 
-const isDesktop = () => mq('only all and (min-width: 768px)');
+import { getNumItemsSince } from '../stream';
 
-const isFourColumnLayout = () => mq('only all and (min-width: 992px)');
+export class Application extends ReactComponent {
 
-const initialState = Immutable.fromJS({
-  className: undefined,
-  isFourColumnLayout: false,
-  colourTheme: 'default',
-});
-
-registerReducer('ui', (state = initialState, action) => {
-  switch (action.type) {
-    case 'ui.class':
-      return state.set('className', action.className);
-    case 'ui.layout':
-      return state.set('isFourColumnLayout', action.isFourColumnLayout);
-    case 'ui.theme':
-      return state.set('colourTheme', action.theme);
-    default:
-      return state;
-  }
-});
-
-export function updateColourTheme(theme) {
-  return {
-    type: 'ui.theme',
-    theme,
-  };
-}
-
-export function updateUIContext() {
-  return (dispatch, getState) => {
-    const currentClassName = getState().getIn(['ui', 'className']);
-    if (currentClassName === undefined || isDesktop() !== (currentClassName === 'desktop')) {
-      dispatch({
-        type: 'ui.class',
-        className: isDesktop() ? 'desktop' : 'mobile',
-      });
-    }
-
-    if (isFourColumnLayout() !== getState().getIn(['ui', 'isFourColumnLayout'])) {
-      dispatch({
-        type: 'ui.layout',
-        isFourColumnLayout: isFourColumnLayout(),
-      });
-    }
-  };
-}
-
-store.dispatch(updateUIContext());
-$(() => $(window).on('resize', () => store.dispatch(updateUIContext())));
-
-class Application extends ReactComponent {
-
-  constructor() {
+  constructor(props) {
     super();
-    this.onSelectItem = this.onSelectItem.bind(this);
-  }
-
-  onSelectItem(p) {
-    this.props.dispatch(push(p));
+    this.onSelectItem = props.onSelectItem.bind(this);
   }
 
   render() {
@@ -115,4 +56,14 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(Application);
+// do all dispatching in here rather than referencing props.dispatch from the component,
+// so that the plain component doesn't depend on redux.
+function mapDispatchToProps(dispatch) {
+  return {
+    onSelectItem: (p) => {
+      dispatch(push(p));
+    },
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Application);
