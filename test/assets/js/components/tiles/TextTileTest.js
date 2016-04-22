@@ -16,9 +16,10 @@ describe('TextTile', () => {
   it('initially renders the first item', () => {
     const html = shallowRender(<TextTile zoomed={ false } { ...props } />);
     const [ item ] = html.props.children;
-    item.type.should.equal('div');
-    item.props.className.should.equal('tile__item');
-    const [callout, text] = item.props.children;
+    const hyperlink = shallowRender(item);
+    hyperlink.type.should.equal('div');
+    hyperlink.props.className.should.equal('tile__item');
+    const [callout, text] = hyperlink.props.children;
     callout.type.should.equal('span');
     callout.props.className.should.equal('tile__callout');
     callout.props.children.should.equal(props.content.items[0].callout);
@@ -39,7 +40,7 @@ describe('TextTile', () => {
     };
     const html = shallowRender(<TextTile { ...props } />);
     const [ a ] = html.props.children;
-    a.type.should.equal('a');
+    a.type.displayName.should.equal('Hyperlink');
     a.props.href.should.equal(props.content.items[0].href);
   });
 

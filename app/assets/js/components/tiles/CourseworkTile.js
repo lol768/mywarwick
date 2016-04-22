@@ -2,12 +2,7 @@ import React from 'react';
 import ListTile from './ListTile';
 import formatDate, { localMoment } from '../../dateFormatter';
 import _ from 'lodash';
-
-function hyperlinkText(text, href) {
-  return href ?
-    <a href={ href } target="_blank" ref="a">{ text }</a>
-    : text;
-}
+import { Hyperlink } from './utilities';
 
 export default class CourseworkTile extends ListTile {
 
@@ -23,7 +18,7 @@ export default class CourseworkTile extends ListTile {
 
     const nextAssignment = (
       <span className="tile__text">
-        Next: {hyperlinkText(text, href)}, due {formatDate(date)}
+        Next: <Hyperlink child={text} href={href} />, due {formatDate(date)}
       </span>
     );
 

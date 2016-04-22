@@ -6,6 +6,7 @@ import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';
 import _ from 'lodash';
 import classNames from 'classnames';
+import { Hyperlink } from './utilities';
 
 const groupItemsForAgendaTile = {
 
@@ -32,12 +33,6 @@ const groupItemsForAgendaTile = {
     return moment.unix(group).tz('Europe/London').format('ddd DD/MM/YY');
   },
 };
-
-function hyperlinkText(text, href, onClickLink) {
-  return href ?
-    <a href={ href } target="_blank" onClick={ onClickLink } ref="a">{ text }</a>
-    : text;
-}
 
 export default class AgendaTile extends TileContent {
 
@@ -113,7 +108,7 @@ export default class AgendaTile extends TileContent {
     return (
       <div className="tile__item">
         { callout }
-        { hyperlinkText(text, nextEvent.href, this.onClickLink) }
+        <Hyperlink child={text} href={nextEvent.href} />
       </div>
     );
   }
@@ -137,7 +132,7 @@ export default class AgendaTile extends TileContent {
 export class AgendaTileItem extends React.Component {
 
   render() {
-    const { title, start, end, href, location, onClickLink } = this.props;
+    const { title, start, end, href, location } = this.props;
 
     const content = (
       <div>
@@ -149,11 +144,11 @@ export class AgendaTileItem extends React.Component {
             className={classNames('tile-list-item__title', 'text--align-bottom',
             { 'text--dotted-underline': href })}
           >
-            { hyperlinkText(title, href, onClickLink) }
+            <Hyperlink child={title} href={href} />
          </span>
           {location ?
             <span className="tile-list-item__location text--align-bottom text--light">
-           &nbsp;- { hyperlinkText(location.name, location.href, onClickLink) }
+           &nbsp;- <Hyperlink child={location.name} href={location.href} />
             </span>
             : null}
         </div>
