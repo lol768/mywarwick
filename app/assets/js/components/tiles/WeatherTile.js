@@ -104,7 +104,7 @@ const Callout = (content) => {
       <div className="col-xs-4">
         {Math.round(hour.temp)}°
       </div>
-      <div className="col-xs-7">
+      <div className="col-xs-8">
         <small className="table-cell">{hour.text.toLowerCase()}</small>
       </div>
     </div>
