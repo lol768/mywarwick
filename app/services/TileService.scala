@@ -3,7 +3,7 @@ package services
 import com.google.inject.{ImplementedBy, Inject}
 import models._
 import play.api.db.{Database, NamedDatabase}
-import services.dao.{TileDao, UserTileLayoutDao}
+import services.dao.{TileDao, TileLayoutDao}
 import warwick.sso.User
 
 @ImplementedBy(classOf[TileServiceImpl])
@@ -13,27 +13,38 @@ trait TileService {
 
   def getTilesForUser(user: Option[User]): Seq[TileInstance]
 
-  def getTileLayoutForUser(user: Option[User]): Seq[UserTileLayout]
+  def getTileLayoutForUser(user: Option[User]): Seq[TileLayout]
 
   def saveTilePreferencesForUser(user: User, tileLayout: Seq[UserTileSetting]): Unit
 
-  def saveTileLayoutForUser(user: User, tileLayout: Seq[UserTileLayout]): Unit
+  def saveTileLayoutForUser(user: User, tileLayout: Seq[TileLayout]): Unit
 
 }
 
 class TileServiceImpl @Inject()(
   tileDao: TileDao,
-  userTileLayoutDao: UserTileLayoutDao,
+  tileLayoutDao: TileLayoutDao,
   @NamedDatabase("default") db: Database
 ) extends TileService {
 
-  override def getTileLayoutForUser(user: Option[User]): Seq[UserTileLayout] =
-    user.map { u =>
-      db.withConnection(implicit c => userTileLayoutDao.getTileLayoutForUser(u.usercode.string))
+  override def getTileLayoutForUser(user: Option[User]): Seq[TileLayout] = {
+    val userTileLayout = user.map { u =>
+      db.withConnection(implicit c => tileLayoutDao.getTileLayoutForUser(u.usercode.string))
     }.getOrElse(Seq.empty)
 
-  override def saveTileLayoutForUser(user: User, tileLayout: Seq[UserTileLayout]) =
-    db.withConnection(implicit c => userTileLayoutDao.saveTileLayoutForUser(user.usercode.string, tileLayout))
+    if (userTileLayout.isEmpty)
+      user match {
+        case Some(u) => getGroups(u).flatMap(group =>
+          db.withConnection(implicit c => tileLayoutDao.getDefaultTileLayoutForGroup(group))
+        ).toSeq
+        case None => db.withConnection(implicit c => tileLayoutDao.getDefaultTileLayoutForGroup("anonymous"))
+      } else {
+      userTileLayout
+    }
+  }
+
+  override def saveTileLayoutForUser(user: User, tileLayout: Seq[TileLayout]) =
+    db.withConnection(implicit c => tileLayoutDao.saveTileLayoutForUser(user.usercode.string, tileLayout))
 
   override def getTilesByIds(user: User, ids: Seq[String]): Seq[TileInstance] =
     db.withConnection(implicit c => tileDao.getTilesByIds(user.usercode.string, ids, getGroups(user)))

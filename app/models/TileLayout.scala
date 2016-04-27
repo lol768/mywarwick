@@ -2,7 +2,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class UserTileLayout(
+case class TileLayout(
   tile: String,
   layoutWidth: Int,
   x: Int,
@@ -11,6 +11,6 @@ case class UserTileLayout(
   height: Int
 )
 
-object UserTileLayout {
-  implicit val format = Json.format[UserTileLayout]
+object TileLayout {
+  implicit val format = Json.format[TileLayout]
 }

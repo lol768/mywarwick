@@ -3,7 +3,7 @@ package services.dao
 import anorm.SQL
 import anorm.SqlParser.scalar
 import helpers.OneStartAppPerSuite
-import models.{TileSize, UserTileLayout, UserTileSetting}
+import models.UserTileSetting
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 
