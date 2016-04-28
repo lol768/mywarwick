@@ -27,20 +27,22 @@ class TileServiceImpl @Inject()(
   @NamedDatabase("default") db: Database
 ) extends TileService {
 
-  override def getTileLayoutForUser(user: Option[User]): Seq[TileLayout] = {
-    val userTileLayout = user.map { u =>
-      db.withConnection(implicit c => tileLayoutDao.getTileLayoutForUser(u.usercode.string))
-    }.getOrElse(Seq.empty)
+  override def getTileLayoutForUser(user: Option[User]): Seq[TileLayout] = db.withConnection {
+    implicit c =>
+      val userTileLayout = user.map { u =>
+        tileLayoutDao.getTileLayoutForUser(u.usercode.string)
+      }.getOrElse(Seq.empty)
 
-    if (userTileLayout.isEmpty)
-      user match {
-        case Some(u) => getGroups(u).flatMap(group =>
-          db.withConnection(implicit c => tileLayoutDao.getDefaultTileLayoutForGroup(group))
-        ).toSeq
-        case None => db.withConnection(implicit c => tileLayoutDao.getDefaultTileLayoutForGroup("anonymous"))
-      } else {
-      userTileLayout
-    }
+      if (userTileLayout.isEmpty)
+        user match {
+          case Some(u) => getGroups(u).flatMap(group =>
+            tileLayoutDao.getDefaultTileLayoutForGroup(group)
+          ).toSeq
+          case None => tileLayoutDao.getDefaultTileLayoutForGroup("anonymous")
+        }
+      else {
+        userTileLayout
+      }
   }
 
   override def saveTileLayoutForUser(user: User, tileLayout: Seq[TileLayout]) =
@@ -50,21 +52,23 @@ class TileServiceImpl @Inject()(
     db.withConnection(implicit c => tileDao.getTilesByIds(user.usercode.string, ids, getGroups(user)))
 
   override def getTilesForUser(user: Option[User]): Seq[TileInstance] =
-    db.withConnection { implicit c =>
-      user match {
-        case Some(u) => tileDao.getTilesForUser(u.usercode.string, getGroups(u))
-        case None => tileDao.getTilesForAnonymousUser
-      }
+    db.withConnection {
+      implicit c =>
+        user match {
+          case Some(u) => tileDao.getTilesForUser(u.usercode.string, getGroups(u))
+          case None => tileDao.getTilesForAnonymousUser
+        }
     }
 
-  override def saveTilePreferencesForUser(user: User, tileLayout: Seq[UserTileSetting]): Unit = db.withConnection { implicit c =>
-    val defaultTiles = tileDao.getDefaultTilesForGroups(getGroups(user)).map(_.tile.id)
-    val currentTiles = tileLayout.map(_.id)
-    val removedTiles = defaultTiles.toSet -- currentTiles
+  override def saveTilePreferencesForUser(user: User, tileLayout: Seq[UserTileSetting]): Unit = db.withConnection {
+    implicit c =>
+      val defaultTiles = tileDao.getDefaultTilesForGroups(getGroups(user)).map(_.tile.id)
+      val currentTiles = tileLayout.map(_.id)
+      val removedTiles = defaultTiles.toSet -- currentTiles
 
-    val tiles = tileLayout ++ removedTiles.map(UserTileSetting.removed)
+      val tiles = tileLayout ++ removedTiles.map(UserTileSetting.removed)
 
-    tileDao.saveTileConfiguration(user.usercode.string, tiles)
+      tileDao.saveTileConfiguration(user.usercode.string, tiles)
   }
 
   // TODO - add undergrad / postgrad groups - review isStaff (should it include PGRs?)
