@@ -75,7 +75,7 @@
     "moment-timezone": "UniversityofWarwick/moment-timezone#london",
     "react": "^15.0.1",
     "react-dom": "^15.0.1",
-    "react-grid-layout": "^0.12.0",
+    "react-grid-layout": "UniversityofWarwick/react-grid-layout#0.13.0-warwick",
     "react-redux": "~4.4.5",
     "react-router": "^2.2.2",
     "react-router-redux": "^4.0.2",
