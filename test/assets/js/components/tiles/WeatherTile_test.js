@@ -1,59 +1,131 @@
-import WeatherTile from 'components/tiles/WeatherTile';
-import { renderToStaticMarkup } from 'react-dom/server';
+import WeatherTile, { oneWordWeather } from 'components/tiles/WeatherTile';
 import { localMomentUnix } from 'dateFormatter';
 
 describe('WeatherTile', () => {
 
-  // all unix times here should be after oldDate
   const data = {
       icon: 'clear-day',
-      temp: 4.13,
-      text: 'Clear',
-      precipProbability: 0.55
+      summary: 'Clear',
+      temperature: 4.13,
+      precipProbability: 0.55,
     },
     props = {
-      "content": {
-        "items": [
-          {"id": 1456316008, "time": 1456316008, ...data},
-          {"id": 1456318800, "time": 1456318800, ...data},
-          {"id": 1456322400, "time": 1456322400, ...data},
-          {"id": 1456326000, "time": 1456326000, ...data},
-          {"id": 1456329600, "time": 1456329600, ...data},
-          {"id": 1456333200, "time": 1456333200, ...data},
+      'content': {
+        minutelySummary: 'Partly cloudy for the hour.',
+        hourlySummary: 'Partly cloudy until this afternoon.',
+        currentConditions: { time: 1456316008, ...data },
+        items: [
+          { id: 1456316008, time: 1456316008, ...data },
+          { id: 1456318800, time: 1456318800, ...data },
+          { id: 1456322400, time: 1456322400, ...data },
+          { id: 1456326000, time: 1456326000, ...data },
+          { id: 1456329600, time: 1456329600, ...data },
+          { id: 1456333200, time: 1456333200, ...data },
         ],
-        daily: {"summary": "all of today is going to suck!"},
       },
       size: 'small',
     };
 
   it('displays a single weather item when size small', () => {
-    const html = renderAtMoment(<WeatherTile { ...props } />);
-    html.type.should.equal('div');
+    const {
+      props: {
+        children: [
+          calloutComponent,
+          {
+            props: {
+              children: caption,
+            },
+          },
+        ],
+      },
+    } = renderAtMoment(<WeatherTile { ...props } />);
 
-    const callout = renderAtMoment(html.props.children[0]);
-    callout.type.should.equal('div');
-    callout.props.className.should.equal('tile__callout row no-margins');
-    callout.props.children[0].props.children[0].should.equal(4); // the ° falls into the next child component
+    const {
+      props: {
+        className: calloutClassName,
+        children: [
+          degrees,
+          degreesSymbol,
+        ],
+      },
+    } = renderAtMoment(calloutComponent);
 
-    const caption = renderAtMoment(html.props.children[1]);
-    caption.type.should.equal('div');
-    caption.props.children[1]
-      .props.children.should.equal('all of today is going to suck!');
+    calloutClassName.should.equal('tile__callout');
+    degrees.should.equal(4);
+    degreesSymbol.should.equal('°');
+
+    caption.should.equal('Partly cloudy for the hour.');
   });
 
   it('displays large layout when zoomed', () => {
-    const html = renderAtMoment(<WeatherTile zoomed={ true } { ...props } />);
-    const [{ props: { children: [calloutContainer, captionContainer] } }, weatherTable] = html.props.children;
-    const callout = renderAtMoment(calloutContainer.props.children);
-    callout.props.className.should.equal('tile__callout row no-margins');
-    const caption = renderAtMoment(captionContainer.props.children);
-    caption.props.children[1]
-      .props.children.should.equal('all of today is going to suck!');
-    const table = renderAtMoment(weatherTable);
-    table.props.children.length.should.equal(6);
-    table.props.children[0]
-      .props.children[2]
-      .props.children[2].should.equal(55); // precipProbability is rendered
+    const {
+      props: {
+        children: [
+          {
+            props: {
+              children: [
+                {
+                  props: {
+                    children: calloutComponent,
+                  },
+                },
+                {
+                  props: {
+                    children: caption,
+                  }
+                },
+              ],
+            },
+          },
+          weatherTable,
+        ]
+      }
+    } = renderAtMoment(<WeatherTile zoomed={ true } { ...props } />);
+
+    const {
+      props: {
+        className: calloutClassName,
+      },
+    } = renderAtMoment(calloutComponent);
+    calloutClassName.should.equal('tile__callout');
+
+    caption.should.equal('Partly cloudy for the hour.');
+
+    const {
+      props: {
+        children: weatherTableItems,
+      },
+    } = renderAtMoment(weatherTable);
+    weatherTableItems.length.should.equal(6);
+
+    const [
+      {
+        props: {
+          children: [
+            {
+              props: {
+                children: time,
+              },
+            },
+            {
+              props: {
+                children: condition,
+              }
+            },
+            {
+              props: {
+                children: [ /* icon */ , /* space */ , precipProbability, percentSymbol ],
+              },
+            },
+          ],
+        },
+      },
+    ] = weatherTableItems;
+
+    time.should.equal('12pm');
+    condition.should.equal('clear');
+    precipProbability.should.equal(55);
+    percentSymbol.should.equal('%');
   });
 
   it('formats icon string to single word', () => {
@@ -62,7 +134,7 @@ describe('WeatherTile', () => {
       'rain',
       'partly-cloudy-day',
     ];
-    const singleWords = icons.map(WeatherTile.oneWordWeather);
+    const singleWords = icons.map(oneWordWeather);
     assert.deepEqual(singleWords, ['clear', 'rain', 'cloudy']);
   });
 
@@ -73,17 +145,12 @@ describe('WeatherTile', () => {
   });
 
   it('renders message for stale data', () => {
-    const html = renderAtMoment(<WeatherTile {...props} />, new Date(2030, 1, 7));
-    html.props.children.props.children.should.equal('Unable to show recent weather information.');
+    const {
+      props: {
+        children: message,
+      },
+    } = renderAtMoment(<WeatherTile {...props} />, new Date(2030, 1, 7));
+    message.should.equal('Unable to show recent weather information.');
   });
 
-  it('accounts for cached weather data being five minutes old', () => {
-    const fiveMinsLater = new Date(Date.UTC(2016, 1, 24, 13, 5)); // next hour +5mins
-    const htmlFive = renderAtMoment(<WeatherTile zoomed={ true } {...props} />, fiveMinsLater);
-    expect(htmlFive.props.children[1].props.items).to.exist;
-
-    const sixMinsLater = new Date(Date.UTC(2016, 1, 24, 13, 6)); // next hour +6mins
-    const htmlSix = renderAtMoment(<WeatherTile zoomed={ true } {...props} />, sixMinsLater);
-    expect(htmlSix.props.children.props.items).to.not.exist;
-  });
 });
