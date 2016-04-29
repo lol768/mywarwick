@@ -109,10 +109,12 @@ export default class Tile extends Component {
     this.props.onZoomIn(e);
   }
 
-  onClick() {
+  onClick(e) {
     const { content, editingAny } = this.props;
-
-    if (!editingAny && content && content.href) {
+    e.stopPropagation();
+    if (editingAny) {
+      e.preventDefault();
+    } else if (content && content.href) {
       if (window.navigator.userAgent.indexOf('Start/') >= 0) {
         window.location = content.href;
       } else {
@@ -211,7 +213,8 @@ export default class Tile extends Component {
             </header>
             <div className="tile__body">
               { React.cloneElement(
-                React.Children.only(this.props.children), { ref: 'content' }
+                React.Children.only(this.props.children),
+                { ref: 'content' }
               )}
             </div>
           </div>

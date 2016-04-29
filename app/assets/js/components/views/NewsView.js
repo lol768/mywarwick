@@ -6,7 +6,7 @@ import NewsItem from '../ui/NewsItem';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 
-import { fetchNews } from '../../serverpipe';
+import * as news from '../../state/news';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 
 const SOME_MORE = 10;
@@ -31,12 +31,12 @@ class NewsView extends ReactComponent {
 
   componentDidMount() {
     if (this.props.items.length === 0 && !this.props.failed) {
-      this.props.dispatch(fetchNews());
+      this.props.dispatch(news.fetch());
     }
   }
 
   onClickRefresh() {
-    this.props.dispatch(fetchNews());
+    this.props.dispatch(news.fetch());
   }
 
   render() {

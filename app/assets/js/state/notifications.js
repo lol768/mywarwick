@@ -1,8 +1,12 @@
 import Immutable from 'immutable';
+import moment from 'moment';
+import log from 'loglevel';
+import _ from 'lodash';
 
-import { registerReducer } from './reducers';
-import { makeStream, onStreamReceive } from './stream';
+import { fetchWithCredentials } from '../serverpipe';
+import { makeStream, onStreamReceive } from '../stream';
 import { USER_CLEAR } from './user';
+import * as notificationMetadata from './notification-metadata';
 
 export const NOTIFICATION_RECEIVE = 'notifications.receive';
 export const NOTIFICATION_FETCH = 'notifications.fetch';
@@ -37,13 +41,32 @@ export function fetchedNotifications(notifications) {
   };
 }
 
+export function fetch() {
+  return dispatch =>
+    fetchWithCredentials('/api/streams/user')
+      .then(response => response.json())
+      .then(json => {
+        const notifications = _.filter(json.data.activities, (a) => a.notification);
+        const activities = _.filter(json.data.activities, (a) => !a.notification);
+
+        const date = json.data.notificationsRead ? moment(json.data.notificationsRead) : null;
+        dispatch(notificationMetadata.fetchedNotificationsLastRead(date));
+
+        dispatch(fetchedNotifications(notifications));
+        dispatch(fetchedActivities(activities));
+      })
+      .catch(err => {
+        log.info('Failed to fetch notifications:', err);
+      });
+}
+
 const partitionByYearAndMonth = (n) => n.date.toString().substr(0, 7);
 
 export function mergeNotifications(stream, newNotifications) {
   return onStreamReceive(stream, partitionByYearAndMonth, newNotifications);
 }
 
-registerReducer('notifications', (state = makeStream(), action) => {
+export function notificationsReducer(state = makeStream(), action) {
   switch (action.type) {
     case USER_CLEAR:
       return makeStream();
@@ -54,9 +77,9 @@ registerReducer('notifications', (state = makeStream(), action) => {
     default:
       return state;
   }
-});
+}
 
-registerReducer('activities', (state = makeStream(), action) => {
+export function activitiesReducer(state = makeStream(), action) {
   switch (action.type) {
     case USER_CLEAR:
       return makeStream();
@@ -67,4 +90,5 @@ registerReducer('activities', (state = makeStream(), action) => {
     default:
       return state;
   }
-});
+}
+
