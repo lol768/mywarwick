@@ -6,9 +6,8 @@
 import fetch from 'isomorphic-fetch';
 import log from 'loglevel';
 import _ from 'lodash';
-import Immutable from 'immutable';
 
-let errors = Immutable.List();
+let errors = [];
 let postErrorsThrottled;
 
 function postErrors() {
@@ -23,7 +22,7 @@ function postErrors() {
     body: JSON.stringify(errorsToPost),
   }).then(() => {
     log.info('Errors posted to server');
-    errors = errors.skip(errorsToPost.size);
+    errors = errors.slice(errorsToPost.length);
   }).catch((e) => {
     log.warn('Failed to post errors to server', e);
     postErrorsThrottled();
@@ -33,7 +32,7 @@ function postErrors() {
 postErrorsThrottled = _.throttle(postErrors, 5000); // eslint-disable-line prefer-const
 
 function onError(message, source, line, column, error) {
-  errors = errors.push({
+  errors = errors.concat({
     time: new Date().getTime(),
     message,
     source,

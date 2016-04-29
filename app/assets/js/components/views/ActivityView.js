@@ -38,7 +38,7 @@ export default class ActivityView extends ReactComponent {
     return (
       <InfiniteScrollable hasMore={hasMore} onLoadMore={ this.loadMore }>
         <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
-          {activities.toJS()}
+          {activities}
         </GroupedList>
       </InfiniteScrollable>
     );
@@ -47,7 +47,7 @@ export default class ActivityView extends ReactComponent {
 
 function select(state) {
   return {
-    activities: state.get('activities'),
+    activities: state.activities,
   };
 }
 

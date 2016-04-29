@@ -255,7 +255,7 @@ class ID7Layout extends ReactComponent {
   }
 
   render() {
-    this.user = this.props.user.toJS();
+    this.user = this.props.user;
     if (this.props.layoutClassName === 'mobile') {
       log.debug('ID7Layout.render:mobile');
       return this.renderMobile();
@@ -270,12 +270,12 @@ class ID7Layout extends ReactComponent {
 }
 
 const select = (state) => ({
-  layoutClassName: state.getIn(['ui', 'className']),
+  layoutClassName: state.ui.className,
   notificationsCount:
-    getNumItemsSince(state.get('notifications'), state.getIn(['notificationsLastRead', 'date'])),
-  user: state.get('user'),
-  colourTheme: state.getIn(['ui', 'colourTheme']),
-  zoomedTile: state.getIn(['me', 'zoomedTile']),
+    getNumItemsSince(state.notifications, _(state).get(['notificationsLastRead', 'date'])),
+  user: state.user,
+  colourTheme: state.ui.colourTheme,
+  zoomedTile: state.ui.zoomedTile,
 });
 
 export default connect(select)(ID7Layout);

@@ -116,7 +116,7 @@ class NotificationsView extends ReactComponent {
         }
         <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore }>
           <GroupedList groupBy={ this.props.grouped ? groupItemsByDate : undefined }>
-            { notifications.toJS() }
+            { notifications }
           </GroupedList>
         </InfiniteScrollable>
       </div>
@@ -127,8 +127,8 @@ class NotificationsView extends ReactComponent {
 
 function select(state) {
   return {
-    notifications: state.get('notifications'),
-    notificationsLastRead: state.get('notificationsLastRead').toJS(),
+    notifications: state.notifications,
+    notificationsLastRead: state.notificationsLastRead,
   };
 }
 

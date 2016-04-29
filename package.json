@@ -63,7 +63,6 @@
     "es6-promise": "~3.1.2",
     "fastclick": "^1.0.6",
     "id7": "UniversityofWarwick/id7#v1.1.15",
-    "immutable": "^3.7.6",
     "isomorphic-fetch": "~2.2.1",
     "jquery": "^2.2.3",
     "jquery.transit": "^0.9.12",
@@ -74,6 +73,7 @@
     "moment": "^2.12.0",
     "moment-timezone": "UniversityofWarwick/moment-timezone#london",
     "react": "^15.0.1",
+    "react-addons-update": "^15.0.1",
     "react-dom": "^15.0.1",
     "react-grid-layout": "^0.12.0",
     "react-redux": "~4.4.5",
@@ -81,7 +81,6 @@
     "react-router-redux": "^4.0.2",
     "redux": "~3.4.0",
     "redux-actions": "^0.9.1",
-    "redux-immutable": "^3.0.6",
     "redux-thunk": "~2.0.1",
     "reselect": "~2.3.0",
     "skycons": "^1.0.0"

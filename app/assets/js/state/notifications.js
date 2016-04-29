@@ -1,4 +1,3 @@
-import Immutable from 'immutable';
 import moment from 'moment';
 import log from 'loglevel';
 import _ from 'lodash';
@@ -71,9 +70,9 @@ export function notificationsReducer(state = makeStream(), action) {
     case USER_CLEAR:
       return makeStream();
     case NOTIFICATION_RECEIVE:
-      return mergeNotifications(state, Immutable.List([action.notification]));
+      return mergeNotifications(state, [action.notification]);
     case NOTIFICATION_FETCH:
-      return mergeNotifications(state, Immutable.List(action.notifications));
+      return mergeNotifications(state, action.notifications);
     default:
       return state;
   }
@@ -84,9 +83,9 @@ export function activitiesReducer(state = makeStream(), action) {
     case USER_CLEAR:
       return makeStream();
     case ACTIVITY_RECEIVE:
-      return mergeNotifications(state, Immutable.List([action.activity]));
+      return mergeNotifications(state, [action.activity]);
     case ACTIVITIES_FETCH:
-      return mergeNotifications(state, Immutable.List(action.activities));
+      return mergeNotifications(state, action.activities);
     default:
       return state;
   }

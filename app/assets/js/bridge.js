@@ -3,7 +3,6 @@
  */
 
 import $ from 'jquery';
-import Immutable from 'immutable';
 import * as stream from './stream';
 import { push } from 'react-router-redux';
 import { displayUpdateProgress } from './state/update';
@@ -15,7 +14,7 @@ import { displayUpdateProgress } from './state/update';
 export default function init(opts) {
   const { store, tiles } = opts;
 
-  let appState = Immutable.Map();
+  let appState = {};
 
   window.Start = {
 
@@ -47,8 +46,11 @@ export default function init(opts) {
   };
 
   function update(state) {
-    appState = appState.merge(state);
-    window.Start.APP = appState.toJS();
+    appState = {
+      ...appState,
+      ...state,
+    };
+    window.Start.APP = appState;
     window.location = 'start://';
   }
 
@@ -67,15 +69,15 @@ export default function init(opts) {
       update({
         unreadNotificationCount:
           stream.getNumItemsSince(
-            state.get('notifications'),
-            state.get('notificationsLastRead')
+            state.notifications,
+            state.notificationsLastRead
           ),
         // FIXME - remove this once app has been updated to have no unreadActivityCount
         unreadActivityCount: 0,
         unreadNewsCount: 0,
         currentPath: window.location.pathname,
-        isUserLoggedIn: state.getIn(['user', 'data', 'usercode']) !== undefined,
-        tabBarHidden: state.getIn(['ui', 'className']) !== 'mobile',
+        isUserLoggedIn: state.user.data.usercode !== undefined,
+        tabBarHidden: state.ui.className !== 'mobile',
       });
     });
 

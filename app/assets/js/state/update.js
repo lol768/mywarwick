@@ -1,10 +1,8 @@
-import Immutable from 'immutable';
-
 const UPDATE_READY = 'UPDATE_READY';
 
-const initialState = Immutable.fromJS({
+const initialState = {
   isUpdateReady: false,
-});
+};
 
 export function updateReady() {
   return {
@@ -15,9 +13,9 @@ export function updateReady() {
 export function reducer(state = initialState, action) {
   switch (action.type) {
     case UPDATE_READY:
-      return state.merge({
+      return { ...state,
         isUpdateReady: true,
-      });
+      };
     default:
       return state;
   }
