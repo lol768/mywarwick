@@ -78,7 +78,7 @@ class ID7Layout extends ReactComponent {
   }
 
   renderMasqueradeNotice() {
-    const user = this.user.data;
+    const user = this.props.user.data;
 
     if (user.masquerading) {
       return <MasqueradeNotice masqueradingAs={user} />;
@@ -89,13 +89,14 @@ class ID7Layout extends ReactComponent {
 
   renderNotificationPermissionRequest() {
     if ('Notification' in window && Notification.permission === 'default') {
-      return <PermissionRequest isDisabled={ !this.user.data.authenticated } />;
+      return <PermissionRequest isDisabled={ !this.props.user.data.authenticated } />;
     }
 
     return null;
   }
 
   renderMobile() {
+    const { user, zoomedTile, path } = this.props;
     return (
       <div>
         <a className="sr-only sr-only-focusable" href="#main">Skip to main content</a>
@@ -104,10 +105,10 @@ class ID7Layout extends ReactComponent {
             <header className="id7-page-header" ref="header">
               { this.renderMasqueradeNotice() }
 
-              <MastheadMobile user={this.user}
-                zoomedTile={this.props.zoomedTile}
+              <MastheadMobile user={user}
+                zoomedTile={zoomedTile}
                 onBackClick={this.onBackClick}
-                path={this.props.path}
+                path={path}
               />
             </header>
           </div>
@@ -141,8 +142,7 @@ class ID7Layout extends ReactComponent {
   }
 
   renderDesktop() {
-    const { notificationsCount } = this.props;
-    const user = this.user;
+    const { notificationsCount, user } = this.props;
 
     return (
       <div>
@@ -255,7 +255,6 @@ class ID7Layout extends ReactComponent {
   }
 
   render() {
-    this.user = this.props.user;
     if (this.props.layoutClassName === 'mobile') {
       log.debug('ID7Layout.render:mobile');
       return this.renderMobile();
