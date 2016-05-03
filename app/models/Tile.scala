@@ -13,13 +13,5 @@ case class Tile(
 )
 
 object Tile {
-  implicit val tileSizeFormat = EnumUtils.enumFormat(TileSize)
   implicit val tileFormat = Json.format[Tile]
-}
-
-object TileSize extends Enumeration {
-  implicit val tileSizeFormat = EnumUtils.enumFormat(TileSize)
-
-  type TileSize = Value
-  val small, wide, large = Value
 }
