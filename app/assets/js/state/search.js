@@ -98,7 +98,7 @@ export function reducer(state = initialState, action) {
       return {
         ...state,
         recentItems: pushRecentItem(state.recentItems, action.result),
-      }
+      };
     case SEARCH_QUERY_START:
       return {
         ...state,

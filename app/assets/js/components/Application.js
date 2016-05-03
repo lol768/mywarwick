@@ -6,6 +6,7 @@ import ID7Layout from './ui/ID7Layout';
 
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
+import _ from 'lodash';
 import log from 'loglevel';
 
 import { getNumItemsSince } from '../stream';
