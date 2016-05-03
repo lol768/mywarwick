@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import classNames from 'classnames';
+import { Hyperlink } from './utilities';
 
 import _ from 'lodash';
 
@@ -59,14 +60,7 @@ export default class TextTile extends TileContent {
         <span className="tile__text">{item.text}</span>
       </div>);
 
-      return item.href ?
-        <a
-          key={item.id}
-          href={item.href}
-          target="_blank"
-        >
-          {tileItem}
-        </a> : tileItem;
+      return <Hyperlink key={item.href} child={tileItem} href={item.href} />;
     });
   }
 

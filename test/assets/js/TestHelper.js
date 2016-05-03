@@ -53,3 +53,17 @@ global.renderAtMoment = function (component, now = new Date(1989, 1, 7)) {
   tk.reset();
   return renderedComponent;
 };
+
+/**
+ * Recursively call props.children[i] in accordance with path param
+ *
+ * @param {object} elem find children of this rendered element
+ * @param {number[]} path path of indicies to target child
+ * @returns {object}
+ */
+global.findChild = function (elem, path) {
+  if (elem === 'undefined' || path.length === 0) {
+    return elem;
+  }
+  return findChild(React.Children.toArray(elem.props.children)[path[0]], path.slice(1));
+};
