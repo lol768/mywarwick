@@ -1,23 +1,22 @@
 import persistedLib from 'persisted';
 import * as redux from 'redux';
-import Immutable from 'immutable';
 import MemoryLocalForage from './testhelpers/MemoryLocalForage';
 
 describe('persisted', () => {
 
-  const initialState = Immutable.fromJS({actions:[]});
+  const initialState = {actions:[]};
   const reducer = function (state=initialState, action) {
     switch (action.type) {
       case 'test.wipe': return initialState;
-      case 'test.store': return state.merge({
+      case 'test.store': return { ...state,
         subsection: {
           storedvalue: action.payload
         }
-      });
+      };
       // other actions: just store them in a list
-      default: return state.merge({
-        actions: state.get('actions').push(action),
-      });
+      default: return { ...state,
+        actions: state.actions.concat(action),
+      };
     }
   };
   const store = redux.createStore(reducer);
@@ -46,7 +45,7 @@ describe('persisted', () => {
       .then(() => persisted('testkey', nothingUseful))
       .then(() => {
         assert(store.subscribe.called);
-        const actions = store.getState().get('actions').toArray();
+        const actions = store.getState().actions;
         actions.should.include({type:'nothingUseful',payload:'testval'});
       });
   });

@@ -1,4 +1,3 @@
-import Immutable from 'immutable';
 import localforage from 'localforage';
 import log from 'loglevel';
 
@@ -6,25 +5,25 @@ export const USER_LOAD = 'USER_LOAD';
 export const USER_RECEIVE = 'USER_RECEIVE';
 export const USER_CLEAR = 'USER_CLEAR';
 
-const initialState = Immutable.fromJS({
+const initialState = {
   data: {},
   authoritative: false,
   empty: true,
-});
+};
 
 export function reducer(state = initialState, action) {
   switch (action.type) {
     case USER_LOAD:
-      return state.merge({
+      return { ...state,
         data: action.data,
         empty: false,
-      });
+      };
     case USER_RECEIVE:
-      return state.merge({
+      return { ...state,
         data: action.data,
         authoritative: true,
         empty: false,
-      });
+      };
     case USER_CLEAR:
       return initialState;
     default:

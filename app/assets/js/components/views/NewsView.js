@@ -82,6 +82,6 @@ class NewsView extends ReactComponent {
 
 }
 
-const select = (state) => state.get('news').toJS();
+const select = (state) => state.news;
 
 export default connect(select)(NewsView);

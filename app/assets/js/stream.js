@@ -1,4 +1,3 @@
-import Immutable from 'immutable';
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -12,7 +11,7 @@ const sortStream = (stream) => _.orderBy(stream, [DATE_KEY, ID_KEY], [DESC, DESC
 const uniqStream = (stream) => _.uniqBy(stream, ID_KEY);
 
 export function makeStream() {
-  return Immutable.Map();
+  return {};
 }
 
 /*
@@ -38,9 +37,7 @@ export function mergeReceivedItems(stream = [], rx = []) {
 
   // Short circuit if all received things are newer than the newest we have
   if (newest[DATE_KEY] < oldestRx[DATE_KEY]) {
-    stream.unshift(...sortStream(uniqRx));
-
-    return uniqStream(stream);
+    return uniqStream(sortStream(uniqRx).concat(stream));
   }
 
   // Try and do the smallest possible merge
@@ -48,18 +45,12 @@ export function mergeReceivedItems(stream = [], rx = []) {
   const mergeStart = _(stream).findLastIndex((x) => x[DATE_KEY] >= oldestRx[DATE_KEY]);
 
   if (mergeStart >= 0) {
-    const toMerge = stream.splice(0, mergeStart + 1);
-    toMerge.push(...uniqRx);
-
-    stream.unshift(...sortStream(uniqStream(toMerge)));
-
-    return stream;
+    const toMerge = stream.splice(0, mergeStart + 1).concat(uniqRx);
+    return sortStream(uniqStream(toMerge)).concat(stream);
   }
 
   // If all rx items older than all stream items, merge whole array
-  stream.push(...uniqRx);
-
-  return sortStream(uniqStream(stream));
+  return sortStream(uniqStream(uniqRx.concat(stream)));
 }
 
 /*
@@ -72,28 +63,23 @@ export function mergeReceivedItems(stream = [], rx = []) {
  * long as it's the same for all items that belong in the same partition.
  */
 export function onStreamReceive(
-  stream = Immutable.Map(),
+  stream = {},
   grouper = (item) => item.date,
-  rx = Immutable.List()
+  rx = []
 ) {
-  let result = stream;
-
-  rx.groupBy(grouper).mapEntries(([k, v]) => {
-    result = result.update(
-      k,
-      Immutable.List(),
-      (str) => Immutable.List(mergeReceivedItems(str.toJS(), v.toList().toJS()))
-    );
+  const result = _.clone(stream);
+  _(rx).groupBy(grouper).each((v, k) => {
+    result[k] = mergeReceivedItems(result[k] || [], v);
   });
-
   return result;
 }
 
 function getOrderedStreamPartitions(stream) {
-  return stream
-    .entrySeq()
+  return _(stream)
+    .toPairs()
     .sortBy(([k]) => k).map(([, v]) => v) // eslint-disable-line no-unused-vars
-    .reverse();
+    .reverse()
+    .value();
 }
 
 /*
@@ -103,17 +89,19 @@ function getOrderedStreamPartitions(stream) {
  * If the partition does not exist, return an empty list.
  */
 export function getStreamPartition(stream, i) {
-  return getOrderedStreamPartitions(stream).get(i) || Immutable.List();
+  return getOrderedStreamPartitions(stream)[i] || [];
 }
 
 /*
  * Return the n most recent items from the stream.
  */
 export function takeFromStream(stream, n) {
-  return getOrderedStreamPartitions(stream)
-    .reduce(
-      (result, part) => result.concat(part.take(n - result.size)),
-      Immutable.List()
+  return _.reduce(getOrderedStreamPartitions(stream),
+      (result, part) => {
+        if (result.length >= n) return result;
+        return result.concat(_.take(part, n - result.length));
+      },
+      []
     );
 }
 
@@ -121,7 +109,7 @@ export function takeFromStream(stream, n) {
  * Return the total number of items in the stream.
  */
 export function getStreamSize(stream) {
-  return stream.valueSeq().reduce((sum, part) => sum + part.size, 0);
+  return _.reduce(stream, (sum, part) => sum + part.length, 0);
 }
 
 /*
@@ -134,7 +122,8 @@ export function getNumItemsSince(stream, date) {
     return getStreamSize(stream);
   }
 
-  return stream.valueSeq().reduce((sum, part) =>
-    sum + part.filter(item => moment(item.date).isAfter(date)).size, 0
+  return _(stream).reduce(
+    (sum, part) => sum + part.filter(item => moment(item.date).isAfter(date)).length,
+    0
   );
 }

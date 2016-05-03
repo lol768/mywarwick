@@ -1,6 +1,6 @@
-import Immutable from 'immutable';
 import log from 'loglevel';
 import _ from 'lodash';
+import update from 'react-addons-update';
 
 import { USER_CLEAR } from './user';
 import { fetchWithCredentials } from '../serverpipe';
@@ -97,13 +97,11 @@ export function resizeTile(tile, layoutWidth, width, height) {
 
 export function persistTiles() {
   return (dispatch, getState) => {
-    const tileData = getState().getIn(['tiles', 'data', 'tiles']).map(item => ({
-      id: item.get('id'),
-      preferences: item.get('preferences'),
-      removed: item.get('removed'),
-    })).toJS();
+    const tiles = getState().tiles.data.tiles.map(item =>
+      _.pick(item, ['id', 'preferences', 'removed'])
+    );
 
-    const layout = getState().getIn(['tiles', 'data', 'layout']).toJS();
+    const layout = getState().tiles.data.layout;
 
     return fetch('/api/tiles', {
       credentials: 'same-origin',
@@ -111,7 +109,7 @@ export function persistTiles() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ tiles: tileData, layout }),
+      body: JSON.stringify({ tiles, layout }),
     });
   };
 }
@@ -156,9 +154,9 @@ export function fetchTileContent(tileId = ALL_TILES) {
 }
 
 
-const initialContentState = Immutable.Map();
+const initialContentState = {};
 
-const initialState = Immutable.fromJS({
+const initialState = {
   fetching: false,
   fetched: false,
   failed: false,
@@ -166,55 +164,81 @@ const initialState = Immutable.fromJS({
     tiles: [],
     layout: [],
   },
-});
+};
+
+function updateTileById(state, id, callback) {
+  const tiles = state.data.tiles;
+  const index = tiles.findIndex(tile => tile.id === id);
+  const newTiles = Object.assign([], tiles, {
+    [index]: callback(tiles[index]),
+  });
+  return { ...state,
+    data: { ...state.data,
+      tiles: newTiles,
+    },
+  };
+}
 
 export function tilesReducer(state = initialState, action) {
   switch (action.type) {
     case USER_CLEAR:
       return initialState;
     case TILES_FETCH:
-      return state.merge({
+      return {
+        ...state,
         fetching: true,
         fetched: false,
         failed: false,
-      });
+      };
     case TILES_FETCH_FAILURE:
-      return state.merge({
+      return {
+        ...state,
         fetching: false,
         fetched: false,
         failed: true,
-      });
+      };
     case TILES_FETCH_SUCCESS:
-      return state.merge({
+      return {
+        ...state,
         fetching: false,
         fetched: true,
         failed: false,
         data: {
-          tiles: action.tiles,
-          layout: action.layout,
+          tiles: action.tiles || [],
+          layout: action.layout || [],
         },
-      });
+      };
     case TILE_HIDE:
-      return state.updateIn(['data', 'tiles'], items => {
-        const index = items.findIndex(tile => tile.get('id') === action.tile.id);
-
-        return items.update(index, tile => tile.set('removed', true));
-      });
+      return updateTileById(state, action.tile.id, (tile) => ({
+        ...tile,
+        removed: true,
+      }));
     case TILE_SHOW:
-      return state.updateIn(['data', 'tiles'], items => {
-        const index = items.findIndex(tile => tile.get('id') === action.tile.id);
-
-        return items.update(index, tile => tile.set('removed', false));
-      });
-    case TILE_RESIZE:
-      return state.updateIn(['data', 'layout'], layout => {
-        const index = layout.findIndex(i =>
-          i.get('layoutWidth') === action.layoutWidth && i.get('tile') === action.tile.id
-        );
-        return layout.update(index, i => i.set('width', action.width).set('height', action.height));
-      });
+      return updateTileById(state, action.tile.id, (tile) => ({
+        ...tile,
+        removed: false,
+      }));
+    case TILE_RESIZE: {
+      const layout = state.data.layout;
+      const index = layout.findIndex(i =>
+        i.layoutWidth === action.layoutWidth && i.tile === action.tile.id
+      );
+      return {
+        ...state,
+        data: {
+          ...state.data,
+          layout: Object.assign([], layout, {
+            [index]: {
+              ...layout[index],
+              width: action.width,
+              height: action.height,
+            },
+          }),
+        },
+      };
+    }
     case TILE_LAYOUT_CHANGE: {
-      const thisLayout = action.layout.map(i => Immutable.Map({
+      const toAdd = action.layout.map(i => ({
         layoutWidth: action.layoutWidth,
         tile: i.i,
         x: i.x,
@@ -222,10 +246,13 @@ export function tilesReducer(state = initialState, action) {
         width: i.w,
         height: i.h,
       }));
-
-      return state.updateIn(['data', 'layout'], layout =>
-        layout.filter(i => i.get('layoutWidth') !== action.layoutWidth).concat(thisLayout)
-      );
+      const oldRemoved = _.filter(state.data.layout, i => i.layoutWidth !== action.layoutWidth);
+      const newLayout = toAdd.concat(oldRemoved);
+      return { ...state,
+        data: { ...state.data,
+          layout: newLayout,
+        },
+      };
     }
     default:
       return state;
@@ -237,57 +264,47 @@ export function tileContentReducer(state = initialContentState, action) {
     case USER_CLEAR:
       return initialContentState;
     case TILE_CONTENT_FETCH: {
-      const update = tile => tile.delete('errors').set('fetching', true);
-
+      const change = tile => ({ ...tile,
+        errors: undefined,
+        fetching: true,
+      });
       if (action.tile) {
-        return state.update(
-          action.tile,
-          update(Immutable.Map()),
-          update
-        );
+        return update(state, { [action.tile]: { $apply: change } });
       }
-      return state.map(update);
+      return _.mapValues(state, change);
     }
     case TILE_CONTENT_FETCH_SUCCESS: {
-      const update = tile => tile.merge({
+      const change = tile => ({ ...tile,
         fetching: false,
         fetchedAt: action.fetchedAt,
         content: action.content,
-      }).delete('errors');
-
-      return state.update(
-        action.tile,
-        update(Immutable.Map()),
-        update
-      );
+        errors: undefined,
+      });
+      return update(state, { [action.tile]: { $apply: change } });
     }
     case TILE_CONTENT_FETCH_FAILURE: {
-      const update = tile => tile.merge({
+      const change = tile => ({ ...tile,
         fetching: false,
         errors: action.errors,
       });
 
       if (action.tile) {
-        return state.update(
-          action.tile,
-          Immutable.Map({ fetching: false, errors: action.errors }),
-          update
-        );
+        return update(state, { [action.tile]: { $apply: change } });
       }
-      return state.map(update);
+      return _.mapValues(state, change);
     }
     case TILE_CONTENT_LOAD_ALL: {
-      const merger = (prev, next) => {
-        if (next.has('content') && !prev.has('content')) {
-          return prev.merge({
-            content: next.get('content'),
-            fetchedAt: next.get('fetchedAt'),
-          });
+      const merger = (prev = {}, next) => {
+        if (next.content && !prev.content) {
+          return { ...prev,
+            content: next.content,
+            fetchedAt: next.fetchedAt,
+          };
         }
         return prev;
       };
 
-      return state.mergeWith(merger, action.content);
+      return _.mergeWith(state, action.content, merger);
     }
     default:
       return state;

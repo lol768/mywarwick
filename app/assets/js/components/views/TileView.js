@@ -74,13 +74,13 @@ class TileView extends Component {
 const select = (state, ownProps) => {
   const id = ownProps.id || ownProps.params.id;
 
-  const tile = state.getIn(['tiles', 'data', 'tiles']).filter(t => t.get('id') === id).first();
-  const content = state.getIn(['tileContent', id]);
+  const tile = state.tiles.data.tiles.filter(t => t.id === id)[0];
+  const content = state.tileContent[id];
 
   return {
-    tile: tile ? tile.toJS() : undefined,
-    content: content ? content.toJS() : undefined,
-    isDesktop: state.get('ui').get('className') === 'desktop',
+    tile,
+    content,
+    isDesktop: state.ui.className === 'desktop',
     zoomed: ownProps.params !== undefined,
   };
 };

@@ -1,4 +1,3 @@
-import Immutable from 'immutable';
 import log from 'loglevel';
 import { createAction } from 'redux-actions';
 import { fetchWithCredentials } from '../serverpipe';
@@ -26,29 +25,31 @@ export function fetch() {
   };
 }
 
-const initialState = Immutable.fromJS({
+const initialState = {
   fetching: false,
   failed: false,
   items: [],
-});
+};
 
 export function reducer(state = initialState, action) {
   switch (action.type) {
     case NEWS_REQUEST:
-      return state.mergeDeep({
+      return {
+        ...state,
         fetching: true,
         failed: false,
-      });
+      };
     case NEWS_RECEIVE:
-      return action.error ? state.mergeDeep({
+      return action.error ? {
+        ...state,
         fetching: false,
         failed: true,
-      })
-      : state.mergeDeep({
+      } : {
+        ...state,
         fetching: false,
         failed: false,
         items: action.payload.items,
-      });
+      };
     default:
       return state;
   }

@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect';
 import log from 'loglevel';
+import _ from 'lodash';
 
 // Immutable object => plain JS object
 const defaultFreeze = x => (
@@ -47,7 +48,7 @@ export default function init(opts) {
       .then(() => {
         // Whenever the value at this key path changes
         const selector = createSelector(
-          state => state.getIn(keyPathArray),
+          state => _.get(state, keyPathArray),
           value => localforage.setItem(keyPath, freeze(value))
         );
 
