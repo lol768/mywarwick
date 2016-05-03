@@ -33,13 +33,14 @@ class TileServiceImpl @Inject()(
         tileLayoutDao.getTileLayoutForUser(u.usercode.string)
       }.getOrElse(Seq.empty)
 
-      if (userTileLayout.isEmpty)
+      if (userTileLayout.isEmpty) {
         user match {
           case Some(u) => getGroups(u).flatMap(group =>
             tileLayoutDao.getDefaultTileLayoutForGroup(group)
           ).toSeq
           case None => tileLayoutDao.getDefaultTileLayoutForGroup("anonymous")
         }
+      }
       else {
         userTileLayout
       }
