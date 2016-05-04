@@ -4,8 +4,6 @@ import React, { Component } from 'react';
 import { localMoment } from '../../dateFormatter.js';
 import classNames from 'classnames';
 
-export const EDITING_ANIMATION_DURATION = 600;
-
 export default class Tile extends Component {
 
   constructor(props) {
@@ -16,9 +14,6 @@ export default class Tile extends Component {
 
     this.onClick = this.onClick.bind(this);
     this.onClickExpand = this.onClickExpand.bind(this);
-    this.onTouchEnd = this.onTouchEnd.bind(this);
-    this.onTouchMove = this.onTouchMove.bind(this);
-    this.onTouchStart = this.onTouchStart.bind(this);
   }
 
   componentWillEnter(callback) {
@@ -68,44 +63,7 @@ export default class Tile extends Component {
     return null;
   }
 
-  onTouchStart(e) {
-    if (!this.props.editingAny && !this.props.zoomed) {
-      if (e.changedTouches) {
-        const touch = e.changedTouches[0];
-        this.startX = touch.clientX;
-        this.startY = touch.clientY;
-      }
-
-      this.timeout = setTimeout(this.props.onBeginEditing, EDITING_ANIMATION_DURATION);
-    }
-  }
-
-  onTouchMove(e) {
-    if (!this.props.editing && this.startX !== null) {
-      const touch = e.changedTouches[0];
-
-      if (Math.abs(touch.clientX - this.startX) > 10
-        || Math.abs(touch.clientY - this.startY) > 10) {
-        this.release();
-      }
-    }
-  }
-
-  release() {
-    this.timeout = clearTimeout(this.timeout);
-    this.startX = null;
-    this.startY = null;
-  }
-
-  onTouchEnd() {
-    if (!this.props.editing && !this.props.zoomed && this.timeout) {
-      this.release();
-    }
-  }
-
   onClickExpand(e) {
-    this.release();
-
     this.props.onZoomIn(e);
   }
 
@@ -181,13 +139,6 @@ export default class Tile extends Component {
               }
             )
           }
-          onTouchStart={ this.onTouchStart }
-          onTouchMove={ this.onTouchMove }
-          onTouchEnd={ this.onTouchEnd }
-          onTouchCancel={ this.onTouchEnd }
-          onMouseDown={ this.onTouchStart }
-          onMouseUp={ this.onTouchEnd }
-          onMouseOut={ this.onTouchEnd }
           onClick={ this.onClick }
           ref="tile"
         >

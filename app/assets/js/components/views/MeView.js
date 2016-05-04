@@ -49,9 +49,8 @@ class MeView extends ReactComponent {
     this.onBodyClick = this.onBodyClick.bind(this);
     this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
-    this.onTouchMove = this.onTouchMove.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
-    this.onDragStop = this.onDragStop.bind(this);
+    this.getDragDelayForItem = this.getDragDelayForItem.bind(this);
   }
 
   onBeginEditing(tile) {
@@ -59,21 +58,7 @@ class MeView extends ReactComponent {
       editing: tile.id,
     });
 
-    /*
-    const el = $(ReactDOM.findDOMNode(this));
-
-    el.stop().transition({
-      scale: 0.8,
-    }, EDITING_ANIMATION_DURATION, 'snap');
-    */
-
-    // Ensure first release of the mouse button/finger is not interpreted as
-    // exiting the editing mode
-    $('body').one('mouseup touchend', () => {
-      _.defer(() => {
-        $('body').off('click', this.onBodyClick).on('click', this.onBodyClick);
-      });
-    });
+    $('body').on('click', this.onBodyClick);
   }
 
   onFinishEditing() {
@@ -83,49 +68,20 @@ class MeView extends ReactComponent {
       });
     }
 
-    /*
-    const el = $(ReactDOM.findDOMNode(this));
-
-    el.stop().transition({
-      scale: 1,
-    }, EDITING_ANIMATION_DURATION, 'snap', () => {
-      el.removeAttr('style'); // transform creates positioning context
-    });
-    */
-
     $('body').off('click', this.onBodyClick);
 
     this.props.dispatch(tiles.persistTiles());
   }
 
   onBodyClick(e) {
-    if (this.state.editing && $(e.target).parents('.tile').length === 0) {
+    if (this.state.editing && $(e.target).parents('.tile--editing').length === 0) {
+      // Defer so this click is still considered to be happening in editing mode
       _.defer(() => this.onFinishEditing());
     }
   }
 
   onDragStart(layout, item) {
-    this.dragging = true;
     this.onBeginEditing({ id: item.i });
-  }
-
-  onDragStop() {
-    this.dragging = false;
-  }
-
-  componentDidMount() {
-    $(window).on('touchmove', this.onTouchMove);
-  }
-
-  componentWillUnmount() {
-    $(window).off('touchmove', this.onTouchMove);
-    this.unmounted = true;
-  }
-
-  onTouchMove(e) {
-    if (this.dragging) {
-      e.preventDefault();
-    }
   }
 
   getTileLayout(layout) {
@@ -198,6 +154,10 @@ class MeView extends ReactComponent {
     return getSizeNameFromSize(layout);
   }
 
+  getDragDelayForItem(item) {
+    return this.state.editing === item.i ? 0 : 200;
+  }
+
   renderTiles() {
     const { editing } = this.state;
     const tileComponents = this.props.tiles.map((tile) => this.renderTile(tile));
@@ -214,7 +174,7 @@ class MeView extends ReactComponent {
       <div>
         <ReactGridLayout
           layout={layout}
-          isDraggable={!!editing}
+          isDraggable
           isResizable={false}
           cols={this.props.layoutWidth}
           rowHeight={125}
@@ -224,12 +184,13 @@ class MeView extends ReactComponent {
           verticalCompact
           draggableCancel=".tile__edit-control"
           onDragStart={this.onDragStart}
-          onDragStop={this.onDragStop}
+          getDragDelayForItem={this.getDragDelayForItem}
         >
           {tileComponents.map(component =>
             <div
               key={component.props.id}
               className={this.state.editing === component.props.id ? 'react-grid-item--editing' : ''} // eslint-disable-line max-len
+              style={{ touchAction: 'auto' }} // Allow touches to scroll (overrides react-draggable)
             >
               {component}
             </div>)}
