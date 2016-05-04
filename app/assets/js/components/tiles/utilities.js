@@ -5,11 +5,12 @@ import React, { PropTypes } from 'react';
  * @param href URL for link, null for no hyperlink
  * @param child to wrap inside hyperlink
  */
-export const Hyperlink = ({ child, href }) => (
-  href ?
-    <a href={ href } target="_blank" >{ child }</a>
-    : child
-);
+export const Hyperlink = ({ child, href }) => {
+  const el = React.isValidElement(child) ? child : <span>{ child }</span>;
+  return href ?
+    <a href={ href } target="_blank">{ el }</a>
+    : el;
+};
 
 Hyperlink.displayName = 'Hyperlink';
 Hyperlink.propTypes = {
