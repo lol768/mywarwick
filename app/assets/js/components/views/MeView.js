@@ -75,7 +75,8 @@ class MeView extends ReactComponent {
 
   onBodyClick(e) {
     if (this.state.editing && $(e.target).parents('.tile--editing').length === 0) {
-      this.onFinishEditing();
+      // Defer so this click is still considered to be happening in editing mode
+      _.defer(() => this.onFinishEditing());
     }
   }
 
@@ -189,6 +190,7 @@ class MeView extends ReactComponent {
             <div
               key={component.props.id}
               className={this.state.editing === component.props.id ? 'react-grid-item--editing' : ''} // eslint-disable-line max-len
+              style={{ touchAction: 'auto' }} // Allow touches to scroll (overrides react-draggable)
             >
               {component}
             </div>)}
