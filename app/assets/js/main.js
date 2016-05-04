@@ -49,12 +49,7 @@ localforage.config({
   name: 'Start',
 });
 
-const history = syncHistoryWithStore(browserHistory, store, {
-  selectLocationState(state) {
-    return state.get('routing').toJS();
-  },
-});
-
+const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
 
 store.dispatch(ui.updateUIContext());
@@ -153,7 +148,7 @@ SocketDatapipe.subscribe(data => {
 
 store.dispatch(update.displayUpdateProgress);
 
-const freezeStream = stream => stream.valueSeq().flatten().toJS();
+const freezeStream = stream => _(stream).values().flatten().value();
 
 const loadPersonalisedDataFromServer = _.once(() => {
   store.dispatch(notifications.fetch());
@@ -162,9 +157,9 @@ const loadPersonalisedDataFromServer = _.once(() => {
 });
 
 store.subscribe(() => {
-  const u = store.getState().get('user');
+  const u = store.getState().user;
 
-  if (u && u.get('authoritative') === true) {
+  if (u && u.authoritative === true) {
     loadPersonalisedDataFromServer();
   }
 });

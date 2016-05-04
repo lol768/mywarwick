@@ -35,4 +35,4 @@ class UpdatePopup extends ReactComponent {
 
 }
 
-export default connect((state) => state.get('update').toJS())(UpdatePopup);
+export default connect((state) => state.update)(UpdatePopup);

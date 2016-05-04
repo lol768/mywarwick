@@ -6,6 +6,7 @@ import ID7Layout from './ui/ID7Layout';
 
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
+import _ from 'lodash';
 import log from 'loglevel';
 
 import { getNumItemsSince } from '../stream';
@@ -18,8 +19,10 @@ export class Application extends ReactComponent {
   }
 
   render() {
-    const { location, notificationsCount, layoutClassName, user, children }
+    const { location, notificationsCount, layoutClassName, children }
       = this.props;
+
+    const user = this.props.user;
 
     log.debug('Application.render');
 
@@ -50,9 +53,9 @@ export class Application extends ReactComponent {
 function mapStateToProps(state) {
   return {
     notificationsCount:
-      getNumItemsSince(state.get('notifications'), state.getIn(['notificationsLastRead', 'date'])),
-    layoutClassName: state.get('ui').get('className'),
-    user: state.getIn(['user', 'data']).toJS(),
+      getNumItemsSince(state.notifications, _(state).get(['notificationsLastRead', 'date'])),
+    layoutClassName: state.ui.className,
+    user: state.user.data,
   };
 }
 

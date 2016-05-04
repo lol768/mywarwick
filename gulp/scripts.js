@@ -64,7 +64,7 @@ function bundle(b, outputFile) {
     .on('error', (e) => {
       gutil.log(gutil.colors.red(e.stack));
     })
-    .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, '..', 'app', 'assets', 'js')))
+    .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, '..')))
     .pipe(source(outputFile))
     .pipe(buffer())
     .pipe(sourcemaps.init({ loadMaps: true }))

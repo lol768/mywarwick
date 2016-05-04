@@ -96,6 +96,7 @@ class ID7Layout extends ReactComponent {
   }
 
   renderMobile() {
+    const { user, zoomedTile, path } = this.props;
     return (
       <div>
         <a className="sr-only sr-only-focusable" href="#main">Skip to main content</a>
@@ -104,10 +105,10 @@ class ID7Layout extends ReactComponent {
             <header className="id7-page-header" ref="header">
               { this.renderMasqueradeNotice() }
 
-              <MastheadMobile user={this.props.user}
-                zoomedTile={this.props.zoomedTile}
+              <MastheadMobile user={user}
+                zoomedTile={zoomedTile}
                 onBackClick={this.onBackClick}
-                path={this.props.path}
+                path={path}
               />
             </header>
           </div>
@@ -153,7 +154,7 @@ class ID7Layout extends ReactComponent {
               { this.renderMasqueradeNotice() }
               <div className="id7-utility-masthead">
                 <nav className="id7-utility-bar" id="utility-bar-container">
-                  <UtilityBar user={this.props.user} layoutClassName="desktop" />
+                  <UtilityBar user={user} layoutClassName="desktop" />
                 </nav>
                 <div className="id7-masthead">
                   <div className="id7-masthead-contents">
@@ -268,12 +269,12 @@ class ID7Layout extends ReactComponent {
 }
 
 const select = (state) => ({
-  layoutClassName: state.getIn(['ui', 'className']),
+  layoutClassName: state.ui.className,
   notificationsCount:
-    getNumItemsSince(state.get('notifications'), state.getIn(['notificationsLastRead', 'date'])),
-  user: state.get('user').toJS(),
-  colourTheme: state.getIn(['ui', 'colourTheme']),
-  zoomedTile: state.getIn(['me', 'zoomedTile']),
+    getNumItemsSince(state.notifications, _(state).get(['notificationsLastRead', 'date'])),
+  user: state.user,
+  colourTheme: state.ui.colourTheme,
+  zoomedTile: state.ui.zoomedTile,
 });
 
 export default connect(select)(ID7Layout);

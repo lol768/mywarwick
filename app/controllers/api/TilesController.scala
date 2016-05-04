@@ -15,7 +15,7 @@ import scala.concurrent.Future
 
 case class SaveTilesRequest(
   tiles: Seq[UserTileSetting],
-  layout: Seq[UserTileLayout]
+  layout: Seq[TileLayout]
 )
 
 object SaveTilesRequest {

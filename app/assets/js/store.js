@@ -1,20 +1,27 @@
-import * as Immutable from 'immutable';
 import log from 'loglevel';
 
 import thunk from 'redux-thunk';
-import { createStore, applyMiddleware } from 'redux';
-import { combineReducers } from 'redux-immutable';
+import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { browserHistory } from 'react-router';
 import { routerMiddleware, routerReducer } from 'react-router-redux';
+import { unstable_batchedUpdates } from 'react-dom'; // eslint-disable-line camelcase
 
 import * as allReducers from './state/all-reducers';
 
-const initialState = Immutable.Map();
+// "Strategy for avoiding cascading renders": https://github.com/reactjs/redux/issues/125
+// A plugin, broken in React 0.14 https://github.com/acdlite/redux-batched-updates
+// This function is essentially the fixed plugin.
+// Prevents a few unnecessary component updates.
+function batchedUpdatesMiddleware() {
+  return next => action => unstable_batchedUpdates(() => next(action));
+}
+
+const initialState = {};
 
 // build a combined reducer, adding in any weird 3rd party reducers we need.
 const reducer = combineReducers({
   ...allReducers,
-  router: routerReducer,
+  routing: routerReducer,
 });
 
 const logger = (/* store */) => next => action => {
@@ -28,6 +35,7 @@ export default createStore(
   applyMiddleware(
     thunk,
     logger,
-    routerMiddleware(browserHistory)
+    routerMiddleware(browserHistory),
+    batchedUpdatesMiddleware
   )
 );

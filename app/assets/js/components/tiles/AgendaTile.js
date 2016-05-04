@@ -6,6 +6,7 @@ import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';
 import _ from 'lodash';
 import classNames from 'classnames';
+import { Hyperlink } from './utilities';
 
 const groupItemsForAgendaTile = {
 
@@ -33,17 +34,10 @@ const groupItemsForAgendaTile = {
   },
 };
 
-function hyperlinkText(text, href, onClickLink) {
-  return href ?
-    <a href={ href } target="_blank" onClick={ onClickLink } ref="a">{ text }</a>
-    : text;
-}
-
 export default class AgendaTile extends TileContent {
 
   constructor(props) {
     super(props);
-    this.onClickLink = this.onClickLink.bind(this);
     this.state = {
       defaultMaxItems: { small: null, wide: 2, large: 5 }[props.size],
     };
@@ -70,7 +64,6 @@ export default class AgendaTile extends TileContent {
 
     const events = itemsToDisplay.map(event =>
       <AgendaTileItem key={event.id}
-        onClickLink={ this.onClickLink }
         {...event}
       />
     );
@@ -113,16 +106,9 @@ export default class AgendaTile extends TileContent {
     return (
       <div className="tile__item">
         { callout }
-        { hyperlinkText(text, nextEvent.href, this.onClickLink) }
+        <Hyperlink child={text} href={nextEvent.href} />
       </div>
     );
-  }
-
-  onClickLink(e) {
-    e.stopPropagation();
-    if (this.props.editingAny) {
-      e.preventDefault();
-    }
   }
 
   static canZoom(content) {
@@ -137,7 +123,7 @@ export default class AgendaTile extends TileContent {
 export class AgendaTileItem extends React.Component {
 
   render() {
-    const { title, start, end, href, location, onClickLink } = this.props;
+    const { title, start, end, href, location } = this.props;
 
     const content = (
       <div>
@@ -149,11 +135,11 @@ export class AgendaTileItem extends React.Component {
             className={classNames('tile-list-item__title', 'text--align-bottom',
             { 'text--dotted-underline': href })}
           >
-            { hyperlinkText(title, href, onClickLink) }
+            <Hyperlink child={title} href={href} />
          </span>
           {location ?
             <span className="tile-list-item__location text--align-bottom text--light">
-           &nbsp;- { hyperlinkText(location.name, location.href, onClickLink) }
+           &nbsp;- <Hyperlink child={location.name} href={location.href} />
             </span>
             : null}
         </div>
@@ -178,5 +164,4 @@ AgendaTileItem.propTypes = {
     href: React.PropTypes.string,
   }),
   href: PropTypes.string,
-  onClickLink: PropTypes.func,
 };

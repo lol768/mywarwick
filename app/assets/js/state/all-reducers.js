@@ -17,6 +17,3 @@ export { tileContentReducer as tileContent } from './tiles';
 export { reducer as update } from './update';
 export { reducer as user } from './user';
 export { reducer as ui } from './ui';
-
-export { default as routing } from './routing';
-

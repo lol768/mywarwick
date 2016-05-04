@@ -1,6 +1,6 @@
-import Immutable from 'immutable';
 import moment from 'moment'
 import formatDate from 'dateFormatter'
+import _ from 'lodash';
 import { onStreamReceive, getStreamPartition, mergeReceivedItems, takeFromStream, getStreamSize, getNumItemsSince } from '../../../app/assets/js/stream';
 
 let item = (id, date) => ({id: id, date: moment('2015-01-01').add(date, 'd').format()});
@@ -9,22 +9,22 @@ describe('stream', () => {
 
   let grouper = (n) => n.date.toString().substr(0, 7);
 
-  it('partitions received items', () => {
-    let stream = onStreamReceive(undefined, grouper, Immutable.List([item('a', 1)]));
+  let stream = onStreamReceive(undefined, grouper, [
+    item('a', 0), item('b', 31), item('c', 59)
+  ]);
 
-    expect(getStreamPartition(stream, 0)).to.eql(Immutable.List([item('a', 1)]));
-    expect(getStreamPartition(stream, 1)).to.equal(Immutable.List());
+  it('partitions received items', () => {
+    let stream = onStreamReceive(undefined, grouper, [item('a', 1)]);
+
+    expect(getStreamPartition(stream, 0)).to.eql([item('a', 1)]);
+    expect(getStreamPartition(stream, 1)).to.eql([]);
   });
 
-  let stream = onStreamReceive(undefined, grouper, Immutable.List([
-    item('a', 0), item('b', 31), item('c', 59)
-  ]));
-
   it('orders partitions by key', () => {
-    expect(stream.count()).to.equal(3);
-    expect(getStreamPartition(stream, 0).first().date).to.equal('2015-03-01T00:00:00+00:00');
-    expect(getStreamPartition(stream, 1).first().date).to.equal('2015-02-01T00:00:00+00:00');
-    expect(getStreamPartition(stream, 2).first().date).to.equal('2015-01-01T00:00:00+00:00');
+    expect(_.keys(stream)).to.have.lengthOf(3);
+    expect(getStreamPartition(stream, 0)[0].date).to.equal('2015-03-01T00:00:00+00:00');
+    expect(getStreamPartition(stream, 1)[0].date).to.equal('2015-02-01T00:00:00+00:00');
+    expect(getStreamPartition(stream, 2)[0].date).to.equal('2015-01-01T00:00:00+00:00');
   });
 
   it('knows the length of the stream', () => {
@@ -39,13 +39,13 @@ describe('stream', () => {
   });
 
   it('takes a given number of items from the stream in order', () => {
-    expect(takeFromStream(stream, -1)).to.eql(Immutable.List());
+    expect(takeFromStream(stream, -1)).to.eql([]);
 
-    expect(takeFromStream(stream, 2)).to.eql(Immutable.List([item('c', 59), item('b', 31)]));
+    expect(takeFromStream(stream, 2)).to.eql([item('c', 59), item('b', 31)]);
   });
 
   it('returns zero items from an empty stream', () => {
-    expect(takeFromStream(onStreamReceive(undefined, grouper, Immutable.List()), 100)).to.eql(Immutable.List());
+    expect(takeFromStream(onStreamReceive(undefined, grouper, []), 100)).to.eql([]);
   });
 
 });

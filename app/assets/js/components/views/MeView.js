@@ -240,14 +240,14 @@ class MeView extends ReactComponent {
 }
 
 const select = (state) => {
-  const items = state.getIn(['tiles', 'data', 'tiles']);
+  const items = state.tiles.data.tiles;
 
   return {
-    isDesktop: state.getIn(['ui', 'className']) === 'desktop',
-    layoutWidth: state.getIn(['ui', 'isFourColumnLayout']) === true ? 4 : 2,
-    tiles: items.filterNot(tile => tile.get('removed')).toJS(),
-    hiddenTiles: items.filter(tile => tile.get('removed')).toJS(),
-    layout: state.getIn(['tiles', 'data', 'layout']).toJS(),
+    isDesktop: state.ui.className === 'desktop',
+    layoutWidth: state.ui.isFourColumnLayout === true ? 4 : 2,
+    tiles: items.filter(tile => !tile.removed),
+    hiddenTiles: items.filter(tile => tile.removed),
+    layout: state.tiles.data.layout,
   };
 };
 

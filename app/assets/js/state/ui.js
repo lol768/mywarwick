@@ -1,4 +1,3 @@
-import Immutable from 'immutable';
 import log from 'loglevel';
 
 let mq;
@@ -12,20 +11,20 @@ try {
 const isDesktop = () => mq('only all and (min-width: 768px)');
 const isFourColumnLayout = () => mq('only all and (min-width: 992px)');
 
-const initialState = Immutable.fromJS({
+const initialState = {
   className: undefined,
   isFourColumnLayout: false,
   colourTheme: 'default',
-});
+};
 
 export function reducer(state = initialState, action) {
   switch (action.type) {
     case 'ui.class':
-      return state.set('className', action.className);
+      return { ...state, className: action.className };
     case 'ui.layout':
-      return state.set('isFourColumnLayout', action.isFourColumnLayout);
+      return { ...state, isFourColumnLayout: action.isFourColumnLayout };
     case 'ui.theme':
-      return state.set('colourTheme', action.theme);
+      return { ...state, colourTheme: action.theme };
     default:
       return state;
   }
@@ -40,7 +39,7 @@ export function updateColourTheme(theme) {
 
 export function updateUIContext() {
   return (dispatch, getState) => {
-    const currentClassName = getState().getIn(['ui', 'className']);
+    const currentClassName = getState().ui.className;
     if (currentClassName === undefined || isDesktop() !== (currentClassName === 'desktop')) {
       dispatch({
         type: 'ui.class',
@@ -48,7 +47,7 @@ export function updateUIContext() {
       });
     }
 
-    if (isFourColumnLayout() !== getState().getIn(['ui', 'isFourColumnLayout'])) {
+    if (isFourColumnLayout() !== getState().ui.isFourColumnLayout) {
       dispatch({
         type: 'ui.layout',
         isFourColumnLayout: isFourColumnLayout(),

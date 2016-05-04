@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import Immutable from 'immutable';
 
 export const SEARCH_QUERY_START = 'search.query.start';
 export const SEARCH_QUERY_SUCCESS = 'search.query.success';
@@ -53,7 +52,7 @@ export function clickSearchResult(result) {
   };
 }
 
-const initialState = Immutable.fromJS({
+const initialState = {
   fetching: false,
   query: undefined,
   results: [],
@@ -66,39 +65,60 @@ const initialState = Immutable.fromJS({
       },
     },
   ],
-});
+};
 
 const NOT_FOUND = -1;
 
 function pushRecentItem(list, item) {
-  const index = list.findIndex((i) => Immutable.fromJS(item).equals(i.get('value')));
+  const index = list.findIndex((i) => _.isEqual(item, i.value));
 
   if (index === NOT_FOUND) {
-    return list.push(Immutable.fromJS({
+    return list.concat({
       count: 1,
       value: item,
-    }));
+    });
   }
-  return list.update(index, (recent) => recent.update('count', (count) => count + 1));
+
+  // Existing item - replace with incremented hit count
+  const existing = list[index];
+  const replacement = {
+    ...existing,
+    count: existing.count + 1,
+  };
+  return [].concat(list.slice(0, index), replacement, list.slice(index + 1));
 }
 
 export function getRecentItemsOrderedByFrequency(list) {
-  return Immutable.fromJS(list)
-    .sort((a, b) => b.get('count') - a.get('count'))
-    .map((item) => item.get('value'))
-    .toJS();
+  return _(list).sortBy('count').map('value').value();
 }
 
 export function reducer(state = initialState, action) {
   switch (action.type) {
     case SEARCH_RESULT_CLICK:
-      return state.update('recentItems', (list) => pushRecentItem(list, action.result));
+      return {
+        ...state,
+        recentItems: pushRecentItem(state.recentItems, action.result),
+      };
     case SEARCH_QUERY_START:
-      return state.set('fetching', true).set('query', action.query);
+      return {
+        ...state,
+        fetching: true,
+        query: action.query,
+      };
     case SEARCH_QUERY_SUCCESS:
-      return state.set('fetching', false).set('results', action.results).set('query', action.query);
+      return {
+        ...state,
+        fetching: false,
+        results: action.results,
+        query: action.query,
+      };
     case SEARCH_QUERY_FAILURE:
-      return state.set('fetching', false).set('results', []).set('query', undefined);
+      return {
+        ...state,
+        fetching: false,
+        results: [],
+        query: undefined,
+      };
     default:
       return state;
   }

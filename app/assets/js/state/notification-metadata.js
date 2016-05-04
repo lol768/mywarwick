@@ -1,4 +1,3 @@
-import Immutable from 'immutable';
 import { USER_CLEAR } from './user';
 
 export const NOTIFICATIONS_READ = 'notifications.read';
@@ -29,32 +28,39 @@ export function loadedNotificationsLastRead(date) {
   };
 }
 
-const initialState = Immutable.Map({ fetched: false, date: null });
+const initialState = { fetched: false, date: null };
 
 export function reducer(state = initialState, { type, date }) {
-  const currentDate = state.get('date');
+  const currentDate = state.date;
   const isNewer = !currentDate || !date || date.isAfter(currentDate);
 
   switch (type) {
     case USER_CLEAR:
       return initialState;
     case NOTIFICATIONS_READ_LOADED:
-      if (state.get('fetched') === false && isNewer) {
+      if (state.fetched === false && isNewer) {
         // Do not overwrite a fetched value with a loaded one
         // Don't load an older last-read time
-        return state.merge({ date });
+        return {
+          ...state,
+          date,
+        };
       }
       return state;
     case NOTIFICATIONS_READ_FETCHED:
       // Trust the data from the server
-      return state.merge({
+      return {
+        ...state,
         fetched: true,
         date,
-      });
+      };
     case NOTIFICATIONS_READ:
+      // Last-read date must not decrease
       if (isNewer) {
-        // Last-read date must not decrease
-        return state.merge({ date });
+        return {
+          ...state,
+          date,
+        };
       }
       return state;
     default:

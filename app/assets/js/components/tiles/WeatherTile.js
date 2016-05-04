@@ -2,17 +2,18 @@ import React from 'react';
 
 import TileContent from './TileContent';
 import Skycon from '../ui/Skycon';
-import moment from 'moment';
 import { localMomentUnix } from '../../dateFormatter';
+
+import _ from 'lodash';
 
 function formatIconString(str) {
   return str.toUpperCase().replace(/-/g, '_');
 }
 
-function formatTime(d, withContext = true) {
-  const date = localMomentUnix(d);
-  const now = moment();
-  return (date.isSame(now, 'hour') && withContext) ? 'Now' : date.format('ha');
+const formatTime = (d) => localMomentUnix(d).format('ha');
+
+export function oneWordWeather(icon) {
+  return icon.replace(/.*(clear|rain|snow|sleet|wind|fog|cloudy).*/, '$1');
 }
 
 export default class WeatherTile extends TileContent {
@@ -21,25 +22,15 @@ export default class WeatherTile extends TileContent {
     return true;
   }
 
-  static oneWordWeather(icon) {
-    return icon.replace(/.*(clear|rain|snow|sleet|wind|fog|cloudy).*/, '$1');
-  }
-
   getIcon(content) {
-    const icon = formatIconString(content.items[0].icon);
+    const icon = formatIconString(content.currentConditions.icon);
     return <Skycon className="skycon" icon={icon} />;
   }
 
   renderIfFresh(contentFunc) {
-    const nextHour = this.props.content.items[1];
-    const fiveMinsAgo = moment().subtract(5, 'minutes');
-    // check against fiveMinsAgo to account for server cached data being this old
-    if (localMomentUnix(nextHour.time).isBefore(fiveMinsAgo)) {
-      return (
-        <div>
-          <div>Unable to show recent weather information.</div>
-        </div>
-      );
+    const { currentConditions } = this.props.content;
+    if (localMomentUnix(currentConditions.time).add(20, 'minutes').isBefore()) {
+      return <div>Unable to show recent weather information.</div>;
     }
     return contentFunc.call(this);
   }
@@ -54,10 +45,10 @@ export default class WeatherTile extends TileContent {
       <div className="container-fluid">
         <div className="row">
           <div className="col-xs-5">
-            <Callout {...content} />
+            <Callout temperature={content.currentConditions.temperature} />
           </div>
           <div className="col-xs-7">
-            <Caption {...content} />
+            {content.minutelySummary}
           </div>
         </div>
         <WeatherTable items={content.items} />
@@ -70,21 +61,22 @@ export default class WeatherTile extends TileContent {
   }
 
   _getSmallBody() {
+    const { content } = this.props;
     return (
       <div>
-        <Callout {...this.props.content} />
-        <Caption {...this.props.content} />
+        <Callout temperature={content.currentConditions.temperature} />
+        <div>{content.minutelySummary}</div>
       </div>
     );
   }
 }
 
-const WeatherTable = (content) =>
+const WeatherTable = ({ items }) =>
   <div className="row text--light">
-    {content.items.map((item, i) => (
+    {_.take(items, 6).map(item => (
       <div className="col-xs-2" key={item.id}>
-        <div>{formatTime(item.time, i === 0)}</div>
-        <div>{WeatherTile.oneWordWeather(item.icon)}</div>
+        <div>{formatTime(item.time)}</div>
+        <div>{oneWordWeather(item.icon)}</div>
         <div>
           <i className="fa fa-tint" /> { Math.round(item.precipProbability * 100) }%
         </div>
@@ -92,33 +84,16 @@ const WeatherTable = (content) =>
     ))}
   </div>;
 
-function plural(i, one, many = `${one}s`) {
-  const word = i === 1 ? one : many;
-  return `${i} ${word}`;
-}
-
-const Callout = (content) => {
-  const hour = content.items[0];
-  return (
-    <div className="tile__callout row no-margins">
-      <div className="col-xs-4">
-        {Math.round(hour.temp)}°
-      </div>
-      <div className="col-xs-7">
-        <small className="table-cell">{hour.text.toLowerCase()}</small>
-      </div>
-    </div>
-  );
+WeatherTable.propTypes = {
+  items: React.PropTypes.array,
 };
 
-const Caption = (content) => {
-  const nextHour = content.items[1];
-  const diff = localMomentUnix(nextHour.time).diff(moment(), 'minutes');
-  const mins = diff < 0 ? 0 : diff;
-  return (
-    <div>
-      <div>{nextHour.text}, in {plural(mins, 'min')}</div>
-      <div>{content.daily.summary}</div>
-    </div>
-  );
+const Callout = ({ temperature }) => (
+  <span className="tile__callout">
+    {Math.round(temperature)}°
+  </span>
+);
+
+Callout.propTypes = {
+  temperature: React.PropTypes.number,
 };

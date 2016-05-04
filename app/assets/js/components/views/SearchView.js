@@ -120,6 +120,6 @@ export class SearchView extends ReactComponent {
 
 }
 
-const select = (state) => state.get('search').toJS();
+const select = (state) => state.search;
 
 export default connect(select)(SearchView);
