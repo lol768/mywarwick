@@ -1,19 +1,17 @@
 import { Hyperlink } from 'components/tiles/utilities';
 
 describe('Hyperlink', () => {
-  const props = {
-    href: "https://google.com",
-    child: "wrap me",
-  };
-  
+  const href = "https://google.com";
+  const child = "wrap me";
+
   it('wraps child in hyperlink', () => {
-    const html = shallowRender(<Hyperlink key="1" {...props} />);
+    const html = shallowRender(<Hyperlink key="1" href={href} >{ child }</Hyperlink>);
     html.type.should.equal('a');
-    expect(html).jsx.to.include(<span>wrap me</span>);
+    expect(html).jsx.to.include(child);
   });
 
   it('returns child as React element if href null', () => {
-    const html = shallowRender(<Hyperlink key="1" {...props} href={null} />);
+    const html = shallowRender(<Hyperlink key="1" href={null} >{ child }</Hyperlink>);
     html.type.should.equal('span');
     html.props.children.should.equal('wrap me');
   });
