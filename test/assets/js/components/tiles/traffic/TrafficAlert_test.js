@@ -8,18 +8,13 @@ describe('TrafficAlert', () => {
       href: 'http://www2.warwick.ac.uk/services/campus-support/alerts/herons',
     };
 
-    const jsx = (
-      <TrafficAlert {...props} />
+    const html = shallowRender(<TrafficAlert {...props} />);
+
+    html.should.deep.equal(
+      <div className="traffic-alert">
+        <i className="fa fa-fw fa-exclamation-triangle"> </i>
+        <a href={props.href}>{props.title}</a>
+      </div>
     );
-
-    const html = shallowRender(jsx);
-    html.type.should.equal('div');
-
-    const [ i, a ] = html.props.children;
-    i.type.should.equal('i');
-    i.props.className.should.equal('fa fa-fw fa-exclamation-triangle');
-    a.type.should.equal('a');
-    a.props.href.should.equal(props.href);
-    a.props.children.should.equal(props.title);
   });
 });
