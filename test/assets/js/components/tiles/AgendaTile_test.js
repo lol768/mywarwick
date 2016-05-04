@@ -50,7 +50,7 @@ describe('AgendaTileItem', () => {
       'tile-list-item__title text--align-bottom'
     );
     titleInner.props.title.should.equal(props.title);
-    titleInner.props.children.props.child.should.equal(props.title);
+    findChild(titleInner, [0, 0]).should.equal(props.title);
     dateInner.should.equal('17:00');
   });
 
@@ -76,7 +76,7 @@ describe('AgendaTileItem', () => {
     locationInner.props.className.should.equal(
       'tile-list-item__location text--align-bottom text--light'
     );
-    locationInner.props.children[1].props.child.should.equal('Heronbank');
+    findChild(locationInner, [1, 0]).should.equal('Heronbank');
     locationInner.props.children[1].props.href.should.equal('https://campus.warwick.ac.uk/?slid=29129');
   })
 

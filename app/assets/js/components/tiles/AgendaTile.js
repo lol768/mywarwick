@@ -106,7 +106,7 @@ export default class AgendaTile extends TileContent {
     return (
       <div className="tile__item">
         { callout }
-        <Hyperlink child={text} href={nextEvent.href} />
+        <Hyperlink href={nextEvent.href}>{ text }</Hyperlink>
       </div>
     );
   }
@@ -135,11 +135,11 @@ export class AgendaTileItem extends React.Component {
             className={classNames('tile-list-item__title', 'text--align-bottom',
             { 'text--dotted-underline': href })}
           >
-            <Hyperlink child={title} href={href} />
+            <Hyperlink href={href} >{ title }</Hyperlink>
          </span>
           {location ?
             <span className="tile-list-item__location text--align-bottom text--light">
-           &nbsp;- <Hyperlink child={location.name} href={location.href} />
+           &nbsp;- <Hyperlink href={location.href} >{ location.name }</Hyperlink>
             </span>
             : null}
         </div>
