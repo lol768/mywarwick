@@ -19,7 +19,7 @@ export default class CourseworkTile extends ListTile {
 
     const nextAssignment = (
       <span className="tile__text">
-        Next: <Hyperlink child={text} href={href} />, due {formatDate(date)}
+        Next: <Hyperlink href={href} >{ text }</Hyperlink>, due {formatDate(date)}
       </span>
     );
 

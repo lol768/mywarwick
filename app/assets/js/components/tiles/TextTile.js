@@ -60,7 +60,7 @@ export default class TextTile extends TileContent {
         <span className="tile__text">{item.text}</span>
       </div>);
 
-      return <Hyperlink key={item.href} child={tileItem} href={item.href} />;
+      return <Hyperlink key={item.href} href={item.href} >{ tileItem }</Hyperlink>;
     });
   }
 
