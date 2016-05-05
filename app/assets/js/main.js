@@ -183,3 +183,5 @@ persisted('tileContent', tiles.loadedAllTileContent);
 store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));
 
 window.Store = store;
+
+$(window).on('contextmenu', () => window.navigator.userAgent.indexOf('Mobile') < 0);
