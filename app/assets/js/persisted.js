@@ -2,15 +2,7 @@ import { createSelector } from 'reselect';
 import log from 'loglevel';
 import _ from 'lodash';
 
-// Immutable object => plain JS object
-const defaultFreeze = x => (
-  (x !== undefined && x !== null && (typeof x === 'object') && 'toJS' in x)
-    ? x.toJS()
-    : x
-);
-
-// Identity function
-const defaultThaw = x => x;
+const identity = x => x;
 
 /**
  * Factory method for injection of interesting dependencies.
@@ -31,7 +23,7 @@ export default function init(opts) {
    * `freeze` and `thaw` are called on the data before/after it is saved/loaded
    * to/from local storage.
    */
-  return function persisted(keyPath, action, freeze = defaultFreeze, thaw = defaultThaw) {
+  return function persisted(keyPath, action, freeze = identity, thaw = identity) {
     const keyPathArray = keyPath.split('.');
     if (!action) {
       throw new Error(`Action passed to persisted for ${keyPath} was undefined`);
