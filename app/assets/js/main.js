@@ -183,3 +183,6 @@ persisted('tileContent', tiles.loadedAllTileContent);
 store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));
 
 window.Store = store;
+
+// Refresh all tile content every five minutes
+setInterval(() => store.dispatch(tiles.fetchTileContent()), 5 * 60 * 1000);
