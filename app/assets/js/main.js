@@ -44,10 +44,6 @@ localforage.config({
 const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
 
-$.getJSON('/ssotest', shouldRedirect => {
-  if (shouldRedirect) window.location = window.SSO.LOGIN_URL;
-});
-
 $(() => {
   attachFastClick(document.body);
 
@@ -109,9 +105,6 @@ SocketDatapipe.subscribe(data => {
       store.dispatch(data.activity.notification ? notifications.receivedNotification(data.activity)
         : notifications.receivedActivity(data.activity));
       break;
-    case 'who-am-i':
-      store.dispatch(user.userReceive(data.userIdentity));
-      break;
     default:
       // nowt
   }
@@ -159,7 +152,16 @@ store.dispatch(update.displayUpdateProgress);
 store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));
 
 // kicks off the whole data flow - when user is received we fetch tile data
-store.dispatch(serverpipe.fetchUserIdentity());
+serverpipe.fetchWithCredentials('/user/info')
+  .then(response => response.json())
+  .then(response => {
+    if (response.refresh) {
+      window.location = response.refresh;
+    } else {
+      store.dispatch(user.userReceive(response.user));
+      store.dispatch(user.receiveSSOLinks(response.links));
+    }
+  });
 
 // Just for access from the console
 window.Store = store;

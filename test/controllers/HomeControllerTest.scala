@@ -17,14 +17,13 @@ class HomeControllerTest extends PlaySpec with MockitoSugar with Results {
   val loginContext = Fixtures.user.loginContext(Option(ron))
 
   val metrics = mock[AppMetrics]
-  val ssoClient = new MockSSOClient(loginContext)
   val securityService = new NullSecurityService(loginContext)
   val photoService = mock[PhotoService]
   val configuration = mock[Configuration]
 
   when(configuration.getString("start.analytics.tracking-id")).thenReturn(None)
 
-  val controller = new HomeController(securityService, ssoClient, metrics, photoService, configuration)
+  val controller = new HomeController(securityService, metrics, photoService, configuration)
 
   "ApplicationController#index" should {
     "render" in {

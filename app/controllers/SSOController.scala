@@ -4,11 +4,13 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Cookie, DiscardingCookie}
+import services.SecurityService
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl.GLOBAL_LOGIN_COOKIE_NAME
 import uk.ac.warwick.sso.client.SSOToken.SSC_TICKET_TYPE
 import uk.ac.warwick.sso.client.cache.UserCache
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import uk.ac.warwick.util.core.StringUtils
+import warwick.sso.{LoginContext, SSOClient}
 
 /**
   * This is some weird SSO stuff for Start, while we're still working out
@@ -19,8 +21,12 @@ import uk.ac.warwick.util.core.StringUtils
 @Singleton
 class SSOController @Inject()(
   ssoConfig: SSOConfiguration,
-  userCache: UserCache
+  userCache: UserCache,
+  securityService: SecurityService,
+  ssoClient: SSOClient
 ) extends BaseController {
+
+  import securityService.UserAction
 
   val SSC_NAME = ssoConfig.getString("shire.sscookie.name")
   val SSC_PATH = ssoConfig.getString("shire.sscookie.path")
@@ -35,13 +41,25 @@ class SSOController @Inject()(
     * the SSC to hang around forever, so instead we check that our local cached copy
     * of the user's session is missing (meaning it probably expired away).
     */
-  def ssotest = Action { request =>
+  def info = UserAction { request =>
     val ltc = request.cookies.get(GLOBAL_LOGIN_COOKIE_NAME).filter(hasValue)
     val ssc = request.cookies.get(SSC_NAME).filter(hasValue)
 
     val refresh = ssc.exists(tokenNotInUserCache) || (ssc.isEmpty && ltc.nonEmpty)
 
-    Ok(Json.toJson(refresh))
+    val links = ssoClient.linkGenerator(request)
+    links.setTarget(s"https://${request.host}/ssotarget")
+
+    val loginUrl = links.getLoginUrl
+
+    Ok(Json.obj(
+      "refresh" -> (if (refresh) loginUrl else false),
+      "user" -> contextUserInfo(request.context),
+      "links" -> Json.obj(
+        "login" -> loginUrl,
+        "logout" -> links.getLogoutUrl
+      )
+    ))
   }
 
   def ssotarget = Action { request =>
@@ -59,6 +77,20 @@ class SSOController @Inject()(
       redirect.discardingCookies(DiscardingCookie(SSC_NAME, SSC_PATH, Some(SSC_DOMAIN)))
     }
   }
+
+  private def contextUserInfo(context: LoginContext) =
+    context.user.map(user =>
+      Json.obj(
+        "authenticated" -> true,
+        "usercode" -> user.usercode.string,
+        "name" -> user.name.full,
+        "masquerading" -> context.isMasquerading
+      )
+    ).getOrElse(
+      Json.obj(
+        "authenticated" -> false
+      )
+    )
 
   private def hasValue(cookie: Cookie): Boolean =
     StringUtils.hasText(cookie.value)

@@ -4,24 +4,15 @@ import sinon from 'sinon';
 
 describe('UtilityBar', () => {
 
-  before(() => {
-    // FIXME Rubbish that we have to set this, shouldn't rely on global state
-    window.SSO = {LOGIN_URL: 'example.com/login', LOGOUT_URL: 'example.com/logout'};
-  });
-
-  after(() => {
-    window.SSO = undefined;
-  });
-
   it('renders nothing when empty', () => {
-    let bar = <UtilityBar user={{empty:true}}/>;
+    let bar = <UtilityBar user={{ empty: true, links: { login: '', logout: '' } }}/>;
     let result = shallowRender(bar);
     expect(result.type).to.equal('ul');
     expect(result.props.children).to.be.null;
   });
 
   it('renders Sign in link when we have no user', () => {
-    let bar = <UtilityBar />;
+    let bar = <UtilityBar user={{ authenticated: false, links: { login: '', logout: '' } }} />;
     let result = shallowRender(bar);
     expect(result.type).to.eql('ul');
     const li = result.props.children;
@@ -30,8 +21,8 @@ describe('UtilityBar', () => {
   });
 
   it('renders name when we are signed in on desktop', () => {
-    const data = {name: 'Ron Swanson', authenticated: true};
-    const bar = <UtilityBar user={{data}}/>;
+    const data = { name: 'Ron Swanson', authenticated: true };
+    const bar = <UtilityBar user={{ data, links: { login: '', logout: '' } }}/>;
     const result = shallowRender(bar);
     expect(result).to.have.property('type', 'ul');
     const link = result.props.children.props.children;
@@ -43,7 +34,10 @@ describe('UtilityBar', () => {
   it('renders image when we are signed in on mobile', () => {
     const props = {
       layoutClassName: 'mobile',
-      user: {data: {name: 'Ron Swanson', authenticated: true}}
+      user: {
+        data: { name: 'Ron Swanson', authenticated: true },
+        links: { login: '', logout: '' },
+      },
     };
     const bar = <UtilityBar {...props} />;
     const result = shallowRender(bar);

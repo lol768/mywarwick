@@ -48,7 +48,7 @@ PUT         /api/tiles                                    @controllers.api.Tiles
 
 POST        /api/errors/js                                @controllers.api.ErrorsController.js
 
-GET         /ssotest                                      @controllers.SSOController.ssotest
+GET         /user/info                                    @controllers.SSOController.info
 GET         /ssotarget                                    @controllers.SSOController.ssotarget
 
 POST        /api/push/apns/subscribe                      @controllers.api.APNSPushNotificationsController.subscribe

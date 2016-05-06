@@ -29,7 +29,7 @@ export default class UtilityBar extends ReactComponent {
 
   signInLink() {
     return (
-      <a href={window.SSO.LOGIN_URL} key="signInLink" className="sign-in-link">
+      <a href={this.props.user.links.login} key="signInLink" className="sign-in-link">
         Sign in
       </a>
     );
@@ -64,8 +64,8 @@ export default class UtilityBar extends ReactComponent {
         className="account-link"
         href="//warwick.ac.uk/myaccount"
         data-toggle="id7:account-popover"
-        data-logoutlink={window.SSO.LOGOUT_URL}
-        data-loginlink={window.SSO.LOGIN_URL}
+        data-loginlink={this.props.user.links.login}
+        data-logoutlink={this.props.user.links.logout}
       >
         { link }
         <span className="caret"></span>
