@@ -3,35 +3,35 @@ import 'core-js/modules/es6.object.assign';
 import initErrorReporter from './errorreporter';
 initErrorReporter();
 
-import attachFastClick from 'fastclick';
 import $ from 'jquery';
 import _ from 'lodash';
-import localforage from 'localforage';
 import moment from 'moment';
 import log from 'loglevel';
 import * as es6Promise from 'es6-promise';
+import attachFastClick from 'fastclick';
+import localforage from 'localforage';
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { browserHistory } from 'react-router';
+import { syncHistoryWithStore } from 'react-router-redux';
 
 import * as notificationsGlue from './notifications-glue';
 import * as pushNotifications from './push-notifications';
 import * as serverpipe from './serverpipe';
-
+import persistedLib from './persisted';
+import SocketDatapipe from './SocketDatapipe';
 import * as notifications from './state/notifications';
 import * as notificationMetadata from './state/notification-metadata';
 import * as tiles from './state/tiles';
 import * as update from './state/update';
 import * as user from './state/user';
 import * as ui from './state/ui';
-
-import persistedLib from './persisted';
-import SocketDatapipe from './SocketDatapipe';
-import { browserHistory } from 'react-router';
-import { syncHistoryWithStore } from 'react-router-redux';
-
-import root from './components/root';
-
 import * as analytics from './analytics';
-
+import store from './store';
+import AppRoot from './components/AppRoot';
 import bridge from './bridge';
+
 bridge({ store, tiles });
 
 log.enableAll(false);
@@ -62,7 +62,7 @@ $(() => {
   }
 
   $(document).tooltip({
-    selector: '.toggle-toolt  ip',
+    selector: '.toggle-tooltip',
     container: 'body',
     trigger: 'click',
   });
@@ -80,7 +80,10 @@ $(() => {
     }
   });
 
-  ReactDOM.render(<root />, document.getElementById('app-container'));
+  ReactDOM.render(
+    <AppRoot history={history} />,
+    document.getElementById('app-container')
+  );
 });
 
 /*

@@ -1,13 +1,13 @@
-import { Application } from 'components/Application';
+import { AppLayout } from 'components/AppLayout';
 import TabBar from 'components/ui/TabBar';
 import TabBarItem from 'components/ui/TabBarItem';
 
-describe('Application', () => {
+describe('AppLayout', () => {
 
   it('includes a tab bar item mobile', () => {
     // because we have an implicit dependency on the react router.
     const location = { pathname: '/' };
-    const result = shallowRender(<Application
+    const result = shallowRender(<AppLayout
       location={location}
       layoutClassName="mobile"
       user={({})}

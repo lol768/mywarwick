@@ -11,7 +11,7 @@ import log from 'loglevel';
 
 import { getNumItemsSince } from '../stream';
 
-export class Application extends ReactComponent {
+export class AppLayout extends ReactComponent {
 
   constructor(props) {
     super();
@@ -24,7 +24,7 @@ export class Application extends ReactComponent {
 
     const user = this.props.user;
 
-    log.debug('Application.render');
+    log.debug('AppLayout.render');
 
     return (
       <ID7Layout path={ location.pathname }>
@@ -69,4 +69,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Application);
+export default connect(mapStateToProps, mapDispatchToProps)(AppLayout);
