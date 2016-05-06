@@ -4,11 +4,16 @@ import log from 'loglevel';
 export const USER_LOAD = 'USER_LOAD';
 export const USER_RECEIVE = 'USER_RECEIVE';
 export const USER_CLEAR = 'USER_CLEAR';
+export const SSO_LINKS_RECEIVE = 'SSO_LINKS_RECEIVE';
 
 const initialState = {
   data: {},
   authoritative: false,
   empty: true,
+  links: {
+    login: null,
+    logout: null,
+  },
 };
 
 export function reducer(state = initialState, action) {
@@ -25,7 +30,13 @@ export function reducer(state = initialState, action) {
         empty: false,
       };
     case USER_CLEAR:
-      return initialState;
+      return { ...initialState,
+        links: state.links,
+      };
+    case SSO_LINKS_RECEIVE:
+      return { ...state,
+        links: action.links,
+      };
     default:
       return state;
   }
@@ -42,6 +53,13 @@ function receiveUserIdentity(data) {
   return {
     type: USER_RECEIVE,
     data,
+  };
+}
+
+export function receiveSSOLinks(links) {
+  return {
+    type: SSO_LINKS_RECEIVE,
+    links,
   };
 }
 

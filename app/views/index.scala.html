@@ -1,5 +1,4 @@
-@import uk.ac.warwick.sso.client.core.LinkGenerator
-@()(implicit linkGenerator: LinkGenerator, analyticsTrackingId: Option[AnalyticsTrackingID])
+@()(implicit analyticsTrackingId: Option[AnalyticsTrackingID])
 
 @common.htmlelement {
   <head>
@@ -11,13 +10,6 @@
         data-analytics-tracking-id="@{trackingId.string}"
         }
     ></div>
-    <script>
-      // FIXME refactor this away
-      window.SSO = {
-        LOGIN_URL: '@Html(linkGenerator.getLoginUrl)',
-        LOGOUT_URL: '@Html(linkGenerator.getLogoutUrl)'
-      };
-    </script>
     <script src="@routes.Assets.versioned("js/bundle.js")"></script>
   </body>
 }
