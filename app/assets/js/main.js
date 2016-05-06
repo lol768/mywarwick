@@ -10,11 +10,7 @@ import localforage from 'localforage';
 import moment from 'moment';
 import log from 'loglevel';
 import * as es6Promise from 'es6-promise';
-import { Provider } from 'react-redux';
-import ReactDOM from 'react-dom';
-import React from 'react';
-import store from './store';
-import Application from './components/Application';
+
 import * as notificationsGlue from './notifications-glue';
 import * as pushNotifications from './push-notifications';
 import * as serverpipe from './serverpipe';
@@ -28,15 +24,11 @@ import * as ui from './state/ui';
 
 import persistedLib from './persisted';
 import SocketDatapipe from './SocketDatapipe';
-import { Router, Route, IndexRoute, IndexRedirect, browserHistory } from 'react-router';
+import { browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
 
-import NewsView from './components/views/NewsView';
-import MeView from './components/views/MeView';
-import TileView from './components/views/TileView';
-import ActivityView from './components/views/ActivityView';
-import NotificationsView from './components/views/NotificationsView';
-import SearchView from './components/views/SearchView';
+import root from './components/root';
+
 import * as analytics from './analytics';
 
 import bridge from './bridge';
@@ -52,11 +44,6 @@ localforage.config({
 const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
 
-store.dispatch(ui.updateUIContext());
-$(() => {
-  $(window).on('resize', () => store.dispatch(ui.updateUIContext()));
-});
-
 $.getJSON('/ssotest', shouldRedirect => {
   if (shouldRedirect) window.location = window.SSO.LOGIN_URL;
 });
@@ -64,34 +51,18 @@ $.getJSON('/ssotest', shouldRedirect => {
 $(() => {
   attachFastClick(document.body);
 
+  window.addEventListener('resize', () => store.dispatch(ui.updateUIContext()));
+
   window.addEventListener('online', () =>
     store.dispatch(notifications.fetch())
   );
-
-  ReactDOM.render(
-    <Provider store={store}>
-      <Router history={history}>
-        <Route path="/" component={Application}>
-          <IndexRoute component={MeView} />
-          <Route path="tiles" component={MeView}>
-            <IndexRedirect to="/" />
-            <Route path=":id" component={TileView} />
-          </Route>
-          <Route path="notifications" component={NotificationsView} />
-          <Route path="activity" component={ActivityView} />
-          <Route path="news" component={NewsView} />
-          <Route path="search" component={SearchView} />
-        </Route>
-      </Router>
-    </Provider>,
-    document.getElementById('app-container'));
 
   if (window.navigator.userAgent.indexOf('Mobile') >= 0) {
     $('html').addClass('mobile');
   }
 
   $(document).tooltip({
-    selector: '.toggle-tooltip',
+    selector: '.toggle-toolt  ip',
     container: 'body',
     trigger: 'click',
   });
@@ -108,6 +79,8 @@ $(() => {
       $('.toggle-tooltip').tooltip('hide').removeClass('tooltip-active');
     }
   });
+
+  ReactDOM.render(<root />, document.getElementById('app-container'));
 });
 
 /*
@@ -146,9 +119,25 @@ SocketDatapipe.subscribe(data => {
   }
 });
 
-store.dispatch(update.displayUpdateProgress);
+/** Fetching/storing locally persisted data */
 
 const freezeStream = stream => _(stream).values().flatten().value();
+const freezeDate = (d) => ((!!d && 'format' in d) ? d.format() : d);
+const thawDate = (d) => (!!d ? moment(d) : d);
+
+const persisted = persistedLib({ store, localforage });
+
+persisted('notificationsLastRead.date', notificationMetadata.loadedNotificationsLastRead,
+  freezeDate, thawDate);
+
+persisted('activities', notifications.fetchedActivities, freezeStream);
+persisted('notifications', notifications.fetchedNotifications, freezeStream);
+
+persisted('tiles.data', tiles.fetchedTiles);
+persisted('tileContent', tiles.loadedAllTileContent);
+
+
+/** Initial requests for data */
 
 const loadPersonalisedDataFromServer = _.once(() => {
   store.dispatch(notifications.fetch());
@@ -164,22 +153,11 @@ store.subscribe(() => {
   }
 });
 
-store.dispatch(serverpipe.fetchUserIdentity());
-
-const freezeDate = (d) => ((!!d && 'format' in d) ? d.format() : d);
-const thawDate = (d) => (!!d ? moment(d) : d);
-
-const persisted = persistedLib({ store, localforage });
-
-persisted('notificationsLastRead.date', notificationMetadata.loadedNotificationsLastRead,
-  freezeDate, thawDate);
-
-persisted('activities', notifications.fetchedActivities, freezeStream);
-persisted('notifications', notifications.fetchedNotifications, freezeStream);
-
-persisted('tiles.data', tiles.fetchedTiles);
-persisted('tileContent', tiles.loadedAllTileContent);
-
+store.dispatch(ui.updateUIContext());
+store.dispatch(update.displayUpdateProgress);
 store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));
+
+// kicks off the whole data flow - when user is received we fetch tile data
+store.dispatch(serverpipe.fetchUserIdentity());
 
 window.Store = store;
