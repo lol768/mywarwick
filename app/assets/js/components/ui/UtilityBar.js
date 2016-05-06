@@ -52,9 +52,11 @@ export default class UtilityBar extends ReactComponent {
     );
   }
 
-  accountLink(user) {
+  accountLink() {
     const isMobile = this.props.layoutClassName === 'mobile';
 
+    const ssoLinks = this.props.user.links;
+    const user = this.props.user.data || {};
     const link = isMobile ? this.renderPhoto(user) : user.name;
 
     return (
@@ -64,8 +66,8 @@ export default class UtilityBar extends ReactComponent {
         className="account-link"
         href="//warwick.ac.uk/myaccount"
         data-toggle="id7:account-popover"
-        data-loginlink={this.props.user.links.login}
-        data-logoutlink={this.props.user.links.logout}
+        data-loginlink={ssoLinks.login}
+        data-logoutlink={ssoLinks.logout}
       >
         { link }
         <span className="caret"></span>
@@ -80,7 +82,7 @@ export default class UtilityBar extends ReactComponent {
     return (
       <ul>
         {!user.empty ?
-          <li>{ userData.authenticated ? this.accountLink(userData) : this.signInLink() }</li>
+          <li>{ userData.authenticated ? this.accountLink() : this.signInLink() }</li>
           : null}
       </ul>
     );
