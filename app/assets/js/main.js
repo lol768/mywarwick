@@ -51,9 +51,9 @@ $.getJSON('/ssotest', shouldRedirect => {
 $(() => {
   attachFastClick(document.body);
 
-  window.addEventListener('resize', () => store.dispatch(ui.updateUIContext()));
+  $(window).on('resize', () => store.dispatch(ui.updateUIContext()));
 
-  window.addEventListener('online', () =>
+  $(window).on('online', () =>
     store.dispatch(notifications.fetch())
   );
 
@@ -79,11 +79,6 @@ $(() => {
       $('.toggle-tooltip').tooltip('hide').removeClass('tooltip-active');
     }
   });
-
-  ReactDOM.render(
-    <AppRoot history={history} />,
-    document.getElementById('app-container')
-  );
 });
 
 /*
@@ -163,4 +158,11 @@ store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getSt
 // kicks off the whole data flow - when user is received we fetch tile data
 store.dispatch(serverpipe.fetchUserIdentity());
 
+// Just for access from the console
 window.Store = store;
+
+// Actually render the app
+ReactDOM.render(
+  <AppRoot history={history} />,
+  document.getElementById('app-container')
+);
