@@ -16,6 +16,8 @@ class SSOControllerTest extends PlaySpec with MockitoSugar with Results {
   val userCache = mock[UserCache]
 
   baseConfig.setProperty("shire.sscookie.name", "Start-SSC")
+  baseConfig.setProperty("shire.sscookie.path", "/")
+  baseConfig.setProperty("shire.sscookie.domain", "example.warwick.ac.uk")
 
   val controller = new SSOController(ssoConfig, userCache)
 
