@@ -47,6 +47,8 @@ history.listen(location => analytics.track(location.pathname));
 $(() => {
   attachFastClick(document.body);
 
+  $(window).on('contextmenu', () => window.navigator.userAgent.indexOf('Mobile') < 0);
+
   $(window).on('resize', () => store.dispatch(ui.updateUIContext()));
 
   $(window).on('online', () =>
