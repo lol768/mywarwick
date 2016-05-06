@@ -1,7 +1,7 @@
 import log from 'loglevel';
 
 import thunk from 'redux-thunk';
-import { createStore, applyMiddleware, combineReducers } from 'redux';
+import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
 import { browserHistory } from 'react-router';
 import { routerMiddleware, routerReducer } from 'react-router-redux';
 import { unstable_batchedUpdates } from 'react-dom'; // eslint-disable-line camelcase
@@ -32,10 +32,13 @@ const logger = (/* store */) => next => action => {
 export default createStore(
   reducer,
   initialState,
-  applyMiddleware(
-    thunk,
-    logger,
-    routerMiddleware(browserHistory),
-    batchedUpdatesMiddleware
+  compose(
+    applyMiddleware(
+      thunk,
+      logger,
+      routerMiddleware(browserHistory),
+      batchedUpdatesMiddleware
+    ),
+    window.devToolsExtension ? window.devToolsExtension() : f => f
   )
 );
