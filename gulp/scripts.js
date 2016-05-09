@@ -78,6 +78,18 @@ const SCRIPTS = {
   'bundle.js': 'main.js',
 };
 
+const cachedAssets = _.map([
+  '/css/main.css',
+  '/js/bundle.js',
+  '/lib/id7/fonts/fontawesome-webfont.ttf',
+  '/lib/id7/fonts/fontawesome-webfont.woff',
+  '/lib/id7/images/masthead-logo-bleed-sm*',
+  '/lib/id7/images/masthead-logo-bleed-xs*',
+  '/lib/id7/images/newwindow.gif',
+  '/lib/id7/images/shim.gif',
+  '/lib/id7/js/id7-bundle.min.js',
+], (asset) => `${paths.assetsOut}${asset}`);
+
 function cacheName(name) {
   return name.replace('.js', '');
 }
@@ -124,8 +136,7 @@ function generateServiceWorker(watch) {
     handleFetch: OFFLINE_WORKERS,
     staticFileGlobs: [
       'public/**/*',
-      `${paths.assetsOut}/**/!(*.map|appcache.manifest|*-worker.js|swagger.json)`,
-    ],
+    ].concat(cachedAssets),
     stripPrefixRegex: '(target/gulp|public)',
     replacePrefix: '/assets',
     ignoreUrlParametersMatching: [/^v$/],
@@ -158,14 +169,10 @@ function generateServiceWorker(watch) {
 // Not strictly a script thing, but here it is in scripts.js.
 function generateAppcache() {
   if (OFFLINE_WORKERS) {
-    const cacheableAssets = gulp.src([
-      `${paths.assetsOut}/**/*`,
-      `!${paths.assetsOut}/**/*.map`, // don't cache source maps
-      `!${paths.assetsOut}/**/*-worker.js`, // don't cache service workers
-      `!${paths.assetsOut}/**/swagger.json`,
-    ], {
-      base: paths.assetsOut,
-    });
+    const cacheableAssets = merge(
+      gulp.src(cachedAssets, { base: paths.assetsOut, }),
+      gulp.src(['public/**/*'], { base: 'public' })
+    );
 
     return getFontAwesomeVersion().then(faVersion =>
       cacheableAssets
@@ -182,7 +189,6 @@ function generateAppcache() {
             '/notifications',
             '/news',
             '/search',
-            '/assets/images/no-photo.png'
           ],
           hash: true,
           exclude: 'appcache.manifest',
