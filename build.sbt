@@ -25,7 +25,7 @@ val appDeps = Seq(
   evolutions,
   "com.typesafe.play" %% "anorm" % "2.4.0",
   "com.oracle" % "ojdbc6" % "11.2.0.3.0",
-  "uk.ac.warwick.sso" %% "sso-client-play" % "2.14",
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.17",
   "uk.ac.warwick.play-utils" %% "anorm" % "1.2",
   "com.typesafe.akka" %% "akka-cluster" % "2.4.0",
   "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.0",

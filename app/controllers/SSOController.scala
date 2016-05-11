@@ -26,7 +26,7 @@ class SSOController @Inject()(
   ssoClient: SSOClient
 ) extends BaseController {
 
-  import securityService.UserAction
+  import ssoClient.Lenient
 
   val SSC_NAME = ssoConfig.getString("shire.sscookie.name")
   val SSC_PATH = ssoConfig.getString("shire.sscookie.path")
@@ -41,7 +41,7 @@ class SSOController @Inject()(
     * the SSC to hang around forever, so instead we check that our local cached copy
     * of the user's session is missing (meaning it probably expired away).
     */
-  def info = UserAction { request =>
+  def info = Lenient.disallowRedirect { request =>
     val ltc = request.cookies.get(GLOBAL_LOGIN_COOKIE_NAME).filter(hasValue)
     val ssc = request.cookies.get(SSC_NAME).filter(hasValue)
 
