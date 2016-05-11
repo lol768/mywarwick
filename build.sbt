@@ -42,7 +42,7 @@ val testDeps = Seq(
   "org.scalatest" %% "scalatest" % "2.2.5",
   "org.scalatestplus" %% "play" % "1.4.0-M4",
   "com.typesafe.akka" %% "akka-testkit" % "2.4.0",
-  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.14",
+  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.17",
   "org.eclipse.jetty" % "jetty-server" % "9.3.6.v20151106",
   // Note - from 2.53 selenium-htmlunit is not bundled so will need to
   // play with dependencies if you need to upgrade.

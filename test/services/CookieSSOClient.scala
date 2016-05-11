@@ -49,7 +49,9 @@ class CookieSSOClient @Inject() (
   override def RequireRole(role: RoleName, otherwise: AuthRequest[_] => Result) = Strict andThen requireCondition(_.context.userHasRole(role), otherwise)
   override def RequireActualUserRole(role: RoleName, otherwise: AuthRequest[_] => Result) = Strict andThen requireCondition(_.context.actualUserHasRole(role), otherwise)
 
-  object FindUser extends ActionBuilder[AuthRequest] {
+  object FindUser extends SSOActionBuilder {
+    def disallowRedirect = this
+
     override def invokeBlock[A](request: Request[A], block: (AuthenticatedRequest[A]) => Future[Result]): Future[Result] = {
       val ctx = getLoginContext(request)
       block(new AuthenticatedRequest(ctx, request))

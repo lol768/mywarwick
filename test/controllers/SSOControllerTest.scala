@@ -26,8 +26,7 @@ class SSOControllerTest extends PlaySpec with MockitoSugar with Results {
   def controller(user: Option[User] = None) = {
     val loginContext = Fixtures.user.loginContext(user)
     val ssoClient = new MockSSOClient(loginContext)
-    val securityService = new SecurityServiceImpl(ssoClient, mock[BasicAuth], mock[CacheApi])
-    new SSOController(ssoConfig, userCache, securityService, ssoClient)
+    new SSOController(ssoConfig, userCache, ssoClient)
   }
 
   val LOGIN_URL = "https://signon.example.com/login"
