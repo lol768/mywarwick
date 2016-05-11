@@ -4,7 +4,6 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Cookie, DiscardingCookie}
-import services.SecurityService
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl.GLOBAL_LOGIN_COOKIE_NAME
 import uk.ac.warwick.sso.client.SSOToken.SSC_TICKET_TYPE
 import uk.ac.warwick.sso.client.cache.UserCache
@@ -22,7 +21,6 @@ import warwick.sso.{LoginContext, SSOClient}
 class SSOController @Inject()(
   ssoConfig: SSOConfiguration,
   userCache: UserCache,
-  securityService: SecurityService,
   ssoClient: SSOClient
 ) extends BaseController {
 
