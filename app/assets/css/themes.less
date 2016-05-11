@@ -67,29 +67,18 @@
   });
 }
 
-// Mixin to generate classes for tiles. Uses contrast() to choose a readable text colour -
-// that may work most of the time but we may want to be more selective with some themes.
+// Mixin to generate classes for tiles
 .tile-theme(@c0, @c1, @c2, @c3) {
-  .do-tile(@i) {
-    .colour-@{i} {
-      background-color: ~"@{c@{i}";
-      color: contrast(~"@{c@{i}}");
-    }
-  }
   .colour-0 {
     background-color: @c0;
-    color: contrast(@c0);
   }
   .colour-1 {
     background-color: @c1;
-    color: contrast(@c1);
   }
   .colour-2 {
     background-color: @c2;
-    color: contrast(@c2);
   }
   .colour-3 {
     background-color: @c3;
-    color: contrast(@c3);
   }
 }
