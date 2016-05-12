@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import classNames from 'classnames';
-import { Hyperlink } from './utilities';
+import Hyperlink from '../ui/Hyperlink';
 
 import _ from 'lodash';
 

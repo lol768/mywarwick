@@ -6,7 +6,7 @@ import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';
 import _ from 'lodash';
 import classNames from 'classnames';
-import { Hyperlink } from './utilities';
+import Hyperlink from '../ui/Hyperlink';
 
 const groupItemsForAgendaTile = {
 

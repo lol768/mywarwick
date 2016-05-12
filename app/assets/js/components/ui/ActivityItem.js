@@ -1,46 +1,47 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
-
+import React, { PropTypes } from 'react';
+import Hyperlink from './Hyperlink';
 import formatDate from '../../dateFormatter';
-
 import classnames from 'classnames';
-
 import AppIcon from './AppIcon';
 
-export default class ActivityItem extends ReactComponent {
+const ActivityItem = (props) => {
+  const classNames = classnames('activity-item',
+    {
+      'activity-item--with-url': props.url,
+      'activity-item--unread': props.unread,
+    }
+  );
 
-  render() {
-    const content = (
-      <div className="media">
-        <div className="media-left">
-          <AppIcon app={this.props.provider} size="lg" />
+  return (
+    <div className={ classNames }>
+      <Hyperlink href={ props.url }>
+        <div className="media">
+          <div className="media-left">
+            <AppIcon app={ props.provider } size="lg" />
+          </div>
+          <div className="media-body">
+            <div className="activity-item__title">{ props.title }</div>
+            <div className="activity-item__text">{ props.text }</div>
+
+            <div className="activity-item__date">
+              { formatDate(props.date, undefined, props.forceDisplayDay) }
+            </div>
+          </div>
         </div>
-        <div className="media-body">
-          <span className="activity-item__date">
-            { formatDate(this.props.date, undefined, this.props.forceDisplayDay) }
-          </span>
+      </Hyperlink>
+    </div>
+  );
+};
 
-          <span className="activity-item__title">{ this.props.title }</span>
-          <span className="activity-item__text">{ this.props.text }</span>
-        </div>
-      </div>
-    );
+export default ActivityItem;
 
-    const classNames = classnames(
-      'activity-item',
-      {
-        'activity-item--with-url': this.props.url,
-        'activity-item--unread': this.props.unread,
-      }
-    );
-
-    return (
-      <div className={ classNames }>
-        { this.props.url ?
-          <a href={ this.props.url }>{content}</a>
-          : content }
-      </div>
-    );
-  }
-
-}
+ActivityItem.displayName = 'ActivityItem';
+ActivityItem.propTypes = {
+  provider: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  text: PropTypes.string,
+  date: PropTypes.string.isRequired,
+  url: PropTypes.string,
+  unread: PropTypes.bool,
+  forceDisplayDay: PropTypes.bool,
+};

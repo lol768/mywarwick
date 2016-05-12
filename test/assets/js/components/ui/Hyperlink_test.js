@@ -1,5 +1,4 @@
-
-import { Hyperlink } from 'components/tiles/utilities';
+import Hyperlink from 'components/ui/Hyperlink';
 
 describe('Hyperlink', () => {
 
