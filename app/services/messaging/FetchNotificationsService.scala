@@ -28,7 +28,7 @@ class FetchNotificationsService @Inject()(
     val pushNotifications = getNotificationsSinceLastFetch(token).map(notification =>
       Json.obj(
         "title" -> JsString(notification.title),
-        "body" -> JsString(notification.text)
+        "body" -> JsString(notification.text.orNull)
       )
     )
     Json.toJson(pushNotifications)
