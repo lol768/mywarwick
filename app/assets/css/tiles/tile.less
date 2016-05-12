@@ -14,11 +14,17 @@
 .tile--hidden {
   .tile__body {
     text-align: center;
-    margin-top: 22px;
-    .fa {
-      font-size: 36px;
-    }
   }
+}
+
+.tile--hidden__icon {
+  margin-top: @tile-height / 5;
+  font-size: @tile-height / 3;
+  margin-bottom: @tile-height / 10;
+}
+
+.tile--hidden__title {
+  font-size: @tile-height / 8;
 }
 
 .react-grid-item--editing {

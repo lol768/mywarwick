@@ -145,7 +145,7 @@ export default class Tile extends Component {
           <div
             className="tile__edit-control top-left"
             onClick={ this.props.onHide }
-            title="Hide tile"
+            title={ `Hide ${title}` }
           >
             <i className="fa fa-fw fa-minus"> </i>
           </div>
