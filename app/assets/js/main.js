@@ -155,16 +155,20 @@ store.dispatch(update.displayUpdateProgress);
 store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));
 
 // kicks off the whole data flow - when user is received we fetch tile data
-serverpipe.fetchWithCredentials('/user/info')
-  .then(response => response.json())
-  .then(response => {
-    if (response.refresh) {
-      window.location = response.refresh;
-    } else {
-      store.dispatch(user.userReceive(response.user));
-      store.dispatch(user.receiveSSOLinks(response.links));
-    }
-  });
+function fetchUserInfo() {
+  serverpipe.fetchWithCredentials('/user/info')
+    .then(response => response.json())
+    .then(response => {
+      if (response.refresh) {
+        window.location = response.refresh;
+      } else {
+        store.dispatch(user.userReceive(response.user));
+        store.dispatch(user.receiveSSOLinks(response.links));
+      }
+    })
+    .catch(() => setTimeout(fetchUserInfo, 5000));
+}
+fetchUserInfo();
 
 // Just for access from the console
 window.Store = store;
