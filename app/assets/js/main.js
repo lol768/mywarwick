@@ -129,6 +129,7 @@ persisted('notifications', notifications.fetchedNotifications, freezeStream);
 persisted('tiles.data', tiles.fetchedTiles);
 persisted('tileContent', tiles.loadedAllTileContent);
 
+persisted('user.links', user.receiveSSOLinks);
 
 /** Initial requests for data */
 
