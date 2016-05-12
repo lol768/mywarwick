@@ -37,6 +37,10 @@ class ID7Layout extends ReactComponent {
     this.setBodyTheme(this.props.colourTheme);
   }
 
+  componentDidMount() {
+    this.updateHeaderHeight();
+  }
+
   componentWillReceiveProps(nextProps) {
     nextProps.dispatch(ui.updateUIContext());
 
@@ -45,11 +49,15 @@ class ID7Layout extends ReactComponent {
   }
 
   componentDidUpdate(prevProps) {
-    const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
-    $('.id7-main-content-area').css('padding-top', headerHeight);
+    this.updateHeaderHeight();
     if (prevProps.colourTheme !== this.props.colourTheme) {
       this.setBodyTheme(this.props.colourTheme, prevProps.colourTheme);
     }
+  }
+
+  updateHeaderHeight() {
+    const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
+    $('.id7-main-content-area').css('padding-top', headerHeight);
   }
 
   /** Set the theme on the body element, so that we can style everything. */
