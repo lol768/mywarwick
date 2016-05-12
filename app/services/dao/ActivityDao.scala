@@ -171,7 +171,7 @@ class ActivityDaoImpl @Inject()(
       get[String]("PROVIDER_ID") ~
       get[String]("TYPE") ~
       get[String]("TITLE") ~
-      get[String]("TEXT") ~
+      get[Option[String]]("TEXT") ~
       get[Option[String]]("URL") ~
       get[Option[String]]("REPLACED_BY_ID") ~
       get[DateTime]("GENERATED_AT") ~
