@@ -2,7 +2,7 @@ import React from 'react';
 import ListTile from './ListTile';
 import formatDate, { localMoment } from '../../dateFormatter';
 import _ from 'lodash';
-import { Hyperlink } from './utilities';
+import Hyperlink from '../ui/Hyperlink';
 
 export default class CourseworkTile extends ListTile {
 
