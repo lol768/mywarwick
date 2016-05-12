@@ -16,6 +16,8 @@ import TileView from './TileView';
 import HiddenTile from '../tiles/HiddenTile';
 
 const ReactGridLayout = WidthProvider(ReactGridLayoutBase); // eslint-disable-line new-cap
+const rowHeight = 125;
+const margin = [4, 4];
 
 function getSizeFromSizeName(name) {
   const sizes = {
@@ -158,54 +160,84 @@ class MeView extends ReactComponent {
     return this.state.editing === item.i ? 0 : 200;
   }
 
-  renderTiles() {
-    const { editing } = this.state;
-    const tileComponents = this.props.tiles.map((tile) => this.renderTile(tile));
-    const hiddenTiles = this.props.hiddenTiles.map(
-      tile => <HiddenTile key={ tile.id } {...tile} onShow={() => this.onShowTile(tile)} /> // eslint-disable-line react/jsx-no-bind, max-len
+  renderHiddenTiles() {
+    const { layoutWidth } = this.props;
+    const hiddenTiles = _.sortBy(this.props.hiddenTiles, 'title');
+
+    const layout = hiddenTiles
+      .map((item, i) => ({
+        i: item.id,
+        x: i % layoutWidth,
+        y: Math.floor(i / layoutWidth),
+        w: 1,
+        h: 1,
+      }));
+
+    const hiddenTileComponents = hiddenTiles.map(tile =>
+      <div key={ tile.id }>
+        <HiddenTile {...tile} onShow={() => this.onShowTile(tile)} />
+      </div>
     );
-
-    // Show hidden tiles (if any) when editing, or if there are no visible tiles
-    const showHiddenTiles = hiddenTiles.length > 0 && (editing || tileComponents.length === 0);
-
-    const layout = this.getTileLayout(this.props.layout, this.props.layoutWidth);
 
     return (
       <div>
+        <h3>More tiles</h3>
         <ReactGridLayout
           layout={layout}
-          isDraggable
+          isDraggable={false}
           isResizable={false}
-          cols={this.props.layoutWidth}
-          rowHeight={125}
-          margin={[4, 4]}
+          cols={layoutWidth}
+          rowHeight={rowHeight}
+          margin={margin}
           useCSSTransformations
-          onLayoutChange={this.onLayoutChange}
           verticalCompact
-          draggableCancel=".tile__edit-control"
-          onDragStart={this.onDragStart}
-          getDragDelayForItem={this.getDragDelayForItem}
         >
-          {tileComponents.map(component =>
-            <div
-              key={component.props.id}
-              className={this.state.editing === component.props.id ? 'react-grid-item--editing' : ''} // eslint-disable-line max-len
-              style={{ touchAction: 'auto' }} // Allow touches to scroll (overrides react-draggable)
-            >
-              {component}
-            </div>)}
+          { hiddenTileComponents }
         </ReactGridLayout>
-        { showHiddenTiles ?
-          <div>
-            <div style={{ clear: 'both' }}></div>
-            <div>
-              <h3 style={{ marginTop: 30 }}>More tiles</h3>
-              <div>
-                {hiddenTiles}
-              </div>
-            </div>
-          </div>
-          : null }
+      </div>
+    );
+  }
+
+  renderTiles() {
+    const { hiddenTiles, layoutWidth } = this.props;
+    const visibleTiles = this.props.tiles;
+    const { editing } = this.state;
+
+    // Show hidden tiles (if any) when editing, or if there are no visible tiles
+    const showHiddenTiles = hiddenTiles.length > 0 && (editing || visibleTiles.length === 0);
+
+    const layout = this.getTileLayout(this.props.layout, layoutWidth);
+    const tileComponents = visibleTiles.map(tile =>
+      <div
+        key={tile.id}
+        className={editing === tile.id ? 'react-grid-item--editing' : ''}
+        style={{ touchAction: 'auto' }} // Allow touches to scroll (overrides react-draggable)
+      >
+        { this.renderTile(tile) }
+      </div>
+    );
+
+    return (
+      <div>
+        <div className="me-view__tiles">
+          <ReactGridLayout
+            layout={layout}
+            isDraggable
+            isResizable={false}
+            cols={layoutWidth}
+            rowHeight={rowHeight}
+            margin={margin}
+            useCSSTransformations
+            onLayoutChange={this.onLayoutChange}
+            verticalCompact
+            draggableCancel=".tile__edit-control"
+            onDragStart={this.onDragStart}
+            getDragDelayForItem={this.getDragDelayForItem}
+          >
+            { tileComponents }
+          </ReactGridLayout>
+        </div>
+        { showHiddenTiles ? this.renderHiddenTiles() : null }
       </div>
     );
   }
