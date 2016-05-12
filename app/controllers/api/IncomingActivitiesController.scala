@@ -23,8 +23,8 @@ class IncomingActivitiesController @Inject()(
   val messagesApi: MessagesApi
 ) extends BaseController with I18nSupport {
 
-  import securityService._
   import DateFormats.isoDateReads
+  import securityService._
 
   def readsPostedActivity(providerId: String, shouldNotify: Boolean): Reads[ActivityPrototype] =
     (Reads.pure(providerId) and
@@ -67,51 +67,26 @@ class IncomingActivitiesController @Inject()(
     }.get // APIAction calls this only if request.context.user is defined
 
   private def forbidden(providerId: String, user: User): Result =
-    Forbidden(API.failure("forbidden",
-      "errors" -> Json.arr(
-        Json.obj(
-          "id" -> "no-permission",
-          "message" -> s"User '${user.usercode.string}' does not have permission to post to the stream for provider '$providerId'"
-        )
-      )
-    ))
+    Forbidden(Json.toJson(API.Failure("forbidden",
+      Seq(API.Error("no-permission", s"User '${user.usercode.string}' does not have permission to post to the stream for provider '$providerId'"))
+    )))
 
   private def created(activityId: String): Result =
-    Created(API.success(
+    Created(Json.toJson(API.Success("ok", Json.obj(
       "id" -> activityId
-    ))
+    ))))
 
   private def noRecipients: Result =
-    PaymentRequired(API.failure("request_failed",
-      "errors" -> Json.arr(
-        Json.obj(
-          "id" -> "no-recipients",
-          "message" -> "No valid recipients for activity"
-        )
-      )
-    ))
+    PaymentRequired(Json.toJson(API.Failure("request_failed",
+      Seq(API.Error("no-recipients", "No valid recipients for activity"))
+    )))
 
   private def otherError: Result =
-    InternalServerError(API.failure("internal_server_error",
-      "errors" -> Json.arr(
-        Json.obj(
-          "id" -> "internal-error",
-          "message" -> "An internal error occurred"
-        )
-      )
-    ))
+    InternalServerError(Json.toJson(API.Failure("internal_server_error",
+      Seq(API.Error("internal-error", "An internal error occurred"))
+    )))
 
   private def validationError(error: JsError): Result =
-    BadRequest(API.failure("bad_request",
-      "errors" -> JsError.toFlatForm(error).map {
-        case (field, errors) =>
-          val propertyName = field.substring(4) // Remove 'obj.' from start of field name
-
-          Json.obj(
-            "id" -> s"invalid-$propertyName",
-            "message" -> errors.flatMap(_.messages).map(Messages(_, propertyName)).mkString(", ")
-          )
-      }
-    ))
+    BadRequest(Json.toJson(API.Failure("bad_request", API.Error.fromJsError(error))))
 
 }
