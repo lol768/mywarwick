@@ -1,14 +1,15 @@
 package controllers
 
-import javax.inject.{Singleton, Inject}
+import javax.inject.{Inject, Singleton}
 
 import play.api.libs.json.Json
-import play.api.mvc.{Action, Cookie}
+import play.api.mvc.{Action, Cookie, DiscardingCookie}
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl.GLOBAL_LOGIN_COOKIE_NAME
 import uk.ac.warwick.sso.client.SSOToken.SSC_TICKET_TYPE
 import uk.ac.warwick.sso.client.cache.UserCache
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import uk.ac.warwick.util.core.StringUtils
+import warwick.sso.{LoginContext, SSOClient}
 
 /**
   * This is some weird SSO stuff for Start, while we're still working out
@@ -19,10 +20,15 @@ import uk.ac.warwick.util.core.StringUtils
 @Singleton
 class SSOController @Inject()(
   ssoConfig: SSOConfiguration,
-  userCache: UserCache
+  userCache: UserCache,
+  ssoClient: SSOClient
 ) extends BaseController {
 
-  val SERVICE_SPECIFIC_COOKIE_NAME = ssoConfig.getString("shire.sscookie.name")
+  import ssoClient.Lenient
+
+  val SSC_NAME = ssoConfig.getString("shire.sscookie.name")
+  val SSC_PATH = ssoConfig.getString("shire.sscookie.path")
+  val SSC_DOMAIN = ssoConfig.getString("shire.sscookie.domain")
 
   /**
     * Returns true if we should redirect to Websignon to refresh the session.
@@ -33,14 +39,56 @@ class SSOController @Inject()(
     * the SSC to hang around forever, so instead we check that our local cached copy
     * of the user's session is missing (meaning it probably expired away).
     */
-  def ssotest = Action { request =>
+  def info = Lenient.disallowRedirect { request =>
     val ltc = request.cookies.get(GLOBAL_LOGIN_COOKIE_NAME).filter(hasValue)
-    val ssc = request.cookies.get(SERVICE_SPECIFIC_COOKIE_NAME).filter(hasValue)
+    val ssc = request.cookies.get(SSC_NAME).filter(hasValue)
 
     val refresh = ssc.exists(tokenNotInUserCache) || (ssc.isEmpty && ltc.nonEmpty)
 
-    Ok(Json.toJson(refresh))
+    val links = ssoClient.linkGenerator(request)
+    links.setTarget(s"https://${request.host}/ssotarget")
+
+    val loginUrl = links.getLoginUrl
+
+    Ok(Json.obj(
+      "refresh" -> (if (refresh) loginUrl else false),
+      "user" -> contextUserInfo(request.context),
+      "links" -> Json.obj(
+        "login" -> loginUrl,
+        "logout" -> links.getLogoutUrl
+      )
+    ))
   }
+
+  def ssotarget = Action { request =>
+    val ltc = request.cookies.get(GLOBAL_LOGIN_COOKIE_NAME).filter(hasValue)
+
+    val target = request.getQueryString("target").filter(_.startsWith("/")).getOrElse("/")
+    val redirect = Redirect(s"https://${request.host}$target")
+
+    if (ltc.nonEmpty) {
+      // We are signed in, carry on
+      redirect
+    } else {
+      // We just signed out or declined to sign in - delete the SSC because
+      // it's no longer valid
+      redirect.discardingCookies(DiscardingCookie(SSC_NAME, SSC_PATH, Some(SSC_DOMAIN)))
+    }
+  }
+
+  private def contextUserInfo(context: LoginContext) =
+    context.user.map(user =>
+      Json.obj(
+        "authenticated" -> true,
+        "usercode" -> user.usercode.string,
+        "name" -> user.name.full,
+        "masquerading" -> context.isMasquerading
+      )
+    ).getOrElse(
+      Json.obj(
+        "authenticated" -> false
+      )
+    )
 
   private def hasValue(cookie: Cookie): Boolean =
     StringUtils.hasText(cookie.value)

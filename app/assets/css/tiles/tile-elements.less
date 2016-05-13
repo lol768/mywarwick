@@ -44,6 +44,11 @@
 
 .tile__body {
   padding: 2px @tile-padding @tile-padding;
+
+  div[class*="col-"] {
+    padding-left: @tile-body-col-padding;
+    padding-right: @tile-body-col-padding;
+  }
 }
 
 .tile__callout {

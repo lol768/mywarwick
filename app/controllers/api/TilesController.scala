@@ -5,13 +5,22 @@ import javax.inject.Singleton
 import com.google.inject.Inject
 import controllers.BaseController
 import models._
-import play.api.libs.json.{JsError, JsSuccess, JsObject, Json}
+import play.api.libs.json.{JsError, JsObject, JsSuccess, Json}
 import play.api.mvc.Result
 import services.{SecurityService, TileContentService, TileService}
 import warwick.sso.User
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
+case class SaveTilesRequest(
+  tiles: Seq[UserTileSetting],
+  layout: Seq[TileLayout]
+)
+
+object SaveTilesRequest {
+  implicit val format = Json.format[SaveTilesRequest]
+}
 
 @Singleton
 class TilesController @Inject()(
@@ -23,16 +32,22 @@ class TilesController @Inject()(
   import securityService._
 
   def getLayout = UserAction { request =>
-    val tileLayout = tileService.getTilesForUser(request.context.user)
-    Ok(Json.toJson(API.Success("ok", tileLayout)))
+    val tiles = tileService.getTilesForUser(request.context.user)
+    val layout = tileService.getTileLayoutForUser(request.context.user)
+
+    Ok(Json.toJson(API.Success("ok", Json.obj(
+      "tiles" -> tiles,
+      "layout" -> layout
+    ))))
   }
 
   def saveLayout = RequiredUserAction { request =>
     request.context.user.map { user =>
       request.body.asJson.map { body =>
-        body.validate[UserTileLayout] match {
+        body.validate[SaveTilesRequest] match {
           case JsSuccess(tileLayout, _) =>
-            tileService.saveTileLayoutForUser(user, tileLayout)
+            tileService.saveTilePreferencesForUser(user, tileLayout.tiles)
+            tileService.saveTileLayoutForUser(user, tileLayout.layout)
             Ok(Json.toJson(API.Success("ok", "saved")))
           case error: JsError =>
             BadRequest(Json.toJson(API.Failure[JsObject]("error", API.Error.fromJsError(error))))
@@ -43,7 +58,7 @@ class TilesController @Inject()(
 
   def content = UserAction.async { request =>
     val tileLayout = tileService.getTilesForUser(request.context.user)
-    tilesContent(request.context.user, tileLayout.tiles)
+    tilesContent(request.context.user, tileLayout)
   }
 
   def tilesContent(user: Option[User], tiles: Seq[TileInstance]): Future[Result] = {

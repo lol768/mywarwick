@@ -1,3 +1,5 @@
+/* global clients */
+
 import log from 'loglevel';
 
 // This is mostly to force a serviceworker update if you make a change
@@ -70,17 +72,21 @@ self.addEventListener('notificationclick', event => {
   event.notification.close();
 
   event.waitUntil(
-    clients.matchAll({ //eslint-disable-line
+    clients.matchAll({
       type: 'window',
     }).then(clientList => {
       clientList.forEach(client => {
         if (/\/notifications$/i.test(client.url) && 'focus' in client) {
           return client.focus();
         }
+
+        return null;
       });
-      if (clients.openWindow) { //eslint-disable-line
-        return clients.openWindow('/notifications'); //eslint-disable-line
+      if (clients.openWindow) {
+        return clients.openWindow('/notifications');
       }
+
+      return null;
     })
   );
 });

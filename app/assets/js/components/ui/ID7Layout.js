@@ -3,6 +3,7 @@ import ReactComponent from 'react/lib/ReactComponent';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import _ from 'lodash';
+import log from 'loglevel';
 import MastheadIcon from './MastheadIcon';
 import NotificationsView from '../views/NotificationsView';
 import ActivityView from '../views/ActivityView';
@@ -17,8 +18,8 @@ import UpdatePopup from './UpdatePopup';
 import UtilityBar from './UtilityBar';
 import { connect } from 'react-redux';
 import { getNumItemsSince } from '../../stream';
-import { updateLayoutClass } from '../Application';
-import { fetchTileContent } from '../../serverpipe';
+import * as ui from '../../state/ui';
+import * as tiles from '../../state/tiles';
 import { push, goBack } from 'react-router-redux';
 
 class ID7Layout extends ReactComponent {
@@ -32,23 +33,31 @@ class ID7Layout extends ReactComponent {
   }
 
   componentWillMount() {
-    this.props.dispatch(updateLayoutClass());
+    this.props.dispatch(ui.updateUIContext());
     this.setBodyTheme(this.props.colourTheme);
   }
 
+  componentDidMount() {
+    this.updateHeaderHeight();
+  }
+
   componentWillReceiveProps(nextProps) {
-    nextProps.dispatch(updateLayoutClass());
+    nextProps.dispatch(ui.updateUIContext());
 
     const hasZoomedTile = _(nextProps.path).startsWith('/tiles/');
     $('body').toggleClass('has-zoomed-tile', hasZoomedTile);
   }
 
   componentDidUpdate(prevProps) {
-    const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
-    $('.id7-main-content-area').css('padding-top', headerHeight);
+    this.updateHeaderHeight();
     if (prevProps.colourTheme !== this.props.colourTheme) {
       this.setBodyTheme(this.props.colourTheme, prevProps.colourTheme);
     }
+  }
+
+  updateHeaderHeight() {
+    const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
+    $('.id7-main-content-area').css('padding-top', headerHeight);
   }
 
   /** Set the theme on the body element, so that we can style everything. */
@@ -61,7 +70,7 @@ class ID7Layout extends ReactComponent {
   goToHome(e) {
     e.preventDefault();
     this.props.dispatch(push('/'));
-    this.props.dispatch(fetchTileContent());
+    this.props.dispatch(tiles.fetchTileContent());
   }
 
   goToNotification() {
@@ -80,17 +89,22 @@ class ID7Layout extends ReactComponent {
     const user = this.props.user.data;
 
     if (user.masquerading) {
-      return <MasqueradeNotice masqueradingAs={user}/>;
+      return <MasqueradeNotice masqueradingAs={user} />;
     }
+
+    return null;
   }
 
   renderNotificationPermissionRequest() {
     if ('Notification' in window && Notification.permission === 'default') {
-      return <PermissionRequest isDisabled={ !this.props.user.data.authenticated }/>;
+      return <PermissionRequest isDisabled={ !this.props.user.data.authenticated } />;
     }
+
+    return null;
   }
 
   renderMobile() {
+    const { user, zoomedTile, path } = this.props;
     return (
       <div>
         <a className="sr-only sr-only-focusable" href="#main">Skip to main content</a>
@@ -99,10 +113,10 @@ class ID7Layout extends ReactComponent {
             <header className="id7-page-header" ref="header">
               { this.renderMasqueradeNotice() }
 
-              <MastheadMobile user={this.props.user}
-                zoomedTile={this.props.zoomedTile}
+              <MastheadMobile user={user}
+                zoomedTile={zoomedTile}
                 onBackClick={this.onBackClick}
-                path={this.props.path}
+                path={path}
               />
             </header>
           </div>
@@ -148,7 +162,7 @@ class ID7Layout extends ReactComponent {
               { this.renderMasqueradeNotice() }
               <div className="id7-utility-masthead">
                 <nav className="id7-utility-bar" id="utility-bar-container">
-                  <UtilityBar user={this.props.user} layoutClassName="desktop"/>
+                  <UtilityBar user={user} layoutClassName="desktop" />
                 </nav>
                 <div className="id7-masthead">
                   <div className="id7-masthead-contents">
@@ -157,7 +171,7 @@ class ID7Layout extends ReactComponent {
                         <div className="id7-logo-row">
                           <div className="id7-logo">
                             <a href="/" title="Warwick homepage" onClick={ this.goToHome }>
-                              <img src="" alt="Warwick"/>
+                              <img src="" alt="Warwick" />
                             </a>
                           </div>
                           <div className="masthead-popover-icons">
@@ -169,7 +183,7 @@ class ID7Layout extends ReactComponent {
                               isDisabled={ !user.data.authenticated }
                               onMore={ this.goToNotification }
                             >
-                              <NotificationsView grouped={false}/>
+                              <NotificationsView grouped={false} />
                             </MastheadIcon>
                             <MastheadIcon
                               icon="dashboard" key="activity"
@@ -177,7 +191,7 @@ class ID7Layout extends ReactComponent {
                               isDisabled={ !user.data.authenticated }
                               onMore={ this.goToActivity }
                             >
-                              <ActivityView grouped={false}/>
+                              <ActivityView grouped={false} />
                             </MastheadIcon>
                             <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
                               <LinkBlock columns="1">
@@ -250,20 +264,25 @@ class ID7Layout extends ReactComponent {
 
   render() {
     if (this.props.layoutClassName === 'mobile') {
+      log.debug('ID7Layout.render:mobile');
       return this.renderMobile();
     }
+    if (!this.props.layoutClassName) {
+      log.warn('props.layoutClassName not set');
+    }
 
+    log.debug('ID7Layout.render:desktop');
     return this.renderDesktop();
   }
 }
 
 const select = (state) => ({
-  layoutClassName: state.get('ui').get('className'),
+  layoutClassName: state.ui.className,
   notificationsCount:
-    getNumItemsSince(state.get('notifications'), state.getIn(['notificationsLastRead', 'date'])),
-  user: state.get('user').toJS(),
-  colourTheme: state.get('ui').get('colourTheme'),
-  zoomedTile: state.getIn(['me', 'zoomedTile']),
+    getNumItemsSince(state.notifications, _(state).get(['notificationsLastRead', 'date'])),
+  user: state.user,
+  colourTheme: state.ui.colourTheme,
+  zoomedTile: state.ui.zoomedTile,
 });
 
 export default connect(select)(ID7Layout);

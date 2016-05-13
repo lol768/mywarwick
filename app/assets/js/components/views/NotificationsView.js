@@ -10,7 +10,7 @@ import InfiniteScrollable from '../ui/InfiniteScrollable';
 import { connect } from 'react-redux';
 
 import { takeFromStream, getStreamSize } from '../../stream';
-import { markNotificationsRead } from '../../notification-metadata';
+import { markNotificationsRead } from '../../state/notification-metadata';
 
 const SOME_MORE = 20;
 
@@ -116,7 +116,7 @@ class NotificationsView extends ReactComponent {
         }
         <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore }>
           <GroupedList groupBy={ this.props.grouped ? groupItemsByDate : undefined }>
-            { notifications.toJS() }
+            { notifications }
           </GroupedList>
         </InfiniteScrollable>
       </div>
@@ -127,8 +127,8 @@ class NotificationsView extends ReactComponent {
 
 function select(state) {
   return {
-    notifications: state.get('notifications'),
-    notificationsLastRead: state.get('notificationsLastRead').toJS(),
+    notifications: state.notifications,
+    notificationsLastRead: state.notificationsLastRead,
   };
 }
 

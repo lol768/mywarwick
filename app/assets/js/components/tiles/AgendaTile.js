@@ -5,6 +5,8 @@ import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';
 import _ from 'lodash';
+import classNames from 'classnames';
+import Hyperlink from '../ui/Hyperlink';
 
 const groupItemsForAgendaTile = {
 
@@ -36,7 +38,6 @@ export default class AgendaTile extends TileContent {
 
   constructor(props) {
     super(props);
-    this.onClickLink = this.onClickLink.bind(this);
     this.state = {
       defaultMaxItems: { small: null, wide: 2, large: 5 }[props.size],
     };
@@ -63,7 +64,6 @@ export default class AgendaTile extends TileContent {
 
     const events = itemsToDisplay.map(event =>
       <AgendaTileItem key={event.id}
-        onClickLink={ this.onClickLink }
         {...event}
       />
     );
@@ -79,7 +79,7 @@ export default class AgendaTile extends TileContent {
     const { content } = this.props;
 
     const nextEvent = content.items[0];
-    const truncTitle = _.trunc(nextEvent.title, { length: 30 });
+    const truncTitle = _.truncate(nextEvent.title, { length: 30 });
     const text = (
       <span className="tile__text">
         Next: {truncTitle} at {localMoment(nextEvent.start).format('HH:mm')}
@@ -106,21 +106,9 @@ export default class AgendaTile extends TileContent {
     return (
       <div className="tile__item">
         { callout }
-        { nextEvent.href ?
-          <a href={ nextEvent.href } target="_blank" onClick={ this.onClickLink }>
-            { text }
-          </a> :
-          text
-        }
+        <Hyperlink href={nextEvent.href}>{ text }</Hyperlink>
       </div>
     );
-  }
-
-  onClickLink(e) {
-    e.stopPropagation();
-    if (this.props.editingAny) {
-      e.preventDefault();
-    }
   }
 
   static canZoom(content) {
@@ -135,22 +123,23 @@ export default class AgendaTile extends TileContent {
 export class AgendaTileItem extends React.Component {
 
   render() {
-    const { title, start, end, href, location, onClickLink } = this.props;
+    const { title, start, end, href, location } = this.props;
 
     const content = (
       <div>
         <div className="col-xs-2">
-          { end ? localMoment(start).format('HH:mm') : 'all-day' }
+          { end ? localMoment(start).format('HH:mm') : 'All day' }
         </div>
         <div className="col-xs-10">
           <span title={title}
-            className="tile-list-item__title text--align-bottom text--dotted-underline"
+            className={classNames('tile-list-item__title', 'text--align-bottom',
+            { 'text--dotted-underline': href })}
           >
-            { title }
+            <Hyperlink href={href} >{ title }</Hyperlink>
          </span>
           {location ?
             <span className="tile-list-item__location text--align-bottom text--light">
-           - { location }
+           &nbsp;- <Hyperlink href={location.href} >{ location.name }</Hyperlink>
             </span>
             : null}
         </div>
@@ -159,12 +148,7 @@ export class AgendaTileItem extends React.Component {
 
     return (
       <div className="tile-list-item">
-        { href ?
-          <a href={ href } target="_blank" onClick={ onClickLink }>
-            { content }
-          </a> :
-          content
-        }
+        { content }
       </div>
     );
   }
@@ -175,7 +159,9 @@ AgendaTileItem.propTypes = {
   start: PropTypes.string,
   end: PropTypes.string,
   title: PropTypes.string,
-  location: PropTypes.string,
+  location: React.PropTypes.shape({
+    name: React.PropTypes.string,
+    href: React.PropTypes.string,
+  }),
   href: PropTypes.string,
-  onClickLink: PropTypes.func,
 };

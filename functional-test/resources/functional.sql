@@ -1,7 +1,7 @@
-INSERT INTO TILE (ID, TILE_TYPE, DEFAULT_SIZE, DEFAULT_POSITION, COLOUR, FETCH_URL, TITLE, ICON) VALUES
-  ('tile', 'count', 'large', 0, 1, 'http://provider', 'Printer Credit', 'print'),
-  ('other-tile', 'count', 'wide', 1, 2, 'http://provider', 'Mail', 'envelope-o'),
-  ('heron-tile', 'count', 'small', 2, 3, 'http://herons-eat-ducklings', 'Mail', 'envelope-o');
+INSERT INTO TILE (ID, TILE_TYPE, COLOUR, FETCH_URL, TITLE, ICON) VALUES
+  ('tile', 'count', 1, 'http://provider', 'Printer Credit', 'print'),
+  ('other-tile', 'count', 2, 'http://provider', 'Mail', 'envelope-o'),
+  ('heron-tile', 'count', 3, 'http://herons-eat-ducklings', 'Mail', 'envelope-o');
 
 -- comment
 INSERT INTO TILE_GROUP (TILE_ID, "GROUP") VALUES

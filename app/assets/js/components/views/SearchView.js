@@ -7,7 +7,7 @@ import LinkBlock from '../ui/LinkBlock';
 import Link from '../ui/Link';
 
 import { connect } from 'react-redux';
-import * as Search from '../../search';
+import * as search from '../../state/search';
 
 import $ from 'jquery';
 
@@ -59,7 +59,7 @@ export class SearchView extends ReactComponent {
   getLinks() {
     const items = this.props.results.length > 0 && this.refs.field.value() === this.props.query ?
       this.props.results :
-      Search.getRecentItemsOrderedByFrequency(this.props.recentItems);
+      search.getRecentItemsOrderedByFrequency(this.props.recentItems);
 
     return items.map((result) =>
       <Link
@@ -72,11 +72,11 @@ export class SearchView extends ReactComponent {
   }
 
   onChange(value) {
-    this.props.dispatch(Search.fetchSearchResults(value));
+    this.props.dispatch(search.fetchSearchResults(value));
   }
 
   onResultClick(result) {
-    this.props.dispatch(Search.clickSearchResult(result));
+    this.props.dispatch(search.clickSearchResult(result));
   }
 
   searchField() {
@@ -120,6 +120,6 @@ export class SearchView extends ReactComponent {
 
 }
 
-const select = (state) => state.get('search').toJS();
+const select = (state) => state.search;
 
 export default connect(select)(SearchView);

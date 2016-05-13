@@ -67,3 +67,7 @@ gulp.task('assets', ['lint', 'all-static', 'appcache', 'service-worker', 'swagge
 gulp.task('watch-assets', ['watch-scripts', 'watch-styles']);
 gulp.task('wizard', ['appcache','service-worker','watch-assets','watch-service-worker', 'watch-appcache']);
 
+gulp.task('yer-a-wizard', () => {
+  gutil.log(gutil.colors.yellow('* * ' + gutil.colors.green('Yer a lizard, Gary!') + '* * '));
+});
+gulp.task('default', ['yer-a-wizard', 'wizard']);

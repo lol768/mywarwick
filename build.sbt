@@ -25,7 +25,7 @@ val appDeps = Seq(
   evolutions,
   "com.typesafe.play" %% "anorm" % "2.4.0",
   "com.oracle" % "ojdbc6" % "11.2.0.3.0",
-  "uk.ac.warwick.sso" %% "sso-client-play" % "2.14",
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.17",
   "uk.ac.warwick.play-utils" %% "anorm" % "1.2",
   "com.typesafe.akka" %% "akka-cluster" % "2.4.0",
   "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.0",
@@ -42,7 +42,7 @@ val testDeps = Seq(
   "org.scalatest" %% "scalatest" % "2.2.5",
   "org.scalatestplus" %% "play" % "1.4.0-M4",
   "com.typesafe.akka" %% "akka-testkit" % "2.4.0",
-  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.14",
+  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.17",
   "org.eclipse.jetty" % "jetty-server" % "9.3.6.v20151106",
   // Note - from 2.53 selenium-htmlunit is not bundled so will need to
   // play with dependencies if you need to upgrade.

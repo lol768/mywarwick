@@ -1,9 +1,9 @@
 .tile {
   height: @tile-height;
   position: relative;
-  margin-top: @tile-gutter;
   font-size: 13px;
   line-height: 1.2em;
+  color: #fff;
 
   a {
     color: inherit;
@@ -14,9 +14,43 @@
 .tile--hidden {
   .tile__body {
     text-align: center;
-    margin-top: 22px;
-    .fa {
-      font-size: 36px;
-    }
   }
+}
+
+.tile--hidden__icon {
+  margin-top: @tile-height / 5;
+  font-size: @tile-height / 3;
+  margin-bottom: @tile-height / 10;
+}
+
+.tile--hidden__title {
+  font-size: @tile-height / 8;
+}
+
+.react-grid-item--editing {
+  z-index: 10;
+}
+
+.me-view {
+  // So MeView is offsetParent of react-grid-items
+  position: relative;
+  margin: -@tile-gutter;
+
+  @media screen and (max-width: @screen-xs-max) {
+    margin-top: 0;
+  }
+  @media screen and (min-width: @screen-lg-min) {
+    .me-view-width(@container-lg, 9);
+  }
+  @media screen and (min-width: @screen-md-min) and (max-width: @screen-md-max) {
+    .me-view-width(@container-md, 8);
+  }
+  @media screen and (min-width: @screen-sm-min) and (max-width: @screen-sm-max) {
+    .me-view-width(@container-sm, 8);
+  }
+}
+
+.me-view-width(@container-width, @cols) {
+  // Width must be a multiple of the tile gutter width
+  width: floor(((@container-width - @grid-gutter-width) * (@cols / @grid-columns) - @grid-gutter-width) / @tile-gutter) * @tile-gutter;
 }

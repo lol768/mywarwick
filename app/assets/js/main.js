@@ -1,84 +1,59 @@
 import 'core-js/modules/es6.object.assign';
 
-import attachFastClick from 'fastclick';
+import initErrorReporter from './errorreporter';
+initErrorReporter();
+
 import $ from 'jquery';
 import _ from 'lodash';
-import localforage from 'localforage';
 import moment from 'moment';
 import log from 'loglevel';
 import * as es6Promise from 'es6-promise';
-import { Provider } from 'react-redux';
-import ReactDOM from 'react-dom';
+import attachFastClick from 'fastclick';
+import localforage from 'localforage';
+
 import React from 'react';
-import store from './store';
-import Application from './components/Application';
-import * as notifications from './notifications';
-import * as notificationMetadata from './notification-metadata';
+import ReactDOM from 'react-dom';
+import { browserHistory } from 'react-router';
+import { syncHistoryWithStore } from 'react-router-redux';
+
 import * as notificationsGlue from './notifications-glue';
 import * as pushNotifications from './push-notifications';
 import * as serverpipe from './serverpipe';
-import * as tiles from './tiles';
-import * as update from './update';
-import * as user from './user';
-import persisted from './persisted';
+import persistedLib from './persisted';
 import SocketDatapipe from './SocketDatapipe';
-import { Router, Route, IndexRoute, IndexRedirect, browserHistory } from 'react-router';
-import { syncHistoryWithStore, routerReducer } from 'react-router-redux';
-import initErrorReporter from './errorreporter';
-import { registerReducer } from './reducers';
-import NewsView from './components/views/NewsView';
-import MeView from './components/views/MeView';
-import TileView from './components/views/TileView';
-import ActivityView from './components/views/ActivityView';
-import NotificationsView from './components/views/NotificationsView';
-import SearchView from './components/views/SearchView';
-import './bridge';
+import * as notifications from './state/notifications';
+import * as notificationMetadata from './state/notification-metadata';
+import * as tiles from './state/tiles';
+import * as update from './state/update';
+import * as user from './state/user';
+import * as ui from './state/ui';
 import * as analytics from './analytics';
+import store from './store';
+import AppRoot from './components/AppRoot';
+import bridge from './bridge';
+
+bridge({ store, tiles });
 
 log.enableAll(false);
 es6Promise.polyfill();
-initErrorReporter();
 
 localforage.config({
   name: 'Start',
 });
 
-registerReducer('routing', routerReducer);
-
-const history = syncHistoryWithStore(browserHistory, store, {
-  selectLocationState: state => state.get('routing'),
-});
-
+const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
-
-$.getJSON('/ssotest', shouldRedirect => {
-  if (shouldRedirect) window.location = window.SSO.LOGIN_URL;
-});
 
 $(() => {
   attachFastClick(document.body);
 
-  window.addEventListener('online', () =>
-    store.dispatch(serverpipe.fetchActivities())
-  );
+  $(window).on('contextmenu', () => window.navigator.userAgent.indexOf('Mobile') < 0);
 
-  ReactDOM.render(
-    <Provider store={store}>
-      <Router history={history}>
-        <Route path="/" component={Application}>
-          <IndexRoute component={MeView}/>
-          <Route path="tiles" component={MeView}>
-            <IndexRedirect to="/"/>
-            <Route path=":id" component={TileView}/>
-          </Route>
-          <Route path="notifications" component={NotificationsView}/>
-          <Route path="activity" component={ActivityView}/>
-          <Route path="news" component={NewsView}/>
-          <Route path="search" component={SearchView}/>
-        </Route>
-      </Router>
-    </Provider>,
-    document.getElementById('app-container'));
+  $(window).on('resize', () => store.dispatch(ui.updateUIContext()));
+
+  $(window).on('online', () =>
+    store.dispatch(notifications.fetch())
+  );
 
   if (window.navigator.userAgent.indexOf('Mobile') >= 0) {
     $('html').addClass('mobile');
@@ -87,7 +62,20 @@ $(() => {
   $(document).tooltip({
     selector: '.toggle-tooltip',
     container: 'body',
-    trigger: 'hover click',
+    trigger: 'click',
+  });
+
+  $(document).on('click', (e) => {
+    if ($(e.target).data('toggle') === 'tooltip') {
+      if (!$(e.target).hasClass('tooltip-active')) {
+        // hide active tooltips after clicking on a non-active tooltip
+        $('.tooltip-active').tooltip('hide').toggleClass('tooltip-active');
+        $(e.target).toggleClass('tooltip-active').tooltip('toggle');
+      }
+    } else {
+      // click elsewhere on body, dismiss all open tooltips
+      $('.toggle-tooltip').tooltip('hide').removeClass('tooltip-active');
+    }
   });
 });
 
@@ -119,36 +107,18 @@ SocketDatapipe.subscribe(data => {
       store.dispatch(data.activity.notification ? notifications.receivedNotification(data.activity)
         : notifications.receivedActivity(data.activity));
       break;
-    case 'who-am-i':
-      store.dispatch(user.userReceive(data.userIdentity));
-      break;
     default:
-    // nowt
+      // nowt
   }
 });
 
-update.displayUpdateProgress(store.dispatch);
+/** Fetching/storing locally persisted data */
 
-const freezeStream = stream => stream.valueSeq().flatten().toJS();
+const freezeStream = stream => _(stream).values().flatten().value();
+const freezeDate = (d) => ((!!d && 'format' in d) ? d.format() : d);
+const thawDate = (d) => (!!d ? moment(d) : d);
 
-const loadPersonalisedDataFromServer = _.once(() => {
-  store.dispatch(serverpipe.fetchActivities());
-  store.dispatch(serverpipe.fetchTiles());
-  store.dispatch(serverpipe.fetchTileContent());
-});
-
-store.subscribe(() => {
-  const u = store.getState().get('user');
-
-  if (u && u.get('authoritative') === true) {
-    loadPersonalisedDataFromServer();
-  }
-});
-
-store.dispatch(serverpipe.fetchUserIdentity());
-
-const freezeDate = (d) => (!!d && 'format' in d) ? d.format() : d;
-const thawDate = (d) => !!d ? moment(d) : d;
+const persisted = persistedLib({ store, localforage });
 
 persisted('notificationsLastRead.date', notificationMetadata.loadedNotificationsLastRead,
   freezeDate, thawDate);
@@ -156,7 +126,55 @@ persisted('notificationsLastRead.date', notificationMetadata.loadedNotifications
 persisted('activities', notifications.fetchedActivities, freezeStream);
 persisted('notifications', notifications.fetchedNotifications, freezeStream);
 
-persisted('tiles.items', tiles.fetchedTiles);
+persisted('tiles.data', tiles.fetchedTiles);
 persisted('tileContent', tiles.loadedAllTileContent);
 
+persisted('user.links', user.receiveSSOLinks);
+
+/** Initial requests for data */
+
+const loadPersonalisedDataFromServer = _.once(() => {
+  store.dispatch(notifications.fetch());
+  store.dispatch(tiles.fetchTiles());
+  store.dispatch(tiles.fetchTileContent());
+
+  // Refresh all tile content every five minutes
+  setInterval(() => store.dispatch(tiles.fetchTileContent()), 5 * 60 * 1000);
+});
+
+store.subscribe(() => {
+  const u = store.getState().user;
+
+  if (u && u.authoritative === true) {
+    loadPersonalisedDataFromServer();
+  }
+});
+
+store.dispatch(ui.updateUIContext());
+store.dispatch(update.displayUpdateProgress);
 store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));
+
+// kicks off the whole data flow - when user is received we fetch tile data
+function fetchUserInfo() {
+  serverpipe.fetchWithCredentials('/user/info')
+    .then(response => response.json())
+    .then(response => {
+      if (response.refresh) {
+        window.location = response.refresh;
+      } else {
+        store.dispatch(user.userReceive(response.user));
+        store.dispatch(user.receiveSSOLinks(response.links));
+      }
+    })
+    .catch(() => setTimeout(fetchUserInfo, 5000));
+}
+fetchUserInfo();
+
+// Just for access from the console
+window.Store = store;
+
+// Actually render the app
+ReactDOM.render(
+  <AppRoot history={history} />,
+  document.getElementById('app-container')
+);

@@ -14,7 +14,7 @@ case class Activity(
     */
   `type`: String,
   title: String,
-  text: String,
+  text: Option[String],
   url: Option[String],
   replacedBy: Option[String],
   generatedAt: DateTime,
@@ -80,7 +80,7 @@ case class ActivityPrototype(
   providerId: String,
   `type`: String,
   title: String,
-  text: String,
+  text: Option[String],
   url: Option[String],
   tags: Seq[ActivityTag],
   replace: Map[String, String],

@@ -1,8 +1,8 @@
 import { createSelector } from 'reselect';
 
 export const persistNotificationsLastRead =
-  createSelector(state => state.get('notificationsLastRead'), (lastRead) => {
-    const { date, fetched } = lastRead.toObject();
+  createSelector(state => state.notificationsLastRead, (lastRead) => {
+    const { date, fetched } = lastRead;
 
     if (date && fetched) {
       fetch('/api/streams/read', {

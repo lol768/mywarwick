@@ -18,7 +18,6 @@ case class AnalyticsTrackingID(string: String)
 @Singleton
 class HomeController @Inject()(
   security: SecurityService,
-  ssoClient: SSOClient,
   metrics: AppMetrics,
   photoService: PhotoService,
   configuration: Configuration
@@ -29,11 +28,7 @@ class HomeController @Inject()(
   implicit val analyticsTrackingId: Option[AnalyticsTrackingID] =
     configuration.getString("start.analytics.tracking-id").map(AnalyticsTrackingID.apply)
 
-  def index = Action { request =>
-    implicit val links = ssoClient.linkGenerator(request)
-    links.setTarget("https://" + request.host + request.path)
-    Ok(views.html.index())
-  }
+  def index = Action(Ok(views.html.index()))
 
   def redirectToIndex = Action(Redirect(routes.HomeController.index()))
 

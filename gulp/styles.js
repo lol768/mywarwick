@@ -1,14 +1,13 @@
 'use strict';
 
 const gulp = require('gulp');
-const gutil = require('gulp-util');
 const path = require('path');
 
 const sourcemaps = require('gulp-sourcemaps');
 const less = require('gulp-less');
 
 const postcss = require('gulp-postcss');
-const autoprefix = require('autoprefixer-core');
+const autoprefix = require('autoprefixer');
 const swagger = require('gulp-swagger');
 
 const bundleEvents = require('./events');

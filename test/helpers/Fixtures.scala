@@ -18,7 +18,7 @@ object Fixtures {
         providerId = "tabula",
         `type` = "due",
         title = "Coursework due",
-        text = "Your coursework is due in 7 days",
+        text = Some("Your coursework is due in 7 days"),
         url = Some("http://tabula.warwick.ac.uk"),
         tags = Seq.empty,
         replace = Map.empty,

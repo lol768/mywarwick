@@ -1,13 +1,20 @@
 import tk from 'timekeeper';
+import jsxChai from 'jsx-chai';
 
-global.expect = require('chai').expect;
-global.should = require('chai').should();
-global.assert = require('chai').assert;
+const chai = require('chai');
+global.expect = chai.expect;
+global.should = chai.should();
+global.assert = chai.assert;
 global.sinon = require('sinon');
+chai.use(require('sinon-chai'));
+chai.use(jsxChai);
 
 global.document = require('jsdom').jsdom();
 global.window = global.document.defaultView;
 global.navigator = global.window.navigator;
+
+class WebSocket {}
+global.WebSocket = WebSocket;
 
 global.React = require('react');
 global.ReactTestUtils = require('react-addons-test-utils');
@@ -16,17 +23,18 @@ global.ReactTestUtils = require('react-addons-test-utils');
 global.spy = function spy(object, method) {
 
   // Spy on the method before any tests run
-  before(() => {
+  before(function () {
     sinon.spy(object, method);
   });
 
   // Re-initialise the spy before each test
-  beforeEach(() => {
+  beforeEach(function () {
     object[method].reset();
   });
 
   // Restore the original method after all tests have run
-  after(() => {
+  after(function() {
+    //restore method doesn't exist when I tried it.
     object[method].restore();
   });
 
@@ -44,4 +52,18 @@ global.renderAtMoment = function (component, now = new Date(1989, 1, 7)) {
   const renderedComponent = shallowRender(component);
   tk.reset();
   return renderedComponent;
+};
+
+/**
+ * Recursively call props.children[i] in accordance with path param
+ *
+ * @param {object} elem find children of this rendered element
+ * @param {number[]} path path of indicies to target child
+ * @returns {object}
+ */
+global.findChild = function (elem, path) {
+  if (elem === 'undefined' || path.length === 0) {
+    return elem;
+  }
+  return findChild(React.Children.toArray(elem.props.children)[path[0]], path.slice(1));
 };

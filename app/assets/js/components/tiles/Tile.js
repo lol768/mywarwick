@@ -1,29 +1,19 @@
 /* eslint react/prop-types: 0, react/sort-comp: 0 */
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 
 import { localMoment } from '../../dateFormatter.js';
 import classNames from 'classnames';
-import $ from 'jquery';
-
-const SIZE_CLASSES = {
-  small: 'col-xs-6 col-sm-6 col-md-3',
-  wide: 'col-xs-12 col-sm-12 col-md-6',
-  large: 'col-xs-12 col-sm-12 col-md-6',
-};
-
-export const EDITING_ANIMATION_DURATION = 600;
 
 export default class Tile extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      contentRef: null,
+    };
 
     this.onClick = this.onClick.bind(this);
     this.onClickExpand = this.onClickExpand.bind(this);
-    this.onTouchEnd = this.onTouchEnd.bind(this);
-    this.onTouchMove = this.onTouchMove.bind(this);
-    this.onTouchStart = this.onTouchStart.bind(this);
   }
 
   componentWillEnter(callback) {
@@ -42,7 +32,9 @@ export default class Tile extends Component {
     const { fetching, errors, icon, content } = this.props;
 
     // FIXME: shouldn't have to pass content here, the TileContent component has its own content
-    const customIcon = (content && this.refs.content) ? this.refs.content.getIcon(content) : null;
+    const customIcon = (content && this.state.contentRef) ?
+      this.state.contentRef.getIcon(content)
+      : null;
 
     const iconJsx = iconName => (
       <i className={`fa ${iconName} toggle-tooltip`} ref="icon" title={ this.getIconTitle() }
@@ -67,59 +59,35 @@ export default class Tile extends Component {
     if (errors) {
       return `Last updated ${localMoment(fetchedAt).calendar()}. ${errors[0].message}`;
     }
-  }
 
-  onTouchStart(e) {
-    if (!this.props.editing && !this.props.zoomed) {
-      if (e.changedTouches) {
-        const touch = e.changedTouches[0];
-        this.startX = touch.clientX;
-        this.startY = touch.clientY;
-      }
-
-      this.timeout = setTimeout(this.props.onBeginEditing, EDITING_ANIMATION_DURATION);
-    }
-  }
-
-  onTouchMove(e) {
-    if (!this.props.editing && this.startX !== null) {
-      const touch = e.changedTouches[0];
-
-      if (Math.abs(touch.clientX - this.startX) > 10
-        || Math.abs(touch.clientY - this.startY) > 10) {
-        this.release();
-      }
-    }
-  }
-
-  release() {
-    this.timeout = clearTimeout(this.timeout);
-    this.startX = null;
-    this.startY = null;
-  }
-
-  onTouchEnd() {
-    if (!this.props.editing && !this.props.zoomed && this.timeout) {
-      this.release();
-    }
+    return null;
   }
 
   onClickExpand(e) {
-    this.release();
-
     this.props.onZoomIn(e);
   }
 
-  onClick() {
+  onClick(e) {
     const { content, editingAny } = this.props;
-
-    if (!editingAny && content && content.href) {
+    e.stopPropagation();
+    if (editingAny) {
+      e.preventDefault();
+    } else if (content && content.href) {
       if (window.navigator.userAgent.indexOf('Start/') >= 0) {
         window.location = content.href;
       } else {
         window.open(content.href);
       }
     }
+  }
+
+  componentDidMount() {
+    if (this.props.editing) {
+      this.animateToScale(1.15);
+    }
+    this.setState({ //eslint-disable-line
+      contentRef: this.refs.content,
+    });
   }
 
   componentDidUpdate(prevProps) {
@@ -133,10 +101,12 @@ export default class Tile extends Component {
     }
   }
 
-  animateToScale(scale) {
+  animateToScale() {
+    /*
     const $tile = $(ReactDOM.findDOMNode(this.refs.tile));
 
     $tile.stop().transition({ scale }, EDITING_ANIMATION_DURATION, 'snap');
+    */
   }
 
   shouldDisplayExpandIcon() {
@@ -146,9 +116,6 @@ export default class Tile extends Component {
   render() {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
-    const sizeClass = SIZE_CLASSES[size];
-    const outerClassName =
-      classNames({ [`${sizeClass}`]: !zoomed }, 'tile__container');
     const zoomIcon = () => {
       if (zoomed) {
         return isDesktop ?
@@ -160,7 +127,7 @@ export default class Tile extends Component {
     };
 
     return (
-      <div className={outerClassName}>
+      <div className="tile__container">
         <article
           className={
             classNames(
@@ -172,20 +139,13 @@ export default class Tile extends Component {
               }
             )
           }
-          onTouchStart={ this.onTouchStart }
-          onTouchMove={ this.onTouchMove }
-          onTouchEnd={ this.onTouchEnd }
-          onTouchCancel={ this.onTouchEnd }
-          onMouseDown={ this.onTouchStart }
-          onMouseUp={ this.onTouchEnd }
-          onMouseOut={ this.onTouchEnd }
           onClick={ this.onClick }
           ref="tile"
         >
           <div
             className="tile__edit-control top-left"
             onClick={ this.props.onHide }
-            title="Hide tile"
+            title={ `Hide ${title}` }
           >
             <i className="fa fa-fw fa-minus"> </i>
           </div>
@@ -204,7 +164,8 @@ export default class Tile extends Component {
             </header>
             <div className="tile__body">
               { React.cloneElement(
-                React.Children.only(this.props.children), { ref: 'content' }
+                React.Children.only(this.props.children),
+                { ref: 'content' }
               )}
             </div>
           </div>

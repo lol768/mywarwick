@@ -2,7 +2,6 @@
 
 import $ from 'jquery';
 import log from 'loglevel';
-import Immutable from 'immutable';
 import _ from 'lodash';
 
 /* eslint-disable */
@@ -26,13 +25,13 @@ if (trackingId === undefined) {
   });
 }
 
-let analyticsQueue = Immutable.List();
+let analyticsQueue = [];
 
 let postNextItemThrottled;
 
 function queue(...args) {
   const time = new Date().getTime();
-  analyticsQueue = analyticsQueue.push({ args, time });
+  analyticsQueue = analyticsQueue.concat({ args, time });
 
   postNextItemThrottled();
 }
@@ -44,19 +43,19 @@ function getTimeSpentInQueue(timeQueued) {
 }
 
 function postNextItem() {
-  if (!navigator.onLine || analyticsQueue.isEmpty()) {
+  if (!navigator.onLine || !analyticsQueue.length) {
     return;
   }
 
-  const { args: [command, fields], time } = analyticsQueue.first();
-  analyticsQueue = analyticsQueue.shift();
+  const { args: [command, fields], time } = analyticsQueue[0];
+  analyticsQueue = analyticsQueue.slice(1);
 
   ga(command, {
     ...fields,
     queueTime: getTimeSpentInQueue(time),
   });
 
-  if (!analyticsQueue.isEmpty()) {
+  if (analyticsQueue.length) {
     postNextItemThrottled();
   }
 }
@@ -65,7 +64,7 @@ $(() => {
   $(window).on('online', postNextItemThrottled);
 });
 
-postNextItemThrottled = _.throttle(postNextItem, 500);
+postNextItemThrottled = _.throttle(postNextItem, 500); // eslint-disable-line prefer-const
 
 export function track(page) {
   if (trackingId) {

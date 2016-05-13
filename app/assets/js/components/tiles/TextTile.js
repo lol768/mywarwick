@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import classNames from 'classnames';
+import Hyperlink from '../ui/Hyperlink';
 
 import _ from 'lodash';
 
@@ -14,8 +15,6 @@ export default class TextTile extends TileContent {
     this.state = {
       itemIndex: 0,
     };
-
-    this.onClickLink = this.onClickLink.bind(this);
   }
 
   componentWillUnmount() {
@@ -61,15 +60,7 @@ export default class TextTile extends TileContent {
         <span className="tile__text">{item.text}</span>
       </div>);
 
-      return item.href ?
-        <a
-          key={`${item.id}-a`}
-          href={item.href}
-          target="_blank"
-          onClick={ this.onClickLink }
-        >
-          {tileItem}
-        </a> : tileItem;
+      return <Hyperlink key={item.href} href={item.href} >{ tileItem }</Hyperlink>;
     });
   }
 
@@ -78,7 +69,7 @@ export default class TextTile extends TileContent {
 
     return (
       <div className="container-fluid">
-        {chunkedItems.map(children => <div className="row">{children}</div>)}
+        {chunkedItems.map((children, i) => <div key={i} className="row">{children}</div>)}
       </div>
     );
   }
@@ -113,14 +104,6 @@ export default class TextTile extends TileContent {
 
   getSmallBody() {
     return this.getWideBody();
-  }
-
-  onClickLink(e) {
-    e.stopPropagation();
-
-    if (this.props.editingAny) {
-      e.preventDefault();
-    }
   }
 
   static canZoom(content) {
