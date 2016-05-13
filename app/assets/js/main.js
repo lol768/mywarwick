@@ -168,6 +168,8 @@ function fetchUserInfo() {
     })
     .catch(() => setTimeout(fetchUserInfo, 5000));
 }
+
+user.loadUserFromLocalStorage(store.dispatch);
 fetchUserInfo();
 
 // Just for access from the console
