@@ -15,6 +15,6 @@ case class FeedItem(
   publicationDate: DateTime
 ) {
 
-  def asNewsItem(source: NewsSource): NewsItem = NewsItem(source, id, title, url, content, publicationDate)
+  def asNewsItem(source: NewsSource): NewsItem = NewsItem(source, id, title, Option(url), content, publicationDate)
 
 }

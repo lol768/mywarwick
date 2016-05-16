@@ -18,6 +18,10 @@ POST        /                                             @controllers.HomeContr
 
 GET         /admin/cluster                                @controllers.admin.ClusterStateController.html
 
+GET         /admin/news                                   @controllers.admin.NewsController.list
+GET         /admin/news/new                               @controllers.admin.NewsController.createForm
+POST        /admin/news/new                               @controllers.admin.NewsController.create
+
 # DEPRECATED no-slash version 2016-02-11
 GET         /websockets/page                              @controllers.HomeController.socket
 GET         /websockets/page/                             @controllers.HomeController.socket
@@ -28,7 +32,8 @@ GET         /assets/*file                                 @controllers.Assets.ve
 
 GET         /service-worker.js                            @controllers.Assets.at(path="/public", file="service-worker.js")
 
-GET         /api/news/feed                                @controllers.NewsController.feed
+GET         /api/news/feed                                @controllers.api.ReadNewsController.feed
+POST        /api/news                                     @controllers.api.ManageNewsController.create
 
 GET         /service/metrics                              @controllers.MetricsController.metrics
 GET         /service/gtg                                  @controllers.ServiceCheckController.gtg

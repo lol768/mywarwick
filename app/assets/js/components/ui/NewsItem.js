@@ -2,6 +2,7 @@ import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 
 import formatDate from '../../dateFormatter';
+import Hyperlink from './Hyperlink';
 
 export default class NewsItem extends ReactComponent {
 
@@ -12,9 +13,9 @@ export default class NewsItem extends ReactComponent {
       <article className="news-item">
         <div className="news-item__body">
           <h1 className="news-item__title">
-            <a href={url} target="_blank">
+            <Hyperlink href={url}>
               {title}
-            </a>
+            </Hyperlink>
           </h1>
 
           <div className="news-item__content">

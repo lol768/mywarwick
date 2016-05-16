@@ -1,0 +1,35 @@
+@import controllers.admin.PublishNewsData
+
+@(form: Form[PublishNewsData])(implicit messages: Messages)
+
+@implicitField = @{ helper.FieldConstructor(customFieldConstructor.apply) }
+
+@common.id7layout("Create news") {
+  <h1>Create news</h1>
+
+  @helper.form(action = controllers.admin.routes.NewsController.create()) {
+    @helper.inputText(form("item.title"),
+      '_label -> "Title"
+    )
+    @helper.textarea(form("item.text"),
+      '_label -> "Text",
+      '_help -> "Keep it short."
+    )
+    @helper.inputText(form("item.publishDate"),
+      '_label -> "Publish date",
+      'type -> "datetime-local",
+      '_help -> "You can select a time in the future, and it will appear to users after that time. Otherwise choose the current time to publish now."
+    )
+    @helper.inputText(form("item.linkHref"),
+      '_label -> "Link URL"
+    )
+    @helper.inputText(form("item.linkTitle"),
+      '_label -> "Link title"
+    )
+    @helper.inputText(form("recipients"),
+      '_label -> "Recipients (comma-separated usercodes)"
+    )
+
+    <input type="submit" value="Save" />
+  }
+}

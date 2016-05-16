@@ -5,18 +5,20 @@ import com.google.inject.ImplementedBy
 @ImplementedBy(classOf[OracleDatabaseDialect])
 trait DatabaseDialect {
 
-  def limit(n: String): String
+  def limitOffset(limit: Int, offset: Int = 0): String
 
 }
 
 class OracleDatabaseDialect extends DatabaseDialect {
 
-  override def limit(n: String): String = s"FETCH NEXT $n ROWS ONLY"
+  override def limitOffset(limit: Int, offset: Int = 0): String =
+    s"OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY"
 
 }
 
 class H2DatabaseDialect extends DatabaseDialect {
 
-  override def limit(n: String): String = s"LIMIT $n"
+  override def limitOffset(limit: Int, offset: Int = 0): String =
+    s"LIMIT ${limit} OFFSET ${offset}"
 
 }
