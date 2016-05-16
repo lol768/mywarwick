@@ -63,7 +63,7 @@ export function receiveSSOLinks(links) {
   };
 }
 
-function loadUserFromLocalStorage(dispatch) {
+export function loadUserFromLocalStorage(dispatch) {
   return localforage.getItem('user')
     .then(user => {
       if (user) {
