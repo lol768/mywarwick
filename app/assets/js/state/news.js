@@ -49,7 +49,7 @@ export function reducer(state = initialState, action) {
         fetching: false,
         failed: false,
         items: action.payload.items,
-        sources: action.payload.sources, 
+        sources: action.payload.sources,
       };
     default:
       return state;
