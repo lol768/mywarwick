@@ -79,10 +79,14 @@ export default class AgendaTile extends TileContent {
     const { content } = this.props;
 
     const nextEvent = content.items[0];
+    const isAllDay = nextEvent.end === undefined;
     const truncTitle = _.truncate(nextEvent.title, { length: 30 });
     const text = (
       <span className="tile__text">
-        Next: {truncTitle} at {localMoment(nextEvent.start).format('HH:mm')}
+        { isAllDay ?
+          `All day: ${truncTitle}`
+          : `Next: ${truncTitle} at ${localMoment(nextEvent.start).format('HH:mm')}`
+        }
       </span>
     );
 
