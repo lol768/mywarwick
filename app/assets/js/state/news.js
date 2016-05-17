@@ -16,7 +16,7 @@ export function fetch() {
       .then(response => response.json())
       .then(json => {
         if (json.items !== undefined) {
-          dispatch(receive({ items: json.items }));
+          dispatch(receive(json));
         } else {
           throw new Error('Invalid response returned from news feed');
         }
@@ -49,6 +49,7 @@ export function reducer(state = initialState, action) {
         fetching: false,
         failed: false,
         items: action.payload.items,
+        sources: action.payload.sources, 
       };
     default:
       return state;

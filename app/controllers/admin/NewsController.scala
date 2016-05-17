@@ -3,17 +3,14 @@ package controllers.admin
 import javax.inject.Inject
 
 import controllers.BaseController
-import models.DateFormats
 import models.news.{Link, NewsItemSave}
-import org.joda.time.{DateTime, DateTimeZone}
+import org.joda.time.DateTime
 import play.api.data.Forms._
 import play.api.data._
 import play.api.data.format.Formats
 import play.api.db.Database
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Action
-import services.SecurityService
-import services.dao.NewsDao
+import services.{NewsService, SecurityService}
 import system.{Roles, TimeZones}
 import uk.ac.warwick.util.web.Uri
 import warwick.sso.Usercode
@@ -45,11 +42,11 @@ class NewsController @Inject() (
   security: SecurityService,
   val messagesApi: MessagesApi,
   db: Database,
-  dao: NewsDao // FIXME direct dao! I'll write a service in a minute, promise
+  news: NewsService
 ) extends BaseController with I18nSupport {
 
-  import security._
   import Roles._
+  import security._
 
   val jodaDateTime = of(Formats.jodaDateTimeFormat("yyyy-MM-dd'T'HH:mm", TimeZones.LONDON))
 
@@ -72,7 +69,7 @@ class NewsController @Inject() (
 
   def list = RequiredActualUserRoleAction(Sysadmin) {
     db.withConnection { implicit c =>
-      Ok(views.html.admin.news.list(dao.allNews(limit = 100)))
+      Ok(views.html.admin.news.list(news.allNews(limit = 100)))
     }
   }
 
@@ -86,7 +83,7 @@ class NewsController @Inject() (
       data => db.withConnection { implicit c =>
         val recipients = data.recipients.split(",").map(_.trim).map(Usercode)
         val newsItem = data.item.toSave
-        dao.save(newsItem, recipients)
+        news.save(newsItem, recipients)
         Redirect(controllers.admin.routes.NewsController.list())
       }
     )

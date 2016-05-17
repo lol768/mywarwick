@@ -4,10 +4,14 @@ import ReactComponent from 'react/lib/ReactComponent';
 import formatDate from '../../dateFormatter';
 import Hyperlink from './Hyperlink';
 
+const html = (content) => ({ __html: content.replace(/<br[ /]+?>/g, '') });
+
 export default class NewsItem extends ReactComponent {
 
   render() {
-    const { url, title, publicationDate, source, children } = this.props;
+    const { link, title, publishDate, text } = this.props;
+    const url = link && link.href;
+    const moreLink = link ? (<Hyperlink href={link.href}>{link.text}</Hyperlink>) : null;
 
     return (
       <article className="news-item">
@@ -19,17 +23,14 @@ export default class NewsItem extends ReactComponent {
           </h1>
 
           <div className="news-item__content">
-            {children}
+            <div dangerouslySetInnerHTML={html(text)}></div>
           </div>
 
           <div className="news-item__footer">
             <p>
-              {formatDate(publicationDate, new Date(), true)}
+              {formatDate(publishDate, new Date(), true)}
             </p>
-            <p>
-              <i className="fa fa-fw fa-circle" style={{ color: source.colour }}> </i>
-              {source.title}
-            </p>
+            { moreLink }
           </div>
         </div>
       </article>

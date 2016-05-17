@@ -1,15 +1,33 @@
 package services
 
-import models.NewsSource
+import java.sql.Connection
+import javax.inject.Inject
 
-class NewsService {
+import com.google.inject.ImplementedBy
+import models.news.{NewsItemRender, NewsItemSave}
+import services.dao.NewsDao
+import warwick.sso.Usercode
 
-  def allSources: Seq[NewsSource] = Seq(
-    NewsSource("insite", "/insite/news/intnews2", "#7ecbb6"),
-    NewsSource("Latest News", "/newsandevents/news", "#5b3069"),
-    NewsSource("IT Services", "/services/its/newschanges/newinitiatives", "#156294"),
-    NewsSource("Warwick Sport", "/services/sport/news/newsfeed", "#51576d"),
-    NewsSource("Student News", "/students/news/newsevents", "#1595af")
-  )
+@ImplementedBy(classOf[AnormNewsService])
+trait NewsService {
+  def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender]
+  def latestNews(user: Usercode, limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender]
+  // TODO public news items -
+  def save(item: NewsItemSave, recipients: Seq[Usercode])(implicit c: Connection): Unit
+}
+
+class AnormNewsService @Inject() (
+  dao: NewsDao
+) extends NewsService {
+  override def allNews(limit: Int, offset: Int)(implicit c: Connection): Seq[NewsItemRender] =
+    dao.allNews(limit, offset)
+
+  override def latestNews(user: Usercode, limit: Int)(implicit c: Connection): Seq[NewsItemRender] =
+    dao.latestNews(user, limit)
+
+  override def save(item: NewsItemSave, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
+    val id = dao.save(item)
+    dao.saveRecipients(id, item.publishDate, recipients)
+  }
 
 }

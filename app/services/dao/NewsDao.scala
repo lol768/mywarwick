@@ -25,7 +25,16 @@ trait NewsDao {
   def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender]
 
   def latestNews(user: Usercode, limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender]
-  def save(item: NewsItemSave, recipients: Seq[Usercode])(implicit c: Connection): Unit
+
+  /**
+    * @param item the news item to save
+    * @return the ID of the created item
+    */
+  // TODO public news items
+  def save(item: NewsItemSave)(implicit c: Connection): String
+
+  // TODO too many args? define an object?
+  def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit
 }
 
 @Singleton
@@ -50,7 +59,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     publishDate <- get[DateTime]("publish_date")
   } yield {
     val link = for { t <- linkText; h <- parseLink(linkHref) } yield Link(t, h)
-    NewsItemRender(id, title, text, link, publishDate)
+    NewsItemRender(id, title, text, "internal", link, publishDate)
   }
 
   def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender] = {
@@ -75,7 +84,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
   /**
     * Save a news item with a specific set of recipients.
     */
-  def save(item: NewsItemSave, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
+  def save(item: NewsItemSave)(implicit c: Connection): String = {
     import item._
     val id = newId
     val linkText = link.map(_.text).orNull
@@ -84,16 +93,23 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     INSERT INTO NEWS_ITEM (id, title, text, link_text, link_href, created_at, publish_date)
     VALUES (${id}, ${title}, ${text}, ${linkText}, ${linkHref}, SYSDATE, ${publishDate})
     """.executeUpdate()
+    id
+  }
 
+  def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
+    // TODO perhaps we shouldn't insert these in sync, as audiences can potentially be 1000s users.
     recipients.foreach { usercode =>
       SQL"""
         INSERT INTO NEWS_RECIPIENT (news_item_id, usercode, publish_date)
-        VALUES (${id}, ${usercode.string}, ${publishDate})
+        VALUES (${newsId}, ${usercode.string}, ${publishDate})
       """.executeUpdate()
     }
   }
 
-  def unpublish(id: String)(implicit c: Connection) = {
+  /**
+    * Deletes all the recipients of a news item.
+    */
+  def deleteRecipients(id: String)(implicit c: Connection) = {
     SQL"DELETE FROM NEWS_RECIPIENT WHERE news_item_id = ${id}".executeUpdate()
   }
 

@@ -33,7 +33,6 @@ GET         /assets/*file                                 @controllers.Assets.ve
 GET         /service-worker.js                            @controllers.Assets.at(path="/public", file="service-worker.js")
 
 GET         /api/news/feed                                @controllers.api.ReadNewsController.feed
-POST        /api/news                                     @controllers.api.ManageNewsController.create
 
 GET         /service/metrics                              @controllers.MetricsController.metrics
 GET         /service/gtg                                  @controllers.ServiceCheckController.gtg
