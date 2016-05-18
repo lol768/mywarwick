@@ -4,7 +4,13 @@ import ReactComponent from 'react/lib/ReactComponent';
 import formatDate from '../../dateFormatter';
 import Hyperlink from './Hyperlink';
 
-const html = (content) => ({ __html: content.replace(/<br[ /]+?>/g, '') });
+// Convert newlines to paragraphs.
+export const render = (content) =>
+  content
+    .split('\n')
+    .map(t => t.trim())
+    .filter(t => t.length)
+    .map(t => <p>{t}</p>);
 
 export default class NewsItem extends ReactComponent {
 
@@ -23,7 +29,7 @@ export default class NewsItem extends ReactComponent {
           </h1>
 
           <div className="news-item__content">
-            <div dangerouslySetInnerHTML={html(text)}></div>
+            {render(text)}>
           </div>
 
           <div className="news-item__footer">
