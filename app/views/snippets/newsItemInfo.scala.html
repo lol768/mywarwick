@@ -1,7 +1,9 @@
 @import models.news.NewsItemRender
 @(item: NewsItemRender)
-<div class="well">
-  <div><strong>@item.title</strong></div>
-  <div>@item.text</div>
-  <div>@item.publishDate</div>
-</div>
+<article class="news-item">
+  <div class="news-item__body">
+    <div class="news-item__title">@item.title</div>
+    <div class="news-item__content">@item.text</div>
+    <div class="news-item__footer">@models.DateFormats.emailDateTime(item.publishDate)</div>
+  </div>
+</article>
