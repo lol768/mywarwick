@@ -1,0 +1,7 @@
+@import models.news.NewsItemRender
+@(item: NewsItemRender)
+<div class="well">
+  <div><strong>@item.title</strong></div>
+  <div>@item.text</div>
+  <div>@item.publishDate</div>
+</div>

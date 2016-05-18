@@ -1,6 +1,6 @@
 @()(implicit analyticsTrackingId: Option[AnalyticsTrackingID])
-
-@common.htmlelement {
+<!DOCTYPE html>
+<html lang="en-GB" class="no-js" manifest="@routes.Assets.versioned("appcache.manifest")">
   <head>
     @common.head(title = "")
   </head>
@@ -12,5 +12,4 @@
     ></div>
     <script src="@routes.Assets.versioned("js/bundle.js")"></script>
   </body>
-}
-
+</html>

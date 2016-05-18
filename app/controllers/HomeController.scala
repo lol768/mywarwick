@@ -26,7 +26,7 @@ class HomeController @Inject()(
   import security._
 
   implicit val analyticsTrackingId: Option[AnalyticsTrackingID] =
-    configuration.getString("start.analytics.tracking-id").map(AnalyticsTrackingID.apply)
+    configuration.getString("start.analytics.tracking-id").map(AnalyticsTrackingID)
 
   def index = Action(Ok(views.html.index()))
 

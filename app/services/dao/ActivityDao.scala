@@ -113,12 +113,11 @@ class ActivityDaoImpl @Inject()(
                 AND REPLACED_BY_ID IS NULL
                 $maybeBefore
           ORDER BY ACTIVITY_RECIPIENT.GENERATED_AT DESC
-          ${dialect.limit("{limit}")})
+          ${dialect.limitOffset(limit)})
         """)
       .on(
         'usercode -> usercode,
-        'before -> before.getOrElse(DateTime.now),
-        'limit -> limit
+        'before -> before.getOrElse(DateTime.now)
       )
       .as(activityResponseParser.*)
 

@@ -26,6 +26,9 @@ const reducer = combineReducers({
 
 const logger = (/* store */) => next => action => {
   log.debug('store.dispatch(action=', action, ')');
+  if (action.error && action.payload && action.payload.message) {
+    log.warn('Error in action: ', action.payload);
+  }
   return next(action);
 };
 
