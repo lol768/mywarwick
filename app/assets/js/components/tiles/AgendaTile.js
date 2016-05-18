@@ -55,6 +55,29 @@ export default class AgendaTile extends TileContent {
     return todayEvents.length;
   }
 
+  getNextEvent(items) {
+    const timedEvent = _.find(items, i => i.end);
+    const trunc = text => _.truncate(text, { length: 30 });
+
+    if (!timedEvent) {
+      // items are all-day events
+      if (items.length === 1) {
+        return {
+          text: `All day: ${trunc(items[0].title)}`,
+          href: items[0].href,
+        };
+      }
+      return {
+        text: `You have ${items.length} all day events`,
+      };
+    }
+
+    return {
+      text: `Next: ${trunc(timedEvent.title)} at ${localMoment(timedEvent.start).format('HH:mm')}`,
+      href: timedEvent.href,
+    };
+  }
+
   getLargeBody() {
     const { content } = this.props;
 
@@ -76,21 +99,9 @@ export default class AgendaTile extends TileContent {
   }
 
   getSmallBody() {
-    const { content } = this.props;
+    const { content: { items } } = this.props;
 
-    const nextEvent = content.items[0];
-    const isAllDay = nextEvent.end === undefined;
-    const truncTitle = _.truncate(nextEvent.title, { length: 30 });
-    const text = (
-      <span className="tile__text">
-        { isAllDay ?
-          `All day: ${truncTitle}`
-          : `Next: ${truncTitle} at ${localMoment(nextEvent.start).format('HH:mm')}`
-        }
-      </span>
-    );
-
-    const numEventsToday = this.numEventsToday(content.items);
+    const numEventsToday = this.numEventsToday(items);
 
     const callout = (
       <span className="tile__callout">
@@ -107,10 +118,17 @@ export default class AgendaTile extends TileContent {
       );
     }
 
+    // only getNextEvent when we know numEventsToday > 0
+    const { text, href } = this.getNextEvent(items);
+
     return (
       <div className="tile__item">
         { callout }
-        <Hyperlink href={nextEvent.href}>{ text }</Hyperlink>
+        <Hyperlink href={href}>
+          <span className="tile__text">
+           { text }
+          </span>
+        </Hyperlink>
       </div>
     );
   }
@@ -139,11 +157,11 @@ export class AgendaTileItem extends React.Component {
             className={classNames('tile-list-item__title', 'text--align-bottom',
             { 'text--dotted-underline': href })}
           >
-            <Hyperlink href={href} >{ title }</Hyperlink>
+            <Hyperlink href={href}>{ title }</Hyperlink>
          </span>
           {location ?
             <span className="tile-list-item__location text--align-bottom text--light">
-           &nbsp;- <Hyperlink href={location.href} >{ location.name }</Hyperlink>
+           &nbsp;- <Hyperlink href={location.href}>{ location.name }</Hyperlink>
             </span>
             : null}
         </div>
