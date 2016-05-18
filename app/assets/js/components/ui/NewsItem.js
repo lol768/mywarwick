@@ -29,7 +29,7 @@ export default class NewsItem extends ReactComponent {
           </h1>
 
           <div className="news-item__content">
-            {render(text)}>
+            {render(text)}
           </div>
 
           <div className="news-item__footer">
