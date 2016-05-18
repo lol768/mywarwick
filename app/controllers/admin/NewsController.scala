@@ -8,7 +8,6 @@ import org.joda.time.DateTime
 import play.api.data.Forms._
 import play.api.data._
 import play.api.data.format.Formats
-import play.api.db.Database
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.{NewsService, SecurityService}
 import system.{Roles, TimeZones}
@@ -41,7 +40,6 @@ case class NewsItemData(
 class NewsController @Inject() (
   security: SecurityService,
   val messagesApi: MessagesApi,
-  db: Database,
   news: NewsService
 ) extends BaseController with I18nSupport {
 
@@ -68,9 +66,7 @@ class NewsController @Inject() (
   )
 
   def list = RequiredActualUserRoleAction(Sysadmin) {
-    db.withConnection { implicit c =>
-      Ok(views.html.admin.news.list(news.allNews(limit = 100)))
-    }
+    Ok(views.html.admin.news.list(news.allNews(limit = 100)))
   }
 
   def createForm = RequiredActualUserRoleAction(Sysadmin) {
@@ -80,7 +76,7 @@ class NewsController @Inject() (
   def create = RequiredActualUserRoleAction(Sysadmin) { implicit req =>
     publishNewsForm.bindFromRequest.fold(
       errorForm => Ok(views.html.admin.news.createForm(errorForm)),
-      data => db.withConnection { implicit c =>
+      data => {
         val recipients = data.recipients.split(",").map(_.trim).map(Usercode)
         val newsItem = data.item.toSave
         news.save(newsItem, recipients)

@@ -59,7 +59,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     publishDate <- get[DateTime]("publish_date")
   } yield {
     val link = for { t <- linkText; h <- parseLink(linkHref) } yield Link(t, h)
-    NewsItemRender(id, title, text, "internal", link, publishDate)
+    NewsItemRender(id, title, text, link, publishDate)
   }
 
   def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender] = {

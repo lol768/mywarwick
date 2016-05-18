@@ -1,5 +1,6 @@
 package models.news
 
+import models.DateFormats
 import org.joda.time.DateTime
 import play.api.libs.json._
 import uk.ac.warwick.util.web.Uri
@@ -22,7 +23,6 @@ case class NewsItemRender (
   id: String,
   title: String,
   text: String, // TODO what is this, HTML? Plaintext? Some other "safe" markup?
-  source: String,
   link: Option[Link],
   publishDate: DateTime
   // TODO Add category info
@@ -30,6 +30,7 @@ case class NewsItemRender (
 )
 
 object NewsItemRender {
+  implicit private val dateWriter = DateFormats.isoDateWrites
   implicit val jsonWriter = Json.writes[NewsItemRender]
 }
 
