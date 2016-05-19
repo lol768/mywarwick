@@ -277,6 +277,8 @@ const select = (state) => {
   return {
     isDesktop: state.ui.className === 'desktop',
     layoutWidth: state.ui.isFourColumnLayout === true ? 4 : 2,
+    // FIXME filtering state here returns a new thing each time, throwing off hasChanged checks.
+    // Instead select all the tiles together, and do this filtering at render time
     tiles: items.filter(tile => !tile.removed),
     hiddenTiles: items.filter(tile => tile.removed),
     layout: state.tiles.data.layout,

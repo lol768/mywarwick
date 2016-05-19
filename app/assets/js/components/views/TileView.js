@@ -74,7 +74,7 @@ class TileView extends Component {
 const select = (state, ownProps) => {
   const id = ownProps.id || ownProps.params.id;
 
-  const tile = state.tiles.data.tiles.filter(t => t.id === id)[0];
+  const tile = state.tiles.data.tiles.find(t => t.id === id);
   const content = state.tileContent[id];
 
   return {
