@@ -10,6 +10,9 @@ import uk.ac.warwick.sso.client.cache.UserCache
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import uk.ac.warwick.util.core.StringUtils
 import warwick.sso.{LoginContext, SSOClient}
+import java.net.URL
+
+import uk.ac.warwick.sso.client.core.LinkGenerator
 
 /**
   * This is some weird SSO stuff for Start, while we're still working out
@@ -30,8 +33,6 @@ class SSOController @Inject()(
   val SSC_PATH = ssoConfig.getString("shire.sscookie.path")
   val SSC_DOMAIN = ssoConfig.getString("shire.sscookie.domain")
 
-  val WSO_HOST = ssoConfig.getString("websignon.host")
-
   /**
     * Returns true if we should redirect to Websignon to refresh the session.
     * False if we're fine where we are.
@@ -51,7 +52,7 @@ class SSOController @Inject()(
     links.setTarget(s"https://${request.host}")
 
     val loginUrl = links.getLoginUrl
-    val logoutUrl = s"https://${request.host}/logout"
+    val logoutUrl = s"https://${request.host}/logout?target=${links.getLogoutUrl}"
 
     Ok(Json.obj(
       "refresh" -> (if (refresh) loginUrl else false),
@@ -64,7 +65,8 @@ class SSOController @Inject()(
   }
 
   def logout = Action { request =>
-    val redirect = Redirect(s"https://${WSO_HOST}/logout?target=https://${request.host}")
+    val logoutUrl = request.getQueryString("target").get
+    val redirect = Redirect(s"$logoutUrl")
     redirect.discardingCookies(DiscardingCookie(SSC_NAME, SSC_PATH, Some(SSC_DOMAIN)))
   }
 

@@ -21,7 +21,6 @@ class SSOControllerTest extends PlaySpec with MockitoSugar with Results {
   baseConfig.setProperty("shire.sscookie.name", "Start-SSC")
   baseConfig.setProperty("shire.sscookie.path", "/")
   baseConfig.setProperty("shire.sscookie.domain", "example.warwick.ac.uk")
-  baseConfig.setProperty("websignon.host", "signon.warwick.ac.uk")
 
   def controller(user: Option[User] = None) = {
     val loginContext = Fixtures.user.loginContext(user)
@@ -29,9 +28,10 @@ class SSOControllerTest extends PlaySpec with MockitoSugar with Results {
     new SSOController(ssoConfig, userCache, ssoClient)
   }
 
+  val URL = "https://signon.example.com"
+  val LOGIN_URL = s"$URL/login"
+  val LOGOUT_URL = s"https://example.warwick.ac.uk/logout?target=$URL/logout"
   val HOSTNAME = "example.warwick.ac.uk"
-  val LOGIN_URL = "https://signon.example.com/login"
-  val LOGOUT_URL = "https://example.warwick.ac.uk/logout"
 
   def FakeRequestWithHost(hostname:String = HOSTNAME) =
     FakeRequest().withHeaders(HeaderNames.HOST -> hostname)
