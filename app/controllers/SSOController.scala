@@ -30,6 +30,8 @@ class SSOController @Inject()(
   val SSC_PATH = ssoConfig.getString("shire.sscookie.path")
   val SSC_DOMAIN = ssoConfig.getString("shire.sscookie.domain")
 
+  val WSO_HOST = ssoConfig.getString("websignon.host")
+
   /**
     * Returns true if we should redirect to Websignon to refresh the session.
     * False if we're fine where we are.
@@ -49,7 +51,7 @@ class SSOController @Inject()(
     links.setTarget(s"https://${request.host}")
 
     val loginUrl = links.getLoginUrl
-    val logoutUrl = s"https://${request.host}/logout?target=${request.path}"
+    val logoutUrl = s"https://${request.host}/logout"
 
     Ok(Json.obj(
       "refresh" -> (if (refresh) loginUrl else false),
@@ -62,8 +64,7 @@ class SSOController @Inject()(
   }
 
   def logout = Action { request =>
-    val target = request.getQueryString("target").filter(_.startsWith("/")).getOrElse("/")
-    val redirect = Redirect(s"https://websignon.warwick.ac.uk/logout?target=https://${request.host}")
+    val redirect = Redirect(s"https://${WSO_HOST}/logout?target=https://${request.host}")
     redirect.discardingCookies(DiscardingCookie(SSC_NAME, SSC_PATH, Some(SSC_DOMAIN)))
   }
 
