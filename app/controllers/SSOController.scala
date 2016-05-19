@@ -46,34 +46,25 @@ class SSOController @Inject()(
     val refresh = ssc.exists(tokenNotInUserCache) || (ssc.isEmpty && ltc.nonEmpty)
 
     val links = ssoClient.linkGenerator(request)
-    links.setTarget(s"https://${request.host}/ssotarget")
+    links.setTarget(s"https://${request.host}")
 
     val loginUrl = links.getLoginUrl
+    val logoutUrl = s"https://${request.host}/logout?target=https://${request.host}"
 
     Ok(Json.obj(
       "refresh" -> (if (refresh) loginUrl else false),
       "user" -> contextUserInfo(request.context),
       "links" -> Json.obj(
         "login" -> loginUrl,
-        "logout" -> links.getLogoutUrl
+        "logout" -> logoutUrl
       )
     ))
   }
 
-  def ssotarget = Action { request =>
-    val ltc = request.cookies.get(GLOBAL_LOGIN_COOKIE_NAME).filter(hasValue)
-
+  def logout = Action { request =>
     val target = request.getQueryString("target").filter(_.startsWith("/")).getOrElse("/")
-    val redirect = Redirect(s"https://${request.host}$target")
-
-    if (ltc.nonEmpty) {
-      // We are signed in, carry on
-      redirect
-    } else {
-      // We just signed out or declined to sign in - delete the SSC because
-      // it's no longer valid
-      redirect.discardingCookies(DiscardingCookie(SSC_NAME, SSC_PATH, Some(SSC_DOMAIN)))
-    }
+    val redirect = Redirect(s"https://websignon.warwick.ac.uk/logout?target=$target")
+    redirect.discardingCookies(DiscardingCookie(SSC_NAME, SSC_PATH, Some(SSC_DOMAIN)))
   }
 
   private def contextUserInfo(context: LoginContext) =
