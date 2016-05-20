@@ -52,7 +52,7 @@ class SSOController @Inject()(
     links.setTarget(s"https://${request.host}")
 
     val loginUrl = links.getLoginUrl
-    val logoutUrl = s"https://${request.host}/logout?target=${links.getLogoutUrl}"
+    val logoutUrl = s"https://${request.host}/logout?target=https://${request.host}"
 
     Ok(Json.obj(
       "refresh" -> (if (refresh) loginUrl else false),
@@ -65,8 +65,10 @@ class SSOController @Inject()(
   }
 
   def logout = Action { request =>
-    val logoutUrl = request.getQueryString("target").get
-    val redirect = Redirect(s"$logoutUrl")
+    val host = request.getQueryString("target").get
+    val links = ssoClient.linkGenerator(request)
+    links.setTarget(host)
+    val redirect = Redirect(s"${links.getLogoutUrl}")
     redirect.discardingCookies(DiscardingCookie(SSC_NAME, SSC_PATH, Some(SSC_DOMAIN)))
   }
 
