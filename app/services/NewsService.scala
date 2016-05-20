@@ -1,6 +1,5 @@
 package services
 
-import java.sql.Connection
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy

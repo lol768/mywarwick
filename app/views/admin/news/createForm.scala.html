@@ -2,75 +2,45 @@
 
 @(form: Form[PublishNewsData])(implicit messages: Messages)
 
-  @implicitField = @{
-    helper.FieldConstructor(customFieldConstructor.apply)
+@implicitFieldConstructor = @{
+  b3.vertical.fieldConstructor
+}
+
+@common.id7layout("Create news") {
+  <div class="container-fluid">
+  @b3.form(action = controllers.admin.routes.NewsController.create()) {
+
+    @b3.text(form("item.title"),
+      '_label -> "Title",
+      'autofocus -> true,
+      'required -> true)
+
+    @b3.textarea(form("item.text"),
+      '_label -> "Text",
+      '_help -> "Keep it short"
+    )
+
+    @b3.datetimeLocal(form("item.publishDate"),
+      '_label -> "Publish date",
+      '_help -> "You can select a time in the future, and it will appear to users after that time. Otherwise choose the current time to publish now"
+    )
+
+    @b3.text(form("item.linkHref"),
+      '_label -> "Link URL"
+    )
+
+    @b3.text(form("item.linkText"),
+      '_label -> "Link title"
+    )
+
+    @b3.text(form("recipients"),
+      '_label -> "Recipients (comma-separated usercodes)",
+      'required -> true
+    )
+
+    @b3.submit(
+      'class -> "btn btn-primary"
+    ) {Save}
   }
-
-  @common.id7layout("Create news") {
-
-    @helper.form(action = controllers.admin.routes.NewsController.create()) {
-
-      <div class="container">
-        <div class="row">
-          <div class="col-sm-6">
-          @helper.inputText(form("item.title"),
-            '_label -> "Title",
-            'autofocus -> "autofocus",
-            'class -> "form-control",
-            'required -> "required")
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-sm-6">
-          @helper.textarea(form("item.text"),
-            '_label -> "Text",
-            'class -> "form-control"
-          )
-          </div>
-          <div class="col-sm-6">
-            Keep it short.
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-sm-6">
-          @helper.inputText(form("item.publishDate"),
-            '_label -> "Publish date",
-            'type -> "datetime-local",
-            'class -> "form-control"
-          )
-          </div>
-          <div class="col-sm-6">
-            You can select a time in the future, and it will appear to users after that time. Otherwise choose the current time to publish now.
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-sm-6">
-          @helper.inputText(form("item.linkHref"),
-            '_label -> "Link URL",
-            'class -> "form-control"
-          )
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-sm-6">
-          @helper.inputText(form("item.linkText"),
-            '_label -> "Link title",
-            'class -> "form-control"
-          )
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-sm-6">
-          @helper.inputText(form("recipients"),
-            '_label -> "Recipients (comma-separated usercodes)",
-            'class -> "form-control",
-            'required -> "required")
-          </div>
-        </div>
-
-        <div class="form-group">
-          <button type="submit" class="btn btn-primary">Save</button>
-        </div>
-      </div>
-    }
-  }
+  </div>
+}
