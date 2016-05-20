@@ -1,24 +1,21 @@
 package models.news
 
-/**
-  * Currently unused.
-  */
+case class Audience(components: Seq[Audience.Component] = Nil)
 
-trait Audience
-case class CombinedAudience(components: Seq[Audience])
-
-// Pieces of audience
-trait AudienceComponent
-// Pieces of department
-trait DepartmentSubset
-case class WebgroupAudience(groupName: String) extends AudienceComponent
-case class ModuleAudience(moduleCode: String) extends AudienceComponent
-case class DepartmentAudience(deptCode: String, subset: Seq[DepartmentSubset]) extends AudienceComponent
-case object TeachingStaff extends AudienceComponent
-case object AdminStaff extends AudienceComponent
-case object Staff extends DepartmentSubset
-case object UndergradStudents extends AudienceComponent with DepartmentSubset
-case object UndergradStudentsFirstYear extends AudienceComponent
-case object UndergradStudentsFinalYear extends AudienceComponent
-case object TaughtPostgrads extends AudienceComponent with DepartmentSubset
-case object ResearchPostgrads extends AudienceComponent with DepartmentSubset
+object Audience {
+  // Pieces of audience
+  sealed trait Component
+  // Pieces of department
+  trait DepartmentSubset
+  case class WebgroupAudience(groupName: String) extends Component
+  case class ModuleAudience(moduleCode: String) extends Component
+  case class DepartmentAudience(deptCode: String, subset: Seq[DepartmentSubset]) extends Component
+  case object TeachingStaff extends Component
+  case object AdminStaff extends Component
+  case object Staff extends DepartmentSubset
+  case object UndergradStudents extends Component with DepartmentSubset
+  case object UndergradStudentsFirstYear extends Component
+  case object UndergradStudentsFinalYear extends Component
+  case object TaughtPostgrads extends Component with DepartmentSubset
+  case object ResearchPostgrads extends Component with DepartmentSubset
+}
