@@ -68,7 +68,7 @@ class SSOController @Inject()(
     val host = request.getQueryString("target").get
     val links = ssoClient.linkGenerator(request)
     links.setTarget(host)
-    val redirect = Redirect(s"${links.getLogoutUrl}")
+    val redirect = Redirect(links.getLogoutUrl)
     redirect.discardingCookies(DiscardingCookie(SSC_NAME, SSC_PATH, Some(SSC_DOMAIN)))
   }
 
