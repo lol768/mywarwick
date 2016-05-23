@@ -117,19 +117,19 @@ class NotificationsView extends ReactComponent {
           </div>
           : null
         }
-        { !hasAny ?
+        { hasAny ?
+          <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore }>
+            <GroupedList groupBy={ this.props.grouped ? groupItemsByDate : undefined }>
+              { notifications }
+            </GroupedList>
+          </InfiniteScrollable>
+          :
           <EmptyState lead="You don't have any notifications yet.">
             When there are things that need your attention &ndash;
             coursework due in, library books due back, that kind of thing &ndash;
             you'll see those notifications here.
           </EmptyState>
-          : null
         }
-        <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore }>
-          <GroupedList groupBy={ this.props.grouped ? groupItemsByDate : undefined }>
-            { notifications }
-          </GroupedList>
-        </InfiniteScrollable>
       </div>
     );
   }

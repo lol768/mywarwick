@@ -40,18 +40,19 @@ export default class ActivityView extends ReactComponent {
 
     return (
       <div>
-        { !hasAny ?
+        { hasAny ?
+          <InfiniteScrollable hasMore={hasMore} onLoadMore={ this.loadMore }>
+            <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
+              {activities}
+            </GroupedList>
+          </InfiniteScrollable>
+          :
           <EmptyState lead="You don't have any activity yet.">
             When you do something at Warwick &ndash;
             like signing in, submitting your coursework, or enrolling for a module &ndash;
             you'll see a record of it here.
           </EmptyState>
-        : null }
-        <InfiniteScrollable hasMore={hasMore} onLoadMore={ this.loadMore }>
-          <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
-            {activities}
-          </GroupedList>
-        </InfiniteScrollable>
+        }
       </div>
     );
   }
