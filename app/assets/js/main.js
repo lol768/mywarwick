@@ -129,7 +129,7 @@ persisted('notifications', notifications.fetchedNotifications, freezeStream);
 persisted('tiles.data', tiles.fetchedTiles);
 persisted('tileContent', tiles.loadedAllTileContent);
 
-persisted('user.links', user.receiveSSOLinks);
+const persistedUserLinks = persisted('user.links', user.receiveSSOLinks);
 
 /** Initial requests for data */
 
@@ -156,8 +156,11 @@ store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getSt
 
 // kicks off the whole data flow - when user is received we fetch tile data
 function fetchUserInfo() {
-  serverpipe.fetchWithCredentials('/user/info')
-    .then(response => response.json())
+  return serverpipe.fetchWithCredentials('/user/info');
+}
+
+function receiveUserInfo(response) {
+  return response.json()
     .then(response => {
       if (response.refresh) {
         window.location = response.refresh;
@@ -166,11 +169,16 @@ function fetchUserInfo() {
         store.dispatch(user.receiveSSOLinks(response.links));
       }
     })
-    .catch(() => setTimeout(fetchUserInfo, 5000));
+    .catch(() => setTimeout(() => fetchUserInfo().then(receiveUserInfo), 5000));
 }
 
 user.loadUserFromLocalStorage(store.dispatch);
-fetchUserInfo();
+fetchUserInfo().then(res =>
+  // ensure local version is written first, then remote version if available.
+  persistedUserLinks.then(() =>
+    receiveUserInfo(res)
+  )
+);
 
 // Just for access from the console
 window.Store = store;
