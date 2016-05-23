@@ -6,6 +6,7 @@ import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
 import * as groupItemsByDate from '../../GroupItemsByDate';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
+import EmptyState from '../ui/EmptyState';
 
 import { connect } from 'react-redux';
 
@@ -103,7 +104,9 @@ class NotificationsView extends ReactComponent {
         />
       );
 
-    const hasMore = this.state.numberToShow < getStreamSize(this.props.notifications);
+    const streamSize = getStreamSize(this.props.notifications);
+    const hasAny = streamSize > 0;
+    const hasMore = this.state.numberToShow < streamSize;
 
     return (
       <div>
@@ -112,6 +115,14 @@ class NotificationsView extends ReactComponent {
             You have blocked Start.Warwick from sending desktop notifications. You'll need to open
             your browser preferences to change that.
           </div>
+          : null
+        }
+        { !hasAny ?
+          <EmptyState lead="You don't have any notifications yet.">
+            When there are things that need your attention &ndash;
+            coursework due in, library books due back, that kind of thing &ndash;
+            you'll see those notifications here.
+          </EmptyState>
           : null
         }
         <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore }>
