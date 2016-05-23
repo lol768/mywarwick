@@ -2,8 +2,6 @@
 @(news: Seq[NewsItemRender])
 
 @common.id7layout("News") {
-  <h1>News</h1>
-
   <p>
     <a class="btn btn-default" href="@controllers.admin.routes.NewsController.createForm()">Create news</a>
   </p>
