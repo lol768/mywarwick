@@ -5,6 +5,7 @@ import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
 import * as groupItemsByDate from '../../GroupItemsByDate';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
+import EmptyState from '../ui/EmptyState';
 
 import { connect } from 'react-redux';
 
@@ -33,14 +34,26 @@ export default class ActivityView extends ReactComponent {
     const activities = takeFromStream(this.props.activities, this.state.numberToShow)
       .map(n => <ActivityItem key={n.id} {...n} />);
 
-    const hasMore = this.state.numberToShow < getStreamSize(this.props.activities);
+    const streamSize = getStreamSize(this.props.activities);
+    const hasAny = streamSize > 0;
+    const hasMore = this.state.numberToShow < streamSize;
 
     return (
-      <InfiniteScrollable hasMore={hasMore} onLoadMore={ this.loadMore }>
-        <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
-          {activities}
-        </GroupedList>
-      </InfiniteScrollable>
+      <div>
+        { hasAny ?
+          <InfiniteScrollable hasMore={hasMore} onLoadMore={ this.loadMore }>
+            <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
+              {activities}
+            </GroupedList>
+          </InfiniteScrollable>
+          :
+          <EmptyState lead="You don't have any activity yet.">
+            When you do something at Warwick &ndash;
+            like signing in, submitting your coursework, or enrolling for a module &ndash;
+            you'll see a record of it here.
+          </EmptyState>
+        }
+      </div>
     );
   }
 }

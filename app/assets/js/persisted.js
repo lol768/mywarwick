@@ -33,8 +33,9 @@ export default function init(opts) {
     return localforage.getItem(keyPath)
       .then(value => {
         if (value !== null) {
-          store.dispatch(action(thaw(value)));
+          return store.dispatch(action(thaw(value)));
         }
+        return null;
       })
       .catch(err => log.warn(`Unable to load ${keyPath} from local storage: `, err.stack || err))
       .then(() => {

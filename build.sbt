@@ -37,7 +37,8 @@ val appDeps = Seq(
   "com.typesafe.play" %% "play-mailer" % "3.0.1",
   "com.notnoop.apns" % "apns" % "1.0.0.Beta6",
   "org.quartz-scheduler" % "quartz" % "2.2.1",
-  "com.google.inject.extensions" % "guice-multibindings" % "4.0"
+  "com.google.inject.extensions" % "guice-multibindings" % "4.0",
+  "com.adrianhurt" %% "play-bootstrap" % "1.0-P24-B3"
 )
 
 val testDeps = Seq(
