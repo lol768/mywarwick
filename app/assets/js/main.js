@@ -161,12 +161,12 @@ function fetchUserInfo() {
 
 function receiveUserInfo(response) {
   return response.json()
-    .then(response => {
-      if (response.refresh) {
-        window.location = response.refresh;
+    .then(data => {
+      if (data.refresh) {
+        window.location = data.refresh;
       } else {
-        store.dispatch(user.userReceive(response.user));
-        store.dispatch(user.receiveSSOLinks(response.links));
+        store.dispatch(user.userReceive(data.user));
+        store.dispatch(user.receiveSSOLinks(data.links));
       }
     })
     .catch(() => setTimeout(() => fetchUserInfo().then(receiveUserInfo), 5000));
