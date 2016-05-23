@@ -5,11 +5,10 @@ import org.apache.commons.configuration.BaseConfiguration
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.cache.CacheApi
+import play.api.http.HeaderNames
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import services.SecurityServiceImpl
 import uk.ac.warwick.sso.client.cache.{UserCache, UserCacheItem}
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import warwick.sso._
@@ -19,22 +18,27 @@ class SSOControllerTest extends PlaySpec with MockitoSugar with Results {
   val ssoConfig = new SSOConfiguration(baseConfig)
   val userCache = mock[UserCache]
 
+  val HOSTNAME = "example.warwick.ac.uk"
+
   baseConfig.setProperty("shire.sscookie.name", "Start-SSC")
   baseConfig.setProperty("shire.sscookie.path", "/")
-  baseConfig.setProperty("shire.sscookie.domain", "example.warwick.ac.uk")
+  baseConfig.setProperty("shire.sscookie.domain", HOSTNAME)
+
 
   def controller(user: Option[User] = None) = {
     val loginContext = Fixtures.user.loginContext(user)
     val ssoClient = new MockSSOClient(loginContext)
     new SSOController(ssoConfig, userCache, ssoClient)
   }
-
   val LOGIN_URL = "https://signon.example.com/login"
-  val LOGOUT_URL = "https://signon.example.com/logout"
+  val LOGOUT_URL = s"https://example.warwick.ac.uk/logout?target=https://$HOSTNAME"
+
+  def FakeRequestWithHost(hostname:String = HOSTNAME) =
+    FakeRequest().withHeaders(HeaderNames.HOST -> hostname)
 
   "SSOController#info" should {
     "handle anonymous" in {
-      val result = controller().info(FakeRequest())
+      val result = controller().info(FakeRequestWithHost())
       status(result) must be(200)
       val json = contentAsJson(result)
       (json \ "refresh").as[Boolean] mustBe false
@@ -45,7 +49,7 @@ class SSOControllerTest extends PlaySpec with MockitoSugar with Results {
 
     "handle unrecognised cookie" in {
       val ssc = Cookie(name = "Start-SSC", value = "unrecognised")
-      val result = controller().info(FakeRequest().withCookies(ssc))
+      val result = controller().info(FakeRequestWithHost().withCookies(ssc))
       status(result) must be(200)
       val json = contentAsJson(result)
       (json \ "refresh").as[String] mustBe LOGIN_URL
@@ -61,7 +65,7 @@ class SSOControllerTest extends PlaySpec with MockitoSugar with Results {
       when(userCache.get(key)).thenReturn(new UserCacheItem(null, 0, null))
 
       val user = Fixtures.user.makeFoundUser()
-      val result = controller(Some(user)).info(FakeRequest().withCookies(ssc))
+      val result = controller(Some(user)).info(FakeRequestWithHost().withCookies(ssc))
       status(result) must be(200)
 
       val json = contentAsJson(result)

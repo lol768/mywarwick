@@ -53,7 +53,7 @@ PUT         /api/tiles                                    @controllers.api.Tiles
 POST        /api/errors/js                                @controllers.api.ErrorsController.js
 
 GET         /user/info                                    @controllers.SSOController.info
-GET         /ssotarget                                    @controllers.SSOController.ssotarget
+GET         /logout                                       @controllers.SSOController.logout
 
 POST        /api/push/apns/subscribe                      @controllers.api.APNSPushNotificationsController.subscribe
 POST        /api/push/gcm/subscribe                       @controllers.api.GCMPushNotificationsController.subscribe
