@@ -22,6 +22,8 @@ trait ActivityService {
   def getLastReadDate(user: User): Option[DateTime]
 
   def setLastReadDate(user: User, dateTime: DateTime): Boolean
+
+  def getActivitiesByProviderId(providerId: String, limit: Int = 50): Seq[Activity]
 }
 
 class ActivityServiceImpl @Inject()(
@@ -75,6 +77,8 @@ class ActivityServiceImpl @Inject()(
   override def setLastReadDate(user: User, dateTime: DateTime): Boolean =
     db.withConnection(implicit c => activityDao.saveLastReadDate(user.usercode.string, dateTime))
 
+  override def getActivitiesByProviderId(providerId: String, limit: Int) =
+    db.withConnection(implicit c => activityDao.getActivitiesByProviderId(providerId, limit))
 }
 
 object NoRecipientsException extends Throwable
