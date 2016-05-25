@@ -10,6 +10,10 @@
   <div class="container-fluid">
   @b3.form(action = controllers.admin.routes.NotificationsController.create()) {
 
+    @form.globalErrors.map { error =>
+      <div class="alert alert-danger">@error.message</div>
+    }
+
     @b3.text(form("recipients"),
       '_label -> "Recipients (comma-separated usercodes)",
       'required -> true

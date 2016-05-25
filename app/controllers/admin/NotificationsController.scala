@@ -7,7 +7,7 @@ import models.news.{NotificationSave, PublishNotification}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import services.{ActivityService, SecurityService}
+import services.{ActivityService, NoRecipientsException, SecurityService}
 import system.{Roles, Validation}
 
 import scala.util.{Failure, Success}
@@ -56,9 +56,15 @@ class NotificationsController @Inject()(
           case Success(_) =>
             Redirect(controllers.admin.routes.NotificationsController.list())
           case Failure(e) =>
-            // TODO Display a nice human-readable error in a standard way across admin pages
-            logger.warn("ActivityService did not save activity", e)
-            Ok(views.html.admin.notifications.createForm(form))
+            val formWithError = e match {
+              case NoRecipientsException =>
+                form.withError("recipients", "No valid usercodes")
+              case _ =>
+                logger.error("Failure while creating notification", e)
+                form.withGlobalError("An error occurred creating this notification")
+            }
+
+            Ok(views.html.admin.notifications.createForm(formWithError))
         }
       }
     )
