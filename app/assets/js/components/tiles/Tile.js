@@ -68,6 +68,11 @@ export default class Tile extends Component {
   }
 
   onClick(e) {
+    if (e.target === this.refs.icon) {
+      // Do not apply default click action to icon
+      return;
+    }
+
     const { content, editingAny } = this.props;
     e.stopPropagation();
     if (editingAny) {
