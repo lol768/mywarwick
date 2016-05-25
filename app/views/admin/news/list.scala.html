@@ -1,7 +1,7 @@
 @import models.news.NewsItemRender
 @(news: Seq[NewsItemRender])
 
-@common.id7layout("News") {
+@common.admin("News") {
   <p>
     <a class="btn btn-default" href="@controllers.admin.routes.NewsController.createForm()">Create news</a>
   </p>
