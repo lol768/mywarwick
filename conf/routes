@@ -26,6 +26,9 @@ GET         /admin/notifications                          @controllers.admin.Not
 GET         /admin/notifications/new                      @controllers.admin.NotificationsController.createForm
 POST        /admin/notifications                          @controllers.admin.NotificationsController.create
 
+POST        /api/news/images                              @controllers.api.NewsImagesController.create
+GET         /api/news/images/:id                          @controllers.api.NewsImagesController.show(id: String)
+
 # DEPRECATED no-slash version 2016-02-11
 GET         /websockets/page                              @controllers.HomeController.socket
 GET         /websockets/page/                             @controllers.HomeController.socket
