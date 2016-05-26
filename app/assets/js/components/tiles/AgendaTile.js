@@ -63,7 +63,7 @@ const agendaViewTransform = (items) => {
 
       return e;
     })
-    .filter(e => startOfToday.isBefore(e.end))
+    .filter(e => startOfToday.isBefore(e.start))
     .sortBy(e => e.start)
     .value();
 };
@@ -125,9 +125,7 @@ export default class AgendaTile extends TileContent {
       items : _.take(items, maxItemsToDisplay);
 
     const events = itemsToDisplay.map(event =>
-      <AgendaTileItem key={event.id}
-        {...event}
-      />
+      <AgendaTileItem key={event.id} {...event} />
     );
 
     return (
@@ -219,7 +217,7 @@ AgendaTileItem.propTypes = {
   id: PropTypes.string,
   start: PropTypes.string,
   end: PropTypes.string,
-  isAllDay: PropTypes.boolean,
+  isAllDay: PropTypes.bool,
   title: PropTypes.string,
   location: React.PropTypes.shape({
     name: React.PropTypes.string,
