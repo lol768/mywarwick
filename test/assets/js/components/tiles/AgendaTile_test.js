@@ -25,7 +25,6 @@ describe('AgendaTile', () => {
   it('renders all-day events when small', () => {
     const allDayProps = buildSmallProps([{ id: '1', title: 'AFD', start: today, end: tomorrow, isAllDay: true }]);
     const html = renderAtMoment(<AgendaTile { ...allDayProps } />, now);
-    console.log(html.props.children);
     findChild(html, [1, 0, 0]).should.equal('All day: AFD');
   });
 
