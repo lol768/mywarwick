@@ -38,7 +38,10 @@ global.paths = {
   assetPath: 'app/assets',
   scriptOut: 'target/gulp/js',
   assetsOut: 'target/gulp',
-  styleIn: ['app/assets/css/main.less'],
+  styleIn: [
+    'app/assets/css/main.less',
+    'app/assets/css/admin.less',
+  ],
   styleOut: 'target/gulp/css',
   // Paths under node_modules that will be searched when @import-ing in your LESS.
   styleModules: [

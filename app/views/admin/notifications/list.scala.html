@@ -1,0 +1,36 @@
+@(notifications: Seq[models.Activity])
+
+@common.admin("Notifications") {
+  <p>
+    <a class="btn btn-default" href="@controllers.admin.routes.NotificationsController.createForm()">
+      Create notification
+    </a>
+  </p>
+
+  @if(notifications.isEmpty) {
+    <p>No notifications.</p>
+  } else {
+    <p>
+      Showing @if(notifications.size == 1) {one item} else {@notifications.size items}.
+    </p>
+    @notifications.map { item =>
+        <div class="activity-item">
+          <div class="media">
+            <div class="media-left">
+              <i class="app-icon app-icon--lg fa fa-fw fa-newspaper-o"></i>
+            </div>
+            <div class="media-body">
+              <div class="activity-item__title">@item.title</div>
+              @item.text.map { text =>
+                <div class="activity-item__text">@text</div>
+              }
+              <div class="activity-item__date">@models.DateFormats.emailDateTime(item.createdAt)</div>
+              @item.url.map { url =>
+                <a href="@url">Link to @url</a>
+              }
+            </div>
+          </div>
+        </div>
+    }
+  }
+}

@@ -22,6 +22,10 @@ GET         /admin/news                                   @controllers.admin.New
 GET         /admin/news/new                               @controllers.admin.NewsController.createForm
 POST        /admin/news/new                               @controllers.admin.NewsController.create
 
+GET         /admin/notifications                          @controllers.admin.NotificationsController.list
+GET         /admin/notifications/new                      @controllers.admin.NotificationsController.createForm
+POST        /admin/notifications                          @controllers.admin.NotificationsController.create
+
 # DEPRECATED no-slash version 2016-02-11
 GET         /websockets/page                              @controllers.HomeController.socket
 GET         /websockets/page/                             @controllers.HomeController.socket

@@ -230,7 +230,7 @@ class MeView extends ReactComponent {
             useCSSTransformations
             onLayoutChange={this.onLayoutChange}
             verticalCompact
-            draggableCancel=".tile__edit-control"
+            draggableCancel=".tile__edit-control, .toggle-tooltip"
             onDragStart={this.onDragStart}
             getDragDelayForItem={this.getDragDelayForItem}
           >
