@@ -1,6 +1,9 @@
 @import controllers.admin.PublishNewsData
 
-@(form: Form[PublishNewsData])(implicit messages: Messages)
+@(
+    form: Form[PublishNewsData],
+    departmentOptions: Seq[(String, String)]
+)(implicit messages: Messages)
 
 @implicitFieldConstructor = @{
   b3.vertical.fieldConstructor
@@ -11,6 +14,7 @@
   @b3.form(action = controllers.admin.routes.NewsController.create()) {
 
     @b3.text(form("item.title"),
+      'class -> "input-lg",
       '_label -> "Title",
       'autofocus -> true,
       'required -> true)
@@ -33,14 +37,14 @@
       '_label -> "Link title"
     )
 
-    @b3.text(form("recipients"),
-      '_label -> "Recipients (comma-separated usercodes)",
-      'required -> true
-    )
+    <div class="form-group">
+      <label class="control-label">Who is this news item for?</label>
+      @snippets.audiencePicker(form, "audience", departmentOptions)
+    </div>
 
     @b3.submit(
       'class -> "btn btn-primary"
-    ) {Save}
+    ) {Create}
   }
   </div>
 }

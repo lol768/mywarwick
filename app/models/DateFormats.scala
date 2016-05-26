@@ -2,8 +2,11 @@ package models
 
 import org.joda.time._
 import org.joda.time.format._
+import play.api.data.Forms._
+import play.api.data.format.Formats
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
+import system.TimeZones
 
 import scala.util._
 
@@ -45,6 +48,11 @@ object DateFormats {
         case Failure(e) => JsError(Seq(JsPath() -> Seq(ValidationError("error.expected.date.format", "iso8601"))))
       }
   }
+
+  /**
+    * Form mapping for a datetime-local input type, reading into a Joda DateTime.
+    */
+  val jodaDateTimeMapping = of(Formats.jodaDateTimeFormat("yyyy-MM-dd'T'HH:mm", TimeZones.LONDON))
 
   class JodaWrites(fmt: DateTimeFormatter) extends Writes[ReadableInstant] {
     override def writes(o: ReadableInstant): JsValue = JsString(o.toInstant.toString(fmt))

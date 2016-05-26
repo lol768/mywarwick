@@ -1,0 +1,32 @@
+@(
+    form: Form[_],
+    fieldName: String,
+    departmentOptions: Seq[(String, String)]
+)(implicit messages: Messages)
+
+@implicitFieldConstructor = @{
+  b3.vertical.fieldConstructor
+}
+
+<div class="audience-picker">
+  @defining(b3.clear.fieldConstructorSpecific) { implicit cfc =>
+    @b3.seqCheckbox(form, fieldName, 'id -> "staff", '_text -> "All staff", 'value -> "Staff")
+    @b3.seqCheckbox(form, fieldName, 'id -> "teaching", '_text -> "Teaching staff", 'value -> "TeachingStaff")
+    @b3.seqCheckbox(form, fieldName, 'id -> "ug", '_text -> "Undergraduates", 'value -> "UndergradStudents")
+    @b3.seqCheckbox(form, fieldName, 'id -> "pgt", '_text -> "PG Taught", 'value -> "TaughtPostgrads")
+    @b3.seqCheckbox(form, fieldName, 'id -> "pgr", '_text -> "PG Research", 'value -> "ResearchPostgrads")
+
+    @b3.select(form("department"), departmentOptions, '_text -> "Department")
+    <div class=row>
+      <div class="col-xs-11 col-xs-offset-1">
+        @b3.seqCheckbox(form, fieldName, 'id -> "dept-staff", '_text -> "Everyone", 'value -> "Dept:All")
+        @b3.seqCheckbox(form, fieldName, 'id -> "dept-staff", '_text -> "All staff", 'value -> "Dept:Staff")
+        @b3.seqCheckbox(form, fieldName, 'id -> "dept-teaching", '_text -> "Teaching staff", 'value -> "Dept:TeachingStaff")
+        @b3.seqCheckbox(form, fieldName, 'id -> "dept-ug", '_text -> "Undergraduates", 'value -> "Dept:UndergradStudents")
+        @b3.seqCheckbox(form, fieldName, 'id -> "dept-pgt", '_text -> "PG Taught", 'value -> "Dept:TaughtPostgrads")
+        @b3.seqCheckbox(form, fieldName, 'id -> "dept-pgr", '_text -> "PG Research", 'value -> "Dept:ResearchPostgrads")
+      </div>
+    </div>
+  }
+
+</div>

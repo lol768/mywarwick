@@ -3,12 +3,14 @@ package controllers.admin
 import javax.inject.Inject
 
 import controllers.BaseController
+import models.DateFormats
 import models.news.{Link, NewsItemSave}
 import org.joda.time.DateTime
 import play.api.data.Forms._
 import play.api.data._
 import play.api.data.format.Formats
 import play.api.i18n.{I18nSupport, MessagesApi}
+import services.dao.DepartmentInfoDao
 import services.{NewsService, SecurityService}
 import system.{Roles, TimeZones}
 import uk.ac.warwick.util.web.Uri
@@ -16,7 +18,8 @@ import warwick.sso.Usercode
 
 case class PublishNewsData(
   item: NewsItemData,
-  recipients: String
+  recipients: Option[String],
+  audience: Seq[String]
 )
 
 case class NewsItemData(
@@ -40,20 +43,30 @@ case class NewsItemData(
 class NewsController @Inject() (
   security: SecurityService,
   val messagesApi: MessagesApi,
-  news: NewsService
+  news: NewsService,
+  departments: DepartmentInfoDao
 ) extends BaseController with I18nSupport {
 
+  import system.ThreadPools.web
   import Roles._
   import security._
 
-  val jodaDateTime = of(Formats.jodaDateTimeFormat("yyyy-MM-dd'T'HH:mm", TimeZones.LONDON))
+  val departmentTypes = Set("ACADEMIC", "SERVICE")
+  val departmentInitialValue = Seq("" -> "--- Department ---")
+  lazy val departmentOptions = departments.allDepartments
+    .recover { case e => Nil }
+    .map { depts =>
+      departmentInitialValue ++ depts.filter { info => departmentTypes.contains(info.`type`) }
+        .sortBy { info => info.name }
+        .map { info => info.code -> info.name }
+    }
 
   val newsItemMapping = mapping(
     "title" -> nonEmptyText,
     "text" -> nonEmptyText,
     "linkText" -> optional(text),
     "linkHref" -> optional(text),
-    "publishDate" -> jodaDateTime
+    "publishDate" -> DateFormats.jodaDateTimeMapping
   )(NewsItemData.apply)(NewsItemData.unapply)
 
   type PublishNewsForm = Form[PublishNewsData]
@@ -61,7 +74,8 @@ class NewsController @Inject() (
   val publishNewsForm = Form(
     mapping(
       "item" -> newsItemMapping,
-      "recipients" -> nonEmptyText
+      "recipients" -> optional(nonEmptyText),
+      "audience" -> seq(nonEmptyText)
     )(PublishNewsData.apply)(PublishNewsData.unapply)
   )
 
@@ -69,20 +83,28 @@ class NewsController @Inject() (
     Ok(views.html.admin.news.list(news.allNews(limit = 100)))
   }
 
-  def createForm = RequiredActualUserRoleAction(Sysadmin) {
-    Ok(views.html.admin.news.createForm(publishNewsForm))
+  def createForm = RequiredActualUserRoleAction(Sysadmin).async {
+    for {
+      dopts <- departmentOptions
+    } yield {
+      Ok(views.html.admin.news.createForm(publishNewsForm, dopts))
+    }
   }
 
-  def create = RequiredActualUserRoleAction(Sysadmin) { implicit req =>
-    publishNewsForm.bindFromRequest.fold(
-      errorForm => Ok(views.html.admin.news.createForm(errorForm)),
-      data => {
-        val recipients = data.recipients.split(",").map(_.trim).map(Usercode)
-        val newsItem = data.item.toSave
-        news.save(newsItem, recipients)
-        Redirect(controllers.admin.routes.NewsController.list())
-      }
-    )
+  def create = RequiredActualUserRoleAction(Sysadmin).async { implicit req =>
+    for {
+      dopts <- departmentOptions
+    } yield {
+      publishNewsForm.bindFromRequest.fold(
+        errorForm => Ok(views.html.admin.news.createForm(errorForm, dopts)),
+        data => {
+          val recipients = data.recipients.getOrElse("").split(",").map(_.trim).map(Usercode)
+          val newsItem = data.item.toSave
+          news.save(newsItem, recipients)
+          Redirect(controllers.admin.routes.NewsController.list())
+        }
+      )
+    }
   }
 
 }
