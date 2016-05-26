@@ -29,7 +29,7 @@ class AudienceServiceTest extends PlaySpec with MockitoSugar {
 
     "search for research postgrads" in new Ctx {
       webgroupsIsEmpty
-      service.resolve(Audience(Seq(ResearchPostgrads)))
+      service.resolve(Audience(Seq(ResearchPostgrads))).get
       verify(webgroups).getWebGroup(GroupName("all-studenttype-postgraduate-research-ft"))
       verify(webgroups).getWebGroup(GroupName("all-studenttype-postgraduate-research-pt"))
       verifyNoMoreInteractions(webgroups)
@@ -37,23 +37,26 @@ class AudienceServiceTest extends PlaySpec with MockitoSugar {
 
     "search for taught postgrads" in new Ctx {
       webgroupsIsEmpty
-      service.resolve(Audience(Seq(TaughtPostgrads)))
+      service.resolve(Audience(Seq(TaughtPostgrads))).get
       verify(webgroups).getWebGroup(GroupName("all-studenttype-postgraduate-taught-ft"))
       verify(webgroups).getWebGroup(GroupName("all-studenttype-postgraduate-taught-pt"))
       verifyNoMoreInteractions(webgroups)
     }
 
     "search for combination of departmental subsets" in new Ctx {
+      webgroupsIsEmpty
       service.resolve(Audience(Seq(
-        WebgroupAudience(GroupName("in-arbitrary")),
+        WebgroupAudience(GroupName("in-winners")),
+        WebgroupAudience(GroupName("in-losers")),
         DepartmentAudience("ch", Seq(UndergradStudents)),
         DepartmentAudience("ph", Seq(UndergradStudents, TeachingStaff))
-      )))
-      verify(webgroups).getWebGroup(GroupName("in-arbitrary"))
-      verify(webgroups).getWebGroup(GroupName("ch-studenttype-undergraduate-part-time"))
+      ))).get
+      verify(webgroups).getWebGroup(GroupName("in-winners"))
+      verify(webgroups).getWebGroup(GroupName("in-losers"))
       verify(webgroups).getWebGroup(GroupName("ch-studenttype-undergraduate-full-time"))
-      verify(webgroups).getWebGroup(GroupName("ph-studenttype-undergraduate-part-time"))
+      verify(webgroups).getWebGroup(GroupName("ch-studenttype-undergraduate-part-time"))
       verify(webgroups).getWebGroup(GroupName("ph-studenttype-undergraduate-full-time"))
+      verify(webgroups).getWebGroup(GroupName("ph-studenttype-undergraduate-part-time"))
       verify(webgroups).getWebGroup(GroupName("ph-teaching"))
       verifyNoMoreInteractions(webgroups)
     }
