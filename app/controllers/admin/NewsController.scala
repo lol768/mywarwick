@@ -24,7 +24,8 @@ case class NewsItemData(
   text: String,
   linkText: Option[String],
   linkHref: Option[String],
-  publishDate: DateTime = new DateTime()
+  publishDate: DateTime = new DateTime(),
+  imageId: Option[String]
 ) {
   def toSave = NewsItemSave(
     title = title,
@@ -33,7 +34,8 @@ case class NewsItemData(
         t <- linkText
         h <- linkHref
       } yield Link(t, Uri.parse(h)),
-    publishDate = publishDate
+    publishDate = publishDate,
+    imageId = imageId
   )
 }
 
@@ -53,7 +55,8 @@ class NewsController @Inject() (
     "text" -> nonEmptyText,
     "linkText" -> optional(text),
     "linkHref" -> optional(text),
-    "publishDate" -> jodaDateTime
+    "publishDate" -> jodaDateTime,
+    "imageId" -> optional(text)
   )(NewsItemData.apply)(NewsItemData.unapply)
 
   type PublishNewsForm = Form[PublishNewsData]

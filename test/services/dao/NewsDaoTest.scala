@@ -20,14 +20,16 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
     title = "London's Burning",
     text = "The capital is on fire.",
     link = None,
-    publishDate = DateTime.now.minusMinutes(5)
+    publishDate = DateTime.now.minusMinutes(5),
+    imageId = None
   )
 
   val brumPanic = NewsItemSave(
     title = "Panic on the streets of Birmingham",
     text = "I wonder to myself - burn down the disco.",
     link = None,
-    publishDate = DateTime.now.minusMinutes(10)
+    publishDate = DateTime.now.minusMinutes(10),
+    imageId = None
   )
 
   // Publish date in future, so shouldn't be shown to user.
@@ -35,7 +37,8 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
     title = "Hoverboards invented",
     text = "Finally, we can all hover to work!",
     link = None,
-    publishDate = DateTime.now.plusYears(10)
+    publishDate = DateTime.now.plusYears(10),
+    imageId = None
   )
 
   "latestNews" should {

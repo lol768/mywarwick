@@ -3,6 +3,11 @@
 <article class="news-item">
   <div class="news-item__body">
     <div class="news-item__title">@item.title</div>
+    @item.imageId.map { imageId =>
+      <div class="news-item__image">
+        <img src="@controllers.api.routes.NewsImagesController.show(imageId)" alt="@item.title">
+      </div>
+    }
     <div class="news-item__content">@item.text</div>
     <div class="news-item__footer">@models.DateFormats.emailDateTime(item.publishDate)</div>
   </div>

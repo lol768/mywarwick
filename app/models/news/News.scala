@@ -24,7 +24,8 @@ case class NewsItemRender (
   title: String,
   text: String, // TODO what is this, HTML? Plaintext? Some other "safe" markup?
   link: Option[Link],
-  publishDate: DateTime
+  publishDate: DateTime,
+  imageId: Option[String]
   // TODO Add category info
   // TODO Add publisher info
 )
@@ -41,7 +42,8 @@ case class NewsItemSave (
   title: String,
   text: String,
   link: Option[Link],
-  publishDate: DateTime
+  publishDate: DateTime,
+  imageId: Option[String]
   // TODO publisher, category/ies
 )
 
