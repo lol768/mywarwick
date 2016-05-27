@@ -10,9 +10,8 @@ import uk.ac.warwick.sso.client.cache.UserCache
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import uk.ac.warwick.util.core.StringUtils
 import warwick.sso.{LoginContext, SSOClient}
-import java.net.URL
 
-import uk.ac.warwick.sso.client.core.LinkGenerator
+import play.api.http.HeaderNames.CACHE_CONTROL
 
 /**
   * This is some weird SSO stuff for Start, while we're still working out
@@ -61,7 +60,7 @@ class SSOController @Inject()(
         "login" -> loginUrl,
         "logout" -> logoutUrl
       )
-    ))
+    )).withHeaders(CACHE_CONTROL -> "no-cache")
   }
 
   def logout = Action { request =>
