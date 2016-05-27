@@ -1,34 +1,54 @@
 package controllers.api
 
+import javax.imageio.ImageIO
+
 import com.google.inject.Inject
 import controllers.BaseController
 import models.API
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Action
-import services.{NewsImageService, SecurityService}
-import system.Roles
+import services.{ImageManipulator, NewsImageService, SecurityService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
 class NewsImagesController @Inject()(
   securityService: SecurityService,
-  newsImageService: NewsImageService
+  newsImageService: NewsImageService,
+  imageManipulator: ImageManipulator
 ) extends BaseController {
 
-  import Roles._
   import securityService._
+  import system.Roles._
 
-  def show(id: String) = Action {
+  def show(id: String) = Action { request =>
     newsImageService.find(id).map { newsImage =>
       newsImageService.fetchStream(id).map { stream =>
-        Ok.stream(Enumerator.fromStream(stream))
-          .withHeaders(
-            CONTENT_DISPOSITION -> "inline",
-            CONTENT_LENGTH -> newsImage.contentLength.toString,
-            CONTENT_TYPE -> newsImage.contentType
-          )
+        val targetWidth = request.getQueryString("width").map(_.toInt)
+
+        val enumerator = targetWidth
+          .filter(_ < newsImage.width) // Don't up-size images
+          .map { targetWidth =>
+          val formatName = newsImage.contentType.split('/').last
+
+          val originalImage = ImageIO.read(stream)
+          val image = imageManipulator.resizeToWidth(originalImage, targetWidth)
+          originalImage.flush()
+
+          Enumerator.outputStream { outputStream =>
+            ImageIO.write(image, formatName, outputStream)
+            outputStream.close()
+          }
+        }.getOrElse {
+          Enumerator.fromStream(stream)
+        }
+
+        Ok.stream(enumerator).withHeaders(
+          CONTENT_DISPOSITION -> "inline",
+          CONTENT_LENGTH -> newsImage.contentLength.toString,
+          CONTENT_TYPE -> newsImage.contentType
+        )
       }.getOrElse(NotFound("Object missing from store"))
     }.getOrElse(NotFound("Image not found"))
   }

@@ -65,7 +65,9 @@ class NewsImageServiceImpl @Inject()(
     Try(ImageIO.read(file)).map { image =>
       require(image != null, "Could not get image dimensions")
 
-      ImageDimensions(image.getWidth, image.getHeight)
+      val dimensions = ImageDimensions(image.getWidth, image.getHeight)
+      image.flush()
+      dimensions
     }
   }
 

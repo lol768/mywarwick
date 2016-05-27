@@ -36,7 +36,8 @@ val appDeps = Seq(
   "com.notnoop.apns" % "apns" % "1.0.0.Beta6",
   "org.quartz-scheduler" % "quartz" % "2.2.1",
   "com.google.inject.extensions" % "guice-multibindings" % "4.0",
-  "com.adrianhurt" %% "play-bootstrap" % "1.0-P24-B3"
+  "com.adrianhurt" %% "play-bootstrap" % "1.0-P24-B3",
+  "org.imgscalr" % "imgscalr-lib" % "4.2"
 )
 
 val testDeps = Seq(
