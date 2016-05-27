@@ -12,7 +12,8 @@ export default class FileUpload extends React.Component {
   }
 
   onChange(e) {
-    const file = e.target.files[0];
+    const fileField = e.target;
+    const file = fileField.files[0];
 
     this.setState({
       uploading: true,
@@ -29,6 +30,7 @@ export default class FileUpload extends React.Component {
         this.setState({
           uploading: false,
         });
+        fileField.value = '';
       });
   }
 
@@ -67,7 +69,7 @@ export default class FileUpload extends React.Component {
         <label className="control-label" htmlFor={ inputName }>Choose an image</label>
         <input type="file" id={ inputName } onChange={this.onChange} disabled={ uploading } />
         { uploading ?
-          <div>Uploading, please wait&helip;</div>
+          <div>Uploading, please wait&hellip;</div>
           : null }
       </div>
     );
