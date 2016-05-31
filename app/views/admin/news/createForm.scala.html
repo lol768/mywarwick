@@ -1,12 +1,14 @@
 @import controllers.admin.PublishNewsData
 
+@import org.joda.time.DateTime
+@import org.joda.time.LocalDateTime
 @(
     form: Form[PublishNewsData],
     departmentOptions: Seq[(String, String)]
 )(implicit messages: Messages)
 
 @implicitFieldConstructor = @{
-  b3.vertical.fieldConstructor
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
 }
 
 @common.admin("Create news") {
@@ -21,12 +23,14 @@
 
     @b3.textarea(form("item.text"),
       '_label -> "Text",
-      '_help -> "Keep it short"
+      '_help -> "Keep it short",
+      'rows -> 7
     )
 
     @b3.datetimeLocal(form("item.publishDate"),
       '_label -> "Publish date",
-      '_help -> "You can select a time in the future, and it will appear to users after that time. Otherwise choose the current time to publish now"
+      '_help -> "You can select a time in the future, and it will appear to users after that time. Otherwise choose the current time to publish now",
+      'value -> new LocalDateTime().withSecondOfMinute(0).withMillisOfSecond(0)
     )
 
     @b3.text(form("item.linkHref"),
@@ -37,10 +41,7 @@
       '_label -> "Link title"
     )
 
-    <div class="form-group">
-      <label class="control-label">Who is this news item for?</label>
-      @snippets.audiencePicker(form, "audience", departmentOptions)
-    </div>
+    @snippets.audiencePicker(form, "audience", departmentOptions, "news item")
 
     @b3.submit(
       'class -> "btn btn-primary"

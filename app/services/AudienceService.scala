@@ -2,6 +2,7 @@ package services
 
 import javax.inject.Inject
 
+import com.google.inject.ImplementedBy
 import models.news.Audience
 import models.news.Audience._
 import system.Logging
@@ -9,6 +10,7 @@ import warwick.sso.{GroupName, GroupService, Usercode}
 
 import scala.util.Try
 
+@ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
   def resolve(audience: Audience): Try[Seq[Usercode]]
 }
@@ -25,12 +27,13 @@ class AudienceServiceImpl @Inject() (webgroups: GroupService) extends AudienceSe
       case ModuleAudience(code) => moduleWebgroupUsers(code).get
       case DepartmentAudience(code, subsets) => for {
           subset <- subsets
-          user <- resolveSubset(code, subset).get
+          user <- resolveSubset(code.toLowerCase, subset).get
         } yield user
     })
 
   private def resolveSubset(deptCode: String, component: DepartmentSubset): Try[Seq[Usercode]] =
     component match {
+      case All => webgroupUsers(GroupName(s"$deptCode-all"))
       case Staff => webgroupUsers(GroupName(s"$deptCode-staff"))
       case UndergradStudents => for {
         ft <- webgroupUsers(GroupName(s"$deptCode-studenttype-undergraduate-full-time"))

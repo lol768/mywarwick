@@ -3,7 +3,7 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import models.news.{NewsItemRender, NewsItemSave}
+import models.news.{Audience, NewsItemRender, NewsItemSave}
 import play.api.db.Database
 import services.dao.NewsDao
 import warwick.sso.Usercode
@@ -13,12 +13,13 @@ trait NewsService {
   def allNews(limit: Int = 100, offset: Int = 0): Seq[NewsItemRender]
   def latestNews(user: Usercode, limit: Int = 100): Seq[NewsItemRender]
   // TODO public news items
-  def save(item: NewsItemSave, recipients: Seq[Usercode]): Unit
+  def save(item: NewsItemSave, audience: Audience): Unit
 }
 
 class AnormNewsService @Inject() (
   db: Database,
-  dao: NewsDao
+  dao: NewsDao,
+  audienceService: AudienceService
 ) extends NewsService {
 
   override def allNews(limit: Int, offset: Int): Seq[NewsItemRender] =
@@ -31,8 +32,9 @@ class AnormNewsService @Inject() (
       dao.latestNews(user, limit)
     }
 
-  override def save(item: NewsItemSave, recipients: Seq[Usercode]): Unit =
+  override def save(item: NewsItemSave, audience: Audience): Unit =
     db.withConnection { implicit c =>
+      val recipients = audienceService.resolve(audience).get // FIXME Try.get throws
       val id = dao.save(item)
       dao.saveRecipients(id, item.publishDate, recipients)
     }

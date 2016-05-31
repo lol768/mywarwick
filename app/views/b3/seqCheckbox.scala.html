@@ -18,7 +18,7 @@
   <div class="checkbox">
   @* May become possible to call through to b3.checkbox, but it doesn't support overriding 'checked until version 1.1 *@
     <label>
-      <input type="checkbox" name="@arrField.name" value="@argsMap.get('value)" @toHtmlArgs(htmlArgs) @if(checked){ checked }>
+      <input type="checkbox" name="@arrField.name" @toHtmlArgs(htmlArgs) @if(checked){ checked }>
       @argsMap.get('_text)
     </label>
   </div>

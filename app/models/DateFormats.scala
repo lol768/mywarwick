@@ -2,12 +2,14 @@ package models
 
 import org.joda.time._
 import org.joda.time.format._
+import play.api.data.FormError
 import play.api.data.Forms._
-import play.api.data.format.Formats
+import play.api.data.format.{Formats, Formatter}
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import system.TimeZones
 
+import scala.Either
 import scala.util._
 
 /**
@@ -23,7 +25,7 @@ object DateFormats {
     */
   def emailDateTime(dateTime: ReadableDateTime): String = {
     def ordinal(day: Int) = day % 10 match {
-      case _ if (day >= 10 && day <= 20) => "th"
+      case _ if day >= 10 && day <= 20 => "th"
       case 1 => "st"
       case 2 => "nd"
       case 3 => "rd"
@@ -49,10 +51,33 @@ object DateFormats {
       }
   }
 
+  object LocalDateTimeFormatter extends Formatter[LocalDateTime] {
+    private val date = ISODateTimeFormat.date()
+    private val timeParser = ISODateTimeFormat.localTimeParser
+    private val hms = ISODateTimeFormat.hourMinuteSecond()
+    private val parser = new DateTimeFormatterBuilder()
+      .append(date).appendLiteral('T').append(timeParser).toParser
+    private val printer = new DateTimeFormatterBuilder()
+      .append(date).appendLiteral('T').append(hms).toPrinter
+    private val formatter = new DateTimeFormatterBuilder()
+      .append(printer, parser).toFormatter
+
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDateTime] =
+      try {
+        data.get(key).map(formatter.parseLocalDateTime).map(Right(_)).getOrElse {
+          Left(Seq(FormError(key, "missing")))
+        }
+      } catch {
+        case e: IllegalArgumentException => Left(Seq(FormError(key, "badness")))
+      }
+    override def unbind(key: String, value: LocalDateTime): Map[String, String] = ???
+  }
+
   /**
     * Form mapping for a datetime-local input type, reading into a Joda DateTime.
+    * TODO try using the thing above that is more lenient about parsing seconds etc.
     */
-  val jodaDateTimeMapping = of(Formats.jodaDateTimeFormat("yyyy-MM-dd'T'HH:mm", TimeZones.LONDON))
+  val dateTimeLocalMapping = of(LocalDateTimeFormatter)
 
   class JodaWrites(fmt: DateTimeFormatter) extends Writes[ReadableInstant] {
     override def writes(o: ReadableInstant): JsValue = JsString(o.toInstant.toString(fmt))
