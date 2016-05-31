@@ -53,14 +53,9 @@ class NewsImagesController @Inject()(
           byteArray
         }
         .map { byteArray =>
-          val enumerator = Enumerator.outputStream { outputStream =>
-            outputStream.write(byteArray)
-            outputStream.close()
-          }
-
-          Ok.stream(enumerator).withHeaders(
+          Ok(byteArray).withHeaders(
             CONTENT_DISPOSITION -> "inline",
-            CONTENT_LENGTH -> newsImage.contentLength.toString,
+            CONTENT_LENGTH -> byteArray.length.toString,
             CONTENT_TYPE -> newsImage.contentType
           )
         }.getOrElse(NotFound("Object missing from store"))
