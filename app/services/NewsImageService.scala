@@ -38,7 +38,7 @@ class NewsImageServiceImpl @Inject()(
   def fetchStream(id: String) = objectStorageService.fetch(id)
 
   def put(file: File): Try[String] = Try {
-    val contentLength = file.length()
+    val contentLength = file.length().toInt
 
     val byteSource = Files.asByteSource(file)
 

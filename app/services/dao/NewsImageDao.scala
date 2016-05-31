@@ -13,7 +13,7 @@ case class NewsImageSave(
   width: Int,
   height: Int,
   contentType: String,
-  contentLength: Long
+  contentLength: Int
 )
 
 case class NewsImage(
@@ -21,7 +21,7 @@ case class NewsImage(
   width: Int,
   height: Int,
   contentType: String,
-  contentLength: Long,
+  contentLength: Int,
   createdAt: DateTime
 )
 

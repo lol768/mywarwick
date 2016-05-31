@@ -41,7 +41,7 @@ class NewsImagesController @Inject()(
               val image = imageManipulator.resizeToWidth(originalImage, targetWidth)
               originalImage.flush()
 
-              val outputStream = new ByteArrayOutputStream
+              val outputStream = new ByteArrayOutputStream(newsImage.contentLength)
               ImageIO.write(image, formatName, outputStream)
               outputStream.toByteArray
             }.getOrElse {
