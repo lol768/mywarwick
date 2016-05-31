@@ -56,9 +56,11 @@ class NewsImageServiceImpl @Inject()(
 
   private def getContentType(byteSource: ByteSource): Option[String] = {
     val stream = byteSource.openBufferedStream()
-    val contentType = Option(URLConnection.guessContentTypeFromStream(stream))
-    stream.close()
-    contentType
+    try {
+      Option(URLConnection.guessContentTypeFromStream(stream))
+    } finally {
+      stream.close()
+    }
   }
 
   private def getImageDimensions(file: File): Try[ImageDimensions] = {

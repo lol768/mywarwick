@@ -23,8 +23,8 @@ export default class FileUpload extends React.Component {
       .then(imageId => {
         this.setState({ imageId });
       })
-      .catch(() => {
-        alert('There was a problem uploading the image.'); // eslint-disable-line no-alert
+      .catch((ex) => {
+        alert(`There was a problem uploading the image: ${ex.message}`); // eslint-disable-line no-alert, max-len
       })
       .then(() => {
         this.setState({
@@ -67,7 +67,9 @@ export default class FileUpload extends React.Component {
     return (
       <div className="form-group">
         <label className="control-label" htmlFor={ inputName }>Choose an image</label>
-        <input type="file" id={ inputName } onChange={this.onChange} disabled={ uploading } />
+        <input type="file" id={ inputName } onChange={this.onChange}
+          disabled={ uploading } accept="image/*"
+        />
         { uploading ?
           <div>Uploading, please wait&hellip;</div>
           : null }

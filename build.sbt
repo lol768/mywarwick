@@ -37,7 +37,8 @@ val appDeps = Seq(
   "org.quartz-scheduler" % "quartz" % "2.2.1",
   "com.google.inject.extensions" % "guice-multibindings" % "4.0",
   "com.adrianhurt" %% "play-bootstrap" % "1.0-P24-B3",
-  "org.imgscalr" % "imgscalr-lib" % "4.2"
+  "org.imgscalr" % "imgscalr-lib" % "4.2",
+  "com.github.mumoshu" %% "play2-memcached-play24" % "0.7.0"
 )
 
 val testDeps = Seq(
