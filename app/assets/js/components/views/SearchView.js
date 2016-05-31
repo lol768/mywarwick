@@ -1,10 +1,15 @@
 import React, { PropTypes } from 'react';
+import $ from 'jquery';
 
-const SearchView = ({ query }) => {
-  let src = '//search-dev.warwick.ac.uk/';
+const defaultRootUrl = $('#app-container').attr('data-search-root-url');
 
-  if (query) {
-    src += `?q=${query}`;
+const SearchView = (props) => {
+  const rootUrl = props.rootUrl || defaultRootUrl;
+
+  let src = `${rootUrl}/embed`;
+
+  if (props.query) {
+    src += `?q=${props.query}`;
   }
 
   return (
@@ -16,6 +21,7 @@ const SearchView = ({ query }) => {
 
 SearchView.propTypes = {
   query: PropTypes.string,
+  rootUrl: PropTypes.string,
 };
 
 export default SearchView;

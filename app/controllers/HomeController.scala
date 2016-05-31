@@ -14,6 +14,7 @@ import warwick.sso._
 import scala.concurrent.Future
 
 case class AnalyticsTrackingID(string: String)
+case class SearchRootUrl(string: String)
 
 @Singleton
 class HomeController @Inject()(
@@ -27,6 +28,10 @@ class HomeController @Inject()(
 
   implicit val analyticsTrackingId: Option[AnalyticsTrackingID] =
     configuration.getString("start.analytics.tracking-id").map(AnalyticsTrackingID)
+
+  implicit val searchRootUrl: SearchRootUrl =
+    configuration.getString("search.root").map(SearchRootUrl)
+      .getOrElse(throw new IllegalStateException("Search root URL not configured - check search.root property"))
 
   def index = Action(Ok(views.html.index()))
 
