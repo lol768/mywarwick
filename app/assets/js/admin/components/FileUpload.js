@@ -48,7 +48,7 @@ export default class FileUpload extends React.Component {
       return (
         <div className="form-group">
           <label className="control-label col-md-3">Choose an image</label>
-          
+
           <div className="col-md-9">
             <div>
               <ImagePreview imageId={ imageId } width={ 300 } />
@@ -69,7 +69,7 @@ export default class FileUpload extends React.Component {
     return (
       <div className="form-group">
         <label className="control-label col-md-3" htmlFor={ inputName }>Choose an image</label>
-        
+
         <div className="col-md-9">
           <input type="file" id={ inputName } onChange={this.onChange}
             disabled={ uploading } accept="image/*"
