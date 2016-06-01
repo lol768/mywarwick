@@ -11,6 +11,10 @@ import scala.concurrent.Future
   * the code in that block.
   */
 object ActionBuilders {
+
+  // Because we're doing type magic
+  import scala.language.higherKinds
+
   /**
     * ActionBuilder that doesn't do anything extra - just runs the block.
     * wrap() needs to be implemented so it knows how to get from Request to R (which may be a subclass)

@@ -16,18 +16,16 @@ POST        /                                             @controllers.HomeContr
 
 ->          /sso                                          sso.Routes
 
+GET         /admin                                        @controllers.admin.AdminController.index
 GET         /admin/cluster                                @controllers.admin.ClusterStateController.html
-
 GET         /admin/news                                   @controllers.admin.NewsController.list
 GET         /admin/news/new                               @controllers.admin.NewsController.createForm
 POST        /admin/news/new                               @controllers.admin.NewsController.create
-
 GET         /admin/notifications                          @controllers.admin.NotificationsController.list
 GET         /admin/notifications/new                      @controllers.admin.NotificationsController.createForm
 POST        /admin/notifications                          @controllers.admin.NotificationsController.create
+GET         /admin/masquerade                             @controllers.admin.MasqueradeController.masquerade
 
-# DEPRECATED no-slash version 2016-02-11
-GET         /websockets/page                              @controllers.HomeController.socket
 GET         /websockets/page/                             @controllers.HomeController.socket
 
 GET         /assets/manifest.json                         @controllers.AppManifestController.getAppManifest
@@ -63,6 +61,7 @@ POST        /api/push/apns/subscribe                      @controllers.api.APNSP
 POST        /api/push/gcm/subscribe                       @controllers.api.GCMPushNotificationsController.subscribe
 POST        /api/push/gcm/notification                    @controllers.api.GCMPushNotificationsController.fetchPushNotifications
 
-GET         /admin/masquerade                             @controllers.admin.MasqueradeController.masquerade
-
 GET         /photo                                        @controllers.HomeController.photo
+
+# Handle trailing slashes in URLs
+GET         /*path/                                       @controllers.HomeController.redirectToPath(path: String)

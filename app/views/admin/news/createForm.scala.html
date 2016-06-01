@@ -1,9 +1,14 @@
 @import controllers.admin.PublishNewsData
 
-@(form: Form[PublishNewsData])(implicit messages: Messages)
+@import org.joda.time.DateTime
+@import org.joda.time.LocalDateTime
+@(
+    form: Form[PublishNewsData],
+    departmentOptions: Seq[(String, String)]
+)(implicit messages: Messages)
 
 @implicitFieldConstructor = @{
-  b3.vertical.fieldConstructor
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
 }
 
 @common.admin("Create news") {
@@ -11,18 +16,21 @@
   @b3.form(action = controllers.admin.routes.NewsController.create()) {
 
     @b3.text(form("item.title"),
+      'class -> "input-lg",
       '_label -> "Title",
       'autofocus -> true,
       'required -> true)
 
     @b3.textarea(form("item.text"),
       '_label -> "Text",
-      '_help -> "Keep it short"
+      '_help -> "Keep it short",
+      'rows -> 7
     )
 
     @b3.datetimeLocal(form("item.publishDate"),
       '_label -> "Publish date",
-      '_help -> "You can select a time in the future, and it will appear to users after that time. Otherwise choose the current time to publish now"
+      '_help -> "You can select a time in the future, and it will appear to users after that time. Otherwise choose the current time to publish now",
+      'value -> new LocalDateTime().withSecondOfMinute(0).withMillisOfSecond(0)
     )
 
     @b3.text(form("item.linkHref"),
@@ -33,14 +41,11 @@
       '_label -> "Link title"
     )
 
-    @b3.text(form("recipients"),
-      '_label -> "Recipients (comma-separated usercodes)",
-      'required -> true
-    )
+    @tags.audiencePicker(form, "audience", departmentOptions, "news item")
 
     @b3.submit(
       'class -> "btn btn-primary"
-    ) {Save}
+    ) {Create}
   }
   </div>
 }
