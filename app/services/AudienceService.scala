@@ -17,10 +17,10 @@ trait AudienceService {
 
 class AudienceServiceImpl @Inject() (webgroups: GroupService) extends AudienceService with Logging {
 
-  override def resolve(audience: Audience): Try[Seq[Usercode]] =
-    // TODO Try.get wrapped with another Try is a weak sauce solution.
-    // Should use magic combinators that nobody can understand.
-    Try(audience.components.flatMap {
+  // TODO Try.get wrapped with another Try is a weak sauce solution.
+  // Should use magic combinators that nobody can understand.
+  override def resolve(audience: Audience): Try[Seq[Usercode]] = Try {
+    audience.components.flatMap {
       // webgroups has handy "all-" webgroups that subset all the departments.
       case ds: DepartmentSubset => resolveSubset("all", ds).get
       case WebgroupAudience(name) => webgroupUsers(name).get
@@ -29,7 +29,8 @@ class AudienceServiceImpl @Inject() (webgroups: GroupService) extends AudienceSe
           subset <- subsets
           user <- resolveSubset(code.toLowerCase, subset).get
         } yield user
-    })
+    }.distinct
+  }
 
   private def resolveSubset(deptCode: String, component: DepartmentSubset): Try[Seq[Usercode]] =
     component match {

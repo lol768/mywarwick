@@ -5,7 +5,7 @@ import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import warwick.sso.{GroupName, GroupService}
+import warwick.sso._
 
 import scala.util.Success
 
@@ -14,9 +14,17 @@ class AudienceServiceTest extends PlaySpec with MockitoSugar {
     val webgroups = mock[GroupService]
     val service = new AudienceServiceImpl(webgroups)
 
+
     def webgroupsIsEmpty: Unit = {
       when(webgroups.getWebGroup(any())).thenReturn(Success(None)) // this webgroups is empty
       when(webgroups.getGroupsForQuery(any())).thenReturn(Success(Nil))
+    }
+
+    // Welcome to Barry's World
+    def webgroupsAllContainBarry: Unit = {
+      val barryGroup = Group(GroupName("in-barry-world"), None, Seq(Usercode("cuddz")), Nil, "Arbitrary", null, null)
+      when(webgroups.getWebGroup(any())).thenReturn(Success(Some(barryGroup)))
+      when(webgroups.getGroupsForQuery(any())).thenReturn(Success(Seq(barryGroup)))
     }
   }
 
@@ -62,6 +70,15 @@ class AudienceServiceTest extends PlaySpec with MockitoSugar {
       verify(webgroups).getWebGroup(GroupName("ph-studenttype-undergraduate-part-time"))
       verify(webgroups).getWebGroup(GroupName("ph-teaching"))
       verifyNoMoreInteractions(webgroups)
+    }
+
+    "deduplicate usercodes" in new Ctx {
+      webgroupsAllContainBarry
+      val users = service.resolve(Audience(Seq(
+        ResearchPostgrads, TaughtPostgrads, UndergradStudents
+      ))).get
+
+      users must be (Seq(Usercode("cuddz")))
     }
 
   }
