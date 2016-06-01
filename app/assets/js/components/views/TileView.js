@@ -4,7 +4,7 @@ import log from 'loglevel';
 import Tile from '../tiles/Tile';
 import { connect } from 'react-redux';
 import { push, goBack } from 'react-router-redux';
-
+import _ from 'lodash';
 
 class TileView extends Component {
 
@@ -74,7 +74,7 @@ class TileView extends Component {
 const select = (state, ownProps) => {
   const id = ownProps.id || ownProps.params.id;
 
-  const tile = state.tiles.data.tiles.find(t => t.id === id);
+  const tile = _(state.tiles.data.tiles).find(t => t.id === id);
   const content = state.tileContent[id];
 
   return {
