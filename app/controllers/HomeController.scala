@@ -30,8 +30,8 @@ class HomeController @Inject()(
     configuration.getString("start.analytics.tracking-id").map(AnalyticsTrackingID)
 
   implicit val searchRootUrl: SearchRootUrl =
-    configuration.getString("search.root").map(SearchRootUrl)
-      .getOrElse(throw new IllegalStateException("Search root URL not configured - check search.root property"))
+    configuration.getString("start.search.root").map(SearchRootUrl)
+      .getOrElse(throw new IllegalStateException("Search root URL not configured - check start.search.root property"))
 
   def index = Action(Ok(views.html.index()))
 
