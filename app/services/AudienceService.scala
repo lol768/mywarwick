@@ -56,7 +56,7 @@ class AudienceServiceImpl @Inject() (webgroups: GroupService) extends AudienceSe
     }
 
   def moduleWebgroupUsers(code: String): Try[Seq[Usercode]] =
-    webgroups.getGroupsForQuery(s"-${code}").map { groups =>
+    webgroups.getGroupsForQuery(s"-${code.toLowerCase}").map { groups =>
       groups.find(group => group.name.string.endsWith(code) && group.`type` == "Module")
         .map(_.members)
         .getOrElse(Nil)

@@ -15,12 +15,11 @@ object Audience {
   sealed trait Component
   // Pieces of department
   sealed trait DepartmentSubset
+
   case class WebgroupAudience(groupName: GroupName) extends Component
   case class ModuleAudience(moduleCode: String) extends Component
   case class DepartmentAudience(deptCode: String, subset: Seq[DepartmentSubset]) extends Component
-  //case object AdminStaff extends Component
-  //case object UndergradStudentsFirstYear extends Component
-  //case object UndergradStudentsFinalYear extends Component
+
   case object All extends DepartmentSubset
   case object Staff extends Component with DepartmentSubset
   case object TeachingStaff extends Component with DepartmentSubset

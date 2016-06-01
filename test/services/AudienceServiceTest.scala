@@ -16,6 +16,7 @@ class AudienceServiceTest extends PlaySpec with MockitoSugar {
 
     def webgroupsIsEmpty: Unit = {
       when(webgroups.getWebGroup(any())).thenReturn(Success(None)) // this webgroups is empty
+      when(webgroups.getGroupsForQuery(any())).thenReturn(Success(Nil))
     }
   }
 
@@ -48,11 +49,13 @@ class AudienceServiceTest extends PlaySpec with MockitoSugar {
       service.resolve(Audience(Seq(
         WebgroupAudience(GroupName("in-winners")),
         WebgroupAudience(GroupName("in-losers")),
-        DepartmentAudience("ch", Seq(UndergradStudents)),
-        DepartmentAudience("ph", Seq(UndergradStudents, TeachingStaff))
+        ModuleAudience("CS102"),
+        DepartmentAudience("CH", Seq(UndergradStudents)),
+        DepartmentAudience("PH", Seq(UndergradStudents, TeachingStaff))
       ))).get
       verify(webgroups).getWebGroup(GroupName("in-winners"))
       verify(webgroups).getWebGroup(GroupName("in-losers"))
+      verify(webgroups).getGroupsForQuery("-cs102")
       verify(webgroups).getWebGroup(GroupName("ch-studenttype-undergraduate-full-time"))
       verify(webgroups).getWebGroup(GroupName("ch-studenttype-undergraduate-part-time"))
       verify(webgroups).getWebGroup(GroupName("ph-studenttype-undergraduate-full-time"))
