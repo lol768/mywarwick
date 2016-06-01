@@ -2,20 +2,21 @@ package models
 
 import org.joda.time._
 import org.joda.time.format._
-import play.api.data.FormError
 import play.api.data.Forms._
-import play.api.data.format.{Formats, Formatter}
+import play.api.data.format.Formatter
 import play.api.data.validation.ValidationError
+import play.api.data.{FieldMapping, FormError}
 import play.api.libs.json._
-import system.TimeZones
 
-import scala.Either
 import scala.util._
 
 /**
   * Arbiter of various date formats.
   */
 object DateFormats {
+
+
+  //// PLAIN DATE TO STRING PRINTERS
 
   private val emailStart = DateTimeFormat.forPattern("HH:mm 'on' EEE d")
   private val emailEnd = DateTimeFormat.forPattern(" MMM, YYYY")
@@ -37,6 +38,9 @@ object DateFormats {
     instant.toString(emailStart) + ordinal(dateTime.getDayOfMonth) + instant.toString(emailEnd)
   }
 
+
+  ///// JSON FORMATTERS
+
   /** ISO8601 DateTime with millis, for API dates */
   implicit val isoDateWrites = new JodaWrites(ISODateTimeFormat.dateTime())
 
@@ -51,16 +55,25 @@ object DateFormats {
       }
   }
 
+
+  ///// JODA FORMATTERS
+
+  /**
+    * For formatting datetime-local input values. Is fairly lenient in parsing,
+    * and outputs to second precision.
+    */
   object LocalDateTimeFormatter extends Formatter[LocalDateTime] {
-    private val date = ISODateTimeFormat.date()
-    private val timeParser = ISODateTimeFormat.localTimeParser
-    private val hms = ISODateTimeFormat.hourMinuteSecond()
     private val parser = new DateTimeFormatterBuilder()
-      .append(date).appendLiteral('T').append(timeParser).toParser
+      .append(ISODateTimeFormat.date())
+      .appendLiteral('T')
+      .append(ISODateTimeFormat.localTimeParser)
+      .toParser
     private val printer = new DateTimeFormatterBuilder()
-      .append(date).appendLiteral('T').append(hms).toPrinter
-    private val formatter = new DateTimeFormatterBuilder()
-      .append(printer, parser).toFormatter
+      .append(ISODateTimeFormat.date())
+      .appendLiteral('T')
+      .append(ISODateTimeFormat.hourMinuteSecond())
+      .toPrinter
+    private val formatter = new DateTimeFormatterBuilder().append(printer, parser).toFormatter
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDateTime] =
       try {
@@ -70,17 +83,20 @@ object DateFormats {
       } catch {
         case e: IllegalArgumentException => Left(Seq(FormError(key, "badness")))
       }
-    override def unbind(key: String, value: LocalDateTime): Map[String, String] = ???
-  }
 
-  /**
-    * Form mapping for a datetime-local input type, reading into a Joda DateTime.
-    * TODO try using the thing above that is more lenient about parsing seconds etc.
-    */
-  val dateTimeLocalMapping = of(LocalDateTimeFormatter)
+    override def unbind(key: String, value: LocalDateTime): Map[String, String] = Map(
+      key -> formatter.print(value)
+    )
+  }
 
   class JodaWrites(fmt: DateTimeFormatter) extends Writes[ReadableInstant] {
     override def writes(o: ReadableInstant): JsValue = JsString(o.toInstant.toString(fmt))
   }
+
+
+  ///// FORM MAPPINGS
+
+  /** Use as a form mapping for a LocalDateTime property against a datetime-local input */
+  val dateTimeLocalMapping: FieldMapping[LocalDateTime] = of(LocalDateTimeFormatter)
 
 }
