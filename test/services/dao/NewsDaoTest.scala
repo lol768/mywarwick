@@ -1,9 +1,12 @@
 package services.dao
 
+import java.sql.Connection
+
 import helpers.OneStartAppPerSuite
-import models.news.NewsItemSave
+import models.news.{Audience, NewsItemSave}
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
+import play.api.db.Database
 import services.NewsService
 import warwick.sso.Usercode
 
@@ -15,6 +18,11 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
   val bob = Usercode("cusbob")
   val eli = Usercode("cuseli")
   val jim = Usercode("cusjim")
+
+  def save(item: NewsItemSave, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
+    val id = newsDao.save(item)
+    newsDao.saveRecipients(id, item.publishDate, recipients)
+  }
 
   val londonsBurning = NewsItemSave(
     title = "London's Burning",
@@ -47,9 +55,9 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
     }
 
     "return only published news for user" in transaction { implicit c =>
-      newsService.save(londonsBurning, Seq(ana, jim))
-      newsService.save(brumPanic, Seq(ana, eli))
-      newsService.save(futureNews, Seq(ana, bob, eli, jim))
+      save(londonsBurning, Seq(ana, jim))
+      save(brumPanic, Seq(ana, eli))
+      save(futureNews, Seq(ana, bob, eli, jim))
 
       val jimNews = newsDao.latestNews(jim)
       jimNews.map(_.title) must be(Seq(londonsBurning.title))
@@ -59,10 +67,11 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
     }
 
     "limit results to requested amount" in transaction { implicit c =>
-      newsService.save(londonsBurning, Seq(ana))
-      newsService.save(brumPanic, Seq(ana))
+      save(londonsBurning, Seq(ana))
+      save(brumPanic, Seq(ana))
       newsDao.latestNews(ana, limit = 2) must have length(2)
       newsDao.latestNews(ana, limit = 1) must have length(1)
     }
   }
+
 }

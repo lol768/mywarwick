@@ -1,0 +1,4 @@
+@(field: Field)(implicit messages: Messages)
+@field.errors.map { error =>
+  <span class="help-block">@Messages(error.message, error.args)</span>
+}

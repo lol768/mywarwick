@@ -18,6 +18,7 @@ import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[AnormNewsDao])
 trait NewsDao {
+
   /**
     * All the news, all the time. This is probably only useful for sysadmins and maybe Comms.
     * Everyone else will be getting a filtered view.
@@ -35,6 +36,8 @@ trait NewsDao {
 
   // TODO too many args? define an object?
   def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit
+
+  def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, Int]
 }
 
 @Singleton
@@ -114,5 +117,13 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     SQL"DELETE FROM NEWS_RECIPIENT WHERE news_item_id = ${id}".executeUpdate()
   }
 
+  private val countParser = (str("id") ~ int("c")).map(flatten).*
+  def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, Int] = {
+    SQL"""
+      SELECT NEWS_ITEM_ID ID, COUNT(*) C FROM NEWS_RECIPIENT
+      WHERE NEWS_ITEM_ID IN ($newsIds)
+      GROUP BY NEWS_ITEM_ID
+    """.as(countParser).seq.toMap
+  }
 
 }

@@ -47,16 +47,18 @@ export default class FileUpload extends React.Component {
     if (imageId) {
       return (
         <div className="form-group">
-          <label className="control-label">Choose an image</label>
+          <label className="control-label col-md-3">Choose an image</label>
+          
+          <div className="col-md-9">
+            <div>
+              <ImagePreview imageId={ imageId } width={ 300 } />
+            </div>
 
-          <div>
-            <ImagePreview imageId={ imageId } width={ 300 } />
-          </div>
-
-          <div>
-            <button onClick={ this.onClear } className="btn btn-default">
-              Use a different image
-            </button>
+            <div>
+              <button onClick={ this.onClear } className="btn btn-default">
+                Use a different image
+              </button>
+            </div>
           </div>
 
           <input type="hidden" name={ inputName } value={ imageId } />
@@ -66,13 +68,16 @@ export default class FileUpload extends React.Component {
 
     return (
       <div className="form-group">
-        <label className="control-label" htmlFor={ inputName }>Choose an image</label>
-        <input type="file" id={ inputName } onChange={this.onChange}
-          disabled={ uploading } accept="image/*"
-        />
-        { uploading ?
-          <div>Uploading, please wait&hellip;</div>
-          : null }
+        <label className="control-label col-md-3" htmlFor={ inputName }>Choose an image</label>
+        
+        <div className="col-md-9">
+          <input type="file" id={ inputName } onChange={this.onChange}
+            disabled={ uploading } accept="image/*"
+          />
+          { uploading ?
+            <div>Uploading, please wait&hellip;</div>
+            : null }
+        </div>
       </div>
     );
   }

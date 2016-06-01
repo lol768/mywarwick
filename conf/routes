@@ -16,21 +16,16 @@ POST        /                                             @controllers.HomeContr
 
 ->          /sso                                          sso.Routes
 
+GET         /admin                                        @controllers.admin.AdminController.index
 GET         /admin/cluster                                @controllers.admin.ClusterStateController.html
-
 GET         /admin/news                                   @controllers.admin.NewsController.list
 GET         /admin/news/new                               @controllers.admin.NewsController.createForm
 POST        /admin/news/new                               @controllers.admin.NewsController.create
-
 GET         /admin/notifications                          @controllers.admin.NotificationsController.list
 GET         /admin/notifications/new                      @controllers.admin.NotificationsController.createForm
 POST        /admin/notifications                          @controllers.admin.NotificationsController.create
+GET         /admin/masquerade                             @controllers.admin.MasqueradeController.masquerade
 
-POST        /api/news/images                              @controllers.api.NewsImagesController.create
-GET         /api/news/images/:id                          @controllers.api.NewsImagesController.show(id: String)
-
-# DEPRECATED no-slash version 2016-02-11
-GET         /websockets/page                              @controllers.HomeController.socket
 GET         /websockets/page/                             @controllers.HomeController.socket
 
 GET         /assets/manifest.json                         @controllers.AppManifestController.getAppManifest
@@ -40,6 +35,8 @@ GET         /assets/*file                                 @controllers.Assets.ve
 GET         /service-worker.js                            @controllers.Assets.at(path="/public", file="service-worker.js")
 
 GET         /api/news/feed                                @controllers.api.ReadNewsController.feed
+POST        /api/news/images                              @controllers.api.NewsImagesController.create
+GET         /api/news/images/:id                          @controllers.api.NewsImagesController.show(id: String)
 
 GET         /service/metrics                              @controllers.MetricsController.metrics
 GET         /service/gtg                                  @controllers.ServiceCheckController.gtg
@@ -66,6 +63,7 @@ POST        /api/push/apns/subscribe                      @controllers.api.APNSP
 POST        /api/push/gcm/subscribe                       @controllers.api.GCMPushNotificationsController.subscribe
 POST        /api/push/gcm/notification                    @controllers.api.GCMPushNotificationsController.fetchPushNotifications
 
-GET         /admin/masquerade                             @controllers.admin.MasqueradeController.masquerade
-
 GET         /photo                                        @controllers.HomeController.photo
+
+# Handle trailing slashes in URLs
+GET         /*path/                                       @controllers.HomeController.redirectToPath(path: String)

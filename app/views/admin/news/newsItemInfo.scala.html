@@ -1,5 +1,5 @@
 @import models.news.NewsItemRender
-@(item: NewsItemRender)
+@(item: NewsItemRender, count: Option[Int])
 <article class="news-item">
   <div class="news-item__body">
     <div class="news-item__title">@item.title</div>
@@ -9,6 +9,8 @@
       </div>
     }
     <div class="news-item__content">@item.text</div>
-    <div class="news-item__footer">@models.DateFormats.emailDateTime(item.publishDate)</div>
+    <div class="news-item__footer">
+      @models.DateFormats.emailDateTime(item.publishDate)
+      @for(c <- count) { <span>- @c recipients</span> } </div>
   </div>
 </article>

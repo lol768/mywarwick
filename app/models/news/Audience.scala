@@ -1,24 +1,48 @@
 package models.news
 
-/**
-  * Currently unused.
-  */
+import warwick.sso.GroupName
 
-trait Audience
-case class CombinedAudience(components: Seq[Audience])
+case class Audience(components: Seq[Audience.Component] = Nil, public: Boolean = false) {
+  if (public && components.nonEmpty) {
+    throw new IllegalArgumentException("Public audience can't have components")
+  }
+}
 
-// Pieces of audience
-trait AudienceComponent
-// Pieces of department
-trait DepartmentSubset
-case class WebgroupAudience(groupName: String) extends AudienceComponent
-case class ModuleAudience(moduleCode: String) extends AudienceComponent
-case class DepartmentAudience(deptCode: String, subset: Seq[DepartmentSubset]) extends AudienceComponent
-case object TeachingStaff extends AudienceComponent
-case object AdminStaff extends AudienceComponent
-case object Staff extends DepartmentSubset
-case object UndergradStudents extends AudienceComponent with DepartmentSubset
-case object UndergradStudentsFirstYear extends AudienceComponent
-case object UndergradStudentsFinalYear extends AudienceComponent
-case object TaughtPostgrads extends AudienceComponent with DepartmentSubset
-case object ResearchPostgrads extends AudienceComponent with DepartmentSubset
+object Audience {
+  val Public = Audience(public = true)
+
+  // Pieces of audience
+  sealed trait Component
+  // Pieces of department
+  sealed trait DepartmentSubset
+
+  case class WebgroupAudience(groupName: GroupName) extends Component
+  case class ModuleAudience(moduleCode: String) extends Component
+  case class DepartmentAudience(deptCode: String, subset: Seq[DepartmentSubset]) extends Component
+
+  case object All extends DepartmentSubset
+  case object Staff extends Component with DepartmentSubset
+  case object TeachingStaff extends Component with DepartmentSubset
+  case object UndergradStudents extends Component with DepartmentSubset
+  case object TaughtPostgrads extends Component with DepartmentSubset
+  case object ResearchPostgrads extends Component with DepartmentSubset
+
+  object ComponentParameter {
+    def unapply(paramValue: String): Option[Component] = paramValue match {
+      case "Staff" => Some(Staff)
+      case "TeachingStaff" => Some(TeachingStaff)
+      case "UndergradStudents" => Some(UndergradStudents)
+      case "TaughtPostgrads" => Some(TaughtPostgrads)
+      case "ResearchPostgrads" => Some(ResearchPostgrads)
+      case _ => None
+    }
+  }
+
+  object DepartmentSubset {
+    def unapply(paramValue: String): Option[DepartmentSubset] = paramValue match {
+      case "All" => Some(All)
+      case ComponentParameter(subset: DepartmentSubset) => Some(subset)
+      case _ => None
+    }
+  }
+}

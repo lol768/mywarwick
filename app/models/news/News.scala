@@ -22,7 +22,7 @@ object Link {
 case class NewsItemRender (
   id: String,
   title: String,
-  text: String, // TODO what is this, HTML? Plaintext? Some other "safe" markup?
+  text: String, // This is plain newline-separated text
   link: Option[Link],
   publishDate: DateTime,
   imageId: Option[String]

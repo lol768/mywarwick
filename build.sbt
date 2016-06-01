@@ -7,6 +7,12 @@ version := "1.0-SNAPSHOT"
 
 scalaVersion := Common.scalaVersion
 
+// ULTRAVIOLENCE
+scalacOptions ++= Seq("-language:implicitConversions", "-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
+
+// Avoid some of the constant SBT "Updating"
+updateOptions := updateOptions.value.withCachedResolution(true)
+
 lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala)
   .configs(FunTest)
   .settings(
