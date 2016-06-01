@@ -22,7 +22,7 @@ class HomeControllerTest extends PlaySpec with MockitoSugar with Results {
   val configuration = mock[Configuration]
 
   when(configuration.getString("start.analytics.tracking-id")).thenReturn(None)
-  when(configuration.getString("search.root")).thenReturn(Some("https://search-dev.warwick.ac.uk"))
+  when(configuration.getString("start.search.root")).thenReturn(Some("https://search-dev.warwick.ac.uk"))
 
   val controller = new HomeController(securityService, metrics, photoService, configuration)
 
