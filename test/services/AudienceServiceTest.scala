@@ -20,9 +20,12 @@ class AudienceServiceTest extends PlaySpec with MockitoSugar {
       when(webgroups.getGroupsForQuery(any())).thenReturn(Success(Nil))
     }
 
+    def newGroup(name: String, users: Seq[String], `type`:String="Arbitrary") =
+      Group(GroupName(name), None, users.map(Usercode), Nil, `type`, null, null)
+
     // Welcome to Barry's World
     def webgroupsAllContainBarry: Unit = {
-      val barryGroup = Group(GroupName("in-barry-world"), None, Seq(Usercode("cuddz")), Nil, "Arbitrary", null, null)
+      val barryGroup = newGroup("in-barry-world", Seq("cuddz"))
       when(webgroups.getWebGroup(any())).thenReturn(Success(Some(barryGroup)))
       when(webgroups.getGroupsForQuery(any())).thenReturn(Success(Seq(barryGroup)))
     }
@@ -70,6 +73,15 @@ class AudienceServiceTest extends PlaySpec with MockitoSugar {
       verify(webgroups).getWebGroup(GroupName("ph-studenttype-undergraduate-part-time"))
       verify(webgroups).getWebGroup(GroupName("ph-teaching"))
       verifyNoMoreInteractions(webgroups)
+    }
+
+    "match an uppercase module group" in new Ctx {
+      val unrelatedGroup = newGroup("in-cs102-eggbox", Seq("ada","bev"), `type`="Module")
+      val moduleGroup = newGroup("in-cs102", Seq("cuuaaa","cuuaab"), `type`="Module")
+      when(webgroups.getGroupsForQuery("-cs102")).thenReturn(Success(Seq(unrelatedGroup, moduleGroup)))
+
+      val users = service.resolve(Audience(Seq( ModuleAudience("CS102") ))).get
+      users.map(_.string) must be (Seq("cuuaaa","cuuaab"))
     }
 
     "deduplicate usercodes" in new Ctx {
