@@ -50,4 +50,8 @@ class HomeController @Inject()(
       NotFound
     )
   }
+
+  def redirectToPath(path: String, status: Int = MOVED_PERMANENTLY) = Action {
+    Redirect(s"/${path.replaceFirst("^/","")}", status)
+  }
 }

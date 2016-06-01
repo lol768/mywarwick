@@ -14,6 +14,8 @@ trait NewsService {
   def latestNews(user: Usercode, limit: Int = 100): Seq[NewsItemRender]
   // TODO public news items
   def save(item: NewsItemSave, audience: Audience): Unit
+
+  def countRecipients(newsIds: Seq[String]): Map[String, Int]
 }
 
 class AnormNewsService @Inject() (
@@ -37,6 +39,11 @@ class AnormNewsService @Inject() (
       val recipients = audienceService.resolve(audience).get // FIXME Try.get throws
       val id = dao.save(item)
       dao.saveRecipients(id, item.publishDate, recipients)
+    }
+
+  def countRecipients(newsIds: Seq[String]): Map[String, Int] =
+    db.withConnection { implicit c =>
+      dao.countRecipients(newsIds)
     }
 
 }

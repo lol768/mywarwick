@@ -84,7 +84,9 @@ class NewsController @Inject() (
   )
 
   def list = RequiredActualUserRoleAction(Sysadmin) {
-    Ok(views.html.admin.news.list(news.allNews(limit = 100)))
+    val theNews = news.allNews(limit = 100)
+    val counts = news.countRecipients(theNews.map(_.id))
+    Ok(views.html.admin.news.list(theNews, counts))
   }
 
   def createForm = RequiredActualUserRoleAction(Sysadmin).async {

@@ -1,6 +1,6 @@
 @import models.news.NewsItemRender
 @import views.html._
-@(news: Seq[NewsItemRender])
+@(news: Seq[NewsItemRender], counts: Map[String, Int])
 
 @common.admin("News") {
   <p>
@@ -14,7 +14,7 @@
       Showing @if(news.size == 1) {one item} else {@news.size items}.
     </p>
     @news.map { item =>
-      @admin.news.newsItemInfo(item)
+      @admin.news.newsItemInfo(item, counts.get(item.id))
     }
   }
 }
