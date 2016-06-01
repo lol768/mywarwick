@@ -1,4 +1,5 @@
 @import models.news.NewsItemRender
+@import views.html._
 @(news: Seq[NewsItemRender])
 
 @common.admin("News") {
@@ -13,7 +14,7 @@
       Showing @if(news.size == 1) {one item} else {@news.size items}.
     </p>
     @news.map { item =>
-      @views.html.snippets.newsItemInfo(item)
+      @admin.news.newsItemInfo(item)
     }
   }
 }

@@ -1,30 +1,33 @@
 package controllers.admin
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import controllers.BaseController
-import models.news.{Link, NewsItemSave}
-import org.joda.time.DateTime
+import models.DateFormats
+import models.news.{Audience, Link, NewsItemSave}
+import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
-import play.api.data.format.Formats
 import play.api.i18n.{I18nSupport, MessagesApi}
-import services.{NewsService, SecurityService}
+import services.dao.DepartmentInfoDao
+import services.{AudienceService, NewsService, SecurityService}
 import system.{Roles, TimeZones}
 import uk.ac.warwick.util.web.Uri
-import warwick.sso.Usercode
+
+import scala.concurrent.Future
 
 case class PublishNewsData(
   item: NewsItemData,
-  recipients: String
-)
+  audience: Seq[String],
+  department: Option[String]
+) extends AudienceFormData
 
 case class NewsItemData(
   title: String,
   text: String,
   linkText: Option[String],
   linkHref: Option[String],
-  publishDate: DateTime = new DateTime()
+  publishDate: LocalDateTime
 ) {
   def toSave = NewsItemSave(
     title = title,
@@ -33,27 +36,41 @@ case class NewsItemData(
         t <- linkText
         h <- linkHref
       } yield Link(t, Uri.parse(h)),
-    publishDate = publishDate
+    // TODO test this gives expected results of TZ&DST
+    publishDate = publishDate.toDateTime(TimeZones.LONDON)
   )
 }
 
+@Singleton
 class NewsController @Inject() (
   security: SecurityService,
   val messagesApi: MessagesApi,
-  news: NewsService
+  news: NewsService,
+  departments: DepartmentInfoDao,
+  audiences: AudienceService,
+  audienceBinder: AudienceBinder
 ) extends BaseController with I18nSupport {
 
   import Roles._
   import security._
+  import system.ThreadPools.web
 
-  val jodaDateTime = of(Formats.jodaDateTimeFormat("yyyy-MM-dd'T'HH:mm", TimeZones.LONDON))
+  val departmentTypes = Set("ACADEMIC", "SERVICE")
+  val departmentInitialValue = Seq("" -> "--- Department ---")
+  def departmentOptions = departments.allDepartments
+    .recover { case e => Nil }
+    .map { depts =>
+      departmentInitialValue ++ depts.filter { info => departmentTypes.contains(info.`type`) }
+        .sortBy { info => info.name }
+        .map { info => info.code -> info.name }
+    }
 
   val newsItemMapping = mapping(
     "title" -> nonEmptyText,
     "text" -> nonEmptyText,
     "linkText" -> optional(text),
     "linkHref" -> optional(text),
-    "publishDate" -> jodaDateTime
+    "publishDate" -> DateFormats.dateTimeLocalMapping
   )(NewsItemData.apply)(NewsItemData.unapply)
 
   type PublishNewsForm = Form[PublishNewsData]
@@ -61,7 +78,8 @@ class NewsController @Inject() (
   val publishNewsForm = Form(
     mapping(
       "item" -> newsItemMapping,
-      "recipients" -> nonEmptyText
+      "audience" -> seq(nonEmptyText),
+      "department" -> optional(text)
     )(PublishNewsData.apply)(PublishNewsData.unapply)
   )
 
@@ -69,20 +87,36 @@ class NewsController @Inject() (
     Ok(views.html.admin.news.list(news.allNews(limit = 100)))
   }
 
-  def createForm = RequiredActualUserRoleAction(Sysadmin) {
-    Ok(views.html.admin.news.createForm(publishNewsForm))
+  def createForm = RequiredActualUserRoleAction(Sysadmin).async {
+    for {
+      dopts <- departmentOptions
+    } yield {
+      Ok(views.html.admin.news.createForm(publishNewsForm, dopts))
+    }
   }
 
-  def create = RequiredActualUserRoleAction(Sysadmin) { implicit req =>
-    publishNewsForm.bindFromRequest.fold(
-      errorForm => Ok(views.html.admin.news.createForm(errorForm)),
-      data => {
-        val recipients = data.recipients.split(",").map(_.trim).map(Usercode)
-        val newsItem = data.item.toSave
-        news.save(newsItem, recipients)
-        Redirect(controllers.admin.routes.NewsController.list())
-      }
-    )
+  def addErrors[A](form: Form[A], errors: Seq[FormError]) = errors.foldLeft(form)(_.withError(_))
+
+  def create = RequiredActualUserRoleAction(Sysadmin).async { implicit req =>
+    departmentOptions.flatMap { dopts =>
+      val bound = publishNewsForm.bindFromRequest
+      bound.fold(
+        errorForm => Future.successful(Ok(views.html.admin.news.createForm(errorForm, dopts))),
+        data => audienceBinder.bindAudience(data).map {
+          case Left(errors) =>
+            val errorForm = addErrors(bound, errors)
+            Ok(views.html.admin.news.createForm(errorForm, dopts))
+          case Right(audience) =>
+            handleForm(data, audience)
+        }
+      )
+    }
+  }
+
+  def handleForm(data: PublishNewsData, audience: Audience) = {
+    val newsItem = data.item.toSave
+    news.save(newsItem, audience)
+    Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News created")
   }
 
 }
