@@ -11,7 +11,6 @@ if ('serviceWorker' in navigator) {
 
 $(() => {
   // Audience pickers
-  // FIXME this stopped working, thing the class is just missing in HTML
   $('.audience-picker').each((i, el) => {
     const $el = $(el);
     const $deptBoxes = $(el).find('input[value*="Dept:"]');
