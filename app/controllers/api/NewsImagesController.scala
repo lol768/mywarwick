@@ -8,12 +8,11 @@ import com.google.inject.Inject
 import controllers.BaseController
 import models.API
 import play.api.cache.CacheApi
-import play.api.libs.iteratee.Enumerator
+import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.Action
+import play.api.mvc.{Action, MultipartFormData, Request}
 import services.{ImageManipulator, NewsImageService, SecurityService}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
 class NewsImagesController @Inject()(
@@ -64,7 +63,9 @@ class NewsImagesController @Inject()(
 
   private val MEGABYTE = 1000 * 1000
 
-  def create = RequiredActualUserRoleAction(Sysadmin)(parse.multipartFormData) { request =>
+  def create = RequiredActualUserRoleAction(Sysadmin)(parse.multipartFormData)(createInternal)
+
+  def createInternal(request: Request[MultipartFormData[TemporaryFile]]) = {
     request.body.file("image").map { maybeValidImage =>
       Option(maybeValidImage)
         .filter(_.contentType.exists(_.startsWith("image/")))
