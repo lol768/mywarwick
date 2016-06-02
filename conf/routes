@@ -26,7 +26,7 @@ GET         /admin/notifications/new                      @controllers.admin.Not
 POST        /admin/notifications                          @controllers.admin.NotificationsController.create
 GET         /admin/masquerade                             @controllers.admin.MasqueradeController.masquerade
 
-GET         /websockets/page/                             @controllers.HomeController.socket
+GET         /websockets/page/                             @controllers.WebSocketController.socket
 
 GET         /assets/manifest.json                         @controllers.AppManifestController.getAppManifest
 # Map static resources from the /public folder to the /assets URL path
