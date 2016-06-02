@@ -65,7 +65,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     NewsItemRender(id, title, text, link, publishDate)
   }
 
-  def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender] = {
+  override def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender] = {
     SQL(s"""
       SELECT n.* FROM news_item n
       ORDER BY publish_date DESC
@@ -73,7 +73,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
       """).as(newsParser.*)
   }
 
-  def latestNews(user: Option[Usercode], limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender] = {
+  override def latestNews(user: Option[Usercode], limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender] = {
     SQL(s"""
       SELECT n.* FROM news_item n
       JOIN news_recipient r ON n.id = r.news_item_id
@@ -87,7 +87,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
   /**
     * Save a news item with a specific set of recipients.
     */
-  def save(item: NewsItemSave)(implicit c: Connection): String = {
+  override def save(item: NewsItemSave)(implicit c: Connection): String = {
     import item._
     val id = newId
     val linkText = link.map(_.text).orNull
@@ -99,7 +99,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     id
   }
 
-  def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
+  override def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
     // TODO perhaps we shouldn't insert these in sync, as audiences can potentially be 1000s users.
     recipients.foreach { usercode =>
       SQL"""
@@ -118,7 +118,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
 
   private val countParser = (str("id") ~ int("c")).map(flatten)
 
-  def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, AudienceSize] = {
+  override def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, AudienceSize] = {
     import AudienceSize._
 
     val publicNews =

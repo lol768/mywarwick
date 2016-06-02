@@ -41,7 +41,7 @@ class AnormNewsService @Inject() (
       dao.saveRecipients(id, item.publishDate, recipients)
     }
 
-  def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize] =
+  override def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize] =
     db.withConnection { implicit c =>
       dao.countRecipients(newsIds)
     }
