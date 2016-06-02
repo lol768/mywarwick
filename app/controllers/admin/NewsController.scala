@@ -27,7 +27,8 @@ case class NewsItemData(
   text: String,
   linkText: Option[String],
   linkHref: Option[String],
-  publishDate: LocalDateTime
+  publishDate: LocalDateTime,
+  imageId: Option[String]
 ) {
   def toSave = NewsItemSave(
     title = title,
@@ -37,7 +38,8 @@ case class NewsItemData(
         h <- linkHref
       } yield Link(t, Uri.parse(h)),
     // TODO test this gives expected results of TZ&DST
-    publishDate = publishDate.toDateTime(TimeZones.LONDON)
+    publishDate = publishDate.toDateTime(TimeZones.LONDON),
+    imageId = imageId
   )
 }
 
@@ -70,7 +72,8 @@ class NewsController @Inject() (
     "text" -> nonEmptyText,
     "linkText" -> optional(text),
     "linkHref" -> optional(text),
-    "publishDate" -> DateFormats.dateTimeLocalMapping
+    "publishDate" -> DateFormats.dateTimeLocalMapping,
+    "imageId" -> optional(text)
   )(NewsItemData.apply)(NewsItemData.unapply)
 
   type PublishNewsForm = Form[PublishNewsData]

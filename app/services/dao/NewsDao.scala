@@ -60,9 +60,10 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     linkText <- str("link_text").?
     linkHref <- str("link_href").?
     publishDate <- get[DateTime]("publish_date")
+    imageId <- str("news_image_id").?
   } yield {
     val link = for { t <- linkText; h <- parseLink(linkHref) } yield Link(t, h)
-    NewsItemRender(id, title, text, link, publishDate)
+    NewsItemRender(id, title, text, link, publishDate, imageId)
   }
 
   def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender] = {
@@ -93,8 +94,8 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     val linkText = link.map(_.text).orNull
     val linkHref = link.map(_.href.toString).orNull
     SQL"""
-    INSERT INTO NEWS_ITEM (id, title, text, link_text, link_href, created_at, publish_date)
-    VALUES (${id}, ${title}, ${text}, ${linkText}, ${linkHref}, SYSDATE, ${publishDate})
+    INSERT INTO NEWS_ITEM (id, title, text, link_text, link_href, news_image_id, created_at, publish_date)
+    VALUES ($id, $title, $text, $linkText, $linkHref, $imageId, SYSDATE, $publishDate)
     """.executeUpdate()
     id
   }
