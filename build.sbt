@@ -43,7 +43,8 @@ val appDeps = Seq(
   "org.quartz-scheduler" % "quartz" % "2.2.1",
   "com.google.inject.extensions" % "guice-multibindings" % "4.0",
   "com.adrianhurt" %% "play-bootstrap" % "1.0-P24-B3",
-  "org.databrary" %% "play-logback-access" % "0.5" exclude("javax.servlet", "servlet-api")
+  "org.databrary" %% "play-logback-access" % "0.5" exclude("javax.servlet", "servlet-api"),
+  "ch.qos.logback" % "logback-access" % "1.1.4"
 )
 
 val testDeps = Seq(
