@@ -7,14 +7,14 @@ import javax.inject.{Inject, Singleton}
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.ImplementedBy
-import models.news.{Link, NewsItemRender, NewsItemSave}
+import models.news.{AudienceSize, Link, NewsItemRender, NewsItemSave}
 import org.joda.time.DateTime
 import play.api.db.Database
 import system.DatabaseDialect
 import uk.ac.warwick.util.web.Uri
 import uk.ac.warwick.util.web.Uri.UriException
-import warwick.sso.Usercode
 import warwick.anorm.converters.ColumnConversions._
+import warwick.sso.Usercode
 
 @ImplementedBy(classOf[AnormNewsDao])
 trait NewsDao {
@@ -37,7 +37,7 @@ trait NewsDao {
   // TODO too many args? define an object?
   def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit
 
-  def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, Int]
+  def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, AudienceSize]
 }
 
 @Singleton
@@ -77,7 +77,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     SQL(s"""
       SELECT n.* FROM news_item n
       JOIN news_recipient r ON n.id = r.news_item_id
-      AND usercode = {user}
+      AND (usercode = {user} OR usercode = '*')
       AND r.publish_date < SYSDATE
       ORDER BY r.publish_date DESC
       ${dialect.limitOffset(limit)}
@@ -116,13 +116,23 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     SQL"DELETE FROM NEWS_RECIPIENT WHERE news_item_id = ${id}".executeUpdate()
   }
 
-  private val countParser = (str("id") ~ int("c")).map(flatten).*
-  def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, Int] = {
-    SQL"""
+  private val countParser = (str("id") ~ int("c")).map(flatten)
+
+  def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, AudienceSize] = {
+    import AudienceSize._
+
+    val publicNews =
+      SQL"SELECT NEWS_ITEM_ID ID FROM NEWS_RECIPIENT WHERE USERCODE = '*'"
+        .as(str("id").*).map(_ -> Public).toMap
+
+    val audienceNews =
+      SQL"""
       SELECT NEWS_ITEM_ID ID, COUNT(*) C FROM NEWS_RECIPIENT
-      WHERE NEWS_ITEM_ID IN ($newsIds)
+      WHERE NEWS_ITEM_ID IN ($newsIds) AND USERCODE != '*'
       GROUP BY NEWS_ITEM_ID
-    """.as(countParser).seq.toMap
+    """.as(countParser.*).toMap.mapValues(Finite)
+
+    publicNews ++ audienceNews
   }
 
 }

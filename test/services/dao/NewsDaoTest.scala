@@ -18,6 +18,7 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
   val bob = Usercode("cusbob")
   val eli = Usercode("cuseli")
   val jim = Usercode("cusjim")
+  val public = Usercode("*")
 
   def save(item: NewsItemSave, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
     val id = newsDao.save(item)
@@ -52,7 +53,7 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
     }
 
     "return only published news for user" in transaction { implicit c =>
-      save(londonsBurning, Seq(ana, jim))
+      save(londonsBurning, Seq(public))
       save(brumPanic, Seq(ana, eli))
       save(futureNews, Seq(ana, bob, eli, jim))
 

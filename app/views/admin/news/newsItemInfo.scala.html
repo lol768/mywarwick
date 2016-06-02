@@ -1,11 +1,23 @@
-@import models.news.NewsItemRender
-@(item: NewsItemRender, count: Option[Int])
+@import models.news.{AudienceSize, NewsItemRender}
+@(item: NewsItemRender, count: Option[AudienceSize])
 <article class="news-item">
   <div class="news-item__body">
     <div class="news-item__title">@item.title</div>
     <div class="news-item__content">@item.text</div>
     <div class="news-item__footer">
       @models.DateFormats.emailDateTime(item.publishDate)
-      @for(c <- count) { <span>- @c recipients</span> } </div>
+      @count match {
+        case Some(AudienceSize.Public) => {
+          <span>- public</span>
+        }
+        case Some(AudienceSize.Finite(c)) => {
+          <span>
+            - @c
+            @if(c == 1) { recipient } else { recipients }
+          </span>
+        }
+        case _ => {}
+      }
+    </div>
   </div>
 </article>

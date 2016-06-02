@@ -20,16 +20,20 @@ class AudienceServiceImpl @Inject() (webgroups: GroupService) extends AudienceSe
   // TODO Try.get wrapped with another Try is a weak sauce solution.
   // Should use magic combinators that nobody can understand.
   override def resolve(audience: Audience): Try[Seq[Usercode]] = Try {
-    audience.components.flatMap {
-      // webgroups has handy "all-" webgroups that subset all the departments.
-      case ds: DepartmentSubset => resolveSubset("all", ds).get
-      case WebgroupAudience(name) => webgroupUsers(name).get
-      case ModuleAudience(code) => moduleWebgroupUsers(code).get
-      case DepartmentAudience(code, subsets) => for {
+    if (audience.public) {
+      Seq(Usercode("*"))
+    } else {
+      audience.components.flatMap {
+        // webgroups has handy "all-" webgroups that subset all the departments.
+        case ds: DepartmentSubset => resolveSubset("all", ds).get
+        case WebgroupAudience(name) => webgroupUsers(name).get
+        case ModuleAudience(code) => moduleWebgroupUsers(code).get
+        case DepartmentAudience(code, subsets) => for {
           subset <- subsets
           user <- resolveSubset(code.toLowerCase, subset).get
         } yield user
-    }.distinct
+      }.distinct
+    }
   }
 
   private def resolveSubset(deptCode: String, component: DepartmentSubset): Try[Seq[Usercode]] =
