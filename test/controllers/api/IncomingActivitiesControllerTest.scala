@@ -17,6 +17,8 @@ import scala.util.Success
 
 class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with Results {
 
+  implicit val mat = FakeApplication().materializer
+
   val tabula = "tabula"
   val ron = Users.create(usercode = Usercode("ron"))
 
