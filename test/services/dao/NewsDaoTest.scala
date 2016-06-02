@@ -49,7 +49,7 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
 
   "latestNews" should {
     "return no news" in transaction { implicit c =>
-      newsDao.latestNews(jim) must be ('empty)
+      newsDao.latestNews(Some(jim)) must be ('empty)
     }
 
     "return only published news for user" in transaction { implicit c =>
@@ -57,18 +57,21 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
       save(brumPanic, Seq(ana, eli))
       save(futureNews, Seq(ana, bob, eli, jim))
 
-      val jimNews = newsDao.latestNews(jim)
+      val publicNews = newsDao.latestNews(None)
+      publicNews.map(_.title) must be(Seq(londonsBurning.title))
+
+      val jimNews = newsDao.latestNews(Some(jim))
       jimNews.map(_.title) must be(Seq(londonsBurning.title))
 
-      val anaNews = newsDao.latestNews(ana)
+      val anaNews = newsDao.latestNews(Some(ana))
       anaNews.map(_.title) must be(Seq(londonsBurning.title, brumPanic.title))
     }
 
     "limit results to requested amount" in transaction { implicit c =>
       save(londonsBurning, Seq(ana))
       save(brumPanic, Seq(ana))
-      newsDao.latestNews(ana, limit = 2) must have length(2)
-      newsDao.latestNews(ana, limit = 1) must have length(1)
+      newsDao.latestNews(Some(ana), limit = 2) must have length(2)
+      newsDao.latestNews(Some(ana), limit = 1) must have length(1)
     }
   }
 

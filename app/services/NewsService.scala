@@ -11,7 +11,7 @@ import warwick.sso.Usercode
 @ImplementedBy(classOf[AnormNewsService])
 trait NewsService {
   def allNews(limit: Int = 100, offset: Int = 0): Seq[NewsItemRender]
-  def latestNews(user: Usercode, limit: Int = 100): Seq[NewsItemRender]
+  def latestNews(user: Option[Usercode], limit: Int = 100): Seq[NewsItemRender]
   // TODO public news items
   def save(item: NewsItemSave, audience: Audience): Unit
 
@@ -29,7 +29,7 @@ class AnormNewsService @Inject() (
       dao.allNews(limit, offset)
     }
 
-  override def latestNews(user: Usercode, limit: Int): Seq[NewsItemRender] =
+  override def latestNews(user: Option[Usercode], limit: Int): Seq[NewsItemRender] =
     db.withConnection { implicit c =>
       dao.latestNews(user, limit)
     }

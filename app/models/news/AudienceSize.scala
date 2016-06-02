@@ -6,4 +6,4 @@ object AudienceSize {
   case class Finite(count: Int) extends AudienceSize
 }
 
-trait AudienceSize
+sealed trait AudienceSize

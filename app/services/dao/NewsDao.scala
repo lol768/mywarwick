@@ -25,7 +25,7 @@ trait NewsDao {
     */
   def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender]
 
-  def latestNews(user: Usercode, limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender]
+  def latestNews(user: Option[Usercode], limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender]
 
   /**
     * @param item the news item to save
@@ -73,7 +73,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
       """).as(newsParser.*)
   }
 
-  def latestNews(user: Usercode, limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender] = {
+  def latestNews(user: Option[Usercode], limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender] = {
     SQL(s"""
       SELECT n.* FROM news_item n
       JOIN news_recipient r ON n.id = r.news_item_id
@@ -81,7 +81,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
       AND r.publish_date < SYSDATE
       ORDER BY r.publish_date DESC
       ${dialect.limitOffset(limit)}
-      """).on('user -> user.string).as(newsParser.*)
+      """).on('user -> user.map(_.string).getOrElse("*")).as(newsParser.*)
   }
 
   /**
