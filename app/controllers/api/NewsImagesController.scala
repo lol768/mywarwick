@@ -52,10 +52,8 @@ class NewsImagesController @Inject()(
           byteArray
         }
         .map { byteArray =>
-          Ok(byteArray).withHeaders(
-            CONTENT_DISPOSITION -> "inline",
-            CONTENT_LENGTH -> byteArray.length.toString,
-            CONTENT_TYPE -> newsImage.contentType
+          Ok(byteArray).as(newsImage.contentType).withHeaders(
+            CONTENT_DISPOSITION -> "inline"
           )
         }.getOrElse(NotFound("Object missing from store"))
     }.getOrElse(NotFound("Image not found"))
