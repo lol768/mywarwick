@@ -1,10 +1,9 @@
 package services
 
-import com.google.inject.{Singleton, Inject}
+import akka.actor.ActorSystem
+import com.google.inject.{Inject, Singleton}
 import models.QueueStatus
 import org.joda.time.DateTime
-import play.api.Play.current
-import play.api.libs.concurrent.Akka
 import services.messaging.MessagingService
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -16,7 +15,8 @@ object HealthCheckService {
 
 @Singleton
 class HealthCheckService @Inject()(
-  messagingService: MessagingService
+  messagingService: MessagingService,
+  system: ActorSystem
 ) {
 
   import HealthCheckService._
@@ -32,6 +32,6 @@ class HealthCheckService @Inject()(
   }
 
   runNow()
-  Akka.system.scheduler.schedule(frequency, frequency)(runNow())
+  system.scheduler.schedule(frequency, frequency)(runNow())
 
 }

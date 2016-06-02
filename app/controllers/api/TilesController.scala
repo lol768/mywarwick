@@ -77,8 +77,10 @@ class TilesController @Inject()(
   def contentById(id: String) = RequiredUserAction.async { request =>
     request.context.user.map { user =>
       val tiles = tileService.getTilesByIds(user, Seq(id))
-
-      tilesContent(Option(user), tiles)
+      tiles match {
+        case Seq(_) => tilesContent(Option(user), tiles)
+        case Seq() => Future(BadRequest(Json.toJson(API.Failure[JsObject]("bad request", Seq(API.Error("no-tile", s"Cannot fetch content. No tiles exist with id '$id'"))))))
+      }
     }.get // RequiredUserAction
   }
 }

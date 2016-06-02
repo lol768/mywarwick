@@ -1,0 +1,18 @@
+@import play.api.Mode.Mode
+@import play.api.Mode
+@(e: Throwable, appMode: Mode)
+@views.html.common.id7layout("Error") {
+
+  @* TODO make this helpful *@
+
+  <p>There was a problem serving your request: @e.getMessage</p>
+
+  @if(appMode == Mode.Dev) {
+    <pre>
+    @for(trace <- e.getStackTrace) {
+      @trace
+    }
+    </pre>
+  }
+
+}
