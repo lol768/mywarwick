@@ -41,7 +41,7 @@ class WsDepartmentInfoDao @Inject() (
   private lazy val url: String = config.getString("start.departments.list.url")
     .getOrElse(throw new IllegalArgumentException("start.departments.list.url missing"))
 
-  private lazy val request: WSRequest = ws.url(url).withRequestTimeout(5000)
+  private lazy val request: WSRequest = ws.url(url).withRequestTimeout(5.seconds)
 
   override def allDepartments: Future[Seq[DepartmentInfo]] = cache.getOrElseFuture("allDepartmentInfo", 1.hour) {
     request.get.map { response =>
