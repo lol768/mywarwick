@@ -27,7 +27,20 @@ $(() => {
   $('.audience-picker').each((i, el) => {
     const $el = $(el);
     const $deptBoxes = $(el).find('input[value*="Dept:"]');
-    $el.find('[name=department]').on('change', e => {
+    const $deptSelect = $el.find('[name=department]');
+
+    const $publicBox = $(el).find('input[value=Public]');
+    const $otherInputs = $(el).find('input, select').not($publicBox);
+    $publicBox.on('change', () => {
+      if ($publicBox.is(':checked')) {
+        $otherInputs.attr('disabled', true);
+      } else {
+        $otherInputs.removeAttr('disabled');
+        $deptSelect.trigger('change');
+      }
+    });
+
+    $deptSelect.on('change', e => {
       const deptSelected = e.target.value;
       const $subsets = $deptBoxes.closest('.checkbox');
       $deptBoxes.attr('disabled', !deptSelected);

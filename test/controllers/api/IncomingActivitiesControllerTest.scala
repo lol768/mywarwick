@@ -13,7 +13,7 @@ import play.api.libs.json.{JsString, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import services.{ActivityService, ProviderPermissionService, SecurityServiceImpl}
+import services.{ActivityRecipientService, ActivityService, ProviderPermissionService, SecurityServiceImpl}
 import warwick.sso._
 
 import scala.concurrent.Await
@@ -44,10 +44,12 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
 
   val providerPermissionService = mock[ProviderPermissionService]
   val activityService = mock[ActivityService]
+  val activityRecipientService = mock[ActivityRecipientService]
 
   val controller = new IncomingActivitiesController(
     new SecurityServiceImpl(ssoClient, mock[BasicAuth], mock[CacheApi]),
     activityService,
+    activityRecipientService,
     providerPermissionService,
     mock[MessagesApi]
   )
@@ -80,7 +82,8 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
 
     "return created activity ID on success" in {
       when(providerPermissionService.canUserPostForProvider(tabula, ron)).thenReturn(true)
-      when(activityService.save(any())).thenReturn(Success("created-activity-id"))
+      when(activityRecipientService.getRecipientUsercodes(Seq(Usercode("someone")), Seq.empty)).thenReturn(Set(Usercode("someone")))
+      when(activityService.save(any(), any[Set[Usercode]]())).thenReturn(Success("created-activity-id"))
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
 
@@ -93,6 +96,8 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
     }
 
     "accept generated_at date in the correct format" in {
+      when(activityRecipientService.getRecipientUsercodes(Seq(Usercode("someone")), Seq.empty)).thenReturn(Set(Usercode("someone")))
+
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(
         body + ("generated_at" -> JsString("2016-01-01T09:00:00.000Z"))
       ))
@@ -108,7 +113,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
 
     "reject an incorrectly-formatted generated_at date" in {
       when(providerPermissionService.canUserPostForProvider(tabula, ron)).thenReturn(true)
-      when(activityService.save(any())).thenReturn(Success("created-activity-id"))
+      when(activityService.save(any(), any[Set[Usercode]]())).thenReturn(Success("created-activity-id"))
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(
         body + ("generated_at" -> JsString("yesterday"))

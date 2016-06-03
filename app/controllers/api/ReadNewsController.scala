@@ -17,9 +17,7 @@ class ReadNewsController @Inject()(
   import security._
 
   def feed = UserAction { implicit req =>
-    val userNews = req.context.user.map { user =>
-      news.latestNews(user.usercode)
-    }.getOrElse(Nil)
+    val userNews = news.latestNews(req.context.user.map(_.usercode))
 
     val sortedNews = (userNews).sortBy(_.publishDate)
     Ok(Json.obj(

@@ -1,6 +1,6 @@
-@import models.news.NewsItemRender
+@import models.news.{AudienceSize, NewsItemRender}
 @import views.html._
-@(news: Seq[NewsItemRender], counts: Map[String, Int])
+@(news: Seq[NewsItemRender], counts: Map[String, AudienceSize])
 
 @common.admin("News") {
   <p>

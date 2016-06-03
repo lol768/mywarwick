@@ -4,7 +4,7 @@ import javax.inject.Singleton
 
 import com.google.inject.{ImplementedBy, Inject}
 import models.news.{Audience, NotificationData}
-import models.{ActivityPrototype, ActivityRecipients}
+import models.{ActivitySave, ActivityRecipients}
 import warwick.sso.Usercode
 
 import scala.util.Try
@@ -31,24 +31,15 @@ class NotificationPublishingServiceImpl @Inject()(
 
   def publish(item: NotificationData, audience: Audience): Try[String] =
     audienceService.resolve(audience)
-      .map(makeActivityPrototype(item))
-      .flatMap(activityService.save)
+      .flatMap(recipients => activityService.save(makeActivitySave(item), recipients))
 
-  private def makeActivityPrototype(item: NotificationData)(usercodes: Seq[Usercode]) =
-    ActivityPrototype(
+  private def makeActivitySave(item: NotificationData) =
+    ActivitySave(
       providerId = PROVIDER_ID,
       `type` = ACTIVITY_TYPE,
       title = item.text,
-      text = None,
       url = item.linkHref,
-      tags = Seq.empty,
-      replace = Map.empty,
-      generatedAt = None,
-      shouldNotify = true,
-      recipients = ActivityRecipients(
-        users = Some(usercodes.map(_.string)),
-        groups = None
-      )
+      shouldNotify = true
     )
 
 }

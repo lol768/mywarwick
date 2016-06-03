@@ -2,12 +2,12 @@ package services
 
 import actors.WebsocketActor.Notification
 import com.google.inject.{ImplementedBy, Inject}
-import models.{Activity, ActivityPrototype, ActivityResponse}
+import models.{Activity, ActivityResponse, ActivitySave}
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
 import services.messaging.MessagingService
-import warwick.sso.{GroupName, User, Usercode}
+import warwick.sso.{User, Usercode}
 
 import scala.util.{Failure, Success, Try}
 
@@ -17,7 +17,9 @@ trait ActivityService {
 
   def getActivitiesForUser(user: User, limit: Int = 50, before: Option[DateTime] = None): Seq[ActivityResponse]
 
-  def save(activity: ActivityPrototype): Try[String]
+  def save(activity: ActivitySave, recipients: Set[Usercode]): Try[String]
+
+  def save(activity: ActivitySave, recipients: Seq[Usercode]): Try[String]
 
   def getLastReadDate(user: User): Option[DateTime]
 
@@ -27,58 +29,51 @@ trait ActivityService {
 }
 
 class ActivityServiceImpl @Inject()(
-  activityRecipientService: ActivityRecipientService,
-  activityCreationDao: ActivityCreationDao,
-  activityDao: ActivityDao,
-  activityTagDao: ActivityTagDao,
+  dao: ActivityDao,
+  creationDao: ActivityCreationDao,
+  tagDao: ActivityTagDao,
   messaging: MessagingService,
-  pubsub: PubSub,
+  pubSub: PubSub,
   @NamedDatabase("default") db: Database
 ) extends ActivityService {
 
-  override def getActivityById(id: String): Option[Activity] = db.withConnection(implicit c => activityDao.getActivityById(id))
+  override def getActivityById(id: String): Option[Activity] =
+    db.withConnection(implicit c => dao.getActivityById(id))
 
-  implicit def stringSeqToUsercodeSeq(strings: Seq[String]): Seq[Usercode] = strings.map(Usercode)
+  override def save(activity: ActivitySave, recipients: Seq[Usercode]): Try[String] =
+    save(activity, recipients.toSet)
 
-  implicit def stringSeqToGroupNameSeq(strings: Seq[String]): Seq[GroupName] = strings.map(GroupName)
-
-  def save(activity: ActivityPrototype): Try[String] = {
-    val recipients = activityRecipientService.getRecipientUsercodes(
-      activity.recipients.users.getOrElse(Seq.empty),
-      activity.recipients.groups.getOrElse(Seq.empty)
-    )
-
+  override def save(activity: ActivitySave, recipients: Set[Usercode]): Try[String] = {
     if (recipients.isEmpty) {
       Failure(NoRecipientsException)
     } else {
       db.withTransaction { implicit c =>
-        val replaceIds = activityTagDao.getActivitiesWithTags(activity.replace, activity.providerId)
+        val replaceIds = tagDao.getActivitiesWithTags(activity.replace, activity.providerId)
 
-        val result = activityCreationDao.createActivity(activity, recipients, replaceIds)
+        val result = creationDao.createActivity(activity, recipients, replaceIds)
 
         if (result.activity.shouldNotify) {
           messaging.send(recipients, result.activity)
         }
 
-        recipients.foreach(usercode => pubsub.publish(usercode.string, Notification(result)))
+        recipients.foreach(usercode => pubSub.publish(usercode.string, Notification(result)))
 
         Success(result.activity.id)
       }
     }
-
   }
 
   override def getActivitiesForUser(user: User, limit: Int, before: Option[DateTime]): Seq[ActivityResponse] =
-    db.withConnection(implicit c => activityDao.getActivitiesForUser(user.usercode.string, limit.min(50), before))
+    db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, limit.min(50), before))
 
   override def getLastReadDate(user: User): Option[DateTime] =
-    db.withConnection(implicit c => activityDao.getLastReadDate(user.usercode.string))
+    db.withConnection(implicit c => dao.getLastReadDate(user.usercode.string))
 
   override def setLastReadDate(user: User, dateTime: DateTime): Boolean =
-    db.withConnection(implicit c => activityDao.saveLastReadDate(user.usercode.string, dateTime))
+    db.withConnection(implicit c => dao.saveLastReadDate(user.usercode.string, dateTime))
 
   override def getActivitiesByProviderId(providerId: String, limit: Int) =
-    db.withConnection(implicit c => activityDao.getActivitiesByProviderId(providerId, limit))
+    db.withConnection(implicit c => dao.getActivitiesByProviderId(providerId, limit))
 }
 
 object NoRecipientsException extends Throwable

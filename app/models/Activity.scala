@@ -76,18 +76,24 @@ case class ActivityTag(
 
 case class TagValue(internalValue: String, displayValue: Option[String] = None)
 
-case class ActivityPrototype(
+case class ActivitySave(
   providerId: String,
+  shouldNotify: Boolean,
   `type`: String,
   title: String,
-  text: Option[String],
-  url: Option[String],
-  tags: Seq[ActivityTag],
-  replace: Map[String, String],
-  generatedAt: Option[DateTime],
-  shouldNotify: Boolean,
-  recipients: ActivityRecipients
+  text: Option[String] = None,
+  url: Option[String] = None,
+  tags: Seq[ActivityTag] = Seq.empty,
+  replace: Map[String, String] = Map.empty,
+  generatedAt: Option[DateTime] = None
 )
+
+object ActivitySave {
+  def fromData(providerId: String, shouldNotify: Boolean, data: IncomingActivityData): ActivitySave = {
+    import data._
+    ActivitySave(providerId, shouldNotify, `type`, title, text, url, tags.getOrElse(Seq.empty), replace.getOrElse(Map.empty), generated_at)
+  }
+}
 
 case class ActivityRecipients(
   users: Option[Seq[String]],
@@ -95,8 +101,21 @@ case class ActivityRecipients(
 )
 
 object ActivityRecipients {
-  lazy val empty = ActivityRecipients(None, None)
-
   implicit val readsActivityRecipients = Json.reads[ActivityRecipients]
 }
 
+case class IncomingActivityData(
+  `type`: String,
+  title: String,
+  text: Option[String],
+  url: Option[String],
+  tags: Option[Seq[ActivityTag]],
+  replace: Option[Map[String, String]],
+  generated_at: Option[DateTime],
+  recipients: ActivityRecipients
+)
+
+object IncomingActivityData {
+  import DateFormats.isoDateReads
+  implicit val readsIncomingActivityData = Json.reads[IncomingActivityData]
+}
