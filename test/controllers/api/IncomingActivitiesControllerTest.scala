@@ -1,7 +1,10 @@
 package controllers.api
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.cache.CacheApi
@@ -13,9 +16,18 @@ import play.api.test._
 import services.{ActivityService, ProviderPermissionService, SecurityServiceImpl}
 import warwick.sso._
 
+import scala.concurrent.Await
 import scala.util.Success
+import scala.concurrent.duration._
 
-class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with Results {
+class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with Results with BeforeAndAfterAll {
+
+  implicit val akka = ActorSystem()
+  implicit val mat = ActorMaterializer()
+
+  override def afterAll(): Unit = {
+    Await.result(akka.terminate(), 5.seconds)
+  }
 
   val tabula = "tabula"
   val ron = Users.create(usercode = Usercode("ron"))

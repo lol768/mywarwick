@@ -62,6 +62,6 @@ class AnormNewsService @Inject() (
 
   override def unpublish(id: String): Int =
     db.withConnection {implicit c =>
-      dao.removeRecipients(id)
+      dao.deleteRecipients(id)
   }
 }

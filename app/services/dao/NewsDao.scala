@@ -43,7 +43,7 @@ trait NewsDao {
 
   def getNewsById(id: String)(implicit c: Connection): Option[NewsItemRender]
 
-  def unpublish(id: String)(implicit c: Connection): Int
+  def deleteRecipients(id: String)(implicit c: Connection)
 }
 
 @Singleton
@@ -66,9 +66,10 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     linkText <- str("link_text").?
     linkHref <- str("link_href").?
     publishDate <- get[DateTime]("publish_date")
+    imageId <- str("news_image_id").?
   } yield {
     val link = for { t <- linkText; h <- parseLink(linkHref) } yield Link(t, h)
-    NewsItemRender(id, title, text, link, publishDate)
+    NewsItemRender(id, title, text, link, publishDate, imageId)
   }
 
   override def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender] = {
@@ -99,8 +100,8 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     val linkText = link.map(_.text).orNull
     val linkHref = link.map(_.href.toString).orNull
     SQL"""
-    INSERT INTO NEWS_ITEM (id, title, text, link_text, link_href, created_at, publish_date)
-    VALUES (${id}, ${title}, ${text}, ${linkText}, ${linkHref}, SYSDATE, ${publishDate})
+    INSERT INTO NEWS_ITEM (id, title, text, link_text, link_href, news_image_id, created_at, publish_date)
+    VALUES ($id, $title, $text, $linkText, $linkHref, $imageId, SYSDATE, $publishDate)
     """.executeUpdate()
     id
   }
@@ -118,7 +119,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
   /**
     * Deletes all the recipients of a news item.
     */
-  def deleteRecipients(id: String)(implicit c: Connection) = {
+  override def deleteRecipients(id: String)(implicit c: Connection) = {
     SQL"DELETE FROM NEWS_RECIPIENT WHERE news_item_id = ${id}".executeUpdate()
   }
 
@@ -148,9 +149,4 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
       """.as(newsParser.singleOpt)
   }
 
-  override def unpublish(id: String)(implicit c: Connection): Int = {
-    SQL"""
-          DELETE FROM NEWS_RECIPIENTS WHERE ID=$id
-      """.executeUpdate()
-  }
 }

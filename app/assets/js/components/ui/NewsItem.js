@@ -15,7 +15,7 @@ export const render = (content) =>
 export default class NewsItem extends ReactComponent {
 
   render() {
-    const { link, title, publishDate, text } = this.props;
+    const { link, title, publishDate, text, imageId } = this.props;
     const url = link && link.href;
     const moreLink = link ? (<Hyperlink href={link.href}>{link.text}</Hyperlink>) : null;
 
@@ -27,6 +27,12 @@ export default class NewsItem extends ReactComponent {
               {title}
             </Hyperlink>
           </h1>
+
+          { imageId ?
+            <div className="news-item__image">
+              <img src={ `/api/news/images/${imageId}` } alt={ title } />
+            </div>
+          : null }
 
           <div className="news-item__content">
             {render(text)}

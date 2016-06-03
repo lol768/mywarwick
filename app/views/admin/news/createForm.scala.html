@@ -1,7 +1,8 @@
-@import controllers.admin.PublishNewsData
+@import controllers.admin.{Publish, NewsItemData}
+
 @import org.joda.time.LocalDateTime
 @(
-    form: Form[PublishNewsData],
+    form: Form[Publish[NewsItemData]],
     departmentOptions: Seq[(String, String)]
 )(implicit messages: Messages)
 
@@ -24,6 +25,8 @@
       '_help -> "Keep it short",
       'rows -> 7
     )
+
+    <div id="file-upload-container" data-input-name="item.imageId"></div>
 
     @b3.datetimeLocal(form("item.publishDate"),
       '_label -> "Publish date",

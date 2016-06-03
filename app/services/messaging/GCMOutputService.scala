@@ -5,10 +5,9 @@ import com.google.inject.Inject
 import models.MessageSend
 import models.Platform.Google
 import play.api.Configuration
-import play.api.Play.current
 import play.api.db._
 import play.api.libs.json._
-import play.api.libs.ws.WS
+import play.api.libs.ws.WSAPI
 import services.dao.PushRegistrationDao
 import system.Logging
 import warwick.sso.Usercode
@@ -19,7 +18,8 @@ import scala.concurrent.Future
 class GCMOutputService @Inject()(
   pushRegistrationDao: PushRegistrationDao,
   @NamedDatabase("default") db: Database,
-  configuration: Configuration
+  configuration: Configuration,
+  ws: WSAPI
 ) extends MobileOutputService with Logging {
 
   import system.ThreadPools.mobile
@@ -43,7 +43,7 @@ class GCMOutputService @Inject()(
       // This is where to put payload readable by native Android clients
     )
 
-    WS.url("https://android.googleapis.com/gcm/send")
+    ws.url("https://android.googleapis.com/gcm/send")
       .withHeaders(
         "Authorization" -> s"key=$apiKey",
         "Content-Type" -> "application/json"
