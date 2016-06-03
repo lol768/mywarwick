@@ -11,16 +11,10 @@ import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.dao.DepartmentInfoDao
 import services.{AudienceService, NewsService, SecurityService}
-import system.{Roles, TimeZones}
+import system.{Roles, TimeZones, Validation}
 import uk.ac.warwick.util.web.Uri
 
 import scala.concurrent.Future
-
-case class PublishNewsData(
-  item: NewsItemData,
-  audience: Seq[String],
-  department: Option[String]
-) extends AudienceFormData
 
 case class NewsItemData(
   title: String,
@@ -48,43 +42,21 @@ class NewsController @Inject() (
   security: SecurityService,
   val messagesApi: MessagesApi,
   news: NewsService,
-  departments: DepartmentInfoDao,
-  audiences: AudienceService,
+  val departmentInfoDao: DepartmentInfoDao,
   audienceBinder: AudienceBinder
-) extends BaseController with I18nSupport {
+) extends BaseController with I18nSupport with Publishing[NewsItemData] {
 
   import Roles._
   import security._
-  import system.ThreadPools.web
 
-  val departmentTypes = Set("ACADEMIC", "SERVICE")
-  val departmentInitialValue = Seq("" -> "--- Department ---")
-  def departmentOptions = departments.allDepartments
-    .recover { case e => Nil }
-    .map { depts =>
-      departmentInitialValue ++ depts.filter { info => departmentTypes.contains(info.`type`) }
-        .sortBy { info => info.name }
-        .map { info => info.code -> info.name }
-    }
-
-  val newsItemMapping = mapping(
+  val publishNewsForm = publishForm(mapping(
     "title" -> nonEmptyText,
     "text" -> nonEmptyText,
     "linkText" -> optional(text),
-    "linkHref" -> optional(text),
+    "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url),
     "publishDate" -> DateFormats.dateTimeLocalMapping,
     "imageId" -> optional(text)
-  )(NewsItemData.apply)(NewsItemData.unapply)
-
-  type PublishNewsForm = Form[PublishNewsData]
-
-  val publishNewsForm = Form(
-    mapping(
-      "item" -> newsItemMapping,
-      "audience" -> seq(nonEmptyText),
-      "department" -> optional(text)
-    )(PublishNewsData.apply)(PublishNewsData.unapply)
-  )
+  )(NewsItemData.apply)(NewsItemData.unapply))
 
   def list = RequiredActualUserRoleAction(Sysadmin) {
     val theNews = news.allNews(limit = 100)
@@ -100,8 +72,6 @@ class NewsController @Inject() (
     }
   }
 
-  def addErrors[A](form: Form[A], errors: Seq[FormError]) = errors.foldLeft(form)(_.withError(_))
-
   def create = RequiredActualUserRoleAction(Sysadmin).async { implicit req =>
     departmentOptions.flatMap { dopts =>
       val bound = publishNewsForm.bindFromRequest
@@ -109,7 +79,7 @@ class NewsController @Inject() (
         errorForm => Future.successful(Ok(views.html.admin.news.createForm(errorForm, dopts))),
         data => audienceBinder.bindAudience(data).map {
           case Left(errors) =>
-            val errorForm = addErrors(bound, errors)
+            val errorForm = addFormErrors(bound, errors)
             Ok(views.html.admin.news.createForm(errorForm, dopts))
           case Right(audience) =>
             handleForm(data, audience)
@@ -118,7 +88,7 @@ class NewsController @Inject() (
     }
   }
 
-  def handleForm(data: PublishNewsData, audience: Audience) = {
+  def handleForm(data: Publish[NewsItemData], audience: Audience) = {
     val newsItem = data.item.toSave
     news.save(newsItem, audience)
     Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News created")

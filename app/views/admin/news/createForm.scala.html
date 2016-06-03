@@ -1,9 +1,8 @@
-@import controllers.admin.PublishNewsData
+@import controllers.admin.{Publish, NewsItemData}
 
-@import org.joda.time.DateTime
 @import org.joda.time.LocalDateTime
 @(
-    form: Form[PublishNewsData],
+    form: Form[Publish[NewsItemData]],
     departmentOptions: Seq[(String, String)]
 )(implicit messages: Messages)
 
