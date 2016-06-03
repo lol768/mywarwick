@@ -8,6 +8,7 @@ import services.{PhotoService, SecurityService}
 import system.AppMetrics
 
 case class AnalyticsTrackingID(string: String)
+case class SearchRootUrl(string: String)
 
 @Singleton
 class HomeController @Inject()(
@@ -21,6 +22,10 @@ class HomeController @Inject()(
 
   implicit val analyticsTrackingId: Option[AnalyticsTrackingID] =
     configuration.getString("start.analytics.tracking-id").map(AnalyticsTrackingID)
+
+  implicit val searchRootUrl: SearchRootUrl =
+    configuration.getString("start.search.root").map(SearchRootUrl)
+      .getOrElse(throw new IllegalStateException("Search root URL not configured - check start.search.root property"))
 
   def index = Action(Ok(views.html.index()))
 

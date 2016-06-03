@@ -11,7 +11,6 @@ export { reducer as news } from './news';
 export { reducer as notificationsLastRead } from './notification-metadata';
 export { notificationsReducer as notifications } from './notifications';
 export { activitiesReducer as activities } from './notifications';
-export { reducer as search } from './search';
 export { tilesReducer as tiles } from './tiles';
 export { tileContentReducer as tileContent } from './tiles';
 export { reducer as update } from './update';
