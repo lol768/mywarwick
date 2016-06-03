@@ -5,13 +5,11 @@ import javax.inject.Singleton
 import com.google.inject.Inject
 import controllers.BaseController
 import models._
-import org.joda.time.DateTime
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.libs.functional.syntax._
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json._
 import play.api.mvc.Result
-import services.{ActivityService, NoRecipientsException, ProviderPermissionService, SecurityService}
-import warwick.sso.{AuthenticatedRequest, User}
+import services._
+import warwick.sso.{AuthenticatedRequest, GroupName, User, Usercode}
 
 import scala.util.{Failure, Success}
 
@@ -19,6 +17,7 @@ import scala.util.{Failure, Success}
 class IncomingActivitiesController @Inject()(
   securityService: SecurityService,
   activityService: ActivityService,
+  recipientService: ActivityRecipientService,
   providerPermissionService: ProviderPermissionService,
   val messagesApi: MessagesApi
 ) extends BaseController with I18nSupport {
@@ -26,17 +25,8 @@ class IncomingActivitiesController @Inject()(
   import DateFormats.isoDateReads
   import securityService._
 
-  def readsPostedActivity(providerId: String, shouldNotify: Boolean): Reads[ActivityPrototype] =
-    (Reads.pure(providerId) and
-      (__ \ "type").read[String] and
-      (__ \ "title").read[String] and
-      (__ \ "text").readNullable[String] and
-      (__ \ "url").readNullable[String] and
-      (__ \ "tags").read[Seq[ActivityTag]].orElse(Reads.pure(Seq.empty)) and
-      (__ \ "replace").read[Map[String, String]].orElse(Reads.pure(Map.empty)) and
-      (__ \ "generated_at").readNullable[DateTime] and
-      Reads.pure(shouldNotify) and
-      (__ \ "recipients").read[ActivityRecipients]) (ActivityPrototype.apply _)
+  implicit val readsActivityRecipients = Json.reads[ActivityRecipients]
+  implicit val readsIncomingActivityData = Json.reads[IncomingActivityData]
 
   def postActivity(providerId: String) = APIAction(parse.json) { implicit request =>
     postItem(providerId, shouldNotify = false)
@@ -49,14 +39,20 @@ class IncomingActivitiesController @Inject()(
   def postItem(providerId: String, shouldNotify: Boolean)(implicit request: AuthenticatedRequest[JsValue]): Result =
     request.context.user.map { user =>
       if (providerPermissionService.canUserPostForProvider(providerId, user)) {
-        request.body.validate[ActivityPrototype](readsPostedActivity(providerId, shouldNotify)).map { data =>
-          activityService.save(data) match {
+        request.body.validate[IncomingActivityData].map { data =>
+          val activity = ActivitySave.fromData(providerId, shouldNotify, data)
+
+          val usercodes = recipientService.getRecipientUsercodes(
+            data.recipients.users.getOrElse(Seq.empty).map(Usercode),
+            data.recipients.groups.getOrElse(Seq.empty).map(GroupName)
+          )
+
+          activityService.save(activity, usercodes) match {
             case Success(activityId) => created(activityId)
             case Failure(NoRecipientsException) => noRecipients
-            // FIXME we are swallowing almost any exception here
-            // differentiate between user error and bug
-            // or at least log the exception.
-            case Failure(e) => otherError
+            case Failure(e) =>
+              logger.error(s"Error while posting activity providerId=$providerId", e)
+              otherError
           }
         }.recoverTotal {
           e => validationError(e)
@@ -67,7 +63,7 @@ class IncomingActivitiesController @Inject()(
     }.get // APIAction calls this only if request.context.user is defined
 
   private def forbidden(providerId: String, user: User): Result =
-    Forbidden(Json.toJson(API.Failure("forbidden",
+    Forbidden(Json.toJson(API.Failure[JsObject]("forbidden",
       Seq(API.Error("no-permission", s"User '${user.usercode.string}' does not have permission to post to the stream for provider '$providerId'"))
     )))
 
@@ -77,16 +73,16 @@ class IncomingActivitiesController @Inject()(
     ))))
 
   private def noRecipients: Result =
-    PaymentRequired(Json.toJson(API.Failure("request_failed",
+    PaymentRequired(Json.toJson(API.Failure[JsObject]("request_failed",
       Seq(API.Error("no-recipients", "No valid recipients for activity"))
     )))
 
   private def otherError: Result =
-    InternalServerError(Json.toJson(API.Failure("internal_server_error",
+    InternalServerError(Json.toJson(API.Failure[JsObject]("internal_server_error",
       Seq(API.Error("internal-error", "An internal error occurred"))
     )))
 
   private def validationError(error: JsError): Result =
-    BadRequest(Json.toJson(API.Failure("bad_request", API.Error.fromJsError(error))))
+    BadRequest(Json.toJson(API.Failure[JsObject]("bad_request", API.Error.fromJsError(error))))
 
 }

@@ -3,7 +3,7 @@ package services.dao
 import java.sql.Connection
 
 import helpers.{Fixtures, OneStartAppPerSuite}
-import models.{ActivityPrototype, ActivityTag, TagValue}
+import models.{ActivitySave, ActivityTag, TagValue}
 import org.scalatestplus.play.PlaySpec
 import warwick.sso.Usercode
 
@@ -13,11 +13,11 @@ class ActivityCreationDaoTest extends PlaySpec with OneStartAppPerSuite {
   val activityDao = app.injector.instanceOf[ActivityDao]
   val activityTagDao = app.injector.instanceOf[ActivityTagDao]
   val activityRecipientDao = app.injector.instanceOf[ActivityRecipientDao]
-  val activityPrototype = Fixtures.activityPrototype.submissionDue
+  val activityPrototype = Fixtures.activitySave.submissionDue
 
   "ActivityCreationDao" should {
 
-    def createActivity(activityPrototype: ActivityPrototype = activityPrototype)(implicit c: Connection): (String, String) = {
+    def createActivity(activityPrototype: ActivitySave = activityPrototype)(implicit c: Connection): (String, String) = {
       val replacedActivityId = activityDao.save(activityPrototype, Seq.empty)
 
       val activityResponse = activityCreationDao.createActivity(

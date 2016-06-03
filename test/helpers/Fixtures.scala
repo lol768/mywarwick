@@ -1,6 +1,6 @@
 package helpers
 
-import models.{Activity, ActivityRecipients, ActivityPrototype}
+import models.{Activity, ActivityRecipients, ActivitySave}
 
 import org.joda.time.DateTime
 
@@ -11,28 +11,23 @@ object Fixtures {
 
   val user = UserFixtures
 
-  object activityPrototype {
+  object activitySave {
 
     lazy val submissionDue =
-      ActivityPrototype(
+      ActivitySave(
         providerId = "tabula",
         `type` = "due",
         title = "Coursework due",
         text = Some("Your coursework is due in 7 days"),
         url = Some("http://tabula.warwick.ac.uk"),
-        tags = Seq.empty,
-        replace = Map.empty,
-        generatedAt = None,
-        shouldNotify = true,
-        recipients = ActivityRecipients.empty
+        shouldNotify = true
       )
 
   }
 
   object activity {
 
-    // Maybe this should be in the main code?
-    def fromPrototype(id: String, activity: ActivityPrototype) = Activity(
+    def fromSave(id: String, activity: ActivitySave) = Activity(
       id = id,
       providerId = activity.providerId,
       `type` = activity.`type`,

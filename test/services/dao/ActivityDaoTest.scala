@@ -17,7 +17,7 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
   val activityRecipientDao = app.injector.instanceOf[ActivityRecipientDao]
   val messagingDao = app.injector.instanceOf[MessagingDao]
 
-  val activityPrototype = Fixtures.activityPrototype.submissionDue
+  val activityPrototype = Fixtures.activitySave.submissionDue
 
 
   "ActivityDao" should {
