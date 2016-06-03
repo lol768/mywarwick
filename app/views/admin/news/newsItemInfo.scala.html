@@ -1,11 +1,28 @@
 @import models.news.NewsItemRender
-@(item: NewsItemRender, count: Option[Int])
+@(item: NewsItemRender, count: Option[Int], published: Boolean = false)
 <article class="news-item">
   <div class="news-item__body">
     <div class="news-item__title">@item.title</div>
     <div class="news-item__content">@item.text</div>
     <div class="news-item__footer">
       @models.DateFormats.emailDateTime(item.publishDate)
-      @for(c <- count) { <span>- @c recipients</span> } </div>
+      @for(c <- count) {
+        <span>- @c recipients</span>
+      }
+
+    <div class="btn-toolbar pull-right">
+
+      <a
+      href="@controllers.admin.routes.NewsController.update(item.id)"
+      class="btn btn-primary"
+      >Edit</a>
+      @if(published) {
+        <a
+        href="@controllers.admin.routes.NewsController.update(item.id)"
+        class="btn btn-danger"
+        >Unpublish</a>
+      }
+    </div>
+    </div>
   </div>
 </article>

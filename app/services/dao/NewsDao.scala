@@ -38,6 +38,12 @@ trait NewsDao {
   def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit
 
   def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, Int]
+
+  def updateNewsItem(newsId: String, item: NewsItemSave)(implicit c: Connection): Int
+
+  def getNewsById(id: String)(implicit c: Connection): Option[NewsItemRender]
+
+  def unpublish(id: String)(implicit c: Connection): Int
 }
 
 @Singleton
@@ -65,7 +71,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     NewsItemRender(id, title, text, link, publishDate)
   }
 
-  def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender] = {
+  override def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender] = {
     SQL(s"""
       SELECT n.* FROM news_item n
       ORDER BY publish_date DESC
@@ -73,7 +79,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
       """).as(newsParser.*)
   }
 
-  def latestNews(user: Usercode, limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender] = {
+  override def latestNews(user: Usercode, limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender] = {
     SQL(s"""
       SELECT n.* FROM news_item n
       JOIN news_recipient r ON n.id = r.news_item_id
@@ -87,7 +93,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
   /**
     * Save a news item with a specific set of recipients.
     */
-  def save(item: NewsItemSave)(implicit c: Connection): String = {
+  override def save(item: NewsItemSave)(implicit c: Connection): String = {
     import item._
     val id = newId
     val linkText = link.map(_.text).orNull
@@ -104,7 +110,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     recipients.foreach { usercode =>
       SQL"""
         INSERT INTO NEWS_RECIPIENT (news_item_id, usercode, publish_date)
-        VALUES (${newsId}, ${usercode.string}, ${publishDate})
+        VALUES ($newsId, ${usercode.string}, $publishDate)
       """.executeUpdate()
     }
   }
@@ -117,7 +123,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
   }
 
   private val countParser = (str("id") ~ int("c")).map(flatten).*
-  def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, Int] = {
+  override def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, Int] = {
     SQL"""
       SELECT NEWS_ITEM_ID ID, COUNT(*) C FROM NEWS_RECIPIENT
       WHERE NEWS_ITEM_ID IN ($newsIds)
@@ -125,4 +131,26 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     """.as(countParser).seq.toMap
   }
 
+  override def updateNewsItem(newsId: String, item: NewsItemSave)(implicit c: Connection): Int = {
+    import item._
+    val linkText = link.map(_.text).orNull
+    val linkHref = link.map(_.href.toString).orNull
+    SQL"""
+      UPDATE NEWS_ITEM SET title=$title, text=$text, link_text=${linkText},
+      link_href=${linkHref}, updated_at=SYSDATE, publish_date=$publishDate
+      WHERE id=$newsId
+      """.executeUpdate()
+  }
+
+  override def getNewsById(id: String)(implicit c: Connection): Option[NewsItemRender] = {
+    SQL"""
+      SELECT * FROM NEWS_ITEM WHERE ID = $id
+      """.as(newsParser.singleOpt)
+  }
+
+  override def unpublish(id: String)(implicit c: Connection): Int = {
+    SQL"""
+          DELETE FROM NEWS_RECIPIENTS WHERE ID=$id
+      """.executeUpdate()
+  }
 }
