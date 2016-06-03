@@ -22,11 +22,7 @@ class IncomingActivitiesController @Inject()(
   val messagesApi: MessagesApi
 ) extends BaseController with I18nSupport {
 
-  import DateFormats.isoDateReads
   import securityService._
-
-  implicit val readsActivityRecipients = Json.reads[ActivityRecipients]
-  implicit val readsIncomingActivityData = Json.reads[IncomingActivityData]
 
   def postActivity(providerId: String) = APIAction(parse.json) { implicit request =>
     postItem(providerId, shouldNotify = false)

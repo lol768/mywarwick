@@ -60,7 +60,7 @@ class NotificationsController @Inject()(
             case Left(errors) =>
               Ok(views.createForm(addFormErrors(form, errors), dopts))
             case Right(Audience.Public) =>
-              Ok(views.createForm(form.withGlobalError("Notifications cannot be public"), dopts))
+              Ok(views.createForm(form.withError("audience", "Notifications cannot be public"), dopts))
             case Right(audience) =>
               notificationPublishingService.publish(publish.item, audience) match {
                 case Success(_) =>
@@ -68,7 +68,7 @@ class NotificationsController @Inject()(
                 case Failure(e) =>
                   val formWithError = e match {
                     case NoRecipientsException =>
-                      form.withGlobalError("The selected audience has no members")
+                      form.withError("audience", "The selected audience has no members")
                     case _ =>
                       logger.error("Failure while creating notification", e)
                       form.withGlobalError("An error occurred creating this notification")

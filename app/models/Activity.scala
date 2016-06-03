@@ -100,6 +100,10 @@ case class ActivityRecipients(
   groups: Option[Seq[String]]
 )
 
+object ActivityRecipients {
+  implicit val readsActivityRecipients = Json.reads[ActivityRecipients]
+}
+
 case class IncomingActivityData(
   `type`: String,
   title: String,
@@ -110,3 +114,8 @@ case class IncomingActivityData(
   generated_at: Option[DateTime],
   recipients: ActivityRecipients
 )
+
+object IncomingActivityData {
+  import DateFormats.isoDateReads
+  implicit val readsIncomingActivityData = Json.reads[IncomingActivityData]
+}
