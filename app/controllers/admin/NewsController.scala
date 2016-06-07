@@ -90,7 +90,7 @@ class NewsController @Inject()(
 
   def handleForm(data: Publish[NewsItemData], audience: Audience) = {
     val newsItem = data.item.toSave
-    news.save(newsItem, audience, data.categories)
+    news.save(newsItem, audience, data.categoryIds)
     Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News created")
   }
 

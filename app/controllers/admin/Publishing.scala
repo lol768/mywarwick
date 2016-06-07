@@ -5,7 +5,7 @@ import play.api.data.{Form, Mapping}
 import services.PublishCategoryService
 import services.dao.DepartmentInfoDao
 
-case class Publish[A](item: A, audience: Seq[String], department: Option[String], categories: Seq[String]) extends AudienceFormData
+case class Publish[A](item: A, audience: Seq[String], department: Option[String], categoryIds: Seq[String]) extends AudienceFormData
 
 trait Publishing[A] extends DepartmentOptions with CategoryOptions {
 

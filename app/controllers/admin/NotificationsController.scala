@@ -63,7 +63,7 @@ class NotificationsController @Inject()(
             case Right(Audience.Public) =>
               Ok(views.createForm(form.withError("audience", "Notifications cannot be public"), dopts, categoryOptions))
             case Right(audience) =>
-              notificationPublishingService.publish(publish.item, audience, publish.categories) match {
+              notificationPublishingService.publish(publish.item, audience, publish.categoryIds) match {
                 case Success(_) =>
                   Redirect(routes.NotificationsController.list()).flashing("result" -> "Notification created")
                 case Failure(e) =>

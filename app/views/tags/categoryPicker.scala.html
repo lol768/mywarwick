@@ -7,7 +7,7 @@
 @defining(form(fieldName)) { field =>
 
   @b3.multifieldFormGroup(
-    Seq(form("categories")),
+    Seq(field),
     Seq('_label -> s"What should this $itemName be tagged with?"),
     Nil) { info =>
     @for(msg <- info.errorsAndInfos) { <span class="help-block">@msg</span> }
