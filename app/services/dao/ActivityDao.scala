@@ -20,7 +20,7 @@ trait ActivityDao {
 
   def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse]
 
-  def save(activity: ActivityPrototype, replaces: Seq[String])(implicit c: Connection): String
+  def save(activity: ActivitySave, replaces: Seq[String])(implicit c: Connection): String
 
   def getActivityById(id: String)(implicit c: Connection): Option[Activity] =
     getActivitiesByIds(Seq(id)).headOption
@@ -39,7 +39,7 @@ class ActivityDaoImpl @Inject()(
 ) extends ActivityDao {
 
 
-  override def save(activity: ActivityPrototype, replaces: Seq[String])(implicit c: Connection): String = {
+  override def save(activity: ActivitySave, replaces: Seq[String])(implicit c: Connection): String = {
     import activity._
     val id = UUID.randomUUID().toString
     val now = new DateTime()

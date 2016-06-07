@@ -2,7 +2,8 @@
     form: Form[_],
     fieldName: String,
     departmentOptions: Seq[(String, String)],
-    itemName: String
+    itemName: String,
+    allowPublic: Boolean
 )(implicit fc: b3.B3FieldConstructor, messages: Messages)
 @defining(form(fieldName)) { field =>
 
@@ -16,6 +17,10 @@
       <div class="audience-picker">
 
         @for(msg <- info.errorsAndInfos) { <span class="help-block">@msg</span> }
+
+        @if(allowPublic) {
+          @tags.seqCheckbox(form, fieldName, 'id -> "public", '_text -> "Everyone (public)", 'value -> "Public")
+        }
 
         @tags.seqCheckbox(form, fieldName, 'id -> "staff", '_text -> "All staff", 'value -> "Staff")
         @tags.seqCheckbox(form, fieldName, 'id -> "teaching", '_text -> "Teaching staff", 'value -> "TeachingStaff")

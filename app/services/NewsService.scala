@@ -3,8 +3,8 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import controllers.admin.{NewsItemData, NewsItemUpdate}
-import models.news.{Audience, NewsItemRender, NewsItemSave}
+import controllers.admin.NewsItemData
+import models.news.{Audience, AudienceSize, NewsItemRender, NewsItemSave}
 import play.api.db.Database
 import services.dao.NewsDao
 import warwick.sso.Usercode
@@ -12,12 +12,14 @@ import warwick.sso.Usercode
 @ImplementedBy(classOf[AnormNewsService])
 trait NewsService {
   def allNews(limit: Int = 100, offset: Int = 0): Seq[NewsItemRender]
-  def latestNews(user: Usercode, limit: Int = 100): Seq[NewsItemRender]
+  def latestNews(user: Option[Usercode], limit: Int = 100): Seq[NewsItemRender]
   // TODO public news items
   def save(item: NewsItemSave, audience: Audience): Unit
 
-  def countRecipients(newsIds: Seq[String]): Map[String, Int]
   def updateNewsItem(id: String, item: NewsItemData): Int
+
+  def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize]
+
   def get(id: String): Option[NewsItemRender]
 }
 
@@ -32,7 +34,7 @@ class AnormNewsService @Inject() (
       dao.allNews(limit, offset)
     }
 
-  override def latestNews(user: Usercode, limit: Int): Seq[NewsItemRender] =
+  override def latestNews(user: Option[Usercode], limit: Int): Seq[NewsItemRender] =
     db.withConnection { implicit c =>
       dao.latestNews(user, limit)
     }
@@ -44,7 +46,7 @@ class AnormNewsService @Inject() (
       dao.saveRecipients(id, item.publishDate, recipients)
     }
 
-  override def countRecipients(newsIds: Seq[String]): Map[String, Int] =
+  override def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize] =
     db.withConnection { implicit c =>
       dao.countRecipients(newsIds)
     }

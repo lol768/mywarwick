@@ -3,7 +3,7 @@ package controllers.admin
 import javax.inject.Inject
 
 import controllers.BaseController
-import models.news.NotificationData
+import models.news.{Audience, NotificationData}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -59,6 +59,8 @@ class NotificationsController @Inject()(
           audienceBinder.bindAudience(publish).map {
             case Left(errors) =>
               Ok(views.createForm(addFormErrors(form, errors), dopts))
+            case Right(Audience.Public) =>
+              Ok(views.createForm(form.withError("audience", "Notifications cannot be public"), dopts))
             case Right(audience) =>
               notificationPublishingService.publish(publish.item, audience) match {
                 case Success(_) =>
@@ -66,7 +68,7 @@ class NotificationsController @Inject()(
                 case Failure(e) =>
                   val formWithError = e match {
                     case NoRecipientsException =>
-                      form.withGlobalError("No valid usercodes")
+                      form.withError("audience", "The selected audience has no members")
                     case _ =>
                       logger.error("Failure while creating notification", e)
                       form.withGlobalError("An error occurred creating this notification")
