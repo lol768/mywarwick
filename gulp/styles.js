@@ -61,7 +61,7 @@ gulp.task('watch-styles', ['styles'], () => {
 });
 
 gulp.task('swagger', () => {
-  gulp.src([paths.assetPath + '/swagger.yml'])
-    .pipe(swagger('swagger.json'))
+  gulp.src([paths.assetPath + '/swagger_public.yml'])
+    .pipe(swagger('swagger_public.json'))
     .pipe(gulp.dest(paths.assetsOut));
 });
