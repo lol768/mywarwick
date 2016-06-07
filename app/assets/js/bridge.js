@@ -24,7 +24,7 @@ export default function init(opts) {
     // external web view that does not share cookies.
     applicationOrigins: [
       'https://websignon.warwick.ac.uk',
-      searchOrigin
+      searchOrigin,
     ],
   };
 
