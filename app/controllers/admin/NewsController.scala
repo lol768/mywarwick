@@ -95,24 +95,19 @@ class NewsController @Inject()(
     Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News created")
   }
 
-  def handleUpdate(id: String, data: NewsItemData) = {
-    news.updateNewsItem(id, data)
+  def handleUpdate(id: String, data: Publish[NewsItemData]) = {
+    news.updateNewsItem(id, data.item)
     Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News updated")
   }
 
   def update(id: String) = RequiredActualUserRoleAction(Sysadmin).async { implicit req =>
     departmentOptions.flatMap { dopts =>
-      val bound = Form(newsItemMapping).bindFromRequest
+      val bound = publishNewsForm.bindFromRequest
       bound.fold(
         errorForm => Future.successful(Ok(views.html.admin.news.updateForm(id, errorForm, dopts))),
         data => Future(handleUpdate(id, data))
       )
     }
-  }
-
-  def unpublish(id: String) = RequiredActualUserRoleAction(Sysadmin).async { implicit req =>
-    news.unpublish(id)
-    Ok()
   }
 
   def updateForm(id: String) = RequiredActualUserRoleAction(Sysadmin).async {
@@ -123,7 +118,8 @@ class NewsController @Inject()(
         for {
           dopts <- departmentOptions
         } yield {
-          Ok(views.html.admin.news.updateForm(id, Form(newsItemMapping).fill(news.toData), dopts))
+          val publishedEmptyAudience = Publish[NewsItemData](news.toData, Seq[String](), None)
+          Ok(views.html.admin.news.updateForm(id, publishNewsForm.fill(publishedEmptyAudience), dopts))
         }
     }
   }

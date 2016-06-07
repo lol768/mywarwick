@@ -15,9 +15,10 @@ const fileUploadContainer = document.getElementById('file-upload-container');
 
 if (fileUploadContainer) {
   const inputName = fileUploadContainer.attributes['data-input-name'];
+  const imageId = fileUploadContainer.attributes['data-image-id'].value;
 
   ReactDOM.render(
-    <FileUpload inputName={ inputName.value } />,
+    <FileUpload inputName={ inputName.value } imageId={ imageId } />,
     fileUploadContainer
   );
 }

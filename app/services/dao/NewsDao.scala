@@ -120,7 +120,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     * Deletes all the recipients of a news item.
     */
   override def deleteRecipients(id: String)(implicit c: Connection) = {
-    SQL"DELETE FROM NEWS_RECIPIENT WHERE news_item_id = ${id}".executeUpdate()
+    SQL"DELETE FROM NEWS_RECIPIENT WHERE news_item_id = $id".executeUpdate()
   }
 
   private val countParser = (str("id") ~ int("c")).map(flatten).*
@@ -137,8 +137,8 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     val linkText = link.map(_.text).orNull
     val linkHref = link.map(_.href.toString).orNull
     SQL"""
-      UPDATE NEWS_ITEM SET title=$title, text=$text, link_text=${linkText},
-      link_href=${linkHref}, updated_at=SYSDATE, publish_date=$publishDate
+      UPDATE NEWS_ITEM SET title=$title, text=$text, link_text=$linkText,
+      link_href=$linkHref, updated_at=SYSDATE, publish_date=$publishDate, news_image_id=$imageId
       WHERE id=$newsId
       """.executeUpdate()
   }

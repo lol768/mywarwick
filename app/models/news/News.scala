@@ -36,7 +36,8 @@ case class NewsItemRender (
     text,
     link.map(_.text),
     link.map(_.href.toString),
-    publishDate.toLocalDateTime
+    publishDate.toLocalDateTime,
+    imageId
   )
 }
 

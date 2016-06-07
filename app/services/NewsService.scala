@@ -19,7 +19,6 @@ trait NewsService {
   def countRecipients(newsIds: Seq[String]): Map[String, Int]
   def updateNewsItem(id: String, item: NewsItemData): Int
   def get(id: String): Option[NewsItemRender]
-  def unpublish(id: String): Int
 }
 
 class AnormNewsService @Inject() (
@@ -60,8 +59,4 @@ class AnormNewsService @Inject() (
       dao.getNewsById(id)
     }
 
-  override def unpublish(id: String): Int =
-    db.withConnection {implicit c =>
-      dao.deleteRecipients(id)
-  }
 }

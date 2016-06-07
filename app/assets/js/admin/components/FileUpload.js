@@ -5,7 +5,9 @@ export default class FileUpload extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      imageId: props.imageId || null,
+    };
 
     this.onChange = this.onChange.bind(this);
     this.onClear = this.onClear.bind(this);
@@ -85,6 +87,7 @@ export default class FileUpload extends React.Component {
 }
 
 FileUpload.propTypes = {
+  imageId: PropTypes.string,
   inputName: PropTypes.string.isRequired,
 };
 

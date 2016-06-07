@@ -26,7 +26,7 @@
       <p>No published news.</p>
     } else {
       @newsPublished.map { item =>
-        @admin.news.newsItemInfo(item, counts.get(item.id), published = true)
+        @admin.news.newsItemInfo(item, counts.get(item.id))
       }
     }
   }
