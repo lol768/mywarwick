@@ -7,10 +7,9 @@ import models.DateFormats
 import models.news.{Audience, Link, NewsItemSave}
 import org.joda.time.LocalDateTime
 import play.api.data.Forms._
-import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.dao.DepartmentInfoDao
-import services.{AudienceService, NewsService, SecurityService}
+import services.{NewsService, PublishCategoryService, SecurityService}
 import system.{Roles, TimeZones, Validation}
 import uk.ac.warwick.util.web.Uri
 
@@ -28,9 +27,9 @@ case class NewsItemData(
     title = title,
     text = text,
     link = for {
-        t <- linkText
-        h <- linkHref
-      } yield Link(t, Uri.parse(h)),
+      t <- linkText
+      h <- linkHref
+    } yield Link(t, Uri.parse(h)),
     // TODO test this gives expected results of TZ&DST
     publishDate = publishDate.toDateTime(TimeZones.LONDON),
     imageId = imageId
@@ -38,12 +37,13 @@ case class NewsItemData(
 }
 
 @Singleton
-class NewsController @Inject() (
+class NewsController @Inject()(
   security: SecurityService,
   val messagesApi: MessagesApi,
   news: NewsService,
   val departmentInfoDao: DepartmentInfoDao,
-  audienceBinder: AudienceBinder
+  audienceBinder: AudienceBinder,
+  val publishCategoryService: PublishCategoryService
 ) extends BaseController with I18nSupport with Publishing[NewsItemData] {
 
   import Roles._
@@ -68,7 +68,7 @@ class NewsController @Inject() (
     for {
       dopts <- departmentOptions
     } yield {
-      Ok(views.html.admin.news.createForm(publishNewsForm, dopts))
+      Ok(views.html.admin.news.createForm(publishNewsForm, dopts, categoryOptions))
     }
   }
 
@@ -76,11 +76,11 @@ class NewsController @Inject() (
     departmentOptions.flatMap { dopts =>
       val bound = publishNewsForm.bindFromRequest
       bound.fold(
-        errorForm => Future.successful(Ok(views.html.admin.news.createForm(errorForm, dopts))),
+        errorForm => Future.successful(Ok(views.html.admin.news.createForm(errorForm, dopts, categoryOptions))),
         data => audienceBinder.bindAudience(data).map {
           case Left(errors) =>
             val errorForm = addFormErrors(bound, errors)
-            Ok(views.html.admin.news.createForm(errorForm, dopts))
+            Ok(views.html.admin.news.createForm(errorForm, dopts, categoryOptions))
           case Right(audience) =>
             handleForm(data, audience)
         }
@@ -90,7 +90,7 @@ class NewsController @Inject() (
 
   def handleForm(data: Publish[NewsItemData], audience: Audience) = {
     val newsItem = data.item.toSave
-    news.save(newsItem, audience)
+    news.save(newsItem, audience, data.categories)
     Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News created")
   }
 

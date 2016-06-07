@@ -25,7 +25,8 @@ class NotificationsController @Inject()(
   val departmentInfoDao: DepartmentInfoDao,
   audienceBinder: AudienceBinder,
   notificationPublishingService: NotificationPublishingService,
-  activityService: ActivityService
+  activityService: ActivityService,
+  val publishCategoryService: PublishCategoryService
 ) extends BaseController with I18nSupport with Publishing[NotificationData] {
 
   import NotificationPublishingService.PROVIDER_ID
@@ -45,7 +46,7 @@ class NotificationsController @Inject()(
 
   def createForm = RequiredActualUserRoleAction(Sysadmin).async {
     departmentOptions.map { dopts =>
-      Ok(views.createForm(publishNotificationForm, dopts))
+      Ok(views.createForm(publishNotificationForm, dopts, categoryOptions))
     }
   }
 
@@ -54,15 +55,15 @@ class NotificationsController @Inject()(
       val form = publishNotificationForm.bindFromRequest
 
       form.fold(
-        formWithErrors => Future.successful(Ok(views.createForm(formWithErrors, dopts))),
+        formWithErrors => Future.successful(Ok(views.createForm(formWithErrors, dopts, categoryOptions))),
         publish => {
           audienceBinder.bindAudience(publish).map {
             case Left(errors) =>
-              Ok(views.createForm(addFormErrors(form, errors), dopts))
+              Ok(views.createForm(addFormErrors(form, errors), dopts, categoryOptions))
             case Right(Audience.Public) =>
-              Ok(views.createForm(form.withError("audience", "Notifications cannot be public"), dopts))
+              Ok(views.createForm(form.withError("audience", "Notifications cannot be public"), dopts, categoryOptions))
             case Right(audience) =>
-              notificationPublishingService.publish(publish.item, audience) match {
+              notificationPublishingService.publish(publish.item, audience, publish.categories) match {
                 case Success(_) =>
                   Redirect(routes.NotificationsController.list()).flashing("result" -> "Notification created")
                 case Failure(e) =>
@@ -74,7 +75,7 @@ class NotificationsController @Inject()(
                       form.withGlobalError("An error occurred creating this notification")
                   }
 
-                  Ok(views.createForm(formWithError, dopts))
+                  Ok(views.createForm(formWithError, dopts, categoryOptions))
               }
           }
         }

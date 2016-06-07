@@ -2,17 +2,22 @@ package controllers.admin
 
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
+import services.PublishCategoryService
 import services.dao.DepartmentInfoDao
 
-case class Publish[A](item: A, audience: Seq[String], department: Option[String]) extends AudienceFormData
+case class Publish[A](item: A, audience: Seq[String], department: Option[String], categories: Seq[String]) extends AudienceFormData
 
-trait Publishing[A] extends DepartmentOptions {
+trait Publishing[A] extends DepartmentOptions with CategoryOptions {
 
   def publishForm(itemMapping: Mapping[A]): Form[Publish[A]] =
     Form(mapping(
       "item" -> itemMapping,
       "audience" -> seq(nonEmptyText),
-      "department" -> optional(text)
+      "department" -> optional(text),
+      "categories" -> seq(nonEmptyText)
+        .verifying("You must select at least one category", _.nonEmpty)
+        // Rationale: after removing all possible options, anything that remains is invalid
+        .verifying("Some selections were invalid", _.diff(categoryOptions.map(_.id)).isEmpty)
     )(Publish.apply)(Publish.unapply))
 
 }
@@ -34,5 +39,13 @@ trait DepartmentOptions {
           .sortBy { info => info.name }
           .map { info => info.code -> info.name }
       }
+
+}
+
+trait CategoryOptions {
+
+  val publishCategoryService: PublishCategoryService
+
+  lazy val categoryOptions = publishCategoryService.all()
 
 }

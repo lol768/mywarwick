@@ -3,7 +3,8 @@
 @import org.joda.time.LocalDateTime
 @(
     form: Form[Publish[NewsItemData]],
-    departmentOptions: Seq[(String, String)]
+    departmentOptions: Seq[(String, String)],
+    categories: Seq[PublishCategory]
 )(implicit messages: Messages)
 
 @implicitFieldConstructor = @{
@@ -43,6 +44,8 @@
     )
 
     @tags.audiencePicker(form, "audience", departmentOptions, "news item", allowPublic = true)
+
+    @tags.categoryPicker(form, "categories", categories, "news item")
 
     @b3.submit(
       'class -> "btn btn-primary"
