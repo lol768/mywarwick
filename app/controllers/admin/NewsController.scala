@@ -16,6 +16,8 @@ import uk.ac.warwick.util.web.Uri
 
 import scala.concurrent.Future
 
+case class NewsUpdate(updateItem: NewsItemData)
+
 case class NewsItemData(
   title: String,
   text: String,
@@ -49,14 +51,20 @@ class NewsController @Inject()(
   import Roles._
   import security._
 
-  val publishNewsForm = publishForm(mapping(
+  val newsDataMapping = mapping(
     "title" -> nonEmptyText,
     "text" -> nonEmptyText,
     "linkText" -> optional(text),
     "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url),
     "publishDate" -> DateFormats.dateTimeLocalMapping,
     "imageId" -> optional(text)
-  )(NewsItemData.apply)(NewsItemData.unapply))
+  )(NewsItemData.apply)(NewsItemData.unapply)
+
+  val publishNewsForm = publishForm(newsDataMapping)
+
+  val updateNewsForm = Form(mapping(
+    "item" -> newsDataMapping)
+  (NewsUpdate.apply)(NewsUpdate.unapply))
 
   def list = RequiredActualUserRoleAction(Sysadmin) {
     val theNews = news.allNews(limit = 100)
@@ -95,19 +103,17 @@ class NewsController @Inject()(
     Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News created")
   }
 
-  def handleUpdate(id: String, data: Publish[NewsItemData]) = {
-    news.updateNewsItem(id, data.item)
+  def handleUpdate(id: String, data: NewsUpdate) = {
+    news.updateNewsItem(id, data.updateItem)
     Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News updated")
   }
 
   def update(id: String) = RequiredActualUserRoleAction(Sysadmin).async { implicit req =>
-    departmentOptions.flatMap { dopts =>
-      val bound = publishNewsForm.bindFromRequest
+      val bound = updateNewsForm.bindFromRequest
       bound.fold(
-        errorForm => Future.successful(Ok(views.html.admin.news.updateForm(id, errorForm, dopts))),
+        errorForm => Future.successful(Ok(views.html.admin.news.updateForm(id, errorForm))),
         data => Future(handleUpdate(id, data))
       )
-    }
   }
 
   def updateForm(id: String) = RequiredActualUserRoleAction(Sysadmin).async {
@@ -118,8 +124,7 @@ class NewsController @Inject()(
         for {
           dopts <- departmentOptions
         } yield {
-          val publishedEmptyAudience = Publish[NewsItemData](news.toData, Seq[String](), None)
-          Ok(views.html.admin.news.updateForm(id, publishNewsForm.fill(publishedEmptyAudience), dopts))
+          Ok(views.html.admin.news.updateForm(id, updateNewsForm.fill(NewsUpdate(news.toData))))
         }
     }
   }

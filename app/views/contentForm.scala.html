@@ -1,6 +1,5 @@
-@import controllers.admin.{NewsItemData, Publish}
 @import org.joda.time.LocalDateTime
-@(form: Form[Publish[NewsItemData]])(implicit fc: b3.B3FieldConstructor, messages: Messages)
+@(form: Form[_])(implicit fc: b3.B3FieldConstructor, messages: Messages)
 
 @b3.text(form("item.title"),
   'class -> "input-lg",

@@ -1,9 +1,7 @@
-@import controllers.admin.{Publish, NewsItemData}
-
+@import controllers.admin.NewsUpdate
 @(
     id: String,
-    form: Form[Publish[NewsItemData]],
-    departmentOptions: Seq[(String, String)]
+    form: Form[NewsUpdate]
 )(implicit messages: Messages)
 
 @implicitFieldConstructor = @{
