@@ -6,6 +6,7 @@ import $ from 'jquery';
 import * as stream from './stream';
 import { push } from 'react-router-redux';
 import { displayUpdateProgress } from './state/update';
+import url from 'url';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -14,7 +15,18 @@ import { displayUpdateProgress } from './state/update';
 export default function init(opts) {
   const { store, tiles } = opts;
 
-  let appState = {};
+  const searchRoot = url.parse($('#app-container').attr('data-search-root-url'));
+  const searchOrigin = `${searchRoot.protocol}//${searchRoot.host}`;
+
+  let appState = {
+    // Origins which serve pages to be rendered within the context of the
+    // Start application.  Pages from other hosts are displayed in an
+    // external web view that does not share cookies.
+    applicationOrigins: [
+      'https://websignon.warwick.ac.uk',
+      searchOrigin
+    ],
+  };
 
   window.Start = {
 
@@ -25,7 +37,6 @@ export default function init(opts) {
       document.dispatchEvent(new Event('click'));
       store.dispatch(push(path));
     },
-
 
     appToForeground() {
       store.dispatch(tiles.fetchTileContent());
@@ -60,7 +71,7 @@ export default function init(opts) {
     });
   }
 
-  if (window.navigator.userAgent.indexOf('Start/') >= 0) {
+  if (window.navigator.userAgent.indexOf('WarwickStart/') >= 0) {
     $('html').addClass('app standalone');
 
     store.subscribe(() => {
@@ -72,9 +83,6 @@ export default function init(opts) {
             state.notifications,
             state.notificationsLastRead
           ),
-        // FIXME - remove this once app has been updated to have no unreadActivityCount
-        unreadActivityCount: 0,
-        unreadNewsCount: 0,
         currentPath: window.location.pathname,
         isUserLoggedIn: state.user.data.usercode !== undefined,
         tabBarHidden: state.ui.className !== 'mobile',
