@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react';
 import classnames from 'classnames';
 import ProgressBar from '../../components/ui/ProgressBar';
 import * as newsImages from '../newsImages';
+import $ from 'jquery';
 
 export default class FileUpload extends React.Component {
 
@@ -15,6 +16,11 @@ export default class FileUpload extends React.Component {
     this.onClear = this.onClear.bind(this);
   }
 
+  componentDidMount() {
+    this.$submitBtn = $('button[type=submit]');
+    this.submitText = this.$submitBtn.text();
+  }
+
   onChange(e) {
     const fileField = e.target;
     const file = fileField.files[0];
@@ -23,6 +29,7 @@ export default class FileUpload extends React.Component {
       uploading: true,
       error: undefined,
     });
+    this.$submitBtn.prop('disabled', true).text('Uploading file...');
 
     const progress = (loaded, total) => this.setState({ loaded, total });
 
@@ -39,6 +46,7 @@ export default class FileUpload extends React.Component {
           loaded: undefined,
           total: undefined,
         });
+        this.$submitBtn.prop('disabled', false).text(this.submitText);
         fileField.value = '';
       });
   }
