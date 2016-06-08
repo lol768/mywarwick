@@ -12,21 +12,16 @@ export default class FileUpload extends React.Component {
     this.onClear = this.onClear.bind(this);
   }
 
-  componentWillUpdate(nextProps, nextState) {
-    if (!this.state.uploading && nextState.uploading) {
-      $('button[type=submit]').prop('disabled', true).text('Uploading file...');
-    } else if (this.state.uploading && !nextState.uploading) {
-      $('button[type=submit]').prop('disabled', false).text('Create');
-    }
-  }
-
   onChange(e) {
     const fileField = e.target;
     const file = fileField.files[0];
+    const $submitBtn = $('button[type=submit]');
+    const submitText = $submitBtn.text();
 
     this.setState({
       uploading: true,
     });
+    $submitBtn.prop('disabled', true).text('Uploading file...');
 
     newsImages.put(file)
       .then(imageId => {
@@ -39,6 +34,7 @@ export default class FileUpload extends React.Component {
         this.setState({
           uploading: false,
         });
+        $submitBtn.prop('disabled', false).text(submitText);
         fileField.value = '';
       });
   }
