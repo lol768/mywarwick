@@ -143,7 +143,7 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
       val json = contentAsJson(result)
 
       (json \ "success").as[Boolean] mustBe false
-      (json \ "errors" \\ "id").head.as[String] mustBe "No image"
+      (json \ "errors" \\ "id").head.as[String] mustBe "no-image"
     }
 
     "fail with not-an-image" in {
@@ -157,7 +157,7 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
       val json = contentAsJson(result)
 
       (json \ "success").as[Boolean] mustBe false
-      (json \ "errors" \\ "id").head.as[String] mustBe "Invalid image"
+      (json \ "errors" \\ "id").head.as[String] mustBe "invalid-content-type"
     }
 
     "fail if service fails" in {

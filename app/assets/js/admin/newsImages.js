@@ -1,27 +1,47 @@
-import { fetchWithCredentials } from '../serverpipe';
-import log from 'loglevel';
+import $ from 'jquery';
 
 export const API_BASE = '/api/news/images';
 
-export function put(file) {
+const errorMessages = {
+  timeout: 'The request timed out.',
+  error: 'Unable to contact the server.',
+  abort: 'The request was aborted.',
+  parsererror: 'The server response was invalid.',
+};
+
+export function put(file, progressCallback) {
   const data = new FormData();
   data.append('image', file);
 
-  return fetchWithCredentials(API_BASE, {
-    method: 'POST',
-    body: data,
-  })
-    .then(response => response.json())
-    .then(json => {
-      if (json.success) {
-        return json.data;
-      }
-
-      throw new Error(json.errors[0].message);
-    })
-    .catch(e => {
-      log.error(e);
-      throw e;
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      url: API_BASE,
+      type: 'post',
+      data,
+      processData: false,
+      contentType: false,
+      dataType: 'json',
+      mimeType: 'multipart/form-data',
+      success: (json) => {
+        if (json.success) {
+          resolve(json.data);
+        } else {
+          // Wouldn't expect to be here, but need to ensure we resolve or reject
+          reject(new Error(json.errors[0].message));
+        }
+      },
+      error: (e, errorType, statusText) => {
+        if (e.responseJSON) {
+          reject(new Error(e.responseJSON.errors[0].message));
+        } else {
+          reject(new Error(statusText || errorMessages[errorType || 'error']));
+        }
+      },
+      xhr: () => {
+        const xhr = $.ajaxSettings.xhr();
+        xhr.upload.addEventListener('progress', (e) => progressCallback(e.loaded, e.total));
+        return xhr;
+      },
     });
+  });
 }
-
