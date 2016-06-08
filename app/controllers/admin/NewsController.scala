@@ -16,7 +16,7 @@ import uk.ac.warwick.util.web.Uri
 
 import scala.concurrent.Future
 
-case class NewsUpdate(updateItem: NewsItemData)
+case class NewsUpdate(item: NewsItemData)
 
 case class NewsItemData(
   title: String,
@@ -104,7 +104,7 @@ class NewsController @Inject()(
   }
 
   def handleUpdate(id: String, data: NewsUpdate) = {
-    news.updateNewsItem(id, data.updateItem)
+    news.updateNewsItem(id, data.item)
     Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News updated")
   }
 
