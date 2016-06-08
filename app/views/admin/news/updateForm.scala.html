@@ -1,0 +1,22 @@
+@import controllers.admin.NewsUpdate
+@(
+    id: String,
+    form: Form[NewsUpdate]
+)(implicit messages: Messages)
+
+@implicitFieldConstructor = @{
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
+}
+
+@common.admin("Update news") {
+  <div class="container-fluid">
+  @b3.form(action = controllers.admin.routes.NewsController.update(id)) {
+
+    @contentForm(form)
+
+    @b3.submit(
+      'class -> "btn btn-primary"
+    ) {Update}
+  }
+  </div>
+}

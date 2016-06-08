@@ -38,6 +38,12 @@ trait NewsDao {
   def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit
 
   def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, AudienceSize]
+
+  def updateNewsItem(newsId: String, item: NewsItemSave)(implicit c: Connection): Int
+
+  def getNewsById(id: String)(implicit c: Connection): Option[NewsItemRender]
+
+  def deleteRecipients(id: String)(implicit c: Connection)
 }
 
 @Singleton
@@ -105,7 +111,7 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     recipients.foreach { usercode =>
       SQL"""
         INSERT INTO NEWS_RECIPIENT (news_item_id, usercode, publish_date)
-        VALUES (${newsId}, ${usercode.string}, ${publishDate})
+        VALUES ($newsId, ${usercode.string}, $publishDate)
       """.executeUpdate()
     }
   }
@@ -113,8 +119,8 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
   /**
     * Deletes all the recipients of a news item.
     */
-  def deleteRecipients(id: String)(implicit c: Connection) = {
-    SQL"DELETE FROM NEWS_RECIPIENT WHERE news_item_id = ${id}".executeUpdate()
+  override def deleteRecipients(id: String)(implicit c: Connection) = {
+    SQL"DELETE FROM NEWS_RECIPIENT WHERE news_item_id = $id".executeUpdate()
   }
 
   private val countParser = (str("id") ~ int("c")).map(flatten)
@@ -134,6 +140,23 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
     """.as(countParser.*).toMap.mapValues(Finite)
 
     publicNews ++ audienceNews
+  }
+
+  override def updateNewsItem(newsId: String, item: NewsItemSave)(implicit c: Connection): Int = {
+    import item._
+    val linkText = link.map(_.text).orNull
+    val linkHref = link.map(_.href.toString).orNull
+    SQL"""
+      UPDATE NEWS_ITEM SET title=$title, text=$text, link_text=$linkText,
+      link_href=$linkHref, updated_at=SYSDATE, publish_date=$publishDate, news_image_id=$imageId
+      WHERE id=$newsId
+      """.executeUpdate()
+  }
+
+  override def getNewsById(id: String)(implicit c: Connection): Option[NewsItemRender] = {
+    SQL"""
+      SELECT * FROM NEWS_ITEM WHERE ID = $id
+      """.as(newsParser.singleOpt)
   }
 
 }
