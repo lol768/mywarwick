@@ -6,7 +6,6 @@ import com.google.inject.Inject
 import controllers.BaseController
 import services.SecurityService
 import system.Roles
-import system.Roles._
 
 @Singleton
 class AdminController @Inject() (
