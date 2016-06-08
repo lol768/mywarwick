@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import * as newsImages from '../newsImages';
+import $ from 'jquery';
 
 export default class FileUpload extends React.Component {
 
@@ -9,6 +10,14 @@ export default class FileUpload extends React.Component {
 
     this.onChange = this.onChange.bind(this);
     this.onClear = this.onClear.bind(this);
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    if (!this.state.uploading && nextState.uploading) {
+      $('button[type=submit]').prop('disabled', true).text('Uploading file...');
+    } else if (this.state.uploading && !nextState.uploading) {
+      $('button[type=submit]').prop('disabled', false).text('Create');
+    }
   }
 
   onChange(e) {
