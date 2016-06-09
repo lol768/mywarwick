@@ -1,0 +1,10 @@
+type: object
+properties:
+  tiles:
+    type: array
+    items:
+      $ref: '#/definitions/UserTileSetting'
+  layout:
+    type: array
+    items:
+      $ref: '#/definitions/TileLayout'

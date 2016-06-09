@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   version: 1.0-snapshot
-  title: Start.Warwick
+  title: Start.WarwickBLAHABLAH
   description: Your personal homepage to keep track of the information that you need regularly such as email and timetables.
   termsOfService: 'http://warwick.ac.uk/terms'
   contact:
@@ -158,136 +158,8 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-responses:
-  unauthorized:
-    description: Unauthorized
-    schema:
-      $ref: '#/definitions/ErrorResponse'
-
 definitions:
-  ErrorResponse:
-    readOnly: true
-    type: object
-    properties:
-      success:
-        type: boolean
-      status:
-        type: string
-      errors:
-        type: array
-        items:
-          $ref: '#/definitions/Error'
-        minLength: 1
+  $ref: ./definitions/index.yml
 
-  Error:
-    readOnly: true
-    type: object
-    properties:
-      id:
-        type: string
-        example: no-permission
-        description: A short name for the error
-      message:
-        type: string
-        example: User 'example-user' does not have permission to post to the stream for provider 'example-provider'
-        description: A human-readable description of the error
-
-  StreamItem:
-    readOnly: true
-    type: object
-    properties:
-      id:
-        type: string
-      notification:
-        type: boolean
-        description: "True if activity is a notification"
-      provider:
-        type: string
-      type:
-        type: string
-      title:
-        type: string
-      text:
-        type: string
-      url:
-        type: string
-      tags:
-        type: array
-        items:
-          $ref: '#/definitions/ActivityTag'
-      date:
-        type: integer
-        format: datetime
-
-  CreatedResult:
-    type: object
-    properties:
-      success:
-        type: boolean
-        example: true
-      status:
-        type: string
-        example: ok
-      data:
-        properties:
-          id:
-            type: string
-            example: 9e71b33b-debd-40e5-8e6c-989c9de8c547
-
-  PostedStreamItem:
-    type: object
-    required:
-      - type
-      - title
-      - recipients
-    properties:
-      type:
-        type: string
-      title:
-        type: string
-      text:
-        type: string
-      url:
-        type: string
-      tags:
-        type: array
-        items:
-          $ref: '#/definitions/ActivityTag'
-      replace:
-        type: object
-      generated_at:
-        type: string
-        format: date-time
-        description: The time the notification was generated.  Defaults to the time the notification was received by Start.Warwick.
-      recipients:
-        description: The recipients for the notification.  Duplicate recipients will be removed
-        type: object
-        properties:
-          users:
-            description: A list of users who should receive the notification
-            type: array
-            items:
-              type: string
-              format: usercode
-              example: u1234567
-          groups:
-            description: A list of WebGroups whose members should receive the notification
-            type: array
-            items:
-              type: string
-              format: groupname
-              example: ch-students
-  ActivityTag:
-    type: object
-    properties:
-      name:
-        type: string
-        example: module
-      value:
-        type: string
-        example: CS118
-      display_value:
-        type: string
-    required:
-      - name
-      - value
+responses:
+  $ref: ./responses/index.yml

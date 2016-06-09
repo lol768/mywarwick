@@ -1,0 +1,25 @@
+readOnly: true
+type: object
+properties:
+  id:
+    type: string
+  notification:
+    type: boolean
+    description: "True if activity is a notification"
+  provider:
+    type: string
+  type:
+    type: string
+  title:
+    type: string
+  text:
+    type: string
+  url:
+    type: string
+  tags:
+    type: array
+    items:
+      $ref: '#/definitions/ActivityTag'
+  date:
+    type: integer
+    format: datetime

@@ -1,0 +1,17 @@
+type: object
+properties:
+  success:
+    type: boolean
+  status:
+    type: string
+  data:
+    properties:
+      tiles:
+        type: array
+        items:
+          $ref: '#/definitions/Tile'
+
+      layout:
+        type: array
+        items:
+          $ref: '#/definitions/TileLayout'

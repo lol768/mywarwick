@@ -1,0 +1,13 @@
+type: object
+properties:
+  name:
+    type: string
+    example: module
+  value:
+    type: string
+    example: CS118
+  display_value:
+    type: string
+required:
+  - name
+  - value

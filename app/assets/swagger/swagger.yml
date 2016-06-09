@@ -1,0 +1,79 @@
+swagger: '2.0'
+info:
+  version: 1.0-snapshot
+  title: Start.Warwick
+  description: Your personal homepage to keep track of the information that you need regularly such as email and timetables.
+  termsOfService: 'http://warwick.ac.uk/terms'
+  contact:
+    name: 'Web Team, Warwick IT Services'
+    email: webteam@warwick.ac.uk
+    url: 'http://warwick.ac.uk/webteam'
+  license:
+    name: MIT
+    url: 'http://opensource.org/licenses/MIT'
+host: start-dev.warwick.ac.uk
+basePath: /api
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  basicAuth:
+    type: basic
+    description: 'Authenticate with Web-Sign On by providing a valid username and password, preferably belonging to a External User account dedicated for Start.Warwick API access.  Accounts must be authorised to write to user streams on behalf of a provider.'
+paths:
+  /tiles:
+    get:
+      description: Retrieves the tile loadout for the logged-in user, not including content
+      responses:
+        200:
+          $ref: '#/responses/getTiles'
+        401:
+          $ref: '#/responses/unauthorized'
+    put:
+      consumes:
+        - application/json
+      description: Save tile layout for logged-in user
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/SaveTilesRequest'
+          required: true
+      responses:
+        200:
+          description: OK
+        401:
+          $ref: '#/responses/unauthorized'
+
+  /tiles/content:
+    get:
+      description: Retrieves content for all tiles belonging to logged-in user
+      responses:
+        200:
+          $ref: '#/responses/getTilesContent'
+        401:
+          $ref: '#/responses/unauthorized'
+
+  /tiles/content/{tile_id}:
+    get:
+      description: Retrieves content for given tile ID
+      parameters:
+        - name: tile_id
+          in: path
+          type: string
+          description: ID of tile to retrieve content for
+          required: true
+      responses:
+        200:
+          $ref: '#/responses/getTilesContent'
+        401:
+          $ref: '#/responses/unauthorized'
+
+definitions:
+  $ref: ./definitions/index.yml
+
+responses:
+  $ref: ./responses/index.yml

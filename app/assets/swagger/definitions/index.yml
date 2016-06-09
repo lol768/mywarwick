@@ -1,0 +1,32 @@
+ActivityTag:
+  $ref: ./ActivityTag.yml
+
+CreatedResult:
+  $ref: ./CreatedResult.yml
+
+Error:
+  $ref: ./Error.yml
+
+ErrorResponse:
+  $ref: ./ErrorResponse.yml
+
+PostedStreamItem:
+  $ref: ./PostedStreamItem.yml
+
+StreamItem:
+  $ref: ./StreamItem.yml
+
+Tile:
+  $ref: ./Tile.yml
+
+TileLayout:
+  $ref: ./TileLayout.yml
+
+TilesContentResponse:
+  $ref: ./TilesContentResponse.yml
+
+TilesResponse:
+  $ref: ./TilesResponse.yml
+
+UserTileSetting:
+  $ref: ./UserTileSetting.yml
