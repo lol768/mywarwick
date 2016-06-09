@@ -1,20 +1,32 @@
 @import models.news.{AudienceSize, NewsItemRender}
 @import views.html._
-@(news: Seq[NewsItemRender], counts: Map[String, AudienceSize])
+@(
+    newsPending: Seq[NewsItemRender],
+    newsPublished: Seq[NewsItemRender],
+    counts: Map[String, AudienceSize]
+)
 
-@common.admin("News") {
-  <p>
-    <a class="btn btn-default" href="@controllers.admin.routes.NewsController.createForm()">Create news</a>
-  </p>
-
-  @if(news.isEmpty) {
-    <p>No news.</p>
-  } else {
+  @common.admin("News") {
     <p>
-      Showing @if(news.size == 1) {one item} else {@news.size items}.
+      <a class="btn btn-default" href="@controllers.admin.routes.NewsController.createForm()">
+        Create news</a>
     </p>
-    @news.map { item =>
-      @admin.news.newsItemInfo(item, counts.get(item.id))
+
+    <h3>Pending</h3>
+    @if(newsPending.isEmpty) {
+      <p>No pending news.</p>
+    } else {
+      @newsPending.map { item =>
+        @admin.news.newsItemInfo(item, counts.get(item.id))
+      }
+    }
+
+    <h3>Published</h3>
+    @if(newsPublished.isEmpty) {
+      <p>No published news.</p>
+    } else {
+      @newsPublished.map { item =>
+        @admin.news.newsItemInfo(item, counts.get(item.id))
+      }
     }
   }
-}

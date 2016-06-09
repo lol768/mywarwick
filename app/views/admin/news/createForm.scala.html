@@ -1,6 +1,5 @@
 @import controllers.admin.{Publish, NewsItemData}
 
-@import org.joda.time.LocalDateTime
 @(
     form: Form[Publish[NewsItemData]],
     departmentOptions: Seq[(String, String)],
@@ -15,33 +14,8 @@
   <div class="container-fluid">
   @b3.form(action = controllers.admin.routes.NewsController.create()) {
 
-    @b3.text(form("item.title"),
-      'class -> "input-lg",
-      '_label -> "Title",
-      'autofocus -> true,
-      'required -> true)
 
-    @b3.textarea(form("item.text"),
-      '_label -> "Text",
-      '_help -> "Keep it short",
-      'rows -> 7
-    )
-
-    <div id="file-upload-container" data-input-name="item.imageId"></div>
-
-    @b3.datetimeLocal(form("item.publishDate"),
-      '_label -> "Publish date",
-      '_help -> "You can select a time in the future, and it will appear to users after that time. Otherwise choose the current time to publish now",
-      'value -> new LocalDateTime().withSecondOfMinute(0).withMillisOfSecond(0)
-    )
-
-    @b3.text(form("item.linkHref"),
-      '_label -> "Link URL"
-    )
-
-    @b3.text(form("item.linkText"),
-      '_label -> "Link title"
-    )
+    @contentForm(form)
 
     @tags.audiencePicker(form, "audience", departmentOptions, "news item", allowPublic = true)
 

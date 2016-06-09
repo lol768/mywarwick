@@ -3,6 +3,7 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
+import controllers.admin.NewsItemData
 import models.news.{Audience, AudienceSize, NewsItemRender, NewsItemSave}
 import play.api.db.Database
 import services.dao.{NewsDao, PublishCategoryDao}
@@ -14,7 +15,11 @@ trait NewsService {
   def latestNews(user: Option[Usercode], limit: Int = 100): Seq[NewsItemRender]
   def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): Unit
 
+  def updateNewsItem(id: String, item: NewsItemData): Int
+
   def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize]
+
+  def get(id: String): Option[NewsItemRender]
 }
 
 class AnormNewsService @Inject() (
@@ -45,6 +50,16 @@ class AnormNewsService @Inject() (
   override def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize] =
     db.withConnection { implicit c =>
       dao.countRecipients(newsIds)
+    }
+
+  override def updateNewsItem(id: String, item: NewsItemData): Int =
+    db.withConnection { implicit c =>
+      dao.updateNewsItem(id, item.toSave)
+    }
+
+  override def get(id: String): Option[NewsItemRender] =
+    db.withConnection { implicit c =>
+      dao.getNewsById(id)
     }
 
 }

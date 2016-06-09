@@ -2,13 +2,20 @@ package controllers.admin
 
 import javax.inject.Singleton
 
+import com.google.inject.Inject
 import controllers.BaseController
-import play.api.mvc.Action
+import services.SecurityService
+import system.Roles
 
 @Singleton
-class AdminController extends BaseController {
+class AdminController @Inject() (
+  security: SecurityService
+) extends BaseController {
 
-  def index = Action {
+  import Roles._
+  import security._
+
+  def index = RequiredActualUserRoleAction(Sysadmin) {
     Ok(views.html.admin.index())
   }
 

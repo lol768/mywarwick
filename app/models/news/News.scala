@@ -1,6 +1,8 @@
 package models.news
 
+import controllers.admin.NewsItemData
 import models.DateFormats
+import oracle.net.aso.h
 import org.joda.time.DateTime
 import play.api.libs.json._
 import uk.ac.warwick.util.web.Uri
@@ -28,7 +30,16 @@ case class NewsItemRender (
   imageId: Option[String]
   // TODO Add category info
   // TODO Add publisher info
-)
+) {
+  def toData: NewsItemData = NewsItemData(
+    title,
+    text,
+    link.map(_.text),
+    link.map(_.href.toString),
+    publishDate.toLocalDateTime,
+    imageId
+  )
+}
 
 object NewsItemRender {
   implicit private val dateWriter = DateFormats.isoDateWrites
