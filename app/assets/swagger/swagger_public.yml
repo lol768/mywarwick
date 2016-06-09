@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   version: 1.0-snapshot
-  title: Start.WarwickBLAHABLAH
+  title: Start.Warwick
   description: Your personal homepage to keep track of the information that you need regularly such as email and timetables.
   termsOfService: 'http://warwick.ac.uk/terms'
   contact:
