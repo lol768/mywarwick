@@ -10,7 +10,7 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.dao.DepartmentInfoDao
-import services.{AudienceService, NewsService, SecurityService}
+import services.{NewsService, SecurityService}
 import system.{Roles, TimeZones, Validation}
 import uk.ac.warwick.util.web.Uri
 
@@ -117,7 +117,7 @@ class NewsController @Inject()(
   }
 
   def updateForm(id: String) = RequiredActualUserRoleAction(Sysadmin).async {
-    val item = news.get(id)
+    val item = news.getNewsItem(id)
     item match {
       case None => Future(NotFound(s"Cannot update news. No news item exists with id '$id'"))
       case Some(news) =>

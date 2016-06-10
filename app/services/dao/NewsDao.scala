@@ -32,7 +32,7 @@ trait NewsDao {
     * @return the ID of the created item
     */
   // TODO public news items
-  def save(item: NewsItemSave)(implicit c: Connection): String
+  def save(item: NewsItemSave, audienceId: String)(implicit c: Connection): String
 
   // TODO too many args? define an object?
   def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit
@@ -94,14 +94,14 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
   /**
     * Save a news item with a specific set of recipients.
     */
-  override def save(item: NewsItemSave)(implicit c: Connection): String = {
+  override def save(item: NewsItemSave, audienceId: String)(implicit c: Connection): String = {
     import item._
     val id = newId
     val linkText = link.map(_.text).orNull
     val linkHref = link.map(_.href.toString).orNull
     SQL"""
-    INSERT INTO NEWS_ITEM (id, title, text, link_text, link_href, news_image_id, created_at, publish_date)
-    VALUES ($id, $title, $text, $linkText, $linkHref, $imageId, SYSDATE, $publishDate)
+    INSERT INTO NEWS_ITEM (id, title, text, link_text, link_href, news_image_id, created_at, publish_date, audience_id)
+    VALUES ($id, $title, $text, $linkText, $linkHref, $imageId, SYSDATE, $publishDate, $audienceId)
     """.executeUpdate()
     id
   }

@@ -6,7 +6,7 @@ import com.google.inject.ImplementedBy
 import controllers.admin.NewsItemData
 import models.news.{Audience, AudienceSize, NewsItemRender, NewsItemSave}
 import play.api.db.Database
-import services.dao.NewsDao
+import services.dao.{AudienceDao, NewsDao}
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[AnormNewsService])
@@ -20,13 +20,14 @@ trait NewsService {
 
   def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize]
 
-  def get(id: String): Option[NewsItemRender]
+  def getNewsItem(id: String): Option[NewsItemRender]
 }
 
 class AnormNewsService @Inject() (
   db: Database,
   dao: NewsDao,
-  audienceService: AudienceService
+  audienceService: AudienceService,
+  audienceDao: AudienceDao
 ) extends NewsService {
 
   override def allNews(limit: Int, offset: Int): Seq[NewsItemRender] =
@@ -39,10 +40,13 @@ class AnormNewsService @Inject() (
       dao.latestNews(user, limit)
     }
 
+  // FIXME: Move audience-resolution and recipient-saving to scheduler
+  // and just save audience components to db here
   override def save(item: NewsItemSave, audience: Audience): Unit =
     db.withConnection { implicit c =>
       val recipients = audienceService.resolve(audience).get // FIXME Try.get throws
-      val id = dao.save(item)
+    val audienceId = audienceDao.saveAudience(audience)
+      val id = dao.save(item, audienceId)
       dao.saveRecipients(id, item.publishDate, recipients)
     }
 
@@ -56,9 +60,8 @@ class AnormNewsService @Inject() (
       dao.updateNewsItem(id, item.toSave)
     }
 
-  override def get(id: String): Option[NewsItemRender] =
+  override def getNewsItem(id: String): Option[NewsItemRender] =
     db.withConnection { implicit c =>
       dao.getNewsById(id)
     }
-
 }
