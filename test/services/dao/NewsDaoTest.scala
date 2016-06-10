@@ -3,6 +3,7 @@ package services.dao
 import java.sql.Connection
 
 import helpers.OneStartAppPerSuite
+import models.news.AudienceSize.{Finite, Public}
 import models.news.{Audience, NewsItemSave}
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
@@ -20,9 +21,10 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
   val jim = Usercode("cusjim")
   val public = Usercode("*")
 
-  def save(item: NewsItemSave, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
+  def save(item: NewsItemSave, recipients: Seq[Usercode])(implicit c: Connection): String = {
     val id = newsDao.save(item)
     newsDao.saveRecipients(id, item.publishDate, recipients)
+    id
   }
 
   val londonsBurning = NewsItemSave(
@@ -75,6 +77,26 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
       save(brumPanic, Seq(ana))
       newsDao.latestNews(Some(ana), limit = 2) must have length(2)
       newsDao.latestNews(Some(ana), limit = 1) must have length(1)
+    }
+  }
+
+  "countRecipients" should {
+    "return an empty result for an empty input" in transaction { implicit c =>
+      newsDao.countRecipients(Nil) mustBe Map()
+    }
+
+    "return results for public and non-public news" in transaction { implicit c =>
+      val id1 = save(londonsBurning, Seq(public))
+      val id2 = save(brumPanic, Seq(ana, eli))
+      val id3 = save(futureNews, Seq(ana, bob, eli, jim))
+      val id4 = save(futureNews, Seq(public)) // should be ignored
+
+      val counts = newsDao.countRecipients(Seq(id1,id2,id3))
+      counts mustBe Map(
+        id1 -> Public,
+        id2 -> Finite(2),
+        id3 -> Finite(4)
+      )
     }
   }
 
