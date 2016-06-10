@@ -1,0 +1,21 @@
+readOnly: true
+type: object
+properties:
+  id:
+    type: string
+  colour:
+    type: integer
+    description: References colour_id in user's colour theme
+  icon:
+    type: string
+  preferences:
+    type: object
+  title:
+    type: string
+  type:
+    type: string
+    example: "agenda"
+    description: Tile data display type
+  removed:
+    type: boolean
+    description: Indicates if user has removed this tile from their loadout

@@ -1,0 +1,11 @@
+readOnly: true
+type: object
+properties:
+  id:
+    type: string
+    example: no-permission
+    description: A short name for the error
+  message:
+    type: string
+    example: User 'example-user' does not have permission to post to the stream for provider 'example-provider'
+    description: A human-readable description of the error

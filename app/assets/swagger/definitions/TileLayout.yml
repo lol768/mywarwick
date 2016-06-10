@@ -1,0 +1,21 @@
+readOnly: true
+type: object
+properties:
+  tile:
+    type: string
+    description: Id of the tile this layout item is associated with
+  layoutWidth:
+    type: integer
+    description: Number of columns in the layout this item belongs to
+  x:
+    type: integer
+    description: X-position on layout grid
+  y:
+    type: integer
+    description: Y-position on layout grid
+  width:
+    type: integer
+    description: Relative tile width in layout
+  height:
+    type: integer
+    description: Relative tile height in layout

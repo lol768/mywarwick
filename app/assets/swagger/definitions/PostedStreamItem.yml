@@ -1,0 +1,42 @@
+type: object
+required:
+  - type
+  - title
+  - recipients
+properties:
+  type:
+    type: string
+  title:
+    type: string
+  text:
+    type: string
+  url:
+    type: string
+  tags:
+    type: array
+    items:
+      $ref: '#/definitions/ActivityTag'
+  replace:
+    type: object
+  generated_at:
+    type: string
+    format: date-time
+    description: The time the notification was generated.  Defaults to the time the notification was received by Start.Warwick.
+  recipients:
+    description: The recipients for the notification.  Duplicate recipients will be removed
+    type: object
+    properties:
+      users:
+        description: A list of users who should receive the notification
+        type: array
+        items:
+          type: string
+          format: usercode
+          example: u1234567
+      groups:
+        description: A list of WebGroups whose members should receive the notification
+        type: array
+        items:
+          type: string
+          format: groupname
+          example: ch-students

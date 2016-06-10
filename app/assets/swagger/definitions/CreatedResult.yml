@@ -1,0 +1,13 @@
+type: object
+properties:
+  success:
+    type: boolean
+    example: true
+  status:
+    type: string
+    example: ok
+  data:
+    properties:
+      id:
+        type: string
+        example: 9e71b33b-debd-40e5-8e6c-989c9de8c547
