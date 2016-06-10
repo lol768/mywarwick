@@ -10,4 +10,4 @@ properties:
     properties:
       tile_id:
        type: object
-       description: Tile-specifc tile content object
+       description: Tile-specific tile content object

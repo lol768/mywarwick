@@ -61,7 +61,12 @@ gulp.task('watch-styles', ['styles'], () => {
 });
 
 gulp.task('swagger', () => {
+  // public API spec
   gulp.src([paths.assetPath + '/swagger/swagger_public.yml'])
     .pipe(swagger('swagger_public.json'))
+    .pipe(gulp.dest(paths.assetsOut));
+  // internal API spec
+  gulp.src([paths.assetPath + '/swagger/swagger.yml'])
+    .pipe(swagger('swagger.json'))
     .pipe(gulp.dest(paths.assetsOut));
 });

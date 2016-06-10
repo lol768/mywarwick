@@ -28,5 +28,8 @@ TilesContentResponse:
 TilesResponse:
   $ref: ./TilesResponse.yml
 
+SaveTilesRequest:
+  $ref: ./SaveTilesRequest.yml
+
 UserTileSetting:
   $ref: ./UserTileSetting.yml
