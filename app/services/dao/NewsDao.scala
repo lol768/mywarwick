@@ -127,19 +127,24 @@ class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends New
 
   override def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, AudienceSize] = {
     import AudienceSize._
+    if (newsIds.isEmpty) {
+      Map.empty
+    } else {
+      val publicNews =
+        SQL"""
+        SELECT NEWS_ITEM_ID ID FROM NEWS_RECIPIENT WHERE USERCODE = '*'
+        AND NEWS_ITEM_ID IN ($newsIds)
+      """.as(str("id").*).map(_ -> Public).toMap
 
-    val publicNews =
-      SQL"SELECT NEWS_ITEM_ID ID FROM NEWS_RECIPIENT WHERE USERCODE = '*'"
-        .as(str("id").*).map(_ -> Public).toMap
+      val audienceNews =
+        SQL"""
+        SELECT NEWS_ITEM_ID ID, COUNT(*) C FROM NEWS_RECIPIENT
+        WHERE NEWS_ITEM_ID IN ($newsIds) AND USERCODE != '*'
+        GROUP BY NEWS_ITEM_ID
+      """.as(countParser.*).toMap.mapValues(Finite)
 
-    val audienceNews =
-      SQL"""
-      SELECT NEWS_ITEM_ID ID, COUNT(*) C FROM NEWS_RECIPIENT
-      WHERE NEWS_ITEM_ID IN ($newsIds) AND USERCODE != '*'
-      GROUP BY NEWS_ITEM_ID
-    """.as(countParser.*).toMap.mapValues(Finite)
-
-    publicNews ++ audienceNews
+      publicNews ++ audienceNews
+    }
   }
 
   override def updateNewsItem(newsId: String, item: NewsItemSave)(implicit c: Connection): Int = {
