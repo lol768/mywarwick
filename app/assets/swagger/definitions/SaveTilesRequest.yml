@@ -5,6 +5,7 @@ properties:
     items:
       $ref: '#/definitions/UserTileSetting'
   layout:
+    readOnly: true
     type: array
     items:
       $ref: '#/definitions/TileLayout'

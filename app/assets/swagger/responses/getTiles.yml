@@ -1,3 +1,4 @@
 description: OK
 schema:
+  readOnly: true
   $ref: '#/definitions/TilesResponse'

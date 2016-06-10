@@ -7,11 +7,13 @@ properties:
   data:
     properties:
       tiles:
+        readOnly: true
         type: array
         items:
           $ref: '#/definitions/Tile'
 
       layout:
+        readOnly: true
         type: array
         items:
           $ref: '#/definitions/TileLayout'
