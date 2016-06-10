@@ -3,10 +3,9 @@ package services.dao
 import java.sql.Connection
 
 import helpers.OneStartAppPerSuite
-import models.news.{Audience, NewsItemSave}
+import models.news.NewsItemSave
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
-import play.api.db.Database
 import services.NewsService
 import warwick.sso.Usercode
 

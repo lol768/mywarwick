@@ -1,6 +1,5 @@
 package models.news
 
-import oracle.net.aso.s
 import warwick.sso.GroupName
 
 case class Audience(components: Seq[Audience.Component] = Nil, public: Boolean = false) {

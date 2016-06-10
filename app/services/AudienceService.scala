@@ -5,7 +5,6 @@ import javax.inject.Inject
 import com.google.inject.ImplementedBy
 import models.news.Audience
 import models.news.Audience._
-import services.dao.AudienceComponentSave
 import system.Logging
 import warwick.sso.{GroupName, GroupService, Usercode}
 

@@ -12,7 +12,9 @@ import warwick.sso.Usercode
 @ImplementedBy(classOf[AnormNewsService])
 trait NewsService {
   def allNews(limit: Int = 100, offset: Int = 0): Seq[NewsItemRender]
+
   def latestNews(user: Option[Usercode], limit: Int = 100): Seq[NewsItemRender]
+
   // TODO public news items
   def save(item: NewsItemSave, audience: Audience): Unit
 
@@ -23,7 +25,7 @@ trait NewsService {
   def getNewsItem(id: String): Option[NewsItemRender]
 }
 
-class AnormNewsService @Inject() (
+class AnormNewsService @Inject()(
   db: Database,
   dao: NewsDao,
   audienceService: AudienceService,
@@ -45,7 +47,7 @@ class AnormNewsService @Inject() (
   override def save(item: NewsItemSave, audience: Audience): Unit =
     db.withConnection { implicit c =>
       val recipients = audienceService.resolve(audience).get // FIXME Try.get throws
-    val audienceId = audienceDao.saveAudience(audience)
+      val audienceId = audienceDao.saveAudience(audience)
       val id = dao.save(item, audienceId)
       dao.saveRecipients(id, item.publishDate, recipients)
     }
