@@ -51,6 +51,7 @@ paths:
               data:
                 properties:
                   activities:
+                    readOnly: true
                     type: array
                     items:
                       $ref: '#/definitions/StreamItem'
@@ -109,16 +110,19 @@ paths:
         400:
           description: Validation error
           schema:
+            readOnly: true
             $ref: '#/definitions/ErrorResponse'
         401:
           $ref: '#/responses/unauthorized'
         402:
           description: No valid recipients
           schema:
+            readOnly: true
             $ref: '#/definitions/ErrorResponse'
         403:
           description: Forbidden
           schema:
+            readOnly: true
             $ref: '#/definitions/ErrorResponse'
 
   /streams/{provider_id}/notifications:
@@ -146,16 +150,19 @@ paths:
         400:
           description: Validation error
           schema:
+            readOnly: true
             $ref: '#/definitions/ErrorResponse'
         401:
           $ref: '#/responses/unauthorized'
         402:
           description: No valid recipients
           schema:
+            readOnly: true
             $ref: '#/definitions/ErrorResponse'
         403:
           description: Forbidden
           schema:
+            readOnly: true
             $ref: '#/definitions/ErrorResponse'
 
 definitions:
