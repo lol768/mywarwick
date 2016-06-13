@@ -1,0 +1,172 @@
+swagger: '2.0'
+info:
+  version: 1.0-snapshot
+  title: Start.Warwick
+  description: Your personal homepage to keep track of the information that you need regularly such as email and timetables.
+  termsOfService: 'http://warwick.ac.uk/terms'
+  contact:
+    name: 'Web Team, Warwick IT Services'
+    email: webteam@warwick.ac.uk
+    url: 'http://warwick.ac.uk/webteam'
+  license:
+    name: MIT
+    url: 'http://opensource.org/licenses/MIT'
+host: start-dev.warwick.ac.uk
+basePath: /api
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  basicAuth:
+    type: basic
+    description: 'Authenticate with Web-Sign On by providing a valid username and password, preferably belonging to a External User account dedicated for Start.Warwick API access.  Accounts must be authorised to write to user streams on behalf of a provider.'
+paths:
+  /streams/user:
+    get:
+      description: 'Retrieves the stream for the logged-in user, in reverse chronological order'
+      parameters:
+        - name: before
+          in: query
+          type: integer
+          format: datetime
+          description: The date of the most recent item that may be retrieved
+        - name: limit
+          in: query
+          type: integer
+          description: The maximum number of items
+          default: 20
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              status:
+                type: string
+              data:
+                properties:
+                  activities:
+                    readOnly: true
+                    type: array
+                    items:
+                      $ref: '#/definitions/StreamItem'
+                  notificationsRead:
+                    type: string
+                    description: Last time logged-in user read notifications
+                    format: date-time
+        401:
+          $ref: '#/responses/unauthorized'
+
+  /streams/read:
+    post:
+      description: Record notifications lastRead datetime for logged in user
+      consumes:
+        - application/json
+      parameters:
+        - name: lastRead
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              lastRead:
+                type: string
+                description: Datetime when user last read notifications
+                format: date-time
+      responses:
+        200:
+          description: OK
+        401:
+          $ref: '#/responses/unauthorized'
+
+  /streams/{provider_id}/activities:
+    post:
+      security:
+        - basicAuth: []
+      description: Adds an activity item to the stream for the specified recipients
+      parameters:
+        - name: provider_id
+          in: path
+          type: string
+          description: The ID of the application providing the activity
+          required: true
+        - name: activity
+          in: body
+          description: The item to be added to the stream
+          required: true
+          schema:
+            $ref: '#/definitions/PostedStreamItem'
+
+      responses:
+        201:
+          description: Item created
+          schema:
+            $ref: '#/definitions/CreatedResult'
+        400:
+          description: Validation error
+          schema:
+            readOnly: true
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          $ref: '#/responses/unauthorized'
+        402:
+          description: No valid recipients
+          schema:
+            readOnly: true
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Forbidden
+          schema:
+            readOnly: true
+            $ref: '#/definitions/ErrorResponse'
+
+  /streams/{provider_id}/notifications:
+    post:
+      security:
+        - basicAuth: []
+      description: Adds a notification to the stream for the specified recipients
+      parameters:
+        - name: provider_id
+          in: path
+          type: string
+          description: The ID of the application providing the notification
+          required: true
+        - name: notification
+          in: body
+          description: The item to be added to the stream
+          required: true
+          schema:
+            $ref: '#/definitions/PostedStreamItem'
+      responses:
+        201:
+          description: Item created
+          schema:
+            $ref: '#/definitions/CreatedResult'
+        400:
+          description: Validation error
+          schema:
+            readOnly: true
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          $ref: '#/responses/unauthorized'
+        402:
+          description: No valid recipients
+          schema:
+            readOnly: true
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Forbidden
+          schema:
+            readOnly: true
+            $ref: '#/definitions/ErrorResponse'
+
+definitions:
+  $ref: ./definitions/index.yml
+
+responses:
+  $ref: ./responses/index.yml

@@ -1,5 +1,8 @@
 import React, { PropTypes } from 'react';
+import classnames from 'classnames';
+import ProgressBar from '../../components/ui/ProgressBar';
 import * as newsImages from '../newsImages';
+import $ from 'jquery';
 
 export default class FileUpload extends React.Component {
 
@@ -13,25 +16,37 @@ export default class FileUpload extends React.Component {
     this.onClear = this.onClear.bind(this);
   }
 
+  componentDidMount() {
+    this.$submitBtn = $('button[type=submit]');
+    this.submitText = this.$submitBtn.text();
+  }
+
   onChange(e) {
     const fileField = e.target;
     const file = fileField.files[0];
 
     this.setState({
       uploading: true,
+      error: undefined,
     });
+    this.$submitBtn.prop('disabled', true).text('Uploading file...');
 
-    newsImages.put(file)
+    const progress = (loaded, total) => this.setState({ loaded, total });
+
+    newsImages.put(file, progress)
       .then(imageId => {
         this.setState({ imageId });
       })
       .catch((ex) => {
-        alert(`There was a problem uploading the image: ${ex.message}`); // eslint-disable-line no-alert, max-len
+        this.setState({ error: ex.message });
       })
       .then(() => {
         this.setState({
           uploading: false,
+          loaded: undefined,
+          total: undefined,
         });
+        this.$submitBtn.prop('disabled', false).text(this.submitText);
         fileField.value = '';
       });
   }
@@ -44,7 +59,7 @@ export default class FileUpload extends React.Component {
 
   render() {
     const { inputName } = this.props;
-    const { imageId, uploading } = this.state;
+    const { imageId, uploading, error, loaded, total } = this.state;
 
     if (imageId) {
       return (
@@ -69,15 +84,27 @@ export default class FileUpload extends React.Component {
     }
 
     return (
-      <div className="form-group">
+      <div className={ classnames('form-group', { 'has-error': error }) }>
         <label className="control-label col-md-3" htmlFor={ inputName }>Choose an image</label>
 
         <div className="col-md-9">
+          { error ?
+            <p className="help-block">
+              { error }
+            </p>
+            : null }
+
           <input type="file" id={ inputName } onChange={this.onChange}
             disabled={ uploading } accept="image/*"
           />
+
           { uploading ?
-            <div>Uploading, please wait&hellip;</div>
+            <div>
+              <p>
+                Uploading, please wait&hellip;
+              </p>
+              <ProgressBar value={ loaded } max={ total } />
+            </div>
             : null }
         </div>
       </div>

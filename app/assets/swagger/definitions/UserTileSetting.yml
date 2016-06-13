@@ -1,0 +1,12 @@
+type: object
+properties:
+  id:
+    type: string
+    description: Tile ID
+  preferences:
+    type: object
+    description: Tile preferences
+  removed:
+    type: boolean
+    default: false
+    description: Indicate if this tile has been removed by user

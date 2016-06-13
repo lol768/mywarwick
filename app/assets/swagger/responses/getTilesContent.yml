@@ -1,0 +1,4 @@
+description: OK
+schema:
+  readOnly: true
+  $ref: '#/definitions/TilesContentResponse'

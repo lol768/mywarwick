@@ -38,7 +38,7 @@ val appDeps = Seq(
   "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.0",
   "com.typesafe.akka" %% "akka-slf4j" % "2.4.0",
   "com.kenshoo" %% "metrics-play" % "2.5.0_0.5.0-play-2.5-fix",
-  "com.typesafe.play" %% "play-mailer" % "3.0.1",
+  "com.typesafe.play" %% "play-mailer" % "5.0.0-M1",
   "com.notnoop.apns" % "apns" % "1.0.0.Beta6",
   "org.quartz-scheduler" % "quartz" % "2.2.1",
   "com.google.inject.extensions" % "guice-multibindings" % "4.0",
