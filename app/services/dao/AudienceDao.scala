@@ -34,7 +34,7 @@ class AudienceDaoImpl @Inject()(
     import component._
     db.withConnection { implicit c =>
       SQL"""
-        INSERT INTO audience_component (id, name, value, dept_code)
+        INSERT INTO audience_component (audience_id, name, value, dept_code)
         VALUES ($id, $name, $value, $deptCode)
         """.execute()
     }
@@ -53,7 +53,7 @@ class AudienceDaoImpl @Inject()(
     audienceFromComponents(
       db.withConnection { implicit c =>
         SQL"""
-       SELECT * FROM audience_component WHERE id=$audienceId
+       SELECT * FROM audience_component WHERE audience_id=$audienceId
        """.as(componentParser.*)
       }
     )

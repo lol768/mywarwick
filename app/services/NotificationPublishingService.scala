@@ -3,9 +3,9 @@ package services
 import javax.inject.Singleton
 
 import com.google.inject.{ImplementedBy, Inject}
+import models.ActivitySave
 import models.news.{Audience, NotificationData}
-import models.{ActivitySave, ActivityRecipients}
-import warwick.sso.Usercode
+import services.dao.AudienceDao
 
 import scala.util.Try
 
@@ -24,22 +24,28 @@ trait NotificationPublishingService {
 @Singleton
 class NotificationPublishingServiceImpl @Inject()(
   activityService: ActivityService,
-  audienceService: AudienceService
+  audienceService: AudienceService,
+  audienceDao: AudienceDao
 ) extends NotificationPublishingService {
 
   import NotificationPublishingService._
 
-  def publish(item: NotificationData, audience: Audience): Try[String] =
-    audienceService.resolve(audience)
-      .flatMap(recipients => activityService.save(makeActivitySave(item), recipients))
+  def publish(item: NotificationData, audience: Audience): Try[String] = {
+    val audienceId = audienceDao.saveAudience(audience)
 
-  private def makeActivitySave(item: NotificationData) =
+    // FIXME: move audience resolution and subsequent notification publishing to scheduler
+    audienceService.resolve(audience)
+      .flatMap(recipients => activityService.save(makeActivitySave(item, audienceId), recipients))
+  }
+
+  private def makeActivitySave(item: NotificationData, audienceId: String) =
     ActivitySave(
       providerId = PROVIDER_ID,
       `type` = ACTIVITY_TYPE,
       title = item.text,
       url = item.linkHref,
-      shouldNotify = true
+      shouldNotify = true,
+      audienceId = Some(audienceId)
     )
 
 }

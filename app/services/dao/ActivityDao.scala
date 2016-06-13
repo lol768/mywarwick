@@ -44,18 +44,23 @@ class ActivityDaoImpl @Inject()(
     val id = UUID.randomUUID().toString
     val now = new DateTime()
 
-    SQL("INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, generated_at, created_at, should_notify) VALUES ({id}, {providerId}, {type}, {title}, {text}, {url}, {generatedAt}, {createdAt}, {shouldNotify})")
-      .on(
-        'id -> id,
-        'providerId -> providerId,
-        'type -> `type`,
-        'title -> title,
-        'text -> text,
-        'url -> url,
-        'generatedAt -> generatedAt.getOrElse(now),
-        'createdAt -> now,
-        'shouldNotify -> shouldNotify
-      )
+    SQL(
+      """
+      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, generated_at, created_at, should_notify, audience_id)
+      VALUES ({id}, {providerId}, {type}, {title}, {text}, {url}, {generatedAt}, {createdAt}, {shouldNotify}, {audienceId})
+      """
+    ).on(
+      'id -> id,
+      'providerId -> providerId,
+      'type -> `type`,
+      'title -> title,
+      'text -> text,
+      'url -> url,
+      'generatedAt -> generatedAt.getOrElse(now),
+      'createdAt -> now,
+      'shouldNotify -> shouldNotify,
+      'audienceId -> audienceId
+    )
       .execute()
 
     updateReplacedActivity(id, replaces)

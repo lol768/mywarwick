@@ -36,6 +36,8 @@ object Audience {
       case "UndergradStudents" => Some(UndergradStudents)
       case "TaughtPostgrads" => Some(TaughtPostgrads)
       case "ResearchPostgrads" => Some(ResearchPostgrads)
+
+      // FIXME: not handling Module or Webgroup parameters
       case moduleCodeRegex(code) => None
       case _ => ???
     }
