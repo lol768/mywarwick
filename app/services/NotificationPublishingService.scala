@@ -5,7 +5,8 @@ import javax.inject.Singleton
 import com.google.inject.{ImplementedBy, Inject}
 import models.ActivitySave
 import models.news.{Audience, NotificationData}
-import services.dao.AudienceDao
+import play.api.db.{Database, NamedDatabase}
+import services.dao.{AudienceDao, PublishCategoryDao}
 
 import scala.util.Try
 
@@ -17,7 +18,7 @@ object NotificationPublishingService {
 @ImplementedBy(classOf[NotificationPublishingServiceImpl])
 trait NotificationPublishingService {
 
-  def publish(item: NotificationData, audience: Audience): Try[String]
+  def publish(item: NotificationData, audience: Audience, categoryIds: Seq[String]): Try[String]
 
 }
 
@@ -25,17 +26,23 @@ trait NotificationPublishingService {
 class NotificationPublishingServiceImpl @Inject()(
   activityService: ActivityService,
   audienceService: AudienceService,
-  audienceDao: AudienceDao
+  publishCategoryDao: PublishCategoryDao,
+  audienceDao: AudienceDao,
+    @NamedDatabase("default") db: Database
 ) extends NotificationPublishingService {
 
   import NotificationPublishingService._
 
-  def publish(item: NotificationData, audience: Audience): Try[String] = {
+  def publish(item: NotificationData, audience: Audience, categoryIds: Seq[String]): Try[String] = {
     val audienceId = audienceDao.saveAudience(audience)
 
     // FIXME: move audience resolution and subsequent notification publishing to scheduler
     audienceService.resolve(audience)
       .flatMap(recipients => activityService.save(makeActivitySave(item, audienceId), recipients))
+      .map { id =>
+        db.withConnection(implicit c => publishCategoryDao.saveNotificationCategories(id, categoryIds))
+        id
+      }
   }
 
   private def makeActivitySave(item: NotificationData, audienceId: String) =
