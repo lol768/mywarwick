@@ -4,10 +4,9 @@ import java.sql.Connection
 
 import helpers.OneStartAppPerSuite
 import models.news.AudienceSize.{Finite, Public}
-import models.news.{Audience, NewsItemSave}
+import models.news.NewsItemSave
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
-import play.api.db.Database
 import services.NewsService
 import warwick.sso.Usercode
 
@@ -22,7 +21,7 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
   val public = Usercode("*")
 
   def save(item: NewsItemSave, recipients: Seq[Usercode])(implicit c: Connection): String = {
-    val id = newsDao.save(item)
+    val id = newsDao.save(item, "audienceId")
     newsDao.saveRecipients(id, item.publishDate, recipients)
     id
   }

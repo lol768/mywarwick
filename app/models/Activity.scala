@@ -85,7 +85,8 @@ case class ActivitySave(
   url: Option[String] = None,
   tags: Seq[ActivityTag] = Seq.empty,
   replace: Map[String, String] = Map.empty,
-  generatedAt: Option[DateTime] = None
+  generatedAt: Option[DateTime] = None,
+  audienceId: Option[String] = None
 )
 
 object ActivitySave {

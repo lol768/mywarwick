@@ -10,12 +10,16 @@ import warwick.sso.{GroupName, GroupService, Usercode}
 
 import scala.util.Try
 
+
+
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
   def resolve(audience: Audience): Try[Seq[Usercode]]
 }
 
-class AudienceServiceImpl @Inject() (webgroups: GroupService) extends AudienceService with Logging {
+class AudienceServiceImpl @Inject()(
+  webgroups: GroupService
+) extends AudienceService with Logging {
 
   // TODO Try.get wrapped with another Try is a weak sauce solution.
   // Should use magic combinators that nobody can understand.

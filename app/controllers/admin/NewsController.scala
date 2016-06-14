@@ -118,7 +118,7 @@ class NewsController @Inject()(
   }
 
   def updateForm(id: String) = RequiredActualUserRoleAction(Sysadmin).async {
-    news.get(id) match {
+    news.getNewsItem(id) match {
       case None => Future(NotFound(s"Cannot update news. No news item exists with id '$id'"))
       case Some(item) =>
         for {

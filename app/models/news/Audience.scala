@@ -27,6 +27,8 @@ object Audience {
   case object TaughtPostgrads extends Component with DepartmentSubset
   case object ResearchPostgrads extends Component with DepartmentSubset
 
+  val moduleCodeRegex = "Module:(.+)".r
+
   object ComponentParameter {
     def unapply(paramValue: String): Option[Component] = paramValue match {
       case "Staff" => Some(Staff)
@@ -34,7 +36,10 @@ object Audience {
       case "UndergradStudents" => Some(UndergradStudents)
       case "TaughtPostgrads" => Some(TaughtPostgrads)
       case "ResearchPostgrads" => Some(ResearchPostgrads)
-      case _ => None
+
+      // FIXME: not handling Module or Webgroup parameters
+      case moduleCodeRegex(code) => None
+      case _ => ???
     }
   }
 
