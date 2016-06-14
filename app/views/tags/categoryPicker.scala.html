@@ -1,0 +1,20 @@
+@(
+    form: Form[_],
+    fieldName: String,
+    categories: Seq[PublishCategory],
+    itemName: String
+)(implicit fc: b3.B3FieldConstructor, messages: Messages)
+@defining(form(fieldName)) { field =>
+
+  @b3.multifieldFormGroup(
+    Seq(field),
+    Seq('_label -> s"What should this $itemName be tagged with?"),
+    Nil) { info =>
+    @for(msg <- info.errorsAndInfos) { <span class="help-block">@msg</span> }
+
+    @for(category <- categories) {
+      @tags.seqCheckbox(form, "categories", '_text -> category.name, 'value -> category.id)
+    }
+  }
+
+}

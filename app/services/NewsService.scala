@@ -6,15 +6,14 @@ import com.google.inject.ImplementedBy
 import controllers.admin.NewsItemData
 import models.news.{Audience, AudienceSize, NewsItemRender, NewsItemSave}
 import play.api.db.Database
-import services.dao.NewsDao
+import services.dao.{NewsDao, PublishCategoryDao}
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[AnormNewsService])
 trait NewsService {
   def allNews(limit: Int = 100, offset: Int = 0): Seq[NewsItemRender]
   def latestNews(user: Option[Usercode], limit: Int = 100): Seq[NewsItemRender]
-  // TODO public news items
-  def save(item: NewsItemSave, audience: Audience): Unit
+  def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): Unit
 
   def updateNewsItem(id: String, item: NewsItemData): Int
 
@@ -26,7 +25,8 @@ trait NewsService {
 class AnormNewsService @Inject() (
   db: Database,
   dao: NewsDao,
-  audienceService: AudienceService
+  audienceService: AudienceService,
+  publishCategoryDao: PublishCategoryDao
 ) extends NewsService {
 
   override def allNews(limit: Int, offset: Int): Seq[NewsItemRender] =
@@ -39,11 +39,12 @@ class AnormNewsService @Inject() (
       dao.latestNews(user, limit)
     }
 
-  override def save(item: NewsItemSave, audience: Audience): Unit =
+  override def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): Unit =
     db.withConnection { implicit c =>
       val recipients = audienceService.resolve(audience).get // FIXME Try.get throws
       val id = dao.save(item)
       dao.saveRecipients(id, item.publishDate, recipients)
+      publishCategoryDao.saveNewsCategories(id, categoryIds)
     }
 
   override def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize] =

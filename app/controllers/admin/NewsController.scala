@@ -10,7 +10,7 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.dao.DepartmentInfoDao
-import services.{AudienceService, NewsService, SecurityService}
+import services.{NewsService, PublishCategoryService, SecurityService}
 import system.{Roles, TimeZones, Validation}
 import uk.ac.warwick.util.web.Uri
 
@@ -45,7 +45,8 @@ class NewsController @Inject()(
   val messagesApi: MessagesApi,
   news: NewsService,
   val departmentInfoDao: DepartmentInfoDao,
-  audienceBinder: AudienceBinder
+  audienceBinder: AudienceBinder,
+  val publishCategoryService: PublishCategoryService
 ) extends BaseController with I18nSupport with Publishing[NewsItemData] {
 
   import Roles._
@@ -77,7 +78,7 @@ class NewsController @Inject()(
     for {
       dopts <- departmentOptions
     } yield {
-      Ok(views.html.admin.news.createForm(publishNewsForm, dopts))
+      Ok(views.html.admin.news.createForm(publishNewsForm, dopts, categoryOptions))
     }
   }
 
@@ -85,11 +86,11 @@ class NewsController @Inject()(
     departmentOptions.flatMap { dopts =>
       val bound = publishNewsForm.bindFromRequest
       bound.fold(
-        errorForm => Future.successful(Ok(views.html.admin.news.createForm(errorForm, dopts))),
+        errorForm => Future.successful(Ok(views.html.admin.news.createForm(errorForm, dopts, categoryOptions))),
         data => audienceBinder.bindAudience(data).map {
           case Left(errors) =>
             val errorForm = addFormErrors(bound, errors)
-            Ok(views.html.admin.news.createForm(errorForm, dopts))
+            Ok(views.html.admin.news.createForm(errorForm, dopts, categoryOptions))
           case Right(audience) =>
             handleForm(data, audience)
         }
@@ -99,7 +100,7 @@ class NewsController @Inject()(
 
   def handleForm(data: Publish[NewsItemData], audience: Audience) = {
     val newsItem = data.item.toSave
-    news.save(newsItem, audience)
+    news.save(newsItem, audience, data.categoryIds)
     Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News created")
   }
 
@@ -109,22 +110,21 @@ class NewsController @Inject()(
   }
 
   def update(id: String) = RequiredActualUserRoleAction(Sysadmin).async { implicit req =>
-      val bound = updateNewsForm.bindFromRequest
-      bound.fold(
-        errorForm => Future.successful(Ok(views.html.admin.news.updateForm(id, errorForm))),
-        data => Future(handleUpdate(id, data))
-      )
+    val bound = updateNewsForm.bindFromRequest
+    bound.fold(
+      errorForm => Future.successful(Ok(views.html.admin.news.updateForm(id, errorForm))),
+      data => Future(handleUpdate(id, data))
+    )
   }
 
   def updateForm(id: String) = RequiredActualUserRoleAction(Sysadmin).async {
-    val item = news.get(id)
-    item match {
+    news.get(id) match {
       case None => Future(NotFound(s"Cannot update news. No news item exists with id '$id'"))
-      case Some(news) =>
+      case Some(item) =>
         for {
           dopts <- departmentOptions
         } yield {
-          Ok(views.html.admin.news.updateForm(id, updateNewsForm.fill(NewsUpdate(news.toData))))
+          Ok(views.html.admin.news.updateForm(id, updateNewsForm.fill(NewsUpdate(item.toData))))
         }
     }
   }

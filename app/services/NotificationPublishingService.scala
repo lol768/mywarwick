@@ -3,9 +3,10 @@ package services
 import javax.inject.Singleton
 
 import com.google.inject.{ImplementedBy, Inject}
+import models.ActivitySave
 import models.news.{Audience, NotificationData}
-import models.{ActivitySave, ActivityRecipients}
-import warwick.sso.Usercode
+import play.api.db.{Database, NamedDatabase}
+import services.dao.PublishCategoryDao
 
 import scala.util.Try
 
@@ -17,21 +18,27 @@ object NotificationPublishingService {
 @ImplementedBy(classOf[NotificationPublishingServiceImpl])
 trait NotificationPublishingService {
 
-  def publish(item: NotificationData, audience: Audience): Try[String]
+  def publish(item: NotificationData, audience: Audience, categoryIds: Seq[String]): Try[String]
 
 }
 
 @Singleton
 class NotificationPublishingServiceImpl @Inject()(
   activityService: ActivityService,
-  audienceService: AudienceService
+  audienceService: AudienceService,
+  publishCategoryDao: PublishCategoryDao,
+  @NamedDatabase("default") db: Database
 ) extends NotificationPublishingService {
 
   import NotificationPublishingService._
 
-  def publish(item: NotificationData, audience: Audience): Try[String] =
+  def publish(item: NotificationData, audience: Audience, categoryIds: Seq[String]): Try[String] =
     audienceService.resolve(audience)
       .flatMap(recipients => activityService.save(makeActivitySave(item), recipients))
+      .map { id =>
+        db.withConnection(implicit c => publishCategoryDao.saveNotificationCategories(id, categoryIds))
+        id
+      }
 
   private def makeActivitySave(item: NotificationData) =
     ActivitySave(
