@@ -1,6 +1,6 @@
 @import controllers.admin.NotificationsController.PublishNotificationForm
 
-@(form: PublishNotificationForm, departmentOptions: Seq[(String, String)], categories: Seq[PublishCategory])(implicit messages: Messages)
+@(form: PublishNotificationForm, departmentOptions: Seq[(String, String)])(implicit messages: Messages)
 
 @implicitFieldConstructor = @{
   b3.vertical.fieldConstructor
@@ -25,8 +25,6 @@
     )
 
     @tags.audiencePicker(form, "audience", departmentOptions, "notification", allowPublic = false)
-
-    @tags.categoryPicker(form, "categories", categories, "notification")
 
     @b3.submit(
       'class -> "btn btn-primary"

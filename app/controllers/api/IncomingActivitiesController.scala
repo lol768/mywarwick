@@ -36,7 +36,7 @@ class IncomingActivitiesController @Inject()(
     request.context.user.map { user =>
       if (providerPermissionService.canUserPostForProvider(providerId, user)) {
         request.body.validate[IncomingActivityData].map { data =>
-          val activity = ActivitySave.fromData(providerId, shouldNotify, data)
+          val activity = ActivitySave.fromApi(providerId, shouldNotify, data)
 
           val usercodes = recipientService.getRecipientUsercodes(
             data.recipients.users.getOrElse(Seq.empty).map(Usercode),

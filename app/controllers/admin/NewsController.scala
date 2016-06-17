@@ -61,7 +61,7 @@ class NewsController @Inject()(
     "imageId" -> optional(text)
   )(NewsItemData.apply)(NewsItemData.unapply)
 
-  val publishNewsForm = publishForm(newsDataMapping)
+  val publishNewsForm = publishForm(categoriesRequired = true, newsDataMapping)
 
   val updateNewsForm = Form(mapping(
     "item" -> newsDataMapping)
@@ -87,6 +87,8 @@ class NewsController @Inject()(
       val bound = publishNewsForm.bindFromRequest
       bound.fold(
         errorForm => Future.successful(Ok(views.html.admin.news.createForm(errorForm, dopts, categoryOptions))),
+        // We only show audience validation errors if there were no other errors, which can look weird.
+
         data => audienceBinder.bindAudience(data).map {
           case Left(errors) =>
             val errorForm = addFormErrors(bound, errors)

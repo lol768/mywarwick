@@ -1,5 +1,6 @@
 package models
 
+import models.news.NotificationData
 import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -90,10 +91,20 @@ case class ActivitySave(
 )
 
 object ActivitySave {
-  def fromData(providerId: String, shouldNotify: Boolean, data: IncomingActivityData): ActivitySave = {
+  def fromApi(providerId: String, shouldNotify: Boolean, data: IncomingActivityData): ActivitySave = {
     import data._
     ActivitySave(providerId, shouldNotify, `type`, title, text, url, tags.getOrElse(Seq.empty), replace.getOrElse(Map.empty), generated_at)
   }
+
+  def fromPublisher(item: NotificationData, audienceId: String) =
+    ActivitySave(
+      providerId = "news",
+      `type` = "news",
+      title = item.text,
+      url = item.linkHref,
+      shouldNotify = true,
+      audienceId = Some(audienceId)
+    )
 }
 
 case class ActivityRecipients(

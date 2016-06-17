@@ -3,6 +3,7 @@ package controllers.admin
 import javax.inject.Inject
 
 import controllers.BaseController
+import models.{Activity, ActivitySave}
 import models.news.{Audience, NotificationData}
 import play.api.data.Forms._
 import play.api.data._
@@ -33,7 +34,7 @@ class NotificationsController @Inject()(
   import Roles._
   import securityService._
 
-  val publishNotificationForm = publishForm(mapping(
+  val publishNotificationForm = publishForm(categoriesRequired = false, mapping(
     "text" -> nonEmptyText,
     "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url)
   )(NotificationData.apply)(NotificationData.unapply))
@@ -46,7 +47,7 @@ class NotificationsController @Inject()(
 
   def createForm = RequiredActualUserRoleAction(Sysadmin).async {
     departmentOptions.map { dopts =>
-      Ok(views.createForm(publishNotificationForm, dopts, categoryOptions))
+      Ok(views.createForm(publishNotificationForm, dopts))
     }
   }
 
@@ -55,15 +56,15 @@ class NotificationsController @Inject()(
       val form = publishNotificationForm.bindFromRequest
 
       form.fold(
-        formWithErrors => Future.successful(Ok(views.createForm(formWithErrors, dopts, categoryOptions))),
+        formWithErrors => Future.successful(Ok(views.createForm(formWithErrors, dopts))),
         publish => {
           audienceBinder.bindAudience(publish).map {
             case Left(errors) =>
-              Ok(views.createForm(addFormErrors(form, errors), dopts, categoryOptions))
+              Ok(views.createForm(addFormErrors(form, errors), dopts))
             case Right(Audience.Public) =>
-              Ok(views.createForm(form.withError("audience", "Notifications cannot be public"), dopts, categoryOptions))
+              Ok(views.createForm(form.withError("audience", "Notifications cannot be public"), dopts))
             case Right(audience) =>
-              notificationPublishingService.publish(publish.item, audience, publish.categoryIds) match {
+              notificationPublishingService.publish(publish.item, audience) match {
                 case Success(_) =>
                   Redirect(routes.NotificationsController.list()).flashing("result" -> "Notification created")
                 case Failure(e) =>
@@ -75,7 +76,7 @@ class NotificationsController @Inject()(
                       form.withGlobalError("An error occurred creating this notification")
                   }
 
-                  Ok(views.createForm(formWithError, dopts, categoryOptions))
+                  Ok(views.createForm(formWithError, dopts))
               }
           }
         }
