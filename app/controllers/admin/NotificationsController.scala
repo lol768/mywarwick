@@ -3,6 +3,7 @@ package controllers.admin
 import javax.inject.Inject
 
 import controllers.BaseController
+import models.{Activity, ActivitySave}
 import models.news.{Audience, NotificationData}
 import play.api.data.Forms._
 import play.api.data._
@@ -33,7 +34,7 @@ class NotificationsController @Inject()(
   import Roles._
   import securityService._
 
-  val publishNotificationForm = publishForm(mapping(
+  val publishNotificationForm = publishForm(categoriesRequired = false, mapping(
     "text" -> nonEmptyText,
     "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url)
   )(NotificationData.apply)(NotificationData.unapply))
@@ -63,7 +64,7 @@ class NotificationsController @Inject()(
             case Right(Audience.Public) =>
               Ok(views.createForm(form.withError("audience", "Notifications cannot be public"), dopts, categoryOptions))
             case Right(audience) =>
-              notificationPublishingService.publish(publish.item, audience, publish.categoryIds) match {
+              notificationPublishingService.publish(publish.item, audience) match {
                 case Success(_) =>
                   Redirect(routes.NotificationsController.list()).flashing("result" -> "Notification created")
                 case Failure(e) =>

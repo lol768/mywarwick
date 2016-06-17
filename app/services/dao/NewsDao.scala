@@ -9,7 +9,6 @@ import anorm._
 import com.google.inject.ImplementedBy
 import models.news.{AudienceSize, Link, NewsItemRender, NewsItemSave}
 import org.joda.time.DateTime
-import play.api.db.Database
 import system.DatabaseDialect
 import uk.ac.warwick.util.web.Uri
 import uk.ac.warwick.util.web.Uri.UriException
@@ -47,7 +46,7 @@ trait NewsDao {
 }
 
 @Singleton
-class AnormNewsDao @Inject()(db: Database, dialect: DatabaseDialect) extends NewsDao {
+class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
 
   private def newId = UUID.randomUUID().toString
 
