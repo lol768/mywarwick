@@ -22,6 +22,7 @@ class ActivityCreationDaoImpl @Inject()(
 
   override def createActivity(activity: ActivitySave, recipients: Set[Usercode], replaces: Seq[String])(implicit c: Connection): ActivityResponse = {
     val activityId = activityDao.save(activity, replaces)
+    val provider = activityDao.getProvider(activity.providerId)
 
     activity.tags.foreach {
       tag => activityTagDao.save(activityId, tag)
@@ -40,6 +41,7 @@ class ActivityCreationDaoImpl @Inject()(
         replacedBy = None,
         generatedAt = activity.generatedAt.getOrElse(DateTime.now),
         createdAt = DateTime.now,
+        icon = provider.activityIcon,
         shouldNotify = activity.shouldNotify
       ),
       activity.tags

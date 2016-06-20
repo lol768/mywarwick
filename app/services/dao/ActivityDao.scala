@@ -32,6 +32,8 @@ trait ActivityDao {
   def countNotificationsSinceDate(usercode: String, date: DateTime)(implicit c: Connection): Int
 
   def saveLastReadDate(usercode: String, read: DateTime)(implicit c: Connection): Boolean
+
+  def getProvider(providerId: String)(implicit c: Connection): Provider
 }
 
 class ActivityDaoImpl @Inject()(
@@ -112,11 +114,14 @@ class ActivityDaoImpl @Inject()(
       s"""
         SELECT
           ACTIVITY.*,
+          PROVIDER.ICON,
+          PROVIDER.COLOUR,
           ACTIVITY_TAG.NAME          AS TAG_NAME,
           ACTIVITY_TAG.VALUE         AS TAG_VALUE,
           ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
         FROM ACTIVITY
           LEFT JOIN ACTIVITY_TAG ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
+          LEFT JOIN PROVIDER ON PROVIDER.ID = ACTIVITY.PROVIDER_ID
         WHERE ACTIVITY.ID IN (
           SELECT ACTIVITY_ID
           FROM ACTIVITY_RECIPIENT
@@ -187,9 +192,19 @@ class ActivityDaoImpl @Inject()(
       get[Option[String]]("REPLACED_BY_ID") ~
       get[DateTime]("GENERATED_AT") ~
       get[DateTime]("CREATED_AT") ~
+      get[Option[String]]("ICON") ~
+      get[Option[String]]("COLOUR") ~
       get[Boolean]("SHOULD_NOTIFY") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify =>
-        Activity(id, providerId, activityType, title, text, url, replacedById, generatedAt, createdAt, shouldNotify)
+      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ generatedAt ~ createdAt ~ iconName ~ iconColour ~ shouldNotify =>
+
+        // FIXME: less disgusting parsing of icon and colour into ActivityIcon. Maybe Activity should have Provider property
+        Activity(id, providerId, activityType, title, text, url, replacedById, generatedAt, createdAt,
+          iconName match {
+            case Some(name) => Some(ActivityIcon(name, iconColour))
+            case None => None
+          },
+          shouldNotify
+        )
     }
 
   private lazy val tagParser: RowParser[Option[ActivityTag]] =
@@ -200,10 +215,24 @@ class ActivityDaoImpl @Inject()(
         for (name <- name; value <- value) yield ActivityTag(name, TagValue(value, display))
     }
 
-
   lazy val activityResponseParser: RowParser[ActivityResponse] =
     activityParser ~ tagParser map {
       case activity ~ tag => ActivityResponse(activity, tag.toSeq)
     }
 
+  override def getProvider(providerId: String)(implicit c: Connection): Provider =
+    SQL"SELECT * FROM PROVIDER WHERE ID = $providerId"
+      .as(providerParser.single)
+
+  private lazy val providerParser: RowParser[Provider] =
+    get[String]("ID") ~
+    get[Option[String]]("DISPLAY_NAME") ~
+    get[Option[String]]("ICON") ~
+      get[Option[String]]("COLOUR") map {
+      case id ~ displayName ~ icon ~ colour =>
+        icon match {
+          case Some(i) => Provider(id, displayName, Some(ActivityIcon(i, colour)))
+          case _ => Provider(id, displayName, None)
+        }
+    }
 }

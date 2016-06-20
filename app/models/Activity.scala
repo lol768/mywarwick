@@ -5,13 +5,22 @@ import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
+case class ActivityIcon(name: String, colour: Option[String])
+object ActivityIcon {
+  implicit val writes = Json.writes[ActivityIcon]
+}
+
+case class Provider(id: String, displayName: Option[String], activityIcon: Option[ActivityIcon])
+object Provider {
+  implicit val writes = Json.writes[Provider]
+}
+
 case class Activity(
   id: String,
   providerId: String,
 
   /**
     * > Some sort of filterable name for what sort of thing the activity is about, e.g `coursework-due` or `squash-court-reserved`
-    * > (I think)
     */
   `type`: String,
   title: String,
@@ -20,6 +29,7 @@ case class Activity(
   replacedBy: Option[String],
   generatedAt: DateTime,
   createdAt: DateTime,
+  icon: Option[ActivityIcon],
   shouldNotify: Boolean
 )
 
@@ -27,23 +37,29 @@ object Activity {
   implicit val writes = Json.writes[Activity]
 }
 
-
 object ActivityResponse {
 
   import DateFormats.isoDateWrites
 
   implicit val writes: Writes[ActivityResponse] = new Writes[ActivityResponse] {
-    override def writes(o: ActivityResponse): JsValue = Json.obj(
-      "id" -> o.activity.id,
-      "notification" -> o.activity.shouldNotify,
-      "provider" -> o.activity.providerId,
-      "type" -> o.activity.`type`,
-      "title" -> o.activity.title,
-      "text" -> o.activity.text,
-      "url" -> o.activity.url,
-      "tags" -> o.tags,
-      "date" -> o.activity.generatedAt
-    )
+    override def writes(o: ActivityResponse): JsValue = {
+      val json = Json.obj(
+        "id" -> o.activity.id,
+        "notification" -> o.activity.shouldNotify,
+        "provider" -> o.activity.providerId,
+        "type" -> o.activity.`type`,
+        "title" -> o.activity.title,
+        "text" -> o.activity.text,
+        "url" -> o.activity.url,
+        "tags" -> o.tags,
+        "date" -> o.activity.generatedAt
+      )
+
+      o.activity.icon match {
+        case Some(icon) => json ++ Json.obj("icon" -> Json.toJson(icon))
+        case None => json
+      }
+    }
   }
 }
 
