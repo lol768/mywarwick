@@ -32,6 +32,8 @@ trait ActivityDao {
   def countNotificationsSinceDate(usercode: String, date: DateTime)(implicit c: Connection): Int
 
   def saveLastReadDate(usercode: String, read: DateTime)(implicit c: Connection): Boolean
+
+  def getActivityIcon(providerId: String)(implicit c: Connection): Option[ActivityIcon]
 }
 
 class ActivityDaoImpl @Inject()(
@@ -112,11 +114,14 @@ class ActivityDaoImpl @Inject()(
       s"""
         SELECT
           ACTIVITY.*,
+          PROVIDER.ICON,
+          PROVIDER.COLOUR,
           ACTIVITY_TAG.NAME          AS TAG_NAME,
           ACTIVITY_TAG.VALUE         AS TAG_VALUE,
           ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
         FROM ACTIVITY
           LEFT JOIN ACTIVITY_TAG ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
+          LEFT JOIN PROVIDER ON PROVIDER.ID = ACTIVITY.PROVIDER_ID
         WHERE ACTIVITY.ID IN (
           SELECT ACTIVITY_ID
           FROM ACTIVITY_RECIPIENT
@@ -200,10 +205,18 @@ class ActivityDaoImpl @Inject()(
         for (name <- name; value <- value) yield ActivityTag(name, TagValue(value, display))
     }
 
-
   lazy val activityResponseParser: RowParser[ActivityResponse] =
-    activityParser ~ tagParser map {
-      case activity ~ tag => ActivityResponse(activity, tag.toSeq)
+    activityParser ~ activityIconParser ~ tagParser map {
+      case activity ~ icon ~ tag => ActivityResponse(activity, icon, tag.toSeq)
     }
 
+  override def getActivityIcon(providerId: String)(implicit c: Connection): Option[ActivityIcon] =
+    SQL"SELECT icon, colour FROM PROVIDER WHERE ID = $providerId"
+      .as(activityIconParser.single)
+
+  private lazy val activityIconParser: RowParser[Option[ActivityIcon]] =
+    get[Option[String]]("ICON") ~
+      get[Option[String]]("COLOUR") map {
+      case icon ~ colour => for (i <- icon) yield ActivityIcon(i, colour)
+    }
 }

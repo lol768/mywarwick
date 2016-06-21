@@ -17,7 +17,7 @@ const ActivityItem = (props) => {
       <Hyperlink href={ props.url }>
         <div className="media">
           <div className="media-left">
-            <AppIcon app={ props.provider } size="lg" />
+            <AppIcon icon={ props.icon } size="lg" />
           </div>
           <div className="media-body">
             <div className="activity-item__title">{ props.title }</div>
@@ -43,5 +43,10 @@ ActivityItem.propTypes = {
   date: PropTypes.string.isRequired,
   url: PropTypes.string,
   unread: PropTypes.bool,
+  icon: React.PropTypes.shape({
+    name: React.PropTypes.string,
+    colour: React.PropTypes.string,
+  }),
   forceDisplayDay: PropTypes.bool,
 };
+
