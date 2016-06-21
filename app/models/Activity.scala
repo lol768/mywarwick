@@ -10,11 +10,6 @@ object ActivityIcon {
   implicit val writes = Json.writes[ActivityIcon]
 }
 
-case class Provider(id: String, displayName: Option[String], activityIcon: Option[ActivityIcon])
-object Provider {
-  implicit val writes = Json.writes[Provider]
-}
-
 case class Activity(
   id: String,
   providerId: String,
