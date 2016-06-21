@@ -33,7 +33,7 @@ trait ActivityDao {
 
   def saveLastReadDate(usercode: String, read: DateTime)(implicit c: Connection): Boolean
 
-  def getProvider(providerId: String)(implicit c: Connection): Provider
+  def getActivityIcon(providerId: String)(implicit c: Connection): Option[ActivityIcon]
 }
 
 class ActivityDaoImpl @Inject()(
@@ -192,19 +192,9 @@ class ActivityDaoImpl @Inject()(
       get[Option[String]]("REPLACED_BY_ID") ~
       get[DateTime]("GENERATED_AT") ~
       get[DateTime]("CREATED_AT") ~
-      get[Option[String]]("ICON") ~
-      get[Option[String]]("COLOUR") ~
       get[Boolean]("SHOULD_NOTIFY") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ generatedAt ~ createdAt ~ iconName ~ iconColour ~ shouldNotify =>
-
-        // FIXME: less disgusting parsing of icon and colour into ActivityIcon. Maybe Activity should have Provider property
-        Activity(id, providerId, activityType, title, text, url, replacedById, generatedAt, createdAt,
-          iconName match {
-            case Some(name) => Some(ActivityIcon(name, iconColour))
-            case None => None
-          },
-          shouldNotify
-        )
+      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify =>
+        Activity(id, providerId, activityType, title, text, url, replacedById, generatedAt, createdAt, shouldNotify)
     }
 
   private lazy val tagParser: RowParser[Option[ActivityTag]] =
@@ -216,23 +206,21 @@ class ActivityDaoImpl @Inject()(
     }
 
   lazy val activityResponseParser: RowParser[ActivityResponse] =
-    activityParser ~ tagParser map {
-      case activity ~ tag => ActivityResponse(activity, tag.toSeq)
+    activityParser ~ activityIconParser ~ tagParser map {
+      case activity ~ icon ~ tag => ActivityResponse(activity, icon, tag.toSeq)
     }
 
-  override def getProvider(providerId: String)(implicit c: Connection): Provider =
-    SQL"SELECT * FROM PROVIDER WHERE ID = $providerId"
-      .as(providerParser.single)
+  override def getActivityIcon(providerId: String)(implicit c: Connection): Option[ActivityIcon] =
+    SQL"SELECT icon, colour FROM PROVIDER WHERE ID = $providerId"
+      .as(activityIconParser.single)
 
-  private lazy val providerParser: RowParser[Provider] =
-    get[String]("ID") ~
-    get[Option[String]]("DISPLAY_NAME") ~
+  private lazy val activityIconParser: RowParser[Option[ActivityIcon]] =
     get[Option[String]]("ICON") ~
       get[Option[String]]("COLOUR") map {
-      case id ~ displayName ~ icon ~ colour =>
+      case icon ~ colour =>
         icon match {
-          case Some(i) => Provider(id, displayName, Some(ActivityIcon(i, colour)))
-          case _ => Provider(id, displayName, None)
+          case Some(i) => Some(ActivityIcon(i, colour))
+          case _ => None
         }
     }
 }

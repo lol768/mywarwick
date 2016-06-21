@@ -37,7 +37,6 @@ object Fixtures {
       replacedBy = None,
       generatedAt = activity.generatedAt.getOrElse(DateTime.now),
       createdAt = DateTime.now,
-      icon = None,
       shouldNotify = activity.shouldNotify
     )
 

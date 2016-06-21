@@ -29,7 +29,6 @@ case class Activity(
   replacedBy: Option[String],
   generatedAt: DateTime,
   createdAt: DateTime,
-  icon: Option[ActivityIcon],
   shouldNotify: Boolean
 )
 
@@ -55,7 +54,7 @@ object ActivityResponse {
         "date" -> o.activity.generatedAt
       )
 
-      o.activity.icon match {
+      o.icon match {
         case Some(icon) => json ++ Json.obj("icon" -> Json.toJson(icon))
         case None => json
       }
@@ -65,6 +64,7 @@ object ActivityResponse {
 
 case class ActivityResponse(
   activity: Activity,
+  icon: Option[ActivityIcon],
   tags: Seq[ActivityTag]
 )
 

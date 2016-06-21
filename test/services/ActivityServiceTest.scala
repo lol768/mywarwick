@@ -46,7 +46,7 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
 
     "save an item for each recipient" in new Scope {
       val createdActivity = Fixtures.activity.fromSave("1234", submissionDue)
-      val response = ActivityResponse(createdActivity, Nil)
+      val response = ActivityResponse(createdActivity, None, Nil)
       val recipients = Set(Usercode("cusebr"))
 
       when(activityRecipientService.getRecipientUsercodes(Nil, Nil)) thenReturn recipients
@@ -60,7 +60,7 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
 
     "not notify when shouldNotify is false" in new Scope {
       val createdActivity = Fixtures.activity.fromSave("1234", submissionDue.copy(shouldNotify = false))
-      val response = ActivityResponse(createdActivity, Nil)
+      val response = ActivityResponse(createdActivity, None, Nil)
       val recipients = Set(Usercode("cusebr"))
 
       when(activityRecipientService.getRecipientUsercodes(Nil, Nil)) thenReturn recipients
