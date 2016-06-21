@@ -217,10 +217,6 @@ class ActivityDaoImpl @Inject()(
   private lazy val activityIconParser: RowParser[Option[ActivityIcon]] =
     get[Option[String]]("ICON") ~
       get[Option[String]]("COLOUR") map {
-      case icon ~ colour =>
-        icon match {
-          case Some(i) => Some(ActivityIcon(i, colour))
-          case _ => None
-        }
+      case icon ~ colour => for (i <- icon) yield ActivityIcon(i, colour)
     }
 }

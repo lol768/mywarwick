@@ -1,13 +1,13 @@
 package services.dao
 
 import helpers.{Fixtures, OneStartAppPerSuite}
-import models.{ActivityTag, Output, TagValue}
+import models._
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
 import Output.Mobile
-import anorm.SQL
 import warwick.anorm.converters.ColumnConversions._
 import warwick.sso.Usercode
+import anorm._
 import anorm.SqlParser._
 
 class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
@@ -117,6 +117,23 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       activityDao.saveLastReadDate(usercode, yesterday)
       lastReadDate mustBe now
+    }
+
+    "get provider's activity icon" in transaction { implicit c =>
+
+      SQL"""
+        INSERT INTO provider (id, display_name, icon, colour) VALUES
+        ('skynet', 'Skynet', 'eye-o', 'greyish')
+      """.execute()
+
+      val activitySave = ActivitySave("skynet", false, "beady-eye", "Watching You", None, None, Seq.empty, Map.empty, None, None)
+      val activityId = activityDao.save(activitySave, Seq.empty)
+      activityRecipientDao.create(activityId, "nicduke", None)
+
+      val response = activityDao.getActivitiesForUser("nicduke", 1).head
+
+      response.icon mustBe Some(ActivityIcon("eye-o", Some("greyish")))
+
     }
   }
 }
