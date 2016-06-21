@@ -28,7 +28,7 @@ class NewsImageServiceTest extends PlaySpec with MockitoSugar {
     }
   }
 
-  "NewsImageService#fechStream" should {
+  "NewsImageService#fetchStream" should {
     "call the object storage service" in {
       val someStream = Some(mock[InputStream])
       when(objectStorageService.fetch("abc")).thenReturn(someStream)

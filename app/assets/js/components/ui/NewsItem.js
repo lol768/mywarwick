@@ -30,9 +30,12 @@ export default class NewsItem extends ReactComponent {
 
           { imageId ?
             <div className="news-item__image">
-              <img src={ `/api/news/images/${imageId}` } alt={ title } />
+              <img
+                src={ `/api/news/images/${imageId}?width=${NewsItem.deviceWidth}` }
+                alt={ title }
+              />
             </div>
-          : null }
+            : null }
 
           <div className="news-item__content">
             {render(text)}
@@ -48,5 +51,6 @@ export default class NewsItem extends ReactComponent {
       </article>
     );
   }
-
 }
+
+NewsItem.deviceWidth = window.innerWidth * window.devicePixelRatio;
