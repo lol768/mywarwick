@@ -135,5 +135,9 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
       response.icon mustBe Some(ActivityIcon("eye-o", Some("greyish")))
 
     }
+
+    "get missing activity icon" in transaction { implicit t =>
+      activityDao.getActivityIcon("nonexist") mustBe None
+    }
   }
 }
