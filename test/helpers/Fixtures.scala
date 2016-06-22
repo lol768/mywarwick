@@ -1,7 +1,7 @@
 package helpers
 
-import models.{Activity, ActivityRecipients, ActivitySave}
-
+import models.news.NewsItemSave
+import models.{Activity, ActivitySave}
 import org.joda.time.DateTime
 
 /**
@@ -40,6 +40,19 @@ object Fixtures {
       shouldNotify = activity.shouldNotify
     )
 
+  }
+
+  object news {
+    def save(
+      title: String = "Some news",
+      text: String = "The news"
+    ) = NewsItemSave(
+      title = title,
+      text = text,
+      link = None,
+      publishDate = DateTime.now,
+      imageId = None
+    )
   }
 
 }

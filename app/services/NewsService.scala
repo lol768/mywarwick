@@ -14,7 +14,7 @@ trait NewsService {
   def allNews(limit: Int = 100, offset: Int = 0): Seq[NewsItemRender]
 
   def latestNews(user: Option[Usercode], limit: Int = 100): Seq[NewsItemRender]
-  def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): Unit
+  def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String
 
   def updateNewsItem(id: String, item: NewsItemData): Int
 
@@ -43,13 +43,14 @@ class AnormNewsService @Inject()(
 
   // FIXME: Move audience-resolution and recipient-saving to scheduler
   // and just save audience components to db here
-  override def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): Unit =
+  override def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String =
     db.withConnection { implicit c =>
       val recipients = audienceService.resolve(audience).get // FIXME Try.get throws
       val audienceId = audienceDao.saveAudience(audience)
       val id = dao.save(item, audienceId)
       dao.saveRecipients(id, item.publishDate, recipients)
       publishCategoryDao.saveNewsCategories(id, categoryIds)
+      id
     }
 
   override def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize] =
