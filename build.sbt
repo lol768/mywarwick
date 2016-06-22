@@ -42,7 +42,7 @@ val appDeps = Seq(
   "com.notnoop.apns" % "apns" % "1.0.0.Beta6",
   "org.quartz-scheduler" % "quartz" % "2.2.1",
   "com.google.inject.extensions" % "guice-multibindings" % "4.0",
-  "com.adrianhurt" %% "play-bootstrap" % "1.0-P24-B3",
+  "com.adrianhurt" %% "play-bootstrap" % "1.0-P25-B3",
   "org.imgscalr" % "imgscalr-lib" % "4.2",
   "com.github.mumoshu" %% "play2-memcached-play24" % "0.7.0",
   "org.databrary" %% "play-logback-access" % "0.5" exclude("javax.servlet", "servlet-api"),
@@ -60,6 +60,8 @@ val testDeps = Seq(
   // play with dependencies if you need to upgrade.
   "org.seleniumhq.selenium" % "selenium-java" % "2.52.0"
 ).map(_ % Test)
+
+javaOptions in Test += "-Dlogger.resource=test-logging.xml"
 
 libraryDependencies ++= (appDeps ++ testDeps).map(_.excludeAll(
   ExclusionRule(organization = "commons-logging"),

@@ -24,6 +24,10 @@ trait SecurityService {
 
   def APIAction: ActionBuilder[AuthenticatedRequest]
 
+  /**
+    * An async result that will either do what you ask (A) or fall back to an error Result.
+    * Used as a handler type for websockets.
+    */
   type TryAccept[A] = Future[Either[Result, A]]
 
   def SecureWebsocket[A](request: play.api.mvc.RequestHeader)(block: warwick.sso.LoginContext => TryAccept[A]): TryAccept[A]

@@ -2,8 +2,8 @@ package controllers.api
 
 import java.io.{File, FileInputStream}
 
-import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import helpers.TestActors
 import org.apache.commons.io.FileUtils
 import org.joda.time.DateTime
 import org.mockito.Matchers
@@ -22,14 +22,14 @@ import services._
 import services.dao.NewsImage
 import warwick.sso._
 
+import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
-import scala.concurrent.duration._
 
 
 class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results with BeforeAndAfterAll {
 
-  implicit val akka = ActorSystem()
+  implicit val akka = TestActors.plainActorSystem()
   implicit val mat = ActorMaterializer()
 
   override def afterAll(): Unit = {

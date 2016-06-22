@@ -1,7 +1,7 @@
 package controllers.api
 
-import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import helpers.TestActors
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterAll
@@ -17,12 +17,12 @@ import services.{ActivityRecipientService, ActivityService, ProviderPermissionSe
 import warwick.sso._
 
 import scala.concurrent.Await
-import scala.util.Success
 import scala.concurrent.duration._
+import scala.util.Success
 
 class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with Results with BeforeAndAfterAll {
 
-  implicit val akka = ActorSystem()
+  implicit val akka = TestActors.plainActorSystem()
   implicit val mat = ActorMaterializer()
 
   override def afterAll(): Unit = {

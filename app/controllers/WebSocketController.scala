@@ -28,8 +28,9 @@ class WebSocketController @Inject()(implicit
   def socket = WebSocket.acceptOrResult[JsValue, JsValue] { request =>
     SecureWebsocket(request) { loginContext: LoginContext =>
       val who = loginContext.user.map(_.usercode).getOrElse("nobody")
-      logger.info(s"Websocket opening for ${who}")
-      Future.successful(Right(ActorFlow.actorRef(WebsocketActor.props(loginContext, metrics.websocketTracker()) _)))
+      logger.info(s"Websocket opening for $who")
+      val flow = ActorFlow.actorRef(out => WebsocketActor.props(loginContext, metrics.websocketTracker())(out))
+      Future.successful(Right(flow))
     }
   }
 
