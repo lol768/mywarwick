@@ -12,58 +12,47 @@ import anorm.SqlParser._
 
 class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
-  val activityDao = app.injector.instanceOf[ActivityDao]
-  val activityTagDao = app.injector.instanceOf[ActivityTagDao]
-  val activityRecipientDao = app.injector.instanceOf[ActivityRecipientDao]
-  val messagingDao = app.injector.instanceOf[MessagingDao]
+  val activityDao = get[ActivityDao]
+  val activityTagDao = get[ActivityTagDao]
+  val activityRecipientDao = get[ActivityRecipientDao]
+  val messagingDao = get[MessagingDao]
 
   val activityPrototype = Fixtures.activitySave.submissionDue
 
+  val insertSkynetProvider = SQL"""
+        INSERT INTO provider (id, display_name, icon, colour) VALUES
+        ('skynet', 'Skynet', 'eye-o', 'greyish')
+      """
 
   "ActivityDao" should {
 
     "get activity by id" in transaction { implicit c =>
-
       val activityId = activityDao.save(activityPrototype, Seq.empty)
-
-      activityDao.getActivityById(activityId).map(_.id) must contain(activityId)
-
+      activityDao.getActivityById(activityId).map(_.id) mustBe Some(activityId)
     }
 
     "get activities by ids" in transaction { implicit c =>
-
       val activityId = activityDao.save(activityPrototype, Seq.empty)
-
-      activityDao.getActivitiesByIds(Seq(activityId)).map(_.id) must contain(activityId)
-
+      activityDao.getActivitiesByIds(Seq(activityId)).map(_.id) mustBe Seq(activityId)
     }
 
     "replace activities" in transaction { implicit c =>
-
       val activityId = activityDao.save(activityPrototype, Seq.empty)
       val newActivityId = activityDao.save(activityPrototype, Seq(activityId))
-
       activityDao.getActivityById(activityId).flatMap(_.replacedBy) mustBe Some(newActivityId)
-
     }
 
     "find activities without tags" in transaction { implicit c =>
-
       val activityId = activityDao.save(activityPrototype, Seq.empty)
       activityRecipientDao.create(activityId, "someone", None)
-
       activityDao.getActivitiesForUser("someone", 100).map(_.activity.id) must contain(activityId)
-
     }
 
     "find activities with tags" in transaction { implicit c =>
-
       val activityId = activityDao.save(activityPrototype, Seq.empty)
       activityRecipientDao.create(activityId, "someone", None)
       activityTagDao.save(activityId, ActivityTag("name", TagValue("value")))
-
       activityDao.getActivitiesForUser("someone", 100).map(_.activity.id) must contain(activityId)
-
     }
 
     "get notifications since date" in transaction { implicit c =>
@@ -120,11 +109,7 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
     }
 
     "get provider's activity icon" in transaction { implicit c =>
-
-      SQL"""
-        INSERT INTO provider (id, display_name, icon, colour) VALUES
-        ('skynet', 'Skynet', 'eye-o', 'greyish')
-      """.execute()
+      insertSkynetProvider.execute()
 
       val activitySave = ActivitySave("skynet", false, "beady-eye", "Watching You", None, None, Seq.empty, Map.empty, None, None)
       val activityId = activityDao.save(activitySave, Seq.empty)
@@ -133,11 +118,15 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
       val response = activityDao.getActivitiesForUser("nicduke", 1).head
 
       response.icon mustBe Some(ActivityIcon("eye-o", Some("greyish")))
-
     }
 
     "get missing activity icon" in transaction { implicit t =>
       activityDao.getActivityIcon("nonexist") mustBe None
+    }
+    
+    "get activity icon" in transaction { implicit t =>
+      insertSkynetProvider.execute()
+      activityDao.getActivityIcon("skynet").get.colour.get mustBe "greyish"
     }
   }
 }

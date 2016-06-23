@@ -206,17 +206,17 @@ class ActivityDaoImpl @Inject()(
     }
 
   lazy val activityResponseParser: RowParser[ActivityResponse] =
-    activityParser ~ activityIconParser ~ tagParser map {
+    activityParser ~ activityIconParser.? ~ tagParser map {
       case activity ~ icon ~ tag => ActivityResponse(activity, icon, tag.toSeq)
     }
 
   override def getActivityIcon(providerId: String)(implicit c: Connection): Option[ActivityIcon] =
     SQL"SELECT icon, colour FROM PROVIDER WHERE ID = $providerId"
-      .as(activityIconParser.single)
+      .as(activityIconParser.singleOpt)
 
-  private lazy val activityIconParser: RowParser[Option[ActivityIcon]] =
-    get[Option[String]]("ICON") ~
-      get[Option[String]]("COLOUR") map {
-      case icon ~ colour => for (i <- icon) yield ActivityIcon(i, colour)
+  private lazy val activityIconParser: RowParser[ActivityIcon] =
+    get[String]("ICON") ~
+    get[Option[String]]("COLOUR") map {
+      case icon ~ colour => ActivityIcon(icon, colour)
     }
 }
