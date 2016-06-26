@@ -9,6 +9,7 @@ import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.Result
 import services.dao.DepartmentInfoDao
 import services.{NewsService, NewsCategoryService, SecurityService}
 import system.{Roles, TimeZones, Validation}
@@ -41,6 +42,7 @@ case class NewsItemData(
     ignoreCategories = ignoreCategories
   )
 }
+
 
 
 @Singleton

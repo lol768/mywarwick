@@ -23,6 +23,9 @@ lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala)
     funSettings
   )
 
+// Versions of things for below
+val enumeratumVersion = "1.4.4"
+
 val appDeps = Seq(
   jdbc,
   cache,
@@ -34,6 +37,7 @@ val appDeps = Seq(
   "uk.ac.warwick.sso" %% "sso-client-play" % "2.18",
   "uk.ac.warwick.play-utils" %% "anorm" % "1.3",
   "uk.ac.warwick.play-utils" %% "objectstore" % "1.3",
+  "uk.ac.warwick.util" % "warwickutils-cache" % "20160429",
   "com.typesafe.akka" %% "akka-cluster" % "2.4.0",
   "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.0",
   "com.typesafe.akka" %% "akka-slf4j" % "2.4.0",
@@ -46,7 +50,10 @@ val appDeps = Seq(
   "org.imgscalr" % "imgscalr-lib" % "4.2",
   "com.github.mumoshu" %% "play2-memcached-play24" % "0.7.0",
   "org.databrary" %% "play-logback-access" % "0.5" exclude("javax.servlet", "servlet-api"),
-  "ch.qos.logback" % "logback-access" % "1.1.4"
+  "ch.qos.logback" % "logback-access" % "1.1.4",
+  "com.beachape" %% "enumeratum" % enumeratumVersion,
+  "com.beachape" %% "enumeratum-play" % enumeratumVersion,
+  "com.beachape" %% "enumeratum-play-json" % enumeratumVersion
 )
 
 val testDeps = Seq(
