@@ -28,17 +28,9 @@ class NewsImagesController @Inject()(
   import securityService._
   import system.Roles._
 
-  private def roundWidth(width: Int): Int = width match {
-    case w if w < 320 => w // piece of shit
-    case w if w <= 640 => 640 // iPhone 5
-    case w if w <= 750 => 750 // iPhone 6
-    case w if w <= 1080 => 1080 // Galaxy S5/ Xperia Z
-    case w => w
-  }
-
   def show(id: String) = Action { request =>
     newsImageService.find(id).map { newsImage =>
-      val targetWidth = request.getQueryString("width").map(_.toInt).filter(_ < newsImage.width).map(roundWidth)
+      val targetWidth = request.getQueryString("width").map(_.toInt).filter(_ < newsImage.width)
       val cacheKey = targetWidth.map(w => s"$id@$w").getOrElse(id)
 
       cache
