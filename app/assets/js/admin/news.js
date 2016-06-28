@@ -1,7 +1,7 @@
 import $ from 'jquery';
 
-$('input[name="item.publishDateSet"]').on('change', () => {
-  const showDateField = $('#item_publishDateSet_true').is(':checked');
+$('input[name="item.publishDateSet"]').on('change', function onChange() {
+  const showDateField = $(this).filter(':checked').val() === 'true';
 
-  $('#item_publishDate_field').toggle(showDateField);
+  $(this).parents('.form-group').next().toggle(showDateField);
 }).trigger('change');
