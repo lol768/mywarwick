@@ -9,6 +9,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json._
 import play.api.mvc.Result
 import services._
+import services.ActivityError._
 import warwick.sso.{AuthenticatedRequest, GroupName, User, Usercode}
 
 import scala.util.{Failure, Success}
@@ -46,6 +47,18 @@ class IncomingActivitiesController @Inject()(
           activityService.save(activity, usercodes) match {
             case Success(activityId) => created(activityId)
             case Failure(NoRecipientsException) => noRecipients
+            case Failure(ActivityException(errors: Seq[ActivityError])) =>
+              BadRequest(Json.toJson(API.Failure[JsObject]("bad_request",
+                errors.map { error =>
+                  val message = error match {
+                    case InvalidActivityType(name) => s"The activity type '$name' is not valid"
+                    case InvalidTagName(name) => s"The tag name '$name' is not valid"
+                    case InvalidTagValue(name, value) => s"The value '$value' for tag '$name' is not valid"
+                  }
+
+                  API.Error(error.getClass.getSimpleName, message)
+                }
+              )))
             case Failure(e) =>
               logger.error(s"Error while posting activity providerId=$providerId", e)
               otherError
