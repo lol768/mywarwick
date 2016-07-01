@@ -10,7 +10,7 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.dao.DepartmentInfoDao
-import services.{NewsService, PublishCategoryService, SecurityService}
+import services.{NewsService, NewsCategoryService, SecurityService}
 import system.{Roles, TimeZones, Validation}
 import uk.ac.warwick.util.web.Uri
 
@@ -46,7 +46,7 @@ class NewsController @Inject()(
   news: NewsService,
   val departmentInfoDao: DepartmentInfoDao,
   audienceBinder: AudienceBinder,
-  val publishCategoryService: PublishCategoryService
+  val newsCategoryService: NewsCategoryService
 ) extends BaseController with I18nSupport with Publishing[NewsItemData] {
 
   import Roles._

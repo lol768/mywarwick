@@ -6,7 +6,7 @@ import com.google.inject.ImplementedBy
 import controllers.admin.NewsItemData
 import models.news.{Audience, AudienceSize, NewsItemRender, NewsItemSave}
 import play.api.db.Database
-import services.dao.{AudienceDao, NewsDao, PublishCategoryDao}
+import services.dao.{AudienceDao, NewsDao, NewsCategoryDao}
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[AnormNewsService])
@@ -27,7 +27,7 @@ class AnormNewsService @Inject()(
   db: Database,
   dao: NewsDao,
   audienceService: AudienceService,
-  publishCategoryDao: PublishCategoryDao,
+  newsCategoryDao: NewsCategoryDao,
   audienceDao: AudienceDao
 ) extends NewsService {
 
@@ -49,7 +49,7 @@ class AnormNewsService @Inject()(
       val audienceId = audienceDao.saveAudience(audience)
       val id = dao.save(item, audienceId)
       dao.saveRecipients(id, item.publishDate, recipients)
-      publishCategoryDao.saveNewsCategories(id, categoryIds)
+      newsCategoryDao.saveNewsCategories(id, categoryIds)
       id
     }
 

@@ -9,7 +9,7 @@ class NewsServiceTest extends PlaySpec with OneStartAppPerSuite {
 
   val newsService = get[NewsService]
 
-  val allCategories = get[PublishCategoryService].all
+  val allCategories = get[NewsCategoryService].all
 
   "NewsService" should {
     "save items" in {

@@ -27,7 +27,7 @@ class NotificationsController @Inject()(
   audienceBinder: AudienceBinder,
   notificationPublishingService: NotificationPublishingService,
   activityService: ActivityService,
-  val publishCategoryService: PublishCategoryService
+  val newsCategoryService: NewsCategoryService
 ) extends BaseController with I18nSupport with Publishing[NotificationData] {
 
   import NotificationPublishingService.PROVIDER_ID
