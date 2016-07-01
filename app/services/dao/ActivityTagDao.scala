@@ -22,18 +22,9 @@ trait ActivityTagDao {
 class ActivityTagDaoImpl extends ActivityTagDao {
 
   override def save(activityId: String, tag: ActivityTag)(implicit c: Connection): String = {
-    if (tag.value.displayValue.isDefined) {
-      SQL"SELECT ID FROM ACTIVITY_TAG_VALUE WHERE TAG_NAME = ${tag.name} AND VALUE = ${tag.value.internalValue}"
-        .executeQuery()
-        .as(scalar[String].singleOpt)
-        .getOrElse {
-          SQL"INSERT INTO ACTIVITY_TAG_VALUE (ID, TAG_NAME, VALUE, DISPLAY_VALUE) VALUES (${UUID.randomUUID.toString}, ${tag.name}, ${tag.value.internalValue}, ${tag.value.displayValue})".execute()
-        }
-    }
-
     val tagId = UUID.randomUUID().toString
 
-    SQL"INSERT INTO ACTIVITY_TAG (ACTIVITY_ID, ID, NAME, VALUE, CREATED_AT) VALUES ($activityId, $tagId, ${tag.name}, ${tag.value.internalValue}, ${DateTime.now})"
+    SQL"INSERT INTO ACTIVITY_TAG (ACTIVITY_ID, ID, NAME, VALUE, DISPLAY_VALUE, CREATED_AT) VALUES ($activityId, $tagId, ${tag.name}, ${tag.value.internalValue}, ${tag.value.displayValue}, ${DateTime.now})"
       .execute()
 
     tagId
