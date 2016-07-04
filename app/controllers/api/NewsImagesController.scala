@@ -24,9 +24,9 @@ class NewsImagesController @Inject()(
   cache: CacheApi
 ) extends BaseController {
 
+  import EitherValidation._
   import securityService._
   import system.Roles._
-  import EitherValidation._
 
   def show(id: String) = Action { request =>
     newsImageService.find(id).map { newsImage =>

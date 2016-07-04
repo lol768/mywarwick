@@ -27,6 +27,7 @@ import * as tiles from './state/tiles';
 import * as update from './state/update';
 import * as user from './state/user';
 import * as ui from './state/ui';
+import * as device from './state/device';
 import * as analytics from './analytics';
 import store from './store';
 import AppRoot from './components/AppRoot';
@@ -50,6 +51,8 @@ $(() => {
   $(window).on('contextmenu', () => window.navigator.userAgent.indexOf('Mobile') < 0);
 
   $(window).on('resize', () => store.dispatch(ui.updateUIContext()));
+
+  $(window).on('deviceorientation resize', () => store.dispatch(device.updateDeviceWidth()));
 
   $(window).on('online', () =>
     store.dispatch(notifications.fetch())
