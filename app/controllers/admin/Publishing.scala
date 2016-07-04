@@ -3,7 +3,7 @@ package controllers.admin
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import services.NewsCategoryService
-import services.dao.DepartmentInfoDao
+import services.dao.{DepartmentInfo, DepartmentInfoDao}
 
 case class Publish[A](item: A, audience: Seq[String], department: Option[String], categoryIds: Seq[String], ignoreCategories: Boolean) extends AudienceFormData
 
@@ -39,14 +39,12 @@ trait DepartmentOptions {
   private val departmentInitialValue = Seq("" -> "--- Department ---")
 
   def departmentOptions =
-    departmentInfoDao.allDepartments
-      .recover { case e => Nil }
-      .map { depts =>
-        departmentInitialValue ++ depts.filter { info => departmentTypes.contains(info.`type`) }
-          .sortBy { info => info.name }
-          .map { info => info.code -> info.name }
-      }
+    toDepartmentOptions(departmentInfoDao.allDepartments)
 
+  def toDepartmentOptions(depts: Seq[DepartmentInfo]) =
+    departmentInitialValue ++ depts.filter { info => departmentTypes.contains(info.`type`) }
+      .sortBy { info => info.name }
+      .map { info => info.code -> info.name }
 }
 
 trait CategoryOptions {

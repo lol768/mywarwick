@@ -3,7 +3,7 @@ package controllers.admin
 import javax.inject.{Inject, Singleton}
 
 import controllers.BaseController
-import models.DateFormats
+import models._
 import models.news.{Audience, Link, NewsItemRender, NewsItemSave}
 import org.joda.time.LocalDateTime
 import play.api.data.Forms._
@@ -42,6 +42,7 @@ case class NewsItemData(
   )
 }
 
+
 @Singleton
 class NewsController @Inject()(
   security: SecurityService,
@@ -79,30 +80,25 @@ class NewsController @Inject()(
     Ok(views.html.admin.news.list(newsPending, newsPublished, counts))
   }
 
-  def createForm = RequiredActualUserRoleAction(Sysadmin).async {
-    for {
-      dopts <- departmentOptions
-    } yield {
-      Ok(views.html.admin.news.createForm(publishNewsForm, dopts, categoryOptions))
-    }
+  def createForm = RequiredActualUserRoleAction(Sysadmin) {
+    Ok(views.html.admin.news.createForm(publishNewsForm, departmentOptions, categoryOptions))
   }
 
+  // TODO drop the sysadmin requirement
   def create = RequiredActualUserRoleAction(Sysadmin).async { implicit req =>
-    departmentOptions.flatMap { dopts =>
-      val bound = publishNewsForm.bindFromRequest
-      bound.fold(
-        errorForm => Future.successful(Ok(views.html.admin.news.createForm(errorForm, dopts, categoryOptions))),
-        // We only show audience validation errors if there were no other errors, which can look weird.
+    val bound = publishNewsForm.bindFromRequest
+    bound.fold(
+      errorForm => Future.successful(Ok(views.html.admin.news.createForm(errorForm, departmentOptions, categoryOptions))),
+      // We only show audience validation errors if there were no other errors, which can look weird.
 
-        data => audienceBinder.bindAudience(data).map {
-          case Left(errors) =>
-            val errorForm = addFormErrors(bound, errors)
-            Ok(views.html.admin.news.createForm(errorForm, dopts, categoryOptions))
-          case Right(audience) =>
-            handleForm(data, audience)
-        }
-      )
-    }
+      data => audienceBinder.bindAudience(data).map {
+        case Left(errors) =>
+          val errorForm = addFormErrors(bound, errors)
+          Ok(views.html.admin.news.createForm(errorForm, departmentOptions, categoryOptions))
+        case Right(audience) =>
+          handleForm(data, audience)
+      }
+    )
   }
 
   def handleForm(data: Publish[NewsItemData], audience: Audience) = {
@@ -124,15 +120,11 @@ class NewsController @Inject()(
     )
   }
 
-  def updateForm(id: String) = RequiredActualUserRoleAction(Sysadmin).async {
-    news.getNewsItem(id) match {
-      case None => Future(NotFound(s"Cannot update news. No news item exists with id '$id'"))
-      case Some(item) =>
-        for {
-          dopts <- departmentOptions
-        } yield {
-          Ok(views.html.admin.news.updateForm(id, updateNewsForm.fill(NewsUpdate(item.toData)), categoryOptions))
-        }
+  def updateForm(id: String) = RequiredActualUserRoleAction(Sysadmin) {
+    news.getNewsItem(id) map { item =>
+      Ok(views.html.admin.news.updateForm(id, updateNewsForm.fill(NewsUpdate(item.toData)), categoryOptions))
+    } getOrElse {
+      NotFound(s"Cannot update news. No news item exists with id '$id'")
     }
   }
 

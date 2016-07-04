@@ -23,13 +23,11 @@ class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
     *
     * Return type is a future because it depends on the list of departments.
     */
-  def bindAudience(data: AudienceFormData): Future[Either[Seq[FormError], Audience]] = for {
-    allDepts <- departments.allDepartments
-  } yield {
+  def bindAudience(data: AudienceFormData): Future[Either[Seq[FormError], Audience]] = {
     var errors = Seq[FormError]()
 
     if (data.audience.contains("Public")) {
-      Right(Audience.Public)
+      Future.successful(Right(Audience.Public))
     } else {
 
       val groupedComponents = data.audience.groupBy(_.startsWith("Dept:"))
@@ -53,7 +51,7 @@ class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
 
       val departmentParam = data.department.filter(StringUtils.hasText).map(_.trim)
       val department = departmentParam.flatMap { code =>
-        allDepts.find(_.code == code)
+        departments.allDepartments.find(_.code == code)
       }
       val deptComponent = department match {
         case Some(d) if deptComponentValues.nonEmpty => Some(DepartmentAudience(d.code, deptComponentValues))
@@ -70,10 +68,12 @@ class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
         errors :+= FormError("audience", "error.audience.empty")
       }
 
-      if (errors.nonEmpty) {
-        Left(errors)
-      } else {
-        Right(Audience(globalComponents ++ deptComponent))
+      Future.successful {
+        if (errors.nonEmpty) {
+          Left(errors)
+        } else {
+          Right(Audience(globalComponents ++ deptComponent))
+        }
       }
     }
   }
