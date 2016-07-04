@@ -32,10 +32,11 @@ object DateFormats {
       case 3 => "rd"
       case _ => "th"
     }
+
     // Joda has no support for ordinals; the easiest way around is to format
     // either side of it and concat together.
-    val instant = dateTime.toInstant
-    instant.toString(emailStart) + ordinal(dateTime.getDayOfMonth) + instant.toString(emailEnd)
+    val dt = dateTime.toDateTime
+    dt.toString(emailStart) + ordinal(dateTime.getDayOfMonth) + dt.toString(emailEnd)
   }
 
 
