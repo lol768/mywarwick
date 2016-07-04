@@ -10,17 +10,15 @@ import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
 import services.messaging.MessagingService
 import warwick.sso.{User, Usercode}
 
-import scala.util.{Failure, Success, Try}
-
 @ImplementedBy(classOf[ActivityServiceImpl])
 trait ActivityService {
   def getActivityById(id: String): Option[Activity]
 
   def getActivitiesForUser(user: User, limit: Int = 50, before: Option[DateTime] = None): Seq[ActivityResponse]
 
-  def save(activity: ActivitySave, recipients: Set[Usercode]): Try[String]
+  def save(activity: ActivitySave, recipients: Set[Usercode]): Either[Seq[ActivityError], String]
 
-  def save(activity: ActivitySave, recipients: Seq[Usercode]): Try[String]
+  def save(activity: ActivitySave, recipients: Seq[Usercode]): Either[Seq[ActivityError], String]
 
   def getLastReadDate(user: User): Option[DateTime]
 
@@ -42,16 +40,16 @@ class ActivityServiceImpl @Inject()(
   override def getActivityById(id: String): Option[Activity] =
     db.withConnection(implicit c => dao.getActivityById(id))
 
-  override def save(activity: ActivitySave, recipients: Seq[Usercode]): Try[String] =
+  override def save(activity: ActivitySave, recipients: Seq[Usercode]): Either[Seq[ActivityError], String] =
     save(activity, recipients.toSet)
 
-  override def save(activity: ActivitySave, recipients: Set[Usercode]): Try[String] = {
+  override def save(activity: ActivitySave, recipients: Set[Usercode]): Either[Seq[ActivityError], String] = {
     if (recipients.isEmpty) {
-      Failure(NoRecipientsException)
+      Left(Seq(NoRecipients))
     } else {
       val errors = validateActivity(activity)
       if (errors.nonEmpty) {
-        Failure(ActivityException(errors))
+        Left(errors)
       } else {
         db.withTransaction { implicit c =>
           val replaceIds = tagDao.getActivitiesWithTags(activity.replace, activity.providerId)
@@ -64,7 +62,7 @@ class ActivityServiceImpl @Inject()(
 
           recipients.foreach(usercode => pubSub.publish(usercode.string, Notification(result)))
 
-          Success(result.activity.id)
+          Right(result.activity.id)
         }
       }
     }
@@ -103,18 +101,26 @@ class ActivityServiceImpl @Inject()(
     db.withConnection(implicit c => dao.getActivitiesByProviderId(providerId, limit))
 }
 
-object NoRecipientsException extends Throwable
-
-case class ActivityException(errors: Seq[ActivityError]) extends Throwable
-
-sealed trait ActivityError
+sealed trait ActivityError {
+  def message: String
+}
 
 object ActivityError {
 
-  case class InvalidActivityType(name: String) extends ActivityError
+  object NoRecipients extends ActivityError {
+    val message = "No valid recipients"
+  }
 
-  case class InvalidTagName(name: String) extends ActivityError
+  case class InvalidActivityType(name: String) extends ActivityError {
+    def message = s"The activity type '$name' is not valid"
+  }
 
-  case class InvalidTagValue(name: String, value: String) extends ActivityError
+  case class InvalidTagName(name: String) extends ActivityError {
+    def message = s"The tag name '$name' is not valid"
+  }
+
+  case class InvalidTagValue(name: String, value: String) extends ActivityError {
+    def message = s"The value '$value' for tag '$name' is not valid"
+  }
 
 }

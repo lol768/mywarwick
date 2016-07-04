@@ -18,7 +18,6 @@ import warwick.sso._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.util.Success
 
 class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with Results with BeforeAndAfterAll {
 
@@ -39,6 +38,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
     override def loginUrl(target: Option[String]): String = "https://app.example.com/login"
 
     override def userHasRole(role: RoleName) = false
+
     override def actualUserHasRole(role: RoleName) = false
   })
 
@@ -83,7 +83,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
     "return created activity ID on success" in {
       when(providerPermissionService.canUserPostForProvider(tabula, ron)).thenReturn(true)
       when(activityRecipientService.getRecipientUsercodes(Seq(Usercode("someone")), Seq.empty)).thenReturn(Set(Usercode("someone")))
-      when(activityService.save(any(), any[Set[Usercode]]())).thenReturn(Success("created-activity-id"))
+      when(activityService.save(any(), any[Set[Usercode]]())).thenReturn(Right("created-activity-id"))
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
 
@@ -113,7 +113,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
 
     "reject an incorrectly-formatted generated_at date" in {
       when(providerPermissionService.canUserPostForProvider(tabula, ron)).thenReturn(true)
-      when(activityService.save(any(), any[Set[Usercode]]())).thenReturn(Success("created-activity-id"))
+      when(activityService.save(any(), any[Set[Usercode]]())).thenReturn(Right("created-activity-id"))
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(
         body + ("generated_at" -> JsString("yesterday"))
