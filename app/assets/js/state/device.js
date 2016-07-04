@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 function calcDeviceWidth() {
   const w = window.innerWidth * window.devicePixelRatio;
-  return _.find([320, 640, 750, 960, 1080, 1136, 1334, 2208], width => width >= w);
+  return _.find([320, 640, 750, 960, 1080, 1136, 1334, 2208], width => width >= w) || w;
 }
 
 const initialState = {
