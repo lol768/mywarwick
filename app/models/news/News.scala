@@ -1,7 +1,7 @@
 package models.news
 
 import controllers.admin.NewsItemData
-import models.DateFormats
+import models.{DateFormats, NewsCategory}
 import oracle.net.aso.h
 import org.joda.time.DateTime
 import play.api.libs.json._
@@ -27,7 +27,9 @@ case class NewsItemRender (
   text: String, // This is plain newline-separated text
   link: Option[Link],
   publishDate: DateTime,
-  imageId: Option[String]
+  imageId: Option[String],
+  categories: Seq[NewsCategory],
+  ignoreCategories: Boolean
   // TODO Add category info
   // TODO Add publisher info
 ) {
@@ -38,7 +40,8 @@ case class NewsItemRender (
     link.map(_.href.toString),
     publishDateSet = true,
     publishDate.toLocalDateTime,
-    imageId
+    imageId,
+    ignoreCategories = ignoreCategories
   )
 }
 
@@ -55,8 +58,7 @@ case class NewsItemSave (
   text: String,
   link: Option[Link],
   publishDate: DateTime,
-  imageId: Option[String]
-  // TODO publisher, category/ies
+  imageId: Option[String],
+  ignoreCategories: Boolean = false
+  // TODO publisher
 )
-
-case class NewsCategory(id: String, name: String)

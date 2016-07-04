@@ -6,7 +6,7 @@ import com.google.inject.{ImplementedBy, Inject}
 import models.ActivitySave
 import models.news.{Audience, NotificationData}
 import play.api.db.{Database, NamedDatabase}
-import services.dao.{AudienceDao, PublishCategoryDao}
+import services.dao.AudienceDao
 
 import scala.util.Try
 
@@ -26,9 +26,8 @@ trait NotificationPublishingService {
 class NotificationPublishingServiceImpl @Inject()(
   activityService: ActivityService,
   audienceService: AudienceService,
-  publishCategoryDao: PublishCategoryDao,
   audienceDao: AudienceDao,
-    @NamedDatabase("default") db: Database
+  @NamedDatabase("default") db: Database
 ) extends NotificationPublishingService {
 
   import NotificationPublishingService._

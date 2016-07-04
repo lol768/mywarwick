@@ -19,12 +19,9 @@ class ReadNewsController @Inject()(
   def feed = UserAction { implicit req =>
     val userNews = news.latestNews(req.context.user.map(_.usercode))
 
-    val sortedNews = (userNews).sortBy(_.publishDate)
     Ok(Json.obj(
-      "items" -> sortedNews
+      "items" -> userNews
     ))
   }
-
-  implicit def newestFirst: Ordering[DateTime] = Ordering.fromLessThan(_ isAfter _)
 
 }

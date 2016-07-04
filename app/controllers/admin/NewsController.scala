@@ -10,7 +10,7 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.dao.DepartmentInfoDao
-import services.{NewsService, PublishCategoryService, SecurityService}
+import services.{NewsService, NewsCategoryService, SecurityService}
 import system.{Roles, TimeZones, Validation}
 import uk.ac.warwick.util.web.Uri
 
@@ -25,7 +25,8 @@ case class NewsItemData(
   linkHref: Option[String],
   publishDateSet: Boolean,
   publishDate: LocalDateTime,
-  imageId: Option[String]
+  imageId: Option[String],
+  ignoreCategories: Boolean = false
 ) {
   def toSave = NewsItemSave(
     title = title,
@@ -36,7 +37,8 @@ case class NewsItemData(
     } yield Link(t, Uri.parse(h)),
     // TODO test this gives expected results of TZ&DST
     publishDate = (if (publishDateSet) publishDate else LocalDateTime.now).toDateTime(TimeZones.LONDON),
-    imageId = imageId
+    imageId = imageId,
+    ignoreCategories = ignoreCategories
   )
 }
 
@@ -47,7 +49,7 @@ class NewsController @Inject()(
   news: NewsService,
   val departmentInfoDao: DepartmentInfoDao,
   audienceBinder: AudienceBinder,
-  val publishCategoryService: PublishCategoryService
+  val newsCategoryService: NewsCategoryService
 ) extends BaseController with I18nSupport with Publishing[NewsItemData] {
 
   import Roles._
@@ -60,7 +62,8 @@ class NewsController @Inject()(
     "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url),
     "publishDateSet" -> boolean,
     "publishDate" -> DateFormats.dateTimeLocalMapping,
-    "imageId" -> optional(text)
+    "imageId" -> optional(text),
+    "ignoreCategories" -> boolean
   )(NewsItemData.apply)(NewsItemData.unapply)
 
   val publishNewsForm = publishForm(categoriesRequired = true, newsDataMapping)
@@ -116,7 +119,7 @@ class NewsController @Inject()(
   def update(id: String) = RequiredActualUserRoleAction(Sysadmin).async { implicit req =>
     val bound = updateNewsForm.bindFromRequest
     bound.fold(
-      errorForm => Future.successful(Ok(views.html.admin.news.updateForm(id, errorForm))),
+      errorForm => Future.successful(Ok(views.html.admin.news.updateForm(id, errorForm, categoryOptions))),
       data => Future(handleUpdate(id, data))
     )
   }
@@ -128,7 +131,7 @@ class NewsController @Inject()(
         for {
           dopts <- departmentOptions
         } yield {
-          Ok(views.html.admin.news.updateForm(id, updateNewsForm.fill(NewsUpdate(item.toData))))
+          Ok(views.html.admin.news.updateForm(id, updateNewsForm.fill(NewsUpdate(item.toData)), categoryOptions))
         }
     }
   }

@@ -31,8 +31,10 @@ trait OneStartAppPerSuite extends Suite with OneAppPerSuite {
     finally {
       if (rollback)
         connection.rollback()
+      else
+        connection.commit()
 
-      connection.setAutoCommit(true)
+      connection.close()
     }
   }
 

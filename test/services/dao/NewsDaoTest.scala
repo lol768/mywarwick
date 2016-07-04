@@ -3,6 +3,8 @@ package services.dao
 import java.sql.Connection
 
 import helpers.OneStartAppPerSuite
+import anorm._
+import anorm.SqlParser._
 import models.news.AudienceSize.{Finite, Public}
 import models.news.NewsItemSave
 import org.joda.time.DateTime
@@ -13,6 +15,8 @@ import warwick.sso.Usercode
 class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
   val newsDao = get[NewsDao]
   val newsService = get[NewsService]
+  val userNewsCategoryDao = get[UserNewsCategoryDao]
+  val newsCategoryDao = get[NewsCategoryDao]
 
   val ana = Usercode("cusana")
   val bob = Usercode("cusbob")
@@ -31,7 +35,8 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
     text = "The capital is on fire.",
     link = None,
     publishDate = DateTime.now.minusMinutes(5),
-    imageId = None
+    imageId = None,
+    ignoreCategories = true
   )
 
   val brumPanic = NewsItemSave(
@@ -39,7 +44,8 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
     text = "I wonder to myself - burn down the disco.",
     link = None,
     publishDate = DateTime.now.minusMinutes(10),
-    imageId = None
+    imageId = None,
+    ignoreCategories = true
   )
 
   // Publish date in future, so shouldn't be shown to user.
@@ -48,12 +54,13 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
     text = "Finally, we can all hover to work!",
     link = None,
     publishDate = DateTime.now.plusYears(10),
-    imageId = None
+    imageId = None,
+    ignoreCategories = true
   )
 
   "latestNews" should {
     "return no news" in transaction { implicit c =>
-      newsDao.latestNews(Some(jim)) must be ('empty)
+      newsDao.latestNews(Some(jim)) mustBe empty
     }
 
     "return only published news for user" in transaction { implicit c =>
@@ -74,8 +81,42 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
     "limit results to requested amount" in transaction { implicit c =>
       save(londonsBurning, Seq(ana))
       save(brumPanic, Seq(ana))
-      newsDao.latestNews(Some(ana), limit = 2) must have length(2)
-      newsDao.latestNews(Some(ana), limit = 1) must have length(1)
+      newsDao.latestNews(Some(ana), limit = 2) must have length 2
+      newsDao.latestNews(Some(ana), limit = 1) must have length 1
+    }
+
+    "return only news for subscribed categories" in transaction { implicit c =>
+      val someCategory = newsCategoryDao.all().head
+
+      val id = save(londonsBurning.copy(ignoreCategories = false), Seq(public))
+      newsCategoryDao.saveNewsCategories(id, Seq(someCategory.id))
+
+      userNewsCategoryDao.setSubscribedCategories(jim, Seq(someCategory.id))
+
+      // Jim sees the item because he is subscribed to the category
+      newsDao.latestNews(Some(jim)) must have length 1
+
+      userNewsCategoryDao.setSubscribedCategories(jim, Seq.empty)
+
+      // No longer sees the item when not subscribed
+      newsDao.latestNews(Some(jim)) mustBe empty
+    }
+
+    "return news with IGNORE_CATEGORIES set regardless of chosen categories" in transaction { implicit c =>
+      val someCategory :: anotherCategory :: _ = newsCategoryDao.all()
+
+      val id = save(londonsBurning.copy(ignoreCategories = true), Seq(public))
+      newsCategoryDao.saveNewsCategories(id, Seq(someCategory.id))
+
+      userNewsCategoryDao.setSubscribedCategories(jim, Seq(anotherCategory.id))
+
+      // Jim is not subscribed to the category, but sees the item anyway
+      newsDao.latestNews(Some(jim)) must have length 1
+
+      userNewsCategoryDao.setSubscribedCategories(jim, Seq(someCategory.id))
+
+      // The same item is not returned twice
+      newsDao.latestNews(Some(jim)) must have length 1
     }
   }
 
@@ -97,6 +138,41 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
         id3 -> Finite(4)
       )
     }
+  }
+
+  "getNewsByIds" should {
+
+    "return nothing" in transaction { implicit c =>
+      newsDao.getNewsByIds(Seq.empty) mustBe Seq.empty
+    }
+
+    "return a single news item" in transaction { implicit c =>
+      val id = save(londonsBurning, Seq(public))
+
+      newsDao.getNewsByIds(Seq(id)) must have length 1
+    }
+
+    "return multiple news items" in transaction { implicit c =>
+      val id1 = save(londonsBurning, Seq(public))
+      val id2 = save(brumPanic, Seq(ana, eli))
+
+      newsDao.getNewsByIds(Seq(id1, id2)) must have length 2
+    }
+
+  }
+
+  "getNewsById" should {
+
+    "return None for a non-existent news item" in transaction { implicit c =>
+      newsDao.getNewsById("nonsense") mustBe empty
+    }
+
+    "return a news item that exists" in transaction { implicit c =>
+      val id = save(londonsBurning, Seq(public))
+
+      newsDao.getNewsById(id) mustNot be(empty)
+    }
+
   }
 
 }

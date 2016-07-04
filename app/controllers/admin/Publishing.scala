@@ -2,10 +2,10 @@ package controllers.admin
 
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
-import services.PublishCategoryService
+import services.NewsCategoryService
 import services.dao.DepartmentInfoDao
 
-case class Publish[A](item: A, audience: Seq[String], department: Option[String], categoryIds: Seq[String]) extends AudienceFormData
+case class Publish[A](item: A, audience: Seq[String], department: Option[String], categoryIds: Seq[String], ignoreCategories: Boolean) extends AudienceFormData
 
 trait Publishing[A] extends DepartmentOptions with CategoryOptions {
 
@@ -20,7 +20,8 @@ trait Publishing[A] extends DepartmentOptions with CategoryOptions {
       "categories" -> seq(nonEmptyText)
         .verifying("You must select at least one category", categorySelected(categoriesRequired) _)
         // Rationale: after removing all possible options, anything that remains is invalid
-        .verifying("Some selections were invalid", _.diff(categoryOptions.map(_.id)).isEmpty)
+        .verifying("Some selections were invalid", _.diff(categoryOptions.map(_.id)).isEmpty),
+      "ignoreCategories" -> boolean
     )(Publish.apply)(Publish.unapply))
 
   private def categorySelected(enabled: Boolean)(ids: Seq[String]): Boolean =
@@ -50,8 +51,8 @@ trait DepartmentOptions {
 
 trait CategoryOptions {
 
-  val publishCategoryService: PublishCategoryService
+  val newsCategoryService: NewsCategoryService
 
-  lazy val categoryOptions = publishCategoryService.all()
+  lazy val categoryOptions = newsCategoryService.all()
 
 }
