@@ -1,0 +1,37 @@
+@(field: Field, args: (Symbol, Any)*)(implicit handler: b3.B3FieldConstructor, messages: Messages)
+
+@b3.inputFormGroup(field, withFeedback = false, withLabelFor = true, bs.Args.withDefault(args, 'class -> "form-control")) { fieldInfo =>
+  <script src="@routes.Assets.versioned("js/moment-with-locales.min.js")"></script>
+  <script src="@routes.Assets.versioned("js/bootstrap-datetimepicker.min.js")"></script>
+  <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/bootstrap-datetimepicker.min.css")" >
+
+  <div class="input-group date" id='datetimepicker1'>
+    <input type="text" id="@fieldInfo.id" name="@fieldInfo.name" value="@fieldInfo.value" @toHtmlArgs(fieldInfo.innerArgsMap)>
+    <span class="input-group-addon">
+      <span class="fa fa-calendar"></span>
+    </span>
+  </div>
+  <script type="text/javascript">
+      var icons = {
+        time: 'fa fa-clock-o',
+        date: 'fa fa-calendar',
+        up: 'fa fa-chevron-up',
+        down: 'fa fa-chevron-down',
+        previous: 'fa fa-chevron-left',
+        next: 'fa fa-chevron-right',
+        today: 'fa fa-crosshairs',
+        clear: 'fa fa-trash-o',
+        close: 'fa fa-times'
+      };
+
+      $(function () {
+        $('#datetimepicker1').datetimepicker({
+          locale: 'en-gb',
+          icons: icons,
+          sideBySide: true,
+          allowInputToggle: true,
+          stepping: 5,
+        });
+      });
+  </script>
+}

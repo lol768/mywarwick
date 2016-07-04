@@ -1,4 +1,3 @@
-@import org.joda.time.LocalDateTime
 @(form: Form[_])(implicit fc: b3.B3FieldConstructor, messages: Messages)
 
 @b3.text(form("item.title"),
@@ -15,10 +14,9 @@
 
 <div id="file-upload-container" data-input-name="item.imageId" data-image-id="@form.data.get("item.imageId")"></div>
 
-@b3.datetimeLocal(form("item.publishDate"),
+@tags.datetimePicker(form("item.publishDate"),
   '_label -> "Publish date",
-  '_help -> "You can select a time in the future, and it will appear to users after that time. Otherwise choose the current time to publish now",
-  'value -> new LocalDateTime().withSecondOfMinute(0).withMillisOfSecond(0)
+  '_help -> "You can select a time in the future, and this news item will appear to users after that time"
 )
 
 @b3.text(form("item.linkHref"),
