@@ -18,7 +18,7 @@ object NotificationPublishingService {
 @ImplementedBy(classOf[NotificationPublishingServiceImpl])
 trait NotificationPublishingService {
 
-  def publish(item: NotificationData, audience: Audience): Try[String]
+  def publish(item: NotificationData, audience: Audience): Try[Either[Seq[ActivityError], String]]
 
 }
 
@@ -32,12 +32,12 @@ class NotificationPublishingServiceImpl @Inject()(
 
   import NotificationPublishingService._
 
-  def publish(item: NotificationData, audience: Audience): Try[String] = {
+  def publish(item: NotificationData, audience: Audience): Try[Either[Seq[ActivityError], String]] = {
     val audienceId = audienceDao.saveAudience(audience)
 
     // FIXME: move audience resolution and subsequent notification publishing to scheduler
     audienceService.resolve(audience)
-      .flatMap(recipients => activityService.save(makeActivitySave(item, audienceId), recipients))
+      .map(recipients => activityService.save(makeActivitySave(item, audienceId), recipients))
   }
 
   private def makeActivitySave(item: NotificationData, audienceId: String) =

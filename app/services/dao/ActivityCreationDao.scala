@@ -3,7 +3,7 @@ package services.dao
 import java.sql.Connection
 
 import com.google.inject.{ImplementedBy, Inject}
-import models.{Activity, ActivitySave, ActivityResponse}
+import models.{Activity, ActivityResponse, ActivitySave}
 import org.joda.time.DateTime
 import warwick.sso.Usercode
 

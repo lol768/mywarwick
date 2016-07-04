@@ -11,8 +11,6 @@ import play.api.mvc.Result
 import services._
 import warwick.sso.{AuthenticatedRequest, GroupName, User, Usercode}
 
-import scala.util.{Failure, Success}
-
 @Singleton
 class IncomingActivitiesController @Inject()(
   securityService: SecurityService,
@@ -43,13 +41,7 @@ class IncomingActivitiesController @Inject()(
             data.recipients.groups.getOrElse(Seq.empty).map(GroupName)
           )
 
-          activityService.save(activity, usercodes) match {
-            case Success(activityId) => created(activityId)
-            case Failure(NoRecipientsException) => noRecipients
-            case Failure(e) =>
-              logger.error(s"Error while posting activity providerId=$providerId", e)
-              otherError
-          }
+          activityService.save(activity, usercodes).fold(badRequest, created)
         }.recoverTotal {
           e => validationError(e)
         }
@@ -58,9 +50,9 @@ class IncomingActivitiesController @Inject()(
       }
     }.get // APIAction calls this only if request.context.user is defined
 
-  private def forbidden(providerId: String, user: User): Result =
-    Forbidden(Json.toJson(API.Failure[JsObject]("forbidden",
-      Seq(API.Error("no-permission", s"User '${user.usercode.string}' does not have permission to post to the stream for provider '$providerId'"))
+  private def badRequest(errors: Seq[ActivityError]): Result =
+    BadRequest(Json.toJson(API.Failure[JsObject]("bad_request",
+      errors.map(error => API.Error(error.getClass.getSimpleName, error.message))
     )))
 
   private def created(activityId: String): Result =
@@ -68,17 +60,12 @@ class IncomingActivitiesController @Inject()(
       "id" -> activityId
     ))))
 
-  private def noRecipients: Result =
-    PaymentRequired(Json.toJson(API.Failure[JsObject]("request_failed",
-      Seq(API.Error("no-recipients", "No valid recipients for activity"))
-    )))
-
-  private def otherError: Result =
-    InternalServerError(Json.toJson(API.Failure[JsObject]("internal_server_error",
-      Seq(API.Error("internal-error", "An internal error occurred"))
-    )))
-
   private def validationError(error: JsError): Result =
     BadRequest(Json.toJson(API.Failure[JsObject]("bad_request", API.Error.fromJsError(error))))
+
+  private def forbidden(providerId: String, user: User): Result =
+    Forbidden(Json.toJson(API.Failure[JsObject]("forbidden",
+      Seq(API.Error("no-permission", s"User '${user.usercode.string}' does not have permission to post to the stream for provider '$providerId'"))
+    )))
 
 }
