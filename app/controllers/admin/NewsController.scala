@@ -24,7 +24,8 @@ case class NewsItemData(
   linkText: Option[String],
   linkHref: Option[String],
   publishDate: LocalDateTime,
-  imageId: Option[String]
+  imageId: Option[String],
+  ignoreCategories: Boolean = false
 ) {
   def toSave = NewsItemSave(
     title = title,
@@ -35,7 +36,8 @@ case class NewsItemData(
     } yield Link(t, Uri.parse(h)),
     // TODO test this gives expected results of TZ&DST
     publishDate = publishDate.toDateTime(TimeZones.LONDON),
-    imageId = imageId
+    imageId = imageId,
+    ignoreCategories = ignoreCategories
   )
 }
 
@@ -58,7 +60,8 @@ class NewsController @Inject()(
     "linkText" -> optional(text),
     "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url),
     "publishDate" -> DateFormats.dateTimeLocalMapping,
-    "imageId" -> optional(text)
+    "imageId" -> optional(text),
+    "ignoreCategories" -> boolean
   )(NewsItemData.apply)(NewsItemData.unapply)
 
   val publishNewsForm = publishForm(categoriesRequired = true, newsDataMapping)
@@ -114,7 +117,7 @@ class NewsController @Inject()(
   def update(id: String) = RequiredActualUserRoleAction(Sysadmin).async { implicit req =>
     val bound = updateNewsForm.bindFromRequest
     bound.fold(
-      errorForm => Future.successful(Ok(views.html.admin.news.updateForm(id, errorForm))),
+      errorForm => Future.successful(Ok(views.html.admin.news.updateForm(id, errorForm, categoryOptions))),
       data => Future(handleUpdate(id, data))
     )
   }
@@ -126,7 +129,7 @@ class NewsController @Inject()(
         for {
           dopts <- departmentOptions
         } yield {
-          Ok(views.html.admin.news.updateForm(id, updateNewsForm.fill(NewsUpdate(item.toData))))
+          Ok(views.html.admin.news.updateForm(id, updateNewsForm.fill(NewsUpdate(item.toData)), categoryOptions))
         }
     }
   }

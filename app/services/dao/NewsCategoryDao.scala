@@ -33,7 +33,7 @@ class NewsCategoryDaoImpl extends NewsCategoryDao {
     }
 
   override def getNewsCategories(newsItemId: String)(implicit c: Connection): Seq[NewsCategory] =
-    SQL"SELECT ID, NAME FROM NEWS_CATEGORY WHERE ID IN (SELECT ID FROM NEWS_ITEM_CATEGORY WHERE NEWS_ITEM_ID = $newsItemId)"
+    SQL"SELECT ID, NAME FROM NEWS_CATEGORY WHERE ID IN (SELECT NEWS_CATEGORY_ID FROM NEWS_ITEM_CATEGORY WHERE NEWS_ITEM_ID = $newsItemId) ORDER BY NAME"
       .as(parser.*)
 
 }

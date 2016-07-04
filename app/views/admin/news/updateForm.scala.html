@@ -1,7 +1,8 @@
 @import controllers.admin.NewsUpdate
 @(
     id: String,
-    form: Form[NewsUpdate]
+    form: Form[NewsUpdate],
+    categories: Seq[NewsCategory]
 )(implicit messages: Messages)
 
 @implicitFieldConstructor = @{

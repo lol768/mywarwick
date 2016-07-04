@@ -24,6 +24,12 @@
         case _ => {}
       }
 
+      <div>
+      @item.categories.map { category =>
+        <span class="badge">@category.name</span>
+      }
+      </div>
+
     <div class="btn-toolbar pull-right">
       <a
       href="@controllers.admin.routes.NewsController.update(item.id)"
