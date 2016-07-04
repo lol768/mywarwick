@@ -1,4 +1,5 @@
 @import controllers.admin.{Publish, NewsItemData}
+@import views.html._
 
 @(
     form: Form[Publish[NewsItemData]],
@@ -15,7 +16,7 @@
   @b3.form(action = controllers.admin.routes.NewsController.create()) {
 
 
-    @contentForm(form)
+    @admin.news.contentForm(form)
 
     @tags.audiencePicker(form, "audience", departmentOptions, "news item", allowPublic = true)
 

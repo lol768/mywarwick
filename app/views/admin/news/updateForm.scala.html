@@ -1,4 +1,5 @@
 @import controllers.admin.NewsUpdate
+@import views.html._
 @(
     id: String,
     form: Form[NewsUpdate],
@@ -13,7 +14,7 @@
   <div class="container-fluid">
   @b3.form(action = controllers.admin.routes.NewsController.update(id)) {
 
-    @contentForm(form)
+    @admin.news.contentForm(form)
 
     @b3.submit(
       'class -> "btn btn-primary"

@@ -23,6 +23,7 @@ case class NewsItemData(
   text: String,
   linkText: Option[String],
   linkHref: Option[String],
+  publishDateSet: Boolean,
   publishDate: LocalDateTime,
   imageId: Option[String],
   ignoreCategories: Boolean = false
@@ -35,7 +36,7 @@ case class NewsItemData(
       h <- linkHref
     } yield Link(t, Uri.parse(h)),
     // TODO test this gives expected results of TZ&DST
-    publishDate = publishDate.toDateTime(TimeZones.LONDON),
+    publishDate = (if (publishDateSet) publishDate else LocalDateTime.now).toDateTime(TimeZones.LONDON),
     imageId = imageId,
     ignoreCategories = ignoreCategories
   )
@@ -59,6 +60,7 @@ class NewsController @Inject()(
     "text" -> nonEmptyText,
     "linkText" -> optional(text),
     "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url),
+    "publishDateSet" -> boolean,
     "publishDate" -> DateFormats.dateTimeLocalMapping,
     "imageId" -> optional(text),
     "ignoreCategories" -> boolean

@@ -38,6 +38,7 @@ case class NewsItemRender (
     text,
     link.map(_.text),
     link.map(_.href.toString),
+    publishDateSet = true,
     publishDate.toLocalDateTime,
     imageId,
     ignoreCategories = ignoreCategories
