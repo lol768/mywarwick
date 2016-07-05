@@ -16,6 +16,8 @@
 
     @admin.news.contentForm(form)
 
+    @tags.categoryPicker(form, "categories", categories, "news item")
+
     @b3.submit(
       'class -> "btn btn-primary"
     ) {Update}
