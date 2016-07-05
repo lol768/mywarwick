@@ -25,7 +25,7 @@ class NewsCategoryServiceImpl @Inject()(
   override def all() = db.withConnection(implicit c => dao.all())
 
   override def updateNewsCategories(newsItemId: String, categoryIds: Seq[String]) =
-    db.withConnection { implicit c =>
+    db.withTransaction { implicit c =>
       dao.deleteNewsCategories(newsItemId)
       dao.saveNewsCategories(newsItemId, categoryIds)
     }
