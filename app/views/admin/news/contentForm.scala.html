@@ -1,4 +1,3 @@
-@import org.joda.time.LocalDateTime
 @(form: Form[_])(implicit fc: b3.B3FieldConstructor, messages: Messages)
 
 @b3.text(form("item.title"),
@@ -24,9 +23,9 @@
   'value -> false
 )
 
-@b3.datetimeLocal(form("item.publishDate"),
-  '_help -> "You can select a time in the future, and this news item will appear to users after that time",
-  'value -> new LocalDateTime().withSecondOfMinute(0).withMillisOfSecond(0)
+@tags.datetimePicker(form("item.publishDate"),
+  '_label -> "Publish date",
+  '_help -> "You can select a time in the future, and this news item will appear to users after that time"
 )
 
 @b3.text(form("item.linkHref"),
