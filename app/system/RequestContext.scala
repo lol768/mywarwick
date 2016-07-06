@@ -31,8 +31,9 @@ object RequestContext {
   def anonymous(sso: SSOClient, request: RequestHeader) =RequestContext(sso, request, None, None)
 
   def apply(sso: SSOClient, request: RequestHeader, user: Option[User], actualUser: Option[User]): RequestContext = {
+    val target = (if (request.secure) "https://" else "http://") + request.host + request.uri
     val linkGenerator = sso.linkGenerator(request)
-    linkGenerator.setTarget(request.uri)
+    linkGenerator.setTarget(target)
 
     RequestContext(
       path = request.path,
