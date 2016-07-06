@@ -16,7 +16,7 @@ import uk.ac.warwick.util.web.Uri
 
 import scala.concurrent.Future
 
-case class NewsUpdate(item: NewsItemData)
+case class NewsUpdate(item: NewsItemData, categoryIds: Seq[String])
 
 case class NewsItemData(
   title: String,
@@ -70,7 +70,9 @@ class NewsController @Inject()(
   val publishNewsForm = publishForm(categoriesRequired = true, newsDataMapping)
 
   val updateNewsForm = Form(mapping(
-    "item" -> newsDataMapping)
+    "item" -> newsDataMapping,
+    "categories" -> categoryMapping(categoriesRequired = true)
+  )
   (NewsUpdate.apply)(NewsUpdate.unapply))
 
   def list = RequiredActualUserRoleAction(Sysadmin) {
@@ -109,6 +111,7 @@ class NewsController @Inject()(
 
   def handleUpdate(id: String, data: NewsUpdate) = {
     news.updateNewsItem(id, data.item)
+    newsCategoryService.updateNewsCategories(id, data.categoryIds)
     Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News updated")
   }
 
@@ -122,7 +125,8 @@ class NewsController @Inject()(
 
   def updateForm(id: String) = RequiredActualUserRoleAction(Sysadmin) {
     news.getNewsItem(id) map { item =>
-      Ok(views.html.admin.news.updateForm(id, updateNewsForm.fill(NewsUpdate(item.toData)), categoryOptions))
+      val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
+      Ok(views.html.admin.news.updateForm(id, updateNewsForm.fill(NewsUpdate(item.toData, categoryIds)), categoryOptions))
     } getOrElse {
       NotFound(s"Cannot update news. No news item exists with id '$id'")
     }
