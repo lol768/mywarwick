@@ -139,7 +139,6 @@ const persistedUserLinks = persisted('user.links', user.receiveSSOLinks);
 const loadPersonalisedDataFromServer = _.once(() => {
   store.dispatch(notifications.fetch());
   store.dispatch(tiles.fetchTiles());
-  store.dispatch(tiles.fetchTileContent());
 
   // Refresh all tile content every five minutes
   setInterval(() => store.dispatch(tiles.fetchTileContent()), 5 * 60 * 1000);

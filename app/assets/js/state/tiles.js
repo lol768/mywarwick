@@ -114,45 +114,53 @@ export function persistTiles() {
   };
 }
 
+const ALL_TILES = undefined;
+export function fetchTileContent(tileId = ALL_TILES) {
+  return (dispatch, getState) => {
+    const tileIds = tileId === ALL_TILES ?
+      getState().tiles.data.tiles
+        .filter(tile => !tile.removed)
+        .map(tile => tile.id) :
+      [tileId];
+
+    tileIds.forEach(id => {
+      dispatch({
+        type: TILE_CONTENT_FETCH,
+        tile: id,
+      });
+
+      return fetchWithCredentials(`/api/tiles/content/${id}`)
+        .then(response => response.json())
+        .then(json =>
+          _(json.data).each((result, tile) => {
+            if (result.content) {
+              dispatch(fetchedTileContent(tile, result.content));
+            } else {
+              dispatch(failedTileContentFetch(tile, result.errors));
+            }
+          })
+        )
+        .catch(err => {
+          log.warn('Tile fetch failed because', err);
+          return dispatch(failedTileContentFetch(tileId, NETWORK_ERRORS));
+        });
+    });
+  };
+}
+
 export function fetchTiles() {
   return dispatch => {
     dispatch({ type: TILES_FETCH });
 
     return fetchWithCredentials('/api/tiles')
       .then(response => response.json())
-      .then(json => dispatch(fetchedTiles(json.data)))
+      .then(json => {
+        dispatch(fetchedTiles(json.data));
+        dispatch(fetchTileContent(ALL_TILES));
+      })
       .catch(() => dispatch({ type: TILES_FETCH_FAILURE }));
   };
 }
-
-const ALL_TILES = undefined;
-export function fetchTileContent(tileId = ALL_TILES) {
-  return dispatch => {
-    dispatch({
-      type: TILE_CONTENT_FETCH,
-      tile: tileId,
-    });
-
-    const endpoint = tileId ? `/api/tiles/content/${tileId}` : '/api/tiles/content';
-
-    return fetchWithCredentials(endpoint)
-      .then(response => response.json())
-      .then(json => {
-        _.each(json.data, (result, tile) => {
-          if (result.content) {
-            dispatch(fetchedTileContent(tile, result.content));
-          } else {
-            dispatch(failedTileContentFetch(tile, result.errors));
-          }
-        });
-      })
-      .catch(err => {
-        log.warn('Tile fetch failed because', err);
-        return dispatch(failedTileContentFetch(tileId, NETWORK_ERRORS));
-      });
-  };
-}
-
 
 const initialContentState = {};
 
