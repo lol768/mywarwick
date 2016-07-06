@@ -3,11 +3,17 @@ package controllers.admin
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import services.NewsCategoryService
-import services.dao.DepartmentInfoDao
+import services.dao.{DepartmentInfo, DepartmentInfoDao}
 
 case class Publish[A](item: A, audience: Seq[String], department: Option[String], categoryIds: Seq[String], ignoreCategories: Boolean) extends AudienceFormData
 
 trait Publishing[A] extends DepartmentOptions with CategoryOptions {
+
+  def categoryMapping(categoriesRequired: Boolean): Mapping[Seq[String]] =
+    seq(nonEmptyText)
+      .verifying("You must select at least one category", categorySelected(categoriesRequired) _)
+      // Rationale: after removing all possible options, anything that remains is invalid
+      .verifying("Some selections were invalid", _.diff(categoryOptions.map(_.id)).isEmpty)
 
   def publishForm(
     categoriesRequired: Boolean,
@@ -17,12 +23,10 @@ trait Publishing[A] extends DepartmentOptions with CategoryOptions {
       "item" -> itemMapping,
       "audience" -> seq(nonEmptyText),
       "department" -> optional(text),
-      "categories" -> seq(nonEmptyText)
-        .verifying("You must select at least one category", categorySelected(categoriesRequired) _)
-        // Rationale: after removing all possible options, anything that remains is invalid
-        .verifying("Some selections were invalid", _.diff(categoryOptions.map(_.id)).isEmpty),
+      "categories" -> categoryMapping(categoriesRequired),
       "ignoreCategories" -> boolean
     )(Publish.apply)(Publish.unapply))
+
 
   private def categorySelected(enabled: Boolean)(ids: Seq[String]): Boolean =
     if (enabled) ids.nonEmpty else true
@@ -39,14 +43,12 @@ trait DepartmentOptions {
   private val departmentInitialValue = Seq("" -> "--- Department ---")
 
   def departmentOptions =
-    departmentInfoDao.allDepartments
-      .recover { case e => Nil }
-      .map { depts =>
-        departmentInitialValue ++ depts.filter { info => departmentTypes.contains(info.`type`) }
-          .sortBy { info => info.name }
-          .map { info => info.code -> info.name }
-      }
+    toDepartmentOptions(departmentInfoDao.allDepartments)
 
+  def toDepartmentOptions(depts: Seq[DepartmentInfo]) =
+    departmentInitialValue ++ depts.filter { info => departmentTypes.contains(info.`type`) }
+      .sortBy { info => info.name }
+      .map { info => info.code -> info.name }
 }
 
 trait CategoryOptions {

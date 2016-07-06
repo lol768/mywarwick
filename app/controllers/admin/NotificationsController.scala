@@ -3,7 +3,6 @@ package controllers.admin
 import javax.inject.Inject
 
 import controllers.BaseController
-import models.{Activity, ActivitySave}
 import models.news.{Audience, NotificationData}
 import play.api.data.Forms._
 import play.api.data._
@@ -39,48 +38,46 @@ class NotificationsController @Inject()(
     "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url)
   )(NotificationData.apply)(NotificationData.unapply))
 
-  def list = RequiredActualUserRoleAction(Sysadmin) {
+  def list = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     val activities = activityService.getActivitiesByProviderId(PROVIDER_ID)
 
     Ok(views.list(activities))
   }
 
-  def createForm = RequiredActualUserRoleAction(Sysadmin).async {
-    departmentOptions.map { dopts =>
-      Ok(views.createForm(publishNotificationForm, dopts))
-    }
+  def createForm = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
+    Ok(views.createForm(publishNotificationForm, departmentOptions))
   }
 
   def create = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
-    departmentOptions.flatMap { dopts =>
-      val form = publishNotificationForm.bindFromRequest
 
-      form.fold(
-        formWithErrors => Future.successful(Ok(views.createForm(formWithErrors, dopts))),
-        publish => {
-          audienceBinder.bindAudience(publish).map {
-            case Left(errors) =>
-              Ok(views.createForm(addFormErrors(form, errors), dopts))
-            case Right(Audience.Public) =>
-              Ok(views.createForm(form.withError("audience", "Notifications cannot be public"), dopts))
-            case Right(audience) =>
-              notificationPublishingService.publish(publish.item, audience) match {
-                case Success(Right(_)) =>
-                  Redirect(routes.NotificationsController.list()).flashing("result" -> "Notification created")
-                case Success(Left(errors)) =>
-                  val formWithError = errors.foldLeft(form)((f, error) => f.withGlobalError(error.message))
+    val form = publishNotificationForm.bindFromRequest
 
-                  Ok(views.createForm(formWithError, dopts))
-                case Failure(e) =>
-                  logger.error("Failure while creating notification", e)
-                  val formWithError = form.withGlobalError("An error occurred creating this notification")
+    form.fold(
+      formWithErrors => Future.successful(Ok(views.createForm(formWithErrors, departmentOptions))),
+      publish => {
+        audienceBinder.bindAudience(publish).map {
+          case Left(errors) =>
+            Ok(views.createForm(addFormErrors(form, errors), departmentOptions))
+          case Right(Audience.Public) =>
+            Ok(views.createForm(form.withError("audience", "Notifications cannot be public"), departmentOptions))
+          case Right(audience) =>
+            notificationPublishingService.publish(publish.item, audience) match {
+              case Success(Right(_)) =>
+                Redirect(routes.NotificationsController.list()).flashing("result" -> "Notification created")
+              case Success(Left(errors)) =>
+                val formWithError = errors.foldLeft(form)((f, error) => f.withGlobalError(error.message))
 
-                  Ok(views.createForm(formWithError, dopts))
-              }
-          }
+                Ok(views.createForm(formWithError, departmentOptions))
+              case Failure(e) =>
+                logger.error("Failure while creating notification", e)
+                val formWithError = form.withGlobalError("An error occurred creating this notification")
+
+                Ok(views.createForm(formWithError, departmentOptions))
+            }
         }
-      )
-    }
+      }
+    )
+
   }
 
 }

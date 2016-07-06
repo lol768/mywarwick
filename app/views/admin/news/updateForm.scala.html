@@ -1,10 +1,11 @@
+@import system.RequestContext
 @import controllers.admin.NewsUpdate
 @import views.html._
 @(
     id: String,
     form: Form[NewsUpdate],
     categories: Seq[NewsCategory]
-)(implicit messages: Messages)
+)(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
   b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
@@ -15,6 +16,8 @@
   @b3.form(action = controllers.admin.routes.NewsController.update(id)) {
 
     @admin.news.contentForm(form)
+
+    @tags.categoryPicker(form, "categories", categories, "news item")
 
     @b3.submit(
       'class -> "btn btn-primary"
