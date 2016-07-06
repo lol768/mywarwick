@@ -123,7 +123,7 @@ export function fetchTileContent(tileId = ALL_TILES) {
         .map(tile => tile.id) :
       [tileId];
 
-    tileIds.forEach(id => {
+    return Promise.all(tileIds.map(id => {
       dispatch({
         type: TILE_CONTENT_FETCH,
         tile: id,
@@ -144,7 +144,7 @@ export function fetchTileContent(tileId = ALL_TILES) {
           log.warn('Tile fetch failed because', err);
           return dispatch(failedTileContentFetch(tileId, NETWORK_ERRORS));
         });
-    });
+    }));
   };
 }
 
@@ -154,10 +154,8 @@ export function fetchTiles() {
 
     return fetchWithCredentials('/api/tiles')
       .then(response => response.json())
-      .then(json => {
-        dispatch(fetchedTiles(json.data));
-        dispatch(fetchTileContent(ALL_TILES));
-      })
+      .then(json => dispatch(fetchedTiles(json.data)))
+      .then(() => dispatch(fetchTileContent(ALL_TILES)))
       .catch(() => dispatch({ type: TILES_FETCH_FAILURE }));
   };
 }
