@@ -1,12 +1,14 @@
 package services
 
-import java.sql.Connection
+import java.sql.{Connection, SQLIntegrityConstraintViolationException}
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.db.{Database, NamedDatabase}
 import services.dao.{NewsCategoryDao, UserNewsCategoryDao, UserPreferencesDao}
 import system.Logging
 import warwick.sso.Usercode
+
+import scala.util.{Failure, Success, Try}
 
 @ImplementedBy(classOf[UserInitialisationServiceImpl])
 trait UserInitialisationService {
@@ -31,9 +33,11 @@ class UserInitialisationServiceImpl @Inject()(
   }
 
   def initialiseUser(usercode: Usercode)(implicit c: Connection): Unit = {
-    preferences.save(usercode)
-
-    initialiseNewsCategories(usercode)
+    Try(preferences.save(usercode)) match {
+      case Success(_) => initialiseNewsCategories(usercode)
+      case Failure(_: SQLIntegrityConstraintViolationException) => // user already initialised, do nothing
+      case Failure(e) => throw e
+    }
   }
 
   def initialiseNewsCategories(usercode: Usercode)(implicit c: Connection): Unit = {
