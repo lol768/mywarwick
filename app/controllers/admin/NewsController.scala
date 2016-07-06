@@ -75,19 +75,19 @@ class NewsController @Inject()(
   )
   (NewsUpdate.apply)(NewsUpdate.unapply))
 
-  def list = RequiredActualUserRoleAction(Sysadmin) {
+  def list = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     val theNews = news.allNews(limit = 100)
     val counts = news.countRecipients(theNews.map(_.id))
     val (newsPending, newsPublished) = partitionNews(theNews)
     Ok(views.html.admin.news.list(newsPending, newsPublished, counts))
   }
 
-  def createForm = RequiredActualUserRoleAction(Sysadmin) {
+  def createForm = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     Ok(views.html.admin.news.createForm(publishNewsForm, departmentOptions, categoryOptions))
   }
 
   // TODO drop the sysadmin requirement
-  def create = RequiredActualUserRoleAction(Sysadmin).async { implicit req =>
+  def create = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
     val bound = publishNewsForm.bindFromRequest
     bound.fold(
       errorForm => Future.successful(Ok(views.html.admin.news.createForm(errorForm, departmentOptions, categoryOptions))),
@@ -115,7 +115,7 @@ class NewsController @Inject()(
     Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News updated")
   }
 
-  def update(id: String) = RequiredActualUserRoleAction(Sysadmin).async { implicit req =>
+  def update(id: String) = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
     val bound = updateNewsForm.bindFromRequest
     bound.fold(
       errorForm => Future.successful(Ok(views.html.admin.news.updateForm(id, errorForm, categoryOptions))),
@@ -123,7 +123,7 @@ class NewsController @Inject()(
     )
   }
 
-  def updateForm(id: String) = RequiredActualUserRoleAction(Sysadmin) {
+  def updateForm(id: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     news.getNewsItem(id) map { item =>
       val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
       Ok(views.html.admin.news.updateForm(id, updateNewsForm.fill(NewsUpdate(item.toData, categoryIds)), categoryOptions))

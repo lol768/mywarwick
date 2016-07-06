@@ -1,4 +1,5 @@
-@(identity: Option[String])
+@import system.RequestContext
+@(identity: Option[String])(implicit context: RequestContext)
 
 @common.id7layout("Permission Denied") {
 

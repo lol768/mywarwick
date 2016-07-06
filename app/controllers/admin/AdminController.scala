@@ -15,7 +15,7 @@ class AdminController @Inject() (
   import Roles._
   import security._
 
-  def index = RequiredActualUserRoleAction(Sysadmin) {
+  def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     Ok(views.html.admin.index())
   }
 

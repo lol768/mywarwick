@@ -1,4 +1,5 @@
-@(status: Int, message: String)
+@import system.RequestContext
+@(status: Int, message: String)(implicit context: RequestContext)
 @views.html.common.id7layout(s"Error: $status") {
   @message
 }
