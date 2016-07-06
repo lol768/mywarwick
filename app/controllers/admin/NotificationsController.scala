@@ -38,13 +38,13 @@ class NotificationsController @Inject()(
     "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url)
   )(NotificationData.apply)(NotificationData.unapply))
 
-  def list = RequiredActualUserRoleAction(Sysadmin) {
+  def list = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     val activities = activityService.getActivitiesByProviderId(PROVIDER_ID)
 
     Ok(views.list(activities))
   }
 
-  def createForm = RequiredActualUserRoleAction(Sysadmin) {
+  def createForm = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     Ok(views.createForm(publishNotificationForm, departmentOptions))
   }
 

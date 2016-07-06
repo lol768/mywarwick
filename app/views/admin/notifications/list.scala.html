@@ -1,4 +1,5 @@
-@(notifications: Seq[models.Activity])
+@import system.RequestContext
+@(notifications: Seq[models.Activity])(implicit context: RequestContext)
 
 @common.admin("Notifications") {
   <p>

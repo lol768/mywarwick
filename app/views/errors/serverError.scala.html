@@ -1,6 +1,7 @@
 @import play.api.Mode.Mode
 @import play.api.Mode
-@(e: Throwable, appMode: Mode)
+@import system.RequestContext
+@(e: Throwable, appMode: Mode)(implicit context: RequestContext)
 @views.html.common.id7layout("Error") {
 
   @* TODO make this helpful *@

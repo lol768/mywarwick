@@ -29,7 +29,7 @@ class ClusterStateController @Inject() (
 
   import security._
 
-  def html = RequiredActualUserRoleAction(Sysadmin) { implicit req =>
+  def html = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     Ok(views.html.admin.clusterstate(cluster.state, cluster.selfAddress))
   }
 

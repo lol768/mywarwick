@@ -1,5 +1,6 @@
 @import warwick.sso.{AuthenticatedRequest, MasqueradeController}
-@()(implicit request: AuthenticatedRequest[_])
+@import system.RequestContext
+@()(implicit request: AuthenticatedRequest[_], context: RequestContext)
 
 @common.admin("Masquerade") {
 
