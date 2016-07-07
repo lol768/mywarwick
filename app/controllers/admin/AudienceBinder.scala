@@ -23,7 +23,7 @@ class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
     *
     * Return type is a future because it depends on the list of departments.
     */
-  def bindAudience(data: AudienceFormData): Future[Either[Seq[FormError], Audience]] = {
+  def bindAudience(data: AudienceData): Future[Either[Seq[FormError], Audience]] = {
     var errors = Seq[FormError]()
 
     if (data.audience.contains("Public")) {

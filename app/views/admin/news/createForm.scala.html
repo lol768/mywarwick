@@ -1,8 +1,8 @@
-@import controllers.admin.{Publish, NewsItemData}
+@import controllers.admin.PublishNewsItemData
 @import views.html._
 @import system.RequestContext
 @(
-    form: Form[Publish[NewsItemData]],
+    form: Form[PublishNewsItemData],
     departmentOptions: Seq[(String, String)],
     categories: Seq[NewsCategory]
 )(implicit messages: Messages, context: RequestContext)
