@@ -10,7 +10,6 @@ import play.api.test.Helpers._
 import play.api.test._
 import services.{NullSecurityService, PhotoService}
 import system.AppMetrics
-import warwick.sso._
 
 class HomeControllerTest extends PlaySpec with MockitoSugar with Results {
   val ron = Fixtures.user.makeFoundUser("ron")

@@ -9,6 +9,7 @@ import play.api.http.HeaderNames
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
+import services.UserInitialisationService
 import uk.ac.warwick.sso.client.cache.{UserCache, UserCacheItem}
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import warwick.sso._
@@ -28,7 +29,7 @@ class SSOControllerTest extends PlaySpec with MockitoSugar with Results {
   def controller(user: Option[User] = None) = {
     val loginContext = Fixtures.user.loginContext(user)
     val ssoClient = new MockSSOClient(loginContext)
-    new SSOController(ssoConfig, userCache, ssoClient)
+    new SSOController(ssoConfig, userCache, ssoClient, mock[UserInitialisationService])
   }
   val LOGIN_URL = "https://signon.example.com/login"
   val LOGOUT_URL = s"https://example.warwick.ac.uk/logout?target=https://$HOSTNAME"

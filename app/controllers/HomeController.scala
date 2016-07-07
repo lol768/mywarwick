@@ -43,6 +43,6 @@ class HomeController @Inject()(
   }
 
   def redirectToPath(path: String, status: Int = MOVED_PERMANENTLY) = Action { implicit request =>
-    Redirect(s"/${path.replaceFirst("^/","")}", status)
+    Redirect(s"/${path.replaceFirst("^/", "")}", status)
   }
 }
