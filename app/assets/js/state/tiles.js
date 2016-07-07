@@ -115,21 +115,21 @@ export function persistTiles() {
 }
 
 const ALL_TILES = undefined;
-export function fetchTileContent(tileId = ALL_TILES) {
+export function fetchTileContent(tileSpec = ALL_TILES) {
   return (dispatch, getState) => {
-    const tileIds = tileId === ALL_TILES ?
+    const tilesToFetch = tileSpec === ALL_TILES ?
       getState().tiles.data.tiles
         .filter(tile => !tile.removed)
         .map(tile => tile.id) :
-      [tileId];
+      [tileSpec];
 
-    return Promise.all(tileIds.map(id => {
+    return Promise.all(tilesToFetch.map(tileId => {
       dispatch({
         type: TILE_CONTENT_FETCH,
-        tile: id,
+        tile: tileId,
       });
 
-      return fetchWithCredentials(`/api/tiles/content/${id}`)
+      return fetchWithCredentials(`/api/tiles/content/${tileId}`)
         .then(response => response.json())
         .then(json =>
           _(json.data).each((result, tile) => {
