@@ -18,17 +18,17 @@ POST        /                                             @controllers.HomeContr
 
 GET         /admin                                        @controllers.admin.AdminController.index
 GET         /admin/cluster                                @controllers.admin.ClusterStateController.html
-
-GET         /admin/news                                   @controllers.admin.NewsController.list
-GET         /admin/news/new                               @controllers.admin.NewsController.createForm
-POST        /admin/news/new                               @controllers.admin.NewsController.create
-GET         /admin/news/update/:id                        @controllers.admin.NewsController.updateForm(id: String)
-POST        /admin/news/update/:id                        @controllers.admin.NewsController.update(id: String)
-
-GET         /admin/notifications                          @controllers.admin.NotificationsController.list
-GET         /admin/notifications/new                      @controllers.admin.NotificationsController.createForm
-POST        /admin/notifications                          @controllers.admin.NotificationsController.create
 GET         /admin/masquerade                             @controllers.admin.MasqueradeController.masquerade
+
+GET         /admin/publish/:publisher/news                @controllers.admin.NewsController.list(publisher: String)
+GET         /admin/publish/:publisher/news/new            @controllers.admin.NewsController.createForm(publisher: String)
+POST        /admin/publish/:publisher/news/new            @controllers.admin.NewsController.create(publisher: String)
+GET         /admin/publish/:publisher/news/update/:id     @controllers.admin.NewsController.updateForm(publisher: String, id: String)
+POST        /admin/publish/:publisher/news/update/:id     @controllers.admin.NewsController.update(publisher: String, id: String)
+
+GET         /admin/publish/:publisher/notifications       @controllers.admin.NotificationsController.list(publisher: String)
+GET         /admin/publish/:publisher/notifications/new   @controllers.admin.NotificationsController.createForm(publisher: String)
+POST        /admin/publish/:publisher/notifications       @controllers.admin.NotificationsController.create(publisher: String)
 
 GET         /websockets/page/                             @controllers.WebSocketController.socket
 

@@ -9,11 +9,12 @@ import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Result
+import play.api.mvc.{ActionRefiner, RequestHeader, Result, WrappedRequest}
 import services.dao.DepartmentInfoDao
-import services.{NewsService, NewsCategoryService, SecurityService}
+import services.{NewsCategoryService, NewsService, SecurityService}
 import system.{Roles, TimeZones, Validation}
 import uk.ac.warwick.util.web.Uri
+import warwick.sso.AuthenticatedRequest
 
 import scala.concurrent.Future
 
@@ -75,7 +76,16 @@ class NewsController @Inject()(
     "item" -> newsDataMapping)
   (NewsUpdate.apply)(NewsUpdate.unapply))
 
-  def list = RequiredActualUserRoleAction(Sysadmin) {
+  class PublisherRequest[A](val publisher: Publisher, request: AuthenticatedRequest[A])
+    extends WrappedRequest[A](request)
+
+  def GetPublisher(id: String) = new ActionRefiner[AuthenticatedRequest, PublisherRequest] {
+    override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, PublisherRequest[A]]] = ???
+  }
+
+  val PublisherAction = RequiredUserAction
+
+  def list(publisher: String) = PublisherAction { req =>
     val theNews = news.allNews(limit = 100)
     val counts = news.countRecipients(theNews.map(_.id))
     val (newsPending, newsPublished) = partitionNews(theNews)

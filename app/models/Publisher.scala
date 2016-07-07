@@ -30,7 +30,12 @@ object Permission {
   sealed trait Role extends EnumEntry
   object Role extends Enum[Role] {
     val values = findValues
-    
+    // Can publish, edit, delete, news items
+    case object NewsManager extends Role
+    //
+    case object NotificationsManager extends Role
+    // Can read and report on news and notifications
+    case object Reporter extends Role
   }
 }
 
