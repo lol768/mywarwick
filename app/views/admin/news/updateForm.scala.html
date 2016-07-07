@@ -1,9 +1,9 @@
 @import system.RequestContext
-@import controllers.admin.NewsUpdate
+@import controllers.admin.UpdateNewsItemData
 @import views.html._
 @(
     id: String,
-    form: Form[NewsUpdate],
+    form: Form[UpdateNewsItemData],
     categories: Seq[NewsCategory]
 )(implicit messages: Messages, context: RequestContext)
 

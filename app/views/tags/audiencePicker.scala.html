@@ -5,12 +5,12 @@
     itemName: String,
     allowPublic: Boolean
 )(implicit fc: b3.B3FieldConstructor, messages: Messages)
-@defining(form(fieldName)) { field =>
+@defining((s"$fieldName.audience", s"$fieldName.department")) { case (audienceField, departmentField) =>
 
     @* TODO make less of a UI nightmare *@
     @* TODO receive list of allowed audiences from controller - each user's will be different *@
     @b3.multifieldFormGroup(
-      Seq(form(fieldName), form("department")),
+      Seq(form(fieldName), form(audienceField), form(departmentField)),
       Seq('_label -> s"Who is this $itemName for?"),
       Nil) { info =>
 
@@ -19,24 +19,24 @@
         @for(msg <- info.errorsAndInfos) { <span class="help-block">@msg</span> }
 
         @if(allowPublic) {
-          @tags.seqCheckbox(form, fieldName, 'id -> "public", '_text -> "Everyone (public)", 'value -> "Public")
+          @tags.seqCheckbox(form, audienceField, 'id -> "public", '_text -> "Everyone (public)", 'value -> "Public")
         }
 
-        @tags.seqCheckbox(form, fieldName, 'id -> "staff", '_text -> "All staff", 'value -> "Staff")
-        @tags.seqCheckbox(form, fieldName, 'id -> "teaching", '_text -> "Teaching staff", 'value -> "TeachingStaff")
-        @tags.seqCheckbox(form, fieldName, 'id -> "ug", '_text -> "Undergraduates", 'value -> "UndergradStudents")
-        @tags.seqCheckbox(form, fieldName, 'id -> "pgt", '_text -> "PG Taught", 'value -> "TaughtPostgrads")
-        @tags.seqCheckbox(form, fieldName, 'id -> "pgr", '_text -> "PG Research", 'value -> "ResearchPostgrads")
+        @tags.seqCheckbox(form, audienceField, 'id -> "staff", '_text -> "All staff", 'value -> "Staff")
+        @tags.seqCheckbox(form, audienceField, 'id -> "teaching", '_text -> "Teaching staff", 'value -> "TeachingStaff")
+        @tags.seqCheckbox(form, audienceField, 'id -> "ug", '_text -> "Undergraduates", 'value -> "UndergradStudents")
+        @tags.seqCheckbox(form, audienceField, 'id -> "pgt", '_text -> "PG Taught", 'value -> "TaughtPostgrads")
+        @tags.seqCheckbox(form, audienceField, 'id -> "pgr", '_text -> "PG Research", 'value -> "ResearchPostgrads")
 
-        @b3.select(form("department"), departmentOptions, '_text -> "Department")(b3.clear.fieldConstructorSpecific, messages)
+        @b3.select(form(departmentField), departmentOptions, '_text -> "Department")(b3.clear.fieldConstructorSpecific, messages)
         <div class=row>
           <div class="col-xs-11 col-xs-offset-1">
-            @tags.seqCheckbox(form, fieldName, 'id -> "dept-staff", '_text -> "Everyone", 'value -> "Dept:All")
-            @tags.seqCheckbox(form, fieldName, 'id -> "dept-staff", '_text -> "All staff", 'value -> "Dept:Staff")
-            @tags.seqCheckbox(form, fieldName, 'id -> "dept-teaching", '_text -> "Teaching staff", 'value -> "Dept:TeachingStaff")
-            @tags.seqCheckbox(form, fieldName, 'id -> "dept-ug", '_text -> "Undergraduates", 'value -> "Dept:UndergradStudents")
-            @tags.seqCheckbox(form, fieldName, 'id -> "dept-pgt", '_text -> "PG Taught", 'value -> "Dept:TaughtPostgrads")
-            @tags.seqCheckbox(form, fieldName, 'id -> "dept-pgr", '_text -> "PG Research", 'value -> "Dept:ResearchPostgrads")
+            @tags.seqCheckbox(form, audienceField, 'id -> "dept-staff", '_text -> "Everyone", 'value -> "Dept:All")
+            @tags.seqCheckbox(form, audienceField, 'id -> "dept-staff", '_text -> "All staff", 'value -> "Dept:Staff")
+            @tags.seqCheckbox(form, audienceField, 'id -> "dept-teaching", '_text -> "Teaching staff", 'value -> "Dept:TeachingStaff")
+            @tags.seqCheckbox(form, audienceField, 'id -> "dept-ug", '_text -> "Undergraduates", 'value -> "Dept:UndergradStudents")
+            @tags.seqCheckbox(form, audienceField, 'id -> "dept-pgt", '_text -> "PG Taught", 'value -> "Dept:TaughtPostgrads")
+            @tags.seqCheckbox(form, audienceField, 'id -> "dept-pgr", '_text -> "PG Research", 'value -> "Dept:ResearchPostgrads")
           </div>
         </div>
 
