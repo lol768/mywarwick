@@ -3,9 +3,10 @@ package services.dao
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import play.api.Configuration
+import play.api.Mode.Dev
 import play.api.libs.json._
 import play.api.libs.ws.{WSAPI, WSRequest}
+import play.api.{Configuration, Environment}
 import system.Logging
 import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
 
@@ -29,9 +30,10 @@ trait DepartmentInfoDao {
   def allDepartments: Seq[DepartmentInfo]
 }
 
-class WsDepartmentInfoDao @Inject() (
+class WsDepartmentInfoDao @Inject()(
   ws: WSAPI,
-  config: Configuration
+  config: Configuration,
+  environment: Environment
 ) extends DepartmentInfoDao with Logging {
 
   import system.ThreadPools.externalData
@@ -51,6 +53,10 @@ class WsDepartmentInfoDao @Inject() (
   }
 
   val cache = Caches.newCache("departmentInfo", factory, 24.hours.toSeconds)
+
+  if (environment.mode == Dev) {
+    cache.clear()
+  }
 
   private lazy val url: String = config.getString("start.departments.list.url")
     .getOrElse(throw new IllegalArgumentException("start.departments.list.url missing"))
