@@ -14,7 +14,6 @@ import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc.{Action, MultipartFormData, Request, Result}
 import services.{ImageManipulator, NewsImageService, SecurityService}
 import system.EitherValidation
-import warwick.sso.AuthenticatedRequest
 
 import scala.util.{Failure, Success}
 
