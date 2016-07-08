@@ -103,29 +103,28 @@ class NewsController @Inject()(
           val errorForm = addFormErrors(bound, errors)
           Ok(views.html.admin.news.createForm(errorForm, departmentOptions, categoryOptions))
         case Right(audience) =>
-          handleForm(data, audience)
+          val newsItem = data.item.toSave
+          val newsItemId = news.save(newsItem, audience, data.categoryIds)
+
+          auditLog('CreateNewsItem, 'id -> newsItemId)
+
+          Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News created")
       }
     )
   }
 
-  def handleForm(data: PublishNewsItemData, audience: Audience) = {
-    val newsItem = data.item.toSave
-    news.save(newsItem, audience, data.categoryIds)
-    Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News created")
-  }
-
-  def handleUpdate(id: String, data: UpdateNewsItemData) = {
-    news.updateNewsItem(id, data.item)
-    newsCategoryService.updateNewsCategories(id, data.categoryIds)
-    Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News updated")
-  }
-
-  def update(id: String) = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
+  def update(id: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     val bound = updateNewsForm.bindFromRequest
     bound.fold(
-      errorForm => Future.successful(Ok(views.html.admin.news.updateForm(id, errorForm, categoryOptions))),
-      data => Future(handleUpdate(id, data))
-    )
+      errorForm => Ok(views.html.admin.news.updateForm(id, errorForm, categoryOptions)),
+      data => {
+        news.updateNewsItem(id, data.item)
+        newsCategoryService.updateNewsCategories(id, data.categoryIds)
+
+        auditLog('UpdateNewsItem, 'id -> id)
+
+        Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News updated")
+      })
   }
 
   def updateForm(id: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request =>

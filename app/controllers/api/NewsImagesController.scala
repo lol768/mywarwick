@@ -14,6 +14,7 @@ import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc.{Action, MultipartFormData, Request, Result}
 import services.{ImageManipulator, NewsImageService, SecurityService}
 import system.EitherValidation
+import warwick.sso.AuthenticatedRequest
 
 import scala.util.{Failure, Success}
 
@@ -82,7 +83,10 @@ class NewsImagesController @Inject()(
         }
         .fold(
           e => e,
-          id => Created(Json.toJson(API.Success(data = id)))
+          id => {
+            auditLog('CreateNewsImage, 'id -> id)(requestContext(request))
+            Created(Json.toJson(API.Success(data = id)))
+          }
         )
     }.getOrElse(API.Error("no-image", "No image provided"))
   }
