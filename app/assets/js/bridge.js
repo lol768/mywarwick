@@ -7,6 +7,7 @@ import * as stream from './stream';
 import { push } from 'react-router-redux';
 import { displayUpdateProgress } from './state/update';
 import url from 'url';
+import { postJsonWithCredentials } from './serverpipe';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -44,14 +45,7 @@ export default function init(opts) {
     },
 
     registerForAPNs(deviceToken) {
-      fetch('/api/push/apns/subscribe', {
-        credentials: 'same-origin',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ deviceToken }),
-      });
+      postJsonWithCredentials('/api/push/apns/subscribe', { deviceToken });
     },
 
   };

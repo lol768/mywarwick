@@ -4,9 +4,10 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import controllers.BaseController
+import models.API
 import org.joda.time.DateTime
 import play.api.libs.json._
-import services.{NewsService, SecurityService}
+import services.{NewsCategoryService, NewsService, SecurityService, UserNewsCategoryService}
 
 @Singleton
 class ReadNewsController @Inject()(
@@ -16,12 +17,10 @@ class ReadNewsController @Inject()(
 
   import security._
 
-  def feed = UserAction { implicit request =>
+  def feed = UserAction { request =>
     val userNews = news.latestNews(request.context.user.map(_.usercode))
 
-    Ok(Json.obj(
-      "items" -> userNews
-    ))
+    Ok(Json.toJson(API.Success(data = userNews)))
   }
 
 }
