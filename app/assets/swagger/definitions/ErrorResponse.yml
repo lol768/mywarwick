@@ -1,0 +1,12 @@
+type: object
+properties:
+  success:
+   type: boolean
+  status:
+    type: string
+  errors:
+    type: array
+    readOnly: true
+    items:
+      $ref: '#/definitions/Error'
+      minLength: 1

@@ -1,0 +1,220 @@
+package services.dao
+
+import java.sql.Connection
+import java.util.UUID
+import javax.inject.{Inject, Singleton}
+
+import anorm.SqlParser._
+import anorm._
+import com.google.inject.ImplementedBy
+import models.NewsCategory
+import models.news.{AudienceSize, Link, NewsItemRender, NewsItemSave}
+import org.joda.time.DateTime
+import system.DatabaseDialect
+import uk.ac.warwick.util.web.Uri
+import uk.ac.warwick.util.web.Uri.UriException
+import warwick.anorm.converters.ColumnConversions._
+import warwick.sso.Usercode
+
+@ImplementedBy(classOf[AnormNewsDao])
+trait NewsDao {
+
+  /**
+    * All the news, all the time. This is probably only useful for sysadmins and maybe Comms.
+    * Everyone else will be getting a filtered view.
+    */
+  def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender]
+
+  def latestNews(user: Option[Usercode], limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender]
+
+  /**
+    * @param item the news item to save
+    * @return the ID of the created item
+    */
+  def save(item: NewsItemSave, audienceId: String)(implicit c: Connection): String
+
+  // TODO too many args? define an object?
+  def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit
+
+  def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, AudienceSize]
+
+  def updateNewsItem(newsId: String, item: NewsItemSave)(implicit c: Connection): Int
+
+  def getNewsById(id: String)(implicit c: Connection): Option[NewsItemRender] =
+    getNewsByIds(Seq(id)).headOption
+
+  def getNewsByIds(ids: Seq[String])(implicit c: Connection): Seq[NewsItemRender]
+
+  def deleteRecipients(id: String)(implicit c: Connection)
+}
+
+@Singleton
+class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
+
+  private def newId = UUID.randomUUID().toString
+
+  def parseLink(href: Option[String]): Option[Uri] = href.flatMap { h =>
+    try {
+      Option(Uri.parse(h))
+    } catch {
+      case e: UriException => None
+    }
+  }
+
+  val newsParser = for {
+    id <- str("id")
+    title <- str("title")
+    text <- str("text")
+    linkText <- str("link_text").?
+    linkHref <- str("link_href").?
+    publishDate <- get[DateTime]("publish_date")
+    imageId <- str("news_image_id").?
+    ignoreCategories <- bool("ignore_categories")
+    newsCategoryId <- str("news_category_id").?
+    newsCategoryName <- str("news_category_name").?
+  } yield {
+    val link = for (text <- linkText; href <- parseLink(linkHref)) yield Link(text, href)
+    val category = for (id <- newsCategoryId; name <- newsCategoryName) yield NewsCategory(id, name)
+
+    NewsItemRender(id, title, text, link, publishDate, imageId, category.toSeq, ignoreCategories)
+  }
+
+  override def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender] = {
+    groupNewsItems(SQL(
+      s"""
+      SELECT
+        n.*,
+        NEWS_CATEGORY.ID AS NEWS_CATEGORY_ID,
+        NEWS_CATEGORY.NAME AS NEWS_CATEGORY_NAME
+      FROM NEWS_ITEM n
+        LEFT OUTER JOIN NEWS_ITEM_CATEGORY c
+          ON c.NEWS_ITEM_ID = n.ID
+        LEFT OUTER JOIN NEWS_CATEGORY
+          ON c.NEWS_CATEGORY_ID = NEWS_CATEGORY.ID
+      ORDER BY PUBLISH_DATE DESC
+      ${dialect.limitOffset(limit, offset)}
+      """)
+      .as(newsParser.*))
+  }
+
+  override def latestNews(user: Option[Usercode], limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender] = {
+    getNewsByIds(getNewsItemIdsForUser(user, limit))
+  }
+
+  def getNewsItemIdsForUser(user: Option[Usercode], limit: Int = 100)(implicit c: Connection): Seq[String] = {
+    SQL(
+      s"""
+        SELECT DISTINCT n.ID
+        FROM NEWS_ITEM n
+          JOIN NEWS_RECIPIENT r
+            ON n.ID = r.NEWS_ITEM_ID
+               AND (USERCODE = {user} OR USERCODE = '*')
+               AND r.PUBLISH_DATE <= SYSDATE
+          LEFT OUTER JOIN NEWS_ITEM_CATEGORY c
+            ON c.NEWS_ITEM_ID = n.ID
+        WHERE n.IGNORE_CATEGORIES = 1 OR c.NEWS_CATEGORY_ID IN
+                                         (SELECT NEWS_CATEGORY_ID
+                                          FROM USER_NEWS_CATEGORY
+                                          WHERE USERCODE = {user})
+        ${dialect.limitOffset(limit)}
+       """)
+      .on('user -> user.map(_.string).getOrElse("*"))
+      .as(scalar[String].*)
+  }
+
+  /**
+    * Save a news item with a specific set of recipients.
+    */
+  override def save(item: NewsItemSave, audienceId: String)(implicit c: Connection): String = {
+    import item._
+    val id = newId
+    val linkText = link.map(_.text).orNull
+    val linkHref = link.map(_.href.toString).orNull
+    SQL"""
+    INSERT INTO NEWS_ITEM (id, title, text, link_text, link_href, news_image_id, created_at, publish_date, audience_id, ignore_categories)
+    VALUES ($id, $title, $text, $linkText, $linkHref, $imageId, SYSDATE, $publishDate, $audienceId, $ignoreCategories)
+    """.executeUpdate()
+    id
+  }
+
+  override def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
+    // TODO perhaps we shouldn't insert these in sync, as audiences can potentially be 1000s users.
+    recipients.foreach { usercode =>
+      SQL"""
+        INSERT INTO NEWS_RECIPIENT (news_item_id, usercode, publish_date)
+        VALUES ($newsId, ${usercode.string}, $publishDate)
+      """.executeUpdate()
+    }
+  }
+
+  /**
+    * Deletes all the recipients of a news item.
+    */
+  override def deleteRecipients(id: String)(implicit c: Connection) = {
+    SQL"DELETE FROM NEWS_RECIPIENT WHERE news_item_id = $id".executeUpdate()
+  }
+
+  private val countParser = (str("id") ~ int("c")).map(flatten)
+
+  override def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, AudienceSize] = {
+    import AudienceSize._
+    if (newsIds.isEmpty) {
+      Map.empty
+    } else {
+      val publicNews =
+        SQL"""
+        SELECT NEWS_ITEM_ID ID FROM NEWS_RECIPIENT WHERE USERCODE = '*'
+        AND NEWS_ITEM_ID IN ($newsIds)
+      """.as(str("id").*).map(_ -> Public).toMap
+
+      val audienceNews =
+        SQL"""
+        SELECT NEWS_ITEM_ID ID, COUNT(*) C FROM NEWS_RECIPIENT
+        WHERE NEWS_ITEM_ID IN ($newsIds) AND USERCODE != '*'
+        GROUP BY NEWS_ITEM_ID
+      """.as(countParser.*).toMap.mapValues(Finite)
+
+      publicNews ++ audienceNews
+    }
+  }
+
+  override def updateNewsItem(newsId: String, item: NewsItemSave)(implicit c: Connection): Int = {
+    import item._
+    val linkText = link.map(_.text).orNull
+    val linkHref = link.map(_.href.toString).orNull
+    SQL"""
+      UPDATE NEWS_ITEM SET title=$title, text=$text, link_text=$linkText,
+      link_href=$linkHref, updated_at=SYSDATE, publish_date=$publishDate, news_image_id=$imageId
+      WHERE id=$newsId
+      """.executeUpdate()
+  }
+
+  override def getNewsByIds(ids: Seq[String])(implicit c: Connection): Seq[NewsItemRender] = {
+    groupNewsItems(ids.grouped(1000).flatMap { ids =>
+      SQL"""
+      SELECT
+        n.*,
+        NEWS_CATEGORY.ID AS NEWS_CATEGORY_ID,
+        NEWS_CATEGORY.NAME AS NEWS_CATEGORY_NAME
+      FROM NEWS_ITEM n
+        LEFT OUTER JOIN NEWS_ITEM_CATEGORY c
+          ON c.NEWS_ITEM_ID = n.ID
+        LEFT OUTER JOIN NEWS_CATEGORY
+          ON c.NEWS_CATEGORY_ID = NEWS_CATEGORY.ID
+      WHERE n.ID IN ($ids)
+      """.as(newsParser.*)
+    }.toSeq)
+  }
+
+  val mostRecentFirst: Ordering[DateTime] = Ordering.fromLessThan(_ isAfter _)
+
+  def groupNewsItems(items: Seq[NewsItemRender]): Seq[NewsItemRender] = {
+    items
+      .groupBy(_.id)
+      .mapValues(items => items.head.copy(categories = items.flatMap(_.categories)))
+      .values
+      .toSeq
+      .sortBy(_.publishDate)(mostRecentFirst)
+  }
+
+}

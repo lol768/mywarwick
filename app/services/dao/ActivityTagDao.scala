@@ -24,15 +24,7 @@ class ActivityTagDaoImpl extends ActivityTagDao {
   override def save(activityId: String, tag: ActivityTag)(implicit c: Connection): String = {
     val tagId = UUID.randomUUID().toString
 
-    SQL("INSERT INTO ACTIVITY_TAG (ACTIVITY_ID, ID, NAME, VALUE, DISPLAY_VALUE, CREATED_AT) VALUES ({activityId}, {id}, {name}, {value}, {displayValue}, {createdAt})")
-      .on(
-        'activityId -> activityId,
-        'id -> tagId,
-        'name -> tag.name,
-        'value -> tag.value.internalValue,
-        'displayValue -> tag.value.displayValue,
-        'createdAt -> DateTime.now()
-      )
+    SQL"INSERT INTO ACTIVITY_TAG (ACTIVITY_ID, ID, NAME, VALUE, DISPLAY_VALUE, CREATED_AT) VALUES ($activityId, $tagId, ${tag.name}, ${tag.value.internalValue}, ${tag.value.displayValue}, ${DateTime.now})"
       .execute()
 
     tagId

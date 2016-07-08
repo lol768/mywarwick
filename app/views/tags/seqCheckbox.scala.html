@@ -1,0 +1,25 @@
+@(
+    form: Form[_],
+    fieldName: String,
+    args: (Symbol, Any)*
+)(implicit constructor: b3.B3FieldConstructor, messages: Messages)
+@*
+
+ Checkbox that should be checked if its value matches an element in a Seq.
+
+*@
+@defining({
+  val argsMap = args.toMap
+  val htmlArgs = bs.Args.remove(bs.Args.inner(args), 'checked, 'selected).toMap
+  val arrField = form(s"$fieldName[]")
+  val checked = views.utils.checked(form, fieldName, argsMap.get('value))
+  (argsMap, form(fieldName), arrField, htmlArgs, checked)
+}) { case (argsMap, field, arrField, htmlArgs, checked) =>
+  <div class="checkbox">
+  @* May become possible to call through to b3.checkbox, but it doesn't support overriding 'checked until version 1.1 *@
+    <label>
+      <input type="checkbox" name="@arrField.name" @toHtmlArgs(htmlArgs) @if(checked){ checked }>
+      @argsMap.get('_text)
+    </label>
+  </div>
+}

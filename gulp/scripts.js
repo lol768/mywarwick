@@ -76,6 +76,7 @@ function bundle(b, outputFile) {
 const SCRIPTS = {
   // Mapping from bundle name to entry point
   'bundle.js': 'main.js',
+  'admin-bundle.js': 'admin.js',
 };
 
 const cachedAssets = _.map([

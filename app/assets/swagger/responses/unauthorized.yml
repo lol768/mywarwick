@@ -1,0 +1,4 @@
+description: Unauthorized
+schema:
+  readOnly: true
+  $ref: '#/definitions/ErrorResponse'

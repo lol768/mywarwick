@@ -12,9 +12,13 @@ import play.api.{Configuration, Environment}
 import system.{DatabaseDialect, H2DatabaseDialect}
 import warwick.sso._
 
+import scala.reflect.ClassTag
+
 trait OneStartAppPerSuite extends Suite with OneAppPerSuite {
 
   implicit override lazy val app = TestApplications.full()
+
+  def get[T : ClassTag]: T = app.injector.instanceOf[T]
 
   def transaction(block: Connection => Unit): Unit =
     transaction(rollback = true)(block)
@@ -27,8 +31,10 @@ trait OneStartAppPerSuite extends Suite with OneAppPerSuite {
     finally {
       if (rollback)
         connection.rollback()
+      else
+        connection.commit()
 
-      connection.setAutoCommit(true)
+      connection.close()
     }
   }
 

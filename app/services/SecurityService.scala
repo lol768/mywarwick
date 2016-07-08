@@ -7,6 +7,7 @@ import play.api.cache.CacheApi
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc._
+import system.RequestContext
 import warwick.sso._
 
 import scala.concurrent.Future
@@ -24,9 +25,15 @@ trait SecurityService {
 
   def APIAction: ActionBuilder[AuthenticatedRequest]
 
+  /**
+    * An async result that will either do what you ask (A) or fall back to an error Result.
+    * Used as a handler type for websockets.
+    */
   type TryAccept[A] = Future[Either[Result, A]]
 
   def SecureWebsocket[A](request: play.api.mvc.RequestHeader)(block: warwick.sso.LoginContext => TryAccept[A]): TryAccept[A]
+
+  implicit def requestContext(implicit request: Request[_]): RequestContext
 
 }
 
@@ -92,7 +99,12 @@ class SecurityServiceImpl @Inject()(
         name
     }
 
-    Forbidden(views.html.errors.forbidden(identity))
+    Forbidden(views.html.errors.forbidden(identity)(requestContext(request)))
+  }
+
+  implicit def requestContext(implicit request: Request[_]): RequestContext = request match {
+    case req: AuthenticatedRequest[_] => RequestContext.authenticated(ssoClient, req)
+    case _ => RequestContext.anonymous(ssoClient, request)
   }
 
 }

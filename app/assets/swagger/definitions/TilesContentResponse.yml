@@ -1,0 +1,12 @@
+type: object
+properties:
+  success:
+    type: boolean
+  status:
+    type: string
+  data:
+    type: object
+    properties:
+      tile_id:
+       type: object
+       description: Tile-specific tile content object

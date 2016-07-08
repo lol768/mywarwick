@@ -16,11 +16,21 @@ POST        /                                             @controllers.HomeContr
 
 ->          /sso                                          sso.Routes
 
+GET         /admin                                        @controllers.admin.AdminController.index
 GET         /admin/cluster                                @controllers.admin.ClusterStateController.html
 
-# DEPRECATED no-slash version 2016-02-11
-GET         /websockets/page                              @controllers.HomeController.socket
-GET         /websockets/page/                             @controllers.HomeController.socket
+GET         /admin/news                                   @controllers.admin.NewsController.list
+GET         /admin/news/new                               @controllers.admin.NewsController.createForm
+POST        /admin/news/new                               @controllers.admin.NewsController.create
+GET         /admin/news/update/:id                        @controllers.admin.NewsController.updateForm(id: String)
+POST        /admin/news/update/:id                        @controllers.admin.NewsController.update(id: String)
+
+GET         /admin/notifications                          @controllers.admin.NotificationsController.list
+GET         /admin/notifications/new                      @controllers.admin.NotificationsController.createForm
+POST        /admin/notifications                          @controllers.admin.NotificationsController.create
+GET         /admin/masquerade                             @controllers.admin.MasqueradeController.masquerade
+
+GET         /websockets/page/                             @controllers.WebSocketController.socket
 
 GET         /assets/manifest.json                         @controllers.AppManifestController.getAppManifest
 # Map static resources from the /public folder to the /assets URL path
@@ -28,7 +38,9 @@ GET         /assets/*file                                 @controllers.Assets.ve
 
 GET         /service-worker.js                            @controllers.Assets.at(path="/public", file="service-worker.js")
 
-GET         /api/news/feed                                @controllers.NewsController.feed
+GET         /api/news/feed                                @controllers.api.ReadNewsController.feed
+POST        /api/news/images                              @controllers.api.NewsImagesController.create
+GET         /api/news/images/:id                          @controllers.api.NewsImagesController.show(id: String)
 
 GET         /service/metrics                              @controllers.MetricsController.metrics
 GET         /service/gtg                                  @controllers.ServiceCheckController.gtg
@@ -49,12 +61,13 @@ PUT         /api/tiles                                    @controllers.api.Tiles
 POST        /api/errors/js                                @controllers.api.ErrorsController.js
 
 GET         /user/info                                    @controllers.SSOController.info
-GET         /ssotarget                                    @controllers.SSOController.ssotarget
+GET         /logout                                       @controllers.SSOController.logout
 
 POST        /api/push/apns/subscribe                      @controllers.api.APNSPushNotificationsController.subscribe
 POST        /api/push/gcm/subscribe                       @controllers.api.GCMPushNotificationsController.subscribe
 POST        /api/push/gcm/notification                    @controllers.api.GCMPushNotificationsController.fetchPushNotifications
 
-GET         /admin/masquerade                             @controllers.admin.MasqueradeController.masquerade
-
 GET         /photo                                        @controllers.HomeController.photo
+
+# Handle trailing slashes in URLs
+GET         /*path/                                       @controllers.HomeController.redirectToPath(path: String)

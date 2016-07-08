@@ -1,15 +1,74 @@
 package services
 
-import models.NewsSource
+import javax.inject.Inject
 
-class NewsService {
+import com.google.inject.ImplementedBy
+import controllers.admin.NewsItemData
+import models.news.{Audience, AudienceSize, NewsItemRender, NewsItemSave}
+import play.api.db.Database
+import services.dao.{AudienceDao, NewsDao, NewsCategoryDao}
+import warwick.sso.Usercode
 
-  def allSources: Seq[NewsSource] = Seq(
-    NewsSource("insite", "/insite/news/intnews2", "#7ecbb6"),
-    NewsSource("Latest News", "/newsandevents/news", "#5b3069"),
-    NewsSource("IT Services", "/services/its/newschanges/newinitiatives", "#156294"),
-    NewsSource("Warwick Sport", "/services/sport/news/newsfeed", "#51576d"),
-    NewsSource("Student News", "/students/news/newsevents", "#1595af")
-  )
+@ImplementedBy(classOf[AnormNewsService])
+trait NewsService {
+  def allNews(limit: Int = 100, offset: Int = 0): Seq[NewsItemRender]
 
+  def latestNews(user: Option[Usercode], limit: Int = 100): Seq[NewsItemRender]
+  def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String
+
+  def updateNewsItem(id: String, item: NewsItemData): Int
+
+  def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize]
+
+  def getNewsItem(id: String): Option[NewsItemRender]
+}
+
+class AnormNewsService @Inject()(
+  db: Database,
+  dao: NewsDao,
+  audienceService: AudienceService,
+  newsCategoryDao: NewsCategoryDao,
+  audienceDao: AudienceDao,
+  userInitialisationService: UserInitialisationService
+) extends NewsService {
+
+  override def allNews(limit: Int, offset: Int): Seq[NewsItemRender] =
+    db.withConnection { implicit c =>
+      dao.allNews(limit, offset)
+    }
+
+  override def latestNews(user: Option[Usercode], limit: Int): Seq[NewsItemRender] = {
+    user.foreach(userInitialisationService.maybeInitialiseUser)
+
+    db.withConnection { implicit c =>
+      dao.latestNews(user, limit)
+    }
+  }
+
+  // FIXME: Move audience-resolution and recipient-saving to scheduler
+  // and just save audience components to db here
+  override def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String =
+    db.withConnection { implicit c =>
+      val recipients = audienceService.resolve(audience).get // FIXME Try.get throws
+      val audienceId = audienceDao.saveAudience(audience)
+      val id = dao.save(item, audienceId)
+      dao.saveRecipients(id, item.publishDate, recipients)
+      newsCategoryDao.saveNewsCategories(id, categoryIds)
+      id
+    }
+
+  override def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize] =
+    db.withConnection { implicit c =>
+      dao.countRecipients(newsIds)
+    }
+
+  override def updateNewsItem(id: String, item: NewsItemData): Int =
+    db.withConnection { implicit c =>
+      dao.updateNewsItem(id, item.toSave)
+    }
+
+  override def getNewsItem(id: String): Option[NewsItemRender] =
+    db.withConnection { implicit c =>
+      dao.getNewsById(id)
+    }
 }

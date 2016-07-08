@@ -2,18 +2,13 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import actors.WebsocketActor
 import play.api.Configuration
-import play.api.Play.current
-import play.api.libs.json._
 import play.api.mvc._
 import services.{PhotoService, SecurityService}
 import system.AppMetrics
-import warwick.sso._
-
-import scala.concurrent.Future
 
 case class AnalyticsTrackingID(string: String)
+case class SearchRootUrl(string: String)
 
 @Singleton
 class HomeController @Inject()(
@@ -26,21 +21,17 @@ class HomeController @Inject()(
   import security._
 
   implicit val analyticsTrackingId: Option[AnalyticsTrackingID] =
-    configuration.getString("start.analytics.tracking-id").map(AnalyticsTrackingID.apply)
+    configuration.getString("start.analytics.tracking-id").map(AnalyticsTrackingID)
+
+  implicit val searchRootUrl: SearchRootUrl =
+    configuration.getString("start.search.root").map(SearchRootUrl)
+      .getOrElse(throw new IllegalStateException("Search root URL not configured - check start.search.root property"))
 
   def index = Action(Ok(views.html.index()))
 
   def redirectToIndex = Action(Redirect(routes.HomeController.index()))
 
   def tile(id: String) = index
-
-  def socket = WebSocket.tryAcceptWithActor[JsValue, JsValue] { request =>
-    SecureWebsocket(request) { loginContext: LoginContext =>
-      val who = loginContext.user.map(_.usercode).getOrElse("nobody")
-      logger.info(s"Websocket opening for ${who}")
-      Future.successful(Right(WebsocketActor.props(loginContext, metrics.websocketTracker()) _))
-    }
-  }
 
   def photo = RequiredUserAction { request =>
     request.context.user.get.universityId.map { id =>
@@ -49,5 +40,9 @@ class HomeController @Inject()(
     }.getOrElse(
       NotFound
     )
+  }
+
+  def redirectToPath(path: String, status: Int = MOVED_PERMANENTLY) = Action { implicit request =>
+    Redirect(s"/${path.replaceFirst("^/", "")}", status)
   }
 }

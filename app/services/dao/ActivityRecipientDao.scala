@@ -5,7 +5,6 @@ import java.sql.Connection
 import anorm.SQL
 import com.google.inject.{ImplementedBy, Inject}
 import org.joda.time.DateTime
-import play.api.db.{Database, NamedDatabase}
 import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityRecipientDaoImpl])
@@ -17,9 +16,7 @@ trait ActivityRecipientDao {
 
 }
 
-class ActivityRecipientDaoImpl @Inject()(
-  @NamedDatabase("default") val db: Database
-) extends ActivityRecipientDao {
+class ActivityRecipientDaoImpl @Inject()() extends ActivityRecipientDao {
 
   override def create(activityId: String, usercode: String, generatedAt: Option[DateTime])(implicit c: Connection): Unit = {
     val now = DateTime.now

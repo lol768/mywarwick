@@ -1,125 +1,27 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import ReactComponent from 'react/lib/ReactComponent';
-
-import SearchField from '../ui/SearchField';
-import LinkBlock from '../ui/LinkBlock';
-import Link from '../ui/Link';
-
-import { connect } from 'react-redux';
-import * as search from '../../state/search';
-
+import React, { PropTypes } from 'react';
 import $ from 'jquery';
 
-export class SearchView extends ReactComponent {
+const defaultRootUrl = $('#app-container').attr('data-search-root-url');
 
-  constructor(props) {
-    super(props);
+const SearchView = (props) => {
+  const rootUrl = props.rootUrl || defaultRootUrl;
 
-    this.state = {
-      searchFocus: false,
-    };
+  let src = `${rootUrl}/embed`;
 
-    this.boundOnReflow = this.onReflow.bind(this);
-    this.onChange = this.onChange.bind(this);
-    this.onFocus = this.onFocus.bind(this);
+  if (props.query) {
+    src += `?q=${props.query}`;
   }
 
-  onFocus() {
-    this.setState({
-      searchFocus: true,
-    });
+  return (
+    <div className="iframe-embed">
+      <iframe src={ src }></iframe>
+    </div>
+  );
+};
 
-    const thisNode = ReactDOM.findDOMNode(this);
+SearchView.propTypes = {
+  query: PropTypes.string,
+  rootUrl: PropTypes.string,
+};
 
-    const documentOnClickListener = $(document).on('click', (e) => {
-      const parents = $(e.target).parents().get();
-      if (parents.indexOf(thisNode) >= 0) return;
-
-      $(document).off('click', documentOnClickListener);
-
-      this.setState({
-        searchFocus: false,
-      });
-    });
-  }
-
-  componentDidMount() {
-    $(window).on('id7:reflow', this.boundOnReflow);
-  }
-
-  componentWillUnmount() {
-    $(window).off('id7:reflow', this.boundOnReflow);
-  }
-
-  onReflow() {
-    this.setState({});
-  }
-
-  getLinks() {
-    const items = this.props.results.length > 0 && this.refs.field.value() === this.props.query ?
-      this.props.results :
-      search.getRecentItemsOrderedByFrequency(this.props.recentItems);
-
-    return items.map((result) =>
-      <Link
-        key={ result.path } href={ `http://warwick.ac.uk/${result.path}` } subtitle={ result.path }
-        result={ result } onClick={ this.onResultClick }
-      >
-        { result.description }
-      </Link>
-    );
-  }
-
-  onChange(value) {
-    this.props.dispatch(search.fetchSearchResults(value));
-  }
-
-  onResultClick(result) {
-    this.props.dispatch(search.clickSearchResult(result));
-  }
-
-  searchField() {
-    return (
-      <SearchField
-        onChange={ this.onChange } onFocus={ this.onFocus } ref="field"
-      />
-    );
-  }
-
-  quickLinks() {
-    return (
-      <div style={{ marginTop: 20 }}>
-        <h4>Quick links</h4>
-        <LinkBlock columns="2">
-          <Link key="bpm" href="http://warwick.ac.uk/bpm">Course Transfers</Link>
-          <Link key="ett" href="http://warwick.ac.uk/ett">Exam Timetable</Link>
-          <Link key="massmail" href="http://warwick.ac.uk/massmail">Mass Mailing</Link>
-
-          <Link key="mrm" href="http://warwick.ac.uk/mrm">Module Registration</Link>
-          <Link key="printercredits" href="http://warwick.ac.uk/printercredits">Printer Credits</Link>
-        </LinkBlock>
-      </div>
-    );
-  }
-
-  suggestions() {
-    return (
-      <LinkBlock columns="1">{ this.getLinks() }</LinkBlock>
-    );
-  }
-
-  render() {
-    return (
-      <div className="search-view">
-        { this.searchField() }
-        { this.state.searchFocus ? this.suggestions() : this.quickLinks() }
-      </div>
-    );
-  }
-
-}
-
-const select = (state) => state.search;
-
-export default connect(select)(SearchView);
+export default SearchView;

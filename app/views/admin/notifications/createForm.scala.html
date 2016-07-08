@@ -1,0 +1,35 @@
+@import system.RequestContext
+@import controllers.admin.NotificationsController.PublishNotificationForm
+
+@(form: PublishNotificationForm, departmentOptions: Seq[(String, String)])(implicit messages: Messages, context: RequestContext)
+
+@implicitFieldConstructor = @{
+  b3.vertical.fieldConstructor
+}
+
+@common.admin("Create notification") {
+  <div class="container-fluid">
+  @b3.form(action = controllers.admin.routes.NotificationsController.create()) {
+
+    @form.globalErrors.map { error =>
+      <div class="alert alert-danger">@error.message</div>
+    }
+
+    @b3.textarea(form("item.text"),
+      '_label -> "Text",
+      '_help -> "Keep it super short"
+    )
+
+    @b3.text(form("item.linkHref"),
+      '_label -> "Link URL",
+      '_help -> "Optional"
+    )
+
+    @tags.audiencePicker(form, "audience", departmentOptions, "notification", allowPublic = false)
+
+    @b3.submit(
+      'class -> "btn btn-primary"
+    ) {Send}
+  }
+  </div>
+}

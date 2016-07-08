@@ -1,8 +1,7 @@
-@(identity: Option[String])
+@import system.RequestContext
+@(identity: Option[String])(implicit context: RequestContext)
 
 @common.id7layout("Permission Denied") {
-
-  <h1>Permission denied</h1>
 
   <p>
     @identity.map { name =>

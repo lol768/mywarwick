@@ -60,24 +60,24 @@ class NewsView extends ReactComponent {
       );
     }
 
-    const html = (content) => ({ __html: content.replace(/<br[ /]+?>/g, '') });
+    if (this.props.items.length) {
+      const items = _.take(this.props.items, this.state.numberToShow).map((item) =>
+        <NewsItem
+          key={item.id}
+          {...item}
+        />
+      );
 
-    const items = _.take(this.props.items, this.state.numberToShow).map((item) =>
-      <NewsItem
-        key={item.id}
-        {...item}
-      >
-        <div dangerouslySetInnerHTML={html(item.content)}></div>
-      </NewsItem>
-    );
+      const hasMore = this.state.numberToShow < this.props.items.length;
 
-    const hasMore = this.state.numberToShow < this.props.items.length;
+      return (
+        <InfiniteScrollable hasMore={hasMore} onLoadMore={this.loadMore}>
+          {items}
+        </InfiniteScrollable>
+      );
+    }
 
-    return (
-      <InfiniteScrollable hasMore={hasMore} onLoadMore={this.loadMore}>
-        {items}
-      </InfiniteScrollable>
-    );
+    return (<p>No news to show you yet.</p>);
   }
 
 }

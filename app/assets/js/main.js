@@ -27,6 +27,7 @@ import * as tiles from './state/tiles';
 import * as update from './state/update';
 import * as user from './state/user';
 import * as ui from './state/ui';
+import * as device from './state/device';
 import * as analytics from './analytics';
 import store from './store';
 import AppRoot from './components/AppRoot';
@@ -50,6 +51,8 @@ $(() => {
   $(window).on('contextmenu', () => window.navigator.userAgent.indexOf('Mobile') < 0);
 
   $(window).on('resize', () => store.dispatch(ui.updateUIContext()));
+
+  $(window).on('deviceorientation resize', () => store.dispatch(device.updateDeviceWidth()));
 
   $(window).on('online', () =>
     store.dispatch(notifications.fetch())
@@ -129,14 +132,13 @@ persisted('notifications', notifications.fetchedNotifications, freezeStream);
 persisted('tiles.data', tiles.fetchedTiles);
 persisted('tileContent', tiles.loadedAllTileContent);
 
-persisted('user.links', user.receiveSSOLinks);
+const persistedUserLinks = persisted('user.links', user.receiveSSOLinks);
 
 /** Initial requests for data */
 
 const loadPersonalisedDataFromServer = _.once(() => {
   store.dispatch(notifications.fetch());
   store.dispatch(tiles.fetchTiles());
-  store.dispatch(tiles.fetchTileContent());
 
   // Refresh all tile content every five minutes
   setInterval(() => store.dispatch(tiles.fetchTileContent()), 5 * 60 * 1000);
@@ -156,21 +158,29 @@ store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getSt
 
 // kicks off the whole data flow - when user is received we fetch tile data
 function fetchUserInfo() {
-  serverpipe.fetchWithCredentials('/user/info')
-    .then(response => response.json())
-    .then(response => {
-      if (response.refresh) {
-        window.location = response.refresh;
+  return serverpipe.fetchWithCredentials('/user/info');
+}
+
+function receiveUserInfo(response) {
+  return response.json()
+    .then(data => {
+      if (data.refresh) {
+        window.location = data.refresh;
       } else {
-        store.dispatch(user.userReceive(response.user));
-        store.dispatch(user.receiveSSOLinks(response.links));
+        store.dispatch(user.userReceive(data.user));
+        store.dispatch(user.receiveSSOLinks(data.links));
       }
     })
-    .catch(() => setTimeout(fetchUserInfo, 5000));
+    .catch(() => setTimeout(() => fetchUserInfo().then(receiveUserInfo), 5000));
 }
 
 user.loadUserFromLocalStorage(store.dispatch);
-fetchUserInfo();
+fetchUserInfo().then(res =>
+  // ensure local version is written first, then remote version if available.
+  persistedUserLinks.then(() =>
+    receiveUserInfo(res)
+  )
+);
 
 // Just for access from the console
 window.Store = store;

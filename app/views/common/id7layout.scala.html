@@ -1,8 +1,10 @@
-@(title: String = "")(content: Html)
+@import system.RequestContext
+@(title: String = "")(content: Html)(implicit context: RequestContext)
 @common.htmlelement {
   <head>
 
     @common.head(title)
+    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("css/admin.css")">
 
   </head>
   <body>
@@ -15,9 +17,23 @@
           <div class="id7-utility-masthead">
             <nav class="id7-utility-bar" id="utility-bar-container">
               <ul>
-                <li>
-
-                </li>
+                @context.user.map { user =>
+                  <li>
+                    <a href="http://warwick.ac.uk/myaccount"
+                      data-toggle="id7:account-popover"
+                      data-name="@user.name.full"
+                      data-loginlink="@context.loginUrl"
+                      data-logoutlink="@context.logoutUrl"
+                    >
+                      @user.name.full
+                      <span class="caret"></span>
+                    </a>
+                  </li>
+                }.getOrElse {
+                  <li>
+                    <a href="@context.loginUrl">Sign in</a>
+                  </li>
+                }
               </ul>
             </nav>
 
@@ -71,9 +87,7 @@
                 <path d="m 0,0 1030.48, 0 22.8,40 16.96,-31.4 16.96,31.4 22.8,-40 20,0" class="divider" stroke="#383838" fill="none" />
               </svg>
             </div>
-            @*<div class="id7-page-title">
             <h1>@title</h1>
-            </div>*@
           </header>
 
           <div class="id7-main-content">

@@ -1,8 +1,9 @@
 @import akka.cluster.ClusterEvent.CurrentClusterState
 @import akka.actor.Address
-@(state: CurrentClusterState, selfAddress: Address)
+@import system.RequestContext
+@(state: CurrentClusterState, selfAddress: Address)(implicit context: RequestContext)
 
-@common.id7layout("Cluster State") {
+@common.admin("Cluster State") {
   <h1>Cluster members</h1>
   @if(state.unreachable.nonEmpty) {
     <div class="alert alert-danger">

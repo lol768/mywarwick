@@ -10,6 +10,8 @@ import uk.ac.warwick.sso.client.cache.UserCache
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import uk.ac.warwick.util.core.StringUtils
 import warwick.sso.{LoginContext, SSOClient}
+import play.api.http.HeaderNames.CACHE_CONTROL
+import services.UserInitialisationService
 
 /**
   * This is some weird SSO stuff for Start, while we're still working out
@@ -21,7 +23,8 @@ import warwick.sso.{LoginContext, SSOClient}
 class SSOController @Inject()(
   ssoConfig: SSOConfiguration,
   userCache: UserCache,
-  ssoClient: SSOClient
+  ssoClient: SSOClient,
+  userInitialisationService: UserInitialisationService
 ) extends BaseController {
 
   import ssoClient.Lenient
@@ -46,34 +49,30 @@ class SSOController @Inject()(
     val refresh = ssc.exists(tokenNotInUserCache) || (ssc.isEmpty && ltc.nonEmpty)
 
     val links = ssoClient.linkGenerator(request)
-    links.setTarget(s"https://${request.host}/ssotarget")
+    links.setTarget(s"https://${request.host}")
 
     val loginUrl = links.getLoginUrl
+    val logoutUrl = s"https://${request.host}/logout?target=https://${request.host}"
+
+    request.context.user.map(_.usercode)
+      .foreach(userInitialisationService.maybeInitialiseUser)
 
     Ok(Json.obj(
       "refresh" -> (if (refresh) loginUrl else false),
       "user" -> contextUserInfo(request.context),
       "links" -> Json.obj(
         "login" -> loginUrl,
-        "logout" -> links.getLogoutUrl
+        "logout" -> logoutUrl
       )
-    ))
+    )).withHeaders(CACHE_CONTROL -> "no-cache")
   }
 
-  def ssotarget = Action { request =>
-    val ltc = request.cookies.get(GLOBAL_LOGIN_COOKIE_NAME).filter(hasValue)
-
-    val target = request.getQueryString("target").filter(_.startsWith("/")).getOrElse("/")
-    val redirect = Redirect(s"https://${request.host}$target")
-
-    if (ltc.nonEmpty) {
-      // We are signed in, carry on
-      redirect
-    } else {
-      // We just signed out or declined to sign in - delete the SSC because
-      // it's no longer valid
-      redirect.discardingCookies(DiscardingCookie(SSC_NAME, SSC_PATH, Some(SSC_DOMAIN)))
-    }
+  def logout = Action { request =>
+    val host = request.getQueryString("target").get
+    val links = ssoClient.linkGenerator(request)
+    links.setTarget(host)
+    val redirect = Redirect(links.getLogoutUrl)
+    redirect.discardingCookies(DiscardingCookie(SSC_NAME, SSC_PATH, Some(SSC_DOMAIN)))
   }
 
   private def contextUserInfo(context: LoginContext) =

@@ -1,5 +1,4 @@
 import React, { PropTypes } from 'react';
-
 import { localMoment } from '../../dateFormatter';
 import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
@@ -7,6 +6,7 @@ import TileContent from './TileContent';
 import _ from 'lodash';
 import classNames from 'classnames';
 import Hyperlink from '../ui/Hyperlink';
+import { createSelector } from 'reselect';
 
 const groupItemsForAgendaTile = {
 
@@ -34,6 +34,40 @@ const groupItemsForAgendaTile = {
   },
 };
 
+// Create an agenda view for the given calendar events.  All-day events
+// spanning multiple days appear on each day.  Events are sorted by start
+// time, and any events ending before the start of the current day are
+// excluded.
+const agendaViewTransform = (items) => {
+  const startOfToday = localMoment().startOf('day');
+
+  return _(items)
+    .flatMap(e => {
+      if (e.isAllDay) {
+        const date = localMoment(e.start);
+        const end = localMoment(e.end);
+
+        const instances = [];
+
+        while (date.isBefore(end)) {
+          instances.push({
+            ...e,
+            start: date.format(),
+          });
+
+          date.add(1, 'day');
+        }
+
+        return instances;
+      }
+
+      return e;
+    })
+    .filter(e => startOfToday.isBefore(e.start))
+    .sortBy(e => e.start)
+    .value();
+};
+
 export default class AgendaTile extends TileContent {
 
   constructor(props) {
@@ -41,6 +75,8 @@ export default class AgendaTile extends TileContent {
     this.state = {
       defaultMaxItems: { small: null, wide: 2, large: 5 }[props.size],
     };
+
+    this.agendaViewSelector = createSelector(_.identity, agendaViewTransform);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -50,22 +86,46 @@ export default class AgendaTile extends TileContent {
   }
 
   numEventsToday(events) {
-    const now = localMoment();
-    const todayEvents = _.takeWhile(events, (e) => localMoment(e.start).isSame(now, 'day'));
-    return todayEvents.length;
+    const startOfToday = localMoment().startOf('day');
+    const startOfTomorrow = localMoment().add(1, 'day').startOf('day');
+
+    return _(events)
+      .filter(e => localMoment(e.start).isBetween(startOfToday, startOfTomorrow, null, '[)'))
+      .size();
+  }
+
+  getNextEvent(items) {
+    const timedEvent = _.find(items, e => !e.isAllDay);
+    const trunc = text => _.truncate(text, { length: 30 });
+
+    if (!timedEvent) {
+      // items are all-day events
+      if (items.length === 1) {
+        return {
+          text: `All day: ${trunc(items[0].title)}`,
+          href: items[0].href,
+        };
+      }
+      return {
+        text: `You have ${items.length} all day events`,
+      };
+    }
+
+    return {
+      text: `Next: ${trunc(timedEvent.title)} at ${localMoment(timedEvent.start).format('HH:mm')}`,
+      href: timedEvent.href,
+    };
   }
 
   getLargeBody() {
-    const { content } = this.props;
+    const items = this.agendaViewSelector(this.props.content.items);
 
     const maxItemsToDisplay = this.props.maxItemsToDisplay || this.state.defaultMaxItems;
     const itemsToDisplay = this.props.zoomed ?
-      content.items : _.take(content.items, maxItemsToDisplay);
+      items : _.take(items, maxItemsToDisplay);
 
     const events = itemsToDisplay.map(event =>
-      <AgendaTileItem key={event.id}
-        {...event}
-      />
+      <AgendaTileItem key={event.id} {...event} />
     );
 
     return (
@@ -76,17 +136,9 @@ export default class AgendaTile extends TileContent {
   }
 
   getSmallBody() {
-    const { content } = this.props;
+    const items = this.agendaViewSelector(this.props.content.items);
 
-    const nextEvent = content.items[0];
-    const truncTitle = _.truncate(nextEvent.title, { length: 30 });
-    const text = (
-      <span className="tile__text">
-        Next: {truncTitle} at {localMoment(nextEvent.start).format('HH:mm')}
-      </span>
-    );
-
-    const numEventsToday = this.numEventsToday(content.items);
+    const numEventsToday = this.numEventsToday(items);
 
     const callout = (
       <span className="tile__callout">
@@ -103,10 +155,17 @@ export default class AgendaTile extends TileContent {
       );
     }
 
+    // only getNextEvent when we know numEventsToday > 0
+    const { text, href } = this.getNextEvent(items);
+
     return (
       <div className="tile__item">
         { callout }
-        <Hyperlink href={nextEvent.href}>{ text }</Hyperlink>
+        <Hyperlink href={href}>
+          <span className="tile__text">
+           { text }
+          </span>
+        </Hyperlink>
       </div>
     );
   }
@@ -123,23 +182,23 @@ export default class AgendaTile extends TileContent {
 export class AgendaTileItem extends React.Component {
 
   render() {
-    const { title, start, end, href, location } = this.props;
+    const { title, start, isAllDay, href, location } = this.props;
 
     const content = (
       <div>
         <div className="col-xs-2">
-          { end ? localMoment(start).format('HH:mm') : 'All day' }
+          { isAllDay ? 'All day' : localMoment(start).format('HH:mm') }
         </div>
         <div className="col-xs-10">
           <span title={title}
             className={classNames('tile-list-item__title', 'text--align-bottom',
             { 'text--dotted-underline': href })}
           >
-            <Hyperlink href={href} >{ title }</Hyperlink>
+            <Hyperlink href={href}>{ title }</Hyperlink>
          </span>
           {location ?
             <span className="tile-list-item__location text--align-bottom text--light">
-           &nbsp;- <Hyperlink href={location.href} >{ location.name }</Hyperlink>
+              &nbsp;- <Hyperlink href={ location.href }>{ location.name }</Hyperlink>
             </span>
             : null}
         </div>
@@ -158,6 +217,7 @@ AgendaTileItem.propTypes = {
   id: PropTypes.string,
   start: PropTypes.string,
   end: PropTypes.string,
+  isAllDay: PropTypes.bool,
   title: PropTypes.string,
   location: React.PropTypes.shape({
     name: React.PropTypes.string,

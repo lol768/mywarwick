@@ -2,40 +2,20 @@ package actors
 
 import akka.actor._
 import akka.cluster.pubsub.DistributedPubSub
-import akka.cluster.pubsub.DistributedPubSubMediator.{SubscribeAck, Subscribe}
-import com.codahale.metrics.{Timer, Meter}
+import akka.cluster.pubsub.DistributedPubSubMediator.{Subscribe, SubscribeAck}
 import models.ActivityResponse
-import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import system.AppMetrics.RequestTracker
 import warwick.sso.LoginContext
 
 object WebsocketActor {
 
-  implicit val clientDataFormat = Json.format[ClientData]
-
   def props(loginContext: LoginContext, tracker: RequestTracker)(out: ActorRef) = Props(classOf[WebsocketActor], out, loginContext, tracker)
 
   /**
-    * This is the format of the JSON that client web pages will send to
-    * the server
-    *
-    * TODO will all messages really have a tileId?
-    *
-    * @param messageId Sequential ID provided by client to use in replies.
-    *                  This is short-lived and only unique within a web page load.
-    * @param tileId Id of the tile that is requesting information.
-    * @param data Freeform JSON payload.
+    * For realtime notification/activity stream updates. This message is published to PubSub
+    * and received by all open websockets for the relevant users.
     */
-  case class ClientData(messageId: Int, tileId: String, data: JsValue)
-
-  /**
-    * Wrapper for ClientData when passing it on to other actors.
-    * @param sender where to send replies.
-    * @param data the ClientData.
-    */
-  case class ClientDataWrapper(sender: ActorRef, data: ClientData)
-
   case class Notification(activity: ActivityResponse)
 
 }
@@ -62,11 +42,6 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext, tracker: Request
     mediator ! Subscribe(user.usercode.string, self)
   }
 
-  // FIXME UserMessageHandler and the way we create it here is non-production.
-  // it likely shouldn't own UserMessageHandler as a child (which is what context.actorOf
-  // does here).
-  val handler = context.actorOf(UserMessageHandler.props(loginContext))
-
   val signedIn = loginContext.user.exists(_.isFound)
   val who = loginContext.user.flatMap(_.name.full).getOrElse("nobody")
 
@@ -77,47 +52,14 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext, tracker: Request
   }
 
   override def receive = {
+    //
     case Notification(activity) => out ! Json.obj(
       "type" -> "activity",
       "activity" -> activity
     )
-    case js: JsValue => handleClientMessage(js)
     case SubscribeAck(Subscribe(topic, group, ref)) =>
       log.debug(s"Websocket subscribed to PubSub messages on the topic of '${topic}'")
     case nonsense => log.error(s"Ignoring unrecognised message: ${nonsense}")
-  }
-
-  def handleClientMessage(js: JsValue): Unit = {
-    log.debug("Got a JsValue message from client")
-    js.validate[ClientData].fold(
-      errors => out ! toErrorResponse(js, errors),
-      clientData => handleClientData(clientData)
-    )
-  }
-
-  def handleClientData(clientData: ClientData) = {
-    log.debug("Successfully parsed ClientData: {}", clientData)
-    handler ! ClientDataWrapper(out, clientData)
-  }
-
-  def toErrorResponse(js: JsValue, errors: Seq[(JsPath, Seq[ValidationError])]) = {
-    val messageId = (js \ "messageId").validate[Int]
-    val errorsSeq = Json.arr(Json.obj(
-      "code" -> "400",
-      "title" -> "JSON parse error",
-      "detail" -> errors.toString()
-    ))
-
-    val msg = messageId.map(id =>
-      Json.obj(
-        "errorFor" -> id,
-        "errors" -> errorsSeq
-      )
-    ).getOrElse(
-      Json.obj(
-        "errors" -> errorsSeq
-      )
-    )
   }
 
 }

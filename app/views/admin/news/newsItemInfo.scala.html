@@ -1,0 +1,41 @@
+@import models.news.{AudienceSize, NewsItemRender}
+@(item: NewsItemRender, count: Option[AudienceSize])
+<article class="news-item">
+  <div class="news-item__body">
+    <div class="news-item__title">@item.title</div>
+    @item.imageId.map { imageId =>
+      <div class="news-item__image">
+        <img src="@controllers.api.routes.NewsImagesController.show(imageId)" alt="@item.title">
+      </div>
+    }
+    <div class="news-item__content">@item.text</div>
+    <div class="news-item__footer">
+      @models.DateFormats.emailDateTime(item.publishDate)
+      @count match {
+        case Some(AudienceSize.Public) => {
+          <span>- public</span>
+        }
+        case Some(AudienceSize.Finite(c)) => {
+          <span>
+            - @c
+            @if(c == 1) { recipient } else { recipients }
+          </span>
+        }
+        case _ => {}
+      }
+
+      <div>
+      @item.categories.map { category =>
+        <span class="badge">@category.name</span>
+      }
+      </div>
+
+    <div class="btn-toolbar pull-right">
+      <a
+      href="@controllers.admin.routes.NewsController.update(item.id)"
+      class="btn btn-primary"
+      >Edit</a>
+    </div>
+    </div>
+  </div>
+</article>

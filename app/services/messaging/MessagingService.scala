@@ -1,7 +1,7 @@
 package services.messaging
 
 import java.sql.Connection
-import javax.inject.{Inject, Named}
+import javax.inject.{Inject, Named, Provider}
 
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.ImplementedBy
@@ -42,12 +42,15 @@ trait MessagingService {
 
 class MessagingServiceImpl @Inject()(
   @NamedDatabase("default") db: Database,
-  activities: ActivityService,
+  activitiesProvider: Provider[ActivityService],
   users: UserLookupService,
   @Named("email") emailer: OutputService,
   @Named("mobile") mobile: OutputService,
   messagingDao: MessagingDao
 ) extends MessagingService with Logging {
+
+  // weak sauce way to resolve cyclic dependency.
+  private lazy val activities = activitiesProvider.get
 
   override def send(recipients: Set[Usercode], activity: Activity): Unit = {
     def save(output: Output, user: Usercode)(implicit c: Connection) = {

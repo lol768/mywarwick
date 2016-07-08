@@ -1,5 +1,9 @@
 package system
 
+import java.util.concurrent.Executors
+
+import scala.concurrent.ExecutionContext
+
 /**
  * Threadpools for various purposes, to prevent certain
  * types of activity from exhausting threads for other things.
@@ -7,13 +11,15 @@ package system
  * Use by importing an individual item into a scope (method or class).
  */
 object ThreadPools {
-  import scala.concurrent.ExecutionContext.global
+  private val shared = ExecutionContext.fromExecutorService(Executors.newWorkStealingPool())
 
-  // TODO think about not using the default pool for all these.
+  implicit val tileData = shared
 
-  implicit val tileData = global
+  implicit val email = shared
+  implicit val mobile = shared
 
-  implicit val email = global
-  implicit val sms = global
-  implicit val mobile = global
+  implicit val externalData = shared
+
+  // For Controllers to do basic processing on received futures.
+  implicit val web = shared
 }

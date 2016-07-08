@@ -1,3 +1,4 @@
+import moment from 'moment';
 import AgendaTile from 'components/tiles/AgendaTile';
 import { AgendaTileItem } from 'components/tiles/AgendaTile';
 
@@ -10,18 +11,69 @@ describe('AgendaTile', () => {
     size: 'large',
   };
 
-  it('Displays a limited number of items when not zoomed', () => {
+  const buildSmallProps = items => ({ content: { items }, size: 'small' });
+  const now = new Date('2016-05-19T13:00:00+01:00');
+  const end = new Date('2016-05-19T14:00:00+01:00');
+  const today = new Date('2016-05-19T00:00:00Z').toISOString();
+  const tomorrow = new Date('2016-05-20T00:00:00Z').toISOString();
+
+  it('displays a limited number of items when not zoomed', () => {
     const html = shallowRender(<AgendaTile { ...props } maxItemsToDisplay={ 1 }/>);
     html.props.children.length.should.equal(1);
   });
 
-  it('Displays all items when zoomed', () => {
+  it('renders all-day events when small', () => {
+    const allDayProps = buildSmallProps([{ id: '1', title: 'AFD', start: today, end: tomorrow, isAllDay: true }]);
+    const html = renderAtMoment(<AgendaTile { ...allDayProps } />, now);
+    findChild(html, [1, 0, 0]).should.equal('All day: AFD');
+  });
+
+  it('renders multiple all-day events text', () => {
+      const allDayProps = buildSmallProps([{ id: '1', title: 'AFD1', start: today, end: tomorrow, isAllDay: true }, { id: '2', title: 'AFD2', start: today, end: tomorrow, isAllDay: true }]);
+    const html = renderAtMoment(<AgendaTile { ...allDayProps } />, now);
+    findChild(html, [1, 0, 0]).should.equal('You have 2 all day events');
+  });
+
+  it('only renders all day event in absence of timed events', () => {
+    const allDayProps = buildSmallProps([{ id: '1' }, {
+      id: '1',
+      title: 'timed',
+      start: now.toISOString(),
+      end: end.toISOString()
+    }]);
+    const html = renderAtMoment(<AgendaTile { ...allDayProps } />, now);
+    findChild(html, [1, 0, 0]).should.equal('Next: timed at 13:00');
+  });
+
+  it('displays all items when zoomed', () => {
     const html = shallowRender(<AgendaTile
       maxItemsToDisplay={ 1 }
       zoomed={ true }
       { ...props }
     />);
     html.props.children.length.should.equal(3);
+  });
+
+  it('displays multiple-day all-day events on each future day within the range', () => {
+    const content = {
+      items: [
+        {
+          id: 'xyz',
+          start: '2016-05-16T00:00:00Z',
+          end: '2016-05-28T00:00:00Z',
+          isAllDay: true,
+          title: 'Two-week event'
+        }
+      ]
+    };
+    const html = renderAtMoment(
+      <AgendaTile
+        zoomed={ true }
+        content={ content }
+        size="large"
+      />
+    , now);
+    html.props.children.length.should.equal(9);
   });
 
 });
@@ -63,7 +115,7 @@ describe('AgendaTileItem', () => {
   });
 
   it('renders time for All day events', () => {
-    const html = shallowRender(<AgendaTileItem zoomed={ true } { ...props } end={ undefined }/>);
+    const html = shallowRender(<AgendaTileItem zoomed={ true } { ...props } isAllDay={ true }/>);
     const a = html.props.children;
     const [ date , ] = a.props.children;
     date.props.children.should.equal('All day');

@@ -3,14 +3,14 @@ package services.dao
 import java.sql.Connection
 
 import com.google.inject.{ImplementedBy, Inject}
-import models.{Activity, ActivityPrototype, ActivityResponse}
+import models.{Activity, ActivityResponse, ActivitySave}
 import org.joda.time.DateTime
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[ActivityCreationDaoImpl])
 trait ActivityCreationDao {
 
-  def createActivity(activity: ActivityPrototype, recipients: Set[Usercode], replaces: Seq[String])(implicit c: Connection): ActivityResponse
+  def createActivity(activity: ActivitySave, recipients: Set[Usercode], replaces: Seq[String])(implicit c: Connection): ActivityResponse
 
 }
 
@@ -20,8 +20,9 @@ class ActivityCreationDaoImpl @Inject()(
   activityRecipientDao: ActivityRecipientDao
 ) extends ActivityCreationDao {
 
-  override def createActivity(activity: ActivityPrototype, recipients: Set[Usercode], replaces: Seq[String])(implicit c: Connection): ActivityResponse = {
+  override def createActivity(activity: ActivitySave, recipients: Set[Usercode], replaces: Seq[String])(implicit c: Connection): ActivityResponse = {
     val activityId = activityDao.save(activity, replaces)
+    val icon = activityDao.getActivityIcon(activity.providerId)
 
     activity.tags.foreach {
       tag => activityTagDao.save(activityId, tag)
@@ -42,6 +43,7 @@ class ActivityCreationDaoImpl @Inject()(
         createdAt = DateTime.now,
         shouldNotify = activity.shouldNotify
       ),
+      icon,
       activity.tags
     )
   }

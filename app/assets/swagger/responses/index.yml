@@ -1,0 +1,8 @@
+unauthorized:
+  $ref: ./unauthorized.yml
+
+getTiles:
+  $ref: ./getTiles.yml
+
+getTilesContent:
+  $ref: ./getTilesContent.yml

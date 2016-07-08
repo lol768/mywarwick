@@ -14,12 +14,13 @@ import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
+  def getActivitiesByProviderId(providerId: String, limit: Int)(implicit c: Connection): Seq[Activity]
 
   def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity]
 
   def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse]
 
-  def save(activity: ActivityPrototype, replaces: Seq[String])(implicit c: Connection): String
+  def save(activity: ActivitySave, replaces: Seq[String])(implicit c: Connection): String
 
   def getActivityById(id: String)(implicit c: Connection): Option[Activity] =
     getActivitiesByIds(Seq(id)).headOption
@@ -31,6 +32,8 @@ trait ActivityDao {
   def countNotificationsSinceDate(usercode: String, date: DateTime)(implicit c: Connection): Int
 
   def saveLastReadDate(usercode: String, read: DateTime)(implicit c: Connection): Boolean
+
+  def getActivityIcon(providerId: String)(implicit c: Connection): Option[ActivityIcon]
 }
 
 class ActivityDaoImpl @Inject()(
@@ -38,23 +41,28 @@ class ActivityDaoImpl @Inject()(
 ) extends ActivityDao {
 
 
-  override def save(activity: ActivityPrototype, replaces: Seq[String])(implicit c: Connection): String = {
+  override def save(activity: ActivitySave, replaces: Seq[String])(implicit c: Connection): String = {
     import activity._
     val id = UUID.randomUUID().toString
     val now = new DateTime()
 
-    SQL("INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, generated_at, created_at, should_notify) VALUES ({id}, {providerId}, {type}, {title}, {text}, {url}, {generatedAt}, {createdAt}, {shouldNotify})")
-      .on(
-        'id -> id,
-        'providerId -> providerId,
-        'type -> `type`,
-        'title -> title,
-        'text -> text,
-        'url -> url,
-        'generatedAt -> generatedAt.getOrElse(now),
-        'createdAt -> now,
-        'shouldNotify -> shouldNotify
-      )
+    SQL(
+      """
+      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, generated_at, created_at, should_notify, audience_id)
+      VALUES ({id}, {providerId}, {type}, {title}, {text}, {url}, {generatedAt}, {createdAt}, {shouldNotify}, {audienceId})
+      """
+    ).on(
+      'id -> id,
+      'providerId -> providerId,
+      'type -> `type`,
+      'title -> title,
+      'text -> text,
+      'url -> url,
+      'generatedAt -> generatedAt.getOrElse(now),
+      'createdAt -> now,
+      'shouldNotify -> shouldNotify,
+      'audienceId -> audienceId
+    )
       .execute()
 
     updateReplacedActivity(id, replaces)
@@ -79,6 +87,12 @@ class ActivityDaoImpl @Inject()(
         .as(activityParser.*)
     }.toSeq
 
+  override def getActivitiesByProviderId(providerId: String, limit: Int)(implicit c: Connection): Seq[Activity] = {
+    SQL(s"SELECT * FROM ACTIVITY WHERE PROVIDER_ID = {providerId} ORDER BY CREATED_AT DESC ${dialect.limitOffset(limit)}")
+      .on('providerId -> providerId)
+      .as(activityParser.*)
+  }
+
   override def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity] = {
     SQL(
       """
@@ -100,11 +114,14 @@ class ActivityDaoImpl @Inject()(
       s"""
         SELECT
           ACTIVITY.*,
+          PROVIDER.ICON,
+          PROVIDER.COLOUR,
           ACTIVITY_TAG.NAME          AS TAG_NAME,
           ACTIVITY_TAG.VALUE         AS TAG_VALUE,
           ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
         FROM ACTIVITY
           LEFT JOIN ACTIVITY_TAG ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
+          LEFT JOIN PROVIDER ON PROVIDER.ID = ACTIVITY.PROVIDER_ID
         WHERE ACTIVITY.ID IN (
           SELECT ACTIVITY_ID
           FROM ACTIVITY_RECIPIENT
@@ -113,12 +130,11 @@ class ActivityDaoImpl @Inject()(
                 AND REPLACED_BY_ID IS NULL
                 $maybeBefore
           ORDER BY ACTIVITY_RECIPIENT.GENERATED_AT DESC
-          ${dialect.limit("{limit}")})
+          ${dialect.limitOffset(limit)})
         """)
       .on(
         'usercode -> usercode,
-        'before -> before.getOrElse(DateTime.now),
-        'limit -> limit
+        'before -> before.getOrElse(DateTime.now)
       )
       .as(activityResponseParser.*)
 
@@ -189,10 +205,18 @@ class ActivityDaoImpl @Inject()(
         for (name <- name; value <- value) yield ActivityTag(name, TagValue(value, display))
     }
 
-
   lazy val activityResponseParser: RowParser[ActivityResponse] =
-    activityParser ~ tagParser map {
-      case activity ~ tag => ActivityResponse(activity, tag.toSeq)
+    activityParser ~ activityIconParser.? ~ tagParser map {
+      case activity ~ icon ~ tag => ActivityResponse(activity, icon, tag.toSeq)
     }
 
+  override def getActivityIcon(providerId: String)(implicit c: Connection): Option[ActivityIcon] =
+    SQL"SELECT icon, colour FROM PROVIDER WHERE ID = $providerId"
+      .as(activityIconParser.singleOpt)
+
+  private lazy val activityIconParser: RowParser[ActivityIcon] =
+    get[String]("ICON") ~
+    get[Option[String]]("COLOUR") map {
+      case icon ~ colour => ActivityIcon(icon, colour)
+    }
 }

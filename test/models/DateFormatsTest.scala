@@ -21,6 +21,12 @@ class DateFormatsTest extends PlaySpec {
       isoDateWrites.writes(dateBST).as[String] must be("2016-06-01T08:00:00.000Z")
     }
 
+    "write friendly date correctly" in {
+      val fourthOfJuly = new DateTime(2016, 7, 4, 10, 0, london)
+      fourthOfJuly.toString mustBe "2016-07-04T10:00:00.000+01:00"
+      emailDateTime(fourthOfJuly) mustBe "10:00 on Mon 4th Jul, 2016"
+    }
+
   }
 
 

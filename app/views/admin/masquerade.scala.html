@@ -1,7 +1,8 @@
 @import warwick.sso.{AuthenticatedRequest, MasqueradeController}
-@()(implicit request: AuthenticatedRequest[_])
+@import system.RequestContext
+@()(implicit request: AuthenticatedRequest[_], context: RequestContext)
 
-@common.id7layout("Masquerade") {
+@common.admin("Masquerade") {
 
   <h1>Masquerade as a different user</h1>
 

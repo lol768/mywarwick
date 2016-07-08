@@ -1,0 +1,30 @@
+@import controllers.admin.PublishNewsItemData
+@import views.html._
+@import system.RequestContext
+@(
+    form: Form[PublishNewsItemData],
+    departmentOptions: Seq[(String, String)],
+    categories: Seq[NewsCategory]
+)(implicit messages: Messages, context: RequestContext)
+
+@implicitFieldConstructor = @{
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
+}
+
+@common.admin("Create news") {
+  <div class="container-fluid">
+  @b3.form(action = controllers.admin.routes.NewsController.create()) {
+
+
+    @admin.news.contentForm(form)
+
+    @tags.audiencePicker(form, "audience", departmentOptions, "news item", allowPublic = true)
+
+    @tags.categoryPicker(form, "categories", categories, "news item")
+
+    @b3.submit(
+      'class -> "btn btn-primary"
+    ) {Create}
+  }
+  </div>
+}
