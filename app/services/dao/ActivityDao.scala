@@ -14,6 +14,8 @@ import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
+  def getActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[Activity]
+
   def getActivitiesByProviderId(providerId: String, limit: Int)(implicit c: Connection): Seq[Activity]
 
   def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity]
@@ -90,6 +92,19 @@ class ActivityDaoImpl @Inject()(
   override def getActivitiesByProviderId(providerId: String, limit: Int)(implicit c: Connection): Seq[Activity] = {
     SQL(s"SELECT * FROM ACTIVITY WHERE PROVIDER_ID = {providerId} ORDER BY CREATED_AT DESC ${dialect.limitOffset(limit)}")
       .on('providerId -> providerId)
+      .as(activityParser.*)
+  }
+
+  override def getActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[Activity] = {
+    SQL(s"""
+      SELECT ACTIVITY.*
+      FROM ACTIVITY
+      JOIN PUBLISHED_NOTIFICATION ON ACTIVITY.ID = PUBLISHED_NOTIFICATION.ACTIVITY_ID
+      WHERE PUBLISHED_NOTIFICATION.PUBLISHER_ID = {publisherId}
+      ORDER BY ACTIVITY.CREATED_AT DESC
+      ${dialect.limitOffset(limit)}
+       """)
+      .on('publisherId -> publisherId)
       .as(activityParser.*)
   }
 

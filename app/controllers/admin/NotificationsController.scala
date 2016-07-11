@@ -34,7 +34,6 @@ class NotificationsController @Inject()(
   val newsCategoryService: NewsCategoryService
 ) extends BaseController with I18nSupport with Publishing {
 
-  import NotificationPublishingService.PROVIDER_ID
   import securityService._
 
   val notificationMapping = mapping(
@@ -48,7 +47,7 @@ class NotificationsController @Inject()(
   )(PublishNotificationData.apply)(PublishNotificationData.unapply))
 
   def list(publisherId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
-    val activities = activityService.getActivitiesByProviderId(PROVIDER_ID)
+    val activities = activityService.getActivitiesByPublisherId(publisherId)
 
     Ok(views.list(publisherId, activities))
   }
@@ -69,7 +68,9 @@ class NotificationsController @Inject()(
           case Right(Audience.Public) =>
             Ok(views.createForm(publisherId, form.withError("audience", "Notifications cannot be public"), departmentOptions))
           case Right(audience) =>
-            notificationPublishingService.publish(publish.item, audience) match {
+            val item = publish.item.toSave(request.context.user.get.usercode, publisherId)
+
+            notificationPublishingService.publish(item, audience) match {
               case Success(Right(_)) =>
                 Redirect(routes.NotificationsController.list(publisherId)).flashing("result" -> "Notification created")
               case Success(Left(errors)) =>

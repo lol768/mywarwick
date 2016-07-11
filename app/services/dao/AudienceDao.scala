@@ -1,28 +1,27 @@
 package services.dao
 
+import java.sql.Connection
 import java.util.UUID
 
 import anorm.SqlParser._
 import anorm._
-import com.google.inject.{ImplementedBy, Inject}
+import com.google.inject.ImplementedBy
 import models.news.Audience
 import models.news.Audience._
-import play.api.db.Database
 import warwick.sso.GroupName
 
 case class AudienceComponentSave(name: String, value: Option[String], deptCode: Option[String])
 
 @ImplementedBy(classOf[AudienceDaoImpl])
 trait AudienceDao {
-  def saveAudience(audience: Audience): String
-  def getAudience(audienceId: String): Audience
+  def saveAudience(audience: Audience)(implicit c: Connection): String
+
+  def getAudience(audienceId: String)(implicit c: Connection): Audience
 }
 
-class AudienceDaoImpl @Inject()(
-  db: Database
-) extends AudienceDao {
+class AudienceDaoImpl extends AudienceDao {
 
-  override def saveAudience(audience: Audience): String = {
+  override def saveAudience(audience: Audience)(implicit c: Connection): String = {
     val id = UUID.randomUUID().toString
     audienceToComponents(audience).map(component =>
       saveComponent(id, component)
@@ -30,14 +29,12 @@ class AudienceDaoImpl @Inject()(
     id
   }
 
-  private def saveComponent(id: String, component: AudienceComponentSave) = {
+  private def saveComponent(id: String, component: AudienceComponentSave)(implicit c: Connection) = {
     import component._
-    db.withConnection { implicit c =>
-      SQL"""
+    SQL"""
         INSERT INTO audience_component (audience_id, name, value, dept_code)
         VALUES ($id, $name, $value, $deptCode)
         """.execute()
-    }
   }
 
   private val componentParser = {
@@ -49,13 +46,9 @@ class AudienceDaoImpl @Inject()(
     }
   }
 
-  override def getAudience(audienceId: String): Audience =
+  override def getAudience(audienceId: String)(implicit c: Connection): Audience =
     audienceFromComponents(
-      db.withConnection { implicit c =>
-        SQL"""
-       SELECT * FROM audience_component WHERE audience_id=$audienceId
-       """.as(componentParser.*)
-      }
+      SQL"SELECT * FROM audience_component WHERE audience_id=$audienceId".as(componentParser.*)
     )
 
   def audienceFromComponents(components: Seq[AudienceComponentSave]): Audience = Audience(

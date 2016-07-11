@@ -10,15 +10,13 @@ import warwick.sso.{GroupName, GroupService, Usercode}
 
 import scala.util.Try
 
-
-
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
   def resolve(audience: Audience): Try[Seq[Usercode]]
 }
 
 class AudienceServiceImpl @Inject()(
-  webgroups: GroupService
+  groupService: GroupService
 ) extends AudienceService with Logging {
 
   // TODO Try.get wrapped with another Try is a weak sauce solution.
@@ -60,17 +58,16 @@ class AudienceServiceImpl @Inject()(
     }
 
   private def webgroupUsers(groupName: GroupName): Try[Seq[Usercode]] =
-    webgroups.getWebGroup(groupName).map { group =>
+    groupService.getWebGroup(groupName).map { group =>
       group.map(_.members).getOrElse(Nil)
     }
 
   def moduleWebgroupUsers(code: String): Try[Seq[Usercode]] =
-    webgroups.getGroupsForQuery(s"-${code.toLowerCase}").map { groups =>
+    groupService.getGroupsForQuery(s"-${code.toLowerCase}").map { groups =>
       groups.find(group => group.name.string.endsWith(code.toLowerCase) && group.`type` == "Module")
         .map(_.members)
         .getOrElse(Nil)
     }
-
 
 }
 

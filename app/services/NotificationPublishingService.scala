@@ -3,10 +3,10 @@ package services
 import javax.inject.Singleton
 
 import com.google.inject.{ImplementedBy, Inject}
-import models.ActivitySave
-import models.news.{Audience, NotificationData}
+import models.news.{Audience, NotificationSave}
+import models.{ActivitySave, PublishedNotificationSave}
 import play.api.db.{Database, NamedDatabase}
-import services.dao.AudienceDao
+import services.dao.{AudienceDao, PublishedNotificationsDao}
 
 import scala.util.Try
 
@@ -18,7 +18,7 @@ object NotificationPublishingService {
 @ImplementedBy(classOf[NotificationPublishingServiceImpl])
 trait NotificationPublishingService {
 
-  def publish(item: NotificationData, audience: Audience): Try[Either[Seq[ActivityError], String]]
+  def publish(item: NotificationSave, audience: Audience): Try[Either[Seq[ActivityError], String]]
 
 }
 
@@ -27,20 +27,36 @@ class NotificationPublishingServiceImpl @Inject()(
   activityService: ActivityService,
   audienceService: AudienceService,
   audienceDao: AudienceDao,
+  publishedNotificationsDao: PublishedNotificationsDao,
   @NamedDatabase("default") db: Database
 ) extends NotificationPublishingService {
 
   import NotificationPublishingService._
 
-  def publish(item: NotificationData, audience: Audience): Try[Either[Seq[ActivityError], String]] = {
-    val audienceId = audienceDao.saveAudience(audience)
+  def publish(item: NotificationSave, audience: Audience): Try[Either[Seq[ActivityError], String]] = {
+    val audienceId = db.withTransaction(implicit c => audienceDao.saveAudience(audience))
 
     // FIXME: move audience resolution and subsequent notification publishing to scheduler
     audienceService.resolve(audience)
-      .map(recipients => activityService.save(makeActivitySave(item, audienceId), recipients))
+      .map { recipients =>
+        activityService.save(makeActivitySave(item, audienceId), recipients)
+          .fold(
+            errors => Left(errors),
+            activityId =>
+              db.withTransaction { implicit c =>
+                publishedNotificationsDao.save(PublishedNotificationSave(
+                  activityId = activityId,
+                  publisherId = item.publisherId,
+                  createdBy = item.usercode
+                ))
+
+                Right(activityId)
+              }
+          )
+      }
   }
 
-  private def makeActivitySave(item: NotificationData, audienceId: String) =
+  private def makeActivitySave(item: NotificationSave, audienceId: String) =
     ActivitySave(
       providerId = PROVIDER_ID,
       `type` = ACTIVITY_TYPE,
