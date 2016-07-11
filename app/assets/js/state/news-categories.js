@@ -1,7 +1,6 @@
 import log from 'loglevel';
 import { createAction } from 'redux-actions';
 import { fetchWithCredentials, postJsonWithCredentials } from '../serverpipe';
-import store from '../store';
 import _ from 'lodash';
 import * as news from './news';
 
@@ -37,19 +36,22 @@ const persistSubscribedCategories = categories => dispatch =>
   postJsonWithCredentials('/api/news/categories', { categories })
     .then(() => dispatch(news.fetch()));
 
+let store = {};
 const persistSubscriptionsDebounced = _.debounce(() =>
   store.dispatch(persistSubscribedCategories([...store.getState().newsCategories.subscribed]))
 , 500);
 
 export function subscribe(id) {
-  return dispatch => {
+  return (dispatch, getState) => {
+    store = { dispatch, getState };
     dispatch(sub(id));
     persistSubscriptionsDebounced();
   };
 }
 
 export function unsubscribe(id) {
-  return dispatch => {
+  return (dispatch, getState) => {
+    store = { dispatch, getState };
     dispatch(unsub(id));
     persistSubscriptionsDebounced();
   };
