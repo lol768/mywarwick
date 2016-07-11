@@ -5,9 +5,8 @@ import javax.inject.Singleton
 import com.google.inject.Inject
 import controllers.BaseController
 import models.API
-import org.joda.time.DateTime
 import play.api.libs.json._
-import services.{NewsCategoryService, NewsService, SecurityService, UserNewsCategoryService}
+import services.{NewsService, SecurityService}
 
 @Singleton
 class ReadNewsController @Inject()(
