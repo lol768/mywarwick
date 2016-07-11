@@ -1,5 +1,5 @@
 @import models.news.{AudienceSize, NewsItemRender}
-@(item: NewsItemRender, count: Option[AudienceSize])
+@(publisher: String, item: NewsItemRender, count: Option[AudienceSize])
 <article class="news-item">
   <div class="news-item__body">
     <div class="news-item__title">@item.title</div>
@@ -32,7 +32,7 @@
 
     <div class="btn-toolbar pull-right">
       <a
-      href="@controllers.admin.routes.NewsController.update(item.id)"
+      href="@controllers.admin.routes.NewsController.updateForm(publisher, item.id)"
       class="btn btn-primary"
       >Edit</a>
     </div>

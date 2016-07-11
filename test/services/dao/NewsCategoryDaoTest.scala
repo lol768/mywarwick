@@ -28,7 +28,7 @@ class NewsCategoryDaoTest extends PlaySpec with OneStartAppPerSuite {
     }
 
     "get news item categories" in transaction { implicit c =>
-      SQL"INSERT INTO NEWS_ITEM (ID, TITLE, TEXT, CREATED_AT, PUBLISH_DATE) VALUES ('news-item', 'Something happened', 'It is now over', SYSDATE, SYSDATE)"
+      SQL"INSERT INTO NEWS_ITEM (ID, TITLE, TEXT, CREATED_AT, PUBLISH_DATE, PUBLISHER_ID, CREATED_BY) VALUES ('news-item', 'Something happened', 'It is now over', SYSDATE, SYSDATE, 'publisher', 'custard')"
         .execute()
 
       SQL"INSERT INTO NEWS_ITEM_CATEGORY (NEWS_ITEM_ID, NEWS_CATEGORY_ID) VALUES ('news-item', 'category-b'), ('news-item', 'category-a')"
@@ -41,7 +41,7 @@ class NewsCategoryDaoTest extends PlaySpec with OneStartAppPerSuite {
     }
 
     "save news item categories" in transaction { implicit c =>
-      SQL"INSERT INTO NEWS_ITEM (id, TITLE, TEXT, CREATED_AT, PUBLISH_DATE) VALUES ('news-item', 'Something happened', 'It is now over', SYSDATE, SYSDATE)"
+      SQL"INSERT INTO NEWS_ITEM (ID, TITLE, TEXT, CREATED_AT, PUBLISH_DATE, PUBLISHER_ID, CREATED_BY) VALUES ('news-item', 'Something happened', 'It is now over', SYSDATE, SYSDATE, 'publisher', 'custard')"
         .execute()
 
       dao.saveNewsCategories("news-item", Seq("category-b", "category-c"))

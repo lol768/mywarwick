@@ -1,20 +1,33 @@
 package services
 
-import models.Permission.Role
-import models.Publisher
-import system.Logging
+import com.google.inject.{ImplementedBy, Inject, Singleton}
+import models.{Publisher, PublishingRole}
+import play.api.db.{Database, NamedDatabase}
+import services.dao.PublisherDao
 import warwick.sso.Usercode
 
-import scala.concurrent.Future
+@ImplementedBy(classOf[PublisherServiceImpl])
+trait PublisherService {
 
-// FIXME trait
-class PublisherService extends Logging {
-  def allPublishers: Future[Seq[Publisher]] = Nil
+  def all: Seq[Publisher]
 
-  // FIXME implement
-  def hasRole(usercode: Usercode, role: Role): Seq[Publisher] = {
-    val result = true
-    logger.debug(s"hasRole($usercode, $role) = $result")
-    result
+  def find(id: String): Option[Publisher]
+
+  def getRolesForUser(id: String, usercode: Usercode): Seq[PublishingRole]
+
+}
+
+@Singleton
+class PublisherServiceImpl @Inject()(
+  publisherDao: PublisherDao,
+  @NamedDatabase("default") db: Database
+) extends PublisherService {
+
+  override def all = db.withConnection(implicit c => publisherDao.all)
+
+  override def find(id: String) = db.withConnection(implicit c => publisherDao.find(id))
+
+  override def getRolesForUser(id: String, usercode: Usercode) = db.withConnection { implicit c =>
+    publisherDao.getPublisherPermissions(id, usercode).map(_.role)
   }
 }

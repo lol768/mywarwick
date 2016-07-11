@@ -3,6 +3,7 @@ package helpers
 import models.news.NewsItemSave
 import models.{Activity, ActivitySave}
 import org.joda.time.DateTime
+import warwick.sso.Usercode
 
 /**
   * Prebuilt or buildable fake data models for use in tests.
@@ -51,7 +52,9 @@ object Fixtures {
       text = text,
       link = None,
       publishDate = DateTime.now,
-      imageId = None
+      imageId = None,
+      publisherId = "publisher",
+      usercode = Usercode("custard")
     )
   }
 

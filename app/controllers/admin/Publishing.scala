@@ -1,11 +1,16 @@
 package controllers.admin
 
+import models.{Publisher, PublishingAbility}
 import play.api.data.Forms._
 import play.api.data.Mapping
-import services.NewsCategoryService
+import play.api.mvc.{ActionRefiner, Result, Results, WrappedRequest}
+import services.{NewsCategoryService, PublisherService, SecurityService}
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
+import warwick.sso.AuthenticatedRequest
 
-trait Publishing extends DepartmentOptions with CategoryOptions {
+import scala.concurrent.Future
+
+trait Publishing extends DepartmentOptions with CategoryOptions with PublishingActionRefiner {
 
   val categoryMapping: Mapping[Seq[String]] =
     seq(nonEmptyText)
@@ -43,5 +48,46 @@ trait CategoryOptions {
   val newsCategoryService: NewsCategoryService
 
   lazy val categoryOptions = newsCategoryService.all()
+
+}
+
+trait PublishingActionRefiner {
+
+  val publisherService: PublisherService
+
+  val securityService: SecurityService
+
+  import securityService._
+
+  class PublisherRequest[A](val publisher: Publisher, request: AuthenticatedRequest[A])
+    extends WrappedRequest[A](request) {
+    val context = request.context
+  }
+
+  private def GetPublisher(id: String, requiredAbilities: Seq[PublishingAbility]) = new ActionRefiner[AuthenticatedRequest, PublisherRequest] {
+
+    override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, PublisherRequest[A]]] = {
+      implicit val r = request
+      val user = request.context.user.get
+
+      Future.successful {
+        publisherService.find(id).map { publisher =>
+          val userRoles = publisherService.getRolesForUser(id, user.usercode)
+          val can = requiredAbilities.forall(ability => userRoles.exists(_.can(ability)))
+
+          if (can) {
+            Right(new PublisherRequest(publisher, request))
+          } else {
+            Left(Results.Forbidden(views.html.errors.forbidden(user.name.first)))
+          }
+        }.getOrElse {
+          Left(Results.NotFound(views.html.errors.notFound()))
+        }
+      }
+    }
+
+  }
+
+  def PublisherAction(id: String, requiredAbilities: PublishingAbility*) = RequiredUserAction andThen GetPublisher(id, requiredAbilities)
 
 }

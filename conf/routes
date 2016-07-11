@@ -22,9 +22,9 @@ GET         /admin/masquerade                             @controllers.admin.Mas
 
 GET         /admin/publish/:publisher/news                @controllers.admin.NewsController.list(publisher: String)
 GET         /admin/publish/:publisher/news/new            @controllers.admin.NewsController.createForm(publisher: String)
-POST        /admin/publish/:publisher/news/new            @controllers.admin.NewsController.create(publisher: String)
-GET         /admin/publish/:publisher/news/update/:id     @controllers.admin.NewsController.updateForm(publisher: String, id: String)
-POST        /admin/publish/:publisher/news/update/:id     @controllers.admin.NewsController.update(publisher: String, id: String)
+POST        /admin/publish/:publisher/news                @controllers.admin.NewsController.create(publisher: String)
+GET         /admin/publish/:publisher/news/:id/edit       @controllers.admin.NewsController.updateForm(publisher: String, id: String)
+POST        /admin/publish/:publisher/news/:id            @controllers.admin.NewsController.update(publisher: String, id: String)
 
 GET         /admin/publish/:publisher/notifications       @controllers.admin.NotificationsController.list(publisher: String)
 GET         /admin/publish/:publisher/notifications/new   @controllers.admin.NotificationsController.createForm(publisher: String)

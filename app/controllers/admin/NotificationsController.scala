@@ -3,6 +3,8 @@ package controllers.admin
 import javax.inject.Inject
 
 import controllers.BaseController
+import models.PublishingAbility
+import models.PublishingAbility._
 import models.news.{Audience, NotificationData}
 import play.api.data.Forms._
 import play.api.data._
@@ -22,7 +24,8 @@ object NotificationsController {
 case class PublishNotificationData(item: NotificationData, audience: AudienceData)
 
 class NotificationsController @Inject()(
-  securityService: SecurityService,
+  val securityService: SecurityService,
+  val publisherService: PublisherService,
   val messagesApi: MessagesApi,
   val departmentInfoDao: DepartmentInfoDao,
   audienceBinder: AudienceBinder,
@@ -32,7 +35,6 @@ class NotificationsController @Inject()(
 ) extends BaseController with I18nSupport with Publishing {
 
   import NotificationPublishingService.PROVIDER_ID
-  import Roles._
   import securityService._
 
   val notificationMapping = mapping(
@@ -45,46 +47,44 @@ class NotificationsController @Inject()(
     "audience" -> audienceMapping
   )(PublishNotificationData.apply)(PublishNotificationData.unapply))
 
-  def list = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
+  def list(publisherId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
     val activities = activityService.getActivitiesByProviderId(PROVIDER_ID)
 
-    Ok(views.list(activities))
+    Ok(views.list(publisherId, activities))
   }
 
-  def createForm = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    Ok(views.createForm(publishNotificationForm, departmentOptions))
+  def createForm(publisherId: String) = PublisherAction(publisherId, CreateNotifications) { implicit request =>
+    Ok(views.createForm(publisherId, publishNotificationForm, departmentOptions))
   }
 
-  def create = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
-
+  def create(publisherId: String) = PublisherAction(publisherId, CreateNotifications).async { implicit request =>
     val form = publishNotificationForm.bindFromRequest
 
     form.fold(
-      formWithErrors => Future.successful(Ok(views.createForm(formWithErrors, departmentOptions))),
+      formWithErrors => Future.successful(Ok(views.createForm(publisherId, formWithErrors, departmentOptions))),
       publish => {
         audienceBinder.bindAudience(publish.audience).map {
           case Left(errors) =>
-            Ok(views.createForm(addFormErrors(form, errors), departmentOptions))
+            Ok(views.createForm(publisherId, addFormErrors(form, errors), departmentOptions))
           case Right(Audience.Public) =>
-            Ok(views.createForm(form.withError("audience", "Notifications cannot be public"), departmentOptions))
+            Ok(views.createForm(publisherId, form.withError("audience", "Notifications cannot be public"), departmentOptions))
           case Right(audience) =>
             notificationPublishingService.publish(publish.item, audience) match {
               case Success(Right(_)) =>
-                Redirect(routes.NotificationsController.list()).flashing("result" -> "Notification created")
+                Redirect(routes.NotificationsController.list(publisherId)).flashing("result" -> "Notification created")
               case Success(Left(errors)) =>
                 val formWithError = errors.foldLeft(form)((f, error) => f.withGlobalError(error.message))
 
-                Ok(views.createForm(formWithError, departmentOptions))
+                Ok(views.createForm(publisherId, formWithError, departmentOptions))
               case Failure(e) =>
                 logger.error("Failure while creating notification", e)
                 val formWithError = form.withGlobalError("An error occurred creating this notification")
 
-                Ok(views.createForm(formWithError, departmentOptions))
+                Ok(views.createForm(publisherId, formWithError, departmentOptions))
             }
         }
       }
     )
-
   }
 
 }

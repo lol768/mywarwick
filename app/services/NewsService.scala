@@ -11,12 +11,12 @@ import warwick.sso.Usercode
 
 @ImplementedBy(classOf[AnormNewsService])
 trait NewsService {
-  def allNews(limit: Int = 100, offset: Int = 0): Seq[NewsItemRender]
+  def getNewsByPublisher(publisherId: String, limit: Int, offset: Int = 0): Seq[NewsItemRender]
 
-  def latestNews(user: Option[Usercode], limit: Int = 100): Seq[NewsItemRender]
+  def latestNews(user: Option[Usercode], limit: Int): Seq[NewsItemRender]
   def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String
 
-  def updateNewsItem(id: String, item: NewsItemData): Int
+  def updateNewsItem(id: String, item: NewsItemSave): Int
 
   def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize]
 
@@ -32,9 +32,9 @@ class AnormNewsService @Inject()(
   userInitialisationService: UserInitialisationService
 ) extends NewsService {
 
-  override def allNews(limit: Int, offset: Int): Seq[NewsItemRender] =
+  override def getNewsByPublisher(publisherId: String, limit: Int, offset: Int): Seq[NewsItemRender] =
     db.withConnection { implicit c =>
-      dao.allNews(limit, offset)
+      dao.allNews(publisherId, limit, offset)
     }
 
   override def latestNews(user: Option[Usercode], limit: Int): Seq[NewsItemRender] = {
@@ -62,9 +62,9 @@ class AnormNewsService @Inject()(
       dao.countRecipients(newsIds)
     }
 
-  override def updateNewsItem(id: String, item: NewsItemData): Int =
+  override def updateNewsItem(id: String, item: NewsItemSave): Int =
     db.withConnection { implicit c =>
-      dao.updateNewsItem(id, item.toSave)
+      dao.updateNewsItem(id, item)
     }
 
   override def getNewsItem(id: String): Option[NewsItemRender] =

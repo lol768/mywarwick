@@ -2,6 +2,7 @@
 @import views.html._
 @import system.RequestContext
 @(
+    publisher: String,
     form: Form[PublishNewsItemData],
     departmentOptions: Seq[(String, String)],
     categories: Seq[NewsCategory]
@@ -13,8 +14,7 @@
 
 @common.admin("Create news") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NewsController.create()) {
-
+  @b3.form(action = controllers.admin.routes.NewsController.create(publisher)) {
 
     @admin.news.contentForm(form)
 

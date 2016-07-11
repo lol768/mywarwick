@@ -1,7 +1,7 @@
 @import system.RequestContext
 @import controllers.admin.NotificationsController.PublishNotificationForm
 
-@(form: PublishNotificationForm, departmentOptions: Seq[(String, String)])(implicit messages: Messages, context: RequestContext)
+@(publisher: String, form: PublishNotificationForm, departmentOptions: Seq[(String, String)])(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
   b3.vertical.fieldConstructor
@@ -9,7 +9,7 @@
 
 @common.admin("Create notification") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NotificationsController.create()) {
+  @b3.form(action = controllers.admin.routes.NotificationsController.create(publisher)) {
 
     @form.globalErrors.map { error =>
       <div class="alert alert-danger">@error.message</div>
