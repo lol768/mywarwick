@@ -16,8 +16,8 @@ class ReadNewsController @Inject()(
 
   import security._
 
-  def feed = UserAction { implicit req =>
-    val userNews = news.latestNews(req.context.user.map(_.usercode))
+  def feed = UserAction { implicit request =>
+    val userNews = news.latestNews(request.context.user.map(_.usercode))
 
     Ok(Json.obj(
       "items" -> userNews

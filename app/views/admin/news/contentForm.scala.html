@@ -24,9 +24,10 @@
   'value -> false
 )
 
-@b3.datetimeLocal(form("item.publishDate"),
+@tags.datetimePicker(form("item.publishDate"),
+  '_label -> "Publish date",
   '_help -> "You can select a time in the future, and this news item will appear to users after that time",
-  'value -> new LocalDateTime().withSecondOfMinute(0).withMillisOfSecond(0)
+  'value -> LocalDateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
 )
 
 @b3.text(form("item.linkHref"),

@@ -10,8 +10,8 @@ import uk.ac.warwick.sso.client.cache.UserCache
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import uk.ac.warwick.util.core.StringUtils
 import warwick.sso.{LoginContext, SSOClient}
-
 import play.api.http.HeaderNames.CACHE_CONTROL
+import services.UserInitialisationService
 
 /**
   * This is some weird SSO stuff for Start, while we're still working out
@@ -23,7 +23,8 @@ import play.api.http.HeaderNames.CACHE_CONTROL
 class SSOController @Inject()(
   ssoConfig: SSOConfiguration,
   userCache: UserCache,
-  ssoClient: SSOClient
+  ssoClient: SSOClient,
+  userInitialisationService: UserInitialisationService
 ) extends BaseController {
 
   import ssoClient.Lenient
@@ -52,6 +53,9 @@ class SSOController @Inject()(
 
     val loginUrl = links.getLoginUrl
     val logoutUrl = s"https://${request.host}/logout?target=https://${request.host}"
+
+    request.context.user.map(_.usercode)
+      .foreach(userInitialisationService.maybeInitialiseUser)
 
     Ok(Json.obj(
       "refresh" -> (if (refresh) loginUrl else false),

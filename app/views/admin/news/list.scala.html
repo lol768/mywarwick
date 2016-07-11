@@ -1,10 +1,11 @@
+@import system.RequestContext
 @import models.news.{AudienceSize, NewsItemRender}
 @import views.html._
 @(
     newsPending: Seq[NewsItemRender],
     newsPublished: Seq[NewsItemRender],
     counts: Map[String, AudienceSize]
-)
+)(implicit context: RequestContext)
 
   @common.admin("News") {
     <p>

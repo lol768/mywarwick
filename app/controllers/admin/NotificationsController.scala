@@ -16,8 +16,10 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 object NotificationsController {
-  type PublishNotificationForm = Form[Publish[NotificationData]]
+  type PublishNotificationForm = Form[PublishNotificationData]
 }
+
+case class PublishNotificationData(item: NotificationData, audience: AudienceData)
 
 class NotificationsController @Inject()(
   securityService: SecurityService,
@@ -27,24 +29,29 @@ class NotificationsController @Inject()(
   notificationPublishingService: NotificationPublishingService,
   activityService: ActivityService,
   val newsCategoryService: NewsCategoryService
-) extends BaseController with I18nSupport with Publishing[NotificationData] {
+) extends BaseController with I18nSupport with Publishing {
 
   import NotificationPublishingService.PROVIDER_ID
   import Roles._
   import securityService._
 
-  val publishNotificationForm = publishForm(categoriesRequired = false, mapping(
+  val notificationMapping = mapping(
     "text" -> nonEmptyText,
     "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url)
-  )(NotificationData.apply)(NotificationData.unapply))
+  )(NotificationData.apply)(NotificationData.unapply)
 
-  def list = RequiredActualUserRoleAction(Sysadmin) {
+  val publishNotificationForm = Form(mapping(
+    "item" -> notificationMapping,
+    "audience" -> audienceMapping
+  )(PublishNotificationData.apply)(PublishNotificationData.unapply))
+
+  def list = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     val activities = activityService.getActivitiesByProviderId(PROVIDER_ID)
 
     Ok(views.list(activities))
   }
 
-  def createForm = RequiredActualUserRoleAction(Sysadmin) {
+  def createForm = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     Ok(views.createForm(publishNotificationForm, departmentOptions))
   }
 
@@ -55,7 +62,7 @@ class NotificationsController @Inject()(
     form.fold(
       formWithErrors => Future.successful(Ok(views.createForm(formWithErrors, departmentOptions))),
       publish => {
-        audienceBinder.bindAudience(publish).map {
+        audienceBinder.bindAudience(publish.audience).map {
           case Left(errors) =>
             Ok(views.createForm(addFormErrors(form, errors), departmentOptions))
           case Right(Audience.Public) =>

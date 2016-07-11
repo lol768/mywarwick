@@ -1,31 +1,22 @@
 package controllers.admin
 
 import play.api.data.Forms._
-import play.api.data.{Form, Mapping}
+import play.api.data.Mapping
 import services.NewsCategoryService
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
 
-case class Publish[A](item: A, audience: Seq[String], department: Option[String], categoryIds: Seq[String], ignoreCategories: Boolean) extends AudienceFormData
+trait Publishing extends DepartmentOptions with CategoryOptions {
 
-trait Publishing[A] extends DepartmentOptions with CategoryOptions {
+  val categoryMapping: Mapping[Seq[String]] =
+    seq(nonEmptyText)
+      .verifying("You must select at least one category", _.nonEmpty)
+      // Rationale: after removing all possible options, anything that remains is invalid
+      .verifying("Some selections were invalid", _.diff(categoryOptions.map(_.id)).isEmpty)
 
-  def publishForm(
-    categoriesRequired: Boolean,
-    itemMapping: Mapping[A]
-  ): Form[Publish[A]] =
-    Form(mapping(
-      "item" -> itemMapping,
-      "audience" -> seq(nonEmptyText),
-      "department" -> optional(text),
-      "categories" -> seq(nonEmptyText)
-        .verifying("You must select at least one category", categorySelected(categoriesRequired) _)
-        // Rationale: after removing all possible options, anything that remains is invalid
-        .verifying("Some selections were invalid", _.diff(categoryOptions.map(_.id)).isEmpty),
-      "ignoreCategories" -> boolean
-    )(Publish.apply)(Publish.unapply))
-
-  private def categorySelected(enabled: Boolean)(ids: Seq[String]): Boolean =
-    if (enabled) ids.nonEmpty else true
+  val audienceMapping: Mapping[AudienceData] = mapping(
+    "audience" -> seq(nonEmptyText),
+    "department" -> optional(text)
+  )(AudienceData.apply)(AudienceData.unapply)
 
 }
 

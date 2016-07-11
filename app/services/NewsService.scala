@@ -28,7 +28,8 @@ class AnormNewsService @Inject()(
   dao: NewsDao,
   audienceService: AudienceService,
   newsCategoryDao: NewsCategoryDao,
-  audienceDao: AudienceDao
+  audienceDao: AudienceDao,
+  userInitialisationService: UserInitialisationService
 ) extends NewsService {
 
   override def allNews(limit: Int, offset: Int): Seq[NewsItemRender] =
@@ -36,10 +37,13 @@ class AnormNewsService @Inject()(
       dao.allNews(limit, offset)
     }
 
-  override def latestNews(user: Option[Usercode], limit: Int): Seq[NewsItemRender] =
+  override def latestNews(user: Option[Usercode], limit: Int): Seq[NewsItemRender] = {
+    user.foreach(userInitialisationService.maybeInitialiseUser)
+
     db.withConnection { implicit c =>
       dao.latestNews(user, limit)
     }
+  }
 
   // FIXME: Move audience-resolution and recipient-saving to scheduler
   // and just save audience components to db here

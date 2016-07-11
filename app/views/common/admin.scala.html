@@ -1,4 +1,5 @@
-@(pageTitle: String)(html: Html)
+@import system.RequestContext
+@(pageTitle: String)(html: Html)(implicit context: RequestContext)
 @common.id7layout(pageTitle) {
   @html
   <script src="@routes.Assets.versioned("js/admin-bundle.js")"></script>
