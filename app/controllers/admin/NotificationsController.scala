@@ -56,7 +56,6 @@ class NotificationsController @Inject()(
   }
 
   def create = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
-
     val form = publishNotificationForm.bindFromRequest
 
     form.fold(
@@ -69,7 +68,9 @@ class NotificationsController @Inject()(
             Ok(views.createForm(form.withError("audience", "Notifications cannot be public"), departmentOptions))
           case Right(audience) =>
             notificationPublishingService.publish(publish.item, audience) match {
-              case Success(Right(_)) =>
+              case Success(Right(activityId)) =>
+                auditLog('CreateNotification, 'id -> activityId)
+
                 Redirect(routes.NotificationsController.list()).flashing("result" -> "Notification created")
               case Success(Left(errors)) =>
                 val formWithError = errors.foldLeft(form)((f, error) => f.withGlobalError(error.message))

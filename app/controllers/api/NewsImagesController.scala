@@ -82,7 +82,10 @@ class NewsImagesController @Inject()(
         }
         .fold(
           e => e,
-          id => Created(Json.toJson(API.Success(data = id)))
+          id => {
+            auditLog('CreateNewsImage, 'id -> id)(requestContext(request))
+            Created(Json.toJson(API.Success(data = id)))
+          }
         )
     }.getOrElse(API.Error("no-image", "No image provided"))
   }
