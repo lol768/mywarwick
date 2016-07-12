@@ -86,52 +86,52 @@ class NewsController @Inject()(
     "categories" -> categoryMapping
   )(UpdateNewsItemData.apply)(UpdateNewsItemData.unapply))
 
-  def list(publisher: String) = PublisherAction(publisher, ViewNews) { implicit request =>
-    val theNews = news.getNewsByPublisher(publisher, limit = 100)
+  def list(publisherId: String) = PublisherAction(publisherId, ViewNews) { implicit request =>
+    val theNews = news.getNewsByPublisher(publisherId, limit = 100)
     val counts = news.countRecipients(theNews.map(_.id))
     val (newsPending, newsPublished) = partitionNews(theNews)
-    Ok(views.html.admin.news.list(publisher, newsPending, newsPublished, counts))
+    Ok(views.html.admin.news.list(publisherId, newsPending, newsPublished, counts))
   }
 
-  def createForm(publisher: String) = PublisherAction(publisher, CreateNews) { implicit request =>
-    Ok(views.html.admin.news.createForm(publisher, publishNewsForm, departmentOptions, categoryOptions))
+  def createForm(publisherId: String) = PublisherAction(publisherId, CreateNews) { implicit request =>
+    Ok(views.html.admin.news.createForm(publisherId, publishNewsForm, departmentOptions, categoryOptions))
   }
 
-  def create(publisher: String) = PublisherAction(publisher, CreateNews).async { implicit request =>
+  def create(publisherId: String) = PublisherAction(publisherId, CreateNews).async { implicit request =>
     val bound = publishNewsForm.bindFromRequest
     bound.fold(
-      errorForm => Future.successful(Ok(views.html.admin.news.createForm(publisher, errorForm, departmentOptions, categoryOptions))),
+      errorForm => Future.successful(Ok(views.html.admin.news.createForm(publisherId, errorForm, departmentOptions, categoryOptions))),
       // We only show audience validation errors if there were no other errors, which can look weird.
 
       data => audienceBinder.bindAudience(data.audience).map {
         case Left(errors) =>
           val errorForm = addFormErrors(bound, errors)
-          Ok(views.html.admin.news.createForm(publisher, errorForm, departmentOptions, categoryOptions))
+          Ok(views.html.admin.news.createForm(publisherId, errorForm, departmentOptions, categoryOptions))
         case Right(audience) =>
-          handleForm(request.context.user.get.usercode, publisher, data, audience)
+          val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
+          val newsItemId = news.save(newsItem, audience, data.categoryIds)
+
+          auditLog('CreateNewsItem, 'id -> newsItemId)
+
+          Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("result" -> "News created")
       }
     )
   }
 
-  def handleForm(usercode: Usercode, publisher: String, data: PublishNewsItemData, audience: Audience) = {
-    val newsItem = data.item.toSave(usercode, publisher)
-    news.save(newsItem, audience, data.categoryIds)
-    Redirect(controllers.admin.routes.NewsController.list(publisher)).flashing("result" -> "News created")
-  }
-
-  def handleUpdate(usercode: Usercode, publisher: String, id: String, data: UpdateNewsItemData) = {
-    val newsItem = data.item.toSave(usercode, publisher)
-    news.updateNewsItem(id, newsItem)
-    newsCategoryService.updateNewsCategories(id, data.categoryIds)
-    Redirect(controllers.admin.routes.NewsController.list(publisher)).flashing("result" -> "News updated")
-  }
-
-  def update(publisher: String, id: String) = PublisherAction(publisher, EditNews).async { implicit request =>
+  def update(publisherId: String, id: String) = PublisherAction(publisherId, EditNews) { implicit request =>
     val bound = updateNewsForm.bindFromRequest
     bound.fold(
-      errorForm => Future.successful(Ok(views.html.admin.news.updateForm(publisher, id, errorForm, categoryOptions))),
-      data => Future(handleUpdate(request.context.user.get.usercode, publisher, id, data))
-    )
+      errorForm => Ok(views.html.admin.news.updateForm(publisherId, id, errorForm, categoryOptions)),
+      data => {
+        val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
+
+        news.updateNewsItem(id, newsItem)
+        newsCategoryService.updateNewsCategories(id, data.categoryIds)
+
+        auditLog('UpdateNewsItem, 'id -> id)
+
+        Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("result" -> "News updated")
+      })
   }
 
   def updateForm(publisher: String, id: String) = PublisherAction(publisher, EditNews) { implicit request =>

@@ -41,7 +41,10 @@ class IncomingActivitiesController @Inject()(
             data.recipients.groups.getOrElse(Seq.empty).map(GroupName)
           )
 
-          activityService.save(activity, usercodes).fold(badRequest, created)
+          activityService.save(activity, usercodes).fold(badRequest, id => {
+            auditLog('CreateActivity, 'id -> id, 'provider -> activity.providerId)
+            created(id)
+          })
         }.recoverTotal {
           e => validationError(e)
         }

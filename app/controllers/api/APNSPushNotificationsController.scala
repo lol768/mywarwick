@@ -16,13 +16,15 @@ class APNSPushNotificationsController @Inject()(
 
   import securityService._
 
-  def subscribe = RequiredUserAction { request =>
+  def subscribe = RequiredUserAction { implicit request =>
     val deviceToken = request.body.asJson.flatMap(_.asInstanceOf[JsObject].value.get("deviceToken")).map(_.as[String])
 
     deviceToken.map { token =>
       val registered = pushRegistrationService.save(request.context.user.get.usercode, Apple, token)
 
       if (registered) {
+        auditLog('CreateAPNSRegistration, 'token -> token)
+
         Ok("Registered for push notifications")
       } else {
         InternalServerError("Unable to register for push notifications")

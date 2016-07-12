@@ -68,10 +68,12 @@ class NotificationsController @Inject()(
           case Right(Audience.Public) =>
             Ok(views.createForm(publisherId, form.withError("audience", "Notifications cannot be public"), departmentOptions))
           case Right(audience) =>
-            val item = publish.item.toSave(request.context.user.get.usercode, publisherId)
+            val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
 
-            notificationPublishingService.publish(item, audience) match {
-              case Success(Right(_)) =>
+            notificationPublishingService.publish(notification, audience) match {
+              case Success(Right(activityId)) =>
+                auditLog('CreateNotification, 'id -> activityId)
+
                 Redirect(routes.NotificationsController.list(publisherId)).flashing("result" -> "Notification created")
               case Success(Left(errors)) =>
                 val formWithError = errors.foldLeft(form)((f, error) => f.withGlobalError(error.message))
