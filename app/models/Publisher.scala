@@ -41,7 +41,7 @@ object PublishingRole extends Enum[PublishingRole] {
 
   case object NewsManager extends UserWhoCan(CreateNews, EditNews, ViewNews)
   case object NotificationsManager extends UserWhoCan(CreateNotifications, ViewNotifications)
-  case object Reporter extends UserWhoCan(ViewNews, ViewNotifications)
+  case object Viewer extends UserWhoCan(ViewNews, ViewNotifications)
 }
 
 // TODO: Permissions for publishing to departments
