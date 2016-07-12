@@ -128,5 +128,20 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
       insertSkynetProvider.execute()
       activityDao.getActivityIcon("skynet").get.colour.get mustBe "greyish"
     }
+
+    "get activities created by publisher" in transaction { implicit c =>
+      SQL"INSERT INTO PUBLISHER (ID, NAME) VALUES ('publisher-id', 'Test Publisher')"
+        .execute()
+
+      val id = get[ActivityDao].save(Fixtures.activitySave.submissionDue, Nil)
+      val id2 = get[ActivityDao].save(Fixtures.activitySave.submissionDue, Nil)
+
+      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id, 'publisher-id', 'custard', SYSDATE)"
+        .execute()
+      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id2, 'publisher-id', 'custard', SYSDATE)"
+        .execute()
+
+      activityDao.getActivitiesByPublisherId("publisher-id", limit = 100).map(_.id) must contain allOf(id, id2)
+    }
   }
 }
