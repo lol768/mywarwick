@@ -1,26 +1,30 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
-
+import React, { PropTypes } from 'react';
+import NewsCategoriesView from './NewsCategoriesView';
 import NewsItem from '../ui/NewsItem';
-
 import { connect } from 'react-redux';
 import _ from 'lodash';
-
 import * as news from '../../state/news';
+import * as newsCategories from '../../state/news-categories';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 
 const SOME_MORE = 10;
 
-class NewsView extends ReactComponent {
+class NewsView extends React.Component {
 
   constructor(props) {
     super(props);
-    this.onClickRefresh = this.onClickRefresh.bind(this);
+    this.onClickRefresh = this.fetch.bind(this);
 
     this.state = {
       numberToShow: SOME_MORE,
     };
     this.loadMore = this.loadMore.bind(this);
+  }
+
+  componentDidMount() {
+    if (this.props.items.length === 0 && !this.props.failed) {
+      this.fetch();
+    }
   }
 
   loadMore() {
@@ -29,22 +33,17 @@ class NewsView extends ReactComponent {
     });
   }
 
-  componentDidMount() {
-    if (this.props.items.length === 0 && !this.props.failed) {
-      this.props.dispatch(news.fetch());
-    }
-  }
-
-  onClickRefresh() {
+  fetch() {
     this.props.dispatch(news.fetch());
+    this.props.dispatch(newsCategories.fetch());
   }
 
   render() {
-    if (this.props.fetching) {
-      return <i className="centered fa fa-lg fa-refresh fa-spin"> </i>;
-    }
+    const { failed, fetching, items } = this.props;
+    const { numberToShow } = this.state;
+    const hasMore = numberToShow < items.length;
 
-    if (this.props.failed) {
+    if (failed) {
       return (
         <div className="alert alert-warning">
           <p>
@@ -60,28 +59,40 @@ class NewsView extends ReactComponent {
       );
     }
 
-    if (this.props.items.length) {
-      const items = _.take(this.props.items, this.state.numberToShow).map((item) =>
-        <NewsItem
-          key={item.id}
-          {...item}
-        />
-      );
+    const itemComponents = _.take(items, numberToShow).map((item) =>
+      <NewsItem
+        key={item.id}
+        {...item}
+      />
+    );
 
-      const hasMore = this.state.numberToShow < this.props.items.length;
-
-      return (
-        <InfiniteScrollable hasMore={hasMore} onLoadMore={this.loadMore}>
-          {items}
-        </InfiniteScrollable>
-      );
-    }
-
-    return (<p>No news to show you yet.</p>);
+    return (
+      <div>
+        <NewsCategoriesView { ...this.props.newsCategories } dispatch={ this.props.dispatch } />
+        { fetching ? <i className="centered fa fa-lg fa-refresh fa-spin"> </i> : null }
+        { items.length ?
+          <InfiniteScrollable hasMore={hasMore} onLoadMore={this.loadMore}>
+            {itemComponents}
+          </InfiniteScrollable> :
+          <p>No news to show you yet.</p>
+        }
+      </div>
+    );
   }
 
 }
 
-const select = (state) => state.news;
+NewsView.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  failed: PropTypes.bool.isRequired,
+  fetching: PropTypes.bool.isRequired,
+  items: PropTypes.array.isRequired,
+  newsCategories: PropTypes.object.isRequired,
+};
+
+const select = (state) => ({
+  ...state.news,
+  newsCategories: state.newsCategories,
+});
 
 export default connect(select)(NewsView);

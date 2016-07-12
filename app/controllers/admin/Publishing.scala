@@ -12,12 +12,6 @@ import scala.concurrent.Future
 
 trait Publishing extends DepartmentOptions with CategoryOptions with PublishingActionRefiner {
 
-  val categoryMapping: Mapping[Seq[String]] =
-    seq(nonEmptyText)
-      .verifying("You must select at least one category", _.nonEmpty)
-      // Rationale: after removing all possible options, anything that remains is invalid
-      .verifying("Some selections were invalid", _.diff(categoryOptions.map(_.id)).isEmpty)
-
   val audienceMapping: Mapping[AudienceData] = mapping(
     "audience" -> seq(nonEmptyText),
     "department" -> optional(text)
@@ -46,6 +40,13 @@ trait DepartmentOptions {
 trait CategoryOptions {
 
   val newsCategoryService: NewsCategoryService
+
+  // Rationale: after removing all possible options, anything that remains is invalid
+  val categoryMappingAllowingEmpty = seq(nonEmptyText)
+    .verifying("Some selections were invalid", _.diff(categoryOptions.map(_.id)).isEmpty)
+
+  val categoryMapping = categoryMappingAllowingEmpty
+    .verifying("You must select at least one category", _.nonEmpty)
 
   lazy val categoryOptions = newsCategoryService.all()
 

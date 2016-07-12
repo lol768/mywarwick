@@ -11,7 +11,7 @@ export const render = (content) =>
     .split('\n')
     .map(t => t.trim())
     .filter(t => t.length)
-    .map(t => <p>{t}</p>);
+    .map((t, i) => <p key={i}>{t}</p>);
 
 export default class NewsItem extends ReactComponent {
 
