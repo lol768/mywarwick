@@ -3,9 +3,9 @@
  * server for reporting purposes.
  */
 
-import fetch from 'isomorphic-fetch';
 import log from 'loglevel';
 import _ from 'lodash';
+import { postJsonWithCredentials } from './serverpipe';
 
 let errors = [];
 let postErrorsThrottled;
@@ -13,20 +13,14 @@ let postErrorsThrottled;
 function postErrors() {
   const errorsToPost = errors;
 
-  fetch('/api/errors/js', {
-    credentials: 'same-origin',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(errorsToPost),
-  }).then(() => {
-    log.info('Errors posted to server');
-    errors = errors.slice(errorsToPost.length);
-  }).catch((e) => {
-    log.warn('Failed to post errors to server', e);
-    postErrorsThrottled();
-  });
+  postJsonWithCredentials('/api/errors/js', errorsToPost)
+    .then(() => {
+      log.info('Errors posted to server');
+      errors = errors.slice(errorsToPost.length);
+    }).catch((e) => {
+      log.warn('Failed to post errors to server', e);
+      postErrorsThrottled();
+    });
 }
 
 postErrorsThrottled = _.throttle(postErrors, 5000); // eslint-disable-line prefer-const

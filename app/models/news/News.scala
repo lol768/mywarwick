@@ -15,6 +15,12 @@ object Link {
       "href" -> o.href.toString
     )
   }
+
+  // Never used; required only to create format for NewsItemRender, required for
+  // news feed endpoint to use API.Success
+  implicit val jsonReader = new Reads[Link] {
+    override def reads(json: JsValue): JsResult[Link] = ???
+  }
 }
 
 /**
@@ -47,7 +53,7 @@ case class NewsItemRender (
 
 object NewsItemRender {
   implicit private val dateWriter = DateFormats.isoDateWrites
-  implicit val jsonWriter = Json.writes[NewsItemRender]
+  implicit val format = Json.format[NewsItemRender]
 }
 
 /**
