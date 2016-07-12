@@ -6,6 +6,7 @@ import play.api.data.Mapping
 import play.api.mvc.{ActionRefiner, Result, Results, WrappedRequest}
 import services.{NewsCategoryService, PublisherService, SecurityService}
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
+import system.RequestContext
 import warwick.sso.AuthenticatedRequest
 
 import scala.concurrent.Future
@@ -61,9 +62,7 @@ trait PublishingActionRefiner {
   import securityService._
 
   class PublisherRequest[A](val publisher: Publisher, request: AuthenticatedRequest[A])
-    extends WrappedRequest[A](request) {
-    val context = request.context
-  }
+    extends AuthenticatedRequest[A](request.context, request.request)
 
   private def GetPublisher(id: String, requiredAbilities: Seq[PublishingAbility]) = new ActionRefiner[AuthenticatedRequest, PublisherRequest] {
 
