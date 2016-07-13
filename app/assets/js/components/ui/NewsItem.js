@@ -44,11 +44,7 @@ export default class NewsItem extends ReactComponent {
 
           <div className="news-item__footer">
             <div className="news-item__category-tags">
-              {categories.map(category =>
-                <span className="badge">
-                  { category.name }
-                </span>
-              )}
+              {categories.map(c => <NewsItemTag key={c.id} name={c.name} />)}
             </div>
             <p>
               {formatDate(publishDate, new Date(), true)}
@@ -60,6 +56,15 @@ export default class NewsItem extends ReactComponent {
     );
   }
 }
+
+const NewsItemTag = props =>
+  <span className="badge">
+    { props.name }
+  </span>;
+
+NewsItemTag.propTypes = {
+  name: React.PropTypes.string.isRequired,
+};
 
 const select = (state) => state.device;
 export default connect(select)(NewsItem);
