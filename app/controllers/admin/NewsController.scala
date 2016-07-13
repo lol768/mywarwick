@@ -75,7 +75,7 @@ class NewsController @Inject()(
     "ignoreCategories" -> boolean
   )(NewsItemData.apply)(NewsItemData.unapply)
 
-  val publishNewsForm = Form(mapping(
+  def publishNewsForm(implicit request: PublisherRequest[_]) = Form(mapping(
     "item" -> newsItemMapping,
     "categories" -> categoryMapping,
     "audience" -> audienceMapping

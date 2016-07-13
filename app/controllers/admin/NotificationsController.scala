@@ -41,7 +41,7 @@ class NotificationsController @Inject()(
     "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url)
   )(NotificationData.apply)(NotificationData.unapply)
 
-  val publishNotificationForm = Form(mapping(
+  def publishNotificationForm(implicit request: PublisherRequest[_]) = Form(mapping(
     "item" -> notificationMapping,
     "audience" -> audienceMapping
   )(PublishNotificationData.apply)(PublishNotificationData.unapply))

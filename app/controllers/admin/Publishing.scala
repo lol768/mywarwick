@@ -4,7 +4,7 @@ import models.{Publisher, PublisherPermissionScope, PublishingAbility}
 import play.api.data.Forms._
 import play.api.data.Mapping
 import play.api.mvc.{ActionRefiner, Result, Results}
-import services.dao.{DepartmentInfo, DepartmentInfoDao}
+import services.dao.DepartmentInfoDao
 import services.{NewsCategoryService, PublisherService, SecurityService}
 import warwick.sso.AuthenticatedRequest
 
@@ -12,14 +12,33 @@ import scala.concurrent.Future
 
 trait Publishing extends DepartmentOptions with CategoryOptions with PublishingActionRefiner {
 
-  val audienceMapping: Mapping[AudienceData] = mapping(
-    "audience" -> seq(nonEmptyText),
-    "department" -> optional(text)
-  )(AudienceData.apply)(AudienceData.unapply)
+  def audienceMapping(implicit publisherRequest: PublisherRequest[_]): Mapping[AudienceData] =
+    mapping(
+      "audience" -> seq(nonEmptyText),
+      "department" -> optional(text)
+    )(AudienceData.apply)(AudienceData.unapply)
+      .verifying(
+        "You do not have the required permissions to publish to that audience.",
+        data => userCanPublishToAudience(data)
+      )
+
+  def permissionScope(implicit publisherRequest: PublisherRequest[_]) =
+    publisherService.getPermissionScope(publisherRequest.publisher.id)
+
+  private def userCanPublishToAudience(data: AudienceData)(implicit publisherRequest: PublisherRequest[_]) = {
+    permissionScope match {
+      case PublisherPermissionScope.AllDepartments =>
+        true
+      case PublisherPermissionScope.Departments(deptCodes: Seq[String]) =>
+        data.audience.forall(_.startsWith("Dept:")) &&
+          data.department.forall(deptCodes.contains)
+    }
+  }
 
 }
 
 trait DepartmentOptions {
+  self: Publishing =>
 
   val departmentInfoDao: DepartmentInfoDao
 
@@ -34,9 +53,6 @@ trait DepartmentOptions {
     departmentInfoDao.allDepartments
       .filter(dept => audienceDepartmentTypes.contains(dept.`type`))
       .sortBy(_.name)
-
-  def permissionScope(implicit publisherRequest: PublisherRequest[_]) =
-    publisherService.getPermissionScope(publisherRequest.publisher.id)
 
   def departmentOptions(implicit publisherRequest: PublisherRequest[_]) =
     departmentInitialValue ++ departmentsWithPublishPermission.map(dept => dept.code -> dept.name)
