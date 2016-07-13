@@ -16,7 +16,7 @@ export const render = (content) =>
 export default class NewsItem extends ReactComponent {
 
   render() {
-    const { link, title, publishDate, text, imageId, width } = this.props;
+    const { link, title, publishDate, text, imageId, width, categories } = this.props;
     const url = link && link.href;
     const moreLink = link ? (<Hyperlink href={link.href}>{link.text}</Hyperlink>) : null;
 
@@ -43,6 +43,13 @@ export default class NewsItem extends ReactComponent {
           </div>
 
           <div className="news-item__footer">
+            <div className="news-item__category-tags">
+              {categories.map(category =>
+                <span className="badge">
+                  { category.name }
+                </span>
+              )}
+            </div>
             <p>
               {formatDate(publishDate, new Date(), true)}
             </p>
