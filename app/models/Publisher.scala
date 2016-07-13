@@ -44,10 +44,9 @@ object PublishingRole extends Enum[PublishingRole] {
   case object Viewer extends UserWhoCan(ViewNews, ViewNotifications)
 }
 
-// TODO: Permissions for publishing to departments
-sealed trait PermissionScope
-object PermissionScope {
-  object AllDepartments extends PermissionScope
-  case class Departments(departments: Seq[String]) extends PermissionScope
+sealed trait PublisherPermissionScope
+object PublisherPermissionScope {
+  object AllDepartments extends PublisherPermissionScope
+  case class Departments(departments: Seq[String]) extends PublisherPermissionScope
 }
 

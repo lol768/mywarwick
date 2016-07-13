@@ -94,19 +94,19 @@ class NewsController @Inject()(
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNews) { implicit request =>
-    Ok(views.html.admin.news.createForm(publisherId, publishNewsForm, departmentOptions, categoryOptions))
+    Ok(renderCreateForm(publisherId, publishNewsForm))
   }
 
   def create(publisherId: String) = PublisherAction(publisherId, CreateNews).async { implicit request =>
     val bound = publishNewsForm.bindFromRequest
     bound.fold(
-      errorForm => Future.successful(Ok(views.html.admin.news.createForm(publisherId, errorForm, departmentOptions, categoryOptions))),
+      errorForm => Future.successful(Ok(renderCreateForm(publisherId, errorForm))),
       // We only show audience validation errors if there were no other errors, which can look weird.
 
       data => audienceBinder.bindAudience(data.audience).map {
         case Left(errors) =>
           val errorForm = addFormErrors(bound, errors)
-          Ok(views.html.admin.news.createForm(publisherId, errorForm, departmentOptions, categoryOptions))
+          Ok(renderCreateForm(publisherId, errorForm))
         case Right(audience) =>
           val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
           val newsItemId = news.save(newsItem, audience, data.categoryIds)
@@ -118,10 +118,31 @@ class NewsController @Inject()(
     )
   }
 
+  def renderCreateForm(publisherId: String, form: Form[PublishNewsItemData])(implicit request: PublisherRequest[_]) = {
+    views.html.admin.news.createForm(
+      publisher = publisherId,
+      form = form,
+      categories = categoryOptions,
+      permissionScope = permissionScope,
+      departmentOptions = departmentOptions
+    )
+  }
+
+  def updateForm(publisher: String, id: String) = PublisherAction(publisher, EditNews) { implicit request =>
+    news.getNewsItem(id).map { item =>
+      val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
+      val formWithData = updateNewsForm.fill(UpdateNewsItemData(item.toData, categoryIds))
+
+      Ok(renderUpdateForm(publisher, id, formWithData))
+    }.getOrElse {
+      NotFound(views.html.errors.notFound())
+    }
+  }
+
   def update(publisherId: String, id: String) = PublisherAction(publisherId, EditNews) { implicit request =>
     val bound = updateNewsForm.bindFromRequest
     bound.fold(
-      errorForm => Ok(views.html.admin.news.updateForm(publisherId, id, errorForm, categoryOptions)),
+      errorForm => Ok(renderUpdateForm(publisherId, id, errorForm)),
       data => {
         val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
 
@@ -134,13 +155,13 @@ class NewsController @Inject()(
       })
   }
 
-  def updateForm(publisher: String, id: String) = PublisherAction(publisher, EditNews) { implicit request =>
-    news.getNewsItem(id) map { item =>
-      val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
-      Ok(views.html.admin.news.updateForm(publisher, id, updateNewsForm.fill(UpdateNewsItemData(item.toData, categoryIds)), categoryOptions))
-    } getOrElse {
-      NotFound(s"Cannot update news. No news item exists with id '$id'")
-    }
+  def renderUpdateForm(publisherId: String, id: String, form: Form[UpdateNewsItemData])(implicit request: PublisherRequest[_]) = {
+    views.html.admin.news.updateForm(
+      publisher = publisherId,
+      id = id,
+      form = form,
+      categories = categoryOptions
+    )
   }
 
   def partitionNews(news: Seq[NewsItemRender]) = news.partition(_.publishDate.isAfterNow)

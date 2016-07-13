@@ -53,20 +53,20 @@ class NotificationsController @Inject()(
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNotifications) { implicit request =>
-    Ok(views.createForm(publisherId, publishNotificationForm, departmentOptions))
+    Ok(views.createForm(publisherId, publishNotificationForm, departmentOptions, permissionScope))
   }
 
   def create(publisherId: String) = PublisherAction(publisherId, CreateNotifications).async { implicit request =>
     val form = publishNotificationForm.bindFromRequest
 
     form.fold(
-      formWithErrors => Future.successful(Ok(views.createForm(publisherId, formWithErrors, departmentOptions))),
+      formWithErrors => Future.successful(Ok(views.createForm(publisherId, formWithErrors, departmentOptions, permissionScope))),
       publish => {
         audienceBinder.bindAudience(publish.audience).map {
           case Left(errors) =>
-            Ok(views.createForm(publisherId, addFormErrors(form, errors), departmentOptions))
+            Ok(views.createForm(publisherId, addFormErrors(form, errors), departmentOptions, permissionScope))
           case Right(Audience.Public) =>
-            Ok(views.createForm(publisherId, form.withError("audience", "Notifications cannot be public"), departmentOptions))
+            Ok(views.createForm(publisherId, form.withError("audience", "Notifications cannot be public"), departmentOptions, permissionScope))
           case Right(audience) =>
             val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
 
@@ -78,12 +78,12 @@ class NotificationsController @Inject()(
               case Success(Left(errors)) =>
                 val formWithError = errors.foldLeft(form)((f, error) => f.withGlobalError(error.message))
 
-                Ok(views.createForm(publisherId, formWithError, departmentOptions))
+                Ok(views.createForm(publisherId, formWithError, departmentOptions, permissionScope))
               case Failure(e) =>
                 logger.error("Failure while creating notification", e)
                 val formWithError = form.withGlobalError("An error occurred creating this notification")
 
-                Ok(views.createForm(publisherId, formWithError, departmentOptions))
+                Ok(views.createForm(publisherId, formWithError, departmentOptions, permissionScope))
             }
         }
       }

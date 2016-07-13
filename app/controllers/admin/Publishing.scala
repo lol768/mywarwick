@@ -1,12 +1,11 @@
 package controllers.admin
 
-import models.{Publisher, PublishingAbility}
+import models.{Publisher, PublisherPermissionScope, PublishingAbility}
 import play.api.data.Forms._
 import play.api.data.Mapping
-import play.api.mvc.{ActionRefiner, Result, Results, WrappedRequest}
-import services.{NewsCategoryService, PublisherService, SecurityService}
+import play.api.mvc.{ActionRefiner, Result, Results}
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
-import system.RequestContext
+import services.{NewsCategoryService, PublisherService, SecurityService}
 import warwick.sso.AuthenticatedRequest
 
 import scala.concurrent.Future
@@ -24,18 +23,32 @@ trait DepartmentOptions {
 
   val departmentInfoDao: DepartmentInfoDao
 
+  val publisherService: PublisherService
+
   implicit val executionContext = system.ThreadPools.web
 
-  private val departmentTypes = Set("ACADEMIC", "SERVICE")
+  private val audienceDepartmentTypes = Set("ACADEMIC", "SERVICE")
   private val departmentInitialValue = Seq("" -> "--- Department ---")
 
-  def departmentOptions =
-    toDepartmentOptions(departmentInfoDao.allDepartments)
+  lazy val allPublishableDepartments =
+    departmentInfoDao.allDepartments
+      .filter(dept => audienceDepartmentTypes.contains(dept.`type`))
+      .sortBy(_.name)
 
-  def toDepartmentOptions(depts: Seq[DepartmentInfo]) =
-    departmentInitialValue ++ depts.filter { info => departmentTypes.contains(info.`type`) }
-      .sortBy { info => info.name }
-      .map { info => info.code -> info.name }
+  def permissionScope(implicit publisherRequest: PublisherRequest[_]) =
+    publisherService.getPermissionScope(publisherRequest.publisher.id)
+
+  def departmentOptions(implicit publisherRequest: PublisherRequest[_]) =
+    departmentInitialValue ++ departmentsWithPublishPermission.map(dept => dept.code -> dept.name)
+
+  def departmentsWithPublishPermission(implicit publisherRequest: PublisherRequest[_]) =
+    permissionScope match {
+      case PublisherPermissionScope.AllDepartments =>
+        allPublishableDepartments
+      case PublisherPermissionScope.Departments(deptCodes: Seq[String]) =>
+        allPublishableDepartments.filter(dept => deptCodes.contains(dept.code))
+    }
+
 }
 
 trait CategoryOptions {
@@ -60,9 +73,6 @@ trait PublishingActionRefiner {
   val securityService: SecurityService
 
   import securityService._
-
-  class PublisherRequest[A](val publisher: Publisher, request: AuthenticatedRequest[A])
-    extends AuthenticatedRequest[A](request.context, request.request)
 
   private def GetPublisher(id: String, requiredAbilities: Seq[PublishingAbility]) = new ActionRefiner[AuthenticatedRequest, PublisherRequest] {
 
@@ -91,3 +101,7 @@ trait PublishingActionRefiner {
   def PublisherAction(id: String, requiredAbilities: PublishingAbility*) = RequiredUserAction andThen GetPublisher(id, requiredAbilities)
 
 }
+
+class PublisherRequest[A](val publisher: Publisher, request: AuthenticatedRequest[A])
+  extends AuthenticatedRequest[A](request.context, request.request)
+
