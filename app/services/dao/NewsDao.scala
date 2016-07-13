@@ -171,14 +171,18 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
 
       val audienceNews =
         SQL"""
-           SELECT nr.NEWS_ITEM_ID ID, COUNT(*) C FROM NEWS_RECIPIENT nr
+           SELECT
+             nr.NEWS_ITEM_ID ID,
+             COUNT(*)        C
+           FROM NEWS_RECIPIENT nr
              JOIN NEWS_ITEM ni ON ni.ID = nr.NEWS_ITEM_ID
            WHERE nr.USERCODE != '*' AND nr.NEWS_ITEM_ID IN ($newsIds)
-                 AND ni.IGNORE_CATEGORIES = 1
-                 OR nr.USERCODE IN
-                    (SELECT unc.USERCODE FROM USER_NEWS_CATEGORY unc
-                      JOIN NEWS_ITEM_CATEGORY nic ON unc.NEWS_CATEGORY_ID = nic.NEWS_CATEGORY_ID
-                                                     AND nr.NEWS_ITEM_ID = nic.NEWS_ITEM_ID)
+                 AND (ni.IGNORE_CATEGORIES = 1 OR nr.USERCODE IN
+                                                  (SELECT unc.USERCODE
+                                                   FROM USER_NEWS_CATEGORY unc
+                                                     JOIN NEWS_ITEM_CATEGORY nic
+                                                       ON unc.NEWS_CATEGORY_ID = nic.NEWS_CATEGORY_ID
+                                                          AND nr.NEWS_ITEM_ID = nic.NEWS_ITEM_ID))
            GROUP BY nr.NEWS_ITEM_ID
       """.as(countParser.*).toMap.mapValues(Finite)
 
