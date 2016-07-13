@@ -14,7 +14,7 @@
 
 @common.admin("Update news") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NewsController.updateForm(publisher, id)) {
+  @b3.form(action = controllers.admin.routes.NewsController.update(publisher, id)) {
 
     @admin.news.contentForm(form)
 
