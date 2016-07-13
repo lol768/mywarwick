@@ -31,6 +31,8 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
   }
 
   val londonsBurning = NewsItemSave(
+    usercode = Usercode("custard"),
+    publisherId = "publisher",
     title = "London's Burning",
     text = "The capital is on fire.",
     link = None,
@@ -40,6 +42,8 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
   )
 
   val brumPanic = NewsItemSave(
+    usercode = Usercode("custard"),
+    publisherId = "publisher",
     title = "Panic on the streets of Birmingham",
     text = "I wonder to myself - burn down the disco.",
     link = None,
@@ -50,6 +54,8 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
 
   // Publish date in future, so shouldn't be shown to user.
   val futureNews = NewsItemSave(
+    usercode = Usercode("custard"),
+    publisherId = "publisher",
     title = "Hoverboards invented",
     text = "Finally, we can all hover to work!",
     link = None,

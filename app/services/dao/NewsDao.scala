@@ -23,7 +23,7 @@ trait NewsDao {
     * All the news, all the time. This is probably only useful for sysadmins and maybe Comms.
     * Everyone else will be getting a filtered view.
     */
-  def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender]
+  def allNews(publisherId: String, limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender]
 
   def latestNews(user: Option[Usercode], limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender]
 
@@ -79,7 +79,7 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     NewsItemRender(id, title, text, link, publishDate, imageId, category.toSeq, ignoreCategories)
   }
 
-  override def allNews(limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender] = {
+  override def allNews(publisherId: String, limit: Int, offset: Int)(implicit c: Connection): Seq[NewsItemRender] = {
     groupNewsItems(SQL(
       s"""
       SELECT
@@ -91,17 +91,19 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
           ON c.NEWS_ITEM_ID = n.ID
         LEFT OUTER JOIN NEWS_CATEGORY
           ON c.NEWS_CATEGORY_ID = NEWS_CATEGORY.ID
+      WHERE n.PUBLISHER_ID = {publisherId}
       ORDER BY PUBLISH_DATE DESC
       ${dialect.limitOffset(limit, offset)}
       """)
+      .on('publisherId -> publisherId)
       .as(newsParser.*))
   }
 
-  override def latestNews(user: Option[Usercode], limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender] = {
+  override def latestNews(user: Option[Usercode], limit: Int)(implicit c: Connection): Seq[NewsItemRender] = {
     getNewsByIds(getNewsItemIdsForUser(user, limit))
   }
 
-  def getNewsItemIdsForUser(user: Option[Usercode], limit: Int = 100)(implicit c: Connection): Seq[String] = {
+  def getNewsItemIdsForUser(user: Option[Usercode], limit: Int)(implicit c: Connection): Seq[String] = {
     SQL(
       s"""
         SELECT DISTINCT n.ID
@@ -131,8 +133,8 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     val linkText = link.map(_.text).orNull
     val linkHref = link.map(_.href.toString).orNull
     SQL"""
-    INSERT INTO NEWS_ITEM (id, title, text, link_text, link_href, news_image_id, created_at, publish_date, audience_id, ignore_categories)
-    VALUES ($id, $title, $text, $linkText, $linkHref, $imageId, SYSDATE, $publishDate, $audienceId, $ignoreCategories)
+    INSERT INTO NEWS_ITEM (id, title, text, link_text, link_href, news_image_id, created_at, publish_date, audience_id, ignore_categories, publisher_id, created_by)
+    VALUES ($id, $title, $text, $linkText, $linkHref, $imageId, SYSDATE, $publishDate, $audienceId, $ignoreCategories, $publisherId, ${usercode.string})
     """.executeUpdate()
     id
   }
@@ -184,7 +186,8 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     val linkHref = link.map(_.href.toString).orNull
     SQL"""
       UPDATE NEWS_ITEM SET title=$title, text=$text, link_text=$linkText,
-      link_href=$linkHref, updated_at=SYSDATE, publish_date=$publishDate, news_image_id=$imageId
+      link_href=$linkHref, publish_date=$publishDate, news_image_id=$imageId,
+      updated_at=SYSDATE, updated_by=${usercode.string}
       WHERE id=$newsId
       """.executeUpdate()
   }

@@ -2,6 +2,7 @@
 @import controllers.admin.UpdateNewsItemData
 @import views.html._
 @(
+    publisher: String,
     id: String,
     form: Form[UpdateNewsItemData],
     categories: Seq[NewsCategory]
@@ -13,7 +14,7 @@
 
 @common.admin("Update news") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NewsController.update(id)) {
+  @b3.form(action = controllers.admin.routes.NewsController.updateForm(publisher, id)) {
 
     @admin.news.contentForm(form)
 

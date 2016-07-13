@@ -2,6 +2,7 @@
 @import models.news.{AudienceSize, NewsItemRender}
 @import views.html._
 @(
+    publisher: String,
     newsPending: Seq[NewsItemRender],
     newsPublished: Seq[NewsItemRender],
     counts: Map[String, AudienceSize]
@@ -9,7 +10,7 @@
 
   @common.admin("News") {
     <p>
-      <a class="btn btn-default" href="@controllers.admin.routes.NewsController.createForm()">
+      <a class="btn btn-default" href="@controllers.admin.routes.NewsController.createForm(publisher)">
         Create news</a>
     </p>
 
@@ -18,7 +19,7 @@
       <p>No pending news.</p>
     } else {
       @newsPending.map { item =>
-        @admin.news.newsItemInfo(item, counts.get(item.id))
+        @admin.news.newsItemInfo(publisher, item, counts.get(item.id))
       }
     }
 
@@ -27,7 +28,7 @@
       <p>No published news.</p>
     } else {
       @newsPublished.map { item =>
-        @admin.news.newsItemInfo(item, counts.get(item.id))
+        @admin.news.newsItemInfo(publisher, item, counts.get(item.id))
       }
     }
   }

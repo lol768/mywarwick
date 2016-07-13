@@ -1,9 +1,9 @@
 @import system.RequestContext
-@(notifications: Seq[models.Activity])(implicit context: RequestContext)
+@(publisher: String, notifications: Seq[models.Activity])(implicit context: RequestContext)
 
 @common.admin("Notifications") {
   <p>
-    <a class="btn btn-default" href="@controllers.admin.routes.NotificationsController.createForm()">
+    <a class="btn btn-default" href="@controllers.admin.routes.NotificationsController.createForm(publisher)">
       Create notification
     </a>
   </p>

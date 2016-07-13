@@ -24,6 +24,8 @@ trait ActivityService {
 
   def setLastReadDate(user: User, dateTime: DateTime): Boolean
 
+  def getActivitiesByPublisherId(publisherId: String, limit: Int = 50): Seq[Activity]
+
   def getActivitiesByProviderId(providerId: String, limit: Int = 50): Seq[Activity]
 }
 
@@ -96,6 +98,9 @@ class ActivityServiceImpl @Inject()(
 
   override def setLastReadDate(user: User, dateTime: DateTime): Boolean =
     db.withConnection(implicit c => dao.saveLastReadDate(user.usercode.string, dateTime))
+
+  override def getActivitiesByPublisherId(publisherId: String, limit: Int) =
+    db.withConnection(implicit c => dao.getActivitiesByPublisherId(publisherId, limit))
 
   override def getActivitiesByProviderId(providerId: String, limit: Int) =
     db.withConnection(implicit c => dao.getActivitiesByProviderId(providerId, limit))

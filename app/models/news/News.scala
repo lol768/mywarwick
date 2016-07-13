@@ -6,6 +6,7 @@ import oracle.net.aso.h
 import org.joda.time.DateTime
 import play.api.libs.json._
 import uk.ac.warwick.util.web.Uri
+import warwick.sso.Usercode
 
 case class Link(text: String, href: Uri)
 object Link {
@@ -60,6 +61,8 @@ object NewsItemRender {
   * The data we need about a new news item to save it as a row.
   */
 case class NewsItemSave (
+  usercode: Usercode,
+  publisherId: String,
   title: String,
   text: String,
   link: Option[Link],
