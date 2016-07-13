@@ -194,7 +194,7 @@ class ID7Layout extends ReactComponent {
                               <ActivityView grouped={false} />
                             </MastheadIcon>
                             <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
-                              <LinkBlock columns="1">
+                              <LinkBlock columns={ 1 }>
                                 <Link key="bpm" href="http://warwick.ac.uk/bpm">
                                   Course Transfers
                                 </Link>

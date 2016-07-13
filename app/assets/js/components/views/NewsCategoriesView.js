@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
-
 import * as newsCategories from '../../state/news-categories';
+import ColumnLayout from '../ui/ColumnLayout';
 
 export default class NewsCategoriesView extends React.Component {
 
@@ -27,8 +27,10 @@ export default class NewsCategoriesView extends React.Component {
     );
 
     return (
-      <div className="form-group">
-        { checkboxes }
+      <div className="container-fluid news-categories">
+        <ColumnLayout columns={ 2 }>
+          { checkboxes }
+        </ColumnLayout>
       </div>
     );
   }
