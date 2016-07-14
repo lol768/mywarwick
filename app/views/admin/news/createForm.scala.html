@@ -5,7 +5,8 @@
     publisher: String,
     form: Form[PublishNewsItemData],
     departmentOptions: Seq[(String, String)],
-    categories: Seq[NewsCategory]
+    categories: Seq[NewsCategory],
+    permissionScope: PublisherPermissionScope
 )(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
@@ -18,7 +19,7 @@
 
     @admin.news.contentForm(form)
 
-    @tags.audiencePicker(form, "audience", departmentOptions, "news item", allowPublic = true)
+    @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true)
 
     @tags.categoryPicker(form, "categories", categories, "news item")
 

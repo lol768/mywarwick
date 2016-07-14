@@ -1,7 +1,7 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import models.{Publisher, PublishingRole}
+import models.{PublisherPermissionScope, Publisher, PublishingRole}
 import play.api.db.{Database, NamedDatabase}
 import services.dao.PublisherDao
 import warwick.sso.Usercode
@@ -13,21 +13,36 @@ trait PublisherService {
 
   def find(id: String): Option[Publisher]
 
-  def getRolesForUser(id: String, usercode: Usercode): Seq[PublishingRole]
+  def getRolesForUser(publisherId: String, usercode: Usercode): Seq[PublishingRole]
+
+  def getPermissionScope(publisherId: String): PublisherPermissionScope
 
 }
 
 @Singleton
 class PublisherServiceImpl @Inject()(
-  publisherDao: PublisherDao,
+  dao: PublisherDao,
   @NamedDatabase("default") db: Database
 ) extends PublisherService {
 
-  override def all = db.withConnection(implicit c => publisherDao.all)
+  val AllDepartmentsWildcard = "**"
 
-  override def find(id: String) = db.withConnection(implicit c => publisherDao.find(id))
+  override def all = db.withConnection(implicit c => dao.all)
 
-  override def getRolesForUser(id: String, usercode: Usercode) = db.withConnection { implicit c =>
-    publisherDao.getPublisherPermissions(id, usercode).map(_.role)
+  override def find(id: String) = db.withConnection(implicit c => dao.find(id))
+
+  override def getRolesForUser(publisherId: String, usercode: Usercode) = db.withConnection { implicit c =>
+    dao.getPublisherPermissions(publisherId, usercode).map(_.role)
   }
+
+  override def getPermissionScope(publisherId: String) = db.withConnection { implicit c =>
+    val departments = dao.getPublisherDepartments(publisherId)
+
+    if (departments.contains(AllDepartmentsWildcard)) {
+      PublisherPermissionScope.AllDepartments
+    } else {
+      PublisherPermissionScope.Departments(departments)
+    }
+  }
+
 }

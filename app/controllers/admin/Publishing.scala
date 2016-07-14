@@ -1,41 +1,70 @@
 package controllers.admin
 
-import models.{Publisher, PublishingAbility}
+import models.{Publisher, PublisherPermissionScope, PublishingAbility}
 import play.api.data.Forms._
 import play.api.data.Mapping
-import play.api.mvc.{ActionRefiner, Result, Results, WrappedRequest}
+import play.api.mvc.{ActionRefiner, Result, Results}
+import services.dao.DepartmentInfoDao
 import services.{NewsCategoryService, PublisherService, SecurityService}
-import services.dao.{DepartmentInfo, DepartmentInfoDao}
-import system.RequestContext
 import warwick.sso.AuthenticatedRequest
 
 import scala.concurrent.Future
 
 trait Publishing extends DepartmentOptions with CategoryOptions with PublishingActionRefiner {
 
-  val audienceMapping: Mapping[AudienceData] = mapping(
-    "audience" -> seq(nonEmptyText),
-    "department" -> optional(text)
-  )(AudienceData.apply)(AudienceData.unapply)
+  def audienceMapping(implicit publisherRequest: PublisherRequest[_]): Mapping[AudienceData] =
+    mapping(
+      "audience" -> seq(nonEmptyText),
+      "department" -> optional(text)
+    )(AudienceData.apply)(AudienceData.unapply)
+      .verifying(
+        "You do not have the required permissions to publish to that audience.",
+        data => userCanPublishToAudience(data)
+      )
+
+  def permissionScope(implicit publisherRequest: PublisherRequest[_]) =
+    publisherService.getPermissionScope(publisherRequest.publisher.id)
+
+  private def userCanPublishToAudience(data: AudienceData)(implicit publisherRequest: PublisherRequest[_]) = {
+    permissionScope match {
+      case PublisherPermissionScope.AllDepartments =>
+        true
+      case PublisherPermissionScope.Departments(deptCodes: Seq[String]) =>
+        data.audience.forall(_.startsWith("Dept:")) &&
+          data.department.forall(deptCodes.contains)
+    }
+  }
 
 }
 
 trait DepartmentOptions {
+  self: Publishing =>
 
   val departmentInfoDao: DepartmentInfoDao
 
+  val publisherService: PublisherService
+
   implicit val executionContext = system.ThreadPools.web
 
-  private val departmentTypes = Set("ACADEMIC", "SERVICE")
+  private val audienceDepartmentTypes = Set("ACADEMIC", "SERVICE")
   private val departmentInitialValue = Seq("" -> "--- Department ---")
 
-  def departmentOptions =
-    toDepartmentOptions(departmentInfoDao.allDepartments)
+  lazy val allPublishableDepartments =
+    departmentInfoDao.allDepartments
+      .filter(dept => audienceDepartmentTypes.contains(dept.`type`))
+      .sortBy(_.name)
 
-  def toDepartmentOptions(depts: Seq[DepartmentInfo]) =
-    departmentInitialValue ++ depts.filter { info => departmentTypes.contains(info.`type`) }
-      .sortBy { info => info.name }
-      .map { info => info.code -> info.name }
+  def departmentOptions(implicit publisherRequest: PublisherRequest[_]) =
+    departmentInitialValue ++ departmentsWithPublishPermission.map(dept => dept.code -> dept.name)
+
+  def departmentsWithPublishPermission(implicit publisherRequest: PublisherRequest[_]) =
+    permissionScope match {
+      case PublisherPermissionScope.AllDepartments =>
+        allPublishableDepartments
+      case PublisherPermissionScope.Departments(deptCodes: Seq[String]) =>
+        allPublishableDepartments.filter(dept => deptCodes.contains(dept.code))
+    }
+
 }
 
 trait CategoryOptions {
@@ -60,9 +89,6 @@ trait PublishingActionRefiner {
   val securityService: SecurityService
 
   import securityService._
-
-  class PublisherRequest[A](val publisher: Publisher, request: AuthenticatedRequest[A])
-    extends AuthenticatedRequest[A](request.context, request.request)
 
   private def GetPublisher(id: String, requiredAbilities: Seq[PublishingAbility]) = new ActionRefiner[AuthenticatedRequest, PublisherRequest] {
 
@@ -91,3 +117,7 @@ trait PublishingActionRefiner {
   def PublisherAction(id: String, requiredAbilities: PublishingAbility*) = RequiredUserAction andThen GetPublisher(id, requiredAbilities)
 
 }
+
+class PublisherRequest[A](val publisher: Publisher, request: AuthenticatedRequest[A])
+  extends AuthenticatedRequest[A](request.context, request.request)
+

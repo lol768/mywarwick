@@ -1,7 +1,12 @@
 @import system.RequestContext
 @import controllers.admin.NotificationsController.PublishNotificationForm
 
-@(publisher: String, form: PublishNotificationForm, departmentOptions: Seq[(String, String)])(implicit messages: Messages, context: RequestContext)
+@(
+    publisher: String,
+    form: PublishNotificationForm,
+    departmentOptions: Seq[(String, String)],
+    permissionScope: PublisherPermissionScope
+)(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
   b3.vertical.fieldConstructor
@@ -25,7 +30,7 @@
       '_help -> "Optional"
     )
 
-    @tags.audiencePicker(form, "audience", departmentOptions, "notification", allowPublic = false)
+    @tags.audiencePicker(form, "audience", departmentOptions, "notification", permissionScope, allowPublic = false)
 
     @b3.submit(
       'class -> "btn btn-primary"
