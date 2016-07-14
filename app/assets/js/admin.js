@@ -41,7 +41,7 @@ $(() => {
         $otherInputs.removeAttr('disabled');
         $deptSelect.trigger('change');
       }
-    });
+    }).trigger('change');
 
     $deptSelect.on('change', e => {
       const deptSelected = e.target.value;

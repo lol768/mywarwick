@@ -1,11 +1,13 @@
 @import system.RequestContext
-@import controllers.admin.UpdateNewsItemData
+@import controllers.admin.PublishNewsItemData
 @import views.html._
 @(
     publisher: String,
     id: String,
-    form: Form[UpdateNewsItemData],
-    categories: Seq[NewsCategory]
+    form: Form[PublishNewsItemData],
+    departmentOptions: Seq[(String, String)],
+    categories: Seq[NewsCategory],
+    permissionScope: PublisherPermissionScope
 )(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
@@ -17,6 +19,8 @@
   @b3.form(action = controllers.admin.routes.NewsController.update(publisher, id)) {
 
     @admin.news.contentForm(form)
+
+    @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true)
 
     @tags.categoryPicker(form, "categories", categories, "news item")
 

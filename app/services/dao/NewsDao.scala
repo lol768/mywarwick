@@ -46,6 +46,10 @@ trait NewsDao {
   def getNewsByIds(ids: Seq[String])(implicit c: Connection): Seq[NewsItemRender]
 
   def deleteRecipients(id: String)(implicit c: Connection)
+
+  def getAudienceId(newsId: String)(implicit c: Connection): Option[String]
+
+  def setAudienceId(newsId: String, audienceId: String)(implicit c: Connection)
 }
 
 @Singleton
@@ -154,6 +158,17 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     */
   override def deleteRecipients(id: String)(implicit c: Connection) = {
     SQL"DELETE FROM NEWS_RECIPIENT WHERE news_item_id = $id".executeUpdate()
+  }
+
+  override def getAudienceId(newsId: String)(implicit c: Connection) = {
+    SQL"SELECT AUDIENCE_ID FROM NEWS_ITEM WHERE ID = $newsId"
+      .executeQuery()
+      .as(scalar[String].singleOpt)
+  }
+
+  override def setAudienceId(newsId: String, audienceId: String)(implicit c: Connection) = {
+    SQL"UPDATE NEWS_ITEM SET AUDIENCE_ID = $audienceId WHERE ID = $newsId"
+      .execute()
   }
 
   private val countParser = (str("id") ~ int("c")).map(flatten)
