@@ -120,6 +120,10 @@ object ActivityError {
     def message = s"The activity type '$name' is not valid"
   }
 
+  case class InvalidProviderId(name: String) extends ActivityError {
+    def message = s"No provider found with id '$name'"
+  }
+
   case class InvalidTagName(name: String) extends ActivityError {
     def message = s"The tag name '$name' is not valid"
   }

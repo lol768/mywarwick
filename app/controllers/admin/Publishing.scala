@@ -10,7 +10,7 @@ import warwick.sso.AuthenticatedRequest
 
 import scala.concurrent.Future
 
-trait Publishing extends DepartmentOptions with CategoryOptions with PublishingActionRefiner {
+trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOptions with PublishingActionRefiner {
 
   def audienceMapping(implicit publisherRequest: PublisherRequest[_]): Mapping[AudienceData] =
     mapping(
@@ -34,6 +34,15 @@ trait Publishing extends DepartmentOptions with CategoryOptions with PublishingA
           data.department.forall(deptCodes.contains)
     }
   }
+
+}
+
+trait ProviderOptions {
+  val publisherService: PublisherService
+  
+  def providerOptions(implicit publisherRequest: PublisherRequest[_]) =
+    publisherService.getProviders(publisherRequest.publisher.id)
+      .map(provider => provider.id -> provider.name)
 
 }
 

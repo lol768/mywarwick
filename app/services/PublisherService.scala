@@ -6,6 +6,8 @@ import play.api.db.{Database, NamedDatabase}
 import services.dao.PublisherDao
 import warwick.sso.Usercode
 
+case class Provider(id: String, name: String)
+
 @ImplementedBy(classOf[PublisherServiceImpl])
 trait PublisherService {
 
@@ -16,6 +18,10 @@ trait PublisherService {
   def getRolesForUser(publisherId: String, usercode: Usercode): Seq[PublishingRole]
 
   def getPermissionScope(publisherId: String): PublisherPermissionScope
+
+  def getParentPublisherId(providerId: String): Option[String]
+
+  def getProviders(publisherId: String): Seq[Provider]
 
 }
 
@@ -45,4 +51,11 @@ class PublisherServiceImpl @Inject()(
     }
   }
 
+  override def getParentPublisherId(providerId: String) = db.withConnection { implicit c =>
+    dao.getParentPublisherId(providerId)
+  }
+
+  override def getProviders(publisherId: String): Seq[Provider] = db.withConnection { implicit c =>
+    dao.getProviders(publisherId)
+  }
 }

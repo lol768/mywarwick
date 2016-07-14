@@ -22,6 +22,7 @@ object PublishingAbility extends Enum[PublishingAbility] {
   case object CreateNews extends V
   case object EditNews extends V
   case object CreateNotifications extends V
+  case object CreateAPINotifications extends V
   case object ViewNews extends V
   case object ViewNotifications extends V
 }
@@ -41,6 +42,7 @@ object PublishingRole extends Enum[PublishingRole] {
 
   case object NewsManager extends UserWhoCan(CreateNews, EditNews, ViewNews)
   case object NotificationsManager extends UserWhoCan(CreateNotifications, ViewNotifications)
+  case object APINotificationsManager extends UserWhoCan(CreateAPINotifications) // God-like, not limited by Audience scope
   case object Viewer extends UserWhoCan(ViewNews, ViewNotifications)
 }
 

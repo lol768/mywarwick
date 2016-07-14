@@ -5,6 +5,7 @@
     publisher: String,
     form: PublishNotificationForm,
     departmentOptions: Seq[(String, String)],
+    providerOptions: Seq[(String, String)],
     permissionScope: PublisherPermissionScope
 )(implicit messages: Messages, context: RequestContext)
 
@@ -23,6 +24,12 @@
     @b3.textarea(form("item.text"),
       '_label -> "Text",
       '_help -> "Keep it super short"
+    )
+
+    @b3.select(form("item.provider"), providerOptions :+ ("news" -> "News"),
+      '_label -> "Provider",
+      'value -> "news",
+      '_help -> "Select the provider responsible for this notification. For general items select 'News'"
     )
 
     @b3.text(form("item.linkHref"),

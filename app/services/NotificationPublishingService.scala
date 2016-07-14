@@ -58,7 +58,7 @@ class NotificationPublishingServiceImpl @Inject()(
 
   private def makeActivitySave(item: NotificationSave, audienceId: String) =
     ActivitySave(
-      providerId = PROVIDER_ID,
+      providerId = item.providerId,
       `type` = ACTIVITY_TYPE,
       title = item.text,
       url = item.linkHref,
