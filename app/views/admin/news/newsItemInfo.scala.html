@@ -1,5 +1,7 @@
+@import models.publishing.Role
 @import models.news.{AudienceSize, NewsItemRender}
-@(publisher: String, item: NewsItemRender, count: Option[AudienceSize])
+@import models.publishing.Ability.EditNews
+@(publisher: String, item: NewsItemRender, count: Option[AudienceSize], user: Role)
 <article class="news-item">
   <div class="news-item__body">
     <div class="news-item__title">@item.title</div>
@@ -30,12 +32,14 @@
       }
       </div>
 
-    <div class="btn-toolbar pull-right">
-      <a
-      href="@controllers.admin.routes.NewsController.updateForm(publisher, item.id)"
-      class="btn btn-primary"
-      >Edit</a>
-    </div>
-    </div>
+      @if(user can EditNews) {
+        <div class="btn-toolbar pull-right">
+          <a
+          href="@controllers.admin.routes.NewsController.updateForm(publisher, item.id)"
+          class="btn btn-primary"
+          >Edit</a>
+        </div>
+      </div>
+      }
   </div>
 </article>

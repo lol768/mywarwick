@@ -5,7 +5,8 @@ import java.sql.Connection
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Singleton}
-import models.{Publisher, PublisherPermission, PublishingRole}
+import models.publishing.{Publisher, PublisherPermission}
+import models.publishing.PublishingRole
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[PublisherDaoImpl])

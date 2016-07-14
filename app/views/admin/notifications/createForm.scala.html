@@ -1,11 +1,12 @@
 @import system.RequestContext
 @import controllers.admin.NotificationsController.PublishNotificationForm
 
+@import models.publishing.PermissionScope
 @(
     publisher: String,
     form: PublishNotificationForm,
     departmentOptions: Seq[(String, String)],
-    permissionScope: PublisherPermissionScope
+    permissionScope: PermissionScope
 )(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{

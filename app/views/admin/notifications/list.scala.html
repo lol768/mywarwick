@@ -1,12 +1,16 @@
+@import models.publishing.Role
 @import system.RequestContext
-@(publisher: String, notifications: Seq[models.Activity])(implicit context: RequestContext)
+@import models.publishing.Ability.CreateNotifications
+@(publisher: String, notifications: Seq[models.Activity], user: Role)(implicit context: RequestContext)
 
 @common.admin("Notifications") {
-  <p>
-    <a class="btn btn-default" href="@controllers.admin.routes.NotificationsController.createForm(publisher)">
-      Create notification
-    </a>
-  </p>
+  @if(user can CreateNotifications) {
+    <p>
+      <a class="btn btn-default" href="@controllers.admin.routes.NotificationsController.createForm(publisher)">
+        Create notification
+      </a>
+    </p>
+  }
 
   @if(notifications.isEmpty) {
     <p>No notifications.</p>
