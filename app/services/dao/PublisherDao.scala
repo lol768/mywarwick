@@ -19,6 +19,8 @@ trait PublisherDao {
 
   def getPublisherDepartments(publisherId: String)(implicit c: Connection): Seq[String]
 
+  def getPublishersForUser(usercode: Usercode)(implicit c: Connection): Seq[Publisher]
+
 }
 
 @Singleton
@@ -27,6 +29,11 @@ class PublisherDaoImpl extends PublisherDao {
   val publisherParser = str("id") ~ str("name") map { case id ~ name => Publisher(id, name) }
 
   val publisherPermissionParser = str("usercode") ~ str("role") map { case usercode ~ role => PublisherPermission(Usercode(usercode), PublishingRole.withName(role)) }
+
+  override def getPublishersForUser(usercode: Usercode)(implicit c: Connection) =
+    SQL"SELECT DISTINCT PUBLISHER.* FROM PUBLISHER JOIN PUBLISHER_PERMISSION ON PUBLISHER_PERMISSION.PUBLISHER_ID = PUBLISHER.ID WHERE USERCODE = ${usercode.string}"
+      .executeQuery()
+      .as(publisherParser.*)
 
   override def all(implicit c: Connection) =
     SQL"SELECT * FROM PUBLISHER"
