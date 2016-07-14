@@ -67,6 +67,7 @@ class AnormNewsService @Inject()(
   override def updateNewsItem(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String]) =
     db.withTransaction { implicit c =>
       dao.updateNewsItem(id, item)
+      newsCategoryDao.deleteNewsCategories(id)
       newsCategoryDao.saveNewsCategories(id, categoryIds)
 
       val existingAudienceId = dao.getAudienceId(id)
