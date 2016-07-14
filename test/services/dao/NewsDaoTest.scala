@@ -131,6 +131,21 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
       newsDao.countRecipients(Nil) mustBe Map()
     }
 
+    "return value inclusive of user news-category preferences" in transaction { implicit c =>
+      val CATS_ON_FIRE = "cats-on-fire"
+      val londonsBurningWithCat = londonsBurning.copy(ignoreCategories = false)
+      val id = save(londonsBurningWithCat, Seq(ana, eli, jim))
+
+      SQL"INSERT INTO news_category VALUES ($CATS_ON_FIRE, $CATS_ON_FIRE)".execute()
+      userNewsCategoryDao.setSubscribedCategories(ana, Seq(CATS_ON_FIRE))
+      newsCategoryDao.saveNewsCategories(id, Seq(CATS_ON_FIRE))
+
+      val count = newsDao.countRecipients(Seq(id))
+      count mustBe Map(
+        id -> Finite(1)
+      )
+    }
+
     "return results for public and non-public news" in transaction { implicit c =>
       val id1 = save(londonsBurning, Seq(public))
       val id2 = save(brumPanic, Seq(ana, eli))
