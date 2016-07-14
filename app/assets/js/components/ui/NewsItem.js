@@ -16,7 +16,7 @@ export const render = (content) =>
 export default class NewsItem extends ReactComponent {
 
   render() {
-    const { link, title, publishDate, text, imageId, width } = this.props;
+    const { link, title, publishDate, text, imageId, width, categories } = this.props;
     const url = link && link.href;
     const moreLink = link ? (<Hyperlink href={link.href}>{link.text}</Hyperlink>) : null;
 
@@ -43,6 +43,9 @@ export default class NewsItem extends ReactComponent {
           </div>
 
           <div className="news-item__footer">
+            <div className="news-item__category-tags">
+              {categories.map(c => <NewsItemTag key={c.id} name={c.name} />)}
+            </div>
             <p>
               {formatDate(publishDate, new Date(), true)}
             </p>
@@ -53,6 +56,15 @@ export default class NewsItem extends ReactComponent {
     );
   }
 }
+
+const NewsItemTag = props =>
+  <span className="badge">
+    { props.name }
+  </span>;
+
+NewsItemTag.propTypes = {
+  name: React.PropTypes.string.isRequired,
+};
 
 const select = (state) => state.device;
 export default connect(select)(NewsItem);
