@@ -24,9 +24,15 @@
 
     @tags.categoryPicker(form, "categories", categories, "news item")
 
-    @b3.submit(
-      'class -> "btn btn-primary"
-    ) {Update}
+    @b3.free() {
+      <button type="submit" class="btn btn-primary">
+        Update
+      </button>
+      <a href="@controllers.admin.routes.NewsController.list(publisher)" class="btn btn-default">
+        Cancel
+      </a>
+    }
+
   }
   </div>
 }
