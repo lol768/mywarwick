@@ -56,7 +56,7 @@ class PublisherDaoImpl extends PublisherDao {
       .as(scalar[String].*)
 
   override def getParentPublisherId(providerId: String)(implicit c: Connection) =
-    SQL"SELECT p.id FROM publisher p JOIN provider pr ON p.id = pr.publisher_id AND pr.id = $providerId"
+    SQL"SELECT p.id FROM publisher p JOIN provider pr ON p.id = pr.publisher_id WHERE pr.id = $providerId"
     .executeQuery()
     .as(scalar[String].singleOpt)
 

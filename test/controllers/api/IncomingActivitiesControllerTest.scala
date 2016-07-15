@@ -31,7 +31,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
   }
 
   val tabula = "tabula"
-  val tabulaProviderId = Some("tabula")
+  val tabulaPublisherId = "tabulaPublisherId"
   val ron = Users.create(usercode = Usercode("ron"))
 
   val ssoClient = new MockSSOClient(new LoginContext {
@@ -71,9 +71,10 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
 
   "IncomingActivitiesController#postNotification" should {
 
+    when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
+
     "return forbidden when user is not authorised to post on behalf of Publisher" in {
-      when(publisherService.getRolesForUser(tabula, ron.usercode)).thenReturn(Seq(NotificationsManager)) // requires APINotificationsManager role
-      when(publisherService.getParentPublisherId(tabula)).thenReturn(tabulaProviderId)
+      when(publisherService.getRolesForUser(tabulaPublisherId, ron.usercode)).thenReturn(Seq(NotificationsManager)) // requires APINotificationsManager role
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
 
@@ -86,8 +87,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
     }
 
     "return created activity ID on success" in {
-      when(publisherService.getRolesForUser(tabula, ron.usercode)).thenReturn(Seq(APINotificationsManager))
-      when(publisherService.getParentPublisherId(tabula)).thenReturn(tabulaProviderId)
+      when(publisherService.getRolesForUser(Matchers.eq(tabulaPublisherId), any())).thenReturn(Seq(APINotificationsManager))
       when(activityRecipientService.getRecipientUsercodes(Seq(Usercode("someone")), Seq.empty)).thenReturn(Set(Usercode("someone")))
       when(activityService.save(any(), any[Set[Usercode]]())).thenReturn(Right("created-activity-id"))
 
@@ -102,7 +102,6 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
     }
 
     "accept generated_at date in the correct format" in {
-      when(publisherService.getRolesForUser(tabula, ron.usercode)).thenReturn(Seq(APINotificationsManager))
       when(activityRecipientService.getRecipientUsercodes(Seq(Usercode("someone")), Seq.empty)).thenReturn(Set(Usercode("someone")))
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(
@@ -119,8 +118,6 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
     }
 
     "reject an incorrectly-formatted generated_at date" in {
-      when(publisherService.getRolesForUser(tabula, ron.usercode)).thenReturn(Seq(APINotificationsManager))
-      when(publisherService.getParentPublisherId(tabula)).thenReturn(tabulaProviderId)
       when(activityService.save(any(), any[Set[Usercode]]())).thenReturn(Right("created-activity-id"))
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(
@@ -131,7 +128,6 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
     }
 
     "fail for invalid provider id" in {
-      when(publisherService.getRolesForUser(tabula, ron.usercode)).thenReturn(Seq(APINotificationsManager))
       when(publisherService.getParentPublisherId(tabula)).thenReturn(None)
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
@@ -140,15 +136,6 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
       val json = contentAsJson(result)
 
       (json \ "errors" \ 0 \ "message").as[String] mustBe s"No provider found with id '$tabula'"
-    }
-  }
-
-  "IncomingActivitiesController#postItem" should {
-    "find Publisher parent given ProviderId" in {
-      val distinctId = "TABULAR"
-      when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(distinctId))
-      call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
-      verify(publisherService).getRolesForUser(Matchers.eq(distinctId), any())
     }
   }
 }
