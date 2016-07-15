@@ -2,8 +2,9 @@ package controllers.api
 
 import akka.stream.ActorMaterializer
 import helpers.TestActors
-import models.PublishingRole.APINotificationsManager
+import models.PublishingRole.{APINotificationsManager, NotificationsManager}
 import org.mockito.Matchers._
+import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.mock.MockitoSugar
@@ -56,21 +57,22 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
     mock[MessagesApi]
   )
 
-  "ActivitiesController#postNotification" should {
-    val body = Json.obj(
-      "type" -> "due",
-      "title" -> "Coursework due soon",
-      "url" -> "http://tabula.warwick.ac.uk",
-      "text" -> "Your submission for CS118 is due tomorrow",
-      "recipients" -> Json.obj(
-        "users" -> Json.arr(
-          "someone"
-        )
+  val body = Json.obj(
+    "type" -> "due",
+    "title" -> "Coursework due soon",
+    "url" -> "http://tabula.warwick.ac.uk",
+    "text" -> "Your submission for CS118 is due tomorrow",
+    "recipients" -> Json.obj(
+      "users" -> Json.arr(
+        "someone"
       )
     )
+  )
+
+  "IncomingActivitiesController#postNotification" should {
 
     "return forbidden when user is not authorised to post on behalf of Publisher" in {
-      when(publisherService.getRolesForUser(tabula, ron.usercode)).thenReturn(Seq.empty)
+      when(publisherService.getRolesForUser(tabula, ron.usercode)).thenReturn(Seq(NotificationsManager)) // requires APINotificationsManager role
       when(publisherService.getParentPublisherId(tabula)).thenReturn(tabulaProviderId)
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
@@ -126,6 +128,27 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
       ))
 
       status(result) mustBe BAD_REQUEST
+    }
+
+    "fail for invalid provider id" in {
+      when(publisherService.getRolesForUser(tabula, ron.usercode)).thenReturn(Seq(APINotificationsManager))
+      when(publisherService.getParentPublisherId(tabula)).thenReturn(None)
+
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
+
+      status(result) mustBe BAD_REQUEST
+      val json = contentAsJson(result)
+
+      (json \ "errors" \ 0 \ "message").as[String] mustBe s"No provider found with id '$tabula'"
+    }
+  }
+
+  "IncomingActivitiesController#postItem" should {
+    "find Publisher parent given ProviderId" in {
+      val distinctId = "TABULAR"
+      when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(distinctId))
+      call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
+      verify(publisherService).getRolesForUser(Matchers.eq(distinctId), any())
     }
   }
 }
