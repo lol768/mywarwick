@@ -6,7 +6,7 @@ ALTER TABLE PROVIDER ADD FOREIGN KEY ("PUBLISHER_ID") REFERENCES PUBLISHER("ID")
 
 INSERT INTO PUBLISHER (ID, NAME) VALUES ('49b3430d-aeb3-45ee-85f2-e67dd96d90c1', 'ITS Web Publishing');
 UPDATE PROVIDER SET PUBLISHER_ID = '49b3430d-aeb3-45ee-85f2-e67dd96d90c1'
-  WHERE ID IN ('eating', 'hearnow', 'libary', 'photos', 'tabula','websignon', 'coursesync', 'printing');
+  WHERE ID IN ('eating', 'hearnow', 'library', 'photos', 'tabula','websignon', 'coursesync', 'printing');
 
 # --- !Downs
 CREATE TABLE PROVIDER_PERMISSION (

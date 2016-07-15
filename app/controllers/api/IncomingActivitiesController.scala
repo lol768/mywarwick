@@ -11,7 +11,7 @@ import play.api.libs.json._
 import play.api.mvc.Result
 import services.ActivityError.InvalidProviderId
 import services._
-import warwick.sso.{GroupName, User, Usercode, AuthenticatedRequest}
+import warwick.sso.{AuthenticatedRequest, GroupName, User, Usercode}
 
 @Singleton
 class IncomingActivitiesController @Inject()(

@@ -5,17 +5,16 @@ import javax.inject.{Inject, Singleton}
 import controllers.BaseController
 import models.PublishingAbility._
 import models._
-import models.news.{Audience, Link, NewsItemRender, NewsItemSave}
+import models.news.{Link, NewsItemRender, NewsItemSave}
 import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{ActionRefiner, Result, WrappedRequest}
 import services.dao.DepartmentInfoDao
 import services.{NewsCategoryService, NewsService, PublisherService, SecurityService}
 import system.{TimeZones, Validation}
 import uk.ac.warwick.util.web.Uri
-import warwick.sso.{AuthenticatedRequest, Usercode}
+import warwick.sso.Usercode
 
 import scala.concurrent.Future
 

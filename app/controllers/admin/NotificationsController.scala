@@ -3,7 +3,6 @@ package controllers.admin
 import javax.inject.Inject
 
 import controllers.BaseController
-import models.PublishingAbility
 import models.PublishingAbility._
 import models.news.{Audience, NotificationData}
 import play.api.data.Forms._
@@ -11,7 +10,7 @@ import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services._
 import services.dao.DepartmentInfoDao
-import system.{Roles, Validation}
+import system.Validation
 import views.html.admin.{notifications => views}
 
 import scala.concurrent.Future

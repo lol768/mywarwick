@@ -1,7 +1,7 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import models.{PublisherPermissionScope, Publisher, PublishingRole}
+import models.{Publisher, PublisherPermissionScope, PublishingRole}
 import play.api.db.{Database, NamedDatabase}
 import services.dao.PublisherDao
 import warwick.sso.Usercode
