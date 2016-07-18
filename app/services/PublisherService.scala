@@ -17,6 +17,8 @@ trait PublisherService {
 
   def getPermissionScope(publisherId: String): PermissionScope
 
+  def getPublishersForUser(usercode: Usercode): Seq[Publisher]
+
 }
 
 @Singleton
@@ -45,4 +47,5 @@ class PublisherServiceImpl @Inject()(
     }
   }
 
+  override def getPublishersForUser(usercode: Usercode) = db.withConnection(implicit c => dao.getPublishersForUser(usercode))
 }
