@@ -1,9 +1,10 @@
+@import models.publishing.PermissionScope
 @(
     form: Form[_],
     fieldName: String,
     departmentOptions: Seq[(String, String)],
     itemName: String,
-    permissionScope: PublisherPermissionScope,
+    permissionScope: PermissionScope,
     allowPublic: Boolean
 )(implicit fc: b3.B3FieldConstructor, messages: Messages)
 @defining((s"$fieldName.audience", s"$fieldName.department")) { case (audienceField, departmentField) =>
@@ -19,7 +20,7 @@
 
         @for(msg <- info.errorsAndInfos) { <span class="help-block">@msg</span> }
 
-        @if(permissionScope == PublisherPermissionScope.AllDepartments) {
+        @if(permissionScope == PermissionScope.AllDepartments) {
           @if(allowPublic) {
             @tags.seqCheckbox(form, audienceField, 'id -> "public", '_text -> "Everyone (public)", 'value -> "Public")
           }

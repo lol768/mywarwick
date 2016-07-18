@@ -3,19 +3,19 @@ package controllers.admin
 import javax.inject.{Inject, Singleton}
 
 import controllers.BaseController
-import models.PublishingAbility._
-import models._
-import models.news.{Audience, Link, NewsItemRender, NewsItemSave}
+import models.DateFormats
+import models.news.{Link, NewsItemRender, NewsItemSave}
+import models.publishing.Ability._
+import models.publishing.CompoundRole
 import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{ActionRefiner, Result, WrappedRequest}
 import services.dao.DepartmentInfoDao
 import services.{NewsCategoryService, NewsService, PublisherService, SecurityService}
 import system.{TimeZones, Validation}
 import uk.ac.warwick.util.web.Uri
-import warwick.sso.{AuthenticatedRequest, Usercode}
+import warwick.sso.Usercode
 
 import scala.concurrent.Future
 
@@ -90,7 +90,7 @@ class NewsController @Inject()(
     val theNews = news.getNewsByPublisher(publisherId, limit = 100)
     val counts = news.countRecipients(theNews.map(_.id))
     val (newsPending, newsPublished) = partitionNews(theNews)
-    Ok(views.html.admin.news.list(publisherId, newsPending, newsPublished, counts))
+    Ok(views.html.admin.news.list(publisherId, newsPending, newsPublished, counts, request.userRole))
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNews) { implicit request =>

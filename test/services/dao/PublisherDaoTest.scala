@@ -1,10 +1,8 @@
 package services.dao
 
-import anorm.SqlParser._
 import anorm._
-import helpers.{Fixtures, OneStartAppPerSuite}
-import models.PublishedNotificationSave
-import models.PublishingRole.{NewsManager, NotificationsManager}
+import helpers.OneStartAppPerSuite
+import models.publishing.PublishingRole.{NewsManager, NotificationsManager}
 import org.scalatestplus.play.PlaySpec
 import warwick.sso.Usercode
 

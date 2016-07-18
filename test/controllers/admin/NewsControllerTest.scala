@@ -2,9 +2,10 @@ package controllers.admin
 
 import akka.stream.ActorMaterializer
 import helpers.{OneStartAppPerSuite, TestActors}
-import models.PublishingRole.NewsManager
+import models.NewsCategory
 import models.news.Audience
-import models.{NewsCategory, Publisher, PublisherPermissionScope, PublishingRole}
+import models.publishing.PublishingRole.NewsManager
+import models.publishing._
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -54,7 +55,7 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
     "return Forbidden if user has no permission" in {
       when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
-      when(publisherService.getRolesForUser("xyz", custard)).thenReturn(Nil)
+      when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NullRole)
 
       val result = call(newsController.list("xyz"), FakeRequest())
 
@@ -71,7 +72,7 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
     "show a page with no news items" in {
       when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
-      when(publisherService.getRolesForUser("xyz", custard)).thenReturn(Seq(NewsManager))
+      when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
 
       when(newsService.getNewsByPublisher("xyz", 100)).thenReturn(Nil)
 
@@ -89,7 +90,7 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
     "return Forbidden if user does not have Create permission" in {
       when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
-      when(publisherService.getRolesForUser("xyz", custard)).thenReturn(Seq(PublishingRole.Viewer))
+      when(publisherService.getRoleForUser("xyz", custard)).thenReturn(PublishingRole.Viewer)
 
       val result = call(newsController.createForm("xyz"), FakeRequest())
 
@@ -98,8 +99,8 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
     "display news form" in {
       when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
-      when(publisherService.getRolesForUser("xyz", custard)).thenReturn(Seq(NewsManager))
-      when(publisherService.getPermissionScope("xyz")).thenReturn(PublisherPermissionScope.AllDepartments)
+      when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
+      when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.AllDepartments)
 
       val result = call(newsController.createForm("xyz"), FakeRequest())
 
@@ -123,8 +124,8 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
       )
 
       when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
-      when(publisherService.getRolesForUser("xyz", custard)).thenReturn(Seq(NewsManager))
-      when(publisherService.getPermissionScope("xyz")).thenReturn(PublisherPermissionScope.Departments(Seq("IN")))
+      when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
+      when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
 
       val audience = Audience(Seq(Audience.DepartmentAudience("IN", Seq(Audience.Staff))))
       when(audienceBinder.bindAudience(AudienceData(Seq("Dept:Staff"), Some("IN")))).thenReturn(Future.successful(Right(audience)))
@@ -146,8 +147,8 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
       )
 
       when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
-      when(publisherService.getRolesForUser("xyz", custard)).thenReturn(Seq(NewsManager))
-      when(publisherService.getPermissionScope("xyz")).thenReturn(PublisherPermissionScope.Departments(Seq("IN")))
+      when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
+      when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
 
       val result = call(newsController.create("xyz"), FakeRequest("POST", "/").withFormUrlEncodedBody(data: _*))
 
