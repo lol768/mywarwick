@@ -1,4 +1,6 @@
 @import system.RequestContext
+@import models.publishing.Publisher
+
 @(publishers: Seq[Publisher], route: (String) => Call)( implicit context: RequestContext)
 @common.admin("Select Publisher Account") {
 
