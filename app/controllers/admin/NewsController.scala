@@ -6,7 +6,6 @@ import controllers.BaseController
 import models.DateFormats
 import models.news.{Link, NewsItemRender, NewsItemSave}
 import models.publishing.Ability._
-import models.publishing.CompoundRole
 import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
@@ -20,8 +19,6 @@ import warwick.sso.Usercode
 import scala.concurrent.Future
 
 case class PublishNewsItemData(item: NewsItemData, categoryIds: Seq[String], audience: AudienceData)
-
-case class UpdateNewsItemData(item: NewsItemData, categoryIds: Seq[String])
 
 case class NewsItemData(
   title: String,
@@ -81,11 +78,6 @@ class NewsController @Inject()(
     "audience" -> audienceMapping
   )(PublishNewsItemData.apply)(PublishNewsItemData.unapply))
 
-  val updateNewsForm = Form(mapping(
-    "item" -> newsItemMapping,
-    "categories" -> categoryMapping
-  )(UpdateNewsItemData.apply)(UpdateNewsItemData.unapply))
-
   def list(publisherId: String) = PublisherAction(publisherId, ViewNews) { implicit request =>
     val theNews = news.getNewsByPublisher(publisherId, limit = 100)
     val counts = news.countRecipients(theNews.map(_.id))
@@ -131,7 +123,8 @@ class NewsController @Inject()(
   def updateForm(publisher: String, id: String) = PublisherAction(publisher, EditNews) { implicit request =>
     news.getNewsItem(id).map { item =>
       val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
-      val formWithData = updateNewsForm.fill(UpdateNewsItemData(item.toData, categoryIds))
+      val audience = news.getAudience(id).map(audienceBinder.unbindAudience).get
+      val formWithData = publishNewsForm.fill(PublishNewsItemData(item.toData, categoryIds, audience))
 
       Ok(renderUpdateForm(publisher, id, formWithData))
     }.getOrElse {
@@ -139,28 +132,33 @@ class NewsController @Inject()(
     }
   }
 
-  def update(publisherId: String, id: String) = PublisherAction(publisherId, EditNews) { implicit request =>
-    val bound = updateNewsForm.bindFromRequest
+  def update(publisherId: String, id: String) = PublisherAction(publisherId, EditNews).async { implicit request =>
+    val bound = publishNewsForm.bindFromRequest
     bound.fold(
-      errorForm => Ok(renderUpdateForm(publisherId, id, errorForm)),
-      data => {
-        val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
+      errorForm => Future.successful(Ok(renderUpdateForm(publisherId, id, errorForm))),
+      data => audienceBinder.bindAudience(data.audience).map {
+        case Left(errors) =>
+          val errorForm = addFormErrors(bound, errors)
+          Ok(renderUpdateForm(publisherId, id, errorForm))
+        case Right(audience) =>
+          val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
+          val newsItemId = news.update(id, newsItem, audience, data.categoryIds)
 
-        news.updateNewsItem(id, newsItem)
-        newsCategoryService.updateNewsCategories(id, data.categoryIds)
+          auditLog('UpdateNewsItem, 'id -> newsItemId)
 
-        auditLog('UpdateNewsItem, 'id -> id)
-
-        Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("result" -> "News updated")
-      })
+          Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("result" -> "News updated")
+      }
+    )
   }
 
-  def renderUpdateForm(publisherId: String, id: String, form: Form[UpdateNewsItemData])(implicit request: PublisherRequest[_]) = {
+  def renderUpdateForm(publisherId: String, id: String, form: Form[PublishNewsItemData])(implicit request: PublisherRequest[_]) = {
     views.html.admin.news.updateForm(
       publisher = publisherId,
       id = id,
       form = form,
-      categories = categoryOptions
+      categories = categoryOptions,
+      permissionScope = permissionScope,
+      departmentOptions = departmentOptions
     )
   }
 

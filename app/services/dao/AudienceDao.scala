@@ -17,6 +17,8 @@ trait AudienceDao {
   def saveAudience(audience: Audience)(implicit c: Connection): String
 
   def getAudience(audienceId: String)(implicit c: Connection): Audience
+
+  def deleteAudience(audienceId: String)(implicit c: Connection)
 }
 
 class AudienceDaoImpl extends AudienceDao {
@@ -27,6 +29,11 @@ class AudienceDaoImpl extends AudienceDao {
       saveComponent(id, component)
     )
     id
+  }
+
+  override def deleteAudience(audienceId: String)(implicit c: Connection) = {
+    SQL"DELETE FROM AUDIENCE_COMPONENT WHERE AUDIENCE_ID = $audienceId"
+      .execute()
   }
 
   private def saveComponent(id: String, component: AudienceComponentSave)(implicit c: Connection) = {

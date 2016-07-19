@@ -1,11 +1,14 @@
 @import system.RequestContext
-@import controllers.admin.UpdateNewsItemData
+@import controllers.admin.PublishNewsItemData
 @import views.html._
+@import models.publishing.PermissionScope
 @(
     publisher: String,
     id: String,
-    form: Form[UpdateNewsItemData],
-    categories: Seq[NewsCategory]
+    form: Form[PublishNewsItemData],
+    departmentOptions: Seq[(String, String)],
+    categories: Seq[NewsCategory],
+    permissionScope: PermissionScope
 )(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
@@ -18,11 +21,12 @@
 
     @admin.news.contentForm(form)
 
+    @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true)
+
     @tags.categoryPicker(form, "categories", categories, "news item")
 
-    @b3.submit(
-      'class -> "btn btn-primary"
-    ) {Update}
+    @tags.submitOrCancel("Update", controllers.admin.routes.NewsController.list(publisher))
+
   }
   </div>
 }

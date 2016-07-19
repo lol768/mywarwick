@@ -24,9 +24,8 @@
 
     @tags.categoryPicker(form, "categories", categories, "news item")
 
-    @b3.submit(
-      'class -> "btn btn-primary"
-    ) {Create}
+    @tags.submitOrCancel("Create", controllers.admin.routes.NewsController.list(publisher))
+
   }
   </div>
 }
