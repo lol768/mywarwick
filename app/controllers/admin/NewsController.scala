@@ -3,9 +3,9 @@ package controllers.admin
 import javax.inject.{Inject, Singleton}
 
 import controllers.BaseController
-import models.PublishingAbility._
-import models._
+import models.DateFormats
 import models.news.{Link, NewsItemRender, NewsItemSave}
+import models.publishing.Ability._
 import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
@@ -82,7 +82,7 @@ class NewsController @Inject()(
     val theNews = news.getNewsByPublisher(publisherId, limit = 100)
     val counts = news.countRecipients(theNews.map(_.id))
     val (newsPending, newsPublished) = partitionNews(theNews)
-    Ok(views.html.admin.news.list(publisherId, newsPending, newsPublished, counts))
+    Ok(views.html.admin.news.list(publisherId, newsPending, newsPublished, counts, request.userRole))
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNews) { implicit request =>

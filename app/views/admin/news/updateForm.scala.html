@@ -1,13 +1,14 @@
 @import system.RequestContext
 @import controllers.admin.PublishNewsItemData
 @import views.html._
+@import models.publishing.PermissionScope
 @(
     publisher: String,
     id: String,
     form: Form[PublishNewsItemData],
     departmentOptions: Seq[(String, String)],
     categories: Seq[NewsCategory],
-    permissionScope: PublisherPermissionScope
+    permissionScope: PermissionScope
 )(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{

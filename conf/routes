@@ -20,6 +20,9 @@ GET         /admin                                        @controllers.admin.Adm
 GET         /admin/cluster                                @controllers.admin.ClusterStateController.html
 GET         /admin/masquerade                             @controllers.admin.MasqueradeController.masquerade
 
+GET        /admin/news                                    @controllers.admin.PublishersController.news
+GET        /admin/notifications                           @controllers.admin.PublishersController.notifications
+
 GET         /admin/publish/:publisher/news                @controllers.admin.NewsController.list(publisher: String)
 GET         /admin/publish/:publisher/news/new            @controllers.admin.NewsController.createForm(publisher: String)
 POST        /admin/publish/:publisher/news                @controllers.admin.NewsController.create(publisher: String)

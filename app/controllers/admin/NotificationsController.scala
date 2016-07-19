@@ -3,9 +3,8 @@ package controllers.admin
 import javax.inject.Inject
 
 import controllers.BaseController
-import models.PublishingAbility
-import models.PublishingAbility._
 import models.news.{Audience, NotificationData}
+import models.publishing.Ability._
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -49,7 +48,7 @@ class NotificationsController @Inject()(
   def list(publisherId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
     val activities = activityService.getActivitiesByPublisherId(publisherId)
 
-    Ok(views.list(publisherId, activities))
+    Ok(views.list(publisherId, activities, request.userRole))
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNotifications) { implicit request =>
