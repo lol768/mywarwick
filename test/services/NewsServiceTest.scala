@@ -27,7 +27,7 @@ class NewsServiceTest extends PlaySpec with OneStartAppPerSuite {
     "update items" in {
       val id = newsService.save(item, Audience.Public, categoryIds.take(1))
 
-      newsService.updateNewsItem(id, item, staffAudience, categoryIds.take(2))
+      newsService.update(id, item, staffAudience, categoryIds.take(2))
 
       val render = newsService.getNewsItem(id).get
 

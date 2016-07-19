@@ -16,9 +16,10 @@ trait NewsService {
   def getNewsByPublisher(publisherId: String, limit: Int, offset: Int = 0): Seq[NewsItemRender]
 
   def latestNews(user: Option[Usercode], limit: Int): Seq[NewsItemRender]
+
   def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String
 
-  def updateNewsItem(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String])
+  def update(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String])
 
   def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize]
 
@@ -64,7 +65,7 @@ class AnormNewsService @Inject()(
       dao.countRecipients(newsIds)
     }
 
-  override def updateNewsItem(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String]) =
+  override def update(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String]) =
     db.withTransaction { implicit c =>
       dao.updateNewsItem(id, item)
       newsCategoryDao.deleteNewsCategories(id)

@@ -142,7 +142,7 @@ class NewsController @Inject()(
           Ok(renderUpdateForm(publisherId, id, errorForm))
         case Right(audience) =>
           val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
-          val newsItemId = news.updateNewsItem(id, newsItem, audience, data.categoryIds)
+          val newsItemId = news.update(id, newsItem, audience, data.categoryIds)
 
           auditLog('UpdateNewsItem, 'id -> newsItemId)
 
