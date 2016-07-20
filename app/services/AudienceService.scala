@@ -5,6 +5,8 @@ import javax.inject.Inject
 import com.google.inject.ImplementedBy
 import models.news.Audience
 import models.news.Audience._
+import play.api.db.Database
+import services.dao.AudienceDao
 import system.Logging
 import warwick.sso.{GroupName, GroupService, Usercode}
 
@@ -13,10 +15,13 @@ import scala.util.Try
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
   def resolve(audience: Audience): Try[Seq[Usercode]]
+  def getAudience(audienceId: String): Audience
 }
 
 class AudienceServiceImpl @Inject()(
-  groupService: GroupService
+  groupService: GroupService,
+  dao: AudienceDao,
+  db: Database
 ) extends AudienceService with Logging {
 
   // TODO Try.get wrapped with another Try is a weak sauce solution.
@@ -69,5 +74,7 @@ class AudienceServiceImpl @Inject()(
         .getOrElse(Nil)
     }
 
+  override def getAudience(audienceId: String): Audience =
+    db.withConnection(implicit c => dao.getAudience(audienceId))
 }
 

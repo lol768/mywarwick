@@ -34,7 +34,7 @@ trait NewsDao {
   def save(item: NewsItemSave, audienceId: String)(implicit c: Connection): String
 
   // TODO too many args? define an object?
-  def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit
+  def saveRecipients(newsId: String, recipients: Seq[Usercode])(implicit c: Connection): Unit
 
   def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, AudienceSize]
 
@@ -143,8 +143,9 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     id
   }
 
-  override def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
+  override def saveRecipients(newsId: String, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
     // TODO perhaps we shouldn't insert these in sync, as audiences can potentially be 1000s users.
+    val publishDate = SQL"SELECT publish_date FROM news_item WHERE id=$newsId".as(get[DateTime]("publish_date").single)
     recipients.foreach { usercode =>
       SQL"""
         INSERT INTO NEWS_RECIPIENT (news_item_id, usercode, publish_date)

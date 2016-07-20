@@ -69,21 +69,10 @@ class NotificationsController @Inject()(
           case Right(audience) =>
             val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
 
-            notificationPublishingService.publish(notification, audience) match {
-              case Success(Right(activityId)) =>
-                auditLog('CreateNotification, 'id -> activityId)
+            val activityId = notificationPublishingService.publish(notification, audience)
+            auditLog('CreateNotification, 'id -> activityId)
 
-                Redirect(routes.NotificationsController.list(publisherId)).flashing("result" -> "Notification created")
-              case Success(Left(errors)) =>
-                val formWithError = errors.foldLeft(form)((f, error) => f.withGlobalError(error.message))
-
-                Ok(views.createForm(publisherId, formWithError, departmentOptions, permissionScope))
-              case Failure(e) =>
-                logger.error("Failure while creating notification", e)
-                val formWithError = form.withGlobalError("An error occurred creating this notification")
-
-                Ok(views.createForm(publisherId, formWithError, departmentOptions, permissionScope))
-            }
+            Redirect(routes.NotificationsController.list(publisherId)).flashing("result" -> "Notification created")
         }
       }
     )
