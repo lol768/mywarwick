@@ -20,8 +20,8 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
   val activityPrototype = Fixtures.activitySave.submissionDue
 
   val insertSkynetProvider = SQL"""
-        INSERT INTO provider (id, display_name, icon, colour) VALUES
-        ('skynet', 'Skynet', 'eye-o', 'greyish')
+        INSERT INTO provider (id, display_name, icon, colour, publisher_id) VALUES
+        ('skynet', 'Skynet', 'eye-o', 'greyish', '315d3e23-614e-4d5a-b27f-703cdb834c9b')
       """
 
   "ActivityDao" should {

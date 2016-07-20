@@ -1,7 +1,7 @@
 @import models.publishing.Role
 @import system.RequestContext
 @import models.publishing.Ability.CreateNotifications
-@(publisher: String, notifications: Seq[models.Activity], user: Role)(implicit context: RequestContext)
+@(publisher: String, notifications: Seq[models.ActivityResponse], user: Role)(implicit context: RequestContext)
 
 @common.admin("Notifications") {
   @if(user can CreateNotifications) {
@@ -22,15 +22,17 @@
         <div class="activity-item">
           <div class="media">
             <div class="media-left">
-              <i class="app-icon app-icon--lg fa fa-fw fa-newspaper-o"></i>
+              <i class="app-icon app-icon--lg fa fa-fw fa-@item.icon.map(_.name).getOrElse("newspaper-o")"
+                 style="background-color:@item.icon.map(_.colour).getOrElse("#5b3069")">
+              </i>
             </div>
             <div class="media-body">
-              <div class="activity-item__title">@item.title</div>
-              @item.text.map { text =>
+              <div class="activity-item__title">@item.activity.title</div>
+              @item.activity.text.map { text =>
                 <div class="activity-item__text">@text</div>
               }
-              <div class="activity-item__date">@models.DateFormats.emailDateTime(item.createdAt)</div>
-              @item.url.map { url =>
+              <div class="activity-item__date">@models.DateFormats.emailDateTime(item.activity.createdAt)</div>
+              @item.activity.url.map { url =>
                 <a href="@url">Link to @url</a>
               }
             </div>
