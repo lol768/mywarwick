@@ -22,6 +22,7 @@ object PublishingRole extends Enum[PublishingRole] {
 
   case object NewsManager extends RoleWithAbilities(CreateNews, EditNews, ViewNews) with V
   case object NotificationsManager extends RoleWithAbilities(CreateNotifications, ViewNotifications) with V
+  case object APINotificationsManager extends RoleWithAbilities(CreateAPINotifications) // God-like, not limited by Audience scope
   case object Viewer extends RoleWithAbilities(ViewNews, ViewNotifications) with V
 }
 

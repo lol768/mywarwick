@@ -59,8 +59,7 @@ class NotificationsAudienceResolverJob @Inject()(
     messaging.send(recipients.toSet, activity)
     val activityResponse = ActivityResponse(
       activity,
-//      activityService.getActivityIcon(id),
-      None,
+      activityService.getActivityIcon(id),
       Seq.empty
     )
     recipients.foreach(usercode => pubSub.publish(usercode.string, Notification(activityResponse)))

@@ -3,20 +3,16 @@ package services
 import javax.inject.Singleton
 
 import com.google.inject.{ImplementedBy, Inject}
-import models.{ActivitySave, PublishedNotificationSave}
 import models.news.{Audience, NotificationSave}
+import models.{ActivitySave, PublishedNotificationSave}
+import org.quartz.JobBuilder
 import org.quartz.TriggerBuilder._
-import org.quartz.{JobBuilder, Scheduler}
 import play.api.db.{Database, NamedDatabase}
 import services.dao.{ActivityDao, AudienceDao, PublishedNotificationsDao}
-import services.job.{NewsAudienceResolverJob, NotificationsAudienceResolverJob}
+import services.job.NotificationsAudienceResolverJob
 import system.SchedulerProvider
-import warwick.sso.Usercode
-
-import scala.util.Try
 
 object NotificationPublishingService {
-  val PROVIDER_ID = "news"
   val ACTIVITY_TYPE = "news"
 }
 
@@ -38,12 +34,10 @@ class NotificationPublishingServiceImpl @Inject()(
 
   import NotificationPublishingService._
 
-  private val immediateJobTrigger = newTrigger().startNow().build()
-
   def publish(item: NotificationSave, audience: Audience): String = {
     def makeActivitySave(item: NotificationSave, audienceId: String) =
       ActivitySave(
-        providerId = PROVIDER_ID,
+        providerId = item.providerId,
         `type` = ACTIVITY_TYPE,
         title = item.text,
         url = item.linkHref,
