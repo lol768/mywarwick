@@ -2,34 +2,31 @@ package services.job
 
 import actors.WebsocketActor.Notification
 import com.google.inject.Inject
-import models.{Activity, ActivityIcon, ActivityResponse}
+import models.{Activity, ActivityResponse}
 import org.quartz.{Job, JobExecutionContext}
-import play.api.db.Database
-import services.dao.{ActivityTagDao, NewsDao, PublishedNotificationsDao}
 import services.messaging.MessagingService
-import services.{ActivityService, AudienceService, PubSub}
+import services.{ActivityService, AudienceService, NewsService, PubSub}
 import system.Logging
 import warwick.sso.Usercode
 
 class NewsAudienceResolverJob @Inject()(
   audienceService: AudienceService,
-  dao: NewsDao,
-  db: Database
+  newsService: NewsService
 ) extends Job with Logging {
 
-  override def execute(context: JobExecutionContext): Unit = db.withTransaction { implicit c =>
+  override def execute(context: JobExecutionContext): Unit = {
 
     val dataMap = context.getJobDetail.getJobDataMap
     val newsItemId = dataMap.getString("newsItemId")
     val audienceId = dataMap.getString("audienceId")
     val isUpdate = dataMap.getBoolean("isUpdate")
 
-    if (isUpdate) dao.deleteRecipients(newsItemId)
+    if (isUpdate) newsService.deleteRecipients(newsItemId)
 
     val recipients = audienceService.resolve(
       audienceService.getAudience(audienceId)
     ).get // FIXME Try.get throws
-    dao.saveRecipients(newsItemId, recipients)
+    newsService.saveRecipients(newsItemId, recipients)
   }
 }
 

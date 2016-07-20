@@ -6,11 +6,9 @@ import com.google.inject.{ImplementedBy, Inject}
 import models.news.{Audience, NotificationSave}
 import models.{ActivitySave, PublishedNotificationSave}
 import org.quartz.JobBuilder
-import org.quartz.TriggerBuilder._
 import play.api.db.{Database, NamedDatabase}
 import services.dao.{ActivityDao, AudienceDao, PublishedNotificationsDao}
 import services.job.NotificationsAudienceResolverJob
-import system.SchedulerProvider
 
 object NotificationPublishingService {
   val ACTIVITY_TYPE = "news"
@@ -27,7 +25,7 @@ trait NotificationPublishingService {
 class NotificationPublishingServiceImpl @Inject()(
   activityDao: ActivityDao,
   audienceDao: AudienceDao,
-  scheduler: SchedulerProvider,
+  scheduler: ScheduleJobService,
   publishedNotificationsDao: PublishedNotificationsDao,
   @NamedDatabase("default") db: Database
 ) extends NotificationPublishingService {

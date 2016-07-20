@@ -1,9 +1,8 @@
 package system
 
 import java.util.Date
-import javax.inject.Provider
 
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.{Inject, Provider, Singleton}
 import org.quartz.CronScheduleBuilder._
 import org.quartz.JobBuilder._
 import org.quartz.TriggerBuilder._
@@ -18,7 +17,6 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class SchedulerProvider @Inject()(jobFactory: GuiceJobFactory, lifecycle: ApplicationLifecycle) extends Provider[Scheduler] {
 
-  private val immediateJobTrigger = newTrigger().startNow().build()
   val logger = Logger(getClass)
 
   def get(): Scheduler = {
@@ -50,9 +48,6 @@ class SchedulerProvider @Inject()(jobFactory: GuiceJobFactory, lifecycle: Applic
 
     scheduler
   }
-
-  def triggerJobNow(job: JobDetail) =
-    get().scheduleJob(job, immediateJobTrigger)
 
   def configureScheduledJob[SBT <: Trigger](name: String, jobBuilder: JobBuilder, schedule: ScheduleBuilder[SBT])(implicit scheduler: Scheduler): Option[Date] = {
     val jobKey = new JobKey(name)
