@@ -16,24 +16,24 @@ class NewsServiceTest extends PlaySpec with OneStartAppPerSuite {
 
   "NewsService" should {
 
-//    "save items" in {
-//      val id = newsService.save(item, Audience.Public, categoryIds.take(2))
-//
-//      val render = newsService.getNewsItem(id).get
-//
-//      render must have('title (item.title))
-//    }
-//
-//    "update items" in {
-//      val id = newsService.save(item, Audience.Public, categoryIds.take(1))
-//
-//      newsService.update(id, item, staffAudience, categoryIds.take(2))
-//
-//      val render = newsService.getNewsItem(id).get
-//
-//      render.categories.map(_.id) mustBe categoryIds.take(2)
-//      newsService.getAudience(id) must contain(staffAudience)
-//    }
+    "save items" in {
+      val id = newsService.save(item, Audience.Public, categoryIds.take(2))
+
+      val render = newsService.getNewsItem(id).get
+
+      render must have('title (item.title))
+    }
+
+    "update items" in {
+      val id = newsService.save(item, Audience.Public, categoryIds.take(1))
+
+      newsService.update(id, item, staffAudience, categoryIds.take(2))
+
+      val render = newsService.getNewsItem(id).get
+
+      render.categories.map(_.id) mustBe categoryIds.take(2)
+      newsService.getAudience(id) must contain(staffAudience)
+    }
 
   }
 
