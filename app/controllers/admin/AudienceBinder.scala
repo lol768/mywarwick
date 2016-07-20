@@ -3,7 +3,7 @@ package controllers.admin
 import javax.inject.{Inject, Singleton}
 
 import models.news.Audience
-import models.news.Audience.DepartmentAudience
+import models.news.Audience._
 import play.api.data.FormError
 import services.dao.DepartmentInfoDao
 import uk.ac.warwick.util.core.StringUtils
@@ -76,5 +76,24 @@ class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
         }
       }
     }
+  }
+
+  def unbindAudience(audience: Audience): AudienceData = {
+    val department = audience.components.map {
+      case DepartmentAudience(deptCode, _) => Some(deptCode)
+      case _ => None
+    }.find(_.isDefined).flatten
+
+    val components = if (audience.components.isEmpty) {
+      Seq("Public")
+    } else {
+      audience.components.flatMap {
+        case DepartmentAudience(_, subsets) => subsets.map(_.entryName).map("Dept:".concat)
+        case component: Component => Seq(component.entryName)
+        case _ => Seq.empty
+      }
+    }
+
+    AudienceData(components, department)
   }
 }

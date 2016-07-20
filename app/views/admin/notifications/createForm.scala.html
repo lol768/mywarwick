@@ -1,12 +1,13 @@
 @import controllers.admin.NotificationsController.PublishNotificationForm
 @import system.RequestContext
 
+@import models.publishing.PermissionScope
 @(
     publisher: String,
     form: PublishNotificationForm,
     departmentOptions: Seq[(String, String)],
     providerOptions: Seq[(String, String)],
-    permissionScope: PublisherPermissionScope
+    permissionScope: PermissionScope
 )(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
@@ -39,9 +40,8 @@
 
     @tags.audiencePicker(form, "audience", departmentOptions, "notification", permissionScope, allowPublic = false)
 
-    @b3.submit(
-      'class -> "btn btn-primary"
-    ) {Send}
+    @tags.submitOrCancel("Send", controllers.admin.routes.NewsController.list(publisher))
+
   }
   </div>
 }

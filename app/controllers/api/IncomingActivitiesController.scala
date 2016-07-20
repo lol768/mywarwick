@@ -4,8 +4,9 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import controllers.BaseController
-import models.PublishingRole.APINotificationsManager
 import models._
+import models.publishing.Ability.CreateAPINotifications
+import models.publishing.PublishingRole.APINotificationsManager
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json._
 import play.api.mvc.Result
@@ -36,7 +37,7 @@ class IncomingActivitiesController @Inject()(
     publisherService.getParentPublisherId(providerId) match {
       case Some(publisherId) =>
         request.context.user.map { user =>
-          if (publisherService.getRolesForUser(publisherId, user.usercode).contains(APINotificationsManager)) {
+          if (publisherService.getRoleForUser(publisherId, user.usercode).can(CreateAPINotifications)) {
             request.body.validate[IncomingActivityData].map { data =>
               val activity = ActivitySave.fromApi(providerId, shouldNotify, data)
 

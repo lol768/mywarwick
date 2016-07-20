@@ -2,9 +2,9 @@ package controllers.api
 
 import akka.stream.ActorMaterializer
 import helpers.TestActors
-import models.PublishingRole.{APINotificationsManager, NotificationsManager}
-import org.mockito.Matchers._
+import models.publishing.PublishingRole.{APINotificationsManager, NotificationsManager}
 import org.mockito.Matchers
+import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.mock.MockitoSugar
@@ -74,7 +74,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
     when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
 
     "return forbidden when user is not authorised to post on behalf of Publisher" in {
-      when(publisherService.getRolesForUser(tabulaPublisherId, ron.usercode)).thenReturn(Seq(NotificationsManager)) // requires APINotificationsManager role
+      when(publisherService.getRoleForUser(tabulaPublisherId, ron.usercode)).thenReturn(NotificationsManager) // requires APINotificationsManager role
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
 
@@ -87,7 +87,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
     }
 
     "return created activity ID on success" in {
-      when(publisherService.getRolesForUser(Matchers.eq(tabulaPublisherId), any())).thenReturn(Seq(APINotificationsManager))
+      when(publisherService.getRoleForUser(Matchers.eq(tabulaPublisherId), any())).thenReturn(APINotificationsManager)
       when(activityRecipientService.getRecipientUsercodes(Seq(Usercode("someone")), Seq.empty)).thenReturn(Set(Usercode("someone")))
       when(activityService.save(any(), any[Set[Usercode]]())).thenReturn(Right("created-activity-id"))
 

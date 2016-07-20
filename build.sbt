@@ -49,8 +49,8 @@ val appDeps = Seq(
   "com.adrianhurt" %% "play-bootstrap" % "1.0-P25-B3",
   "org.imgscalr" % "imgscalr-lib" % "4.2",
   "com.github.mumoshu" %% "play2-memcached-play24" % "0.7.0",
-  "org.databrary" %% "play-logback-access" % "0.5" exclude("javax.servlet", "servlet-api"),
-  "ch.qos.logback" % "logback-access" % "1.1.4",
+  "org.databrary" %% "play-logback-access" % "0.5.1-warwick",
+  "ch.qos.logback" % "logback-access" % "1.1.7",
   "com.beachape" %% "enumeratum" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play-json" % enumeratumVersion

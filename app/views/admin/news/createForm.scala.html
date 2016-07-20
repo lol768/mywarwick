@@ -1,12 +1,13 @@
 @import controllers.admin.PublishNewsItemData
 @import views.html._
 @import system.RequestContext
+@import models.publishing.PermissionScope
 @(
     publisher: String,
     form: Form[PublishNewsItemData],
     departmentOptions: Seq[(String, String)],
     categories: Seq[NewsCategory],
-    permissionScope: PublisherPermissionScope
+    permissionScope: PermissionScope
 )(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
@@ -23,9 +24,8 @@
 
     @tags.categoryPicker(form, "categories", categories, "news item")
 
-    @b3.submit(
-      'class -> "btn btn-primary"
-    ) {Create}
+    @tags.submitOrCancel("Create", controllers.admin.routes.NewsController.list(publisher))
+
   }
   </div>
 }

@@ -1,7 +1,7 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import models.{Publisher, PublisherPermissionScope, PublishingRole}
+import models.publishing._
 import play.api.db.{Database, NamedDatabase}
 import services.dao.PublisherDao
 import warwick.sso.Usercode
@@ -15,9 +15,11 @@ trait PublisherService {
 
   def find(id: String): Option[Publisher]
 
-  def getRolesForUser(publisherId: String, usercode: Usercode): Seq[PublishingRole]
+  def getRoleForUser(publisherId: String, usercode: Usercode): Role
 
-  def getPermissionScope(publisherId: String): PublisherPermissionScope
+  def getPermissionScope(publisherId: String): PermissionScope
+
+  def getPublishersForUser(usercode: Usercode): Seq[Publisher]
 
   def getParentPublisherId(providerId: String): Option[String]
 
@@ -37,17 +39,17 @@ class PublisherServiceImpl @Inject()(
 
   override def find(id: String) = db.withConnection(implicit c => dao.find(id))
 
-  override def getRolesForUser(publisherId: String, usercode: Usercode) = db.withConnection { implicit c =>
-    dao.getPublisherPermissions(publisherId, usercode).map(_.role)
+  override def getRoleForUser(publisherId: String, usercode: Usercode) = db.withConnection { implicit c =>
+    CompoundRole(dao.getPublisherPermissions(publisherId, usercode).map(_.role))
   }
 
   override def getPermissionScope(publisherId: String) = db.withConnection { implicit c =>
     val departments = dao.getPublisherDepartments(publisherId)
 
     if (departments.contains(AllDepartmentsWildcard)) {
-      PublisherPermissionScope.AllDepartments
+      PermissionScope.AllDepartments
     } else {
-      PublisherPermissionScope.Departments(departments)
+      PermissionScope.Departments(departments)
     }
   }
 
@@ -58,4 +60,5 @@ class PublisherServiceImpl @Inject()(
   override def getProviders(publisherId: String): Seq[Provider] = db.withConnection { implicit c =>
     dao.getProviders(publisherId)
   }
+  override def getPublishersForUser(usercode: Usercode) = db.withConnection(implicit c => dao.getPublishersForUser(usercode))
 }

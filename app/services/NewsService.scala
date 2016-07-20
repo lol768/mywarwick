@@ -11,12 +11,15 @@ import warwick.sso.Usercode
 
 @ImplementedBy(classOf[AnormNewsService])
 trait NewsService {
+  def getAudience(newsId: String): Option[Audience]
+
   def getNewsByPublisher(publisherId: String, limit: Int, offset: Int = 0): Seq[NewsItemRender]
 
   def latestNews(user: Option[Usercode], limit: Int): Seq[NewsItemRender]
+
   def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String
 
-  def updateNewsItem(id: String, item: NewsItemSave): Int
+  def update(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String])
 
   def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize]
 
@@ -48,7 +51,7 @@ class AnormNewsService @Inject()(
   // FIXME: Move audience-resolution and recipient-saving to scheduler
   // and just save audience components to db here
   override def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String =
-    db.withConnection { implicit c =>
+    db.withTransaction { implicit c =>
       val recipients = audienceService.resolve(audience).get // FIXME Try.get throws
       val audienceId = audienceDao.saveAudience(audience)
       val id = dao.save(item, audienceId)
@@ -62,9 +65,32 @@ class AnormNewsService @Inject()(
       dao.countRecipients(newsIds)
     }
 
-  override def updateNewsItem(id: String, item: NewsItemSave): Int =
-    db.withConnection { implicit c =>
+  override def update(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String]) =
+    db.withTransaction { implicit c =>
       dao.updateNewsItem(id, item)
+      newsCategoryDao.deleteNewsCategories(id)
+      newsCategoryDao.saveNewsCategories(id, categoryIds)
+
+      val existingAudienceId = dao.getAudienceId(id)
+      val existingAudience = existingAudienceId.map(audienceDao.getAudience)
+
+      // If the audience has changed
+      if (!existingAudience.contains(audience)) {
+        // Swap the audience associated with the news item
+        val audienceId = audienceDao.saveAudience(audience)
+        dao.setAudienceId(id, audienceId)
+        existingAudienceId.foreach(audienceDao.deleteAudience)
+
+        // Set up the new recipients
+        val recipients = audienceService.resolve(audience).get
+        dao.deleteRecipients(id)
+        dao.saveRecipients(id, item.publishDate, recipients)
+      }
+    }
+
+  override def getAudience(newsId: String) =
+    db.withConnection { implicit c =>
+      dao.getAudienceId(newsId).map(audienceDao.getAudience)
     }
 
   override def getNewsItem(id: String): Option[NewsItemRender] =

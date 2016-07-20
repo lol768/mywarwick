@@ -1,6 +1,6 @@
 package controllers.admin
 
-import models.{Publisher, PublisherPermissionScope, PublishingAbility}
+import models.publishing._
 import play.api.data.Forms._
 import play.api.data.Mapping
 import play.api.mvc.{ActionRefiner, Result, Results}
@@ -27,9 +27,9 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
 
   private def userCanPublishToAudience(data: AudienceData)(implicit publisherRequest: PublisherRequest[_]) = {
     permissionScope match {
-      case PublisherPermissionScope.AllDepartments =>
+      case PermissionScope.AllDepartments =>
         true
-      case PublisherPermissionScope.Departments(deptCodes: Seq[String]) =>
+      case PermissionScope.Departments(deptCodes: Seq[String]) =>
         data.audience.forall(_.startsWith("Dept:")) &&
           data.department.forall(deptCodes.contains)
     }
@@ -68,9 +68,9 @@ trait DepartmentOptions {
 
   def departmentsWithPublishPermission(implicit publisherRequest: PublisherRequest[_]) =
     permissionScope match {
-      case PublisherPermissionScope.AllDepartments =>
+      case PermissionScope.AllDepartments =>
         allPublishableDepartments
-      case PublisherPermissionScope.Departments(deptCodes: Seq[String]) =>
+      case PermissionScope.Departments(deptCodes: Seq[String]) =>
         allPublishableDepartments.filter(dept => deptCodes.contains(dept.code))
     }
 
@@ -99,7 +99,7 @@ trait PublishingActionRefiner {
 
   import securityService._
 
-  private def GetPublisher(id: String, requiredAbilities: Seq[PublishingAbility]) = new ActionRefiner[AuthenticatedRequest, PublisherRequest] {
+  private def GetPublisher(id: String, requiredAbilities: Seq[Ability]) = new ActionRefiner[AuthenticatedRequest, PublisherRequest] {
 
     override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, PublisherRequest[A]]] = {
       implicit val r = request
@@ -107,11 +107,9 @@ trait PublishingActionRefiner {
 
       Future.successful {
         publisherService.find(id).map { publisher =>
-          val userRoles = publisherService.getRolesForUser(id, user.usercode)
-          val can = requiredAbilities.forall(ability => userRoles.exists(_.can(ability)))
-
-          if (can) {
-            Right(new PublisherRequest(publisher, request))
+          val userRole = publisherService.getRoleForUser(id, user.usercode)
+          if (userRole.can(requiredAbilities)) {
+            Right(new PublisherRequest(publisher, userRole, request))
           } else {
             Left(Results.Forbidden(views.html.errors.forbidden(user.name.first)))
           }
@@ -123,10 +121,10 @@ trait PublishingActionRefiner {
 
   }
 
-  def PublisherAction(id: String, requiredAbilities: PublishingAbility*) = RequiredUserAction andThen GetPublisher(id, requiredAbilities)
+  def PublisherAction(id: String, requiredAbilities: Ability*) = RequiredUserAction andThen GetPublisher(id, requiredAbilities)
 
 }
 
-class PublisherRequest[A](val publisher: Publisher, request: AuthenticatedRequest[A])
+class PublisherRequest[A](val publisher: Publisher, val userRole: Role, request: AuthenticatedRequest[A])
   extends AuthenticatedRequest[A](request.context, request.request)
 

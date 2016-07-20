@@ -5,7 +5,8 @@ import java.sql.Connection
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Singleton}
-import models.{Publisher, PublisherPermission, PublishingRole}
+import models.publishing.{Publisher, PublisherPermission}
+import models.publishing.PublishingRole
 import services.Provider
 import warwick.sso.Usercode
 
@@ -19,6 +20,8 @@ trait PublisherDao {
   def getPublisherPermissions(publisherId: String, usercode: Usercode)(implicit c: Connection): Seq[PublisherPermission]
 
   def getPublisherDepartments(publisherId: String)(implicit c: Connection): Seq[String]
+
+  def getPublishersForUser(usercode: Usercode)(implicit c: Connection): Seq[Publisher]
 
   def getParentPublisherId(providerId: String)(implicit c: Connection): Option[String]
 
@@ -34,6 +37,11 @@ class PublisherDaoImpl extends PublisherDao {
   val publisherPermissionParser = str("usercode") ~ str("role") map { case usercode ~ role => PublisherPermission(Usercode(usercode), PublishingRole.withName(role)) }
 
   var providerParser = str("id") ~ str("display_name") map { case id ~ name => Provider(id, name) }
+
+  override def getPublishersForUser(usercode: Usercode)(implicit c: Connection) =
+    SQL"SELECT DISTINCT PUBLISHER.* FROM PUBLISHER JOIN PUBLISHER_PERMISSION ON PUBLISHER_PERMISSION.PUBLISHER_ID = PUBLISHER.ID WHERE USERCODE = ${usercode.string}"
+      .executeQuery()
+      .as(publisherParser.*)
 
   override def all(implicit c: Connection) =
     SQL"SELECT * FROM PUBLISHER"
