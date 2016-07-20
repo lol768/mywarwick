@@ -2,7 +2,7 @@ package services
 
 import actors.WebsocketActor.Notification
 import com.google.inject.{ImplementedBy, Inject}
-import models.{Activity, ActivityResponse, ActivitySave}
+import models.{Activity, ActivityIcon, ActivityResponse, ActivitySave}
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.ActivityError._
@@ -27,6 +27,9 @@ trait ActivityService {
   def getActivitiesByPublisherId(publisherId: String, limit: Int = 50): Seq[Activity]
 
   def getActivitiesByProviderId(providerId: String, limit: Int = 50): Seq[Activity]
+
+  def getActivityIcon(providerId: String): Option[ActivityIcon]
+
 }
 
 class ActivityServiceImpl @Inject()(
@@ -104,6 +107,10 @@ class ActivityServiceImpl @Inject()(
 
   override def getActivitiesByProviderId(providerId: String, limit: Int) =
     db.withConnection(implicit c => dao.getActivitiesByProviderId(providerId, limit))
+
+  override def getActivityIcon(providerId: String): Option[ActivityIcon] =
+    db.withConnection(implicit c => dao.getActivityIcon(providerId))
+
 }
 
 sealed trait ActivityError {

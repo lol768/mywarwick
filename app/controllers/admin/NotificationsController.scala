@@ -3,6 +3,7 @@ package controllers.admin
 import javax.inject.Inject
 
 import controllers.BaseController
+import models.{Activity, ActivityIcon, ActivityResponse}
 import models.news.{Audience, NotificationData}
 import models.publishing.Ability.{CreateNotifications, ViewNotifications}
 import play.api.data.Forms._
@@ -48,6 +49,11 @@ class NotificationsController @Inject()(
 
   def list(publisherId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
     val activities = activityService.getActivitiesByPublisherId(publisherId)
+      .map(activity => ActivityResponse(
+        activity,
+        activityService.getActivityIcon(activity.providerId),
+        Seq.empty
+      ))
 
     Ok(views.list(publisherId, activities, request.userRole))
   }
