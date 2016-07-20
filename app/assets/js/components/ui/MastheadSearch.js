@@ -68,7 +68,7 @@ export default class MastheadSearch extends React.Component {
             attachTo={this.refs.field.refs.input} top={42} left={20}
             width={$(this.refs.field.refs.input).outerWidth() - 1} height={500}
           >
-            <SearchView query={query} />
+            <SearchView query={query} showSearchForm={false} />
           </Popover>
           : null }
       </div>
