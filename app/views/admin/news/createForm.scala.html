@@ -15,7 +15,7 @@
   b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
 }
 
-@common.admin(s"${publisher.name} > Create news") {
+@common.admin(publisher.name, "Create news") {
   <div class="container-fluid">
   @b3.form(action = controllers.admin.routes.NewsController.create(publisher.id)) {
 
