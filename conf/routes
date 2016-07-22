@@ -76,3 +76,6 @@ GET         /photo                                        @controllers.HomeContr
 
 # Handle trailing slashes in URLs
 GET         /*path/                                       @controllers.HomeController.redirectToPath(path: String)
+
+GET         /service/search/*path                         @controllers.SearchController.proxy(path: String)
+POST        /service/search/*path                         @controllers.SearchController.proxy(path: String)
