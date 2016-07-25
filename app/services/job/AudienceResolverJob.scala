@@ -3,18 +3,36 @@ package services.job
 import actors.WebsocketActor.Notification
 import com.google.inject.Inject
 import models.{Activity, ActivityResponse}
-import org.quartz.{Job, JobExecutionContext}
+import org.quartz._
+import services._
 import services.messaging.MessagingService
-import services.{ActivityService, AudienceService, NewsService, PubSub}
 import system.Logging
 import warwick.sso.Usercode
 
+@DisallowConcurrentExecution
+@PersistJobDataAfterExecution
+trait AudienceResolverJob extends Job with Logging {
+
+  val scheduler: ScheduleJobService
+
+  def executeJob(context: JobExecutionContext): Unit
+
+  override def execute(c: JobExecutionContext): Unit =
+    try {
+      executeJob(c)
+    }
+    catch {
+      case e: Exception => scheduler.maybeRetryJob(c, e)
+    }
+}
+
 class NewsAudienceResolverJob @Inject()(
   audienceService: AudienceService,
-  newsService: NewsService
-) extends Job with Logging {
+  newsService: NewsService,
+  override val scheduler: ScheduleJobService
+) extends AudienceResolverJob {
 
-  override def execute(context: JobExecutionContext): Unit = {
+  override def executeJob(context: JobExecutionContext): Unit = {
 
     val dataMap = context.getJobDetail.getJobDataMap
     val newsItemId = dataMap.getString("newsItemId")
@@ -31,10 +49,11 @@ class NotificationsAudienceResolverJob @Inject()(
   audienceService: AudienceService,
   activityService: ActivityService,
   messaging: MessagingService,
-  pubSub: PubSub
-) extends Job with Logging {
+  pubSub: PubSub,
+  override val scheduler: ScheduleJobService
+) extends AudienceResolverJob {
 
-  override def execute(context: JobExecutionContext): Unit = {
+  override def executeJob(context: JobExecutionContext): Unit = {
 
     val dataMap = context.getJobDetail.getJobDataMap
     val activityId = dataMap.getString("activityId")

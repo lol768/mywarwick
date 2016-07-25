@@ -25,6 +25,7 @@ class AudienceResolverJobTest extends PlaySpec with MockitoSugar with OneStartAp
 
   val db = get[Database]
   val audienceService = mock[AudienceService]
+  val scheduler = new MockScheduleJobService
 
   val activityIdKey = "activityId"
   val audienceId = "audienceId"
@@ -56,12 +57,11 @@ class AudienceResolverJobTest extends PlaySpec with MockitoSugar with OneStartAp
     val newsCategoryDao = mock[NewsCategoryDao]
     val audienceDao = mock[AudienceDao]
     val userInitialisationService = mock[UserInitialisationService]
-    val scheduler = new MockScheduleJobService
     val newsService = new AnormNewsService(db, newsDao, audienceService, newsCategoryDao, audienceDao, userInitialisationService, scheduler)
 
     val newsItemId = "newsItemId"
     when(map.getString(newsItemId)).thenReturn(newsItemId)
-    val newsAudienceResolverJob = new NewsAudienceResolverJob(audienceService, newsService)
+    val newsAudienceResolverJob = new NewsAudienceResolverJob(audienceService, newsService, scheduler)
 
     "save audience for news item" in db.withConnection { implicit c =>
 
@@ -86,7 +86,7 @@ class AudienceResolverJobTest extends PlaySpec with MockitoSugar with OneStartAp
     val pubSub = mock[PubSub]
     val activityService = new ActivityServiceImpl(activityDao, creationDao, tagDao, messaging, pubSub, db, activityTypeService)
 
-    val notificationsAudienceResolverJob = new NotificationsAudienceResolverJob(audienceService, activityService, messaging, pubSub)
+    val notificationsAudienceResolverJob = new NotificationsAudienceResolverJob(audienceService, activityService, messaging, pubSub, scheduler)
 
     "save audience for notification" in {
 
