@@ -1,9 +1,9 @@
 @import controllers.admin.NotificationsController.PublishNotificationForm
 @import system.RequestContext
-
 @import models.publishing.PermissionScope
+@import models.publishing.Publisher
 @(
-    publisher: String,
+    publisher: Publisher,
     form: PublishNotificationForm,
     departmentOptions: Seq[(String, String)],
     providerOptions: Seq[(String, String)],
@@ -14,9 +14,9 @@
   b3.vertical.fieldConstructor
 }
 
-@common.admin("Create notification") {
+@common.admin(publisher.name, "Create notification") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NotificationsController.create(publisher)) {
+  @b3.form(action = controllers.admin.routes.NotificationsController.create(publisher.id)) {
 
     @form.globalErrors.map { error =>
       <div class="alert alert-danger">@error.message</div>
@@ -40,7 +40,7 @@
 
     @tags.audiencePicker(form, "audience", departmentOptions, "notification", permissionScope, allowPublic = false)
 
-    @tags.submitOrCancel("Send", controllers.admin.routes.NewsController.list(publisher))
+    @tags.submitOrCancel("Send", controllers.admin.routes.NotificationsController.list(publisher.id))
 
   }
   </div>

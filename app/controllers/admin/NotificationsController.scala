@@ -55,24 +55,24 @@ class NotificationsController @Inject()(
         Seq.empty
       ))
 
-    Ok(views.list(publisherId, activities, request.userRole))
+    Ok(views.list(request.publisher, activities, request.userRole))
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNotifications) { implicit request =>
-    Ok(views.createForm(publisherId, publishNotificationForm, departmentOptions, providerOptions, permissionScope))
+    Ok(views.createForm(request.publisher, publishNotificationForm, departmentOptions, providerOptions, permissionScope))
   }
 
   def create(publisherId: String) = PublisherAction(publisherId, CreateNotifications).async { implicit request =>
     val form = publishNotificationForm.bindFromRequest
 
     form.fold(
-      formWithErrors => Future.successful(Ok(views.createForm(publisherId, formWithErrors, departmentOptions, providerOptions, permissionScope))),
+      formWithErrors => Future.successful(Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope))),
       publish => {
         audienceBinder.bindAudience(publish.audience).map {
           case Left(errors) =>
-            Ok(views.createForm(publisherId, addFormErrors(form, errors), departmentOptions, providerOptions, permissionScope))
+            Ok(views.createForm(request.publisher, addFormErrors(form, errors), departmentOptions, providerOptions, permissionScope))
           case Right(Audience.Public) =>
-            Ok(views.createForm(publisherId, form.withError("audience", "Notifications cannot be public"), departmentOptions, providerOptions, permissionScope))
+            Ok(views.createForm(request.publisher, form.withError("audience", "Notifications cannot be public"), departmentOptions, providerOptions, permissionScope))
           case Right(audience) =>
             val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
 

@@ -2,8 +2,9 @@
 @import controllers.admin.PublishNewsItemData
 @import views.html._
 @import models.publishing.PermissionScope
+@import models.publishing.Publisher
 @(
-    publisher: String,
+    publisher: Publisher,
     id: String,
     form: Form[PublishNewsItemData],
     departmentOptions: Seq[(String, String)],
@@ -15,9 +16,9 @@
   b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
 }
 
-@common.admin("Update news") {
+@common.admin(publisher.name, "Update news") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NewsController.update(publisher, id)) {
+  @b3.form(action = controllers.admin.routes.NewsController.update(publisher.id, id)) {
 
     @admin.news.contentForm(form)
 
@@ -25,7 +26,7 @@
 
     @tags.categoryPicker(form, "categories", categories, "news item")
 
-    @tags.submitOrCancel("Update", controllers.admin.routes.NewsController.list(publisher))
+    @tags.submitOrCancel("Update", controllers.admin.routes.NewsController.list(publisher.id))
 
   }
   </div>

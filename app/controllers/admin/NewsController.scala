@@ -6,6 +6,7 @@ import controllers.BaseController
 import models.publishing.Ability._
 import models._
 import models.news.{Link, NewsItemRender, NewsItemSave}
+import models.publishing.Publisher
 import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
@@ -82,23 +83,23 @@ class NewsController @Inject()(
     val theNews = news.getNewsByPublisher(publisherId, limit = 100)
     val counts = news.countRecipients(theNews.map(_.id))
     val (newsPending, newsPublished) = partitionNews(theNews)
-    Ok(views.html.admin.news.list(publisherId, newsPending, newsPublished, counts, request.userRole))
+    Ok(views.html.admin.news.list(request.publisher, newsPending, newsPublished, counts, request.userRole))
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNews) { implicit request =>
-    Ok(renderCreateForm(publisherId, publishNewsForm))
+    Ok(renderCreateForm(request.publisher, publishNewsForm))
   }
 
   def create(publisherId: String) = PublisherAction(publisherId, CreateNews).async { implicit request =>
     val bound = publishNewsForm.bindFromRequest
     bound.fold(
-      errorForm => Future.successful(Ok(renderCreateForm(publisherId, errorForm))),
+      errorForm => Future.successful(Ok(renderCreateForm(request.publisher, errorForm))),
       // We only show audience validation errors if there were no other errors, which can look weird.
 
       data => audienceBinder.bindAudience(data.audience).map {
         case Left(errors) =>
           val errorForm = addFormErrors(bound, errors)
-          Ok(renderCreateForm(publisherId, errorForm))
+          Ok(renderCreateForm(request.publisher, errorForm))
         case Right(audience) =>
           val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
           val newsItemId = news.save(newsItem, audience, data.categoryIds)
@@ -110,9 +111,9 @@ class NewsController @Inject()(
     )
   }
 
-  def renderCreateForm(publisherId: String, form: Form[PublishNewsItemData])(implicit request: PublisherRequest[_]) = {
+  def renderCreateForm(publisher: Publisher, form: Form[PublishNewsItemData])(implicit request: PublisherRequest[_]) = {
     views.html.admin.news.createForm(
-      publisher = publisherId,
+      publisher = publisher,
       form = form,
       categories = categoryOptions,
       permissionScope = permissionScope,
@@ -153,7 +154,7 @@ class NewsController @Inject()(
 
   def renderUpdateForm(publisherId: String, id: String, form: Form[PublishNewsItemData])(implicit request: PublisherRequest[_]) = {
     views.html.admin.news.updateForm(
-      publisher = publisherId,
+      publisher = request.publisher,
       id = id,
       form = form,
       categories = categoryOptions,

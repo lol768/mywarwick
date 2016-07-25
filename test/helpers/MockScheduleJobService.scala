@@ -7,5 +7,5 @@ import services.ScheduleJobService
 @Singleton
 class MockScheduleJobService extends ScheduleJobService {
   override def triggerJobNow(job: JobDetail): Unit = Nil
-  override def maybeRetryJob(context: JobExecutionContext): Unit = Nil
+  override def maybeRetryJob(c: JobExecutionContext, e: Exception): Unit = Nil
 }
