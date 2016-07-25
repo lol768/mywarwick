@@ -19,14 +19,11 @@ class NewsAudienceResolverJob @Inject()(
     val dataMap = context.getJobDetail.getJobDataMap
     val newsItemId = dataMap.getString("newsItemId")
     val audienceId = dataMap.getString("audienceId")
-    val isUpdate = dataMap.getBoolean("isUpdate")
-
-    if (isUpdate) newsService.deleteRecipients(newsItemId)
 
     val recipients = audienceService.resolve(
       audienceService.getAudience(audienceId)
     ).get // FIXME Try.get throws
-    newsService.saveRecipients(newsItemId, recipients)
+    newsService.setRecipients(newsItemId, recipients)
   }
 }
 

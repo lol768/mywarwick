@@ -26,9 +26,7 @@ trait NewsService {
 
   def getNewsItem(id: String): Option[NewsItemRender]
 
-  def deleteRecipients(newsItemId: String): Unit
-
-  def saveRecipients(newsItemId: String, recipients: Seq[Usercode]): Unit
+  def setRecipients(newsItemId: String, recipients: Seq[Usercode]): Unit
 }
 
 class AnormNewsService @Inject()(
@@ -54,17 +52,13 @@ class AnormNewsService @Inject()(
     }
   }
 
-  private def scheduleResolveAudience(newsId: String, audienceId: String, isUpdate: Boolean = false): Unit =
+  private def scheduleResolveAudience(newsId: String, audienceId: String): Unit =
     scheduler.triggerJobNow(
       JobBuilder.newJob(classOf[NewsAudienceResolverJob])
         .usingJobData("newsItemId", newsId)
         .usingJobData("audienceId", audienceId)
-        .usingJobData("isUpdate", isUpdate)
         .build()
     )
-
-  private def scheduleUpdateAudience(newsId: String, audienceId: String): Unit =
-    scheduleResolveAudience(newsId, audienceId, isUpdate = true)
 
   override def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String =
     db.withTransaction { implicit c =>
@@ -96,7 +90,7 @@ class AnormNewsService @Inject()(
         dao.setAudienceId(id, audienceId)
         existingAudienceId.foreach(audienceDao.deleteAudience)
 
-        scheduleUpdateAudience(id, audienceId)
+        scheduleResolveAudience(id, audienceId)
       }
     }
 
@@ -110,9 +104,11 @@ class AnormNewsService @Inject()(
       dao.getNewsById(id)
     }
 
-  override def deleteRecipients(newsItemId: String) =
-    db.withConnection(implicit c => dao.deleteRecipients(newsItemId))
-
-  override def saveRecipients(newsItemId: String, recipients: Seq[Usercode]) =
-    db.withConnection(implicit c => dao.saveRecipients(newsItemId, recipients))
+  /**
+    * Deletes all the recipients of a news item and replaces them with recipients param
+    * @param newsItemId
+    * @param recipients
+    */
+  override def setRecipients(newsItemId: String, recipients: Seq[Usercode]) =
+    db.withTransaction(implicit c => dao.setRecipients(newsItemId, recipients))
 }
