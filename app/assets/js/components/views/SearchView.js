@@ -1,3 +1,3 @@
-import WarwickSearch from 'warwick-search-frontend';
+import warwickSearch from 'warwick-search-frontend';
 
-export default WarwickSearch('/service/search');
+export default warwickSearch('/service/search');
