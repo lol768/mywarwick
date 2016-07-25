@@ -22,10 +22,10 @@ class ScheduleJobServiceImpl @Inject()(
   config: Configuration
 ) extends ScheduleJobService {
 
-  private val RETRY_TIMES = config.getInt("quartz.default.retryAttempts")
+  private val RETRY_TIMES = config.getInt("quartz.job.retryAttempts")
     .getOrElse(throw new IllegalStateException("Missing Quartz job retry attempt times - set quartz.retryAttempts"))
 
-  private val retryWaitSecs = config.getInt("quartz.default.retryWaitSecs")
+  private val retryWaitSecs = config.getInt("quartz.job.retryWaitSecs")
     .getOrElse(throw new IllegalStateException("Missing Quartz job retry wait time - set quartz.retryWaitSecs"))
 
   private def immediateJobTrigger = newTrigger.startNow.build
@@ -40,7 +40,7 @@ class ScheduleJobServiceImpl @Inject()(
       val trigger = newTrigger.startAt(startTime.toDate).build
       scheduler.rescheduleJob(c.getTrigger.getKey, trigger)
     } else {
-      logger.error(s"Job ${c.getJobDetail.getKey.getName} failed $RETRY_TIMES times", e)
+      logger.error(s"Job ${c.getJobDetail.getJobClass} failed $RETRY_TIMES times", e)
     }
   }
 
