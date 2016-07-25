@@ -3,7 +3,7 @@ package helpers
 import models.news.NewsItemSave
 import models.{Activity, ActivitySave}
 import org.joda.time.DateTime
-import warwick.sso.Usercode
+import warwick.sso._
 
 /**
   * Prebuilt or buildable fake data models for use in tests.
@@ -56,6 +56,17 @@ object Fixtures {
       publisherId = "publisher",
       usercode = Usercode("custard")
     )
+  }
+
+  def mockLoginContext(u: Option[User]) = new LoginContext {
+    override val user: Option[User] = u
+    override val actualUser: Option[User] = None
+
+    override def loginUrl(target: Option[String]): String = "https://app.example.com/login"
+
+    override def userHasRole(role: RoleName) = false
+
+    override def actualUserHasRole(role: RoleName) = false
   }
 
 }
