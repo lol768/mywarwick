@@ -3,18 +3,19 @@
 @import views.html._
 @import models.publishing.Ability.CreateNews
 @import models.publishing.Role
+@import models.publishing.Publisher
 @(
-    publisher: String,
+    publisher: Publisher,
     newsPending: Seq[NewsItemRender],
     newsPublished: Seq[NewsItemRender],
     counts: Map[String, AudienceSize],
     user: Role
 )(implicit context: RequestContext)
 
-  @common.admin("News") {
+  @common.admin(publisher.name, "News") {
     @if(user can CreateNews) {
       <p>
-        <a class="btn btn-default" href="@controllers.admin.routes.NewsController.createForm(publisher)">
+        <a class="btn btn-default" href="@controllers.admin.routes.NewsController.createForm(publisher.id)">
           Create news</a>
       </p>
     }
@@ -24,7 +25,7 @@
       <p>No pending news.</p>
     } else {
       @newsPending.map { item =>
-        @admin.news.newsItemInfo(publisher, item, counts.get(item.id), user)
+        @admin.news.newsItemInfo(publisher.id, item, counts.get(item.id), user)
       }
     }
 
@@ -33,7 +34,7 @@
       <p>No published news.</p>
     } else {
       @newsPublished.map { item =>
-        @admin.news.newsItemInfo(publisher, item, counts.get(item.id), user)
+        @admin.news.newsItemInfo(publisher.id, item, counts.get(item.id), user)
       }
     }
   }
