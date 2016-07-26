@@ -3,7 +3,8 @@ package helpers
 import models.news.NewsItemSave
 import models.{Activity, ActivitySave}
 import org.joda.time.DateTime
-import warwick.sso.Usercode
+import anorm._
+import warwick.sso._
 
 /**
   * Prebuilt or buildable fake data models for use in tests.
@@ -56,6 +57,19 @@ object Fixtures {
       publisherId = "publisher",
       usercode = Usercode("custard")
     )
+  }
+
+  object sql {
+    def insertPublisherPermission(
+      publisherId: String,
+      usercode: String,
+      role: String
+    ) = SQL"INSERT INTO PUBLISHER_PERMISSION (PUBLISHER_ID, USERCODE, ROLE) VALUES ($publisherId, $usercode, $role)"
+
+    def insertActivityType(
+      name: String,
+      displayName: String
+    ) = SQL"INSERT INTO ACTIVITY_TYPE (NAME, DISPLAY_NAME) VALUES ($name, $displayName)"
   }
 
 }
