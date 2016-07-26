@@ -85,7 +85,7 @@
     "redux-thunk": "~2.0.1",
     "reselect": "~2.3.0",
     "skycons": "~1.0.0",
-    "warwick-search-frontend": "git+ssh://git@repo.elab.warwick.ac.uk/sch/omni.git#SEARCH-87"
+    "warwick-search-frontend": "git+ssh://git@repo.elab.warwick.ac.uk/sch/omni.git#a56ecd1"
   },
   "scripts": {
     "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha --compilers js:babel-register -r TestHelper --recursive test/assets/js",
