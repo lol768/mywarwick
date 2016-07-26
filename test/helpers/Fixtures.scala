@@ -3,6 +3,7 @@ package helpers
 import models.news.NewsItemSave
 import models.{Activity, ActivitySave}
 import org.joda.time.DateTime
+import anorm._
 import warwick.sso._
 
 /**
@@ -58,15 +59,17 @@ object Fixtures {
     )
   }
 
-  def mockLoginContext(u: Option[User]) = new LoginContext {
-    override val user: Option[User] = u
-    override val actualUser: Option[User] = None
+  object sql {
+    def insertPublisherPermission(
+      publisherId: String,
+      usercode: String,
+      role: String
+    ) = SQL"INSERT INTO PUBLISHER_PERMISSION (PUBLISHER_ID, USERCODE, ROLE) VALUES ($publisherId, $usercode, $role)"
 
-    override def loginUrl(target: Option[String]): String = "https://app.example.com/login"
-
-    override def userHasRole(role: RoleName) = false
-
-    override def actualUserHasRole(role: RoleName) = false
+    def insertActivityType(
+      name: String,
+      displayName: String
+    ) = SQL"INSERT INTO ACTIVITY_TYPE (NAME, DISPLAY_NAME) VALUES ($name, $displayName)"
   }
 
 }

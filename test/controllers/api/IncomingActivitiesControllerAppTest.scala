@@ -3,17 +3,13 @@ package controllers.api
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import anorm._
-import helpers.Fixtures.mockLoginContext
-import helpers.OneStartAppPerSuite
+import helpers.{Fixtures, OneStartAppPerSuite, TestApplications}
 import org.scalatestplus.play.PlaySpec
-import play.api.cache.CacheApi
 import play.api.db.Database
-import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services._
 import warwick.sso._
 
 class IncomingActivitiesControllerAppTest extends PlaySpec with Results with OneStartAppPerSuite {
@@ -21,24 +17,16 @@ class IncomingActivitiesControllerAppTest extends PlaySpec with Results with One
   implicit val akka = get[ActorSystem]
   implicit val mat = ActorMaterializer()
 
-  val ron = Users.create(usercode = Usercode("ron"))
+  lazy val ron = Users.create(usercode = Usercode("ron"))
 
-  val ssoClient = new MockSSOClient(mockLoginContext(Some(ron)))
+  implicit override lazy val app = TestApplications.full(Some(ron))
 
   get[Database].withConnection { implicit c =>
-    SQL"INSERT INTO PUBLISHER_PERMISSION (PUBLISHER_ID, USERCODE, ROLE) VALUES ('elab', 'ron', 'APINotificationsManager')"
-      .execute()
-    SQL"INSERT INTO ACTIVITY_TYPE (NAME, DISPLAY_NAME) VALUES ('due', 'Coursework due')"
-      .execute()
+    Fixtures.sql.insertPublisherPermission(publisherId = "elab", usercode = "ron", role = "APINotificationsManager").execute()
+    Fixtures.sql.insertActivityType(name = "due", displayName = "Coursework due").execute()
   }
 
-  val controller = new IncomingActivitiesController(
-    new SecurityServiceImpl(ssoClient, get[BasicAuth], get[CacheApi]),
-    get[ActivityService],
-    get[ActivityRecipientService],
-    get[PublisherService],
-    get[MessagesApi]
-  )
+  val controller = get[IncomingActivitiesController]
 
   "IncomingActivitiesController" should {
 
