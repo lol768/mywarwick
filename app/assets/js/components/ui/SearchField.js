@@ -1,4 +1,5 @@
 import React, { PropTypes } from 'react';
+import ReactDOM from 'react-dom';
 
 export default class SearchField extends React.Component {
 
@@ -13,25 +14,23 @@ export default class SearchField extends React.Component {
   onSubmit(e) {
     e.preventDefault(0);
 
-    if (this.props.onSearch && this.hasQuery()) {
+    if (this.props.onSearch) {
       this.props.onSearch(this.value());
     }
   }
 
   onClickSearch() {
-    if (this.props.onSearch && this.hasQuery()) {
+    if (this.props.onSearch) {
       this.props.onSearch(this.value());
     }
+
+    ReactDOM.findDOMNode(this.refs.input).focus();
   }
 
   onChange() {
     if (this.props.onChange) {
       this.props.onChange(this.value());
     }
-  }
-
-  hasQuery() {
-    return this.value().trim().length > 0;
   }
 
   value() {

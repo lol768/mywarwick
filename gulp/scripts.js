@@ -62,7 +62,7 @@ function createBrowserify(options) {
 function bundle(b, outputFile) {
   return b.bundle()
     .on('error', (e) => {
-      gutil.log(gutil.colors.red(e.stack));
+      gutil.log(gutil.colors.red(e.stack || e));
     })
     .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, '..')))
     .pipe(source(outputFile))
