@@ -24,7 +24,8 @@ class SearchController @Inject()(
   val searchRoot = configuration.getString("start.search.root")
     .getOrElse(throw new IllegalStateException("Search root configuration missing - check start.search.root in application.conf"))
 
-  val ExcludedHeaders = Seq(CONTENT_TYPE, CONTENT_LENGTH)
+  val ForwardedHeaders = Seq(CONTENT_TYPE, ACCEPT)
+  val IgnoredReturnHeaders = Seq(CONTENT_TYPE, CONTENT_LENGTH)
 
   def proxy(path: String) = UserAction.async(parse.raw) { implicit request =>
     val url = searchRoot + "/" + Seq(path, request.rawQueryString).filter(_.nonEmpty).mkString("?")
@@ -35,7 +36,7 @@ class SearchController @Inject()(
     ws
       .url(url)
       .withMethod(request.method)
-      .withHeaders(request.headers.toSimpleMap.toSeq: _*)
+      .withHeaders(request.headers.toSimpleMap.filterKeys(ForwardedHeaders.contains).toSeq: _*)
       .withHeaders(trustedHeaders: _*)
       .withBody(body)
       .execute()
@@ -43,7 +44,7 @@ class SearchController @Inject()(
         val contentType = response.header(CONTENT_TYPE).getOrElse("text/html")
 
         val headers = response.allHeaders.collect {
-          case (name, value :: _) if !ExcludedHeaders.contains(name) => name -> value
+          case (name, value :: _) if !IgnoredReturnHeaders.contains(name) => name -> value
         }
 
         Status(response.status)
