@@ -6,8 +6,12 @@ import play.api.Configuration
 import play.api.mvc._
 import services.{PhotoService, SecurityService}
 import system.AppMetrics
+import system.ThreadPools.externalData
+
+import scala.concurrent.Future
 
 case class AnalyticsTrackingID(string: String)
+
 case class SearchRootUrl(string: String)
 
 @Singleton
@@ -33,13 +37,8 @@ class HomeController @Inject()(
 
   def tile(id: String) = index
 
-  def photo = RequiredUserAction { request =>
-    request.context.user.get.universityId.map { id =>
-      val photoUrl = photoService.photo(id)
-      Redirect(photoUrl)
-    }.getOrElse(
-      NotFound
-    )
+  def photo = RequiredUserAction.async { request =>
+    photoService.photoUrl(request.context.user.flatMap(_.universityId)).map(url => Redirect(url))
   }
 
   def redirectToPath(path: String, status: Int = MOVED_PERMANENTLY) = Action { implicit request =>

@@ -2,16 +2,18 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import play.api.libs.json.Json
+import play.api.libs.json.{JsNull, JsString, JsValue, Json}
 import play.api.mvc.{Action, Cookie, DiscardingCookie}
+import services.{PhotoService, UserInitialisationService}
+import system.ThreadPools.externalData
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl.GLOBAL_LOGIN_COOKIE_NAME
 import uk.ac.warwick.sso.client.SSOToken.SSC_TICKET_TYPE
 import uk.ac.warwick.sso.client.cache.UserCache
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import uk.ac.warwick.util.core.StringUtils
 import warwick.sso.{LoginContext, SSOClient}
-import play.api.http.HeaderNames.CACHE_CONTROL
-import services.UserInitialisationService
+
+import scala.concurrent.Future
 
 /**
   * This is some weird SSO stuff for Start, while we're still working out
@@ -24,7 +26,8 @@ class SSOController @Inject()(
   ssoConfig: SSOConfiguration,
   userCache: UserCache,
   ssoClient: SSOClient,
-  userInitialisationService: UserInitialisationService
+  userInitialisationService: UserInitialisationService,
+  photoService: PhotoService
 ) extends BaseController {
 
   import ssoClient.Lenient
@@ -42,7 +45,7 @@ class SSOController @Inject()(
     * the SSC to hang around forever, so instead we check that our local cached copy
     * of the user's session is missing (meaning it probably expired away).
     */
-  def info = Lenient.disallowRedirect { request =>
+  def info = Lenient.disallowRedirect.async { request =>
     val ltc = request.cookies.get(GLOBAL_LOGIN_COOKIE_NAME).filter(hasValue)
     val ssc = request.cookies.get(SSC_NAME).filter(hasValue)
 
@@ -57,14 +60,16 @@ class SSOController @Inject()(
     request.context.user.map(_.usercode)
       .foreach(userInitialisationService.maybeInitialiseUser)
 
-    Ok(Json.obj(
-      "refresh" -> (if (refresh) loginUrl else false),
-      "user" -> contextUserInfo(request.context),
-      "links" -> Json.obj(
-        "login" -> loginUrl,
-        "logout" -> logoutUrl
-      )
-    )).withHeaders(CACHE_CONTROL -> "no-cache")
+    contextUserInfo(request.context).map { userInfo =>
+      Ok(Json.obj(
+        "refresh" -> (if (refresh) loginUrl else false),
+        "user" -> userInfo,
+        "links" -> Json.obj(
+          "login" -> loginUrl,
+          "logout" -> logoutUrl
+        )
+      )).withHeaders(CACHE_CONTROL -> "no-cache")
+    }
   }
 
   def logout = Action { request =>
@@ -75,19 +80,28 @@ class SSOController @Inject()(
     redirect.discardingCookies(DiscardingCookie(SSC_NAME, SSC_PATH, Some(SSC_DOMAIN)))
   }
 
-  private def contextUserInfo(context: LoginContext) =
-    context.user.map(user =>
-      Json.obj(
-        "authenticated" -> true,
-        "usercode" -> user.usercode.string,
-        "name" -> user.name.full,
-        "masquerading" -> context.isMasquerading
-      )
-    ).getOrElse(
-      Json.obj(
-        "authenticated" -> false
+  private def contextUserInfo(context: LoginContext): Future[JsValue] = {
+    context.user.map { user =>
+      photoService.photoUrl(user.universityId)
+        .map { photo =>
+          Json.obj(
+            "authenticated" -> true,
+            "usercode" -> user.usercode.string,
+            "name" -> user.name.full,
+            "masquerading" -> context.isMasquerading,
+            "photo" -> Json.obj(
+              "url" -> photo
+            )
+          )
+        }
+    }.getOrElse(
+      Future.successful(
+        Json.obj(
+          "authenticated" -> false
+        )
       )
     )
+  }
 
   private def hasValue(cookie: Cookie): Boolean =
     StringUtils.hasText(cookie.value)
