@@ -35,7 +35,7 @@ describe('UtilityBar', () => {
     const props = {
       layoutClassName: 'mobile',
       user: {
-        data: { name: 'Ron Swanson', authenticated: true },
+        data: { name: 'Ron Swanson', authenticated: true, photo: { url: 'http://photos/photo/123' } },
         links: { login: '', logout: '' },
       },
     };
