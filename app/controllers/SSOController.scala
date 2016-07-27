@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import play.api.libs.json.{JsNull, JsString, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, Cookie, DiscardingCookie}
 import services.{PhotoService, UserInitialisationService}
 import system.ThreadPools.externalData
@@ -83,6 +83,7 @@ class SSOController @Inject()(
   private def contextUserInfo(context: LoginContext): Future[JsValue] = {
     context.user.map { user =>
       photoService.photoUrl(user.universityId)
+        .recover { case _ => routes.Assets.versioned("images/no-photo.png").toString }
         .map { photo =>
           Json.obj(
             "authenticated" -> true,

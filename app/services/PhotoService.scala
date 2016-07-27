@@ -27,8 +27,6 @@ class PhotoServiceImpl @Inject()(
   val photosKey = configuration.getString("start.photos.apiKey")
     .getOrElse(throw new IllegalStateException("Missing Photos API Key - set start.photos.apiKey"))
 
-  val noPhotoUrl = s"$photosHost/assets/images/no-photo.jpg"
-
   def photoUrl(universityId: Option[UniversityID]): Future[String] = {
     universityId.map { universityId =>
       ws.url(s"$photosHost/start/photo/${hash(universityId)}/${universityId.string}.json?s=60")
@@ -37,10 +35,12 @@ class PhotoServiceImpl @Inject()(
         .map(response => (response.json \ "photo" \ "url").as[String])
         .recover { case e =>
           logger.warn(s"Unable to retrieve photo for ${universityId.string}", e)
-          noPhotoUrl
+          throw e
         }
-    }.getOrElse(Future.successful(noPhotoUrl))
+    }.getOrElse(Future.failed(NoUniversityID))
   }
+
+  object NoUniversityID extends Throwable
 
   private def hash(universityId: UniversityID): String = {
     MessageDigest.getInstance("MD5").digest(s"$photosKey${universityId.string}".getBytes)
