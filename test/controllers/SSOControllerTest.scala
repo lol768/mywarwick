@@ -2,17 +2,22 @@ package controllers
 
 import helpers.Fixtures
 import org.apache.commons.configuration.BaseConfiguration
+import org.mockito.Matchers
+import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.http.HeaderNames
+import play.api.libs.json.JsNull
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import services.UserInitialisationService
+import services.{PhotoService, UserInitialisationService}
 import uk.ac.warwick.sso.client.cache.{UserCache, UserCacheItem}
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import warwick.sso._
+
+import scala.concurrent.Future
 
 class SSOControllerTest extends PlaySpec with MockitoSugar with Results {
   val baseConfig = new BaseConfiguration
@@ -25,11 +30,13 @@ class SSOControllerTest extends PlaySpec with MockitoSugar with Results {
   baseConfig.setProperty("shire.sscookie.path", "/")
   baseConfig.setProperty("shire.sscookie.domain", HOSTNAME)
 
+  val photoService = mock[PhotoService]
+  when(photoService.photoUrl(any())).thenReturn(Future.failed(new Exception))
 
   def controller(user: Option[User] = None) = {
     val loginContext = Fixtures.user.loginContext(user)
     val ssoClient = new MockSSOClient(loginContext)
-    new SSOController(ssoConfig, userCache, ssoClient, mock[UserInitialisationService])
+    new SSOController(ssoConfig, userCache, ssoClient, mock[UserInitialisationService], photoService)
   }
   val LOGIN_URL = "https://signon.example.com/login"
   val LOGOUT_URL = s"https://example.warwick.ac.uk/logout?target=https://$HOSTNAME"
@@ -75,6 +82,23 @@ class SSOControllerTest extends PlaySpec with MockitoSugar with Results {
       (json \ "user" \ "usercode").as[String] mustBe "user"
       (json \ "links" \ "login").as[String] mustBe LOGIN_URL
       (json \ "links" \ "logout").as[String] mustBe LOGOUT_URL
+      (json \ "user" \ "photo" \ "url").as[String] mustBe "/assets/images/no-photo.png"
+    }
+
+    "include photo URL when one is available" in {
+      val ssc = Cookie(name = "Start-SSC", value = "recognised")
+      val key = new SSOToken("recognised", SSOToken.SSC_TICKET_TYPE)
+      // doesn't matter that the cache item is full of nulls, we just check something is returned.
+      when(userCache.get(key)).thenReturn(new UserCacheItem(null, 0, null))
+
+      when(photoService.photoUrl(Some(UniversityID("1234567")))).thenReturn(Future.successful("https://photos/photo/123"))
+
+      val user = Fixtures.user.makeFoundUser()
+      val result = controller(Some(user)).info(FakeRequestWithHost().withCookies(ssc))
+      status(result) must be(200)
+
+      val json = contentAsJson(result)
+      (json \ "user" \ "photo" \ "url").as[String] mustBe "https://photos/photo/123"
     }
   }
 }

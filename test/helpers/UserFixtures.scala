@@ -18,7 +18,7 @@ private[helpers] object UserFixtures {
     )
 
   def makeFoundUser(usercode: String = "user"): User =
-    Users.create(Usercode(usercode), student = true)
+    Users.create(Usercode(usercode), Some(UniversityID("1234567")), student = true)
 
   def makeNotFoundUser(usercode: String = "user"): User =
     Users.create(Usercode(usercode), found = false)

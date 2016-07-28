@@ -72,8 +72,6 @@ POST        /api/push/apns/subscribe                      @controllers.api.APNSP
 POST        /api/push/gcm/subscribe                       @controllers.api.GCMPushNotificationsController.subscribe
 POST        /api/push/gcm/notification                    @controllers.api.GCMPushNotificationsController.fetchPushNotifications
 
-GET         /photo                                        @controllers.HomeController.photo
-
 # Handle trailing slashes in URLs
 GET         /*path/                                       @controllers.HomeController.redirectToPath(path: String)
 

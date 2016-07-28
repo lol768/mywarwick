@@ -12,18 +12,13 @@ import services.{NullSecurityService, PhotoService}
 import system.AppMetrics
 
 class HomeControllerTest extends PlaySpec with MockitoSugar with Results {
-  val ron = Fixtures.user.makeFoundUser("ron")
-  val loginContext = Fixtures.user.loginContext(Option(ron))
-
   val metrics = mock[AppMetrics]
-  val securityService = new NullSecurityService(loginContext)
-  val photoService = mock[PhotoService]
   val configuration = mock[Configuration]
 
   when(configuration.getString("start.analytics.tracking-id")).thenReturn(None)
   when(configuration.getString("start.search.root")).thenReturn(Some("https://search-dev.warwick.ac.uk"))
 
-  val controller = new HomeController(securityService, metrics, photoService, configuration)
+  val controller = new HomeController(metrics, configuration)
 
   "ApplicationController#index" should {
     "render" in {
