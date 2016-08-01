@@ -15,8 +15,8 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Results
 import play.api.test.Helpers._
 import play.api.test._
+import services._
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
-import services.{NewsCategoryService, NewsService, PublisherService, SecurityServiceImpl}
 import warwick.sso._
 
 import scala.concurrent.Future
@@ -37,7 +37,7 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
     override val user: Option[User] = Some(Users.create(custard))
     override val actualUser: Option[User] = user
-  }), mock[BasicAuth], mock[CacheApi])
+  }), mock[BasicAuth], mock[CacheApi], new MockNavigationService())
 
   val publisherService = mock[PublisherService]
   val newsService = mock[NewsService]

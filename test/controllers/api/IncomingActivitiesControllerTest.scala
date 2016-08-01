@@ -50,7 +50,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
   val activityRecipientService = mock[ActivityRecipientService]
 
   val controller = new IncomingActivitiesController(
-    new SecurityServiceImpl(ssoClient, mock[BasicAuth], mock[CacheApi]),
+    new SecurityServiceImpl(ssoClient, mock[BasicAuth], mock[CacheApi], new MockNavigationService()),
     activityService,
     activityRecipientService,
     publisherService,

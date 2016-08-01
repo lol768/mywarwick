@@ -45,7 +45,8 @@ trait SecurityService {
 class SecurityServiceImpl @Inject()(
   val ssoClient: SSOClient,
   val basicAuth: BasicAuth,
-  cache: CacheApi
+  cache: CacheApi,
+  navigationService: NavigationService
 ) extends SecurityService {
 
   import play.api.libs.concurrent.Execution.Implicits._
@@ -103,8 +104,12 @@ class SecurityServiceImpl @Inject()(
   }
 
   implicit def requestContext(implicit request: Request[_]): RequestContext = request match {
-    case req: AuthenticatedRequest[_] => RequestContext.authenticated(ssoClient, req)
-    case _ => RequestContext.anonymous(ssoClient, request)
+    case req: AuthenticatedRequest[_] =>
+      val nav = navigationService.getNavigation(req.context)
+      RequestContext.authenticated(ssoClient, req, nav)
+    case _ =>
+      // Assumes anonymous users have no navigation
+      RequestContext.anonymous(ssoClient, request, Seq.empty)
   }
 
 }

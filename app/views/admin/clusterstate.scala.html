@@ -4,7 +4,6 @@
 @(state: CurrentClusterState, selfAddress: Address)(implicit context: RequestContext)
 
 @common.admin("Cluster State") {
-  <h1>Cluster members</h1>
   @if(state.unreachable.nonEmpty) {
     <div class="alert alert-danger">
       Some nodes are unreachable. The leader will not add any new nodes into the

@@ -49,7 +49,7 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
     override def actualUserHasRole(role: RoleName) = true
   })
 
-  val securityService = new SecurityServiceImpl(ssoClient, mock[BasicAuth], mock[CacheApi])
+  val securityService = new SecurityServiceImpl(ssoClient, mock[BasicAuth], mock[CacheApi], new MockNavigationService())
 
   private val service = mock[NewsImageService]
   private val imageManipulator = mock[NoopImageManipulator]
