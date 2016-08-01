@@ -1,9 +1,8 @@
 package system
 
 import java.util.Date
-import javax.inject.Provider
 
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.{Inject, Provider, Singleton}
 import org.quartz.CronScheduleBuilder._
 import org.quartz.JobBuilder._
 import org.quartz.TriggerBuilder._

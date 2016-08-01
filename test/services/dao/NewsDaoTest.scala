@@ -26,7 +26,7 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
 
   def save(item: NewsItemSave, recipients: Seq[Usercode])(implicit c: Connection): String = {
     val id = newsDao.save(item, "audienceId")
-    newsDao.saveRecipients(id, item.publishDate, recipients)
+    newsDao.setRecipients(id, recipients)
     id
   }
 

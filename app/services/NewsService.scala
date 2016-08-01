@@ -3,10 +3,11 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import controllers.admin.NewsItemData
 import models.news.{Audience, AudienceSize, NewsItemRender, NewsItemSave}
+import org.quartz._
 import play.api.db.Database
-import services.dao.{AudienceDao, NewsDao, NewsCategoryDao}
+import services.dao.{AudienceDao, NewsCategoryDao, NewsDao}
+import services.job.NewsAudienceResolverJob
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[AnormNewsService])
@@ -24,6 +25,8 @@ trait NewsService {
   def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize]
 
   def getNewsItem(id: String): Option[NewsItemRender]
+
+  def setRecipients(newsItemId: String, recipients: Seq[Usercode]): Unit
 }
 
 class AnormNewsService @Inject()(
@@ -32,7 +35,8 @@ class AnormNewsService @Inject()(
   audienceService: AudienceService,
   newsCategoryDao: NewsCategoryDao,
   audienceDao: AudienceDao,
-  userInitialisationService: UserInitialisationService
+  userInitialisationService: UserInitialisationService,
+  scheduler: ScheduleJobService
 ) extends NewsService {
 
   override def getNewsByPublisher(publisherId: String, limit: Int, offset: Int): Seq[NewsItemRender] =
@@ -48,15 +52,20 @@ class AnormNewsService @Inject()(
     }
   }
 
-  // FIXME: Move audience-resolution and recipient-saving to scheduler
-  // and just save audience components to db here
+  private def scheduleResolveAudience(newsId: String, audienceId: String): Unit =
+    scheduler.triggerJobNow(
+      JobBuilder.newJob(classOf[NewsAudienceResolverJob])
+        .usingJobData("newsItemId", newsId)
+        .usingJobData("audienceId", audienceId)
+        .build()
+    )
+
   override def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String =
     db.withTransaction { implicit c =>
-      val recipients = audienceService.resolve(audience).get // FIXME Try.get throws
       val audienceId = audienceDao.saveAudience(audience)
       val id = dao.save(item, audienceId)
-      dao.saveRecipients(id, item.publishDate, recipients)
       newsCategoryDao.saveNewsCategories(id, categoryIds)
+      scheduleResolveAudience(id, audienceId)
       id
     }
 
@@ -81,10 +90,7 @@ class AnormNewsService @Inject()(
         dao.setAudienceId(id, audienceId)
         existingAudienceId.foreach(audienceDao.deleteAudience)
 
-        // Set up the new recipients
-        val recipients = audienceService.resolve(audience).get
-        dao.deleteRecipients(id)
-        dao.saveRecipients(id, item.publishDate, recipients)
+        scheduleResolveAudience(id, audienceId)
       }
     }
 
@@ -97,4 +103,12 @@ class AnormNewsService @Inject()(
     db.withConnection { implicit c =>
       dao.getNewsById(id)
     }
+
+  /**
+    * Deletes all the recipients of a news item and replaces them with recipients param
+    * @param newsItemId
+    * @param recipients
+    */
+  override def setRecipients(newsItemId: String, recipients: Seq[Usercode]) =
+    db.withTransaction(implicit c => dao.setRecipients(newsItemId, recipients))
 }

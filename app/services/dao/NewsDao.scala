@@ -34,7 +34,7 @@ trait NewsDao {
   def save(item: NewsItemSave, audienceId: String)(implicit c: Connection): String
 
   // TODO too many args? define an object?
-  def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit
+  def setRecipients(newsId: String, recipients: Seq[Usercode])(implicit c: Connection): Unit
 
   def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, AudienceSize]
 
@@ -44,8 +44,6 @@ trait NewsDao {
     getNewsByIds(Seq(id)).headOption
 
   def getNewsByIds(ids: Seq[String])(implicit c: Connection): Seq[NewsItemRender]
-
-  def deleteRecipients(id: String)(implicit c: Connection)
 
   def getAudienceId(newsId: String)(implicit c: Connection): Option[String]
 
@@ -143,8 +141,12 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     id
   }
 
-  override def saveRecipients(newsId: String, publishDate: DateTime, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
+  override def setRecipients(newsId: String, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
+
+    deleteRecipients(newsId) // delete existing News item recipients
+
     // TODO perhaps we shouldn't insert these in sync, as audiences can potentially be 1000s users.
+    val publishDate = SQL"SELECT publish_date FROM news_item WHERE id=$newsId".as(get[DateTime]("publish_date").single)
     recipients.foreach { usercode =>
       SQL"""
         INSERT INTO NEWS_RECIPIENT (news_item_id, usercode, publish_date)
@@ -156,7 +158,7 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
   /**
     * Deletes all the recipients of a news item.
     */
-  override def deleteRecipients(id: String)(implicit c: Connection) = {
+  private def deleteRecipients(id: String)(implicit c: Connection) = {
     SQL"DELETE FROM NEWS_RECIPIENT WHERE news_item_id = $id".executeUpdate()
   }
 
