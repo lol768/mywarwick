@@ -10,7 +10,9 @@ import org.quartz._
 import services.job.{APNSInactiveDeviceCleanupJob, MessageSendCleanupJob}
 
 @Singleton
-class SchedulerConfiguration @Inject()(implicit scheduler: Scheduler) extends Logging {
+class SchedulerConfiguration @Inject()(
+  implicit scheduler: Scheduler
+) extends Logging {
 
     configureScheduledJob(
       "MessageSendCleanupJob",
