@@ -3,6 +3,7 @@ package system
 import com.google.inject.multibindings.Multibinder
 import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Provides, TypeLiteral}
+import org.quartz.Scheduler
 import play.api.libs.concurrent.AkkaGuiceSupport
 import services.healthcheck._
 import services.messaging.{EmailOutputService, MobileOutputService, OutputService}
@@ -20,6 +21,9 @@ class AppModule extends AbstractModule with AkkaGuiceSupport {
 
     // Start this up straight away so we always manage the cluster.
     bind(classOf[ClusterLifecycle]).asEagerSingleton()
+
+    // Enables Scheduler for injection. Scheduler.start() happens separately, in SchedulerConfigModule
+    bind(classOf[Scheduler]).toProvider(classOf[SchedulerProvider]).asEagerSingleton()
 
     bindHealthChecks()
   }
