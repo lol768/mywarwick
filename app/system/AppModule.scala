@@ -23,7 +23,7 @@ class AppModule extends AbstractModule with AkkaGuiceSupport {
     bind(classOf[ClusterLifecycle]).asEagerSingleton()
 
     // Enables Scheduler for injection. Scheduler.start() happens separately, in SchedulerConfigModule
-    bind(classOf[Scheduler]).toProvider(classOf[SchedulerProvider]).asEagerSingleton()
+    bind(classOf[Scheduler]).toProvider(classOf[SchedulerProvider])
 
     bindHealthChecks()
   }
