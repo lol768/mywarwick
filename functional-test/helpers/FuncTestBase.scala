@@ -2,6 +2,7 @@ package helpers
 
 import org.openqa.selenium
 import org.openqa.selenium.WebDriver
+import org.openqa.selenium.chrome.ChromeOptions
 import org.scalatest.{Matchers, OptionValues, WordSpec}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures, ScaledTimeSpans}
 import org.scalatestplus.play.{BrowserInfo, WsScalaTestClient}
@@ -47,10 +48,11 @@ abstract class FuncTestBase
 
   // constants you can use e.g. "go to homepage"
   lazy val homepage = PathPage("/")
+  lazy val search = PathPage("/search")
 
   lazy val standardSize = Dimension(1024, 768)
   // virtual dimension
-  lazy val iphone5Size = Dimension(568, 320)
+  lazy val iphone5Size = Dimension(320, 568)
 
   setCaptureDir("target/functional-test/screenshots")
 
