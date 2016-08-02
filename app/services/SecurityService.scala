@@ -7,7 +7,7 @@ import play.api.cache.CacheApi
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc._
-import system.RequestContext
+import system.ImplicitRequestContext
 import warwick.sso._
 
 import scala.concurrent.Future
@@ -33,8 +33,6 @@ trait SecurityService {
 
   def SecureWebsocket[A](request: play.api.mvc.RequestHeader)(block: warwick.sso.LoginContext => TryAccept[A]): TryAccept[A]
 
-  implicit def requestContext(implicit request: Request[_]): RequestContext
-
 }
 
 /**
@@ -43,11 +41,10 @@ trait SecurityService {
   * we can combine actions together here too.
   */
 class SecurityServiceImpl @Inject()(
-  val ssoClient: SSOClient,
+  override val ssoClient: SSOClient,
   val basicAuth: BasicAuth,
-  cache: CacheApi,
-  navigationService: NavigationService
-) extends SecurityService {
+  cache: CacheApi
+) extends SecurityService with ImplicitRequestContext {
 
   import play.api.libs.concurrent.Execution.Implicits._
 
@@ -101,15 +98,6 @@ class SecurityServiceImpl @Inject()(
     }
 
     Forbidden(views.html.errors.forbidden(identity)(requestContext(request)))
-  }
-
-  implicit def requestContext(implicit request: Request[_]): RequestContext = request match {
-    case req: AuthenticatedRequest[_] =>
-      val nav = navigationService.getNavigation(req.context)
-      RequestContext.authenticated(ssoClient, req, nav)
-    case _ =>
-      // Assumes anonymous users have no navigation
-      RequestContext.anonymous(ssoClient, request, Seq.empty)
   }
 
 }

@@ -38,7 +38,7 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
 
   val ron = Users.create(usercode = Usercode("ron"))
 
-  val ssoClient = new MockSSOClient(new LoginContext {
+  val mockSSOClient = new MockSSOClient(new LoginContext {
     override val user: Option[User] = Some(ron)
     override val actualUser: Option[User] = None
 
@@ -49,7 +49,7 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
     override def actualUserHasRole(role: RoleName) = true
   })
 
-  val securityService = new SecurityServiceImpl(ssoClient, mock[BasicAuth], mock[CacheApi], new MockNavigationService())
+  val securityService = new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], mock[CacheApi])
 
   private val service = mock[NewsImageService]
   private val imageManipulator = mock[NoopImageManipulator]
@@ -59,7 +59,10 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
     service,
     imageManipulator,
     cache
-  )
+  ) {
+    override val navigationService = new MockNavigationService()
+    override val ssoClient = mockSSOClient
+  }
 
   val frog = new File("test/resources/frog.jpg")
   val tempFile = File.createTempFile("frog", ".jpg")
