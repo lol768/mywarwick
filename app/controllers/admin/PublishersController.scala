@@ -2,7 +2,6 @@ package controllers.admin
 
 import com.google.inject.Inject
 import controllers.BaseController
-import play.api.mvc.Call
 import services.{PublisherService, SecurityService}
 
 class PublishersController @Inject()(
@@ -12,21 +11,23 @@ class PublishersController @Inject()(
 
   import securityService._
 
-  def notifications = handlePublisherRedirect(routes.NotificationsController.list)
-
-  def news = handlePublisherRedirect(routes.NewsController.list)
-
-  def handlePublisherRedirect(route: (String) => Call) = RequiredUserAction { implicit request =>
+  def index = RequiredUserAction { implicit request =>
     val user = request.context.user.get // RequiredUserAction
 
-    publisherService.getPublishersForUser(user.usercode) match {
-      case Nil =>
-        Forbidden(views.html.errors.forbidden(user.name.first))
-      case Seq(publisher) =>
-        Redirect(route(publisher.id))
-      case publishers =>
-        Ok(views.html.admin.publishers(publishers, route))
-    }
+    val publishers = publisherService.getPublishersForUser(user.usercode)
+
+    Ok(views.html.admin.publishers.index(publishers))
+  }
+
+  def show(publisherId: String) = RequiredUserAction { implicit request =>
+    val user = request.context.user.get // RequiredUserAction
+
+    val publishers = publisherService.getPublishersForUser(user.usercode)
+    val role = publisherService.getRoleForUser(publisherId, user.usercode)
+
+    publishers.find(_.id == publisherId)
+      .map(publisher => Ok(views.html.admin.publishers.show(publisher, role)))
+      .getOrElse(Forbidden(views.html.errors.forbidden(user.name.first)))
   }
 
 }

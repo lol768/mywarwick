@@ -64,8 +64,12 @@
                 @if(title.nonEmpty) {
                   <div class="id7-header-text clearfix">
                     <h1>
-                        <!-- Parent site link often excluded -->
-                      <span class="id7-current-site-link"><a href="/">Start</a></span>
+                      @if(context.path.startsWith(controllers.admin.routes.AdminController.index().toString)) {
+                        <span class="id7-parent-site-link"><a href="/">Start</a></span>
+                        <span class="id7-current-site-link"><a href="@controllers.admin.routes.AdminController.index()">Admin</a></span>
+                      } else {
+                        <span class="id7-current-site-link"><a href="/">Start</a></span>
+                      }
                     </h1>
                   </div>
                 }
@@ -75,7 +79,7 @@
 
             <!-- Docs master nav -->
           <div class="id7-navigation" data-affixHeader="false" data-affixNav="false">
-              <!-- Include the navigation component here if used -->
+            @tags.navigation(context)
           </div>
         </header>
 

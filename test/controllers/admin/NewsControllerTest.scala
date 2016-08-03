@@ -15,8 +15,8 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Results
 import play.api.test.Helpers._
 import play.api.test._
+import services._
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
-import services.{NewsCategoryService, NewsService, PublisherService, SecurityServiceImpl}
 import warwick.sso._
 
 import scala.concurrent.Future
@@ -28,7 +28,7 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
   val custard = Usercode("custard")
 
-  val securityServiceImpl = new SecurityServiceImpl(new MockSSOClient(new LoginContext {
+  val mockSSOClient = new MockSSOClient(new LoginContext {
     override def loginUrl(target: Option[String]) = ""
 
     override def actualUserHasRole(role: RoleName) = false
@@ -37,7 +37,9 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
     override val user: Option[User] = Some(Users.create(custard))
     override val actualUser: Option[User] = user
-  }), mock[BasicAuth], mock[CacheApi])
+  })
+
+  val securityServiceImpl = new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], mock[CacheApi])
 
   val publisherService = mock[PublisherService]
   val newsService = mock[NewsService]
@@ -49,7 +51,10 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
   when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("IN", "IT Services", "IT Services", "ITS", "SERVICE")))
   when(newsCategoryService.all()).thenReturn(Seq(NewsCategory("abc", "Campus")))
 
-  val newsController = new NewsController(securityServiceImpl, publisherService, messagesApi, newsService, departmentInfoDao, audienceBinder, newsCategoryService)
+  val newsController = new NewsController(securityServiceImpl, publisherService, messagesApi, newsService, departmentInfoDao, audienceBinder, newsCategoryService) {
+    override val navigationService = new MockNavigationService()
+    override val ssoClient = mockSSOClient
+  }
 
   "NewsController#list" should {
 

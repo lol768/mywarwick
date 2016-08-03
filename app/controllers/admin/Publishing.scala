@@ -6,11 +6,13 @@ import play.api.data.Mapping
 import play.api.mvc.{ActionRefiner, Result, Results}
 import services.dao.DepartmentInfoDao
 import services.{NewsCategoryService, PublisherService, SecurityService}
+import system.ImplicitRequestContext
 import warwick.sso.AuthenticatedRequest
 
 import scala.concurrent.Future
 
 trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOptions with PublishingActionRefiner {
+  self: ImplicitRequestContext =>
 
   def audienceMapping(implicit publisherRequest: PublisherRequest[_]): Mapping[AudienceData] =
     mapping(
@@ -92,6 +94,7 @@ trait CategoryOptions {
 }
 
 trait PublishingActionRefiner {
+  self: ImplicitRequestContext =>
 
   val publisherService: PublisherService
 

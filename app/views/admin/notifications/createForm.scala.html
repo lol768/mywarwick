@@ -14,7 +14,7 @@
   b3.vertical.fieldConstructor
 }
 
-@common.admin(publisher.name, "Create notification") {
+@common.admin("Create notification") {
   <div class="container-fluid">
   @b3.form(action = controllers.admin.routes.NotificationsController.create(publisher.id)) {
 

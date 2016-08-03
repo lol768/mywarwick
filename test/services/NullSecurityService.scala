@@ -14,5 +14,4 @@ class NullSecurityService(ctx: LoginContext) extends SecurityService {
   override def RequiredRoleAction(role: RoleName) = new NullSecure(ctx)
   override def RequiredActualUserRoleAction(role: RoleName) = new NullSecure(ctx)
   override def SecureWebsocket[A](request: RequestHeader)(block: (LoginContext) => TryAccept[A]): TryAccept[A] = block(ctx)
-  override implicit def requestContext(implicit request: Request[_]) = ???
 }
