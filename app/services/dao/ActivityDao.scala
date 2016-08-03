@@ -101,7 +101,7 @@ class ActivityDaoImpl @Inject()(
       FROM ACTIVITY
       JOIN PUBLISHED_NOTIFICATION ON ACTIVITY.ID = PUBLISHED_NOTIFICATION.ACTIVITY_ID
       WHERE PUBLISHED_NOTIFICATION.PUBLISHER_ID = {publisherId}
-      ORDER BY ACTIVITY.CREATED_AT DESC
+      ORDER BY ACTIVITY.GENERATED_AT DESC
       ${dialect.limitOffset(limit)}
        """)
       .on('publisherId -> publisherId)

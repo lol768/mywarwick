@@ -5,7 +5,7 @@ import javax.inject.Singleton
 import com.google.inject.{ImplementedBy, Inject}
 import models.news.{Audience, NotificationSave}
 import models.{ActivitySave, PublishedNotificationSave}
-import org.quartz.JobBuilder
+import org.quartz.{JobBuilder, Scheduler, TriggerBuilder}
 import play.api.db.{Database, NamedDatabase}
 import services.dao.{ActivityDao, AudienceDao, PublishedNotificationsDao}
 import services.job.NotificationsAudienceResolverJob
@@ -25,7 +25,7 @@ trait NotificationPublishingService {
 class NotificationPublishingServiceImpl @Inject()(
   activityDao: ActivityDao,
   audienceDao: AudienceDao,
-  scheduler: ScheduleJobService,
+  scheduler: Scheduler,
   publishedNotificationsDao: PublishedNotificationsDao,
   @NamedDatabase("default") db: Database
 ) extends NotificationPublishingService {
@@ -40,7 +40,8 @@ class NotificationPublishingServiceImpl @Inject()(
         title = item.text,
         url = item.linkHref,
         shouldNotify = true,
-        audienceId = Some(audienceId)
+        audienceId = Some(audienceId),
+        generatedAt = Some(item.publishDate)
       )
 
     db.withTransaction { implicit c =>
@@ -50,15 +51,21 @@ class NotificationPublishingServiceImpl @Inject()(
       publishedNotificationsDao.save(PublishedNotificationSave(
         activityId = activityId,
         publisherId = item.publisherId,
-        createdBy = item.usercode
+        createdBy = item.usercode,
+        publishedAt = item.publishDate
       ))
 
       val job = JobBuilder.newJob(classOf[NotificationsAudienceResolverJob])
+        .withIdentity(activityId, "ResolveNotificationAudience")
         .usingJobData("activityId", activityId)
         .usingJobData("audienceId", audienceId)
         .build()
 
-      scheduler.triggerJobNow(job)
+      val trigger = TriggerBuilder.newTrigger()
+        .startAt(item.publishDate.toDate)
+        .build()
+
+      scheduler.scheduleJob(job, trigger)
 
       activityId
     }

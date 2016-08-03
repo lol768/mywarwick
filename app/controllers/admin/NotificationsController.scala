@@ -3,9 +3,9 @@ package controllers.admin
 import javax.inject.Inject
 
 import controllers.BaseController
-import models.{Activity, ActivityIcon, ActivityResponse}
 import models.news.{Audience, NotificationData}
 import models.publishing.Ability.{CreateNotifications, ViewNotifications}
+import models.{ActivityResponse, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -15,7 +15,6 @@ import system.Validation
 import views.html.admin.{notifications => views}
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 object NotificationsController {
   type PublishNotificationForm = Form[PublishNotificationData]
@@ -34,12 +33,12 @@ class NotificationsController @Inject()(
   val newsCategoryService: NewsCategoryService
 ) extends BaseController with I18nSupport with Publishing {
 
-  import securityService._
-
   val notificationMapping = mapping(
     "text" -> nonEmptyText,
     "provider" -> nonEmptyText,
-    "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url)
+    "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url),
+    "publishDateSet" -> boolean,
+    "publishDate" -> DateFormats.dateTimeLocalMapping
   )(NotificationData.apply)(NotificationData.unapply)
 
   def publishNotificationForm(implicit request: PublisherRequest[_]) = Form(mapping(
@@ -48,14 +47,15 @@ class NotificationsController @Inject()(
   )(PublishNotificationData.apply)(PublishNotificationData.unapply))
 
   def list(publisherId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
-    val activities = activityService.getActivitiesByPublisherId(publisherId)
+    val (pastNotifications, futureNotifications) = activityService.getActivitiesByPublisherId(publisherId)
       .map(activity => ActivityResponse(
         activity,
         activityService.getActivityIcon(activity.providerId),
         Seq.empty
       ))
+      .partition(_.activity.generatedAt.isBeforeNow)
 
-    Ok(views.list(request.publisher, activities, request.userRole))
+    Ok(views.list(request.publisher, futureNotifications, pastNotifications, request.userRole))
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNotifications) { implicit request =>

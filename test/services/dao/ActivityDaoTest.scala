@@ -136,9 +136,9 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
       val id = get[ActivityDao].save(Fixtures.activitySave.submissionDue, Nil)
       val id2 = get[ActivityDao].save(Fixtures.activitySave.submissionDue, Nil)
 
-      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id, 'publisher-id', 'custard', SYSDATE)"
+      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT, PUBLISHED_AT) VALUES ($id, 'publisher-id', 'custard', SYSDATE, SYSDATE)"
         .execute()
-      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id2, 'publisher-id', 'custard', SYSDATE)"
+      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT, PUBLISHED_AT) VALUES ($id2, 'publisher-id', 'custard', SYSDATE, SYSDATE)"
         .execute()
 
       activityDao.getActivitiesByPublisherId("publisher-id", limit = 100).map(_.id) must contain allOf(id, id2)

@@ -1,11 +1,10 @@
 package services.dao
 
-import java.util.UUID
-
 import anorm.SqlParser._
 import anorm._
 import helpers.{Fixtures, OneStartAppPerSuite}
 import models.PublishedNotificationSave
+import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
 import warwick.sso.Usercode
 
@@ -26,7 +25,8 @@ class PublishedNotificationsDaoTest extends PlaySpec with OneStartAppPerSuite {
       dao.save(PublishedNotificationSave(
         activityId = id,
         publisherId = "publisher-id",
-        createdBy = custard
+        createdBy = custard,
+        publishedAt = DateTime.now
       ))
 
       SQL"SELECT COUNT(*) FROM PUBLISHED_NOTIFICATION WHERE ACTIVITY_ID = $id AND PUBLISHER_ID = 'publisher-id'"
@@ -41,9 +41,9 @@ class PublishedNotificationsDaoTest extends PlaySpec with OneStartAppPerSuite {
       val id = get[ActivityDao].save(Fixtures.activitySave.submissionDue, Nil)
       val id2 = get[ActivityDao].save(Fixtures.activitySave.submissionDue, Nil)
 
-      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id, 'publisher-id', 'custard', SYSDATE)"
+      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT, PUBLISHED_AT) VALUES ($id, 'publisher-id', 'custard', SYSDATE, SYSDATE)"
         .execute()
-      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id2, 'publisher-id', 'custard', SYSDATE)"
+      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT, PUBLISHED_AT) VALUES ($id2, 'publisher-id', 'custard', SYSDATE, SYSDATE)"
         .execute()
 
       val publishedNotifications = dao.getByPublisherId("publisher-id")
