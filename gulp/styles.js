@@ -2,6 +2,7 @@
 
 const gulp = require('gulp');
 const path = require('path');
+const playAssets = require('gulp-play-assets');
 
 const sourcemaps = require('gulp-sourcemaps');
 const less = require('gulp-less');
@@ -45,6 +46,7 @@ gulp.task('styles', () => {
     .pipe(postcss([
       autoprefix({ browsers: 'last 1 version' }),
     ]))
+    .pipe(playAssets())
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.styleOut));
 
