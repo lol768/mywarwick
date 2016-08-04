@@ -10,6 +10,7 @@ const buffer = require('vinyl-buffer');
 const _ = require('lodash');
 const path = require('path');
 const mold = require('mold-source-map');
+const playAssets = require('gulp-play-assets');
 
 const babelify = require('babelify');
 const browserify = require('browserify');
@@ -69,6 +70,7 @@ function bundle(b, outputFile) {
     .pipe(buffer())
     .pipe(sourcemaps.init({ loadMaps: true }))
       .pipe(UGLIFY ? uglify() : gutil.noop())
+    .pipe(playAssets())
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.scriptOut));
 }
@@ -79,17 +81,27 @@ const SCRIPTS = {
   'admin-bundle.js': 'admin.js',
 };
 
-const cachedAssets = _.map([
-  '/css/main.css',
-  '/js/bundle.js',
-  '/lib/id7/fonts/fontawesome-webfont.ttf',
-  '/lib/id7/fonts/fontawesome-webfont.woff',
-  '/lib/id7/images/masthead-logo-bleed-sm*',
-  '/lib/id7/images/masthead-logo-bleed-xs*',
-  '/lib/id7/images/newwindow.gif',
-  '/lib/id7/images/shim.gif',
-  '/lib/id7/js/id7-bundle.min.js',
-], (asset) => `${paths.assetsOut}${asset}`);
+function currentRevisionOf(file) {
+  const dirname = path.dirname(file);
+  const basename = path.basename(file);
+  const md5 = fs.readFileSync(`${paths.assetsOut}/${file}.md5`);
+
+  return `${dirname}/${md5}-${basename}`;
+}
+
+function getCachedAssets() {
+  return _.map([
+    currentRevisionOf('/css/main.css'),
+    currentRevisionOf('/js/bundle.js'),
+    '/lib/id7/fonts/fontawesome-webfont.ttf',
+    '/lib/id7/fonts/fontawesome-webfont.woff',
+    '/lib/id7/images/masthead-logo-bleed-sm*',
+    '/lib/id7/images/masthead-logo-bleed-xs*',
+    '/lib/id7/images/newwindow.gif',
+    '/lib/id7/images/shim.gif',
+    '/lib/id7/js/id7-bundle.min.js',
+  ], (asset) => `${paths.assetsOut}${asset}`);
+}
 
 function cacheName(name) {
   return name.replace('.js', '');
@@ -137,7 +149,7 @@ function generateServiceWorker(watch) {
     handleFetch: OFFLINE_WORKERS,
     staticFileGlobs: [
       'public/**/*',
-    ].concat(cachedAssets),
+    ].concat(getCachedAssets()),
     stripPrefixRegex: '(target/gulp|public)',
     replacePrefix: '/assets',
     ignoreUrlParametersMatching: [/^v$/],
@@ -171,7 +183,7 @@ function generateServiceWorker(watch) {
 function generateAppcache() {
   if (OFFLINE_WORKERS) {
     const cacheableAssets = merge(
-      gulp.src(cachedAssets, { base: paths.assetsOut, }),
+      gulp.src(getCachedAssets(), { base: paths.assetsOut, }),
       gulp.src(['public/**/*'], { base: 'public' })
     );
 
