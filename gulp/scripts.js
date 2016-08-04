@@ -149,7 +149,7 @@ function generateServiceWorker(watch) {
       '/news': jsBundle,
       '/search': jsBundle,
     },
-    maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+    maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
   })
   .then((offlineWorker) => {
     const bopts = browserifyOptions(cacheName('push-worker'), 'push-worker.js');
