@@ -2,7 +2,7 @@ package services
 
 import actors.WebsocketActor.Notification
 import com.google.inject.{ImplementedBy, Inject}
-import models.{Activity, ActivityIcon, ActivityResponse, ActivitySave}
+import models._
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.ActivityError._
@@ -12,6 +12,10 @@ import warwick.sso.{User, Usercode}
 
 @ImplementedBy(classOf[ActivityServiceImpl])
 trait ActivityService {
+  def setPublished(activityId: String): Unit
+
+  def getActivitiesToPublishNow(): Seq[ActivityIdAndAudienceId]
+
   def getActivityById(id: String): Option[Activity]
 
   def getActivitiesForUser(user: User, limit: Int = 50, before: Option[DateTime] = None): Seq[ActivityResponse]
@@ -41,6 +45,12 @@ class ActivityServiceImpl @Inject()(
   @NamedDatabase("default") db: Database,
   activityTypeService: ActivityTypeService
 ) extends ActivityService {
+
+  override def setPublished(activityId: String): Unit =
+    db.withConnection(implicit c => dao.setPublished(activityId))
+
+  override def getActivitiesToPublishNow(): Seq[ActivityIdAndAudienceId] =
+    db.withConnection(implicit c => dao.getActivitiesToPublishNow())
 
   override def getActivityById(id: String): Option[Activity] =
     db.withConnection(implicit c => dao.getActivityById(id))

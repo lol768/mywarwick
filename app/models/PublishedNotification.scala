@@ -7,13 +7,11 @@ case class PublishedNotification(
   activityId: String,
   publisherId: String,
   createdAt: DateTime,
-  createdBy: Usercode,
-  publishedAt: DateTime
+  createdBy: Usercode
 )
 
 case class PublishedNotificationSave(
   activityId: String,
   publisherId: String,
-  createdBy: Usercode,
-  publishedAt: DateTime
+  createdBy: Usercode
 )

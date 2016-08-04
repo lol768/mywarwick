@@ -21,7 +21,7 @@ import warwick.sso.Usercode
 
 import scala.util.Try
 
-class AudienceResolverJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSuite {
+class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSuite {
 
   val db = get[Database]
   val audienceService = mock[AudienceService]
@@ -61,7 +61,7 @@ class AudienceResolverJobTest extends PlaySpec with MockitoSugar with OneStartAp
 
     val newsItemId = "newsItemId"
     when(map.getString(newsItemId)).thenReturn(newsItemId)
-    val newsAudienceResolverJob = new NewsAudienceResolverJob(audienceService, newsService, scheduler)
+    val newsAudienceResolverJob = new PublishNewsItemJob(audienceService, newsService, scheduler)
 
     "save audience for news item" in db.withConnection { implicit c =>
 
@@ -86,7 +86,7 @@ class AudienceResolverJobTest extends PlaySpec with MockitoSugar with OneStartAp
     val pubSub = mock[PubSub]
     val activityService = new ActivityServiceImpl(activityDao, creationDao, tagDao, messaging, pubSub, db, activityTypeService)
 
-    val notificationsAudienceResolverJob = new NotificationsAudienceResolverJob(audienceService, activityService, messaging, pubSub, scheduler)
+    val notificationsAudienceResolverJob = new PublishActivityJob(audienceService, activityService, messaging, pubSub, scheduler)
 
     "save audience for notification" in {
 

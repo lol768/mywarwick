@@ -24,7 +24,7 @@ class PublishedNotificationsDaoImpl extends PublishedNotificationsDao {
 
   override def save(publishedNotification: PublishedNotificationSave)(implicit c: Connection) = {
     import publishedNotification._
-    SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_AT, CREATED_BY, PUBLISHED_AT) VALUES ($activityId, $publisherId, SYSDATE, ${createdBy.string}, $publishedAt)"
+    SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_AT, CREATED_BY) VALUES ($activityId, $publisherId, SYSDATE, ${createdBy.string})"
       .execute()
   }
 
@@ -33,9 +33,9 @@ class PublishedNotificationsDaoImpl extends PublishedNotificationsDao {
       .executeQuery()
       .as(publishedNotificationParser.*)
 
-  val publishedNotificationParser = str("activity_id") ~ str("publisher_id") ~ get[DateTime]("created_at") ~ str("created_by") ~ get[DateTime]("published_at") map {
-    case (activityId ~ publisherId ~ createdAt ~ createdBy ~ publishedAt) =>
-      PublishedNotification(activityId, publisherId, createdAt, Usercode(createdBy), publishedAt)
+  val publishedNotificationParser = str("activity_id") ~ str("publisher_id") ~ get[DateTime]("created_at") ~ str("created_by") map {
+    case (activityId ~ publisherId ~ createdAt ~ createdBy) =>
+      PublishedNotification(activityId, publisherId, createdAt, Usercode(createdBy))
   }
 
 }

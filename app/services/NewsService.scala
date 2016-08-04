@@ -3,15 +3,17 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import models.news.{Audience, AudienceSize, NewsItemRender, NewsItemSave}
-import org.quartz._
+import models.news._
 import play.api.db.Database
 import services.dao.{AudienceDao, NewsCategoryDao, NewsDao}
-import services.job.NewsAudienceResolverJob
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[AnormNewsService])
 trait NewsService {
+  def setPublished(newsItemId: String): Unit
+
+  def getNewsItemsToPublishNow(): Seq[NewsItemIdAndAudienceId]
+
   def getAudience(newsId: String): Option[Audience]
 
   def getNewsByPublisher(publisherId: String, limit: Int, offset: Int = 0): Seq[NewsItemRender]
@@ -39,6 +41,12 @@ class AnormNewsService @Inject()(
   scheduler: ScheduleJobService
 ) extends NewsService {
 
+  override def setPublished(newsItemId: String): Unit =
+    db.withConnection(implicit c => dao.setPublished(newsItemId))
+
+  override def getNewsItemsToPublishNow(): Seq[NewsItemIdAndAudienceId] =
+    db.withConnection(implicit c => dao.getNewsItemsToPublishNow())
+
   override def getNewsByPublisher(publisherId: String, limit: Int, offset: Int): Seq[NewsItemRender] =
     db.withConnection { implicit c =>
       dao.allNews(publisherId, limit, offset)
@@ -52,20 +60,11 @@ class AnormNewsService @Inject()(
     }
   }
 
-  private def scheduleResolveAudience(newsId: String, audienceId: String): Unit =
-    scheduler.triggerJobNow(
-      JobBuilder.newJob(classOf[NewsAudienceResolverJob])
-        .usingJobData("newsItemId", newsId)
-        .usingJobData("audienceId", audienceId)
-        .build()
-    )
-
   override def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String =
     db.withTransaction { implicit c =>
       val audienceId = audienceDao.saveAudience(audience)
       val id = dao.save(item, audienceId)
       newsCategoryDao.saveNewsCategories(id, categoryIds)
-      scheduleResolveAudience(id, audienceId)
       id
     }
 
@@ -89,8 +88,6 @@ class AnormNewsService @Inject()(
         val audienceId = audienceDao.saveAudience(audience)
         dao.setAudienceId(id, audienceId)
         existingAudienceId.foreach(audienceDao.deleteAudience)
-
-        scheduleResolveAudience(id, audienceId)
       }
     }
 

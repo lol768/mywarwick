@@ -11,7 +11,7 @@ import warwick.sso.Usercode
 
 @DisallowConcurrentExecution
 @PersistJobDataAfterExecution
-trait AudienceResolverJob extends Job with Logging {
+trait PublishingJob extends Job with Logging {
 
   val scheduler: ScheduleJobService
 
@@ -26,11 +26,11 @@ trait AudienceResolverJob extends Job with Logging {
     }
 }
 
-class NewsAudienceResolverJob @Inject()(
+class PublishNewsItemJob @Inject()(
   audienceService: AudienceService,
   newsService: NewsService,
   override val scheduler: ScheduleJobService
-) extends AudienceResolverJob {
+) extends PublishingJob {
 
   override def executeJob(context: JobExecutionContext): Unit = {
 
@@ -42,16 +42,18 @@ class NewsAudienceResolverJob @Inject()(
       audienceService.getAudience(audienceId)
     ).get // FIXME Try.get throws
     newsService.setRecipients(newsItemId, recipients)
+
+    newsService.setPublished(newsItemId)
   }
 }
 
-class NotificationsAudienceResolverJob @Inject()(
+class PublishActivityJob @Inject()(
   audienceService: AudienceService,
   activityService: ActivityService,
   messaging: MessagingService,
   pubSub: PubSub,
   override val scheduler: ScheduleJobService
-) extends AudienceResolverJob {
+) extends PublishingJob {
 
   override def executeJob(context: JobExecutionContext): Unit = {
 
@@ -65,6 +67,8 @@ class NotificationsAudienceResolverJob @Inject()(
       activityService.getActivityById(activityId).foreach { activity =>
         saveRecipients(activityId, activity, recipients)
       }
+
+      activityService.setPublished(activityId)
     }
   }
 
