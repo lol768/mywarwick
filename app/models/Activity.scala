@@ -142,8 +142,3 @@ object IncomingActivityData {
   import DateFormats.isoDateReads
   implicit val readsIncomingActivityData = Json.reads[IncomingActivityData]
 }
-
-case class ActivityIdAndAudienceId(
-  activityId: String,
-  audienceId: String
-)

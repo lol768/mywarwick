@@ -12,9 +12,6 @@ import warwick.sso.{User, Usercode}
 
 @ImplementedBy(classOf[ActivityServiceImpl])
 trait ActivityService {
-  def setPublished(activityId: String): Unit
-
-  def getActivitiesToPublishNow(): Seq[ActivityIdAndAudienceId]
 
   def getActivityById(id: String): Option[Activity]
 
@@ -45,12 +42,6 @@ class ActivityServiceImpl @Inject()(
   @NamedDatabase("default") db: Database,
   activityTypeService: ActivityTypeService
 ) extends ActivityService {
-
-  override def setPublished(activityId: String): Unit =
-    db.withConnection(implicit c => dao.setPublished(activityId))
-
-  override def getActivitiesToPublishNow(): Seq[ActivityIdAndAudienceId] =
-    db.withConnection(implicit c => dao.getActivitiesToPublishNow())
 
   override def getActivityById(id: String): Option[Activity] =
     db.withConnection(implicit c => dao.getActivityById(id))

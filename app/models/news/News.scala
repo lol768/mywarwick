@@ -71,8 +71,3 @@ case class NewsItemSave (
   ignoreCategories: Boolean = false
   // TODO publisher
 )
-
-case class NewsItemIdAndAudienceId(
-  newsItemId: String,
-  audienceId: String
-)

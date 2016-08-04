@@ -5,10 +5,9 @@ import java.util.Date
 import com.google.inject.{Inject, Singleton}
 import org.quartz.CronScheduleBuilder._
 import org.quartz.JobBuilder._
-import org.quartz.SimpleScheduleBuilder.repeatMinutelyForever
 import org.quartz.TriggerBuilder._
 import org.quartz._
-import services.job.{APNSInactiveDeviceCleanupJob, MessageSendCleanupJob, PublishPendingItemsJob}
+import services.job.{APNSInactiveDeviceCleanupJob, MessageSendCleanupJob}
 
 @Singleton
 class SchedulerConfiguration @Inject()(
@@ -25,12 +24,6 @@ class SchedulerConfiguration @Inject()(
     "APNSInactiveDeviceCleanupJob",
     newJob(classOf[APNSInactiveDeviceCleanupJob]),
     dailyAtHourAndMinute(1, 30)
-  )
-
-  configureScheduledJob(
-    "PublishPendingItemsJob",
-    newJob(classOf[PublishPendingItemsJob]),
-    repeatMinutelyForever()
   )
 
   scheduler.start()

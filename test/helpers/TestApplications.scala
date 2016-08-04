@@ -1,5 +1,7 @@
 package helpers
 
+import org.quartz.Scheduler
+import org.scalatest.mock.MockitoSugar
 import play.api.db.evolutions.{ClassLoaderEvolutionsReader, EvolutionsReader}
 import play.api.inject._
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -11,7 +13,7 @@ import system.{DatabaseDialect, H2DatabaseDialect}
 import warwick.sso._
 
 
-object TestApplications {
+object TestApplications extends MockitoSugar {
 
   def testConfig(environment: Environment) =
     config("test.conf", environment)
@@ -47,7 +49,8 @@ object TestApplications {
       .overrides(
         bind[SSOClient].to[MockSSOClient],
         bind[DatabaseDialect].to[H2DatabaseDialect],
-        bind[ScheduleJobService].to[MockScheduleJobService],
+        bind[ScheduleJobService].toInstance(mock[ScheduleJobService]),
+        bind[Scheduler].toInstance(mock[Scheduler]),
 
         // Allows putting test versions of migrations under test/resources/evolutions/default
         bind[EvolutionsReader].toInstance(new ClassLoaderEvolutionsReader())

@@ -42,8 +42,6 @@ class PublishNewsItemJob @Inject()(
       audienceService.getAudience(audienceId)
     ).get // FIXME Try.get throws
     newsService.setRecipients(newsItemId, recipients)
-
-    newsService.setPublished(newsItemId)
   }
 }
 
@@ -67,8 +65,6 @@ class PublishActivityJob @Inject()(
       activityService.getActivityById(activityId).foreach { activity =>
         saveRecipients(activityId, activity, recipients)
       }
-
-      activityService.setPublished(activityId)
     }
   }
 

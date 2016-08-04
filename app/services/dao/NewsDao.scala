@@ -8,7 +8,7 @@ import anorm.SqlParser._
 import anorm._
 import com.google.inject.ImplementedBy
 import models.NewsCategory
-import models.news._
+import models.news.{AudienceSize, Link, NewsItemRender, NewsItemSave}
 import org.joda.time.DateTime
 import system.DatabaseDialect
 import uk.ac.warwick.util.web.Uri
@@ -18,9 +18,6 @@ import warwick.sso.Usercode
 
 @ImplementedBy(classOf[AnormNewsDao])
 trait NewsDao {
-  def setPublished(newsItemId: String)(implicit c: Connection): Unit
-
-  def getNewsItemsToPublishNow()(implicit c: Connection): Seq[NewsItemIdAndAudienceId]
 
   /**
     * All the news, all the time. This is probably only useful for sysadmins and maybe Comms.
@@ -82,22 +79,6 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     val category = for (id <- newsCategoryId; name <- newsCategoryName) yield NewsCategory(id, name)
 
     NewsItemRender(id, title, text, link, publishDate, imageId, category.toSeq, ignoreCategories)
-  }
-
-  val newsItemIdAndAudienceIdParser = for {
-    newsItemId <- str("id")
-    audienceId <- str("audience_id")
-  } yield NewsItemIdAndAudienceId(newsItemId, audienceId)
-
-  override def setPublished(newsItemId: String)(implicit c: Connection): Unit = {
-    SQL"UPDATE NEWS_ITEM SET PUBLISHED_AT = SYSDATE WHERE ID = $newsItemId"
-      .execute()
-  }
-
-  override def getNewsItemsToPublishNow()(implicit c: Connection): Seq[NewsItemIdAndAudienceId] = {
-    SQL"SELECT ID, AUDIENCE_ID FROM NEWS_ITEM WHERE PUBLISH_DATE <= SYSDATE AND PUBLISHED_AT IS NULL AND AUDIENCE_ID IS NOT NULL"
-      .executeQuery()
-      .as(newsItemIdAndAudienceIdParser.*)
   }
 
   override def allNews(publisherId: String, limit: Int, offset: Int)(implicit c: Connection): Seq[NewsItemRender] = {

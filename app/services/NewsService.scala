@@ -3,17 +3,16 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import models.news._
+import models.news.{Audience, AudienceSize, NewsItemRender, NewsItemSave}
+import org.joda.time.DateTime
+import org.quartz._
 import play.api.db.Database
 import services.dao.{AudienceDao, NewsCategoryDao, NewsDao}
+import services.job.PublishNewsItemJob
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[AnormNewsService])
 trait NewsService {
-  def setPublished(newsItemId: String): Unit
-
-  def getNewsItemsToPublishNow(): Seq[NewsItemIdAndAudienceId]
-
   def getAudience(newsId: String): Option[Audience]
 
   def getNewsByPublisher(publisherId: String, limit: Int, offset: Int = 0): Seq[NewsItemRender]
@@ -38,14 +37,8 @@ class AnormNewsService @Inject()(
   newsCategoryDao: NewsCategoryDao,
   audienceDao: AudienceDao,
   userInitialisationService: UserInitialisationService,
-  scheduler: ScheduleJobService
+  scheduler: Scheduler
 ) extends NewsService {
-
-  override def setPublished(newsItemId: String): Unit =
-    db.withConnection(implicit c => dao.setPublished(newsItemId))
-
-  override def getNewsItemsToPublishNow(): Seq[NewsItemIdAndAudienceId] =
-    db.withConnection(implicit c => dao.getNewsItemsToPublishNow())
 
   override def getNewsByPublisher(publisherId: String, limit: Int, offset: Int): Seq[NewsItemRender] =
     db.withConnection { implicit c =>
@@ -60,11 +53,31 @@ class AnormNewsService @Inject()(
     }
   }
 
+  private def schedulePublishNewsItem(newsId: String, audienceId: String, publishDate: DateTime): Unit = {
+    val key = new JobKey(newsId, "PublishNewsItem")
+
+    // Delete any existing job that would publish the same news item
+    scheduler.deleteJob(key)
+
+    val job = JobBuilder.newJob(classOf[PublishNewsItemJob])
+      .withIdentity(key)
+      .usingJobData("newsItemId", newsId)
+      .usingJobData("audienceId", audienceId)
+      .build()
+
+    val trigger = TriggerBuilder.newTrigger()
+      .startAt(publishDate.toDate)
+      .build()
+
+    scheduler.scheduleJob(job, trigger)
+  }
+
   override def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String =
     db.withTransaction { implicit c =>
       val audienceId = audienceDao.saveAudience(audience)
       val id = dao.save(item, audienceId)
       newsCategoryDao.saveNewsCategories(id, categoryIds)
+      schedulePublishNewsItem(id, audienceId, item.publishDate)
       id
     }
 
@@ -82,13 +95,23 @@ class AnormNewsService @Inject()(
       val existingAudienceId = dao.getAudienceId(id)
       val existingAudience = existingAudienceId.map(audienceDao.getAudience)
 
-      // If the audience has changed
-      if (!existingAudience.contains(audience)) {
-        // Swap the audience associated with the news item
-        val audienceId = audienceDao.saveAudience(audience)
-        dao.setAudienceId(id, audienceId)
-        existingAudienceId.foreach(audienceDao.deleteAudience)
+      val audienceId = existingAudience match {
+        case Some(existing) if existing == audience =>
+          existingAudienceId.get
+        case _ =>
+          val audienceId = audienceDao.saveAudience(audience)
+          dao.setAudienceId(id, audienceId)
+          existingAudienceId.foreach(audienceDao.deleteAudience)
+
+          audienceId
       }
+
+      // Delete the recipients now and re-create them in the future
+      if (existingAudience.nonEmpty) {
+        dao.setRecipients(id, Seq.empty)
+      }
+
+      schedulePublishNewsItem(id, audienceId, item.publishDate)
     }
 
   override def getAudience(newsId: String) =

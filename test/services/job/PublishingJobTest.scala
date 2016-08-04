@@ -5,12 +5,12 @@ import java.sql.Connection
 import anorm.SqlParser._
 import anorm._
 import warwick.anorm.converters.ColumnConversions._
-import helpers.{Fixtures, MockScheduleJobService, OneStartAppPerSuite}
+import helpers.{Fixtures, OneStartAppPerSuite}
 import org.joda.time.DateTime
 import org.mockito.Matchers._
 import org.mockito.Matchers
 import org.mockito.Mockito._
-import org.quartz.{JobDataMap, JobDetail, JobExecutionContext}
+import org.quartz.{JobDataMap, JobDetail, JobExecutionContext, Scheduler}
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.db.Database
@@ -25,7 +25,7 @@ class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSu
 
   val db = get[Database]
   val audienceService = mock[AudienceService]
-  val scheduler = new MockScheduleJobService
+  val scheduler = mock[ScheduleJobService]
 
   val activityIdKey = "activityId"
   val audienceId = "audienceId"
@@ -57,7 +57,7 @@ class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSu
     val newsCategoryDao = mock[NewsCategoryDao]
     val audienceDao = mock[AudienceDao]
     val userInitialisationService = mock[UserInitialisationService]
-    val newsService = new AnormNewsService(db, newsDao, audienceService, newsCategoryDao, audienceDao, userInitialisationService, scheduler)
+    val newsService = new AnormNewsService(db, newsDao, audienceService, newsCategoryDao, audienceDao, userInitialisationService, mock[Scheduler])
 
     val newsItemId = "newsItemId"
     when(map.getString(newsItemId)).thenReturn(newsItemId)

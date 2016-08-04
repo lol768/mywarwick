@@ -14,10 +14,6 @@ import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
-  def setPublished(activityId: String)(implicit c: Connection): Unit
-
-  def getActivitiesToPublishNow()(implicit c: Connection): Seq[ActivityIdAndAudienceId]
-
   def getActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[Activity]
 
   def getActivitiesByProviderId(providerId: String, limit: Int)(implicit c: Connection): Seq[Activity]
@@ -99,29 +95,13 @@ class ActivityDaoImpl @Inject()(
       .as(activityParser.*)
   }
 
-  val activityIdAndAudienceIdParser = for {
-    activityId <- str("id")
-    audienceId <- str("audience_id")
-  } yield ActivityIdAndAudienceId(activityId, audienceId)
-
-  override def setPublished(activityId: String)(implicit c: Connection): Unit = {
-    SQL"UPDATE ACTIVITY SET PUBLISHED_AT = SYSDATE WHERE ID = $activityId"
-      .execute()
-  }
-
-  override def getActivitiesToPublishNow()(implicit c: Connection): Seq[ActivityIdAndAudienceId] = {
-    SQL"SELECT ID, AUDIENCE_ID FROM ACTIVITY WHERE GENERATED_AT <= SYSDATE AND PUBLISHED_AT IS NULL AND AUDIENCE_ID IS NOT NULL"
-      .executeQuery()
-      .as(activityIdAndAudienceIdParser.*)
-  }
-
   override def getActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[Activity] = {
     SQL(s"""
       SELECT ACTIVITY.*
       FROM ACTIVITY
       JOIN PUBLISHED_NOTIFICATION ON ACTIVITY.ID = PUBLISHED_NOTIFICATION.ACTIVITY_ID
       WHERE PUBLISHED_NOTIFICATION.PUBLISHER_ID = {publisherId}
-      ORDER BY ACTIVITY.GENERATED_AT DESC
+      ORDER BY ACTIVITY.CREATED_AT DESC
       ${dialect.limitOffset(limit)}
        """)
       .on('publisherId -> publisherId)
