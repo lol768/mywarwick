@@ -5,7 +5,6 @@ import javax.inject.Singleton
 import com.google.inject.{ImplementedBy, Inject}
 import models.news.{Audience, NotificationSave}
 import models.{ActivitySave, PublishedNotificationSave}
-import org.quartz.Scheduler
 import play.api.db.{Database, NamedDatabase}
 import services.dao.{ActivityDao, AudienceDao, PublishedNotificationsDao}
 
@@ -24,7 +23,6 @@ trait NotificationPublishingService {
 class NotificationPublishingServiceImpl @Inject()(
   activityDao: ActivityDao,
   audienceDao: AudienceDao,
-  scheduler: Scheduler,
   publishedNotificationsDao: PublishedNotificationsDao,
   @NamedDatabase("default") db: Database
 ) extends NotificationPublishingService {

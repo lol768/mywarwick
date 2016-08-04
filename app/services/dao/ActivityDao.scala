@@ -99,7 +99,7 @@ class ActivityDaoImpl @Inject()(
       .as(activityParser.*)
   }
 
-  val bparser = for {
+  val activityIdAndAudienceIdParser = for {
     activityId <- str("id")
     audienceId <- str("audience_id")
   } yield ActivityIdAndAudienceId(activityId, audienceId)
@@ -112,7 +112,7 @@ class ActivityDaoImpl @Inject()(
   override def getActivitiesToPublishNow()(implicit c: Connection): Seq[ActivityIdAndAudienceId] = {
     SQL"SELECT ID, AUDIENCE_ID FROM ACTIVITY WHERE GENERATED_AT <= SYSDATE AND PUBLISHED_AT IS NULL AND AUDIENCE_ID IS NOT NULL"
       .executeQuery()
-      .as(bparser.*)
+      .as(activityIdAndAudienceIdParser.*)
   }
 
   override def getActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[Activity] = {

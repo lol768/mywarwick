@@ -84,7 +84,7 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     NewsItemRender(id, title, text, link, publishDate, imageId, category.toSeq, ignoreCategories)
   }
 
-  val bparser = for {
+  val newsItemIdAndAudienceIdParser = for {
     newsItemId <- str("id")
     audienceId <- str("audience_id")
   } yield NewsItemIdAndAudienceId(newsItemId, audienceId)
@@ -97,7 +97,7 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
   override def getNewsItemsToPublishNow()(implicit c: Connection): Seq[NewsItemIdAndAudienceId] = {
     SQL"SELECT ID, AUDIENCE_ID FROM NEWS_ITEM WHERE PUBLISH_DATE <= SYSDATE AND PUBLISHED_AT IS NULL AND AUDIENCE_ID IS NOT NULL"
       .executeQuery()
-      .as(bparser.*)
+      .as(newsItemIdAndAudienceIdParser.*)
   }
 
   override def allNews(publisherId: String, limit: Int, offset: Int)(implicit c: Connection): Seq[NewsItemRender] = {

@@ -51,7 +51,7 @@ class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSu
         VALUES ($id, 'balls', 'balls', $publishDate, $publishDate, 1, 'default', 'balls')
       """.executeInsert()
 
-  "NewsAudienceResolverJob" should {
+  "PublishNewsItemJob" should {
 
     val newsDao = get[NewsDao]
     val newsCategoryDao = mock[NewsCategoryDao]
@@ -61,13 +61,13 @@ class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSu
 
     val newsItemId = "newsItemId"
     when(map.getString(newsItemId)).thenReturn(newsItemId)
-    val newsAudienceResolverJob = new PublishNewsItemJob(audienceService, newsService, scheduler)
+    val publishNewsItemJob = new PublishNewsItemJob(audienceService, newsService, scheduler)
 
     "save audience for news item" in db.withConnection { implicit c =>
 
       saveNewsItem(newsItemId, date)
 
-      newsAudienceResolverJob.execute(context)
+      publishNewsItemJob.execute(context)
 
       val recipientsSet = SQL"SELECT usercode FROM news_recipient WHERE news_item_id=$newsItemId"
         .as((str("usercode") map { u => Usercode(u) }).*)
@@ -76,7 +76,7 @@ class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSu
     }
   }
 
-  "NotificationsAudienceResolverJob" should {
+  "PublishNotificationJob" should {
 
     val activityDao = get[ActivityDao]
     val creationDao = mock[ActivityCreationDao]
@@ -86,7 +86,7 @@ class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSu
     val pubSub = mock[PubSub]
     val activityService = new ActivityServiceImpl(activityDao, creationDao, tagDao, messaging, pubSub, db, activityTypeService)
 
-    val notificationsAudienceResolverJob = new PublishActivityJob(audienceService, activityService, messaging, pubSub, scheduler)
+    val publishNotificationJob = new PublishActivityJob(audienceService, activityService, messaging, pubSub, scheduler)
 
     "save audience for notification" in {
 
@@ -97,7 +97,7 @@ class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSu
         val activityId = activityDao.save(activitySave, Seq.empty)
         when(map.getString(activityIdKey)).thenReturn(activityId)
 
-        notificationsAudienceResolverJob.execute(context)
+        publishNotificationJob.execute(context)
 
         val activity = activityDao.getActivityById(activityId).get
 
