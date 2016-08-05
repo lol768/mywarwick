@@ -7,6 +7,7 @@ import models.news.{Audience, NotificationSave}
 import models.{ActivitySave, PublishedNotificationSave}
 import org.joda.time.DateTime
 import org.quartz.JobBuilder.newJob
+import org.quartz.JobKey
 import org.quartz.SimpleScheduleBuilder.simpleSchedule
 import org.quartz.TriggerBuilder.newTrigger
 import play.api.db.{Database, NamedDatabase}
@@ -46,7 +47,7 @@ class NotificationPublishingServiceImpl @Inject()(
         createdBy = item.usercode
       ))
 
-      schedulePublishJob(audienceId, activityId, item.publishDate)
+      schedulePublishJob(activityId, audienceId, item.publishDate)
 
       activityId
     }
@@ -63,9 +64,13 @@ class NotificationPublishingServiceImpl @Inject()(
       generatedAt = Some(item.publishDate)
     )
 
-  private def schedulePublishJob(audienceId: String, activityId: String, publishDate: DateTime): Unit = {
+  private def schedulePublishJob(activityId: String, audienceId: String, publishDate: DateTime): Unit = {
+    val key = new JobKey(activityId, "PublishActivity")
+
+    scheduler.deleteJob(key)
+
     val job = newJob(classOf[PublishActivityJob])
-      .withIdentity(activityId, "PublishActivity")
+      .withIdentity(key)
       .usingJobData("activityId", activityId)
       .usingJobData("audienceId", audienceId)
       .build()

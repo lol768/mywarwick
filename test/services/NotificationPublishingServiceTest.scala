@@ -27,7 +27,9 @@ class NotificationPublishingServiceTest extends PlaySpec with OneStartAppPerSuit
       val activity = activityService.getActivityById(id).get
       activity must have('title (item.text))
 
-      scheduler.scheduledJobs.map(_.job.getKey) must contain(new JobKey(id, "PublishActivity"))
+      val key = new JobKey(id, "PublishActivity")
+      scheduler.deletedJobs must contain(key)
+      scheduler.scheduledJobs.map(_.job.getKey) must contain(key)
     }
 
     "publish a notification now" in {
@@ -38,7 +40,9 @@ class NotificationPublishingServiceTest extends PlaySpec with OneStartAppPerSuit
       val activity = activityService.getActivityById(id).get
       activity must have('title (item.text))
 
-      scheduler.triggeredJobs.map(_.getKey) must contain(new JobKey(id, "PublishActivity"))
+      val key = new JobKey(id, "PublishActivity")
+      scheduler.deletedJobs must contain(key)
+      scheduler.triggeredJobs.map(_.getKey) must contain(key)
     }
 
   }
