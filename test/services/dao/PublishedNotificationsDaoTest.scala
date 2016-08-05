@@ -4,7 +4,6 @@ import anorm.SqlParser._
 import anorm._
 import helpers.{Fixtures, OneStartAppPerSuite}
 import models.PublishedNotificationSave
-import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
 import warwick.sso.Usercode
 

@@ -1,6 +1,5 @@
 package helpers
 
-import org.scalatest.mock.MockitoSugar
 import play.api.db.evolutions.{ClassLoaderEvolutionsReader, EvolutionsReader}
 import play.api.inject._
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -12,7 +11,7 @@ import system.{DatabaseDialect, H2DatabaseDialect}
 import warwick.sso._
 
 
-object TestApplications extends MockitoSugar {
+object TestApplications {
 
   def testConfig(environment: Environment) =
     config("test.conf", environment)

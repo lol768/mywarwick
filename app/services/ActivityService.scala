@@ -12,7 +12,6 @@ import warwick.sso.{User, Usercode}
 
 @ImplementedBy(classOf[ActivityServiceImpl])
 trait ActivityService {
-
   def getActivityById(id: String): Option[Activity]
 
   def getActivitiesForUser(user: User, limit: Int = 50, before: Option[DateTime] = None): Seq[ActivityResponse]
