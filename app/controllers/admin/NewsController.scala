@@ -59,9 +59,6 @@ class NewsController @Inject()(
   val newsCategoryService: NewsCategoryService
 ) extends BaseController with I18nSupport with Publishing {
 
-  // Provides implicit conversion from Request to RequestContext
-  import securityService._
-
   val newsItemMapping = mapping(
     "title" -> nonEmptyText,
     "text" -> nonEmptyText,

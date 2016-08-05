@@ -2,7 +2,7 @@ package services
 
 import actors.WebsocketActor.Notification
 import com.google.inject.{ImplementedBy, Inject}
-import models.{Activity, ActivityIcon, ActivityResponse, ActivitySave}
+import models._
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.ActivityError._

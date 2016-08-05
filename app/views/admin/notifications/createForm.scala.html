@@ -2,6 +2,7 @@
 @import system.RequestContext
 @import models.publishing.PermissionScope
 @import models.publishing.Publisher
+@import org.joda.time.LocalDateTime
 @(
     publisher: Publisher,
     form: PublishNotificationForm,
@@ -36,6 +37,21 @@
     @b3.text(form("item.linkHref"),
       '_label -> "Link URL",
       '_help -> "Optional"
+    )
+
+    @b3.radio(form("item.publishDateSet"),
+      Seq(
+        "false" -> "Now",
+        "true" -> "Select a time"
+      ),
+      '_label -> "Publish time",
+      'value -> false
+    )
+
+    @tags.datetimePicker(form("item.publishDate"),
+      '_label -> "Publish date",
+      '_help -> "Select a time in the future to automatically deliver this notification at that time",
+      'value -> LocalDateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
     )
 
     @tags.audiencePicker(form, "audience", departmentOptions, "notification", permissionScope, allowPublic = false)

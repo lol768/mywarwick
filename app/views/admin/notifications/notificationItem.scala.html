@@ -1,0 +1,21 @@
+@(item: ActivityResponse)
+
+<div class="activity-item">
+  <div class="media">
+    <div class="media-left">
+      <i class="app-icon app-icon--lg fa fa-fw fa-@item.icon.map(_.name).getOrElse("newspaper-o")"
+        style="background-color:@item.icon.map(_.colour).getOrElse("#5b3069")">
+      </i>
+    </div>
+    <div class="media-body">
+      <div class="activity-item__title">@item.activity.title</div>
+      @item.activity.text.map { text =>
+        <div class="activity-item__text">@text</div>
+      }
+      <div class="activity-item__date">@models.DateFormats.emailDateTime(item.activity.generatedAt)</div>
+      @item.activity.url.map { url =>
+        <a href="@url">Link to @url</a>
+      }
+    </div>
+  </div>
+</div>

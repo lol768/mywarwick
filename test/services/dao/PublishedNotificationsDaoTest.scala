@@ -1,7 +1,5 @@
 package services.dao
 
-import java.util.UUID
-
 import anorm.SqlParser._
 import anorm._
 import helpers.{Fixtures, OneStartAppPerSuite}
