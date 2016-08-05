@@ -3,6 +3,7 @@ package services
 import helpers.{Fixtures, MockSchedulerService, OneStartAppPerSuite}
 import models.news.Audience
 import models.news.Audience.{DepartmentAudience, Staff}
+import org.joda.time.DateTime
 import org.quartz.JobKey
 import org.scalatestplus.play.PlaySpec
 
@@ -21,13 +22,23 @@ class NotificationPublishingServiceTest extends PlaySpec with OneStartAppPerSuit
     "save a notification and schedule it for publishing" in {
       scheduler.reset()
 
-      val id = notificationPublishingService.publish(item, staffAudience)
+      val id = notificationPublishingService.publish(item.copy(publishDate = DateTime.now.plusHours(2)), staffAudience)
 
-      val render = activityService.getActivityById(id).get
-
-      render must have('title (item.text))
+      val activity = activityService.getActivityById(id).get
+      activity must have('title (item.text))
 
       scheduler.scheduledJobs.map(_.job.getKey) must contain(new JobKey(id, "PublishActivity"))
+    }
+
+    "publish a notification now" in {
+      scheduler.reset()
+
+      val id = notificationPublishingService.publish(item, staffAudience)
+
+      val activity = activityService.getActivityById(id).get
+      activity must have('title (item.text))
+
+      scheduler.triggeredJobs.map(_.getKey) must contain(new JobKey(id, "PublishActivity"))
     }
 
   }

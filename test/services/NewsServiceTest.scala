@@ -3,7 +3,9 @@ package services
 import helpers.{Fixtures, MockSchedulerService, OneStartAppPerSuite}
 import models.news.Audience
 import models.news.Audience.{DepartmentAudience, Staff}
+import org.joda.time.DateTime
 import org.quartz.JobKey
+import org.quartz.SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW
 import org.scalatestplus.play.PlaySpec
 
 
@@ -14,7 +16,7 @@ class NewsServiceTest extends PlaySpec with OneStartAppPerSuite {
   val scheduler = get[SchedulerService].asInstanceOf[MockSchedulerService]
 
   val staffAudience = Audience(Seq(DepartmentAudience("IN", Seq(Staff))))
-  val item = Fixtures.news.save()
+  val item = Fixtures.news.save().copy(publishDate = DateTime.now.plusDays(1))
 
   "NewsService" should {
 
@@ -28,6 +30,8 @@ class NewsServiceTest extends PlaySpec with OneStartAppPerSuite {
       render must have('title (item.title))
 
       scheduler.scheduledJobs.map(_.job.getKey) must contain(new JobKey(id, "PublishNewsItem"))
+      scheduler.scheduledJobs.map(_.trigger.getStartTime) must contain(item.publishDate.toDate)
+      scheduler.scheduledJobs.map(_.trigger.getMisfireInstruction) must contain(MISFIRE_INSTRUCTION_FIRE_NOW)
     }
 
     "update items" in {
@@ -45,6 +49,18 @@ class NewsServiceTest extends PlaySpec with OneStartAppPerSuite {
       val jobKey = new JobKey(id, "PublishNewsItem")
       scheduler.deletedJobs must contain(jobKey)
       scheduler.scheduledJobs.map(_.job.getKey) must contain(jobKey)
+    }
+
+    "trigger update job now for item with past publish date" in {
+      scheduler.reset()
+
+      val id = newsService.save(item, Audience.Public, categoryIds.take(1))
+
+      newsService.update(id, item.copy(publishDate = DateTime.now.minusHours(2)), staffAudience, categoryIds.take(2))
+
+      val jobKey = new JobKey(id, "PublishNewsItem")
+      scheduler.deletedJobs must contain(jobKey)
+      scheduler.triggeredJobs.map(_.getKey) must contain(jobKey)
     }
 
   }

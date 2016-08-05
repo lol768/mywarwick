@@ -6,7 +6,9 @@ import com.google.inject.{ImplementedBy, Inject}
 import models.news.{Audience, NotificationSave}
 import models.{ActivitySave, PublishedNotificationSave}
 import org.joda.time.DateTime
-import org.quartz.{JobBuilder, Scheduler, TriggerBuilder}
+import org.quartz.JobBuilder.newJob
+import org.quartz.SimpleScheduleBuilder.simpleSchedule
+import org.quartz.TriggerBuilder.newTrigger
 import play.api.db.{Database, NamedDatabase}
 import services.dao.{ActivityDao, AudienceDao, PublishedNotificationsDao}
 import services.job.PublishActivityJob
@@ -62,17 +64,22 @@ class NotificationPublishingServiceImpl @Inject()(
     )
 
   private def schedulePublishJob(audienceId: String, activityId: String, publishDate: DateTime): Unit = {
-    val job = JobBuilder.newJob(classOf[PublishActivityJob])
+    val job = newJob(classOf[PublishActivityJob])
       .withIdentity(activityId, "PublishActivity")
       .usingJobData("activityId", activityId)
       .usingJobData("audienceId", audienceId)
       .build()
 
-    val trigger = TriggerBuilder.newTrigger()
-      .startAt(publishDate.toDate)
-      .build()
+    if (publishDate.isAfterNow) {
+      val trigger = newTrigger()
+        .startAt(publishDate.toDate)
+        .withSchedule(simpleSchedule().withMisfireHandlingInstructionFireNow())
+        .build()
 
-    scheduler.scheduleJob(job, trigger)
+      scheduler.scheduleJob(job, trigger)
+    } else {
+      scheduler.triggerJobNow(job)
+    }
   }
 
 }

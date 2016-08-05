@@ -5,6 +5,9 @@ import javax.inject.Inject
 import com.google.inject.ImplementedBy
 import models.news.{Audience, AudienceSize, NewsItemRender, NewsItemSave}
 import org.joda.time.DateTime
+import org.quartz.JobBuilder.newJob
+import org.quartz.SimpleScheduleBuilder.simpleSchedule
+import org.quartz.TriggerBuilder.newTrigger
 import org.quartz._
 import play.api.db.Database
 import services.dao.{AudienceDao, NewsCategoryDao, NewsDao}
@@ -59,17 +62,22 @@ class AnormNewsService @Inject()(
     // Delete any existing job that would publish the same news item
     scheduler.deleteJob(key)
 
-    val job = JobBuilder.newJob(classOf[PublishNewsItemJob])
+    val job = newJob(classOf[PublishNewsItemJob])
       .withIdentity(key)
       .usingJobData("newsItemId", newsId)
       .usingJobData("audienceId", audienceId)
       .build()
 
-    val trigger = TriggerBuilder.newTrigger()
-      .startAt(publishDate.toDate)
-      .build()
+    if (publishDate.isAfterNow) {
+      val trigger = newTrigger()
+        .startAt(publishDate.toDate)
+        .withSchedule(simpleSchedule().withMisfireHandlingInstructionFireNow())
+        .build()
 
-    scheduler.scheduleJob(job, trigger)
+      scheduler.scheduleJob(job, trigger)
+    } else {
+      scheduler.triggerJobNow(job)
+    }
   }
 
   override def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String =
@@ -126,9 +134,10 @@ class AnormNewsService @Inject()(
 
   /**
     * Deletes all the recipients of a news item and replaces them with recipients param
+    *
     * @param newsItemId
     * @param recipients
     */
   override def setRecipients(newsItemId: String, recipients: Seq[Usercode]) =
-    db.withTransaction(implicit c => dao.setRecipients(newsItemId, recipients))
+  db.withTransaction(implicit c => dao.setRecipients(newsItemId, recipients))
 }

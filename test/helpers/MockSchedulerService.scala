@@ -1,8 +1,10 @@
 package helpers
 
+import com.google.inject.Singleton
 import org.quartz.{JobDetail, JobExecutionContext, JobKey, Trigger}
 import services.SchedulerService
 
+@Singleton
 class MockSchedulerService extends SchedulerService {
 
   var triggeredJobs: Seq[JobDetail] = Seq.empty
