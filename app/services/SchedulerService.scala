@@ -7,8 +7,8 @@ import org.quartz._
 import play.api.Configuration
 import system.Logging
 
-@ImplementedBy(classOf[ScheduleJobServiceImpl])
-trait ScheduleJobService extends Logging {
+@ImplementedBy(classOf[SchedulerServiceImpl])
+trait SchedulerService extends Logging {
   val FAILED_ATTEMPTS = "FAILED_ATTEMPTS"
 
   def triggerJobNow(job: JobDetail): Unit
@@ -21,10 +21,10 @@ trait ScheduleJobService extends Logging {
 }
 
 @Singleton
-class ScheduleJobServiceImpl @Inject()(
+class SchedulerServiceImpl @Inject()(
   scheduler: Scheduler,
   config: Configuration
-) extends ScheduleJobService {
+) extends SchedulerService {
 
   private val RETRY_TIMES = config.getInt("quartz.job.retryAttempts")
     .getOrElse(throw new IllegalStateException("Missing Quartz job retry attempt times - set quartz.retryAttempts"))

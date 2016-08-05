@@ -25,7 +25,7 @@ class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSu
 
   val db = get[Database]
   val audienceService = mock[AudienceService]
-  val scheduler = mock[ScheduleJobService]
+  val scheduler = mock[SchedulerService]
 
   val activityIdKey = "activityId"
   val audienceId = "audienceId"

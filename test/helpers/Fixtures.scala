@@ -1,9 +1,9 @@
 package helpers
 
-import models.news.NewsItemSave
+import anorm._
+import models.news.{NewsItemSave, NotificationSave}
 import models.{Activity, ActivitySave}
 import org.joda.time.DateTime
-import anorm._
 import warwick.sso._
 
 /**
@@ -23,6 +23,20 @@ object Fixtures {
         text = Some("Your coursework is due in 7 days"),
         url = Some("http://tabula.warwick.ac.uk"),
         shouldNotify = true
+      )
+
+  }
+
+  object notificationSave {
+
+    lazy val lunchtime =
+      NotificationSave(
+        text = "It is lunch time",
+        linkHref = None,
+        publisherId = "default",
+        usercode = Usercode("custard"),
+        providerId = "news",
+        publishDate = DateTime.now
       )
 
   }

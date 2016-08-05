@@ -1,6 +1,6 @@
 package services
 
-import helpers.{Fixtures, MockScheduleJobService, OneStartAppPerSuite}
+import helpers.{Fixtures, MockSchedulerService, OneStartAppPerSuite}
 import models.news.Audience
 import models.news.Audience.{DepartmentAudience, Staff}
 import org.quartz.JobKey
@@ -11,7 +11,7 @@ class NewsServiceTest extends PlaySpec with OneStartAppPerSuite {
 
   val newsService = get[NewsService]
   val categoryIds = get[NewsCategoryService].all().map(_.id)
-  val scheduler = get[ScheduleJobService].asInstanceOf[MockScheduleJobService]
+  val scheduler = get[SchedulerService].asInstanceOf[MockSchedulerService]
 
   val staffAudience = Audience(Seq(DepartmentAudience("IN", Seq(Staff))))
   val item = Fixtures.news.save()

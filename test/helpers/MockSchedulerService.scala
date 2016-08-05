@@ -1,9 +1,9 @@
 package helpers
 
 import org.quartz.{JobDetail, JobExecutionContext, JobKey, Trigger}
-import services.ScheduleJobService
+import services.SchedulerService
 
-class MockScheduleJobService extends ScheduleJobService {
+class MockSchedulerService extends SchedulerService {
 
   var triggeredJobs: Seq[JobDetail] = Seq.empty
   var scheduledJobs: Seq[JobDetailAndTrigger] = Seq.empty

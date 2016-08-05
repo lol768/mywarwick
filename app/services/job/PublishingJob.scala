@@ -13,7 +13,7 @@ import warwick.sso.Usercode
 @PersistJobDataAfterExecution
 trait PublishingJob extends Job with Logging {
 
-  val scheduler: ScheduleJobService
+  val scheduler: SchedulerService
 
   def executeJob(context: JobExecutionContext): Unit
 
@@ -29,11 +29,10 @@ trait PublishingJob extends Job with Logging {
 class PublishNewsItemJob @Inject()(
   audienceService: AudienceService,
   newsService: NewsService,
-  override val scheduler: ScheduleJobService
+  override val scheduler: SchedulerService
 ) extends PublishingJob {
 
   override def executeJob(context: JobExecutionContext): Unit = {
-
     val dataMap = context.getJobDetail.getJobDataMap
     val newsItemId = dataMap.getString("newsItemId")
     val audienceId = dataMap.getString("audienceId")
@@ -50,11 +49,10 @@ class PublishActivityJob @Inject()(
   activityService: ActivityService,
   messaging: MessagingService,
   pubSub: PubSub,
-  override val scheduler: ScheduleJobService
+  override val scheduler: SchedulerService
 ) extends PublishingJob {
 
   override def executeJob(context: JobExecutionContext): Unit = {
-
     val dataMap = context.getJobDetail.getJobDataMap
     val activityId = dataMap.getString("activityId")
     val audienceId = dataMap.getString("audienceId")
@@ -69,7 +67,9 @@ class PublishActivityJob @Inject()(
   }
 
   private def saveRecipients(id: String, activity: Activity, recipients: Seq[Usercode]) = {
-    messaging.send(recipients.toSet, activity)
+    if (activity.shouldNotify) {
+      messaging.send(recipients.toSet, activity)
+    }
     val activityResponse = ActivityResponse(
       activity,
       activityService.getActivityIcon(id),

@@ -26,7 +26,7 @@ trait NotificationPublishingService {
 class NotificationPublishingServiceImpl @Inject()(
   activityDao: ActivityDao,
   audienceDao: AudienceDao,
-  scheduler: ScheduleJobService,
+  scheduler: SchedulerService,
   publishedNotificationsDao: PublishedNotificationsDao,
   @NamedDatabase("default") db: Database
 ) extends NotificationPublishingService {
