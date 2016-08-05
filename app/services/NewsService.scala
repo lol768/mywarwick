@@ -37,7 +37,7 @@ class AnormNewsService @Inject()(
   newsCategoryDao: NewsCategoryDao,
   audienceDao: AudienceDao,
   userInitialisationService: UserInitialisationService,
-  scheduler: Scheduler
+  scheduler: ScheduleJobService
 ) extends NewsService {
 
   override def getNewsByPublisher(publisherId: String, limit: Int, offset: Int): Seq[NewsItemRender] =

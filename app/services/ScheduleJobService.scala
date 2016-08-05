@@ -3,7 +3,7 @@ package services
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import org.joda.time.DateTime
 import org.quartz.TriggerBuilder._
-import org.quartz.{JobDetail, JobExecutionContext, Scheduler}
+import org.quartz._
 import play.api.Configuration
 import system.Logging
 
@@ -14,6 +14,10 @@ trait ScheduleJobService extends Logging {
   def triggerJobNow(job: JobDetail): Unit
 
   def maybeRetryJob(context: JobExecutionContext, e: Exception): Unit
+
+  def scheduleJob(job: JobDetail, trigger: Trigger): Unit
+
+  def deleteJob(key: JobKey): Unit
 }
 
 @Singleton
@@ -42,6 +46,14 @@ class ScheduleJobServiceImpl @Inject()(
     } else {
       logger.error(s"Job ${c.getJobDetail.getJobClass} failed $RETRY_TIMES times", e)
     }
+  }
+
+  override def scheduleJob(job: JobDetail, trigger: Trigger) = {
+    scheduler.scheduleJob(job, trigger)
+  }
+
+  override def deleteJob(key: JobKey) = {
+    scheduler.deleteJob(key)
   }
 
   private def incrementJobAttempts(context: JobExecutionContext) = {

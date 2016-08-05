@@ -1,6 +1,5 @@
 package helpers
 
-import org.quartz.Scheduler
 import org.scalatest.mock.MockitoSugar
 import play.api.db.evolutions.{ClassLoaderEvolutionsReader, EvolutionsReader}
 import play.api.inject._
@@ -49,8 +48,7 @@ object TestApplications extends MockitoSugar {
       .overrides(
         bind[SSOClient].to[MockSSOClient],
         bind[DatabaseDialect].to[H2DatabaseDialect],
-        bind[ScheduleJobService].toInstance(mock[ScheduleJobService]),
-        bind[Scheduler].toInstance(mock[Scheduler]),
+        bind[ScheduleJobService].toInstance(new MockScheduleJobService),
 
         // Allows putting test versions of migrations under test/resources/evolutions/default
         bind[EvolutionsReader].toInstance(new ClassLoaderEvolutionsReader())

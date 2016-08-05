@@ -57,7 +57,7 @@ class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSu
     val newsCategoryDao = mock[NewsCategoryDao]
     val audienceDao = mock[AudienceDao]
     val userInitialisationService = mock[UserInitialisationService]
-    val newsService = new AnormNewsService(db, newsDao, audienceService, newsCategoryDao, audienceDao, userInitialisationService, mock[Scheduler])
+    val newsService = new AnormNewsService(db, newsDao, audienceService, newsCategoryDao, audienceDao, userInitialisationService, scheduler)
 
     val newsItemId = "newsItemId"
     when(map.getString(newsItemId)).thenReturn(newsItemId)
