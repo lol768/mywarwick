@@ -57,7 +57,7 @@ class AnormNewsService @Inject()(
   }
 
   private def schedulePublishNewsItem(newsId: String, audienceId: String, publishDate: DateTime): Unit = {
-    val key = new JobKey(newsId, "PublishNewsItem")
+    val key = new JobKey(newsId, PublishNewsItemJob.name)
 
     // Delete any existing job that would publish the same news item
     scheduler.deleteJob(key)

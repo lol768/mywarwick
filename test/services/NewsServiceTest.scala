@@ -7,6 +7,7 @@ import org.joda.time.DateTime
 import org.quartz.JobKey
 import org.quartz.SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW
 import org.scalatestplus.play.PlaySpec
+import services.job.PublishNewsItemJob
 
 
 class NewsServiceTest extends PlaySpec with OneStartAppPerSuite {
@@ -29,7 +30,7 @@ class NewsServiceTest extends PlaySpec with OneStartAppPerSuite {
 
       render must have('title (item.title))
 
-      scheduler.scheduledJobs.map(_.job.getKey) must contain(new JobKey(id, "PublishNewsItem"))
+      scheduler.scheduledJobs.map(_.job.getKey) must contain(new JobKey(id, PublishNewsItemJob.name))
       scheduler.scheduledJobs.map(_.trigger.getStartTime) must contain(item.publishDate.toDate)
       scheduler.scheduledJobs.map(_.trigger.getMisfireInstruction) must contain(MISFIRE_INSTRUCTION_FIRE_NOW)
     }
@@ -46,7 +47,7 @@ class NewsServiceTest extends PlaySpec with OneStartAppPerSuite {
       render.categories.map(_.id) mustBe categoryIds.take(2)
       newsService.getAudience(id) must contain(staffAudience)
 
-      val jobKey = new JobKey(id, "PublishNewsItem")
+      val jobKey = new JobKey(id, PublishNewsItemJob.name)
       scheduler.deletedJobs must contain(jobKey)
       scheduler.scheduledJobs.map(_.job.getKey) must contain(jobKey)
     }
@@ -58,7 +59,7 @@ class NewsServiceTest extends PlaySpec with OneStartAppPerSuite {
 
       newsService.update(id, item.copy(publishDate = DateTime.now.minusHours(2)), staffAudience, categoryIds.take(2))
 
-      val jobKey = new JobKey(id, "PublishNewsItem")
+      val jobKey = new JobKey(id, PublishNewsItemJob.name)
       scheduler.deletedJobs must contain(jobKey)
       scheduler.triggeredJobs.map(_.getKey) must contain(jobKey)
     }

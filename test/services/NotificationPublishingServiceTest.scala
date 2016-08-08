@@ -7,6 +7,7 @@ import org.joda.time.DateTime
 import org.quartz.JobKey
 import org.scalatestplus.play.PlaySpec
 import services.ActivityError.AlreadyPublished
+import services.job.PublishActivityJob
 
 
 class NotificationPublishingServiceTest extends PlaySpec with OneStartAppPerSuite {
@@ -28,7 +29,7 @@ class NotificationPublishingServiceTest extends PlaySpec with OneStartAppPerSuit
       val activity = activityService.getActivityById(id).get
       activity must have('title (item.text))
 
-      val key = new JobKey(id, "PublishActivity")
+      val key = new JobKey(id, PublishActivityJob.name)
       scheduler.deletedJobs must contain(key)
       scheduler.scheduledJobs.map(_.job.getKey) must contain(key)
     }
@@ -41,7 +42,7 @@ class NotificationPublishingServiceTest extends PlaySpec with OneStartAppPerSuit
       val activity = activityService.getActivityById(id).get
       activity must have('title (item.text))
 
-      val key = new JobKey(id, "PublishActivity")
+      val key = new JobKey(id, PublishActivityJob.name)
       scheduler.deletedJobs must contain(key)
       scheduler.triggeredJobs.map(_.getKey) must contain(key)
     }
@@ -55,7 +56,7 @@ class NotificationPublishingServiceTest extends PlaySpec with OneStartAppPerSuit
 
       result must be('right)
 
-      val key = new JobKey(id, "PublishActivity")
+      val key = new JobKey(id, PublishActivityJob.name)
       scheduler.deletedJobs must contain(key)
       scheduler.scheduledJobs.map(_.job.getKey) must contain(key)
     }

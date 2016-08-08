@@ -118,7 +118,7 @@ class NotificationPublishingServiceImpl @Inject()(
     )
 
   private def schedulePublishJob(activityId: String, audienceId: String, publishDate: DateTime): Unit = {
-    val key = new JobKey(activityId, "PublishActivity")
+    val key = new JobKey(activityId, PublishActivityJob.name)
 
     scheduler.deleteJob(key)
 
@@ -141,7 +141,7 @@ class NotificationPublishingServiceImpl @Inject()(
   }
 
   private def unschedulePublishJob(activityId: String): Unit = {
-    scheduler.deleteJob(new JobKey(activityId, "PublishActivity"))
+    scheduler.deleteJob(new JobKey(activityId, PublishActivityJob.name))
   }
 
 }

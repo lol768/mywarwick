@@ -26,6 +26,10 @@ trait PublishingJob extends Job with Logging {
     }
 }
 
+object PublishNewsItemJob {
+  val name = "PublishNewsItem"
+}
+
 class PublishNewsItemJob @Inject()(
   audienceService: AudienceService,
   newsService: NewsService,
@@ -42,6 +46,10 @@ class PublishNewsItemJob @Inject()(
     ).get // FIXME Try.get throws
     newsService.setRecipients(newsItemId, recipients)
   }
+}
+
+object PublishActivityJob {
+  val name = "PublishActivity"
 }
 
 class PublishActivityJob @Inject()(
