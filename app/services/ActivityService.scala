@@ -20,6 +20,8 @@ trait ActivityService {
 
   def save(activity: ActivitySave, recipients: Seq[Usercode]): Either[Seq[ActivityError], String]
 
+  def update(id: String, activity: ActivitySave): Either[Seq[ActivityError], String]
+
   def getLastReadDate(user: User): Option[DateTime]
 
   def setLastReadDate(user: User, dateTime: DateTime): Boolean
@@ -47,6 +49,19 @@ class ActivityServiceImpl @Inject()(
 
   override def save(activity: ActivitySave, recipients: Seq[Usercode]): Either[Seq[ActivityError], String] =
     save(activity, recipients.toSet)
+
+  override def update(id: String, activity: ActivitySave) = {
+    getActivityById(id).map { existingActivity =>
+      if (existingActivity.generatedAt.isBeforeNow) {
+        Left(Seq(AlreadyPublished))
+      } else {
+        db.withTransaction(implicit c => dao.update(id, activity))
+        Right(id)
+      }
+    }.getOrElse {
+      Left(Seq(DoesNotExist))
+    }
+  }
 
   override def save(activity: ActivitySave, recipients: Set[Usercode]): Either[Seq[ActivityError], String] = {
     if (recipients.isEmpty) {
@@ -137,6 +152,14 @@ object ActivityError {
 
   case class InvalidTagValue(name: String, value: String) extends ActivityError {
     def message = s"The value '$value' for tag '$name' is not valid"
+  }
+
+  object AlreadyPublished extends ActivityError {
+    val message = "This activity cannot be modified as it has already been published"
+  }
+
+  object DoesNotExist extends ActivityError {
+    val message = "This activity does not exist"
   }
 
 }

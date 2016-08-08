@@ -1,7 +1,7 @@
 @import models.publishing.Ability._
 @import models.publishing.{Publisher, Role}
 @import system.RequestContext
-@(publisher: Publisher, user: Role)(implicit context: RequestContext)
+@(publisher: Publisher, user: Role)(implicit context: RequestContext, flash: Flash)
 @common.admin(publisher.name) {
 
   <p>This is a publisher.  You can view:</p>

@@ -9,7 +9,7 @@
     departmentOptions: Seq[(String, String)],
     categories: Seq[NewsCategory],
     permissionScope: PermissionScope
-)(implicit messages: Messages, context: RequestContext)
+)(implicit messages: Messages, context: RequestContext, flash: Flash)
 
 @implicitFieldConstructor = @{
   b3.horizontal.fieldConstructor("col-md-3", "col-md-9")

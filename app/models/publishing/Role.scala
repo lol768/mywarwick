@@ -21,7 +21,7 @@ object PublishingRole extends Enum[PublishingRole] {
   val values = findValues
 
   case object NewsManager extends RoleWithAbilities(CreateNews, EditNews, ViewNews) with V
-  case object NotificationsManager extends RoleWithAbilities(CreateNotifications, ViewNotifications) with V
+  case object NotificationsManager extends RoleWithAbilities(CreateNotifications, EditNotifications, ViewNotifications, DeleteNotifications) with V
   case object Viewer extends RoleWithAbilities(ViewNews, ViewNotifications) with V
 
   // God-like, not limited by Audience scope

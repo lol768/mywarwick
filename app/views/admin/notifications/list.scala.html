@@ -7,7 +7,7 @@
     futureNotifications: Seq[models.ActivityResponse],
     pastNotifications: Seq[models.ActivityResponse],
     user: Role
-)(implicit context: RequestContext)
+)(implicit context: RequestContext, flash: Flash)
 
 @common.admin("Notifications") {
   @if(user can CreateNotifications) {
@@ -22,13 +22,13 @@
   @if(futureNotifications.isEmpty) {
     <p>No pending notifications.</p>
   } else {
-    @futureNotifications.map(n => views.html.admin.notifications.notificationItem(n))
+    @futureNotifications.map(n => views.html.admin.notifications.notificationItem(publisher, n))
   }
 
   <h3>Sent</h3>
   @if(pastNotifications.isEmpty) {
     <p>No sent notifications.</p>
   } else {
-    @pastNotifications.map(n => views.html.admin.notifications.notificationItem(n))
+    @pastNotifications.map(n => views.html.admin.notifications.notificationItem(publisher, n))
   }
 }

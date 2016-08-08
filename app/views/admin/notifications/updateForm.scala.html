@@ -4,6 +4,7 @@
 @import views.html._
 @(
     publisher: Publisher,
+    activity: Activity,
     form: PublishNotificationForm,
     departmentOptions: Seq[(String, String)],
     providerOptions: Seq[(String, String)],
@@ -14,9 +15,9 @@
   b3.vertical.fieldConstructor
 }
 
-@common.admin("Create notification") {
+@common.admin("Update notification") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NotificationsController.create(publisher.id)) {
+  @b3.form(action = controllers.admin.routes.NotificationsController.update(publisher.id, activity.id)) {
 
     @form.globalErrors.map { error =>
       <div class="alert alert-danger">@error.message</div>
@@ -24,8 +25,9 @@
 
     @admin.notifications.contentForm(form, departmentOptions, providerOptions, permissionScope)
 
-    @tags.submitOrCancel("Create", controllers.admin.routes.NotificationsController.list(publisher.id))
+    @tags.submitOrCancel("Update", controllers.admin.routes.NotificationsController.list(publisher.id))
 
   }
   </div>
 }
+

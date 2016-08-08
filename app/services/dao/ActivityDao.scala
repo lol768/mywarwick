@@ -24,6 +24,10 @@ trait ActivityDao {
 
   def save(activity: ActivitySave, replaces: Seq[String])(implicit c: Connection): String
 
+  def update(id: String, activity: ActivitySave)(implicit c: Connection): Unit
+
+  def delete(activityId: String)(implicit c: Connection): Unit
+
   def getActivityById(id: String)(implicit c: Connection): Option[Activity] =
     getActivitiesByIds(Seq(id)).headOption
 
@@ -41,7 +45,6 @@ trait ActivityDao {
 class ActivityDaoImpl @Inject()(
   dialect: DatabaseDialect
 ) extends ActivityDao {
-
 
   override def save(activity: ActivitySave, replaces: Seq[String])(implicit c: Connection): String = {
     import activity._
@@ -70,6 +73,20 @@ class ActivityDaoImpl @Inject()(
     updateReplacedActivity(id, replaces)
 
     id
+  }
+
+  override def update(id: String, activity: ActivitySave)(implicit c: Connection): Unit = {
+    import activity._
+    val date = generatedAt.getOrElse(DateTime.now)
+    SQL"UPDATE ACTIVITY SET TYPE = ${`type`}, TITLE = $title, TEXT = $text, URL = $url, GENERATED_AT = $date, AUDIENCE_ID = $audienceId WHERE ID = $id"
+      .execute()
+  }
+
+  override def delete(activityId: String)(implicit c: Connection) = {
+    SQL"DELETE FROM MESSAGE_SEND WHERE ACTIVITY_ID = $activityId".execute()
+    SQL"DELETE FROM ACTIVITY_TAG WHERE ACTIVITY_ID = $activityId".execute()
+    SQL"DELETE FROM ACTIVITY_RECIPIENT WHERE ACTIVITY_ID = $activityId".execute()
+    SQL"DELETE FROM ACTIVITY WHERE ID = $activityId".execute()
   }
 
   def updateReplacedActivity(replacedById: String, replaces: Seq[String])(implicit c: Connection) =
@@ -207,9 +224,10 @@ class ActivityDaoImpl @Inject()(
       get[Option[String]]("REPLACED_BY_ID") ~
       get[DateTime]("GENERATED_AT") ~
       get[DateTime]("CREATED_AT") ~
-      get[Boolean]("SHOULD_NOTIFY") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify =>
-        Activity(id, providerId, activityType, title, text, url, replacedById, generatedAt, createdAt, shouldNotify)
+      get[Boolean]("SHOULD_NOTIFY") ~
+      get[Option[String]]("AUDIENCE_ID") map {
+      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify ~ audienceId =>
+        Activity(id, providerId, activityType, title, text, url, replacedById, generatedAt, createdAt, shouldNotify, audienceId)
     }
 
   private lazy val tagParser: RowParser[Option[ActivityTag]] =

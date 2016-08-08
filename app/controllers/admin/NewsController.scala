@@ -103,7 +103,7 @@ class NewsController @Inject()(
 
           auditLog('CreateNewsItem, 'id -> newsItemId)
 
-          Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("result" -> "News created")
+          Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("success" -> "News created")
       }
     )
   }
@@ -144,7 +144,7 @@ class NewsController @Inject()(
 
           auditLog('UpdateNewsItem, 'id -> newsItemId)
 
-          Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("result" -> "News updated")
+          Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("success" -> "News updated")
       }
     )
   }
