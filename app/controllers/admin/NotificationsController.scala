@@ -16,11 +16,6 @@ import views.html.admin.{notifications => views}
 
 import scala.concurrent.Future
 
-object NotificationsController {
-  type PublishNotificationForm = Form[PublishNotificationData]
-}
-
-case class PublishNotificationData(item: NotificationData, audience: AudienceData)
 
 class NotificationsController @Inject()(
   val securityService: SecurityService,
@@ -86,3 +81,9 @@ class NotificationsController @Inject()(
   }
 
 }
+
+object NotificationsController {
+  type PublishNotificationForm = Form[PublishNotificationData]
+}
+
+case class PublishNotificationData(item: NotificationData, audience: AudienceData)

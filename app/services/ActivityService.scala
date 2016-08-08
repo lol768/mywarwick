@@ -6,7 +6,7 @@ import models._
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.ActivityError._
-import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
+import services.dao.{ActivityCreationDao, ActivityDao, ActivityRecipientDao, ActivityTagDao}
 import services.messaging.MessagingService
 import warwick.sso.{User, Usercode}
 
@@ -18,7 +18,7 @@ trait ActivityService {
 
   def save(activity: ActivitySave, recipients: Set[Usercode]): Either[Seq[ActivityError], String]
 
-  def save(activity: ActivitySave, recipients: Seq[Usercode]): Either[Seq[ActivityError], String]
+  def setRecipients(activity: Activity, recipients: Set[Usercode]): Either[Seq[ActivityError], Unit]
 
   def getLastReadDate(user: User): Option[DateTime]
 
@@ -35,6 +35,7 @@ trait ActivityService {
 class ActivityServiceImpl @Inject()(
   dao: ActivityDao,
   creationDao: ActivityCreationDao,
+  recipientDao: ActivityRecipientDao,
   tagDao: ActivityTagDao,
   messaging: MessagingService,
   pubSub: PubSub,
@@ -44,9 +45,6 @@ class ActivityServiceImpl @Inject()(
 
   override def getActivityById(id: String): Option[Activity] =
     db.withConnection(implicit c => dao.getActivityById(id))
-
-  override def save(activity: ActivitySave, recipients: Seq[Usercode]): Either[Seq[ActivityError], String] =
-    save(activity, recipients.toSet)
 
   override def save(activity: ActivitySave, recipients: Set[Usercode]): Either[Seq[ActivityError], String] = {
     if (recipients.isEmpty) {
@@ -71,6 +69,13 @@ class ActivityServiceImpl @Inject()(
         }
       }
     }
+  }
+
+  override def setRecipients(activity: Activity, recipients: Set[Usercode]): Either[Seq[ActivityError], Unit] = {
+    db.withTransaction { implicit c =>
+      recipientDao.setRecipients(activity, recipients)
+    }
+    Right(())
   }
 
   private def validateActivity(activity: ActivitySave): Seq[ActivityError] = {

@@ -10,7 +10,7 @@ import org.scalatest.LoneElement._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import services.ActivityError.{InvalidActivityType, InvalidTagName, InvalidTagValue, NoRecipients}
-import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
+import services.dao.{ActivityCreationDao, ActivityDao, ActivityRecipientDao, ActivityTagDao}
 import services.messaging.MessagingService
 import warwick.sso.Usercode
 
@@ -20,6 +20,7 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
   class Scope {
     val activityRecipientService = mock[ActivityRecipientService]
     val activityCreationDao = mock[ActivityCreationDao]
+    val activityRecipientDao = mock[ActivityRecipientDao]
     val activityDao = mock[ActivityDao]
     val activityTagDao = mock[ActivityTagDao]
     val messaging = mock[MessagingService]
@@ -28,6 +29,7 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
     val service = new ActivityServiceImpl(
       activityDao,
       activityCreationDao,
+      activityRecipientDao,
       activityTagDao,
       messaging,
       pubSub,
