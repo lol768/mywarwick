@@ -57,7 +57,19 @@ class NotificationPublishingServiceImpl @Inject()(
   override def update(activityId: String, item: NotificationSave, audience: Audience) = db.withTransaction { implicit c =>
     activityDao.getActivityById(activityId) match {
       case Some(activity) if activity.generatedAt.isAfterNow =>
-        val audienceId = audienceDao.saveAudience(audience)
+
+        val audienceId = activity.audienceId match {
+          case Some(id) if audienceDao.getAudience(id) == audience =>
+            id
+          case Some(id) =>
+            val audienceId = audienceDao.saveAudience(audience)
+            audienceDao.deleteAudience(id)
+            audienceId
+          case _ =>
+            // Don't expect this, but for completeness
+            audienceDao.saveAudience(audience)
+        }
+
         activityDao.update(activityId, makeActivitySave(item, audienceId))
 
         publishedNotificationsDao.update(PublishedNotificationSave(
