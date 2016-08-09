@@ -74,11 +74,12 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     ignoreCategories <- bool("ignore_categories")
     newsCategoryId <- str("news_category_id").?
     newsCategoryName <- str("news_category_name").?
+    publisherId <- str("publisher_id")
   } yield {
     val link = for (text <- linkText; href <- parseLink(linkHref)) yield Link(text, href)
     val category = for (id <- newsCategoryId; name <- newsCategoryName) yield NewsCategory(id, name)
 
-    NewsItemRender(id, title, text, link, publishDate, imageId, category.toSeq, ignoreCategories)
+    NewsItemRender(id, title, text, link, publishDate, imageId, category.toSeq, ignoreCategories, publisherId)
   }
 
   override def allNews(publisherId: String, limit: Int, offset: Int)(implicit c: Connection): Seq[NewsItemRender] = {
