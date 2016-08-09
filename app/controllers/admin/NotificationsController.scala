@@ -9,7 +9,7 @@ import models.{Activity, ActivityResponse, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Result
+import play.api.mvc.{RequestHeader, Result}
 import services._
 import services.dao.DepartmentInfoDao
 import system.{RequestContext, Validation}
@@ -67,24 +67,16 @@ class NotificationsController @Inject()(
   }
 
   def create(publisherId: String) = PublisherAction(publisherId, CreateNotifications).async { implicit request =>
-    val form = publishNotificationForm.bindFromRequest
+    bindFormWithAudience(
+      formWithErrors =>
+        Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope)),
+      (publish, audience) => {
+        val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
 
-    form.fold(
-      formWithErrors => Future.successful(Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope))),
-      publish => {
-        audienceBinder.bindAudience(publish.audience).map {
-          case Left(errors) =>
-            Ok(views.createForm(request.publisher, addFormErrors(form, errors), departmentOptions, providerOptions, permissionScope))
-          case Right(Audience.Public) =>
-            Ok(views.createForm(request.publisher, form.withError("audience", "Notifications cannot be public"), departmentOptions, providerOptions, permissionScope))
-          case Right(audience) =>
-            val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
+        val activityId = notificationPublishingService.publish(notification, audience)
+        auditLog('CreateNotification, 'id -> activityId)
 
-            val activityId = notificationPublishingService.publish(notification, audience)
-            auditLog('CreateNotification, 'id -> activityId)
-
-            Redirect(routes.NotificationsController.list(publisherId)).flashing("success" -> "Notification created")
-        }
+        Redirect(routes.NotificationsController.list(publisherId)).flashing("success" -> "Notification created")
       }
     )
   }
@@ -111,32 +103,42 @@ class NotificationsController @Inject()(
 
   def update(publisherId: String, id: String) = PublisherAction(publisherId, EditNotifications).async { implicit request =>
     withActivityAndAudience(publisherId, id, (activity, _) => {
-      val form = publishNotificationForm.bindFromRequest
+      bindFormWithAudience(
+        formWithErrors =>
+          Ok(views.updateForm(request.publisher, activity, formWithErrors, departmentOptions, providerOptions, permissionScope)),
+        (publish, audience) => {
+          val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
-      form.fold(
-        formWithErrors => Future.successful(Ok(views.updateForm(request.publisher, activity, formWithErrors, departmentOptions, providerOptions, permissionScope))),
-        publish => {
-          audienceBinder.bindAudience(publish.audience).map {
-            case Left(errors) =>
-              Ok(views.updateForm(request.publisher, activity, addFormErrors(form, errors), departmentOptions, providerOptions, permissionScope))
-            case Right(Audience.Public) =>
-              Ok(views.updateForm(request.publisher, activity, form.withError("audience", "Notifications cannot be public"), departmentOptions, providerOptions, permissionScope))
-            case Right(audience) =>
-              val redirect = Redirect(routes.NotificationsController.list(publisherId))
+          val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
 
-              val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
-
-              notificationPublishingService.update(id, notification, audience).fold(
-                errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
-                id => {
-                  auditLog('UpdateNotification, 'id -> id)
-                  redirect.flashing("success" -> "Notification updated")
-                }
-              )
-          }
+          notificationPublishingService.update(id, notification, audience).fold(
+            errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
+            id => {
+              auditLog('UpdateNotification, 'id -> id)
+              redirect.flashing("success" -> "Notification updated")
+            }
+          )
         }
       )
     })
+  }
+
+  def bindFormWithAudience(onError: (Form[PublishNotificationData]) => Result, onSuccess: ((PublishNotificationData, Audience) => Result))(implicit request: PublisherRequest[_]): Future[Result] = {
+    val form = publishNotificationForm.bindFromRequest
+
+    form.fold(
+      formWithErrors => Future.successful(onError(formWithErrors)),
+      publish => {
+        audienceBinder.bindAudience(publish.audience).map {
+          case Left(errors) =>
+            onError(addFormErrors(form, errors))
+          case Right(Audience.Public) =>
+            onError(form.withError("audience", "Notifications cannot be public"))
+          case Right(audience) =>
+            onSuccess(publish, audience)
+        }
+      }
+    )
   }
 
   def delete(publisherId: String, id: String) = PublisherAction(publisherId, DeleteNotifications) { implicit request =>
