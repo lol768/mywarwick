@@ -118,9 +118,9 @@ class NotificationsController @Inject()(
         publish => {
           audienceBinder.bindAudience(publish.audience).map {
             case Left(errors) =>
-              Ok(views.createForm(request.publisher, addFormErrors(form, errors), departmentOptions, providerOptions, permissionScope))
+              Ok(views.updateForm(request.publisher, activity, addFormErrors(form, errors), departmentOptions, providerOptions, permissionScope))
             case Right(Audience.Public) =>
-              Ok(views.createForm(request.publisher, form.withError("audience", "Notifications cannot be public"), departmentOptions, providerOptions, permissionScope))
+              Ok(views.updateForm(request.publisher, activity, form.withError("audience", "Notifications cannot be public"), departmentOptions, providerOptions, permissionScope))
             case Right(audience) =>
               val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
