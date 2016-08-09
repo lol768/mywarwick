@@ -142,10 +142,7 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
   }
 
   override def setRecipients(newsId: String, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
-
     deleteRecipients(newsId) // delete existing News item recipients
-
-    // TODO perhaps we shouldn't insert these in sync, as audiences can potentially be 1000s users.
     val publishDate = SQL"SELECT publish_date FROM news_item WHERE id=$newsId".as(get[DateTime]("publish_date").single)
     recipients.foreach { usercode =>
       SQL"""

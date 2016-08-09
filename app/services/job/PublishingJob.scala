@@ -69,18 +69,19 @@ class PublishActivityJob @Inject()(
 
     audienceService.resolve(audience).foreach { recipients =>
       activityService.getActivityById(activityId).foreach { activity =>
-        saveRecipients(activityId, activity, recipients)
+        saveRecipients(activity, recipients.toSet)
       }
     }
   }
 
-  private def saveRecipients(id: String, activity: Activity, recipients: Seq[Usercode]) = {
+  private def saveRecipients(activity: Activity, recipients: Set[Usercode]) = {
+    activityService.setRecipients(activity, recipients)
     if (activity.shouldNotify) {
-      messaging.send(recipients.toSet, activity)
+      messaging.send(recipients, activity)
     }
     val activityResponse = ActivityResponse(
       activity,
-      activityService.getActivityIcon(id),
+      activityService.getActivityIcon(activity.id),
       Seq.empty
     )
     recipients.foreach(usercode => pubSub.publish(usercode.string, Notification(activityResponse)))
