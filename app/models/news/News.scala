@@ -36,9 +36,8 @@ case class NewsItemRender (
   publishDate: DateTime,
   imageId: Option[String],
   categories: Seq[NewsCategory],
-  ignoreCategories: Boolean
-  // TODO Add category info
-  // TODO Add publisher info
+  ignoreCategories: Boolean,
+  publisherId: String
 ) {
   def toData: NewsItemData = NewsItemData(
     title,
