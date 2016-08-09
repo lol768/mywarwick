@@ -141,16 +141,18 @@ class NotificationsController @Inject()(
     )
   }
 
-  def delete(publisherId: String, id: String) = PublisherAction(publisherId, DeleteNotifications) { implicit request =>
-    val redirect = Redirect(routes.NotificationsController.list(publisherId))
+  def delete(publisherId: String, id: String) = PublisherAction(publisherId, DeleteNotifications).async { implicit request =>
+    withActivityAndAudience(publisherId, id, (activity, _) => Future.successful {
+      val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
-    notificationPublishingService.delete(id).fold(
-      errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
-      _ => {
-        auditLog('DeleteNotification, 'id -> id)
-        redirect.flashing("success" -> "Notification deleted")
-      }
-    )
+      notificationPublishingService.delete(id).fold(
+        errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
+        _ => {
+          auditLog('DeleteNotification, 'id -> id)
+          redirect.flashing("success" -> "Notification deleted")
+        }
+      )
+    })
   }
 
   private def withActivityAndAudience(publisherId: String, id: String, block: ((Activity, Audience) => Future[Result]))(implicit request: RequestContext): Future[Result] = {
