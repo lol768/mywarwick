@@ -1,7 +1,7 @@
 package helpers
 
 import anorm._
-import models.news.{NewsItemSave, NotificationSave}
+import models.news.{NewsItemRender, NewsItemSave, NotificationSave}
 import models.{Activity, ActivitySave}
 import org.joda.time.DateTime
 import warwick.sso._
@@ -70,6 +70,18 @@ object Fixtures {
       imageId = None,
       publisherId = "publisher",
       usercode = Usercode("custard")
+    )
+
+    val render = NewsItemRender(
+      id = "news",
+      title = "Some news",
+      text = "The news",
+      link = None,
+      publishDate = DateTime.now,
+      imageId = None,
+      categories = Seq.empty,
+      ignoreCategories = false,
+      publisherId = "publisher"
     )
   }
 
