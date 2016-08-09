@@ -9,7 +9,7 @@ import models.{Activity, ActivityResponse, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{RequestHeader, Result}
+import play.api.mvc.Result
 import services._
 import services.dao.DepartmentInfoDao
 import system.{RequestContext, Validation}
