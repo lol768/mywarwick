@@ -10,7 +10,7 @@
     newsPublished: Seq[NewsItemRender],
     counts: Map[String, AudienceSize],
     user: Role
-)(implicit context: RequestContext, flash: Flash)
+)(implicit context: RequestContext)
 
   @common.admin("News") {
     @if(user can CreateNews) {

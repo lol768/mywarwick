@@ -1,7 +1,7 @@
 @import akka.cluster.ClusterEvent.CurrentClusterState
 @import akka.actor.Address
 @import system.RequestContext
-@(state: CurrentClusterState, selfAddress: Address)(implicit context: RequestContext, flash: Flash)
+@(state: CurrentClusterState, selfAddress: Address)(implicit context: RequestContext)
 
 @common.admin("Cluster State") {
   @if(state.unreachable.nonEmpty) {

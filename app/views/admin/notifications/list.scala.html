@@ -7,7 +7,7 @@
     futureNotifications: Seq[models.ActivityResponse],
     pastNotifications: Seq[models.ActivityResponse],
     user: Role
-)(implicit context: RequestContext, flash: Flash)
+)(implicit context: RequestContext)
 
 @common.admin("Notifications") {
   @if(user can CreateNotifications) {

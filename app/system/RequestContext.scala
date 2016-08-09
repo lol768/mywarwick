@@ -1,6 +1,6 @@
 package system
 
-import play.api.mvc.RequestHeader
+import play.api.mvc.{Flash, RequestHeader}
 import services.Navigation
 import warwick.sso.{AuthenticatedRequest, SSOClient, User}
 
@@ -14,7 +14,8 @@ case class RequestContext(
   actualUser: Option[User],
   loginUrl: String,
   logoutUrl: String,
-  navigation: Seq[Navigation]
+  navigation: Seq[Navigation],
+  flash: Flash
 )
 
 object RequestContext {
@@ -43,7 +44,8 @@ object RequestContext {
       actualUser = actualUser,
       loginUrl = linkGenerator.getLoginUrl,
       logoutUrl = linkGenerator.getLogoutUrl,
-      navigation = navigation
+      navigation = navigation,
+      flash = request.flash
     )
   }
 

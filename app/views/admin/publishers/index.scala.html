@@ -1,7 +1,7 @@
 @import models.publishing.Publisher
 @import system.RequestContext
 
-@(publishers: Seq[Publisher])(implicit context: RequestContext, flash: Flash)
+@(publishers: Seq[Publisher])(implicit context: RequestContext)
 @common.admin("Select Publisher Account") {
 
   <p>
