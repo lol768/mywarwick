@@ -79,12 +79,13 @@ class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSu
   "PublishNotificationJob" should {
 
     val activityDao = get[ActivityDao]
-    val creationDao = mock[ActivityCreationDao]
+    val recipientDao = get[ActivityRecipientDao]
+    val creationDao = null
     val tagDao = mock[ActivityTagDao]
     val activityTypeService = mock[ActivityTypeService]
     val messaging = mock[MessagingService]
     val pubSub = mock[PubSub]
-    val activityService = new ActivityServiceImpl(activityDao, creationDao, tagDao, messaging, pubSub, db, activityTypeService)
+    val activityService = new ActivityServiceImpl(activityDao, creationDao, recipientDao, tagDao, messaging, pubSub, db, activityTypeService)
 
     val publishNotificationJob = new PublishActivityJob(audienceService, activityService, messaging, pubSub, scheduler)
 
@@ -104,7 +105,18 @@ class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSu
         verify(messaging).send(recipients.get.toSet, activity)
         verify(pubSub).publish(Matchers.eq(dave.string), any())
         verify(pubSub).publish(Matchers.eq(james.string), any())
+
+        getRecipients(activity.id) mustBe recipients.get
+
+        publishNotificationJob.execute(context)
+
+        // check recipients are replaced, not appended.
+        getRecipients(activity.id) mustBe recipients.get
       }
     }
   }
+
+  def getRecipients(activityId: String)(implicit c: Connection) =
+    SQL"SELECT usercode FROM activity_recipient WHERE activity_id = $activityId"
+      .as(scalar[String].map(Usercode.apply).*)
 }

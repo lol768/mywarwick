@@ -2,13 +2,20 @@ package services.dao
 
 import java.sql.Connection
 
-import anorm.SQL
+import anorm._
 import com.google.inject.{ImplementedBy, Inject}
+import models.Activity
 import org.joda.time.DateTime
 import warwick.anorm.converters.ColumnConversions._
+import warwick.sso.Usercode
 
 @ImplementedBy(classOf[ActivityRecipientDaoImpl])
 trait ActivityRecipientDao {
+
+  /**
+    * Sets the recipients for the activity, deleting any existing recipients.
+    */
+  def setRecipients(activity: Activity, recipients: Set[Usercode])(implicit c: Connection): Unit
 
   def create(activityId: String, usercode: String, generatedAt: Option[DateTime])(implicit c: Connection): Unit
 
@@ -38,6 +45,14 @@ class ActivityRecipientDaoImpl @Inject()() extends ActivityRecipientDao {
         'sentAt -> DateTime.now()
       )
       .execute()
+
+  override def setRecipients(activity: Activity, recipients: Set[Usercode])(implicit c: Connection): Unit = {
+    SQL"DELETE FROM ACTIVITY_RECIPIENT WHERE ACTIVITY_ID = ${activity.id}".execute()
+    recipients.foreach { recipient =>
+      create(activity.id, recipient.string, Some(activity.generatedAt))
+    }
+  }
+
 
 
 }
