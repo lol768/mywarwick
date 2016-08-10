@@ -7,6 +7,7 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
+import play.api.Configuration
 import play.api.http.HeaderNames
 import play.api.libs.json.JsNull
 import play.api.mvc._
@@ -19,12 +20,15 @@ import warwick.sso._
 
 import scala.concurrent.Future
 
-class SSOControllerTest extends PlaySpec with MockitoSugar with Results {
+class UserInfoControllerTest extends PlaySpec with MockitoSugar with Results {
   val baseConfig = new BaseConfiguration
   val ssoConfig = new SSOConfiguration(baseConfig)
   val userCache = mock[UserCache]
 
   val HOSTNAME = "example.warwick.ac.uk"
+
+  val configuration = mock[Configuration]
+  when(configuration.getString("start.analytics.identifier.salt")).thenReturn(Some("secret"))
 
   baseConfig.setProperty("shire.sscookie.name", "Start-SSC")
   baseConfig.setProperty("shire.sscookie.path", "/")
@@ -36,7 +40,7 @@ class SSOControllerTest extends PlaySpec with MockitoSugar with Results {
   def controller(user: Option[User] = None) = {
     val loginContext = Fixtures.user.loginContext(user)
     val ssoClient = new MockSSOClient(loginContext)
-    new SSOController(ssoConfig, userCache, ssoClient, mock[UserInitialisationService], photoService)
+    new UserInfoController(ssoConfig, userCache, ssoClient, mock[UserInitialisationService], photoService, configuration)
   }
   val LOGIN_URL = "https://signon.example.com/login"
   val LOGOUT_URL = s"https://example.warwick.ac.uk/logout?target=https://$HOSTNAME"
@@ -80,6 +84,7 @@ class SSOControllerTest extends PlaySpec with MockitoSugar with Results {
       (json \ "refresh").as[Boolean] mustBe false
       (json \ "user" \ "authenticated").as[Boolean] mustBe true
       (json \ "user" \ "usercode").as[String] mustBe "user"
+      (json \ "user" \ "analytics" \ "identifier").as[String] mustBe "199b02eb2cf264223ff766f473f2ad442e9b7f5534b500b69944273b5cfa86ca" // sha256(secretuser)
       (json \ "links" \ "login").as[String] mustBe LOGIN_URL
       (json \ "links" \ "logout").as[String] mustBe LOGOUT_URL
       (json \ "user" \ "photo" \ "url").as[String] mustBe "/assets/images/no-photo.png"

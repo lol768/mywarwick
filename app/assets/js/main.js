@@ -169,6 +169,8 @@ function receiveUserInfo(response) {
       } else {
         store.dispatch(user.userReceive(data.user));
         store.dispatch(user.receiveSSOLinks(data.links));
+
+        window.ga('set', 'userId', data.user.analytics.identifier);
       }
     })
     .catch(() => setTimeout(() => fetchUserInfo().then(receiveUserInfo), 5000));
