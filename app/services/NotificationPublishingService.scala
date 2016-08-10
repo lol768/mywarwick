@@ -11,6 +11,7 @@ import org.quartz.JobKey
 import org.quartz.SimpleScheduleBuilder.simpleSchedule
 import org.quartz.TriggerBuilder.newTrigger
 import play.api.db.{Database, NamedDatabase}
+import services.ActivityError.{AlreadyPublished, DoesNotExist}
 import services.dao.{ActivityDao, AudienceDao, PublishedNotificationsDao}
 import services.job.PublishActivityJob
 
@@ -20,9 +21,11 @@ object NotificationPublishingService {
 
 @ImplementedBy(classOf[NotificationPublishingServiceImpl])
 trait NotificationPublishingService {
+  def update(id: String, item: NotificationSave, audience: Audience): Either[Seq[ActivityError], Unit]
 
-  def publish(item: NotificationSave, audience: Audience): String
+  def publish(item: NotificationSave, audience: Audience): Either[Seq[ActivityError], String]
 
+  def delete(id: String): Either[Seq[ActivityError], Unit]
 }
 
 @Singleton
@@ -36,20 +39,70 @@ class NotificationPublishingServiceImpl @Inject()(
 
   import NotificationPublishingService._
 
-  def publish(item: NotificationSave, audience: Audience): String = {
-    db.withTransaction { implicit c =>
-      val audienceId = audienceDao.saveAudience(audience)
-      val activityId = activityDao.save(makeActivitySave(item, audienceId), Seq.empty)
+  override def publish(item: NotificationSave, audience: Audience) = db.withTransaction { implicit c =>
+    val audienceId = audienceDao.saveAudience(audience)
+    val activityId = activityDao.save(makeActivitySave(item, audienceId), Seq.empty)
 
-      publishedNotificationsDao.save(PublishedNotificationSave(
-        activityId = activityId,
-        publisherId = item.publisherId,
-        createdBy = item.usercode
-      ))
+    publishedNotificationsDao.save(PublishedNotificationSave(
+      activityId = activityId,
+      publisherId = item.publisherId,
+      changedBy = item.usercode
+    ))
 
-      schedulePublishJob(activityId, audienceId, item.publishDate)
+    schedulePublishJob(activityId, audienceId, item.publishDate)
 
-      activityId
+    Right(activityId)
+  }
+
+  override def update(activityId: String, item: NotificationSave, audience: Audience) = db.withTransaction { implicit c =>
+    activityDao.getActivityById(activityId) match {
+      case Some(activity) if activity.generatedAt.isAfterNow =>
+
+        val audienceId = activity.audienceId match {
+          case Some(id) if audienceDao.getAudience(id) == audience =>
+            id
+          case Some(id) =>
+            val audienceId = audienceDao.saveAudience(audience)
+            audienceDao.deleteAudience(id)
+            audienceId
+          case _ =>
+            // Don't expect this, but for completeness
+            audienceDao.saveAudience(audience)
+        }
+
+        activityDao.update(activityId, makeActivitySave(item, audienceId))
+
+        publishedNotificationsDao.update(PublishedNotificationSave(
+          activityId = activityId,
+          publisherId = item.publisherId,
+          changedBy = item.usercode
+        ))
+
+        schedulePublishJob(activityId, audienceId, item.publishDate)
+
+        Right(())
+      case Some(_) =>
+        Left(Seq(AlreadyPublished))
+      case None =>
+        Left(Seq(DoesNotExist))
+    }
+  }
+
+  override def delete(id: String) = db.withTransaction { implicit c =>
+    activityDao.getActivityById(id) match {
+      case Some(activity) if activity.generatedAt.isAfterNow =>
+        publishedNotificationsDao.delete(id)
+
+        activity.audienceId.foreach(audienceDao.deleteAudience)
+        activityDao.delete(id)
+
+        unschedulePublishJob(id)
+
+        Right(())
+      case Some(_) =>
+        Left(Seq(AlreadyPublished))
+      case None =>
+        Left(Seq(DoesNotExist))
     }
   }
 
@@ -65,7 +118,7 @@ class NotificationPublishingServiceImpl @Inject()(
     )
 
   private def schedulePublishJob(activityId: String, audienceId: String, publishDate: DateTime): Unit = {
-    val key = new JobKey(activityId, "PublishActivity")
+    val key = new JobKey(activityId, PublishActivityJob.name)
 
     scheduler.deleteJob(key)
 
@@ -85,6 +138,10 @@ class NotificationPublishingServiceImpl @Inject()(
     } else {
       scheduler.triggerJobNow(job)
     }
+  }
+
+  private def unschedulePublishJob(activityId: String): Unit = {
+    scheduler.deleteJob(new JobKey(activityId, PublishActivityJob.name))
   }
 
 }

@@ -1,6 +1,15 @@
 @import system.RequestContext
 @(pageTitle: String*)(html: Html)(implicit context: RequestContext)
 @common.id7layout(pageTitle.mkString("", " > ", "")) {
+  @context.flash.get("success").map { message =>
+    <div class="alert alert-success">@message</div>
+  }
+  @context.flash.get("warning").map { message =>
+    <div class="alert alert-warning">@message</div>
+  }
+  @context.flash.get("error").map { message =>
+    <div class="alert alert-danger">@message</div>
+  }
   @html
   <script src="@routes.Assets.versioned("js/admin-bundle.js")"></script>
 }

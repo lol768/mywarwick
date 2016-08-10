@@ -3,13 +3,14 @@ package services
 import actors.WebsocketActor.Notification
 import helpers.Fixtures
 import models._
+import org.joda.time.DateTime
 import org.mockito.Matchers
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.LoneElement._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import services.ActivityError.{InvalidActivityType, InvalidTagName, InvalidTagValue, NoRecipients}
+import services.ActivityError.{InvalidActivityType, InvalidTagName, InvalidTagValue, NoRecipients, _}
 import services.dao.{ActivityCreationDao, ActivityDao, ActivityRecipientDao, ActivityTagDao}
 import services.messaging.MessagingService
 import warwick.sso.Usercode
@@ -109,6 +110,37 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
 
       e.loneElement mustBe an[InvalidTagValue]
       e.loneElement must have('name ("module"), 'value ("CS118"))
+    }
+
+    "update - fail if activity does not exist" in new Scope {
+      when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(None)
+
+      val result = service.update("activity", submissionDue)
+
+      result must be a 'left
+      result.left.get must contain(DoesNotExist)
+    }
+
+    "update - fail if activity is already published" in new Scope {
+      val existingActivity = Fixtures.activity.fromSave("activity", submissionDue).copy(generatedAt = DateTime.now.minusHours(1))
+      when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(Some(existingActivity))
+
+      val result = service.update("activity", submissionDue)
+
+      result must be a 'left
+      result.left.get must contain(AlreadyPublished)
+    }
+
+    "update an existing activity" in new Scope {
+      val existingActivity = Fixtures.activity.fromSave("activity", submissionDue).copy(generatedAt = DateTime.now.plusHours(1))
+      when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(Some(existingActivity))
+
+      val result = service.update("activity", submissionDue)
+
+      result must be a 'right
+      result.right.get must be("activity")
+
+      verify(activityDao).update(Matchers.eq("activity"), Matchers.eq(submissionDue))(Matchers.any())
     }
 
     // TODO test when there are activities to replace

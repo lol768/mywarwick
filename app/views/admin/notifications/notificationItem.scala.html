@@ -1,4 +1,5 @@
-@(item: ActivityResponse)
+@import models.publishing.Publisher
+@(publisher: Publisher, item: ActivityResponse)
 
 <div class="activity-item">
   <div class="media">
@@ -17,5 +18,13 @@
         <a href="@url">Link to @url</a>
       }
     </div>
+    @if(item.activity.generatedAt.isAfterNow) {
+      <div class="media-right">
+        <a href="@controllers.admin.routes.NotificationsController.updateForm(publisher.id, item.activity.id)" class="btn btn-default">Edit</a>
+        @helper.form(controllers.admin.routes.NotificationsController.delete(publisher.id, item.activity.id)) {
+          <button type="submit" class="btn btn-danger">Delete</button>
+        }
+      </div>
+    }
   </div>
 </div>
