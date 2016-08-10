@@ -1,13 +1,14 @@
 package services
 
-import actors.WebsocketActor.Notification
 import com.google.inject.{ImplementedBy, Inject}
 import models._
+import models.news.Audience
 import org.joda.time.DateTime
+import org.quartz._
 import play.api.db.{Database, NamedDatabase}
 import services.ActivityError._
-import services.dao.{ActivityCreationDao, ActivityDao, ActivityRecipientDao, ActivityTagDao}
-import services.messaging.MessagingService
+import services.dao._
+import services.job.PublishActivityJob
 import warwick.sso.{User, Usercode}
 
 @ImplementedBy(classOf[ActivityServiceImpl])
@@ -16,11 +17,13 @@ trait ActivityService {
 
   def getActivitiesForUser(user: User, limit: Int = 50, before: Option[DateTime] = None): Seq[ActivityResponse]
 
-  def save(activity: ActivitySave, recipients: Set[Usercode]): Either[Seq[ActivityError], String]
+  def save(activity: ActivitySave, audience: Audience): Either[Seq[ActivityError], String]
 
   def setRecipients(activity: Activity, recipients: Set[Usercode]): Either[Seq[ActivityError], Unit]
 
-  def update(id: String, activity: ActivitySave): Either[Seq[ActivityError], String]
+  def update(id: String, activity: ActivitySave, audience: Audience): Either[Seq[ActivityError], String]
+
+  def delete(id: String): Either[Seq[ActivityError], Unit]
 
   def getLastReadDate(user: User): Option[DateTime]
 
@@ -35,25 +38,40 @@ trait ActivityService {
 }
 
 class ActivityServiceImpl @Inject()(
-  dao: ActivityDao,
-  creationDao: ActivityCreationDao,
-  recipientDao: ActivityRecipientDao,
-  tagDao: ActivityTagDao,
-  messaging: MessagingService,
-  pubSub: PubSub,
   @NamedDatabase("default") db: Database,
-  activityTypeService: ActivityTypeService
+  dao: ActivityDao,
+  activityTypeService: ActivityTypeService,
+  tagDao: ActivityTagDao,
+  audienceDao: AudienceDao,
+  recipientDao: ActivityRecipientDao,
+  scheduler: SchedulerService
 ) extends ActivityService {
 
   override def getActivityById(id: String): Option[Activity] =
     db.withConnection(implicit c => dao.getActivityById(id))
 
-  override def update(id: String, activity: ActivitySave) = {
+  override def update(id: String, activity: ActivitySave, audience: Audience) = {
     getActivityById(id).map { existingActivity =>
-      if (existingActivity.generatedAt.isBeforeNow) {
+      if (existingActivity.publishedAt.isBeforeNow) {
         Left(Seq(AlreadyPublished))
       } else {
-        db.withTransaction(implicit c => dao.update(id, activity))
+        db.withTransaction { implicit c =>
+          val audienceId = existingActivity.audienceId match {
+            case Some(aid) if audienceDao.getAudience(id) == audience =>
+              aid
+            case Some(aid) =>
+              val audienceId = audienceDao.saveAudience(audience)
+              audienceDao.deleteAudience(aid)
+              audienceId
+            case _ =>
+              // Don't expect this, but for completeness
+              audienceDao.saveAudience(audience)
+          }
+
+          dao.update(id, activity, audienceId)
+
+          schedulePublishJob(id, audienceId, activity.publishedAt.getOrElse(DateTime.now))
+        }
         Right(id)
       }
     }.getOrElse {
@@ -61,27 +79,37 @@ class ActivityServiceImpl @Inject()(
     }
   }
 
-  override def save(activity: ActivitySave, recipients: Set[Usercode]): Either[Seq[ActivityError], String] = {
-    if (recipients.isEmpty) {
-      Left(Seq(NoRecipients))
-    } else {
-      val errors = validateActivity(activity)
-      if (errors.nonEmpty) {
-        Left(errors)
+  override def delete(id: String) = {
+    getActivityById(id).map { existingActivity =>
+      if (existingActivity.publishedAt.isBeforeNow) {
+        Left(Seq(AlreadyPublished))
       } else {
-        db.withTransaction { implicit c =>
-          val replaceIds = tagDao.getActivitiesWithTags(activity.replace, activity.providerId)
+        db.withTransaction(implicit c => dao.delete(id))
+        unschedulePublishJob(id)
 
-          val result = creationDao.createActivity(activity, recipients, replaceIds)
+        Right(())
+      }
+    }.getOrElse {
+      Left(Seq(DoesNotExist))
+    }
+  }
 
-          if (result.activity.shouldNotify) {
-            messaging.send(recipients, result.activity)
-          }
+  override def save(activity: ActivitySave, audience: Audience): Either[Seq[ActivityError], String] = {
+    val errors = validateActivity(activity)
+    if (errors.nonEmpty) {
+      Left(errors)
+    } else {
+      db.withTransaction { implicit c =>
+        val replaceIds = tagDao.getActivitiesWithTags(activity.replace, activity.providerId)
 
-          recipients.foreach(usercode => pubSub.publish(usercode.string, Notification(result)))
+        val audienceId = audienceDao.saveAudience(audience)
+        val activityId = dao.save(activity, audienceId, replaceIds)
 
-          Right(result.activity.id)
-        }
+        activity.tags.foreach(tag => tagDao.save(activityId, tag))
+
+        schedulePublishJob(activityId, audienceId, activity.publishedAt.getOrElse(DateTime.now))
+
+        Right(activityId)
       }
     }
   }
@@ -131,6 +159,33 @@ class ActivityServiceImpl @Inject()(
   override def getActivityIcon(providerId: String): Option[ActivityIcon] =
     db.withConnection(implicit c => dao.getActivityIcon(providerId))
 
+  private def schedulePublishJob(activityId: String, audienceId: String, publishDate: DateTime): Unit = {
+    val key = new JobKey(activityId, PublishActivityJob.name)
+
+    scheduler.deleteJob(key)
+
+    val job = JobBuilder.newJob(classOf[PublishActivityJob])
+      .withIdentity(key)
+      .usingJobData("activityId", activityId)
+      .usingJobData("audienceId", audienceId)
+      .build()
+
+    if (publishDate.isAfterNow) {
+      val trigger = TriggerBuilder.newTrigger()
+        .startAt(publishDate.toDate)
+        .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
+        .build()
+
+      scheduler.scheduleJob(job, trigger)
+    } else {
+      scheduler.triggerJobNow(job)
+    }
+  }
+
+  private def unschedulePublishJob(activityId: String): Unit = {
+    scheduler.deleteJob(new JobKey(activityId, PublishActivityJob.name))
+  }
+
 }
 
 sealed trait ActivityError {
@@ -138,10 +193,6 @@ sealed trait ActivityError {
 }
 
 object ActivityError {
-
-  object NoRecipients extends ActivityError {
-    val message = "No valid recipients"
-  }
 
   case class InvalidActivityType(name: String) extends ActivityError {
     def message = s"The activity type '$name' is not valid"

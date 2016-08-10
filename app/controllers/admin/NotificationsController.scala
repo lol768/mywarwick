@@ -5,14 +5,14 @@ import javax.inject.Inject
 import controllers.BaseController
 import models.news.{Audience, NotificationData}
 import models.publishing.Ability.{CreateNotifications, DeleteNotifications, EditNotifications, ViewNotifications}
-import models.{Activity, ActivityResponse, DateFormats}
+import models.{ActivityResponse, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{ActionRefiner, Result}
 import services._
 import services.dao.DepartmentInfoDao
-import system.{RequestContext, Validation}
+import system.Validation
 import views.html.errors
 import views.html.admin.{notifications => views}
 
@@ -25,11 +25,9 @@ class NotificationsController @Inject()(
   val messagesApi: MessagesApi,
   val departmentInfoDao: DepartmentInfoDao,
   audienceBinder: AudienceBinder,
-  notificationPublishingService: NotificationPublishingService,
   activityService: ActivityService,
   val newsCategoryService: NewsCategoryService,
-  audienceService: AudienceService,
-  publishedNotificationsService: PublishedNotificationsService
+  audienceService: AudienceService
 ) extends BaseController with I18nSupport with Publishing {
 
   val notificationMapping = mapping(
@@ -52,7 +50,7 @@ class NotificationsController @Inject()(
         activityService.getActivityIcon(activity.providerId),
         Seq.empty
       ))
-      .partition(_.activity.generatedAt.isBeforeNow)
+      .partition(_.activity.publishedAt.isBeforeNow)
 
     Ok(views.list(request.publisher, futureNotifications, pastNotifications, request.userRole))
   }
@@ -68,7 +66,7 @@ class NotificationsController @Inject()(
       (publish, audience) => {
         val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
 
-        val activityId = notificationPublishingService.publish(notification, audience)
+        val activityId = activityService.save(notification, audience)
         auditLog('CreateNotification, 'id -> activityId)
 
         Redirect(routes.NotificationsController.list(publisherId)).flashing("success" -> "Notification created")
@@ -87,7 +85,7 @@ class NotificationsController @Inject()(
         providerId = activity.providerId,
         linkHref = activity.url,
         publishDateSet = true,
-        publishDate = activity.generatedAt.toLocalDateTime
+        publishDate = activity.publishedAt.toLocalDateTime
       )
 
       val audienceData = audienceBinder.unbindAudience(audience)
@@ -110,9 +108,9 @@ class NotificationsController @Inject()(
         (publish, audience) => {
           val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
-          val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
+          val activity = publish.item.toSave(request.context.user.get.usercode, publisherId)
 
-          notificationPublishingService.update(id, notification, audience).fold(
+          activityService.update(id, activity, audience).fold(
             errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
             id => {
               auditLog('UpdateNotification, 'id -> id)
@@ -127,7 +125,7 @@ class NotificationsController @Inject()(
     .andThen(NotificationBelongsToPublisher(id, publisherId)) { implicit request =>
       val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
-      notificationPublishingService.delete(id).fold(
+      activityService.delete(id).fold(
         errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
         _ => {
           auditLog('DeleteNotification, 'id -> id)
@@ -143,8 +141,7 @@ class NotificationsController @Inject()(
       val maybeBoolean = for {
         activity <- activityService.getActivityById(id)
         audienceId <- activity.audienceId
-        publishedNotification <- publishedNotificationsService.getByActivityId(id)
-      } yield publishedNotification.publisherId == publisherId
+      } yield activity.publisherId.contains(publisherId)
 
       Future.successful {
         if (maybeBoolean.contains(true)) {

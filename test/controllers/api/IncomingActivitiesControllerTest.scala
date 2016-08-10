@@ -2,6 +2,7 @@ package controllers.api
 
 import akka.stream.ActorMaterializer
 import helpers.TestActors
+import models.news.Audience
 import models.publishing.PublishingRole.{APINotificationsManager, NotificationsManager}
 import org.mockito.Matchers
 import org.mockito.Matchers._
@@ -92,7 +93,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
     "return created activity ID on success" in {
       when(publisherService.getRoleForUser(Matchers.eq(tabulaPublisherId), any())).thenReturn(APINotificationsManager)
       when(activityRecipientService.getRecipientUsercodes(Seq(Usercode("someone")), Seq.empty)).thenReturn(Set(Usercode("someone")))
-      when(activityService.save(any(), any[Set[Usercode]]())).thenReturn(Right("created-activity-id"))
+      when(activityService.save(any(), Matchers.eq(Audience.usercode("someone")))).thenReturn(Right("created-activity-id"))
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
 
@@ -121,8 +122,6 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
     }
 
     "reject an incorrectly-formatted generated_at date" in {
-      when(activityService.save(any(), any[Set[Usercode]]())).thenReturn(Right("created-activity-id"))
-
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(
         body + ("generated_at" -> JsString("yesterday"))
       ))

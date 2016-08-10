@@ -17,7 +17,7 @@ trait ActivityRecipientDao {
     */
   def setRecipients(activity: Activity, recipients: Set[Usercode])(implicit c: Connection): Unit
 
-  def create(activityId: String, usercode: String, generatedAt: Option[DateTime])(implicit c: Connection): Unit
+  def create(activityId: String, usercode: String, publishedAt: Option[DateTime])(implicit c: Connection): Unit
 
   def markSent(activityId: String, usercode: String)(implicit c: Connection): Unit
 
@@ -25,14 +25,14 @@ trait ActivityRecipientDao {
 
 class ActivityRecipientDaoImpl @Inject()() extends ActivityRecipientDao {
 
-  override def create(activityId: String, usercode: String, generatedAt: Option[DateTime])(implicit c: Connection): Unit = {
+  override def create(activityId: String, usercode: String, publishedAt: Option[DateTime])(implicit c: Connection): Unit = {
     val now = DateTime.now
-    SQL("INSERT INTO ACTIVITY_RECIPIENT (ACTIVITY_ID, USERCODE, CREATED_AT, GENERATED_AT) VALUES ({activityId}, {usercode}, {createdAt}, {generatedAt})")
+    SQL("INSERT INTO ACTIVITY_RECIPIENT (ACTIVITY_ID, USERCODE, CREATED_AT, PUBLISHED_AT) VALUES ({activityId}, {usercode}, {createdAt}, {publishedAt})")
       .on(
         'activityId -> activityId,
         'usercode -> usercode,
         'createdAt -> now,
-        'generatedAt -> generatedAt.getOrElse(now)
+        'publishedAt -> publishedAt.getOrElse(now)
       )
       .execute()
   }
@@ -49,7 +49,7 @@ class ActivityRecipientDaoImpl @Inject()() extends ActivityRecipientDao {
   override def setRecipients(activity: Activity, recipients: Set[Usercode])(implicit c: Connection): Unit = {
     SQL"DELETE FROM ACTIVITY_RECIPIENT WHERE ACTIVITY_ID = ${activity.id}".execute()
     recipients.foreach { recipient =>
-      create(activity.id, recipient.string, Some(activity.generatedAt))
+      create(activity.id, recipient.string, Some(activity.publishedAt))
     }
   }
 

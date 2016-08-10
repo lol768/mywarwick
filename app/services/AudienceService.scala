@@ -39,6 +39,7 @@ class AudienceServiceImpl @Inject()(
           subset <- subsets
           user <- resolveSubset(code.toLowerCase, subset).get
         } yield user
+        case UsercodesAudience(usercodes) => usercodes
       }.distinct
     }
   }

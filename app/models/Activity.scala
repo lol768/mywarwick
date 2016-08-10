@@ -4,6 +4,7 @@ import models.news.NotificationData
 import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import warwick.sso.Usercode
 
 case class ActivityIcon(name: String, colour: Option[String])
 object ActivityIcon {
@@ -22,10 +23,11 @@ case class Activity(
   text: Option[String],
   url: Option[String],
   replacedBy: Option[String],
-  generatedAt: DateTime,
+  publishedAt: DateTime,
   createdAt: DateTime,
   shouldNotify: Boolean,
-  audienceId: Option[String] = None
+  audienceId: Option[String] = None,
+  publisherId: Option[String] = None
 )
 
 object Activity {
@@ -47,7 +49,7 @@ object ActivityResponse {
         "text" -> o.activity.text,
         "url" -> o.activity.url,
         "tags" -> o.tags,
-        "date" -> o.activity.generatedAt
+        "date" -> o.activity.publishedAt
       )
 
       o.icon match {
@@ -90,6 +92,8 @@ case class ActivityTag(
 case class TagValue(internalValue: String, displayValue: Option[String] = None)
 
 case class ActivitySave(
+  changedBy: Usercode,
+  publisherId: String,
   providerId: String,
   shouldNotify: Boolean,
   `type`: String,
@@ -98,25 +102,14 @@ case class ActivitySave(
   url: Option[String] = None,
   tags: Seq[ActivityTag] = Seq.empty,
   replace: Map[String, String] = Map.empty,
-  generatedAt: Option[DateTime] = None,
-  audienceId: Option[String] = None
+  publishedAt: Option[DateTime] = None
 )
 
 object ActivitySave {
-  def fromApi(providerId: String, shouldNotify: Boolean, data: IncomingActivityData): ActivitySave = {
+  def fromApi(usercode: Usercode, publisherId: String, providerId: String, shouldNotify: Boolean, data: IncomingActivityData): ActivitySave = {
     import data._
-    ActivitySave(providerId, shouldNotify, `type`, title, text, url, tags.getOrElse(Seq.empty), replace.getOrElse(Map.empty), generated_at)
+    ActivitySave(usercode, publisherId, providerId, shouldNotify, `type`, title, text, url, tags.getOrElse(Seq.empty), replace.getOrElse(Map.empty), generated_at)
   }
-
-  def fromPublisher(item: NotificationData, audienceId: String) =
-    ActivitySave(
-      providerId = "news",
-      `type` = "news",
-      title = item.text,
-      url = item.linkHref,
-      shouldNotify = true,
-      audienceId = Some(audienceId)
-    )
 }
 
 case class ActivityRecipients(

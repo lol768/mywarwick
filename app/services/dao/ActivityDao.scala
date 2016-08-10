@@ -22,9 +22,9 @@ trait ActivityDao {
 
   def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse]
 
-  def save(activity: ActivitySave, replaces: Seq[String])(implicit c: Connection): String
+  def save(activity: ActivitySave, audienceId: String, replaces: Seq[String])(implicit c: Connection): String
 
-  def update(id: String, activity: ActivitySave)(implicit c: Connection): Unit
+  def update(id: String, activity: ActivitySave, audienceId: String)(implicit c: Connection): Unit
 
   def delete(activityId: String)(implicit c: Connection): Unit
 
@@ -46,28 +46,16 @@ class ActivityDaoImpl @Inject()(
   dialect: DatabaseDialect
 ) extends ActivityDao {
 
-  override def save(activity: ActivitySave, replaces: Seq[String])(implicit c: Connection): String = {
+  override def save(activity: ActivitySave, audienceId: String, replaces: Seq[String])(implicit c: Connection): String = {
     import activity._
     val id = UUID.randomUUID().toString
     val now = new DateTime()
+    val generated = publishedAt.getOrElse(now)
 
-    SQL(
-      """
-      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, generated_at, created_at, should_notify, audience_id)
-      VALUES ({id}, {providerId}, {type}, {title}, {text}, {url}, {generatedAt}, {createdAt}, {shouldNotify}, {audienceId})
-      """
-    ).on(
-      'id -> id,
-      'providerId -> providerId,
-      'type -> `type`,
-      'title -> title,
-      'text -> text,
-      'url -> url,
-      'generatedAt -> generatedAt.getOrElse(now),
-      'createdAt -> now,
-      'shouldNotify -> shouldNotify,
-      'audienceId -> audienceId
-    )
+    SQL"""
+      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by)
+      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $generated, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string})
+    """
       .execute()
 
     updateReplacedActivity(id, replaces)
@@ -75,10 +63,10 @@ class ActivityDaoImpl @Inject()(
     id
   }
 
-  override def update(id: String, activity: ActivitySave)(implicit c: Connection): Unit = {
+  override def update(id: String, activity: ActivitySave, audienceId: String)(implicit c: Connection): Unit = {
     import activity._
-    val date = generatedAt.getOrElse(DateTime.now)
-    SQL"UPDATE ACTIVITY SET TYPE = ${`type`}, TITLE = $title, TEXT = $text, URL = $url, GENERATED_AT = $date, AUDIENCE_ID = $audienceId WHERE ID = $id"
+    val date = publishedAt.getOrElse(DateTime.now)
+    SQL"UPDATE ACTIVITY SET TYPE = ${`type`}, TITLE = $title, TEXT = $text, URL = $url, PUBLISHED_AT = $date, AUDIENCE_ID = $audienceId WHERE ID = $id"
       .execute()
   }
 
@@ -114,11 +102,9 @@ class ActivityDaoImpl @Inject()(
 
   override def getActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[Activity] = {
     SQL(s"""
-      SELECT ACTIVITY.*
-      FROM ACTIVITY
-      JOIN PUBLISHED_NOTIFICATION ON ACTIVITY.ID = PUBLISHED_NOTIFICATION.ACTIVITY_ID
-      WHERE PUBLISHED_NOTIFICATION.PUBLISHER_ID = {publisherId}
-      ORDER BY ACTIVITY.CREATED_AT DESC
+      SELECT * FROM ACTIVITY
+      WHERE PUBLISHER_ID = {publisherId}
+      ORDER BY CREATED_AT DESC
       ${dialect.limitOffset(limit)}
        """)
       .on('publisherId -> publisherId)
@@ -129,7 +115,7 @@ class ActivityDaoImpl @Inject()(
     SQL(
       """
       SELECT ACTIVITY.* FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
-      WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.GENERATED_AT > {sinceDate} AND ACTIVITY.ID IN (
+      WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.PUBLISHED_AT > {sinceDate} AND ACTIVITY.ID IN (
       SELECT ACTIVITY.ID FROM MESSAGE_SEND WHERE USERCODE = {usercode} AND OUTPUT = {mobile})
       """)
       .on(
@@ -141,7 +127,7 @@ class ActivityDaoImpl @Inject()(
   }
 
   override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse] = {
-    val maybeBefore = if (before.isDefined) "AND ACTIVITY_RECIPIENT.GENERATED_AT < {before}" else ""
+    val maybeBefore = if (before.isDefined) "AND ACTIVITY_RECIPIENT.PUBLISHED_AT < {before}" else ""
     val activities = SQL(
       s"""
         SELECT
@@ -161,7 +147,7 @@ class ActivityDaoImpl @Inject()(
           WHERE USERCODE = {usercode}
                 AND REPLACED_BY_ID IS NULL
                 $maybeBefore
-          ORDER BY ACTIVITY_RECIPIENT.GENERATED_AT DESC
+          ORDER BY ACTIVITY_RECIPIENT.PUBLISHED_AT DESC
           ${dialect.limitOffset(limit)})
         """)
       .on(
@@ -207,7 +193,7 @@ class ActivityDaoImpl @Inject()(
   }
 
   override def countNotificationsSinceDate(usercode: String, date: DateTime)(implicit c: Connection): Int =
-    SQL("SELECT COUNT(ACTIVITY.ID) FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.GENERATED_AT > {date}")
+    SQL("SELECT COUNT(ACTIVITY.ID) FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.PUBLISHED_AT > {date}")
       .on(
         'usercode -> usercode,
         'date -> date
@@ -222,12 +208,12 @@ class ActivityDaoImpl @Inject()(
       get[Option[String]]("TEXT") ~
       get[Option[String]]("URL") ~
       get[Option[String]]("REPLACED_BY_ID") ~
-      get[DateTime]("GENERATED_AT") ~
+      get[DateTime]("PUBLISHED_AT") ~
       get[DateTime]("CREATED_AT") ~
       get[Boolean]("SHOULD_NOTIFY") ~
       get[Option[String]]("AUDIENCE_ID") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify ~ audienceId =>
-        Activity(id, providerId, activityType, title, text, url, replacedById, generatedAt, createdAt, shouldNotify, audienceId)
+      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ publishedAt ~ createdAt ~ shouldNotify ~ audienceId =>
+        Activity(id, providerId, activityType, title, text, url, replacedById, publishedAt, createdAt, shouldNotify, audienceId)
     }
 
   private lazy val tagParser: RowParser[Option[ActivityTag]] =

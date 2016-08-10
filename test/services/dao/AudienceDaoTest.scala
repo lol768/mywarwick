@@ -54,12 +54,13 @@ class AudienceDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       val audience = audienceDao.audienceFromComponents(components)
 
-      audience mustBe Audience(Seq(
+      audience must not be 'public
+      audience.components must contain only(
         DepartmentAudience("ch", Seq(Staff, UndergradStudents)),
         ModuleAudience("music"),
         WebgroupAudience(GroupName("in-elab")),
         ModuleAudience("history")
-      ))
+      )
     }
 
     "group cross-DepartmentAudience Components into Audience" in {
@@ -72,11 +73,12 @@ class AudienceDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       val audience = audienceDao.audienceFromComponents(components)
 
-      audience mustBe Audience(Seq(
+      audience must not be 'public
+      audience.components must contain only(
         DepartmentAudience("fr", Seq(ResearchPostgrads)),
         DepartmentAudience("ch", Seq(Staff, UndergradStudents)),
         DepartmentAudience("ec", Seq(Staff))
-      ))
+      )
     }
 
     "group global Staff and PG Components into audience" in {
@@ -88,11 +90,12 @@ class AudienceDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       val audience = audienceDao.audienceFromComponents(components)
 
-      audience mustBe Audience(Seq(
+      audience must not be 'public
+      audience.components must contain only(
         Staff,
         TaughtPostgrads,
         ResearchPostgrads
-      ))
+      )
     }
 
     "read Components from db into Audience" in transaction {implicit c =>

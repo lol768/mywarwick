@@ -8,7 +8,7 @@ import anorm._
 import com.google.inject.ImplementedBy
 import models.news.Audience
 import models.news.Audience._
-import warwick.sso.GroupName
+import warwick.sso.{GroupName, Usercode}
 
 case class AudienceComponentSave(name: String, value: Option[String], deptCode: Option[String])
 
@@ -60,10 +60,15 @@ class AudienceDaoImpl extends AudienceDao {
 
   def audienceFromComponents(components: Seq[AudienceComponentSave]): Audience = Audience(
     components.groupBy(_.deptCode).flatMap {
-      case (None, components) => components.flatMap {
-        case AudienceComponentSave("Module", Some(code), _) => Some(ModuleAudience(code))
-        case AudienceComponentSave("Webgroup", Some(group), _) => Some(WebgroupAudience(GroupName(group)))
-        case other => ComponentParameter.unapply(other.name)
+      case (None, components) => components.groupBy(_.name).flatMap {
+        case ("Module", components) => components.collect {
+          case AudienceComponentSave("Module", Some(code), _) => ModuleAudience(code)
+        }
+        case ("Webgroup", components) => components.collect {
+          case AudienceComponentSave("Webgroup", Some(group), _) => WebgroupAudience(GroupName(group))
+        }
+        case ("Usercode", components) => Some(UsercodesAudience(components.map(_.value).collect { case Some(string) => Usercode(string) }))
+        case (_, components) => components.map(_.name).flatMap(ComponentParameter.unapply)
       }
       case (Some(deptCode), components) =>
         val subsets = components.map(_.name).map {
@@ -79,6 +84,7 @@ class AudienceDaoImpl extends AudienceDao {
       case DepartmentAudience(code, subsets) => subsets.flatMap { subset => resolveSubset(Some(code), subset) }
       case ModuleAudience(code) => Seq(AudienceComponentSave("Module", Some(code), None))
       case WebgroupAudience(group) => Seq(AudienceComponentSave("Webgroup", Some(group.string), None))
+      case UsercodesAudience(usercodes) => usercodes.map(usercode => AudienceComponentSave("Usercode", Some(usercode.string), None))
     }
 
   private def resolveSubset(deptCode: Option[String], subset: DepartmentSubset): Seq[AudienceComponentSave] =

@@ -1,7 +1,7 @@
 package models.news
 
 import enumeratum.EnumEntry
-import warwick.sso.GroupName
+import warwick.sso.{GroupName, Usercode}
 
 case class Audience(components: Seq[Audience.Component] = Nil, public: Boolean = false) {
   if (public && components.nonEmpty) {
@@ -12,10 +12,20 @@ case class Audience(components: Seq[Audience.Component] = Nil, public: Boolean =
 object Audience {
   val Public = Audience(public = true)
 
+  def usercodes(usercodes: Seq[Usercode]): Audience = {
+    Audience(Seq(UsercodesAudience(usercodes)))
+  }
+
+  def usercode(usercodeString: String): Audience = {
+    usercodes(Seq(Usercode(usercodeString)))
+  }
+
   // Pieces of audience
   sealed trait Component extends EnumEntry
   // Pieces of department
   sealed trait DepartmentSubset extends Component
+
+  case class UsercodesAudience(usercodes: Seq[Usercode]) extends Component
 
   case class WebgroupAudience(groupName: GroupName) extends Component
   case class ModuleAudience(moduleCode: String) extends Component

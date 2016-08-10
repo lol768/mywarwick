@@ -5,6 +5,7 @@ import javax.inject.Singleton
 import com.google.inject.Inject
 import controllers.BaseController
 import models._
+import models.news.Audience
 import models.publishing.Ability.CreateAPINotifications
 import models.publishing.PublishingRole.APINotificationsManager
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -39,14 +40,14 @@ class IncomingActivitiesController @Inject()(
         request.context.user.map { user =>
           if (publisherService.getRoleForUser(publisherId, user.usercode).can(CreateAPINotifications)) {
             request.body.validate[IncomingActivityData].map { data =>
-              val activity = ActivitySave.fromApi(providerId, shouldNotify, data)
+              val activity = ActivitySave.fromApi(user.usercode, publisherId, providerId, shouldNotify, data)
 
               val usercodes = recipientService.getRecipientUsercodes(
                 data.recipients.users.getOrElse(Seq.empty).map(Usercode),
                 data.recipients.groups.getOrElse(Seq.empty).map(GroupName)
-              )
+              ).toSeq
 
-              activityService.save(activity, usercodes).fold(badRequest, id => {
+              activityService.save(activity, Audience.usercodes(usercodes)).fold(badRequest, id => {
                 auditLog('CreateActivity, 'id -> id, 'provider -> activity.providerId)
                 created(id)
               })
