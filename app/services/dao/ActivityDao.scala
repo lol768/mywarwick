@@ -50,11 +50,11 @@ class ActivityDaoImpl @Inject()(
     import activity._
     val id = UUID.randomUUID().toString
     val now = new DateTime()
-    val generated = publishedAt.getOrElse(now)
+    val publishedAtOrNow = publishedAt.getOrElse(now)
 
     SQL"""
       INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by)
-      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $generated, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string})
+      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $publishedAtOrNow, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string})
     """
       .execute()
 
@@ -65,8 +65,8 @@ class ActivityDaoImpl @Inject()(
 
   override def update(id: String, activity: ActivitySave, audienceId: String)(implicit c: Connection): Unit = {
     import activity._
-    val date = publishedAt.getOrElse(DateTime.now)
-    SQL"UPDATE ACTIVITY SET TYPE = ${`type`}, TITLE = $title, TEXT = $text, URL = $url, PUBLISHED_AT = $date, AUDIENCE_ID = $audienceId WHERE ID = $id"
+    val publishedAtOrNow = publishedAt.getOrElse(DateTime.now)
+    SQL"UPDATE ACTIVITY SET TYPE = ${`type`}, TITLE = $title, TEXT = $text, URL = $url, PUBLISHED_AT = $publishedAtOrNow, AUDIENCE_ID = $audienceId WHERE ID = $id"
       .execute()
   }
 
@@ -217,7 +217,7 @@ class ActivityDaoImpl @Inject()(
     }
 
   private lazy val tagParser: RowParser[Option[ActivityTag]] =
-    get[Option[String]]("TAG_NAME") ~ // Option because an activity can have no tags
+    get[Option[String]]("TAG_NAME") ~ // Option becbugs.elab.warwick.ac.ukause an activity can have no tags
       get[Option[String]]("TAG_VALUE") ~
       get[Option[String]]("TAG_DISPLAY_VALUE") map {
       case name ~ value ~ display =>

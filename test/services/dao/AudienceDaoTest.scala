@@ -4,7 +4,7 @@ import helpers.OneStartAppPerSuite
 import models.news.Audience
 import models.news.Audience._
 import org.scalatestplus.play.PlaySpec
-import warwick.sso.GroupName
+import warwick.sso.{GroupName, Usercode}
 
 class AudienceDaoTest extends PlaySpec with OneStartAppPerSuite {
 
@@ -41,6 +41,26 @@ class AudienceDaoTest extends PlaySpec with OneStartAppPerSuite {
       val saved = audienceDao.audienceToComponents(audience)
 
       saved mustBe Seq(AudienceComponentSave("Webgroup", Some("in-music"), None))
+    }
+
+    "save Usercodes component" in {
+      val audience = Audience(Seq(Audience.UsercodesAudience(Seq(Usercode("a"), Usercode("b")))))
+      val saved = audienceDao.audienceToComponents(audience)
+
+      saved mustBe Seq(AudienceComponentSave("Usercode", Some("a"), None), AudienceComponentSave("Usercode", Some("b"), None))
+    }
+
+    "reconstitute usercodes audience" in {
+      val components = Seq(
+        AudienceComponentSave("Usercode", Some("a"), None),
+        AudienceComponentSave("Usercode", Some("b"), None)
+      )
+
+      val audience = audienceDao.audienceFromComponents(components)
+
+      audience mustBe Audience(Seq(
+        Audience.UsercodesAudience(Seq(Usercode("a"), Usercode("b")))
+      ))
     }
 
     "group mixed Components into Audience" in {
