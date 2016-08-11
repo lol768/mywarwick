@@ -32,7 +32,7 @@ export default class PermissionRequest extends ReactComponent {
       <div className={classNames('permission-request')}>
         <div className="permission-notice">
           Start needs your permission to <a onClick={ this.requestPermission }>
-          send desktop notifications</a>
+          show system notifications</a>
         </div>
         <div className="permission-dismiss">
           <i className={classNames('fa', 'fa-fw', 'fa-times')} onClick={this.hide}> </i>
