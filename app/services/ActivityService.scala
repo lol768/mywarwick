@@ -60,9 +60,8 @@ class ActivityServiceImpl @Inject()(
             case Some(id) if audienceDao.getAudience(activityId) == audience =>
               id
             case Some(id) =>
-              val audienceId = audienceDao.saveAudience(audience)
               audienceDao.deleteAudience(id)
-              audienceId
+              audienceDao.saveAudience(audience)
             case _ =>
               // Don't expect this, but for completeness
               audienceDao.saveAudience(audience)
