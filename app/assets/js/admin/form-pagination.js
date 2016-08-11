@@ -2,7 +2,6 @@ import $ from 'jquery';
 import '../../../../node_modules/jquery-form/jquery.form.js';
 
 (() => {
-
   const SPLIT_FORM = 'form.split-form';
 
   function getHashNum() {
@@ -12,26 +11,36 @@ import '../../../../node_modules/jquery-form/jquery.form.js';
   let currentPage = getHashNum() || 0;
   history.pushState({ pageNum: currentPage }, location.href);
 
+  function showSection(num) {
+    history.replaceState({ pageNum: num }, location.href);
+    currentPage = num;
+    const section = `section:eq(${num})`;
+    $('.active').removeClass('active').hide();
+    $(section).show().addClass('active').fadeIn();
+  }
+
+  $('section:not(:last)').append('<button class="btn btn-primary next pull-right" >Next</button>');
+
+  showSection(currentPage);
+
   function validate() {
     return new Promise((resolve, reject) =>
       $(SPLIT_FORM).ajaxSubmit({
         success: resolve,
         error: reject,
+        data: { validateOnly: true },
         resetForm: false,
       })
     );
   }
 
   function replaceErrors(errs) {
-    // console.log(`replacing ${errs.length} errors`);
-    // console.log(errs)
     $.map(errs, err => $(`#${err.id}`).replaceWith(err));
   }
 
   function checkFormErrors(html) {
     return new Promise((res, rej) => {
       const errors = $(html).find(`section:eq(${currentPage}) .has-error`);
-      console.log(errors);
       if (errors.length > 0) {
         rej(errors);
       } else {
@@ -40,35 +49,9 @@ import '../../../../node_modules/jquery-form/jquery.form.js';
     });
   }
 
-  $(SPLIT_FORM).on('submit', e => {
-    validate()
-      .then(html =>
-        checkFormErrors(html)
-          .then(() => $(SPLIT_FORM).off().submit())
-          .catch(replaceErrors)
-      ).catch(console.log);
-    return false;
-  });
-
-  function showSection(num) {
-    console.log(`showing section ${num}`);
-    history.replaceState({ pageNum: num }, location.href);
-    currentPage = num;
-    const section = `section:eq(${num})`;
-    $('.active').removeClass('active').hide();
-    $(section).show().addClass('active').fadeIn();
-  }
-
-
-  $('section:not(:last)').append('<button class="btn btn-primary next pull-right" >Next</button>');
-
-
-  showSection(currentPage);
-
   $('button.next').on('click', e => {
     e.preventDefault();
     history.pushState({ pageNum: currentPage }, location.href);
-
     validate()
       .then(html => checkFormErrors(html)
         .then(() => {
@@ -76,8 +59,7 @@ import '../../../../node_modules/jquery-form/jquery.form.js';
           return showSection(currentPage + 1);
         })
         .catch(replaceErrors)
-      )
-      .catch(console.log);
+      ).catch(() => {}); // TODO: log ting?
   });
 
   window.onpopstate = e => {
@@ -85,4 +67,15 @@ import '../../../../node_modules/jquery-form/jquery.form.js';
       showSection(e.state.pageNum);
     }
   };
+
+  $(SPLIT_FORM).on('submit', () => {
+    $(this).off();
+    validate()
+      .then(html =>
+        checkFormErrors(html)
+          .then(() => $(SPLIT_FORM).off().submit())
+          .catch(replaceErrors)
+      ).catch(() => {}); // TODO: log ting?
+    return false;
+  });
 })();
