@@ -112,7 +112,7 @@ class NotificationsView extends ReactComponent {
       <div>
         { this.state.browserPushDisabled ?
           <div className="permission-warning">
-            You have blocked Start.Warwick from sending desktop notifications. You'll need to open
+            You have blocked Start.Warwick from showing system notifications. You'll need to open
             your browser preferences to change that.
           </div>
           : null

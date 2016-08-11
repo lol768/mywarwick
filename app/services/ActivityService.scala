@@ -2,11 +2,11 @@ package services
 
 import actors.WebsocketActor.Notification
 import com.google.inject.{ImplementedBy, Inject}
-import models.{Activity, ActivityIcon, ActivityResponse, ActivitySave}
+import models._
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.ActivityError._
-import services.dao.{ActivityCreationDao, ActivityDao, ActivityTagDao}
+import services.dao.{ActivityCreationDao, ActivityDao, ActivityRecipientDao, ActivityTagDao}
 import services.messaging.MessagingService
 import warwick.sso.{User, Usercode}
 
@@ -18,7 +18,9 @@ trait ActivityService {
 
   def save(activity: ActivitySave, recipients: Set[Usercode]): Either[Seq[ActivityError], String]
 
-  def save(activity: ActivitySave, recipients: Seq[Usercode]): Either[Seq[ActivityError], String]
+  def setRecipients(activity: Activity, recipients: Set[Usercode]): Either[Seq[ActivityError], Unit]
+
+  def update(id: String, activity: ActivitySave): Either[Seq[ActivityError], String]
 
   def getLastReadDate(user: User): Option[DateTime]
 
@@ -35,6 +37,7 @@ trait ActivityService {
 class ActivityServiceImpl @Inject()(
   dao: ActivityDao,
   creationDao: ActivityCreationDao,
+  recipientDao: ActivityRecipientDao,
   tagDao: ActivityTagDao,
   messaging: MessagingService,
   pubSub: PubSub,
@@ -45,8 +48,18 @@ class ActivityServiceImpl @Inject()(
   override def getActivityById(id: String): Option[Activity] =
     db.withConnection(implicit c => dao.getActivityById(id))
 
-  override def save(activity: ActivitySave, recipients: Seq[Usercode]): Either[Seq[ActivityError], String] =
-    save(activity, recipients.toSet)
+  override def update(id: String, activity: ActivitySave) = {
+    getActivityById(id).map { existingActivity =>
+      if (existingActivity.generatedAt.isBeforeNow) {
+        Left(Seq(AlreadyPublished))
+      } else {
+        db.withTransaction(implicit c => dao.update(id, activity))
+        Right(id)
+      }
+    }.getOrElse {
+      Left(Seq(DoesNotExist))
+    }
+  }
 
   override def save(activity: ActivitySave, recipients: Set[Usercode]): Either[Seq[ActivityError], String] = {
     if (recipients.isEmpty) {
@@ -71,6 +84,13 @@ class ActivityServiceImpl @Inject()(
         }
       }
     }
+  }
+
+  override def setRecipients(activity: Activity, recipients: Set[Usercode]): Either[Seq[ActivityError], Unit] = {
+    db.withTransaction { implicit c =>
+      recipientDao.setRecipients(activity, recipients)
+    }
+    Right(())
   }
 
   private def validateActivity(activity: ActivitySave): Seq[ActivityError] = {
@@ -137,6 +157,14 @@ object ActivityError {
 
   case class InvalidTagValue(name: String, value: String) extends ActivityError {
     def message = s"The value '$value' for tag '$name' is not valid"
+  }
+
+  object AlreadyPublished extends ActivityError {
+    val message = "This activity cannot be modified as it has already been published"
+  }
+
+  object DoesNotExist extends ActivityError {
+    val message = "This activity does not exist"
   }
 
 }

@@ -5,12 +5,12 @@ import java.sql.Connection
 import anorm.SqlParser._
 import anorm._
 import warwick.anorm.converters.ColumnConversions._
-import helpers.{Fixtures, MockScheduleJobService, OneStartAppPerSuite}
+import helpers.{Fixtures, OneStartAppPerSuite}
 import org.joda.time.DateTime
 import org.mockito.Matchers._
 import org.mockito.Matchers
 import org.mockito.Mockito._
-import org.quartz.{JobDataMap, JobDetail, JobExecutionContext}
+import org.quartz.{JobDataMap, JobDetail, JobExecutionContext, Scheduler}
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.db.Database
@@ -21,11 +21,11 @@ import warwick.sso.Usercode
 
 import scala.util.Try
 
-class AudienceResolverJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSuite {
+class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSuite {
 
   val db = get[Database]
   val audienceService = mock[AudienceService]
-  val scheduler = new MockScheduleJobService
+  val scheduler = mock[SchedulerService]
 
   val activityIdKey = "activityId"
   val audienceId = "audienceId"
@@ -51,7 +51,7 @@ class AudienceResolverJobTest extends PlaySpec with MockitoSugar with OneStartAp
         VALUES ($id, 'balls', 'balls', $publishDate, $publishDate, 1, 'default', 'balls')
       """.executeInsert()
 
-  "NewsAudienceResolverJob" should {
+  "PublishNewsItemJob" should {
 
     val newsDao = get[NewsDao]
     val newsCategoryDao = mock[NewsCategoryDao]
@@ -61,13 +61,13 @@ class AudienceResolverJobTest extends PlaySpec with MockitoSugar with OneStartAp
 
     val newsItemId = "newsItemId"
     when(map.getString(newsItemId)).thenReturn(newsItemId)
-    val newsAudienceResolverJob = new NewsAudienceResolverJob(audienceService, newsService, scheduler)
+    val publishNewsItemJob = new PublishNewsItemJob(audienceService, newsService, scheduler)
 
     "save audience for news item" in db.withConnection { implicit c =>
 
       saveNewsItem(newsItemId, date)
 
-      newsAudienceResolverJob.execute(context)
+      publishNewsItemJob.execute(context)
 
       val recipientsSet = SQL"SELECT usercode FROM news_recipient WHERE news_item_id=$newsItemId"
         .as((str("usercode") map { u => Usercode(u) }).*)
@@ -76,17 +76,18 @@ class AudienceResolverJobTest extends PlaySpec with MockitoSugar with OneStartAp
     }
   }
 
-  "NotificationsAudienceResolverJob" should {
+  "PublishNotificationJob" should {
 
     val activityDao = get[ActivityDao]
-    val creationDao = mock[ActivityCreationDao]
+    val recipientDao = get[ActivityRecipientDao]
+    val creationDao = null
     val tagDao = mock[ActivityTagDao]
     val activityTypeService = mock[ActivityTypeService]
     val messaging = mock[MessagingService]
     val pubSub = mock[PubSub]
-    val activityService = new ActivityServiceImpl(activityDao, creationDao, tagDao, messaging, pubSub, db, activityTypeService)
+    val activityService = new ActivityServiceImpl(activityDao, creationDao, recipientDao, tagDao, messaging, pubSub, db, activityTypeService)
 
-    val notificationsAudienceResolverJob = new NotificationsAudienceResolverJob(audienceService, activityService, messaging, pubSub, scheduler)
+    val publishNotificationJob = new PublishActivityJob(audienceService, activityService, messaging, pubSub, scheduler)
 
     "save audience for notification" in {
 
@@ -97,14 +98,25 @@ class AudienceResolverJobTest extends PlaySpec with MockitoSugar with OneStartAp
         val activityId = activityDao.save(activitySave, Seq.empty)
         when(map.getString(activityIdKey)).thenReturn(activityId)
 
-        notificationsAudienceResolverJob.execute(context)
+        publishNotificationJob.execute(context)
 
         val activity = activityDao.getActivityById(activityId).get
 
         verify(messaging).send(recipients.get.toSet, activity)
         verify(pubSub).publish(Matchers.eq(dave.string), any())
         verify(pubSub).publish(Matchers.eq(james.string), any())
+
+        getRecipients(activity.id) mustBe recipients.get
+
+        publishNotificationJob.execute(context)
+
+        // check recipients are replaced, not appended.
+        getRecipients(activity.id) mustBe recipients.get
       }
     }
   }
+
+  def getRecipients(activityId: String)(implicit c: Connection) =
+    SQL"SELECT usercode FROM activity_recipient WHERE activity_id = $activityId"
+      .as(scalar[String].map(Usercode.apply).*)
 }

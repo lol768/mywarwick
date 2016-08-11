@@ -6,7 +6,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import services.messaging.MobileOutputService
-import services.{CookieSSOClient, NullMobileOutputService, ScheduleJobService}
+import services.{CookieSSOClient, NullMobileOutputService, SchedulerService}
 import system.{DatabaseDialect, H2DatabaseDialect}
 import warwick.sso._
 
@@ -47,7 +47,7 @@ object TestApplications {
       .overrides(
         bind[SSOClient].to[MockSSOClient],
         bind[DatabaseDialect].to[H2DatabaseDialect],
-        bind[ScheduleJobService].to[MockScheduleJobService],
+        bind[SchedulerService].to[MockSchedulerService],
 
         // Allows putting test versions of migrations under test/resources/evolutions/default
         bind[EvolutionsReader].toInstance(new ClassLoaderEvolutionsReader())

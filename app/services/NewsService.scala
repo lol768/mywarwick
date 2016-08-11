@@ -4,10 +4,14 @@ import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
 import models.news.{Audience, AudienceSize, NewsItemRender, NewsItemSave}
+import org.joda.time.DateTime
+import org.quartz.JobBuilder.newJob
+import org.quartz.SimpleScheduleBuilder.simpleSchedule
+import org.quartz.TriggerBuilder.newTrigger
 import org.quartz._
 import play.api.db.Database
 import services.dao.{AudienceDao, NewsCategoryDao, NewsDao}
-import services.job.NewsAudienceResolverJob
+import services.job.PublishNewsItemJob
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[AnormNewsService])
@@ -36,7 +40,7 @@ class AnormNewsService @Inject()(
   newsCategoryDao: NewsCategoryDao,
   audienceDao: AudienceDao,
   userInitialisationService: UserInitialisationService,
-  scheduler: ScheduleJobService
+  scheduler: SchedulerService
 ) extends NewsService {
 
   override def getNewsByPublisher(publisherId: String, limit: Int, offset: Int): Seq[NewsItemRender] =
@@ -52,20 +56,36 @@ class AnormNewsService @Inject()(
     }
   }
 
-  private def scheduleResolveAudience(newsId: String, audienceId: String): Unit =
-    scheduler.triggerJobNow(
-      JobBuilder.newJob(classOf[NewsAudienceResolverJob])
-        .usingJobData("newsItemId", newsId)
-        .usingJobData("audienceId", audienceId)
+  private def schedulePublishNewsItem(newsId: String, audienceId: String, publishDate: DateTime): Unit = {
+    val key = new JobKey(newsId, PublishNewsItemJob.name)
+
+    // Delete any existing job that would publish the same news item
+    scheduler.deleteJob(key)
+
+    val job = newJob(classOf[PublishNewsItemJob])
+      .withIdentity(key)
+      .usingJobData("newsItemId", newsId)
+      .usingJobData("audienceId", audienceId)
+      .build()
+
+    if (publishDate.isAfterNow) {
+      val trigger = newTrigger()
+        .startAt(publishDate.toDate)
+        .withSchedule(simpleSchedule().withMisfireHandlingInstructionFireNow())
         .build()
-    )
+
+      scheduler.scheduleJob(job, trigger)
+    } else {
+      scheduler.triggerJobNow(job)
+    }
+  }
 
   override def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String =
     db.withTransaction { implicit c =>
       val audienceId = audienceDao.saveAudience(audience)
       val id = dao.save(item, audienceId)
       newsCategoryDao.saveNewsCategories(id, categoryIds)
-      scheduleResolveAudience(id, audienceId)
+      schedulePublishNewsItem(id, audienceId, item.publishDate)
       id
     }
 
@@ -83,15 +103,23 @@ class AnormNewsService @Inject()(
       val existingAudienceId = dao.getAudienceId(id)
       val existingAudience = existingAudienceId.map(audienceDao.getAudience)
 
-      // If the audience has changed
-      if (!existingAudience.contains(audience)) {
-        // Swap the audience associated with the news item
-        val audienceId = audienceDao.saveAudience(audience)
-        dao.setAudienceId(id, audienceId)
-        existingAudienceId.foreach(audienceDao.deleteAudience)
+      val audienceId = existingAudience match {
+        case Some(existing) if existing == audience =>
+          existingAudienceId.get
+        case _ =>
+          val audienceId = audienceDao.saveAudience(audience)
+          dao.setAudienceId(id, audienceId)
+          existingAudienceId.foreach(audienceDao.deleteAudience)
 
-        scheduleResolveAudience(id, audienceId)
+          audienceId
       }
+
+      // Delete the recipients now and re-create them in the future
+      if (existingAudience.nonEmpty) {
+        dao.setRecipients(id, Seq.empty)
+      }
+
+      schedulePublishNewsItem(id, audienceId, item.publishDate)
     }
 
   override def getAudience(newsId: String) =
@@ -106,9 +134,10 @@ class AnormNewsService @Inject()(
 
   /**
     * Deletes all the recipients of a news item and replaces them with recipients param
+    *
     * @param newsItemId
     * @param recipients
     */
   override def setRecipients(newsItemId: String, recipients: Seq[Usercode]) =
-    db.withTransaction(implicit c => dao.setRecipients(newsItemId, recipients))
+  db.withTransaction(implicit c => dao.setRecipients(newsItemId, recipients))
 }

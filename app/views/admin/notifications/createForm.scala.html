@@ -1,7 +1,7 @@
 @import controllers.admin.NotificationsController.PublishNotificationForm
+@import models.publishing.{PermissionScope, Publisher}
 @import system.RequestContext
-@import models.publishing.PermissionScope
-@import models.publishing.Publisher
+@import views.html._
 @(
     publisher: Publisher,
     form: PublishNotificationForm,
@@ -14,7 +14,7 @@
   b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
 }
 
-@common.admin(publisher.name, "Create notification") {
+@common.admin("Create notification") {
   <div class="container-fluid">
   @b3.form(action = controllers.admin.routes.NotificationsController.create(publisher.id), 'class -> "split-form") {
 
@@ -22,30 +22,12 @@
       <div class="alert alert-danger">@error.message</div>
     }
 
-    <section>
-    @b3.textarea(form("item.text"),
-      '_label -> "Text",
-      '_help -> "Keep it super short"
-    )
-
-    @b3.select(form("item.provider"), providerOptions :+ ("news" -> "News"),
-      '_label -> "Provider",
-      'value -> "news",
-      '_help -> "Select the service responsible for this notification. For general items select 'News'"
-    )
-
-    @b3.text(form("item.linkHref"),
-      '_label -> "Link URL",
-      '_help -> "Optional"
-    )
-    </section>
+    @admin.notifications.contentForm(form, departmentOptions, providerOptions, permissionScope)
 
     <section>
     @tags.audiencePicker(form, "audience", departmentOptions, "notification", permissionScope, allowPublic = false)
-
-    @tags.submitOrCancel("Send", controllers.admin.routes.NotificationsController.list(publisher.id))
+    @tags.submitOrCancel("Create", controllers.admin.routes.NotificationsController.list(publisher.id))
     </section>
-
   }
   </div>
 }

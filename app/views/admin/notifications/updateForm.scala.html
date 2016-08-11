@@ -1,0 +1,35 @@
+@import controllers.admin.NotificationsController.PublishNotificationForm
+@import models.publishing.{PermissionScope, Publisher}
+@import system.RequestContext
+@import views.html._
+@(
+    publisher: Publisher,
+    activity: Activity,
+    form: PublishNotificationForm,
+    departmentOptions: Seq[(String, String)],
+    providerOptions: Seq[(String, String)],
+    permissionScope: PermissionScope
+)(implicit messages: Messages, context: RequestContext)
+
+@implicitFieldConstructor = @{
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
+}
+
+@common.admin("Update notification") {
+  <div class="container-fluid">
+  @b3.form(action = controllers.admin.routes.NotificationsController.update(publisher.id, activity.id), 'class -> "split-form") {
+
+    @form.globalErrors.map { error =>
+      <div class="alert alert-danger">@error.message</div>
+    }
+
+    @admin.notifications.contentForm(form, departmentOptions, providerOptions, permissionScope)
+
+    <section>
+    @tags.audiencePicker(form, "audience", departmentOptions, "notification", permissionScope, allowPublic = false)
+    @tags.submitOrCancel("Update", controllers.admin.routes.NotificationsController.list(publisher.id))
+    </section>
+  }
+  </div>
+}
+

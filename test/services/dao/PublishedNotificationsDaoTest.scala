@@ -1,7 +1,5 @@
 package services.dao
 
-import java.util.UUID
-
 import anorm.SqlParser._
 import anorm._
 import helpers.{Fixtures, OneStartAppPerSuite}
@@ -18,35 +16,49 @@ class PublishedNotificationsDaoTest extends PlaySpec with OneStartAppPerSuite {
     val custard = Usercode("custard")
 
     "save a published notification" in transaction { implicit c =>
-      SQL"INSERT INTO PUBLISHER (ID, NAME) VALUES ('publisher-id', 'Test Publisher')"
-        .execute()
-
       val id = get[ActivityDao].save(Fixtures.activitySave.submissionDue, Nil)
 
       dao.save(PublishedNotificationSave(
         activityId = id,
-        publisherId = "publisher-id",
-        createdBy = custard
+        publisherId = "default",
+        changedBy = custard
       ))
 
-      SQL"SELECT COUNT(*) FROM PUBLISHED_NOTIFICATION WHERE ACTIVITY_ID = $id AND PUBLISHER_ID = 'publisher-id'"
+      SQL"SELECT COUNT(*) FROM PUBLISHED_NOTIFICATION WHERE ACTIVITY_ID = $id AND PUBLISHER_ID = 'default'"
         .executeQuery()
         .as(scalar[Int].single) must equal(1)
     }
 
-    "get notifications published by publisher" in transaction { implicit c =>
-      SQL"INSERT INTO PUBLISHER (ID, NAME) VALUES ('publisher-id', 'Test Publisher')"
-        .execute()
+    "update a published notification" in transaction { implicit c =>
+      val id = get[ActivityDao].save(Fixtures.activitySave.submissionDue, Nil)
 
+      dao.save(PublishedNotificationSave(
+        activityId = id,
+        publisherId = "default",
+        changedBy = custard
+      ))
+
+      dao.update(PublishedNotificationSave(
+        activityId = id,
+        publisherId = "default",
+        changedBy = custard
+      ))
+
+      SQL"SELECT UPDATED_BY FROM PUBLISHED_NOTIFICATION WHERE ACTIVITY_ID = $id"
+        .executeQuery()
+        .as(scalar[String].single) must be("custard")
+    }
+
+    "get notifications published by publisher" in transaction { implicit c =>
       val id = get[ActivityDao].save(Fixtures.activitySave.submissionDue, Nil)
       val id2 = get[ActivityDao].save(Fixtures.activitySave.submissionDue, Nil)
 
-      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id, 'publisher-id', 'custard', SYSDATE)"
+      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id, 'default', 'custard', SYSDATE)"
         .execute()
-      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id2, 'publisher-id', 'custard', SYSDATE)"
+      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id2, 'default', 'custard', SYSDATE)"
         .execute()
 
-      val publishedNotifications = dao.getByPublisherId("publisher-id")
+      val publishedNotifications = dao.getByPublisherId("default")
       publishedNotifications.map(_.activityId) must contain only(id, id2)
     }
 

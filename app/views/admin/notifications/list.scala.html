@@ -4,11 +4,12 @@
 @import models.publishing.Publisher
 @(
     publisher: Publisher,
-    notifications: Seq[models.ActivityResponse],
+    futureNotifications: Seq[models.ActivityResponse],
+    pastNotifications: Seq[models.ActivityResponse],
     user: Role
 )(implicit context: RequestContext)
 
-@common.admin(publisher.name, "Notifications") {
+@common.admin("Notifications") {
   @if(user can CreateNotifications) {
     <p>
       <a class="btn btn-default" href="@controllers.admin.routes.NotificationsController.createForm(publisher.id)">
@@ -17,32 +18,17 @@
     </p>
   }
 
-  @if(notifications.isEmpty) {
-    <p>No notifications.</p>
+  <h3>Pending</h3>
+  @if(futureNotifications.isEmpty) {
+    <p>No pending notifications.</p>
   } else {
-    <p>
-      Showing @if(notifications.size == 1) {one item} else {@notifications.size items}.
-    </p>
-    @notifications.map { item =>
-        <div class="activity-item">
-          <div class="media">
-            <div class="media-left">
-              <i class="app-icon app-icon--lg fa fa-fw fa-@item.icon.map(_.name).getOrElse("newspaper-o")"
-                 style="background-color:@item.icon.map(_.colour).getOrElse("#5b3069")">
-              </i>
-            </div>
-            <div class="media-body">
-              <div class="activity-item__title">@item.activity.title</div>
-              @item.activity.text.map { text =>
-                <div class="activity-item__text">@text</div>
-              }
-              <div class="activity-item__date">@models.DateFormats.emailDateTime(item.activity.createdAt)</div>
-              @item.activity.url.map { url =>
-                <a href="@url">Link to @url</a>
-              }
-            </div>
-          </div>
-        </div>
-    }
+    @futureNotifications.map(n => views.html.admin.notifications.notificationItem(publisher, n))
+  }
+
+  <h3>Sent</h3>
+  @if(pastNotifications.isEmpty) {
+    <p>No sent notifications.</p>
+  } else {
+    @pastNotifications.map(n => views.html.admin.notifications.notificationItem(publisher, n))
   }
 }

@@ -11,9 +11,9 @@ import warwick.sso.Usercode
 
 @DisallowConcurrentExecution
 @PersistJobDataAfterExecution
-trait AudienceResolverJob extends Job with Logging {
+trait PublishingJob extends Job with Logging {
 
-  val scheduler: ScheduleJobService
+  val scheduler: SchedulerService
 
   def executeJob(context: JobExecutionContext): Unit
 
@@ -26,14 +26,17 @@ trait AudienceResolverJob extends Job with Logging {
     }
 }
 
-class NewsAudienceResolverJob @Inject()(
+object PublishNewsItemJob {
+  val name = "PublishNewsItem"
+}
+
+class PublishNewsItemJob @Inject()(
   audienceService: AudienceService,
   newsService: NewsService,
-  override val scheduler: ScheduleJobService
-) extends AudienceResolverJob {
+  override val scheduler: SchedulerService
+) extends PublishingJob {
 
   override def executeJob(context: JobExecutionContext): Unit = {
-
     val dataMap = context.getJobDetail.getJobDataMap
     val newsItemId = dataMap.getString("newsItemId")
     val audienceId = dataMap.getString("audienceId")
@@ -45,16 +48,19 @@ class NewsAudienceResolverJob @Inject()(
   }
 }
 
-class NotificationsAudienceResolverJob @Inject()(
+object PublishActivityJob {
+  val name = "PublishActivity"
+}
+
+class PublishActivityJob @Inject()(
   audienceService: AudienceService,
   activityService: ActivityService,
   messaging: MessagingService,
   pubSub: PubSub,
-  override val scheduler: ScheduleJobService
-) extends AudienceResolverJob {
+  override val scheduler: SchedulerService
+) extends PublishingJob {
 
   override def executeJob(context: JobExecutionContext): Unit = {
-
     val dataMap = context.getJobDetail.getJobDataMap
     val activityId = dataMap.getString("activityId")
     val audienceId = dataMap.getString("audienceId")
@@ -63,16 +69,19 @@ class NotificationsAudienceResolverJob @Inject()(
 
     audienceService.resolve(audience).foreach { recipients =>
       activityService.getActivityById(activityId).foreach { activity =>
-        saveRecipients(activityId, activity, recipients)
+        saveRecipients(activity, recipients.toSet)
       }
     }
   }
 
-  private def saveRecipients(id: String, activity: Activity, recipients: Seq[Usercode]) = {
-    messaging.send(recipients.toSet, activity)
+  private def saveRecipients(activity: Activity, recipients: Set[Usercode]) = {
+    activityService.setRecipients(activity, recipients)
+    if (activity.shouldNotify) {
+      messaging.send(recipients, activity)
+    }
     val activityResponse = ActivityResponse(
       activity,
-      activityService.getActivityIcon(id),
+      activityService.getActivityIcon(activity.id),
       Seq.empty
     )
     recipients.foreach(usercode => pubSub.publish(usercode.string, Notification(activityResponse)))

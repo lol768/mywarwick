@@ -74,11 +74,12 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     ignoreCategories <- bool("ignore_categories")
     newsCategoryId <- str("news_category_id").?
     newsCategoryName <- str("news_category_name").?
+    publisherId <- str("publisher_id")
   } yield {
     val link = for (text <- linkText; href <- parseLink(linkHref)) yield Link(text, href)
     val category = for (id <- newsCategoryId; name <- newsCategoryName) yield NewsCategory(id, name)
 
-    NewsItemRender(id, title, text, link, publishDate, imageId, category.toSeq, ignoreCategories)
+    NewsItemRender(id, title, text, link, publishDate, imageId, category.toSeq, ignoreCategories, publisherId)
   }
 
   override def allNews(publisherId: String, limit: Int, offset: Int)(implicit c: Connection): Seq[NewsItemRender] = {
@@ -142,10 +143,7 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
   }
 
   override def setRecipients(newsId: String, recipients: Seq[Usercode])(implicit c: Connection): Unit = {
-
     deleteRecipients(newsId) // delete existing News item recipients
-
-    // TODO perhaps we shouldn't insert these in sync, as audiences can potentially be 1000s users.
     val publishDate = SQL"SELECT publish_date FROM news_item WHERE id=$newsId".as(get[DateTime]("publish_date").single)
     recipients.foreach { usercode =>
       SQL"""

@@ -130,18 +130,35 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
     }
 
     "get activities created by publisher" in transaction { implicit c =>
-      SQL"INSERT INTO PUBLISHER (ID, NAME) VALUES ('publisher-id', 'Test Publisher')"
-        .execute()
-
       val id = get[ActivityDao].save(Fixtures.activitySave.submissionDue, Nil)
       val id2 = get[ActivityDao].save(Fixtures.activitySave.submissionDue, Nil)
 
-      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id, 'publisher-id', 'custard', SYSDATE)"
+      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id, 'default', 'custard', SYSDATE)"
         .execute()
-      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id2, 'publisher-id', 'custard', SYSDATE)"
+      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id2, 'default', 'custard', SYSDATE)"
         .execute()
 
-      activityDao.getActivitiesByPublisherId("publisher-id", limit = 100).map(_.id) must contain allOf(id, id2)
+      activityDao.getActivitiesByPublisherId("default", limit = 100).map(_.id) must contain allOf(id, id2)
+    }
+
+    "delete an activity" in transaction { implicit c =>
+      val activityId = activityDao.save(activityPrototype, Seq.empty)
+
+      activityDao.delete(activityId)
+
+      SQL"SELECT COUNT(*) FROM ACTIVITY WHERE ID = $activityId"
+        .executeQuery()
+        .as(scalar[Int].single) must be(0)
+    }
+
+    "update an activity" in transaction { implicit c =>
+      val activityId = activityDao.save(activityPrototype, Seq.empty)
+
+      activityDao.update(activityId, activityPrototype.copy(title = "New title"))
+
+      SQL"SELECT TITLE FROM ACTIVITY WHERE ID = $activityId"
+        .executeQuery()
+        .as(scalar[String].single) must be("New title")
     }
   }
 }

@@ -3,6 +3,8 @@
 @import views.html._
 @import models.publishing.PermissionScope
 @import models.publishing.Publisher
+@import org.joda.time.LocalDateTime
+
 @(
     publisher: Publisher,
     id: String,
@@ -16,18 +18,39 @@
   b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
 }
 
-@common.admin(publisher.name, "Update news") {
+@common.admin("Update news") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NewsController.update(publisher.id, id)) {
+  @b3.form(action = controllers.admin.routes.NewsController.update(publisher.id, id), 'class -> "split-form") {
 
+    <section>
     @admin.news.contentForm(form)
+    </section>
 
+    <section>
+      @b3.radio(form("item.publishDateSet"),
+        Seq(
+          "false" -> "Now",
+          "true" -> "Select a time"
+        ),
+        '_label -> "Publish time",
+        'value -> false
+      )
+      @tags.datetimePicker(form("item.publishDate"),
+        '_label -> "Publish date",
+        '_help -> "You can select a time in the future, and this news item will appear to users after that time",
+        'value -> LocalDateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
+      )
+    </section>
+
+    <section>
     @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true)
+    </section>
 
+    <section>
     @tags.categoryPicker(form, "categories", categories, "news item")
 
     @tags.submitOrCancel("Update", controllers.admin.routes.NewsController.list(publisher.id))
-
+    </section>
   }
   </div>
 }

@@ -24,7 +24,8 @@ case class Activity(
   replacedBy: Option[String],
   generatedAt: DateTime,
   createdAt: DateTime,
-  shouldNotify: Boolean
+  shouldNotify: Boolean,
+  audienceId: Option[String] = None
 )
 
 object Activity {

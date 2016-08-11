@@ -3,9 +3,9 @@ package controllers.admin
 import javax.inject.{Inject, Singleton}
 
 import controllers.BaseController
-import models.publishing.Ability._
 import models._
 import models.news.{Audience, Link, NewsItemRender, NewsItemSave}
+import models.publishing.Ability._
 import models.publishing.Publisher
 import org.joda.time.LocalDateTime
 import play.api.data.Forms._
@@ -14,7 +14,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Result
 import services.dao.DepartmentInfoDao
 import services.{NewsCategoryService, NewsService, PublisherService, SecurityService}
-import system.{TimeZones, Validation}
+import system.{RequestContext, TimeZones, Validation}
 import uk.ac.warwick.util.web.Uri
 import warwick.sso.Usercode
 
@@ -59,9 +59,6 @@ class NewsController @Inject()(
   audienceBinder: AudienceBinder,
   val newsCategoryService: NewsCategoryService
 ) extends BaseController with I18nSupport with Publishing {
-
-  // Provides implicit conversion from Request to RequestContext
-  import securityService._
 
   val newsItemMapping = mapping(
     "title" -> nonEmptyText,
@@ -138,38 +135,45 @@ class NewsController @Inject()(
     )
   }
 
-  def updateForm(publisher: String, id: String) = PublisherAction(publisher, EditNews) { implicit request =>
-    news.getNewsItem(id).map { item =>
+  def updateForm(publisherId: String, id: String) = PublisherAction(publisherId, EditNews).async { implicit request =>
+    withNewsItem(id, publisherId, item => {
       val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
       val audience = news.getAudience(id).map(audienceBinder.unbindAudience).get
       val formWithData = publishNewsForm.fill(PublishNewsItemData(item.toData, categoryIds, audience))
 
-      Ok(renderUpdateForm(publisher, id, formWithData))
-    }.getOrElse {
-      NotFound(views.html.errors.notFound())
-    }
+      Future.successful(Ok(renderUpdateForm(publisherId, id, formWithData)))
+    })
   }
 
   def update(publisherId: String, id: String) = PublisherAction(publisherId, EditNews).async { implicit request =>
-    val bound = publishNewsForm.bindFromRequest
-    bound.fold(
-      errorForm => Future.successful(Ok(renderUpdateForm(publisherId, id, errorForm))),
-      data => audienceBinder.bindAudience(data.audience).map {
-        case Left(errors) =>
-          val errorForm = addFormErrors(bound, errors)
-          Ok(renderUpdateForm(publisherId, id, errorForm))
-        case Right(audience) =>
-          val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
-          val newsItemId = news.update(id, newsItem, audience, data.categoryIds)
+    withNewsItem(id, publisherId, _ => {
+      val bound = publishNewsForm.bindFromRequest
+      bound.fold(
+        errorForm => Future.successful(Ok(renderUpdateForm(publisherId, id, errorForm))),
+        data => audienceBinder.bindAudience(data.audience).map {
+          case Left(errors) =>
+            val errorForm = addFormErrors(bound, errors)
+            Ok(renderUpdateForm(publisherId, id, errorForm))
+          case Right(audience) =>
+            val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
+            val newsItemId = news.update(id, newsItem, audience, data.categoryIds)
 
-          auditLog('UpdateNewsItem, 'id -> newsItemId)
+            auditLog('UpdateNewsItem, 'id -> newsItemId)
 
-          Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("result" -> "News updated")
-      }
-    )
+            Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("success" -> "News updated")
+        }
+      )
+    })
   }
 
-  def renderUpdateForm(publisherId: String, id: String, form: Form[PublishNewsItemData])(implicit request: PublisherRequest[_]) = {
+  private def withNewsItem(id: String, publisherId: String, block: (NewsItemRender) => Future[Result])(implicit request: RequestContext): Future[Result] = {
+    news.getNewsItem(id)
+      .filter(_.publisherId == publisherId)
+      .map(block)
+      .getOrElse(Future.successful(NotFound(views.html.errors.notFound())))
+  }
+
+  private def renderUpdateForm(publisherId: String, id: String, form: Form[PublishNewsItemData])(implicit request: PublisherRequest[_]) = {
     views.html.admin.news.updateForm(
       publisher = request.publisher,
       id = id,
@@ -180,6 +184,6 @@ class NewsController @Inject()(
     )
   }
 
-  def partitionNews(news: Seq[NewsItemRender]) = news.partition(_.publishDate.isAfterNow)
+  private def partitionNews(news: Seq[NewsItemRender]) = news.partition(_.publishDate.isAfterNow)
 
 }

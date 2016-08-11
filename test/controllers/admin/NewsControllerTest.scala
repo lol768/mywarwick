@@ -1,11 +1,12 @@
 package controllers.admin
 
 import akka.stream.ActorMaterializer
-import helpers.{OneStartAppPerSuite, TestActors}
+import helpers.{Fixtures, OneStartAppPerSuite, TestActors}
 import models.NewsCategory
-import models.news.Audience
+import models.news.{Audience, NewsItemRender}
 import models.publishing.PublishingRole.NewsManager
 import models.publishing._
+import org.joda.time.DateTime
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -15,8 +16,8 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Results
 import play.api.test.Helpers._
 import play.api.test._
+import services._
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
-import services.{NewsCategoryService, NewsService, PublisherService, SecurityServiceImpl}
 import warwick.sso._
 
 import scala.concurrent.Future
@@ -28,7 +29,7 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
   val custard = Usercode("custard")
 
-  val securityServiceImpl = new SecurityServiceImpl(new MockSSOClient(new LoginContext {
+  val mockSSOClient = new MockSSOClient(new LoginContext {
     override def loginUrl(target: Option[String]) = ""
 
     override def actualUserHasRole(role: RoleName) = false
@@ -37,7 +38,9 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
     override val user: Option[User] = Some(Users.create(custard))
     override val actualUser: Option[User] = user
-  }), mock[BasicAuth], mock[CacheApi])
+  })
+
+  val securityServiceImpl = new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], mock[CacheApi])
 
   val publisherService = mock[PublisherService]
   val newsService = mock[NewsService]
@@ -49,7 +52,10 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
   when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("IN", "IT Services", "IT Services", "ITS", "SERVICE")))
   when(newsCategoryService.all()).thenReturn(Seq(NewsCategory("abc", "Campus")))
 
-  val newsController = new NewsController(securityServiceImpl, publisherService, messagesApi, newsService, departmentInfoDao, audienceBinder, newsCategoryService)
+  val newsController = new NewsController(securityServiceImpl, publisherService, messagesApi, newsService, departmentInfoDao, audienceBinder, newsCategoryService) {
+    override val navigationService = new MockNavigationService()
+    override val ssoClient = mockSSOClient
+  }
 
   "NewsController#list" should {
 
@@ -153,6 +159,48 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
       val result = call(newsController.create("xyz"), FakeRequest("POST", "/").withFormUrlEncodedBody(data: _*))
 
       contentAsString(result) must include("You do not have the required permissions to publish to that audience.")
+    }
+
+  }
+
+  "NewsController#updateForm" should {
+
+    "return Not Found if the news item does not exist" in {
+      when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
+      when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
+      when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
+      when(newsService.getNewsItem("news")).thenReturn(None)
+
+      val result = call(newsController.updateForm("xyz", "news"), FakeRequest())
+
+      status(result) must be(NOT_FOUND)
+      contentAsString(result) must include("Sorry, there's nothing at this URL.")
+    }
+
+    "return Not Found if the news item does not belong to the requested publisher" in {
+      when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
+      when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
+      when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
+      when(newsService.getNewsItem("news")).thenReturn(Some(Fixtures.news.render.copy(publisherId = "another")))
+
+      val result = call(newsController.updateForm("xyz", "news"), FakeRequest())
+
+      status(result) must be(NOT_FOUND)
+      contentAsString(result) must include("Sorry, there's nothing at this URL.")
+    }
+
+    "display the update form" in {
+      when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
+      when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
+      when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
+      when(newsCategoryService.getNewsCategories("news")).thenReturn(Seq.empty)
+      when(newsService.getAudience("news")).thenReturn(Some(Audience.Public))
+      when(newsService.getNewsItem("news")).thenReturn(Some(Fixtures.news.render.copy(publisherId = "xyz")))
+
+      val result = call(newsController.updateForm("xyz", "news"), FakeRequest())
+
+      status(result) must be(OK)
+      contentAsString(result) must include("Update news")
     }
 
   }

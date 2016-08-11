@@ -19,4 +19,8 @@ class AdminController @Inject() (
     Ok(views.html.admin.index())
   }
 
+  def sysadmin = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
+    Ok(views.html.admin.sysadmin())
+  }
+
 }

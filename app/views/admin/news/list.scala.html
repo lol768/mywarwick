@@ -12,7 +12,7 @@
     user: Role
 )(implicit context: RequestContext)
 
-  @common.admin(publisher.name, "News") {
+  @common.admin("News") {
     @if(user can CreateNews) {
       <p>
         <a class="btn btn-default" href="@controllers.admin.routes.NewsController.createForm(publisher.id)">

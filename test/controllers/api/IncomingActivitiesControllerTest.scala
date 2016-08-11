@@ -34,7 +34,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
   val tabulaPublisherId = "tabulaPublisherId"
   val ron = Users.create(usercode = Usercode("ron"))
 
-  val ssoClient = new MockSSOClient(new LoginContext {
+  val mockSSOClient = new MockSSOClient(new LoginContext {
     override val user: Option[User] = Some(ron)
     override val actualUser: Option[User] = None
 
@@ -50,12 +50,15 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
   val activityRecipientService = mock[ActivityRecipientService]
 
   val controller = new IncomingActivitiesController(
-    new SecurityServiceImpl(ssoClient, mock[BasicAuth], mock[CacheApi]),
+    new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], mock[CacheApi]),
     activityService,
     activityRecipientService,
     publisherService,
     mock[MessagesApi]
-  )
+  ) {
+    override val navigationService = new MockNavigationService()
+    override val ssoClient = mockSSOClient
+  }
 
   val body = Json.obj(
     "type" -> "due",
