@@ -44,7 +44,7 @@ class AudienceDaoTest extends PlaySpec with OneStartAppPerSuite {
     }
 
     "save Usercodes component" in {
-      val audience = Audience(Seq(Audience.UsercodesAudience(Seq(Usercode("a"), Usercode("b")))))
+      val audience = Audience.usercodes(Seq(Usercode("a"), Usercode("b")))
       val saved = audienceDao.audienceToComponents(audience)
 
       saved mustBe Seq(AudienceComponentSave("Usercode", Some("a"), None), AudienceComponentSave("Usercode", Some("b"), None))
@@ -59,7 +59,8 @@ class AudienceDaoTest extends PlaySpec with OneStartAppPerSuite {
       val audience = audienceDao.audienceFromComponents(components)
 
       audience mustBe Audience(Seq(
-        Audience.UsercodesAudience(Seq(Usercode("a"), Usercode("b")))
+        Audience.UsercodeAudience(Usercode("a")),
+        Audience.UsercodeAudience(Usercode("b"))
       ))
     }
 

@@ -67,7 +67,7 @@ class AudienceDaoImpl extends AudienceDao {
         case ("Webgroup", components) => components.collect {
           case AudienceComponentSave("Webgroup", Some(group), _) => WebgroupAudience(GroupName(group))
         }
-        case ("Usercode", components) => Some(UsercodesAudience(components.map(_.value).collect { case Some(string) => Usercode(string) }))
+        case ("Usercode", components) => components.flatMap(_.value).map(Usercode).map(UsercodeAudience.apply)
         case (_, components) => components.map(_.name).flatMap(ComponentParameter.unapply)
       }
       case (Some(deptCode), components) =>
@@ -84,7 +84,7 @@ class AudienceDaoImpl extends AudienceDao {
       case DepartmentAudience(code, subsets) => subsets.flatMap { subset => resolveSubset(Some(code), subset) }
       case ModuleAudience(code) => Seq(AudienceComponentSave("Module", Some(code), None))
       case WebgroupAudience(group) => Seq(AudienceComponentSave("Webgroup", Some(group.string), None))
-      case UsercodesAudience(usercodes) => usercodes.map(usercode => AudienceComponentSave("Usercode", Some(usercode.string), None))
+      case UsercodeAudience(usercode) => Seq(AudienceComponentSave("Usercode", Some(usercode.string), None))
     }
 
   private def resolveSubset(deptCode: Option[String], subset: DepartmentSubset): Seq[AudienceComponentSave] =

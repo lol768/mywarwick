@@ -13,7 +13,7 @@ object Audience {
   val Public = Audience(public = true)
 
   def usercodes(usercodes: Seq[Usercode]): Audience = {
-    Audience(Seq(UsercodesAudience(usercodes)))
+    Audience(usercodes.map(UsercodeAudience))
   }
 
   def usercode(usercodeString: String): Audience = {
@@ -25,7 +25,7 @@ object Audience {
   // Pieces of department
   sealed trait DepartmentSubset extends Component
 
-  case class UsercodesAudience(usercodes: Seq[Usercode]) extends Component
+  case class UsercodeAudience(usercode: Usercode) extends Component
 
   case class WebgroupAudience(groupName: GroupName) extends Component
   case class ModuleAudience(moduleCode: String) extends Component

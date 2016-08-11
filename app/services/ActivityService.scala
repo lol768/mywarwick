@@ -50,29 +50,29 @@ class ActivityServiceImpl @Inject()(
   override def getActivityById(id: String): Option[Activity] =
     db.withConnection(implicit c => dao.getActivityById(id))
 
-  override def update(id: String, activity: ActivitySave, audience: Audience) = {
-    getActivityById(id).map { existingActivity =>
+  override def update(activityId: String, activity: ActivitySave, audience: Audience) = {
+    getActivityById(activityId).map { existingActivity =>
       if (existingActivity.publishedAt.isBeforeNow) {
         Left(Seq(AlreadyPublished))
       } else {
         db.withTransaction { implicit c =>
           val audienceId = existingActivity.audienceId match {
-            case Some(aid) if audienceDao.getAudience(id) == audience =>
-              aid
-            case Some(aid) =>
+            case Some(id) if audienceDao.getAudience(activityId) == audience =>
+              id
+            case Some(id) =>
               val audienceId = audienceDao.saveAudience(audience)
-              audienceDao.deleteAudience(aid)
+              audienceDao.deleteAudience(id)
               audienceId
             case _ =>
               // Don't expect this, but for completeness
               audienceDao.saveAudience(audience)
           }
 
-          dao.update(id, activity, audienceId)
+          dao.update(activityId, activity, audienceId)
 
-          schedulePublishJob(id, audienceId, activity.publishedAt.getOrElse(DateTime.now))
+          schedulePublishJob(activityId, audienceId, activity.publishedAt.getOrElse(DateTime.now))
         }
-        Right(id)
+        Right(activityId)
       }
     }.getOrElse {
       Left(Seq(DoesNotExist))
@@ -95,7 +95,7 @@ class ActivityServiceImpl @Inject()(
   }
 
   override def save(activity: ActivitySave, audience: Audience): Either[Seq[ActivityError], String] = {
-    val errors = validateActivity(activity)
+    val errors = validateAudience(audience) ++ validateActivity(activity)
     if (errors.nonEmpty) {
       Left(errors)
     } else {
@@ -121,13 +121,23 @@ class ActivityServiceImpl @Inject()(
     Right(())
   }
 
+  private def validateAudience(audience: Audience): Seq[ActivityError] = {
+    val maybeEmptyAudience =
+      if (audience.components.isEmpty) Seq(EmptyAudience)
+      else Nil
+
+    val maybePublicAudience =
+      if (audience.public) Seq(PublicAudience)
+      else Nil
+
+    maybeEmptyAudience ++ maybePublicAudience
+  }
+
   private def validateActivity(activity: ActivitySave): Seq[ActivityError] = {
     val maybeActivityTypeError: Seq[ActivityError] =
-      if (!activityTypeService.isValidActivityType(activity.`type`)) {
+      if (!activityTypeService.isValidActivityType(activity.`type`))
         Seq(InvalidActivityType(activity.`type`))
-      } else {
-        Seq.empty
-      }
+      else Nil
 
     activity.tags
       .foldLeft(maybeActivityTypeError) { (errors, tag) =>
@@ -193,6 +203,14 @@ sealed trait ActivityError {
 }
 
 object ActivityError {
+
+  object EmptyAudience extends ActivityError {
+    val message = "Empty audience"
+  }
+
+  object PublicAudience extends ActivityError {
+    val message = "Audience cannot be public"
+  }
 
   case class InvalidActivityType(name: String) extends ActivityError {
     def message = s"The activity type '$name' is not valid"

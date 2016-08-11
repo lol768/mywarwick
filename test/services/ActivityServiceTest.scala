@@ -47,6 +47,10 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
 
   "ActivityServiceTest" should {
 
+    "fail on empty audience" in new Scope {
+      service.save(submissionDue, Audience.usercodes(Nil)) mustBe Left(Seq(EmptyAudience))
+    }
+
     "save an item for each recipient" in new Scope {
       val recipients = Audience.usercode("cusebr")
 
