@@ -1,8 +1,7 @@
 package services
 
 import helpers.{Fixtures, MockSchedulerService}
-import models._
-import models.news.Audience
+import models.{Audience, _}
 import org.joda.time.DateTime
 import org.mockito.Matchers
 import org.mockito.Matchers.any

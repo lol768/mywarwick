@@ -1,8 +1,7 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject}
-import models._
-import models.news.Audience
+import models.{Audience, _}
 import org.joda.time.DateTime
 import org.quartz._
 import play.api.db.{Database, NamedDatabase}

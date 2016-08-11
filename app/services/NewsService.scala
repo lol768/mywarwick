@@ -3,7 +3,8 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import models.news.{Audience, AudienceSize, NewsItemRender, NewsItemSave}
+import models.news.{NewsItemRender, NewsItemSave}
+import models.{Audience, AudienceSize}
 import org.joda.time.DateTime
 import org.quartz.JobBuilder.newJob
 import org.quartz.SimpleScheduleBuilder.simpleSchedule

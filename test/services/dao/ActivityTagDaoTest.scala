@@ -1,8 +1,7 @@
 package services.dao
 
 import helpers.{Fixtures, OneStartAppPerSuite}
-import models.news.Audience
-import models.{ActivityTag, TagValue}
+import models.{ActivityTag, Audience, TagValue}
 import org.scalatestplus.play.PlaySpec
 
 class ActivityTagDaoTest extends PlaySpec with OneStartAppPerSuite {

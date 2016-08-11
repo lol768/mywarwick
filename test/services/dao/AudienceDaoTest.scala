@@ -1,8 +1,8 @@
 package services.dao
 
 import helpers.OneStartAppPerSuite
-import models.news.Audience
-import models.news.Audience._
+import models.Audience
+import models.Audience._
 import org.scalatestplus.play.PlaySpec
 import warwick.sso.{GroupName, Usercode}
 

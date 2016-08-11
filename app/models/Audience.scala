@@ -1,4 +1,4 @@
-package models.news
+package models
 
 import enumeratum.EnumEntry
 import warwick.sso.{GroupName, Usercode}

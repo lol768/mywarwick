@@ -3,7 +3,7 @@ package services.dao
 import anorm.SQL
 import anorm.SqlParser._
 import helpers.{Fixtures, OneStartAppPerSuite}
-import models.news.Audience
+import models.Audience
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
 import warwick.anorm.converters.ColumnConversions._

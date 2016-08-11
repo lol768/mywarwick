@@ -2,8 +2,8 @@ package controllers.admin
 
 import akka.stream.ActorMaterializer
 import helpers.{Fixtures, OneStartAppPerSuite, TestActors}
-import models.NewsCategory
-import models.news.{Audience, NewsItemRender}
+import models.{Audience, NewsCategory}
+import models.news.NewsItemRender
 import models.publishing.PublishingRole.NewsManager
 import models.publishing._
 import org.joda.time.DateTime

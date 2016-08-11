@@ -4,8 +4,7 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import controllers.BaseController
-import models._
-import models.news.Audience
+import models.{Audience, _}
 import models.publishing.Ability.CreateAPINotifications
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json._

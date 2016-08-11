@@ -1,4 +1,4 @@
-package models.news
+package models
 
 object AudienceSize {
   object Public extends AudienceSize

@@ -3,9 +3,9 @@ package controllers.admin
 import javax.inject.Inject
 
 import controllers.BaseController
-import models.news.{Audience, NotificationData}
+import models.news.NotificationData
 import models.publishing.Ability.{CreateNotifications, DeleteNotifications, EditNotifications, ViewNotifications}
-import models.{ActivityResponse, DateFormats}
+import models.{ActivityResponse, Audience, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}

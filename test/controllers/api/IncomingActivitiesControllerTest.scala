@@ -2,7 +2,7 @@ package controllers.api
 
 import akka.stream.ActorMaterializer
 import helpers.TestActors
-import models.news.Audience
+import models.Audience
 import models.publishing.PublishingRole.{APINotificationsManager, NotificationsManager}
 import org.mockito.Matchers
 import org.mockito.Matchers._

@@ -3,8 +3,8 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import models.news.Audience
-import models.news.Audience._
+import models.Audience
+import models.Audience._
 import play.api.db.Database
 import services.dao.AudienceDao
 import system.Logging

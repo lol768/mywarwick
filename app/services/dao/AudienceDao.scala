@@ -6,8 +6,8 @@ import java.util.UUID
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.ImplementedBy
-import models.news.Audience
-import models.news.Audience._
+import models.Audience
+import models.Audience._
 import warwick.sso.{GroupName, Usercode}
 
 case class AudienceComponentSave(name: String, value: Option[String], deptCode: Option[String])

@@ -2,7 +2,6 @@ package models.news
 
 import controllers.admin.NewsItemData
 import models.{DateFormats, NewsCategory}
-import oracle.net.aso.h
 import org.joda.time.DateTime
 import play.api.libs.json._
 import uk.ac.warwick.util.web.Uri
