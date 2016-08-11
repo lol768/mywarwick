@@ -49,7 +49,7 @@ class ActivityDaoImpl @Inject()(
   override def save(activity: ActivitySave, audienceId: String, replaces: Seq[String])(implicit c: Connection): String = {
     import activity._
     val id = UUID.randomUUID().toString
-    val now = new DateTime()
+    val now = DateTime.now
     val publishedAtOrNow = publishedAt.getOrElse(now)
 
     SQL"""
