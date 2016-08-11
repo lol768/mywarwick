@@ -11,17 +11,18 @@
 )(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
-  b3.vertical.fieldConstructor
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
 }
 
 @common.admin(publisher.name, "Create notification") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NotificationsController.create(publisher.id)) {
+  @b3.form(action = controllers.admin.routes.NotificationsController.create(publisher.id), 'class -> "split-form") {
 
     @form.globalErrors.map { error =>
       <div class="alert alert-danger">@error.message</div>
     }
 
+    <section>
     @b3.textarea(form("item.text"),
       '_label -> "Text",
       '_help -> "Keep it super short"
@@ -37,10 +38,13 @@
       '_label -> "Link URL",
       '_help -> "Optional"
     )
+    </section>
 
+    <section>
     @tags.audiencePicker(form, "audience", departmentOptions, "notification", permissionScope, allowPublic = false)
 
     @tags.submitOrCancel("Send", controllers.admin.routes.NotificationsController.list(publisher.id))
+    </section>
 
   }
   </div>
