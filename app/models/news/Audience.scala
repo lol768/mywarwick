@@ -16,8 +16,8 @@ object Audience {
     Audience(usercodes.map(UsercodeAudience))
   }
 
-  def usercode(usercodeString: String): Audience = {
-    usercodes(Seq(Usercode(usercodeString)))
+  def usercode(usercode: Usercode): Audience = {
+    usercodes(Seq(usercode))
   }
 
   // Pieces of audience

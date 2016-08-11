@@ -14,6 +14,7 @@ import org.scalatestplus.play.PlaySpec
 import services.ActivityError.{InvalidActivityType, InvalidTagName, InvalidTagValue, _}
 import services.dao._
 import services.job.PublishActivityJob
+import warwick.sso.Usercode
 
 class ActivityServiceTest extends PlaySpec with MockitoSugar {
 
@@ -52,7 +53,7 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
     }
 
     "save an item for each recipient" in new Scope {
-      val recipients = Audience.usercode("cusebr")
+      val recipients = Audience.usercode(Usercode("cusebr"))
 
       when(audienceDao.saveAudience(Matchers.eq(recipients))(any())).thenReturn("audience-id")
       when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
@@ -67,7 +68,7 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
       when(activityTypeService.isValidActivityTagName(Matchers.any())).thenReturn(false)
 
       val activity = submissionDue.copy(tags = Seq(ActivityTag("module", TagValue("CS118", Some("CS118 Programming for Computer Scientists")))))
-      val result = service.save(activity, Audience.usercode("custard"))
+      val result = service.save(activity, Audience.usercode(Usercode("custard")))
 
       result must be a 'left
       val e = result.left.get
@@ -84,7 +85,7 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
       when(activityTypeService.isValidActivityTag(Matchers.any(), Matchers.any())).thenReturn(false)
 
       val activity = submissionDue.copy(tags = Seq(ActivityTag("module", TagValue("CS118", Some("CS118 Programming for Computer Scientists")))))
-      val result = service.save(activity, Audience.usercode("custard"))
+      val result = service.save(activity, Audience.usercode(Usercode("custard")))
 
       result must be a 'left
       val e = result.left.get
@@ -96,7 +97,7 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
     "update - fail if activity does not exist" in new Scope {
       when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(None)
 
-      val result = service.update("activity", submissionDue, Audience.usercode("custard"))
+      val result = service.update("activity", submissionDue, Audience.usercode(Usercode("custard")))
 
       result must be a 'left
       result.left.get must contain(DoesNotExist)
@@ -106,7 +107,7 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
       val existingActivity = Fixtures.activity.fromSave("activity", submissionDue).copy(publishedAt = DateTime.now.minusHours(1))
       when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(Some(existingActivity))
 
-      val result = service.update("activity", submissionDue, Audience.usercode("custard"))
+      val result = service.update("activity", submissionDue, Audience.usercode(Usercode("custard")))
 
       result must be a 'left
       result.left.get must contain(AlreadyPublished)
@@ -116,7 +117,7 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
       val existingActivity = Fixtures.activity.fromSave("activity", submissionDue).copy(publishedAt = DateTime.now.plusHours(1))
       when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(Some(existingActivity))
 
-      val audience = Audience.usercode("custard")
+      val audience = Audience.usercode(Usercode("custard"))
       when(audienceDao.saveAudience(Matchers.eq(audience))(any())).thenReturn("audience")
 
       val result = service.update("activity", submissionDue, audience)

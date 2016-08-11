@@ -90,7 +90,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
 
     "return created activity ID on success" in {
       when(publisherService.getRoleForUser(Matchers.eq(tabulaPublisherId), any())).thenReturn(APINotificationsManager)
-      when(activityService.save(any(), Matchers.eq(Audience.usercode("someone")))).thenReturn(Right("created-activity-id"))
+      when(activityService.save(any(), Matchers.eq(Audience.usercode(Usercode("someone"))))).thenReturn(Right("created-activity-id"))
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
 
