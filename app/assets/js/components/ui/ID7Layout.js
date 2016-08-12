@@ -170,11 +170,17 @@ class ID7Layout extends ReactComponent {
                       <div className="id7-logo-column">
                         <div className="id7-logo-row">
                           <div className="id7-logo">
-                            <a href="/" title="Warwick homepage" onClick={ this.goToHome }>
+                            <a href="http://warwick.ac.uk" title="Warwick homepage">
                               <img src="" alt="Warwick" />
                             </a>
                           </div>
                           <div className="masthead-popover-icons">
+                            <MastheadIcon
+                              icon="home"
+                              key="home"
+                              popoverTitle="Home"
+                              onClick={ this.goToHome }
+                            />
                             <MastheadIcon
                               icon="inbox"
                               badge={ notificationsCount }

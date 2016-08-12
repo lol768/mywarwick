@@ -65,7 +65,7 @@ export default class MastheadIcon extends ReactComponent {
       <span className={ classNames({ disabled: this.props.isDisabled }) }>
         <a
           href="#"
-          onClick={ this.onClick }
+          onClick={ this.props.onClick || this.onClick }
           ref="icon"
           className={classNames({
             'masthead-popover-icon': true,
