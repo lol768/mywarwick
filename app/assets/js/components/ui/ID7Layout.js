@@ -176,12 +176,6 @@ class ID7Layout extends ReactComponent {
                           </div>
                           <div className="masthead-popover-icons">
                             <MastheadIcon
-                              icon="home"
-                              key="home"
-                              popoverTitle="Home"
-                              onClick={ this.goToHome }
-                            />
-                            <MastheadIcon
                               icon="inbox"
                               badge={ notificationsCount }
                               key="notifications"
