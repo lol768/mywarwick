@@ -9,7 +9,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.Configuration
 import play.api.http.HeaderNames
-import play.api.libs.json.JsNull
+import play.api.libs.json.{JsBoolean, JsNull, JsNumber, JsString}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
@@ -76,7 +76,17 @@ class UserInfoControllerTest extends PlaySpec with MockitoSugar with Results {
       // doesn't matter that the cache item is full of nulls, we just check something is returned.
       when(userCache.get(key)).thenReturn(new UserCacheItem(null, 0, null))
 
-      val user = Fixtures.user.makeFoundUser()
+      val its = Department(shortName = Some("IT Services"), name = Some("Information Technology Services"), code = Some("IN"))
+
+      val user = Fixtures.user.makeFoundUser().copy(
+        department = Some(its),
+        rawProperties = Map(
+          "warwickitsclass" -> "Staff",
+          "warwickyearofstudy" -> "3",
+          "warwickfinalyear" -> "true"
+        )
+      )
+
       val result = controller(Some(user)).info(FakeRequestWithHost().withCookies(ssc))
       status(result) must be(200)
 
@@ -85,6 +95,8 @@ class UserInfoControllerTest extends PlaySpec with MockitoSugar with Results {
       (json \ "user" \ "authenticated").as[Boolean] mustBe true
       (json \ "user" \ "usercode").as[String] mustBe "user"
       (json \ "user" \ "analytics" \ "identifier").as[String] mustBe "199b02eb2cf264223ff766f473f2ad442e9b7f5534b500b69944273b5cfa86ca" // sha256(secretuser)
+      (json \ "user" \ "analytics" \ "dimensions" \\ "index").map(_.as[Int]) mustBe Seq(1, 2, 3, 4)
+      (json \ "user" \ "analytics" \ "dimensions" \\ "value").map(_.as[String]) mustBe Seq("IT Services", "Staff", "3", "true")
       (json \ "links" \ "login").as[String] mustBe LOGIN_URL
       (json \ "links" \ "logout").as[String] mustBe LOGOUT_URL
       (json \ "user" \ "photo" \ "url").as[String] mustBe "/assets/images/no-photo.png"
