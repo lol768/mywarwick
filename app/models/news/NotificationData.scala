@@ -1,6 +1,7 @@
 package models.news
 
-import org.joda.time.{DateTime, LocalDateTime}
+import models.ActivitySave
+import org.joda.time.LocalDateTime
 import system.TimeZones
 import warwick.sso.Usercode
 
@@ -11,22 +12,15 @@ case class NotificationData(
   publishDateSet: Boolean,
   publishDate: LocalDateTime
 ) {
-  def toSave(usercode: Usercode, publisherId: String) = NotificationSave(
-    text = text,
-    linkHref = linkHref,
-    publisherId = publisherId,
-    usercode = usercode,
+  def toSave(usercode: Usercode, publisherId: String) = ActivitySave(
+    usercode,
+    publisherId,
     providerId = providerId,
-    publishDate = (if (publishDateSet) publishDate else LocalDateTime.now).toDateTime(TimeZones.LONDON)
+    shouldNotify = true,
+    `type` = "news",
+    title = text,
+    url = linkHref,
+    publishedAt = if (publishDateSet) Some(publishDate.toDateTime(TimeZones.LONDON)) else None
   )
 }
-
-case class NotificationSave(
-  text: String,
-  linkHref: Option[String],
-  publisherId: String,
-  usercode: Usercode,
-  providerId: String,
-  publishDate: DateTime
-)
 

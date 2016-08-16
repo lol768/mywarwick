@@ -5,7 +5,7 @@ import java.sql.Connection
 import anorm.SqlParser._
 import anorm._
 import warwick.anorm.converters.ColumnConversions._
-import helpers.{Fixtures, OneStartAppPerSuite}
+import helpers.{Fixtures, MockSchedulerService, OneStartAppPerSuite}
 import org.joda.time.DateTime
 import org.mockito.Matchers._
 import org.mockito.Matchers
@@ -80,22 +80,22 @@ class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSu
 
     val activityDao = get[ActivityDao]
     val recipientDao = get[ActivityRecipientDao]
-    val creationDao = null
     val tagDao = mock[ActivityTagDao]
     val activityTypeService = mock[ActivityTypeService]
     val messaging = mock[MessagingService]
     val pubSub = mock[PubSub]
-    val activityService = new ActivityServiceImpl(activityDao, creationDao, recipientDao, tagDao, messaging, pubSub, db, activityTypeService)
+    val audienceDao = mock[AudienceDao]
+    val scheduler = mock[SchedulerService]
+    val activityService = new ActivityServiceImpl(db, activityDao, activityTypeService, tagDao, audienceDao, recipientDao, scheduler)
 
     val publishNotificationJob = new PublishActivityJob(audienceService, activityService, messaging, pubSub, scheduler)
 
     "save audience for notification" in {
 
       db.withConnection { implicit c =>
+        val activitySave = Fixtures.activitySave.submissionDue.copy(publishedAt = Some(date))
 
-        val activitySave = Fixtures.activitySave.submissionDue.copy(audienceId = Some(audienceId), generatedAt = Some(date))
-
-        val activityId = activityDao.save(activitySave, Seq.empty)
+        val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
         when(map.getString(activityIdKey)).thenReturn(activityId)
 
         publishNotificationJob.execute(context)

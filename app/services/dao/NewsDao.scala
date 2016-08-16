@@ -7,8 +7,8 @@ import javax.inject.{Inject, Singleton}
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.ImplementedBy
-import models.NewsCategory
-import models.news.{AudienceSize, Link, NewsItemRender, NewsItemSave}
+import models.{AudienceSize, NewsCategory}
+import models.news.{Link, NewsItemRender, NewsItemSave}
 import org.joda.time.DateTime
 import system.DatabaseDialect
 import uk.ac.warwick.util.web.Uri

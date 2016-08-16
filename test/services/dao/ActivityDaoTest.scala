@@ -17,39 +17,41 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
   val activityRecipientDao = get[ActivityRecipientDao]
   val messagingDao = get[MessagingDao]
 
-  val activityPrototype = Fixtures.activitySave.submissionDue
+  val activitySave = Fixtures.activitySave.submissionDue
 
   val insertSkynetProvider = SQL"""
         INSERT INTO provider (id, display_name, icon, colour, publisher_id) VALUES
         ('skynet', 'Skynet', 'eye-o', 'greyish', 'default')
       """
 
+  val audienceId = "audience"
+
   "ActivityDao" should {
 
     "get activity by id" in transaction { implicit c =>
-      val activityId = activityDao.save(activityPrototype, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
       activityDao.getActivityById(activityId).map(_.id) mustBe Some(activityId)
     }
 
     "get activities by ids" in transaction { implicit c =>
-      val activityId = activityDao.save(activityPrototype, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
       activityDao.getActivitiesByIds(Seq(activityId)).map(_.id) mustBe Seq(activityId)
     }
 
     "replace activities" in transaction { implicit c =>
-      val activityId = activityDao.save(activityPrototype, Seq.empty)
-      val newActivityId = activityDao.save(activityPrototype, Seq(activityId))
+      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val newActivityId = activityDao.save(activitySave, audienceId, Seq(activityId))
       activityDao.getActivityById(activityId).flatMap(_.replacedBy) mustBe Some(newActivityId)
     }
 
     "find activities without tags" in transaction { implicit c =>
-      val activityId = activityDao.save(activityPrototype, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
       activityRecipientDao.create(activityId, "someone", None)
       activityDao.getActivitiesForUser("someone", 100).map(_.activity.id) must contain(activityId)
     }
 
     "find activities with tags" in transaction { implicit c =>
-      val activityId = activityDao.save(activityPrototype, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
       activityRecipientDao.create(activityId, "someone", None)
       activityTagDao.save(activityId, ActivityTag("name", TagValue("value")))
       activityDao.getActivitiesForUser("someone", 100).map(_.activity.id) must contain(activityId)
@@ -61,8 +63,8 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
       val oldDate = nowDate.minusMonths(1)
       val lastFetchedDate = nowDate.minusDays(1)
 
-      val oldActivityId = activityDao.save(activityPrototype, Seq.empty)
-      val newActivityId = activityDao.save(activityPrototype, Seq.empty)
+      val oldActivityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val newActivityId = activityDao.save(activitySave, audienceId, Seq.empty)
 
       val newActivity = activityDao.getActivityById(newActivityId).get
 
@@ -111,8 +113,8 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
     "get provider's activity icon" in transaction { implicit c =>
       insertSkynetProvider.execute()
 
-      val activitySave = ActivitySave("skynet", false, "beady-eye", "Watching You", None, None, Seq.empty, Map.empty, None, None)
-      val activityId = activityDao.save(activitySave, Seq.empty)
+      val activitySave = ActivitySave(Usercode("custard"), "default", "skynet", false, "beady-eye", "Watching You", None, None, Seq.empty, Map.empty, None)
+      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
       activityRecipientDao.create(activityId, "nicduke", None)
 
       val response = activityDao.getActivitiesForUser("nicduke", 1).head
@@ -123,25 +125,39 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
     "get missing activity icon" in transaction { implicit t =>
       activityDao.getActivityIcon("nonexist") mustBe None
     }
-    
+
     "get activity icon" in transaction { implicit t =>
       insertSkynetProvider.execute()
       activityDao.getActivityIcon("skynet").get.colour.get mustBe "greyish"
     }
 
     "get activities created by publisher" in transaction { implicit c =>
-      SQL"INSERT INTO PUBLISHER (ID, NAME) VALUES ('publisher-id', 'Test Publisher')"
-        .execute()
+      SQL"INSERT INTO PUBLISHER (ID, NAME) VALUES ('xyz', 'Test Publisher')".execute()
 
-      val id = get[ActivityDao].save(Fixtures.activitySave.submissionDue, Nil)
-      val id2 = get[ActivityDao].save(Fixtures.activitySave.submissionDue, Nil)
+      val id = activityDao.save(Fixtures.activitySave.submissionDue.copy(publisherId = "xyz"), audienceId, Nil)
+      val id2 = activityDao.save(Fixtures.activitySave.submissionDue.copy(publisherId = "xyz"), audienceId, Nil)
 
-      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id, 'publisher-id', 'custard', SYSDATE)"
-        .execute()
-      SQL"INSERT INTO PUBLISHED_NOTIFICATION (ACTIVITY_ID, PUBLISHER_ID, CREATED_BY, CREATED_AT) VALUES ($id2, 'publisher-id', 'custard', SYSDATE)"
-        .execute()
+      activityDao.getActivitiesByPublisherId("xyz", limit = 100).map(_.id) must contain allOf(id, id2)
+    }
 
-      activityDao.getActivitiesByPublisherId("publisher-id", limit = 100).map(_.id) must contain allOf(id, id2)
+    "delete an activity" in transaction { implicit c =>
+      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+
+      activityDao.delete(activityId)
+
+      SQL"SELECT COUNT(*) FROM ACTIVITY WHERE ID = $activityId"
+        .executeQuery()
+        .as(scalar[Int].single) must be(0)
+    }
+
+    "update an activity" in transaction { implicit c =>
+      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+
+      activityDao.update(activityId, activitySave.copy(title = "New title"), audienceId)
+
+      SQL"SELECT TITLE FROM ACTIVITY WHERE ID = $activityId"
+        .executeQuery()
+        .as(scalar[String].single) must be("New title")
     }
   }
 }

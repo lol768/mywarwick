@@ -23,6 +23,13 @@
         <MarkdownNavigatorCodeStyleSettings>
           <option name="RIGHT_MARGIN" value="72" />
         </MarkdownNavigatorCodeStyleSettings>
+        <ScalaCodeStyleSettings>
+          <option name="alwaysUsedImports">
+            <array>
+              <option value="DateFormats.isoDateReads" />
+            </array>
+          </option>
+        </ScalaCodeStyleSettings>
         <XML>
           <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
         </XML>

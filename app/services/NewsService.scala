@@ -3,7 +3,8 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import models.news.{Audience, AudienceSize, NewsItemRender, NewsItemSave}
+import models.news.{NewsItemRender, NewsItemSave}
+import models.{Audience, AudienceSize}
 import org.joda.time.DateTime
 import org.quartz.JobBuilder.newJob
 import org.quartz.SimpleScheduleBuilder.simpleSchedule
@@ -57,7 +58,7 @@ class AnormNewsService @Inject()(
   }
 
   private def schedulePublishNewsItem(newsId: String, audienceId: String, publishDate: DateTime): Unit = {
-    val key = new JobKey(newsId, "PublishNewsItem")
+    val key = new JobKey(newsId, PublishNewsItemJob.name)
 
     // Delete any existing job that would publish the same news item
     scheduler.deleteJob(key)

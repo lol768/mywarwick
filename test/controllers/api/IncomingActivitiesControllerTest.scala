@@ -2,6 +2,7 @@ package controllers.api
 
 import akka.stream.ActorMaterializer
 import helpers.TestActors
+import models.Audience
 import models.publishing.PublishingRole.{APINotificationsManager, NotificationsManager}
 import org.mockito.Matchers
 import org.mockito.Matchers._
@@ -47,12 +48,10 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
 
   val publisherService = mock[PublisherService]
   val activityService = mock[ActivityService]
-  val activityRecipientService = mock[ActivityRecipientService]
 
   val controller = new IncomingActivitiesController(
     new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], mock[CacheApi]),
     activityService,
-    activityRecipientService,
     publisherService,
     mock[MessagesApi]
   ) {
@@ -91,8 +90,7 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
 
     "return created activity ID on success" in {
       when(publisherService.getRoleForUser(Matchers.eq(tabulaPublisherId), any())).thenReturn(APINotificationsManager)
-      when(activityRecipientService.getRecipientUsercodes(Seq(Usercode("someone")), Seq.empty)).thenReturn(Set(Usercode("someone")))
-      when(activityService.save(any(), any[Set[Usercode]]())).thenReturn(Right("created-activity-id"))
+      when(activityService.save(any(), Matchers.eq(Audience.usercode(Usercode("someone"))))).thenReturn(Right("created-activity-id"))
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
 
@@ -104,9 +102,29 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
       (json \ "data" \ "id").as[String] mustBe "created-activity-id"
     }
 
-    "accept generated_at date in the correct format" in {
-      when(activityRecipientService.getRecipientUsercodes(Seq(Usercode("someone")), Seq.empty)).thenReturn(Set(Usercode("someone")))
+    "send to a webgroup" in {
+      val groupAudience = Audience(Seq(Audience.WebgroupAudience(GroupName("in-trigue"))))
 
+      when(publisherService.getRoleForUser(Matchers.eq(tabulaPublisherId), any())).thenReturn(APINotificationsManager)
+      when(activityService.save(any(), Matchers.eq(groupAudience))).thenReturn(Right("created-activity-id"))
+
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(
+        body + ("recipients" -> Json.obj(
+          "groups" -> Json.arr(
+            "in-trigue"
+          )
+        ))
+      ))
+
+      status(result) mustBe CREATED
+      val json = contentAsJson(result)
+
+      (json \ "success").as[Boolean] mustBe true
+      (json \ "status").as[String] mustBe "ok"
+      (json \ "data" \ "id").as[String] mustBe "created-activity-id"
+    }
+
+    "accept generated_at date in the correct format" in {
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(
         body + ("generated_at" -> JsString("2016-01-01T09:00:00.000Z"))
       ))
@@ -121,8 +139,6 @@ class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with R
     }
 
     "reject an incorrectly-formatted generated_at date" in {
-      when(activityService.save(any(), any[Set[Usercode]]())).thenReturn(Right("created-activity-id"))
-
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(
         body + ("generated_at" -> JsString("yesterday"))
       ))
