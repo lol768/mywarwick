@@ -26,7 +26,7 @@ class HealthCheckService @Inject()(
   var oldestUnsentMessageCreatedAt: Option[DateTime] = None
 
   def runNow(): Unit = {
-    healthCheckLastRunAt = new DateTime
+    healthCheckLastRunAt = DateTime.now
     messagingQueueStatus = messagingService.getQueueStatus()
     oldestUnsentMessageCreatedAt = messagingService.getOldestUnsentMessageCreatedAt()
   }

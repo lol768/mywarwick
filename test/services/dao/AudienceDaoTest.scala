@@ -1,10 +1,10 @@
 package services.dao
 
 import helpers.OneStartAppPerSuite
-import models.news.Audience
-import models.news.Audience._
+import models.Audience
+import models.Audience._
 import org.scalatestplus.play.PlaySpec
-import warwick.sso.GroupName
+import warwick.sso.{GroupName, Usercode}
 
 class AudienceDaoTest extends PlaySpec with OneStartAppPerSuite {
 
@@ -43,6 +43,27 @@ class AudienceDaoTest extends PlaySpec with OneStartAppPerSuite {
       saved mustBe Seq(AudienceComponentSave("Webgroup", Some("in-music"), None))
     }
 
+    "save Usercodes component" in {
+      val audience = Audience.usercodes(Seq(Usercode("a"), Usercode("b")))
+      val saved = audienceDao.audienceToComponents(audience)
+
+      saved mustBe Seq(AudienceComponentSave("Usercode", Some("a"), None), AudienceComponentSave("Usercode", Some("b"), None))
+    }
+
+    "reconstitute usercodes audience" in {
+      val components = Seq(
+        AudienceComponentSave("Usercode", Some("a"), None),
+        AudienceComponentSave("Usercode", Some("b"), None)
+      )
+
+      val audience = audienceDao.audienceFromComponents(components)
+
+      audience mustBe Audience(Seq(
+        Audience.UsercodeAudience(Usercode("a")),
+        Audience.UsercodeAudience(Usercode("b"))
+      ))
+    }
+
     "group mixed Components into Audience" in {
       val components = Seq(
         AudienceComponentSave("Staff", None, Some("ch")),
@@ -54,12 +75,13 @@ class AudienceDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       val audience = audienceDao.audienceFromComponents(components)
 
-      audience mustBe Audience(Seq(
+      audience must not be 'public
+      audience.components must contain only(
         DepartmentAudience("ch", Seq(Staff, UndergradStudents)),
         ModuleAudience("music"),
         WebgroupAudience(GroupName("in-elab")),
         ModuleAudience("history")
-      ))
+      )
     }
 
     "group cross-DepartmentAudience Components into Audience" in {
@@ -72,11 +94,12 @@ class AudienceDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       val audience = audienceDao.audienceFromComponents(components)
 
-      audience mustBe Audience(Seq(
+      audience must not be 'public
+      audience.components must contain only(
         DepartmentAudience("fr", Seq(ResearchPostgrads)),
         DepartmentAudience("ch", Seq(Staff, UndergradStudents)),
         DepartmentAudience("ec", Seq(Staff))
-      ))
+      )
     }
 
     "group global Staff and PG Components into audience" in {
@@ -88,11 +111,12 @@ class AudienceDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       val audience = audienceDao.audienceFromComponents(components)
 
-      audience mustBe Audience(Seq(
+      audience must not be 'public
+      audience.components must contain only(
         Staff,
         TaughtPostgrads,
         ResearchPostgrads
-      ))
+      )
     }
 
     "read Components from db into Audience" in transaction {implicit c =>

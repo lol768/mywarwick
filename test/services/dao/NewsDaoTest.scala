@@ -5,7 +5,7 @@ import java.sql.Connection
 import helpers.OneStartAppPerSuite
 import anorm._
 import anorm.SqlParser._
-import models.news.AudienceSize.{Finite, Public}
+import models.AudienceSize.{Finite, Public}
 import models.news.NewsItemSave
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec

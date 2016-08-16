@@ -1,6 +1,6 @@
 package services
 
-import models.news.Audience
+import models.Audience
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar

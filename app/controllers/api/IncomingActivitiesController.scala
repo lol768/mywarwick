@@ -4,9 +4,8 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import controllers.BaseController
-import models._
+import models.{Audience, _}
 import models.publishing.Ability.CreateAPINotifications
-import models.publishing.PublishingRole.APINotificationsManager
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json._
 import play.api.mvc.Result
@@ -18,7 +17,6 @@ import warwick.sso.{AuthenticatedRequest, GroupName, User, Usercode}
 class IncomingActivitiesController @Inject()(
   securityService: SecurityService,
   activityService: ActivityService,
-  recipientService: ActivityRecipientService,
   publisherService: PublisherService,
   val messagesApi: MessagesApi
 ) extends BaseController with I18nSupport {
@@ -39,14 +37,14 @@ class IncomingActivitiesController @Inject()(
         request.context.user.map { user =>
           if (publisherService.getRoleForUser(publisherId, user.usercode).can(CreateAPINotifications)) {
             request.body.validate[IncomingActivityData].map { data =>
-              val activity = ActivitySave.fromApi(providerId, shouldNotify, data)
+              val activity = ActivitySave.fromApi(user.usercode, publisherId, providerId, shouldNotify, data)
 
-              val usercodes = recipientService.getRecipientUsercodes(
-                data.recipients.users.getOrElse(Seq.empty).map(Usercode),
-                data.recipients.groups.getOrElse(Seq.empty).map(GroupName)
-              )
+              val usercodes = data.recipients.users.getOrElse(Seq.empty).map(Usercode).map(Audience.UsercodeAudience)
+              val webgroups = data.recipients.groups.getOrElse(Seq.empty).map(GroupName).map(Audience.WebgroupAudience)
 
-              activityService.save(activity, usercodes).fold(badRequest, id => {
+              val audience = Audience(usercodes ++ webgroups)
+
+              activityService.save(activity, audience).fold(badRequest, id => {
                 auditLog('CreateActivity, 'id -> id, 'provider -> activity.providerId)
                 created(id)
               })

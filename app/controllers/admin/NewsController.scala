@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import controllers.BaseController
 import models._
-import models.news.{Audience, Link, NewsItemRender, NewsItemSave}
+import models.news.{Link, NewsItemRender, NewsItemSave}
 import models.publishing.Ability._
 import models.publishing.Publisher
 import org.joda.time.LocalDateTime

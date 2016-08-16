@@ -2,8 +2,8 @@ package controllers.admin
 
 import javax.inject.{Inject, Singleton}
 
-import models.news.Audience
-import models.news.Audience._
+import models.Audience
+import models.Audience._
 import play.api.data.FormError
 import services.dao.DepartmentInfoDao
 import uk.ac.warwick.util.core.StringUtils
@@ -15,7 +15,6 @@ import scala.concurrent.Future
   */
 @Singleton
 class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
-  import system.ThreadPools.web
 
   /**
     * Attempts to convert the request parameters into an Audience object.

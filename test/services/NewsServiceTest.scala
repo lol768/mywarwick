@@ -1,8 +1,8 @@
 package services
 
 import helpers.{Fixtures, MockSchedulerService, OneStartAppPerSuite}
-import models.news.Audience
-import models.news.Audience.{DepartmentAudience, Staff}
+import models.Audience
+import models.Audience._
 import org.joda.time.DateTime
 import org.quartz.JobKey
 import org.quartz.SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW

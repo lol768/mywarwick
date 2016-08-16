@@ -1,41 +1,39 @@
 package services
 
-import actors.WebsocketActor.Notification
-import helpers.Fixtures
-import models._
+import helpers.{Fixtures, MockSchedulerService}
+import models.{Audience, _}
 import org.joda.time.DateTime
 import org.mockito.Matchers
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
+import org.quartz.JobKey
 import org.scalatest.LoneElement._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import services.ActivityError.{InvalidActivityType, InvalidTagName, InvalidTagValue, NoRecipients, _}
-import services.dao.{ActivityCreationDao, ActivityDao, ActivityRecipientDao, ActivityTagDao}
-import services.messaging.MessagingService
+import services.ActivityError.{InvalidActivityType, InvalidTagName, InvalidTagValue, _}
+import services.dao._
+import services.job.PublishActivityJob
 import warwick.sso.Usercode
 
 class ActivityServiceTest extends PlaySpec with MockitoSugar {
 
 
   class Scope {
-    val activityRecipientService = mock[ActivityRecipientService]
-    val activityCreationDao = mock[ActivityCreationDao]
-    val activityRecipientDao = mock[ActivityRecipientDao]
     val activityDao = mock[ActivityDao]
-    val activityTagDao = mock[ActivityTagDao]
-    val messaging = mock[MessagingService]
-    val pubSub = mock[PubSub]
     val activityTypeService = mock[ActivityTypeService]
+    val activityTagDao = mock[ActivityTagDao]
+    val activityRecipientDao = mock[ActivityRecipientDao]
+    val audienceDao = mock[AudienceDao]
+    val scheduler = new MockSchedulerService()
+
     val service = new ActivityServiceImpl(
-      activityDao,
-      activityCreationDao,
-      activityRecipientDao,
-      activityTagDao,
-      messaging,
-      pubSub,
       new MockDatabase(),
-      activityTypeService
+      activityDao,
+      activityTypeService,
+      activityTagDao,
+      audienceDao,
+      activityRecipientDao,
+      scheduler
     )
 
     when(activityTypeService.isValidActivityType(Matchers.any())).thenReturn(true)
@@ -49,36 +47,19 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
 
   "ActivityServiceTest" should {
 
-    "fail on no recipients" in new Scope {
-      service.save(submissionDue, Set.empty[Usercode]) mustBe Left(Seq(NoRecipients))
+    "fail on empty audience" in new Scope {
+      service.save(submissionDue, Audience.usercodes(Nil)) mustBe Left(Seq(EmptyAudience))
     }
 
     "save an item for each recipient" in new Scope {
-      val createdActivity = Fixtures.activity.fromSave("1234", submissionDue)
-      val response = ActivityResponse(createdActivity, None, Nil)
-      val recipients = Set(Usercode("cusebr"))
+      val recipients = Audience.usercode(Usercode("cusebr"))
 
-      when(activityRecipientService.getRecipientUsercodes(Nil, Nil)) thenReturn recipients
-      when(activityCreationDao.createActivity(Matchers.eq(submissionDue), Matchers.eq(Set(Usercode("cusebr"))), Matchers.eq(Nil))(any())) thenReturn response
+      when(audienceDao.saveAudience(Matchers.eq(recipients))(any())).thenReturn("audience-id")
+      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
 
-      service.save(submissionDue, recipients) must be (Right("1234"))
+      service.save(submissionDue, recipients) must be(Right("activity-id"))
 
-      verify(messaging).send(recipients, createdActivity)
-      verify(pubSub).publish("cusebr", Notification(response))
-    }
-
-    "not notify when shouldNotify is false" in new Scope {
-      val createdActivity = Fixtures.activity.fromSave("1234", submissionDue.copy(shouldNotify = false))
-      val response = ActivityResponse(createdActivity, None, Nil)
-      val recipients = Set(Usercode("cusebr"))
-
-      when(activityRecipientService.getRecipientUsercodes(Nil, Nil)) thenReturn recipients
-      when(activityCreationDao.createActivity(Matchers.eq(submissionDue), Matchers.eq(Set(Usercode("cusebr"))), Matchers.eq(Nil))(any())) thenReturn response
-
-      service.save(submissionDue, recipients) must be (Right("1234"))
-
-      verifyZeroInteractions(messaging)
-      verify(pubSub).publish("cusebr", Notification(response))
+      scheduler.triggeredJobs.map(_.getKey) must contain(new JobKey("activity-id", PublishActivityJob.name))
     }
 
     "fail with invalid activity type and tag name" in new Scope {
@@ -86,7 +67,7 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
       when(activityTypeService.isValidActivityTagName(Matchers.any())).thenReturn(false)
 
       val activity = submissionDue.copy(tags = Seq(ActivityTag("module", TagValue("CS118", Some("CS118 Programming for Computer Scientists")))))
-      val result = service.save(activity, Set(Usercode("custard")))
+      val result = service.save(activity, Audience.usercode(Usercode("custard")))
 
       result must be a 'left
       val e = result.left.get
@@ -103,7 +84,7 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
       when(activityTypeService.isValidActivityTag(Matchers.any(), Matchers.any())).thenReturn(false)
 
       val activity = submissionDue.copy(tags = Seq(ActivityTag("module", TagValue("CS118", Some("CS118 Programming for Computer Scientists")))))
-      val result = service.save(activity, Set(Usercode("custard")))
+      val result = service.save(activity, Audience.usercode(Usercode("custard")))
 
       result must be a 'left
       val e = result.left.get
@@ -115,32 +96,35 @@ class ActivityServiceTest extends PlaySpec with MockitoSugar {
     "update - fail if activity does not exist" in new Scope {
       when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(None)
 
-      val result = service.update("activity", submissionDue)
+      val result = service.update("activity", submissionDue, Audience.usercode(Usercode("custard")))
 
       result must be a 'left
       result.left.get must contain(DoesNotExist)
     }
 
     "update - fail if activity is already published" in new Scope {
-      val existingActivity = Fixtures.activity.fromSave("activity", submissionDue).copy(generatedAt = DateTime.now.minusHours(1))
+      val existingActivity = Fixtures.activity.fromSave("activity", submissionDue).copy(publishedAt = DateTime.now.minusHours(1))
       when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(Some(existingActivity))
 
-      val result = service.update("activity", submissionDue)
+      val result = service.update("activity", submissionDue, Audience.usercode(Usercode("custard")))
 
       result must be a 'left
       result.left.get must contain(AlreadyPublished)
     }
 
     "update an existing activity" in new Scope {
-      val existingActivity = Fixtures.activity.fromSave("activity", submissionDue).copy(generatedAt = DateTime.now.plusHours(1))
+      val existingActivity = Fixtures.activity.fromSave("activity", submissionDue).copy(publishedAt = DateTime.now.plusHours(1))
       when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(Some(existingActivity))
 
-      val result = service.update("activity", submissionDue)
+      val audience = Audience.usercode(Usercode("custard"))
+      when(audienceDao.saveAudience(Matchers.eq(audience))(any())).thenReturn("audience")
+
+      val result = service.update("activity", submissionDue, audience)
 
       result must be a 'right
       result.right.get must be("activity")
 
-      verify(activityDao).update(Matchers.eq("activity"), Matchers.eq(submissionDue))(Matchers.any())
+      verify(activityDao).update(Matchers.eq("activity"), Matchers.eq(submissionDue), Matchers.eq("audience"))(Matchers.any())
     }
 
     // TODO test when there are activities to replace

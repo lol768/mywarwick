@@ -1,7 +1,7 @@
 package helpers
 
 import anorm._
-import models.news.{NewsItemRender, NewsItemSave, NotificationSave}
+import models.news.{NewsItemRender, NewsItemSave}
 import models.{Activity, ActivitySave}
 import org.joda.time.DateTime
 import warwick.sso._
@@ -17,26 +17,14 @@ object Fixtures {
 
     lazy val submissionDue =
       ActivitySave(
+        changedBy = Usercode("custard"),
+        publisherId = "elab",
         providerId = "tabula",
         `type` = "due",
         title = "Coursework due",
         text = Some("Your coursework is due in 7 days"),
         url = Some("http://tabula.warwick.ac.uk"),
         shouldNotify = true
-      )
-
-  }
-
-  object notificationSave {
-
-    lazy val lunchtime =
-      NotificationSave(
-        text = "It is lunch time",
-        linkHref = None,
-        publisherId = "default",
-        usercode = Usercode("custard"),
-        providerId = "news",
-        publishDate = DateTime.now
       )
 
   }
@@ -51,7 +39,7 @@ object Fixtures {
       text = activity.text,
       url = activity.url,
       replacedBy = None,
-      generatedAt = activity.generatedAt.getOrElse(DateTime.now),
+      publishedAt = activity.publishedAt.getOrElse(DateTime.now),
       createdAt = DateTime.now,
       shouldNotify = activity.shouldNotify
     )
