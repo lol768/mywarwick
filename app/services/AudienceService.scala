@@ -3,8 +3,8 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import models.news.Audience
-import models.news.Audience._
+import models.Audience
+import models.Audience._
 import play.api.db.Database
 import services.dao.AudienceDao
 import system.Logging
@@ -39,6 +39,7 @@ class AudienceServiceImpl @Inject()(
           subset <- subsets
           user <- resolveSubset(code.toLowerCase, subset).get
         } yield user
+        case UsercodeAudience(usercode) => Seq(usercode)
       }.distinct
     }
   }

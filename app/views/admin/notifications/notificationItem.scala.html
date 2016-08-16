@@ -13,12 +13,12 @@
       @item.activity.text.map { text =>
         <div class="activity-item__text">@text</div>
       }
-      <div class="activity-item__date">@models.DateFormats.emailDateTime(item.activity.generatedAt)</div>
+      <div class="activity-item__date">@models.DateFormats.emailDateTime(item.activity.publishedAt)</div>
       @item.activity.url.map { url =>
         <a href="@url">Link to @url</a>
       }
     </div>
-    @if(item.activity.generatedAt.isAfterNow) {
+    @if(item.activity.publishedAt.isAfterNow) {
       <div class="media-right">
         <a href="@controllers.admin.routes.NotificationsController.updateForm(publisher.id, item.activity.id)" class="btn btn-default">Edit</a>
         @helper.form(controllers.admin.routes.NotificationsController.delete(publisher.id, item.activity.id)) {
