@@ -13,7 +13,7 @@
     @* TODO receive list of allowed audiences from controller - each user's will be different *@
     @b3.multifieldFormGroup(
       Seq(form(fieldName), form(audienceField), form(departmentField)),
-      Seq('_label -> s"Who is this $itemName for?"),
+      Seq('_label -> s"Who is this $itemName for?", 'id -> "item_audience"),
       Nil) { info =>
 
       <div class="audience-picker">

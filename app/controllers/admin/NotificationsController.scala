@@ -5,6 +5,7 @@ import javax.inject.Inject
 import controllers.BaseController
 import models.news.NotificationData
 import models.publishing.Ability.{CreateNotifications, DeleteNotifications, EditNotifications, ViewNotifications}
+import models.publishing.Publisher
 import models.{ActivityResponse, Audience, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
@@ -56,20 +57,24 @@ class NotificationsController @Inject()(
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNotifications) { implicit request =>
-    Ok(views.createForm(request.publisher, publishNotificationForm, departmentOptions, providerOptions, permissionScope))
+    Ok(renderCreateForm(request.publisher, publishNotificationForm))
   }
 
   def create(publisherId: String) = PublisherAction(publisherId, CreateNotifications).async { implicit request =>
+    val validateOnly = request.body.asFormUrlEncoded.get.contains("validateOnly")
     bindFormWithAudience(
       formWithErrors =>
         Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope)),
       (publish, audience) => {
-        val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
+        if (!validateOnly) {
+          val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
 
         val activityId = activityService.save(notification, audience)
         auditLog('CreateNotification, 'id -> activityId)
 
-        Redirect(routes.NotificationsController.list(publisherId)).flashing("success" -> "Notification created")
+          Redirect(routes.NotificationsController.list(publisherId)).flashing("success" -> "Notification created")
+        } else
+          Ok(renderCreateForm(request.publisher, publishNotificationForm.fill(publish)))
       }
     )
   }
@@ -171,6 +176,14 @@ class NotificationsController @Inject()(
     )
   }
 
+  def renderCreateForm(publisher: Publisher, form: Form[PublishNotificationData])(implicit request: PublisherRequest[_]) =
+    views.createForm(
+      publisher = publisher,
+      form = form,
+      departmentOptions = departmentOptions,
+      providerOptions = providerOptions,
+      permissionScope = permissionScope
+    )
 }
 
 object NotificationsController {

@@ -8,6 +8,7 @@
     permissionScope: PermissionScope
 )(implicit fc: b3.B3FieldConstructor, messages: Messages)
 
+<section>
 @b3.textarea(form("item.text"),
   '_label -> "Text",
   '_help -> "Keep it super short"
@@ -23,7 +24,9 @@
   '_label -> "Link URL",
   '_help -> "Optional"
 )
+</section>
 
+<section>
 @b3.radio(form("item.publishDateSet"),
   Seq(
     "false" -> "Now",
@@ -38,6 +41,4 @@
   '_help -> "Select a time in the future to automatically deliver this notification at that time",
   'value -> LocalDateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
 )
-
-@tags.audiencePicker(form, "audience", departmentOptions, "notification", permissionScope, allowPublic = false)
-
+</section>
