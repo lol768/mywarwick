@@ -217,7 +217,7 @@ class ActivityDaoImpl @Inject()(
     }
 
   private lazy val tagParser: RowParser[Option[ActivityTag]] =
-    get[Option[String]]("TAG_NAME") ~ // Option becbugs.elab.warwick.ac.ukause an activity can have no tags
+    get[Option[String]]("TAG_NAME") ~ // Option because an activity can have no tags
       get[Option[String]]("TAG_VALUE") ~
       get[Option[String]]("TAG_DISPLAY_VALUE") map {
       case name ~ value ~ display =>
