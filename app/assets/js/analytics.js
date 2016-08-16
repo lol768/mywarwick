@@ -29,17 +29,23 @@ let analyticsQueue = [];
 
 let postNextItemThrottled;
 
-function queue(...args) {
-  const time = new Date().getTime();
-  analyticsQueue = analyticsQueue.concat({ args, time });
+let isReady = false;
 
-  postNextItemThrottled();
+function queue(...args) {
+  const time = _.now();
+  analyticsQueue = [
+    ...analyticsQueue,
+    { args, time },
+  ];
+
+  if (isReady) {
+    postNextItemThrottled();
+  }
 }
 
-function getTimeSpentInQueue(timeQueued) {
-  const time = new Date().getTime();
 
-  return time - timeQueued;
+function getTimeSpentInQueue(timeQueued) {
+  return _.now() - timeQueued;
 }
 
 function postNextItem() {
@@ -61,7 +67,9 @@ function postNextItem() {
 }
 
 $(() => {
-  $(window).on('online', postNextItemThrottled);
+  if (isReady) {
+    $(window).on('online', postNextItemThrottled);
+  }
 });
 
 postNextItemThrottled = _.throttle(postNextItem, 500); // eslint-disable-line prefer-const
@@ -70,4 +78,20 @@ export function track(page) {
   if (trackingId) {
     queue('send', { hitType: 'pageview', page });
   }
+}
+
+export function setUserId(userId) {
+  ga('set', 'userId', userId);
+}
+
+export function setDimension(index, value) {
+  if (value !== null) {
+    ga('set', `dimension${index}`, value);
+  }
+}
+
+export function ready() {
+  isReady = true;
+
+  postNextItemThrottled();
 }

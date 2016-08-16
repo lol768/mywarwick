@@ -90,6 +90,10 @@ class UserInfoController @Inject()(
     redirect.discardingCookies(DiscardingCookie(SSC_NAME, SSC_PATH, Some(SSC_DOMAIN)))
   }
 
+  private val WARWICK_ITS_CLASS = "warwickitsclass"
+  private val WARWICK_YEAR_OF_STUDY = "warwickyearofstudy"
+  private var WARWICK_FINAL_YEAR = "warwickfinalyear"
+
   private def contextUserInfo(context: LoginContext): Future[JsValue] = {
     context.user.map { user =>
       photoService.photoUrl(user.universityId)
@@ -100,8 +104,24 @@ class UserInfoController @Inject()(
             "usercode" -> user.usercode.string,
             "analytics" -> Json.obj(
               "identifier" -> getUniqueIdentifier(user.usercode),
-              "kind" -> user.rawProperties.getOrElse("warwickitsclass", null),
-              "department" -> user.department.flatMap(_.code)
+              "dimensions" -> Json.arr(
+                Json.obj(
+                  "index" -> 1,
+                  "value" -> user.department.flatMap(_.shortName).getOrElse(null)
+                ),
+                Json.obj(
+                  "index" -> 2,
+                  "value" -> user.rawProperties.getOrElse(WARWICK_ITS_CLASS, null)
+                ),
+                Json.obj(
+                  "index" -> 3,
+                  "value" -> user.rawProperties.getOrElse(WARWICK_YEAR_OF_STUDY, null)
+                ),
+                Json.obj(
+                  "index" -> 4,
+                  "value" -> user.rawProperties.getOrElse(WARWICK_FINAL_YEAR, null)
+                )
+              )
             ),
             "name" -> user.name.full,
             "masquerading" -> context.isMasquerading,
