@@ -169,9 +169,23 @@ function receiveUserInfo(response) {
       } else {
         store.dispatch(user.userReceive(data.user));
         store.dispatch(user.receiveSSOLinks(data.links));
+
+        const analyticsData = data.user.analytics;
+        if (analyticsData !== undefined) {
+          analyticsData.dimensions.forEach(dimension =>
+            analytics.setDimension(dimension.index, dimension.value)
+          );
+
+          analytics.setUserId(analyticsData.identifier);
+        }
+
+        analytics.ready();
       }
     })
-    .catch(() => setTimeout(() => fetchUserInfo().then(receiveUserInfo), 5000));
+    .catch(e => {
+      setTimeout(() => fetchUserInfo().then(receiveUserInfo), 5000);
+      throw e;
+    });
 }
 
 user.loadUserFromLocalStorage(store.dispatch);

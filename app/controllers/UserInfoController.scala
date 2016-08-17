@@ -2,6 +2,8 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
+import org.apache.commons.codec.digest.DigestUtils
+import play.api.Configuration
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, Cookie, DiscardingCookie}
 import services.{PhotoService, UserInitialisationService}
@@ -11,7 +13,7 @@ import uk.ac.warwick.sso.client.SSOToken.SSC_TICKET_TYPE
 import uk.ac.warwick.sso.client.cache.UserCache
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import uk.ac.warwick.util.core.StringUtils
-import warwick.sso.{LoginContext, SSOClient}
+import warwick.sso.{LoginContext, SSOClient, Usercode}
 
 import scala.concurrent.Future
 
@@ -22,12 +24,13 @@ import scala.concurrent.Future
   * SSO Client as an optional behaviour.
   */
 @Singleton
-class SSOController @Inject()(
+class UserInfoController @Inject()(
   ssoConfig: SSOConfiguration,
   userCache: UserCache,
   ssoClient: SSOClient,
   userInitialisationService: UserInitialisationService,
-  photoService: PhotoService
+  photoService: PhotoService,
+  configuration: Configuration
 ) extends BaseController {
 
   import ssoClient.Lenient
@@ -35,6 +38,9 @@ class SSOController @Inject()(
   val SSC_NAME = ssoConfig.getString("shire.sscookie.name")
   val SSC_PATH = ssoConfig.getString("shire.sscookie.path")
   val SSC_DOMAIN = ssoConfig.getString("shire.sscookie.domain")
+
+  val salt = configuration.getString("start.analytics.identifier.salt")
+    .getOrElse(throw new IllegalStateException("Analytics identifier salt missing - check start.analytics.identifier.salt in application.conf"))
 
   /**
     * Returns true if we should redirect to Websignon to refresh the session.
@@ -72,6 +78,9 @@ class SSOController @Inject()(
     }
   }
 
+  def getUniqueIdentifier(usercode: Usercode): String =
+    DigestUtils.sha256Hex(salt + usercode.string)
+
   def logout = Action { request =>
     val host = request.getQueryString("target").get
     val links = ssoClient.linkGenerator(request)
@@ -79,6 +88,10 @@ class SSOController @Inject()(
     val redirect = Redirect(links.getLogoutUrl)
     redirect.discardingCookies(DiscardingCookie(SSC_NAME, SSC_PATH, Some(SSC_DOMAIN)))
   }
+
+  private val WARWICK_ITS_CLASS = "warwickitsclass"
+  private val WARWICK_YEAR_OF_STUDY = "warwickyearofstudy"
+  private var WARWICK_FINAL_YEAR = "warwickfinalyear"
 
   private def contextUserInfo(context: LoginContext): Future[JsValue] = {
     context.user.map { user =>
@@ -88,6 +101,27 @@ class SSOController @Inject()(
           Json.obj(
             "authenticated" -> true,
             "usercode" -> user.usercode.string,
+            "analytics" -> Json.obj(
+              "identifier" -> getUniqueIdentifier(user.usercode),
+              "dimensions" -> Json.arr(
+                Json.obj(
+                  "index" -> 1,
+                  "value" -> user.department.flatMap(_.shortName).getOrElse(null)
+                ),
+                Json.obj(
+                  "index" -> 2,
+                  "value" -> user.rawProperties.getOrElse(WARWICK_ITS_CLASS, null)
+                ),
+                Json.obj(
+                  "index" -> 3,
+                  "value" -> user.rawProperties.getOrElse(WARWICK_YEAR_OF_STUDY, null)
+                ),
+                Json.obj(
+                  "index" -> 4,
+                  "value" -> user.rawProperties.getOrElse(WARWICK_FINAL_YEAR, null)
+                )
+              )
+            ),
             "name" -> user.name.full,
             "masquerading" -> context.isMasquerading,
             "photo" -> Json.obj(
