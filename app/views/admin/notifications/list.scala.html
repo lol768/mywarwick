@@ -4,8 +4,8 @@
 @import models.publishing.Publisher
 @(
     publisher: Publisher,
-    futureNotifications: Seq[models.ActivityResponse],
-    pastNotifications: Seq[models.ActivityResponse],
+    futureNotifications: Seq[models.ActivityRender],
+    pastNotifications: Seq[models.ActivityRender],
     user: Role
 )(implicit context: RequestContext)
 
