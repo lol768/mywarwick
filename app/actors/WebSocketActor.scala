@@ -3,25 +3,25 @@ package actors
 import akka.actor._
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{Subscribe, SubscribeAck}
-import models.ActivityResponse
+import models.ActivityRender
 import play.api.libs.json._
 import system.AppMetrics.RequestTracker
 import warwick.sso.LoginContext
 
-object WebsocketActor {
+object WebSocketActor {
 
-  def props(loginContext: LoginContext, tracker: RequestTracker)(out: ActorRef) = Props(classOf[WebsocketActor], out, loginContext, tracker)
+  def props(loginContext: LoginContext, tracker: RequestTracker)(out: ActorRef) = Props(classOf[WebSocketActor], out, loginContext, tracker)
 
   /**
     * For realtime notification/activity stream updates. This message is published to PubSub
     * and received by all open websockets for the relevant users.
     */
-  case class Notification(activity: ActivityResponse)
+  case class Notification(activity: ActivityRender)
 
 }
 
 /**
-  * Websocket-facing actor, wired in to the controller. It receives
+  * WebSocket-facing actor, wired in to the controller. It receives
   * any messages sent from the client in the form of a JsValue. Other
   * actors can also send any kind of message to it.
   *
@@ -33,9 +33,9 @@ object WebsocketActor {
   * @param out this output will be attached to the websocket and will send
   *            messages back to the client.
   */
-class WebsocketActor(out: ActorRef, loginContext: LoginContext, tracker: RequestTracker) extends Actor with ActorLogging {
+class WebSocketActor(out: ActorRef, loginContext: LoginContext, tracker: RequestTracker) extends Actor with ActorLogging {
 
-  import WebsocketActor._
+  import WebSocketActor._
 
   loginContext.user.foreach { user =>
     val mediator = DistributedPubSub(context.system).mediator
@@ -45,21 +45,20 @@ class WebsocketActor(out: ActorRef, loginContext: LoginContext, tracker: Request
   val signedIn = loginContext.user.exists(_.isFound)
   val who = loginContext.user.flatMap(_.name.full).getOrElse("nobody")
 
-  import ActivityResponse.writes
+  import ActivityRender.writes
 
   override def postStop(): Unit = {
     tracker.stop()
   }
 
   override def receive = {
-    //
     case Notification(activity) => out ! Json.obj(
       "type" -> "activity",
       "activity" -> activity
     )
     case SubscribeAck(Subscribe(topic, group, ref)) =>
-      log.debug(s"Websocket subscribed to PubSub messages on the topic of '${topic}'")
-    case nonsense => log.error(s"Ignoring unrecognised message: ${nonsense}")
+      log.debug(s"WebSocket subscribed to PubSub messages on the topic of '$topic'")
+    case nonsense => log.error(s"Ignoring unrecognised message: $nonsense")
   }
 
 }

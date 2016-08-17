@@ -1,8 +1,8 @@
 package services.job
 
-import actors.WebsocketActor.Notification
+import actors.WebSocketActor.Notification
 import com.google.inject.Inject
-import models.{Activity, ActivityResponse}
+import models.ActivityRender
 import org.quartz._
 import services._
 import services.messaging.MessagingService
@@ -68,22 +68,21 @@ class PublishActivityJob @Inject()(
     val audience = audienceService.getAudience(audienceId)
 
     audienceService.resolve(audience).foreach { recipients =>
-      activityService.getActivityById(activityId).foreach { activity =>
-        saveRecipients(activity, recipients.toSet)
+      activityService.getActivityRenderById(activityId).foreach { activityRender =>
+        saveRecipients(activityRender, recipients.toSet)
       }
     }
   }
 
-  private def saveRecipients(activity: Activity, recipients: Set[Usercode]) = {
+  private def saveRecipients(activityRender: ActivityRender, recipients: Set[Usercode]) = {
+    val activity = activityRender.activity
     activityService.setRecipients(activity, recipients)
+
+    val notification = Notification(activityRender)
+    recipients.foreach(usercode => pubSub.publish(usercode.string, notification))
+
     if (activity.shouldNotify) {
       messaging.send(recipients, activity)
     }
-    val activityResponse = ActivityResponse(
-      activity,
-      activityService.getActivityIcon(activity.id),
-      Seq.empty
-    )
-    recipients.foreach(usercode => pubSub.publish(usercode.string, Notification(activityResponse)))
   }
 }

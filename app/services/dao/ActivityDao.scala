@@ -20,7 +20,9 @@ trait ActivityDao {
 
   def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity]
 
-  def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse]
+  def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityRender]
+
+  def getActivityRenderById(id: String)(implicit c: Connection): Option[ActivityRender]
 
   def save(activity: ActivitySave, audienceId: String, replaces: Seq[String])(implicit c: Connection): String
 
@@ -126,7 +128,7 @@ class ActivityDaoImpl @Inject()(
       .as(activityParser.*)
   }
 
-  override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse] = {
+  override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityRender] = {
     val maybeBefore = if (before.isDefined) "AND ACTIVITY_RECIPIENT.PUBLISHED_AT < {before}" else ""
     val activities = SQL(
       s"""
@@ -154,12 +156,30 @@ class ActivityDaoImpl @Inject()(
         'usercode -> usercode,
         'before -> before.getOrElse(DateTime.now)
       )
-      .as(activityResponseParser.*)
+      .as(activityRenderParser.*)
 
     combineActivities(activities)
   }
 
-  def combineActivities(activities: Seq[ActivityResponse]): Seq[ActivityResponse] = {
+  override def getActivityRenderById(id: String)(implicit c: Connection): Option[ActivityRender] = {
+    SQL"""
+      SELECT
+      ACTIVITY.*,
+      PROVIDER.ICON,
+      PROVIDER.COLOUR,
+      ACTIVITY_TAG.NAME          AS TAG_NAME,
+      ACTIVITY_TAG.VALUE         AS TAG_VALUE,
+      ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
+      FROM ACTIVITY
+        LEFT JOIN ACTIVITY_TAG ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
+      LEFT JOIN PROVIDER ON PROVIDER.ID = ACTIVITY.PROVIDER_ID
+      WHERE ACTIVITY.ID = $id
+    """
+      .executeQuery()
+      .as(activityRenderParser.singleOpt)
+  }
+
+  def combineActivities(activities: Seq[ActivityRender]): Seq[ActivityRender] = {
     activities
       .groupBy(_.activity.id)
       .map { case (id, a) => a.reduceLeft((a1, a2) => a1.copy(tags = a1.tags ++ a2.tags)) }
@@ -224,9 +244,9 @@ class ActivityDaoImpl @Inject()(
         for (name <- name; value <- value) yield ActivityTag(name, TagValue(value, display))
     }
 
-  lazy val activityResponseParser: RowParser[ActivityResponse] =
+  lazy val activityRenderParser: RowParser[ActivityRender] =
     activityParser ~ activityIconParser.? ~ tagParser map {
-      case activity ~ icon ~ tag => ActivityResponse(activity, icon, tag.toSeq)
+      case activity ~ icon ~ tag => ActivityRender(activity, icon, tag.toSeq)
     }
 
   override def getActivityIcon(providerId: String)(implicit c: Connection): Option[ActivityIcon] =

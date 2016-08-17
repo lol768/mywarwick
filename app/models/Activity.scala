@@ -33,12 +33,12 @@ object Activity {
   implicit val writes = Json.writes[Activity]
 }
 
-object ActivityResponse {
+object ActivityRender {
 
   import DateFormats.isoDateWrites
 
-  implicit val writes: Writes[ActivityResponse] = new Writes[ActivityResponse] {
-    override def writes(o: ActivityResponse): JsValue = {
+  implicit val writes: Writes[ActivityRender] = new Writes[ActivityRender] {
+    override def writes(o: ActivityRender): JsValue = {
       val json = Json.obj(
         "id" -> o.activity.id,
         "notification" -> o.activity.shouldNotify,
@@ -59,7 +59,7 @@ object ActivityResponse {
   }
 }
 
-case class ActivityResponse(
+case class ActivityRender(
   activity: Activity,
   icon: Option[ActivityIcon],
   tags: Seq[ActivityTag]

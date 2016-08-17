@@ -14,7 +14,9 @@ import warwick.sso.{User, Usercode}
 trait ActivityService {
   def getActivityById(id: String): Option[Activity]
 
-  def getActivitiesForUser(user: User, limit: Int = 50, before: Option[DateTime] = None): Seq[ActivityResponse]
+  def getActivityRenderById(id: String): Option[ActivityRender]
+
+  def getActivitiesForUser(user: User, limit: Int = 50, before: Option[DateTime] = None): Seq[ActivityRender]
 
   def save(activity: ActivitySave, audience: Audience): Either[Seq[ActivityError], String]
 
@@ -48,6 +50,9 @@ class ActivityServiceImpl @Inject()(
 
   override def getActivityById(id: String): Option[Activity] =
     db.withConnection(implicit c => dao.getActivityById(id))
+
+  override def getActivityRenderById(id: String) =
+    db.withConnection(implicit c => dao.getActivityRenderById(id))
 
   override def update(activityId: String, activity: ActivitySave, audience: Audience) = {
     getActivityById(activityId).map { existingActivity =>
@@ -149,7 +154,7 @@ class ActivityServiceImpl @Inject()(
       }
   }
 
-  override def getActivitiesForUser(user: User, limit: Int, before: Option[DateTime]): Seq[ActivityResponse] =
+  override def getActivitiesForUser(user: User, limit: Int, before: Option[DateTime]): Seq[ActivityRender] =
     db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, limit.min(50), before))
 
   override def getLastReadDate(user: User): Option[DateTime] =
