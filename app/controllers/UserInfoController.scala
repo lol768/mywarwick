@@ -1,6 +1,5 @@
 package controllers
 
-import java.security.MessageDigest
 import javax.inject.{Inject, Singleton}
 
 import org.apache.commons.codec.digest.DigestUtils
