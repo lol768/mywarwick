@@ -14,10 +14,10 @@
   '_help -> "Keep it super short"
 )
 
-@b3.select(form("item.provider"), providerOptions :+ ("news" -> "News"),
-  '_label -> "Provider",
+@b3.select(form("item.provider"), providerOptions,
+  '_label -> "Source",
   'value -> "news",
-  '_help -> "Select the service responsible for this notification. For general items select 'News'"
+  '_help -> "Select the source of this notification"
 )
 
 @b3.text(form("item.linkHref"),
