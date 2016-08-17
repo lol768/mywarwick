@@ -14,9 +14,9 @@ import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
-  def getActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[Activity]
+  def getPastActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender]
 
-  def getActivitiesByProviderId(providerId: String, limit: Int)(implicit c: Connection): Seq[Activity]
+  def getFutureActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender]
 
   def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity]
 
@@ -96,21 +96,28 @@ class ActivityDaoImpl @Inject()(
         .as(activityParser.*)
     }.toSeq
 
-  override def getActivitiesByProviderId(providerId: String, limit: Int)(implicit c: Connection): Seq[Activity] = {
-    SQL(s"SELECT * FROM ACTIVITY WHERE PROVIDER_ID = {providerId} ORDER BY CREATED_AT DESC ${dialect.limitOffset(limit)}")
-      .on('providerId -> providerId)
-      .as(activityParser.*)
+  override def getPastActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = {
+    SQL(s"""
+      $selectActivityRender
+      WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
+        AND ACTIVITY.PUBLISHED_AT <= SYSDATE
+      ORDER BY ACTIVITY.PUBLISHED_AT DESC
+      ${dialect.limitOffset(limit)}
+      """)
+      .on('publisherId -> publisherId)
+      .as(activityRenderParser.*)
   }
 
-  override def getActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[Activity] = {
+  override def getFutureActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = {
     SQL(s"""
-      SELECT * FROM ACTIVITY
-      WHERE PUBLISHER_ID = {publisherId}
-      ORDER BY CREATED_AT DESC
+      $selectActivityRender
+      WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
+        AND ACTIVITY.PUBLISHED_AT > SYSDATE
+      ORDER BY ACTIVITY.PUBLISHED_AT DESC
       ${dialect.limitOffset(limit)}
        """)
       .on('publisherId -> publisherId)
-      .as(activityParser.*)
+      .as(activityRenderParser.*)
   }
 
   override def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity] = {
@@ -132,16 +139,7 @@ class ActivityDaoImpl @Inject()(
     val maybeBefore = if (before.isDefined) "AND ACTIVITY_RECIPIENT.PUBLISHED_AT < {before}" else ""
     val activities = SQL(
       s"""
-        SELECT
-          ACTIVITY.*,
-          PROVIDER.ICON,
-          PROVIDER.COLOUR,
-          ACTIVITY_TAG.NAME          AS TAG_NAME,
-          ACTIVITY_TAG.VALUE         AS TAG_VALUE,
-          ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
-        FROM ACTIVITY
-          LEFT JOIN ACTIVITY_TAG ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
-          LEFT JOIN PROVIDER ON PROVIDER.ID = ACTIVITY.PROVIDER_ID
+        $selectActivityRender
         WHERE ACTIVITY.ID IN (
           SELECT ACTIVITY_ID
           FROM ACTIVITY_RECIPIENT
@@ -162,20 +160,8 @@ class ActivityDaoImpl @Inject()(
   }
 
   override def getActivityRenderById(id: String)(implicit c: Connection): Option[ActivityRender] = {
-    SQL"""
-      SELECT
-      ACTIVITY.*,
-      PROVIDER.ICON,
-      PROVIDER.COLOUR,
-      ACTIVITY_TAG.NAME          AS TAG_NAME,
-      ACTIVITY_TAG.VALUE         AS TAG_VALUE,
-      ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
-      FROM ACTIVITY
-        LEFT JOIN ACTIVITY_TAG ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
-      LEFT JOIN PROVIDER ON PROVIDER.ID = ACTIVITY.PROVIDER_ID
-      WHERE ACTIVITY.ID = $id
-    """
-      .executeQuery()
+    SQL(s"$selectActivityRender WHERE ACTIVITY.ID = {id}")
+      .on('id -> id)
       .as(activityRenderParser.singleOpt)
   }
 
@@ -243,6 +229,20 @@ class ActivityDaoImpl @Inject()(
       case name ~ value ~ display =>
         for (name <- name; value <- value) yield ActivityTag(name, TagValue(value, display))
     }
+
+  val selectActivityRender =
+    """
+      SELECT
+        ACTIVITY.*,
+        PROVIDER.ICON,
+        PROVIDER.COLOUR,
+        ACTIVITY_TAG.NAME          AS TAG_NAME,
+        ACTIVITY_TAG.VALUE         AS TAG_VALUE,
+        ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
+      FROM ACTIVITY
+        LEFT JOIN ACTIVITY_TAG ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
+        LEFT JOIN PROVIDER ON PROVIDER.ID = ACTIVITY.PROVIDER_ID
+    """
 
   lazy val activityRenderParser: RowParser[ActivityRender] =
     activityParser ~ activityIconParser.? ~ tagParser map {
