@@ -30,9 +30,9 @@ trait ActivityService {
 
   def setLastReadDate(user: User, dateTime: DateTime): Boolean
 
-  def getActivitiesByPublisherId(publisherId: String, limit: Int = 50): Seq[Activity]
+  def getFutureActivitiesByPublisherId(publisherId: String, limit: Int = 50): Seq[ActivityRender]
 
-  def getActivitiesByProviderId(providerId: String, limit: Int = 50): Seq[Activity]
+  def getPastActivitiesByPublisherId(publisherId: String, limit: Int = 50): Seq[ActivityRender]
 
   def getActivityIcon(providerId: String): Option[ActivityIcon]
 
@@ -163,11 +163,11 @@ class ActivityServiceImpl @Inject()(
   override def setLastReadDate(user: User, dateTime: DateTime): Boolean =
     db.withConnection(implicit c => dao.saveLastReadDate(user.usercode.string, dateTime))
 
-  override def getActivitiesByPublisherId(publisherId: String, limit: Int) =
-    db.withConnection(implicit c => dao.getActivitiesByPublisherId(publisherId, limit))
+  override def getFutureActivitiesByPublisherId(publisherId: String, limit: Int) =
+    db.withConnection(implicit c => dao.getFutureActivitiesByPublisherId(publisherId, limit))
 
-  override def getActivitiesByProviderId(providerId: String, limit: Int) =
-    db.withConnection(implicit c => dao.getActivitiesByProviderId(providerId, limit))
+  override def getPastActivitiesByPublisherId(publisherId: String, limit: Int) =
+    db.withConnection(implicit c => dao.getPastActivitiesByPublisherId(publisherId, limit))
 
   override def getActivityIcon(providerId: String): Option[ActivityIcon] =
     db.withConnection(implicit c => dao.getActivityIcon(providerId))

@@ -45,13 +45,8 @@ class NotificationsController @Inject()(
   )(PublishNotificationData.apply)(PublishNotificationData.unapply))
 
   def list(publisherId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
-    val (pastNotifications, futureNotifications) = activityService.getActivitiesByPublisherId(publisherId)
-      .map(activity => ActivityRender(
-        activity,
-        activityService.getActivityIcon(activity.providerId),
-        Seq.empty
-      ))
-      .partition(_.activity.publishedAt.isBeforeNow)
+    val futureNotifications = activityService.getFutureActivitiesByPublisherId(publisherId)
+    val pastNotifications = activityService.getPastActivitiesByPublisherId(publisherId)
 
     Ok(views.list(request.publisher, futureNotifications, pastNotifications, request.userRole))
   }

@@ -131,13 +131,20 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
       activityDao.getActivityIcon("skynet").get.colour.get mustBe "greyish"
     }
 
-    "get activities created by publisher" in transaction { implicit c =>
-      SQL"INSERT INTO PUBLISHER (ID, NAME) VALUES ('xyz', 'Test Publisher')".execute()
+    "get past activities created by publisher" in transaction { implicit c =>
+      val id = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, Nil)
+      val id2 = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, Nil)
 
-      val id = activityDao.save(Fixtures.activitySave.submissionDue.copy(publisherId = "xyz"), audienceId, Nil)
-      val id2 = activityDao.save(Fixtures.activitySave.submissionDue.copy(publisherId = "xyz"), audienceId, Nil)
+      activityDao.getPastActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must contain allOf(id, id2)
+      activityDao.getFutureActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must be(empty)
+    }
 
-      activityDao.getActivitiesByPublisherId("xyz", limit = 100).map(_.id) must contain allOf(id, id2)
+    "get future activities created by publisher" in transaction { implicit c =>
+      val id = activityDao.save(Fixtures.activitySave.submissionDue.copy(publishedAt = Some(DateTime.now.plusDays(1))), audienceId, Nil)
+      val id2 = activityDao.save(Fixtures.activitySave.submissionDue.copy(publishedAt = Some(DateTime.now.plusDays(2))), audienceId, Nil)
+
+      activityDao.getPastActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must be(empty)
+      activityDao.getFutureActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must contain allOf(id, id2)
     }
 
     "delete an activity" in transaction { implicit c =>
