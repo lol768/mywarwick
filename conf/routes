@@ -50,6 +50,8 @@ POST        /api/news/categories                                      @controlle
 POST        /api/news/images                                          @controllers.api.NewsImagesController.create
 GET         /api/news/images/:id                                      @controllers.api.NewsImagesController.show(id: String)
 
+GET         /news/:id/redirect                                        @controllers.api.ReadNewsController.redirect(id: String)
+
 GET         /service/metrics                                          @controllers.MetricsController.metrics
 GET         /service/gtg                                              @controllers.ServiceCheckController.gtg
 GET         /service/healthcheck                                      @controllers.ServiceCheckController.healthcheck

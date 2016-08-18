@@ -18,3 +18,4 @@ export { reducer as update } from './update';
 export { reducer as user } from './user';
 export { reducer as ui } from './ui';
 export { reducer as device } from './device';
+export { reducer as analytics } from './analytics';
