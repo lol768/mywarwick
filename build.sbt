@@ -79,6 +79,9 @@ libraryDependencies ++= (appDeps ++ testDeps).map(_.excludeAll(
 // https://bugs.elab.warwick.ac.uk/browse/SSO-1653
 dependencyOverrides += "xml-apis" % "xml-apis" % "1.4.01"
 
+// NEWSTART-407
+dependencyOverrides += "ch.qos.logback" % "logback-classic" % "1.1.7"
+
 // Make gulp output available as Play assets.
 unmanagedResourceDirectories in Assets <+= baseDirectory { _ / "target" / "gulp" }
 
