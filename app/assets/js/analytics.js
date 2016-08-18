@@ -3,6 +3,7 @@
 import $ from 'jquery';
 import log from 'loglevel';
 import _ from 'lodash';
+import store from './store';
 
 /* eslint-disable */
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -22,6 +23,15 @@ if (trackingId === undefined) {
   ga('create', {
     trackingId,
     cookieDomain: 'auto',
+  });
+
+  ga(tracker => {
+    const clientId = tracker.get('clientId');
+
+    store.dispatch({
+      type: 'analytics.client-id',
+      payload: clientId,
+    });
   });
 }
 

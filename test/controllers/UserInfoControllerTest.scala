@@ -7,13 +7,12 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.Configuration
 import play.api.http.HeaderNames
 import play.api.libs.json.{JsBoolean, JsNull, JsNumber, JsString}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import services.{PhotoService, UserInitialisationService}
+import services.{AnalyticsMeasurementService, PhotoService, UserInitialisationService}
 import uk.ac.warwick.sso.client.cache.{UserCache, UserCacheItem}
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import warwick.sso._
@@ -27,9 +26,6 @@ class UserInfoControllerTest extends PlaySpec with MockitoSugar with Results {
 
   val HOSTNAME = "example.warwick.ac.uk"
 
-  val configuration = mock[Configuration]
-  when(configuration.getString("start.analytics.identifier.salt")).thenReturn(Some("secret"))
-
   baseConfig.setProperty("shire.sscookie.name", "Start-SSC")
   baseConfig.setProperty("shire.sscookie.path", "/")
   baseConfig.setProperty("shire.sscookie.domain", HOSTNAME)
@@ -37,10 +33,13 @@ class UserInfoControllerTest extends PlaySpec with MockitoSugar with Results {
   val photoService = mock[PhotoService]
   when(photoService.photoUrl(any())).thenReturn(Future.failed(new Exception))
 
+  val measurementService = mock[AnalyticsMeasurementService]
+  when(measurementService.getUserIdentifier(Usercode("user"))).thenReturn("user-identifier")
+
   def controller(user: Option[User] = None) = {
     val loginContext = Fixtures.user.loginContext(user)
     val ssoClient = new MockSSOClient(loginContext)
-    new UserInfoController(ssoConfig, userCache, ssoClient, mock[UserInitialisationService], photoService, configuration)
+    new UserInfoController(ssoConfig, userCache, ssoClient, mock[UserInitialisationService], photoService, measurementService)
   }
   val LOGIN_URL = "https://signon.example.com/login"
   val LOGOUT_URL = s"https://example.warwick.ac.uk/logout?target=https://$HOSTNAME"
@@ -94,7 +93,7 @@ class UserInfoControllerTest extends PlaySpec with MockitoSugar with Results {
       (json \ "refresh").as[Boolean] mustBe false
       (json \ "user" \ "authenticated").as[Boolean] mustBe true
       (json \ "user" \ "usercode").as[String] mustBe "user"
-      (json \ "user" \ "analytics" \ "identifier").as[String] mustBe "199b02eb2cf264223ff766f473f2ad442e9b7f5534b500b69944273b5cfa86ca" // sha256(secretuser)
+      (json \ "user" \ "analytics" \ "identifier").as[String] mustBe "user-identifier"
       (json \ "user" \ "analytics" \ "dimensions" \\ "index").map(_.as[Int]) mustBe Seq(1, 2, 3, 4)
       (json \ "user" \ "analytics" \ "dimensions" \\ "value").map(_.as[String]) mustBe Seq("IT Services", "Staff", "3", "true")
       (json \ "links" \ "login").as[String] mustBe LOGIN_URL

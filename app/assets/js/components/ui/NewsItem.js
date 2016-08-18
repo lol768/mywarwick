@@ -16,9 +16,11 @@ export const render = (content) =>
 export default class NewsItem extends ReactComponent {
 
   render() {
-    const { link, title, publishDate, text, imageId, width, categories } = this.props;
-    const url = link && link.href;
-    const moreLink = link ? (<p><Hyperlink href={link.href}>{link.text}</Hyperlink></p>) : null;
+    const { id, link, title, publishDate, text, imageId, categories } = this.props;
+    const { deviceWidth, analyticsClientId } = this.props;
+
+    const url = link && `/news/${id}/redirect?clientId=${analyticsClientId}`;
+    const moreLink = link ? (<p><Hyperlink href={url}>{link.text}</Hyperlink></p>) : null;
 
     return (
       <article className="news-item">
@@ -32,7 +34,7 @@ export default class NewsItem extends ReactComponent {
           { imageId ?
             <div className="news-item__image">
               <img
-                src={ `/api/news/images/${imageId}?width=${width}` }
+                src={ `/api/news/images/${imageId}?width=${deviceWidth}` }
                 alt={ title }
               />
             </div>
@@ -66,5 +68,8 @@ NewsItemTag.propTypes = {
   name: React.PropTypes.string.isRequired,
 };
 
-const select = (state) => state.device;
+const select = (state) => ({
+  deviceWidth: state.device.width,
+  analyticsClientId: state.analytics.clientId,
+});
 export default connect(select)(NewsItem);
