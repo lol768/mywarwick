@@ -13,11 +13,16 @@ $(SPLIT_FORM).each((i, form) => {
   let currentPage = getHashNum() || 0;
 
   function showSection(num) {
-    history.pushState({ pageNum: num }, location.href);
+    history.replaceState({ pageNum: num }, location.href);
     currentPage = num;
     const $section = $form.find(`section:eq(${num})`);
     $form.find('section.active').removeClass('active').hide();
-    $section.show().addClass('active').fadeIn();
+    $section.show().addClass('active');
+  }
+
+  function pushSection(num) {
+    history.pushState({ pageNum: num }, location.href);
+    showSection(num);
   }
 
   $form.find('section:not(:last)')
@@ -53,17 +58,21 @@ $(SPLIT_FORM).each((i, form) => {
     });
   }
 
-  $('button.next').on('click', e => {
+  $('button.next').on('click', function onClick(e) {
     e.preventDefault();
-    // history.pushState({ pageNum: currentPage }, location.href);
+
+    const $button = $(this).prop('disabled', true);
+
     validate()
       .then(html => checkFormErrors(html)
         .then(() => {
           $form.find(`section:eq(${currentPage}) > *`).removeClass('has-error');
-          return showSection(currentPage + 1);
+          return pushSection(currentPage + 1);
         })
         .catch(replaceErrors)
-      ).catch(() => {}); // TODO: log ting?
+      )
+      .catch(() => {}) // TODO: log ting?
+      .then(() => $button.prop('disabled', false));
   });
 
   window.onpopstate = e => {
@@ -74,12 +83,10 @@ $(SPLIT_FORM).each((i, form) => {
 
   $('button.back').on('click', e => {
     e.preventDefault();
-    showSection(currentPage - 1);
+    pushSection(currentPage - 1);
   });
 
-
   $form.on('submit', () => {
-    $(this).off();
     validate()
       .then(html =>
         checkFormErrors(html)
