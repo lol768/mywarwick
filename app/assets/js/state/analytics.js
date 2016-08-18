@@ -1,5 +1,5 @@
 const initialState = {
-  clientId: null
+  clientId: null,
 };
 
 export function reducer(state = initialState, action) {
