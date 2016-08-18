@@ -2,18 +2,16 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import org.apache.commons.codec.digest.DigestUtils
-import play.api.Configuration
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, Cookie, DiscardingCookie}
-import services.{PhotoService, UserInitialisationService}
+import services.{AnalyticsMeasurementService, PhotoService, UserInitialisationService}
 import system.ThreadPools.externalData
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl.GLOBAL_LOGIN_COOKIE_NAME
 import uk.ac.warwick.sso.client.SSOToken.SSC_TICKET_TYPE
 import uk.ac.warwick.sso.client.cache.UserCache
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import uk.ac.warwick.util.core.StringUtils
-import warwick.sso.{LoginContext, SSOClient, Usercode}
+import warwick.sso.{LoginContext, SSOClient}
 
 import scala.concurrent.Future
 
@@ -30,7 +28,7 @@ class UserInfoController @Inject()(
   ssoClient: SSOClient,
   userInitialisationService: UserInitialisationService,
   photoService: PhotoService,
-  configuration: Configuration
+  measurementService: AnalyticsMeasurementService
 ) extends BaseController {
 
   import ssoClient.Lenient
@@ -38,9 +36,6 @@ class UserInfoController @Inject()(
   val SSC_NAME = ssoConfig.getString("shire.sscookie.name")
   val SSC_PATH = ssoConfig.getString("shire.sscookie.path")
   val SSC_DOMAIN = ssoConfig.getString("shire.sscookie.domain")
-
-  val salt = configuration.getString("start.analytics.identifier.salt")
-    .getOrElse(throw new IllegalStateException("Analytics identifier salt missing - check start.analytics.identifier.salt in application.conf"))
 
   /**
     * Returns true if we should redirect to Websignon to refresh the session.
@@ -78,9 +73,6 @@ class UserInfoController @Inject()(
     }
   }
 
-  def getUniqueIdentifier(usercode: Usercode): String =
-    DigestUtils.sha256Hex(salt + usercode.string)
-
   def logout = Action { request =>
     val host = request.getQueryString("target").get
     val links = ssoClient.linkGenerator(request)
@@ -102,7 +94,7 @@ class UserInfoController @Inject()(
             "authenticated" -> true,
             "usercode" -> user.usercode.string,
             "analytics" -> Json.obj(
-              "identifier" -> getUniqueIdentifier(user.usercode),
+              "identifier" -> measurementService.getUserIdentifier(user.usercode),
               "dimensions" -> Json.arr(
                 Json.obj(
                   "index" -> 1,

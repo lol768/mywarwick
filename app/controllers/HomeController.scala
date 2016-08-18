@@ -4,20 +4,19 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.Configuration
 import play.api.mvc._
+import services.{AnalyticsMeasurementService, AnalyticsTrackingID}
 import system.AppMetrics
-
-case class AnalyticsTrackingID(string: String)
 
 case class SearchRootUrl(string: String)
 
 @Singleton
 class HomeController @Inject()(
   metrics: AppMetrics,
-  configuration: Configuration
+  configuration: Configuration,
+  measurementService: AnalyticsMeasurementService
 ) extends BaseController {
 
-  implicit val analyticsTrackingId: Option[AnalyticsTrackingID] =
-    configuration.getString("start.analytics.tracking-id").map(AnalyticsTrackingID)
+  implicit val analyticsTrackingId: Option[AnalyticsTrackingID] = Some(measurementService.trackingID)
 
   implicit val searchRootUrl: SearchRootUrl =
     configuration.getString("start.search.root").map(SearchRootUrl)
