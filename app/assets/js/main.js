@@ -8,7 +8,6 @@ import _ from 'lodash';
 import moment from 'moment';
 import log from 'loglevel';
 import * as es6Promise from 'es6-promise';
-import attachFastClick from 'fastclick';
 import localforage from 'localforage';
 
 import React from 'react';
@@ -46,8 +45,6 @@ const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
 
 $(() => {
-  attachFastClick(document.body);
-
   $(window).on('contextmenu', () => window.navigator.userAgent.indexOf('Mobile') < 0);
 
   $(window).on('resize', () => store.dispatch(ui.updateUIContext()));
