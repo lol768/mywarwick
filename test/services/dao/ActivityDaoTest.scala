@@ -166,5 +166,18 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
         .executeQuery()
         .as(scalar[String].single) must be("New title")
     }
+
+    "retrieve all tags associated with an activity" in transaction { implicit c =>
+      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      activityTagDao.save(activityId, ActivityTag("a", TagValue("apple")))
+      activityTagDao.save(activityId, ActivityTag("b", TagValue("banana")))
+
+      val maybeActivityRender = activityDao.getActivityRenderById(activityId)
+      maybeActivityRender must not be empty
+
+      val activityRender = maybeActivityRender.get
+      activityRender.activity.id must be(activityId)
+      activityRender.tags must have length 2
+    }
   }
 }

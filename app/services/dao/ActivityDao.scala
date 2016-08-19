@@ -96,26 +96,34 @@ class ActivityDaoImpl @Inject()(
         .as(activityParser.*)
     }.toSeq
 
-  override def getPastActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = {
+  override def getPastActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
     SQL(s"""
       $selectActivityRender
-      WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
-        AND ACTIVITY.PUBLISHED_AT <= SYSDATE
+      WHERE ACTIVITY.ID IN (
+        SELECT ID FROM ACTIVITY
+        WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
+          AND ACTIVITY.PUBLISHED_AT <= SYSDATE
+        ORDER BY ACTIVITY.PUBLISHED_AT DESC
+        ${dialect.limitOffset(limit)}
+      )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC
-      ${dialect.limitOffset(limit)}
       """)
       .on('publisherId -> publisherId)
       .as(activityRenderParser.*)
   }
 
-  override def getFutureActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = {
+  override def getFutureActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
     SQL(s"""
       $selectActivityRender
-      WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
-        AND ACTIVITY.PUBLISHED_AT > SYSDATE
+      WHERE ACTIVITY.ID IN (
+        SELECT ID FROM ACTIVITY
+        WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
+          AND ACTIVITY.PUBLISHED_AT > SYSDATE
+        ORDER BY ACTIVITY.PUBLISHED_AT DESC
+        ${dialect.limitOffset(limit)}
+      )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC
-      ${dialect.limitOffset(limit)}
-       """)
+      """)
       .on('publisherId -> publisherId)
       .as(activityRenderParser.*)
   }
@@ -135,35 +143,35 @@ class ActivityDaoImpl @Inject()(
       .as(activityParser.*)
   }
 
-  override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityRender] = {
+  override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
     val maybeBefore = if (before.isDefined) "AND ACTIVITY_RECIPIENT.PUBLISHED_AT < {before}" else ""
-    val activities = SQL(
-      s"""
-        $selectActivityRender
-        WHERE ACTIVITY.ID IN (
-          SELECT ACTIVITY_ID
-          FROM ACTIVITY_RECIPIENT
-            JOIN ACTIVITY ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
-          WHERE USERCODE = {usercode}
-                AND REPLACED_BY_ID IS NULL
-                $maybeBefore
-          ORDER BY ACTIVITY_RECIPIENT.PUBLISHED_AT DESC
-          ${dialect.limitOffset(limit)})
-        """)
+    SQL(s"""
+      $selectActivityRender
+      WHERE ACTIVITY.ID IN (
+        SELECT ACTIVITY_ID
+        FROM ACTIVITY_RECIPIENT
+          JOIN ACTIVITY ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
+        WHERE USERCODE = {usercode}
+          AND REPLACED_BY_ID IS NULL
+          $maybeBefore
+        ORDER BY ACTIVITY_RECIPIENT.PUBLISHED_AT DESC
+        ${dialect.limitOffset(limit)}
+      )
+      ORDER BY ACTIVITY.PUBLISHED_AT DESC
+      """)
       .on(
         'usercode -> usercode,
         'before -> before.getOrElse(DateTime.now)
       )
       .as(activityRenderParser.*)
-
-    combineActivities(activities)
   }
 
-  override def getActivityRenderById(id: String)(implicit c: Connection): Option[ActivityRender] = {
-    SQL(s"$selectActivityRender WHERE ACTIVITY.ID = {id}")
-      .on('id -> id)
-      .as(activityRenderParser.singleOpt)
-  }
+  override def getActivityRenderById(id: String)(implicit c: Connection): Option[ActivityRender] =
+    combineActivities {
+      SQL(s"$selectActivityRender WHERE ACTIVITY.ID = {id}")
+        .on('id -> id)
+        .as(activityRenderParser.*)
+    }.headOption
 
   def combineActivities(activities: Seq[ActivityRender]): Seq[ActivityRender] = {
     activities
