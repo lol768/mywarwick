@@ -1,9 +1,10 @@
 package controllers.admin
 
+import models.Audience
 import models.publishing._
 import play.api.data.Forms._
-import play.api.data.Mapping
-import play.api.mvc.{ActionRefiner, Result, Results}
+import play.api.data.{Form, Mapping}
+import play.api.mvc.{ActionRefiner, AnyContent, Result, Results}
 import services.dao.DepartmentInfoDao
 import services.{NewsCategoryService, PublisherService, SecurityService}
 import system.ImplicitRequestContext
@@ -13,6 +14,15 @@ import scala.concurrent.Future
 
 trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOptions with PublishingActionRefiner {
   self: ImplicitRequestContext =>
+
+  val audienceBinder: AudienceBinder
+
+  def validateOnly(implicit request: PublisherRequest[AnyContent]) =
+    request.body.asFormUrlEncoded.exists(_.contains("validateOnly"))
+
+  def audienceForm(implicit request: PublisherRequest[_]) = Form(
+    single("audience" -> audienceMapping)
+  )
 
   def audienceMapping(implicit publisherRequest: PublisherRequest[_]): Mapping[AudienceData] =
     mapping(
@@ -37,6 +47,45 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
     }
   }
 
+  def bindFormWithAudience[A <: PublishableWithAudience](
+    baseForm: Form[A],
+    onError: (Form[A]) => Result,
+    onSuccess: ((A, Audience) => Result)
+  )(implicit request: PublisherRequest[_]): Future[Result] = {
+    val form = baseForm.bindFromRequest
+
+    form.fold(
+      formWithErrors => {
+        // If the PublishNewsItemData form fails to bind, we can't display
+        // validation errors for the audience.  Work around this by separately
+        // binding the audience field and pushing any errors onto the top-level
+        // form.
+        val boundForm = audienceForm.bindFromRequest.fold(
+          _ => Future.successful(formWithErrors),
+          audienceData => audienceBinder.bindAudience(audienceData).map {
+            case Left(errors) => addFormErrors(formWithErrors, errors)
+            case Right(_) => formWithErrors
+          }
+        )
+
+        boundForm.map(onError)
+      },
+      publish => {
+        audienceBinder.bindAudience(publish.audience).map {
+          case Left(errors) =>
+            onError(addFormErrors(form, errors))
+          case Right(audience) =>
+            onSuccess(publish, audience)
+        }
+      }
+    )
+  }
+
+
+}
+
+trait PublishableWithAudience {
+  val audience: AudienceData
 }
 
 trait ProviderOptions {

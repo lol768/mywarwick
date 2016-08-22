@@ -6,7 +6,7 @@ import controllers.BaseController
 import models.news.NotificationData
 import models.publishing.Ability.{CreateNotifications, DeleteNotifications, EditNotifications, ViewNotifications}
 import models.publishing.Publisher
-import models.{ActivityRender, Audience, DateFormats}
+import models.{Audience, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -25,7 +25,7 @@ class NotificationsController @Inject()(
   val publisherService: PublisherService,
   val messagesApi: MessagesApi,
   val departmentInfoDao: DepartmentInfoDao,
-  audienceBinder: AudienceBinder,
+  val audienceBinder: AudienceBinder,
   activityService: ActivityService,
   val newsCategoryService: NewsCategoryService,
   audienceService: AudienceService
@@ -41,7 +41,7 @@ class NotificationsController @Inject()(
 
   def publishNotificationForm(implicit request: PublisherRequest[_]) = Form(mapping(
     "item" -> notificationMapping,
-    "audience" -> audienceMapping
+    "audience" -> audienceMapping.verifying("Notifications cannot be public", !_.audience.contains("Public"))
   )(PublishNotificationData.apply)(PublishNotificationData.unapply))
 
   def list(publisherId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
@@ -56,20 +56,20 @@ class NotificationsController @Inject()(
   }
 
   def create(publisherId: String) = PublisherAction(publisherId, CreateNotifications).async { implicit request =>
-    val validateOnly = request.body.asFormUrlEncoded.get.contains("validateOnly")
-    bindFormWithAudience(
+    bindFormWithAudience[PublishNotificationData](publishNotificationForm,
       formWithErrors =>
         Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope)),
       (publish, audience) => {
-        if (!validateOnly) {
+        if (validateOnly) {
+          Ok(renderCreateForm(request.publisher, publishNotificationForm.fill(publish)))
+        } else {
           val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
 
-        val activityId = activityService.save(notification, audience)
-        auditLog('CreateNotification, 'id -> activityId)
+          val activityId = activityService.save(notification, audience)
+          auditLog('CreateNotification, 'id -> activityId)
 
           Redirect(routes.NotificationsController.list(publisherId)).flashing("success" -> "Notification created")
-        } else
-          Ok(renderCreateForm(request.publisher, publishNotificationForm.fill(publish)))
+        }
       }
     )
   }
@@ -102,21 +102,25 @@ class NotificationsController @Inject()(
     .async { implicit request =>
       val activity = activityService.getActivityById(id).get
 
-      bindFormWithAudience(
+      bindFormWithAudience[PublishNotificationData](publishNotificationForm,
         formWithErrors =>
           Ok(views.updateForm(request.publisher, activity, formWithErrors, departmentOptions, providerOptions, permissionScope)),
         (publish, audience) => {
           val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
-          val activity = publish.item.toSave(request.context.user.get.usercode, publisherId)
+          if (validateOnly) {
+            Ok(views.updateForm(request.publisher, activity, publishNotificationForm.fill(publish), departmentOptions, providerOptions, permissionScope))
+          } else {
+            val activity = publish.item.toSave(request.context.user.get.usercode, publisherId)
 
-          activityService.update(id, activity, audience).fold(
-            errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
-            id => {
-              auditLog('UpdateNotification, 'id -> id)
-              redirect.flashing("success" -> "Notification updated")
-            }
-          )
+            activityService.update(id, activity, audience).fold(
+              errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
+              id => {
+                auditLog('UpdateNotification, 'id -> id)
+                redirect.flashing("success" -> "Notification updated")
+              }
+            )
+          }
         }
       )
     }
@@ -153,24 +157,6 @@ class NotificationsController @Inject()(
     }
   }
 
-  private def bindFormWithAudience(onError: (Form[PublishNotificationData]) => Result, onSuccess: ((PublishNotificationData, Audience) => Result))(implicit request: PublisherRequest[_]): Future[Result] = {
-    val form = publishNotificationForm.bindFromRequest
-
-    form.fold(
-      formWithErrors => Future.successful(onError(formWithErrors)),
-      publish => {
-        audienceBinder.bindAudience(publish.audience).map {
-          case Left(errors) =>
-            onError(addFormErrors(form, errors))
-          case Right(Audience.Public) =>
-            onError(form.withError("audience", "Notifications cannot be public"))
-          case Right(audience) =>
-            onSuccess(publish, audience)
-        }
-      }
-    )
-  }
-
   def renderCreateForm(publisher: Publisher, form: Form[PublishNotificationData])(implicit request: PublisherRequest[_]) =
     views.createForm(
       publisher = publisher,
@@ -185,4 +171,4 @@ object NotificationsController {
   type PublishNotificationForm = Form[PublishNotificationData]
 }
 
-case class PublishNotificationData(item: NotificationData, audience: AudienceData)
+case class PublishNotificationData(item: NotificationData, audience: AudienceData) extends PublishableWithAudience

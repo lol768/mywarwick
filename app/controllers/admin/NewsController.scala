@@ -20,7 +20,7 @@ import warwick.sso.Usercode
 
 import scala.concurrent.Future
 
-case class PublishNewsItemData(item: NewsItemData, categoryIds: Seq[String], audience: AudienceData)
+case class PublishNewsItemData(item: NewsItemData, categoryIds: Seq[String], audience: AudienceData) extends PublishableWithAudience
 
 case class NewsItemData(
   title: String,
@@ -56,7 +56,7 @@ class NewsController @Inject()(
   val messagesApi: MessagesApi,
   news: NewsService,
   val departmentInfoDao: DepartmentInfoDao,
-  audienceBinder: AudienceBinder,
+  val audienceBinder: AudienceBinder,
   val newsCategoryService: NewsCategoryService
 ) extends BaseController with I18nSupport with Publishing {
 
@@ -71,16 +71,11 @@ class NewsController @Inject()(
     "ignoreCategories" -> boolean
   )(NewsItemData.apply)(NewsItemData.unapply)
 
-
   def publishNewsForm(implicit request: PublisherRequest[_]) = Form(mapping(
     "item" -> newsItemMapping,
     "categories" -> categoryMapping,
     "audience" -> audienceMapping
   )(PublishNewsItemData.apply)(PublishNewsItemData.unapply))
-
-  private def bindOnlyAudience(implicit request: PublisherRequest[_]) = Form(mapping(
-    "audience" -> audienceMapping
-  )(a => a)(a => Some(a)))
 
   def list(publisherId: String) = PublisherAction(publisherId, ViewNews) { implicit request =>
     val theNews = news.getNewsByPublisher(publisherId, limit = 100)
@@ -94,34 +89,20 @@ class NewsController @Inject()(
   }
 
   def create(publisherId: String) = PublisherAction(publisherId, CreateNews).async { implicit request =>
-    val validateOnly = request.body.asFormUrlEncoded.get.contains("validateOnly")
-    val bound = publishNewsForm.bindFromRequest
+    bindFormWithAudience[PublishNewsItemData](publishNewsForm,
+      formWithErrors => Ok(renderCreateForm(request.publisher, formWithErrors)),
+      (data, audience) => {
+        if (validateOnly) {
+          Ok(renderCreateForm(request.publisher, publishNewsForm.fill(data)))
+        } else {
+          val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
+          val newsItemId = news.save(newsItem, audience, data.categoryIds)
 
-    def bindAudience(data: AudienceData, form: Form[PublishNewsItemData])(fn: (Audience) => Result) =
-      audienceBinder.bindAudience(data).map {
-        case Left(errors) => Ok(renderCreateForm(request.publisher, addFormErrors(form, errors)))
-        case Right(audience) => fn(audience)
+          auditLog('CreateNewsItem, 'id -> newsItemId)
+
+          Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("result" -> "News created")
+        }
       }
-
-    bound.fold(
-      errorForm =>
-        bindOnlyAudience.bindFromRequest.fold(
-          badAudience => Future.successful(Ok(renderCreateForm(request.publisher, addFormErrors(errorForm, badAudience.errors)))),
-          audience => bindAudience(audience, errorForm) { a =>
-            Ok(renderCreateForm(request.publisher, errorForm))
-          }
-        ),
-      data =>
-        if (!validateOnly) {
-          bindAudience(data.audience, bound) { audience =>
-            val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
-            val newsItemId = news.save(newsItem, audience, data.categoryIds)
-
-            auditLog('CreateNewsItem, 'id -> newsItemId)
-
-            Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("result" -> "News created")
-          }
-        } else Future.successful(Ok(renderCreateForm(request.publisher, publishNewsForm.fill(data))))
     )
   }
 
@@ -147,20 +128,19 @@ class NewsController @Inject()(
 
   def update(publisherId: String, id: String) = PublisherAction(publisherId, EditNews).async { implicit request =>
     withNewsItem(id, publisherId, _ => {
-      val bound = publishNewsForm.bindFromRequest
-      bound.fold(
-        errorForm => Future.successful(Ok(renderUpdateForm(publisherId, id, errorForm))),
-        data => audienceBinder.bindAudience(data.audience).map {
-          case Left(errors) =>
-            val errorForm = addFormErrors(bound, errors)
-            Ok(renderUpdateForm(publisherId, id, errorForm))
-          case Right(audience) =>
+      bindFormWithAudience[PublishNewsItemData](publishNewsForm,
+        formWithErrors => Ok(renderUpdateForm(publisherId, id, formWithErrors)),
+        (data, audience) => {
+          if (validateOnly) {
+            Ok(renderUpdateForm(publisherId, id, publishNewsForm.fill(data)))
+          } else {
             val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
-            val newsItemId = news.update(id, newsItem, audience, data.categoryIds)
+            news.update(id, newsItem, audience, data.categoryIds)
 
-            auditLog('UpdateNewsItem, 'id -> newsItemId)
+            auditLog('UpdateNewsItem, 'id -> id)
 
             Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("success" -> "News updated")
+          }
         }
       )
     })
