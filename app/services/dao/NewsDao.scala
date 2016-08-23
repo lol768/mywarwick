@@ -117,10 +117,11 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
                AND r.PUBLISH_DATE <= SYSDATE
           LEFT OUTER JOIN NEWS_ITEM_CATEGORY c
             ON c.NEWS_ITEM_ID = n.ID
-        WHERE n.IGNORE_CATEGORIES = 1 OR c.NEWS_CATEGORY_ID IN
-                                         (SELECT NEWS_CATEGORY_ID
-                                          FROM USER_NEWS_CATEGORY
-                                          WHERE USERCODE = {user})
+        WHERE n.IGNORE_CATEGORIES = 1
+          OR c.NEWS_CATEGORY_ID IN (SELECT NEWS_CATEGORY_ID
+                                    FROM USER_NEWS_CATEGORY
+                                    WHERE USERCODE = {user})
+          OR {user} = '*'
         ${dialect.limitOffset(limit)}
        """)
       .on('user -> user.map(_.string).getOrElse("*"))
