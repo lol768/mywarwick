@@ -40,7 +40,6 @@ $(SPLIT_FORM).each((i, form) => {
         url: `${formAction}/validate`,
         success: resolve,
         error: reject,
-        data: { validateOnly: true },
         resetForm: false,
       })
     );
