@@ -10,11 +10,12 @@ import services.{NewsCategoryService, PublisherService, SecurityService}
 import system.ImplicitRequestContext
 import warwick.sso.AuthenticatedRequest
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOptions with PublishingActionRefiner {
   self: ImplicitRequestContext =>
+
+  implicit val executionContext = system.ThreadPools.web
 
   val audienceBinder: AudienceBinder
 
@@ -109,8 +110,6 @@ trait DepartmentOptions {
 
   val publisherService: PublisherService
 
-  implicit val executionContext = system.ThreadPools.web
-
   private val audienceDepartmentTypes = Set("ACADEMIC", "SERVICE")
   private val departmentInitialValue = Seq("" -> "--- Department ---")
 
@@ -184,4 +183,3 @@ trait PublishingActionRefiner {
 
 class PublisherRequest[A](val publisher: Publisher, val userRole: Role, request: AuthenticatedRequest[A])
   extends AuthenticatedRequest[A](request.context, request.request)
-
