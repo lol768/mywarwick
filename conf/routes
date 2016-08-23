@@ -28,6 +28,7 @@ GET         /admin/publish/:publisher/news/new                        @controlle
 POST        /admin/publish/:publisher/news                            @controllers.admin.NewsController.create(publisher: String)
 GET         /admin/publish/:publisher/news/:id/edit                   @controllers.admin.NewsController.updateForm(publisher: String, id: String)
 POST        /admin/publish/:publisher/news/:id                        @controllers.admin.NewsController.update(publisher: String, id: String)
+POST        /admin/publish/:publisher/news/:id/delete                 @controllers.admin.NewsController.delete(publisher: String, id: String)
 
 GET         /admin/publish/:publisher/notifications                   @controllers.admin.NotificationsController.list(publisher: String)
 GET         /admin/publish/:publisher/notifications/new               @controllers.admin.NotificationsController.createForm(publisher: String)

@@ -1,7 +1,6 @@
 @import 'id7/less/variables.less';
 @import 'id7/less/id7.less';
 @import 'id7/less/default-theme.less';
-
 @import 'eonasdan-bootstrap-datetimepicker/src/less/_bootstrap-datetimepicker.less';
 
 @id7-image-root-dir: '../lib/id7/images';
@@ -22,4 +21,21 @@ dd.error {
 
 .split-form > section {
   display: none;
+}
+
+.confirm-delete {
+  display: none;
+  opacity: 0;
+  left: 20%;
+}
+.news-item {
+  .btn-toolbar {
+    position: relative;
+    form {
+      display: inline;
+    }
+    .btn {
+      margin-bottom: 4px;
+    }
+  }
 }

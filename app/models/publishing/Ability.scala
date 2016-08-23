@@ -10,6 +10,7 @@ object Ability extends Enum[Ability] {
 
   case object CreateNews extends V
   case object EditNews extends V
+  case object DeleteNews extends V
   case object CreateNotifications extends V
   case object EditNotifications extends V
   case object DeleteNotifications extends V

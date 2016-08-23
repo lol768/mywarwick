@@ -32,12 +32,22 @@ trait NewsImageDao {
 
   def find(id: String)(implicit c: Connection): Option[NewsImage]
 
+  def deleteForNewsItemId(newsItemId: String): Unit
+
 }
 
 @Singleton
 class NewsImageDaoImpl extends NewsImageDao {
 
   import warwick.anorm.converters.ColumnConversions._
+
+  override def deleteForNewsItemId(newsItemId: String): Unit =
+    SQL"""
+       DELETE FROM news_image
+       WHERE id IN (SELECT news_image_id
+                    FROM news_item
+                    WHERE id =$newsItemId);
+    """
 
   def save(newsImageSave: NewsImageSave)(implicit c: Connection) = {
     import newsImageSave._

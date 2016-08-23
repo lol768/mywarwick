@@ -1,45 +1,61 @@
 @import models.publishing.Role
 @import models.news.NewsItemRender
-@import models.publishing.Ability.EditNews
+@import models.publishing.Ability.{EditNews, DeleteNews}
 @(publisher: String, item: NewsItemRender, count: Option[AudienceSize], user: Role)
-<article class="news-item">
-  <div class="news-item__body">
-    <div class="news-item__title">@item.title</div>
-    @item.imageId.map { imageId =>
-      <div class="news-item__image">
-        <img src="@controllers.api.routes.NewsImagesController.show(imageId)" alt="@item.title">
-      </div>
-    }
-    <div class="news-item__content">@item.text</div>
-    <div class="news-item__footer">
-      @models.DateFormats.emailDateTime(item.publishDate)
-      @count match {
-        case Some(AudienceSize.Public) => {
-          <span>- public</span>
-        }
-        case Some(AudienceSize.Finite(c)) => {
-          <span>
+<article class="news-item row">
+  <div class="col-xs-10">
+    <div class="news-item__body">
+      <div class="news-item__title">@item.title</div>
+      @item.imageId.map { imageId =>
+        <div class="news-item__image">
+          <img src="@controllers.api.routes.NewsImagesController.show(imageId)" alt="@item.title">
+        </div>
+      }
+      <div class="news-item__content">@item.text</div>
+      <div class="news-item__footer">
+        @models.DateFormats.emailDateTime(item.publishDate)
+        @count match {
+          case Some(AudienceSize.Public) => {
+            <span>- public</span>
+          }
+          case Some(AudienceSize.Finite(c)) => {
+            <span>
             - @c
-            @if(c == 1) { recipient } else { recipients }
+              @if(c == 1) { recipient } else { recipients }
           </span>
+          }
+          case _ => {}
         }
-        case _ => {}
-      }
 
-      <div>
-      @item.categories.map { category =>
-        <span class="badge">@category.name</span>
-      }
-      </div>
-
-      @if(user can EditNews) {
-        <div class="btn-toolbar pull-right">
-          <a
-          href="@controllers.admin.routes.NewsController.updateForm(publisher, item.id)"
-          class="btn btn-primary"
-          >Edit</a>
+        <div>
+        @item.categories.map { category =>
+          <span class="badge">@category.name</span>
+        }
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="col-xs-2">
+    <div class="btn-toolbar pull-right">
+      @if(user can EditNews) {
+        <a
+        href="@controllers.admin.routes.NewsController.updateForm(publisher, item.id)"
+        class="btn btn-primary"
+        >Edit</a>
       }
+      @if(user can DeleteNews) {
+        <a href=""
+        class="btn btn-danger delete"
+        >Delete</a>
+      </div>
+    <div class="btn-toolbar pull-right confirm-delete">
+      <p>Are you sure?</p>
+      @helper.form(controllers.admin.routes.NewsController.delete(publisher, item.id)) {
+        <button type="submit" class="btn btn-danger">Delete</button>
+      }
+      <button class="btn btn-default cancel">Cancel</button>
+    </div>
+    } else { </div> }
   </div>
 </article>

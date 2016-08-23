@@ -11,11 +11,12 @@ import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Result
+import play.api.mvc.{ActionRefiner, Result}
 import services.dao.DepartmentInfoDao
 import services.{NewsCategoryService, NewsService, PublisherService, SecurityService}
 import system.{RequestContext, TimeZones, Validation}
 import uk.ac.warwick.util.web.Uri
+import views.html.errors
 import warwick.sso.Usercode
 
 import scala.concurrent.Future
@@ -164,6 +165,31 @@ class NewsController @Inject()(
         }
       )
     })
+  }
+
+  def delete(publisherId: String, id: String) = PublisherAction(publisherId, DeleteNotifications)
+    .andThen(NewsBelongsToPublisher(id, publisherId)) { implicit request =>
+      news.delete(id)
+      auditLog('DeleteNews, 'id -> id)
+      Redirect(routes.NewsController.list(publisherId)).flashing("success" -> "News deleted")
+    }
+
+  private def NewsBelongsToPublisher(id: String, publisherId: String) = new ActionRefiner[PublisherRequest, PublisherRequest] {
+    override protected def refine[A](request: PublisherRequest[A]): Future[Either[Result, PublisherRequest[A]]] = {
+      implicit val r = request
+
+      val maybeBoolean = for {
+        item <- news.getNewsItem(id)
+      } yield item.publisherId.contains(publisherId)
+
+      Future.successful {
+        if (maybeBoolean.contains(true)) {
+          Right(request)
+        } else {
+          Left(NotFound(errors.notFound()))
+        }
+      }
+    }
   }
 
   private def withNewsItem(id: String, publisherId: String, block: (NewsItemRender) => Future[Result])(implicit request: RequestContext): Future[Result] = {

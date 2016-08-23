@@ -5,13 +5,14 @@ import javax.inject.Inject
 import com.google.inject.ImplementedBy
 import models.news.{NewsItemRender, NewsItemSave}
 import models.{Audience, AudienceSize}
+import oracle.net.aso.d
 import org.joda.time.DateTime
 import org.quartz.JobBuilder.newJob
 import org.quartz.SimpleScheduleBuilder.simpleSchedule
 import org.quartz.TriggerBuilder.newTrigger
 import org.quartz._
 import play.api.db.Database
-import services.dao.{AudienceDao, NewsCategoryDao, NewsDao}
+import services.dao.{AudienceDao, NewsCategoryDao, NewsDao, NewsImageDao}
 import services.job.PublishNewsItemJob
 import warwick.sso.Usercode
 
@@ -32,6 +33,8 @@ trait NewsService {
   def getNewsItem(id: String): Option[NewsItemRender]
 
   def setRecipients(newsItemId: String, recipients: Seq[Usercode]): Unit
+
+  def delete(newsItemId: String): Unit
 }
 
 class AnormNewsService @Inject()(
@@ -39,10 +42,18 @@ class AnormNewsService @Inject()(
   dao: NewsDao,
   audienceService: AudienceService,
   newsCategoryDao: NewsCategoryDao,
+  newsImageDao: NewsImageDao,
   audienceDao: AudienceDao,
   userInitialisationService: UserInitialisationService,
   scheduler: SchedulerService
 ) extends NewsService {
+
+  override def delete(newsId: String) = db.withTransaction { implicit c =>
+    newsImageDao.deleteForNewsItemId(newsId)
+    newsCategoryDao.deleteNewsCategories(newsId)
+    dao.deleteRecipients(newsId)
+    dao.delete(newsId)
+  }
 
   override def getNewsByPublisher(publisherId: String, limit: Int, offset: Int): Seq[NewsItemRender] =
     db.withConnection { implicit c =>

@@ -48,6 +48,10 @@ trait NewsDao {
   def getAudienceId(newsId: String)(implicit c: Connection): Option[String]
 
   def setAudienceId(newsId: String, audienceId: String)(implicit c: Connection)
+
+  def delete(newsId: String)(implicit c: Connection): Int
+
+  def deleteRecipients(id: String)(implicit c: Connection): Unit
 }
 
 @Singleton
@@ -153,10 +157,13 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     }
   }
 
+  override def delete(newsId: String)(implicit c: Connection) =
+    SQL"DELETE FROM news_item WHERE id=$newsId".executeUpdate()
+
   /**
     * Deletes all the recipients of a news item.
     */
-  private def deleteRecipients(id: String)(implicit c: Connection) = {
+  override def deleteRecipients(id: String)(implicit c: Connection) = {
     SQL"DELETE FROM NEWS_RECIPIENT WHERE news_item_id = $id".executeUpdate()
   }
 
