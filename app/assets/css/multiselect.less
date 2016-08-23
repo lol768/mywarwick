@@ -1,0 +1,23 @@
+@import 'react-bootstrap-multiselect/less/bootstrap-multiselect.less';
+
+.dropdown-menu > li > a {
+  text-decoration: none !important;
+
+  > label {
+    // Give the options a bit more room
+    padding-top: .75em;
+    padding-bottom: .75em;
+  }
+}
+
+.dropdown-menu > .active > a {
+  background-color: @table-bg;
+
+  &:hover, &:focus, &:active {
+    background-color: @table-bg-hover;
+  }
+}
+
+.dropdown-menu > .active label {
+  font-weight: bold;
+}

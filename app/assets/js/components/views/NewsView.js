@@ -67,7 +67,7 @@ class NewsView extends React.Component {
     );
 
     return (
-      <div>
+      <div className="margin-top-1">
         <NewsCategoriesView { ...this.props.newsCategories } dispatch={ this.props.dispatch } />
         { fetching ? <i className="centered fa fa-lg fa-refresh fa-spin"> </i> : null }
         { items.length ?
