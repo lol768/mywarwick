@@ -137,7 +137,7 @@ class NewsController @Inject()(
   }
 
   def updateForm(publisherId: String, id: String) = PublisherAction(publisherId, EditNews)
-    .andThen(NewsBelongsToPublisher(publisherId, id))
+    .andThen(NewsBelongsToPublisher(id, publisherId))
     .async { implicit request =>
       withNewsItem(id, publisherId, item => {
         val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
@@ -149,7 +149,7 @@ class NewsController @Inject()(
     }
 
   def update(publisherId: String, id: String) = PublisherAction(publisherId, EditNews)
-    .andThen(NewsBelongsToPublisher(publisherId, id))
+    .andThen(NewsBelongsToPublisher(id, publisherId))
     .async { implicit request =>
       withNewsItem(id, publisherId, _ => {
         val bound = publishNewsForm.bindFromRequest
