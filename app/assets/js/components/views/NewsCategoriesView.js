@@ -1,36 +1,50 @@
 import React, { PropTypes } from 'react';
+import Multiselect from 'react-bootstrap-multiselect';
 import * as newsCategories from '../../state/news-categories';
-import ColumnLayout from '../ui/ColumnLayout';
+import _ from 'lodash';
 
 export default class NewsCategoriesView extends React.Component {
 
-  onChange(id) {
-    return () => {
-      const { subscribed, dispatch } = this.props;
+  constructor(props) {
+    super(props);
+
+    this.onChange = this.onChange.bind(this);
+  }
+
+  onChange(options) {
+    const { subscribed, dispatch } = this.props;
+
+    _(options).each(option => {
+      const id = option.value;
 
       if (subscribed.has(id)) {
         dispatch(newsCategories.unsubscribe(id));
       } else {
         dispatch(newsCategories.subscribe(id));
       }
-    };
+    });
+  }
+
+  buttonText(options) {
+    return `Categories (${options.length})`;
   }
 
   render() {
     const { items, subscribed } = this.props;
 
-    const checkboxes = items.map(({ id, name }) =>
-      <Checkbox key={ id } label={ name }
-        checked={ subscribed.has(id) }
-        onChange={ this.onChange(id) }
-      />
-    );
+    const data = items.map(item => ({
+      value: item.id,
+      label: item.name,
+      selected: subscribed.has(item.id),
+    }));
 
     return (
       <div className="container-fluid news-categories">
-        <ColumnLayout columns={ 2 }>
-          { checkboxes }
-        </ColumnLayout>
+        <Multiselect multiple
+          data={ data }
+          onChange={ this.onChange }
+          buttonText={ this.buttonText }
+        />
       </div>
     );
   }
@@ -41,20 +55,5 @@ NewsCategoriesView.propTypes = {
   dispatch: PropTypes.func.isRequired,
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
   subscribed: PropTypes.instanceOf(Set).isRequired,
-};
-
-const Checkbox = ({ label, checked, onChange }) => (
-  <div className="checkbox">
-    <label>
-      <input type="checkbox" checked={ checked } onChange={ onChange } />
-      { label }
-    </label>
-  </div>
-);
-
-Checkbox.propTypes = {
-  checked: PropTypes.bool.isRequired,
-  label: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
 };
 

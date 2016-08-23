@@ -16,7 +16,7 @@
 
 @common.admin("Create notification") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NotificationsController.create(publisher.id), 'class -> "split-form") {
+  @b3.form(action = controllers.admin.routes.NotificationsController.create(publisher.id, true), 'class -> "split-form") {
 
     @form.globalErrors.map { error =>
       <div class="alert alert-danger">@error.message</div>

@@ -217,9 +217,10 @@ class ActivityDaoImpl @Inject()(
       get[DateTime]("PUBLISHED_AT") ~
       get[DateTime]("CREATED_AT") ~
       get[Boolean]("SHOULD_NOTIFY") ~
-      get[Option[String]]("AUDIENCE_ID") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ publishedAt ~ createdAt ~ shouldNotify ~ audienceId =>
-        Activity(id, providerId, activityType, title, text, url, replacedById, publishedAt, createdAt, shouldNotify, audienceId)
+      get[Option[String]]("AUDIENCE_ID") ~
+      get[Option[String]]("PUBLISHER_ID") map {
+      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ publishedAt ~ createdAt ~ shouldNotify ~ audienceId ~ publisherId =>
+        Activity(id, providerId, activityType, title, text, url, replacedById, publishedAt, createdAt, shouldNotify, audienceId, publisherId)
     }
 
   private lazy val tagParser: RowParser[Option[ActivityTag]] =

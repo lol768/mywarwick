@@ -1,9 +1,10 @@
 package controllers.admin
 
+import models.Audience
 import models.publishing._
 import play.api.data.Forms._
-import play.api.data.Mapping
-import play.api.mvc.{ActionRefiner, Result, Results}
+import play.api.data.{Form, Mapping}
+import play.api.mvc.{ActionRefiner, AnyContent, Result, Results}
 import services.dao.DepartmentInfoDao
 import services.{NewsCategoryService, PublisherService, SecurityService}
 import system.ImplicitRequestContext
@@ -13,6 +14,14 @@ import scala.concurrent.Future
 
 trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOptions with PublishingActionRefiner {
   self: ImplicitRequestContext =>
+
+  implicit val executionContext = system.ThreadPools.web
+
+  val audienceBinder: AudienceBinder
+
+  def audienceForm(implicit request: PublisherRequest[_]) = Form(
+    single("audience" -> audienceMapping)
+  )
 
   def audienceMapping(implicit publisherRequest: PublisherRequest[_]): Mapping[AudienceData] =
     mapping(
@@ -37,11 +46,57 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
     }
   }
 
+  def bindFormWithAudience[A <: PublishableWithAudience](
+    baseForm: Form[A],
+    submitted: Boolean,
+    renderForm: (Form[A]) => Result,
+    onSubmit: ((A, Audience) => Result)
+  )(implicit request: PublisherRequest[AnyContent]): Future[Result] = {
+    val form = baseForm.bindFromRequest
+
+    form.fold(
+      formWithErrors => {
+        // If the PublishNewsItemData form fails to bind, we can't display
+        // validation errors for the audience.  Work around this by separately
+        // binding the audience field and pushing any errors onto the top-level
+        // form.
+        val boundForm = audienceForm.bindFromRequest.fold(
+          _ => Future.successful(formWithErrors),
+          audienceData => audienceBinder.bindAudience(audienceData).map {
+            case Left(errors) => addFormErrors(formWithErrors, errors)
+            case Right(_) => formWithErrors
+          }
+        )
+
+        boundForm.map(renderForm)
+      },
+      publish => {
+        audienceBinder.bindAudience(publish.audience).map {
+          case Left(errors) =>
+            renderForm(addFormErrors(form, errors))
+          case Right(audience) =>
+            if (submitted) {
+              onSubmit(publish, audience)
+            } else {
+              // If the form has not been submitted, just render the form again
+              // having performed validation.
+              renderForm(form)
+            }
+        }
+      }
+    )
+  }
+
+
+}
+
+trait PublishableWithAudience {
+  val audience: AudienceData
 }
 
 trait ProviderOptions {
   val publisherService: PublisherService
-  
+
   def providerOptions(implicit publisherRequest: PublisherRequest[_]) =
     publisherService.getProviders(publisherRequest.publisher.id)
       .map(provider => provider.id -> provider.name)
@@ -54,8 +109,6 @@ trait DepartmentOptions {
   val departmentInfoDao: DepartmentInfoDao
 
   val publisherService: PublisherService
-
-  implicit val executionContext = system.ThreadPools.web
 
   private val audienceDepartmentTypes = Set("ACADEMIC", "SERVICE")
   private val departmentInitialValue = Seq("" -> "--- Department ---")
@@ -130,4 +183,3 @@ trait PublishingActionRefiner {
 
 class PublisherRequest[A](val publisher: Publisher, val userRole: Role, request: AuthenticatedRequest[A])
   extends AuthenticatedRequest[A](request.context, request.request)
-
