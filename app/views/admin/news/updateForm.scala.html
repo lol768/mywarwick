@@ -20,7 +20,7 @@
 
 @common.admin("Update news") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NewsController.update(publisher.id, id), 'class -> "split-form") {
+  @b3.form(action = controllers.admin.routes.NewsController.update(publisher.id, id, true), 'class -> "split-form") {
 
     <section>
     @admin.news.contentForm(form)

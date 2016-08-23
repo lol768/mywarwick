@@ -47,10 +47,10 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
 
   def bindFormWithAudience[A <: PublishableWithAudience](
     baseForm: Form[A],
-    onError: (Form[A]) => Result,
-    onSuccess: ((A, Audience) => Result)
+    submitted: Boolean,
+    renderForm: (Form[A]) => Result,
+    onSubmit: ((A, Audience) => Result)
   )(implicit request: PublisherRequest[AnyContent]): Future[Result] = {
-    val validateOnly = request.body.asFormUrlEncoded.exists(_.contains("validateOnly"))
     val form = baseForm.bindFromRequest
 
     form.fold(
@@ -67,17 +67,19 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
           }
         )
 
-        boundForm.map(onError)
+        boundForm.map(renderForm)
       },
       publish => {
         audienceBinder.bindAudience(publish.audience).map {
           case Left(errors) =>
-            onError(addFormErrors(form, errors))
+            renderForm(addFormErrors(form, errors))
           case Right(audience) =>
-            if (validateOnly) {
-              onError(form)
+            if (submitted) {
+              onSubmit(publish, audience)
             } else {
-              onSuccess(publish, audience)
+              // If the form has not been submitted, just render the form again
+              // having performed validation.
+              renderForm(form)
             }
         }
       }

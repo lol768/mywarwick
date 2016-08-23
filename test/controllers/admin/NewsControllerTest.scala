@@ -119,24 +119,24 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
   "NewsController#create" should {
 
+    when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
+    when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
+    when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
+
+    val validData = Seq(
+      "item.title" -> "Big news",
+      "item.text" -> "Something happened",
+      "item.publishDate" -> "2016-01-01T00:00.000",
+      "categories[]" -> "abc",
+      "audience.department" -> "IN",
+      "audience.audience[]" -> "Dept:Staff"
+    )
+
     "create a news item" in {
-      val data = Seq(
-        "item.title" -> "Big news",
-        "item.text" -> "Something happened",
-        "item.publishDate" -> "2016-01-01T00:00.000",
-        "categories[]" -> "abc",
-        "audience.department" -> "IN",
-        "audience.audience[]" -> "Dept:Staff"
-      )
-
-      when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
-      when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
-      when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
-
       val audience = Audience(Seq(Audience.DepartmentAudience("IN", Seq(Audience.Staff))))
       when(audienceBinder.bindAudience(AudienceData(Seq("Dept:Staff"), Some("IN")))).thenReturn(Future.successful(Right(audience)))
 
-      val result = call(newsController.create("xyz"), FakeRequest("POST", "/").withFormUrlEncodedBody(data: _*))
+      val result = call(newsController.create("xyz", submitted = true), FakeRequest("POST", "/").withFormUrlEncodedBody(validData: _*))
 
       redirectLocation(result) must contain("/admin/publish/xyz/news")
 
@@ -156,9 +156,22 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
       when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
       when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
 
-      val result = call(newsController.create("xyz"), FakeRequest("POST", "/").withFormUrlEncodedBody(data: _*))
+      val result = call(newsController.create("xyz", submitted = true), FakeRequest("POST", "/").withFormUrlEncodedBody(data: _*))
 
       contentAsString(result) must include("You do not have the required permissions to publish to that audience.")
+    }
+
+    "do nothing unless submitted" in {
+      reset(newsService)
+
+      val audience = Audience(Seq(Audience.DepartmentAudience("IN", Seq(Audience.Staff))))
+      when(audienceBinder.bindAudience(AudienceData(Seq("Dept:Staff"), Some("IN")))).thenReturn(Future.successful(Right(audience)))
+
+      val result = call(newsController.create("xyz", submitted = false), FakeRequest("POST", "/").withFormUrlEncodedBody(validData: _*))
+
+      contentAsString(result) must include("Big news")
+
+      verify(newsService, never()).save(Matchers.any(), Matchers.eq(audience), Matchers.eq(Seq("abc")))
     }
 
   }

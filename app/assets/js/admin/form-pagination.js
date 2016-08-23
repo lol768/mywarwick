@@ -33,8 +33,11 @@ $(SPLIT_FORM).each((i, form) => {
   showSection(currentPage);
 
   function validate() {
+    const formAction = $form.attr('action');
+
     return new Promise((resolve, reject) =>
       $form.ajaxSubmit({
+        url: `${formAction}/validate`,
         success: resolve,
         error: reject,
         data: { validateOnly: true },

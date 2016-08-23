@@ -25,15 +25,19 @@ GET         /admin/publish                                            @controlle
 GET         /admin/publish/:publisher                                 @controllers.admin.PublishersController.show(publisher: String)
 GET         /admin/publish/:publisher/news                            @controllers.admin.NewsController.list(publisher: String)
 GET         /admin/publish/:publisher/news/new                        @controllers.admin.NewsController.createForm(publisher: String)
-POST        /admin/publish/:publisher/news                            @controllers.admin.NewsController.create(publisher: String)
+POST        /admin/publish/:publisher/news/validate                   @controllers.admin.NewsController.create(publisher: String, submitted: Boolean = false)
+POST        /admin/publish/:publisher/news                            @controllers.admin.NewsController.create(publisher: String, submitted: Boolean = true)
 GET         /admin/publish/:publisher/news/:id/edit                   @controllers.admin.NewsController.updateForm(publisher: String, id: String)
-POST        /admin/publish/:publisher/news/:id                        @controllers.admin.NewsController.update(publisher: String, id: String)
+POST        /admin/publish/:publisher/news/:id/validate               @controllers.admin.NewsController.update(publisher: String, id: String, submitted: Boolean = false)
+POST        /admin/publish/:publisher/news/:id                        @controllers.admin.NewsController.update(publisher: String, id: String, submitted: Boolean = true)
 
 GET         /admin/publish/:publisher/notifications                   @controllers.admin.NotificationsController.list(publisher: String)
 GET         /admin/publish/:publisher/notifications/new               @controllers.admin.NotificationsController.createForm(publisher: String)
-POST        /admin/publish/:publisher/notifications                   @controllers.admin.NotificationsController.create(publisher: String)
+POST        /admin/publish/:publisher/notifications/validate          @controllers.admin.NotificationsController.create(publisher: String, submitted: Boolean = false)
+POST        /admin/publish/:publisher/notifications                   @controllers.admin.NotificationsController.create(publisher: String, submitted: Boolean = true)
 GET         /admin/publish/:publisher/notifications/:id/edit          @controllers.admin.NotificationsController.updateForm(publisher: String, id: String)
-POST        /admin/publish/:publisher/notifications/:id               @controllers.admin.NotificationsController.update(publisher: String, id: String)
+POST        /admin/publish/:publisher/notifications/:id/validate      @controllers.admin.NotificationsController.update(publisher: String, id: String, submitted: Boolean = false)
+POST        /admin/publish/:publisher/notifications/:id               @controllers.admin.NotificationsController.update(publisher: String, id: String, submitted: Boolean = true)
 POST        /admin/publish/:publisher/notifications/:id/delete        @controllers.admin.NotificationsController.delete(publisher: String, id: String)
 
 GET         /websockets/page/                                         @controllers.WebSocketController.socket
