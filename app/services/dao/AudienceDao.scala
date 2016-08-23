@@ -61,6 +61,7 @@ class AudienceDaoImpl extends AudienceDao {
   def audienceFromComponents(components: Seq[AudienceComponentSave]): Audience = Audience(
     components.groupBy(_.deptCode).flatMap {
       case (None, components) => components.groupBy(_.name).flatMap {
+        case ("Public", _) => Seq(PublicAudience)
         case ("Module", components) => components.collect {
           case AudienceComponentSave("Module", Some(code), _) => ModuleAudience(code)
         }
@@ -80,6 +81,7 @@ class AudienceDaoImpl extends AudienceDao {
 
   def audienceToComponents(audience: Audience): Seq[AudienceComponentSave] =
     audience.components.flatMap {
+      case PublicAudience => Seq(AudienceComponentSave("Public", None, None))
       case ds: DepartmentSubset => resolveSubset(None, ds)
       case DepartmentAudience(code, subsets) => subsets.flatMap { subset => resolveSubset(Some(code), subset) }
       case ModuleAudience(code) => Seq(AudienceComponentSave("Module", Some(code), None))
