@@ -1,6 +1,7 @@
 @import models.publishing.Role
 @import models.news.NewsItemRender
-@import models.publishing.Ability.{EditNews, DeleteNews}
+@import models.publishing.Ability.EditNews
+@import models.publishing.Ability.DeleteNews
 @(publisher: String, item: NewsItemRender, count: Option[AudienceSize], user: Role)
 <article class="news-item row">
   <div class="col-xs-10">

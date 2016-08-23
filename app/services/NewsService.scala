@@ -5,7 +5,6 @@ import javax.inject.Inject
 import com.google.inject.ImplementedBy
 import models.news.{NewsItemRender, NewsItemSave}
 import models.{Audience, AudienceSize}
-import oracle.net.aso.d
 import org.joda.time.DateTime
 import org.quartz.JobBuilder.newJob
 import org.quartz.SimpleScheduleBuilder.simpleSchedule

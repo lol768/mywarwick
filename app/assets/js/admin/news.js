@@ -12,7 +12,7 @@ $('input[name="item.publishDateSet"]').on('change', function onChange() {
 /*
  * Handles delete confirmation
  */
-$('.news-item').each((i, item) => {
+$('.news-item, .activity-item').each((i, item) => {
   const $item = $(item);
   const $delete = $item.find('a.delete');
   const $cancel = $item.find('.confirm-delete > button.cancel');
