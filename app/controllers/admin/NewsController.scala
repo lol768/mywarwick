@@ -136,36 +136,40 @@ class NewsController @Inject()(
     )
   }
 
-  def updateForm(publisherId: String, id: String) = PublisherAction(publisherId, EditNews).async { implicit request =>
-    withNewsItem(id, publisherId, item => {
-      val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
-      val audience = news.getAudience(id).map(audienceBinder.unbindAudience).get
-      val formWithData = publishNewsForm.fill(PublishNewsItemData(item.toData, categoryIds, audience))
+  def updateForm(publisherId: String, id: String) = PublisherAction(publisherId, EditNews)
+    .andThen(NewsBelongsToPublisher(publisherId, id))
+    .async { implicit request =>
+      withNewsItem(id, publisherId, item => {
+        val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
+        val audience = news.getAudience(id).map(audienceBinder.unbindAudience).get
+        val formWithData = publishNewsForm.fill(PublishNewsItemData(item.toData, categoryIds, audience))
 
-      Future.successful(Ok(renderUpdateForm(publisherId, id, formWithData)))
-    })
-  }
+        Future.successful(Ok(renderUpdateForm(publisherId, id, formWithData)))
+      })
+    }
 
-  def update(publisherId: String, id: String) = PublisherAction(publisherId, EditNews).async { implicit request =>
-    withNewsItem(id, publisherId, _ => {
-      val bound = publishNewsForm.bindFromRequest
-      bound.fold(
-        errorForm => Future.successful(Ok(renderUpdateForm(publisherId, id, errorForm))),
-        data => audienceBinder.bindAudience(data.audience).map {
-          case Left(errors) =>
-            val errorForm = addFormErrors(bound, errors)
-            Ok(renderUpdateForm(publisherId, id, errorForm))
-          case Right(audience) =>
-            val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
-            val newsItemId = news.update(id, newsItem, audience, data.categoryIds)
+  def update(publisherId: String, id: String) = PublisherAction(publisherId, EditNews)
+    .andThen(NewsBelongsToPublisher(publisherId, id))
+    .async { implicit request =>
+      withNewsItem(id, publisherId, _ => {
+        val bound = publishNewsForm.bindFromRequest
+        bound.fold(
+          errorForm => Future.successful(Ok(renderUpdateForm(publisherId, id, errorForm))),
+          data => audienceBinder.bindAudience(data.audience).map {
+            case Left(errors) =>
+              val errorForm = addFormErrors(bound, errors)
+              Ok(renderUpdateForm(publisherId, id, errorForm))
+            case Right(audience) =>
+              val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
+              val newsItemId = news.update(id, newsItem, audience, data.categoryIds)
 
-            auditLog('UpdateNewsItem, 'id -> newsItemId)
+              auditLog('UpdateNewsItem, 'id -> newsItemId)
 
-            Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("success" -> "News updated")
-        }
-      )
-    })
-  }
+              Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("success" -> "News updated")
+          }
+        )
+      })
+    }
 
   def delete(publisherId: String, id: String) = PublisherAction(publisherId, DeleteNotifications)
     .andThen(NewsBelongsToPublisher(id, publisherId)) { implicit request =>
