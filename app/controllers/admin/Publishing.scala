@@ -18,9 +18,6 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
 
   val audienceBinder: AudienceBinder
 
-  def validateOnly(implicit request: PublisherRequest[AnyContent]) =
-    request.body.asFormUrlEncoded.exists(_.contains("validateOnly"))
-
   def audienceForm(implicit request: PublisherRequest[_]) = Form(
     single("audience" -> audienceMapping)
   )
@@ -52,7 +49,8 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
     baseForm: Form[A],
     onError: (Form[A]) => Result,
     onSuccess: ((A, Audience) => Result)
-  )(implicit request: PublisherRequest[_]): Future[Result] = {
+  )(implicit request: PublisherRequest[AnyContent]): Future[Result] = {
+    val validateOnly = request.body.asFormUrlEncoded.exists(_.contains("validateOnly"))
     val form = baseForm.bindFromRequest
 
     form.fold(
@@ -76,7 +74,11 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
           case Left(errors) =>
             onError(addFormErrors(form, errors))
           case Right(audience) =>
-            onSuccess(publish, audience)
+            if (validateOnly) {
+              onError(form)
+            } else {
+              onSuccess(publish, audience)
+            }
         }
       }
     )

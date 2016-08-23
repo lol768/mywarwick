@@ -92,16 +92,12 @@ class NewsController @Inject()(
     bindFormWithAudience[PublishNewsItemData](publishNewsForm,
       formWithErrors => Ok(renderCreateForm(request.publisher, formWithErrors)),
       (data, audience) => {
-        if (validateOnly) {
-          Ok(renderCreateForm(request.publisher, publishNewsForm.fill(data)))
-        } else {
-          val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
-          val newsItemId = news.save(newsItem, audience, data.categoryIds)
+        val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
+        val newsItemId = news.save(newsItem, audience, data.categoryIds)
 
-          auditLog('CreateNewsItem, 'id -> newsItemId)
+        auditLog('CreateNewsItem, 'id -> newsItemId)
 
-          Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("result" -> "News created")
-        }
+        Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("result" -> "News created")
       }
     )
   }
@@ -131,16 +127,12 @@ class NewsController @Inject()(
       bindFormWithAudience[PublishNewsItemData](publishNewsForm,
         formWithErrors => Ok(renderUpdateForm(publisherId, id, formWithErrors)),
         (data, audience) => {
-          if (validateOnly) {
-            Ok(renderUpdateForm(publisherId, id, publishNewsForm.fill(data)))
-          } else {
-            val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
-            news.update(id, newsItem, audience, data.categoryIds)
+          val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
+          news.update(id, newsItem, audience, data.categoryIds)
 
-            auditLog('UpdateNewsItem, 'id -> id)
+          auditLog('UpdateNewsItem, 'id -> id)
 
-            Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("success" -> "News updated")
-          }
+          Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("success" -> "News updated")
         }
       )
     })

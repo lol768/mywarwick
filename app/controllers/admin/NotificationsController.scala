@@ -60,16 +60,12 @@ class NotificationsController @Inject()(
       formWithErrors =>
         Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope)),
       (publish, audience) => {
-        if (validateOnly) {
-          Ok(renderCreateForm(request.publisher, publishNotificationForm.fill(publish)))
-        } else {
-          val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
+        val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
 
-          val activityId = activityService.save(notification, audience)
-          auditLog('CreateNotification, 'id -> activityId)
+        val activityId = activityService.save(notification, audience)
+        auditLog('CreateNotification, 'id -> activityId)
 
-          Redirect(routes.NotificationsController.list(publisherId)).flashing("success" -> "Notification created")
-        }
+        Redirect(routes.NotificationsController.list(publisherId)).flashing("success" -> "Notification created")
       }
     )
   }
@@ -108,19 +104,15 @@ class NotificationsController @Inject()(
         (publish, audience) => {
           val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
-          if (validateOnly) {
-            Ok(views.updateForm(request.publisher, activity, publishNotificationForm.fill(publish), departmentOptions, providerOptions, permissionScope))
-          } else {
-            val activity = publish.item.toSave(request.context.user.get.usercode, publisherId)
+          val activity = publish.item.toSave(request.context.user.get.usercode, publisherId)
 
-            activityService.update(id, activity, audience).fold(
-              errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
-              id => {
-                auditLog('UpdateNotification, 'id -> id)
-                redirect.flashing("success" -> "Notification updated")
-              }
-            )
-          }
+          activityService.update(id, activity, audience).fold(
+            errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
+            id => {
+              auditLog('UpdateNotification, 'id -> id)
+              redirect.flashing("success" -> "Notification updated")
+            }
+          )
         }
       )
     }
