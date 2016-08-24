@@ -13,7 +13,10 @@ import org.quartz._
 import play.api.db.Database
 import services.dao.{AudienceDao, NewsCategoryDao, NewsDao}
 import services.job.PublishNewsItemJob
+import system.ThreadPools.web
 import warwick.sso.Usercode
+
+import scala.concurrent.Future
 
 @ImplementedBy(classOf[AnormNewsService])
 trait NewsService {
@@ -95,8 +98,8 @@ class AnormNewsService @Inject()(
       dao.countRecipients(newsIds)
     }
 
-  override def update(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String]) =
-    db.withTransaction { implicit c =>
+  override def update(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String]) = {
+    val (existingAudience, audienceId) = db.withTransaction { implicit c =>
       dao.updateNewsItem(id, item)
       newsCategoryDao.deleteNewsCategories(id)
       newsCategoryDao.saveNewsCategories(id, categoryIds)
@@ -115,13 +118,18 @@ class AnormNewsService @Inject()(
           audienceId
       }
 
+      (existingAudience, audienceId)
+    }
+
+    Future {
       // Delete the recipients now and re-create them in the future
       if (existingAudience.nonEmpty) {
-        dao.setRecipients(id, Seq.empty)
+        db.withTransaction(implicit c => dao.setRecipients(id, Seq.empty))
       }
 
       schedulePublishNewsItem(id, audienceId, item.publishDate)
     }
+  }
 
   override def getAudience(newsId: String) =
     db.withConnection { implicit c =>

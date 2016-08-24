@@ -6,6 +6,7 @@ import models.Audience._
 import org.joda.time.DateTime
 import org.quartz.JobKey
 import org.quartz.SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW
+import org.scalatest.concurrent.Eventually.eventually
 import org.scalatestplus.play.PlaySpec
 import services.job.PublishNewsItemJob
 
@@ -60,8 +61,11 @@ class NewsServiceTest extends PlaySpec with OneStartAppPerSuite {
       newsService.update(id, item.copy(publishDate = DateTime.now.minusHours(2)), staffAudience, categoryIds.take(2))
 
       val jobKey = new JobKey(id, PublishNewsItemJob.name)
-      scheduler.deletedJobs must contain(jobKey)
-      scheduler.triggeredJobs.map(_.getKey) must contain(jobKey)
+
+      eventually {
+        scheduler.deletedJobs must contain(jobKey)
+        scheduler.triggeredJobs.map(_.getKey) must contain(jobKey)
+      }
     }
 
   }
