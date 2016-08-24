@@ -50,7 +50,7 @@ class NewsView extends React.Component {
             Unable to fetch news.
           </p>
           <p>
-            <button onClick={ this.onClickRefresh } className="btn btn-default">
+            <button type="button" onClick={ this.onClickRefresh } className="btn btn-default">
               <i className="fa fa-refresh fa-fw"> </i>
               Retry
             </button>
