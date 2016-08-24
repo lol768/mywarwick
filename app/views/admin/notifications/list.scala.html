@@ -22,13 +22,13 @@
   @if(futureNotifications.isEmpty) {
     <p>No pending notifications.</p>
   } else {
-    @futureNotifications.map(n => views.html.admin.notifications.notificationItem(publisher, n))
+    @futureNotifications.map(n => views.html.admin.notifications.notificationItem(publisher, n, user))
   }
 
   <h3>Sent</h3>
   @if(pastNotifications.isEmpty) {
     <p>No sent notifications.</p>
   } else {
-    @pastNotifications.map(n => views.html.admin.notifications.notificationItem(publisher, n))
+    @pastNotifications.map(n => views.html.admin.notifications.notificationItem(publisher, n, user))
   }
 }

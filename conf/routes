@@ -30,6 +30,7 @@ POST        /admin/publish/:publisher/news                            @controlle
 GET         /admin/publish/:publisher/news/:id/edit                   @controllers.admin.NewsController.updateForm(publisher: String, id: String)
 POST        /admin/publish/:publisher/news/:id/validate               @controllers.admin.NewsController.update(publisher: String, id: String, submitted: Boolean = false)
 POST        /admin/publish/:publisher/news/:id                        @controllers.admin.NewsController.update(publisher: String, id: String, submitted: Boolean = true)
+POST        /admin/publish/:publisher/news/:id/delete                 @controllers.admin.NewsController.delete(publisher: String, id: String)
 
 GET         /admin/publish/:publisher/notifications                   @controllers.admin.NotificationsController.list(publisher: String)
 GET         /admin/publish/:publisher/notifications/new               @controllers.admin.NotificationsController.createForm(publisher: String)

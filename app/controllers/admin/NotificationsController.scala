@@ -5,12 +5,12 @@ import javax.inject.Inject
 import controllers.BaseController
 import models.news.NotificationData
 import models.publishing.Ability.{CreateNotifications, DeleteNotifications, EditNotifications, ViewNotifications}
-import models.publishing.Publisher
+import models.publishing.{Ability, Publisher}
 import models.{Audience, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{ActionRefiner, Result}
+import play.api.mvc.{ActionFilter, ActionRefiner, Result}
 import services._
 import services.dao.DepartmentInfoDao
 import system.Validation
@@ -70,9 +70,7 @@ class NotificationsController @Inject()(
     )
   }
 
-  def updateForm(publisherId: String, id: String) = PublisherAction(publisherId, EditNotifications)
-    .andThen(NotificationBelongsToPublisher(id, publisherId))
-    .async { implicit request =>
+  def updateForm(publisherId: String, id: String) = EditAction(id, publisherId, EditNotifications).async { implicit request =>
       val activity = activityService.getActivityById(id).get
       val audience = audienceService.getAudience(activity.audienceId.get)
 
@@ -93,9 +91,7 @@ class NotificationsController @Inject()(
       )
     }
 
-  def update(publisherId: String, id: String, submitted: Boolean) = PublisherAction(publisherId, EditNotifications)
-    .andThen(NotificationBelongsToPublisher(id, publisherId))
-    .async { implicit request =>
+  def update(publisherId: String, id: String, submitted: Boolean) = EditAction(id, publisherId, EditNotifications).async { implicit request =>
       val activity = activityService.getActivityById(id).get
 
       bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted,
@@ -117,8 +113,7 @@ class NotificationsController @Inject()(
       )
     }
 
-  def delete(publisherId: String, id: String) = PublisherAction(publisherId, DeleteNotifications)
-    .andThen(NotificationBelongsToPublisher(id, publisherId)) { implicit request =>
+  def delete(publisherId: String, id: String) = EditAction(id, publisherId, DeleteNotifications) { implicit request =>
       val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
       activityService.delete(id).fold(
@@ -130,10 +125,9 @@ class NotificationsController @Inject()(
       )
     }
 
-  private def NotificationBelongsToPublisher(id: String, publisherId: String) = new ActionRefiner[PublisherRequest, PublisherRequest] {
-    override protected def refine[A](request: PublisherRequest[A]): Future[Either[Result, PublisherRequest[A]]] = {
+  private def NotificationBelongsToPublisher(id: String, publisherId: String) = new ActionFilter[PublisherRequest] {
+    override protected def filter[A](request: PublisherRequest[A]): Future[Option[Result]] = {
       implicit val r = request
-
       val maybeBoolean = for {
         activity <- activityService.getActivityById(id)
         audienceId <- activity.audienceId
@@ -141,9 +135,9 @@ class NotificationsController @Inject()(
 
       Future.successful {
         if (maybeBoolean.contains(true)) {
-          Right(request)
+          None
         } else {
-          Left(NotFound(errors.notFound()))
+          Some(NotFound(errors.notFound()))
         }
       }
     }
@@ -157,6 +151,9 @@ class NotificationsController @Inject()(
       providerOptions = providerOptions,
       permissionScope = permissionScope
     )
+
+  private def EditAction(id: String, publisherId: String, ability: Ability) = PublisherAction(publisherId, ability)
+    .andThen(NotificationBelongsToPublisher(id, publisherId))
 }
 
 object NotificationsController {
