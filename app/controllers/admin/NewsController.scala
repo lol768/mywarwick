@@ -6,7 +6,7 @@ import controllers.BaseController
 import models._
 import models.news.{Link, NewsItemRender, NewsItemSave}
 import models.publishing.Ability._
-import models.publishing.Publisher
+import models.publishing.{Ability, Publisher}
 import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
@@ -113,9 +113,7 @@ class NewsController @Inject()(
     )
   }
 
-  def updateForm(publisherId: String, id: String) = PublisherAction(publisherId, EditNews)
-    .andThen(NewsBelongsToPublisher(id, publisherId))
-    .async { implicit request =>
+  def updateForm(publisherId: String, id: String) = EditAction(id, publisherId, EditNews).async { implicit request =>
       withNewsItem(id, publisherId, item => {
         val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
         val audience = news.getAudience(id).map(audienceBinder.unbindAudience).get
@@ -125,9 +123,7 @@ class NewsController @Inject()(
       })
     }
 
-  def update(publisherId: String, id: String, submitted: Boolean) = PublisherAction(publisherId, EditNews)
-    .andThen(NewsBelongsToPublisher(id, publisherId))
-    .async { implicit request =>
+  def update(publisherId: String, id: String, submitted: Boolean) = EditAction(id, publisherId, EditNews).async { implicit request =>
     withNewsItem(id, publisherId, _ => {
       bindFormWithAudience[PublishNewsItemData](publishNewsForm, submitted,
         formWithErrors => Ok(renderUpdateForm(publisherId, id, formWithErrors)),
@@ -143,8 +139,7 @@ class NewsController @Inject()(
     })
   }
 
-  def delete(publisherId: String, id: String) = PublisherAction(publisherId, DeleteNotifications)
-    .andThen(NewsBelongsToPublisher(id, publisherId)) { implicit request =>
+  def delete(publisherId: String, id: String) = EditAction(id, publisherId, DeleteNews) { implicit request =>
       news.delete(id)
       auditLog('DeleteNews, 'id -> id)
       Redirect(routes.NewsController.list(publisherId)).flashing("success" -> "News deleted")
@@ -187,5 +182,8 @@ class NewsController @Inject()(
   }
 
   private def partitionNews(news: Seq[NewsItemRender]) = news.partition(_.publishDate.isAfterNow)
+
+  private def EditAction(id: String, publisherId: String, ability: Ability) = PublisherAction(publisherId, ability)
+    .andThen(NewsBelongsToPublisher(id, publisherId))
 
 }
