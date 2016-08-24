@@ -18,9 +18,7 @@ class ReadNewsController @Inject()(
 
   import security._
 
-  def feed = UserAction { request =>
-    val offset = request.getQueryString("offset").map(Integer.parseInt).getOrElse(0)
-
+  def feed(offset: Int) = UserAction { request =>
     val userNews = news.latestNews(request.context.user.map(_.usercode), limit = 10, offset = offset)
 
     Ok(Json.toJson(API.Success(data = userNews)))

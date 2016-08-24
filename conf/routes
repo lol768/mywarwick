@@ -48,7 +48,7 @@ GET         /assets/*file                                             @controlle
 
 GET         /service-worker.js                                        @controllers.Assets.at(path="/public", file="service-worker.js")
 
-GET         /api/news/feed                                            @controllers.api.ReadNewsController.feed
+GET         /api/news/feed                                            @controllers.api.ReadNewsController.feed(offset: Int ?= 0)
 GET         /api/news/categories                                      @controllers.api.NewsCategoriesController.categories
 POST        /api/news/categories                                      @controllers.api.NewsCategoriesController.update
 POST        /api/news/images                                          @controllers.api.NewsImagesController.create
