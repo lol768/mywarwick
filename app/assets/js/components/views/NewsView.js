@@ -2,12 +2,9 @@ import React, { PropTypes } from 'react';
 import NewsCategoriesView from './NewsCategoriesView';
 import NewsItem from '../ui/NewsItem';
 import { connect } from 'react-redux';
-import _ from 'lodash';
 import * as news from '../../state/news';
 import * as newsCategories from '../../state/news-categories';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
-
-const SOME_MORE = 10;
 
 class NewsView extends React.Component {
 
@@ -15,9 +12,6 @@ class NewsView extends React.Component {
     super(props);
     this.onClickRefresh = this.fetch.bind(this);
 
-    this.state = {
-      numberToShow: SOME_MORE,
-    };
     this.loadMore = this.loadMore.bind(this);
   }
 
@@ -28,9 +22,7 @@ class NewsView extends React.Component {
   }
 
   loadMore() {
-    this.setState({
-      numberToShow: this.state.numberToShow + SOME_MORE,
-    });
+    this.props.dispatch(news.fetch());
   }
 
   fetch() {
@@ -39,9 +31,7 @@ class NewsView extends React.Component {
   }
 
   render() {
-    const { failed, fetching, items } = this.props;
-    const { numberToShow } = this.state;
-    const hasMore = numberToShow < items.length;
+    const { failed, fetching, items, moreAvailable } = this.props;
 
     if (failed) {
       return (
@@ -50,7 +40,7 @@ class NewsView extends React.Component {
             Unable to fetch news.
           </p>
           <p>
-            <button onClick={ this.onClickRefresh } className="btn btn-default">
+            <button type="button" onClick={ this.onClickRefresh } className="btn btn-default">
               <i className="fa fa-refresh fa-fw"> </i>
               Retry
             </button>
@@ -59,23 +49,22 @@ class NewsView extends React.Component {
       );
     }
 
-    const itemComponents = _.take(items, numberToShow).map((item) =>
-      <NewsItem
-        key={item.id}
-        {...item}
-      />
-    );
+    const itemComponents = items.map(item => <NewsItem key={item.id} {...item} />);
+
+    const maybeMessage = !fetching ? <p>No news to show you yet.</p> : null;
 
     return (
       <div className="margin-top-1">
         <NewsCategoriesView { ...this.props.newsCategories } dispatch={ this.props.dispatch } />
-        { fetching ? <i className="centered fa fa-lg fa-refresh fa-spin"> </i> : null }
         { items.length ?
-          <InfiniteScrollable hasMore={hasMore} onLoadMore={this.loadMore}>
+          <InfiniteScrollable hasMore={moreAvailable} onLoadMore={this.loadMore}>
             {itemComponents}
-          </InfiniteScrollable> :
-          <p>No news to show you yet.</p>
+          </InfiniteScrollable> : maybeMessage
         }
+        { fetching ?
+          <div className="centered">
+            <i className="fa fa-lg fa-refresh fa-spin"></i>
+          </div> : null }
       </div>
     );
   }
@@ -88,6 +77,7 @@ NewsView.propTypes = {
   fetching: PropTypes.bool.isRequired,
   items: PropTypes.array.isRequired,
   newsCategories: PropTypes.object.isRequired,
+  moreAvailable: PropTypes.bool.isRequired,
 };
 
 const select = (state) => ({

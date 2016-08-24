@@ -2,9 +2,8 @@ package services.dao
 
 import java.sql.Connection
 
-import helpers.OneStartAppPerSuite
 import anorm._
-import anorm.SqlParser._
+import helpers.OneStartAppPerSuite
 import models.AudienceSize.{Finite, Public}
 import models.news.NewsItemSave
 import org.joda.time.DateTime
@@ -91,6 +90,14 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
       newsDao.latestNews(Some(ana), limit = 1) must have length 1
     }
 
+    "offset results by requested number" in transaction { implicit c =>
+      save(londonsBurning, Seq(ana))
+      save(brumPanic, Seq(ana))
+      newsDao.latestNews(Some(ana), offset = 1) must have length 1
+      newsDao.latestNews(Some(ana), limit = 1, offset = 1).head must have('title (brumPanic.title))
+      newsDao.latestNews(Some(ana), limit = 1).head must have('title (londonsBurning.title))
+    }
+
     "return only news for subscribed categories" in transaction { implicit c =>
       val someCategory = newsCategoryDao.all().head
 
@@ -123,6 +130,15 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
 
       // The same item is not returned twice
       newsDao.latestNews(Some(jim)) must have length 1
+    }
+
+    "return all public news for anonymous user" in transaction { implicit c =>
+      // Anonymous user should see all news as they cannot choose categories
+      save(londonsBurning.copy(ignoreCategories = false), Seq(public))
+
+      val anonNews = newsDao.latestNews(None)
+
+      anonNews.map(_.title) must contain(londonsBurning.title)
     }
   }
 

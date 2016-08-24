@@ -4,13 +4,12 @@ import java.sql.Connection
 
 import anorm.SqlParser._
 import anorm._
-import warwick.anorm.converters.ColumnConversions._
-import helpers.{Fixtures, MockSchedulerService, OneStartAppPerSuite}
-import org.joda.time.DateTime
-import org.mockito.Matchers._
+import helpers.{Fixtures, OneStartAppPerSuite}
+import models.Audience
 import org.mockito.Matchers
+import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.quartz.{JobDataMap, JobDetail, JobExecutionContext, Scheduler}
+import org.quartz.{JobDataMap, JobDetail, JobExecutionContext}
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.db.Database
@@ -19,74 +18,72 @@ import services.dao._
 import services.messaging.MessagingService
 import warwick.sso.Usercode
 
-import scala.util.Try
-
 class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSuite {
 
   val db = get[Database]
-  val audienceService = mock[AudienceService]
+  val audienceService = get[AudienceService]
+  val audienceDao = get[AudienceDao]
+  val pubSub = mock[PubSub]
   val scheduler = mock[SchedulerService]
-
-  val activityIdKey = "activityId"
-  val audienceId = "audienceId"
 
   val context = mock[JobExecutionContext]
   val jobDetail = mock[JobDetail]
-  val map = mock[JobDataMap]
+  val jobDataMap = mock[JobDataMap]
 
   when(context.getJobDetail).thenReturn(jobDetail)
-  when(jobDetail.getJobDataMap).thenReturn(map)
-  when(map.getString(audienceId)).thenReturn(audienceId)
-
-  val dave = Usercode("dave")
-  val james = Usercode("james")
-  val recipients = Try(Seq(dave, james))
-  when(audienceService.resolve(any())).thenReturn(recipients)
-
-  val date = DateTime.now
-
-  private def saveNewsItem(id: String, publishDate: DateTime)(implicit c: Connection) =
-    SQL"""
-        INSERT INTO NEWS_ITEM (ID, TITLE, TEXT, CREATED_AT, PUBLISH_DATE, IGNORE_CATEGORIES, PUBLISHER_ID, CREATED_BY)
-        VALUES ($id, 'balls', 'balls', $publishDate, $publishDate, 1, 'default', 'balls')
-      """.executeInsert()
+  when(jobDetail.getJobDataMap).thenReturn(jobDataMap)
 
   "PublishNewsItemJob" should {
 
     val newsDao = get[NewsDao]
-    val newsCategoryDao = mock[NewsCategoryDao]
-    val audienceDao = mock[AudienceDao]
+    val newsCategoryDao = get[NewsCategoryDao]
     val newsImageDao = mock[NewsImageDao]
     val userInitialisationService = mock[UserInitialisationService]
     val newsService = new AnormNewsService(db, newsDao, audienceService, newsCategoryDao, newsImageDao, audienceDao, userInitialisationService, scheduler)
 
-    val newsItemId = "newsItemId"
-    when(map.getString(newsItemId)).thenReturn(newsItemId)
     val publishNewsItemJob = new PublishNewsItemJob(audienceService, newsService, scheduler)
 
     "save audience for news item" in db.withConnection { implicit c =>
+      val audienceId = audienceDao.saveAudience(Audience(Seq(
+        Audience.UsercodeAudience(Usercode("dave")),
+        Audience.UsercodeAudience(Usercode("james"))
+      )))
+      val newsItemId = newsDao.save(Fixtures.news.save(), audienceId)
 
-      saveNewsItem(newsItemId, date)
+      when(jobDataMap.getString("newsItemId")).thenReturn(newsItemId)
+      when(jobDataMap.getString("audienceId")).thenReturn(audienceId)
 
       publishNewsItemJob.execute(context)
 
       val recipientsSet = SQL"SELECT usercode FROM news_recipient WHERE news_item_id=$newsItemId"
-        .as((str("usercode") map { u => Usercode(u) }).*)
+        .as(str("usercode").*)
 
-      recipientsSet mustBe recipients.get
+      recipientsSet must contain allOf("dave", "james")
+    }
+
+    "save public audience for news item" in db.withConnection { implicit c =>
+      val audienceId = audienceDao.saveAudience(Audience.Public)
+      val newsItemId = newsDao.save(Fixtures.news.save(), audienceId)
+
+      when(jobDataMap.getString("newsItemId")).thenReturn(newsItemId)
+      when(jobDataMap.getString("audienceId")).thenReturn(audienceId)
+
+      publishNewsItemJob.execute(context)
+
+      val recipientsSet = SQL"SELECT usercode FROM news_recipient WHERE news_item_id=$newsItemId"
+        .as(str("usercode").*)
+
+      recipientsSet must contain only("*")
     }
   }
 
   "PublishNotificationJob" should {
 
+    val activityTypeService = get[ActivityTypeService]
     val activityDao = get[ActivityDao]
     val recipientDao = get[ActivityRecipientDao]
-    val tagDao = mock[ActivityTagDao]
-    val activityTypeService = mock[ActivityTypeService]
+    val tagDao = get[ActivityTagDao]
     val messaging = mock[MessagingService]
-    val pubSub = mock[PubSub]
-    val audienceDao = mock[AudienceDao]
-    val scheduler = mock[SchedulerService]
     val activityService = new ActivityServiceImpl(db, activityDao, activityTypeService, tagDao, audienceDao, recipientDao, scheduler)
 
     val publishNotificationJob = new PublishActivityJob(audienceService, activityService, messaging, pubSub, scheduler)
@@ -94,30 +91,35 @@ class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSu
     "save audience for notification" in {
 
       db.withConnection { implicit c =>
-        val activitySave = Fixtures.activitySave.submissionDue.copy(publishedAt = Some(date))
+        val audienceId = audienceDao.saveAudience(Audience(Seq(
+          Audience.UsercodeAudience(Usercode("dave")),
+          Audience.UsercodeAudience(Usercode("james"))
+        )))
+        when(jobDataMap.getString("audienceId")).thenReturn(audienceId)
 
-        val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
-        when(map.getString(activityIdKey)).thenReturn(activityId)
+        val activityId = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, Seq.empty)
+        when(jobDataMap.getString("activityId")).thenReturn(activityId)
 
         publishNotificationJob.execute(context)
 
         val activity = activityDao.getActivityById(activityId).get
 
-        verify(messaging).send(recipients.get.toSet, activity)
-        verify(pubSub).publish(Matchers.eq(dave.string), any())
-        verify(pubSub).publish(Matchers.eq(james.string), any())
+        val recipients = Seq(Usercode("dave"), Usercode("james"))
+        verify(messaging).send(recipients.toSet, activity)
+        verify(pubSub).publish(Matchers.eq("dave"), any())
+        verify(pubSub).publish(Matchers.eq("james"), any())
 
-        getRecipients(activity.id) mustBe recipients.get
+        getRecipients(activity.id) must contain allOf("dave", "james")
 
         publishNotificationJob.execute(context)
 
         // check recipients are replaced, not appended.
-        getRecipients(activity.id) mustBe recipients.get
+        getRecipients(activity.id).toSet mustBe Set("dave", "james")
       }
     }
   }
 
   def getRecipients(activityId: String)(implicit c: Connection) =
     SQL"SELECT usercode FROM activity_recipient WHERE activity_id = $activityId"
-      .as(scalar[String].map(Usercode.apply).*)
+      .as(str("usercode").*)
 }

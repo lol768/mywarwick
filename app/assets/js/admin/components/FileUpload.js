@@ -72,7 +72,7 @@ export default class FileUpload extends React.Component {
             </div>
 
             <div>
-              <button onClick={ this.onClear } className="btn btn-default">
+              <button type="button" onClick={ this.onClear } className="btn btn-default">
                 Use a different image
               </button>
             </div>
