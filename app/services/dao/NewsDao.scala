@@ -25,7 +25,7 @@ trait NewsDao {
     */
   def allNews(publisherId: String, limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender]
 
-  def latestNews(user: Option[Usercode], limit: Int = 100)(implicit c: Connection): Seq[NewsItemRender]
+  def latestNews(user: Option[Usercode], limit: Int = 100, offset: Int = 0)(implicit c: Connection): Seq[NewsItemRender]
 
   /**
     * @param item the news item to save
@@ -102,14 +102,14 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
       .as(newsParser.*))
   }
 
-  override def latestNews(user: Option[Usercode], limit: Int)(implicit c: Connection): Seq[NewsItemRender] = {
-    getNewsByIds(getNewsItemIdsForUser(user, limit))
+  override def latestNews(user: Option[Usercode], limit: Int, offset: Int)(implicit c: Connection): Seq[NewsItemRender] = {
+    getNewsByIds(getNewsItemIdsForUser(user, limit, offset))
   }
 
-  def getNewsItemIdsForUser(user: Option[Usercode], limit: Int)(implicit c: Connection): Seq[String] = {
+  def getNewsItemIdsForUser(user: Option[Usercode], limit: Int, offset: Int)(implicit c: Connection): Seq[String] = {
     SQL(
       s"""
-        SELECT DISTINCT n.ID
+        SELECT DISTINCT n.ID, n.PUBLISH_DATE
         FROM NEWS_ITEM n
           JOIN NEWS_RECIPIENT r
             ON n.ID = r.NEWS_ITEM_ID
@@ -121,9 +121,12 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
                                          (SELECT NEWS_CATEGORY_ID
                                           FROM USER_NEWS_CATEGORY
                                           WHERE USERCODE = {user})
-        ${dialect.limitOffset(limit)}
+        ORDER BY n.PUBLISH_DATE DESC
+        ${dialect.limitOffset(limit, offset)}
        """)
-      .on('user -> user.map(_.string).getOrElse("*"))
+      .on(
+        'user -> user.map(_.string).getOrElse("*")
+      )
       .as(scalar[String].*)
   }
 

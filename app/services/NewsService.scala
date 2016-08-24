@@ -21,7 +21,7 @@ trait NewsService {
 
   def getNewsByPublisher(publisherId: String, limit: Int, offset: Int = 0): Seq[NewsItemRender]
 
-  def latestNews(user: Option[Usercode], limit: Int): Seq[NewsItemRender]
+  def latestNews(user: Option[Usercode], limit: Int, offset: Int = 0): Seq[NewsItemRender]
 
   def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String
 
@@ -49,11 +49,11 @@ class AnormNewsService @Inject()(
       dao.allNews(publisherId, limit, offset)
     }
 
-  override def latestNews(user: Option[Usercode], limit: Int): Seq[NewsItemRender] = {
+  override def latestNews(user: Option[Usercode], limit: Int, offset: Int): Seq[NewsItemRender] = {
     user.foreach(userInitialisationService.maybeInitialiseUser)
 
     db.withConnection { implicit c =>
-      dao.latestNews(user, limit)
+      dao.latestNews(user, limit, offset)
     }
   }
 

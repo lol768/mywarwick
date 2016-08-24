@@ -34,7 +34,7 @@ export function fetch() {
 
 const persistSubscribedCategories = categories => dispatch =>
   postJsonWithCredentials('/api/news/categories', { categories })
-    .then(() => dispatch(news.fetch()));
+    .then(() => dispatch(news.refresh()));
 
 let store = {};
 const persistSubscriptionsDebounced = _.debounce(() =>
