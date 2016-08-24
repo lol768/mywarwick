@@ -26,9 +26,9 @@ $(SPLIT_FORM).each((i, form) => {
   }
 
   $form.find('section:not(:last)')
-    .append('<button class="btn btn-primary next pull-right" >Next</button>');
+    .append('<button class="btn btn-primary next pull-right">Next</button>');
   $form.find('section:not(:first)')
-    .append('<button class="btn btn-default back pull-left" >Back</button>');
+    .append('<button type="button" class="btn btn-default back pull-left">Back</button>');
 
   showSection(currentPage);
 
@@ -83,8 +83,7 @@ $(SPLIT_FORM).each((i, form) => {
     }
   };
 
-  $('button.back').on('click', e => {
-    e.preventDefault();
+  $('button.back').on('click', () => {
     pushSection(currentPage - 1);
   });
 
