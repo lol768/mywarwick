@@ -24,13 +24,12 @@
       </div>
     </div>
     <div class="col-xs-2">
-      <div class="btn-toolbar pull-right">
+      @if(item.activity.publishedAt.isAfterNow) {
+        <div class="btn-toolbar pull-right">
         @if(user can EditNotifications) {
-          @if(item.activity.publishedAt.isAfterNow) {
             <a href="@controllers.admin.routes.NotificationsController.updateForm(publisher.id, item.activity.id)" class="btn btn-default">
               Edit</a>
           }
-        }
         @if(user can DeleteNotifications) {
           <a href=""
           class="btn btn-danger delete"
@@ -44,6 +43,7 @@
         <button class="btn btn-default cancel">Cancel</button>
       </div>
       } else { </div> }
+    }
     </div>
   </div>
 </div>

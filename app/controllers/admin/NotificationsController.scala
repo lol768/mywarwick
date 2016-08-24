@@ -10,7 +10,7 @@ import models.{Audience, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{ActionRefiner, Result}
+import play.api.mvc.{ActionFilter, ActionRefiner, Result}
 import services._
 import services.dao.DepartmentInfoDao
 import system.Validation
@@ -125,10 +125,9 @@ class NotificationsController @Inject()(
       )
     }
 
-  private def NotificationBelongsToPublisher(id: String, publisherId: String) = new ActionRefiner[PublisherRequest, PublisherRequest] {
-    override protected def refine[A](request: PublisherRequest[A]): Future[Either[Result, PublisherRequest[A]]] = {
+  private def NotificationBelongsToPublisher(id: String, publisherId: String) = new ActionFilter[PublisherRequest] {
+    override protected def filter[A](request: PublisherRequest[A]): Future[Option[Result]] = {
       implicit val r = request
-
       val maybeBoolean = for {
         activity <- activityService.getActivityById(id)
         audienceId <- activity.audienceId
@@ -136,9 +135,9 @@ class NotificationsController @Inject()(
 
       Future.successful {
         if (maybeBoolean.contains(true)) {
-          Right(request)
+          None
         } else {
-          Left(NotFound(errors.notFound()))
+          Some(NotFound(errors.notFound()))
         }
       }
     }
