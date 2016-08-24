@@ -131,6 +131,15 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
       // The same item is not returned twice
       newsDao.latestNews(Some(jim)) must have length 1
     }
+
+    "return all public news for anonymous user" in transaction { implicit c =>
+      // Anonymous user should see all news as they cannot choose categories
+      save(londonsBurning.copy(ignoreCategories = false), Seq(public))
+
+      val anonNews = newsDao.latestNews(None)
+
+      anonNews.map(_.title) must contain(londonsBurning.title)
+    }
   }
 
   "countRecipients" should {
