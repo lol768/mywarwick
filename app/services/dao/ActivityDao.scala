@@ -100,7 +100,9 @@ class ActivityDaoImpl @Inject()(
     SQL(s"""
       $selectActivityRender
       WHERE ACTIVITY.ID IN (
-        SELECT ID FROM ACTIVITY
+        SELECT
+          --+ INDEX(ACTIVITY ACTIVITY_PUBLISHED_AT_INDEX)
+          ID FROM ACTIVITY
         WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
           AND ACTIVITY.PUBLISHED_AT <= SYSDATE
         ORDER BY ACTIVITY.PUBLISHED_AT DESC
@@ -116,7 +118,9 @@ class ActivityDaoImpl @Inject()(
     SQL(s"""
       $selectActivityRender
       WHERE ACTIVITY.ID IN (
-        SELECT ID FROM ACTIVITY
+        SELECT
+          --+ INDEX(ACTIVITY ACTIVITY_PUBLISHED_AT_INDEX)
+          ID FROM ACTIVITY
         WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
           AND ACTIVITY.PUBLISHED_AT > SYSDATE
         ORDER BY ACTIVITY.PUBLISHED_AT DESC
