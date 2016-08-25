@@ -28,6 +28,16 @@ trait NewsService {
 
   def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String
 
+  // Updates a news item.  This happens in two parts for performance reasons.
+  //
+  // When the method returns:
+  //   - the news item has been updated
+  //   - the news categories have been updated
+  //   - the new audience has been saved and associated with the news item
+  //
+  // When the returned Future completes:
+  //   - any existing recipients have been deleted
+  //   - the job to publish the news item has been scheduled
   def update(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): Future[Unit]
 
   def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize]
