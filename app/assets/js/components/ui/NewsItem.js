@@ -13,7 +13,7 @@ export const render = (content) =>
     .filter(t => t.length)
     .map((t, i) => <p key={i}>{t}</p>);
 
-export default class NewsItem extends ReactComponent {
+class NewsItem extends ReactComponent {
 
   render() {
     const { id, link, title, publishDate, text, imageId, categories } = this.props;

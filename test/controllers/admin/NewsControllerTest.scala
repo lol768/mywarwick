@@ -18,6 +18,7 @@ import play.api.test.Helpers._
 import play.api.test._
 import services._
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
+import system.ErrorHandler
 import warwick.sso._
 
 import scala.concurrent.Future
@@ -52,7 +53,7 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
   when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("IN", "IT Services", "IT Services", "ITS", "SERVICE")))
   when(newsCategoryService.all()).thenReturn(Seq(NewsCategory("abc", "Campus")))
 
-  val newsController = new NewsController(securityServiceImpl, publisherService, messagesApi, newsService, departmentInfoDao, audienceBinder, newsCategoryService) {
+  val newsController = new NewsController(securityServiceImpl, publisherService, messagesApi, newsService, departmentInfoDao, audienceBinder, newsCategoryService, mock[ErrorHandler]) {
     override val navigationService = new MockNavigationService()
     override val ssoClient = mockSSOClient
   }
