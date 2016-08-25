@@ -4,21 +4,24 @@ import javax.inject.{Inject, Singleton}
 
 import controllers.BaseController
 import models._
-import models.news.{Audience, Link, NewsItemRender, NewsItemSave}
+import models.news.{Link, NewsItemRender, NewsItemSave}
+import models.publishing.Ability._
+import models.publishing.{Ability, Publisher}
 import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{ActionFilter, ActionRefiner, Result}
 import services.dao.DepartmentInfoDao
-import services.{NewsCategoryService, NewsService, SecurityService}
-import system.{Roles, TimeZones, Validation}
+import services.{NewsCategoryService, NewsService, PublisherService, SecurityService}
+import system.{ErrorHandler, RequestContext, TimeZones, Validation}
 import uk.ac.warwick.util.web.Uri
+import views.html.errors
+import warwick.sso.Usercode
 
 import scala.concurrent.Future
 
-case class PublishNewsItemData(item: NewsItemData, categoryIds: Seq[String], audience: AudienceData)
-
-case class UpdateNewsItemData(item: NewsItemData, categoryIds: Seq[String])
+case class PublishNewsItemData(item: NewsItemData, categoryIds: Seq[String], audience: AudienceData) extends PublishableWithAudience
 
 case class NewsItemData(
   title: String,
@@ -30,7 +33,9 @@ case class NewsItemData(
   imageId: Option[String],
   ignoreCategories: Boolean = false
 ) {
-  def toSave = NewsItemSave(
+  def toSave(usercode: Usercode, publisherId: String) = NewsItemSave(
+    usercode = usercode,
+    publisherId = publisherId,
     title = title,
     text = text,
     link = for {
@@ -47,16 +52,15 @@ case class NewsItemData(
 
 @Singleton
 class NewsController @Inject()(
-  security: SecurityService,
+  val securityService: SecurityService,
+  val publisherService: PublisherService,
   val messagesApi: MessagesApi,
   news: NewsService,
   val departmentInfoDao: DepartmentInfoDao,
-  audienceBinder: AudienceBinder,
-  val newsCategoryService: NewsCategoryService
+  val audienceBinder: AudienceBinder,
+  val newsCategoryService: NewsCategoryService,
+  errorHandler: ErrorHandler
 ) extends BaseController with I18nSupport with Publishing {
-
-  import Roles._
-  import security._
 
   val newsItemMapping = mapping(
     "title" -> nonEmptyText,
@@ -69,73 +73,123 @@ class NewsController @Inject()(
     "ignoreCategories" -> boolean
   )(NewsItemData.apply)(NewsItemData.unapply)
 
-  val publishNewsForm = Form(mapping(
+  def publishNewsForm(implicit request: PublisherRequest[_]) = Form(mapping(
     "item" -> newsItemMapping,
     "categories" -> categoryMapping,
     "audience" -> audienceMapping
   )(PublishNewsItemData.apply)(PublishNewsItemData.unapply))
 
-  val updateNewsForm = Form(mapping(
-    "item" -> newsItemMapping,
-    "categories" -> categoryMapping
-  )(UpdateNewsItemData.apply)(UpdateNewsItemData.unapply))
-
-  def list = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    val theNews = news.allNews(limit = 100)
+  def list(publisherId: String) = PublisherAction(publisherId, ViewNews) { implicit request =>
+    val theNews = news.getNewsByPublisher(publisherId, limit = 100)
     val counts = news.countRecipients(theNews.map(_.id))
     val (newsPending, newsPublished) = partitionNews(theNews)
-    Ok(views.html.admin.news.list(newsPending, newsPublished, counts))
+    Ok(views.html.admin.news.list(request.publisher, newsPending, newsPublished, counts, request.userRole))
   }
 
-  def createForm = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    Ok(views.html.admin.news.createForm(publishNewsForm, departmentOptions, categoryOptions))
+  def createForm(publisherId: String) = PublisherAction(publisherId, CreateNews) { implicit request =>
+    Ok(renderCreateForm(request.publisher, publishNewsForm))
   }
 
-  // TODO drop the sysadmin requirement
-  def create = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
-    val bound = publishNewsForm.bindFromRequest
-    bound.fold(
-      errorForm => Future.successful(Ok(views.html.admin.news.createForm(errorForm, departmentOptions, categoryOptions))),
-      // We only show audience validation errors if there were no other errors, which can look weird.
+  def create(publisherId: String, submitted: Boolean) = PublisherAction(publisherId, CreateNews).async { implicit request =>
+    bindFormWithAudience[PublishNewsItemData](publishNewsForm, submitted,
+      formWithErrors => Ok(renderCreateForm(request.publisher, formWithErrors)),
+      (data, audience) => {
+        val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
+        val newsItemId = news.save(newsItem, audience, data.categoryIds)
 
-      data => audienceBinder.bindAudience(data.audience).map {
-        case Left(errors) =>
-          val errorForm = addFormErrors(bound, errors)
-          Ok(views.html.admin.news.createForm(errorForm, departmentOptions, categoryOptions))
-        case Right(audience) =>
-          handleForm(data, audience)
+        auditLog('CreateNewsItem, 'id -> newsItemId)
+
+        Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("result" -> "News created")
       }
     )
   }
 
-  def handleForm(data: PublishNewsItemData, audience: Audience) = {
-    val newsItem = data.item.toSave
-    news.save(newsItem, audience, data.categoryIds)
-    Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News created")
-  }
-
-  def handleUpdate(id: String, data: UpdateNewsItemData) = {
-    news.updateNewsItem(id, data.item)
-    newsCategoryService.updateNewsCategories(id, data.categoryIds)
-    Redirect(controllers.admin.routes.NewsController.list()).flashing("result" -> "News updated")
-  }
-
-  def update(id: String) = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
-    val bound = updateNewsForm.bindFromRequest
-    bound.fold(
-      errorForm => Future.successful(Ok(views.html.admin.news.updateForm(id, errorForm, categoryOptions))),
-      data => Future(handleUpdate(id, data))
+  def renderCreateForm(publisher: Publisher, form: Form[PublishNewsItemData])(implicit request: PublisherRequest[_]) = {
+    views.html.admin.news.createForm(
+      publisher = publisher,
+      form = form,
+      categories = categoryOptions,
+      permissionScope = permissionScope,
+      departmentOptions = departmentOptions
     )
   }
 
-  def updateForm(id: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    news.getNewsItem(id) map { item =>
-      val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
-      Ok(views.html.admin.news.updateForm(id, updateNewsForm.fill(UpdateNewsItemData(item.toData, categoryIds)), categoryOptions))
-    } getOrElse {
-      NotFound(s"Cannot update news. No news item exists with id '$id'")
+  def updateForm(publisherId: String, id: String) = EditAction(id, publisherId, EditNews).async { implicit request =>
+      withNewsItem(id, publisherId, item => {
+        val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
+        val audience = news.getAudience(id).map(audienceBinder.unbindAudience).get
+        val formWithData = publishNewsForm.fill(PublishNewsItemData(item.toData, categoryIds, audience))
+
+        Future.successful(Ok(renderUpdateForm(publisherId, id, formWithData)))
+      })
+    }
+
+  def update(publisherId: String, id: String, submitted: Boolean) = EditAction(id, publisherId, EditNews).async { implicit request =>
+    withNewsItem(id, publisherId, _ => {
+      bindFormWithAudience[PublishNewsItemData](publishNewsForm, submitted,
+        formWithErrors => Ok(renderUpdateForm(publisherId, id, formWithErrors)),
+        (data, audience) => {
+          val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
+
+          news.update(id, newsItem, audience, data.categoryIds)
+            .onFailure { case e =>
+              logger.error(s"Error updating news item $id", e)
+              errorHandler.markInternalServerError()
+            }
+
+          auditLog('UpdateNewsItem, 'id -> id)
+
+          Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("success" -> "News updated")
+        }
+      )
+    })
+  }
+
+  def delete(publisherId: String, id: String) = EditAction(id, publisherId, DeleteNews) { implicit request =>
+      news.delete(id)
+      auditLog('DeleteNews, 'id -> id)
+      Redirect(routes.NewsController.list(publisherId)).flashing("success" -> "News deleted")
+    }
+
+  private def NewsBelongsToPublisher(id: String, publisherId: String) = new ActionFilter[PublisherRequest] {
+    override protected def filter[A](request: PublisherRequest[A]): Future[Option[Result]] = {
+      implicit val r = request
+
+      val maybeBoolean = for {
+        item <- news.getNewsItem(id)
+      } yield item.publisherId.contains(publisherId)
+
+      Future.successful {
+        if (maybeBoolean.contains(true)) {
+          None
+        } else {
+          Some(NotFound(errors.notFound()))
+        }
+      }
     }
   }
 
-  def partitionNews(news: Seq[NewsItemRender]) = news.partition(_.publishDate.isAfterNow)
+  private def withNewsItem(id: String, publisherId: String, block: (NewsItemRender) => Future[Result])(implicit request: RequestContext): Future[Result] = {
+    news.getNewsItem(id)
+      .filter(_.publisherId == publisherId)
+      .map(block)
+      .getOrElse(Future.successful(NotFound(views.html.errors.notFound())))
+  }
+
+  private def renderUpdateForm(publisherId: String, id: String, form: Form[PublishNewsItemData])(implicit request: PublisherRequest[_]) = {
+    views.html.admin.news.updateForm(
+      publisher = request.publisher,
+      id = id,
+      form = form,
+      categories = categoryOptions,
+      permissionScope = permissionScope,
+      departmentOptions = departmentOptions
+    )
+  }
+
+  private def partitionNews(news: Seq[NewsItemRender]) = news.partition(_.publishDate.isAfterNow)
+
+  private def EditAction(id: String, publisherId: String, ability: Ability) = PublisherAction(publisherId, ability)
+    .andThen(NewsBelongsToPublisher(id, publisherId))
+
 }

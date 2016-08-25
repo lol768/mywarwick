@@ -8,7 +8,6 @@ import _ from 'lodash';
 import moment from 'moment';
 import log from 'loglevel';
 import * as es6Promise from 'es6-promise';
-import attachFastClick from 'fastclick';
 import localforage from 'localforage';
 
 import React from 'react';
@@ -46,8 +45,6 @@ const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
 
 $(() => {
-  attachFastClick(document.body);
-
   $(window).on('contextmenu', () => window.navigator.userAgent.indexOf('Mobile') < 0);
 
   $(window).on('resize', () => store.dispatch(ui.updateUIContext()));
@@ -169,9 +166,23 @@ function receiveUserInfo(response) {
       } else {
         store.dispatch(user.userReceive(data.user));
         store.dispatch(user.receiveSSOLinks(data.links));
+
+        const analyticsData = data.user.analytics;
+        if (analyticsData !== undefined) {
+          analyticsData.dimensions.forEach(dimension =>
+            analytics.setDimension(dimension.index, dimension.value)
+          );
+
+          analytics.setUserId(analyticsData.identifier);
+        }
+
+        analytics.ready();
       }
     })
-    .catch(() => setTimeout(() => fetchUserInfo().then(receiveUserInfo), 5000));
+    .catch(e => {
+      setTimeout(() => fetchUserInfo().then(receiveUserInfo), 5000);
+      throw e;
+    });
 }
 
 user.loadUserFromLocalStorage(store.dispatch);

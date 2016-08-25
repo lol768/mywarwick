@@ -14,13 +14,21 @@ import warwick.anorm.converters.ColumnConversions._
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
-  def getActivitiesByProviderId(providerId: String, limit: Int)(implicit c: Connection): Seq[Activity]
+  def getPastActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender]
+
+  def getFutureActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender]
 
   def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity]
 
-  def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse]
+  def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityRender]
 
-  def save(activity: ActivitySave, replaces: Seq[String])(implicit c: Connection): String
+  def getActivityRenderById(id: String)(implicit c: Connection): Option[ActivityRender]
+
+  def save(activity: ActivitySave, audienceId: String, replaces: Seq[String])(implicit c: Connection): String
+
+  def update(id: String, activity: ActivitySave, audienceId: String)(implicit c: Connection): Unit
+
+  def delete(activityId: String)(implicit c: Connection): Unit
 
   def getActivityById(id: String)(implicit c: Connection): Option[Activity] =
     getActivitiesByIds(Seq(id)).headOption
@@ -40,34 +48,35 @@ class ActivityDaoImpl @Inject()(
   dialect: DatabaseDialect
 ) extends ActivityDao {
 
-
-  override def save(activity: ActivitySave, replaces: Seq[String])(implicit c: Connection): String = {
+  override def save(activity: ActivitySave, audienceId: String, replaces: Seq[String])(implicit c: Connection): String = {
     import activity._
     val id = UUID.randomUUID().toString
-    val now = new DateTime()
+    val now = DateTime.now
+    val publishedAtOrNow = publishedAt.getOrElse(now)
 
-    SQL(
-      """
-      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, generated_at, created_at, should_notify, audience_id)
-      VALUES ({id}, {providerId}, {type}, {title}, {text}, {url}, {generatedAt}, {createdAt}, {shouldNotify}, {audienceId})
-      """
-    ).on(
-      'id -> id,
-      'providerId -> providerId,
-      'type -> `type`,
-      'title -> title,
-      'text -> text,
-      'url -> url,
-      'generatedAt -> generatedAt.getOrElse(now),
-      'createdAt -> now,
-      'shouldNotify -> shouldNotify,
-      'audienceId -> audienceId
-    )
+    SQL"""
+      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by)
+      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $publishedAtOrNow, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string})
+    """
       .execute()
 
     updateReplacedActivity(id, replaces)
 
     id
+  }
+
+  override def update(id: String, activity: ActivitySave, audienceId: String)(implicit c: Connection): Unit = {
+    import activity._
+    val publishedAtOrNow = publishedAt.getOrElse(DateTime.now)
+    SQL"UPDATE ACTIVITY SET TYPE = ${`type`}, TITLE = $title, TEXT = $text, URL = $url, PUBLISHED_AT = $publishedAtOrNow, AUDIENCE_ID = $audienceId WHERE ID = $id"
+      .execute()
+  }
+
+  override def delete(activityId: String)(implicit c: Connection) = {
+    SQL"DELETE FROM MESSAGE_SEND WHERE ACTIVITY_ID = $activityId".execute()
+    SQL"DELETE FROM ACTIVITY_TAG WHERE ACTIVITY_ID = $activityId".execute()
+    SQL"DELETE FROM ACTIVITY_RECIPIENT WHERE ACTIVITY_ID = $activityId".execute()
+    SQL"DELETE FROM ACTIVITY WHERE ID = $activityId".execute()
   }
 
   def updateReplacedActivity(replacedById: String, replaces: Seq[String])(implicit c: Connection) =
@@ -87,17 +96,47 @@ class ActivityDaoImpl @Inject()(
         .as(activityParser.*)
     }.toSeq
 
-  override def getActivitiesByProviderId(providerId: String, limit: Int)(implicit c: Connection): Seq[Activity] = {
-    SQL(s"SELECT * FROM ACTIVITY WHERE PROVIDER_ID = {providerId} ORDER BY CREATED_AT DESC ${dialect.limitOffset(limit)}")
-      .on('providerId -> providerId)
-      .as(activityParser.*)
+  override def getPastActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
+    SQL(s"""
+      $selectActivityRender
+      WHERE ACTIVITY.ID IN (
+        SELECT
+          --+ INDEX(ACTIVITY ACTIVITY_PUBLISHED_AT_INDEX)
+          ID FROM ACTIVITY
+        WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
+          AND ACTIVITY.PUBLISHED_AT <= SYSDATE
+        ORDER BY ACTIVITY.PUBLISHED_AT DESC
+        ${dialect.limitOffset(limit)}
+      )
+      ORDER BY ACTIVITY.PUBLISHED_AT DESC
+      """)
+      .on('publisherId -> publisherId)
+      .as(activityRenderParser.*)
+  }
+
+  override def getFutureActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
+    SQL(s"""
+      $selectActivityRender
+      WHERE ACTIVITY.ID IN (
+        SELECT
+          --+ INDEX(ACTIVITY ACTIVITY_PUBLISHED_AT_INDEX)
+          ID FROM ACTIVITY
+        WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
+          AND ACTIVITY.PUBLISHED_AT > SYSDATE
+        ORDER BY ACTIVITY.PUBLISHED_AT DESC
+        ${dialect.limitOffset(limit)}
+      )
+      ORDER BY ACTIVITY.PUBLISHED_AT DESC
+      """)
+      .on('publisherId -> publisherId)
+      .as(activityRenderParser.*)
   }
 
   override def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity] = {
     SQL(
       """
       SELECT ACTIVITY.* FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
-      WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.GENERATED_AT > {sinceDate} AND ACTIVITY.ID IN (
+      WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.PUBLISHED_AT > {sinceDate} AND ACTIVITY.ID IN (
       SELECT ACTIVITY.ID FROM MESSAGE_SEND WHERE USERCODE = {usercode} AND OUTPUT = {mobile})
       """)
       .on(
@@ -108,40 +147,37 @@ class ActivityDaoImpl @Inject()(
       .as(activityParser.*)
   }
 
-  override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityResponse] = {
-    val maybeBefore = if (before.isDefined) "AND ACTIVITY_RECIPIENT.GENERATED_AT < {before}" else ""
-    val activities = SQL(
-      s"""
-        SELECT
-          ACTIVITY.*,
-          PROVIDER.ICON,
-          PROVIDER.COLOUR,
-          ACTIVITY_TAG.NAME          AS TAG_NAME,
-          ACTIVITY_TAG.VALUE         AS TAG_VALUE,
-          ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
-        FROM ACTIVITY
-          LEFT JOIN ACTIVITY_TAG ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
-          LEFT JOIN PROVIDER ON PROVIDER.ID = ACTIVITY.PROVIDER_ID
-        WHERE ACTIVITY.ID IN (
-          SELECT ACTIVITY_ID
-          FROM ACTIVITY_RECIPIENT
-            JOIN ACTIVITY ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
-          WHERE USERCODE = {usercode}
-                AND REPLACED_BY_ID IS NULL
-                $maybeBefore
-          ORDER BY ACTIVITY_RECIPIENT.GENERATED_AT DESC
-          ${dialect.limitOffset(limit)})
-        """)
+  override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
+    val maybeBefore = if (before.isDefined) "AND ACTIVITY_RECIPIENT.PUBLISHED_AT < {before}" else ""
+    SQL(s"""
+      $selectActivityRender
+      WHERE ACTIVITY.ID IN (
+        SELECT ACTIVITY_ID
+        FROM ACTIVITY_RECIPIENT
+          JOIN ACTIVITY ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
+        WHERE USERCODE = {usercode}
+          AND REPLACED_BY_ID IS NULL
+          $maybeBefore
+        ORDER BY ACTIVITY_RECIPIENT.PUBLISHED_AT DESC
+        ${dialect.limitOffset(limit)}
+      )
+      ORDER BY ACTIVITY.PUBLISHED_AT DESC
+      """)
       .on(
         'usercode -> usercode,
         'before -> before.getOrElse(DateTime.now)
       )
-      .as(activityResponseParser.*)
-
-    combineActivities(activities)
+      .as(activityRenderParser.*)
   }
 
-  def combineActivities(activities: Seq[ActivityResponse]): Seq[ActivityResponse] = {
+  override def getActivityRenderById(id: String)(implicit c: Connection): Option[ActivityRender] =
+    combineActivities {
+      SQL(s"$selectActivityRender WHERE ACTIVITY.ID = {id}")
+        .on('id -> id)
+        .as(activityRenderParser.*)
+    }.headOption
+
+  def combineActivities(activities: Seq[ActivityRender]): Seq[ActivityRender] = {
     activities
       .groupBy(_.activity.id)
       .map { case (id, a) => a.reduceLeft((a1, a2) => a1.copy(tags = a1.tags ++ a2.tags)) }
@@ -175,7 +211,7 @@ class ActivityDaoImpl @Inject()(
   }
 
   override def countNotificationsSinceDate(usercode: String, date: DateTime)(implicit c: Connection): Int =
-    SQL("SELECT COUNT(ACTIVITY.ID) FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.GENERATED_AT > {date}")
+    SQL("SELECT COUNT(ACTIVITY.ID) FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.PUBLISHED_AT > {date}")
       .on(
         'usercode -> usercode,
         'date -> date
@@ -190,11 +226,13 @@ class ActivityDaoImpl @Inject()(
       get[Option[String]]("TEXT") ~
       get[Option[String]]("URL") ~
       get[Option[String]]("REPLACED_BY_ID") ~
-      get[DateTime]("GENERATED_AT") ~
+      get[DateTime]("PUBLISHED_AT") ~
       get[DateTime]("CREATED_AT") ~
-      get[Boolean]("SHOULD_NOTIFY") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ generatedAt ~ createdAt ~ shouldNotify =>
-        Activity(id, providerId, activityType, title, text, url, replacedById, generatedAt, createdAt, shouldNotify)
+      get[Boolean]("SHOULD_NOTIFY") ~
+      get[Option[String]]("AUDIENCE_ID") ~
+      get[Option[String]]("PUBLISHER_ID") map {
+      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ publishedAt ~ createdAt ~ shouldNotify ~ audienceId ~ publisherId =>
+        Activity(id, providerId, activityType, title, text, url, replacedById, publishedAt, createdAt, shouldNotify, audienceId, publisherId)
     }
 
   private lazy val tagParser: RowParser[Option[ActivityTag]] =
@@ -205,9 +243,23 @@ class ActivityDaoImpl @Inject()(
         for (name <- name; value <- value) yield ActivityTag(name, TagValue(value, display))
     }
 
-  lazy val activityResponseParser: RowParser[ActivityResponse] =
+  val selectActivityRender =
+    """
+      SELECT
+        ACTIVITY.*,
+        PROVIDER.ICON,
+        PROVIDER.COLOUR,
+        ACTIVITY_TAG.NAME          AS TAG_NAME,
+        ACTIVITY_TAG.VALUE         AS TAG_VALUE,
+        ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
+      FROM ACTIVITY
+        LEFT JOIN ACTIVITY_TAG ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
+        LEFT JOIN PROVIDER ON PROVIDER.ID = ACTIVITY.PROVIDER_ID
+    """
+
+  lazy val activityRenderParser: RowParser[ActivityRender] =
     activityParser ~ activityIconParser.? ~ tagParser map {
-      case activity ~ icon ~ tag => ActivityResponse(activity, icon, tag.toSeq)
+      case activity ~ icon ~ tag => ActivityRender(activity, icon, tag.toSeq)
     }
 
   override def getActivityIcon(providerId: String)(implicit c: Connection): Option[ActivityIcon] =

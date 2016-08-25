@@ -3,41 +3,42 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import models.news.Audience
-import models.news.Audience._
+import models.Audience
+import models.Audience._
+import play.api.db.Database
+import services.dao.AudienceDao
 import system.Logging
 import warwick.sso.{GroupName, GroupService, Usercode}
 
 import scala.util.Try
 
-
-
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
   def resolve(audience: Audience): Try[Seq[Usercode]]
+  def getAudience(audienceId: String): Audience
 }
 
 class AudienceServiceImpl @Inject()(
-  webgroups: GroupService
+  groupService: GroupService,
+  dao: AudienceDao,
+  db: Database
 ) extends AudienceService with Logging {
 
   // TODO Try.get wrapped with another Try is a weak sauce solution.
   // Should use magic combinators that nobody can understand.
   override def resolve(audience: Audience): Try[Seq[Usercode]] = Try {
-    if (audience.public) {
-      Seq(Usercode("*"))
-    } else {
-      audience.components.flatMap {
-        // webgroups has handy "all-" webgroups that subset all the departments.
-        case ds: DepartmentSubset => resolveSubset("all", ds).get
-        case WebgroupAudience(name) => webgroupUsers(name).get
-        case ModuleAudience(code) => moduleWebgroupUsers(code).get
-        case DepartmentAudience(code, subsets) => for {
-          subset <- subsets
-          user <- resolveSubset(code.toLowerCase, subset).get
-        } yield user
-      }.distinct
-    }
+    audience.components.flatMap {
+      case PublicAudience => Seq(Usercode("*"))
+      // webgroups has handy "all-" webgroups that subset all the departments.
+      case ds: DepartmentSubset => resolveSubset("all", ds).get
+      case WebgroupAudience(name) => webgroupUsers(name).get
+      case ModuleAudience(code) => moduleWebgroupUsers(code).get
+      case DepartmentAudience(code, subsets) => for {
+        subset <- subsets
+        user <- resolveSubset(code.toLowerCase, subset).get
+      } yield user
+      case UsercodeAudience(usercode) => Seq(usercode)
+    }.distinct
   }
 
   private def resolveSubset(deptCode: String, component: DepartmentSubset): Try[Seq[Usercode]] =
@@ -60,17 +61,17 @@ class AudienceServiceImpl @Inject()(
     }
 
   private def webgroupUsers(groupName: GroupName): Try[Seq[Usercode]] =
-    webgroups.getWebGroup(groupName).map { group =>
+    groupService.getWebGroup(groupName).map { group =>
       group.map(_.members).getOrElse(Nil)
     }
 
   def moduleWebgroupUsers(code: String): Try[Seq[Usercode]] =
-    webgroups.getGroupsForQuery(s"-${code.toLowerCase}").map { groups =>
+    groupService.getGroupsForQuery(s"-${code.toLowerCase}").map { groups =>
       groups.find(group => group.name.string.endsWith(code.toLowerCase) && group.`type` == "Module")
         .map(_.members)
         .getOrElse(Nil)
     }
 
-
+  override def getAudience(audienceId: String): Audience =
+    db.withConnection(implicit c => dao.getAudience(audienceId))
 }
-

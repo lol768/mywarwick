@@ -38,7 +38,7 @@ class EmailOutputService @Inject() (
 
   def build(address: String, user: User, activity: Activity): Email = {
     val fullAddress = user.name.full.map(full => s"${full} <${address}>").getOrElse(address)
-    val date = DateFormats.emailDateTime(activity.generatedAt)
+    val date = DateFormats.emailDateTime(activity.publishedAt)
     Email(
       subject = activity.title,
       from = from,

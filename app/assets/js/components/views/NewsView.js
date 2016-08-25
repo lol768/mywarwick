@@ -1,57 +1,46 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
-
+import React, { PropTypes } from 'react';
+import NewsCategoriesView from './NewsCategoriesView';
 import NewsItem from '../ui/NewsItem';
-
 import { connect } from 'react-redux';
-import _ from 'lodash';
-
 import * as news from '../../state/news';
+import * as newsCategories from '../../state/news-categories';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 
-const SOME_MORE = 10;
-
-class NewsView extends ReactComponent {
+class NewsView extends React.Component {
 
   constructor(props) {
     super(props);
-    this.onClickRefresh = this.onClickRefresh.bind(this);
+    this.onClickRefresh = this.fetch.bind(this);
 
-    this.state = {
-      numberToShow: SOME_MORE,
-    };
     this.loadMore = this.loadMore.bind(this);
-  }
-
-  loadMore() {
-    this.setState({
-      numberToShow: this.state.numberToShow + SOME_MORE,
-    });
   }
 
   componentDidMount() {
     if (this.props.items.length === 0 && !this.props.failed) {
-      this.props.dispatch(news.fetch());
+      this.fetch();
     }
   }
 
-  onClickRefresh() {
+  loadMore() {
     this.props.dispatch(news.fetch());
   }
 
-  render() {
-    if (this.props.fetching) {
-      return <i className="centered fa fa-lg fa-refresh fa-spin"> </i>;
-    }
+  fetch() {
+    this.props.dispatch(news.fetch());
+    this.props.dispatch(newsCategories.fetch());
+  }
 
-    if (this.props.failed) {
+  render() {
+    const { failed, fetching, items, moreAvailable } = this.props;
+
+    if (failed) {
       return (
         <div className="alert alert-warning">
           <p>
             Unable to fetch news.
           </p>
           <p>
-            <button onClick={ this.onClickRefresh } className="btn btn-default">
+            <button type="button" onClick={ this.onClickRefresh } className="btn btn-default">
               <i className="fa fa-refresh fa-fw"> </i>
               Retry
             </button>
@@ -60,28 +49,40 @@ class NewsView extends ReactComponent {
       );
     }
 
-    if (this.props.items.length) {
-      const items = _.take(this.props.items, this.state.numberToShow).map((item) =>
-        <NewsItem
-          key={item.id}
-          {...item}
-        />
-      );
+    const itemComponents = items.map(item => <NewsItem key={item.id} {...item} />);
 
-      const hasMore = this.state.numberToShow < this.props.items.length;
+    const maybeMessage = !fetching ? <p>No news to show you yet.</p> : null;
 
-      return (
-        <InfiniteScrollable hasMore={hasMore} onLoadMore={this.loadMore}>
-          {items}
-        </InfiniteScrollable>
-      );
-    }
-
-    return (<p>No news to show you yet.</p>);
+    return (
+      <div className="margin-top-1">
+        <NewsCategoriesView { ...this.props.newsCategories } dispatch={ this.props.dispatch } />
+        { items.length ?
+          <InfiniteScrollable hasMore={moreAvailable} onLoadMore={this.loadMore}>
+            {itemComponents}
+          </InfiniteScrollable> : maybeMessage
+        }
+        { fetching ?
+          <div className="centered">
+            <i className="fa fa-lg fa-refresh fa-spin"></i>
+          </div> : null }
+      </div>
+    );
   }
 
 }
 
-const select = (state) => state.news;
+NewsView.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  failed: PropTypes.bool.isRequired,
+  fetching: PropTypes.bool.isRequired,
+  items: PropTypes.array.isRequired,
+  newsCategories: PropTypes.object.isRequired,
+  moreAvailable: PropTypes.bool.isRequired,
+};
+
+const select = (state) => ({
+  ...state.news,
+  newsCategories: state.newsCategories,
+});
 
 export default connect(select)(NewsView);

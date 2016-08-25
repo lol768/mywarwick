@@ -2,10 +2,10 @@ package models.news
 
 import controllers.admin.NewsItemData
 import models.{DateFormats, NewsCategory}
-import oracle.net.aso.h
 import org.joda.time.DateTime
 import play.api.libs.json._
 import uk.ac.warwick.util.web.Uri
+import warwick.sso.Usercode
 
 case class Link(text: String, href: Uri)
 object Link {
@@ -14,6 +14,12 @@ object Link {
       "text" -> o.text,
       "href" -> o.href.toString
     )
+  }
+
+  // Never used; required only to create format for NewsItemRender, required for
+  // news feed endpoint to use API.Success
+  implicit val jsonReader = new Reads[Link] {
+    override def reads(json: JsValue): JsResult[Link] = ???
   }
 }
 
@@ -29,9 +35,8 @@ case class NewsItemRender (
   publishDate: DateTime,
   imageId: Option[String],
   categories: Seq[NewsCategory],
-  ignoreCategories: Boolean
-  // TODO Add category info
-  // TODO Add publisher info
+  ignoreCategories: Boolean,
+  publisherId: String
 ) {
   def toData: NewsItemData = NewsItemData(
     title,
@@ -47,13 +52,15 @@ case class NewsItemRender (
 
 object NewsItemRender {
   implicit private val dateWriter = DateFormats.isoDateWrites
-  implicit val jsonWriter = Json.writes[NewsItemRender]
+  implicit val format = Json.format[NewsItemRender]
 }
 
 /**
   * The data we need about a new news item to save it as a row.
   */
 case class NewsItemSave (
+  usercode: Usercode,
+  publisherId: String,
   title: String,
   text: String,
   link: Option[Link],

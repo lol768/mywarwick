@@ -1,37 +1,34 @@
+@import models.publishing.Role
 @import system.RequestContext
-@(notifications: Seq[models.Activity])(implicit context: RequestContext)
+@import models.publishing.Ability.CreateNotifications
+@import models.publishing.Publisher
+@(
+    publisher: Publisher,
+    futureNotifications: Seq[models.ActivityRender],
+    pastNotifications: Seq[models.ActivityRender],
+    user: Role
+)(implicit context: RequestContext)
 
 @common.admin("Notifications") {
-  <p>
-    <a class="btn btn-default" href="@controllers.admin.routes.NotificationsController.createForm()">
-      Create notification
-    </a>
-  </p>
-
-  @if(notifications.isEmpty) {
-    <p>No notifications.</p>
-  } else {
+  @if(user can CreateNotifications) {
     <p>
-      Showing @if(notifications.size == 1) {one item} else {@notifications.size items}.
+      <a class="btn btn-default" href="@controllers.admin.routes.NotificationsController.createForm(publisher.id)">
+        Create notification
+      </a>
     </p>
-    @notifications.map { item =>
-        <div class="activity-item">
-          <div class="media">
-            <div class="media-left">
-              <i class="app-icon app-icon--lg fa fa-fw fa-newspaper-o"></i>
-            </div>
-            <div class="media-body">
-              <div class="activity-item__title">@item.title</div>
-              @item.text.map { text =>
-                <div class="activity-item__text">@text</div>
-              }
-              <div class="activity-item__date">@models.DateFormats.emailDateTime(item.createdAt)</div>
-              @item.url.map { url =>
-                <a href="@url">Link to @url</a>
-              }
-            </div>
-          </div>
-        </div>
-    }
+  }
+
+  <h3>Pending</h3>
+  @if(futureNotifications.isEmpty) {
+    <p>No pending notifications.</p>
+  } else {
+    @futureNotifications.map(n => views.html.admin.notifications.notificationItem(publisher, n, user))
+  }
+
+  <h3>Sent</h3>
+  @if(pastNotifications.isEmpty) {
+    <p>No sent notifications.</p>
+  } else {
+    @pastNotifications.map(n => views.html.admin.notifications.notificationItem(publisher, n, user))
   }
 }

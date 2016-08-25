@@ -1,8 +1,10 @@
 package helpers
 
-import models.news.NewsItemSave
+import anorm._
+import models.news.{NewsItemRender, NewsItemSave}
 import models.{Activity, ActivitySave}
 import org.joda.time.DateTime
+import warwick.sso._
 
 /**
   * Prebuilt or buildable fake data models for use in tests.
@@ -15,6 +17,8 @@ object Fixtures {
 
     lazy val submissionDue =
       ActivitySave(
+        changedBy = Usercode("custard"),
+        publisherId = "elab",
         providerId = "tabula",
         `type` = "due",
         title = "Coursework due",
@@ -35,7 +39,7 @@ object Fixtures {
       text = activity.text,
       url = activity.url,
       replacedBy = None,
-      generatedAt = activity.generatedAt.getOrElse(DateTime.now),
+      publishedAt = activity.publishedAt.getOrElse(DateTime.now),
       createdAt = DateTime.now,
       shouldNotify = activity.shouldNotify
     )
@@ -51,8 +55,35 @@ object Fixtures {
       text = text,
       link = None,
       publishDate = DateTime.now,
-      imageId = None
+      imageId = None,
+      publisherId = "publisher",
+      usercode = Usercode("custard")
     )
+
+    val render = NewsItemRender(
+      id = "news",
+      title = "Some news",
+      text = "The news",
+      link = None,
+      publishDate = DateTime.now,
+      imageId = None,
+      categories = Seq.empty,
+      ignoreCategories = false,
+      publisherId = "publisher"
+    )
+  }
+
+  object sql {
+    def insertPublisherPermission(
+      publisherId: String,
+      usercode: String,
+      role: String
+    ) = SQL"INSERT INTO PUBLISHER_PERMISSION (PUBLISHER_ID, USERCODE, ROLE) VALUES ($publisherId, $usercode, $role)"
+
+    def insertActivityType(
+      name: String,
+      displayName: String
+    ) = SQL"INSERT INTO ACTIVITY_TYPE (NAME, DISPLAY_NAME) VALUES ($name, $displayName)"
   }
 
 }

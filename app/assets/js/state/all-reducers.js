@@ -8,6 +8,7 @@
  */
 
 export { reducer as news } from './news';
+export { reducer as newsCategories } from './news-categories';
 export { reducer as notificationsLastRead } from './notification-metadata';
 export { notificationsReducer as notifications } from './notifications';
 export { activitiesReducer as activities } from './notifications';
@@ -17,3 +18,4 @@ export { reducer as update } from './update';
 export { reducer as user } from './user';
 export { reducer as ui } from './ui';
 export { reducer as device } from './device';
+export { reducer as analytics } from './analytics';

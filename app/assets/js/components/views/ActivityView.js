@@ -13,7 +13,7 @@ import { takeFromStream, getStreamSize } from '../../stream';
 
 const SOME_MORE = 20;
 
-export default class ActivityView extends ReactComponent {
+class ActivityView extends ReactComponent {
 
   constructor(props) {
     super(props);

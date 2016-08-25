@@ -1,10 +1,16 @@
 @import controllers.admin.PublishNewsItemData
 @import views.html._
 @import system.RequestContext
+@import models.publishing.PermissionScope
+@import models.publishing.Publisher
+@import org.joda.time.LocalDateTime
+
 @(
+    publisher: Publisher,
     form: Form[PublishNewsItemData],
     departmentOptions: Seq[(String, String)],
-    categories: Seq[NewsCategory]
+    categories: Seq[NewsCategory],
+    permissionScope: PermissionScope
 )(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
@@ -13,18 +19,36 @@
 
 @common.admin("Create news") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NewsController.create()) {
+  @b3.form(action = controllers.admin.routes.NewsController.create(publisher.id, true), 'class -> "split-form") {
 
-
+    <section>
     @admin.news.contentForm(form)
+    </section>
 
-    @tags.audiencePicker(form, "audience", departmentOptions, "news item", allowPublic = true)
+    <section>
+      @b3.radio(form("item.publishDateSet"),
+        Seq(
+          "false" -> "Now",
+          "true" -> "Select a time"
+        ),
+        '_label -> "Publish time",
+        'value -> false
+      )
+      @tags.datetimePicker(form("item.publishDate"),
+        '_label -> "Publish date",
+        '_help -> "You can select a time in the future, and this news item will appear to users after that time",
+        'value -> LocalDateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
+      )
+    </section>
 
-    @tags.categoryPicker(form, "categories", categories, "news item")
+    <section>
+    @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true)
+    </section>
 
-    @b3.submit(
-      'class -> "btn btn-primary"
-    ) {Create}
+    <section>
+      @tags.categoryPicker(form, "categories", categories, "news item")
+      @tags.submitOrCancel("Create", controllers.admin.routes.NewsController.list(publisher.id))
+    </section>
   }
   </div>
 }

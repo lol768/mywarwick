@@ -2,7 +2,6 @@ package helpers
 
 import org.scalatest.Suite
 import org.scalatestplus.play._
-import play.api.test.TestBrowser
 
 /**
   * Subclass of AllBrowsersPerSuite that lets you select a set of
@@ -15,6 +14,7 @@ trait SelectBrowsersPerSuite extends AllBrowsersPerSuite {
     "firefox" -> FirefoxInfo(firefoxProfile),
     "htmlunit" -> HtmlUnitInfo(true),
     "chrome" -> ChromeInfo,
+    "chrome-mobile" -> ChromeMobileInfo,
     "safari" -> SafariInfo,
     "ie" -> InternetExplorerInfo
   ) withDefault { key =>

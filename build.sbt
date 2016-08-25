@@ -23,17 +23,21 @@ lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala)
     funSettings
   )
 
+// Versions of things for below
+val enumeratumVersion = "1.4.4"
+
 val appDeps = Seq(
   jdbc,
   cache,
   ws,
   filters,
   evolutions,
-  "com.typesafe.play" %% "anorm" % "2.4.0",
+  "com.typesafe.play" %% "anorm" % "2.5.0",
   "com.oracle" % "ojdbc6" % "11.2.0.3.0",
-  "uk.ac.warwick.sso" %% "sso-client-play" % "2.18",
-  "uk.ac.warwick.play-utils" %% "anorm" % "1.3",
-  "uk.ac.warwick.play-utils" %% "objectstore" % "1.3",
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.22",
+  "uk.ac.warwick.play-utils" %% "anorm" % "1.4",
+  "uk.ac.warwick.play-utils" %% "objectstore" % "1.4",
+  "uk.ac.warwick.util" % "warwickutils-cache" % "20160429",
   "com.typesafe.akka" %% "akka-cluster" % "2.4.0",
   "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.0",
   "com.typesafe.akka" %% "akka-slf4j" % "2.4.0",
@@ -45,8 +49,11 @@ val appDeps = Seq(
   "com.adrianhurt" %% "play-bootstrap" % "1.0-P25-B3",
   "org.imgscalr" % "imgscalr-lib" % "4.2",
   "com.github.mumoshu" %% "play2-memcached-play24" % "0.7.0",
-  "org.databrary" %% "play-logback-access" % "0.5" exclude("javax.servlet", "servlet-api"),
-  "ch.qos.logback" % "logback-access" % "1.1.4"
+  "org.databrary" %% "play-logback-access" % "0.5.1-warwick",
+  "ch.qos.logback" % "logback-access" % "1.1.7",
+  "com.beachape" %% "enumeratum" % enumeratumVersion,
+  "com.beachape" %% "enumeratum-play" % enumeratumVersion,
+  "com.beachape" %% "enumeratum-play-json" % enumeratumVersion
 )
 
 val testDeps = Seq(
@@ -71,6 +78,9 @@ libraryDependencies ++= (appDeps ++ testDeps).map(_.excludeAll(
 
 // https://bugs.elab.warwick.ac.uk/browse/SSO-1653
 dependencyOverrides += "xml-apis" % "xml-apis" % "1.4.01"
+
+// NEWSTART-407
+dependencyOverrides += "ch.qos.logback" % "logback-classic" % "1.1.7"
 
 // Make gulp output available as Play assets.
 unmanagedResourceDirectories in Assets <+= baseDirectory { _ / "target" / "gulp" }

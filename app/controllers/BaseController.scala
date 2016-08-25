@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.Controller
-import system.Logging
+import system.{ImplicitRequestContext, Logging}
 
 
-abstract class BaseController extends Controller with Logging
+abstract class BaseController extends Controller with Logging with ImplicitRequestContext

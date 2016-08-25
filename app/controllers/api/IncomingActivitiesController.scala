@@ -4,10 +4,12 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import controllers.BaseController
-import models._
+import models.{Audience, _}
+import models.publishing.Ability.CreateAPINotifications
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json._
 import play.api.mvc.Result
+import services.ActivityError.InvalidProviderId
 import services._
 import warwick.sso.{AuthenticatedRequest, GroupName, User, Usercode}
 
@@ -15,8 +17,7 @@ import warwick.sso.{AuthenticatedRequest, GroupName, User, Usercode}
 class IncomingActivitiesController @Inject()(
   securityService: SecurityService,
   activityService: ActivityService,
-  recipientService: ActivityRecipientService,
-  providerPermissionService: ProviderPermissionService,
+  publisherService: PublisherService,
   val messagesApi: MessagesApi
 ) extends BaseController with I18nSupport {
 
@@ -31,24 +32,30 @@ class IncomingActivitiesController @Inject()(
   }
 
   def postItem(providerId: String, shouldNotify: Boolean)(implicit request: AuthenticatedRequest[JsValue]): Result =
-    request.context.user.map { user =>
-      if (providerPermissionService.canUserPostForProvider(providerId, user)) {
-        request.body.validate[IncomingActivityData].map { data =>
-          val activity = ActivitySave.fromApi(providerId, shouldNotify, data)
+    publisherService.getParentPublisherId(providerId) match {
+      case Some(publisherId) =>
+        request.context.user.map { user =>
+          if (publisherService.getRoleForUser(publisherId, user.usercode).can(CreateAPINotifications)) {
+            request.body.validate[IncomingActivityData].map { data =>
+              val activity = ActivitySave.fromApi(user.usercode, publisherId, providerId, shouldNotify, data)
 
-          val usercodes = recipientService.getRecipientUsercodes(
-            data.recipients.users.getOrElse(Seq.empty).map(Usercode),
-            data.recipients.groups.getOrElse(Seq.empty).map(GroupName)
-          )
+              val usercodes = data.recipients.users.getOrElse(Seq.empty).map(Usercode).map(Audience.UsercodeAudience)
+              val webgroups = data.recipients.groups.getOrElse(Seq.empty).map(GroupName).map(Audience.WebgroupAudience)
 
-          activityService.save(activity, usercodes).fold(badRequest, created)
-        }.recoverTotal {
-          e => validationError(e)
-        }
-      } else {
-        forbidden(providerId, user)
-      }
-    }.get // APIAction calls this only if request.context.user is defined
+              val audience = Audience(usercodes ++ webgroups)
+
+              activityService.save(activity, audience).fold(badRequest, id => {
+                auditLog('CreateActivity, 'id -> id, 'provider -> activity.providerId)
+                created(id)
+              })
+            }.recoverTotal(validationError)
+          } else {
+            forbidden(providerId, user)
+          }
+        }.get // APIAction calls this only if request.context.user is defined
+
+      case None => badRequest(Seq(InvalidProviderId(providerId)))
+    }
 
   private def badRequest(errors: Seq[ActivityError]): Result =
     BadRequest(Json.toJson(API.Failure[JsObject]("bad_request",

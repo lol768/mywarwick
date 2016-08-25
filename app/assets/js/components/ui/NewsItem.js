@@ -11,14 +11,16 @@ export const render = (content) =>
     .split('\n')
     .map(t => t.trim())
     .filter(t => t.length)
-    .map(t => <p>{t}</p>);
+    .map((t, i) => <p key={i}>{t}</p>);
 
-export default class NewsItem extends ReactComponent {
+class NewsItem extends ReactComponent {
 
   render() {
-    const { link, title, publishDate, text, imageId, width } = this.props;
-    const url = link && link.href;
-    const moreLink = link ? (<Hyperlink href={link.href}>{link.text}</Hyperlink>) : null;
+    const { id, link, title, publishDate, text, imageId, categories } = this.props;
+    const { deviceWidth, analyticsClientId } = this.props;
+
+    const url = link && `/news/${id}/redirect?clientId=${analyticsClientId}`;
+    const moreLink = link ? (<p><Hyperlink href={url}>{link.text}</Hyperlink></p>) : null;
 
     return (
       <article className="news-item">
@@ -32,7 +34,7 @@ export default class NewsItem extends ReactComponent {
           { imageId ?
             <div className="news-item__image">
               <img
-                src={ `/api/news/images/${imageId}?width=${width}` }
+                src={ `/api/news/images/${imageId}?width=${deviceWidth}` }
                 alt={ title }
               />
             </div>
@@ -43,10 +45,13 @@ export default class NewsItem extends ReactComponent {
           </div>
 
           <div className="news-item__footer">
+            { moreLink }
+            <div className="news-item__category-tags">
+              {categories.map(c => <NewsItemTag key={c.id} name={c.name} />)}
+            </div>
             <p>
               {formatDate(publishDate, new Date(), true)}
             </p>
-            { moreLink }
           </div>
         </div>
       </article>
@@ -54,5 +59,17 @@ export default class NewsItem extends ReactComponent {
   }
 }
 
-const select = (state) => state.device;
+const NewsItemTag = props =>
+  <span className="badge">
+    { props.name }
+  </span>;
+
+NewsItemTag.propTypes = {
+  name: React.PropTypes.string.isRequired,
+};
+
+const select = (state) => ({
+  deviceWidth: state.device.width,
+  analyticsClientId: state.analytics.clientId,
+});
 export default connect(select)(NewsItem);

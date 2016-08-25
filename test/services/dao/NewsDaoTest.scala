@@ -2,10 +2,9 @@ package services.dao
 
 import java.sql.Connection
 
-import helpers.OneStartAppPerSuite
 import anorm._
-import anorm.SqlParser._
-import models.news.AudienceSize.{Finite, Public}
+import helpers.OneStartAppPerSuite
+import models.AudienceSize.{Finite, Public}
 import models.news.NewsItemSave
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
@@ -26,11 +25,13 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
 
   def save(item: NewsItemSave, recipients: Seq[Usercode])(implicit c: Connection): String = {
     val id = newsDao.save(item, "audienceId")
-    newsDao.saveRecipients(id, item.publishDate, recipients)
+    newsDao.setRecipients(id, recipients)
     id
   }
 
   val londonsBurning = NewsItemSave(
+    usercode = Usercode("custard"),
+    publisherId = "publisher",
     title = "London's Burning",
     text = "The capital is on fire.",
     link = None,
@@ -40,6 +41,8 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
   )
 
   val brumPanic = NewsItemSave(
+    usercode = Usercode("custard"),
+    publisherId = "publisher",
     title = "Panic on the streets of Birmingham",
     text = "I wonder to myself - burn down the disco.",
     link = None,
@@ -50,6 +53,8 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
 
   // Publish date in future, so shouldn't be shown to user.
   val futureNews = NewsItemSave(
+    usercode = Usercode("custard"),
+    publisherId = "publisher",
     title = "Hoverboards invented",
     text = "Finally, we can all hover to work!",
     link = None,
@@ -85,6 +90,14 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
       newsDao.latestNews(Some(ana), limit = 1) must have length 1
     }
 
+    "offset results by requested number" in transaction { implicit c =>
+      save(londonsBurning, Seq(ana))
+      save(brumPanic, Seq(ana))
+      newsDao.latestNews(Some(ana), offset = 1) must have length 1
+      newsDao.latestNews(Some(ana), limit = 1, offset = 1).head must have('title (brumPanic.title))
+      newsDao.latestNews(Some(ana), limit = 1).head must have('title (londonsBurning.title))
+    }
+
     "return only news for subscribed categories" in transaction { implicit c =>
       val someCategory = newsCategoryDao.all().head
 
@@ -118,11 +131,35 @@ class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
       // The same item is not returned twice
       newsDao.latestNews(Some(jim)) must have length 1
     }
+
+    "return all public news for anonymous user" in transaction { implicit c =>
+      // Anonymous user should see all news as they cannot choose categories
+      save(londonsBurning.copy(ignoreCategories = false), Seq(public))
+
+      val anonNews = newsDao.latestNews(None)
+
+      anonNews.map(_.title) must contain(londonsBurning.title)
+    }
   }
 
   "countRecipients" should {
     "return an empty result for an empty input" in transaction { implicit c =>
       newsDao.countRecipients(Nil) mustBe Map()
+    }
+
+    "return value inclusive of user news-category preferences" in transaction { implicit c =>
+      val CATS_ON_FIRE = "cats-on-fire"
+      val londonsBurningWithCat = londonsBurning.copy(ignoreCategories = false)
+      val id = save(londonsBurningWithCat, Seq(ana, eli, jim))
+
+      SQL"INSERT INTO news_category VALUES ($CATS_ON_FIRE, $CATS_ON_FIRE)".execute()
+      userNewsCategoryDao.setSubscribedCategories(ana, Seq(CATS_ON_FIRE))
+      newsCategoryDao.saveNewsCategories(id, Seq(CATS_ON_FIRE))
+
+      val count = newsDao.countRecipients(Seq(id))
+      count mustBe Map(
+        id -> Finite(1)
+      )
     }
 
     "return results for public and non-public news" in transaction { implicit c =>

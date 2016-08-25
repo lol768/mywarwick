@@ -32,6 +32,7 @@
     "gulp-insert": "~0.5.0",
     "gulp-less": "~3.0.5",
     "gulp-manifest": "~0.1.1",
+    "gulp-play-assets": "^0.9.1",
     "gulp-postcss": "~6.1.0",
     "gulp-rename": "~1.2.2",
     "gulp-replace": "~0.5.4",
@@ -62,10 +63,10 @@
     "core-js": "~2.2.2",
     "eonasdan-bootstrap-datetimepicker": "^4.15.35",
     "es6-promise": "~3.1.2",
-    "fastclick": "~1.0.6",
     "id7": "UniversityofWarwick/id7#v1.1.15",
     "isomorphic-fetch": "~2.2.1",
     "jquery": "~2.2.3",
+    "jquery-form": "^3.50.0",
     "jquery.transit": "~0.9.12",
     "less": "~2.6.1",
     "localforage": "~1.4.0",
@@ -75,6 +76,7 @@
     "moment-timezone": "UniversityofWarwick/moment-timezone#london",
     "react": "~15.0.1",
     "react-addons-update": "~15.0.1",
+    "react-bootstrap-multiselect": "^2.0.0",
     "react-dom": "~15.0.1",
     "react-grid-layout": "UniversityofWarwick/react-grid-layout#0.13.1-warwick",
     "react-redux": "~4.4.5",
@@ -84,7 +86,8 @@
     "redux-actions": "~0.9.1",
     "redux-thunk": "~2.0.1",
     "reselect": "~2.3.0",
-    "skycons": "~1.0.0"
+    "skycons": "~1.0.0",
+    "warwick-search-frontend": "git+ssh://git@repo.elab.warwick.ac.uk/sch/omni.git#a56ecd1"
   },
   "scripts": {
     "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha --compilers js:babel-register -r TestHelper --recursive test/assets/js",

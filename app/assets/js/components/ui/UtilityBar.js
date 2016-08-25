@@ -43,7 +43,7 @@ export default class UtilityBar extends ReactComponent {
 
   renderPhoto(user) {
     return (
-      <img src="/photo"
+      <img src={ user.photo.url }
         ref="photo"
         className="img-circle"
         alt={ user.name }

@@ -170,7 +170,7 @@ class ID7Layout extends ReactComponent {
                       <div className="id7-logo-column">
                         <div className="id7-logo-row">
                           <div className="id7-logo">
-                            <a href="/" title="Warwick homepage" onClick={ this.goToHome }>
+                            <a href="http://warwick.ac.uk" title="Warwick homepage">
                               <img src="" alt="Warwick" />
                             </a>
                           </div>
@@ -194,7 +194,7 @@ class ID7Layout extends ReactComponent {
                               <ActivityView grouped={false} />
                             </MastheadIcon>
                             <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
-                              <LinkBlock columns="1">
+                              <LinkBlock columns={ 1 }>
                                 <Link key="bpm" href="http://warwick.ac.uk/bpm">
                                   Course Transfers
                                 </Link>

@@ -1,10 +1,11 @@
 package services
 
-import models.news.Audience
+import models.Audience
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
+import services.dao.AudienceDao
 import warwick.sso._
 
 import scala.util.Success
@@ -12,7 +13,8 @@ import scala.util.Success
 class AudienceServiceTest extends PlaySpec with MockitoSugar {
   trait Ctx {
     val webgroups = mock[GroupService]
-    val service = new AudienceServiceImpl(webgroups)
+    val audienceDao = mock[AudienceDao]
+    val service = new AudienceServiceImpl(webgroups, audienceDao, new MockDatabase)
 
 
     def webgroupsIsEmpty: Unit = {

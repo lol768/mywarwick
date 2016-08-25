@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import actors.WebsocketActor
+import actors.WebSocketActor
 import akka.actor.ActorSystem
 import akka.stream.Materializer
 import play.api.libs.json.JsValue
@@ -20,7 +20,7 @@ class WebSocketController @Inject()(implicit
   security: SecurityService,
   metrics: AppMetrics,
   system: ActorSystem,
-  materializer: Materializer
+  mat: Materializer
 ) extends Logging {
 
   import security._
@@ -28,8 +28,8 @@ class WebSocketController @Inject()(implicit
   def socket = WebSocket.acceptOrResult[JsValue, JsValue] { request =>
     SecureWebsocket(request) { loginContext: LoginContext =>
       val who = loginContext.user.map(_.usercode).getOrElse("nobody")
-      logger.info(s"Websocket opening for $who")
-      val flow = ActorFlow.actorRef(out => WebsocketActor.props(loginContext, metrics.websocketTracker())(out))
+      logger.info(s"WebSocket opening for $who")
+      val flow = ActorFlow.actorRef(out => WebSocketActor.props(loginContext, metrics.websocketTracker())(out))
       Future.successful(Right(flow))
     }
   }
