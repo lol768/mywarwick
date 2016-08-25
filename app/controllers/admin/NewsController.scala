@@ -14,7 +14,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Result
 import services.dao.DepartmentInfoDao
 import services.{NewsCategoryService, NewsService, PublisherService, SecurityService}
-import system.{RequestContext, TimeZones, Validation}
+import system.{ErrorHandler, RequestContext, TimeZones, Validation}
 import uk.ac.warwick.util.web.Uri
 import warwick.sso.Usercode
 
@@ -57,7 +57,8 @@ class NewsController @Inject()(
   news: NewsService,
   val departmentInfoDao: DepartmentInfoDao,
   val audienceBinder: AudienceBinder,
-  val newsCategoryService: NewsCategoryService
+  val newsCategoryService: NewsCategoryService,
+  errorHandler: ErrorHandler
 ) extends BaseController with I18nSupport with Publishing {
 
   val newsItemMapping = mapping(
@@ -128,7 +129,12 @@ class NewsController @Inject()(
         formWithErrors => Ok(renderUpdateForm(publisherId, id, formWithErrors)),
         (data, audience) => {
           val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
+
           news.update(id, newsItem, audience, data.categoryIds)
+            .onFailure { case e =>
+              logger.error(s"Error updating news item $id", e)
+              errorHandler.markInternalServerError()
+            }
 
           auditLog('UpdateNewsItem, 'id -> id)
 

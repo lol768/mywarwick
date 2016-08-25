@@ -28,7 +28,7 @@ trait NewsService {
 
   def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String
 
-  def update(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String])
+  def update(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): Future[Unit]
 
   def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize]
 

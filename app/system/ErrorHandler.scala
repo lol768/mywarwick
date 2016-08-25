@@ -1,3 +1,5 @@
+package system
+
 import javax.inject.Inject
 
 import com.codahale.metrics.MetricRegistry.name
@@ -6,7 +8,6 @@ import play.api.Environment
 import play.api.http.HttpErrorHandler
 import play.api.mvc.{RequestHeader, Results}
 import services.SecurityService
-import system.RequestContext
 import warwick.sso.SSOClient
 
 import scala.concurrent.Future
@@ -30,10 +31,12 @@ class ErrorHandler @Inject()(environment: Environment, metrics: Metrics, sso: SS
   }
 
   def onServerError(request: RequestHeader, exception: Throwable) = {
-    internalServerErrorMeter.mark()
+    markInternalServerError()
     Future.successful(
       InternalServerError(views.html.errors.serverError(exception, environment.mode)(RequestContext.authenticated(sso, request)))
     )
   }
+
+  def markInternalServerError() = internalServerErrorMeter.mark()
 
 }
