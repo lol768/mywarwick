@@ -47,6 +47,8 @@ $(SPLIT_FORM).each((i, form) => {
 
   function replaceErrors(errs) {
     $.map(errs, err => $(`#${err.id}`).replaceWith(err));
+
+    $(document).trigger('start:replace');
   }
 
   function checkFormErrors(html) {
