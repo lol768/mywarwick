@@ -2,24 +2,30 @@ import $ from 'jquery';
 import 'jquery-form/jquery.form.js';
 
 const SPLIT_FORM = 'form.split-form';
+const SLIDE_DURATION = 350;
 
 $(SPLIT_FORM).each((i, form) => {
   const $form = $(form);
 
-  function transitionToLeft($prev, $next) {
+  /**
+   * Animates slide transition on $prev and $next elements
+   * @param dir left (-1) or right (1)
+   * @param $prev
+   * @param $next
+   */
+  function transition($prev, $next, dir = -1) {
     $prev.removeClass('active')
-      .animate({ marginLeft: '-100%', opacity: 0 }, { duration: 350, complete: $prev.hide });
+      .animate({ marginLeft: `${100 * dir}%`, opacity: 0 }, {
+        duration: SLIDE_DURATION,
+        start: () => $form.css('overflow-x', 'hidden'),
+        complete: () => {
+          $form.css('overflow-x', 'visible');
+          $prev.hide();
+        },
+      });
 
-    $next.css({ marginLeft: '100%', display: 'inline-block' }).addClass('active')
-      .animate({ marginLeft: '0', opacity: 1 }, { duration: 350 });
-  }
-
-  function transitionToRight($prev, $next) {
-    $prev.removeClass('active').css('margin-left', '0')
-      .animate({ marginLeft: '100%', opacity: 0 }, { duration: 350, complete: $prev.hide });
-
-    $next.css({ marginLeft: '-100%', display: 'inline-block' }).addClass('active')
-      .animate({ marginLeft: '0', opacity: 1 }, { duration: 350 });
+    $next.css({ marginLeft: `${-100 * dir}%`, display: 'inline-block' }).addClass('active')
+      .animate({ marginLeft: '0', opacity: 1 }, { duration: SLIDE_DURATION });
   }
 
   function getHashNum() {
@@ -38,9 +44,9 @@ $(SPLIT_FORM).each((i, form) => {
     if (prevPage === num) { // on initial load
       $entering.addClass('active').css('display', 'inline-block');
     } else if (prevPage < num) {
-      transitionToLeft($leaving, $entering);
+      transition($leaving, $entering);
     } else {
-      transitionToRight($leaving, $entering);
+      transition($leaving, $entering, 1); // transition right
     }
   }
 
