@@ -19,8 +19,20 @@ dd.error {
   color: @id7-brand-red;
 }
 
-.split-form > section {
-  display: none;
+.split-form {
+  position: relative;
+  overflow-x: hidden;
+  min-height: 1000px; // to counteract overflow:hidden obscuring date popover
+
+  > section {
+    display: none;
+    width: 100%;
+    position: absolute;
+
+    &.active {
+      position: relative;
+    }
+  }
 }
 
 .confirm-delete {
@@ -28,6 +40,7 @@ dd.error {
   opacity: 0;
   left: 20%;
 }
+
 .news-item, .activity-item {
   .btn-toolbar {
     position: relative;

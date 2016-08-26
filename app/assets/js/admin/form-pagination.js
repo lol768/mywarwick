@@ -6,6 +6,22 @@ const SPLIT_FORM = 'form.split-form';
 $(SPLIT_FORM).each((i, form) => {
   const $form = $(form);
 
+  function transitionToLeft($prev, $next) {
+    $prev.removeClass('active')
+      .animate({ marginLeft: '-100%', opacity: 0 }, { duration: 350, complete: $prev.hide });
+
+    $next.css({ marginLeft: '100%', display: 'inline-block' }).addClass('active')
+      .animate({ marginLeft: '0', opacity: 1 }, { duration: 350 });
+  }
+
+  function transitionToRight($prev, $next) {
+    $prev.removeClass('active').css('margin-left', '0')
+      .animate({ marginLeft: '100%', opacity: 0 }, { duration: 350, complete: $prev.hide });
+
+    $next.css({ marginLeft: '-100%', display: 'inline-block' }).addClass('active')
+      .animate({ marginLeft: '0', opacity: 1 }, { duration: 350 });
+  }
+
   function getHashNum() {
     return parseInt(location.hash.substring(1), 10);
   }
@@ -14,10 +30,18 @@ $(SPLIT_FORM).each((i, form) => {
 
   function showSection(num) {
     history.replaceState({ pageNum: num }, location.href);
+    const prevPage = currentPage;
     currentPage = num;
-    const $section = $form.find(`section:eq(${num})`);
-    $form.find('section.active').removeClass('active').hide();
-    $section.show().addClass('active');
+    const $entering = $form.find(`section:eq(${num})`);
+    const $leaving = $form.find('section.active');
+
+    if (prevPage === num) { // on initial load
+      $entering.addClass('active').css('display', 'inline-block');
+    } else if (prevPage < num) {
+      transitionToLeft($leaving, $entering);
+    } else {
+      transitionToRight($leaving, $entering);
+    }
   }
 
   function pushSection(num) {
@@ -73,7 +97,8 @@ $(SPLIT_FORM).each((i, form) => {
         })
         .catch(replaceErrors)
       )
-      .catch(() => {}) // TODO: log ting?
+      .catch(() => {
+      }) // TODO: log ting?
       .then(() => $button.prop('disabled', false));
   });
 
