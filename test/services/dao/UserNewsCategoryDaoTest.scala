@@ -42,6 +42,28 @@ class UserNewsCategoryDaoTest extends PlaySpec with OneStartAppPerSuite {
         .as(scalar[String].*) mustBe Seq("category-c")
     }
 
+    "get users with all categories selected" in transaction { implicit c =>
+      SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID) VALUES ('cusab', 'category-a')".execute()
+      SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID) VALUES ('cusab', 'category-b')".execute()
+
+      SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID) VALUES ('cusabc', 'category-a')".execute()
+      SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID) VALUES ('cusabc', 'category-b')".execute()
+      SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID) VALUES ('cusabc', 'category-c')".execute()
+
+      SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID) VALUES ('cusac', 'category-a')".execute()
+      SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID) VALUES ('cusac', 'category-c')".execute()
+
+      dao.getUsercodesSubscribedToAllCategories(Seq("category-a")).map(_.string) must contain allOf("cusab", "cusabc", "cusac")
+      dao.getUsercodesSubscribedToAllCategories(Seq("category-b")).map(_.string) must contain allOf("cusab", "cusabc")
+      dao.getUsercodesSubscribedToAllCategories(Seq("category-c")).map(_.string) must contain allOf("cusabc", "cusac")
+
+      dao.getUsercodesSubscribedToAllCategories(Seq("category-a", "category-b")).map(_.string) must contain allOf("cusab", "cusabc")
+      dao.getUsercodesSubscribedToAllCategories(Seq("category-a", "category-c")).map(_.string) must contain allOf("cusabc", "cusac")
+      dao.getUsercodesSubscribedToAllCategories(Seq("category-a", "category-b", "category-c")).map(_.string) must contain only "cusabc"
+
+      dao.getUsercodesSubscribedToAllCategories(Nil).map(_.string) must contain allOf("cusab", "cusabc", "cusac")
+    }
+
   }
 
 }

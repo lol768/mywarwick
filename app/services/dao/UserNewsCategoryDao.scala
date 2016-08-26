@@ -38,7 +38,9 @@ class UserNewsCategoryDaoImpl extends UserNewsCategoryDao {
 
   override def getUsercodesSubscribedToAllCategories(categoryIds: Seq[String])(implicit c: Connection) = {
     if (categoryIds.isEmpty) {
-      Nil
+      SQL"SELECT DISTINCT USERCODE FROM USER_NEWS_CATEGORY"
+        .as(str("usercode").*)
+        .map(Usercode)
     } else {
       val selects = categoryIds.zipWithIndex.map { case (id, index) =>
         s"(SELECT DISTINCT USERCODE FROM USER_NEWS_CATEGORY WHERE NEWS_CATEGORY_ID = {category$index})"
