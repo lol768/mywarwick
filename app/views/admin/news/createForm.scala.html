@@ -19,7 +19,11 @@
 
 @common.admin("Create news") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NewsController.create(publisher.id, true), 'class -> "split-form") {
+  @b3.form(action = controllers.admin.routes.NewsController.create(publisher.id, true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.admin.routes.NewsController.audienceSize(publisher.id)) {
+    <div class="alert alert-info audience-estimate-container">
+      Estimated reach:
+      <span class="audience-estimate-value"></span>
+    </div>
 
     <section>
     @admin.news.contentForm(form)
@@ -42,7 +46,7 @@
     </section>
 
     <section>
-    @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true)
+      @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true)
     </section>
 
     <section>

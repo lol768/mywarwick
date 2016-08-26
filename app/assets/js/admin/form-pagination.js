@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import 'jquery-form/jquery.form.js';
+import { promiseSubmit } from './utils';
 
 const SPLIT_FORM = 'form.split-form';
 
@@ -35,14 +35,7 @@ $(SPLIT_FORM).each((i, form) => {
   function validate() {
     const formAction = $form.attr('action');
 
-    return new Promise((resolve, reject) =>
-      $form.ajaxSubmit({
-        url: `${formAction}/validate`,
-        success: resolve,
-        error: reject,
-        resetForm: false,
-      })
-    );
+    return promiseSubmit(form, { url: `${formAction}/validate` });
   }
 
   function replaceErrors(errs) {

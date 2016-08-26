@@ -14,6 +14,8 @@ trait UserNewsCategoryDao {
 
   def setSubscribedCategories(usercode: Usercode, categoryIds: Seq[String])(implicit c: Connection): Unit
 
+  def getUsercodesSubscribedToAllCategories(categoryIds: Seq[String])(implicit c: Connection): Seq[Usercode]
+
 }
 
 @Singleton
@@ -31,6 +33,25 @@ class UserNewsCategoryDaoImpl extends UserNewsCategoryDao {
     categoryIds.foreach { categoryId =>
       SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID) VALUES (${usercode.string}, $categoryId)"
         .execute()
+    }
+  }
+
+  override def getUsercodesSubscribedToAllCategories(categoryIds: Seq[String])(implicit c: Connection) = {
+    if (categoryIds.isEmpty) {
+      Nil
+    } else {
+      val selects = categoryIds.zipWithIndex.map { case (id, index) =>
+        s"(SELECT DISTINCT USERCODE FROM USER_NEWS_CATEGORY WHERE NEWS_CATEGORY_ID = {category$index})"
+      }
+
+      val parameters = categoryIds.zipWithIndex.map { case (id, index) =>
+        NamedParameter(s"category$index", id)
+      }
+
+      SQL(selects.mkString(" INTERSECT "))
+        .on(parameters: _*)
+        .as(str("usercode").*)
+        .map(Usercode)
     }
   }
 

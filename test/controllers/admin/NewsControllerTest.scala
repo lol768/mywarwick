@@ -53,7 +53,7 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
   when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("IN", "IT Services", "IT Services", "ITS", "SERVICE")))
   when(newsCategoryService.all()).thenReturn(Seq(NewsCategory("abc", "Campus")))
 
-  val newsController = new NewsController(securityServiceImpl, publisherService, messagesApi, newsService, departmentInfoDao, audienceBinder, newsCategoryService, mock[ErrorHandler]) {
+  val newsController = new NewsController(securityServiceImpl, publisherService, messagesApi, newsService, departmentInfoDao, audienceBinder, newsCategoryService, mock[UserNewsCategoryService], mock[ErrorHandler], mock[AudienceService]) {
     override val navigationService = new MockNavigationService()
     override val ssoClient = mockSSOClient
   }
