@@ -21,10 +21,12 @@ $('.split-form').each((i, form) => {
       dataType: 'json',
     })
       .then(response => {
-        const number = response.data;
-        const people = number === 1 ? 'person' : 'people';
+        const { count } = response.data;
+        const people = count === 1 ? 'person' : 'people';
 
-        $audienceEstimate.text(number < 0 ? 'public' : `${number.toLocaleString()} ${people}`);
+        $audienceEstimate.text(
+          count < 0 ? 'public' : `${count.toLocaleString()} ${people}`
+        );
         $audienceEstimateContainer.show();
       })
       .catch(e => {

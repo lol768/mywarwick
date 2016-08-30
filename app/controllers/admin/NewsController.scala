@@ -11,7 +11,7 @@ import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{ActionFilter, Result}
 import services._
 import services.dao.DepartmentInfoDao
@@ -89,15 +89,17 @@ class NewsController @Inject()(
     Ok(views.html.admin.news.list(request.publisher, newsPending, newsPublished, counts, request.userRole))
   }
 
-  def audienceSize(publisherId: String) = PublisherAction(publisherId, ViewNews).async { implicit request =>
+  def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNews).async { implicit request =>
     audienceForm.bindFromRequest.fold(
-      formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[Int]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
+      formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
       audienceData => {
         audienceBinder.bindAudience(audienceData).map {
-          case Left(errors) => BadRequest(Json.toJson(API.Failure[Int]("Bad Request", errors.map(e => API.Error(e.key, e.message)))))
+          case Left(errors) => BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", errors.map(e => API.Error(e.key, e.message)))))
           case Right(audience) =>
             if (audience.public) {
-              Ok(Json.toJson(API.Success[Int](data = -1)))
+              Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
+                "count" -> -1
+              ))))
             } else {
               val formData = publishNewsForm.bindFromRequest.value
 
@@ -110,8 +112,10 @@ class NewsController @Inject()(
                         .intersect(usercodesInAudience))
                     .getOrElse(usercodesInAudience)
                 }
-                .map(usercodes => Ok(Json.toJson(API.Success[Int](data = usercodes.length))))
-                .getOrElse(InternalServerError(Json.toJson(API.Failure[Int]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience"))))))
+                .map(usercodes => Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
+                  "count" -> usercodes.length
+                )))))
+                .getOrElse(InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience"))))))
             }
         }
       }

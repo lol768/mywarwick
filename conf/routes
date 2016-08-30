@@ -26,7 +26,7 @@ GET         /admin/publish/:publisher                                 @controlle
 GET         /admin/publish/:publisher/news                            @controllers.admin.NewsController.list(publisher: String)
 GET         /admin/publish/:publisher/news/new                        @controllers.admin.NewsController.createForm(publisher: String)
 POST        /admin/publish/:publisher/news/validate                   @controllers.admin.NewsController.create(publisher: String, submitted: Boolean = false)
-POST        /admin/publish/:publisher/news/audience                   @controllers.admin.NewsController.audienceSize(publisher: String)
+POST        /admin/publish/:publisher/news/audience                   @controllers.admin.NewsController.audienceInfo(publisher: String)
 POST        /admin/publish/:publisher/news                            @controllers.admin.NewsController.create(publisher: String, submitted: Boolean = true)
 GET         /admin/publish/:publisher/news/:id/edit                   @controllers.admin.NewsController.updateForm(publisher: String, id: String)
 POST        /admin/publish/:publisher/news/:id/validate               @controllers.admin.NewsController.update(publisher: String, id: String, submitted: Boolean = false)
