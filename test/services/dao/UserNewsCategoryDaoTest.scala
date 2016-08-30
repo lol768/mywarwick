@@ -42,7 +42,7 @@ class UserNewsCategoryDaoTest extends PlaySpec with OneStartAppPerSuite {
         .as(scalar[String].*) mustBe Seq("category-c")
     }
 
-    "get users with all categories selected" in transaction { implicit c =>
+    "get users with any categories selected" in transaction { implicit c =>
       SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID) VALUES ('cusab', 'category-a')".execute()
       SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID) VALUES ('cusab', 'category-b')".execute()
 
@@ -53,15 +53,15 @@ class UserNewsCategoryDaoTest extends PlaySpec with OneStartAppPerSuite {
       SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID) VALUES ('cusac', 'category-a')".execute()
       SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID) VALUES ('cusac', 'category-c')".execute()
 
-      dao.getUsercodesSubscribedToAllCategories(Seq("category-a")).map(_.string) must contain allOf("cusab", "cusabc", "cusac")
-      dao.getUsercodesSubscribedToAllCategories(Seq("category-b")).map(_.string) must contain allOf("cusab", "cusabc")
-      dao.getUsercodesSubscribedToAllCategories(Seq("category-c")).map(_.string) must contain allOf("cusabc", "cusac")
+      dao.getRecipientsOfNewsInCategories(Seq("category-a")).map(_.string) must contain allOf("cusab", "cusabc", "cusac")
+      dao.getRecipientsOfNewsInCategories(Seq("category-b")).map(_.string) must contain allOf("cusab", "cusabc")
+      dao.getRecipientsOfNewsInCategories(Seq("category-c")).map(_.string) must contain allOf("cusabc", "cusac")
 
-      dao.getUsercodesSubscribedToAllCategories(Seq("category-a", "category-b")).map(_.string) must contain allOf("cusab", "cusabc")
-      dao.getUsercodesSubscribedToAllCategories(Seq("category-a", "category-c")).map(_.string) must contain allOf("cusabc", "cusac")
-      dao.getUsercodesSubscribedToAllCategories(Seq("category-a", "category-b", "category-c")).map(_.string) must contain only "cusabc"
+      dao.getRecipientsOfNewsInCategories(Seq("category-a", "category-b")).map(_.string) must contain allOf("cusab", "cusabc")
+      dao.getRecipientsOfNewsInCategories(Seq("category-a", "category-c")).map(_.string) must contain allOf("cusabc", "cusac")
+      dao.getRecipientsOfNewsInCategories(Seq("category-a", "category-b", "category-c")).map(_.string) must contain allOf("cusab", "cusabc", "cusac")
 
-      dao.getUsercodesSubscribedToAllCategories(Nil).map(_.string) must contain allOf("cusab", "cusabc", "cusac")
+      dao.getRecipientsOfNewsInCategories(Nil).map(_.string) must be(empty)
     }
 
   }

@@ -14,7 +14,7 @@ trait UserNewsCategoryDao {
 
   def setSubscribedCategories(usercode: Usercode, categoryIds: Seq[String])(implicit c: Connection): Unit
 
-  def getUsercodesSubscribedToAllCategories(categoryIds: Seq[String])(implicit c: Connection): Seq[Usercode]
+  def getRecipientsOfNewsInCategories(categoryIds: Seq[String])(implicit c: Connection): Seq[Usercode]
 
 }
 
@@ -36,22 +36,10 @@ class UserNewsCategoryDaoImpl extends UserNewsCategoryDao {
     }
   }
 
-  override def getUsercodesSubscribedToAllCategories(categoryIds: Seq[String])(implicit c: Connection) = {
-    val result = if (categoryIds.isEmpty) {
-      SQL("SELECT DISTINCT USERCODE FROM USER_NEWS_CATEGORY").executeQuery()
-    } else {
-      val selects = categoryIds.zipWithIndex.map { case (id, index) =>
-        s"(SELECT DISTINCT USERCODE FROM USER_NEWS_CATEGORY WHERE NEWS_CATEGORY_ID = {category$index})"
-      }
-
-      val parameters = categoryIds.zipWithIndex.map { case (id, index) =>
-        NamedParameter(s"category$index", id)
-      }
-
-      SQL(selects.mkString(" INTERSECT ")).on(parameters: _*)
-    }
-
-    result.as(str("usercode").*).map(Usercode)
+  override def getRecipientsOfNewsInCategories(categoryIds: Seq[String])(implicit c: Connection) = {
+    SQL"SELECT DISTINCT USERCODE FROM USER_NEWS_CATEGORY WHERE NEWS_CATEGORY_ID IN ($categoryIds)"
+      .as(str("usercode").*)
+      .map(Usercode)
   }
 
 }

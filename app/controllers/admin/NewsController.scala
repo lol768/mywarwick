@@ -103,12 +103,12 @@ class NewsController @Inject()(
 
               audienceService.resolve(audience)
                 .toOption
-                .map { usercodes =>
+                .map { usercodesInAudience =>
                   formData.filterNot(_.item.ignoreCategories)
                     .map(data =>
-                      userNewsCategoryService.getUsercodesSubscribedToAllCategories(data.categoryIds)
-                        .intersect(usercodes))
-                    .getOrElse(usercodes)
+                      userNewsCategoryService.getRecipientsOfNewsInCategories(data.categoryIds)
+                        .intersect(usercodesInAudience))
+                    .getOrElse(usercodesInAudience)
                 }
                 .map(usercodes => Ok(Json.toJson(API.Success[Int](data = usercodes.length))))
                 .getOrElse(InternalServerError(Json.toJson(API.Failure[Int]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience"))))))

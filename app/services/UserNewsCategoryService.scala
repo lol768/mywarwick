@@ -12,7 +12,7 @@ trait UserNewsCategoryService {
 
   def setSubscribedCategories(usercode: Usercode, categoryIds: Seq[String]): Unit
 
-  def getUsercodesSubscribedToAllCategories(categoryIds: Seq[String]): Seq[Usercode]
+  def getRecipientsOfNewsInCategories(categoryIds: Seq[String]): Seq[Usercode]
 
 }
 
@@ -28,7 +28,7 @@ class UserNewsCategoryServiceImpl @Inject()(
   override def setSubscribedCategories(usercode: Usercode, categoryIds: Seq[String]) =
     db.withTransaction(implicit c => dao.setSubscribedCategories(usercode, categoryIds))
 
-  override def getUsercodesSubscribedToAllCategories(categoryIds: Seq[String]) =
-    db.withConnection(implicit c => dao.getUsercodesSubscribedToAllCategories(categoryIds))
+  override def getRecipientsOfNewsInCategories(categoryIds: Seq[String]) =
+    db.withConnection(implicit c => dao.getRecipientsOfNewsInCategories(categoryIds))
 
 }
