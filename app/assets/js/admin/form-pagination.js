@@ -17,9 +17,9 @@ $(SPLIT_FORM).each((i, form) => {
     $prev.removeClass('active')
       .animate({ marginLeft: `${100 * dir}%`, opacity: 0 }, {
         duration: SLIDE_DURATION,
-        start: () => $form.css('overflow-x', 'hidden'),
+        start: () => $form.css('overflow', 'hidden'),
         complete: () => {
-          $form.css('overflow-x', 'visible');
+          $form.css('overflow', 'visible');
           $prev.hide();
         },
       });
