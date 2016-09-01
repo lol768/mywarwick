@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import 'jquery-form/jquery.form.js';
+import log from 'loglevel';
 
 const SPLIT_FORM = 'form.split-form';
 const SLIDE_DURATION = 350;
@@ -103,8 +104,7 @@ $(SPLIT_FORM).each((i, form) => {
         })
         .catch(replaceErrors)
       )
-      .catch(() => {
-      }) // TODO: log ting?
+      .catch(err => log.warn('Could not validate form', err))
       .then(() => $button.prop('disabled', false));
   });
 
