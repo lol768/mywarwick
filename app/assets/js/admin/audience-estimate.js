@@ -1,42 +1,51 @@
 import $ from 'jquery';
 import _ from 'lodash';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import AudienceIndicator from './components/AudienceIndicator';
 import { promiseSubmit } from './utils';
 import log from 'loglevel';
 
 $('.split-form').each((i, form) => {
   const $form = $(form);
 
-  const $audienceEstimateContainer = $form.find('.audience-estimate-container');
-  const $audienceEstimate = $audienceEstimateContainer.find('.audience-estimate-value');
-
-  $audienceEstimateContainer.hide();
+  const $audienceIndicator = $form.find('.audience-indicator');
+  const container = $audienceIndicator[0];
 
   function updateAudienceEstimate() {
     const timeout = setTimeout(() => {
-      $audienceEstimate.html('<i class="fa fa-spin fa-refresh"></i>');
-    }, 300);
+      ReactDOM.render(
+        <AudienceIndicator fetching />,
+        container
+      );
+    }, 200);
 
     promiseSubmit($form, {
       url: $form.attr('data-audience-action'),
       dataType: 'json',
     })
       .then(response => {
-        const { count } = response.data;
-        const people = count === 1 ? 'person' : 'people';
-
-        $audienceEstimate.text(
-          count < 0 ? 'public' : `${count.toLocaleString()} ${people}`
+        ReactDOM.render(
+          <AudienceIndicator {...response.data} />,
+          container
         );
-        $audienceEstimateContainer.show();
       })
       .catch(e => {
         log.error('Audience estimate returned error', e);
-        $audienceEstimateContainer.hide();
+        ReactDOM.render(
+          <AudienceIndicator error />,
+          container
+        );
       })
       .then(() => clearTimeout(timeout));
   }
 
-  if ($audienceEstimate.length > 0) {
+  if (container !== undefined) {
+    ReactDOM.render(
+      <AudienceIndicator empty />,
+      container
+    );
+
     $form.on(
       'change',
       [

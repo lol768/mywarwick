@@ -62,7 +62,8 @@ class NewsController @Inject()(
   val newsCategoryService: NewsCategoryService,
   userNewsCategoryService: UserNewsCategoryService,
   errorHandler: ErrorHandler,
-  audienceService: AudienceService
+  audienceService: AudienceService,
+  userPreferencesService: UserPreferencesService
 ) extends BaseController with I18nSupport with Publishing {
 
   val newsItemMapping = mapping(
@@ -98,7 +99,7 @@ class NewsController @Inject()(
           case Right(audience) =>
             if (audience.public) {
               Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
-                "count" -> -1
+                "public" -> true
               ))))
             } else {
               val formData = publishNewsForm.bindFromRequest.value
@@ -107,14 +108,22 @@ class NewsController @Inject()(
                 .toOption
                 .map { usercodesInAudience =>
                   formData.filterNot(_.item.ignoreCategories)
-                    .map(data =>
-                      userNewsCategoryService.getRecipientsOfNewsInCategories(data.categoryIds)
-                        .intersect(usercodesInAudience))
-                    .getOrElse(usercodesInAudience)
+                    .map { data =>
+                      val initialisedUsers = userPreferencesService.countInitialisedUsers(usercodesInAudience)
+                      val newsRecipients = userNewsCategoryService.getRecipientsOfNewsInCategories(data.categoryIds).intersect(usercodesInAudience).length
+
+                      Json.obj(
+                        "baseAudience" -> usercodesInAudience.length,
+                        "categorySubset" -> (usercodesInAudience.length - initialisedUsers + newsRecipients)
+                      )
+                    }
+                    .getOrElse(
+                      Json.obj(
+                        "baseAudience" -> usercodesInAudience.length
+                      )
+                    )
                 }
-                .map(usercodes => Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
-                  "count" -> usercodes.length
-                )))))
+                .map(usercodes => Ok(Json.toJson(API.Success[JsObject](data = usercodes))))
                 .getOrElse(InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience"))))))
             }
         }

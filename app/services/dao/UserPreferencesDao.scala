@@ -16,6 +16,8 @@ trait UserPreferencesDao {
 
   def save(usercode: Usercode)(implicit c: Connection): Unit
 
+  def countInitialisedUsers(usercodes: Seq[Usercode])(implicit c: Connection): Int
+
 }
 
 @Singleton
@@ -30,5 +32,11 @@ class UserPreferencesDaoImpl extends UserPreferencesDao {
   override def save(usercode: Usercode)(implicit c: Connection) =
     SQL"INSERT INTO USER_PREFERENCE (USERCODE, CREATED_AT) VALUES (${usercode.string}, SYSDATE)"
       .execute()
+
+  override def countInitialisedUsers(usercodes: Seq[Usercode])(implicit c: Connection) =
+    usercodes.grouped(1000).map { groupedUsercodes =>
+      SQL"SELECT COUNT(*) FROM USER_PREFERENCE WHERE USERCODE IN (${groupedUsercodes.map(_.string)})"
+        .as(scalar[Int].single)
+    }.sum
 
 }

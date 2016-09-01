@@ -20,10 +20,7 @@
 @common.admin("Create news") {
   <div class="container-fluid">
   @b3.form(action = controllers.admin.routes.NewsController.create(publisher.id, true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.admin.routes.NewsController.audienceInfo(publisher.id)) {
-    <div class="alert alert-info audience-estimate-container">
-      Estimated reach:
-      <span class="audience-estimate-value"></span>
-    </div>
+    <div class="audience-indicator"></div>
 
     <section>
     @admin.news.contentForm(form)
