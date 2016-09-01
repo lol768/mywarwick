@@ -228,8 +228,8 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
     "respond with audience size" in {
       when(audienceService.resolve(Audience(Seq(Audience.DepartmentAudience("IN", Seq(Staff)))))).thenReturn(Success(Seq("a", "b", "c").map(Usercode)))
-      when(userPreferencesService.countInitialisedUsers(Matchers.any())).thenReturn(1)
-      when(userNewsCategoryService.getRecipientsOfNewsInCategories(Seq("abc"))).thenReturn(Seq("a", "c", "e").map(Usercode))
+      when(userPreferencesService.countInitialisedUsers(Seq("a", "b", "c").map(Usercode))).thenReturn(2)
+      when(userNewsCategoryService.getRecipientsOfNewsInCategories(Seq("abc"))).thenReturn(Seq("a", "e").map(Usercode))
 
       val result = call(newsController.audienceInfo("xyz"), FakeRequest("POST", "/").withFormUrlEncodedBody(validData: _*))
 
@@ -239,6 +239,28 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
       (json \ "status").as[String] must be("ok")
       (json \ "data" \ "baseAudience").as[Int] must be(3)
       (json \ "data" \ "categorySubset").as[Int] must be(2)
+    }
+
+    "respond with public" in {
+      when(audienceBinder.bindAudience(AudienceData(Seq("Public"), None))).thenReturn(Future.successful(Right(Audience.Public)))
+      when(audienceService.resolve(Audience.Public)).thenReturn(Success(Seq(Usercode("*"))))
+      when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.AllDepartments)
+
+      val data = Seq(
+        "item.title" -> "Big news",
+        "item.text" -> "Something happened",
+        "item.publishDate" -> "2016-01-01T00:00.000",
+        "categories[]" -> "abc",
+        "audience.audience[]" -> "Public"
+      )
+
+      val result = call(newsController.audienceInfo("xyz"), FakeRequest("POST", "/").withFormUrlEncodedBody(data: _*))
+
+      status(result) must be(OK)
+      val json = contentAsJson(result)
+
+      (json \ "status").as[String] must be("ok")
+      (json \ "data" \ "public").as[Boolean] must be(true)
     }
 
   }
