@@ -12,6 +12,8 @@ trait UserPreferencesService {
 
   def save(usercode: Usercode): Unit
 
+  def countInitialisedUsers(usercodes: Seq[Usercode]): Int
+
 }
 
 @Singleton
@@ -23,5 +25,8 @@ class UserPreferencesServiceImpl @Inject()(
   override def exists(usercode: Usercode) = db.withConnection(implicit c => dao.exists(usercode))
 
   override def save(usercode: Usercode) = db.withConnection(implicit c => dao.save(usercode))
+
+  override def countInitialisedUsers(usercodes: Seq[Usercode]) =
+    db.withConnection(implicit c => dao.countInitialisedUsers(usercodes))
 
 }

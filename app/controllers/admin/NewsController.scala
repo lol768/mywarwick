@@ -11,9 +11,10 @@ import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{ActionFilter, ActionRefiner, Result}
+import play.api.libs.json.{JsObject, Json}
+import play.api.mvc.{ActionFilter, Result}
+import services._
 import services.dao.DepartmentInfoDao
-import services.{NewsCategoryService, NewsService, PublisherService, SecurityService}
 import system.{ErrorHandler, RequestContext, TimeZones, Validation}
 import uk.ac.warwick.util.web.Uri
 import views.html.errors
@@ -59,7 +60,10 @@ class NewsController @Inject()(
   val departmentInfoDao: DepartmentInfoDao,
   val audienceBinder: AudienceBinder,
   val newsCategoryService: NewsCategoryService,
-  errorHandler: ErrorHandler
+  userNewsCategoryService: UserNewsCategoryService,
+  errorHandler: ErrorHandler,
+  audienceService: AudienceService,
+  userPreferencesService: UserPreferencesService
 ) extends BaseController with I18nSupport with Publishing {
 
   val newsItemMapping = mapping(
@@ -84,6 +88,47 @@ class NewsController @Inject()(
     val counts = news.countRecipients(theNews.map(_.id))
     val (newsPending, newsPublished) = partitionNews(theNews)
     Ok(views.html.admin.news.list(request.publisher, newsPending, newsPublished, counts, request.userRole))
+  }
+
+  def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNews).async { implicit request =>
+    audienceForm.bindFromRequest.fold(
+      formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
+      audienceData => {
+        audienceBinder.bindAudience(audienceData).map {
+          case Left(errors) => BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", errors.map(e => API.Error(e.key, e.message)))))
+          case Right(audience) =>
+            if (audience.public) {
+              Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
+                "public" -> true
+              ))))
+            } else {
+              val formData = publishNewsForm.bindFromRequest.value
+
+              audienceService.resolve(audience)
+                .toOption
+                .map { usercodesInAudience =>
+                  formData.filterNot(_.item.ignoreCategories)
+                    .map { data =>
+                      val initialisedUsers = userPreferencesService.countInitialisedUsers(usercodesInAudience)
+                      val newsRecipients = userNewsCategoryService.getRecipientsOfNewsInCategories(data.categoryIds).intersect(usercodesInAudience).length
+
+                      Json.obj(
+                        "baseAudience" -> usercodesInAudience.length,
+                        "categorySubset" -> (usercodesInAudience.length - initialisedUsers + newsRecipients)
+                      )
+                    }
+                    .getOrElse(
+                      Json.obj(
+                        "baseAudience" -> usercodesInAudience.length
+                      )
+                    )
+                }
+                .map(usercodes => Ok(Json.toJson(API.Success[JsObject](data = usercodes))))
+                .getOrElse(InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience"))))))
+            }
+        }
+      }
+    )
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNews) { implicit request =>
@@ -115,14 +160,14 @@ class NewsController @Inject()(
   }
 
   def updateForm(publisherId: String, id: String) = EditAction(id, publisherId, EditNews).async { implicit request =>
-      withNewsItem(id, publisherId, item => {
-        val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
-        val audience = news.getAudience(id).map(audienceBinder.unbindAudience).get
-        val formWithData = publishNewsForm.fill(PublishNewsItemData(item.toData, categoryIds, audience))
+    withNewsItem(id, publisherId, item => {
+      val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
+      val audience = news.getAudience(id).map(audienceBinder.unbindAudience).get
+      val formWithData = publishNewsForm.fill(PublishNewsItemData(item.toData, categoryIds, audience))
 
-        Future.successful(Ok(renderUpdateForm(publisherId, id, formWithData)))
-      })
-    }
+      Future.successful(Ok(renderUpdateForm(publisherId, id, formWithData)))
+    })
+  }
 
   def update(publisherId: String, id: String, submitted: Boolean) = EditAction(id, publisherId, EditNews).async { implicit request =>
     withNewsItem(id, publisherId, _ => {
@@ -146,10 +191,10 @@ class NewsController @Inject()(
   }
 
   def delete(publisherId: String, id: String) = EditAction(id, publisherId, DeleteNews) { implicit request =>
-      news.delete(id)
-      auditLog('DeleteNews, 'id -> id)
-      Redirect(routes.NewsController.list(publisherId)).flashing("success" -> "News deleted")
-    }
+    news.delete(id)
+    auditLog('DeleteNews, 'id -> id)
+    Redirect(routes.NewsController.list(publisherId)).flashing("success" -> "News deleted")
+  }
 
   private def NewsBelongsToPublisher(id: String, publisherId: String) = new ActionFilter[PublisherRequest] {
     override protected def filter[A](request: PublisherRequest[A]): Future[Option[Result]] = {

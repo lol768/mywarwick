@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import { promiseSubmit } from './utils';
 import 'jquery-form/jquery.form.js';
 import log from 'loglevel';
 
@@ -36,14 +37,7 @@ $(SPLIT_FORM).each((i, form) => {
   function validate() {
     const formAction = $form.attr('action');
 
-    return new Promise((resolve, reject) =>
-      $form.ajaxSubmit({
-        url: `${formAction}/validate`,
-        success: resolve,
-        error: reject,
-        resetForm: false,
-      })
-    );
+    return promiseSubmit(form, { url: `${formAction}/validate` });
   }
 
   function hasErrors() {

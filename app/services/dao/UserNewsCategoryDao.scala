@@ -14,6 +14,8 @@ trait UserNewsCategoryDao {
 
   def setSubscribedCategories(usercode: Usercode, categoryIds: Seq[String])(implicit c: Connection): Unit
 
+  def getRecipientsOfNewsInCategories(categoryIds: Seq[String])(implicit c: Connection): Seq[Usercode]
+
 }
 
 @Singleton
@@ -32,6 +34,12 @@ class UserNewsCategoryDaoImpl extends UserNewsCategoryDao {
       SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID) VALUES (${usercode.string}, $categoryId)"
         .execute()
     }
+  }
+
+  override def getRecipientsOfNewsInCategories(categoryIds: Seq[String])(implicit c: Connection) = {
+    SQL"SELECT DISTINCT USERCODE FROM USER_NEWS_CATEGORY WHERE NEWS_CATEGORY_ID IN ($categoryIds)"
+      .as(str("usercode").*)
+      .map(Usercode)
   }
 
 }
