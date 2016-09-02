@@ -10,6 +10,7 @@ export default class FileUpload extends React.Component {
     super(props);
     this.state = {
       imageId: props.imageId || null,
+      fileTooLarge: false,
     };
 
     this.onChange = this.onChange.bind(this);
@@ -25,30 +26,36 @@ export default class FileUpload extends React.Component {
     const fileField = e.target;
     const file = fileField.files[0];
 
-    this.setState({
-      uploading: true,
-      error: undefined,
-    });
-    this.$submitBtn.prop('disabled', true).text('Uploading file...');
+    const { uploadLimit } = this.props;
 
-    const progress = (loaded, total) => this.setState({ loaded, total });
-
-    newsImages.put(file, progress)
-      .then(imageId => {
-        this.setState({ imageId });
-      })
-      .catch((ex) => {
-        this.setState({ error: ex.message });
-      })
-      .then(() => {
-        this.setState({
-          uploading: false,
-          loaded: undefined,
-          total: undefined,
-        });
-        this.$submitBtn.prop('disabled', false).text(this.submitText);
-        fileField.value = '';
+    if (file.size <= uploadLimit) {
+      this.setState({
+        uploading: true,
+        error: undefined,
       });
+      this.$submitBtn.prop('disabled', true).text('Uploading file...');
+
+      const progress = (loaded, total) => this.setState({ loaded, total });
+
+      newsImages.put(file, progress)
+        .then(imageId => {
+          this.setState({ imageId });
+        })
+        .catch((ex) => {
+          this.setState({ error: ex.message });
+        })
+        .then(() => {
+          this.setState({
+            uploading: false,
+            loaded: undefined,
+            total: undefined,
+          });
+          this.$submitBtn.prop('disabled', false).text(this.submitText);
+          fileField.value = '';
+        });
+    } else {
+      this.setState({ error: `File size exceeds ${uploadLimit / 1000 / 1000}MB limit` });
+    }
   }
 
   onClear() {
@@ -116,6 +123,11 @@ export default class FileUpload extends React.Component {
 FileUpload.propTypes = {
   imageId: PropTypes.string,
   inputName: PropTypes.string.isRequired,
+  uploadLimit: PropTypes.number,
+};
+
+FileUpload.defaultProps = {
+  uploadLimit: 1000 * 1000, // 1MB
 };
 
 const ImagePreview = ({ imageId, width }) => {

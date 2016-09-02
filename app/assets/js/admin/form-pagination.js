@@ -1,5 +1,7 @@
 import $ from 'jquery';
 import { promiseSubmit } from './utils';
+import 'jquery-form/jquery.form.js';
+import log from 'loglevel';
 
 const SPLIT_FORM = 'form.split-form';
 
@@ -16,8 +18,8 @@ $(SPLIT_FORM).each((i, form) => {
     history.replaceState({ pageNum: num }, location.href);
     currentPage = num;
     const $section = $form.find(`section:eq(${num})`);
-    $form.find('section.active').removeClass('active').hide();
-    $section.show().addClass('active');
+    $form.find('section.active').removeClass('active');
+    $section.addClass('active');
   }
 
   function pushSection(num) {
@@ -38,21 +40,16 @@ $(SPLIT_FORM).each((i, form) => {
     return promiseSubmit(form, { url: `${formAction}/validate` });
   }
 
-  function replaceErrors(errs) {
-    $.map(errs, err => $(`#${err.id}`).replaceWith(err));
-
-    $(document).trigger('start:replace');
+  function hasErrors() {
+    return $form.find(`section:eq(${currentPage}) .has-error`).length > 0;
   }
 
-  function checkFormErrors(html) {
-    return new Promise((res, rej) => {
-      const errors = $(html).find(`section:eq(${currentPage}) .has-error`);
-      if (errors.length > 0) {
-        rej(errors);
-      } else {
-        res();
-      }
+  function replaceFormGroups(html) {
+    $(html).find(`section:eq(${currentPage}) .form-group[id]`).each((j, group) => {
+      $form.find(`#${group.id}`).replaceWith(group);
     });
+
+    $(document).trigger('start:replace');
   }
 
   $('button.next').on('click', function onClick(e) {
@@ -61,14 +58,14 @@ $(SPLIT_FORM).each((i, form) => {
     const $button = $(this).prop('disabled', true);
 
     validate()
-      .then(html => checkFormErrors(html)
-        .then(() => {
-          $form.find(`section:eq(${currentPage}) > *`).removeClass('has-error');
-          return pushSection(currentPage + 1);
-        })
-        .catch(replaceErrors)
-      )
-      .catch(() => {}) // TODO: log ting?
+      .then(html => {
+        replaceFormGroups(html);
+
+        if (!hasErrors()) {
+          pushSection(currentPage + 1);
+        }
+      })
+      .catch(ex => log.error(ex))
       .then(() => $button.prop('disabled', false));
   });
 
@@ -84,11 +81,14 @@ $(SPLIT_FORM).each((i, form) => {
 
   $form.on('submit', () => {
     validate()
-      .then(html =>
-        checkFormErrors(html)
-          .then(() => $form.off().submit())
-          .catch(replaceErrors)
-      ).catch(() => {}); // TODO: log ting?
+      .then(html => {
+        replaceFormGroups(html);
+
+        if (!hasErrors()) {
+          $form.off().submit();
+        }
+      })
+      .catch(e => log.error(e));
     return false;
   });
 });
