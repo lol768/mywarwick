@@ -9,6 +9,7 @@ export default class NewsCategoriesView extends React.Component {
     super(props);
 
     this.onChange = this.onChange.bind(this);
+    this.buttonText = this.buttonText.bind(this);
   }
 
   onChange(options) {
@@ -25,8 +26,9 @@ export default class NewsCategoriesView extends React.Component {
     });
   }
 
-  buttonText(options) {
-    return `Categories (${options.length})`;
+  buttonText({ length: optionsLen }) {
+    const { items: { length: totalLen } } = this.props;
+    return `Categories (${optionsLen === totalLen ? 'all' : `${optionsLen}/${totalLen}`})`;
   }
 
   render() {
