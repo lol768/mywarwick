@@ -7,6 +7,11 @@
     // Give the options a bit more room
     padding-top: .75em;
     padding-bottom: .75em;
+
+    > input[type="checkbox"] {
+      margin-top: 5px;
+      -webkit-transform: translateZ(0); // prevent checkbox flicker
+    }
   }
 }
 
