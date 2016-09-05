@@ -7,8 +7,6 @@ import log from 'loglevel';
 import MastheadIcon from './MastheadIcon';
 import NotificationsView from '../views/NotificationsView';
 import ActivityView from '../views/ActivityView';
-import LinkBlock from './LinkBlock';
-import Link from './Link';
 import NewsView from '../views/NewsView';
 import MastheadSearch from './MastheadSearch';
 import MastheadMobile from './MastheadMobile';
@@ -192,28 +190,6 @@ class ID7Layout extends ReactComponent {
                               onMore={ this.goToActivity }
                             >
                               <ActivityView grouped={false} />
-                            </MastheadIcon>
-                            <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
-                              <LinkBlock columns={ 1 }>
-                                <Link key="bpm" href="http://warwick.ac.uk/bpm">
-                                  Course Transfers
-                                </Link>
-                                <Link key="ett" href="http://warwick.ac.uk/ett">
-                                  Exam Timetable
-                                </Link>
-                                <Link key="massmail" href="http://warwick.ac.uk/massmail">
-                                  Mass Mailing
-                                </Link>
-                                <Link key="mrm" href="http://warwick.ac.uk/mrm">
-                                  Module Registration
-                                </Link>
-                                <Link
-                                  key="printercredits"
-                                  href="http://warwick.ac.uk/printercredits"
-                                >
-                                  Printer Credits
-                                </Link>
-                              </LinkBlock>
                             </MastheadIcon>
                           </div>
                         </div>
