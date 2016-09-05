@@ -25,12 +25,13 @@ if (fileUploadContainer) {
   );
 }
 
-$(() => {
+function wireEventListeners() {
   // Audience pickers
-  $('.audience-picker').each((i, el) => {
+  $('.audience-picker:not([data-wired])').each((i, el) => {
     const $el = $(el);
+    $el.attr('data-wired', true);
     const $deptBoxes = $(el).find('input[value*="Dept:"]');
-    const $deptSelect = $el.find('[name=department]');
+    const $deptSelect = $el.find('[data-select=department]');
 
     const $publicBox = $(el).find('input[value=Public]');
     const $otherInputs = $(el).find('input, select').not($publicBox);
@@ -41,16 +42,21 @@ $(() => {
         $otherInputs.removeAttr('disabled');
         $deptSelect.trigger('change');
       }
+
+      $deptSelect.trigger('change');
     }).trigger('change');
 
     $deptSelect.on('change', e => {
-      const deptSelected = e.target.value;
+      const deptSelected = e.target.value && !$deptSelect.is(':disabled');
       const $subsets = $deptBoxes.closest('.checkbox');
       $deptBoxes.attr('disabled', !deptSelected);
       $subsets.toggleClass('disabled', !deptSelected);
-      if (!deptSelected) {
-        $subsets.find('input').prop('checked', false);
-      }
     }).trigger('change');
   });
+}
+
+$(() => {
+  wireEventListeners();
+
+  $(document).on('start:replace', wireEventListeners);
 });

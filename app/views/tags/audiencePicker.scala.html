@@ -32,7 +32,9 @@
           @tags.seqCheckbox(form, audienceField, 'id -> "pgr", '_text -> "PG Research", 'value -> "ResearchPostgrads")
         }
 
-        @b3.select(form(departmentField), departmentOptions, '_text -> "Department")(b3.clear.fieldConstructorSpecific, messages)
+        <div class="margin-top-1">
+          @b3.select(form(departmentField), departmentOptions, '_text -> "Department", Symbol("data-select") -> "department")(b3.clear.fieldConstructorSpecific, messages)
+        </div>
         <div class=row>
           <div class="col-xs-11 col-xs-offset-1">
             @tags.seqCheckbox(form, audienceField, 'id -> "dept-all", '_text -> "Everyone", 'value -> "Dept:All")

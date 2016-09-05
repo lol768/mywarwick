@@ -142,7 +142,15 @@ gulp.task('lint', () => {
 
 function generateServiceWorker(watch) {
   const swPrecache = require('sw-precache');
-  const jsBundle = ['target/gulp/js/bundle.js','app/assets/js/push-worker.js'];
+  const globby = require('globby');
+  const htmlDependencies = globby.sync([
+    'app/assets/css/**/*'
+  ], { nodir: true }).concat([
+    'target/gulp/js/bundle.js',
+    'app/assets/js/push-worker.js',
+  ]);
+
+  console.log('htmlDependencies:', htmlDependencies);
 
   return swPrecache.generate({
     cacheId: 'start',
@@ -155,11 +163,11 @@ function generateServiceWorker(watch) {
     ignoreUrlParametersMatching: [/^v$/],
     logger: gutil.log,
     dynamicUrlToDependencies: {
-      '/': jsBundle,
-      '/notifications': jsBundle,
-      '/activity': jsBundle,
-      '/news': jsBundle,
-      '/search': jsBundle,
+      '/': htmlDependencies,
+      '/notifications': htmlDependencies,
+      '/activity': htmlDependencies,
+      '/news': htmlDependencies,
+      '/search': htmlDependencies,
     },
     maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
   })
