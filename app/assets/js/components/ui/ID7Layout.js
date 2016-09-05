@@ -222,6 +222,8 @@ class ID7Layout extends ReactComponent {
             </header>
 
             <div className="id7-main-content">
+              { this.props.pathname.startsWith('/news') ?
+                this.props.children :
               <div className="row">
                 <div className="col-sm-8 col-lg-9">
                   {this.props.children}
@@ -229,7 +231,7 @@ class ID7Layout extends ReactComponent {
                 <div className="col-sm-4 col-lg-3">
                   <NewsView />
                 </div>
-              </div>
+              </div> }
             </div>
           </main>
         </div>
@@ -259,6 +261,7 @@ const select = (state) => ({
   user: state.user,
   colourTheme: state.ui.colourTheme,
   zoomedTile: state.ui.zoomedTile,
+  pathname: state.routing.locationBeforeTransitions.pathname,
 });
 
 export default connect(select)(ID7Layout);
