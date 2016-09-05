@@ -45,11 +45,28 @@ $(SPLIT_FORM).each((i, form) => {
   }
 
   function replaceFormGroups(html) {
-    $(html).find(`section:eq(${currentPage}) .form-group[id]`).each((j, group) => {
-      $form.find(`#${group.id}`).replaceWith(group);
-    });
+    // Remove all errors from the current page of the form
+    const $currentSection = $(`section:eq(${currentPage})`);
+    $currentSection.find('*[id*=_error_]').remove();
+    $currentSection.find('.has-error').removeClass('has-error');
 
-    $(document).trigger('start:replace');
+    const $groupsWithErrors = $(html).find(`section:eq(${currentPage}) .has-error`);
+
+    $.map($groupsWithErrors, group => {
+      const $errors = $(group).find('*[id*=_error_]');
+      const $groupInPage = $(`#${group.id}`);
+
+      // Put the form group into the error state and add any errors
+      $groupInPage.addClass('has-error');
+      const $div = $groupInPage.find('> div').eq(0);
+
+      // Some fields display their errors before the control
+      if ($errors.index() === 0) {
+        $errors.prependTo($div);
+      } else {
+        $errors.appendTo($div);
+      }
+    });
   }
 
   $('button.next').on('click', function onClick(e) {

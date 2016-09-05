@@ -18,7 +18,7 @@
 
       <div class="audience-picker">
 
-        @for(msg <- info.errorsAndInfos) { <span class="help-block">@msg</span> }
+        @for((msg, i) <- info.errorsAndInfos.zipWithIndex) { <span class="help-block" id="item_audience_error_@i">@msg</span> }
 
         @if(permissionScope == PermissionScope.AllDepartments) {
           @if(allowPublic) {
