@@ -41,6 +41,12 @@ localforage.config({
   name: 'Start',
 });
 
+function hasAuthoritativeUser() {
+  const u = store.getState().user;
+
+  return u && u.authoritative === true;
+}
+
 const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
 
@@ -51,9 +57,11 @@ $(() => {
 
   $(window).on('deviceorientation resize', () => store.dispatch(device.updateDeviceWidth()));
 
-  $(window).on('online', () =>
-    store.dispatch(notifications.fetch())
-  );
+  $(window).on('online', () => {
+    if (hasAuthoritativeUser()) {
+      store.dispatch(notifications.fetch());
+    }
+  });
 
   if (window.navigator.userAgent.indexOf('Mobile') >= 0) {
     $('html').addClass('mobile');
@@ -102,7 +110,9 @@ if ('serviceWorker' in navigator) {
 }
 
 SocketDatapipe.onopen = () => {
-  store.dispatch(notifications.fetch());
+  if (hasAuthoritativeUser()) {
+    store.dispatch(notifications.fetch());
+  }
 };
 
 SocketDatapipe.subscribe(data => {
@@ -145,11 +155,10 @@ const loadPersonalisedDataFromServer = _.once(() => {
   setInterval(() => store.dispatch(tiles.fetchTileContent()), 5 * 60 * 1000);
 });
 
-store.subscribe(() => {
-  const u = store.getState().user;
-
-  if (u && u.authoritative === true) {
+const unsubscribe = store.subscribe(() => {
+  if (hasAuthoritativeUser()) {
     loadPersonalisedDataFromServer();
+    unsubscribe();
   }
 });
 
