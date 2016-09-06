@@ -18,3 +18,14 @@ case class EventHit(
     "ev" -> value.map(_.toString).toSeq
   )
 }
+
+case class PageViewHit(
+  url: String,
+  title: Option[String]
+) extends Hit {
+  val attributes = Map(
+    "t" -> Seq("pageview"),
+    "dl" -> Seq(url),
+    "dt" -> title.toSeq
+  )
+}
