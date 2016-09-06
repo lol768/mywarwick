@@ -4,8 +4,7 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import controllers.BaseController
-import models.{API, EventHit}
-import org.joda.time.DateTime
+import models.{API, PageViewHit}
 import play.api.libs.json._
 import services.{AnalyticsMeasurementService, NewsService, SecurityService}
 
@@ -25,17 +24,19 @@ class ReadNewsController @Inject()(
   }
 
   def redirect(id: String) = UserAction { implicit request =>
-    news.getNewsItem(id).flatMap(_.link).map { link =>
-      measurementService.tracker.send(EventHit(
-        category = "News",
-        action = "Click",
-        label = Some(id)
+    (for {
+      item <- news.getNewsItem(id)
+      link <- item.link
+    } yield {
+      measurementService.tracker.send(PageViewHit(
+        url = controllers.api.routes.ReadNewsController.redirect(id).absoluteURL(),
+        title = Some(item.title)
       ))
 
       Redirect(link.href.toString)
-    }.getOrElse {
+    }).getOrElse(
       Redirect(controllers.routes.HomeController.index())
-    }
+    )
   }
 
 }
