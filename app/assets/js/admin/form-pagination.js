@@ -44,7 +44,7 @@ $(SPLIT_FORM).each((i, form) => {
     return $form.find(`section:eq(${currentPage}) .has-error`).length > 0;
   }
 
-  function replaceFormGroups(html) {
+  function updateFormGroupErrors(html) {
     // Remove all errors from the current page of the form
     const $currentSection = $(`section:eq(${currentPage})`);
     $currentSection.find('*[id*=_error_]').remove();
@@ -76,7 +76,7 @@ $(SPLIT_FORM).each((i, form) => {
 
     validate()
       .then(html => {
-        replaceFormGroups(html);
+        updateFormGroupErrors(html);
 
         if (!hasErrors()) {
           pushSection(currentPage + 1);
@@ -99,7 +99,7 @@ $(SPLIT_FORM).each((i, form) => {
   $form.on('submit', () => {
     validate()
       .then(html => {
-        replaceFormGroups(html);
+        updateFormGroupErrors(html);
 
         if (!hasErrors()) {
           $form.off().submit();
