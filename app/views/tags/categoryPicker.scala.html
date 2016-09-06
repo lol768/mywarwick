@@ -10,7 +10,7 @@
     Seq(field),
     Seq('_label -> s"What should this $itemName be tagged with?", 'id -> "item_category"),
     Nil) { info =>
-    @for(msg <- info.errorsAndInfos) { <span class="help-block">@msg</span> }
+    @for((msg, i) <- info.errorsAndInfos.zipWithIndex) { <span class="help-block" id="item_category_error_@i">@msg</span> }
 
     @for(category <- categories) {
       @tags.seqCheckbox(form, "categories", '_text -> category.name, 'value -> category.id)

@@ -26,10 +26,8 @@ if (fileUploadContainer) {
 }
 
 function wireEventListeners() {
-  // Audience pickers
-  $('.audience-picker:not([data-wired])').each((i, el) => {
+  $('.audience-picker').each((i, el) => {
     const $el = $(el);
-    $el.attr('data-wired', true);
     const $deptBoxes = $(el).find('input[value*="Dept:"]');
     const $deptSelect = $el.find('[data-select=department]');
 
@@ -57,6 +55,4 @@ function wireEventListeners() {
 
 $(() => {
   wireEventListeners();
-
-  $(document).on('start:replace', wireEventListeners);
 });
