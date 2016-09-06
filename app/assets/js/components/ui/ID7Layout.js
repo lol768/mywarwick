@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import _ from 'lodash';
 import log from 'loglevel';
-import MastheadIcon from './MastheadIcon';
+import MastheadNavItem from './MastheadNavItem';
 import NotificationsView from '../views/NotificationsView';
 import ActivityView from '../views/ActivityView';
 import NewsView from '../views/NewsView';
@@ -17,16 +17,12 @@ import UtilityBar from './UtilityBar';
 import { connect } from 'react-redux';
 import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
-import * as tiles from '../../state/tiles';
-import { push, goBack } from 'react-router-redux';
+import { goBack } from 'react-router-redux';
 
 class ID7Layout extends ReactComponent {
 
   constructor(props) {
     super(props);
-    this.goToHome = this.goToHome.bind(this);
-    this.goToNotification = this.goToNotification.bind(this);
-    this.goToActivity = this.goToActivity.bind(this);
     this.onBackClick = this.onBackClick.bind(this);
   }
 
@@ -63,20 +59,6 @@ class ID7Layout extends ReactComponent {
     $(document.body)
       .removeClass(`theme-${oldTheme}`)
       .addClass(`theme-${newTheme}`);
-  }
-
-  goToHome(e) {
-    e.preventDefault();
-    this.props.dispatch(push('/'));
-    this.props.dispatch(tiles.fetchTileContent());
-  }
-
-  goToNotification() {
-    this.props.dispatch(push('/notifications'));
-  }
-
-  goToActivity() {
-    this.props.dispatch(push('/activity'));
   }
 
   onBackClick() {
@@ -172,26 +154,40 @@ class ID7Layout extends ReactComponent {
                               <img src="" alt="Warwick" />
                             </a>
                           </div>
-                          <div className="masthead-popover-icons">
-                            <MastheadIcon
+                          <ul className="masthead-nav">
+                            <MastheadNavItem
+                              icon="user"
+                              key="me"
+                              title="Me"
+                              href="/"
+                              dispatch={this.props.dispatch}
+                              pathname={this.props.pathname}
+                            />
+                            <MastheadNavItem
+                              popover
                               icon="inbox"
                               badge={ notificationsCount }
                               key="notifications"
-                              popoverTitle="Notifications"
-                              isDisabled={ !user.data.authenticated }
-                              onMore={ this.goToNotification }
+                              title="Notifications"
+                              disabled={ !user.data.authenticated }
+                              href="/notifications"
+                              dispatch={this.props.dispatch}
+                              pathname={this.props.pathname}
                             >
                               <NotificationsView grouped={false} />
-                            </MastheadIcon>
-                            <MastheadIcon
+                            </MastheadNavItem>
+                            <MastheadNavItem
+                              popover
                               icon="dashboard" key="activity"
-                              popoverTitle="Activity"
-                              isDisabled={ !user.data.authenticated }
-                              onMore={ this.goToActivity }
+                              title="Activity"
+                              disabled={ !user.data.authenticated }
+                              href="/activity"
+                              dispatch={this.props.dispatch}
+                              pathname={this.props.pathname}
                             >
                               <ActivityView grouped={false} />
-                            </MastheadIcon>
-                          </div>
+                            </MastheadNavItem>
+                          </ul>
                         </div>
                       </div>
                       <MastheadSearch />

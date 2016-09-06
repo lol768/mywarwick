@@ -1,36 +1,43 @@
-.masthead-popover-icons {
-  font-size: 28px;
-  float: right;
-  margin-top: 42px;
+.masthead-nav {
+  .nav;
+  .nav-pills;
+  .pull-right;
 
-  .masthead-popover-icon {
-    padding: 10px;
+  margin-top: 47px;
 
-    &:hover, &.popover-active {
-      color: #8c6e96;
+  li {
+    margin-bottom: 0;
+  }
+
+  a {
+    transition: color 0s;
+
+    &.popover-active {
+      background-color: @gray-lighter;
     }
+  }
 
-    .disabled & {
-      color: #9c9c9c;
-      &:hover {
-        color: #9c9c9c;
+  li.active {
+    > a {
+      &, &:hover, &:focus {
+        background-color: @id7-brand-default;
       }
     }
 
-    > i {
-      position: relative;
-
-      > .badge {
-        background-color: #ff0404;
-        position: absolute;
-        top: 0;
-        right: -6px;
-
-        padding: 2px 3px 2px 2px;
-        border-radius: 4px;
-        font-size: 10px;
-      }
+    .badge {
+      background-color: white;
+      color: @id7-brand-default;
     }
+  }
+
+  &.disabled {
+    &, &:hover {
+      color: @gray-light;
+    }
+  }
+
+  .badge {
+    background-color: #ff0404;
   }
 
   .popover-title {
