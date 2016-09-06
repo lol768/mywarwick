@@ -4,9 +4,31 @@ import 'jquery-form/jquery.form.js';
 import log from 'loglevel';
 
 const SPLIT_FORM = 'form.split-form';
+const SLIDE_DURATION = 350;
 
 $(SPLIT_FORM).each((i, form) => {
   const $form = $(form);
+
+  /**
+   * Animates slide transition on $prev and $next elements
+   * @param dir left (-1) or right (1)
+   * @param $prev
+   * @param $next
+   */
+  function transition($prev, $next, dir = -1) {
+    $prev.removeClass('active')
+      .animate({ marginLeft: `${100 * dir}%`, opacity: 0 }, {
+        duration: SLIDE_DURATION,
+        start: () => $form.css('overflow', 'hidden'),
+        complete: () => {
+          $form.css('overflow', 'visible');
+          $prev.hide();
+        },
+      });
+
+    $next.css({ marginLeft: `${-100 * dir}%`, display: 'inline-block' }).addClass('active')
+      .animate({ marginLeft: '0', opacity: 1 }, { duration: SLIDE_DURATION });
+  }
 
   function getHashNum() {
     return parseInt(location.hash.substring(1), 10);
@@ -16,10 +38,18 @@ $(SPLIT_FORM).each((i, form) => {
 
   function showSection(num) {
     history.replaceState({ pageNum: num }, location.href);
+    const prevPage = currentPage;
     currentPage = num;
-    const $section = $form.find(`section:eq(${num})`);
-    $form.find('section.active').removeClass('active');
-    $section.addClass('active');
+    const $entering = $form.find(`section:eq(${num})`);
+    const $leaving = $form.find('section.active');
+
+    if (prevPage === num) { // on initial load
+      $entering.addClass('active').css('display', 'inline-block');
+    } else if (prevPage < num) {
+      transition($leaving, $entering);
+    } else {
+      transition($leaving, $entering, 1); // transition right
+    }
   }
 
   function pushSection(num) {

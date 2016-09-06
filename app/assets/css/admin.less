@@ -19,8 +19,18 @@ dd.error {
   color: @id7-brand-red;
 }
 
-.split-form > section {
-  display: none;
+.split-form {
+  position: relative;
+
+  > section {
+    display: none;
+    width: 100%;
+    position: absolute;
+
+    &.active {
+      position: relative;
+    }
+  }
 }
 
 .split-form > section.active {
@@ -32,6 +42,7 @@ dd.error {
   opacity: 0;
   left: 20%;
 }
+
 .news-item, .activity-item {
   .btn-toolbar {
     position: relative;
