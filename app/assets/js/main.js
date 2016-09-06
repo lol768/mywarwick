@@ -101,6 +101,10 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+SocketDatapipe.onopen = () => {
+  store.dispatch(notifications.fetch());
+};
+
 SocketDatapipe.subscribe(data => {
   switch (data.type) {
     case 'activity':
