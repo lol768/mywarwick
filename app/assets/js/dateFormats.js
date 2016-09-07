@@ -31,13 +31,13 @@ function formatMoment(then, now) {
   return then.format(FULL_DATE_TIME);
 }
 
-export function formatDateForNewsItem(date, referenceDate = new Date()) {
+export function forNewsItem(date, referenceDate = new Date()) {
   if (date === undefined) throw new Error('No date specified'); // otherwise we render now :|
 
   return formatMoment(localMoment(date), localMoment(referenceDate));
 }
 
-export function formatDateForActivity(date, grouped = false, referenceDate = new Date()) {
+export function forActivity(date, grouped = false, referenceDate = new Date()) {
   if (date === undefined) throw new Error('No date specified'); // otherwise we render now :|
   const then = localMoment(date);
   const now = localMoment(referenceDate);
@@ -62,6 +62,6 @@ export function formatDateForActivity(date, grouped = false, referenceDate = new
 }
 
 export default function formatDate(date, referenceDate = new Date()) {
-  return formatDateForNewsItem(date, referenceDate);
+  return forNewsItem(date, referenceDate);
 }
 

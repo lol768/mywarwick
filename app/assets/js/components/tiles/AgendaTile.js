@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { localMoment } from '../../dateFormatter';
+import { localMoment } from '../../dateFormats';
 import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';

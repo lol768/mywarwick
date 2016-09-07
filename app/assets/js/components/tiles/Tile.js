@@ -1,7 +1,7 @@
 /* eslint react/prop-types: 0, react/sort-comp: 0 */
 import React, { Component } from 'react';
 
-import { localMoment } from '../../dateFormatter.js';
+import { localMoment } from '../../dateFormats.js';
 import classNames from 'classnames';
 
 export default class Tile extends Component {

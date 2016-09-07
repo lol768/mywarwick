@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import TileContent from './TileContent';
 
-import formatDate from '../../dateFormatter';
+import formatDate from '../../dateFormats';
 import _ from 'lodash';
 
 export default class ListTile extends TileContent {
