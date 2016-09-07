@@ -2,7 +2,7 @@ import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 import { connect } from 'react-redux';
 
-import formatDate from '../../dateFormatter';
+import { formatDateForNewsItem } from '../../dateFormatter';
 import Hyperlink from './Hyperlink';
 
 // Convert newlines to paragraphs.
@@ -50,7 +50,7 @@ class NewsItem extends ReactComponent {
               {categories.map(c => <NewsItemTag key={c.id} name={c.name} />)}
             </div>
             <p>
-              {formatDate(publishDate, new Date(), true)}
+              {formatDateForNewsItem(publishDate)}
             </p>
           </div>
         </div>

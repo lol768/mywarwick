@@ -32,7 +32,7 @@ class ActivityView extends ReactComponent {
 
   render() {
     const activities = takeFromStream(this.props.activities, this.state.numberToShow)
-      .map(n => <ActivityItem key={n.id} {...n} />);
+      .map(n => <ActivityItem key={n.id} grouped={this.props.grouped} {...n} />);
 
     const streamSize = getStreamSize(this.props.activities);
     const hasAny = streamSize > 0;
@@ -57,6 +57,10 @@ class ActivityView extends ReactComponent {
     );
   }
 }
+
+ActivityView.defaultProps = {
+  grouped: true,
+};
 
 function select(state) {
   return {

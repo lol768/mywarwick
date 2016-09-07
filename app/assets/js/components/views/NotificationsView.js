@@ -98,7 +98,7 @@ class NotificationsView extends ReactComponent {
       .map(n =>
         <ActivityItem
           key={ n.id }
-          forceDisplayDay={ !this.props.grouped }
+          grouped={ this.props.grouped }
           unread={ this.isUnread(n) }
           {...n}
         />
@@ -135,6 +135,10 @@ class NotificationsView extends ReactComponent {
   }
 
 }
+
+NotificationsView.defaultProps = {
+  grouped: true,
+};
 
 function select(state) {
   return {
