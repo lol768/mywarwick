@@ -1,5 +1,5 @@
 import WeatherTile, { oneWordWeather } from 'components/tiles/WeatherTile';
-import { localMomentUnix } from 'dateFormatter';
+import { localMomentUnix } from 'dateFormats';
 
 describe('WeatherTile', () => {
 

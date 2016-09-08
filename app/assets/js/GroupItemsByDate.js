@@ -1,4 +1,4 @@
-import { localMoment } from './dateFormatter';
+import { localMoment } from './dateFormats';
 
 // A way to describe a grouping strategy
 

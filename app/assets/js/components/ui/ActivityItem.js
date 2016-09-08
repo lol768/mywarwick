@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import Hyperlink from './Hyperlink';
-import formatDate from '../../dateFormatter';
+import * as dateFormats from '../../dateFormats';
 import classnames from 'classnames';
 import AppIcon from './AppIcon';
 
@@ -24,7 +24,7 @@ const ActivityItem = (props) => {
             <div className="activity-item__text">{ props.text }</div>
 
             <div className="activity-item__date">
-              { formatDate(props.date, undefined, props.forceDisplayDay) }
+              { dateFormats.forActivity(props.date, props.grouped) }
             </div>
           </div>
         </div>
@@ -47,6 +47,6 @@ ActivityItem.propTypes = {
     name: React.PropTypes.string,
     colour: React.PropTypes.string,
   }),
-  forceDisplayDay: PropTypes.bool,
+  grouped: PropTypes.bool,
 };
 

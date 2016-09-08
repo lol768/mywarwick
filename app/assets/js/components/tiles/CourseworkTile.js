@@ -1,6 +1,6 @@
 import React from 'react';
 import ListTile from './ListTile';
-import formatDate, { localMoment } from '../../dateFormatter';
+import formatDate, { localMoment } from '../../dateFormats';
 import _ from 'lodash';
 import Hyperlink from '../ui/Hyperlink';
 
