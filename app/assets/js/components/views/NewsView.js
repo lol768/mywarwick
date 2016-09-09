@@ -1,4 +1,6 @@
+import $ from 'jquery';
 import React, { PropTypes } from 'react';
+import ReactDOM from 'react-dom';
 import NewsCategoriesView from './NewsCategoriesView';
 import NewsItem from '../ui/NewsItem';
 import { connect } from 'react-redux';
@@ -13,11 +15,28 @@ class NewsView extends React.Component {
     this.onClickRefresh = this.fetch.bind(this);
 
     this.loadMore = this.loadMore.bind(this);
+
+    this.state = {};
   }
 
   componentDidMount() {
     if (this.props.items.length === 0 && !this.props.failed) {
       this.fetch();
+    }
+
+    this.updateWidth();
+  }
+
+  componentDidUpdate() {
+    this.updateWidth();
+  }
+
+  updateWidth() {
+    const $node = $(ReactDOM.findDOMNode(this));
+    const width = $node.width();
+
+    if (width !== this.state.width) {
+      this.setState({ width });
     }
   }
 
@@ -49,7 +68,12 @@ class NewsView extends React.Component {
       );
     }
 
-    const itemComponents = items.map(item => <NewsItem key={item.id} {...item} />);
+    if (this.state.width === undefined) {
+      return <div />;
+    }
+
+    const itemComponents = items
+      .map(item => <NewsItem key={item.id} width={this.state.width} {...item} />);
 
     const maybeMessage = !fetching ? <p>No news to show you yet.</p> : null;
 
@@ -83,6 +107,9 @@ NewsView.propTypes = {
 const select = (state) => ({
   ...state.news,
   newsCategories: state.newsCategories,
+
+  // Never read, but kicks the component into updating when the device width changes
+  deviceWidth: state.device.width,
 });
 
 export default connect(select)(NewsView);
