@@ -56,7 +56,8 @@ class NewsImagesController @Inject()(
         }
         .map { byteArray =>
           Ok(byteArray).as(newsImage.contentType).withHeaders(
-            CONTENT_DISPOSITION -> "inline"
+            CONTENT_DISPOSITION -> "inline",
+            CACHE_CONTROL -> "max-age=31536000"
           )
         }.getOrElse(NotFound("Object missing from store"))
     }.getOrElse(NotFound("Image not found"))
