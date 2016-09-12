@@ -39,6 +39,12 @@ export default function init(opts) {
       store.dispatch(push(path));
     },
 
+    search(query) {
+      // This will be better once we revisit Search in Start - quick bodge for now
+      this.navigate('/');
+      this.navigate(`/search?q=${encodeURIComponent(query)}`);
+    },
+
     appToForeground() {
       store.dispatch(tiles.fetchTileContent());
       store.dispatch(displayUpdateProgress);
@@ -65,8 +71,15 @@ export default function init(opts) {
     });
   }
 
-  if (window.navigator.userAgent.indexOf('WarwickStart/') >= 0) {
-    $('html').addClass('app standalone');
+  const $html = $('html');
+  const userAgent = window.navigator.userAgent;
+
+  if (userAgent.indexOf('Android') >= 0) {
+    $html.addClass('android');
+  }
+
+  if (userAgent.indexOf('WarwickStart/') >= 0) {
+    $html.addClass('app standalone');
 
     store.subscribe(() => {
       const state = store.getState();
@@ -80,6 +93,8 @@ export default function init(opts) {
         currentPath: window.location.pathname,
         isUserLoggedIn: state.user.data.usercode !== undefined,
         tabBarHidden: state.ui.className !== 'mobile',
+        user: state.user.data,
+        ssoUrls: state.user.links,
       });
     });
 
