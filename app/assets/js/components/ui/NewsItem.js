@@ -22,6 +22,8 @@ class NewsItem extends ReactComponent {
     const url = link && `/news/${id}/redirect?clientId=${analyticsClientId}`;
     const moreLink = link ? (<p><Hyperlink href={url}>{link.text}</Hyperlink></p>) : null;
 
+    const imageWidth = Math.round(width * (window.devicePixelRatio || 1));
+
     return (
       <article className="news-item">
         <div className="news-item__body">
@@ -34,7 +36,7 @@ class NewsItem extends ReactComponent {
           { imageId ?
             <div className="news-item__image">
               <img
-                src={ `/api/news/images/${imageId}?width=${width * window.devicePixelRatio}` }
+                src={ `/api/news/images/${imageId}?width=${imageWidth}` }
                 alt={ title }
               />
             </div>
