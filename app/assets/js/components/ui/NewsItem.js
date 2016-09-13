@@ -22,6 +22,8 @@ class NewsItem extends ReactComponent {
     const url = link && `/news/${id}/redirect?clientId=${analyticsClientId}`;
     const moreLink = link ? (<p><Hyperlink href={url}>{link.text}</Hyperlink></p>) : null;
 
+    const imageWidth = width * (window.devicePixelRatio || 1);
+
     return (
       <article className="news-item">
         <div className="news-item__body">
@@ -31,14 +33,7 @@ class NewsItem extends ReactComponent {
             </Hyperlink>
           </h1>
 
-          { imageId ?
-            <div className="news-item__image">
-              <img
-                src={ `/api/news/images/${imageId}?width=${width * window.devicePixelRatio}` }
-                alt={ title }
-              />
-            </div>
-            : null }
+          { imageId && <NewsItemImage id={imageId} width={imageWidth} alt={title} /> }
 
           <div className="news-item__content">
             {render(text)}
@@ -58,6 +53,20 @@ class NewsItem extends ReactComponent {
     );
   }
 }
+
+export function NewsItemImage({ id, width, alt }) {
+  return (
+    <div className="news-item__image">
+      <img src={`/api/news/images/${id}?width=${Math.round(width)}`} alt={alt} />
+    </div>
+  );
+}
+
+NewsItemImage.propTypes = {
+  id: React.PropTypes.string.isRequired,
+  width: React.PropTypes.number.isRequired,
+  alt: React.PropTypes.string.isRequired,
+};
 
 const NewsItemTag = props =>
   <span className="badge">
