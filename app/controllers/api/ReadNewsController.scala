@@ -6,7 +6,8 @@ import com.google.inject.Inject
 import controllers.BaseController
 import models.{API, PageViewHit}
 import play.api.libs.json._
-import services.{AnalyticsMeasurementService, NewsService, SecurityService}
+import services.analytics.AnalyticsMeasurementService
+import services.{NewsService, SecurityService}
 
 @Singleton
 class ReadNewsController @Inject()(

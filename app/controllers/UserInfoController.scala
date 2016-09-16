@@ -4,7 +4,8 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, Cookie, DiscardingCookie}
-import services.{AnalyticsMeasurementService, PhotoService, UserInitialisationService}
+import services.analytics.AnalyticsMeasurementService
+import services.{PhotoService, UserInitialisationService}
 import system.ThreadPools.externalData
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl.GLOBAL_LOGIN_COOKIE_NAME
 import uk.ac.warwick.sso.client.SSOToken.SSC_TICKET_TYPE

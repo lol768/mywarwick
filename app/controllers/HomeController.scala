@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.Configuration
 import play.api.mvc._
-import services.{AnalyticsMeasurementService, AnalyticsTrackingID}
+import services.analytics.{AnalyticsMeasurementService, AnalyticsTrackingID}
 import system.AppMetrics
 
 case class SearchRootUrl(string: String)

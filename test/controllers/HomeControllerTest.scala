@@ -7,7 +7,8 @@ import play.api.Configuration
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import services.{AnalyticsMeasurementService, AnalyticsTrackingID}
+import services.AnalyticsTrackingID
+import services.analytics.{AnalyticsMeasurementService, AnalyticsTrackingID}
 import system.AppMetrics
 
 class HomeControllerTest extends PlaySpec with MockitoSugar with Results {
