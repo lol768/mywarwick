@@ -87,7 +87,7 @@ export default function init(opts) {
       update({
         unreadNotificationCount:
           stream.getNumItemsSince(
-            state.notifications,
+            state.notifications.stream,
             state.notificationsLastRead
           ),
         currentPath: window.location.pathname,

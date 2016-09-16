@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 
 import { takeFromStream, getStreamSize } from '../../stream';
 import { markNotificationsRead } from '../../state/notification-metadata';
+import * as notifications from '../../state/notifications';
 
 const SOME_MORE = 20;
 
@@ -42,6 +43,18 @@ class NotificationsView extends ReactComponent {
   }
 
   loadMore() {
+    const streamSize = getStreamSize(this.props.notifications);
+    const hasOlderItemsLocally = this.state.numberToShow < streamSize;
+
+    if (hasOlderItemsLocally) {
+      this.showMore();
+    } else if (this.props.olderItemsOnServer) {
+      this.props.dispatch(notifications.fetchMoreNotifications())
+        .then(() => this.showMore());
+    }
+  }
+
+  showMore() {
     this.setState({
       numberToShow: this.state.numberToShow + SOME_MORE,
     });
@@ -94,7 +107,7 @@ class NotificationsView extends ReactComponent {
   }
 
   render() {
-    const notifications = takeFromStream(this.props.notifications, this.state.numberToShow)
+    const notificationItems = takeFromStream(this.props.notifications, this.state.numberToShow)
       .map(n =>
         <ActivityItem
           key={ n.id }
@@ -106,7 +119,7 @@ class NotificationsView extends ReactComponent {
 
     const streamSize = getStreamSize(this.props.notifications);
     const hasAny = streamSize > 0;
-    const hasMore = this.state.numberToShow < streamSize;
+    const hasMore = this.state.numberToShow < streamSize || this.props.olderItemsOnServer;
 
     return (
       <div>
@@ -120,7 +133,7 @@ class NotificationsView extends ReactComponent {
         { hasAny ?
           <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore }>
             <GroupedList groupBy={ this.props.grouped ? groupItemsByDate : undefined }>
-              { notifications }
+              { notificationItems }
             </GroupedList>
           </InfiniteScrollable>
           :
@@ -142,8 +155,9 @@ NotificationsView.defaultProps = {
 
 function select(state) {
   return {
-    notifications: state.notifications,
+    notifications: state.notifications.stream,
     notificationsLastRead: state.notificationsLastRead,
+    olderItemsOnServer: state.notifications.olderItemsOnServer,
   };
 }
 

@@ -53,7 +53,7 @@ export class AppLayout extends ReactComponent {
 function mapStateToProps(state) {
   return {
     notificationsCount:
-      getNumItemsSince(state.notifications, _(state).get(['notificationsLastRead', 'date'])),
+      getNumItemsSince(state.notifications.stream, _(state).get(['notificationsLastRead', 'date'])),
     layoutClassName: state.ui.className,
     user: state.user.data,
   };

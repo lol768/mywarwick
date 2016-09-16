@@ -20,7 +20,7 @@ trait ActivityDao {
 
   def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity]
 
-  def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityRender]
+  def getActivitiesForUser(usercode: String, notifications: Option[Boolean] = None, before: Option[String] = None, since: Option[String] = None, limit: Int = 20)(implicit c: Connection): Seq[ActivityRender]
 
   def getActivityRenderById(id: String)(implicit c: Connection): Option[ActivityRender]
 
@@ -147,25 +147,78 @@ class ActivityDaoImpl @Inject()(
       .as(activityParser.*)
   }
 
-  override def getActivitiesForUser(usercode: String, limit: Int, before: Option[DateTime] = None)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
-    val maybeBefore = if (before.isDefined) "AND ACTIVITY_RECIPIENT.PUBLISHED_AT < {before}" else ""
-    SQL(s"""
+  override def getActivitiesForUser(usercode: String, notifications: Option[Boolean], before: Option[String], since: Option[String], limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
+    // If before or since are specified, get the publish date for each
+    val beforeDate = before.flatMap(getActivityById).map(_.publishedAt)
+    val sinceDate = since.flatMap(getActivityById).map(_.publishedAt)
+
+    // Optionally only return notifications or activities - default is both
+    val maybeNotifications = if (notifications.nonEmpty)
+      "AND ACTIVITY.SHOULD_NOTIFY = {notifications}"
+    else ""
+
+    // If the before activity exists, SQL to find only activities published before it
+    val maybeBefore = if (beforeDate.nonEmpty)
+      """
+        AND (
+          ACTIVITY.PUBLISHED_AT < {beforeDate} OR (
+            ACTIVITY.PUBLISHED_AT = {beforeDate} AND ACTIVITY.ID < {before}
+          )
+        )
+      """
+    else ""
+
+    // If the since activity exists, SQL to find only activities published after it
+    val maybeSince = if (sinceDate.nonEmpty)
+      """
+        AND (
+          ACTIVITY.PUBLISHED_AT > {sinceDate} OR (
+            ACTIVITY.PUBLISHED_AT = {sinceDate} AND ACTIVITY.ID > {since}
+          )
+        )
+      """
+    else ""
+
+    // Handle the case where there is an upper and lower bound on the activity
+    // to return, and they have the same publish time
+    val conditions = if (beforeDate.nonEmpty && beforeDate == sinceDate)
+      """
+        AND ACTIVITY.PUBLISHED_AT = {beforeDate}
+        AND ACTIVITY.ID > {since}
+        AND ACTIVITY.ID < {before}
+      """
+    else maybeBefore + maybeSince
+
+    // If requesting activities since an activity, return the activities
+    // immediately after the since activity - not just any that have happened
+    // since.
+    // Note that the returned activities are always sorted newest-first.  This
+    // affects which activities are returned.
+    val publishedAtOrder = if (sinceDate.nonEmpty) "ASC" else "DESC"
+
+    val query = s"""
       $selectActivityRender
       WHERE ACTIVITY.ID IN (
         SELECT ACTIVITY_ID
         FROM ACTIVITY_RECIPIENT
           JOIN ACTIVITY ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
         WHERE USERCODE = {usercode}
-          AND REPLACED_BY_ID IS NULL
-          $maybeBefore
-        ORDER BY ACTIVITY_RECIPIENT.PUBLISHED_AT DESC
+          AND ACTIVITY.REPLACED_BY_ID IS NULL
+          $maybeNotifications
+          $conditions
+        ORDER BY ACTIVITY_RECIPIENT.PUBLISHED_AT $publishedAtOrder, ACTIVITY.ID ASC
         ${dialect.limitOffset(limit)}
       )
-      ORDER BY ACTIVITY.PUBLISHED_AT DESC
-      """)
-      .on(
+      ORDER BY ACTIVITY.PUBLISHED_AT DESC, ACTIVITY.ID ASC
+      """
+
+    SQL(query).on(
         'usercode -> usercode,
-        'before -> before.getOrElse(DateTime.now)
+        'before -> before.orNull,
+        'since -> since.orNull,
+        'beforeDate -> beforeDate.orNull,
+        'sinceDate -> sinceDate.orNull,
+        'notifications -> notifications.getOrElse(false)
       )
       .as(activityRenderParser.*)
   }
@@ -177,18 +230,18 @@ class ActivityDaoImpl @Inject()(
         .as(activityRenderParser.*)
     }.headOption
 
-  def combineActivities(activities: Seq[ActivityRender]): Seq[ActivityRender] = {
-    activities
-      .groupBy(_.activity.id)
-      .map { case (id, a) => a.reduceLeft((a1, a2) => a1.copy(tags = a1.tags ++ a2.tags)) }
-      .toSeq
+  private def combineActivities(activities: Seq[ActivityRender]): Seq[ActivityRender] = {
+    foldMerge[ActivityRender, String](activities, a => a.activity.id, (a1, a2) => a1.copy(tags = a1.tags ++ a2.tags))
   }
 
-  sealed abstract class ReadField(val name: String)
-
-  case object Notifications extends ReadField("NOTIFICATIONS_LAST_READ")
-
-  case object Activities extends ReadField("ACTIVITIES_LAST_READ")
+  // This is an amalgamation of groupBy and foldRight that preserves the original
+  // ordering of the input sequence
+  private def foldMerge[A, B](seq: Seq[A], key: A => B, merge: (A, A) => A): Seq[A] = {
+    seq.foldRight(List.empty[A]) {
+      case (a, b :: tail) if key(a) == key(b) => merge(a, b) :: tail
+      case (a, b) => a :: b
+    }
+  }
 
   override def getLastReadDate(usercode: String)(implicit c: Connection): Option[DateTime] = {
     SQL(
@@ -268,7 +321,7 @@ class ActivityDaoImpl @Inject()(
 
   private lazy val activityIconParser: RowParser[ActivityIcon] =
     get[String]("ICON") ~
-    get[Option[String]]("COLOUR") map {
+      get[Option[String]]("COLOUR") map {
       case icon ~ colour => ActivityIcon(icon, colour)
     }
 }

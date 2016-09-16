@@ -128,7 +128,13 @@ SocketDatapipe.subscribe(data => {
 
 /** Fetching/storing locally persisted data */
 
-const freezeStream = stream => _(stream).values().flatten().value();
+function freezeStream({ stream, olderItemsOnServer }) {
+  return {
+    items: _(stream).values().flatten().value(),
+    olderItemsOnServer,
+  };
+}
+
 const freezeDate = (d) => ((!!d && 'format' in d) ? d.format() : d);
 const thawDate = (d) => (!!d ? moment(d) : d);
 

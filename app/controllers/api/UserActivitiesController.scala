@@ -7,6 +7,7 @@ import controllers.BaseController
 import models.API.Error
 import models.{API, DateFormats}
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 import services.messaging.{APNSOutputService, MobileOutputService}
 import services.{ActivityService, SecurityService}
@@ -24,30 +25,25 @@ class UserActivitiesController @Inject()(
   import DateFormats.{isoDateReads, isoDateWrites}
   import securityService._
 
-  def get = APIAction { implicit request =>
-    val data = request.context.user.map { user =>
-      val before = request.getQueryString("before").map(date => new DateTime(date.toLong))
-      val limit = request.getQueryString("limit").map(_.toInt).getOrElse(20)
+  def notifications(since: Option[String], before: Option[String]) = APIAction { implicit request =>
+    val notifications = request.context.user
+      .map(user => activityService.getNotificationsForUser(user, before, since))
+      .getOrElse(Nil)
 
-      val activities = request.context.user
-        .map(user => activityService.getActivitiesForUser(user, limit, before))
-        .getOrElse(Seq.empty)
+    Ok(Json.toJson(API.Success(data = Json.obj(
+      "notifications" -> notifications,
+      "read" -> request.context.user.flatMap(activityService.getLastReadDate)
+    ))))
+  }
 
-      Json.obj(
-        "activities" -> activities,
-        "notificationsRead" -> request.context.user.flatMap(activityService.getLastReadDate)
-      )
-    } getOrElse {
-      // It looks like this might handle anonymous users okay,
-      // but APIAction above currently doesn't support them so
-      // we will never reach here.
-      Json.obj(
-        "activities" -> Nil,
-        "notificationsRead" -> None
-      )
-    }
+  def activities(since: Option[String], before: Option[String]) = APIAction { implicit request =>
+    val activities = request.context.user
+      .map(user => activityService.getActivitiesForUser(user, before, since))
+      .getOrElse(Nil)
 
-    Ok(Json.toJson(API.Success[JsObject](data = data)))
+    Ok(Json.toJson(API.Success(data = Json.obj(
+      "activities" -> activities
+    ))))
   }
 
   def markAsRead = APIAction(parse.json) { implicit request =>

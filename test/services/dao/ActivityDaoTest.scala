@@ -1,14 +1,16 @@
 package services.dao
 
+import java.sql.Connection
+
+import anorm.SqlParser._
+import anorm._
 import helpers.{Fixtures, OneStartAppPerSuite}
+import models.Output.Mobile
 import models._
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
-import Output.Mobile
 import warwick.anorm.converters.ColumnConversions._
 import warwick.sso.Usercode
-import anorm._
-import anorm.SqlParser._
 
 class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
@@ -19,7 +21,8 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
   val activitySave = Fixtures.activitySave.submissionDue
 
-  val insertSkynetProvider = SQL"""
+  val insertSkynetProvider =
+    SQL"""
         INSERT INTO provider (id, display_name, icon, colour, publisher_id) VALUES
         ('skynet', 'Skynet', 'eye-o', 'greyish', 'default')
       """
@@ -47,14 +50,14 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
     "find activities without tags" in transaction { implicit c =>
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
       activityRecipientDao.create(activityId, "someone", None)
-      activityDao.getActivitiesForUser("someone", 100).map(_.activity.id) must contain(activityId)
+      activityDao.getActivitiesForUser("someone").map(_.activity.id) must contain(activityId)
     }
 
     "find activities with tags" in transaction { implicit c =>
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
       activityRecipientDao.create(activityId, "someone", None)
       activityTagDao.save(activityId, ActivityTag("name", TagValue("value")))
-      activityDao.getActivitiesForUser("someone", 100).map(_.activity.id) must contain(activityId)
+      activityDao.getActivitiesForUser("someone").map(_.activity.id) must contain(activityId)
     }
 
     "get notifications since date" in transaction { implicit c =>
@@ -117,7 +120,7 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
       activityRecipientDao.create(activityId, "nicduke", None)
 
-      val response = activityDao.getActivitiesForUser("nicduke", 1).head
+      val response = activityDao.getActivitiesForUser("nicduke", limit = 1).head
 
       response.icon mustBe Some(ActivityIcon("eye-o", Some("greyish")))
     }
@@ -178,6 +181,43 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
       val activityRender = maybeActivityRender.get
       activityRender.activity.id must be(activityId)
       activityRender.tags must have length 2
+    }
+
+    def createActivity(time: DateTime)(implicit c: Connection) = {
+      val id = activityDao.save(activitySave.copy(publishedAt = Some(time)), audienceId, Nil)
+      activityRecipientDao.create(id, "someone", Some(time))
+      id
+    }
+
+    "handle edge case where multiple activities created at the same instant" in transaction { implicit c =>
+    val time = DateTime.now()
+
+      val ids = Seq(
+        createActivity(time),
+        createActivity(time),
+        createActivity(time),
+        createActivity(time),
+        createActivity(time)
+      ).sorted
+
+      activityDao.getActivitiesForUser("someone", since = ids.headOption, before = ids.lastOption).map(_.activity.id) must be(Seq(ids(1), ids(2), ids(3)))
+      activityDao.getActivitiesForUser("someone", since = ids.headOption, before = ids.lastOption, limit = 1).map(_.activity.id) must contain only ids(1)
+    }
+
+    "get activities before and since" in transaction { implicit c =>
+      val first = createActivity(DateTime.now().minusHours(1))
+      val middle = createActivity(DateTime.now())
+      val last = createActivity(DateTime.now().plusHours(1))
+
+      activityDao.getActivitiesForUser("someone", since = Some(first)).map(_.activity.id) must be(Seq(last, middle))
+      activityDao.getActivitiesForUser("someone", before = Some(last)).map(_.activity.id) must be(Seq(middle, first))
+      activityDao.getActivitiesForUser("someone", since = Some(first), before = Some(last)).map(_.activity.id) must contain only middle
+
+      activityDao.getActivitiesForUser("someone", before = Some(last), limit = 1).map(_.activity.id) must contain only middle
+      activityDao.getActivitiesForUser("someone", before = Some(middle), limit = 1).map(_.activity.id) must contain only first
+      activityDao.getActivitiesForUser("someone", before = Some(first), limit = 1) must be(empty)
+
+      activityDao.getActivitiesForUser("someone", since = Some(first), before = Some(first)) must be(empty)
     }
   }
 }
