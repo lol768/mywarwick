@@ -236,10 +236,10 @@ class ActivityDaoImpl @Inject()(
 
   // This is an amalgamation of groupBy and foldRight that preserves the original
   // ordering of the input sequence
-  private def foldMerge[A, B](seq: Seq[A], key: A => B, merge: (A, A) => A): Seq[A] = {
+  private def foldMerge[A, K](seq: Seq[A], key: A => K, merge: (A, A) => A): Seq[A] = {
     seq.foldRight(List.empty[A]) {
-      case (a, b :: tail) if key(a) == key(b) => merge(a, b) :: tail
-      case (a, b) => a :: b
+      case (a, x :: xs) if key(a) == key(x) => merge(a, x) :: xs
+      case (a, xs) => a :: xs
     }
   }
 

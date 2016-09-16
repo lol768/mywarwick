@@ -185,6 +185,8 @@ class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
 
     def createActivity(time: DateTime)(implicit c: Connection) = {
       val id = activityDao.save(activitySave.copy(publishedAt = Some(time)), audienceId, Nil)
+      activityTagDao.save(id, ActivityTag("a", TagValue("apple")))
+      activityTagDao.save(id, ActivityTag("b", TagValue("banana")))
       activityRecipientDao.create(id, "someone", Some(time))
       id
     }
