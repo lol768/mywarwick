@@ -17,10 +17,12 @@ import scala.collection.JavaConverters._
 trait AnalyticsReportService {
   protected val START_DATE = "2016-01-07" // dodgy af (in absence of 'all-of-time' option)
   protected val TODAY = "today"
+
   def getReport(
     ids: Seq[String],
     metrics: Seq[String],
     dimensions: Seq[String],
+    filters: Seq[DimensionFilter],
     startDate: String = START_DATE,
     endDate: String = TODAY): GetReportsResponse
 }
@@ -29,6 +31,7 @@ class AnalyticsReportServiceImpl @Inject()(
   config: Configuration
 ) extends AnalyticsReportService {
 
+  // DateRange object accepts "nDaysAgo" string for start and end dates
   private def daysAgo(num: Int) = s"${num}DaysAgo"
 
   private lazy val APPLICATION_NAME = "Start"
@@ -61,33 +64,27 @@ class AnalyticsReportServiceImpl @Inject()(
     ids: Seq[String],
     metrics: Seq[String],
     dimensions: Seq[String],
-    startDate: String = START_DATE,
-    endDate: String = TODAY) = {
+    filters: Seq[DimensionFilter],
+    startDate: String,
+    endDate: String) = {
 
     val dateRange = new DateRange()
-    dateRange.setStartDate("2016-08-15")
-    dateRange.setEndDate("2016-09-15")
+    dateRange.setStartDate(startDate)
+    dateRange.setEndDate(endDate)
 
-    val metric = new Metric()
-      .setExpression(ga("uniqueEvents"))
+    val metricsSet = metrics.map(str => new Metric().setExpression(ga(str)))
 
-    val dimension = new Dimension()
-      .setName(ga("eventLabel"))
+    val dimensionsSet = dimensions.map(str => new Dimension().setName(ga(str)))
 
-    val filter = new DimensionFilter()
-      .setDimensionName(ga("eventLabel"))
-      .setOperator("EXACT")
-      .setExpressions(ids.asJava)
-
-    val filterClause = new DimensionFilterClause()
-      .setFilters(List(filter).asJava)
+    val filterClaus = new DimensionFilterClause() // ho, ho, ho, merry filtering!
+      .setFilters(filters.asJava)
 
     val request = new ReportRequest()
       .setViewId(VIEW_ID)
-      //      .setDateRanges(java.util.Arrays.asList(dateRange))
-      .setMetrics(java.util.Arrays.asList(metric))
-      .setDimensions(java.util.Arrays.asList(dimension))
-      .setDimensionFilterClauses(List(filterClause).asJava)
+      .setDateRanges(java.util.Arrays.asList(dateRange))
+      .setMetrics(metricsSet.asJava)
+      .setDimensions(dimensionsSet.asJava)
+      .setDimensionFilterClauses(java.util.Arrays.asList(filterClaus))
 
     val getReport: GetReportsRequest = new GetReportsRequest().setReportRequests(java.util.Arrays.asList(request))
 

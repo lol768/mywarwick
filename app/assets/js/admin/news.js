@@ -2,6 +2,7 @@ import $ from 'jquery';
 import './datetimepicker';
 import './form-pagination';
 import './audience-estimate';
+import log from 'loglevel';
 
 $('input[name="item.publishDateSet"]').on('change', function onChange() {
   const showDateField = $(this).filter(':checked').val() === 'true';
@@ -35,4 +36,24 @@ $('.news-item, .activity-item').each((i, item) => {
     $confirmToolbar.animate({ left: '25%', opacity: 0 }).hide();
     $toolbar.show().animate({ right: '0%', opacity: 1 });
   });
+});
+
+function populateNewsAnalytics(data) {
+  $('.news-item').each((i, e) => {
+    const id = e.id;
+    const $elem = $(e);
+    $elem.find('.click-count').empty().text(
+      data[id] ? `Clicked by ${data[id]} people` : ''
+    );
+  });
+}
+
+$.ajax({
+  url: '/api/news/analytics',
+  type: 'POST',
+  data: JSON.stringify({ ids: $.map($('.news-item'), e => e.id) }),
+  contentType: 'application/json; charset=utf-8',
+  dataType: 'json',
+  success: data => populateNewsAnalytics(data),
+  error: (xhr, status) => log.error(`${status}: ${xhr}`),
 });
