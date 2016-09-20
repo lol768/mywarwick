@@ -18,7 +18,7 @@ trait ActivityService {
 
   def getActivitiesForUser(user: User, before: Option[String], since: Option[String]): Seq[ActivityRender]
 
-  def getNotificationsForUser(user: User, before: Option[String], since: Option[String]): Seq[ActivityRender]
+  def getNotificationsForUser(user: User, before: Option[String], since: Option[String], limit: Int): Seq[ActivityRender]
 
   def save(activity: ActivitySave, audience: Audience): Either[Seq[ActivityError], String]
 
@@ -156,8 +156,8 @@ class ActivityServiceImpl @Inject()(
       }
   }
 
-  override def getNotificationsForUser(user: User, before: Option[String], since: Option[String]): Seq[ActivityRender] =
-    db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, notifications = Some(true), before, since))
+  override def getNotificationsForUser(user: User, before: Option[String], since: Option[String], limit: Int): Seq[ActivityRender] =
+    db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, notifications = Some(true), before, since, limit))
 
   override def getActivitiesForUser(user: User, before: Option[String], since: Option[String]): Seq[ActivityRender] =
     db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, notifications = Some(false), before, since))

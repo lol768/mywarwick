@@ -25,9 +25,9 @@ class UserActivitiesController @Inject()(
   import DateFormats.{isoDateReads, isoDateWrites}
   import securityService._
 
-  def notifications(since: Option[String], before: Option[String]) = APIAction { implicit request =>
+  def notifications(since: Option[String], before: Option[String], limit: Int) = APIAction { implicit request =>
     val notifications = request.context.user
-      .map(user => activityService.getNotificationsForUser(user, before, since))
+      .map(user => activityService.getNotificationsForUser(user, before, since, limit))
       .getOrElse(Nil)
 
     Ok(Json.toJson(API.Success(data = Json.obj(
@@ -36,7 +36,7 @@ class UserActivitiesController @Inject()(
     ))))
   }
 
-  def activities(since: Option[String], before: Option[String]) = APIAction { implicit request =>
+  def activities(since: Option[String], before: Option[String], limit: Int) = APIAction { implicit request =>
     val activities = request.context.user
       .map(user => activityService.getActivitiesForUser(user, before, since))
       .getOrElse(Nil)

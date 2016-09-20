@@ -65,8 +65,8 @@ GET         /service/cluster/state                                    @controlle
 
 POST        /api/streams/read                                         @controllers.api.UserActivitiesController.markAsRead
 
-GET        /api/streams/notifications        @controllers.api.UserActivitiesController.notifications(since: Option[String], before: Option[String])
-GET        /api/streams/activities           @controllers.api.UserActivitiesController.activities(since: Option[String], before: Option[String])
+GET         /api/streams/notifications                                @controllers.api.UserActivitiesController.notifications(since: Option[String], before: Option[String], limit: Int ?= 100)
+GET         /api/streams/activities                                   @controllers.api.UserActivitiesController.activities(since: Option[String], before: Option[String], limit: Int ?= 100)
 
 POST        /api/streams/:providerId/notifications                    @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
 POST        /api/streams/:providerId/activities                       @controllers.api.IncomingActivitiesController.postActivity(providerId: String)
