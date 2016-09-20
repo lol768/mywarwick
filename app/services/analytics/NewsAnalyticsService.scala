@@ -2,50 +2,34 @@ package services.analytics
 
 import com.google.api.services.analyticsreporting.v4.model._
 import com.google.inject.{ImplementedBy, Inject}
-import play.api.libs.json._
+import play.api.mvc.{AnyContent, Request}
 
-import scala.collection.JavaConverters._
+case class NewsAnalyticsReport(id: String, clicks: String)
 
-case class AnalyticsReport(id: String, metric: String)
-
-object AnalyticsReport {
-  def fromGaReport(row: ReportRow): AnalyticsReport = {
-    AnalyticsReport(
-      row.getDimensions.get(0),
+object NewsAnalyticsReport {
+  def fromGaReport(row: ReportRow): NewsAnalyticsReport =
+    NewsAnalyticsReport(
+      row.getDimensions.get(0).replaceAll("""/news/([a-zA-Z0-9-]+)/redirect""", "$1"), // erm
       row.getMetrics.get(0).getValues.get(0)
     )
-  }
-
-  implicit val writes = new Writes[AnalyticsReport] {
-    override def writes(o: AnalyticsReport): JsValue =
-      Json.obj(o.id -> o.metric)
-  }
 }
 
 @ImplementedBy(classOf[NewsAnalyticsServiceImpl])
 trait NewsAnalyticsService {
-  def getClicks(ids: Seq[String]): Seq[AnalyticsReport]
+  def getClicks(ids: Seq[String])(implicit request: Request[AnyContent]): Seq[NewsAnalyticsReport]
 }
 
 class NewsAnalyticsServiceImpl @Inject()(
   analytics: AnalyticsReportService
 ) extends NewsAnalyticsService {
 
-  override def getClicks(ids: Seq[String]): Seq[AnalyticsReport] = {
-    // tried to do single filter and have setExpressions(List(ids)) but apparently that doesn't work
-    val filters = ids.map(id => new DimensionFilter()
-      .setDimensionName("ga:eventLabel")
-      .setOperator("EXACT")
-      .setExpressions(List(id).asJava)
-    )
+  override def getClicks(ids: Seq[String])(implicit request: Request[AnyContent]) = {
+    val PAGE_PATH = "pagePath"
+    val paths = ids.map(id => controllers.api.routes.ReadNewsController.redirect(id).url)
+    val filters = analytics.idEqualityFilter(paths, PAGE_PATH)
 
-    val result = analytics.getReport(ids, Seq("uniqueEvents"), Seq("eventLabel"), filters)
-    result.getReports.asScala.map { report =>
-      Option(report.getData.getRows) match {
-        case Some(rows) => rows.asScala.map(AnalyticsReport.fromGaReport)
-        case None => Seq.empty[AnalyticsReport]
-      }
-    }.head
+    val results = analytics.getReport(paths, Seq("pageviews"), Seq(PAGE_PATH), filters)
+    results.map(NewsAnalyticsReport.fromGaReport)
   }
 }
 
