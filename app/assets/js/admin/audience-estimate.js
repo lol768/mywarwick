@@ -59,4 +59,6 @@ $('.split-form').each((i, form) => {
       () => _.defer(_.debounce(updateAudienceEstimate, 500))
     );
   }
+
+  $('[data-toggle="tooltip"]').tooltip();
 });

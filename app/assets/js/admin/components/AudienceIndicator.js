@@ -1,10 +1,6 @@
 import React from 'react';
 
 export default function AudienceIndicator(props) {
-  if (props.error || props.empty) {
-    return <div />;
-  }
-
   if (props.fetching) {
     return (
       <div className="alert alert-info">
@@ -15,36 +11,27 @@ export default function AudienceIndicator(props) {
 
   const { baseAudience, categorySubset } = props;
 
-  let parts = [];
-
   if (props.public) {
-    parts.push(
-      <div>
-        Public audience
+    return (
+      <div className="alert alert-info">
+        <div>Public audience</div>
       </div>
     );
   }
 
-  if (baseAudience !== undefined) {
-    parts.push(
-      <div>
-        People in this audience: {baseAudience.toLocaleString()}
-      </div>
-    );
-
-    if (categorySubset !== undefined) {
-      parts.push(
-        <div>
-          Interested in these categories: {categorySubset.toLocaleString()}
-          /{baseAudience.toLocaleString()}
-        </div>
-      );
-    }
-  }
+  const baseNum = baseAudience !== undefined ?
+    baseAudience.toLocaleString() : '0';
+  const catNum = categorySubset !== undefined ?
+    `${categorySubset.toLocaleString()}/${baseNum}` : `0/${baseNum}`;
 
   return (
     <div className="alert alert-info">
-      {parts}
+      <i className="fa fa-info-circle" data-toggle="tooltip" data-placement="left"
+        title="Estimated audience size will be shown here, when audience and categories
+        have been selected"
+      />
+      <div>{`People in this audience: ${baseNum}`}</div>
+      <div>{`Interested in these categories: ${catNum}`}</div>
     </div>
   );
 }
