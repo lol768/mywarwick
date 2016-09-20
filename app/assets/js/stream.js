@@ -105,6 +105,14 @@ export function takeFromStream(stream, n) {
     );
 }
 
+export function getLastItemInStream(stream) {
+  return _.last(
+    getOrderedStreamPartitions(stream)
+      .map(part => _.last(part))
+      .filter(part => !!part)
+  );
+}
+
 /*
  * Return the total number of items in the stream.
  */

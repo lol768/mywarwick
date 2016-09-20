@@ -88,8 +88,8 @@ export default function init(opts) {
       update({
         unreadNotificationCount:
           stream.getNumItemsSince(
-            state.notifications,
-            state.notificationsLastRead.date
+            state.notifications.stream,
+            state.notificationsLastRead.date,
           ),
         currentPath: window.location.pathname,
         isUserLoggedIn: state.user.data.usercode !== undefined,

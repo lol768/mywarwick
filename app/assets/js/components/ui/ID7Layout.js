@@ -253,7 +253,7 @@ class ID7Layout extends ReactComponent {
 const select = (state) => ({
   layoutClassName: state.ui.className,
   notificationsCount:
-    getNumItemsSince(state.notifications, _(state).get(['notificationsLastRead', 'date'])),
+    getNumItemsSince(state.notifications.stream, _(state).get(['notificationsLastRead', 'date'])),
   user: state.user,
   colourTheme: state.ui.colourTheme,
   zoomedTile: state.ui.zoomedTile,
