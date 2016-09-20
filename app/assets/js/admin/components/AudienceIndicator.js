@@ -1,7 +1,6 @@
 import React from 'react';
 
 export default function AudienceIndicator(props) {
-
   if (props.fetching) {
     return (
       <div className="alert alert-info">
@@ -27,6 +26,10 @@ export default function AudienceIndicator(props) {
 
   return (
     <div className="alert alert-info">
+      <i className="fa fa-info-circle" data-toggle="tooltip" data-placement="left"
+        title="Estimated audience size will be shown here, when audience and categories
+        have been selected"
+      />
       <div>{`People in this audience: ${baseNum}`}</div>
       <div>{`Interested in these categories: ${catNum}`}</div>
     </div>
