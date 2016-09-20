@@ -9,7 +9,7 @@ case class NewsAnalyticsReport(id: String, clicks: String)
 object NewsAnalyticsReport {
   def fromGaReport(row: ReportRow): NewsAnalyticsReport =
     NewsAnalyticsReport(
-      row.getDimensions.get(0).replaceAll("""/news/([a-zA-Z0-9-]+)/redirect""", "$1"), // erm
+      row.getDimensions.get(0).split("/")(2), // get newsId substring from pagePath
       row.getMetrics.get(0).getValues.get(0)
     )
 }
