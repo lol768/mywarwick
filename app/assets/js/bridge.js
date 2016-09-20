@@ -37,6 +37,7 @@ export default function init(opts) {
       // click event to dismiss active tooltips
       document.dispatchEvent(new Event('click'));
       store.dispatch(push(path));
+      window.scrollTo(0, 0);
     },
 
     search(query) {
@@ -88,7 +89,7 @@ export default function init(opts) {
         unreadNotificationCount:
           stream.getNumItemsSince(
             state.notifications.stream,
-            state.notificationsLastRead
+            state.notificationsLastRead.date,
           ),
         currentPath: window.location.pathname,
         isUserLoggedIn: state.user.data.usercode !== undefined,
