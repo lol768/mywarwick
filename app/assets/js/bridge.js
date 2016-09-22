@@ -47,7 +47,7 @@ export default function init(opts) {
     },
 
     appToForeground() {
-      store.dispatch(tiles.fetchTileContent());
+      store.dispatch(tiles.fetchTiles());
       store.dispatch(displayUpdateProgress);
     },
 
