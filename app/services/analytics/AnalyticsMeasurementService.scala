@@ -1,4 +1,4 @@
-package services
+package services.analytics
 
 import java.util.UUID
 

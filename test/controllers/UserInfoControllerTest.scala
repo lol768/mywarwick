@@ -12,7 +12,8 @@ import play.api.libs.json.{JsBoolean, JsNull, JsNumber, JsString}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import services.{AnalyticsMeasurementService, PhotoService, UserInitialisationService}
+import services.analytics.AnalyticsMeasurementService
+import services.{PhotoService, UserInitialisationService}
 import uk.ac.warwick.sso.client.cache.{UserCache, UserCacheItem}
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import warwick.sso._
