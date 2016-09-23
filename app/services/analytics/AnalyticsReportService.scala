@@ -42,21 +42,12 @@ class AnalyticsReportServiceImpl @Inject()(
   private val APPLICATION_NAME = "Start"
   private val JSON_FACTORY = new JacksonFactory()
 
-  //  private val KEY_FILE_STRING = config.getString("start.analytics.keyFileString")
-  //    .getOrElse(throw new IllegalStateException("Missing Google Analytics key file path - set start.analytics.keyFileString"))
-  private val KEY_FILE_LOCATION = config.getString("start.analytics.keyFilePath")
-    .getOrElse(throw new IllegalStateException("Missing Google Analytics key file path - set start.analytics.keyFilePath"))
+  private val KEY_FILE_LOCATION = config.getString("start.analytics.key_path")
+    .getOrElse(throw new IllegalStateException("Missing Google Analytics key file path - set start.analytics.key_path"))
   private val SERVICE_ACCOUNT_EMAIL = config.getString("start.analytics.account.email")
     .getOrElse(throw new IllegalStateException("Missing Google Analytics service account id - set start.analytics.account.email"))
-  private val VIEW_ID = config.getString("start.analytics.viewId")
-    .getOrElse(throw new IllegalStateException("Missing Google Analytics view id - set start.analytics.viewId"))
-
-  //  private val PRIVATE_KEY = {
-  //    val spec: PKCS8EncodedKeySpec = new PKCS8EncodedKeySpec(KEY_FILE_STRING.getBytes)
-  //    val kf: KeyFactory = KeyFactory.getInstance("RSA")
-  //    kf.generatePrivate(spec)
-  //  }
-
+  private val VIEW_ID = config.getString("start.analytics.view_id")
+    .getOrElse(throw new IllegalStateException("Missing Google Analytics view id - set start.analytics.view_id"))
 
   private val analytics: AnalyticsReporting = {
     val httpTransport = GoogleNetHttpTransport.newTrustedTransport()
@@ -64,7 +55,6 @@ class AnalyticsReportServiceImpl @Inject()(
       .setTransport(httpTransport)
       .setJsonFactory(JSON_FACTORY)
       .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
-      //      .setServiceAccountPrivateKey(PRIVATE_KEY)
       .setServiceAccountPrivateKeyFromP12File(new File(KEY_FILE_LOCATION))
       .setServiceAccountScopes(AnalyticsReportingScopes.all())
       .build()
