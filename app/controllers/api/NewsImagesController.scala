@@ -68,11 +68,12 @@ class NewsImagesController @Inject()(
   private val MEGABYTE = 1000 * 1000
 
   def create = RequiredUserAction(parse.multipartFormData) { implicit request =>
-    val usercode = request.context.user.get.usercode
-    if(publisherService.isPublisher(usercode)) {
+    val user = request.context.user
+    val usercode = user.map(_.usercode)
+    if(usercode.exists(publisherService.isPublisher)) {
       createInternal(request)
     } else{
-      apiError2result(API.Error("forbidden",s"${usercode} is not allowed to upload news image"))
+      API.Error("forbidden",s"${usercode.getOrElse("Anonymous user")} is not allowed to upload news image")
     }
   }
 
