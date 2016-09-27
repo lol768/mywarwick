@@ -25,6 +25,8 @@ trait PublisherService {
 
   def getProviders(publisherId: String): Seq[Provider]
 
+  def isPublisher(usercode: Usercode): Boolean
+
 }
 
 @Singleton
@@ -60,5 +62,9 @@ class PublisherServiceImpl @Inject()(
   override def getProviders(publisherId: String): Seq[Provider] = db.withConnection { implicit c =>
     dao.getProviders(publisherId)
   }
+
   override def getPublishersForUser(usercode: Usercode) = db.withConnection(implicit c => dao.getPublishersForUser(usercode))
+
+  override def isPublisher(usercode: Usercode) = db.withConnection(implicit c => dao.isPublisher(usercode.string))
+
 }

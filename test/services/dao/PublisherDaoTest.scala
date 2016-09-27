@@ -52,6 +52,21 @@ class PublisherDaoTest extends PlaySpec with OneStartAppPerSuite {
       dao.getPublisherPermissions("publisher-id", Usercode("cusbob")) mustBe empty
     }
 
+    "custard(non-publisher user) should not be a publisher" in transaction { implicit  c =>
+      dao.isPublisher(custard.string) mustBe false
+    }
+
+    "shylock(legitimate publisher) should be identified as a publisher" in transaction { implicit  c=>
+
+      SQL"INSERT INTO PUBLISHER (ID, NAME) VALUES ('publisher-id', 'Test Publisher')"
+        .execute()
+      SQL"INSERT INTO PUBLISHER_PERMISSION (PUBLISHER_ID, USERCODE, ROLE) VALUES ('publisher-id', 'shylock', 'NewsManager')"
+        .execute()
+
+      dao.isPublisher("shylock") mustBe true
+
+    }
+
   }
 
 }
