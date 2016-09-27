@@ -14,6 +14,7 @@ import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc.{Action, MultipartFormData, Request, Result}
 import services.{ImageManipulator, NewsImageService, PublisherService, SecurityService}
 import system.EitherValidation
+import warwick.sso.AuthenticatedRequest
 
 import scala.util.{Failure, Success}
 
@@ -75,10 +76,18 @@ class NewsImagesController @Inject()(
 //  def create = RequiredActualUserRoleAction(Sysadmin)(parse.multipartFormData)(createInternal)
 
   def create = RequiredUserAction(parse.multipartFormData) { implicit request =>
-
     val usercode = request.context.user.get.usercode
+    if(publisherService.isPublisher(usercode)) {
+      createInternal(request)
+    } else{
+      API.Error("forbidden",s"${usercode} is not allowed to upload news image")
+    }
+  }
 
-    if(publisherService.isPublisher(usercode)){
+  implicit def apiError2result(e: API.Error): Result =
+    BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", Seq(e))))
+
+  def createInternal(request: Request[MultipartFormData[TemporaryFile]]): Result = {
       request.body.file("image").map { maybeValidImage =>
         Right[Result, FilePart[TemporaryFile]](maybeValidImage)
           .verifying(_.contentType.exists(_.startsWith("image/")), API.Error("invalid-content-type", "Invalid image content type"))
@@ -100,12 +109,6 @@ class NewsImagesController @Inject()(
             }
           )
       }.getOrElse(API.Error("no-image", "No image provided"))
-    } else{
-      API.Error("forbidden",s"${usercode} is not allowed to upload news image")
     }
-  }
-
-  implicit def apiError2result(e: API.Error): Result =
-    BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", Seq(e))))
 
 }
