@@ -67,25 +67,14 @@ class NewsImagesController @Inject()(
 
   private val MEGABYTE = 1000 * 1000
 
-//  def create = RequiredUserAction(parse.multipartFormData) { implicit req =>
-//    if (publisherService.isPublisher(req.context.user.get.usercode)) {
-//      createInternal(req)
-//    }
-//  }
-
-//  def create = RequiredActualUserRoleAction(Sysadmin)(parse.multipartFormData)(createInternal)
-
   def create = RequiredUserAction(parse.multipartFormData) { implicit request =>
     val usercode = request.context.user.get.usercode
     if(publisherService.isPublisher(usercode)) {
       createInternal(request)
     } else{
-      API.Error("forbidden",s"${usercode} is not allowed to upload news image")
+      apiError2result(API.Error("forbidden",s"${usercode} is not allowed to upload news image"))
     }
   }
-
-  implicit def apiError2result(e: API.Error): Result =
-    BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", Seq(e))))
 
   def createInternal(request: Request[MultipartFormData[TemporaryFile]]): Result = {
       request.body.file("image").map { maybeValidImage =>
@@ -110,5 +99,8 @@ class NewsImagesController @Inject()(
           )
       }.getOrElse(API.Error("no-image", "No image provided"))
     }
+
+  implicit def apiError2result(e: API.Error): Result =
+    BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", Seq(e))))
 
 }
