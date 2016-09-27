@@ -53,11 +53,13 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
 
   private val service = mock[NewsImageService]
   private val imageManipulator = mock[NoopImageManipulator]
+  private val publisherService = mock[PublisherService]
   val cache = spy(new MockCacheApi)
   val controller = new NewsImagesController(
     securityService,
     service,
     imageManipulator,
+    publisherService,
     cache
   ) {
     override val navigationService = new MockNavigationService()
