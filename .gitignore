@@ -1,6 +1,8 @@
 /conf/application.conf
 /conf/worker.conf
 /conf/ehcache.properties
+/conf/ga_secret.p12
+
 logback.xml
 logback-access.xml
 logs
