@@ -4,13 +4,13 @@ import com.google.api.services.analyticsreporting.v4.model._
 import com.google.inject.{ImplementedBy, Inject}
 import play.api.mvc.{AnyContent, Request}
 
-case class NewsAnalyticsReport(id: String, clicks: String)
+case class NewsAnalyticsReport(id: String, clicks: Int)
 
 object NewsAnalyticsReport {
   def fromGaReport(row: ReportRow): NewsAnalyticsReport =
     NewsAnalyticsReport(
       row.getDimensions.get(0).split("/")(2), // get newsId substring from pagePath
-      row.getMetrics.get(0).getValues.get(0)
+      row.getMetrics.get(0).getValues.get(0).toInt
     )
 }
 
