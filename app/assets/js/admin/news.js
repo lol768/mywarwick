@@ -12,14 +12,24 @@ $('input[name="item.publishDateSet"]').on('change', function onChange() {
   $(this).parents('.form-group').next().toggle(showDateField);
 }).trigger('change');
 
-
 function populateNewsAnalytics(data) {
   $(NEWS_ITEM).each((i, e) => {
     const id = e.id;
     const $elem = $(e);
-    $elem.find('.click-count').empty().text(
-      data[id] ? `Clicked by ${data[id]} people` : ''
-    );
+    const count = data[id] || '0';
+    let message = 'Clicked by ';
+    switch (count) {
+      case '1':
+        message += `${count} person`;
+        break;
+      case '0':
+        message += 'nobody';
+        break;
+      default:
+        message += `${count} people`;
+    }
+
+    $elem.find('.click-count').text(message);
   });
 }
 
