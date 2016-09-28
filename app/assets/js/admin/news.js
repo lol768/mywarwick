@@ -16,10 +16,7 @@ function populateNewsAnalytics(data) {
   $(NEWS_ITEM).each((i, e) => {
     const id = e.id;
     const $elem = $(e);
-    let count = data[id];
-    if (count === undefined) {
-      count = '0';
-    }
+    const count = data[id] || '0';
     let message = 'Clicked by ';
     switch (count) {
       case '1':
