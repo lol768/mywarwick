@@ -16,20 +16,20 @@ function populateNewsAnalytics(data) {
   $(NEWS_ITEM).each((i, e) => {
     const id = e.id;
     const $elem = $(e);
-    const count = data[id] || '0';
-    let message = 'Clicked by ';
+    const count = data[id] || 0;
+    const messagePartOne = 'Clicked by ';
+    let messagePartTwo = '';
     switch (count) {
-      case '1':
-        message += `${count} person`;
+      case 1:
+        messagePartTwo = `${count} person`;
         break;
-      case '0':
-        message += 'nobody';
+      case 0:
+        messagePartTwo = 'nobody';
         break;
       default:
-        message += `${count} people`;
+        messagePartTwo = `${count} people`;
     }
-
-    $elem.find('.click-count').text(message);
+    $elem.find('.click-count').text(messagePartOne + messagePartTwo);
   });
 }
 
