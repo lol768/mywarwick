@@ -12,17 +12,15 @@ $('input[name="item.publishDateSet"]').on('change', function onChange() {
   $(this).parents('.form-group').next().toggle(showDateField);
 }).trigger('change');
 
-
-
 function populateNewsAnalytics(data) {
   $(NEWS_ITEM).each((i, e) => {
     const id = e.id;
     const $elem = $(e);
-    var count = data[id];
+    let count = data[id];
     if (count === undefined) {
-      count = '0'
+      count = '0';
     }
-    var message = 'Clicked by ';
+    let message = 'Clicked by ';
     switch (count) {
       case '1':
         message += `${count} person`;
