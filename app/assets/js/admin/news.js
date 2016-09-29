@@ -30,7 +30,7 @@ function populateNewsAnalytics(data) {
         msgForGuestClicks = `${guestClicksCount} guest`;
         break;
       case 0:
-        msgForGuestClicks = `${guestClicksCount} guest`;
+        msgForGuestClicks = '0 guest';
         break;
       default:
         msgForGuestClicks = `${guestClicksCount} guests`;
@@ -48,7 +48,9 @@ function populateNewsAnalytics(data) {
         msgForUserClicks = `${usersClicksCount} users`;
     }
 
-    $elem.find('.click-count').text(`Clicked by ${msgForGuestClicks} ${msgForUserClicks}`);
+    $elem.find('.click-count').text(
+      (guestClicksCount === 0 && usersClicksCount === 0) ?
+        'Clicked by nobody' : `Clicked by ${msgForGuestClicks}, ${msgForUserClicks}`);
   });
 }
 
