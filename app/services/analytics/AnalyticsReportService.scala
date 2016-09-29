@@ -1,9 +1,6 @@
 package services.analytics
 
 import java.io.File
-import java.security.KeyFactory
-import java.security.spec.PKCS8EncodedKeySpec
-
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
@@ -13,6 +10,16 @@ import com.google.inject.{ImplementedBy, Inject}
 import play.api.Configuration
 
 import scala.collection.JavaConverters._
+
+/*
+id and clicks count
+ */
+case class Row(id: String, count: Int)
+
+/*
+combined clicks information from guest clicks and logged in users' clicks
+ */
+case class CombinedRow(id: String, guests: Int, users: Int)
 
 @ImplementedBy(classOf[AnalyticsReportServiceImpl])
 trait AnalyticsReportService {
@@ -28,7 +35,7 @@ trait AnalyticsReportService {
     dimensions: Seq[String],
     filters: Seq[DimensionFilter],
     startDate: String = START_DATE,
-    endDate: String = TODAY): Seq[ReportRow]
+    endDate: String = TODAY): Seq[CombinedRow]
 
 }
 
@@ -46,8 +53,15 @@ class AnalyticsReportServiceImpl @Inject()(
     .getOrElse(throw new IllegalStateException("Missing Google Analytics key file path - set start.analytics.key_path"))
   private val SERVICE_ACCOUNT_EMAIL = config.getString("start.analytics.account.email")
     .getOrElse(throw new IllegalStateException("Missing Google Analytics service account id - set start.analytics.account.email"))
-  private val VIEW_ID = config.getString("start.analytics.view_id")
-    .getOrElse(throw new IllegalStateException("Missing Google Analytics view id - set start.analytics.view_id"))
+
+  //view id for guest
+  private val VIEW_ID_GUEST = config.getString("start.analytics.view-id.guests")
+    .getOrElse(throw new IllegalStateException("Missing Google Analytics view id - set start.analytics.view_id_guest"))
+
+  //view id for logged in user
+  private val VIEW_ID_LOGGED_IN_USER = config.getString("start.analytics.view-id.users")
+    .getOrElse(throw new IllegalStateException("Missing Google Analytics view id - set start.analytics.view_id_logged_in_user"))
+
 
   private val analytics: AnalyticsReporting = {
     val httpTransport = GoogleNetHttpTransport.newTrustedTransport()
@@ -91,22 +105,53 @@ class AnalyticsReportServiceImpl @Inject()(
     val filterClaus = new DimensionFilterClause() // ho, ho, ho, merry filtering!
       .setFilters(filters.asJava)
 
-    val request = new ReportRequest()
-      .setViewId(VIEW_ID)
+    def newReportRequest = new ReportRequest()
       .setDateRanges(java.util.Arrays.asList(dateRange))
       .setMetrics(metricsSet.asJava)
       .setDimensions(dimensionsSet.asJava)
       .setDimensionFilterClauses(java.util.Arrays.asList(filterClaus))
 
-    val getReport: GetReportsRequest = new GetReportsRequest().setReportRequests(java.util.Arrays.asList(request))
 
-    val result = analytics.reports().batchGet(getReport).execute()
-
-    result.getReports.asScala.map { report =>
-      Option(report.getData.getRows) match {
-        case Some(rows) => rows.asScala
-        case None => Seq.empty[ReportRow]
+    def resultToRows(response: GetReportsResponse) = response.getReports.asScala.flatMap { report =>
+      val rows = Option(report.getData.getRows)
+      rows.map(_.asScala).getOrElse(Nil).map { row =>
+        Row(
+          row.getDimensions.get(0).split("/")(2), // get newsId substring from pagePath
+          row.getMetrics.get(0).getValues.get(0).toInt
+        )
       }
-    }.head
+    }
+
+    /*
+    google does not allow getting reports for multiple requests, so we have to get these reports
+    one by one
+
+    the process is like request -> result -> report
+     */
+
+    //make requests
+    val requestForGuests: GetReportsRequest = new GetReportsRequest().setReportRequests(java.util.Arrays.asList(newReportRequest.setViewId(VIEW_ID_GUEST)))
+    val requestForUsers: GetReportsRequest = new GetReportsRequest().setReportRequests(java.util.Arrays.asList(newReportRequest.setViewId(VIEW_ID_LOGGED_IN_USER)))
+
+    //get results
+    val resultForGuests = analytics.reports().batchGet(requestForGuests).execute()
+    val resultForLoggedInUsers = analytics.reports().batchGet(requestForUsers).execute()
+
+    //get reports
+    val reportForGuests = resultToRows(resultForGuests)
+    val reportForUsers = resultToRows(resultForLoggedInUsers)
+
+    //extract news ids
+    val allIds = (reportForGuests ++ reportForUsers).map(_.id).distinct
+
+    //map to Seq[CombinedRow]
+    allIds.map { id =>
+      val guestCount =  reportForGuests.find(_.id == id).map(_.count).getOrElse(0)
+      val userCount = reportForUsers.find(_.id == id).map(_.count).getOrElse(0)
+      CombinedRow(id, guestCount, userCount)
+    }
   }
+
+
 }
+
