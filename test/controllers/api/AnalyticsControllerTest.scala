@@ -15,9 +15,6 @@ import play.api.test._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-/**
-  * Created by kailan on 29/09/2016.
-  */
 class AnalyticsControllerTest extends PlaySpec with MockitoSugar with Results with BeforeAndAfterAll{
 
   implicit val akka = TestActors.plainActorSystem()
