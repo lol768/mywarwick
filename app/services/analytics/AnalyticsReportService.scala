@@ -6,14 +6,8 @@ import play.api.Configuration
 
 import scala.collection.JavaConverters._
 
-/*
-id and clicks count
- */
 case class Row(id: String, count: Int)
 
-/*
-combined clicks information from guest clicks and logged in users' clicks
- */
 case class CombinedRow(id: String, guests: Int, users: Int)
 
 @ImplementedBy(classOf[AnalyticsReportServiceImpl])
