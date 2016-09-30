@@ -2,14 +2,12 @@ package controllers.api
 
 import java.io.{File, FileInputStream}
 
-import akka.stream.ActorMaterializer
-import helpers.TestActors
+import helpers.WithActorSystem
 import org.apache.commons.io.FileUtils
 import org.joda.time.DateTime
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfterAll
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.cache.CacheApi
@@ -22,19 +20,11 @@ import services._
 import services.dao.NewsImage
 import warwick.sso._
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 
-class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results with BeforeAndAfterAll {
-
-  implicit val akka = TestActors.plainActorSystem()
-  implicit val mat = ActorMaterializer()
-
-  override def afterAll(): Unit = {
-    Await.result(akka.terminate(), 5.seconds)
-  }
+class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results with WithActorSystem {
 
   val ron = Users.create(usercode = Usercode("ron"))
 

@@ -1,28 +1,17 @@
 package controllers.api
 
-import akka.stream.ActorMaterializer
-import helpers.{TestActors, TestApplications}
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import services.analytics.{CombinedRow, NewsAnalyticsService}
+import helpers.WithActorSystem
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfterAll
 import org.scalatest.mock.MockitoSugar
-import play.api.libs.json.{JsString, Json}
+import org.scalatestplus.play.PlaySpec
+import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import scala.concurrent.Await
-import scala.concurrent.duration._
+import services.analytics.{CombinedRow, NewsAnalyticsService}
 
-class AnalyticsControllerTest extends PlaySpec with MockitoSugar with Results with BeforeAndAfterAll{
-
-  implicit val akka = TestActors.plainActorSystem()
-  implicit val mat = ActorMaterializer()
-
-  override def afterAll(): Unit = {
-    Await.result(akka.terminate(), 5.seconds)
-  }
+class AnalyticsControllerTest extends PlaySpec with MockitoSugar with Results with WithActorSystem {
 
   "AnalyticsControllerTest" should {
 

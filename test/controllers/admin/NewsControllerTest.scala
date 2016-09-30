@@ -1,13 +1,10 @@
 package controllers.admin
 
-import akka.stream.ActorMaterializer
-import helpers.{Fixtures, OneStartAppPerSuite, TestActors}
+import helpers.{Fixtures, OneStartAppPerSuite}
 import models.Audience.Staff
-import models.{Audience, NewsCategory}
-import models.news.NewsItemRender
 import models.publishing.PublishingRole.NewsManager
 import models.publishing._
-import org.joda.time.DateTime
+import models.{Audience, NewsCategory}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -27,16 +24,11 @@ import scala.util.Success
 
 class NewsControllerTest extends PlaySpec with MockitoSugar with Results with OneStartAppPerSuite {
 
-  implicit val akka = TestActors.plainActorSystem()
-  implicit val mat = ActorMaterializer()
-
   val custard = Usercode("custard")
 
   val mockSSOClient = new MockSSOClient(new LoginContext {
     override def loginUrl(target: Option[String]) = ""
-
     override def actualUserHasRole(role: RoleName) = false
-
     override def userHasRole(role: RoleName) = false
 
     override val user: Option[User] = Some(Users.create(custard))

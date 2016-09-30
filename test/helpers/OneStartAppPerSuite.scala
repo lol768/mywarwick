@@ -5,18 +5,13 @@ import java.sql.Connection
 import org.scalatest.Suite
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.db.Database
-import play.api.inject._
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.test.Helpers._
-import play.api.{Configuration, Environment}
-import system.{DatabaseDialect, H2DatabaseDialect}
-import warwick.sso._
 
 import scala.reflect.ClassTag
 
 trait OneStartAppPerSuite extends Suite with OneAppPerSuite {
 
   implicit override lazy val app = TestApplications.full()
+  implicit lazy val mat = app.materializer
 
   def get[T : ClassTag]: T = app.injector.instanceOf[T]
 

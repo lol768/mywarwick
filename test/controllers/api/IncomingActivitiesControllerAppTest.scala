@@ -1,8 +1,5 @@
 package controllers.api
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import anorm._
 import helpers.{Fixtures, OneStartAppPerSuite, TestApplications}
 import org.scalatestplus.play.PlaySpec
 import play.api.db.Database
@@ -13,9 +10,6 @@ import play.api.test.Helpers._
 import warwick.sso._
 
 class IncomingActivitiesControllerAppTest extends PlaySpec with Results with OneStartAppPerSuite {
-
-  implicit val akka = get[ActorSystem]
-  implicit val mat = ActorMaterializer()
 
   lazy val ron = Users.create(usercode = Usercode("ron"))
 
