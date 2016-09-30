@@ -31,7 +31,6 @@ trait AnalyticsReportService {
     filters: Seq[DimensionFilter],
     startDate: String = START_DATE,
     endDate: String = TODAY): Seq[CombinedRow]
-
 }
 
 class AnalyticsReportServiceImpl @Inject()(
