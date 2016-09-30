@@ -27,10 +27,10 @@ function populateNewsAnalytics(data) {
     let msgForGuestClicks = '';
     switch (guestClicksCount) {
       case 1:
-        msgForGuestClicks = `${guestClicksCount} guest`;
+        msgForGuestClicks = 'one guest';
         break;
       case 0:
-        msgForGuestClicks = '0 guest';
+        msgForGuestClicks = 'no guests';
         break;
       default:
         msgForGuestClicks = `${guestClicksCount} guests`;
@@ -39,10 +39,10 @@ function populateNewsAnalytics(data) {
     let msgForUserClicks = '';
     switch (usersClicksCount) {
       case 1:
-        msgForUserClicks = `${usersClicksCount} user`;
+        msgForUserClicks = 'one user';
         break;
       case 0:
-        msgForUserClicks = '0 user';
+        msgForUserClicks = 'no users';
         break;
       default:
         msgForUserClicks = `${usersClicksCount} users`;
