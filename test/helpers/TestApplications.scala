@@ -3,6 +3,7 @@ package helpers
 import play.api.db.evolutions.{ClassLoaderEvolutionsReader, EvolutionsReader}
 import play.api.inject._
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.routing.SimpleRouter
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import services.messaging.MobileOutputService
@@ -30,6 +31,7 @@ object TestApplications {
   def minimal() =
     GuiceApplicationBuilder(loadConfiguration = e => config("minimal.conf", e))
       .in(Environment.simple())
+      .router(SimpleRouter(PartialFunction.empty))
       .build()
 
   /**
