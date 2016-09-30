@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import controllers.BaseController
 import play.api.libs.json.Json
 import play.api.mvc.Action
-import services.analytics.{CombinedRow, NewsAnalyticsService}
+import services.analytics.NewsAnalyticsService
 
 class AnalyticsController @Inject()(
   news: NewsAnalyticsService
