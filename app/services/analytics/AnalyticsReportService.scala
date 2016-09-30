@@ -1,18 +1,14 @@
 package services.analytics
 
-import java.io.File
-import java.security.KeyFactory
-import java.security.spec.PKCS8EncodedKeySpec
-
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
-import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.analyticsreporting.v4.model._
-import com.google.api.services.analyticsreporting.v4.{AnalyticsReporting, AnalyticsReportingScopes}
 import com.google.inject.{ImplementedBy, Inject}
 import play.api.Configuration
 
 import scala.collection.JavaConverters._
+
+case class Row(id: String, count: Int)
+
+case class CombinedRow(id: String, guests: Int, users: Int)
 
 @ImplementedBy(classOf[AnalyticsReportServiceImpl])
 trait AnalyticsReportService {
@@ -28,40 +24,25 @@ trait AnalyticsReportService {
     dimensions: Seq[String],
     filters: Seq[DimensionFilter],
     startDate: String = START_DATE,
-    endDate: String = TODAY): Seq[ReportRow]
-
+    endDate: String = TODAY): Seq[CombinedRow]
 }
 
 class AnalyticsReportServiceImpl @Inject()(
-  config: Configuration
+  config: Configuration,
+  analyticsTransport: AnalyticsTransport
 ) extends AnalyticsReportService {
 
   // DateRange object accepts "nDaysAgo" string for start and end dates
   private def daysAgo(num: Int) = s"${num}DaysAgo"
 
-  private val APPLICATION_NAME = "Start"
-  private val JSON_FACTORY = new JacksonFactory()
+  //view id for guest
+  val VIEW_ID_GUEST = config.getString("start.analytics.view-id.guests")
+    .getOrElse(throw new IllegalStateException("Missing Google Analytics view id - set start.analytics.view-id.guests"))
 
-  private val KEY_FILE_LOCATION = config.getString("start.analytics.key_path")
-    .getOrElse(throw new IllegalStateException("Missing Google Analytics key file path - set start.analytics.key_path"))
-  private val SERVICE_ACCOUNT_EMAIL = config.getString("start.analytics.account.email")
-    .getOrElse(throw new IllegalStateException("Missing Google Analytics service account id - set start.analytics.account.email"))
-  private val VIEW_ID = config.getString("start.analytics.view_id")
-    .getOrElse(throw new IllegalStateException("Missing Google Analytics view id - set start.analytics.view_id"))
+  //view id for logged in user
+  val VIEW_ID_LOGGED_IN_USER = config.getString("start.analytics.view-id.users")
+    .getOrElse(throw new IllegalStateException("Missing Google Analytics view id - set start.analytics.view-id.users"))
 
-  private val analytics: AnalyticsReporting = {
-    val httpTransport = GoogleNetHttpTransport.newTrustedTransport()
-    val credential = new GoogleCredential.Builder()
-      .setTransport(httpTransport)
-      .setJsonFactory(JSON_FACTORY)
-      .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
-      .setServiceAccountPrivateKeyFromP12File(new File(KEY_FILE_LOCATION))
-      .setServiceAccountScopes(AnalyticsReportingScopes.all())
-      .build()
-
-    new AnalyticsReporting.Builder(httpTransport, JSON_FACTORY, credential)
-      .setApplicationName(APPLICATION_NAME).build()
-  }
 
   private def ga(str: String) = s"ga:$str"
 
@@ -88,25 +69,53 @@ class AnalyticsReportServiceImpl @Inject()(
 
     val dimensionsSet = dimensions.map(str => new Dimension().setName(ga(str)))
 
-    val filterClaus = new DimensionFilterClause() // ho, ho, ho, merry filtering!
+    val filterClause = new DimensionFilterClause()
       .setFilters(filters.asJava)
 
-    val request = new ReportRequest()
-      .setViewId(VIEW_ID)
+    def newReportRequest = new ReportRequest()
       .setDateRanges(java.util.Arrays.asList(dateRange))
       .setMetrics(metricsSet.asJava)
       .setDimensions(dimensionsSet.asJava)
-      .setDimensionFilterClauses(java.util.Arrays.asList(filterClaus))
+      .setDimensionFilterClauses(java.util.Arrays.asList(filterClause))
 
-    val getReport: GetReportsRequest = new GetReportsRequest().setReportRequests(java.util.Arrays.asList(request))
+    /*
+    google does not allow getting reports for multiple requests with different ids, so we have to
+    make these requests one by one
+     */
 
-    val result = analytics.reports().batchGet(getReport).execute()
+    //make requests
+    val requestForGuests: GetReportsRequest = new GetReportsRequest().setReportRequests(java.util.Arrays.asList(newReportRequest.setViewId(VIEW_ID_GUEST)))
+    val requestForUsers: GetReportsRequest = new GetReportsRequest().setReportRequests(java.util.Arrays.asList(newReportRequest.setViewId(VIEW_ID_LOGGED_IN_USER)))
 
-    result.getReports.asScala.map { report =>
-      Option(report.getData.getRows) match {
-        case Some(rows) => rows.asScala
-        case None => Seq.empty[ReportRow]
-      }
-    }.head
+    //get results
+    val resultForGuests = analyticsTransport.getReports(requestForGuests)
+    val resultForLoggedInUsers = analyticsTransport.getReports(requestForUsers)
+
+    //get reports
+    val reportForGuests = resultToRows(resultForGuests)
+    val reportForUsers = resultToRows(resultForLoggedInUsers)
+
+    //extract news ids
+    val allIds = (reportForGuests ++ reportForUsers).map(_.id).distinct
+
+    //map to Seq[CombinedRow]
+    allIds.map { id =>
+      val guestCount = reportForGuests.find(_.id == id).map(_.count).getOrElse(0)
+      val userCount = reportForUsers.find(_.id == id).map(_.count).getOrElse(0)
+      CombinedRow(id, guestCount, userCount)
+    }
   }
+
+  def resultToRows(response: GetReportsResponse) = response.getReports.asScala.flatMap { report =>
+    val rows = Option(report.getData.getRows)
+    rows.map(_.asScala).getOrElse(Nil).map { row =>
+      Row(
+        row.getDimensions.get(0).split("/")(2), // get newsId substring from pagePath
+        row.getMetrics.get(0).getValues.get(0).toInt
+      )
+    }
+  }
+
+
 }
+

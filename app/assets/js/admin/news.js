@@ -16,20 +16,41 @@ function populateNewsAnalytics(data) {
   $(NEWS_ITEM).each((i, e) => {
     const id = e.id;
     const $elem = $(e);
-    const count = data[id] || '0';
-    let message = 'Clicked by ';
-    switch (count) {
-      case '1':
-        message += `${count} person`;
-        break;
-      case '0':
-        message += 'nobody';
-        break;
-      default:
-        message += `${count} people`;
+
+    let guestClicksCount = 0;
+    let usersClicksCount = 0;
+    if (data[id]) {
+      guestClicksCount = data[id].guests;
+      usersClicksCount = data[id].users;
     }
 
-    $elem.find('.click-count').text(message);
+    let msgForGuestClicks = '';
+    switch (guestClicksCount) {
+      case 1:
+        msgForGuestClicks = 'one guest';
+        break;
+      case 0:
+        msgForGuestClicks = 'no guests';
+        break;
+      default:
+        msgForGuestClicks = `${guestClicksCount} guests`;
+    }
+
+    let msgForUserClicks = '';
+    switch (usersClicksCount) {
+      case 1:
+        msgForUserClicks = 'one user';
+        break;
+      case 0:
+        msgForUserClicks = 'no users';
+        break;
+      default:
+        msgForUserClicks = `${usersClicksCount} users`;
+    }
+
+    $elem.find('.click-count').text(
+      (guestClicksCount === 0 && usersClicksCount === 0) ?
+        'Clicked by nobody' : `Clicked by ${msgForGuestClicks}, ${msgForUserClicks}`);
   });
 }
 
