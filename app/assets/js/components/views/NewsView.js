@@ -8,7 +8,7 @@ import * as news from '../../state/news';
 import * as newsCategories from '../../state/news-categories';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 
-class NewsView extends React.Component {
+export class NewsView extends React.Component {
 
   constructor(props) {
     super(props);
@@ -50,7 +50,9 @@ class NewsView extends React.Component {
   }
 
   render() {
-    const { failed, fetching, items, moreAvailable } = this.props;
+    const { failed, fetching, items, moreAvailable, user } = this.props;
+
+    const width = this.state.width || this.props.width;
 
     if (failed) {
       return (
@@ -68,18 +70,21 @@ class NewsView extends React.Component {
       );
     }
 
-    if (this.state.width === undefined) {
+    if (width === undefined) {
       return <div />;
     }
 
     const itemComponents = items
-      .map(item => <NewsItem key={item.id} width={this.state.width} {...item} />);
+      .map(item => <NewsItem key={item.id} width={width} {...item} />);
 
     const maybeMessage = !fetching ? <p>No news to show you yet.</p> : null;
 
     return (
       <div className="margin-top-1">
-        <NewsCategoriesView { ...this.props.newsCategories } dispatch={ this.props.dispatch } />
+        { user && user.authenticated ?
+          <NewsCategoriesView { ...this.props.newsCategories } dispatch={ this.props.dispatch } />
+          : null
+        }
         { items.length ?
           <InfiniteScrollable hasMore={moreAvailable} onLoadMore={this.loadMore}>
             {itemComponents}
@@ -102,14 +107,17 @@ NewsView.propTypes = {
   items: PropTypes.array.isRequired,
   newsCategories: PropTypes.object.isRequired,
   moreAvailable: PropTypes.bool.isRequired,
+  user: PropTypes.object.isRequired,
+  width: PropTypes.number,
 };
 
 const select = (state) => ({
   ...state.news,
   newsCategories: state.newsCategories,
-
+  user: state.user.data,
   // Never read, but kicks the component into updating when the device width changes
   deviceWidth: state.device.width,
 });
 
 export default connect(select)(NewsView);
+
