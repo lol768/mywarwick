@@ -105,7 +105,7 @@ NewsView.propTypes = {
   items: PropTypes.array.isRequired,
   newsCategories: PropTypes.object.isRequired,
   moreAvailable: PropTypes.bool.isRequired,
-  user: PropTypes.object.isRequired
+  user: PropTypes.object.isRequired,
 };
 
 const select = (state) => ({
