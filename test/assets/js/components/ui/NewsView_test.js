@@ -5,10 +5,16 @@ describe('NewsView', () => {
   const defaults = {
     dispatch: () => {},
     failed: false,
-    fetching: false,
     items: [],
+    fetching: true,
+    news: ['','',''],
     user: { authenticated: false },
-    newsCategories: {},
+    newsCategories: {
+      data:{
+        id: 'id1', name: 'veryStrangeThings9380182'
+      },
+    },
+    width: 10,
     moreAvailable: true,
   };
 
@@ -28,15 +34,7 @@ describe('NewsView', () => {
 
     const props = {
       ...defaults,
-      news: ['','',''],
-      fetching: true,
-      newsCategories: {
-        data:{
-          id: 'id1', name: 'veryStrangeThings9380182'
-        },
-      },
       user: { authenticated: true },
-      width: 10,
     };
 
     const result = shallowRender(<NewsView {...props} />);
@@ -50,14 +48,6 @@ describe('NewsView', () => {
 
     const props = {
       ...defaults,
-      news: ['','',''],
-      fetching: true,
-      newsCategories: {
-        data:{
-          id: 'id1', name: 'veryStrangeThings9380182'
-        },
-      },
-      width: 10,
     };
 
     const result = shallowRender(<NewsView {...props} />);
