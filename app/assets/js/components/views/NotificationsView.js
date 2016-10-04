@@ -27,19 +27,6 @@ class NotificationsView extends ReactComponent {
     };
 
     this.loadMore = this.loadMore.bind(this);
-
-    if ('permissions' in navigator) {
-      navigator.permissions.query({ name: 'notifications' })
-        .then(notificationPermissions => {
-          /* eslint-disable no-param-reassign */
-          /*
-           * function parameter reassignment is valid here. See the Permissions API docs ...
-           * https://developers.google.com/web/updates/2015/04/permissions-api-for-the-web?hl=en
-           */
-          notificationPermissions.onchange = this.onBrowserPermissionChange.bind(this);
-          /* eslint-enable no-param-reassign */
-        });
-    }
   }
 
   loadMore() {
@@ -57,12 +44,6 @@ class NotificationsView extends ReactComponent {
   showMore() {
     this.setState({
       numberToShow: this.state.numberToShow + SOME_MORE,
-    });
-  }
-
-  onBrowserPermissionChange() {
-    this.setState({
-      browserPushDisabled: 'Notification' in window && Notification.permission === 'denied',
     });
   }
 
@@ -120,10 +101,11 @@ class NotificationsView extends ReactComponent {
     const streamSize = getStreamSize(this.props.notifications);
     const hasAny = streamSize > 0;
     const hasMore = this.state.numberToShow < streamSize || this.props.olderItemsOnServer;
+    const browserPushDisabled = this.props.notificationPermission === 'denied';
 
     return (
       <div>
-        { this.state.browserPushDisabled ?
+        { browserPushDisabled ?
           <div className="permission-warning">
             You have blocked My Warwick from showing system notifications. You'll need to open
             your browser preferences to change that.
@@ -149,6 +131,7 @@ class NotificationsView extends ReactComponent {
 
 }
 
+
 NotificationsView.defaultProps = {
   grouped: true,
 };
@@ -158,6 +141,7 @@ function select(state) {
     notifications: state.notifications.stream,
     notificationsLastRead: state.notificationsLastRead,
     olderItemsOnServer: state.notifications.olderItemsOnServer,
+    notificationPermission: state.device.notificationPermission,
   };
 }
 
