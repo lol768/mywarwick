@@ -53,12 +53,12 @@ export function init() {
 
 export function subscribe() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
+    navigator.serviceWorker.ready.then(serviceWorkerRegistration =>
       serviceWorkerRegistration.pushManager.subscribe({ userVisibleOnly: true })
         .then(
           sub => {
             store.dispatch(device.updateNotificationPermissions);
-            return uploadSubscription;
+            return uploadSubscription(sub);
           },
           e => {
             store.dispatch(device.updateNotificationPermissions);
@@ -68,8 +68,8 @@ export function subscribe() {
               log.error('Unable to subscribe to push.', e);
             }
           }
-        );
-    });
+        )
+    );
   } else {
     // for browsers not supporting service worker
     window.Notification.requestPermission(() => {
