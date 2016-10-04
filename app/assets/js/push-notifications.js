@@ -56,8 +56,10 @@ export function subscribe() {
     navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
       serviceWorkerRegistration.pushManager.subscribe({ userVisibleOnly: true })
         .then(
-          uploadSubscription,
-          store.dispatch(device.updateNotificationPermissions),
+          sub => {
+            store.dispatch(device.updateNotificationPermissions);
+            return uploadSubscription;
+          },
           e => {
             store.dispatch(device.updateNotificationPermissions);
             if (Notification.permission === 'denied') {
