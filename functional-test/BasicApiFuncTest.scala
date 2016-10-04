@@ -9,7 +9,7 @@ class BasicApiFuncTest extends ApiFuncTestBase {
     "be able to access the Web App Manifest" in {
       val manifest = wsUrl("/assets/manifest.json").get.futureValue
       manifest.status should be(Status.OK)
-      (manifest.json \ "name").get should be(JsString("Start.Warwick"))
+      (manifest.json \ "name").get should be(JsString("My Warwick"))
       (manifest.json \ "display").get should be(JsString("standalone"))
     }
 

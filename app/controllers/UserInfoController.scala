@@ -17,7 +17,7 @@ import warwick.sso.{LoginContext, SSOClient}
 import scala.concurrent.Future
 
 /**
-  * This is some weird SSO stuff for Start, while we're still working out
+  * This is some weird SSO stuff for My Warwick, while we're still working out
   * how best to handle indefinite sessions. It likely will apply to any similar
   * Play app but DON'T copy and paste this into Search. Better to move it into
   * SSO Client as an optional behaviour.

@@ -36,12 +36,12 @@ class AnalyticsReportServiceImpl @Inject()(
   private def daysAgo(num: Int) = s"${num}DaysAgo"
 
   //view id for guest
-  val VIEW_ID_GUEST = config.getString("start.analytics.view-id.guests")
-    .getOrElse(throw new IllegalStateException("Missing Google Analytics view id - set start.analytics.view-id.guests"))
+  val VIEW_ID_GUEST = config.getString("mywarwick.analytics.view-id.guests")
+    .getOrElse(throw new IllegalStateException("Missing Google Analytics view id - set mywarwick.analytics.view-id.guests"))
 
   //view id for logged in user
-  val VIEW_ID_LOGGED_IN_USER = config.getString("start.analytics.view-id.users")
-    .getOrElse(throw new IllegalStateException("Missing Google Analytics view id - set start.analytics.view-id.users"))
+  val VIEW_ID_LOGGED_IN_USER = config.getString("mywarwick.analytics.view-id.users")
+    .getOrElse(throw new IllegalStateException("Missing Google Analytics view id - set mywarwick.analytics.view-id.users"))
 
 
   private def ga(str: String) = s"ga:$str"

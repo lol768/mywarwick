@@ -24,8 +24,8 @@ class AnalyticsReportServiceImplTest extends PlaySpec with MockitoSugar {
   class Scope {
     val transport = mock[AnalyticsTransport]
     val config = Configuration (
-      "start.analytics.view-id.guests" -> "fakeid1",
-      "start.analytics.view-id.users" -> "fakeid2"
+      "mywarwick.analytics.view-id.guests" -> "fakeid1",
+      "mywarwick.analytics.view-id.users" -> "fakeid2"
     )
     val service = new AnalyticsReportServiceImpl(config, transport)
 

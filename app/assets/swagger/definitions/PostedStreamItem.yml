@@ -21,7 +21,7 @@ properties:
   generated_at:
     type: string
     format: date-time
-    description: The time the notification was generated.  Defaults to the time the notification was received by Start.Warwick.
+    description: The time the notification was generated.  Defaults to the time the notification was received by My Warwick.
   recipients:
     description: The recipients for the notification.  Duplicate recipients will be removed
     type: object
