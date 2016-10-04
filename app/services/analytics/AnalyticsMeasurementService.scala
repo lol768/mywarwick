@@ -42,11 +42,11 @@ class AnalyticsMeasurementServiceImpl @Inject()(
   configuration: Configuration
 ) extends AnalyticsMeasurementService {
 
-  val trackingID = configuration.getString("start.analytics.tracking-id").map(AnalyticsTrackingID)
-    .getOrElse(throw new IllegalStateException("Analytics tracking ID missing - check start.analytics.tracking-id"))
+  val trackingID = configuration.getString("mywarwick.analytics.tracking-id").map(AnalyticsTrackingID)
+    .getOrElse(throw new IllegalStateException("Analytics tracking ID missing - check mywarwick.analytics.tracking-id"))
 
-  val identifierSalt = configuration.getString("start.analytics.identifier.salt")
-    .getOrElse(throw new IllegalStateException("Analytics identifier salt missing - check start.analytics.identifier.salt"))
+  val identifierSalt = configuration.getString("mywarwick.analytics.identifier.salt")
+    .getOrElse(throw new IllegalStateException("Analytics identifier salt missing - check mywarwick.analytics.identifier.salt"))
 
   override def getUserIdentifier(usercode: Usercode) =
     DigestUtils.sha256Hex(identifierSalt + usercode.string)

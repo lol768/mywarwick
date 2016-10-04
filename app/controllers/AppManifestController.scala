@@ -14,8 +14,8 @@ class AppManifestController @Inject()(
   cached: Cached
 ) extends BaseController {
 
-  val gcmSenderId = configuration.getString("start.gcm.id")
-    .getOrElse(throw new IllegalStateException("Missing GCM Sender Id - set start.gcm.id"))
+  val gcmSenderId = configuration.getString("mywarwick.gcm.id")
+    .getOrElse(throw new IllegalStateException("Missing GCM Sender Id - set mywarwick.gcm.id"))
 
   def getAppManifest = cached("manifest") {
     Action {

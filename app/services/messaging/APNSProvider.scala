@@ -11,13 +11,13 @@ trait APNSProvider {
 
 class APNSProviderImpl @Inject()(configuration: Configuration) extends APNSProvider {
 
-  private val certFile = configuration.getString("start.apns.cert.file")
-    .getOrElse(throw new IllegalStateException("Missing APNs certificate file - set start.apns.cert.file"))
+  private val certFile = configuration.getString("mywarwick.apns.cert.file")
+    .getOrElse(throw new IllegalStateException("Missing APNs certificate file - set mywarwick.apns.cert.file"))
 
-  private val certPassword = configuration.getString("start.apns.cert.password")
-    .getOrElse(throw new IllegalStateException("Missing APNs certificate password - set start.apns.cert.password"))
+  private val certPassword = configuration.getString("mywarwick.apns.cert.password")
+    .getOrElse(throw new IllegalStateException("Missing APNs certificate password - set mywarwick.apns.cert.password"))
 
-  private val isProductionDestination = configuration.getBoolean("start.apns.production").getOrElse(false)
+  private val isProductionDestination = configuration.getBoolean("mywarwick.apns.production").getOrElse(false)
 
   val apns = {
     val builder = APNS.newService().withCert(certFile, certPassword)
