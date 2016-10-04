@@ -21,9 +21,9 @@ class EmailOutputService @Inject() (
 
   import system.ThreadPools.email
 
-  val from = config.getString("start.mail.notifications.from")
-            .orElse(config.getString("start.mail.from"))
-            .getOrElse(throw new IllegalStateException("No From address - set start.mail[.notifications].from"))
+  val from = config.getString("mywarwick.mail.notifications.from")
+            .orElse(config.getString("mywarwick.mail.from"))
+            .getOrElse(throw new IllegalStateException("No From address - set mywarwick.mail[.notifications].from"))
 
   override def send(message: MessageSend.Heavy): Future[ProcessingResult] = Future {
     import message.{user, activity}

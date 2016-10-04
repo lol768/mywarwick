@@ -25,10 +25,10 @@ class GoogleAnalyticsTransport @Inject()(
   private val APPLICATION_NAME = "Start"
   private val JSON_FACTORY = new JacksonFactory()
 
-  private val KEY_FILE_LOCATION = config.getString("start.analytics.key_path")
-    .getOrElse(throw new IllegalStateException("Missing Google Analytics key file path - set start.analytics.key_path"))
-  private val SERVICE_ACCOUNT_EMAIL = config.getString("start.analytics.account.email")
-    .getOrElse(throw new IllegalStateException("Missing Google Analytics service account id - set start.analytics.account.email"))
+  private val KEY_FILE_LOCATION = config.getString("mywarwick.analytics.key_path")
+    .getOrElse(throw new IllegalStateException("Missing Google Analytics key file path - set mywarwick.analytics.key_path"))
+  private val SERVICE_ACCOUNT_EMAIL = config.getString("mywarwick.analytics.account.email")
+    .getOrElse(throw new IllegalStateException("Missing Google Analytics service account id - set mywarwick.analytics.account.email"))
 
   private val analytics: AnalyticsReporting = {
     val httpTransport = GoogleNetHttpTransport.newTrustedTransport()

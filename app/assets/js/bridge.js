@@ -41,7 +41,7 @@ export default function init(opts) {
     },
 
     search(query) {
-      // This will be better once we revisit Search in Start - quick bodge for now
+      // This will be better once we revisit Search in My Warwick - quick bodge for now
       this.navigate('/');
       this.navigate(`/search?q=${encodeURIComponent(query)}`);
     },

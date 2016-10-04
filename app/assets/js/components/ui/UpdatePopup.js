@@ -16,7 +16,7 @@ class UpdatePopup extends ReactComponent {
               > </i>
             </div>
             <div className="media-body" style={{ paddingTop: 2 }}>
-              A new version of Start.Warwick is available. Just&nbsp;
+              A new version of My Warwick is available. Just&nbsp;
               <a href="#" onClick={this.reload}>refresh the page</a>
               &nbsp;to upgrade.
             </div>

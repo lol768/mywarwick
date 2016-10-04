@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   version: 1.0-snapshot
-  title: Start.Warwick
+  title: My Warwick
   description: Your personal homepage to keep track of the information that you need regularly such as email and timetables.
   termsOfService: 'http://warwick.ac.uk/terms'
   contact:
@@ -22,7 +22,7 @@ produces:
 securityDefinitions:
   basicAuth:
     type: basic
-    description: 'Authenticate with Web Sign-On by providing a valid username and password, preferably belonging to a External User account dedicated for Start.Warwick API access.  Accounts must be authorised to write to user streams on behalf of a provider.'
+    description: 'Authenticate with Web Sign-On by providing a valid username and password, preferably belonging to a External User account dedicated for My Warwick API access.  Accounts must be authorised to write to user streams on behalf of a provider.'
 paths:
   /streams/user:
     get:
