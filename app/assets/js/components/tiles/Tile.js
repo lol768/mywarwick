@@ -78,7 +78,7 @@ export default class Tile extends Component {
     if (editingAny) {
       e.preventDefault();
     } else if (content && content.href) {
-      if (window.navigator.userAgent.indexOf('Start/') >= 0) {
+      if (window.navigator.userAgent.indexOf('MyWarwick/') >= 0) {
         window.location = content.href;
       } else {
         window.open(content.href);
