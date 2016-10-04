@@ -79,7 +79,7 @@ export default function init(opts) {
     $html.addClass('android');
   }
 
-  if (userAgent.indexOf('WarwickStart/') >= 0) {
+  if (userAgent.indexOf('MyWarwick/') >= 0) {
     $html.addClass('app standalone');
 
     store.subscribe(() => {
