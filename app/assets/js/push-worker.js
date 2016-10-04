@@ -49,7 +49,7 @@ self.addEventListener('push', event => {
       .then(data => {
         if (data.length === 0) {
           // No notifications to display
-          // (avoid generic 'my warwick.ac.uk has updated in the background')
+          // (avoid generic 'my.warwick.ac.uk has updated in the background')
           showNotification('My Warwick', 'You have new notifications');
         } else {
           data.map(notification =>
