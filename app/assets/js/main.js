@@ -89,10 +89,6 @@ $(() => {
 
 // save the initial state of notification permission to redux regardless of service worker support
 store.dispatch(device.updateNotificationPermissions);
-store.dispatch({
-  type: 'UPDATE_NOTIFICATION_PERMISSIONS',
-  notificationPermission: Notification.permission
-});
 /*
  Attempt to register service worker, to handle push notifications and offline
  */
