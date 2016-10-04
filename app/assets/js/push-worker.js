@@ -39,7 +39,7 @@ self.addEventListener('push', event => {
         } else if (response.status === 401) {
           // Unauthorized; user is no longer signed in so unregister the service worker
           // Must still show a notification to avoid update message
-          showNotification('Start.Warwick', 'You are no longer signed in to Start.Warwick');
+          showNotification('My Warwick', 'You are no longer signed in to My Warwick');
           self.registration.unregister();
           throw new Error('User session expired');
         } else {
@@ -49,8 +49,8 @@ self.addEventListener('push', event => {
       .then(data => {
         if (data.length === 0) {
           // No notifications to display
-          // (avoid generic 'start.warwick.ac.uk has updated in the background')
-          showNotification('Start.Warwick', 'You have new notifications');
+          // (avoid generic 'my warwick.ac.uk has updated in the background')
+          showNotification('My Warwick', 'You have new notifications');
         } else {
           data.map(notification =>
             self.registration.showNotification(notification.title, {

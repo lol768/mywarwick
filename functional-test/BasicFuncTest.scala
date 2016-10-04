@@ -29,7 +29,7 @@ class BasicFuncTest extends FuncTestBase with BeforeAndAfter {
         go to homepage
 
         find("app-container") should be(defined)
-        pageTitle should be("Start.Warwick")
+        pageTitle should be("My Warwick")
 
         eventually {
           find(className("sign-in-link")).get.text should be("Sign in")

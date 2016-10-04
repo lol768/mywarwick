@@ -20,8 +20,8 @@ class AppManifestController @Inject()(
   def getAppManifest = cached("manifest") {
     Action {
       Ok(Json.obj(
-        "name" -> "Start.Warwick",
-        "short_name" -> "Start.Warwick",
+        "name" -> "My Warwick",
+        "short_name" -> "My Warwick",
         "start_url" -> "/",
         "display" -> "standalone",
         "background_color" -> "#8C6E96",
