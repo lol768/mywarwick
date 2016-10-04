@@ -50,17 +50,22 @@ export function init() {
 }
 
 export function subscribe() {
-  navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
-    serviceWorkerRegistration.pushManager.subscribe({ userVisibleOnly: true })
-      .then(
-        uploadSubscription,
-        e => {
-          if (Notification.permission === 'denied') {
-            log.warn('Permission for Notifications was denied');
-          } else {
-            log.error('Unable to subscribe to push.', e);
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
+      serviceWorkerRegistration.pushManager.subscribe({ userVisibleOnly: true })
+        .then(
+          uploadSubscription,
+          e => {
+            if (Notification.permission === 'denied') {
+              log.warn('Permission for Notifications was denied');
+            } else {
+              log.error('Unable to subscribe to push.', e);
+            }
           }
-        }
-      );
-  });
+        );
+    });
+  } else {
+    // for browsers not supporting service worker
+    window.Notification.requestPermission();
+  }
 }
