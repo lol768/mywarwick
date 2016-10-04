@@ -31,7 +31,7 @@ export default class PermissionRequest extends ReactComponent {
       window.Notification && !this.props.isDisabled && this.state.visible ?
       <div className={classNames('permission-request')}>
         <div className="permission-notice">
-          Start needs your permission to <a onClick={ this.requestPermission }>
+          My Warwick needs your permission to <a onClick={ this.requestPermission }>
           show system notifications</a>
         </div>
         <div className="permission-dismiss">
