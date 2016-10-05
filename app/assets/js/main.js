@@ -88,8 +88,7 @@ $(() => {
 });
 
 /*
- save the initial state of notification permission to redux regardless of service worker support
- window.Notification is checked as ios does not support it.
+ save the initial state of notification permission to redux
   */
 if ('Notification' in window) {
   store.dispatch(device.updateNotificationPermissions);
