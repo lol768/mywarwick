@@ -87,8 +87,12 @@ $(() => {
   });
 });
 
-// save the initial state of notification permission to redux regardless of service worker support
-store.dispatch(device.updateNotificationPermissions);
+/*
+ save the initial state of notification permission to redux
+  */
+if ('Notification' in window) {
+  store.dispatch(device.updateNotificationPermissions);
+}
 /*
  Attempt to register service worker, to handle push notifications and offline
  */
