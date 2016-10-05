@@ -1,6 +1,6 @@
 package helpers
 
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import org.eclipse.jetty.server
 import org.eclipse.jetty.server.handler.AbstractHandler

@@ -37,10 +37,17 @@ export default function init(opts) {
       // click event to dismiss active tooltips
       document.dispatchEvent(new Event('click'));
       store.dispatch(push(path));
+      window.scrollTo(0, 0);
+    },
+
+    search(query) {
+      // This will be better once we revisit Search in My Warwick - quick bodge for now
+      this.navigate('/');
+      this.navigate(`/search?q=${encodeURIComponent(query)}`);
     },
 
     appToForeground() {
-      store.dispatch(tiles.fetchTileContent());
+      store.dispatch(tiles.fetchTiles());
       store.dispatch(displayUpdateProgress);
     },
 
@@ -65,8 +72,15 @@ export default function init(opts) {
     });
   }
 
-  if (window.navigator.userAgent.indexOf('WarwickStart/') >= 0) {
-    $('html').addClass('app standalone');
+  const $html = $('html');
+  const userAgent = window.navigator.userAgent;
+
+  if (userAgent.indexOf('Android') >= 0) {
+    $html.addClass('android');
+  }
+
+  if (userAgent.indexOf('MyWarwick/') >= 0) {
+    $html.addClass('app standalone');
 
     store.subscribe(() => {
       const state = store.getState();
@@ -74,12 +88,14 @@ export default function init(opts) {
       update({
         unreadNotificationCount:
           stream.getNumItemsSince(
-            state.notifications,
-            state.notificationsLastRead
+            state.notifications.stream,
+            state.notificationsLastRead.date
           ),
         currentPath: window.location.pathname,
         isUserLoggedIn: state.user.data.usercode !== undefined,
         tabBarHidden: state.ui.className !== 'mobile',
+        user: state.user.data,
+        ssoUrls: state.user.links,
       });
     });
 

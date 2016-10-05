@@ -19,8 +19,22 @@ dd.error {
   color: @id7-brand-red;
 }
 
-.split-form > section {
-  display: none;
+.split-form {
+  position: relative;
+
+  > section {
+    display: none;
+    width: 100%;
+    position: absolute;
+
+    &.active {
+      position: relative;
+    }
+  }
+}
+
+.split-form > section.active {
+  display: block;
 }
 
 .confirm-delete {
@@ -28,6 +42,7 @@ dd.error {
   opacity: 0;
   left: 20%;
 }
+
 .news-item, .activity-item {
   .btn-toolbar {
     position: relative;
@@ -37,5 +52,14 @@ dd.error {
     .btn {
       margin-bottom: 4px;
     }
+  }
+}
+
+.audience-indicator {
+  i {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 8px 10px;
   }
 }

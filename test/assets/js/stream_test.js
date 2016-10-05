@@ -1,5 +1,4 @@
-import moment from 'moment'
-import formatDate from 'dateFormatter'
+import moment from 'moment';
 import _ from 'lodash';
 import { onStreamReceive, getStreamPartition, mergeReceivedItems, takeFromStream, getStreamSize, getNumItemsSince } from '../../../app/assets/js/stream';
 

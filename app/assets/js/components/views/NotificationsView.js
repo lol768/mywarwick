@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 
 import { takeFromStream, getStreamSize } from '../../stream';
 import { markNotificationsRead } from '../../state/notification-metadata';
+import * as notifications from '../../state/notifications';
 
 const SOME_MORE = 20;
 
@@ -26,30 +27,23 @@ class NotificationsView extends ReactComponent {
     };
 
     this.loadMore = this.loadMore.bind(this);
-
-    if ('permissions' in navigator) {
-      navigator.permissions.query({ name: 'notifications' })
-        .then(notificationPermissions => {
-          /* eslint-disable no-param-reassign */
-          /*
-           * function parameter reassignment is valid here. See the Permissions API docs ...
-           * https://developers.google.com/web/updates/2015/04/permissions-api-for-the-web?hl=en
-           */
-          notificationPermissions.onchange = this.onBrowserPermissionChange.bind(this);
-          /* eslint-enable no-param-reassign */
-        });
-    }
   }
 
   loadMore() {
-    this.setState({
-      numberToShow: this.state.numberToShow + SOME_MORE,
-    });
+    const streamSize = getStreamSize(this.props.notifications);
+    const hasOlderItemsLocally = this.state.numberToShow < streamSize;
+
+    if (hasOlderItemsLocally) {
+      this.showMore();
+    } else if (this.props.olderItemsOnServer) {
+      this.props.dispatch(notifications.fetchMoreNotifications())
+        .then(() => this.showMore());
+    }
   }
 
-  onBrowserPermissionChange() {
+  showMore() {
     this.setState({
-      browserPushDisabled: 'Notification' in window && Notification.permission === 'denied',
+      numberToShow: this.state.numberToShow + SOME_MORE,
     });
   }
 
@@ -94,11 +88,11 @@ class NotificationsView extends ReactComponent {
   }
 
   render() {
-    const notifications = takeFromStream(this.props.notifications, this.state.numberToShow)
+    const notificationItems = takeFromStream(this.props.notifications, this.state.numberToShow)
       .map(n =>
         <ActivityItem
           key={ n.id }
-          forceDisplayDay={ !this.props.grouped }
+          grouped={ this.props.grouped }
           unread={ this.isUnread(n) }
           {...n}
         />
@@ -106,13 +100,14 @@ class NotificationsView extends ReactComponent {
 
     const streamSize = getStreamSize(this.props.notifications);
     const hasAny = streamSize > 0;
-    const hasMore = this.state.numberToShow < streamSize;
+    const hasMore = this.state.numberToShow < streamSize || this.props.olderItemsOnServer;
+    const browserPushDisabled = this.props.notificationPermission === 'denied';
 
     return (
       <div>
-        { this.state.browserPushDisabled ?
+        { browserPushDisabled ?
           <div className="permission-warning">
-            You have blocked Start.Warwick from showing system notifications. You'll need to open
+            You have blocked My Warwick from showing system notifications. You'll need to open
             your browser preferences to change that.
           </div>
           : null
@@ -120,7 +115,7 @@ class NotificationsView extends ReactComponent {
         { hasAny ?
           <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore }>
             <GroupedList groupBy={ this.props.grouped ? groupItemsByDate : undefined }>
-              { notifications }
+              { notificationItems }
             </GroupedList>
           </InfiniteScrollable>
           :
@@ -136,10 +131,17 @@ class NotificationsView extends ReactComponent {
 
 }
 
+
+NotificationsView.defaultProps = {
+  grouped: true,
+};
+
 function select(state) {
   return {
-    notifications: state.notifications,
+    notifications: state.notifications.stream,
     notificationsLastRead: state.notificationsLastRead,
+    olderItemsOnServer: state.notifications.olderItemsOnServer,
+    notificationPermission: state.device.notificationPermission,
   };
 }
 

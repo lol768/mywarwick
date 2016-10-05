@@ -17,6 +17,7 @@ object TestActors {
     * This method returns a totally configless Akka, with plain JVM-only actors.
     *
     * REMEMBER to terminate the system after the tests have run!
+    * Also see WithActorSystem which handles this for you.
     */
   def plainActorSystem(config: Config = ConfigFactory.empty()) = ActorSystem("test", config)
 

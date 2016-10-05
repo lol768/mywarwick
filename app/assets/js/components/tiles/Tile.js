@@ -1,7 +1,7 @@
 /* eslint react/prop-types: 0, react/sort-comp: 0 */
 import React, { Component } from 'react';
 
-import { localMoment } from '../../dateFormatter.js';
+import { localMoment } from '../../dateFormats.js';
 import classNames from 'classnames';
 
 export default class Tile extends Component {
@@ -78,7 +78,7 @@ export default class Tile extends Component {
     if (editingAny) {
       e.preventDefault();
     } else if (content && content.href) {
-      if (window.navigator.userAgent.indexOf('Start/') >= 0) {
+      if (window.navigator.userAgent.indexOf('MyWarwick/') >= 0) {
         window.location = content.href;
       } else {
         window.open(content.href);

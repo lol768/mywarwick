@@ -11,6 +11,8 @@ import { connect } from 'react-redux';
 
 import { takeFromStream, getStreamSize } from '../../stream';
 
+import * as notifications from '../../state/notifications';
+
 const SOME_MORE = 20;
 
 class ActivityView extends ReactComponent {
@@ -25,6 +27,18 @@ class ActivityView extends ReactComponent {
   }
 
   loadMore() {
+    const streamSize = getStreamSize(this.props.activities);
+    const hasOlderItemsLocally = this.state.numberToShow < streamSize;
+
+    if (hasOlderItemsLocally) {
+      this.showMore();
+    } else if (this.props.olderItemsOnServer) {
+      this.props.dispatch(notifications.fetchMoreActivities())
+        .then(() => this.showMore());
+    }
+  }
+
+  showMore() {
     this.setState({
       numberToShow: this.state.numberToShow + SOME_MORE,
     });
@@ -32,11 +46,11 @@ class ActivityView extends ReactComponent {
 
   render() {
     const activities = takeFromStream(this.props.activities, this.state.numberToShow)
-      .map(n => <ActivityItem key={n.id} {...n} />);
+      .map(n => <ActivityItem key={n.id} grouped={this.props.grouped} {...n} />);
 
     const streamSize = getStreamSize(this.props.activities);
     const hasAny = streamSize > 0;
-    const hasMore = this.state.numberToShow < streamSize;
+    const hasMore = this.state.numberToShow < streamSize || this.props.olderItemsOnServer;
 
     return (
       <div>
@@ -58,9 +72,14 @@ class ActivityView extends ReactComponent {
   }
 }
 
+ActivityView.defaultProps = {
+  grouped: true,
+};
+
 function select(state) {
   return {
-    activities: state.activities,
+    activities: state.activities.stream,
+    olderItemsOnServer: state.activities.olderItemsOnServer,
   };
 }
 

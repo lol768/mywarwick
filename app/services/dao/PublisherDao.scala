@@ -27,6 +27,8 @@ trait PublisherDao {
 
   def getProviders(publisherId: String)(implicit c: Connection): Seq[Provider]
 
+  def isPublisher(usercode: String)(implicit  c: Connection): Boolean
+
 }
 
 @Singleton
@@ -65,14 +67,19 @@ class PublisherDaoImpl extends PublisherDao {
 
   override def getParentPublisherId(providerId: String)(implicit c: Connection) =
     SQL"SELECT p.id FROM publisher p JOIN provider pr ON p.id = pr.publisher_id WHERE pr.id = $providerId"
-    .executeQuery()
-    .as(scalar[String].singleOpt)
+      .executeQuery()
+      .as(scalar[String].singleOpt)
 
   override def getProviders(publisherId: String)(implicit c: Connection): Seq[Provider] =
     SQL"SELECT id, display_name FROM provider WHERE publisher_id = $publisherId ORDER BY display_name"
-    .executeQuery()
-    .as(providerParser.*)
+      .executeQuery()
+      .as(providerParser.*)
 
+  override def isPublisher(usercode: String)(implicit c: Connection): Boolean =
+
+    SQL"SELECT COUNT(*) FROM PUBLISHER_PERMISSION WHERE USERCODE = $usercode"
+      .executeQuery()
+      .as(scalar[Int].single) > 0
 }
 
 

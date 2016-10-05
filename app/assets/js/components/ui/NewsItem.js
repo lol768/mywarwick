@@ -2,7 +2,7 @@ import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 import { connect } from 'react-redux';
 
-import formatDate from '../../dateFormatter';
+import * as dateFormats from '../../dateFormats';
 import Hyperlink from './Hyperlink';
 
 // Convert newlines to paragraphs.
@@ -16,11 +16,13 @@ export const render = (content) =>
 class NewsItem extends ReactComponent {
 
   render() {
-    const { id, link, title, publishDate, text, imageId, categories } = this.props;
-    const { deviceWidth, analyticsClientId } = this.props;
+    const { id, link, title, publishDate, text, imageId, categories, width } = this.props;
+    const { analyticsClientId } = this.props;
 
     const url = link && `/news/${id}/redirect?clientId=${analyticsClientId}`;
     const moreLink = link ? (<p><Hyperlink href={url}>{link.text}</Hyperlink></p>) : null;
+
+    const imageWidth = width * (window.devicePixelRatio || 1);
 
     return (
       <article className="news-item">
@@ -31,14 +33,7 @@ class NewsItem extends ReactComponent {
             </Hyperlink>
           </h1>
 
-          { imageId ?
-            <div className="news-item__image">
-              <img
-                src={ `/api/news/images/${imageId}?width=${deviceWidth}` }
-                alt={ title }
-              />
-            </div>
-            : null }
+          { imageId && <NewsItemImage id={imageId} width={imageWidth} alt={title} /> }
 
           <div className="news-item__content">
             {render(text)}
@@ -50,7 +45,7 @@ class NewsItem extends ReactComponent {
               {categories.map(c => <NewsItemTag key={c.id} name={c.name} />)}
             </div>
             <p>
-              {formatDate(publishDate, new Date(), true)}
+              {dateFormats.forNewsItem(publishDate)}
             </p>
           </div>
         </div>
@@ -58,6 +53,20 @@ class NewsItem extends ReactComponent {
     );
   }
 }
+
+export function NewsItemImage({ id, width, alt }) {
+  return (
+    <div className="news-item__image">
+      <img src={`/api/news/images/${id}?width=${Math.round(width)}`} alt={alt} />
+    </div>
+  );
+}
+
+NewsItemImage.propTypes = {
+  id: React.PropTypes.string.isRequired,
+  width: React.PropTypes.number.isRequired,
+  alt: React.PropTypes.string.isRequired,
+};
 
 const NewsItemTag = props =>
   <span className="badge">
@@ -69,7 +78,6 @@ NewsItemTag.propTypes = {
 };
 
 const select = (state) => ({
-  deviceWidth: state.device.width,
   analyticsClientId: state.analytics.clientId,
 });
 export default connect(select)(NewsItem);

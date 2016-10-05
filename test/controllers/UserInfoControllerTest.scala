@@ -2,17 +2,16 @@ package controllers
 
 import helpers.Fixtures
 import org.apache.commons.configuration.BaseConfiguration
-import org.mockito.Matchers
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.http.HeaderNames
-import play.api.libs.json.{JsBoolean, JsNull, JsNumber, JsString}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import services.{AnalyticsMeasurementService, PhotoService, UserInitialisationService}
+import services.analytics.AnalyticsMeasurementService
+import services.{PhotoService, UserInitialisationService}
 import uk.ac.warwick.sso.client.cache.{UserCache, UserCacheItem}
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import warwick.sso._

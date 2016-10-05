@@ -24,8 +24,8 @@ class GCMOutputService @Inject()(
 
   import system.ThreadPools.mobile
 
-  val apiKey = configuration.getString("start.gcm.apiKey")
-    .getOrElse(throw new IllegalStateException("Missing GCM API key - set start.gcm.apiKey"))
+  val apiKey = configuration.getString("mywarwick.gcm.apiKey")
+    .getOrElse(throw new IllegalStateException("Missing GCM API key - set mywarwick.gcm.apiKey"))
 
   def send(message: MessageSend.Heavy): Future[ProcessingResult] = {
     val usercode = message.user.usercode

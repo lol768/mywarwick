@@ -1,12 +1,10 @@
 package controllers.admin
 
-import akka.stream.ActorMaterializer
-import helpers.{Fixtures, OneStartAppPerSuite, TestActors}
-import models.{Audience, NewsCategory}
-import models.news.NewsItemRender
+import helpers.{Fixtures, OneStartAppPerSuite}
+import models.Audience.Staff
 import models.publishing.PublishingRole.NewsManager
 import models.publishing._
-import org.joda.time.DateTime
+import models.{Audience, NewsCategory}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -22,19 +20,15 @@ import system.ErrorHandler
 import warwick.sso._
 
 import scala.concurrent.Future
+import scala.util.Success
 
 class NewsControllerTest extends PlaySpec with MockitoSugar with Results with OneStartAppPerSuite {
-
-  implicit val akka = TestActors.plainActorSystem()
-  implicit val mat = ActorMaterializer()
 
   val custard = Usercode("custard")
 
   val mockSSOClient = new MockSSOClient(new LoginContext {
     override def loginUrl(target: Option[String]) = ""
-
     override def actualUserHasRole(role: RoleName) = false
-
     override def userHasRole(role: RoleName) = false
 
     override val user: Option[User] = Some(Users.create(custard))
@@ -49,11 +43,14 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
   val newsCategoryService = mock[NewsCategoryService]
   val messagesApi = app.injector.instanceOf[MessagesApi]
   val audienceBinder = mock[AudienceBinder]
+  val audienceService = mock[AudienceService]
+  val userPreferencesService = mock[UserPreferencesService]
+  val userNewsCategoryService = mock[UserNewsCategoryService]
 
   when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("IN", "IT Services", "IT Services", "ITS", "SERVICE")))
   when(newsCategoryService.all()).thenReturn(Seq(NewsCategory("abc", "Campus")))
 
-  val newsController = new NewsController(securityServiceImpl, publisherService, messagesApi, newsService, departmentInfoDao, audienceBinder, newsCategoryService, mock[ErrorHandler]) {
+  val newsController = new NewsController(securityServiceImpl, publisherService, messagesApi, newsService, departmentInfoDao, audienceBinder, newsCategoryService, userNewsCategoryService, mock[ErrorHandler], audienceService, userPreferencesService) {
     override val navigationService = new MockNavigationService()
     override val ssoClient = mockSSOClient
   }
@@ -118,20 +115,20 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
   }
 
+  val validData = Seq(
+    "item.title" -> "Big news",
+    "item.text" -> "Something happened",
+    "item.publishDate" -> "2016-01-01T00:00.000",
+    "categories[]" -> "abc",
+    "audience.department" -> "IN",
+    "audience.audience[]" -> "Dept:Staff"
+  )
+
   "NewsController#create" should {
 
     when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
     when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
     when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
-
-    val validData = Seq(
-      "item.title" -> "Big news",
-      "item.text" -> "Something happened",
-      "item.publishDate" -> "2016-01-01T00:00.000",
-      "categories[]" -> "abc",
-      "audience.department" -> "IN",
-      "audience.audience[]" -> "Dept:Staff"
-    )
 
     "create a news item" in {
       val audience = Audience(Seq(Audience.DepartmentAudience("IN", Seq(Audience.Staff))))
@@ -215,6 +212,47 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
       status(result) must be(OK)
       contentAsString(result) must include("Update news")
+    }
+
+  }
+
+  "NewsController#audienceInfo" should {
+
+    "respond with audience size" in {
+      when(audienceService.resolve(Audience(Seq(Audience.DepartmentAudience("IN", Seq(Staff)))))).thenReturn(Success(Seq("a", "b", "c").map(Usercode)))
+      when(userPreferencesService.countInitialisedUsers(Seq("a", "b", "c").map(Usercode))).thenReturn(2)
+      when(userNewsCategoryService.getRecipientsOfNewsInCategories(Seq("abc"))).thenReturn(Seq("a", "e").map(Usercode))
+
+      val result = call(newsController.audienceInfo("xyz"), FakeRequest("POST", "/").withFormUrlEncodedBody(validData: _*))
+
+      status(result) must be(OK)
+      val json = contentAsJson(result)
+
+      (json \ "status").as[String] must be("ok")
+      (json \ "data" \ "baseAudience").as[Int] must be(3)
+      (json \ "data" \ "categorySubset").as[Int] must be(2)
+    }
+
+    "respond with public" in {
+      when(audienceBinder.bindAudience(AudienceData(Seq("Public"), None))).thenReturn(Future.successful(Right(Audience.Public)))
+      when(audienceService.resolve(Audience.Public)).thenReturn(Success(Seq(Usercode("*"))))
+      when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.AllDepartments)
+
+      val data = Seq(
+        "item.title" -> "Big news",
+        "item.text" -> "Something happened",
+        "item.publishDate" -> "2016-01-01T00:00.000",
+        "categories[]" -> "abc",
+        "audience.audience[]" -> "Public"
+      )
+
+      val result = call(newsController.audienceInfo("xyz"), FakeRequest("POST", "/").withFormUrlEncodedBody(data: _*))
+
+      status(result) must be(OK)
+      val json = contentAsJson(result)
+
+      (json \ "status").as[String] must be("ok")
+      (json \ "data" \ "public").as[Boolean] must be(true)
     }
 
   }

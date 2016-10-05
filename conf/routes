@@ -26,6 +26,7 @@ GET         /admin/publish/:publisher                                 @controlle
 GET         /admin/publish/:publisher/news                            @controllers.admin.NewsController.list(publisher: String)
 GET         /admin/publish/:publisher/news/new                        @controllers.admin.NewsController.createForm(publisher: String)
 POST        /admin/publish/:publisher/news/validate                   @controllers.admin.NewsController.create(publisher: String, submitted: Boolean = false)
+POST        /admin/publish/:publisher/news/audience                   @controllers.admin.NewsController.audienceInfo(publisher: String)
 POST        /admin/publish/:publisher/news                            @controllers.admin.NewsController.create(publisher: String, submitted: Boolean = true)
 GET         /admin/publish/:publisher/news/:id/edit                   @controllers.admin.NewsController.updateForm(publisher: String, id: String)
 POST        /admin/publish/:publisher/news/:id/validate               @controllers.admin.NewsController.update(publisher: String, id: String, submitted: Boolean = false)
@@ -54,6 +55,7 @@ GET         /api/news/categories                                      @controlle
 POST        /api/news/categories                                      @controllers.api.NewsCategoriesController.update
 POST        /api/news/images                                          @controllers.api.NewsImagesController.create
 GET         /api/news/images/:id                                      @controllers.api.NewsImagesController.show(id: String)
+POST        /api/news/analytics                                       @controllers.api.AnalyticsController.newsItemReport
 
 GET         /news/:id/redirect                                        @controllers.api.ReadNewsController.redirect(id: String)
 
@@ -62,8 +64,10 @@ GET         /service/gtg                                              @controlle
 GET         /service/healthcheck                                      @controllers.ServiceCheckController.healthcheck
 GET         /service/cluster/state                                    @controllers.admin.ClusterStateController.get
 
-GET         /api/streams/user                                         @controllers.api.UserActivitiesController.get
 POST        /api/streams/read                                         @controllers.api.UserActivitiesController.markAsRead
+
+GET         /api/streams/notifications                                @controllers.api.UserActivitiesController.notifications(since: Option[String], before: Option[String], limit: Int ?= 100)
+GET         /api/streams/activities                                   @controllers.api.UserActivitiesController.activities(since: Option[String], before: Option[String], limit: Int ?= 100)
 
 POST        /api/streams/:providerId/notifications                    @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
 POST        /api/streams/:providerId/activities                       @controllers.api.IncomingActivitiesController.postActivity(providerId: String)

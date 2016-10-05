@@ -1,4 +1,6 @@
 import log from 'loglevel';
+import store from './store';
+import * as device from './state/device';
 
 function uploadSubscription(subscription) {
   return fetch('/api/push/gcm/subscribe', {
@@ -14,13 +16,13 @@ function uploadSubscription(subscription) {
 
 // Once the service worker is registered set the initial state
 export function init() {
-  // Are Notifications supported in the service worker?
+  // Are Notifications supported?
   if (!('Notification' in window || 'showNotification' in ServiceWorkerRegistration.prototype)) {
     log.warn('Notifications aren\'t supported.');
     return;
   }
 
-// If the user has disabled notifications
+  // If the user has disabled notifications
   if (Notification.permission === 'denied') {
     log.warn('The user has disabled notifications.');
     return;
@@ -50,17 +52,28 @@ export function init() {
 }
 
 export function subscribe() {
-  navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
-    serviceWorkerRegistration.pushManager.subscribe({ userVisibleOnly: true })
-      .then(
-        uploadSubscription,
-        e => {
-          if (Notification.permission === 'denied') {
-            log.warn('Permission for Notifications was denied');
-          } else {
-            log.error('Unable to subscribe to push.', e);
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(serviceWorkerRegistration =>
+      serviceWorkerRegistration.pushManager.subscribe({ userVisibleOnly: true })
+        .then(
+          sub => {
+            store.dispatch(device.updateNotificationPermissions);
+            return uploadSubscription(sub);
+          },
+          e => {
+            store.dispatch(device.updateNotificationPermissions);
+            if (Notification.permission === 'denied') {
+              log.warn('Permission for Notifications was denied');
+            } else {
+              log.error('Unable to subscribe to push.', e);
+            }
           }
-        }
-      );
-  });
+        )
+    );
+  } else {
+    // for browsers not supporting service worker
+    window.Notification.requestPermission(() => {
+      store.dispatch(device.updateNotificationPermissions);
+    });
+  }
 }

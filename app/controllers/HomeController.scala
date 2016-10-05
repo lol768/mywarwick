@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.Configuration
 import play.api.mvc._
-import services.{AnalyticsMeasurementService, AnalyticsTrackingID}
+import services.analytics.{AnalyticsMeasurementService, AnalyticsTrackingID}
 import system.AppMetrics
 
 case class SearchRootUrl(string: String)
@@ -19,8 +19,8 @@ class HomeController @Inject()(
   implicit val analyticsTrackingId: Option[AnalyticsTrackingID] = Some(measurementService.trackingID)
 
   implicit val searchRootUrl: SearchRootUrl =
-    configuration.getString("start.search.root").map(SearchRootUrl)
-      .getOrElse(throw new IllegalStateException("Search root URL not configured - check start.search.root property"))
+    configuration.getString("mywarwick.search.root").map(SearchRootUrl)
+      .getOrElse(throw new IllegalStateException("Search root URL not configured - check mywarwick.search.root property"))
 
   def index = Action(Ok(views.html.index()))
 

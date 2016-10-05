@@ -2,7 +2,7 @@ import React from 'react';
 
 import TileContent from './TileContent';
 import Skycon from '../ui/Skycon';
-import { localMomentUnix } from '../../dateFormatter';
+import { localMomentUnix } from '../../dateFormats';
 
 import _ from 'lodash';
 

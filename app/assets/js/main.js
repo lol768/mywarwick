@@ -41,6 +41,12 @@ localforage.config({
   name: 'Start',
 });
 
+function hasAuthoritativeUser() {
+  const u = store.getState().user;
+
+  return u && u.authoritative === true;
+}
+
 const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
 
@@ -51,9 +57,11 @@ $(() => {
 
   $(window).on('deviceorientation resize', () => store.dispatch(device.updateDeviceWidth()));
 
-  $(window).on('online', () =>
-    store.dispatch(notifications.fetch())
-  );
+  $(window).on('online', () => {
+    if (hasAuthoritativeUser()) {
+      store.dispatch(notifications.fetch());
+    }
+  });
 
   if (window.navigator.userAgent.indexOf('Mobile') >= 0) {
     $('html').addClass('mobile');
@@ -80,6 +88,12 @@ $(() => {
 });
 
 /*
+ save the initial state of notification permission to redux
+  */
+if ('Notification' in window) {
+  store.dispatch(device.updateNotificationPermissions);
+}
+/*
  Attempt to register service worker, to handle push notifications and offline
  */
 if ('serviceWorker' in navigator) {
@@ -101,6 +115,12 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+SocketDatapipe.onopen = () => {
+  if (hasAuthoritativeUser()) {
+    store.dispatch(notifications.fetch());
+  }
+};
+
 SocketDatapipe.subscribe(data => {
   switch (data.type) {
     case 'activity':
@@ -114,7 +134,13 @@ SocketDatapipe.subscribe(data => {
 
 /** Fetching/storing locally persisted data */
 
-const freezeStream = stream => _(stream).values().flatten().value();
+function freezeStream({ stream, olderItemsOnServer }) {
+  return {
+    items: _(stream).values().flatten().value(),
+    olderItemsOnServer,
+  };
+}
+
 const freezeDate = (d) => ((!!d && 'format' in d) ? d.format() : d);
 const thawDate = (d) => (!!d ? moment(d) : d);
 
@@ -141,11 +167,10 @@ const loadPersonalisedDataFromServer = _.once(() => {
   setInterval(() => store.dispatch(tiles.fetchTileContent()), 5 * 60 * 1000);
 });
 
-store.subscribe(() => {
-  const u = store.getState().user;
-
-  if (u && u.authoritative === true) {
+const unsubscribe = store.subscribe(() => {
+  if (hasAuthoritativeUser()) {
     loadPersonalisedDataFromServer();
+    unsubscribe();
   }
 });
 

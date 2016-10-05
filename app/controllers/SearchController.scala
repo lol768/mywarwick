@@ -21,8 +21,8 @@ class SearchController @Inject()(
 
   import securityService._
 
-  val searchRoot = configuration.getString("start.search.root")
-    .getOrElse(throw new IllegalStateException("Search root configuration missing - check start.search.root in application.conf"))
+  val searchRoot = configuration.getString("mywarwick.search.root")
+    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.search.root in application.conf"))
 
   val ForwardedHeaders = Seq(CONTENT_TYPE, ACCEPT)
   val IgnoredReturnHeaders = Seq(CONTENT_TYPE, CONTENT_LENGTH)

@@ -37,7 +37,7 @@ export class SettingsView extends ReactComponent {
       <div>
         { this.state.browserPushDisabled ?
           <div className="permission-warning">
-            You have blocked Start.Warwick from showing system notifications. You'll need to open
+            You have blocked My Warwick from showing system notifications. You'll need to open
             your browser preferences to change that.
           </div>
           : null
@@ -64,7 +64,7 @@ export class SettingsView extends ReactComponent {
 const appSettings = [
   // TODO: If your adding the first settings to the app remember to ...
   // Remove the notification permissions stuff from NotificationsView. It will live here instead.
-  // Put the settings MastheadIcon back in ID7Layout
+  // Put the settings MastheadNavItem back in ID7Layout
 ];
 
 SettingsView.defaultProps = {

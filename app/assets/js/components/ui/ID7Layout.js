@@ -4,11 +4,9 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import _ from 'lodash';
 import log from 'loglevel';
-import MastheadIcon from './MastheadIcon';
+import MastheadNavItem from './MastheadNavItem';
 import NotificationsView from '../views/NotificationsView';
 import ActivityView from '../views/ActivityView';
-import LinkBlock from './LinkBlock';
-import Link from './Link';
 import NewsView from '../views/NewsView';
 import MastheadSearch from './MastheadSearch';
 import MastheadMobile from './MastheadMobile';
@@ -19,16 +17,12 @@ import UtilityBar from './UtilityBar';
 import { connect } from 'react-redux';
 import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
-import * as tiles from '../../state/tiles';
-import { push, goBack } from 'react-router-redux';
+import { goBack } from 'react-router-redux';
 
 class ID7Layout extends ReactComponent {
 
   constructor(props) {
     super(props);
-    this.goToHome = this.goToHome.bind(this);
-    this.goToNotification = this.goToNotification.bind(this);
-    this.goToActivity = this.goToActivity.bind(this);
     this.onBackClick = this.onBackClick.bind(this);
   }
 
@@ -65,20 +59,6 @@ class ID7Layout extends ReactComponent {
     $(document.body)
       .removeClass(`theme-${oldTheme}`)
       .addClass(`theme-${newTheme}`);
-  }
-
-  goToHome(e) {
-    e.preventDefault();
-    this.props.dispatch(push('/'));
-    this.props.dispatch(tiles.fetchTileContent());
-  }
-
-  goToNotification() {
-    this.props.dispatch(push('/notifications'));
-  }
-
-  goToActivity() {
-    this.props.dispatch(push('/activity'));
   }
 
   onBackClick() {
@@ -174,48 +154,40 @@ class ID7Layout extends ReactComponent {
                               <img src="" alt="Warwick" />
                             </a>
                           </div>
-                          <div className="masthead-popover-icons">
-                            <MastheadIcon
+                          <ul className="masthead-nav">
+                            <MastheadNavItem
+                              icon="user"
+                              key="me"
+                              title="Me"
+                              href="/"
+                              dispatch={this.props.dispatch}
+                              pathname={this.props.pathname}
+                            />
+                            <MastheadNavItem
+                              popover
                               icon="inbox"
                               badge={ notificationsCount }
                               key="notifications"
-                              popoverTitle="Notifications"
-                              isDisabled={ !user.data.authenticated }
-                              onMore={ this.goToNotification }
+                              title="Notifications"
+                              disabled={ !user.data.authenticated }
+                              href="/notifications"
+                              dispatch={this.props.dispatch}
+                              pathname={this.props.pathname}
                             >
                               <NotificationsView grouped={false} />
-                            </MastheadIcon>
-                            <MastheadIcon
+                            </MastheadNavItem>
+                            <MastheadNavItem
+                              popover
                               icon="dashboard" key="activity"
-                              popoverTitle="Activity"
-                              isDisabled={ !user.data.authenticated }
-                              onMore={ this.goToActivity }
+                              title="Activity"
+                              disabled={ !user.data.authenticated }
+                              href="/activity"
+                              dispatch={this.props.dispatch}
+                              pathname={this.props.pathname}
                             >
                               <ActivityView grouped={false} />
-                            </MastheadIcon>
-                            <MastheadIcon icon="bars" key="links" popoverTitle="Quick links">
-                              <LinkBlock columns={ 1 }>
-                                <Link key="bpm" href="http://warwick.ac.uk/bpm">
-                                  Course Transfers
-                                </Link>
-                                <Link key="ett" href="http://warwick.ac.uk/ett">
-                                  Exam Timetable
-                                </Link>
-                                <Link key="massmail" href="http://warwick.ac.uk/massmail">
-                                  Mass Mailing
-                                </Link>
-                                <Link key="mrm" href="http://warwick.ac.uk/mrm">
-                                  Module Registration
-                                </Link>
-                                <Link
-                                  key="printercredits"
-                                  href="http://warwick.ac.uk/printercredits"
-                                >
-                                  Printer Credits
-                                </Link>
-                              </LinkBlock>
-                            </MastheadIcon>
-                          </div>
+                            </MastheadNavItem>
+                          </ul>
                         </div>
                       </div>
                       <MastheadSearch />
@@ -246,6 +218,8 @@ class ID7Layout extends ReactComponent {
             </header>
 
             <div className="id7-main-content">
+              { this.props.pathname.startsWith('/news') ?
+                this.props.children :
               <div className="row">
                 <div className="col-sm-8 col-lg-9">
                   {this.props.children}
@@ -253,7 +227,7 @@ class ID7Layout extends ReactComponent {
                 <div className="col-sm-4 col-lg-3">
                   <NewsView />
                 </div>
-              </div>
+              </div> }
             </div>
           </main>
         </div>
@@ -279,10 +253,11 @@ class ID7Layout extends ReactComponent {
 const select = (state) => ({
   layoutClassName: state.ui.className,
   notificationsCount:
-    getNumItemsSince(state.notifications, _(state).get(['notificationsLastRead', 'date'])),
+    getNumItemsSince(state.notifications.stream, _(state).get(['notificationsLastRead', 'date'])),
   user: state.user,
   colourTheme: state.ui.colourTheme,
   zoomedTile: state.ui.zoomedTile,
+  pathname: state.routing.locationBeforeTransitions.pathname,
 });
 
 export default connect(select)(ID7Layout);

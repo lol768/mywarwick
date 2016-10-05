@@ -9,7 +9,7 @@ import warwick.sso.User
 @ImplementedBy(classOf[TileServiceImpl])
 trait TileService {
 
-  def getTilesByIds(user: User, ids: Seq[String]): Seq[TileInstance]
+  def getTilesByIds(user: Option[User], ids: Seq[String]): Seq[TileInstance]
 
   def getTilesForUser(user: Option[User]): Seq[TileInstance]
 
@@ -49,8 +49,14 @@ class TileServiceImpl @Inject()(
   override def saveTileLayoutForUser(user: User, tileLayout: Seq[TileLayout]) =
     db.withConnection(implicit c => tileLayoutDao.saveTileLayoutForUser(user.usercode.string, tileLayout))
 
-  override def getTilesByIds(user: User, ids: Seq[String]): Seq[TileInstance] =
-    db.withConnection(implicit c => tileDao.getTilesByIds(user.usercode.string, ids, getGroups(user)))
+  override def getTilesByIds(user: Option[User], ids: Seq[String]): Seq[TileInstance] =
+    db.withConnection {
+      implicit c =>
+        user match {
+          case Some(u) => tileDao.getTilesByIds(u.usercode.string, ids, getGroups(u))
+          case None => tileDao.getTilesForAnonymousUser.filter(instance => ids.contains(instance.tile.id))
+        }
+    }
 
   override def getTilesForUser(user: Option[User]): Seq[TileInstance] =
     db.withConnection {

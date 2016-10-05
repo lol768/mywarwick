@@ -4,7 +4,8 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, Cookie, DiscardingCookie}
-import services.{AnalyticsMeasurementService, PhotoService, UserInitialisationService}
+import services.analytics.AnalyticsMeasurementService
+import services.{PhotoService, UserInitialisationService}
 import system.ThreadPools.externalData
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl.GLOBAL_LOGIN_COOKIE_NAME
 import uk.ac.warwick.sso.client.SSOToken.SSC_TICKET_TYPE
@@ -16,7 +17,7 @@ import warwick.sso.{LoginContext, SSOClient}
 import scala.concurrent.Future
 
 /**
-  * This is some weird SSO stuff for Start, while we're still working out
+  * This is some weird SSO stuff for My Warwick, while we're still working out
   * how best to handle indefinite sessions. It likely will apply to any similar
   * Play app but DON'T copy and paste this into Search. Better to move it into
   * SSO Client as an optional behaviour.

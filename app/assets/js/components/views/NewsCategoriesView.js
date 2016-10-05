@@ -8,11 +8,22 @@ export default class NewsCategoriesView extends React.Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      changing: false,
+    };
+
     this.onChange = this.onChange.bind(this);
+    this.buttonText = this.buttonText.bind(this);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return !(this.state.changing || nextState.changing);
   }
 
   onChange(options) {
     const { subscribed, dispatch } = this.props;
+
+    this.setState({ changing: true });
 
     _(options).each(option => {
       const id = option.value;
@@ -23,10 +34,13 @@ export default class NewsCategoriesView extends React.Component {
         dispatch(newsCategories.subscribe(id));
       }
     });
+
+    this.setState({ changing: false });
   }
 
-  buttonText(options) {
-    return `Categories (${options.length})`;
+  buttonText({ length: optionsLen }) {
+    const { items: { length: totalLen } } = this.props;
+    return `Categories (${optionsLen === totalLen ? 'all' : `${optionsLen}/${totalLen}`})`;
   }
 
   render() {

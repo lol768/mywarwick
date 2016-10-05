@@ -51,6 +51,7 @@ val appDeps = Seq(
   "com.github.mumoshu" %% "play2-memcached-play24" % "0.7.0",
   "org.databrary" %% "play-logback-access" % "0.5.1-warwick",
   "ch.qos.logback" % "logback-access" % "1.1.7",
+  "com.google.apis" % "google-api-services-analyticsreporting" % "v4-rev10-1.22.0",
   "com.beachape" %% "enumeratum" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play-json" % enumeratumVersion
@@ -73,7 +74,7 @@ javaOptions in Test += "-Dlogger.resource=test-logging.xml"
 libraryDependencies ++= (appDeps ++ testDeps).map(_.excludeAll(
   ExclusionRule(organization = "commons-logging"),
   // ehcache renamed ehcache-core, don't load in the old version
-  ExclusionRule(organization = "net.sf.ehcache", name="ehcache")
+  ExclusionRule(organization = "net.sf.ehcache", name = "ehcache")
 ))
 
 // https://bugs.elab.warwick.ac.uk/browse/SSO-1653
@@ -83,7 +84,9 @@ dependencyOverrides += "xml-apis" % "xml-apis" % "1.4.01"
 dependencyOverrides += "ch.qos.logback" % "logback-classic" % "1.1.7"
 
 // Make gulp output available as Play assets.
-unmanagedResourceDirectories in Assets <+= baseDirectory { _ / "target" / "gulp" }
+unmanagedResourceDirectories in Assets <+= baseDirectory {
+  _ / "target" / "gulp"
+}
 
 resolvers += ("Local Maven Repository" at "file:///" + Path.userHome.absolutePath + "/.m2/repository")
 
