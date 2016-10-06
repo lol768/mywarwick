@@ -83,7 +83,7 @@ class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
       case _ => None
     }.find(_.isDefined).flatten
 
-    val components = if (audience.components.isEmpty) {
+    val components = if (audience.public) {
       Seq("Public")
     } else {
       audience.components.flatMap {
@@ -95,4 +95,5 @@ class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
 
     AudienceData(components, department)
   }
+
 }
