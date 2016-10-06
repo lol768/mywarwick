@@ -1,11 +1,9 @@
 package controllers.admin
 
 import models.Audience
-
-import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 
-class AudienceBinderTest extends PlaySpec with MockitoSugar {
+class AudienceBinderTest extends PlaySpec {
 
   "AudienceBinderTest" should {
 
