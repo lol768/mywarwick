@@ -5,7 +5,7 @@ import org.scalatestplus.play.PlaySpec
 
 class AudienceBinderTest extends PlaySpec {
 
-  "AudienceBinderTest" should {
+  "AudienceBinder" should {
 
     "return Seq of Public when unbinding public Audience" in {
       val audience = Audience(Seq(Audience.PublicAudience))
