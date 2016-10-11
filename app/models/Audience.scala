@@ -54,7 +54,7 @@ object Audience {
 
       // FIXME: not handling Module or Webgroup parameters
       case moduleCodeRegex(code) => None
-      case _ => ???
+      case _ => None
     }
   }
 

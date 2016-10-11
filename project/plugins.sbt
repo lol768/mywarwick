@@ -12,6 +12,8 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.0.3")
 // Code coverage
 addSbtPlugin("de.johoop" % "jacoco4sbt" % "2.1.6")
 
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.4.0")
+
 // web plugins
 
 //addSbtPlugin("com.typesafe.sbt" % "sbt-coffeescript" % "1.0.0")
