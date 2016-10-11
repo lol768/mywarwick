@@ -3,7 +3,7 @@ package services.messaging
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.Inject
 import models.MessageSend
-import models.Platform.WebPush
+import models.Platform.Google
 import play.api.Configuration
 import play.api.db._
 import play.api.libs.json._
@@ -31,7 +31,7 @@ class GCMOutputService @Inject()(
     val usercode = message.user.usercode
 
     db.withConnection { implicit c =>
-      val sendNotifications = pushRegistrationDao.getPushRegistrationsForUser(usercode).filter(_.platform == WebPush).map(_.token).map(sendGCMNotification)
+      val sendNotifications = pushRegistrationDao.getPushRegistrationsForUser(usercode).filter(_.platform == Google).map(_.token).map(sendGCMNotification)
 
       Future.sequence(sendNotifications).map(_ => ProcessingResult(success = true, "yay"))
     }
