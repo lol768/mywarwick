@@ -83,8 +83,7 @@ GET         /user/info                                                @controlle
 GET         /logout                                                   @controllers.UserInfoController.logout
 
 POST        /api/push/apns/subscribe                                  @controllers.api.APNSPushNotificationsController.subscribe
-POST        /api/push/gcm/subscribe                                   @controllers.api.GCMPushNotificationsController.subscribe
-POST        /api/push/gcm/notification                                @controllers.api.GCMPushNotificationsController.fetchPushNotifications
+POST        /api/push/web/subscribe                                   @controllers.api.WebPushNotificationsController.subscribe
 
 # Handle trailing slashes in URLs
 GET         /*path/                                                   @controllers.HomeController.redirectToPath(path: String)

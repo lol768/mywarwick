@@ -17,19 +17,21 @@ trait MobileOutputService extends OutputService {
 @Named("mobile")
 class MobileOutputServiceImpl @Inject()(
   apns: APNSOutputService,
-  gcm: GCMOutputService
+  gcm: GCMOutputService,
+  webPush: WebPushOutputService
 ) extends MobileOutputService {
 
   import system.ThreadPools.mobile
 
   override def send(message: MessageSend.Heavy): Future[ProcessingResult] = {
-    Future.sequence(Seq(apns.send(message), gcm.send(message))).map { _ => ProcessingResult(success = true, "perfect")}
+    Future.sequence(Seq(
+      apns.send(message),
+      gcm.send(message),
+      webPush.send(message)
+    )).map(_ => ProcessingResult(success = true, "perfect"))
   }
 
   override def clearUnreadCount(user: Usercode): Unit = {
-    val doneApns = Try { apns.clearUnreadCount(user) }
-    val doneGcm = Try { gcm.clearUnreadCount(user) }
-    doneApns.get
-    doneGcm.get
+    apns.clearUnreadCount(user)
   }
 }

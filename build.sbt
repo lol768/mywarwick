@@ -54,7 +54,8 @@ val appDeps = Seq(
   "com.google.apis" % "google-api-services-analyticsreporting" % "v4-rev10-1.22.0",
   "com.beachape" %% "enumeratum" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
-  "com.beachape" %% "enumeratum-play-json" % enumeratumVersion
+  "com.beachape" %% "enumeratum-play-json" % enumeratumVersion,
+  "nl.martijndwars" % "web-push" % "2.0.0"
 )
 
 val testDeps = Seq(

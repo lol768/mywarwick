@@ -12,56 +12,17 @@ self.addEventListener('install', () => {
 });
 
 self.addEventListener('push', event => {
-  function showNotification(title, body) {
-    self.registration.showNotification(title, {
-      body,
+  log.info('Push event', event);
+
+  if (event.data) {
+    const notification = event.data.json();
+    log.info('Push event payload', notification);
+
+    self.registration.showNotification(notification.title, {
+      body: notification.text,
       icon: '/assets/images/notification-icon.png',
     });
   }
-
-  event.waitUntil(
-    self.registration.pushManager.getSubscription()
-      .then(
-        subscription =>
-          fetch('/api/push/gcm/notification', {
-            method: 'post',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(subscription),
-            credentials: 'same-origin',
-          })
-      )
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else if (response.status === 401) {
-          // Unauthorized; user is no longer signed in so unregister the service worker
-          // Must still show a notification to avoid update message
-          showNotification('My Warwick', 'You are no longer signed in to My Warwick');
-          self.registration.unregister();
-          throw new Error('User session expired');
-        } else {
-          throw new Error(`Unexpected response status ${response.status}`);
-        }
-      })
-      .then(data => {
-        if (data.length === 0) {
-          // No notifications to display
-          // (avoid generic 'my.warwick.ac.uk has updated in the background')
-          showNotification('My Warwick', 'You have new notifications');
-        } else {
-          data.map(notification =>
-            self.registration.showNotification(notification.title, {
-              body: notification.body,
-              icon: notification.icon || '/assets/images/notification-icon.png',
-            })
-          );
-        }
-      })
-      .catch(err => log.error(err))
-  );
 });
 
 self.addEventListener('message', event => {
