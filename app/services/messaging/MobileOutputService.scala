@@ -17,7 +17,7 @@ trait MobileOutputService extends OutputService {
 @Named("mobile")
 class MobileOutputServiceImpl @Inject()(
   apns: APNSOutputService,
-  gcm: GCMOutputService,
+  fcm: FCMOutputService,
   webPush: WebPushOutputService
 ) extends MobileOutputService {
 
@@ -26,7 +26,7 @@ class MobileOutputServiceImpl @Inject()(
   override def send(message: MessageSend.Heavy): Future[ProcessingResult] = {
     Future.sequence(Seq(
       apns.send(message),
-      gcm.send(message),
+      fcm.send(message),
       webPush.send(message)
     )).map(_ => ProcessingResult(success = true, "perfect"))
   }

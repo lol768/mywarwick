@@ -15,7 +15,7 @@ import warwick.sso.Usercode
 import scala.concurrent.Future
 
 
-class GCMOutputService @Inject()(
+class FCMOutputService @Inject()(
   pushRegistrationDao: PushRegistrationDao,
   @NamedDatabase("default") db: Database,
   configuration: Configuration,
@@ -24,44 +24,55 @@ class GCMOutputService @Inject()(
 
   import system.ThreadPools.mobile
 
-  val apiKey = configuration.getString("mywarwick.gcm.apiKey")
-    .getOrElse(throw new IllegalStateException("Missing GCM API key - set mywarwick.gcm.apiKey"))
+  val apiKey = configuration.getString("mywarwick.fcm.apiKey")
+    .getOrElse(throw new IllegalStateException("Missing FCM API key - set mywarwick.fcm.apiKey"))
 
   def send(message: MessageSend.Heavy): Future[ProcessingResult] = {
     val usercode = message.user.usercode
 
     db.withConnection { implicit c =>
-      val sendNotifications = pushRegistrationDao.getPushRegistrationsForUser(usercode).filter(_.platform == Google).map(_.token).map(sendGCMNotification)
+      val sendNotifications =
+        pushRegistrationDao.getPushRegistrationsForUser(usercode)
+          .filter(_.platform == Google)
+          .map(_.token)
+          .map(sendNotification(message))
 
       Future.sequence(sendNotifications).map(_ => ProcessingResult(success = true, "yay"))
     }
   }
 
-  def sendGCMNotification(token: String): Future[Unit] = {
+  def sendNotification(message: MessageSend.Heavy)(token: String): Future[Unit] = {
     val body = Json.obj(
-      "to" -> token
-      // This is where to put payload readable by native Android clients
+      "to" -> token,
+      "notification" -> Json.obj(
+        "title" -> message.activity.title,
+        "body" -> message.activity.text
+      )
     )
 
-    ws.url("https://android.googleapis.com/gcm/send")
+    ws.url("https://fcm.googleapis.com/fcm/send")
       .withHeaders(
         "Authorization" -> s"key=$apiKey",
         "Content-Type" -> "application/json"
       )
       .post(body)
       .map { response =>
-        val errors = (response.json \ "results" \\ "error").map(_.asOpt[String])
+        val errors = (response.json \ "results" \\ "error").map(_.as[String])
 
-        if (errors.contains(Some("NotRegistered"))) {
-          logger.info(s"Received NotRegistered GCM error, removing token=$token")
+        if (errors.contains("NotRegistered")) {
+          logger.info(s"Received NotRegistered FCM error, removing token=$token")
           db.withConnection { implicit c =>
             pushRegistrationDao.removeRegistration(token)
           }
+        }
+
+        if (errors.nonEmpty && !errors.forall(_ == "NotRegistered")) {
+          logger.warn("FCM errors: " + errors.mkString(", "))
         }
       }
   }
 
   override def clearUnreadCount(user: Usercode): Unit = {
-    // Not a thing on GCM, do nothing.
+    // Not a thing on FCM, do nothing.
   }
 }
