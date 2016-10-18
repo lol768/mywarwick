@@ -84,6 +84,7 @@ GET         /logout                                                   @controlle
 
 POST        /api/push/apns/subscribe                                  @controllers.api.APNSPushNotificationsController.subscribe
 POST        /api/push/web/subscribe                                   @controllers.api.WebPushNotificationsController.subscribe
+POST        /api/push/fcm/subscribe                                   @controllers.api.FCMPushNotificationsController.subscribe
 
 # Handle trailing slashes in URLs
 GET         /*path/                                                   @controllers.HomeController.redirectToPath(path: String)

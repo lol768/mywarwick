@@ -11,6 +11,7 @@ import play.api.Configuration
 import play.api.db.{Database, NamedDatabase}
 import play.api.libs.json.Json
 import services.dao.PushRegistrationDao
+import system.Logging
 
 import scala.concurrent.Future
 
@@ -18,12 +19,12 @@ class WebPushOutputService @Inject()(
   pushRegistrationDao: PushRegistrationDao,
   @NamedDatabase("default") db: Database,
   configuration: Configuration
-) extends OutputService {
+) extends OutputService with Logging {
 
   import system.ThreadPools.mobile
 
-  val apiKey = configuration.getString("mywarwick.gcm.apiKey")
-    .getOrElse(throw new IllegalStateException("Missing GCM API key - set mywarwick.gcm.apiKey"))
+  val apiKey = configuration.getString("mywarwick.fcm.apiKey")
+    .getOrElse(throw new IllegalStateException("Missing GCM API key - set mywarwick.fcm.apiKey"))
 
   val pushService = new PushService
   pushService.setGcmApiKey(apiKey)
@@ -40,7 +41,17 @@ class WebPushOutputService @Inject()(
           Json.toJson(message.activity).toString.getBytes
         )
 
-        Future(pushService.send(notification))
+        Future {
+          val response = pushService.send(notification)
+
+          val status = response.getStatusLine
+          val statusCode = status.getStatusCode
+
+          if (statusCode < 200 || statusCode > 299) {
+            logger.info(s"Error sending Web Push notification to endpoint ${subscription.endpoint}: $status")
+            throw new Exception("Error status " + status)
+          }
+        }
       }
 
     Future.sequence(futures)

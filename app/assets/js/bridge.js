@@ -106,6 +106,10 @@ export default function init(opts) {
       registerForAPNs(deviceToken) {
         postJsonWithCredentials('/api/push/apns/subscribe', { deviceToken });
       },
+
+      registerForFCM(deviceToken) {
+        postJsonWithCredentials('/api/push/fcm/subscribe', { deviceToken });
+      },
     };
 
     maybeInit();
