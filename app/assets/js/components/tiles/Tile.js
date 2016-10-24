@@ -38,7 +38,7 @@ export default class Tile extends Component {
 
     const iconJsx = iconName => (
       <i className={`fa ${iconName} toggle-tooltip`} ref="icon" title={ this.getIconTitle() }
-        data-toggle="tooltip"
+        data-toggle="tooltip" data-placement="auto"
       />);
 
     if (fetching) {
