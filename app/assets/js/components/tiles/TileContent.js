@@ -4,15 +4,23 @@ export const TILE_SIZES = {
   SMALL: 'small',
   WIDE: 'wide',
   LARGE: 'large',
+  TALL: 'tall',
 };
 
 export default class TileContent extends Component {
 
-  // when do we consider the tile to have no valid content
   isEmpty() {
     const { content } = this.props;
 
     return !content.items || content.items.length === 0;
+  }
+
+  isRemovable() {
+    return true;
+  }
+
+  isVisibleAtLayoutWidth() {
+    return true;
   }
 
   contentOrDefault(contentFunction) {
@@ -26,6 +34,7 @@ export default class TileContent extends Component {
   getBody() {
     switch (this.props.size.toLowerCase()) {
       case TILE_SIZES.LARGE:
+      case TILE_SIZES.TALL:
         return this.getLargeBody();
       case TILE_SIZES.WIDE:
         return this.getWideBody();

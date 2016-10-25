@@ -62,9 +62,11 @@ class ActivityView extends ReactComponent {
           </InfiniteScrollable>
           :
           <EmptyState lead="You don't have any activity yet.">
-            When you do something at Warwick &ndash;
-            like signing in, submitting your coursework, or enrolling for a module &ndash;
-            you'll see a record of it here.
+            <p>
+              When you do something at Warwick &ndash;
+              like signing in, submitting your coursework, or enrolling for a module &ndash;
+              you'll see a record of it here.
+            </p>
           </EmptyState>
         }
       </div>

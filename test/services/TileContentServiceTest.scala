@@ -35,7 +35,7 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
       id = "printcredits",
       tileType = "count",
       colour = 0,
-      fetchUrl = url,
+      fetchUrl = Some(url),
       title = "Printer Credit",
       icon = Some("print")
     ),

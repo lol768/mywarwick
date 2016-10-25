@@ -7,7 +7,7 @@ case class Tile(
   id: String,
   tileType: String,
   colour: Int,
-  fetchUrl: String,
+  fetchUrl: Option[String],
   title: String,
   icon: Option[String]
 )

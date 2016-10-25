@@ -5,3 +5,6 @@ export { default as coursework } from './CourseworkTile';
 export { default as text } from './TextTile';
 export { default as weather } from './WeatherTile';
 export { default as traffic } from './traffic/TrafficTile';
+export { default as news } from './NewsTile';
+export { default as activity } from './ActivityTile';
+export { default as notifications } from './NotificationsTile';

@@ -17,9 +17,9 @@ import play.api.libs.json.{JsObject, _}
 import system.{Logging, ThreadPools}
 import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils}
 import warwick.sso.User
-import scala.concurrent.duration._
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 object TileContentService {
 
@@ -54,35 +54,42 @@ class TileContentServiceImpl @Inject()(
   import ThreadPools.tileData
 
   // TODO cache
-  override def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]] = Future {
-    val request = jsonPost(tileInstance.tile.fetchUrl, tileInstance.preferences)
-    user.foreach(user => signRequest(trustedApp, user.usercode.string, request))
+  override def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]] = {
+    tileInstance.tile.fetchUrl.map { fetchUrl =>
+      Future {
+        val request = jsonPost(fetchUrl, tileInstance.preferences)
+        user.foreach(user => signRequest(trustedApp, user.usercode.string, request))
 
-    var response: CloseableHttpResponse = null
+        var response: CloseableHttpResponse = null
 
-    try {
-      response = client.execute(request)
-      val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
-      val apiResponse = Json.parse(body).as[API.Response[JsObject]]
+        try {
+          response = client.execute(request)
+          val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
+          val apiResponse = Json.parse(body).as[API.Response[JsObject]]
 
-      if (!apiResponse.success) {
-        logger.logger.warn(s"Content provider returned Failure: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}, response=$body")
+          if (!apiResponse.success) {
+            logger.logger.warn(s"Content provider returned Failure: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}, response=$body")
+          }
+
+          apiResponse
+        } catch {
+          case e: HttpHostConnectException => API.Failure[JsObject]("error", Seq(API.Error("io", "Couldn't connect to provider")))
+          case e@(_: JsonParseException | _: JsResultException) => API.Failure[JsObject]("error", Seq(API.Error("parse", s"Parse error: ${e.getMessage}")))
+          case e: IOException => API.Failure[JsObject]("error", Seq(API.Error("io", s"I/O error: ${e.getClass.getName}")))
+        } finally {
+          if (response != null) response.close()
+        }
       }
-
-      apiResponse
-    } catch {
-      case e: HttpHostConnectException => API.Failure("error", Seq(API.Error("io", "Couldn't connect to provider")))
-      case e@(_: JsonParseException | _: JsResultException) => API.Failure("error", Seq(API.Error("parse", s"Parse error: ${e.getMessage}")))
-      case e: IOException => API.Failure("error", Seq(API.Error("io", s"I/O error: ${e.getClass.getName}")))
-    } finally {
-      if (response != null) response.close()
     }
+      .getOrElse {
+        Future.successful(API.Success(data = Json.obj()))
+      }
   }
 
   // For test overriding - if we cared that this was lame we could pull all TA ops
   // out into a service, no object functions
   def signRequest(trustedApp: CurrentApplication, usercode: String, request: HttpUriRequest) =
-    TrustedApplicationUtils.signRequest(trustedApp, usercode, request)
+  TrustedApplicationUtils.signRequest(trustedApp, usercode, request)
 
   private def jsonPost(url: String, postData: Option[JsObject]) = {
     val request = new HttpPost(url)

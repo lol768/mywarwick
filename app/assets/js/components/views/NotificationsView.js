@@ -120,9 +120,11 @@ class NotificationsView extends ReactComponent {
           </InfiniteScrollable>
           :
           <EmptyState lead="You don't have any notifications yet.">
-            When there are things that need your attention &ndash;
-            coursework due in, library books due back, that kind of thing &ndash;
-            you'll see those notifications here.
+            <p>
+              When there are things that need your attention &ndash;
+              coursework due in, library books due back, that kind of thing &ndash;
+              you'll see those notifications here.
+            </p>
           </EmptyState>
         }
       </div>

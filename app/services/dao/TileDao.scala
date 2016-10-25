@@ -80,7 +80,7 @@ class TileDaoImpl @Inject()() extends TileDao {
     get[String]("ID") ~
       get[String]("TILE_TYPE") ~
       get[Int]("COLOUR") ~
-      get[String]("FETCH_URL") ~
+      get[Option[String]]("FETCH_URL") ~
       get[String]("TITLE") ~
       get[Option[String]]("ICON") ~
       get[Boolean]("REMOVED") ~

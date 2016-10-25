@@ -1,21 +1,18 @@
 .activity-item {
-  .list-group-item;
-
   line-height: @line-height-computed;
+  color: @text-color;
 
   &__title {
     font-weight: bold;
-    color: @text-color;
   }
 
   &__text {
     font-weight: normal;
-    color: @text-color;
   }
 
   &__date {
-    font-size: @font-size-small;
-    color: @gray-light;
+    .small;
+    .text-muted;
   }
 
   &--with-url {
@@ -31,3 +28,23 @@
   }
 }
 
+.tile .activity-item {
+  color: #fff;
+
+  border-top: 1px solid rgba(255, 255, 255, .4);
+  padding: .5em 0;
+
+  &__date {
+    color: @gray-lighter;
+  }
+
+  .app-icon {
+    background-color: transparent !important;
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, .6);
+  }
+}
+
+//:not(.tile) .activity-item {
+//  .list-group-item;
+//}

@@ -4,10 +4,7 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import _ from 'lodash';
 import log from 'loglevel';
-import MastheadNavItem from './MastheadNavItem';
-import NotificationsView from '../views/NotificationsView';
-import ActivityView from '../views/ActivityView';
-import NewsView from '../views/NewsView';
+import Badge from './Badge';
 import MastheadSearch from './MastheadSearch';
 import MastheadMobile from './MastheadMobile';
 import PermissionRequest from './PermissionRequest';
@@ -153,41 +150,8 @@ class ID7Layout extends ReactComponent {
                             <a href="http://warwick.ac.uk" title="Warwick homepage">
                               <img src="" alt="Warwick" />
                             </a>
+                            <Badge count={ notificationsCount } className="badge--red" />
                           </div>
-                          <ul className="masthead-nav">
-                            <MastheadNavItem
-                              icon="user"
-                              key="me"
-                              title="Me"
-                              href="/"
-                              dispatch={this.props.dispatch}
-                              pathname={this.props.pathname}
-                            />
-                            <MastheadNavItem
-                              popover
-                              icon="inbox"
-                              badge={ notificationsCount }
-                              key="notifications"
-                              title="Notifications"
-                              disabled={ !user.data.authenticated }
-                              href="/notifications"
-                              dispatch={this.props.dispatch}
-                              pathname={this.props.pathname}
-                            >
-                              <NotificationsView grouped={false} />
-                            </MastheadNavItem>
-                            <MastheadNavItem
-                              popover
-                              icon="dashboard" key="activity"
-                              title="Activity"
-                              disabled={ !user.data.authenticated }
-                              href="/activity"
-                              dispatch={this.props.dispatch}
-                              pathname={this.props.pathname}
-                            >
-                              <ActivityView grouped={false} />
-                            </MastheadNavItem>
-                          </ul>
                         </div>
                       </div>
                       <MastheadSearch />
@@ -218,16 +182,7 @@ class ID7Layout extends ReactComponent {
             </header>
 
             <div className="id7-main-content">
-              { this.props.pathname.startsWith('/news') ?
-                this.props.children :
-              <div className="row">
-                <div className="col-sm-8 col-lg-9">
-                  {this.props.children}
-                </div>
-                <div className="col-sm-4 col-lg-3">
-                  <NewsView />
-                </div>
-              </div> }
+              { this.props.children }
             </div>
           </main>
         </div>
@@ -257,7 +212,6 @@ const select = (state) => ({
   user: state.user,
   colourTheme: state.ui.colourTheme,
   zoomedTile: state.ui.zoomedTile,
-  pathname: state.routing.locationBeforeTransitions.pathname,
 });
 
 export default connect(select)(ID7Layout);
