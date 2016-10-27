@@ -59,7 +59,7 @@ export default class LibraryTile extends TileContent {
         <span className="tile__text">{item.dueMessage}: {item.itemTitle}</span>
       </div>);
 
-      return <Hyperlink key={item.href} href={item.href} >{ tileItem }</Hyperlink>;
+      return <Hyperlink key={item.href} href={item.href}>{ tileItem }</Hyperlink>;
     });
   }
 
@@ -69,17 +69,17 @@ export default class LibraryTile extends TileContent {
         <span className="tile__text">{item.dueMessage}: {item.itemTitle}</span>
       </div>);
 
-      return <Hyperlink key={item.href} href={item.href} >{ tileItem }</Hyperlink>;
+      return <Hyperlink key={item.href} href={item.href}>{ tileItem }</Hyperlink>;
     });
   }
 
   getZoomedBody() {
-    const chunkedItems = _.chunk(this.mapItemsForZoomedBody(this.props.content.items, 'col-xs-6'), 2);
+    const items = _.chunk(this.mapItemsForZoomedBody(this.props.content.items, 'col-xs-6'), 2);
 
     return (
       <div className="container-fluid">
         {this.getSubtitle()}
-        {chunkedItems.map((children, i) => <div key={i} className="row">{children}</div>)}
+        {items.map((children, i) => <div key={i} className="row">{children}</div>)}
       </div>
     );
   }
@@ -100,10 +100,6 @@ export default class LibraryTile extends TileContent {
 
   getWideBody() {
     const { content } = this.props;
-
-    let subtitleArray = ['',''];
-    if (content.title) subtitleArray = content.title.split(' ');
-
     return (
       <ReactCSSTransitionGroup
         className="text-tile-transition-group"
@@ -129,12 +125,13 @@ export default class LibraryTile extends TileContent {
     return false;
   }
 
-  getSubtitle(){
+  getSubtitle() {
     const { content } = this.props;
-    let subtitleArray = ['',''];
+    let subtitleArray = ['', ''];
     if (content.subtitle) subtitleArray = content.subtitle.split(' ');
     return (
-      <span className="tile__callout">{subtitleArray[0]} <small>{subtitleArray.slice(1)}</small></span>
+      <span className="tile__callout">{subtitleArray[0]}
+        <small>{subtitleArray.slice(1)}</small></span>
     );
   }
 }
