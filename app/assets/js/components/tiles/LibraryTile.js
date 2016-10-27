@@ -2,56 +2,11 @@ import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import classNames from 'classnames';
 import Hyperlink from '../ui/Hyperlink';
+import TextTile from './TextTile';
 
 import _ from 'lodash';
 
-import TileContent from './TileContent';
-
-export default class LibraryTile extends TileContent {
-
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      itemIndex: 0,
-    };
-  }
-
-  componentWillUnmount() {
-    this.clearTransitionInterval();
-  }
-
-  componentDidMount() {
-    this.setTransitionInterval();
-  }
-
-  componentWillReceiveProps() {
-    this.setTransitionInterval();
-  }
-
-  setTransitionInterval() {
-    clearInterval(this.transitionInterval);
-
-    if (this.props.content) {
-      this.transitionInterval = setInterval(this.onInterval.bind(this), 5000);
-    }
-  }
-
-  clearTransitionInterval() {
-    clearInterval(this.transitionInterval);
-
-    this.transitionInterval = null;
-  }
-
-  onInterval() {
-    const oldItemIndex = this.state.itemIndex;
-
-    const itemIndex = (oldItemIndex >= this.props.content.items.length - 1) ? 0 : oldItemIndex + 1;
-
-    this.setState({
-      itemIndex,
-    });
-  }
+export default class LibraryTile extends TextTile {
 
   mapItems(itemsToDisplay, className) {
     return itemsToDisplay.map(item => {
@@ -111,18 +66,6 @@ export default class LibraryTile extends TileContent {
         {this.mapItems([content.items[this.state.itemIndex]])}
       </ReactCSSTransitionGroup>
     );
-  }
-
-  getSmallBody() {
-    return this.getWideBody();
-  }
-
-  static canZoom(content) {
-    if (content && content.items) {
-      return content.items.length > 1;
-    }
-
-    return false;
   }
 
   getSubtitle() {
