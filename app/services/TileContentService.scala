@@ -70,7 +70,7 @@ class TileContentServiceImpl @Inject()(
       val apiResponse = Json.parse(body).as[API.Response[JsObject]]
 
       if (!apiResponse.success) {
-        throw new FailureResponseException(body)
+        logger.warn(s"Content provider returned failure: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}, body: $body")
       }
 
       apiResponse
