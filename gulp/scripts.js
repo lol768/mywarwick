@@ -144,7 +144,8 @@ function generateServiceWorker(watch) {
   const swPrecache = require('sw-precache');
   const globby = require('globby');
   const htmlDependencies = globby.sync([
-    'app/assets/css/**/*'
+    'app/assets/css/**/*',
+    'app/assets/css/*'
   ], { nodir: true }).concat([
     'target/gulp/js/bundle.js',
     'app/assets/js/push-worker.js',
