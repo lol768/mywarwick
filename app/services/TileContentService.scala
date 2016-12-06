@@ -106,6 +106,4 @@ class TileContentServiceImpl @Inject()(
     request
   }
 
-  class FailureResponseException(body: String) extends Throwable(body)
-
 }
