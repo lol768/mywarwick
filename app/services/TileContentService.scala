@@ -1,9 +1,10 @@
 package services
 
 import java.io.{IOException, InputStreamReader}
+import java.net.SocketTimeoutException
 import javax.inject.Inject
 
-import com.fasterxml.jackson.core.JsonParseException
+import com.fasterxml.jackson.core.{JsonParseException, JsonProcessingException}
 import com.google.common.base.Charsets
 import com.google.common.io.CharStreams
 import com.google.inject.ImplementedBy
@@ -17,9 +18,10 @@ import play.api.libs.json.{JsObject, _}
 import system.{Logging, ThreadPools}
 import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils}
 import warwick.sso.User
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 import scala.concurrent.Future
+import scala.util.Try
 
 object TileContentService {
 
@@ -60,23 +62,37 @@ class TileContentServiceImpl @Inject()(
 
     var response: CloseableHttpResponse = null
 
-    try {
+    val serviceName = tileInstance.tile.title.toLowerCase
+
+    val result = Try {
       response = client.execute(request)
       val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
       val apiResponse = Json.parse(body).as[API.Response[JsObject]]
 
       if (!apiResponse.success) {
-        logger.logger.warn(s"Content provider returned Failure: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}, response=$body")
+        throw new FailureResponseException(body)
       }
 
       apiResponse
-    } catch {
-      case e: HttpHostConnectException => API.Failure("error", Seq(API.Error("io", "Couldn't connect to provider")))
-      case e@(_: JsonParseException | _: JsResultException) => API.Failure("error", Seq(API.Error("parse", s"Parse error: ${e.getMessage}")))
-      case e: IOException => API.Failure("error", Seq(API.Error("io", s"I/O error: ${e.getClass.getName}")))
-    } finally {
-      if (response != null) response.close()
+    }.recover {
+      case e =>
+        logger.warn(s"Error fetching tile content: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}", e)
+        throw e
+    }.recover {
+      case _: JsonProcessingException | _: JsResultException => error('parse, s"The $serviceName service returned an unexpected response.")
+      case _: HttpHostConnectException => error('io, s"Couldn't connect to the $serviceName service.")
+      case _: SocketTimeoutException => error('timeout, s"The $serviceName service isn't responding right now.")
+      case _: IOException => error('io, s"Couldn't read from the $serviceName service.")
+      case _ => error('unknown, "An error occurred.")
     }
+
+    if (response != null) response.close()
+
+    result.get
+  }
+
+  private def error(kind: Symbol, message: String): API.Failure[JsObject] = {
+    API.Failure("error", Seq(API.Error(kind.toString(), message)))
   }
 
   // For test overriding - if we cared that this was lame we could pull all TA ops
@@ -89,5 +105,7 @@ class TileContentServiceImpl @Inject()(
     postData.foreach(data => request.setEntity(new StringEntity(Json.stringify(data), ContentType.APPLICATION_JSON)))
     request
   }
+
+  class FailureResponseException(body: String) extends Throwable(body)
 
 }
