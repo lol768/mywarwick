@@ -8,8 +8,8 @@ export default class NotificationsTile extends TileContent {
     return true;
   }
 
-  static isVisibleAtLayoutWidth(width) {
-    return width > 2;
+  static isVisibleOnDesktopOnly() {
+    return true;
   }
 
   isEmpty() {

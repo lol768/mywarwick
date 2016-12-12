@@ -19,8 +19,8 @@ export default class TileContent extends Component {
     return true;
   }
 
-  static isVisibleAtLayoutWidth() {
-    return true;
+  static isVisibleOnDesktopOnly() {
+    return false;
   }
 
   contentOrDefault(contentFunction) {

@@ -206,11 +206,11 @@ class MeView extends ReactComponent {
   }
 
   renderTiles() {
-    const { layoutWidth } = this.props;
+    const { layoutWidth, isDesktop } = this.props;
     const visibleTiles = this.props.tiles.filter(t => !t.removed
-      && TILE_TYPES[t.type].isVisibleAtLayoutWidth(layoutWidth));
+      && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
     const hiddenTiles = this.props.tiles.filter(t => t.removed
-      && TILE_TYPES[t.type].isVisibleAtLayoutWidth(layoutWidth));
+      && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
     const { editing } = this.state;
 
     // Show hidden tiles (if any) when editing, or if there are no visible tiles
