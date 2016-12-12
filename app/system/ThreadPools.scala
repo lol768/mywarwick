@@ -1,7 +1,5 @@
 package system
 
-import java.util.concurrent.Executors
-
 import scala.concurrent.ExecutionContext
 
 /**
@@ -11,7 +9,7 @@ import scala.concurrent.ExecutionContext
  * Use by importing an individual item into a scope (method or class).
  */
 object ThreadPools {
-  private val shared = ExecutionContext.fromExecutorService(Executors.newWorkStealingPool())
+  private val shared = ExecutionContext.global
 
   implicit val tileData = shared
 
