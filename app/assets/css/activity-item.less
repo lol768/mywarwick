@@ -1,6 +1,11 @@
 .activity-item {
+  .list-group-item;
+
   line-height: @line-height-computed;
-  color: @text-color;
+
+  &, &__title, &__text {
+    color: @text-color;
+  }
 
   &__title {
     font-weight: bold;
@@ -28,8 +33,14 @@
   }
 }
 
-.tile .activity-item {
-  color: #fff;
+.tile__body .activity-item {
+  background: none;
+  border: none;
+  box-shadow: none;
+
+  &, &__title, &__text {
+    color: #fff;
+  }
 
   border-top: 1px solid rgba(255, 255, 255, .4);
   padding: .5em 0;
@@ -45,6 +56,3 @@
   }
 }
 
-//:not(.tile) .activity-item {
-//  .list-group-item;
-//}

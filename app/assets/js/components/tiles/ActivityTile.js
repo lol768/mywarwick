@@ -8,8 +8,8 @@ export default class ActivityTile extends TileContent {
     return true;
   }
 
-  isVisibleAtLayoutWidth(width) {
-    return width === 4;
+  static isVisibleAtLayoutWidth(width) {
+    return width > 2;
   }
 
   isEmpty() {

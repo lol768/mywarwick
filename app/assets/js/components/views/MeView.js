@@ -12,6 +12,7 @@ import { goBack } from 'react-router-redux';
 import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
+import * as TILE_TYPES from '../tiles';
 
 import HiddenTile from '../tiles/HiddenTile';
 
@@ -122,6 +123,7 @@ class MeView extends ReactComponent {
         editing={this.state.editing === id}
         editingAny={!!this.state.editing}
         size={this.getTileSize(id)}
+        layoutWidth={this.props.layoutWidth}
       />
     );
   }
@@ -204,8 +206,11 @@ class MeView extends ReactComponent {
   }
 
   renderTiles() {
-    const { hiddenTiles, layoutWidth } = this.props;
-    const visibleTiles = this.props.tiles;
+    const { layoutWidth } = this.props;
+    const visibleTiles = this.props.tiles.filter(t => !t.removed
+      && TILE_TYPES[t.type].isVisibleAtLayoutWidth(layoutWidth));
+    const hiddenTiles = this.props.tiles.filter(t => t.removed
+      && TILE_TYPES[t.type].isVisibleAtLayoutWidth(layoutWidth));
     const { editing } = this.state;
 
     // Show hidden tiles (if any) when editing, or if there are no visible tiles
@@ -276,18 +281,11 @@ class MeView extends ReactComponent {
   }
 }
 
-const select = (state) => {
-  const items = state.tiles.data.tiles;
-
-  return {
-    isDesktop: state.ui.className === 'desktop',
-    layoutWidth: state.ui.isFourColumnLayout === true ? 5 : 2,
-    // FIXME filtering state here returns a new thing each time, throwing off hasChanged checks.
-    // Instead select all the tiles together, and do this filtering at render time
-    tiles: items.filter(tile => !tile.removed),
-    hiddenTiles: items.filter(tile => tile.removed),
-    layout: state.tiles.data.layout,
-  };
-};
+const select = (state) => ({
+  isDesktop: state.ui.className === 'desktop',
+  layoutWidth: state.ui.isWideLayout === true ? 5 : 2,
+  tiles: state.tiles.data.tiles,
+  layout: state.tiles.data.layout,
+});
 
 export default connect(select)(MeView);

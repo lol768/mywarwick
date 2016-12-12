@@ -19,7 +19,7 @@ export default class TileContent extends Component {
     return true;
   }
 
-  isVisibleAtLayoutWidth() {
+  static isVisibleAtLayoutWidth() {
     return true;
   }
 
