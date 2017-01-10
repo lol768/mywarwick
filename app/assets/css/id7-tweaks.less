@@ -47,13 +47,27 @@
   .id7-main-content-area .id7-main-content {
     padding: 0;
   }
+
+  body {
+    overflow: hidden !important;
+    min-height: 0 !important;
+  }
+
   .id7-main-content-area {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 44px;
+
     // On mobile we make tile content flush with the edges, which causes
     // a couple of pixels of nothing to overlap the side which causes an annoying
     // scroll. There's no legitimate need for sideways scrolling in My Warwick, so
     // just turn it off.
     // (however this seems to cause some z-index problems, so keep an eye on it.)
     overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
 });
