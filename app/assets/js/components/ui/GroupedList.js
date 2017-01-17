@@ -24,7 +24,7 @@ export default class GroupedList extends ReactComponent {
   render() {
     if (this.props.groupBy === undefined) {
       return (
-        <div className="list-group">
+        <div className={ this.props.className }>
           {this.props.children}
         </div>
       );
@@ -39,7 +39,7 @@ export default class GroupedList extends ReactComponent {
 
     const orderedGroups = groups.map(([group, items]) => (
       // Title the group with a list header
-      <div key={`group-${group}`} className="tile-list-group">
+      <div key={`group-${group}`} className="list-group">
         <ListHeader
           key={`group-header-${group}`}
           title={this.props.groupBy.titleForGroup(group)}
@@ -49,7 +49,7 @@ export default class GroupedList extends ReactComponent {
     ));
 
     return (
-      <div>
+      <div className={ this.props.className }>
         {orderedGroups}
       </div>
     );
