@@ -1,14 +1,13 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import ReactGridLayoutBase, { WidthProvider } from 'react-grid-layout';
-
 import _ from 'lodash';
 import $ from 'jquery.transit';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 import { goBack } from 'react-router-redux';
-
 import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
@@ -54,11 +53,34 @@ class MeView extends ReactComponent {
   constructor(props) {
     super(props);
     this.state = {};
-    this.onBodyClick = this.onBodyClick.bind(this);
+    this.onClickOutside = this.onClickOutside.bind(this);
     this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
+    this.onDragStop = this.onDragStop.bind(this);
     this.getDragDelayForItem = this.getDragDelayForItem.bind(this);
+    this.onBodyScroll = this.onBodyScroll.bind(this);
+  }
+
+  componentDidMount() {
+    $('.id7-main-content-area').on('touchstart', this.onBodyScroll);
+  }
+
+  componentWillUnmount() {
+    $('.id7-main-content-area').off('touchstart', this.onBodyScroll);
+  }
+
+  onBodyScroll(e) {
+    // This event handler fixes an issue on iOS where initiating a scroll
+    // into the overflow does not appear to do rubber banding, but scrolling
+    // the view becomes disabled until the rubber banding effect would have completed.
+    const target = e.currentTarget;
+
+    if (target.scrollTop === 0) {
+      target.scrollTop = 1;
+    } else if (target.scrollHeight === target.scrollTop + target.offsetHeight) {
+      target.scrollTop -= 1;
+    }
   }
 
   onBeginEditing(tile) {
@@ -66,7 +88,7 @@ class MeView extends ReactComponent {
       editing: tile.id,
     });
 
-    $('body').on('click', this.onBodyClick);
+    $(ReactDOM.findDOMNode(this)).on('click', this.onClickOutside);
   }
 
   onFinishEditing() {
@@ -76,12 +98,12 @@ class MeView extends ReactComponent {
       });
     }
 
-    $('body').off('click', this.onBodyClick);
+    $(ReactDOM.findDOMNode(this)).off('click', this.onClickOutside);
 
     this.props.dispatch(tiles.persistTiles());
   }
 
-  onBodyClick(e) {
+  onClickOutside(e) {
     if (this.state.editing && $(e.target).parents('.tile--editing').length === 0) {
       // Defer so this click is still considered to be happening in editing mode
       _.defer(() => this.onFinishEditing());
@@ -89,7 +111,16 @@ class MeView extends ReactComponent {
   }
 
   onDragStart(layout, item) {
+    // Disable rubber banding so the users' finger and the tile they are dragging
+    // don't get out of sync.  (iOS)
+    $('.id7-main-content-area').css('-webkit-overflow-scrolling', 'auto');
+
     this.onBeginEditing({ id: item.i });
+  }
+
+  onDragStop() {
+    // Re-enable rubber banding when not dragging, because it's nicer.  (iOS)
+    $('.id7-main-content-area').css('-webkit-overflow-scrolling', 'touch');
   }
 
   getTileLayout(layout) {
@@ -164,7 +195,7 @@ class MeView extends ReactComponent {
   }
 
   getDragDelayForItem(item) {
-    return this.state.editing === item.i ? 0 : 200;
+    return this.state.editing === item.i ? 0 : 400;
   }
 
   renderHiddenTiles() {
@@ -242,6 +273,7 @@ class MeView extends ReactComponent {
             verticalCompact
             draggableCancel=".tile__edit-control, .toggle-tooltip"
             onDragStart={this.onDragStart}
+            onDragStop={this.onDragStop}
             getDragDelayForItem={this.getDragDelayForItem}
           >
             { tileComponents }

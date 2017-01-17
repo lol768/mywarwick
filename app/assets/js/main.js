@@ -73,6 +73,10 @@ $(() => {
     trigger: 'click',
   });
 
+  // Prevent the body element from scrolling on touch.
+  $(document.body).on('touchmove', (e) => e.preventDefault());
+  $(document.body).on('touchmove', '.id7-main-content-area', (e) => e.stopPropagation());
+
   $(document).on('click', (e) => {
     if ($(e.target).data('toggle') === 'tooltip') {
       if (!$(e.target).hasClass('tooltip-active')) {

@@ -3,12 +3,10 @@ import ReactComponent from 'react/lib/ReactComponent';
 import TabBar from './ui/TabBar';
 import TabBarItem from './ui/TabBarItem';
 import ID7Layout from './ui/ID7Layout';
-
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import _ from 'lodash';
 import log from 'loglevel';
-
 import { getNumItemsSince } from '../stream';
 
 export class AppLayout extends ReactComponent {
@@ -27,24 +25,26 @@ export class AppLayout extends ReactComponent {
     log.debug('AppLayout.render');
 
     return (
-      <ID7Layout path={ location.pathname }>
-        { children }
+      <div>
+        <ID7Layout path={ location.pathname }>
+          { children }
+        </ID7Layout>
         { layoutClassName === 'mobile' ?
           <TabBar selectedItem={ location.pathname } onSelectItem={ this.onSelectItem }>
             <TabBarItem title="Me" icon="user" path="/" />
             <TabBarItem
               title="Notifications" icon="inbox" path="/notifications"
-              badge={ notificationsCount } isDisabled = { !user.authenticated }
+              badge={ notificationsCount } isDisabled={ !user.authenticated }
             />
             <TabBarItem
               title="Activity" icon="dashboard" path="/activity"
-              isDisabled = { !user.authenticated }
+              isDisabled={ !user.authenticated }
             />
             <TabBarItem title="News" icon="mortar-board" path="/news" />
             <TabBarItem title="Search" icon="search" path="/search" />
           </TabBar>
-          : null}
-      </ID7Layout>
+          : null }
+      </div>
     );
   }
 

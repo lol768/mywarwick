@@ -48,7 +48,7 @@ class ID7Layout extends ReactComponent {
 
   updateHeaderHeight() {
     const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
-    $('.id7-main-content-area').css('padding-top', headerHeight);
+    $('.id7-main-content-area').css('top', headerHeight);
   }
 
   /** Set the theme on the body element, so that we can style everything. */
@@ -83,7 +83,7 @@ class ID7Layout extends ReactComponent {
   renderMobile() {
     const { user, zoomedTile, path } = this.props;
     return (
-      <div>
+      <div className="">
         <a className="sr-only sr-only-focusable" href="#main">Skip to main content</a>
         <div className="fixed-header at-top">
           <div className="id7-fixed-width-container">
