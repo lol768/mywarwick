@@ -82,7 +82,7 @@
     "react-addons-update": "~15.0.1",
     "react-bootstrap-multiselect": "^2.0.0",
     "react-dom": "~15.0.1",
-    "react-grid-layout": "git+ssh://git@repo.elab.warwick.ac.uk/~acursley/react-grid-layout.git#89915502cb5",
+    "react-grid-layout": "git+ssh://git@repo.elab.warwick.ac.uk/~acursley/react-grid-layout.git#a44d361",
     "react-redux": "~4.4.5",
     "react-router": "~2.2.2",
     "react-router-redux": "~4.0.2",
