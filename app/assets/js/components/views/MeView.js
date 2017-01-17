@@ -187,7 +187,7 @@ class MeView extends ReactComponent {
   }
 
   getDragDelayForItem(item) {
-    return this.state.editing === item.i ? 0 : 200;
+    return this.state.editing === item.i ? 0 : 400;
   }
 
   renderHiddenTiles() {
