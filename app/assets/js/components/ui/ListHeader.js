@@ -5,7 +5,7 @@ export default class ListHeader extends ReactComponent {
 
   render() {
     return (
-      <div className="tile-list-item tile-list-item--header">
+      <div className="list-group-item list-group-item--header">
         {this.props.title}
       </div>
     );

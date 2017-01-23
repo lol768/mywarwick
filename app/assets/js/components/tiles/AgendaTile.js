@@ -129,7 +129,7 @@ export default class AgendaTile extends TileContent {
     );
 
     return (
-      <GroupedList groupBy={groupItemsForAgendaTile}>
+      <GroupedList className="tile-list-group" groupBy={groupItemsForAgendaTile}>
         {events}
       </GroupedList>
     );
