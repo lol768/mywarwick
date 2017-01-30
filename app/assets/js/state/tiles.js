@@ -119,7 +119,7 @@ export function fetchTileContent(tileSpec = ALL_TILES) {
   return (dispatch, getState) => {
     const tilesToFetch = tileSpec === ALL_TILES ?
       getState().tiles.data.tiles
-        .filter(tile => !tile.removed)
+        .filter(tile => tile.needsFetch && !tile.removed)
         .map(tile => tile.id) :
       [tileSpec];
 

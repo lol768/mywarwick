@@ -94,7 +94,7 @@ class TileContentServiceImpl @Inject()(
       }
     }
       .getOrElse {
-        Future.successful(API.Success(data = Json.obj()))
+        Future.failed(new IllegalArgumentException(s"Tile type ${tileInstance.tile.id} does not have a fetch URL"))
       }
 
   private def error(kind: Symbol, message: String): API.Failure[JsObject] = {
