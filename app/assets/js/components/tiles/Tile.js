@@ -1,10 +1,13 @@
-/* eslint react/prop-types: 0, react/sort-comp: 0 */
-import React, { Component } from 'react';
+/* eslint react/sort-comp: 0 */
+import React from 'react';
+import _ from 'lodash';
 
 import { localMoment } from '../../dateFormats.js';
 import classNames from 'classnames';
 
-export default class Tile extends Component {
+import { TILE_SIZES } from '../tiles/TileContent';
+
+export default class Tile extends React.Component {
 
   constructor(props) {
     super(props);
@@ -14,18 +17,6 @@ export default class Tile extends Component {
 
     this.onClick = this.onClick.bind(this);
     this.onClickExpand = this.onClickExpand.bind(this);
-  }
-
-  componentWillEnter(callback) {
-    if ('componentWillEnter' in this.props) {
-      this.props.componentWillEnter(callback);
-    }
-  }
-
-  componentWillLeave(callback) {
-    if ('componentWillLeave' in this.props) {
-      this.props.componentWillLeave(callback);
-    }
   }
 
   getIcon() {
@@ -87,31 +78,9 @@ export default class Tile extends Component {
   }
 
   componentDidMount() {
-    if (this.props.editing) {
-      this.animateToScale(1.15);
-    }
-    this.setState({ //eslint-disable-line
+    this.setState({ // eslint-disable-line react/no-did-mount-set-state
       contentRef: this.refs.content,
     });
-  }
-
-  componentDidUpdate(prevProps) {
-    const nowEditing = this.props.editing;
-    const wasEditing = prevProps.editing;
-
-    if (nowEditing && !wasEditing) {
-      this.animateToScale(1.15);
-    } else if (wasEditing && !nowEditing) {
-      this.animateToScale(1);
-    }
-  }
-
-  animateToScale() {
-    /*
-    const $tile = $(ReactDOM.findDOMNode(this.refs.tile));
-
-    $tile.stop().transition({ scale }, EDITING_ANIMATION_DURATION, 'snap');
-    */
   }
 
   shouldDisplayExpandIcon() {
@@ -147,17 +116,19 @@ export default class Tile extends Component {
           onClick={ this.onClick }
           ref="tile"
         >
-          <div
-            className="tile__edit-control top-left"
-            onClick={ this.props.onHide }
-            title={ `Hide ${title}` }
-          >
-            <i className="fa fa-fw fa-minus"> </i>
-          </div>
+          { this.state.contentRef && this.state.contentRef.isRemovable() &&
+            <div
+              className="tile__edit-control top-left"
+              onClick={ this.props.onHide }
+              title={ `Hide ${title}` }
+            >
+              <i className="fa fa-fw fa-minus"> </i>
+            </div>
+          }
           <div
             className="tile__edit-control bottom-right"
             onClick={ this.props.onResize }
-            title={`Make tile ${size !== 'large' ? 'bigger' : 'smaller'}`}
+            title={`Make tile ${size !== 'tall' ? 'bigger' : 'smaller'}`}
           >
             <i className="fa fa-fw fa-arrow-up"> </i>
           </div>
@@ -179,3 +150,29 @@ export default class Tile extends Component {
     );
   }
 }
+
+Tile.propTypes = {
+  children: React.PropTypes.node,
+  onResize: React.PropTypes.func.isRequired,
+  onHide: React.PropTypes.func.isRequired,
+  onZoomOut: React.PropTypes.func.isRequired,
+  onZoomIn: React.PropTypes.func.isRequired,
+  type: React.PropTypes.string.isRequired,
+  title: React.PropTypes.string.isRequired,
+  icon: React.PropTypes.string.isRequired,
+  size: React.PropTypes.oneOf(_.values(TILE_SIZES)),
+  editing: React.PropTypes.bool.isRequired,
+  editingAny: React.PropTypes.bool.isRequired,
+  zoomed: React.PropTypes.bool.isRequired,
+  isDesktop: React.PropTypes.bool.isRequired,
+  canZoom: React.PropTypes.bool.isRequired,
+  fetching: React.PropTypes.bool,
+  errors: React.PropTypes.arrayOf(React.PropTypes.shape({
+    message: React.PropTypes.string,
+  })),
+  content: React.PropTypes.shape({
+    href: React.PropTypes.string,
+  }),
+  colour: React.PropTypes.number.isRequired,
+  fetchedAt: React.PropTypes.number,
+};

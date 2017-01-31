@@ -11,6 +11,8 @@ import { goBack } from 'react-router-redux';
 import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
+import * as TILE_TYPES from '../tiles';
+
 import HiddenTile from '../tiles/HiddenTile';
 
 const ReactGridLayout = WidthProvider(ReactGridLayoutBase); // eslint-disable-line new-cap
@@ -22,6 +24,7 @@ function getSizeFromSizeName(name) {
     [TILE_SIZES.SMALL]: { width: 1, height: 1 },
     [TILE_SIZES.WIDE]: { width: 2, height: 1 },
     [TILE_SIZES.LARGE]: { width: 2, height: 2 },
+    [TILE_SIZES.TALL]: { width: 2, height: 4 },
   };
 
   return sizes[name];
@@ -36,6 +39,10 @@ function getSizeNameFromSize(size) {
 
   if (width === 2 && height === 1) {
     return TILE_SIZES.WIDE;
+  }
+
+  if (width === 2 && height === 4) {
+    return TILE_SIZES.TALL;
   }
 
   return TILE_SIZES.LARGE;
@@ -147,6 +154,7 @@ class MeView extends ReactComponent {
         editing={this.state.editing === id}
         editingAny={!!this.state.editing}
         size={this.getTileSize(id)}
+        layoutWidth={this.props.layoutWidth}
       />
     );
   }
@@ -229,8 +237,11 @@ class MeView extends ReactComponent {
   }
 
   renderTiles() {
-    const { hiddenTiles, layoutWidth } = this.props;
-    const visibleTiles = this.props.tiles;
+    const { layoutWidth, isDesktop } = this.props;
+    const visibleTiles = this.props.tiles.filter(t => !t.removed
+      && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
+    const hiddenTiles = this.props.tiles.filter(t => t.removed
+      && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
     const { editing } = this.state;
 
     // Show hidden tiles (if any) when editing, or if there are no visible tiles
@@ -302,18 +313,11 @@ class MeView extends ReactComponent {
   }
 }
 
-const select = (state) => {
-  const items = state.tiles.data.tiles;
-
-  return {
-    isDesktop: state.ui.className === 'desktop',
-    layoutWidth: state.ui.isFourColumnLayout === true ? 4 : 2,
-    // FIXME filtering state here returns a new thing each time, throwing off hasChanged checks.
-    // Instead select all the tiles together, and do this filtering at render time
-    tiles: items.filter(tile => !tile.removed),
-    hiddenTiles: items.filter(tile => tile.removed),
-    layout: state.tiles.data.layout,
-  };
-};
+const select = (state) => ({
+  isDesktop: state.ui.className === 'desktop',
+  layoutWidth: state.ui.isWideLayout === true ? 5 : 2,
+  tiles: state.tiles.data.tiles,
+  layout: state.tiles.data.layout,
+});
 
 export default connect(select)(MeView);

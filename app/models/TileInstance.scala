@@ -38,7 +38,8 @@ object TileInstance {
         "preferences" -> o.preferences,
         "title" -> o.tile.title,
         "type" -> o.tile.tileType,
-        "removed" -> o.removed
+        "removed" -> o.removed,
+        "needsFetch" -> o.tile.fetchUrl.isDefined
       )
   }
 }

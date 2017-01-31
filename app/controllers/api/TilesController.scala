@@ -62,7 +62,7 @@ class TilesController @Inject()(
   }
 
   def tilesContent(user: Option[User], tiles: Seq[TileInstance]): Future[Result] = {
-    val futures = tiles.map { tile =>
+    val futures = tiles.filter(_.tile.fetchUrl.isDefined).map { tile =>
       tileContentService.getTileContent(user, tile).map(content => (tile, content))
     }
 

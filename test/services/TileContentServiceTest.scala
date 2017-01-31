@@ -11,6 +11,9 @@ import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsObject, Json}
 import uk.ac.warwick.sso.client.trusted.CurrentApplication
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSugar {
 
   override implicit def patienceConfig =
@@ -30,7 +33,7 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
     case ("POST", "/content/printcredits") => Response.json(Json.toJson(response))
   }
 
-  def userPrinterTile(url: String) = TileInstance(
+  def userPrinterTile(url: Option[String]) = TileInstance(
     tile = Tile(
       id = "printcredits",
       tileType = "count",
@@ -53,9 +56,15 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
 
     "fetch a Tile's URL" in {
       ExternalServers.runServer(handler) { port =>
-        val ut = userPrinterTile(s"http://localhost:${port}/content/printcredits")
+        val ut = userPrinterTile(Some(s"http://localhost:${port}/content/printcredits"))
         service.getTileContent(Some(user), ut).futureValue must be(response)
       }
+    }
+
+    "return a failed Future if the tile does not have a fetch URL" in {
+      val content = service.getTileContent(Some(user), userPrinterTile(None))
+
+      content.failed.futureValue mustBe an[IllegalArgumentException]
     }
   }
 

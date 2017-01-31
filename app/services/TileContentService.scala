@@ -4,7 +4,7 @@ import java.io.{IOException, InputStreamReader}
 import java.net.SocketTimeoutException
 import javax.inject.Inject
 
-import com.fasterxml.jackson.core.{JsonParseException, JsonProcessingException}
+import com.fasterxml.jackson.core.JsonProcessingException
 import com.google.common.base.Charsets
 import com.google.common.io.CharStreams
 import com.google.inject.ImplementedBy
@@ -19,8 +19,8 @@ import system.{Logging, ThreadPools}
 import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils}
 import warwick.sso.User
 
-import scala.concurrent.duration._
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.util.Try
 
 object TileContentService {
@@ -56,40 +56,46 @@ class TileContentServiceImpl @Inject()(
   import ThreadPools.tileData
 
   // TODO cache
-  override def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]] = Future {
-    val request = jsonPost(tileInstance.tile.fetchUrl, tileInstance.preferences)
-    user.foreach(user => signRequest(trustedApp, user.usercode.string, request))
+  override def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]] =
+    tileInstance.tile.fetchUrl.map { fetchUrl =>
+      Future {
+        val request = jsonPost(fetchUrl, tileInstance.preferences)
+        user.foreach(user => signRequest(trustedApp, user.usercode.string, request))
 
-    var response: CloseableHttpResponse = null
+        var response: CloseableHttpResponse = null
 
-    val serviceName = tileInstance.tile.title.toLowerCase
+        val serviceName = tileInstance.tile.title.toLowerCase
 
-    val result = Try {
-      response = client.execute(request)
-      val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
-      val apiResponse = Json.parse(body).as[API.Response[JsObject]]
+        val result = Try {
+          response = client.execute(request)
+          val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
+          val apiResponse = Json.parse(body).as[API.Response[JsObject]]
 
-      if (!apiResponse.success) {
-        logger.warn(s"Content provider returned failure: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}, response=$body")
+          if (!apiResponse.success) {
+            logger.warn(s"Content provider returned failure: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}, response=$body")
+          }
+
+          apiResponse
+        }.recover {
+          case e =>
+            logger.warn(s"Error fetching tile content: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}", e)
+            throw e
+        }.recover {
+          case _: JsonProcessingException | _: JsResultException => error('parse, s"The $serviceName service returned an unexpected response.")
+          case _: HttpHostConnectException => error('io, s"Couldn't connect to the $serviceName service.")
+          case _: SocketTimeoutException => error('timeout, s"The $serviceName service isn't responding right now.")
+          case _: IOException => error('io, s"Couldn't read from the $serviceName service.")
+          case _ => error('unknown, "An error occurred.")
+        }
+
+        if (response != null) response.close()
+
+        result.get
       }
-
-      apiResponse
-    }.recover {
-      case e =>
-        logger.warn(s"Error fetching tile content: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}", e)
-        throw e
-    }.recover {
-      case _: JsonProcessingException | _: JsResultException => error('parse, s"The $serviceName service returned an unexpected response.")
-      case _: HttpHostConnectException => error('io, s"Couldn't connect to the $serviceName service.")
-      case _: SocketTimeoutException => error('timeout, s"The $serviceName service isn't responding right now.")
-      case _: IOException => error('io, s"Couldn't read from the $serviceName service.")
-      case _ => error('unknown, "An error occurred.")
     }
-
-    if (response != null) response.close()
-
-    result.get
-  }
+      .getOrElse {
+        Future.failed(new IllegalArgumentException(s"Tile type ${tileInstance.tile.id} does not have a fetch URL"))
+      }
 
   private def error(kind: Symbol, message: String): API.Failure[JsObject] = {
     API.Failure("error", Seq(API.Error(kind.toString(), message)))
@@ -98,7 +104,7 @@ class TileContentServiceImpl @Inject()(
   // For test overriding - if we cared that this was lame we could pull all TA ops
   // out into a service, no object functions
   def signRequest(trustedApp: CurrentApplication, usercode: String, request: HttpUriRequest) =
-    TrustedApplicationUtils.signRequest(trustedApp, usercode, request)
+  TrustedApplicationUtils.signRequest(trustedApp, usercode, request)
 
   private def jsonPost(url: String, postData: Option[JsObject]) = {
     val request = new HttpPost(url)
