@@ -18,8 +18,7 @@ lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala)
   .settings(
     Gulp.settings,
     // Package up assets before we build tar.gz
-    packageZipTarball in Universal <<= (packageZipTarball in Universal).dependsOn(Gulp.gulpAssets),
-
+    packageZipTarball in Universal := (packageZipTarball in Universal).dependsOn(Gulp.gulpAssets).value,
     funSettings
   )
 
@@ -38,9 +37,9 @@ val appDeps = Seq(
   "uk.ac.warwick.play-utils" %% "anorm" % "1.4",
   "uk.ac.warwick.play-utils" %% "objectstore" % "1.4",
   "uk.ac.warwick.util" % "warwickutils-cache" % "20160429",
-  "com.typesafe.akka" %% "akka-cluster" % "2.4.0",
-  "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.0",
-  "com.typesafe.akka" %% "akka-slf4j" % "2.4.0",
+  "com.typesafe.akka" %% "akka-cluster" % "2.4.16",
+  "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.16",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.4.16",
   "com.kenshoo" %% "metrics-play" % "2.5.0_0.5.0-play-2.5-fix",
   "com.typesafe.play" %% "play-mailer" % "5.0.0-M1",
   "com.notnoop.apns" % "apns" % "1.0.0.Beta6",
@@ -85,9 +84,7 @@ dependencyOverrides += "xml-apis" % "xml-apis" % "1.4.01"
 dependencyOverrides += "ch.qos.logback" % "logback-classic" % "1.1.7"
 
 // Make gulp output available as Play assets.
-unmanagedResourceDirectories in Assets <+= baseDirectory {
-  _ / "target" / "gulp"
-}
+unmanagedResourceDirectories in Assets += baseDirectory.value / "target" / "gulp"
 
 resolvers += ("Local Maven Repository" at "file:///" + Path.userHome.absolutePath + "/.m2/repository")
 
