@@ -1,5 +1,7 @@
 /* eslint react/prop-types: 0, react/sort-comp: 0 */
 import React, { Component } from 'react';
+import * as log from 'loglevel';
+import * as errorreporter from '../../errorreporter';
 export const TILE_SIZES = {
   SMALL: 'small',
   WIDE: 'wide',
@@ -9,10 +11,18 @@ export const TILE_SIZES = {
 
 export default class TileContent extends Component {
 
+  constructor(props) {
+    super(props);
+    this.error = false;
+  }
+
   isEmpty() {
     const { content } = this.props;
-
     return !content.items || content.items.length === 0;
+  }
+
+  isError() {
+    return this.error;
   }
 
   isRemovable() {
@@ -70,9 +80,20 @@ export default class TileContent extends Component {
   }
 
   render() {
-    const { content, zoomed } = this.props;
-    if (content) {
-      return this.contentOrDefault(zoomed ? this.getZoomedBody : this.getBody);
+    if (!this.isError()) {
+      try {
+        const { content, zoomed } = this.props;
+        if (content) {
+          return this.contentOrDefault(zoomed ? this.getZoomedBody : this.getBody);
+        }
+      } catch (e) {
+        log.error('Error rendering tile', e);
+        errorreporter.post(e);
+        this.error = true;
+      }
+    }
+    if (this.isError()) {
+      return <span>Unexpected error displaying this tile.</span>;
     }
     return null;
   }

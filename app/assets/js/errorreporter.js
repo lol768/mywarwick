@@ -38,6 +38,10 @@ function onError(message, source, line, column, error) {
   postErrorsThrottled();
 }
 
+export function post(e) {
+  onError(e.message, null, null, null, e);
+}
+
 export default function init() {
   window.onerror = onError;
 }
