@@ -3,7 +3,7 @@ package system
 import com.google.inject.Inject
 import play.api.mvc.Request
 import services.NavigationService
-import warwick.sso.{AuthenticatedRequest, SSOClient}
+import warwick.sso.{AuthenticatedRequest, LoginContext, SSOClient, User}
 
 trait ImplicitRequestContext {
 
@@ -12,6 +12,17 @@ trait ImplicitRequestContext {
 
   @Inject
   val ssoClient: SSOClient = null
+
+  implicit def userProperties(implicit request: Request[_]): UserProperties = request match {
+    case req: AuthenticatedRequest[_] => new UserProperties {
+      override def user: Option[User] = req.context.user
+      override def actualUser: Option[User] = req.context.actualUser
+    }
+    case _ => new UserProperties {
+      override def user: Option[User] = None
+      override def actualUser: Option[User] = None
+    }
+  }
 
   implicit def requestContext(implicit request: Request[_]): RequestContext = request match {
     case req: AuthenticatedRequest[_] =>
