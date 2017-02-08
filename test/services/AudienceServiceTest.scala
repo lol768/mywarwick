@@ -23,7 +23,7 @@ class AudienceServiceTest extends PlaySpec with MockitoSugar {
     }
 
     def newGroup(name: String, users: Seq[String], `type`:String="Arbitrary") =
-      Group(GroupName(name), None, users.map(Usercode), Nil, `type`, null, null)
+      Group(GroupName(name), None, users.map(Usercode), Nil, `type`, null, null, restricted = false)
 
     // Welcome to Barry's World
     def webgroupsAllContainBarry: Unit = {
