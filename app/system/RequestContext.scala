@@ -18,11 +18,6 @@ case class RequestContext(
   flash: Flash
 )
 
-trait UserProperties {
-  def user: Option[User]
-  def actualUser: Option[User]
-}
-
 object RequestContext {
 
   def authenticated(sso: SSOClient, request: AuthenticatedRequest[_], navigation: Seq[Navigation]) =

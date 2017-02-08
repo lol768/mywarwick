@@ -14,7 +14,6 @@ import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc.{Action, MultipartFormData, Request, Result}
 import services.{ImageManipulator, NewsImageService, PublisherService, SecurityService}
 import system.EitherValidation
-import warwick.sso.AuthenticatedRequest
 
 import scala.util.{Failure, Success}
 
@@ -28,7 +27,6 @@ class NewsImagesController @Inject()(
 
   import EitherValidation._
   import securityService._
-  import system.Roles._
 
   def show(id: String) = Action { request =>
     newsImageService.find(id).map { newsImage =>
