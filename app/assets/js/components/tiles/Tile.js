@@ -132,6 +132,12 @@ export default class Tile extends React.Component {
           >
             <i className="fa fa-fw fa-arrow-up"> </i>
           </div>
+          <div
+            className="tile__edit-control top-right"
+            title={`Change setting`}
+          >
+            <i className="fa fa-fw fa-pencil"> </i>
+          </div>
           <div className="tile__wrap">
             <header className="tile__header">
               <div className="tile__icon tile__icon--left">{this.getIcon()}</div>
