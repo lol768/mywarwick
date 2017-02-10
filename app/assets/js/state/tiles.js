@@ -39,7 +39,7 @@ export function tileLayoutChange(layout, layoutWidth) {
   };
 }
 
-export function fetchedTiles({ tiles, layout, options }) {
+export function fetchedTiles({ tiles, layout, options, }) {
   return {
     type: TILES_FETCH_SUCCESS,
     tiles,
@@ -103,6 +103,7 @@ export function persistTiles() {
     );
 
     const layout = getState().tiles.data.layout;
+    const options = getState().tiles.data.options;
 
     return fetch('/api/tiles', {
       credentials: 'same-origin',
@@ -110,7 +111,7 @@ export function persistTiles() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ tiles, layout }),
+      body: JSON.stringify({ tiles, layout, options }),
     });
   };
 }

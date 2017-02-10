@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 import * as log from 'loglevel';
 import * as errorreporter from '../../errorreporter';
-import _ from 'lodash';
 export const TILE_SIZES = {
   SMALL: 'small',
   WIDE: 'wide',
@@ -30,11 +29,6 @@ export default class TileContent extends Component {
     return true;
   }
 
-  isConfigable() {
-    // return !_.isEmpty(this.props.option);
-    // not in use yet,
-    return true;
-  }
 
   static isVisibleOnDesktopOnly() {
     return false;

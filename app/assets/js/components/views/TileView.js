@@ -77,7 +77,7 @@ const select = (state, ownProps) => {
 
   const tile = _(state.tiles.data.tiles).find(t => t.id === id);
   const content = state.tileContent[id];
-  const option = state.options[id];
+  const option = state.tiles.data.options[id];
 
   return {
     tile,

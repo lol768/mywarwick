@@ -87,6 +87,20 @@ export default class Tile extends React.Component {
     return this.props.editing ? false : this.props.canZoom;
   }
 
+
+  displayEditButton() {
+    if (!_.isEmpty(this.props.option)) {
+      return (
+        <div
+          className="tile__edit-control top-right"
+          title={`Change setting`}
+          onClick={this.onClick}
+        >
+          <i className="fa fa-fw fa-pencil"> </i>
+        </div>
+      );
+    }
+  }
   render() {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
@@ -125,6 +139,7 @@ export default class Tile extends React.Component {
               <i className="fa fa-fw fa-minus"> </i>
             </div>
           }
+
           <div
             className="tile__edit-control bottom-right"
             onClick={ this.props.onResize }
@@ -133,14 +148,7 @@ export default class Tile extends React.Component {
             <i className="fa fa-fw fa-arrow-up"> </i>
           </div>
 
-          {/*will check if isConfigable() */}
-          <div
-            className="tile__edit-control top-right"
-            title={`Change setting`}
-          >
-            <i className="fa fa-fw fa-pencil"> </i>
-          </div>
-
+          { this.displayEditButton() }
 
           <div className="tile__wrap">
             <header className="tile__header">
@@ -175,6 +183,7 @@ Tile.propTypes = {
   editingAny: React.PropTypes.bool.isRequired,
   zoomed: React.PropTypes.bool.isRequired,
   isDesktop: React.PropTypes.bool.isRequired,
+  option: React.PropTypes.object,
   canZoom: React.PropTypes.bool.isRequired,
   fetching: React.PropTypes.bool,
   errors: React.PropTypes.arrayOf(React.PropTypes.shape({
