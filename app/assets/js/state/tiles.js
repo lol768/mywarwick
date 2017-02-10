@@ -39,11 +39,12 @@ export function tileLayoutChange(layout, layoutWidth) {
   };
 }
 
-export function fetchedTiles({ tiles, layout }) {
+export function fetchedTiles({ tiles, layout, options }) {
   return {
     type: TILES_FETCH_SUCCESS,
     tiles,
     layout,
+    options,
   };
 }
 
@@ -169,6 +170,7 @@ const initialState = {
   data: {
     tiles: [],
     layout: [],
+    options: {},
   },
 };
 
@@ -212,6 +214,7 @@ export function tilesReducer(state = initialState, action) {
         data: {
           tiles: action.tiles || [],
           layout: action.layout || [],
+          options: action.options || {},
         },
       };
     case TILE_HIDE:
@@ -264,6 +267,8 @@ export function tilesReducer(state = initialState, action) {
       return state;
   }
 }
+
+
 
 export function tileContentReducer(state = initialContentState, action) {
   switch (action.type) {
