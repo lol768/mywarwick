@@ -60,22 +60,22 @@ class TileContentServiceImpl @Inject()(
   import ThreadPools.tileData
 
   override def getTilesOptions(tiles: Seq[Tile]): Future[JsValue] = {
-    val allOptions: Seq[Future[Map[String, JsValue]]] = tiles.map { tile =>
+    val allOptions: Seq[Future[(String, JsValue)]] = tiles.map { tile =>
       tile.fetchUrl match {
         case Some(url) => {
           ws.url(s"${url}/preferences.json")
             .get()
             .map(res =>
               res.status match {
-                case 200 => Map(tile.id -> res.json)
-                case _ => Map(tile.id -> Json.obj())
+                case 200 => (tile.id, res.json)
+                case _ => (tile.id, Json.obj())
               }
             )
         }
-        case None => Future(Map(tile.id -> Json.obj()))
+        case None => Future((tile.id, Json.obj()))
       }
     }
-    Future.sequence(allOptions).map(result => JsArray(result.map(JsObject.apply)))
+    Future.sequence(allOptions).map(JsObject.apply)
   }
 
   // TODO cache
