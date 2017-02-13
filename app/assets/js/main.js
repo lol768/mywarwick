@@ -47,6 +47,10 @@ function hasAuthoritativeUser() {
   return u && u.authoritative === true;
 }
 
+function hasAuthenticatedUser() {
+  return hasAuthoritativeUser() && store.getState().user.data.authenticated === true;
+}
+
 const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
 
@@ -58,7 +62,7 @@ $(() => {
   $(window).on('deviceorientation resize', () => store.dispatch(device.updateDeviceWidth()));
 
   $(window).on('online', () => {
-    if (hasAuthoritativeUser()) {
+    if (hasAuthenticatedUser()) {
       store.dispatch(notifications.fetch());
     }
   });
@@ -120,7 +124,7 @@ if ('serviceWorker' in navigator) {
 }
 
 SocketDatapipe.onopen = () => {
-  if (hasAuthoritativeUser()) {
+  if (hasAuthenticatedUser()) {
     store.dispatch(notifications.fetch());
   }
 };
@@ -163,17 +167,17 @@ const persistedUserLinks = persisted('user.links', user.receiveSSOLinks);
 
 /** Initial requests for data */
 
-const loadPersonalisedDataFromServer = _.once(() => {
-  store.dispatch(notifications.fetch());
+const loadDataFromServer = _.once(() => {
   store.dispatch(tiles.fetchTiles());
 
-  // Refresh all tile content every five minutes
-  setInterval(() => store.dispatch(tiles.fetchTileContent()), 5 * 60 * 1000);
+  if (hasAuthenticatedUser()) {
+    store.dispatch(notifications.fetch());
+  }
 });
 
 const unsubscribe = store.subscribe(() => {
   if (hasAuthoritativeUser()) {
-    loadPersonalisedDataFromServer();
+    loadDataFromServer();
     unsubscribe();
   }
 });
@@ -221,6 +225,9 @@ fetchUserInfo().then(res =>
     receiveUserInfo(res)
   )
 );
+
+// Refresh all tile content every five minutes
+setInterval(() => store.dispatch(tiles.fetchTileContent()), 5 * 60 * 1000);
 
 // Just for access from the console
 window.Store = store;
