@@ -12,6 +12,10 @@ export default class NotificationsTile extends TileContent {
     return true;
   }
 
+  needsContentToRender() {
+    return false;
+  }
+
   isEmpty() {
     return false;
   }
