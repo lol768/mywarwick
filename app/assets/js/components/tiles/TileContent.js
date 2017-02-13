@@ -33,6 +33,10 @@ export default class TileContent extends Component {
     return false;
   }
 
+  needsContentToRender() {
+    return true;
+  }
+
   contentOrDefault(contentFunction) {
     if (this.isEmpty()) {
       return <span>{ this.props.content.defaultText || 'Nothing to show.' }</span>;
@@ -83,7 +87,7 @@ export default class TileContent extends Component {
     if (!this.isError()) {
       try {
         const { content, zoomed } = this.props;
-        if (content) {
+        if (content || !this.needsContentToRender()) {
           return this.contentOrDefault(zoomed ? this.getZoomedBody : this.getBody);
         }
       } catch (e) {
