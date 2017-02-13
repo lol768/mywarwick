@@ -47,7 +47,7 @@ function hasAuthoritativeUser() {
   return u && u.authoritative === true;
 }
 
-function hasAuthenticatedUser() {
+function hasAuthoritativeAuthenticatedUser() {
   return hasAuthoritativeUser() && store.getState().user.data.authenticated === true;
 }
 
@@ -62,7 +62,7 @@ $(() => {
   $(window).on('deviceorientation resize', () => store.dispatch(device.updateDeviceWidth()));
 
   $(window).on('online', () => {
-    if (hasAuthenticatedUser()) {
+    if (hasAuthoritativeAuthenticatedUser()) {
       store.dispatch(notifications.fetch());
     }
   });
@@ -124,7 +124,7 @@ if ('serviceWorker' in navigator) {
 }
 
 SocketDatapipe.onopen = () => {
-  if (hasAuthenticatedUser()) {
+  if (hasAuthoritativeAuthenticatedUser()) {
     store.dispatch(notifications.fetch());
   }
 };
@@ -170,7 +170,7 @@ const persistedUserLinks = persisted('user.links', user.receiveSSOLinks);
 const loadDataFromServer = _.once(() => {
   store.dispatch(tiles.fetchTiles());
 
-  if (hasAuthenticatedUser()) {
+  if (hasAuthoritativeAuthenticatedUser()) {
     store.dispatch(notifications.fetch());
   }
 });
