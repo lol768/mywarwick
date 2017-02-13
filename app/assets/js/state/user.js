@@ -7,7 +7,9 @@ export const USER_CLEAR = 'USER_CLEAR';
 export const SSO_LINKS_RECEIVE = 'SSO_LINKS_RECEIVE';
 
 const initialState = {
-  data: {},
+  data: {
+    authenticated: false,
+  },
   authoritative: false,
   empty: true,
   links: {
