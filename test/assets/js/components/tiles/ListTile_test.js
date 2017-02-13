@@ -40,10 +40,10 @@ describe('ListTileItem', () => {
     a.props.href.should.equal(props.href);
     const [title, , text] = a.props.children;
     title.type.should.equal('span');
-    title.props.className.should.equal('tile-list-item__title');
+    title.props.className.should.equal('list-group-item__title');
     title.props.children.should.equal(props.title);
     text.type.should.equal('span');
-    text.props.className.should.equal('tile-list-item__text');
+    text.props.className.should.equal('list-group-item__text');
     text.props.children.should.equal(props.text);
   });
 
@@ -58,7 +58,7 @@ describe('ListTileItem', () => {
     const html = ReactTestUtils.renderIntoDocument(
       <MockedUl><ListTileItem date={ '2015-10-27 08:27:00.000' } {... props} /></MockedUl>
     );
-    const date = ReactTestUtils.findRenderedDOMComponentWithClass(html, 'tile-list-item__date');
+    const date = ReactTestUtils.findRenderedDOMComponentWithClass(html, 'list-group-item__date');
     expect(date.textContent).to.equal('Tue 27 Oct 2015, 8:27');
   });
 });
