@@ -32,12 +32,14 @@ class NotificationsView extends ReactComponent {
 
   beginMarkReadTimeout() {
     if (!document.hidden && document.hasFocus()) {
-      if (!this.timeout) {
-        this.timeout = setTimeout(() => {
-          this.timeout = null;
-          this.markNotificationsRead();
-        }, NOTIFICATION_READ_TIMEOUT);
+      if (this.timeout) {
+        clearTimeout(this.timeout);
       }
+
+      this.timeout = setTimeout(() => {
+        this.timeout = null;
+        this.markNotificationsRead();
+      }, NOTIFICATION_READ_TIMEOUT);
     } else {
       clearTimeout(this.timeout);
       this.timeout = null;
