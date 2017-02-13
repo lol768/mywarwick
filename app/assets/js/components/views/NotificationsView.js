@@ -1,20 +1,20 @@
 import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 import moment from 'moment';
-
 import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
 import * as groupItemsByDate from '../../GroupItemsByDate';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 import EmptyState from '../ui/EmptyState';
-
 import { connect } from 'react-redux';
-
 import { takeFromStream, getStreamSize } from '../../stream';
 import { markNotificationsRead } from '../../state/notification-metadata';
 import * as notifications from '../../state/notifications';
 
 const SOME_MORE = 20;
+
+// ms of continuous visibility required for notifications to be marked as read
+const NOTIFICATION_READ_TIMEOUT = 1500;
 
 class NotificationsView extends ReactComponent {
 
@@ -27,6 +27,23 @@ class NotificationsView extends ReactComponent {
     };
 
     this.loadMore = this.loadMore.bind(this);
+    this.beginMarkReadTimeout = this.beginMarkReadTimeout.bind(this);
+  }
+
+  beginMarkReadTimeout() {
+    if (!document.hidden && document.hasFocus()) {
+      if (this.timeout) {
+        clearTimeout(this.timeout);
+      }
+
+      this.timeout = setTimeout(() => {
+        this.timeout = null;
+        this.markNotificationsRead();
+      }, NOTIFICATION_READ_TIMEOUT);
+    } else {
+      clearTimeout(this.timeout);
+      this.timeout = null;
+    }
   }
 
   loadMore() {
@@ -52,36 +69,34 @@ class NotificationsView extends ReactComponent {
   }
 
   componentWillMount() {
-    const { notificationsLastRead } = this.props;
+    this.beginMarkReadTimeout();
+  }
 
-    // Store the current notifications last-read time so we can highlight new
-    // notifications as they arrive
-    this.setState({ notificationsLastRead });
+  componentWillUnmount() {
+    clearTimeout(this.timeout);
+    this.markNotificationsRead();
+
+    document.removeEventListener('visibilitychange', this.beginMarkReadTimeout);
+    window.removeEventListener('focus', this.beginMarkReadTimeout);
+    window.removeEventListener('blur', this.beginMarkReadTimeout);
   }
 
   componentWillReceiveProps(newProps) {
-    const was = this.state.notificationsLastRead;
-    const is = newProps.notificationsLastRead;
-
-    if (!was.fetched && is.fetched) {
-      // Only update cached last-read time upon fetch.  Otherwise retain the
-      // same value as long as this component is mounted
-      this.setState({ notificationsLastRead: is });
-    }
-
     if (getStreamSize(newProps.notifications) !== getStreamSize(this.props.notifications)) {
       // If there are new notifications (while the view is mounted), mark them
       // as read
-      this.markNotificationsRead();
+      this.beginMarkReadTimeout();
     }
   }
 
   componentDidMount() {
-    this.markNotificationsRead();
+    document.addEventListener('visibilitychange', this.beginMarkReadTimeout);
+    window.addEventListener('focus', this.beginMarkReadTimeout);
+    window.addEventListener('blur', this.beginMarkReadTimeout);
   }
 
   isUnread(notification) {
-    const { notificationsLastRead } = this.state;
+    const { notificationsLastRead } = this.props;
 
     return notificationsLastRead.date === null
       || moment(notification.date).isAfter(notificationsLastRead.date);
