@@ -244,7 +244,7 @@ class MeView extends ReactComponent {
 
     const hiddenTileComponents = hiddenTiles.map(tile =>
       <div key={ tile.id }>
-        <HiddenTile {...tile} onShow={() => this.onShowTile(tile)}/>
+        <HiddenTile {...tile} onShow={ () => this.onShowTile(tile) } />
       </div>
     );
 
@@ -328,10 +328,14 @@ class MeView extends ReactComponent {
           <TileOptionView
             tile={ configuringTile }
             onConfigViewDismiss= { this.onConfigViewDismiss }
-            onConfigSave = { this.onConfigSave } />
+            onConfigSave = { this.onConfigSave }
+          />
         </div>
       );
     }
+    return (
+      <div />
+    );
   }
 
   render() {

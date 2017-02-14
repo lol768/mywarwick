@@ -87,19 +87,19 @@ export default class Tile extends React.Component {
     return this.props.editing ? false : this.props.canZoom;
   }
 
-
-  displayEditButton() {
+  displayConfigButton() {
     if (!_.isEmpty(this.props.option)) {
       return (
         <div
           className="tile__edit-control top-right"
-          title={`Change setting`}
+          title={'Change setting'}
           onClick={this.props.onConfiguring}
         >
-          <i className="fa fa-fw fa-pencil"> </i>
+          <i className="fa fa-fw fa-pencil"></i>
         </div>
       );
     }
+    return (<div />);
   }
   render() {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
@@ -148,7 +148,7 @@ export default class Tile extends React.Component {
             <i className="fa fa-fw fa-arrow-up"> </i>
           </div>
 
-          { this.displayEditButton() }
+          { this.displayConfigButton() }
 
           <div className="tile__wrap">
             <header className="tile__header">
