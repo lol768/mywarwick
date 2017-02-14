@@ -8,15 +8,15 @@ export default class TileOptionView extends Component {
   }
 
   makeFormBody() {
-    const option = this.props.tile.option;
-    const optionsKeys = Object.keys(option);
+    const options = this.props.tile.option;
+    const optionsKeys = Object.keys(options);
 
     return (
       <div>
         <form className="form">
           <div>
             {optionsKeys.map(key => <div className="form-group">
-              <label>{key}:</label>{option[key].options.map(this.makeCheckbox)}
+              <label>{key}:</label>{this.makeOptionElement(options[key])}
             </div>)}
           </div>
         </form>
@@ -24,12 +24,34 @@ export default class TileOptionView extends Component {
     );
   }
 
-  makeCheckbox(option) {
+  makeOptionElement(option) {
+    switch (option.type.toLowerCase()) {
+      case 'array':
+        return option.options.map(this.makeCheckbox);
+        break;
+      case 'string':
+        return option.options.map(this.makeRadioBox);
+        break;
+    }
+  }
+
+  makeCheckbox(possibleChoice) {
     return (
       <div className="checkbox">
         <label>
-          <input type="checkbox" id="checkbox" value={option.value}/>
-          {option.name ? option.name : option.value }
+          <input type="checkbox" id={possibleChoice.value} value={possibleChoice.value}/>
+          {possibleChoice.name ? possibleChoice.name : possibleChoice.value }
+        </label>
+      </div>
+    );
+  }
+
+  makeRadioBox(possibleChoice) {
+    return (
+      <div className="radio">
+        <label>
+          <input type="radio" name={possibleChoice.value} id={possibleChoice.value} value={possibleChoice.value}/>
+          {possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         </label>
       </div>
     );
