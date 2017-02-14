@@ -1,11 +1,6 @@
-import React, { Component } from 'react';
-import classNames from 'classnames';
+import React, { Component, PropTypes } from 'react';
 
 export default class TileOptionView extends Component {
-
-  constructor(props) {
-    super(props);
-  }
 
   makeFormBody() {
     const options = this.props.tile.option;
@@ -28,10 +23,12 @@ export default class TileOptionView extends Component {
     switch (option.type.toLowerCase()) {
       case 'array':
         return option.options.map(this.makeCheckbox);
-        break;
       case 'string':
         return option.options.map(e => this.makeRadioBox(e, key));
-        break;
+      default:
+        return (
+          <div />
+        );
     }
   }
 
@@ -39,7 +36,11 @@ export default class TileOptionView extends Component {
     return (
       <div className="checkbox">
         <label>
-          <input type="checkbox" id={possibleChoice.value} value={possibleChoice.value}/>
+          <input
+            type="checkbox"
+            id={possibleChoice.value}
+            value={possibleChoice.value}
+          />
           {possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         </label>
       </div>
@@ -50,8 +51,11 @@ export default class TileOptionView extends Component {
     return (
       <div className="radio">
         <label>
-          <input type="radio" name={radioName} id={possibleChoice.value}
-                 value={possibleChoice.value}/>
+          <input
+            type="radio" name={radioName}
+            id={possibleChoice.value}
+            value={possibleChoice.value}
+          />
           {possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         </label>
       </div>
@@ -60,15 +64,29 @@ export default class TileOptionView extends Component {
 
   render() {
     return (
-      <div className="tile--config__modal fade in" id={`config-${this.props.tile.id}`} tabindex="-1"
-           role="dialog"
-           aria-labelledby="myModalLabel">
+      <div
+        className="tile--config__modal fade in"
+        id={`config-${this.props.tile.id}`}
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="myModalLabel"
+      >
         <div className="tile--config__modal_dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <button type="button" className="close" data-dismiss="modal"
-                      aria-label="Close"><span
-                aria-hidden="true" onClick={ this.props.onConfigViewDismiss }>&times;</span></button>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span
+                  aria-hidden="true"
+                  onClick={ this.props.onConfigViewDismiss }
+                >
+                  &times;
+                </span>
+              </button>
               <h4 className="modal-title" id={`title-${this.props.tile.id}`}>Change settings
                 for {this.props.tile.title}</h4>
             </div>
@@ -76,11 +94,16 @@ export default class TileOptionView extends Component {
               { this.makeFormBody() }
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-default" data-dismiss="modal"
-                      onClick={ this.props.onConfigViewDismiss }>Close
+              <button
+                type="button"
+                className="btn btn-default"
+                data-dismiss="modal"
+                onClick={ this.props.onConfigViewDismiss }
+              >
+                Close
               </button>
-              <button type="button" className="btn btn-primary" onClick={ this.props.onConfigSave }>Save
-                changes
+              <button type="button" className="btn btn-primary" onClick={ this.props.onConfigSave }>
+                Save changes
               </button>
             </div>
           </div>
@@ -89,3 +112,9 @@ export default class TileOptionView extends Component {
     );
   }
 }
+
+TileOptionView.propTypes = {
+  tile: PropTypes.object.isRequired,
+  onConfigViewDismiss: PropTypes.func.isRequired,
+  onConfigSave: PropTypes.func.isRequired,
+};
