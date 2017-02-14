@@ -200,7 +200,7 @@ class MeView extends ReactComponent {
 
   renderHiddenTiles() {
     const { layoutWidth } = this.props;
-    const hiddenTiles = _.sortBy(this.props.hiddenTiles, 'title');
+    const hiddenTiles = _.sortBy(this.props.tiles.filter(t => t.removed), 'title');
 
     const layout = hiddenTiles
       .map((item, i) => ({
