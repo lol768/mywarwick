@@ -16,7 +16,7 @@ export default class TileOptionView extends Component {
         <form className="form">
           <div>
             {optionsKeys.map(key => <div className="form-group">
-              <label>{key}:</label>{this.makeOptionElement(options[key])}
+              <label>{key}:</label>{this.makeOptionElement(options[key], key)}
             </div>)}
           </div>
         </form>
@@ -24,13 +24,13 @@ export default class TileOptionView extends Component {
     );
   }
 
-  makeOptionElement(option) {
+  makeOptionElement(option, key) {
     switch (option.type.toLowerCase()) {
       case 'array':
         return option.options.map(this.makeCheckbox);
         break;
       case 'string':
-        return option.options.map(this.makeRadioBox);
+        return option.options.map(e => this.makeRadioBox(e, key));
         break;
     }
   }
@@ -46,11 +46,12 @@ export default class TileOptionView extends Component {
     );
   }
 
-  makeRadioBox(possibleChoice) {
+  makeRadioBox(possibleChoice, radioName) {
     return (
       <div className="radio">
         <label>
-          <input type="radio" name={possibleChoice.value} id={possibleChoice.value} value={possibleChoice.value}/>
+          <input type="radio" name={radioName} id={possibleChoice.value}
+                 value={possibleChoice.value}/>
           {possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         </label>
       </div>
@@ -67,7 +68,7 @@ export default class TileOptionView extends Component {
             <div className="modal-header">
               <button type="button" className="close" data-dismiss="modal"
                       aria-label="Close"><span
-                aria-hidden="true">&times;</span></button>
+                aria-hidden="true" onClick={ this.props.onConfigViewDismiss }>&times;</span></button>
               <h4 className="modal-title" id={`title-${this.props.tile.id}`}>Change settings
                 for {this.props.tile.title}</h4>
             </div>
@@ -75,9 +76,12 @@ export default class TileOptionView extends Component {
               { this.makeFormBody() }
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-default" data-dismiss="modal">Close
+              <button type="button" className="btn btn-default" data-dismiss="modal"
+                      onClick={ this.props.onConfigViewDismiss }>Close
               </button>
-              <button type="button" className="btn btn-primary">Save changes</button>
+              <button type="button" className="btn btn-primary" onClick={ this.props.onConfigSave }>Save
+                changes
+              </button>
             </div>
           </div>
         </div>

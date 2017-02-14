@@ -61,6 +61,8 @@ class MeView extends ReactComponent {
     this.onDragStop = this.onDragStop.bind(this);
     this.getDragDelayForItem = this.getDragDelayForItem.bind(this);
     this.onBodyScroll = this.onBodyScroll.bind(this);
+    this.onConfigSave = this.onConfigSave.bind(this);
+    this.onConfigViewDismiss = this.onConfigViewDismiss.bind(this);
   }
 
   componentDidMount() {
@@ -105,11 +107,15 @@ class MeView extends ReactComponent {
   }
 
   onClickOutside(e) {
+    if (this.state.configuringTile) {
+      return;
+    }
+
     if (this.state.editing && $(e.target).parents('.tile--editing').length === 0) {
       // Defer so this click is still considered to be happening in editing mode
       _.defer(() => {
         this.onFinishEditing();
-        this.onFinishConfiguring();
+        this.onConfigViewDismiss();
       });
     }
   }
@@ -187,25 +193,25 @@ class MeView extends ReactComponent {
     this.onFinishEditing();
   }
 
+  // beginning the configuring
   onConfiguring(tileProps) {
+    // load existing preferences?
     this.setState({
       configuringTile: tileProps,
     });
-    // $(`#config-${tileProps.id}`).modal('show')
   }
 
-  onFinishConfiguring() {
-    // save setting?
+  onConfigViewDismiss() {
     this.setState({
       configuringTile: null,
     });
   }
 
-  onConfigViewDismiss() {
-    this.onFinishConfiguring();
+  onConfigSave() {
+    // save
+
+    // ???
   }
-
-
 
   getTileSize(id) {
     const layout = this.props.layout.filter(i =>
@@ -319,7 +325,10 @@ class MeView extends ReactComponent {
       return (
         <div>
           <div className="tile-zoom-backdrop" onClick={this.onConfigViewDismiss}></div>
-          <TileOptionView tile={ configuringTile } />
+          <TileOptionView
+            tile={ configuringTile }
+            onConfigViewDismiss= { this.onConfigViewDismiss }
+            onConfigSave = { this.onConfigSave } />
         </div>
       );
     }
@@ -356,7 +365,6 @@ const select = (state) => ({
   layoutWidth: state.ui.isWideLayout === true ? 5 : 2,
   tiles: state.tiles.data.tiles,
   layout: state.tiles.data.layout,
-  // options: state.tiles.data.options,
 });
 
 export default connect(select)(MeView);
