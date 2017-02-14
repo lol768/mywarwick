@@ -94,7 +94,7 @@ export default class Tile extends React.Component {
         <div
           className="tile__edit-control top-right"
           title={`Change setting`}
-          onClick={this.onClick}
+          onClick={this.props.onConfiguring}
         >
           <i className="fa fa-fw fa-pencil"> </i>
         </div>
@@ -171,6 +171,7 @@ export default class Tile extends React.Component {
 
 Tile.propTypes = {
   children: React.PropTypes.node,
+  onConfiguring: React.PropTypes.func,
   onResize: React.PropTypes.func.isRequired,
   onHide: React.PropTypes.func.isRequired,
   onZoomOut: React.PropTypes.func.isRequired,
@@ -184,6 +185,7 @@ Tile.propTypes = {
   zoomed: React.PropTypes.bool.isRequired,
   isDesktop: React.PropTypes.bool.isRequired,
   option: React.PropTypes.object,
+  id: React.PropTypes.string,
   canZoom: React.PropTypes.bool.isRequired,
   fetching: React.PropTypes.bool,
   errors: React.PropTypes.arrayOf(React.PropTypes.shape({
