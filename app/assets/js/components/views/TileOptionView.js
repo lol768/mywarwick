@@ -2,27 +2,23 @@ import React, { Component, PropTypes } from 'react';
 
 export default class TileOptionView extends Component {
 
-  makeFormBody() {
+  makeFormBody(formId) {
     const options = this.props.tile.option;
     const optionsKeys = Object.keys(options);
 
     return (
-      <div>
-        <form className="form">
-          <div>
-            {optionsKeys.map(key => <div className="form-group">
-              <label>{key}:</label>{this.makeOptionElement(options[key], key)}
-            </div>)}
-          </div>
-        </form>
-      </div>
+      <form className="form" id={formId}>
+        {optionsKeys.map(key => <div className="form-group">
+          <label>{key}:</label>{this.makeOptionElement(options[key], key)}
+        </div>)}
+      </form>
     );
   }
 
   makeOptionElement(option, key) {
     switch (option.type.toLowerCase()) {
       case 'array':
-        return option.options.map(this.makeCheckbox);
+        return option.options.map(e => this.makeCheckbox(e, key));
       case 'string':
         return option.options.map(e => this.makeRadioBox(e, key));
       default:
@@ -32,7 +28,7 @@ export default class TileOptionView extends Component {
     }
   }
 
-  makeCheckbox(possibleChoice) {
+  makeCheckbox(possibleChoice, checkboxName) {
     return (
       <div className="checkbox">
         <label>
@@ -40,6 +36,7 @@ export default class TileOptionView extends Component {
             type="checkbox"
             id={possibleChoice.value}
             value={possibleChoice.value}
+            name={checkboxName}
           />
           {possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         </label>
@@ -52,7 +49,8 @@ export default class TileOptionView extends Component {
       <div className="radio">
         <label>
           <input
-            type="radio" name={radioName}
+            type="radio"
+            name={radioName}
             id={possibleChoice.value}
             value={possibleChoice.value}
           />
@@ -60,6 +58,12 @@ export default class TileOptionView extends Component {
         </label>
       </div>
     );
+  }
+
+  saveConfig() {
+    const preferences = $(`#config-${this.props.tile.id}`).serializeArray();
+    const tile = this.props.tile;
+    this.props.onConfigSave(tile, preferences);
   }
 
   render() {
@@ -91,7 +95,7 @@ export default class TileOptionView extends Component {
                 for {this.props.tile.title}</h4>
             </div>
             <div className="tile--config__modal_body">
-              { this.makeFormBody() }
+              { this.makeFormBody(`config-${this.props.tile.id}-form`) }
             </div>
             <div className="modal-footer">
               <button
@@ -102,7 +106,7 @@ export default class TileOptionView extends Component {
               >
                 Close
               </button>
-              <button type="button" className="btn btn-primary" onClick={ this.props.onConfigSave }>
+              <button type="button" className="btn btn-primary" onClick={ this.saveConfig }>
                 Save changes
               </button>
             </div>
