@@ -22,6 +22,8 @@ const TILE_RESIZE = 'tiles.resize';
 
 const TILE_LAYOUT_CHANGE = 'me.tile-layout-change';
 
+const TILE_PREFERENCES_SAVE = 'tiles.preferences.save';
+
 const NETWORK_ERRORS = [
   {
     id: 'network',
@@ -39,7 +41,7 @@ export function tileLayoutChange(layout, layoutWidth) {
   };
 }
 
-export function fetchedTiles({ tiles, layout, options, }) {
+export function fetchedTiles({ tiles, layout, options }) {
   return {
     type: TILES_FETCH_SUCCESS,
     tiles,
@@ -116,6 +118,23 @@ export function persistTiles() {
   };
 }
 
+export function saveTilePreferences(tile, preferences) {
+  return dispatch => {
+    dispatch(storeTilePreferences(tile, preferences));
+    // return fetchWithCredentials('url for saving preferences', {method: 'put'})
+    //   .then()
+    //   .catch();
+  }
+}
+
+export function storeTilePreferences(tile, preferences) {
+  return {
+    type: TILE_PREFERENCES_SAVE,
+    tile,
+    preferences,
+  }
+}
+
 const ALL_TILES = undefined;
 export function fetchTileContent(tileSpec = ALL_TILES) {
   return (dispatch, getState) => {
@@ -190,6 +209,45 @@ function updateTileById(state, id, callback) {
 
 export function tilesReducer(state = initialState, action) {
   switch (action.type) {
+    case TILE_PREFERENCES_SAVE:
+      const allTiles = state.data.tiles;
+      const newTiles = allTiles.map(tile => {
+        if (tile.id === action.tile.id) {
+          const preferences = {};
+          action.preferences.forEach(e => {
+            const optionsType = state.data.options[tile.id][e.name].type;
+            switch (optionsType) {
+              case 'array':
+                if(preferences[e.name]){
+                  const elements = preferences[e.name];
+                  elements.push(e.value);
+                  preferences[e.name] = elements;
+                } else {
+                  preferences[e.name] = [e.value];
+                }
+                break;
+              case 'string':
+                preferences[e.name] = e.value;
+                break;
+            }
+          });
+
+          return {
+            ...action.tile,
+            preferences,
+          };
+        } else {
+          return tile;
+        }
+      });
+      const newState = {
+        ...state,
+        data:{
+          ...state.data,
+          tiles: newTiles,
+        }
+      };
+      return newState;
     case USER_CLEAR:
       return initialState;
     case TILES_FETCH:
@@ -268,8 +326,6 @@ export function tilesReducer(state = initialState, action) {
       return state;
   }
 }
-
-
 
 export function tileContentReducer(state = initialContentState, action) {
   switch (action.type) {
