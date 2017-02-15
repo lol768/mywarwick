@@ -207,10 +207,9 @@ class MeView extends ReactComponent {
     });
   }
 
-  onConfigSave() {
-    // save
-
-    // ???
+  onConfigSave(tile, preferences) {
+    this.props.dispatch(tiles.saveTilePreferences(tile, preferences));
+    this.onConfigViewDismiss();
   }
 
   getTileSize(id) {

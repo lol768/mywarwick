@@ -2,6 +2,11 @@ import React, { Component, PropTypes } from 'react';
 
 export default class TileOptionView extends Component {
 
+  constructor(props) {
+    super(props);
+    this.saveConfig = this.saveConfig.bind(this);
+  }
+
   makeFormBody(formId) {
     const options = this.props.tile.option;
     const optionsKeys = Object.keys(options);
@@ -61,7 +66,8 @@ export default class TileOptionView extends Component {
   }
 
   saveConfig() {
-    const preferences = $(`#config-${this.props.tile.id}`).serializeArray();
+    const formId = `#config-${this.props.tile.id}-form`;
+    const preferences = $(formId).serializeArray();
     const tile = this.props.tile;
     this.props.onConfigSave(tile, preferences);
   }
