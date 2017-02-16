@@ -118,21 +118,21 @@ export function persistTiles() {
   };
 }
 
+export function storeTilePreferences(tile, preferences) {
+  return {
+    type: TILE_PREFERENCES_SAVE,
+    tile,
+    preferences,
+  };
+}
+
 export function saveTilePreferences(tile, preferences) {
   return dispatch => {
     dispatch(storeTilePreferences(tile, preferences));
     // return fetchWithCredentials('url for saving preferences', {method: 'put'})
     //   .then()
     //   .catch();
-  }
-}
-
-export function storeTilePreferences(tile, preferences) {
-  return {
-    type: TILE_PREFERENCES_SAVE,
-    tile,
-    preferences,
-  }
+  };
 }
 
 const ALL_TILES = undefined;
@@ -209,16 +209,17 @@ function updateTileById(state, id, callback) {
 
 export function tilesReducer(state = initialState, action) {
   switch (action.type) {
-    case TILE_PREFERENCES_SAVE:
+    case TILE_PREFERENCES_SAVE: {
       const allTiles = state.data.tiles;
       const newTiles = allTiles.map(tile => {
+        let returningTile = null;
         if (tile.id === action.tile.id) {
           const preferences = {};
           action.preferences.forEach(e => {
             const optionsType = state.data.options[tile.id][e.name].type;
             switch (optionsType) {
               case 'array':
-                if(preferences[e.name]){
+                if (preferences[e.name]) {
                   const elements = preferences[e.name];
                   elements.push(e.value);
                   preferences[e.name] = elements;
@@ -229,25 +230,28 @@ export function tilesReducer(state = initialState, action) {
               case 'string':
                 preferences[e.name] = e.value;
                 break;
+              default:
+                preferences[e.name] = null; // default case doing nothin
             }
           });
-
-          return {
+          returningTile = {
             ...action.tile,
             preferences,
           };
         } else {
-          return tile;
+          returningTile = tile;
         }
+        return returningTile;
       });
       const newState = {
         ...state,
-        data:{
+        data: {
           ...state.data,
           tiles: newTiles,
-        }
+        },
       };
       return newState;
+    }
     case USER_CLEAR:
       return initialState;
     case TILES_FETCH:

@@ -17,7 +17,18 @@ class TileView extends Component {
   }
 
   render() {
-    const { id, zoomed, editing, editingAny, isDesktop, tile, content, size, option, user } = this.props;
+    const {
+      id,
+      zoomed,
+      editing,
+      editingAny,
+      isDesktop,
+      tile,
+      content,
+      size,
+      option,
+      user,
+    } = this.props;
 
     if (tile === undefined) {
       return <div />;

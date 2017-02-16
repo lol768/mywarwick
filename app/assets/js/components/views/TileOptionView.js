@@ -1,15 +1,16 @@
 import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
+import $ from 'jquery';
 
 export default class TileOptionView extends Component {
 
   constructor(props) {
     super(props);
 
-    if (props.tile.preferences && _.size(props.tile.preferences) != 0) {
+    if (props.tile.preferences && _.size(props.tile.preferences) !== 0) {
       this.state = {
         currentPreferences: props.tile.preferences,
-      }
+      };
     } else {
       // set preferences to default preferences from content-provider
       const defaultPref = {};
@@ -52,7 +53,7 @@ export default class TileOptionView extends Component {
     }
   }
 
-  makeCheckbox(possibleChoice, checkboxName) {
+  makeCheckbox(possibleChoice, cbName) {
     return (
       <div className="checkbox">
         <label>
@@ -60,8 +61,11 @@ export default class TileOptionView extends Component {
             type="checkbox"
             id={possibleChoice.value}
             value={possibleChoice.value}
-            name={checkboxName}
-            checked={ (this.state.currentPreferences[checkboxName] && this.state.currentPreferences[checkboxName].includes(possibleChoice.value)) ? true : null }
+            name={cbName}
+            checked={
+              (this.state.currentPreferences[cbName] &&
+              this.state.currentPreferences[cbName].includes(possibleChoice.value)) ? true : null
+            }
             onChange={ this.handleCheckboxChange }
           />
           {possibleChoice.name ? possibleChoice.name : possibleChoice.value }
@@ -79,7 +83,10 @@ export default class TileOptionView extends Component {
             name={radioName}
             id={possibleChoice.value}
             value={possibleChoice.value}
-            checked={ (this.state.currentPreferences[radioName] && this.state.currentPreferences[radioName] === possibleChoice.value) ? true : null }
+            checked={
+              (this.state.currentPreferences[radioName] &&
+              this.state.currentPreferences[radioName] === possibleChoice.value) ? true : null
+            }
             onChange={ this.handleRadioChange }
           />
           {possibleChoice.name ? possibleChoice.name : possibleChoice.value }
@@ -89,7 +96,6 @@ export default class TileOptionView extends Component {
   }
 
   handleRadioChange(event) {
-
     const target = event.target;
     const value = target.value;
     const checked = target.checked;
@@ -101,7 +107,7 @@ export default class TileOptionView extends Component {
         currentPreferences: {
           ...currentPref,
           [name]: value,
-        }
+        },
       });
     }
   }
@@ -119,22 +125,20 @@ export default class TileOptionView extends Component {
         currentPreferences: {
           ...currentPref,
           [name]: items,
-        }
+        },
       });
     } else {
       const currentItems = currentPref[name];
       let items = [];
       if (currentItems) {
-        items = currentPref[name].filter(e => {
-          return !(e === value);
-        });
+        items = currentPref[name].filter(e => !(e === value));
       }
 
       this.setState({
         currentPreferences: {
           ...currentPref,
           [name]: items,
-        }
+        },
       });
     }
   }

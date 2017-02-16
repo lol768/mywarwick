@@ -88,7 +88,9 @@ export default class Tile extends React.Component {
   }
 
   displayConfigButton() {
-    if (!_.isEmpty(this.props.option) && (this.props.user ? this.props.user.authenticated : false)) {
+    const hasOption = !_.isEmpty(this.props.option);
+    const userLoggedIn = this.props.user ? this.props.user.authenticated : false;
+    if (hasOption && userLoggedIn) {
       return (
         <div
           className="tile__edit-control top-right"
