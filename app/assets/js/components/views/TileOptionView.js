@@ -7,20 +7,16 @@ export default class TileOptionView extends Component {
   constructor(props) {
     super(props);
 
-    if (props.tile.preferences && _.size(props.tile.preferences) !== 0) {
-      this.state = {
-        currentPreferences: props.tile.preferences,
-      };
-    } else {
-      // set preferences to default preferences from content-provider
-      const defaultPref = {};
-      _.forOwn(props.tile.option, (value, key) => {
-        defaultPref[key] = value.default;
-      });
-      this.state = {
-        currentPreferences: defaultPref,
-      };
-    }
+    const defaultPref = {};
+    _.forOwn(props.tile.option, (value, key) => {
+      defaultPref[key] = value.default;
+    });
+    this.state = {
+      currentPreferences: {
+        ...defaultPref,
+        ...props.tile.preferences || {},
+      },
+    };
 
     this.saveConfig = this.saveConfig.bind(this);
     this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
