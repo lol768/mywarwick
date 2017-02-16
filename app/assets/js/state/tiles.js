@@ -204,6 +204,28 @@ function updateTileById(state, id, callback) {
   };
 }
 
+export function formatPreferenceData(preferencesFromAction, availableTileOptions) {
+  const preferences = {};
+  preferencesFromAction.forEach(e => {
+    const optionsType = availableTileOptions[e.name].type;
+    switch (optionsType) {
+      case 'array':
+        if (preferences[e.name]) {
+          preferences[e.name].push(e.value);
+        } else {
+          preferences[e.name] = [e.value];
+        }
+        break;
+      case 'string':
+        preferences[e.name] = e.value;
+        break;
+      default:
+        preferences[e.name] = null; // default case doing nothing
+    }
+  });
+  return preferences;
+}
+
 export function tilesReducer(state = initialState, action) {
   switch (action.type) {
     case TILE_PREFERENCES_SAVE: {
@@ -211,29 +233,12 @@ export function tilesReducer(state = initialState, action) {
       const newTiles = allTiles.map(tile => {
         let returningTile = null;
         if (tile.id === action.tile.id) {
-          const preferences = {};
-          action.preferences.forEach(e => {
-            const optionsType = state.data.options[tile.id][e.name].type;
-            switch (optionsType) {
-              case 'array':
-                if (preferences[e.name]) {
-                  const elements = preferences[e.name];
-                  elements.push(e.value);
-                  preferences[e.name] = elements;
-                } else {
-                  preferences[e.name] = [e.value];
-                }
-                break;
-              case 'string':
-                preferences[e.name] = e.value;
-                break;
-              default:
-                preferences[e.name] = null; // default case doing nothin
-            }
-          });
           returningTile = {
             ...action.tile,
-            preferences,
+            preferences: formatPreferenceData(
+              action.preferences,
+              state.data.options[tile.id]
+            ),
           };
         } else {
           returningTile = tile;
