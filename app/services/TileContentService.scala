@@ -72,7 +72,7 @@ class TileContentServiceImpl @Inject()(
               }
             )
         }
-        case None => Future((tile.id, Json.obj()))
+        case None => Future.successful((tile.id, Json.obj()))
       }
     }
     Future.sequence(allOptions).map(JsObject.apply)
