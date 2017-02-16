@@ -68,7 +68,10 @@ class TileContentServiceImpl @Inject()(
             .map(res =>
               res.status match {
                 case 200 => (tile.id, res.json)
-                case _ => (tile.id, Json.obj())
+                case 404 => (tile.id, Json.obj())
+                case _ =>
+                  logger.error(s"error requesting preferences for a tile, res: ${res}")
+                  (tile.id, Json.obj())
               }
             )
         }
