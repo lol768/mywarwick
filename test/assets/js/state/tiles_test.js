@@ -5,7 +5,7 @@ describe('tiles', () => {
 
   it('has initial state', () => {
     reducer(undefined, {type: '*'}).data.should.eql({
-      tiles: [], layout: []
+      tiles: [], layout: [], options: {},
     });
   });
 
