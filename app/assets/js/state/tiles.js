@@ -105,7 +105,6 @@ export function persistTiles() {
     );
 
     const layout = getState().tiles.data.layout;
-    const options = getState().tiles.data.options;
 
     return fetch('/api/tiles', {
       credentials: 'same-origin',
@@ -113,7 +112,7 @@ export function persistTiles() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ tiles, layout, options }),
+      body: JSON.stringify({ tiles, layout }),
     });
   };
 }
@@ -129,9 +128,7 @@ export function storeTilePreferences(tile, preferences) {
 export function saveTilePreferences(tile, preferences) {
   return dispatch => {
     dispatch(storeTilePreferences(tile, preferences));
-    // return fetchWithCredentials('url for saving preferences', {method: 'put'})
-    //   .then()
-    //   .catch();
+    return dispatch(persistTiles());
   };
 }
 

@@ -193,9 +193,7 @@ class MeView extends ReactComponent {
     this.onFinishEditing();
   }
 
-  // beginning the configuring
   onConfiguring(tileProps) {
-    // load existing preferences?
     this.setState({
       configuringTile: tileProps,
     });
