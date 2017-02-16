@@ -1,10 +1,28 @@
 import React, { Component, PropTypes } from 'react';
+import _ from 'lodash';
 
 export default class TileOptionView extends Component {
 
   constructor(props) {
     super(props);
+
+    if (props.tile.preferences) {
+      this.state = {
+        currentPreferences: props.tile.preferences,
+      }
+    } else {
+      // set preferences to default preferences from content-provider
+      const defaultPref = {};
+      _.forOwn(props.tile.option, (value, key) => {
+        defaultPref[key] = value.default;
+      });
+      this.state = {
+        currentPreferences: defaultPref,
+      };
+    }
+
     this.saveConfig = this.saveConfig.bind(this);
+    this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
   }
 
   makeFormBody(formId) {
@@ -42,6 +60,8 @@ export default class TileOptionView extends Component {
             id={possibleChoice.value}
             value={possibleChoice.value}
             name={checkboxName}
+            checked={ (this.state.currentPreferences[checkboxName] && this.state.currentPreferences[checkboxName].includes(possibleChoice.value)) ? true : null }
+            onChange={ this.handleCheckboxChange }
           />
           {possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         </label>
@@ -63,6 +83,39 @@ export default class TileOptionView extends Component {
         </label>
       </div>
     );
+  }
+
+  handleCheckboxChange(event) {
+    const target = event.target;
+    const value = target.value;
+    const checked = target.checked;
+    const name = target.name;
+    const currentPref = _.clone(this.state.currentPreferences, true);
+
+    if (checked) {
+      const items = (currentPref[name] || []).concat([value]);
+      this.setState({
+        currentPreferences: {
+          ...currentPref,
+          [name]: items,
+        }
+      });
+    } else {
+      const currentItems = currentPref[name];
+      let items = [];
+      if (currentItems) {
+        items = currentPref[name].filter(e => {
+          return !(e === value);
+        });
+      }
+
+      this.setState({
+        currentPreferences: {
+          ...currentPref,
+          [name]: items,
+        }
+      });
+    }
   }
 
   saveConfig() {
