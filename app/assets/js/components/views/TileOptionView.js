@@ -160,7 +160,7 @@ export default class TileOptionView extends Component {
         aria-labelledby="myModalLabel"
       >
         <div className="tile--config__modal_dialog" role="document">
-          <div className="modal-content">
+          <div className="tile--config__modal_content">
             <div className="modal-header">
               <button
                 type="button"
@@ -181,7 +181,7 @@ export default class TileOptionView extends Component {
             <div className="tile--config__modal_body">
               { this.makeFormBody(`config-${this.props.tile.id}-form`) }
             </div>
-            <div className="modal-footer">
+            <div className="tile--config__modal_footer">
               <button
                 type="button"
                 className="btn btn-default"
