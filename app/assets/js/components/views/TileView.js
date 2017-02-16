@@ -17,7 +17,7 @@ class TileView extends Component {
   }
 
   render() {
-    const { id, zoomed, editing, editingAny, isDesktop, tile, content, size, option } = this.props;
+    const { id, zoomed, editing, editingAny, isDesktop, tile, content, size, option, user } = this.props;
 
     if (tile === undefined) {
       return <div />;
@@ -36,6 +36,7 @@ class TileView extends Component {
       ...tile,
       ...content,
       option,
+      user,
       zoomed,
       size,
       canZoom: content ? tileContentComponent.canZoom(content.content) : false,
@@ -81,11 +82,13 @@ const select = (state, ownProps) => {
   const tile = _(state.tiles.data.tiles).find(t => t.id === id);
   const content = state.tileContent[id];
   const option = state.tiles.data.options[id];
+  const user = state.user.data;
 
   return {
     tile,
     content,
     option,
+    user,
     isDesktop: state.ui.className === 'desktop',
     zoomed: ownProps.params !== undefined,
   };
@@ -105,6 +108,7 @@ TileView.propTypes = {
   editing: PropTypes.bool,
   view: PropTypes.object,
   colour: React.PropTypes.number,
+  user: PropTypes.object.isRequired,
 };
 
 export default connect(select)(TileView);

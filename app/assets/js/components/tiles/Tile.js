@@ -88,7 +88,7 @@ export default class Tile extends React.Component {
   }
 
   displayConfigButton() {
-    if (!_.isEmpty(this.props.option)) {
+    if (!_.isEmpty(this.props.option) && (this.props.user ? this.props.user.authenticated : false)) {
       return (
         <div
           className="tile__edit-control top-right"
@@ -196,4 +196,5 @@ Tile.propTypes = {
   }),
   colour: React.PropTypes.number.isRequired,
   fetchedAt: React.PropTypes.number,
+  user: React.PropTypes.object,
 };
