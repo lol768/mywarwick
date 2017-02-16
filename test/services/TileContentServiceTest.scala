@@ -9,6 +9,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsObject, Json}
+import play.api.libs.ws.WSClient
 import uk.ac.warwick.sso.client.trusted.CurrentApplication
 
 import scala.concurrent.Await
@@ -48,7 +49,8 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
 
   "TileContentService" should {
     val trusted = mock[CurrentApplication]
-    val service = new TileContentServiceImpl(trusted) {
+    val ws = mock[WSClient]
+    val service = new TileContentServiceImpl(trusted, ws) {
       // do nothing - no testing of TrustedApps here
       override def signRequest(trustedApp: CurrentApplication, usercode: String, request: HttpUriRequest): Unit = {}
     }
