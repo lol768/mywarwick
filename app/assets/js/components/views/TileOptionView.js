@@ -6,7 +6,7 @@ export default class TileOptionView extends Component {
   constructor(props) {
     super(props);
 
-    if (props.tile.preferences) {
+    if (props.tile.preferences && _.size(props.tile.preferences) != 0) {
       this.state = {
         currentPreferences: props.tile.preferences,
       }
@@ -23,6 +23,7 @@ export default class TileOptionView extends Component {
 
     this.saveConfig = this.saveConfig.bind(this);
     this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
+    this.handleRadioChange = this.handleRadioChange.bind(this);
   }
 
   makeFormBody(formId) {
@@ -78,11 +79,31 @@ export default class TileOptionView extends Component {
             name={radioName}
             id={possibleChoice.value}
             value={possibleChoice.value}
+            checked={ (this.state.currentPreferences[radioName] && this.state.currentPreferences[radioName] === possibleChoice.value) ? true : null }
+            onChange={ this.handleRadioChange }
           />
           {possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         </label>
       </div>
     );
+  }
+
+  handleRadioChange(event) {
+
+    const target = event.target;
+    const value = target.value;
+    const checked = target.checked;
+    const currentPref = _.clone(this.state.currentPreferences, true);
+    const name = target.name;
+
+    if (checked) {
+      this.setState({
+        currentPreferences: {
+          ...currentPref,
+          [name]: value,
+        }
+      });
+    }
   }
 
   handleCheckboxChange(event) {
