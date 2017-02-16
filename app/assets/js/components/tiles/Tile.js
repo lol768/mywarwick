@@ -94,7 +94,7 @@ export default class Tile extends React.Component {
       return (
         <div
           className="tile__edit-control top-right"
-          title={'Change setting'}
+          title="Change setting"
           onClick={this.props.onConfiguring}
         >
           <i className="fa fa-fw fa-pencil"></i>
