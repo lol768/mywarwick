@@ -14,6 +14,7 @@ import org.apache.http.client.methods._
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.impl.client.HttpClientBuilder
+import play.api.cache._
 import play.api.libs.json.{JsObject, _}
 import play.api.libs.ws.WSClient
 import system.{Logging, ThreadPools}
@@ -42,7 +43,8 @@ trait TileContentService {
 
 class TileContentServiceImpl @Inject()(
   trustedApp: CurrentApplication,
-  ws: WSClient
+  ws: WSClient,
+  cache: CacheApi
 ) extends TileContentService with Logging {
 
   import TileContentService._
