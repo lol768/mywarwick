@@ -101,7 +101,7 @@ export default class Tile extends React.Component {
         </div>
       );
     }
-    return (<div />);
+    return null;
   }
   render() {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;

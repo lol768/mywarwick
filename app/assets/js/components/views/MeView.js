@@ -330,9 +330,7 @@ class MeView extends ReactComponent {
         </div>
       );
     }
-    return (
-      <div />
-    );
+    return null;
   }
 
   render() {
