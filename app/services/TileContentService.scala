@@ -73,7 +73,10 @@ class TileContentServiceImpl @Inject()(
     cachedResult match {
       case Some(result) => Future.successful(result)
       case _ =>
-        val cacheDuration = config.getInt("mywarwick.cacheapi.duration.sec").getOrElse(3600).seconds
+        val cacheDuration = config
+          .getInt("mywarwick.cache.tile-preferences.seconds")
+          .map(_.seconds)
+          .getOrElse(1.hours)
         Future.sequence(tiles.map { tile =>
           tile.fetchUrl match {
             case Some(url) =>
