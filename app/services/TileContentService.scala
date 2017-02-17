@@ -14,6 +14,7 @@ import org.apache.http.client.methods._
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.impl.client.HttpClientBuilder
+import play.api.Configuration
 import play.api.cache._
 import play.api.libs.json.{JsObject, _}
 import play.api.libs.ws.WSClient
@@ -44,7 +45,8 @@ trait TileContentService {
 class TileContentServiceImpl @Inject()(
   trustedApp: CurrentApplication,
   ws: WSClient,
-  cache: CacheApi
+  cache: CacheApi,
+  config: Configuration
 ) extends TileContentService with Logging {
 
   import TileContentService._
@@ -66,14 +68,15 @@ class TileContentServiceImpl @Inject()(
   }
 
   def getCachedTilesOptions(tiles: Seq[Tile]): Future[Seq[(String, JsValue)]] = {
-    val cacheKey: String = "getTilesOptions"
+    val cacheKey = "getTilesOptions"
     val cachedResult: Option[Seq[(String, JsValue)]] = cache.get(cacheKey)
     cachedResult match {
       case Some(result) => Future.successful(result)
-      case _ => {
+      case _ =>
+        val cacheDuration = config.getInt("mywarwick.cacheapi.duration.sec").getOrElse(3600).seconds
         Future.sequence(tiles.map { tile =>
           tile.fetchUrl match {
-            case Some(url) => {
+            case Some(url) =>
               ws.url(s"${url}/preferences.json")
                 .get()
                 .map(res =>
@@ -81,18 +84,16 @@ class TileContentServiceImpl @Inject()(
                     case 200 => (tile.id, res.json)
                     case 404 => (tile.id, Json.obj())
                     case _ =>
-                      logger.error(s"error requesting preferences for a tile, res: ${res}")
+                      logger.error(s"error requesting preferences for a tile, res: $res")
                       (tile.id, Json.obj())
                   }
                 )
-            }
             case None => Future.successful((tile.id, Json.obj()))
           }
         }).map(result => {
-          cache.set(cacheKey, result)
+          cache.set(cacheKey, result, cacheDuration)
           result
         })
-      }
     }
   }
 
