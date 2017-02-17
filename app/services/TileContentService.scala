@@ -26,6 +26,8 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Try
 
+import system.CacheMethods._
+
 object TileContentService {
 
   val connectTimeout = 5.seconds
@@ -61,6 +63,10 @@ class TileContentServiceImpl @Inject()(
     .setDefaultRequestConfig(requestConfig)
     .build()
 
+  val preferenceCacheDuration = config
+    .getInt("mywarwick.cache.tile-preferences.seconds").map(_.seconds)
+    .getOrElse(throw new IllegalStateException("Missing default"))
+
   import ThreadPools.tileData
 
   override def getTilesOptions(tiles: Seq[Tile]): Future[JsValue] = {
@@ -68,36 +74,22 @@ class TileContentServiceImpl @Inject()(
   }
 
   def getCachedTilesOptions(tiles: Seq[Tile]): Future[Seq[(String, JsValue)]] = {
-    val cacheKey = "getTilesOptions"
-    val cachedResult: Option[Seq[(String, JsValue)]] = cache.get(cacheKey)
-    cachedResult match {
-      case Some(result) => Future.successful(result)
-      case _ =>
-        val cacheDuration = config
-          .getInt("mywarwick.cache.tile-preferences.seconds")
-          .map(_.seconds)
-          .getOrElse(1.hours)
-        Future.sequence(tiles.map { tile =>
-          tile.fetchUrl match {
-            case Some(url) =>
-              ws.url(s"${url}/preferences.json")
-                .get()
-                .map(res =>
-                  res.status match {
-                    case 200 => (tile.id, res.json)
-                    case 404 => (tile.id, Json.obj())
-                    case _ =>
-                      logger.error(s"error requesting preferences for a tile, res: $res")
-                      (tile.id, Json.obj())
-                  }
-                )
-            case None => Future.successful((tile.id, Json.obj()))
-          }
-        }).map(result => {
-          cache.set(cacheKey, result, cacheDuration)
-          result
-        })
-    }
+    Future.sequence(tiles.map { tile =>
+      tile.fetchUrl.map { url =>
+        cache.getOrElseFuture(s"tile-preferences-${tile.id}", preferenceCacheDuration) {
+          ws.url(s"$url/preferences.json").get()
+            .map(res =>
+              res.status match {
+                case 200 => (tile.id, res.json)
+                case 404 => (tile.id, Json.obj())
+                case _ =>
+                  logger.error(s"Error requesting preferences for a tile, res: $res")
+                  (tile.id, Json.obj())
+              }
+            )
+        }
+      }.getOrElse(Future.successful((tile.id, Json.obj())))
+    })
   }
 
   // TODO cache
