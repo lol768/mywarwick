@@ -53,7 +53,9 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
     val trusted = mock[CurrentApplication]
     val ws = mock[WSClient]
     val cache = mock[CacheApi]
-    val config = mock[Configuration]
+    val config = Configuration {
+      "mywarwick.cache.tile-preferences.seconds" -> 1
+    }
     val service = new TileContentServiceImpl(trusted, ws, cache, config) {
       // do nothing - no testing of TrustedApps here
       override def signRequest(trustedApp: CurrentApplication, usercode: String, request: HttpUriRequest): Unit = {}
