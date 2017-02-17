@@ -12,6 +12,7 @@ import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
 import * as TILE_TYPES from '../tiles';
+import TileOptionView from './TileOptionView';
 
 import HiddenTile from '../tiles/HiddenTile';
 
@@ -60,6 +61,8 @@ class MeView extends ReactComponent {
     this.onDragStop = this.onDragStop.bind(this);
     this.getDragDelayForItem = this.getDragDelayForItem.bind(this);
     this.onBodyScroll = this.onBodyScroll.bind(this);
+    this.onConfigSave = this.onConfigSave.bind(this);
+    this.onConfigViewDismiss = this.onConfigViewDismiss.bind(this);
   }
 
   componentDidMount() {
@@ -104,9 +107,16 @@ class MeView extends ReactComponent {
   }
 
   onClickOutside(e) {
+    if (this.state.configuringTile) {
+      return;
+    }
+
     if (this.state.editing && $(e.target).parents('.tile--editing').length === 0) {
       // Defer so this click is still considered to be happening in editing mode
-      _.defer(() => this.onFinishEditing());
+      _.defer(() => {
+        this.onFinishEditing();
+        this.onConfigViewDismiss();
+      });
     }
   }
 
@@ -141,6 +151,7 @@ class MeView extends ReactComponent {
       this.previousLayout = _.cloneDeep(layout);
     }
   }
+
 
   renderTile(props) {
     const { id } = props;
@@ -182,6 +193,23 @@ class MeView extends ReactComponent {
     this.onFinishEditing();
   }
 
+  onConfiguring(tileProps) {
+    this.setState({
+      configuringTile: tileProps,
+    });
+  }
+
+  onConfigViewDismiss() {
+    this.setState({
+      configuringTile: null,
+    });
+  }
+
+  onConfigSave(tile, preferences) {
+    this.props.dispatch(tiles.saveTilePreferences(tile, preferences));
+    this.onConfigViewDismiss();
+  }
+
   getTileSize(id) {
     const layout = this.props.layout.filter(i =>
       i.tile === id && i.layoutWidth === this.props.layoutWidth
@@ -213,7 +241,7 @@ class MeView extends ReactComponent {
 
     const hiddenTileComponents = hiddenTiles.map(tile =>
       <div key={ tile.id }>
-        <HiddenTile {...tile} onShow={() => this.onShowTile(tile)} />
+        <HiddenTile {...tile} onShow={ () => this.onShowTile(tile) } />
       </div>
     );
 
@@ -239,9 +267,9 @@ class MeView extends ReactComponent {
   renderTiles() {
     const { layoutWidth, isDesktop } = this.props;
     const visibleTiles = this.props.tiles.filter(t => !t.removed
-      && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
+    && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
     const hiddenTiles = this.props.tiles.filter(t => t.removed
-      && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
+    && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
     const { editing } = this.state;
 
     // Show hidden tiles (if any) when editing, or if there are no visible tiles
@@ -288,6 +316,23 @@ class MeView extends ReactComponent {
     this.props.dispatch(goBack());
   }
 
+  renderTileOptionsView() {
+    if (this.state.configuringTile && this.state.editing) {
+      const configuringTile = this.state.configuringTile;
+      return (
+        <div>
+          <div className="tile-zoom-backdrop" onClick={this.onConfigViewDismiss}></div>
+          <TileOptionView
+            tile={ configuringTile }
+            onConfigViewDismiss= { this.onConfigViewDismiss }
+            onConfigSave = { this.onConfigSave }
+          />
+        </div>
+      );
+    }
+    return null;
+  }
+
   render() {
     const classes = classNames('me-view', { 'me-view--editing': this.state.editing });
     const { isDesktop } = this.props;
@@ -305,6 +350,7 @@ class MeView extends ReactComponent {
           <div className="tile-zoom-backdrop" onClick={ this.onTileDismiss }></div>
           : null}
         {this.renderTiles()}
+        {this.renderTileOptionsView()}
         <ReactCSSTransitionGroup {...transitionProps}>
           { this.props.children }
         </ReactCSSTransitionGroup>

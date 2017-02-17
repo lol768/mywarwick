@@ -17,7 +17,18 @@ class TileView extends Component {
   }
 
   render() {
-    const { id, zoomed, editing, editingAny, isDesktop, tile, content, size } = this.props;
+    const {
+      id,
+      zoomed,
+      editing,
+      editingAny,
+      isDesktop,
+      tile,
+      content,
+      size,
+      option,
+      user,
+    } = this.props;
 
     if (tile === undefined) {
       return <div />;
@@ -35,6 +46,8 @@ class TileView extends Component {
     const tileProps = {
       ...tile,
       ...content,
+      option,
+      user,
       zoomed,
       size,
       canZoom: content ? tileContentComponent.canZoom(content.content) : false,
@@ -53,6 +66,9 @@ class TileView extends Component {
     tileProps.onBeginEditing = () => view.onBeginEditing(tileProps);
     tileProps.onHide = () => view.onHideTile(tileProps);
     tileProps.onResize = () => view.onResizeTile(tileProps);
+
+    // Configuring
+    tileProps.onConfiguring = () => view.onConfiguring(tileProps);
 
     // subset of config needed by TileContent subclasses
     const contentProps = {
@@ -76,10 +92,14 @@ const select = (state, ownProps) => {
 
   const tile = _(state.tiles.data.tiles).find(t => t.id === id);
   const content = state.tileContent[id];
+  const option = state.tiles.data.options[id];
+  const user = state.user.data;
 
   return {
     tile,
     content,
+    option,
+    user,
     isDesktop: state.ui.className === 'desktop',
     zoomed: ownProps.params !== undefined,
   };
@@ -91,12 +111,15 @@ TileView.propTypes = {
   dispatch: PropTypes.func,
   tile: PropTypes.object,
   content: PropTypes.object,
+  option: PropTypes.object,
   isDesktop: PropTypes.bool,
   zoomed: PropTypes.bool,
   size: PropTypes.string,
   editingAny: PropTypes.bool,
   editing: PropTypes.bool,
   view: PropTypes.object,
+  colour: React.PropTypes.number,
+  user: PropTypes.object.isRequired,
 };
 
 export default connect(select)(TileView);

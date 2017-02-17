@@ -87,6 +87,22 @@ export default class Tile extends React.Component {
     return this.props.editing ? false : this.props.canZoom;
   }
 
+  displayConfigButton() {
+    const hasOption = !_.isEmpty(this.props.option);
+    const userLoggedIn = this.props.user ? this.props.user.authenticated : false;
+    if (hasOption && userLoggedIn) {
+      return (
+        <div
+          className="tile__edit-control top-right"
+          title="Change setting"
+          onClick={this.props.onConfiguring}
+        >
+          <i className="fa fa-fw fa-pencil"></i>
+        </div>
+      );
+    }
+    return null;
+  }
   render() {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
@@ -125,6 +141,7 @@ export default class Tile extends React.Component {
               <i className="fa fa-fw fa-minus"> </i>
             </div>
           }
+
           <div
             className="tile__edit-control bottom-right"
             onClick={ this.props.onResize }
@@ -132,6 +149,9 @@ export default class Tile extends React.Component {
           >
             <i className="fa fa-fw fa-arrow-up"> </i>
           </div>
+
+          { this.displayConfigButton() }
+
           <div className="tile__wrap">
             <header className="tile__header">
               <div className="tile__icon tile__icon--left">{this.getIcon()}</div>
@@ -153,6 +173,7 @@ export default class Tile extends React.Component {
 
 Tile.propTypes = {
   children: React.PropTypes.node,
+  onConfiguring: React.PropTypes.func,
   onResize: React.PropTypes.func.isRequired,
   onHide: React.PropTypes.func.isRequired,
   onZoomOut: React.PropTypes.func.isRequired,
@@ -165,6 +186,8 @@ Tile.propTypes = {
   editingAny: React.PropTypes.bool.isRequired,
   zoomed: React.PropTypes.bool.isRequired,
   isDesktop: React.PropTypes.bool.isRequired,
+  option: React.PropTypes.object,
+  id: React.PropTypes.string,
   canZoom: React.PropTypes.bool.isRequired,
   fetching: React.PropTypes.bool,
   errors: React.PropTypes.arrayOf(React.PropTypes.shape({
@@ -175,4 +198,5 @@ Tile.propTypes = {
   }),
   colour: React.PropTypes.number.isRequired,
   fetchedAt: React.PropTypes.number,
+  user: React.PropTypes.object,
 };

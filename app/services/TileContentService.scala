@@ -8,13 +8,16 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.google.common.base.Charsets
 import com.google.common.io.CharStreams
 import com.google.inject.ImplementedBy
-import models.{API, TileInstance}
+import models.{API, Tile, TileInstance}
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods._
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.impl.client.HttpClientBuilder
+import play.api.Configuration
+import play.api.cache._
 import play.api.libs.json.{JsObject, _}
+import play.api.libs.ws.WSClient
 import system.{Logging, ThreadPools}
 import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils}
 import warwick.sso.User
@@ -22,6 +25,8 @@ import warwick.sso.User
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Try
+
+import system.CacheMethods._
 
 object TileContentService {
 
@@ -33,12 +38,17 @@ object TileContentService {
 @ImplementedBy(classOf[TileContentServiceImpl])
 trait TileContentService {
 
+  def getTilesOptions(tiles: Seq[Tile]): Future[JsValue]
+
   def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]]
 
 }
 
 class TileContentServiceImpl @Inject()(
-  trustedApp: CurrentApplication
+  trustedApp: CurrentApplication,
+  ws: WSClient,
+  cache: CacheApi,
+  config: Configuration
 ) extends TileContentService with Logging {
 
   import TileContentService._
@@ -53,7 +63,34 @@ class TileContentServiceImpl @Inject()(
     .setDefaultRequestConfig(requestConfig)
     .build()
 
+  val preferenceCacheDuration = config
+    .getInt("mywarwick.cache.tile-preferences.seconds").map(_.seconds)
+    .getOrElse(throw new IllegalStateException("Missing default"))
+
   import ThreadPools.tileData
+
+  override def getTilesOptions(tiles: Seq[Tile]): Future[JsValue] = {
+    getCachedTilesOptions(tiles).map(JsObject.apply)
+  }
+
+  def getCachedTilesOptions(tiles: Seq[Tile]): Future[Seq[(String, JsValue)]] = {
+    Future.sequence(tiles.map { tile =>
+      tile.fetchUrl.map { url =>
+        cache.getOrElseFuture(s"tile-preferences-${tile.id}", preferenceCacheDuration) {
+          ws.url(s"$url/preferences.json").get()
+            .map(res =>
+              res.status match {
+                case 200 => (tile.id, res.json)
+                case 404 => (tile.id, Json.obj())
+                case _ =>
+                  logger.error(s"Error requesting preferences for a tile, res: $res")
+                  (tile.id, Json.obj())
+              }
+            )
+        }
+      }.getOrElse(Future.successful((tile.id, Json.obj())))
+    })
+  }
 
   // TODO cache
   override def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]] =

@@ -29,6 +29,7 @@ export default class TileContent extends Component {
     return true;
   }
 
+
   static isVisibleOnDesktopOnly() {
     return false;
   }
