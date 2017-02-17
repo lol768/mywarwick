@@ -62,25 +62,38 @@ class TileContentServiceImpl @Inject()(
   import ThreadPools.tileData
 
   override def getTilesOptions(tiles: Seq[Tile]): Future[JsValue] = {
-    val allOptions: Seq[Future[(String, JsValue)]] = tiles.map { tile =>
-      tile.fetchUrl match {
-        case Some(url) => {
-          ws.url(s"${url}/preferences.json")
-            .get()
-            .map(res =>
-              res.status match {
-                case 200 => (tile.id, res.json)
-                case 404 => (tile.id, Json.obj())
-                case _ =>
-                  logger.error(s"error requesting preferences for a tile, res: ${res}")
-                  (tile.id, Json.obj())
-              }
-            )
-        }
-        case None => Future.successful((tile.id, Json.obj()))
+    getCachedTilesOptions(tiles).map(JsObject.apply)
+  }
+
+  def getCachedTilesOptions(tiles: Seq[Tile]): Future[Seq[(String, JsValue)]] = {
+    val cacheKey: String = "getTilesOptions"
+    val cachedResult: Option[Seq[(String, JsValue)]] = cache.get(cacheKey)
+    cachedResult match {
+      case Some(result) => Future.successful(result)
+      case _ => {
+        Future.sequence(tiles.map { tile =>
+          tile.fetchUrl match {
+            case Some(url) => {
+              ws.url(s"${url}/preferences.json")
+                .get()
+                .map(res =>
+                  res.status match {
+                    case 200 => (tile.id, res.json)
+                    case 404 => (tile.id, Json.obj())
+                    case _ =>
+                      logger.error(s"error requesting preferences for a tile, res: ${res}")
+                      (tile.id, Json.obj())
+                  }
+                )
+            }
+            case None => Future.successful((tile.id, Json.obj()))
+          }
+        }).map(result => {
+          cache.set(cacheKey, result)
+          result
+        })
       }
     }
-    Future.sequence(allOptions).map(JsObject.apply)
   }
 
   // TODO cache
