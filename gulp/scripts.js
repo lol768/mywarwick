@@ -142,10 +142,15 @@ gulp.task('lint', () => {
 
 function generateServiceWorker(watch) {
   const swPrecache = require('sw-precache');
+  // Things that should cause fresh HTML to be downloaded
   const htmlDependencies = [
     'target/gulp/css/main.css',
     'target/gulp/js/bundle.js',
     'app/assets/js/push-worker.js',
+    'app/views/index.scala.html',
+    'app/views/common/head.scala.html',
+    'app/views/common/htmlelement.scala.html',
+    'app/views/common/id7layout.scala.html',
   ];
 
   console.log('htmlDependencies:', htmlDependencies);

@@ -239,6 +239,12 @@ setInterval(() => store.dispatch(tiles.fetchTileContent()), 5 * 60 * 1000);
 // Just for access from the console
 window.Store = store;
 
+$(() => {
+  // this element contains a fallback error - once we're fairly
+  // sure that this script isn't completely broken, we can hide it.
+  document.getElementById('error-fallback').style.display = 'none';
+});
+
 // Actually render the app
 ReactDOM.render(
   <AppRoot history={history} />,
