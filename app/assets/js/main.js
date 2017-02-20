@@ -31,8 +31,9 @@ import * as analytics from './analytics';
 import store from './store';
 import AppRoot from './components/AppRoot';
 import bridge from './bridge';
+import { hasAuthoritativeUser, hasAuthoritativeAuthenticatedUser } from './state';
 
-bridge({ store, tiles });
+bridge({ store, tiles, notifications });
 
 log.enableAll(false);
 es6Promise.polyfill();
@@ -40,16 +41,6 @@ es6Promise.polyfill();
 localforage.config({
   name: 'Start',
 });
-
-function hasAuthoritativeUser() {
-  const u = store.getState().user;
-
-  return u && u.authoritative === true;
-}
-
-function hasAuthoritativeAuthenticatedUser() {
-  return hasAuthoritativeUser() && store.getState().user.data.authenticated === true;
-}
 
 const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
@@ -64,7 +55,7 @@ $(() => {
   $(window).on('online', () => {
     store.dispatch(tiles.fetchTileContent());
 
-    if (hasAuthoritativeAuthenticatedUser()) {
+    if (hasAuthoritativeAuthenticatedUser(store.getState())) {
       store.dispatch(notifications.fetch());
     }
   });
@@ -132,12 +123,6 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-SocketDatapipe.onopen = () => {
-  if (hasAuthoritativeAuthenticatedUser()) {
-    store.dispatch(notifications.fetch());
-  }
-};
-
 SocketDatapipe.subscribe(data => {
   switch (data.type) {
     case 'activity':
@@ -179,13 +164,13 @@ const persistedUserLinks = persisted('user.links', user.receiveSSOLinks);
 const loadDataFromServer = _.once(() => {
   store.dispatch(tiles.fetchTiles());
 
-  if (hasAuthoritativeAuthenticatedUser()) {
+  if (hasAuthoritativeAuthenticatedUser(store.getState())) {
     store.dispatch(notifications.fetch());
   }
 });
 
 const unsubscribe = store.subscribe(() => {
-  if (hasAuthoritativeUser()) {
+  if (hasAuthoritativeUser(store.getState())) {
     loadDataFromServer();
     unsubscribe();
   }
