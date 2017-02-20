@@ -99,7 +99,9 @@ export default function init(opts) {
       },
 
       onApplicationDidBecomeActive() {
-        store.dispatch(tiles.fetchTiles());
+        if (navigator.onLine) {
+          store.dispatch(tiles.fetchTileContent());
+        }
         store.dispatch(displayUpdateProgress);
       },
 

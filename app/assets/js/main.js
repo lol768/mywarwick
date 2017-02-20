@@ -62,6 +62,8 @@ $(() => {
   $(window).on('deviceorientation resize', () => store.dispatch(device.updateDeviceWidth()));
 
   $(window).on('online', () => {
+    store.dispatch(tiles.fetchTileContent());
+
     if (hasAuthoritativeAuthenticatedUser()) {
       store.dispatch(notifications.fetch());
     }
@@ -234,7 +236,11 @@ fetchUserInfo().then(res =>
 );
 
 // Refresh all tile content every five minutes
-setInterval(() => store.dispatch(tiles.fetchTileContent()), 5 * 60 * 1000);
+setInterval(() => {
+  if (navigator.onLine) {
+    store.dispatch(tiles.fetchTileContent());
+  }
+}, 5 * 60 * 1000);
 
 // Just for access from the console
 window.Store = store;
