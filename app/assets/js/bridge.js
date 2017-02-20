@@ -63,6 +63,11 @@ export default function init(opts) {
         setAppCached();
       }
     }
+
+    // When this gets called, the app knows that MyWarwick var is available.
+    if (native.ready) {
+      native.ready();
+    }
   }
 
   function maybeInit() {
