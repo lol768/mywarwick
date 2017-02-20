@@ -11,13 +11,14 @@ import { push } from 'react-router-redux';
 import { displayUpdateProgress } from './state/update';
 import { postJsonWithCredentials } from './serverpipe';
 import { createSelector } from 'reselect';
+import { hasAuthoritativeAuthenticatedUser } from './state';
 
 /**
  * Factory method for bridge so you can create an instance
  * with different dependencies.
  */
 export default function init(opts) {
-  const { store, tiles } = opts;
+  const { store, tiles, notifications } = opts;
 
   function doInit(native) {
     const nativeSelectors = [
@@ -104,7 +105,13 @@ export default function init(opts) {
       },
 
       onApplicationDidBecomeActive() {
-        store.dispatch(tiles.fetchTiles());
+        if (navigator.onLine) {
+          store.dispatch(tiles.fetchTileContent());
+
+          if (hasAuthoritativeAuthenticatedUser(store.getState())) {
+            store.dispatch(notifications.fetch());
+          }
+        }
         store.dispatch(displayUpdateProgress);
       },
 
