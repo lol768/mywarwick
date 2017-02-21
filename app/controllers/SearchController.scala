@@ -1,11 +1,10 @@
 package controllers
 
 import com.google.inject.{Inject, Singleton}
-import org.apache.http.Header
 import org.apache.http.client.methods.HttpGet
 import play.api.Configuration
 import play.api.libs.ws.{InMemoryBody, WSClient}
-import play.api.mvc.{Action, RawBuffer, Result}
+import play.api.mvc.{Action, RawBuffer}
 import services.SecurityService
 import system.ThreadPools.externalData
 import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplicationsManager}

@@ -50,7 +50,7 @@
     "mold-source-map": "~0.4.0",
     "node-libs-browser": "~1.0.0",
     "node-notifier": "~4.5.0",
-    "react-addons-test-utils": "~15.0.1",
+    "react-addons-test-utils": "^15.0.0",
     "sinon": "~1.17.3",
     "sinon-chai": "~2.8.0",
     "sw-precache": "UniversityofWarwick/sw-precache#3.1.0-warwick",
@@ -78,10 +78,10 @@
     "moment": "~2.12.0",
     "moment-timezone": "^0.4.0",
     "qs": "^6.2.1",
-    "react": "~15.0.1",
-    "react-addons-update": "~15.0.1",
+    "react": "^15.0.0",
+    "react-addons-update": "^15.0.0",
     "react-bootstrap-multiselect": "^2.0.0",
-    "react-dom": "~15.0.1",
+    "react-dom": "^15.0.0",
     "react-grid-layout": "git+ssh://git@repo.elab.warwick.ac.uk/~acursley/react-grid-layout.git#4fe2c70",
     "react-redux": "~4.4.5",
     "react-router": "~2.2.2",
@@ -91,7 +91,7 @@
     "redux-thunk": "~2.0.1",
     "reselect": "~2.3.0",
     "skycons": "~1.0.0",
-    "warwick-search-frontend": "git+ssh://git@repo.elab.warwick.ac.uk/sch/omni.git#a56ecd1"
+    "warwick-search-frontend": "git+ssh://git@repo.elab.warwick.ac.uk/sch/omni.git#1dac44ecdc3"
   },
   "scripts": {
     "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha --compilers js:babel-register -r TestHelper --recursive test/assets/js",
