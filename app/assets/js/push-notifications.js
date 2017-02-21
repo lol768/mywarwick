@@ -16,8 +16,14 @@ function uploadSubscription(subscription) {
 
 // Once the service worker is registered set the initial state
 export function init() {
+  // Check if push messaging is supported
+  if (!('PushManager' in window)) {
+    log.warn('Push messaging isn\'t supported.');
+    return;
+  }
+
   // Are Notifications supported?
-  if (!('Notification' in window || 'showNotification' in ServiceWorkerRegistration.prototype)) {
+  if (!('Notification' in window && 'showNotification' in ServiceWorkerRegistration.prototype)) {
     log.warn('Notifications aren\'t supported.');
     return;
   }
@@ -25,12 +31,6 @@ export function init() {
   // If the user has disabled notifications
   if (Notification.permission === 'denied') {
     log.warn('The user has disabled notifications.');
-    return;
-  }
-
-  // Check if push messaging is supported
-  if (!('PushManager' in window)) {
-    log.warn('Push messaging isn\'t supported.');
     return;
   }
 
