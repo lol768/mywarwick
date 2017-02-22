@@ -128,6 +128,7 @@ export function storeTilePreferences(tile, preferences) {
 export function saveTilePreferences(tile, preferences) {
   return dispatch => {
     dispatch(storeTilePreferences(tile, preferences));
+    dispatch(fetchTiles());
     return dispatch(persistTiles());
   };
 }
