@@ -148,13 +148,28 @@ const thawDate = (d) => (!!d ? moment(d) : d);
 
 const persisted = persistedLib({ store, localforage });
 
+const filterTileData = (d) => ({
+  layout: d.layout,
+  options: d.options,
+  tiles: d.tiles.map(t => ({
+    id: t.id,
+    colour: t.colour,
+    icon: t.icon,
+    preferences: t.preferences,
+    title: t.title,
+    type: t.type,
+    removed: t.removed,
+    needsFetch: t.needsFetch,
+  })),
+});
+
 persisted('notificationsLastRead.date', notificationMetadata.loadedNotificationsLastRead,
   freezeDate, thawDate);
 
 persisted('activities', notifications.fetchedActivities, freezeStream);
 persisted('notifications', notifications.fetchedNotifications, freezeStream);
 
-persisted('tiles.data', tiles.fetchedTiles);
+persisted('tiles.data', tiles.fetchedTiles, filterTileData);
 persisted('tileContent', tiles.loadedAllTileContent);
 
 const persistedUserLinks = persisted('user.links', user.receiveSSOLinks);
