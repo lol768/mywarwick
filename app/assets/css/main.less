@@ -7,6 +7,7 @@
 @fa-font-path: '../lib/id7/fonts';
 
 @import 'variables';
+@import 'fatal-error';
 @import 'id7-tweaks';
 @import 'activity-item';
 @import 'app-icon';
@@ -25,6 +26,7 @@
 @import 'tiles/tile-elements';
 @import 'tiles/tile-modifiers';
 @import 'tiles/edit-controls';
+@import 'tiles/tile-config';
 @import 'tiles/lists';
 @import 'tiles/overrides';
 @import 'search';
@@ -36,4 +38,52 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+
+  -webkit-overflow-scrolling: auto;
+}
+
+.id7-main-content-area {
+  position: relative;
+}
+
+body :not(iframe)::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+  cursor: pointer;
+}
+body :not(iframe)::-webkit-scrollbar-button:vertical:start:decrement {
+  display: none;
+}
+body :not(iframe)::-webkit-scrollbar-button:vertical:end:increment {
+  display: none;
+}
+body :not(iframe)::-webkit-scrollbar-button:horizontal:start:decrement {
+  display: none;
+}
+body :not(iframe)::-webkit-scrollbar-button:horizontal:end:increment {
+  display: none;
+}
+body :not(iframe)::-webkit-scrollbar-track-piece {
+  background-color: rgba(255, 255, 255, .2);
+}
+body :not(iframe)::-webkit-scrollbar-thumb {
+  -webkit-transition: background-color 0.2s linear 0s;
+  /* Saf3.1+, Chrome */
+  -moz-transition: background-color 0.2s linear 0s;
+  /* FF4 */
+  -ms-transition: background-color 0.2s linear 0s;
+  /* IE10 */
+  -o-transition: background-color 0.2s linear 0s;
+  /* Opera 10.5x */
+  transition: background-color 0.2s linear 0s;
+  background-color: rgba(255, 255, 255, .2);
+}
+body :not(iframe)::-webkit-scrollbar-thumb:vertical {
+  height: 0;
+}
+body :not(iframe)::-webkit-scrollbar-thumb:horizontal {
+  width: 0;
+}
+body :not(iframe)::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, .4);
 }

@@ -1,5 +1,12 @@
-.tile-list-group {
-  margin-bottom: 6px;
+.list-group-item--header {
+  background-color: @behind-tiles-colour;
+}
+
+.tile .list-group-item--header {
+  background-color: transparent;
+  border: 0;
+  padding-left: 0;
+  font-weight: bold;
 }
 
 .tile-list-item {
@@ -13,32 +20,37 @@
   border-bottom: 1px solid rgba(255, 255, 255, .3);
 }
 
-.tile-list-item{
-  &__title, &__location {
-    max-width: 95%;
-    max-width: calc(100% - @tile-gutter);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-block;
-  }
+.tile-list-group {
+  margin-bottom: 6px;
 
-  &__date {
-    float: right;
-    
-    &--left {
-      margin-right: 8px;
-      margin-left: 4px;
+  .list-group-item {
+    &__title, &__location {
+      max-width: 95%;
+      max-width: calc(100% - @tile-gutter);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-block;
     }
-  }
-  
-  &__text {
-    display: block;
-  }
 
-  &--header {
-    padding-left: 0;
-    padding-right: 0;
-    font-weight: bold;
+    &__date {
+      float: right;
+
+      &--left {
+        margin-right: 8px;
+        margin-left: 4px;
+      }
+    }
+
+    &__text {
+      display: block;
+    }
+
+    &--header {
+      padding: 3px;
+      border: 0;
+      font-weight: bold;
+      background-color: transparent;
+    }
   }
 }

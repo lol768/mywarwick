@@ -1,5 +1,6 @@
 package helpers
 
+import org.databrary.PlayLogbackAccessModule
 import play.api.db.evolutions.{ClassLoaderEvolutionsReader, EvolutionsReader}
 import play.api.inject._
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -9,6 +10,7 @@ import play.api.{Configuration, Environment}
 import services.messaging.MobileOutputService
 import services.{CookieSSOClient, NullMobileOutputService, SchedulerService}
 import system.{DatabaseDialect, H2DatabaseDialect}
+import warwick.accesslog.LogbackAccessModule
 import warwick.sso._
 
 
@@ -32,6 +34,8 @@ object TestApplications {
     GuiceApplicationBuilder(loadConfiguration = e => config("minimal.conf", e))
       .in(Environment.simple())
       .router(SimpleRouter(PartialFunction.empty))
+      .disable[PlayLogbackAccessModule]
+      .disable[LogbackAccessModule]
       .build()
 
   /**
@@ -46,6 +50,7 @@ object TestApplications {
       .bindings(
         bind[LoginContext].toInstance(new MockLoginContext(user))
       )
+      .disable[PlayLogbackAccessModule]
       .overrides(
         bind[SSOClient].to[MockSSOClient],
         bind[DatabaseDialect].to[H2DatabaseDialect],
@@ -60,6 +65,7 @@ object TestApplications {
     GuiceApplicationBuilder(loadConfiguration = functionalConfig)
       .in(Environment.simple())
       .configure(inMemoryDatabase("default", Map("MODE" -> "Oracle")))
+      .disable[PlayLogbackAccessModule]
       .overrides(
         bind[SSOClient].to[CookieSSOClient],
         bind[DatabaseDialect].to[H2DatabaseDialect],

@@ -7,9 +7,7 @@ import scala.concurrent.duration.Duration
 import scala.reflect.ClassTag
 import scala.util.Success
 
-/**
-  *
-  */
+
 object CacheMethods {
 
   implicit class FutureCache(val c: CacheApi) extends AnyVal {

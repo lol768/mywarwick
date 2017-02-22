@@ -8,8 +8,14 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.PlaySpec
+import play.api.Configuration
+import play.api.cache._
 import play.api.libs.json.{JsObject, Json}
+import play.api.libs.ws.WSClient
 import uk.ac.warwick.sso.client.trusted.CurrentApplication
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSugar {
 
@@ -30,7 +36,7 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
     case ("POST", "/content/printcredits") => Response.json(Json.toJson(response))
   }
 
-  def userPrinterTile(url: String) = TileInstance(
+  def userPrinterTile(url: Option[String]) = TileInstance(
     tile = Tile(
       id = "printcredits",
       tileType = "count",
@@ -45,7 +51,12 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
 
   "TileContentService" should {
     val trusted = mock[CurrentApplication]
-    val service = new TileContentServiceImpl(trusted) {
+    val ws = mock[WSClient]
+    val cache = mock[CacheApi]
+    val config = Configuration {
+      "mywarwick.cache.tile-preferences.seconds" -> 1
+    }
+    val service = new TileContentServiceImpl(trusted, ws, cache, config) {
       // do nothing - no testing of TrustedApps here
       override def signRequest(trustedApp: CurrentApplication, usercode: String, request: HttpUriRequest): Unit = {}
     }
@@ -53,9 +64,15 @@ class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSuga
 
     "fetch a Tile's URL" in {
       ExternalServers.runServer(handler) { port =>
-        val ut = userPrinterTile(s"http://localhost:${port}/content/printcredits")
+        val ut = userPrinterTile(Some(s"http://localhost:${port}/content/printcredits"))
         service.getTileContent(Some(user), ut).futureValue must be(response)
       }
+    }
+
+    "return a failed Future if the tile does not have a fetch URL" in {
+      val content = service.getTileContent(Some(user), userPrinterTile(None))
+
+      content.failed.futureValue mustBe an[IllegalArgumentException]
     }
   }
 

@@ -9,11 +9,11 @@ try {
 }
 
 const isDesktop = () => mq('only all and (min-width: 768px)');
-const isFourColumnLayout = () => mq('only all and (min-width: 992px)');
+const isWideLayout = () => mq('only all and (min-width: 992px)');
 
 const initialState = {
   className: undefined,
-  isFourColumnLayout: false,
+  isWideLayout: false,
   colourTheme: 'default',
 };
 
@@ -22,7 +22,7 @@ export function reducer(state = initialState, action) {
     case 'ui.class':
       return { ...state, className: action.className };
     case 'ui.layout':
-      return { ...state, isFourColumnLayout: action.isFourColumnLayout };
+      return { ...state, isWideLayout: action.isWideLayout };
     case 'ui.theme':
       return { ...state, colourTheme: action.theme };
     default:
@@ -47,10 +47,10 @@ export function updateUIContext() {
       });
     }
 
-    if (isFourColumnLayout() !== getState().ui.isFourColumnLayout) {
+    if (isWideLayout() !== getState().ui.isWideLayout) {
       dispatch({
         type: 'ui.layout',
-        isFourColumnLayout: isFourColumnLayout(),
+        isWideLayout: isWideLayout(),
       });
     }
   };

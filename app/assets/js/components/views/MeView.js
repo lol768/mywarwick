@@ -1,17 +1,18 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import ReactGridLayoutBase, { WidthProvider } from 'react-grid-layout';
-
 import _ from 'lodash';
 import $ from 'jquery.transit';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 import { goBack } from 'react-router-redux';
-
 import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
+import * as TILE_TYPES from '../tiles';
+import TileOptionView from './TileOptionView';
 
 import HiddenTile from '../tiles/HiddenTile';
 
@@ -24,6 +25,7 @@ function getSizeFromSizeName(name) {
     [TILE_SIZES.SMALL]: { width: 1, height: 1 },
     [TILE_SIZES.WIDE]: { width: 2, height: 1 },
     [TILE_SIZES.LARGE]: { width: 2, height: 2 },
+    [TILE_SIZES.TALL]: { width: 2, height: 4 },
   };
 
   return sizes[name];
@@ -40,6 +42,10 @@ function getSizeNameFromSize(size) {
     return TILE_SIZES.WIDE;
   }
 
+  if (width === 2 && height === 4) {
+    return TILE_SIZES.TALL;
+  }
+
   return TILE_SIZES.LARGE;
 }
 
@@ -48,11 +54,36 @@ class MeView extends ReactComponent {
   constructor(props) {
     super(props);
     this.state = {};
-    this.onBodyClick = this.onBodyClick.bind(this);
+    this.onClickOutside = this.onClickOutside.bind(this);
     this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
+    this.onDragStop = this.onDragStop.bind(this);
     this.getDragDelayForItem = this.getDragDelayForItem.bind(this);
+    this.onBodyScroll = this.onBodyScroll.bind(this);
+    this.onConfigSave = this.onConfigSave.bind(this);
+    this.onConfigViewDismiss = this.onConfigViewDismiss.bind(this);
+  }
+
+  componentDidMount() {
+    $('.id7-main-content-area').on('touchstart', this.onBodyScroll);
+  }
+
+  componentWillUnmount() {
+    $('.id7-main-content-area').off('touchstart', this.onBodyScroll);
+  }
+
+  onBodyScroll(e) {
+    // This event handler fixes an issue on iOS where initiating a scroll
+    // into the overflow does not appear to do rubber banding, but scrolling
+    // the view becomes disabled until the rubber banding effect would have completed.
+    const target = e.currentTarget;
+
+    if (target.scrollTop === 0) {
+      target.scrollTop = 1;
+    } else if (target.scrollHeight === target.scrollTop + target.offsetHeight) {
+      target.scrollTop -= 1;
+    }
   }
 
   onBeginEditing(tile) {
@@ -60,7 +91,7 @@ class MeView extends ReactComponent {
       editing: tile.id,
     });
 
-    $('body').on('click', this.onBodyClick);
+    $(ReactDOM.findDOMNode(this)).on('click', this.onClickOutside);
   }
 
   onFinishEditing() {
@@ -70,20 +101,36 @@ class MeView extends ReactComponent {
       });
     }
 
-    $('body').off('click', this.onBodyClick);
+    $(ReactDOM.findDOMNode(this)).off('click', this.onClickOutside);
 
     this.props.dispatch(tiles.persistTiles());
   }
 
-  onBodyClick(e) {
+  onClickOutside(e) {
+    if (this.state.configuringTile) {
+      return;
+    }
+
     if (this.state.editing && $(e.target).parents('.tile--editing').length === 0) {
       // Defer so this click is still considered to be happening in editing mode
-      _.defer(() => this.onFinishEditing());
+      _.defer(() => {
+        this.onFinishEditing();
+        this.onConfigViewDismiss();
+      });
     }
   }
 
   onDragStart(layout, item) {
+    // Disable rubber banding so the users' finger and the tile they are dragging
+    // don't get out of sync.  (iOS)
+    $('.id7-main-content-area').css('-webkit-overflow-scrolling', 'auto');
+
     this.onBeginEditing({ id: item.i });
+  }
+
+  onDragStop() {
+    // Re-enable rubber banding when not dragging, because it's nicer.  (iOS)
+    $('.id7-main-content-area').css('-webkit-overflow-scrolling', 'touch');
   }
 
   getTileLayout(layout) {
@@ -105,6 +152,7 @@ class MeView extends ReactComponent {
     }
   }
 
+
   renderTile(props) {
     const { id } = props;
 
@@ -117,6 +165,7 @@ class MeView extends ReactComponent {
         editing={this.state.editing === id}
         editingAny={!!this.state.editing}
         size={this.getTileSize(id)}
+        layoutWidth={this.props.layoutWidth}
       />
     );
   }
@@ -144,6 +193,23 @@ class MeView extends ReactComponent {
     this.onFinishEditing();
   }
 
+  onConfiguring(tileProps) {
+    this.setState({
+      configuringTile: tileProps,
+    });
+  }
+
+  onConfigViewDismiss() {
+    this.setState({
+      configuringTile: null,
+    });
+  }
+
+  onConfigSave(tile, preferences) {
+    this.props.dispatch(tiles.saveTilePreferences(tile, preferences));
+    this.onConfigViewDismiss();
+  }
+
   getTileSize(id) {
     const layout = this.props.layout.filter(i =>
       i.tile === id && i.layoutWidth === this.props.layoutWidth
@@ -157,12 +223,12 @@ class MeView extends ReactComponent {
   }
 
   getDragDelayForItem(item) {
-    return this.state.editing === item.i ? 0 : 200;
+    return this.state.editing === item.i ? 0 : 400;
   }
 
   renderHiddenTiles() {
     const { layoutWidth } = this.props;
-    const hiddenTiles = _.sortBy(this.props.hiddenTiles, 'title');
+    const hiddenTiles = _.sortBy(this.props.tiles.filter(t => t.removed), 'title');
 
     const layout = hiddenTiles
       .map((item, i) => ({
@@ -175,7 +241,7 @@ class MeView extends ReactComponent {
 
     const hiddenTileComponents = hiddenTiles.map(tile =>
       <div key={ tile.id }>
-        <HiddenTile {...tile} onShow={() => this.onShowTile(tile)} />
+        <HiddenTile {...tile} onShow={ () => this.onShowTile(tile) } />
       </div>
     );
 
@@ -199,8 +265,11 @@ class MeView extends ReactComponent {
   }
 
   renderTiles() {
-    const { hiddenTiles, layoutWidth } = this.props;
-    const visibleTiles = this.props.tiles;
+    const { layoutWidth, isDesktop } = this.props;
+    const visibleTiles = this.props.tiles.filter(t => !t.removed
+    && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
+    const hiddenTiles = this.props.tiles.filter(t => t.removed
+    && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
     const { editing } = this.state;
 
     // Show hidden tiles (if any) when editing, or if there are no visible tiles
@@ -232,6 +301,7 @@ class MeView extends ReactComponent {
             verticalCompact
             draggableCancel=".tile__edit-control, .toggle-tooltip"
             onDragStart={this.onDragStart}
+            onDragStop={this.onDragStop}
             getDragDelayForItem={this.getDragDelayForItem}
           >
             { tileComponents }
@@ -244,6 +314,23 @@ class MeView extends ReactComponent {
 
   onTileDismiss() {
     this.props.dispatch(goBack());
+  }
+
+  renderTileOptionsView() {
+    if (this.state.configuringTile && this.state.editing) {
+      const configuringTile = this.state.configuringTile;
+      return (
+        <div>
+          <div className="tile-zoom-backdrop" onClick={this.onConfigViewDismiss}></div>
+          <TileOptionView
+            tile={ configuringTile }
+            onConfigViewDismiss= { this.onConfigViewDismiss }
+            onConfigSave = { this.onConfigSave }
+          />
+        </div>
+      );
+    }
+    return null;
   }
 
   render() {
@@ -263,6 +350,7 @@ class MeView extends ReactComponent {
           <div className="tile-zoom-backdrop" onClick={ this.onTileDismiss }></div>
           : null}
         {this.renderTiles()}
+        {this.renderTileOptionsView()}
         <ReactCSSTransitionGroup {...transitionProps}>
           { this.props.children }
         </ReactCSSTransitionGroup>
@@ -271,18 +359,11 @@ class MeView extends ReactComponent {
   }
 }
 
-const select = (state) => {
-  const items = state.tiles.data.tiles;
-
-  return {
-    isDesktop: state.ui.className === 'desktop',
-    layoutWidth: state.ui.isFourColumnLayout === true ? 4 : 2,
-    // FIXME filtering state here returns a new thing each time, throwing off hasChanged checks.
-    // Instead select all the tiles together, and do this filtering at render time
-    tiles: items.filter(tile => !tile.removed),
-    hiddenTiles: items.filter(tile => tile.removed),
-    layout: state.tiles.data.layout,
-  };
-};
+const select = (state) => ({
+  isDesktop: state.ui.className === 'desktop',
+  layoutWidth: state.ui.isWideLayout === true ? 5 : 2,
+  tiles: state.tiles.data.tiles,
+  layout: state.tiles.data.layout,
+});
 
 export default connect(select)(MeView);

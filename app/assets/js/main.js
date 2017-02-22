@@ -31,8 +31,9 @@ import * as analytics from './analytics';
 import store from './store';
 import AppRoot from './components/AppRoot';
 import bridge from './bridge';
+import { hasAuthoritativeUser, hasAuthoritativeAuthenticatedUser } from './state';
 
-bridge({ store, tiles });
+bridge({ store, tiles, notifications });
 
 log.enableAll(false);
 es6Promise.polyfill();
@@ -40,12 +41,6 @@ es6Promise.polyfill();
 localforage.config({
   name: 'Start',
 });
-
-function hasAuthoritativeUser() {
-  const u = store.getState().user;
-
-  return u && u.authoritative === true;
-}
 
 const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
@@ -58,7 +53,9 @@ $(() => {
   $(window).on('deviceorientation resize', () => store.dispatch(device.updateDeviceWidth()));
 
   $(window).on('online', () => {
-    if (hasAuthoritativeUser()) {
+    store.dispatch(tiles.fetchTileContent());
+
+    if (hasAuthoritativeAuthenticatedUser(store.getState())) {
       store.dispatch(notifications.fetch());
     }
   });
@@ -69,20 +66,31 @@ $(() => {
 
   $(document).tooltip({
     selector: '.toggle-tooltip',
-    container: 'body',
+    container: '.id7-main-content-area',
     trigger: 'click',
+  });
+
+  function closeTooltips() {
+    $('.tooltip-active').tooltip('hide').removeClass('tooltip-active');
+  }
+
+  // Prevent the body element from scrolling on touch.
+  $(document.body).on('touchmove', (e) => e.preventDefault());
+  $(document.body).on('touchmove', '.id7-main-content-area', (e) => {
+    e.stopPropagation();
+    closeTooltips();
   });
 
   $(document).on('click', (e) => {
     if ($(e.target).data('toggle') === 'tooltip') {
       if (!$(e.target).hasClass('tooltip-active')) {
         // hide active tooltips after clicking on a non-active tooltip
-        $('.tooltip-active').tooltip('hide').toggleClass('tooltip-active');
+        closeTooltips();
         $(e.target).toggleClass('tooltip-active').tooltip('toggle');
       }
     } else {
       // click elsewhere on body, dismiss all open tooltips
-      $('.toggle-tooltip').tooltip('hide').removeClass('tooltip-active');
+      closeTooltips();
     }
   });
 });
@@ -114,12 +122,6 @@ if ('serviceWorker' in navigator) {
       };
     });
 }
-
-SocketDatapipe.onopen = () => {
-  if (hasAuthoritativeUser()) {
-    store.dispatch(notifications.fetch());
-  }
-};
 
 SocketDatapipe.subscribe(data => {
   switch (data.type) {
@@ -159,17 +161,17 @@ const persistedUserLinks = persisted('user.links', user.receiveSSOLinks);
 
 /** Initial requests for data */
 
-const loadPersonalisedDataFromServer = _.once(() => {
-  store.dispatch(notifications.fetch());
+const loadDataFromServer = _.once(() => {
   store.dispatch(tiles.fetchTiles());
 
-  // Refresh all tile content every five minutes
-  setInterval(() => store.dispatch(tiles.fetchTileContent()), 5 * 60 * 1000);
+  if (hasAuthoritativeAuthenticatedUser(store.getState())) {
+    store.dispatch(notifications.fetch());
+  }
 });
 
 const unsubscribe = store.subscribe(() => {
-  if (hasAuthoritativeUser()) {
-    loadPersonalisedDataFromServer();
+  if (hasAuthoritativeUser(store.getState())) {
+    loadDataFromServer();
     unsubscribe();
   }
 });
@@ -218,8 +220,21 @@ fetchUserInfo().then(res =>
   )
 );
 
+// Refresh all tile content every five minutes
+setInterval(() => {
+  if (navigator.onLine) {
+    store.dispatch(tiles.fetchTileContent());
+  }
+}, 5 * 60 * 1000);
+
 // Just for access from the console
 window.Store = store;
+
+$(() => {
+  // this element contains a fallback error - once we're fairly
+  // sure that this script isn't completely broken, we can hide it.
+  document.getElementById('error-fallback').style.display = 'none';
+});
 
 // Actually render the app
 ReactDOM.render(

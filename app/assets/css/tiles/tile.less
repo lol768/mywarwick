@@ -14,11 +14,11 @@
 .tile--hidden {
   .tile__body {
     text-align: center;
+    overflow: hidden;
   }
 }
 
 .tile--hidden__icon {
-  margin-top: @tile-height / 5;
   font-size: @tile-height / 3;
   margin-bottom: @tile-height / 10;
 }
@@ -40,13 +40,13 @@
     margin-top: 0;
   }
   @media screen and (min-width: @screen-lg-min) {
-    .me-view-width(@container-lg, 9);
+    .me-view-width(@container-lg, 12);
   }
   @media screen and (min-width: @screen-md-min) and (max-width: @screen-md-max) {
-    .me-view-width(@container-md, 8);
+    .me-view-width(@container-md, 12);
   }
   @media screen and (min-width: @screen-sm-min) and (max-width: @screen-sm-max) {
-    .me-view-width(@container-sm, 8);
+    .me-view-width(@container-sm, 12);
   }
 }
 

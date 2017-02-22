@@ -14,7 +14,8 @@ private[helpers] object UserFixtures {
       Seq(Usercode("a")),
       "Arbitrary",
       Department(None, Some("Information Technology Services"), Some("in")),
-      DateTime.now()
+      DateTime.now(),
+      restricted = false
     )
 
   def makeFoundUser(usercode: String = "user"): User =

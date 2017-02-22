@@ -31,14 +31,21 @@ class TilesController @Inject()(
 
   import securityService._
 
-  def getLayout = UserAction { request =>
-    val tiles = tileService.getTilesForUser(request.context.user)
-    val layout = tileService.getTileLayoutForUser(request.context.user)
+  def getLayout = UserAction.async { request =>
+    val user = request.context.user
+    val tiles = tileService.getTilesForUser(user)
+    val layout = tileService.getTileLayoutForUser(user)
+    val optionsFuture = tileContentService.getTilesOptions(tiles.map(_.tile))
 
-    Ok(Json.toJson(API.Success("ok", Json.obj(
-      "tiles" -> tiles,
-      "layout" -> layout
-    ))))
+    for {
+      options <- optionsFuture
+    } yield {
+      Ok(Json.toJson(API.Success("ok", Json.obj(
+        "tiles" -> tiles,
+        "layout" -> layout,
+        "options" -> options
+      ))))
+    }
   }
 
   def saveLayout = RequiredUserAction { request =>
@@ -62,7 +69,7 @@ class TilesController @Inject()(
   }
 
   def tilesContent(user: Option[User], tiles: Seq[TileInstance]): Future[Result] = {
-    val futures = tiles.map { tile =>
+    val futures = tiles.filter(_.tile.fetchUrl.isDefined).map { tile =>
       tileContentService.getTileContent(user, tile).map(content => (tile, content))
     }
 

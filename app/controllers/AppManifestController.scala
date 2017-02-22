@@ -14,8 +14,8 @@ class AppManifestController @Inject()(
   cached: Cached
 ) extends BaseController {
 
-  val gcmSenderId = configuration.getString("mywarwick.gcm.id")
-    .getOrElse(throw new IllegalStateException("Missing GCM Sender Id - set mywarwick.gcm.id"))
+  val senderId = configuration.getString("mywarwick.fcm.id")
+    .getOrElse(throw new IllegalStateException("Missing FCM Sender ID - set mywarwick.fcm.id"))
 
   def getAppManifest = cached("manifest") {
     Action {
@@ -38,7 +38,7 @@ class AppManifestController @Inject()(
             "type" -> "image/png"
           )
         ),
-        "gcm_sender_id" -> gcmSenderId
+        "gcm_sender_id" -> senderId
       ))
     }
   }

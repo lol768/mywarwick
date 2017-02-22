@@ -1,18 +1,41 @@
 /* eslint react/prop-types: 0, react/sort-comp: 0 */
 import React, { Component } from 'react';
+import * as log from 'loglevel';
+import * as errorreporter from '../../errorreporter';
 export const TILE_SIZES = {
   SMALL: 'small',
   WIDE: 'wide',
   LARGE: 'large',
+  TALL: 'tall',
 };
 
 export default class TileContent extends Component {
 
-  // when do we consider the tile to have no valid content
+  constructor(props) {
+    super(props);
+    this.error = false;
+  }
+
   isEmpty() {
     const { content } = this.props;
-
     return !content.items || content.items.length === 0;
+  }
+
+  isError() {
+    return this.error;
+  }
+
+  isRemovable() {
+    return true;
+  }
+
+
+  static isVisibleOnDesktopOnly() {
+    return false;
+  }
+
+  needsContentToRender() {
+    return true;
   }
 
   contentOrDefault(contentFunction) {
@@ -26,6 +49,7 @@ export default class TileContent extends Component {
   getBody() {
     switch (this.props.size.toLowerCase()) {
       case TILE_SIZES.LARGE:
+      case TILE_SIZES.TALL:
         return this.getLargeBody();
       case TILE_SIZES.WIDE:
         return this.getWideBody();
@@ -61,9 +85,20 @@ export default class TileContent extends Component {
   }
 
   render() {
-    const { content, zoomed } = this.props;
-    if (content) {
-      return this.contentOrDefault(zoomed ? this.getZoomedBody : this.getBody);
+    if (!this.isError()) {
+      try {
+        const { content, zoomed } = this.props;
+        if (content || !this.needsContentToRender()) {
+          return this.contentOrDefault(zoomed ? this.getZoomedBody : this.getBody);
+        }
+      } catch (e) {
+        log.error('Error rendering tile', e);
+        errorreporter.post(e);
+        this.error = true;
+      }
+    }
+    if (this.isError()) {
+      return <span>Unexpected error displaying this tile.</span>;
     }
     return null;
   }

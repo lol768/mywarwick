@@ -12,5 +12,12 @@
       data-search-root-url="@searchRootUrl.string"
     ></div>
     <script src="@routes.Assets.versioned("js/bundle.js")"></script>
+    <!-- This is hidden by successful script load. -->
+    <div id="error-fallback" class="fatal-error">
+      There was a problem loading My Warwick.<br>Please try again later.
+    </div>
+    <noscript class="fatal-error">
+      Javascript has been disabled in your browser, but it's required.
+    </noscript>
   </body>
 </html>

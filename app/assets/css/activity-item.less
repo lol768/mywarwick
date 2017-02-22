@@ -3,19 +3,21 @@
 
   line-height: @line-height-computed;
 
+  &, &__title, &__text {
+    color: @text-color;
+  }
+
   &__title {
     font-weight: bold;
-    color: @text-color;
   }
 
   &__text {
     font-weight: normal;
-    color: @text-color;
   }
 
   &__date {
-    font-size: @font-size-small;
-    color: @gray-light;
+    .small;
+    .text-muted;
   }
 
   &--with-url {
@@ -28,6 +30,33 @@
 
   a, a:hover {
     text-decoration: none;
+  }
+}
+
+.tile__body .activity-item {
+  background: none;
+  border: none;
+  box-shadow: none;
+
+  &, &__title, &__text {
+    color: #fff;
+  }
+
+  border-top: 1px solid rgba(255, 255, 255, .4);
+  padding: .5em 0;
+
+  &__date {
+    color: @gray-lighter;
+  }
+
+  &--unread {
+    background: rgba(255, 255, 255, .2);
+  }
+
+  .app-icon {
+    background-color: transparent !important;
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, .6);
   }
 }
 

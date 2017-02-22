@@ -142,13 +142,16 @@ gulp.task('lint', () => {
 
 function generateServiceWorker(watch) {
   const swPrecache = require('sw-precache');
-  const globby = require('globby');
-  const htmlDependencies = globby.sync([
-    'app/assets/css/**/*'
-  ], { nodir: true }).concat([
+  // Things that should cause fresh HTML to be downloaded
+  const htmlDependencies = [
+    'target/gulp/css/main.css',
     'target/gulp/js/bundle.js',
     'app/assets/js/push-worker.js',
-  ]);
+    'app/views/index.scala.html',
+    'app/views/common/head.scala.html',
+    'app/views/common/htmlelement.scala.html',
+    'app/views/common/id7layout.scala.html',
+  ];
 
   console.log('htmlDependencies:', htmlDependencies);
 
@@ -169,7 +172,7 @@ function generateServiceWorker(watch) {
       '/news': htmlDependencies,
       '/search': htmlDependencies,
     },
-    maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+    maximumFileSizeToCacheInBytes: 10 * 1000 * 1000,
   })
   .then((offlineWorker) => {
     const bopts = browserifyOptions(cacheName('push-worker'), 'push-worker.js');
