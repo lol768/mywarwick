@@ -125,14 +125,6 @@ export function storeTilePreferences(tile, preferences) {
   };
 }
 
-export function saveTilePreferences(tile, preferences) {
-  return dispatch => {
-    dispatch(storeTilePreferences(tile, preferences));
-    return dispatch(persistTiles())
-      .then(() => dispatch(fetchTileContent()));
-  };
-}
-
 const ALL_TILES = undefined;
 export function fetchTileContent(tileSpec = ALL_TILES) {
   return (dispatch, getState) => {
@@ -164,6 +156,14 @@ export function fetchTileContent(tileSpec = ALL_TILES) {
           return dispatch(failedTileContentFetch(tileId, NETWORK_ERRORS));
         });
     }));
+  };
+}
+
+export function saveTilePreferences(tile, preferences) {
+  return dispatch => {
+    dispatch(storeTilePreferences(tile, preferences));
+    return dispatch(persistTiles())
+      .then(() => dispatch(fetchTileContent()));
   };
 }
 
