@@ -8,7 +8,6 @@
   },
   "devDependencies": {
     "autoprefixer": "~6.3.6",
-    "babel": "~6.5.2",
     "babel-core": "~6.7.6",
     "babel-eslint": "~6.0.2",
     "babel-plugin-transform-object-rest-spread": "~6.6.5",
@@ -53,7 +52,7 @@
     "react-addons-test-utils": "^15.0.0",
     "sinon": "~1.17.3",
     "sinon-chai": "~2.8.0",
-    "sw-precache": "UniversityofWarwick/sw-precache#3.1.0-warwick",
+    "sw-precache": "~5.0.0",
     "timekeeper": "0.0.5",
     "vinyl-buffer": "~1.0.0",
     "vinyl-source-stream": "~1.1.0",
