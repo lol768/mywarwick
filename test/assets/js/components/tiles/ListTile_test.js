@@ -59,6 +59,6 @@ describe('ListTileItem', () => {
       <MockedUl><ListTileItem date={ '2015-10-27 08:27:00.000' } {... props} /></MockedUl>
     );
     const date = ReactTestUtils.findRenderedDOMComponentWithClass(html, 'list-group-item__date');
-    expect(date.textContent).to.equal('Tue 27 Oct 2015, 8:27');
+    expect(date.textContent).to.equal('Tue 27 Oct 2015, 08:27');
   });
 });
