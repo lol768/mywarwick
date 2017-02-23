@@ -153,25 +153,30 @@ function generateServiceWorker(watch) {
     'app/views/common/id7layout.scala.html',
   ];
 
-  console.log('htmlDependencies:', htmlDependencies);
-
   return swPrecache.generate({
     cacheId: 'start',
     handleFetch: OFFLINE_WORKERS,
     staticFileGlobs: [
       'public/**/*',
     ].concat(getCachedAssets()),
-    stripPrefixRegex: '(target/gulp|public)',
-    replacePrefix: '/assets',
+    stripPrefixMulti: {
+      'target/gulp/' : 'assets/',
+      'public/': 'assets/'
+    },
     ignoreUrlParametersMatching: [/^v$/],
     logger: gutil.log,
     dynamicUrlToDependencies: {
-      '/': htmlDependencies,
-      '/notifications': htmlDependencies,
-      '/activity': htmlDependencies,
-      '/news': htmlDependencies,
-      '/search': htmlDependencies,
+      '/': htmlDependencies
     },
+    // If any of these other URLs are hit, use the same cache entry as /
+    // because the HTML is the same for all of them.
+    navigateFallback: '/',
+    navigateFallbackWhitelist: [
+      /^\/notifications/,
+      /^\/activities/,
+      /^\/search/,
+      /^\/news/
+    ],
     maximumFileSizeToCacheInBytes: 10 * 1000 * 1000,
   })
   .then((offlineWorker) => {
