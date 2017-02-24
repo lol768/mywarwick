@@ -23,8 +23,12 @@ export default function init(opts) {
   function doInit(native) {
     const nativeSelectors = [
       createSelector(
-        state => state.user.data,
-        user => native.setUser(user)
+        state => state.user,
+        user => {
+          if (!user.empty) {
+            native.setUser(user.data);
+          }
+        }
       ),
       createSelector(
         state => _.get(state, 'routing.locationBeforeTransitions.pathname', '/'),
