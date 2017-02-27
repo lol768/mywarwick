@@ -73,8 +73,11 @@ export default class LibraryTile extends TextTile {
     let subtitleArray = ['', ''];
     if (content.subtitle) subtitleArray = content.subtitle.split(' ');
     return (
-      <span className="tile__callout">
-        {subtitleArray[0]} <small>{subtitleArray.slice(1)}</small>
+      <span>
+        <span className="tile__callout">
+          {subtitleArray[0]}
+        </span>
+        &nbsp;{subtitleArray.slice(1)}
       </span>
     );
   }
