@@ -141,9 +141,11 @@ export default class AgendaTile extends TileContent {
     const numEventsToday = this.numEventsToday(items);
 
     const callout = (
-      <span className="tile__callout">
-        {numEventsToday}
-        <small> event{numEventsToday === 1 ? null : 's'} today</small>
+      <span>
+        <span className="tile__callout">
+          {numEventsToday}
+        </span>
+        &nbsp;event{numEventsToday === 1 ? null : 's'} today
       </span>
     );
 
