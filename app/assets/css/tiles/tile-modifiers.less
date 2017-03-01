@@ -25,14 +25,16 @@
   height: auto;
   cursor: default;
 
-  @media (min-width: @screen-sm-min) {
-    top: 25%;
-    left: 50%;
-    right: auto;
-    bottom: auto;
-    margin-left: -(@screen-sm-min - 100px) / 2;
-    width: @screen-sm-min - 100px;
-    height: 50%;
+  html.not-app & {
+    @media (min-width: @screen-sm-min) {
+      top: 25%;
+      left: 50%;
+      right: auto;
+      bottom: auto;
+      margin-left: -(@screen-sm-min - 100px) / 2;
+      width: @screen-sm-min - 100px;
+      height: 50%;
+    }
   }
 
   html.app & {
