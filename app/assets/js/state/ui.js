@@ -8,7 +8,13 @@ try {
   mq = () => global.mqResult;
 }
 
-const isDesktop = () => mq('only all and (min-width: 768px)');
+function isNative() {
+  return ('navigator' in window) && navigator.userAgent.indexOf('MyWarwick/') > -1;
+}
+
+function isDesktop() {
+  return !isNative() && mq('only all and (min-width: 768px)');
+}
 const isWideLayout = () => mq('only all and (min-width: 992px)');
 
 const initialState = {
