@@ -125,6 +125,8 @@ export default function init(opts) {
     };
 
     maybeInit();
+  } else {
+    $html.addClass('not-app');
   }
 }
 
