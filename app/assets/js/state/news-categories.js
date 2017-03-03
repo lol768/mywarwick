@@ -93,13 +93,9 @@ export function reducer(state = initialState, action) {
         ]),
       };
     case NEWS_CATEGORY_UNSUBSCRIBE: {
-      const subscribed = state.subscribed;
-      _.pull(subscribed, action.payload);
-      // subscribed.delete(action.payload);
-
       return {
         ...state,
-        subscribed,
+        subscribed: _.without(state.subscribed, action.payload),
       };
     }
     default:
