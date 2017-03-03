@@ -38,7 +38,7 @@ const persistSubscribedCategories = categories => dispatch =>
 
 let store = {};
 const persistSubscriptionsDebounced = _.debounce(() =>
-  store.dispatch(persistSubscribedCategories([...store.getState().newsCategories.subscribed]))
+  store.dispatch(persistSubscribedCategories(store.getState().newsCategories.subscribed))
 , 500);
 
 export function subscribe(id) {
@@ -61,7 +61,7 @@ const initialState = {
   fetching: false,
   failed: false,
   items: [],
-  subscribed: new Set(),
+  subscribed: [],
 };
 
 export function reducer(state = initialState, action) {
@@ -82,19 +82,20 @@ export function reducer(state = initialState, action) {
         fetching: false,
         failed: false,
         items: action.payload.data.items,
-        subscribed: new Set(action.payload.data.subscribed),
+        subscribed: _.uniq(action.payload.data.subscribed),
       };
     case NEWS_CATEGORY_SUBSCRIBE:
       return {
         ...state,
-        subscribed: new Set([
+        subscribed: _.uniq([
           ...state.subscribed,
           action.payload,
         ]),
       };
     case NEWS_CATEGORY_UNSUBSCRIBE: {
-      const subscribed = new Set([...state.subscribed]);
-      subscribed.delete(action.payload);
+      const subscribed = state.subscribed;
+      _.pull(subscribed, action.payload);
+      // subscribed.delete(action.payload);
 
       return {
         ...state,
