@@ -109,7 +109,7 @@ export default class AgendaTile extends TileContent {
   }
 
   getNextEvent(items) {
-    const nextEvent = _.find(items, e => !e.isAllDay && localMoment(e.start).isAfter());
+    const nextEvent = _.find(items, e => !e.isAllDay && localMoment(e.start).isSameOrAfter());
     const trunc = text => _.truncate(text, { length: 30 });
 
     if (!nextEvent) {
