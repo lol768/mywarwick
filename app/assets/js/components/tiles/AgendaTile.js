@@ -8,6 +8,20 @@ import classNames from 'classnames';
 import Hyperlink from '../ui/Hyperlink';
 import { createSelector } from 'reselect';
 
+const moduleColours = [
+  '#00b2dd', // Bright Sky blue
+  '#7ecbb6', // Bright Emerald green
+  '#ef4050', // Bright Ruby red
+  '#f47920', // Bright Burnt orange
+  '#ffc233', // Bright Gold
+];
+
+const colourForModule = _.memoize(() => {
+  const nextColour = moduleColours.shift();
+  moduleColours.push(nextColour);
+  return nextColour;
+});
+
 const groupItemsForAgendaTile = {
 
   description: 'by-date--agenda',
@@ -73,7 +87,7 @@ export default class AgendaTile extends TileContent {
   constructor(props) {
     super(props);
     this.state = {
-      defaultMaxItems: { small: null, wide: 2, large: 5 }[props.size],
+      defaultMaxItems: { small: null, wide: 2, large: 5, tall: 100 }[props.size],
     };
 
     this.agendaViewSelector = createSelector(_.identity, agendaViewTransform);
@@ -81,7 +95,7 @@ export default class AgendaTile extends TileContent {
 
   componentWillReceiveProps(nextProps) {
     this.setState({
-      defaultMaxItems: { small: null, wide: 2, large: 5 }[nextProps.size],
+      defaultMaxItems: { small: null, wide: 2, large: 5, tall: 100 }[nextProps.size],
     });
   }
 
@@ -95,10 +109,10 @@ export default class AgendaTile extends TileContent {
   }
 
   getNextEvent(items) {
-    const timedEvent = _.find(items, e => !e.isAllDay);
+    const nextEvent = _.find(items, e => !e.isAllDay && localMoment(e.start).isAfter());
     const trunc = text => _.truncate(text, { length: 30 });
 
-    if (!timedEvent) {
+    if (!nextEvent) {
       // items are all-day events
       if (items.length === 1) {
         return {
@@ -112,8 +126,8 @@ export default class AgendaTile extends TileContent {
     }
 
     return {
-      text: `Next: ${trunc(timedEvent.title)} at ${localMoment(timedEvent.start).format('HH:mm')}`,
-      href: timedEvent.href,
+      text: `Next: ${trunc(nextEvent.title)} at ${localMoment(nextEvent.start).format('HH:mm')}`,
+      href: nextEvent.href,
     };
   }
 
@@ -183,26 +197,123 @@ export default class AgendaTile extends TileContent {
 
 export class AgendaTileItem extends React.Component {
 
-  render() {
-    const { title, start, isAllDay, href, location } = this.props;
+  renderDate() {
+    const { isAllDay, start, end, parent } = this.props;
 
-    const content = (
+    if (isAllDay) {
+      return 'All day';
+    }
+
+    if (!parent || (start && !end)) {
+      return localMoment(start).format('HH:mm');
+    }
+
+    return (
       <div>
-        <div className="col-xs-2">
-          { isAllDay ? 'All day' : localMoment(start).format('HH:mm') }
+        { localMoment(start).format('HH:mm') }&nbsp;–
+        <br />
+        { localMoment(end).format('HH:mm') }
+      </div>
+    );
+  }
+
+  renderMarker() {
+    const { parent } = this.props;
+
+    if (parent) {
+      return (
+        <div className="agenda-item__cell" style={{ paddingLeft: '.5em', paddingRight: '.25em' }}>
+          <i className="fa fa-circle" style={{ color: colourForModule(parent.shortName) }}> </i>
         </div>
-        <div className="col-xs-10">
-          <span title={title}
-            className={classNames('tile-list-item__title', 'text--align-bottom',
-            { 'text--dotted-underline': href })}
-          >
-            <Hyperlink href={href}>{ title }</Hyperlink>
-         </span>
-          {location ?
-            <span className="tile-list-item__location text--align-bottom text--light">
-              &nbsp;- <Hyperlink href={ location.href }>{ location.name }</Hyperlink>
-            </span>
-            : null}
+      );
+    }
+
+    return null;
+  }
+
+  renderParent() {
+    const { parent } = this.props;
+
+    if (parent) {
+      return (
+        <div>
+          { parent.shortName } { parent.fullName }
+        </div>
+      );
+    }
+
+    return null;
+  }
+
+  renderTitle() {
+    const { title, href } = this.props;
+
+    return (
+      <span title={ title } className={ classNames({
+        'tile-list-item__title': true,
+        'text--dotted-underline': href,
+      }) }
+      >
+        <Hyperlink href={ href }>{ title }</Hyperlink>
+      </span>
+    );
+  }
+
+  renderLocation() {
+    const { location } = this.props;
+
+    if (!location) {
+      return null;
+    }
+
+    if (location.href) {
+      return (
+        <span className="tile-list-item__location text--light">
+          (<Hyperlink href={ location.href } className="text--dotted-underline">
+            { location.name }
+            &nbsp;
+            <i className="fa fa-map-marker"> </i>
+          </Hyperlink>)
+        </span>
+      );
+    }
+
+    return (
+      <span className="tile-list-item__location text--light">
+        ({ location.name })
+      </span>
+    );
+  }
+
+  renderStaff() {
+    const { staff } = this.props;
+
+    if (!staff || staff.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="text--translucent">
+        <i className="fa fa-user-o"> </i>
+        &nbsp;
+        { staff.map(person => `${person.firstName} ${person.lastName}`).join(', ') }
+      </div>
+    );
+  }
+
+  render() {
+    const content = (
+      <div className="agenda-item">
+        <div className="agenda-item__cell" style={{ paddingRight: '.25em' }}>
+          { this.renderDate() }
+        </div>
+        { this.renderMarker() }
+        <div className="agenda-item__cell" style={{ paddingLeft: '.5em' }}>
+          { this.renderParent() }
+          { this.renderTitle() }
+          { ' ' }
+          { this.renderLocation() }
+          { this.renderStaff() }
         </div>
       </div>
     );
@@ -226,4 +337,16 @@ AgendaTileItem.propTypes = {
     href: React.PropTypes.string,
   }),
   href: PropTypes.string,
+  parent: React.PropTypes.shape({
+    shortName: React.PropTypes.string,
+    fullName: React.PropTypes.string,
+  }),
+  type: PropTypes.string,
+  staff: React.PropTypes.arrayOf(React.PropTypes.shape({
+    email: React.PropTypes.string,
+    lastName: React.PropTypes.string,
+    firstName: React.PropTypes.string,
+    userType: React.PropTypes.string,
+    universityId: React.PropTypes.string,
+  })),
 };
