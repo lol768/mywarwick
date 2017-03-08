@@ -1,4 +1,3 @@
-import moment from 'moment';
 import AgendaTile from 'components/tiles/AgendaTile';
 import { AgendaTileItem } from 'components/tiles/AgendaTile';
 
@@ -95,11 +94,11 @@ describe('AgendaTileItem', () => {
     html.type.should.equal('div');
     html.props.className.should.equal('tile-list-item');
     const a = html.props.children;
-    const [ date, title ] = a.props.children;
-    const titleInner = title.props.children[0],
+    const [ date, , title ] = a.props.children;
+    const titleInner = title.props.children[1],
       dateInner = date.props.children;
     titleInner.props.className.should.equal(
-      'tile-list-item__title text--align-bottom'
+      'tile-list-item__title'
     );
     titleInner.props.title.should.equal(props.title);
     findChild(titleInner, [0, 0]).should.equal(props.title);
@@ -109,7 +108,7 @@ describe('AgendaTileItem', () => {
   it('renders with a href', () => {
     const tileItem = <AgendaTileItem zoomed={ true } href={ 'href' } { ...props } />;
     const html = shallowRender(tileItem);
-    const hyperlink = html.props.children.props.children[1].props.children[0].props.children;
+    const hyperlink = html.props.children.props.children[2].props.children[1].props.children;
     hyperlink.props.href.should.equal('href');
     hyperlink.type.displayName.should.equal('Hyperlink');
   });
@@ -117,16 +116,16 @@ describe('AgendaTileItem', () => {
   it('renders time for All day events', () => {
     const html = shallowRender(<AgendaTileItem zoomed={ true } { ...props } isAllDay={ true }/>);
     const a = html.props.children;
-    const [ date , ] = a.props.children;
+    const [ date ] = a.props.children;
     date.props.children.should.equal('All day');
   });
 
   it('renders location text with hyperlink', () => {
     const html = shallowRender(<AgendaTileItem zoomed={ true } { ...props } />);
     const locationInner = html.props.children
-      .props.children[1].props.children[1];
+      .props.children[2].props.children[3];
     locationInner.props.className.should.equal(
-      'tile-list-item__location text--align-bottom text--light'
+      'tile-list-item__location text--light'
     );
     findChild(locationInner, [1, 0]).should.equal('Heronbank');
     locationInner.props.children[1].props.href.should.equal('https://campus.warwick.ac.uk/?slid=29129');
