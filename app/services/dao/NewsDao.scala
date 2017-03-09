@@ -87,7 +87,7 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
   }
 
   override def allNews(publisherId: String, limit: Int, offset: Int)(implicit c: Connection): Seq[NewsItemRender] = {
-    groupNewsItems(SQL(
+    groupNewsItems(SQL(dialect.limitOffset(limit, offset)(
       s"""
       SELECT
         n.*,
@@ -100,8 +100,7 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
           ON c.NEWS_CATEGORY_ID = NEWS_CATEGORY.ID
       WHERE n.PUBLISHER_ID = {publisherId}
       ORDER BY PUBLISH_DATE DESC
-      ${dialect.limitOffset(limit, offset)}
-      """)
+      """))
       .on('publisherId -> publisherId)
       .as(newsParser.*))
   }
@@ -111,7 +110,7 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
   }
 
   def getNewsItemIdsForUser(user: Option[Usercode], limit: Int, offset: Int)(implicit c: Connection): Seq[String] = {
-    SQL(
+    SQL(dialect.limitOffset(limit, offset)(
       s"""
         SELECT DISTINCT n.ID, n.PUBLISH_DATE
         FROM NEWS_ITEM n
@@ -127,8 +126,7 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
                                     WHERE USERCODE = {user})
           OR {user} = '*'
         ORDER BY n.PUBLISH_DATE DESC
-        ${dialect.limitOffset(limit, offset)}
-       """)
+       """))
       .on(
         'user -> user.map(_.string).getOrElse("*")
       )
