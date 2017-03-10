@@ -6,6 +6,9 @@ export const USER_RECEIVE = 'USER_RECEIVE';
 export const USER_CLEAR = 'USER_CLEAR';
 export const SSO_LINKS_RECEIVE = 'SSO_LINKS_RECEIVE';
 
+import url from 'url';
+import querystring from 'querystring';
+
 const initialState = {
   data: {
     authenticated: false,
@@ -83,6 +86,13 @@ export function loadUserFromLocalStorage(dispatch) {
 function clearUserData() {
   return dispatch =>
     localforage.clear().then(() => dispatch({ type: USER_CLEAR }));
+}
+
+export function rewriteRefreshUrl(location, currentLocation) {
+  const parsed = url.parse(location, true);
+  parsed.query.target = currentLocation;
+  parsed.search = querystring.stringify(parsed.query);
+  return url.format(parsed);
 }
 
 export function userReceive(currentUser) {
