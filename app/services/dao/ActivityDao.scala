@@ -100,13 +100,14 @@ class ActivityDaoImpl @Inject()(
     SQL(s"""
       $selectActivityRender
       WHERE ACTIVITY.ID IN (
-        SELECT
-          --+ INDEX(ACTIVITY ACTIVITY_PUBLISHED_AT_INDEX)
-          ID FROM ACTIVITY
-        WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
-          AND ACTIVITY.PUBLISHED_AT <= SYSDATE
-        ORDER BY ACTIVITY.PUBLISHED_AT DESC
-        ${dialect.limitOffset(limit)}
+        ${dialect.limitOffset(limit) (
+          s"""SELECT
+            --+ INDEX(ACTIVITY, ACTIVITY_PUBLISHER_TIME_INDEX)
+            ID FROM ACTIVITY
+          WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
+            AND ACTIVITY.PUBLISHED_AT <= SYSDATE
+          ORDER BY ACTIVITY.PUBLISHED_AT DESC"""
+        )}
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC
       """)
@@ -118,13 +119,14 @@ class ActivityDaoImpl @Inject()(
     SQL(s"""
       $selectActivityRender
       WHERE ACTIVITY.ID IN (
-        SELECT
-          --+ INDEX(ACTIVITY ACTIVITY_PUBLISHED_AT_INDEX)
-          ID FROM ACTIVITY
-        WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
-          AND ACTIVITY.PUBLISHED_AT > SYSDATE
-        ORDER BY ACTIVITY.PUBLISHED_AT DESC
-        ${dialect.limitOffset(limit)}
+        ${dialect.limitOffset(limit)(
+          s"""SELECT
+            --+ INDEX(ACTIVITY, ACTIVITY_PUBLISHER_TIME_INDEX)
+            ID FROM ACTIVITY
+          WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
+            AND ACTIVITY.PUBLISHED_AT > SYSDATE
+          ORDER BY ACTIVITY.PUBLISHED_AT DESC"""
+        )}
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC
       """)
@@ -199,15 +201,16 @@ class ActivityDaoImpl @Inject()(
     val query = s"""
       $selectActivityRender
       WHERE ACTIVITY.ID IN (
-        SELECT ACTIVITY_ID
-        FROM ACTIVITY_RECIPIENT
-          JOIN ACTIVITY ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
-        WHERE USERCODE = {usercode}
-          AND ACTIVITY.REPLACED_BY_ID IS NULL
-          $maybeNotifications
-          $conditions
-        ORDER BY ACTIVITY_RECIPIENT.PUBLISHED_AT $publishedAtOrder, ACTIVITY.ID ASC
-        ${dialect.limitOffset(limit)}
+        ${dialect.limitOffset(limit)(
+          s"""SELECT ACTIVITY_ID
+          FROM ACTIVITY_RECIPIENT
+            JOIN ACTIVITY ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
+          WHERE USERCODE = {usercode}
+            AND ACTIVITY.REPLACED_BY_ID IS NULL
+            $maybeNotifications
+            $conditions
+          ORDER BY ACTIVITY_RECIPIENT.PUBLISHED_AT $publishedAtOrder, ACTIVITY.ID ASC"""
+        )}
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC, ACTIVITY.ID ASC
       """
