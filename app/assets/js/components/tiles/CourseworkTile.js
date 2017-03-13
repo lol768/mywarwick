@@ -26,9 +26,11 @@ export default class CourseworkTile extends ListTile {
     const numAssignments = numAssignmentsDue(content.items);
 
     const callout = (
-      <span className="tile__callout">
-        { numAssignments }
-        <small> assignment{numAssignments === 1 ? null : 's'} in next month</small>
+      <span>
+        <span className="tile__callout">
+          { numAssignments }
+        </span>
+        &nbsp;assignment{numAssignments === 1 ? null : 's'} in next month
       </span>
     );
 

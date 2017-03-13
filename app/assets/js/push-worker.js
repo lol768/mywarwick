@@ -1,10 +1,19 @@
 /* global clients */
 
-import log from 'loglevel';
+/**
+ * This code ends up in service-worker, so it wants to be as minimal as possible.
+ * This includes not importing lots of libraries into it, because they'll all end
+ * up in service-worker.js.
+ */
+
+// deliberately not using a logging library here, for conciseness
+function log(...args) {
+  console.log(...args); // eslint-disable-line no-console
+}
 
 // This is mostly to force a serviceworker update if you make a change
 // that doesn't change any assets. Increment updateid.
-log.debug('push worker (updateid:1)');
+log('push worker (updateid:1)');
 
 // Set the callback for the install step
 self.addEventListener('install', () => {
@@ -12,11 +21,11 @@ self.addEventListener('install', () => {
 });
 
 self.addEventListener('push', event => {
-  log.info('Push event', event);
+  log('Push event', event);
 
   if (event.data) {
     const notification = event.data.json();
-    log.info('Push event payload', notification);
+    log('Push event payload', notification);
 
     self.registration.showNotification(notification.title, {
       body: notification.text,

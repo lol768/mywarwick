@@ -25,13 +25,15 @@ export default class TileOptionView extends Component {
 
   makeFormBody(formId) {
     const options = this.props.tile.option;
-    const optionsKeys = Object.keys(options);
 
     return (
       <form className="form" id={formId}>
-        {optionsKeys.map(key => <div className="form-group">
-          <label>{key}:</label>{this.makeOptionElement(options[key], key)}
-        </div>)}
+        {_.map(options, (option, key) =>
+          <div key={key} className="form-group">
+            <label>{option.description}</label>
+            {this.makeOptionElement(option, key)}
+          </div>
+        )}
       </form>
     );
   }
@@ -51,7 +53,7 @@ export default class TileOptionView extends Component {
 
   makeCheckbox(possibleChoice, cbName) {
     return (
-      <div className="checkbox">
+      <div className="checkbox" key={`${cbName}:${possibleChoice.value}`}>
         <label>
           <input
             type="checkbox"
@@ -72,7 +74,7 @@ export default class TileOptionView extends Component {
 
   makeRadioBox(possibleChoice, radioName) {
     return (
-      <div className="radio">
+      <div key={`${radioName}:${possibleChoice.value}`} className="radio">
         <label>
           <input
             type="radio"

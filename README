@@ -8,12 +8,15 @@ You will need a recent JDK, 8 ideally. You will need `node` (with `npm`) install
 
 To get Node dependencies run `npm install`.
 
-Building
---------
+Get a global `gulp` command with `npm install -g gulp-cli` in case you don't already have it.
 
-To build assets, run `node_modules/.bin/gulp assets`.
-To continually build assets when they change, run `scripts/watch-assets`.
+Building and running
+--------------------
+
+To build assets, run `gulp assets`.
+To continually build assets when they change, run `gulp wizard`.
 
 To start the app, run `./activator "run 8080"`. You can choose a different port but using 8080 might make it simpler
 to re-use your Apache/Nginx proxy config that you have working for Tomcat.
 
+You probably also need to run the `content-providers` app to generate content for your tiles.

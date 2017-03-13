@@ -32,7 +32,7 @@ export default class NewsCategoriesView extends React.Component {
     _(options).each(option => {
       const id = option.value;
 
-      if (subscribed.has(id)) {
+      if (subscribed.includes(id)) {
         dispatch(newsCategories.unsubscribe(id));
       } else {
         dispatch(newsCategories.subscribe(id));
@@ -81,7 +81,7 @@ export default class NewsCategoriesView extends React.Component {
     const data = items.map(item => ({
       value: item.id,
       label: item.name,
-      selected: subscribed.has(item.id),
+      selected: subscribed.includes(item.id),
     }));
 
     return (
@@ -102,6 +102,6 @@ export default class NewsCategoriesView extends React.Component {
 NewsCategoriesView.propTypes = {
   dispatch: PropTypes.func.isRequired,
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
-  subscribed: PropTypes.instanceOf(Set).isRequired,
+  subscribed: PropTypes.array.isRequired,
 };
 

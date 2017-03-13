@@ -3,11 +3,11 @@ import moment from 'moment-timezone';
 export const localMoment = date => moment(date).tz('Europe/London');
 export const localMomentUnix = date => moment.unix(date).tz('Europe/London');
 
-const ONLY_TIME = 'H:mm';
-const YESTERDAY_TIME = '[Yesterday] H:mm';
-const WEEKDAY_TIME = 'ddd H:mm';
-const FULL_DATE_WITHOUT_YEAR_TIME = 'ddd D MMM, H:mm';
-const FULL_DATE_TIME = 'ddd D MMM YYYY, H:mm';
+const ONLY_TIME = 'HH:mm';
+const YESTERDAY_TIME = '[Yesterday] HH:mm';
+const WEEKDAY_TIME = 'ddd HH:mm';
+const FULL_DATE_WITHOUT_YEAR_TIME = 'ddd D MMM, HH:mm';
+const FULL_DATE_TIME = 'ddd D MMM YYYY, HH:mm';
 
 function formatMoment(then, now) {
   if (then.isSame(now, 'day')) {

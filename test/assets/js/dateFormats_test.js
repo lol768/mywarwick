@@ -5,7 +5,7 @@ describe('dateFormats', () => {
   it('formats time only on current date', () => {
     let date = localMoment().hour(9).minute(0).toDate();
 
-    expect(dateFormats.forNewsItem(date)).to.equal('9:00');
+    expect(dateFormats.forNewsItem(date)).to.equal('09:00');
   });
 
   it('formats time yesterday for grouped activity', () => {

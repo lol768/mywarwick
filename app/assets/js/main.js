@@ -189,7 +189,7 @@ function receiveUserInfo(response) {
   return response.json()
     .then(data => {
       if (data.refresh) {
-        window.location = data.refresh;
+        window.location = user.rewriteRefreshUrl(data.refresh, window.location.href);
       } else {
         store.dispatch(user.userReceive(data.user));
         store.dispatch(user.receiveSSOLinks(data.links));

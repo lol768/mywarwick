@@ -103,6 +103,23 @@ export default class Tile extends React.Component {
     }
     return null;
   }
+
+  shouldComponentUpdate(nextProps) {
+    if (this.props.size !== nextProps.size) {
+      return true;
+    }
+
+    if (this.props.editing !== nextProps.editing) {
+      return true;
+    }
+
+    if (nextProps.editing) {
+      return false;
+    }
+
+    return true;
+  }
+
   render() {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 

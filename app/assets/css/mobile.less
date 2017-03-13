@@ -85,7 +85,10 @@
 }
 
 .has-zoomed-tile {
-  overflow: hidden;
+  &, .id7-main-content-area {
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: auto;
+  }
 
   .back-btn {
     visibility: visible;

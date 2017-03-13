@@ -10,21 +10,21 @@ import com.google.inject.ImplementedBy
 @ImplementedBy(classOf[OracleDatabaseDialect])
 trait DatabaseDialect {
 
-  def limitOffset(limit: Int, offset: Int = 0): String
-  def limitOffset(o: SqlPage): String = limitOffset(o.limit, o.offset)
+  def limitOffset(limit: Int, offset: Int = 0)(body: String): String
+  def limitOffset(o: SqlPage)(body: String): String = limitOffset(o.limit, o.offset)(body)
 
 }
 
 class OracleDatabaseDialect extends DatabaseDialect {
 
-  override def limitOffset(limit: Int, offset: Int = 0): String =
-    s"OFFSET $offset ROWS FETCH NEXT $limit ROWS ONLY"
+  override def limitOffset(limit: Int, offset: Int = 0)(body: String) : String =
+    s"SELECT * FROM ( $body ) WHERE ROWNUM BETWEEN ${offset+1} AND $limit"
 
 }
 
 class H2DatabaseDialect extends DatabaseDialect {
 
-  override def limitOffset(limit: Int, offset: Int = 0): String =
-    s"LIMIT $limit OFFSET $offset"
+  override def limitOffset(limit: Int, offset: Int = 0)(body: String): String =
+    s"$body LIMIT $limit OFFSET $offset"
 
 }

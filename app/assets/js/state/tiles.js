@@ -125,13 +125,6 @@ export function storeTilePreferences(tile, preferences) {
   };
 }
 
-export function saveTilePreferences(tile, preferences) {
-  return dispatch => {
-    dispatch(storeTilePreferences(tile, preferences));
-    return dispatch(persistTiles());
-  };
-}
-
 const ALL_TILES = undefined;
 export function fetchTileContent(tileSpec = ALL_TILES) {
   return (dispatch, getState) => {
@@ -163,6 +156,14 @@ export function fetchTileContent(tileSpec = ALL_TILES) {
           return dispatch(failedTileContentFetch(tileId, NETWORK_ERRORS));
         });
     }));
+  };
+}
+
+export function saveTilePreferences(tile, preferences) {
+  return dispatch => {
+    dispatch(storeTilePreferences(tile, preferences));
+    return dispatch(persistTiles())
+      .then(() => dispatch(fetchTileContent()));
   };
 }
 
@@ -228,32 +229,14 @@ export function formatPreferenceData(preferencesFromAction, availableTileOptions
 
 export function tilesReducer(state = initialState, action) {
   switch (action.type) {
-    case TILE_PREFERENCES_SAVE: {
-      const allTiles = state.data.tiles;
-      const newTiles = allTiles.map(tile => {
-        let returningTile = null;
-        if (tile.id === action.tile.id) {
-          returningTile = {
-            ...action.tile,
-            preferences: formatPreferenceData(
-              action.preferences,
-              state.data.options[tile.id]
-            ),
-          };
-        } else {
-          returningTile = tile;
-        }
-        return returningTile;
-      });
-      const newState = {
-        ...state,
-        data: {
-          ...state.data,
-          tiles: newTiles,
-        },
-      };
-      return newState;
-    }
+    case TILE_PREFERENCES_SAVE:
+      return updateTileById(state, action.tile.id, (tile) => ({
+        ...tile,
+        preferences: formatPreferenceData(
+          action.preferences,
+          state.data.options[tile.id]
+        ),
+      }));
     case USER_CLEAR:
       return initialState;
     case TILES_FETCH:

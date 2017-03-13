@@ -4,17 +4,20 @@
 @(publisher: Publisher, user: Role)(implicit context: RequestContext)
 @common.admin(publisher.name) {
 
-  <p>This is a publisher.  You can view:</p>
+  <p>From here you may manage publishing items to the department(s) you have access to.</p>
 
   <ul>
     @if(user.can(ViewNews)) {
       <li>
         <a href="@controllers.admin.routes.NewsController.list(publisher.id)">News</a>
+        - short paragraphs with an image and a link to a longer article.
       </li>
     }
     @if(user.can(ViewNotifications)) {
       <li>
         <a href="@controllers.admin.routes.NotificationsController.list(publisher.id)">Notifications</a>
+        - very short messages which will appear on users' phones, either immediately or
+        at a scheduled time later.
       </li>
     }
   </ul>
