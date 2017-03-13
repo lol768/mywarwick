@@ -21,12 +21,16 @@ const initialState = {
   className: undefined,
   isWideLayout: false,
   colourTheme: 'default',
+  native: false,
 };
 
 export function reducer(state = initialState, action) {
   switch (action.type) {
     case 'ui.class':
       return { ...state, className: action.className };
+    case 'ui.native':
+      if (action.native !== state.native) return { ...state, native: action.native };
+      return state;
     case 'ui.layout':
       return { ...state, isWideLayout: action.isWideLayout };
     case 'ui.theme':
@@ -45,7 +49,9 @@ export function updateColourTheme(theme) {
 
 export function updateUIContext() {
   return (dispatch, getState) => {
-    const currentClassName = getState().ui.className;
+    const state = getState();
+    const currentClassName = state.ui.className;
+
     if (currentClassName === undefined || isDesktop() !== (currentClassName === 'desktop')) {
       dispatch({
         type: 'ui.class',
@@ -53,11 +59,16 @@ export function updateUIContext() {
       });
     }
 
-    if (isWideLayout() !== getState().ui.isWideLayout) {
+    if (isWideLayout() !== state.ui.isWideLayout) {
       dispatch({
         type: 'ui.layout',
         isWideLayout: isWideLayout(),
       });
     }
+
+    dispatch({
+      type: 'ui.native',
+      native: isNative(),
+    });
   };
 }
