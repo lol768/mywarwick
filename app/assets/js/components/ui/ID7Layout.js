@@ -80,6 +80,18 @@ class ID7Layout extends ReactComponent {
     return null;
   }
 
+  renderBetaWarning() {
+    if (!this.props.native) {
+      return (
+        <div className="top-page-notice">
+          My&nbsp;Warwick is currently being piloted and is not yet available for general use.
+          Please visit our <a href="http://warwick.ac.uk/webteam/mywarwick/">My&nbsp;Warwick support pages</a> for more information.
+        </div>
+      );
+    }
+    return null;
+  }
+
   renderMobile() {
     const { user, zoomedTile, path } = this.props;
     return (
@@ -88,6 +100,7 @@ class ID7Layout extends ReactComponent {
         <div className="fixed-header at-top">
           <div className="id7-fixed-width-container">
             <header className="id7-page-header" ref="header">
+              { this.renderBetaWarning() }
               { this.renderMasqueradeNotice() }
 
               <MastheadMobile user={user}
@@ -136,6 +149,7 @@ class ID7Layout extends ReactComponent {
         <div className="fixed-header at-top">
           <div className="id7-fixed-width-container">
             <header className="id7-page-header" ref="header">
+              { this.renderBetaWarning() }
               { this.renderMasqueradeNotice() }
               <div className="id7-utility-masthead">
                 <nav className="id7-utility-bar" id="utility-bar-container">
@@ -212,6 +226,7 @@ const select = (state) => ({
   user: state.user,
   colourTheme: state.ui.colourTheme,
   zoomedTile: state.ui.zoomedTile,
+  native: state.ui.native,
 });
 
 export default connect(select)(ID7Layout);
