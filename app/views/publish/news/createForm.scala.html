@@ -18,38 +18,36 @@
 }
 
 @common.admin("Create news") {
-  <div class="container-fluid">
   @b3.form(action = controllers.publish.routes.NewsController.create(publisher.id, true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.publish.routes.NewsController.audienceInfo(publisher.id)) {
     <div class="audience-indicator"></div>
 
-    <section>
-    @publish.news.contentForm(form)
-    </section>
+    <div class="split-form__sections">
+      <section>
+        @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true)
+        @tags.categoryPicker(form, "categories", categories, "news item")
+      </section>
 
-    <section>
-      @b3.radio(form("item.publishDateSet"),
-        Seq(
-          "false" -> "Now",
-          "true" -> "Select a time"
-        ),
-        '_label -> "Publish time",
-        'value -> false
-      )
-      @tags.datetimePicker(form("item.publishDate"),
-        '_label -> "Publish date",
-        '_help -> "You can select a time in the future, and this news item will appear to users after that time",
-        'value -> LocalDateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
-      )
-    </section>
+      <section>
+        @publish.news.contentForm(form)
+      </section>
 
-    <section>
-      @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true)
-    </section>
+      <section>
+        @b3.radio(form("item.publishDateSet"),
+          Seq(
+            "false" -> "Now",
+            "true" -> "Select a time"
+          ),
+          '_label -> "Publish time",
+          'value -> false
+        )
+        @tags.datetimePicker(form("item.publishDate"),
+          '_label -> "Publish date",
+          '_help -> "You can select a time in the future, and this news item will appear to users after that time",
+          'value -> LocalDateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
+        )
 
-    <section>
-      @tags.categoryPicker(form, "categories", categories, "news item")
-      @tags.submitOrCancel("Create", controllers.publish.routes.NewsController.list(publisher.id))
-    </section>
-  }
-  </div>
+        @tags.submitOrCancel("Create", controllers.publish.routes.NewsController.list(publisher.id))
+      </section>
+    </div>
+}
 }

@@ -3,7 +3,7 @@
 @b3.text(form("item.title"),
   'class -> "input-lg",
   '_label -> "Title",
-  'autofocus -> true,
+  Symbol("data-autofocus") -> true,
   'required -> true)
 
 @b3.textarea(form("item.text"),
