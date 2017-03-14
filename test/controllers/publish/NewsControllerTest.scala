@@ -1,4 +1,4 @@
-package controllers.admin
+package controllers.publish
 
 import helpers.{Fixtures, OneStartAppPerSuite}
 import models.Audience.Staff
@@ -84,7 +84,7 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
       status(result) mustBe OK
       contentAsString(result) must include("Create news")
-      contentAsString(result) must include("/admin/publish/xyz/news/new")
+      contentAsString(result) must include("/publish/xyz/news/new")
       contentAsString(result) must include("No published news")
     }
 
@@ -136,7 +136,7 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
       val result = call(newsController.create("xyz", submitted = true), FakeRequest("POST", "/").withFormUrlEncodedBody(validData: _*))
 
-      redirectLocation(result) must contain("/admin/publish/xyz/news")
+      redirectLocation(result) must contain("/publish/xyz/news")
 
       verify(newsService).save(Matchers.any(), Matchers.eq(audience), Matchers.eq(Seq("abc")))
     }

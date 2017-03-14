@@ -4,7 +4,7 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import controllers.BaseController
-import controllers.admin.CategoryOptions
+import controllers.publish.CategoryOptions
 import models.API
 import play.api.data.Forms._
 import play.api.data._

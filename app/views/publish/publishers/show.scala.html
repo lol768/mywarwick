@@ -9,13 +9,13 @@
   <ul>
     @if(user.can(ViewNews)) {
       <li>
-        <a href="@controllers.admin.routes.NewsController.list(publisher.id)">News</a>
+        <a href="@controllers.publish.routes.NewsController.list(publisher.id)">News</a>
         - short paragraphs with an image and a link to a longer article.
       </li>
     }
     @if(user.can(ViewNotifications)) {
       <li>
-        <a href="@controllers.admin.routes.NotificationsController.list(publisher.id)">Notifications</a>
+        <a href="@controllers.publish.routes.NotificationsController.list(publisher.id)">Notifications</a>
         - very short messages which will appear on users' phones, either immediately or
         at a scheduled time later.
       </li>

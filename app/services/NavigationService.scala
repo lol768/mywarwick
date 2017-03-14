@@ -4,6 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
 import controllers.admin.{routes => adminRoutes}
+import controllers.publish.{routes => publishRoutes}
 import models.publishing.Ability.{ViewNews, ViewNotifications}
 import models.publishing.Publisher
 import play.api.mvc.Call
@@ -62,7 +63,7 @@ class NavigationServiceImpl @Inject()(
     Seq(
       publishers.nonEmpty ->
         NavigationPage("Publishing",
-          adminRoutes.PublishersController.index(),
+          publishRoutes.PublishersController.index(),
           publishers.map(navigationForPublisher(_, user))
         ),
 
@@ -75,11 +76,11 @@ class NavigationServiceImpl @Inject()(
     val publishingRole = publisherService.getRoleForUser(publisher.id, user.usercode)
 
     val children = Seq(
-      ViewNews -> NavigationPage("News", adminRoutes.NewsController.list(publisher.id)),
-      ViewNotifications -> NavigationPage("Notifications", adminRoutes.NotificationsController.list(publisher.id))
+      ViewNews -> NavigationPage("News", publishRoutes.NewsController.list(publisher.id)),
+      ViewNotifications -> NavigationPage("Notifications", publishRoutes.NotificationsController.list(publisher.id))
     ).collect { case (ability, page) if publishingRole.can(ability) => page }
 
-    NavigationPage(publisher.name, adminRoutes.PublishersController.show(publisher.id), children)
+    NavigationPage(publisher.name, publishRoutes.PublishersController.show(publisher.id), children)
   }
 
   val sysadminNavigation: Navigation = {

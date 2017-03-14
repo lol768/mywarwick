@@ -1,4 +1,4 @@
-package controllers.admin
+package controllers.publish
 
 import com.google.inject.Inject
 import controllers.BaseController
@@ -16,7 +16,7 @@ class PublishersController @Inject()(
 
     val publishers = publisherService.getPublishersForUser(user.usercode)
 
-    Ok(views.html.admin.publishers.index(publishers))
+    Ok(views.html.publish.publishers.index(publishers))
   }
 
   def show(publisherId: String) = RequiredUserAction { implicit request =>
@@ -26,7 +26,7 @@ class PublishersController @Inject()(
     val role = publisherService.getRoleForUser(publisherId, user.usercode)
 
     publishers.find(_.id == publisherId)
-      .map(publisher => Ok(views.html.admin.publishers.show(publisher, role)))
+      .map(publisher => Ok(views.html.publish.publishers.show(publisher, role)))
       .getOrElse(Forbidden(views.html.errors.forbidden(user.name.first)))
   }
 

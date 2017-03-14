@@ -1,4 +1,4 @@
-package controllers.admin
+package controllers.publish
 
 import javax.inject.{Inject, Singleton}
 
@@ -87,7 +87,7 @@ class NewsController @Inject()(
     val theNews = news.getNewsByPublisher(publisherId, limit = 100)
     val counts = news.countRecipients(theNews.map(_.id))
     val (newsPending, newsPublished) = partitionNews(theNews)
-    Ok(views.html.admin.news.list(request.publisher, newsPending, newsPublished, counts, request.userRole))
+    Ok(views.html.publish.news.list(request.publisher, newsPending, newsPublished, counts, request.userRole))
   }
 
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNews).async { implicit request =>
@@ -144,13 +144,13 @@ class NewsController @Inject()(
 
         auditLog('CreateNewsItem, 'id -> newsItemId)
 
-        Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("result" -> "News created")
+        Redirect(controllers.publish.routes.NewsController.list(publisherId)).flashing("result" -> "News created")
       }
     )
   }
 
   def renderCreateForm(publisher: Publisher, form: Form[PublishNewsItemData])(implicit request: PublisherRequest[_]) = {
-    views.html.admin.news.createForm(
+    views.html.publish.news.createForm(
       publisher = publisher,
       form = form,
       categories = categoryOptions,
@@ -184,7 +184,7 @@ class NewsController @Inject()(
 
           auditLog('UpdateNewsItem, 'id -> id)
 
-          Redirect(controllers.admin.routes.NewsController.list(publisherId)).flashing("success" -> "News updated")
+          Redirect(controllers.publish.routes.NewsController.list(publisherId)).flashing("success" -> "News updated")
         }
       )
     })
@@ -222,7 +222,7 @@ class NewsController @Inject()(
   }
 
   private def renderUpdateForm(publisherId: String, id: String, form: Form[PublishNewsItemData])(implicit request: PublisherRequest[_]) = {
-    views.html.admin.news.updateForm(
+    views.html.publish.news.updateForm(
       publisher = request.publisher,
       id = id,
       form = form,
