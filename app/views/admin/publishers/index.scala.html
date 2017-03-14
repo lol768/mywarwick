@@ -4,16 +4,26 @@
 @(publishers: Seq[Publisher])(implicit context: RequestContext)
 @common.admin("Select Publisher Account") {
 
-  <p>
-    Please select the account you would like to use:
-  </p>
+  @if(publishers.isEmpty) {
 
-  <ul>
-  @for(publisher <- publishers) {
-    <li>
-      <a href="@controllers.admin.routes.PublishersController.show(publisher.id)">@publisher.name</a>
-    </li>
+    <div class="alert alert-danger">
+      You do not have access to any publishers
+    </div>
+
+  } else {
+
+    <p>
+      Please select the account you would like to use:
+    </p>
+
+    <ul>
+    @for(publisher <- publishers) {
+      <li>
+        <a href="@controllers.admin.routes.PublishersController.show(publisher.id)">@publisher.name</a>
+      </li>
+    }
+    </ul>
+
   }
-  </ul>
 
 }
