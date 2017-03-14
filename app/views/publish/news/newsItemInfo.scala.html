@@ -42,7 +42,7 @@
     <div class="btn-toolbar pull-right">
       @if(user can EditNews) {
         <a
-        href="@controllers.admin.routes.NewsController.updateForm(publisher, item.id)"
+        href="@controllers.publish.routes.NewsController.updateForm(publisher, item.id)"
         class="btn btn-primary"
         >Edit</a>
       }
@@ -53,7 +53,7 @@
       </div>
     <div class="btn-toolbar pull-right confirm-delete">
       <p>Are you sure?</p>
-      @helper.form(controllers.admin.routes.NewsController.delete(publisher, item.id)) {
+      @helper.form(controllers.publish.routes.NewsController.delete(publisher, item.id)) {
         <button type="submit" class="btn btn-danger">Delete</button>
       }
       <button class="btn btn-default cancel">Cancel</button>

@@ -1,6 +1,6 @@
 package models.news
 
-import controllers.admin.NewsItemData
+import controllers.publish.NewsItemData
 import models.{DateFormats, NewsCategory}
 import org.joda.time.DateTime
 import play.api.libs.json._

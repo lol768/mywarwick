@@ -77,7 +77,10 @@ export class NewsView extends React.Component {
     const itemComponents = items
       .map(item => <NewsItem key={item.id} width={width} {...item} />);
 
-    const maybeMessage = !fetching ? <p>No news to show you yet.</p> : null;
+    const maybeMessage = !fetching ?
+      <div className="container">
+        <p>No news to show you yet.</p>
+      </div> : null;
 
     return (
       <div className="margin-top-1">

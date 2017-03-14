@@ -16,6 +16,7 @@ describe('TrafficTile', () => {
   // Re-initialise the spy before each test
   beforeEach(() => {
     props = {
+      size: 'wide',
       content: {
         items: [
           {

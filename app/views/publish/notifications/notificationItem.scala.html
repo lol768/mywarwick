@@ -9,7 +9,7 @@
     <div class="col-xs-10">
       <div class="media-left">
         <i class="app-icon app-icon--lg fa fa-fw fa-@item.icon.map(_.name).getOrElse("newspaper-o")"
-        style="background-color:@item.icon.map(_.colour).getOrElse("#5b3069")">
+        data-background-color="@item.icon.map(_.colour).getOrElse("#5b3069")">
         </i>
       </div>
       <div class="media-body">
@@ -27,7 +27,7 @@
       @if(item.activity.publishedAt.isAfterNow) {
         <div class="btn-toolbar pull-right">
         @if(user can EditNotifications) {
-            <a href="@controllers.admin.routes.NotificationsController.updateForm(publisher.id, item.activity.id)" class="btn btn-default">
+            <a href="@controllers.publish.routes.NotificationsController.updateForm(publisher.id, item.activity.id)" class="btn btn-default">
               Edit</a>
           }
         @if(user can DeleteNotifications) {
@@ -37,7 +37,7 @@
       </div>
       <div class="btn-toolbar pull-right confirm-delete">
         <p>Are you sure?</p>
-        @helper.form(controllers.admin.routes.NotificationsController.delete(publisher.id, item.activity.id)) {
+        @helper.form(controllers.publish.routes.NotificationsController.delete(publisher.id, item.activity.id)) {
           <button type="submit" class="btn btn-danger">Delete</button>
         }
         <button class="btn btn-default cancel">Cancel</button>

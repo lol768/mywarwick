@@ -1,0 +1,29 @@
+@import models.publishing.Publisher
+@import system.RequestContext
+
+@(publishers: Seq[Publisher])(implicit context: RequestContext)
+@common.admin("Select Publisher Account") {
+
+  @if(publishers.isEmpty) {
+
+    <div class="alert alert-danger">
+      You do not have access to any publishers
+    </div>
+
+  } else {
+
+    <p>
+      Please select the account you would like to use:
+    </p>
+
+    <ul>
+    @for(publisher <- publishers) {
+      <li>
+        <a href="@controllers.publish.routes.PublishersController.show(publisher.id)">@publisher.name</a>
+      </li>
+    }
+    </ul>
+
+  }
+
+}
