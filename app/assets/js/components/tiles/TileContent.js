@@ -29,7 +29,6 @@ export default class TileContent extends Component {
     return true;
   }
 
-
   static isVisibleOnDesktopOnly() {
     return false;
   }
@@ -47,16 +46,21 @@ export default class TileContent extends Component {
   }
 
   getBody() {
+    if (this.props.zoomed) {
+      return this.getZoomedBody();
+    }
+
     switch (this.props.size.toLowerCase()) {
-      case TILE_SIZES.LARGE:
       case TILE_SIZES.TALL:
+        return this.getZoomedBody();
+      case TILE_SIZES.LARGE:
         return this.getLargeBody();
       case TILE_SIZES.WIDE:
         return this.getWideBody();
       case TILE_SIZES.SMALL:
         return this.getSmallBody();
       default:
-        throw new ReferenceError('Tile props.size is not one of [ large, wide, small ]');
+        throw new ReferenceError('Tile props.size is not valid');
     }
   }
 
@@ -87,9 +91,8 @@ export default class TileContent extends Component {
   render() {
     if (!this.isError()) {
       try {
-        const { content, zoomed } = this.props;
-        if (content || !this.needsContentToRender()) {
-          return this.contentOrDefault(zoomed ? this.getZoomedBody : this.getBody);
+        if (this.props.content || !this.needsContentToRender()) {
+          return this.contentOrDefault(this.getBody);
         }
       } catch (e) {
         log.error('Error rendering tile', e);
