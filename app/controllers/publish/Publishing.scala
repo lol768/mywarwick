@@ -112,7 +112,6 @@ trait DepartmentOptions {
   val publisherService: PublisherService
 
   private val audienceDepartmentTypes = Set("ACADEMIC", "SERVICE")
-  private val departmentInitialValue = Seq("" -> "--- Department ---")
 
   lazy val allPublishableDepartments =
     departmentInfoDao.allDepartments
@@ -120,7 +119,7 @@ trait DepartmentOptions {
       .sortBy(_.name)
 
   def departmentOptions(implicit publisherRequest: PublisherRequest[_]) =
-    departmentInitialValue ++ departmentsWithPublishPermission.map(dept => dept.code -> dept.name)
+    departmentsWithPublishPermission.map(dept => dept.code -> dept.name)
 
   def departmentsWithPublishPermission(implicit publisherRequest: PublisherRequest[_]) =
     permissionScope match {
