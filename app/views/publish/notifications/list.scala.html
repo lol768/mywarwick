@@ -12,7 +12,7 @@
 @common.admin("Notifications") {
   @if(user can CreateNotifications) {
     <p>
-      <a class="btn btn-default" href="@controllers.admin.routes.NotificationsController.createForm(publisher.id)">
+      <a class="btn btn-default" href="@controllers.publish.routes.NotificationsController.createForm(publisher.id)">
         Create notification
       </a>
     </p>
@@ -22,13 +22,13 @@
   @if(futureNotifications.isEmpty) {
     <p>No pending notifications.</p>
   } else {
-    @futureNotifications.map(n => views.html.admin.notifications.notificationItem(publisher, n, user))
+    @futureNotifications.map(n => views.html.publish.notifications.notificationItem(publisher, n, user))
   }
 
   <h3>Sent</h3>
   @if(pastNotifications.isEmpty) {
     <p>No sent notifications.</p>
   } else {
-    @pastNotifications.map(n => views.html.admin.notifications.notificationItem(publisher, n, user))
+    @pastNotifications.map(n => views.html.publish.notifications.notificationItem(publisher, n, user))
   }
 }

@@ -11,7 +11,7 @@
   <ul>
   @for(publisher <- publishers) {
     <li>
-      <a href="@controllers.admin.routes.PublishersController.show(publisher.id)">@publisher.name</a>
+      <a href="@controllers.publish.routes.PublishersController.show(publisher.id)">@publisher.name</a>
     </li>
   }
   </ul>

@@ -1,9 +1,10 @@
-@import controllers.admin.NotificationsController.PublishNotificationForm
+@import controllers.publish.NotificationsController.PublishNotificationForm
 @import models.publishing.{PermissionScope, Publisher}
 @import system.RequestContext
 @import views.html._
 @(
     publisher: Publisher,
+    activity: Activity,
     form: PublishNotificationForm,
     departmentOptions: Seq[(String, String)],
     providerOptions: Seq[(String, String)],
@@ -14,20 +15,21 @@
   b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
 }
 
-@common.admin("Create notification") {
+@common.admin("Update notification") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NotificationsController.create(publisher.id, true), 'class -> "split-form") {
+  @b3.form(action = controllers.publish.routes.NotificationsController.update(publisher.id, activity.id, true), 'class -> "split-form") {
 
     @form.globalErrors.map { error =>
       <div class="alert alert-danger">@error.message</div>
     }
 
-    @admin.notifications.contentForm(form, departmentOptions, providerOptions, permissionScope)
+    @publish.notifications.contentForm(form, departmentOptions, providerOptions, permissionScope)
 
     <section>
     @tags.audiencePicker(form, "audience", departmentOptions, "notification", permissionScope, allowPublic = false)
-    @tags.submitOrCancel("Create", controllers.admin.routes.NotificationsController.list(publisher.id))
+    @tags.submitOrCancel("Update", controllers.publish.routes.NotificationsController.list(publisher.id))
     </section>
   }
   </div>
 }
+

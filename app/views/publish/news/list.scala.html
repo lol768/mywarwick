@@ -15,7 +15,7 @@
   @common.admin("News") {
     @if(user can CreateNews) {
       <p>
-        <a class="btn btn-default" href="@controllers.admin.routes.NewsController.createForm(publisher.id)">
+        <a class="btn btn-default" href="@controllers.publish.routes.NewsController.createForm(publisher.id)">
           Create news</a>
       </p>
     }
@@ -25,7 +25,7 @@
       <p>No pending news.</p>
     } else {
       @newsPending.map { item =>
-        @admin.news.newsItemInfo(publisher.id, item, counts.get(item.id), user)
+        @publish.news.newsItemInfo(publisher.id, item, counts.get(item.id), user)
       }
     }
 
@@ -34,7 +34,7 @@
       <p>No published news.</p>
     } else {
       @newsPublished.map { item =>
-        @admin.news.newsItemInfo(publisher.id, item, counts.get(item.id), user)
+        @publish.news.newsItemInfo(publisher.id, item, counts.get(item.id), user)
       }
     }
   }

@@ -1,5 +1,5 @@
+@import controllers.publish.PublishNewsItemData
 @import system.RequestContext
-@import controllers.admin.PublishNewsItemData
 @import views.html._
 @import models.publishing.PermissionScope
 @import models.publishing.Publisher
@@ -20,11 +20,11 @@
 
 @common.admin("Update news") {
   <div class="container-fluid">
-  @b3.form(action = controllers.admin.routes.NewsController.update(publisher.id, id, true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.admin.routes.NewsController.audienceInfo(publisher.id)) {
+  @b3.form(action = controllers.publish.routes.NewsController.update(publisher.id, id, true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.publish.routes.NewsController.audienceInfo(publisher.id)) {
     <div class="audience-indicator"></div>
 
     <section>
-      @admin.news.contentForm(form)
+      @publish.news.contentForm(form)
     </section>
 
     <section>
@@ -50,7 +50,7 @@
     <section>
       @tags.categoryPicker(form, "categories", categories, "news item")
 
-      @tags.submitOrCancel("Update", controllers.admin.routes.NewsController.list(publisher.id))
+      @tags.submitOrCancel("Update", controllers.publish.routes.NewsController.list(publisher.id))
     </section>
   }
   </div>

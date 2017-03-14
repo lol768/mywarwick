@@ -1,4 +1,4 @@
-package controllers.admin
+package controllers.publish
 
 import javax.inject.Inject
 
@@ -15,7 +15,7 @@ import services._
 import services.dao.DepartmentInfoDao
 import system.Validation
 import views.html.errors
-import views.html.admin.{notifications => views}
+import views.html.publish.{notifications => views}
 
 import scala.concurrent.Future
 
