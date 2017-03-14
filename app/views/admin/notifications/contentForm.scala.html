@@ -14,11 +14,16 @@
   '_help -> "Keep it super short"
 )
 
-@b3.select(form("item.provider"), providerOptions,
-  '_label -> "Source",
-  '_default -> "",
-  '_help -> "Select the source of this notification"
-)
+@if(providerOptions.size == 1) {
+  @b3.hidden("item.provider", providerOptions.head._1)
+} else {
+  @b3.select(form("item.provider"), providerOptions,
+    '_label -> "Source",
+    '_default -> "",
+    '_help -> "Select the source of this notification"
+  )
+}
+
 
 @b3.text(form("item.linkHref"),
   '_label -> "Link URL",
