@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import FileUpload from './publish/components/FileUpload';
 import $ from 'jquery';
-
 import './publish/news';
 
 /*
@@ -55,4 +54,8 @@ function wireEventListeners() {
 
 $(() => {
   wireEventListeners();
+
+  $('[data-background-color]').each(function applyBackgroundColour() {
+    $(this).css('background-color', $(this).data('background-color'));
+  });
 });
