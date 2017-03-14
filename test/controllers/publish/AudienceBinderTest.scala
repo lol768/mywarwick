@@ -1,18 +1,12 @@
-package controllers.admin
+package controllers.publish
 
 import models.Audience
-import models.Audience.{Staff, UndergradStudents}
-import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.data.FormError
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
-import play.api.test.Helpers._
-import play.api.test._
-
-import scala.concurrent.Future
 
 class AudienceBinderTest extends PlaySpec with MockitoSugar with ScalaFutures {
 

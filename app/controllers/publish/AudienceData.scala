@@ -1,4 +1,4 @@
-package controllers.admin
+package controllers.publish
 
 case class AudienceData(
   audience: Seq[String],

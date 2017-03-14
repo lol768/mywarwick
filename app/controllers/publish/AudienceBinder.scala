@@ -1,4 +1,4 @@
-package controllers.admin
+package controllers.publish
 
 import javax.inject.{Inject, Singleton}
 

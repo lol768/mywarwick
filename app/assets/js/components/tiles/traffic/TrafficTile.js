@@ -41,7 +41,7 @@ export default class TrafficTile extends TileContent {
     return true;
   }
 
-  _getBody() {
+  _getLargeBody() {
     const { content, content: { alerts: { items } } } = this.props;
 
     return (
@@ -64,8 +64,8 @@ export default class TrafficTile extends TileContent {
     );
   }
 
-  getBody() {
-    return this.renderIfFresh(this._getBody);
+  getLargeBody() {
+    return this.renderIfFresh(this._getLargeBody);
   }
 
   _getZoomedBody() {
@@ -82,7 +82,7 @@ export default class TrafficTile extends TileContent {
           )}
           {
             content.alerts.items.length > 2 ?
-              <a className="more-alerts" href={content.alerts.href}>See more ...</a>
+              <a className="more-alerts" href={content.alerts.href}>See more&hellip;</a>
               : null
           }
         </div>

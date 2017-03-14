@@ -1,5 +1,6 @@
-package controllers.admin
+package controllers.publish
 
+import controllers.admin.addFormErrors
 import models.Audience
 import models.publishing._
 import play.api.data.Forms._

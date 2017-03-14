@@ -1,4 +1,4 @@
-package controllers.admin
+package controllers.publish
 
 import com.google.inject.Inject
 import controllers.BaseController
@@ -17,11 +17,11 @@ class PublishersController @Inject()(
     val publishers = publisherService.getPublishersForUser(user.usercode)
 
     if (publishers.isEmpty) {
-      Forbidden(views.html.admin.publishers.index(Nil))
+      Forbidden(views.html.publish.publishers.index(Nil))
     } else if (publishers.size == 1) {
       Redirect(routes.PublishersController.show(publishers.head.id))
     } else {
-      Ok(views.html.admin.publishers.index(publishers))
+      Ok(views.html.publish.publishers.index(publishers))
     }
   }
 
@@ -32,7 +32,7 @@ class PublishersController @Inject()(
     val role = publisherService.getRoleForUser(publisherId, user.usercode)
 
     publishers.find(_.id == publisherId)
-      .map(publisher => Ok(views.html.admin.publishers.show(publisher, role)))
+      .map(publisher => Ok(views.html.publish.publishers.show(publisher, role)))
       .getOrElse(Forbidden(views.html.errors.forbidden(user.name.first)))
   }
 

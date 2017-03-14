@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import FileUpload from './admin/components/FileUpload';
+import FileUpload from './publish/components/FileUpload';
 import $ from 'jquery';
 
-import './admin/news';
+import './publish/news';
 
 /*
  Attempt to register service worker - we don't do notifications or offline but it's nice to keep it
