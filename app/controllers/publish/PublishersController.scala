@@ -16,7 +16,13 @@ class PublishersController @Inject()(
 
     val publishers = publisherService.getPublishersForUser(user.usercode)
 
-    Ok(views.html.publish.publishers.index(publishers))
+    if (publishers.isEmpty) {
+      Forbidden(views.html.publish.publishers.index(Nil))
+    } else if (publishers.size == 1) {
+      Redirect(routes.PublishersController.show(publishers.head.id))
+    } else {
+      Ok(views.html.publish.publishers.index(publishers))
+    }
   }
 
   def show(publisherId: String) = RequiredUserAction { implicit request =>
