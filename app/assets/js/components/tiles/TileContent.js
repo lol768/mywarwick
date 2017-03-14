@@ -1,7 +1,8 @@
-/* eslint react/prop-types: 0, react/sort-comp: 0 */
-import React, { Component } from 'react';
+import React from 'react';
 import * as log from 'loglevel';
 import * as errorreporter from '../../errorreporter';
+import _ from 'lodash';
+
 export const TILE_SIZES = {
   SMALL: 'small',
   WIDE: 'wide',
@@ -9,40 +10,19 @@ export const TILE_SIZES = {
   TALL: 'tall',
 };
 
-export default class TileContent extends Component {
-
-  constructor(props) {
-    super(props);
-    this.error = false;
-  }
-
-  isEmpty() {
-    const { content } = this.props;
-    return !content.items || content.items.length === 0;
-  }
-
-  isError() {
-    return this.error;
-  }
-
-  isRemovable() {
-    return true;
-  }
+export default class TileContent extends React.Component {
 
   static isVisibleOnDesktopOnly() {
     return false;
   }
 
-  needsContentToRender() {
-    return true;
+  static canZoom() {
+    return false;
   }
 
-  contentOrDefault(contentFunction) {
-    if (this.isEmpty()) {
-      return <span>{ this.props.content.defaultText || 'Nothing to show.' }</span>;
-    }
-
-    return contentFunction.call(this);
+  constructor(props) {
+    super(props);
+    this.error = false;
   }
 
   getBody() {
@@ -50,17 +30,16 @@ export default class TileContent extends Component {
       return this.getZoomedBody();
     }
 
-    switch (this.props.size.toLowerCase()) {
+    switch (this.props.size) {
       case TILE_SIZES.TALL:
         return this.getZoomedBody();
-      case TILE_SIZES.LARGE:
-        return this.getLargeBody();
       case TILE_SIZES.WIDE:
         return this.getWideBody();
       case TILE_SIZES.SMALL:
         return this.getSmallBody();
+      case TILE_SIZES.LARGE:
       default:
-        throw new ReferenceError('Tile props.size is not valid');
+        return this.getLargeBody();
     }
   }
 
@@ -76,16 +55,37 @@ export default class TileContent extends Component {
     return this.getLargeBody();
   }
 
-  static canZoom() {
-    return false;
-  }
-
   getZoomedBody() {
     return this.getLargeBody();
   }
 
   getIcon() {
     return null;
+  }
+
+  contentOrDefault(contentFunction) {
+    if (this.isEmpty()) {
+      return <span>{ this.props.content.defaultText || 'Nothing to show.' }</span>;
+    }
+
+    return contentFunction.call(this);
+  }
+
+  isError() {
+    return this.error;
+  }
+
+  isEmpty() {
+    const { content } = this.props;
+    return !content.items || content.items.length === 0;
+  }
+
+  isRemovable() {
+    return true;
+  }
+
+  needsContentToRender() {
+    return true;
   }
 
   render() {
@@ -107,3 +107,9 @@ export default class TileContent extends Component {
   }
 
 }
+
+TileContent.propTypes = {
+  content: React.PropTypes.object,
+  size: React.PropTypes.oneOf(_.values(TILE_SIZES)).isRequired,
+  zoomed: React.PropTypes.bool,
+};
