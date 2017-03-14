@@ -361,7 +361,7 @@ export function tileContentReducer(state = initialContentState, action) {
         return prev;
       };
 
-      return _.mergeWith(state, action.content, merger);
+      return _.mergeWith({ ...state }, action.content, merger);
     }
     default:
       return state;
