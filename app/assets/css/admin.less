@@ -19,7 +19,7 @@ dd.error {
   color: @id7-brand-red;
 }
 
-.split-form {
+.split-form__sections {
   position: relative;
 
   > section {
@@ -33,7 +33,11 @@ dd.error {
   }
 }
 
-.split-form > section.active {
+.split-form--transitioning .split-form__sections {
+  overflow: hidden;
+}
+
+.split-form__sections > section.active {
   display: block;
 }
 
@@ -55,11 +59,3 @@ dd.error {
   }
 }
 
-.audience-indicator {
-  i {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 8px 10px;
-  }
-}

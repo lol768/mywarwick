@@ -16,20 +16,20 @@
 }
 
 @common.admin("Update notification") {
-  <div class="container-fluid">
   @b3.form(action = controllers.publish.routes.NotificationsController.update(publisher.id, activity.id, true), 'class -> "split-form") {
 
     @form.globalErrors.map { error =>
       <div class="alert alert-danger">@error.message</div>
     }
 
-    @publish.notifications.contentForm(form, departmentOptions, providerOptions, permissionScope)
+    <div class="split-form__sections">
+      @publish.notifications.contentForm(form, departmentOptions, providerOptions, permissionScope)
 
-    <section>
-    @tags.audiencePicker(form, "audience", departmentOptions, "notification", permissionScope, allowPublic = false)
-    @tags.submitOrCancel("Update", controllers.publish.routes.NotificationsController.list(publisher.id))
-    </section>
+      <section>
+        @tags.audiencePicker(form, "audience", departmentOptions, "notification", permissionScope, allowPublic = false)
+        @tags.submitOrCancel("Update", controllers.publish.routes.NotificationsController.list(publisher.id))
+      </section>
+    </div>
   }
-  </div>
 }
 
