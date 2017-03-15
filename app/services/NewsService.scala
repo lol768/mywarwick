@@ -3,7 +3,7 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import models.news.{NewsItemRender, NewsItemSave}
+import models.news.{NewsItemAudit, NewsItemRender, NewsItemSave}
 import models.{Audience, AudienceSize}
 import org.joda.time.DateTime
 import org.quartz.JobBuilder.newJob
@@ -14,7 +14,7 @@ import play.api.db.Database
 import services.dao.{AudienceDao, NewsCategoryDao, NewsDao, NewsImageDao}
 import services.job.PublishNewsItemJob
 import system.ThreadPools.web
-import warwick.sso.Usercode
+import warwick.sso.{UserLookupService, Usercode}
 
 import scala.concurrent.Future
 
@@ -44,6 +44,8 @@ trait NewsService {
 
   def getNewsItem(id: String): Option[NewsItemRender]
 
+  def getNewsItemAudits(newsIds: Seq[String]): Seq[NewsItemAudit]
+
   def setRecipients(newsItemId: String, recipients: Seq[Usercode]): Unit
 
   def delete(newsItemId: String): Unit
@@ -57,7 +59,8 @@ class AnormNewsService @Inject()(
   newsImageDao: NewsImageDao,
   audienceDao: AudienceDao,
   userInitialisationService: UserInitialisationService,
-  scheduler: SchedulerService
+  scheduler: SchedulerService,
+  userLookupService: UserLookupService
 ) extends NewsService {
 
   override def delete(newsId: String) = db.withTransaction { implicit c =>
@@ -159,6 +162,14 @@ class AnormNewsService @Inject()(
   override def getNewsItem(id: String): Option[NewsItemRender] =
     db.withConnection { implicit c =>
       dao.getNewsById(id)
+    }
+
+  override def getNewsItemAudits(newsIds: Seq[String]): Seq[NewsItemAudit] =
+    db.withConnection { implicit c =>
+      dao.getNewsAuditByIds(newsIds).map(audit => audit.copy(
+        createdByUser = userLookupService.getUser(audit.createdBy).toOption,
+        updatedByUser = audit.updatedBy.flatMap(u => userLookupService.getUser(u).toOption)
+      ))
     }
 
   /**

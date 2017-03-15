@@ -95,7 +95,9 @@ class NewsController @Inject()(
     val theNews = news.getNewsByPublisher(publisherId, limit = 100)
     val counts = news.countRecipients(theNews.map(_.id))
     val (newsPending, newsPublished) = partitionNews(theNews)
-    Ok(views.html.publish.news.list(request.publisher, newsPending, newsPublished, counts, request.userRole))
+    val audits = news.getNewsItemAudits(theNews.map(_.id))
+    val auditMap = theNews.map(n => n -> audits.find(_.id == n.id)).toMap
+    Ok(views.html.publish.news.list(request.publisher, newsPending, newsPublished, auditMap, counts, request.userRole))
   }
 
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNews).async { implicit request =>

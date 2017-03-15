@@ -5,7 +5,7 @@ import models.{DateFormats, NewsCategory}
 import org.joda.time.DateTime
 import play.api.libs.json._
 import uk.ac.warwick.util.web.Uri
-import warwick.sso.Usercode
+import warwick.sso.{User, Usercode}
 
 case class Link(text: String, href: Uri)
 object Link {
@@ -68,4 +68,14 @@ case class NewsItemSave (
   imageId: Option[String],
   ignoreCategories: Boolean = false
   // TODO publisher
+)
+
+case class NewsItemAudit (
+  id: String,
+  created: DateTime,
+  createdBy: Usercode,
+  createdByUser: Option[User],
+  updated: Option[DateTime],
+  updatedBy: Option[Usercode],
+  updatedByUser: Option[User]
 )
