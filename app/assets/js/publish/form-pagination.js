@@ -19,10 +19,11 @@ $(SPLIT_FORM).each((i, form) => {
     $prev.removeClass('active')
       .animate({ marginLeft: `${100 * dir}%`, opacity: 0 }, {
         duration: SLIDE_DURATION,
-        start: () => $form.css('overflow', 'hidden'),
+        start: () => $form.addClass('split-form--transitioning'),
         complete: () => {
-          $form.css('overflow', 'visible');
+          $form.removeClass('split-form--transitioning');
           $prev.hide();
+          $next.find('input[data-autofocus]').focus();
         },
       });
 
@@ -76,7 +77,7 @@ $(SPLIT_FORM).each((i, form) => {
 
   function updateFormGroupErrors(html) {
     // Remove all errors from the current page of the form
-    const $currentSection = $(`section:eq(${currentPage})`);
+    const $currentSection = $form.find(`section:eq(${currentPage})`);
     $currentSection.find('*[id*=_error_]').remove();
     $currentSection.find('.has-error').removeClass('has-error');
 

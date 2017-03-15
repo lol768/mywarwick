@@ -24,6 +24,8 @@ import scala.concurrent.Future
 
 case class PublishNewsItemData(item: NewsItemData, categoryIds: Seq[String], audience: AudienceData) extends PublishableWithAudience
 
+case class NewsItemAudienceData(ignoreCategories: Boolean, categoryIds: Seq[String], audience: AudienceData)
+
 case class NewsItemData(
   title: String,
   text: String,
@@ -83,6 +85,12 @@ class NewsController @Inject()(
     "audience" -> audienceMapping
   )(PublishNewsItemData.apply)(PublishNewsItemData.unapply))
 
+  def newsAudienceForm(implicit request: PublisherRequest[_]) = Form(mapping(
+    "item.ignoreCategories" -> boolean,
+    "categories" -> categoryMapping,
+    "audience" -> audienceMapping
+  )(NewsItemAudienceData.apply)(NewsItemAudienceData.unapply))
+
   def list(publisherId: String) = PublisherAction(publisherId, ViewNews) { implicit request =>
     val theNews = news.getNewsByPublisher(publisherId, limit = 100)
     val counts = news.countRecipients(theNews.map(_.id))
@@ -102,12 +110,12 @@ class NewsController @Inject()(
                 "public" -> true
               ))))
             } else {
-              val formData = publishNewsForm.bindFromRequest.value
+              val formData = newsAudienceForm.bindFromRequest.value
 
               audienceService.resolve(audience)
                 .toOption
                 .map { usercodesInAudience =>
-                  formData.filterNot(_.item.ignoreCategories)
+                  formData.filterNot(_.ignoreCategories)
                     .map { data =>
                       val initialisedUsers = userPreferencesService.countInitialisedUsers(usercodesInAudience)
                       val newsRecipients = userNewsCategoryService.getRecipientsOfNewsInCategories(data.categoryIds).intersect(usercodesInAudience).length
