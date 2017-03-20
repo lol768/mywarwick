@@ -1,4 +1,5 @@
 import log from 'loglevel';
+import { browserHistory } from 'react-router';
 
 let mq;
 try {
@@ -71,4 +72,15 @@ export function updateUIContext() {
       native: isNative(),
     });
   };
+}
+
+// todo REMOVE ME WHEN YOU IMPLEMENT PER-TAB SCROLL POSITION REMEMBERING
+browserHistory.listen( location =>  {
+  if(isTopLevelUrl(location)) {
+    $('#main').scrollTop(0);  
+  }
+}); 
+
+function isTopLevelUrl(location) {
+  return (location.pathname.match(/\//g) || []).length == 1;
 }
