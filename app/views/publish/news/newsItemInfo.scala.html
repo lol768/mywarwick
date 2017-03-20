@@ -1,8 +1,8 @@
 @import models.publishing.Role
-@import models.news.NewsItemRender
 @import models.publishing.Ability.EditNews
 @import models.publishing.Ability.DeleteNews
-@(publisher: String, item: NewsItemRender, count: Option[AudienceSize], user: Role)
+@import models.news.NewsItemRenderWithAudit
+@(publisher: String, item: NewsItemRenderWithAudit, count: Option[AudienceSize], user: Role)
 <article id="@item.id" class="news-item row">
   <div class="col-xs-10">
     <div class="news-item__body">
@@ -14,7 +14,16 @@
       }
       <div class="news-item__content">@item.text</div>
       <div class="news-item__footer">
-        @models.DateFormats.emailDateTime(item.publishDate)
+        Published @models.DateFormats.emailDateTime(item.publishDate),
+        @item.updated.map { updated =>
+          updated by
+          @item.updatedBy.flatMap(_.name.full).getOrElse("[Unknown]")
+          @models.DateFormats.emailDateTime(updated)
+        }.getOrElse {
+          created by
+          @item.createdBy.flatMap(_.name.full).getOrElse("[Unknown]")
+          @models.DateFormats.emailDateTime(item.created)
+        }
         <div class="click-count"><i class="fa fa-spin fa-refresh"></i></div>
         @count match {
           case Some(AudienceSize.Public) => {
