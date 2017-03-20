@@ -1,15 +1,12 @@
-@import system.RequestContext
-@import models.news.NewsItemRender
-@import views.html._
+@import models.news.NewsItemRenderWithAudit
 @import models.publishing.Ability.CreateNews
-@import models.publishing.Role
-@import models.publishing.Publisher
-@import models.news.NewsItemAudit
+@import models.publishing.{Publisher, Role}
+@import system.RequestContext
+@import views.html._
 @(
     publisher: Publisher,
-    newsPending: Seq[NewsItemRender],
-    newsPublished: Seq[NewsItemRender],
-    newsAuditMap: Map[NewsItemRender, Option[NewsItemAudit]],
+    newsPending: Seq[NewsItemRenderWithAudit],
+    newsPublished: Seq[NewsItemRenderWithAudit],
     counts: Map[String, AudienceSize],
     user: Role
 )(implicit context: RequestContext)
@@ -27,7 +24,7 @@
       <p>No pending news.</p>
     } else {
       @newsPending.map { item =>
-        @publish.news.newsItemInfo(publisher.id, item, newsAuditMap(item), counts.get(item.id), user)
+        @publish.news.newsItemInfo(publisher.id, item, counts.get(item.id), user)
       }
     }
 
@@ -36,7 +33,7 @@
       <p>No published news.</p>
     } else {
       @newsPublished.map { item =>
-        @publish.news.newsItemInfo(publisher.id, item, newsAuditMap(item), counts.get(item.id), user)
+        @publish.news.newsItemInfo(publisher.id, item, counts.get(item.id), user)
       }
     }
   }

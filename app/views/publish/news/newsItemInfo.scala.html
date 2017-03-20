@@ -1,9 +1,8 @@
 @import models.publishing.Role
-@import models.news.NewsItemRender
 @import models.publishing.Ability.EditNews
 @import models.publishing.Ability.DeleteNews
-@import models.news.NewsItemAudit
-@(publisher: String, item: NewsItemRender, auditOption: Option[NewsItemAudit], count: Option[AudienceSize], user: Role)
+@import models.news.NewsItemRenderWithAudit
+@(publisher: String, item: NewsItemRenderWithAudit, count: Option[AudienceSize], user: Role)
 <article id="@item.id" class="news-item row">
   <div class="col-xs-10">
     <div class="news-item__body">
@@ -15,17 +14,15 @@
       }
       <div class="news-item__content">@item.text</div>
       <div class="news-item__footer">
-        Published @models.DateFormats.emailDateTime(item.publishDate)@if(auditOption.nonEmpty){,}
-        @auditOption.map { audit =>
-          @if(audit.updatedBy.nonEmpty) {
-            updated by
-            @audit.updatedByUser.flatMap(_.name.full).map(n => s"$n (${audit.updatedBy.get.string})").getOrElse(audit.updatedBy.get.string)
-            @audit.updated.map { u => @models.DateFormats.emailDateTime(u) }
-          } else {
-            created by
-            @audit.createdByUser.flatMap(_.name.full).map(n => s"$n (${audit.createdBy.string})").getOrElse(audit.createdBy.string)
-            @models.DateFormats.emailDateTime(audit.created)
-          }
+        Published @models.DateFormats.emailDateTime(item.publishDate),
+        @item.updated.map { updated =>
+          updated by
+          @item.updatedBy.flatMap(_.name.full).getOrElse("[Unknown]")
+          @models.DateFormats.emailDateTime(updated)
+        }.getOrElse {
+          created by
+          @item.createdBy.flatMap(_.name.full).getOrElse("[Unknown]")
+          @models.DateFormats.emailDateTime(item.created)
         }
         <div class="click-count"><i class="fa fa-spin fa-refresh"></i></div>
         @count match {

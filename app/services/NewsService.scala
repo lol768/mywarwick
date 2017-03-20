@@ -3,7 +3,7 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import models.news.{NewsItemAudit, NewsItemRender, NewsItemSave}
+import models.news.{NewsItemAudit, NewsItemRender, NewsItemRenderWithAudit, NewsItemSave}
 import models.{Audience, AudienceSize}
 import org.joda.time.DateTime
 import org.quartz.JobBuilder.newJob
@@ -24,6 +24,8 @@ trait NewsService {
 
   def getNewsByPublisher(publisherId: String, limit: Int, offset: Int = 0): Seq[NewsItemRender]
 
+  def getNewsByPublisherWithAudits(publisherId: String, limit: Int, offset: Int = 0): Seq[NewsItemRenderWithAudit]
+
   def latestNews(user: Option[Usercode], limit: Int, offset: Int = 0): Seq[NewsItemRender]
 
   def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String
@@ -43,8 +45,6 @@ trait NewsService {
   def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize]
 
   def getNewsItem(id: String): Option[NewsItemRender]
-
-  def getNewsItemAudits(newsIds: Seq[String]): Seq[NewsItemAudit]
 
   def setRecipients(newsItemId: String, recipients: Seq[Usercode]): Unit
 
@@ -74,6 +74,19 @@ class AnormNewsService @Inject()(
     db.withConnection { implicit c =>
       dao.allNews(publisherId, limit, offset)
     }
+
+  def getNewsByPublisherWithAudits(publisherId: String, limit: Int, offset: Int = 0): Seq[NewsItemRenderWithAudit] = {
+    val news = getNewsByPublisher(publisherId, limit, offset)
+    val audits = db.withConnection { implicit c =>
+      val audits = dao.getNewsAuditByIds(news.map(_.id))
+      val users = userLookupService.getUsers(audits.flatMap(n => Seq(n.createdBy, n.updatedBy).flatten)).getOrElse(Map.empty)
+      audits.map(audit => audit.copy(
+        createdBy = audit.createdBy.flatMap(u => users.get(u)),
+        updatedBy = audit.updatedBy.flatMap(u => users.get(u))
+      ))
+    }.groupBy(_.id).mapValues(_.head)
+    news.map(n => NewsItemRenderWithAudit.applyWithAudit(n, audits(n.id)))
+  }
 
   override def latestNews(user: Option[Usercode], limit: Int, offset: Int): Seq[NewsItemRender] = {
     user.foreach(userInitialisationService.maybeInitialiseUser)
@@ -162,14 +175,6 @@ class AnormNewsService @Inject()(
   override def getNewsItem(id: String): Option[NewsItemRender] =
     db.withConnection { implicit c =>
       dao.getNewsById(id)
-    }
-
-  override def getNewsItemAudits(newsIds: Seq[String]): Seq[NewsItemAudit] =
-    db.withConnection { implicit c =>
-      dao.getNewsAuditByIds(newsIds).map(audit => audit.copy(
-        createdByUser = userLookupService.getUser(audit.createdBy).toOption,
-        updatedByUser = audit.updatedBy.flatMap(u => userLookupService.getUser(u).toOption)
-      ))
     }
 
   /**

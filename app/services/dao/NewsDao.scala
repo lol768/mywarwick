@@ -7,8 +7,8 @@ import javax.inject.{Inject, Singleton}
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.ImplementedBy
-import models.{AudienceSize, NewsCategory}
 import models.news.{Link, NewsItemAudit, NewsItemRender, NewsItemSave}
+import models.{AudienceSize, NewsCategory}
 import org.joda.time.DateTime
 import system.DatabaseDialect
 import uk.ac.warwick.util.web.Uri
@@ -45,7 +45,7 @@ trait NewsDao {
 
   def getNewsByIds(ids: Seq[String])(implicit c: Connection): Seq[NewsItemRender]
 
-  def getNewsAuditByIds(ids: Seq[String])(implicit c: Connection): Seq[NewsItemAudit]
+  def getNewsAuditByIds(ids: Seq[String])(implicit c: Connection): Seq[NewsItemAudit.Light]
 
   def getAudienceId(newsId: String)(implicit c: Connection): Option[String]
 
@@ -95,7 +95,7 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     updated <- get[DateTime]("updated_at").?
     updatedBy <- str("updated_by").?
   } yield {
-    NewsItemAudit(id, created, Usercode(createdBy), None, updated, updatedBy.map(Usercode), None)
+    NewsItemAudit(id, created, Some(Usercode(createdBy)), updated, updatedBy.map(Usercode))
   }
 
   override def allNews(publisherId: String, limit: Int, offset: Int)(implicit c: Connection): Seq[NewsItemRender] = {
@@ -255,7 +255,7 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     }.toSeq)
   }
 
-  override def getNewsAuditByIds(ids: Seq[String])(implicit c: Connection): Seq[NewsItemAudit] = {
+  override def getNewsAuditByIds(ids: Seq[String])(implicit c: Connection): Seq[NewsItemAudit.Light] = {
     ids.grouped(1000).flatMap { ids =>
       SQL"""SELECT n.* FROM NEWS_ITEM n WHERE n.ID IN ($ids)""".as(newsAuditParser.*)
     }.toSeq
