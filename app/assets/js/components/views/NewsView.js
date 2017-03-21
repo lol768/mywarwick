@@ -33,22 +33,22 @@ export class NewsView extends React.Component {
 
   componentDidUpdate() {
     this.updateWidth();
-
-    if (this.refreshResolve !== undefined) {
-      this.setState({ // eslint-disable-line react/no-did-update-set-state
-        refreshing: false,
-      });
-      this.refreshResolve();
-      this.refreshResolve = undefined;
-    }
   }
 
-  onRefresh(resolve) {
+  onRefresh(resolve, reject) {
     this.setState({
       refreshing: true,
     });
-    this.fetch();
-    this.refreshResolve = resolve;
+
+    function unsetRefreshing() {
+      this.setState({
+        refreshing: false,
+      });
+    }
+
+    this.fetch()
+      .then(resolve, reject)
+      .then(unsetRefreshing, unsetRefreshing);
   }
 
   updateWidth() {
@@ -65,8 +65,10 @@ export class NewsView extends React.Component {
   }
 
   fetch() {
-    this.props.dispatch(news.refresh());
-    this.props.dispatch(newsCategories.fetch());
+    return Promise.all([
+      this.props.dispatch(news.refresh()),
+      this.props.dispatch(newsCategories.fetch()),
+    ]);
   }
 
   render() {
