@@ -36,15 +36,17 @@ function fetchStream(name, options = {}) {
 
 export function fetchActivities() {
   return (dispatch, getState) => {
-    const [latestActivity] = takeFromStream(getState().activities.stream, 1);
+    const { lastItemFetched } = getState().notifications;
 
     dispatch(fetchingActivities());
 
     return fetchStream('activities', {
-      since: latestActivity && latestActivity.id,
+      since: lastItemFetched,
     })
       .then(data => {
-        dispatch(fetchedActivities(data.activities));
+        dispatch(fetchedActivities({
+          items: data.activities,
+        }));
 
         if (data.activities.length === ITEM_FETCH_LIMIT) {
           // Likely there are more recent items available, so fetch them
@@ -60,18 +62,20 @@ export function fetchActivities() {
 
 export function fetchNotifications() {
   return (dispatch, getState) => {
-    const [latestNotification] = takeFromStream(getState().notifications.stream, 1);
+    const { lastItemFetched } = getState().notifications;
 
     dispatch(fetchingNotifications());
 
     return fetchStream('notifications', {
-      since: latestNotification && latestNotification.id,
+      since: lastItemFetched,
     })
       .then(data => {
         const date = data.read && moment(data.read);
         dispatch(notificationMetadata.fetchedNotificationsLastRead(date));
 
-        dispatch(fetchedNotifications(data.notifications));
+        dispatch(fetchedNotifications({
+          items: data.notifications,
+        }));
 
         if (data.notifications.length === ITEM_FETCH_LIMIT) {
           dispatch(fetchNotifications());
@@ -105,7 +109,9 @@ export function fetchMoreNotifications() {
     })
       .then(data => dispatch(fetchedNotifications({
         items: data.notifications,
-        olderItemsOnServer: data.notifications.length === ITEM_FETCH_LIMIT,
+        meta: {
+          olderItemsOnServer: data.notifications.length === ITEM_FETCH_LIMIT,
+        },
       })));
   };
 }
@@ -127,7 +133,9 @@ export function fetchMoreActivities() {
     })
       .then(data => dispatch(fetchedActivities({
         items: data.activities,
-        olderItemsOnServer: data.activities.length === ITEM_FETCH_LIMIT,
+        meta: {
+          olderItemsOnServer: data.activities.length === ITEM_FETCH_LIMIT,
+        },
       })));
   };
 }
@@ -142,6 +150,7 @@ const initialState = {
   stream: makeStream(),
   fetching: false,
   olderItemsOnServer: true,
+  lastItemFetched: null,
 };
 
 export function notificationsReducer(state = initialState, action) {
@@ -158,21 +167,18 @@ export function notificationsReducer(state = initialState, action) {
         ...state,
         stream: mergeNotifications(state.stream, [action.payload]),
       };
-    case NOTIFICATION_FETCH:
-      if (action.payload instanceof Array) {
-        return {
-          ...state,
-          stream: mergeNotifications(state.stream, action.payload),
-          fetching: false,
-        };
-      }
+    case NOTIFICATION_FETCH: {
+      const updatedStream = mergeNotifications(state.stream, action.payload.items);
+      const [lastItem] = takeFromStream(updatedStream, 1);
 
       return {
         ...state,
-        stream: mergeNotifications(state.stream, action.payload.items),
+        ...(action.meta || {}),
+        stream: updatedStream,
         fetching: false,
-        olderItemsOnServer: action.payload.olderItemsOnServer,
+        lastItemFetched: lastItem && lastItem.id,
       };
+    }
     default:
       return state;
   }
@@ -192,21 +198,19 @@ export function activitiesReducer(state = initialState, action) {
         ...state,
         stream: mergeNotifications(state.stream, [action.payload]),
       };
-    case ACTIVITY_FETCH:
-      if (action.payload instanceof Array) {
-        return {
-          ...state,
-          stream: mergeNotifications(state.stream, action.payload),
-          fetching: false,
-        };
-      }
+    case ACTIVITY_FETCH: {
+      const updatedStream = mergeNotifications(state.stream, action.payload.items);
+      const [lastItem] = takeFromStream(updatedStream, 1);
 
       return {
         ...state,
-        stream: mergeNotifications(state.stream, action.payload.items),
+        ...(action.meta || {}),
+        stream: updatedStream,
         fetching: false,
         olderItemsOnServer: action.payload.olderItemsOnServer,
+        lastItemFetched: lastItem && lastItem.id,
       };
+    }
     default:
       return state;
   }
