@@ -119,7 +119,7 @@ const select = (state) => ({
   newsCategories: state.newsCategories,
   user: state.user.data,
   // Never read, but kicks the component into updating when the device width changes
-  deviceWidth: state.device.width,
+  pixelWidth: state.device.pixelWidth,
 });
 
 export default connect(select)(NewsView);
