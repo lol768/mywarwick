@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
+import ReactPullToRefresh from 'react-pull-to-refresh';
 import NewsCategoriesView from './NewsCategoriesView';
 import NewsItem from '../ui/NewsItem';
 import { connect } from 'react-redux';
@@ -12,11 +13,14 @@ export class NewsView extends React.Component {
 
   constructor(props) {
     super(props);
-    this.onClickRefresh = this.fetch.bind(this);
+    this.fetch = this.fetch.bind(this);
+    this.onRefresh = this.onRefresh.bind(this);
 
     this.loadMore = this.loadMore.bind(this);
 
-    this.state = {};
+    this.state = {
+      refreshing: false,
+    };
   }
 
   componentDidMount() {
@@ -29,6 +33,22 @@ export class NewsView extends React.Component {
 
   componentDidUpdate() {
     this.updateWidth();
+  }
+
+  onRefresh(resolve, reject) {
+    this.setState({
+      refreshing: true,
+    });
+
+    function unsetRefreshing() {
+      this.setState({
+        refreshing: false,
+      });
+    }
+
+    this.fetch()
+      .then(resolve, reject)
+      .then(unsetRefreshing, unsetRefreshing);
   }
 
   updateWidth() {
@@ -45,12 +65,15 @@ export class NewsView extends React.Component {
   }
 
   fetch() {
-    this.props.dispatch(news.fetch());
-    this.props.dispatch(newsCategories.fetch());
+    return Promise.all([
+      this.props.dispatch(news.refresh()),
+      this.props.dispatch(newsCategories.fetch()),
+    ]);
   }
 
   render() {
     const { failed, fetching, items, moreAvailable, user } = this.props;
+    const { refreshing } = this.state;
 
     const width = this.state.width || this.props.width;
 
@@ -61,7 +84,7 @@ export class NewsView extends React.Component {
             Unable to fetch news.
           </p>
           <p>
-            <button type="button" onClick={ this.onClickRefresh } className="btn btn-default">
+            <button type="button" onClick={ this.fetch } className="btn btn-default">
               <i className="fa fa-refresh fa-fw"> </i>
               Retry
             </button>
@@ -82,7 +105,7 @@ export class NewsView extends React.Component {
         <p>No news to show you yet.</p>
       </div> : null;
 
-    return (
+    const content = (
       <div className="margin-top-1">
         { user && user.authenticated ?
           <NewsCategoriesView { ...this.props.newsCategories } dispatch={ this.props.dispatch } />
@@ -91,13 +114,30 @@ export class NewsView extends React.Component {
         { items.length ?
           <InfiniteScrollable hasMore={moreAvailable} onLoadMore={this.loadMore}>
             {itemComponents}
-          </InfiniteScrollable> : maybeMessage
+          </InfiniteScrollable>
+          : maybeMessage
         }
-        { fetching ?
+        { fetching && !refreshing ?
           <div className="centered">
-            <i className="fa fa-lg fa-refresh fa-spin"></i>
+            <i className="fa fa-lg fa-refresh fa-spin"> </i>
           </div> : null }
       </div>
+    );
+
+    if (this.props.inTile) {
+      return content;
+    }
+
+    return (
+      <ReactPullToRefresh
+        loading={<span>
+            <i className="fa fa-lg fa-refresh"> </i>
+            <i className="fa fa-lg fa-refresh fa-spin"> </i>
+          </span>}
+        onRefresh={this.onRefresh}
+      >
+        {content}
+      </ReactPullToRefresh>
     );
   }
 
@@ -112,6 +152,7 @@ NewsView.propTypes = {
   moreAvailable: PropTypes.bool.isRequired,
   user: PropTypes.object.isRequired,
   width: PropTypes.number,
+  inTile: PropTypes.bool,
 };
 
 const select = (state) => ({
