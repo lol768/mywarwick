@@ -75,12 +75,15 @@ export function updateUIContext() {
 }
 
 // todo REMOVE ME WHEN YOU IMPLEMENT PER-TAB SCROLL POSITION REMEMBERING
-browserHistory.listen( location =>  {
-  if(isTopLevelUrl(location)) {
-    $('#main').scrollTop(0);  
-  }
-}); 
+export function scrollTopOnTabChange() {
+  browserHistory.listen( location =>  {
+    if(isTopLevelUrl(location)) {
+      $('#main').scrollTop(0);  
+    }
+  });
+}
 
 function isTopLevelUrl(location) {
+  console.log("location is ", location);
   return (location.pathname.match(/\//g) || []).length == 1;
 }
