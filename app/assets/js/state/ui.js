@@ -81,9 +81,9 @@ export function scrollTopOnTabChange() {
       $('#main').scrollTop(0);  
     }
   });
+
+  function isTopLevelUrl(location) {
+    return (location.pathname.match(/\//g) || []).length == 1;
+  }
 }
 
-function isTopLevelUrl(location) {
-  console.log("location is ", location);
-  return (location.pathname.match(/\//g) || []).length == 1;
-}
