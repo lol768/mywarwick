@@ -1,19 +1,20 @@
 import _ from 'lodash';
 
-function calcDeviceWidth() {
+function getDevicePixelWidth() {
   const MAX = 2208;
   const w = window.innerWidth * window.devicePixelRatio;
   return _.find([320, 640, 750, 960, 1080, 1136, 1334, MAX], width => width >= w) || MAX;
 }
 
 const initialState = {
-  width: calcDeviceWidth(),
+  pixelWidth: getDevicePixelWidth(),
+  width: window.innerWidth,
 };
 
 export function reducer(state = initialState, action) {
   switch (action.type) {
     case 'device.width':
-      return { ...state, width: action.width };
+      return { ...state, width: action.width, pointWidth: action.pointWidth };
     case 'UPDATE_NOTIFICATION_PERMISSIONS':
       return { ...state,
         notificationPermission: window.Notification && Notification.permission,
@@ -25,12 +26,11 @@ export function reducer(state = initialState, action) {
 
 export function updateDeviceWidth() {
   return (dispatch, getState) => {
-    const currentWidth = getState().device.width;
-    const newWidth = calcDeviceWidth();
-    if (newWidth !== currentWidth) {
+    if (window.innerWidth !== getState().device.width) {
       dispatch({
         type: 'device.width',
-        width: newWidth,
+        width: window.innerWidth,
+        pixelWidth: getDevicePixelWidth(),
       });
     }
   };

@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
-import ReactGridLayoutBase, { WidthProvider } from 'react-grid-layout';
+import ReactGridLayoutBase from 'react-grid-layout';
 import _ from 'lodash';
 import $ from 'jquery.transit';
 import { connect } from 'react-redux';
@@ -16,7 +16,6 @@ import TileOptionView from './TileOptionView';
 
 import HiddenTile from '../tiles/HiddenTile';
 
-const ReactGridLayout = WidthProvider(ReactGridLayoutBase); // eslint-disable-line new-cap
 const rowHeight = 125;
 const margin = [4, 4];
 
@@ -226,6 +225,18 @@ class MeView extends ReactComponent {
     return this.state.editing === item.i ? 0 : 400;
   }
 
+  getGridLayoutWidth() {
+    const { isDesktop, deviceWidth } = this.props;
+
+    const margins = _.sum(margin);
+
+    if (isDesktop) {
+      return $('.id7-main-content').width() + margins;
+    }
+
+    return deviceWidth + margins;
+  }
+
   renderHiddenTiles() {
     const { layoutWidth } = this.props;
     const hiddenTiles = _.sortBy(this.props.tiles.filter(t => t.removed), 'title');
@@ -248,7 +259,7 @@ class MeView extends ReactComponent {
     return (
       <div>
         <h3>More tiles</h3>
-        <ReactGridLayout
+        <ReactGridLayoutBase
           layout={layout}
           isDraggable={false}
           isResizable={false}
@@ -257,9 +268,10 @@ class MeView extends ReactComponent {
           margin={margin}
           useCSSTransformations
           verticalCompact
+          width={this.getGridLayoutWidth()}
         >
           { hiddenTileComponents }
-        </ReactGridLayout>
+        </ReactGridLayoutBase>
       </div>
     );
   }
@@ -289,7 +301,7 @@ class MeView extends ReactComponent {
     return (
       <div>
         <div className="me-view__tiles">
-          <ReactGridLayout
+          <ReactGridLayoutBase
             layout={layout}
             isDraggable
             isResizable={false}
@@ -303,9 +315,10 @@ class MeView extends ReactComponent {
             onDragStart={this.onDragStart}
             onDragStop={this.onDragStop}
             getDragDelayForItem={this.getDragDelayForItem}
+            width={this.getGridLayoutWidth()}
           >
             { tileComponents }
-          </ReactGridLayout>
+          </ReactGridLayoutBase>
         </div>
         { showHiddenTiles ? this.renderHiddenTiles() : null }
       </div>
@@ -364,6 +377,7 @@ const select = (state) => ({
   layoutWidth: state.ui.isWideLayout === true ? 5 : 2,
   tiles: state.tiles.data.tiles,
   layout: state.tiles.data.layout,
+  deviceWidth: state.device.width,
 });
 
 export default connect(select)(MeView);
