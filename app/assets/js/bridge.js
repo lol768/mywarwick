@@ -89,7 +89,10 @@ export default function init(opts) {
   const userAgent = window.navigator.userAgent;
 
   if (userAgent.indexOf('MyWarwick/') >= 0) {
-    $html.addClass('app standalone');
+    // 'native' is also 'mobile'. We make the same assumption in
+    // ui.js - may need to change this if we want to give a different
+    // experience to tablets later (we can tweak CSS with media queries).
+    $html.addClass('app standalone mobile');
 
     if (userAgent.indexOf('Android') >= 0) {
       $html.addClass('android');
