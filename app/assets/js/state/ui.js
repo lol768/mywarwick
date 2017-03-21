@@ -1,5 +1,6 @@
 import log from 'loglevel';
 import { browserHistory } from 'react-router';
+import $ from 'jquery';
 
 let mq;
 try {
@@ -76,14 +77,14 @@ export function updateUIContext() {
 
 // todo REMOVE ME WHEN YOU IMPLEMENT PER-TAB SCROLL POSITION REMEMBERING
 export function scrollTopOnTabChange() {
-  browserHistory.listen( location =>  {
-    if(isTopLevelUrl(location)) {
-      $('#main').scrollTop(0);  
+  function isTopLevelUrl(location) {
+    return (location.pathname.match(/\//g) || []).length === 1;
+  }
+
+  browserHistory.listen(location => {
+    if (isTopLevelUrl(location)) {
+      $('#main').scrollTop(0);
     }
   });
-
-  function isTopLevelUrl(location) {
-    return (location.pathname.match(/\//g) || []).length == 1;
-  }
 }
 
