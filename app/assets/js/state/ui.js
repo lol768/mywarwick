@@ -15,6 +15,7 @@ function isNative() {
 }
 
 function isDesktop() {
+  // We make the same 'native is mobile' assumption in bridge.js
   return !isNative() && mq('only all and (min-width: 768px)');
 }
 const isWideLayout = () => mq('only all and (min-width: 992px)');
