@@ -173,7 +173,7 @@ export function notificationsReducer(state = initialState, action) {
 
       return {
         ...state,
-        ...(action.meta || {}),
+        ...action.payload.meta,
         stream: updatedStream,
         fetching: false,
         lastItemFetched: lastItem && lastItem.id,
@@ -204,10 +204,9 @@ export function activitiesReducer(state = initialState, action) {
 
       return {
         ...state,
-        ...(action.meta || {}),
+        ...action.payload.meta,
         stream: updatedStream,
         fetching: false,
-        olderItemsOnServer: action.payload.olderItemsOnServer,
         lastItemFetched: lastItem && lastItem.id,
       };
     }
