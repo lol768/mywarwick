@@ -16,7 +16,7 @@ import play.api.db.Database
 import services._
 import services.dao._
 import services.messaging.MessagingService
-import warwick.sso.Usercode
+import warwick.sso.{UserLookupService, Usercode}
 
 class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSuite {
 
@@ -39,7 +39,8 @@ class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSu
     val newsCategoryDao = get[NewsCategoryDao]
     val newsImageDao = mock[NewsImageDao]
     val userInitialisationService = mock[UserInitialisationService]
-    val newsService = new AnormNewsService(db, newsDao, audienceService, newsCategoryDao, newsImageDao, audienceDao, userInitialisationService, scheduler)
+    val userLookupService = mock[UserLookupService]
+    val newsService = new AnormNewsService(db, newsDao, audienceService, newsCategoryDao, newsImageDao, audienceDao, userInitialisationService, scheduler, userLookupService)
 
     val publishNewsItemJob = new PublishNewsItemJob(audienceService, newsService, scheduler)
 

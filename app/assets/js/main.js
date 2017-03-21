@@ -236,6 +236,8 @@ $(() => {
   document.getElementById('error-fallback').style.display = 'none';
 });
 
+ui.scrollTopOnTabChange();
+
 // Actually render the app
 ReactDOM.render(
   <AppRoot history={history} />,

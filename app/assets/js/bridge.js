@@ -12,6 +12,7 @@ import { displayUpdateProgress } from './state/update';
 import { postJsonWithCredentials } from './serverpipe';
 import { createSelector } from 'reselect';
 import { hasAuthoritativeAuthenticatedUser } from './state';
+import * as warwickSearch from 'warwick-search-frontend';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -103,9 +104,7 @@ export default function init(opts) {
       },
 
       search(query) {
-        // This will be better once we revisit Search in My Warwick - quick bodge for now
-        this.navigate('/');
-        this.navigate(`/search?q=${encodeURIComponent(query)}`);
+        warwickSearch.submitSearch(query);
       },
 
       onApplicationDidBecomeActive() {

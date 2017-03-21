@@ -37,15 +37,15 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
 
   val securityServiceImpl = new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], mock[CacheApi])
 
-  val publisherService = mock[PublisherService]
-  val newsService = mock[NewsService]
-  val departmentInfoDao = mock[DepartmentInfoDao]
-  val newsCategoryService = mock[NewsCategoryService]
-  val messagesApi = app.injector.instanceOf[MessagesApi]
-  val audienceBinder = mock[AudienceBinder]
-  val audienceService = mock[AudienceService]
-  val userPreferencesService = mock[UserPreferencesService]
-  val userNewsCategoryService = mock[UserNewsCategoryService]
+  private val publisherService = mock[PublisherService]
+  private val newsService = mock[NewsService]
+  private val departmentInfoDao = mock[DepartmentInfoDao]
+  private val newsCategoryService = mock[NewsCategoryService]
+  private val messagesApi = app.injector.instanceOf[MessagesApi]
+  private val audienceBinder = mock[AudienceBinder]
+  private val audienceService = mock[AudienceService]
+  private val userPreferencesService = mock[UserPreferencesService]
+  private val userNewsCategoryService = mock[UserNewsCategoryService]
 
   when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("IN", "IT Services", "IT Services", "ITS", "SERVICE")))
   when(newsCategoryService.all()).thenReturn(Seq(NewsCategory("abc", "Campus")))
@@ -78,7 +78,7 @@ class NewsControllerTest extends PlaySpec with MockitoSugar with Results with On
       when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
       when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
 
-      when(newsService.getNewsByPublisher("xyz", 100)).thenReturn(Nil)
+      when(newsService.getNewsByPublisherWithAudits("xyz", 100)).thenReturn(Nil)
 
       val result = call(newsController.list("xyz"), FakeRequest())
 

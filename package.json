@@ -81,16 +81,16 @@
     "react-addons-update": "^15.0.0",
     "react-bootstrap-multiselect": "^2.0.0",
     "react-dom": "^15.0.0",
-    "react-grid-layout": "git+ssh://git@repo.elab.warwick.ac.uk/start/react-grid-layout.git#caa49ae",
+    "react-grid-layout": "git+ssh://git@repo.elab.warwick.ac.uk/start/react-grid-layout.git#78df199",
     "react-redux": "~4.4.5",
-    "react-router": "~2.2.2",
-    "react-router-redux": "~4.0.2",
-    "redux": "~3.4.0",
+    "react-router": "^2.5.1",
+    "react-router-redux": "^4.0.4",
+    "redux": "^3.5.2",
     "redux-actions": "~0.9.1",
-    "redux-thunk": "~2.0.1",
+    "redux-thunk": "^2.1.0",
     "reselect": "~2.3.0",
     "skycons": "~1.0.0",
-    "warwick-search-frontend": "git+ssh://git@repo.elab.warwick.ac.uk/sch/omni.git#0a370a539e5"
+    "warwick-search-frontend": "git+ssh://git@repo.elab.warwick.ac.uk/sch/omni.git#2e47a1f8a22"
   },
   "scripts": {
     "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha --compilers js:babel-register -r TestHelper --recursive test/assets/js",

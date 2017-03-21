@@ -7,8 +7,8 @@ import javax.inject.{Inject, Singleton}
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.ImplementedBy
+import models.news.{Link, NewsItemAudit, NewsItemRender, NewsItemSave}
 import models.{AudienceSize, NewsCategory}
-import models.news.{Link, NewsItemRender, NewsItemSave}
 import org.joda.time.DateTime
 import system.DatabaseDialect
 import uk.ac.warwick.util.web.Uri
@@ -44,6 +44,8 @@ trait NewsDao {
     getNewsByIds(Seq(id)).headOption
 
   def getNewsByIds(ids: Seq[String])(implicit c: Connection): Seq[NewsItemRender]
+
+  def getNewsAuditByIds(ids: Seq[String])(implicit c: Connection): Seq[NewsItemAudit.Light]
 
   def getAudienceId(newsId: String)(implicit c: Connection): Option[String]
 
@@ -84,6 +86,16 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     val category = for (id <- newsCategoryId; name <- newsCategoryName) yield NewsCategory(id, name)
 
     NewsItemRender(id, title, text, link, publishDate, imageId, category.toSeq, ignoreCategories, publisherId)
+  }
+
+  val newsAuditParser = for {
+    id <- str("id")
+    created <- get[DateTime]("created_at")
+    createdBy <- str("created_by")
+    updated <- get[DateTime]("updated_at").?
+    updatedBy <- str("updated_by").?
+  } yield {
+    NewsItemAudit(id, created, Some(Usercode(createdBy)), updated, updatedBy.map(Usercode))
   }
 
   override def allNews(publisherId: String, limit: Int, offset: Int)(implicit c: Connection): Seq[NewsItemRender] = {
@@ -241,6 +253,12 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
       WHERE n.ID IN ($ids)
       """.as(newsParser.*)
     }.toSeq)
+  }
+
+  override def getNewsAuditByIds(ids: Seq[String])(implicit c: Connection): Seq[NewsItemAudit.Light] = {
+    ids.grouped(1000).flatMap { ids =>
+      SQL"""SELECT n.* FROM NEWS_ITEM n WHERE n.ID IN ($ids)""".as(newsAuditParser.*)
+    }.toSeq
   }
 
   val mostRecentFirst: Ordering[DateTime] = Ordering.fromLessThan(_ isAfter _)
