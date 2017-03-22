@@ -1,3 +1,12 @@
+// In case of JS error, hide the loading spinner.
+// Has to be up top to catch all possible JS errors.
+if (window.addEventListener) {
+  window.addEventListener('error', (err) => {
+    console.warn('oh  an error;', err);
+    document.getElementById('react-app-spinner').style.display = 'none';
+  }, true);
+}
+
 import 'core-js/modules/es6.object.assign';
 
 import initErrorReporter from './errorreporter';
@@ -230,12 +239,6 @@ setInterval(() => {
 // Just for access from the console
 window.Store = store;
 
-$(() => {
-  // this element contains a fallback error - once we're fairly
-  // sure that this script isn't completely broken, we can hide it.
-  document.getElementById('error-fallback').style.display = 'none';
-});
-
 ui.scrollTopOnTabChange();
 
 // Actually render the app
@@ -243,3 +246,9 @@ ReactDOM.render(
   <AppRoot history={history} />,
   document.getElementById('app-container')
 );
+
+$(() => {
+  // this element contains a fallback error - once we're fairly
+  // sure that this script isn't completely broken, we can hide it.
+  document.getElementById('error-fallback').style.display = 'none';
+});
