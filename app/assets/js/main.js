@@ -191,19 +191,23 @@ function receiveUserInfo(response) {
       if (data.refresh) {
         window.location = user.rewriteRefreshUrl(data.refresh, window.location.href);
       } else {
-        store.dispatch(user.userReceive(data.user));
-        store.dispatch(user.receiveSSOLinks(data.links));
+        if (!data.user.authenticated) {
+          window.location = data.links.permissionDenied;
+        } else {
+          store.dispatch(user.userReceive(data.user));
+          store.dispatch(user.receiveSSOLinks(data.links));
 
-        const analyticsData = data.user.analytics;
-        if (analyticsData !== undefined) {
-          analyticsData.dimensions.forEach(dimension =>
-            analytics.setDimension(dimension.index, dimension.value)
-          );
+          const analyticsData = data.user.analytics;
+          if (analyticsData !== undefined) {
+            analyticsData.dimensions.forEach(dimension =>
+              analytics.setDimension(dimension.index, dimension.value)
+            );
 
-          analytics.setUserId(analyticsData.identifier);
+            analytics.setUserId(analyticsData.identifier);
+          }
+
+          analytics.ready();
         }
-
-        analytics.ready();
       }
     })
     .catch(e => {
