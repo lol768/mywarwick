@@ -1,40 +1,35 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
-import classNames from 'classnames';
 import Hyperlink from '../ui/Hyperlink';
 import TextTile from './TextTile';
-
 import _ from 'lodash';
 
 export default class LibraryTile extends TextTile {
 
-  mapItems(itemsToDisplay, className) {
-    return itemsToDisplay.map(item => {
-      const tileItem = (<div key={item.id} className={classNames('tile__item', className)}>
-        <span className="tile__text">{item.dueMessage}: {item.itemTitle}</span>
-      </div>);
-
-      return <Hyperlink key={item.href} href={item.href}>{ tileItem }</Hyperlink>;
-    });
-  }
-
-  mapItemsForZoomedBody(itemsToDisplay, className) {
-    return itemsToDisplay.map(item => {
-      const tileItem = (<div key={item.id} className={classNames('tile__item', className)}>
-        <span className="tile__text">{item.dueMessage}: {item.itemTitle}</span>
-      </div>);
-
-      return <Hyperlink key={item.href} href={item.href}>{ tileItem }</Hyperlink>;
-    });
+  renderItems(items) {
+    return items.map(item =>
+      <Hyperlink key={item.id} href={item.href}>
+        <div key={item.id} className="tile__item">
+          <span className="tile__text">
+            {item.dueMessage}: {item.itemTitle}
+            </span>
+        </div>
+      </Hyperlink>
+    );
   }
 
   getZoomedBody() {
-    const items = _.chunk(this.mapItemsForZoomedBody(this.props.content.items, 'col-xs-6'), 2);
+    const { content: { items } } = this.props;
+
+    const elements = _.zip(items, this.renderItems(items))
+      .map(([item, element]) => <div className="col-xs-6" key={item.id}>{element}</div>);
+
+    const chunkedItems = _.chunk(elements, 2);
 
     return (
       <div className="container-fluid">
         {this.getSubtitle()}
-        {items.map((children, i) => <div key={i} className="row">{children}</div>)}
+        {chunkedItems.map((children, i) => <div key={i} className="row">{children}</div>)}
       </div>
     );
   }
@@ -48,7 +43,7 @@ export default class LibraryTile extends TextTile {
     return (
       <div>
         {this.getSubtitle()}
-        {this.mapItems(itemsToDisplay)}
+        {this.renderItems(itemsToDisplay)}
       </div>
     );
   }
@@ -63,7 +58,7 @@ export default class LibraryTile extends TextTile {
         transitionLeaveTimeout={1000}
       >
         {this.getSubtitle()}
-        {this.mapItems([content.items[this.state.itemIndex]])}
+        {this.renderItems([content.items[this.state.itemIndex]])}
       </ReactCSSTransitionGroup>
     );
   }

@@ -1,10 +1,7 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
-import classNames from 'classnames';
 import Hyperlink from '../ui/Hyperlink';
-
 import _ from 'lodash';
-
 import TileContent from './TileContent';
 
 export default class TextTile extends TileContent {
@@ -22,17 +19,28 @@ export default class TextTile extends TileContent {
   }
 
   componentDidMount() {
-    this.setTransitionInterval();
+    if (this.props.content && this.props.content.items) {
+      this.setTransitionInterval();
+    }
   }
 
-  componentWillReceiveProps() {
+  componentWillReceiveProps(nextProps) {
+    if (!nextProps.content || !nextProps.content.items
+      || this.state.itemIndex >= nextProps.content.items.length) {
+      // If the number of items changes such that the current item doesn't exist any more,
+      // reset the index of the item we're currently looking at
+      this.setState({
+        itemIndex: 0,
+      });
+    }
+
     this.setTransitionInterval();
   }
 
   setTransitionInterval() {
     clearInterval(this.transitionInterval);
 
-    if (this.props.content) {
+    if (this.props.content && this.props.content.items) {
       this.transitionInterval = setInterval(this.onInterval.bind(this), 5000);
     }
   }
@@ -53,19 +61,30 @@ export default class TextTile extends TileContent {
     });
   }
 
-  mapTextItems(itemsToDisplay, className) {
+  renderItems(itemsToDisplay) {
     return itemsToDisplay.map(item => {
-      const tileItem = (<div key={item.id} className={classNames('tile__item', className)}>
-        <span className="tile__callout">{item.callout}</span>
-        <span className="tile__text">{item.text}</span>
-      </div>);
+      if (!item) {
+        return null;
+      }
 
-      return <Hyperlink key={item.href} href={item.href} >{ tileItem }</Hyperlink>;
+      return (
+        <Hyperlink key={item.id} href={item.href}>
+          <div className="tile__item">
+            <span className="tile__callout">{item.callout}</span>
+            <span className="tile__text">{item.text}</span>
+          </div>
+        </Hyperlink>
+      );
     });
   }
 
   getZoomedBody() {
-    const chunkedItems = _.chunk(this.mapTextItems(this.props.content.items, 'col-xs-6'), 2);
+    const { content: { items } } = this.props;
+
+    const elements = _.zip(items, this.renderItems(items))
+      .map(([item, element]) => <div className="col-xs-6" key={item.id}>{element}</div>);
+
+    const chunkedItems = _.chunk(elements, 2);
 
     return (
       <div className="container-fluid">
@@ -82,7 +101,7 @@ export default class TextTile extends TileContent {
 
     return (
       <div>
-        {this.mapTextItems(itemsToDisplay)}
+        {this.renderItems(itemsToDisplay)}
       </div>
     );
   }
@@ -97,7 +116,7 @@ export default class TextTile extends TileContent {
         transitionEnterTimeout={1000}
         transitionLeaveTimeout={1000}
       >
-        {this.mapTextItems([content.items[this.state.itemIndex]])}
+        {this.renderItems([content.items[this.state.itemIndex]])}
       </ReactCSSTransitionGroup>
     );
   }
