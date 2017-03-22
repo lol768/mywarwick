@@ -68,7 +68,8 @@ class UserInfoController @Inject()(
         "user" -> userInfo,
         "links" -> Json.obj(
           "login" -> loginUrl,
-          "logout" -> logoutUrl
+          "logout" -> logoutUrl,
+          "permissionDenied" -> links.getPermissionDeniedLink(request.context.user.nonEmpty)
         )
       )).withHeaders(CACHE_CONTROL -> "no-cache")
     }
