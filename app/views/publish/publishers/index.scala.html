@@ -1,4 +1,4 @@
-@import models.publishing.{Publisher, Role}
+@import models.publishing.Publisher
 @import system.RequestContext
 @import warwick.sso.User
 @(publishers: Seq[Publisher], publisherPermissions: Map[Publisher, Seq[User]])(implicit context: RequestContext)

@@ -28,8 +28,6 @@ class PublishersController @Inject()(
 
     if (publishers.isEmpty) {
       Forbidden(views.html.publish.publishers.index(Nil, Map.empty))
-    } else if (publishers.size == 1) {
-      Redirect(routes.PublishersController.show(publishers.head.id))
     } else {
       Ok(views.html.publish.publishers.index(publishers, publisherPermissions))
     }
