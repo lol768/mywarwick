@@ -2,11 +2,14 @@ package controllers.publish
 
 import com.google.inject.Inject
 import controllers.BaseController
+import models.publishing.Publisher
 import services.{PublisherService, SecurityService}
+import warwick.sso.{User, UserLookupService}
 
 class PublishersController @Inject()(
   securityService: SecurityService,
-  publisherService: PublisherService
+  publisherService: PublisherService,
+  userLookup: UserLookupService
 ) extends BaseController {
 
   import securityService._
@@ -16,12 +19,17 @@ class PublishersController @Inject()(
 
     val publishers = publisherService.getPublishersForUser(user.usercode)
 
+    val publisherPermissions: Map[Publisher, Seq[User]] =
+      publishers.map(publisher => publisher -> publisherService.getPublisherPermissions(publisher.id)).toMap
+        .mapValues(_.flatMap(permission =>
+          userLookup.getUser(permission.usercode).toOption
+        ).sortBy(u => (u.name.last.getOrElse(""), u.name.first.getOrElse(""))))
+
+
     if (publishers.isEmpty) {
-      Forbidden(views.html.publish.publishers.index(Nil))
-    } else if (publishers.size == 1) {
-      Redirect(routes.PublishersController.show(publishers.head.id))
+      Forbidden(views.html.publish.publishers.index(Nil, Map.empty))
     } else {
-      Ok(views.html.publish.publishers.index(publishers))
+      Ok(views.html.publish.publishers.index(publishers, publisherPermissions))
     }
   }
 
