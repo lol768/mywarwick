@@ -29,7 +29,7 @@ trait Logging {
 
     // We need to convert all Scala collections into Java collections
     def handle(in: Any): AnyRef = (in match {
-      case Left(_) => throw new IllegalArgumentException("Failed actions shouldn't be audited")
+      case _: Either[_, _] => throw new IllegalArgumentException("Either should be flattened into successful action")
       case Some(x: Object) => handle(x)
       case Some(null) => null
       case None => null
