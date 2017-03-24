@@ -1,8 +1,7 @@
 // In case of JS error, hide the loading spinner.
 // Has to be up top to catch all possible JS errors.
 if (window.addEventListener) {
-  window.addEventListener('error', (err) => {
-    console.warn('oh  an error;', err);
+  window.addEventListener('error', () => {
     document.getElementById('react-app-spinner').style.display = 'none';
   }, true);
 }
