@@ -87,13 +87,17 @@ class MeView extends ReactComponent {
   }
 
   onBeginEditing(tile) {
-    this.setState({
-      editing: tile.id,
-    });
+    if (this.state.editing !== tile.id) {
+      this.setState({
+        editing: tile.id,
+      });
 
-    $(ReactDOM.findDOMNode(this)).on('click', this.onClickOutside);
-    $(window).on('popstate', this.onBackButton);
-    this.props.dispatch(push('/?editing'));
+      $(ReactDOM.findDOMNode(this)).off('click', this.onClickOutside);
+      $(ReactDOM.findDOMNode(this)).on('click', this.onClickOutside);
+      $(window).off('popstate', this.onBackButton);
+      $(window).on('popstate', this.onBackButton);
+      this.props.dispatch(push('/?editing'));
+    }
   }
 
   onFinishEditing() {
@@ -107,7 +111,7 @@ class MeView extends ReactComponent {
     $(window).off('popstate', this.onBackButton);
 
     this.props.dispatch(tiles.persistTiles());
-    this.props.dispatch(push('/'));
+    this.props.dispatch(goBack());
   }
 
   onClickOutside(e) {
