@@ -59,30 +59,8 @@ class MeView extends ReactComponent {
     this.onDragStart = this.onDragStart.bind(this);
     this.onDragStop = this.onDragStop.bind(this);
     this.getDragDelayForItem = this.getDragDelayForItem.bind(this);
-    this.onBodyScroll = this.onBodyScroll.bind(this);
     this.onConfigSave = this.onConfigSave.bind(this);
     this.onConfigViewDismiss = this.onConfigViewDismiss.bind(this);
-  }
-
-  componentDidMount() {
-    $('.id7-main-content-area').on('touchstart', this.onBodyScroll);
-  }
-
-  componentWillUnmount() {
-    $('.id7-main-content-area').off('touchstart', this.onBodyScroll);
-  }
-
-  onBodyScroll(e) {
-    // This event handler fixes an issue on iOS where initiating a scroll
-    // into the overflow does not appear to do rubber banding, but scrolling
-    // the view becomes disabled until the rubber banding effect would have completed.
-    const target = e.currentTarget;
-
-    if (target.scrollTop === 0) {
-      target.scrollTop = 1;
-    } else if (target.scrollHeight === target.scrollTop + target.offsetHeight) {
-      target.scrollTop -= 1;
-    }
   }
 
   onBeginEditing(tile) {
@@ -120,16 +98,10 @@ class MeView extends ReactComponent {
   }
 
   onDragStart(layout, item) {
-    // Disable rubber banding so the users' finger and the tile they are dragging
-    // don't get out of sync.  (iOS)
-    $('.id7-main-content-area').css('-webkit-overflow-scrolling', 'auto');
-
     this.onBeginEditing({ id: item.i });
   }
 
   onDragStop() {
-    // Re-enable rubber banding when not dragging, because it's nicer.  (iOS)
-    $('.id7-main-content-area').css('-webkit-overflow-scrolling', 'touch');
   }
 
   getTileLayout(layout) {
