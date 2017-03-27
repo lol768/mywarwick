@@ -32,7 +32,8 @@ export default function init(opts) {
         }
       ),
       createSelector(
-        state => _.get(state, 'routing.locationBeforeTransitions.pathname', '/'),
+        state => _.get(state, 'routing.locationBeforeTransitions.pathname', '/')
+          + _.get(state, 'routing.locationBeforeTransitions.search', ''),
         path => native.setPath(path)
       ),
       createSelector(

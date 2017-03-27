@@ -7,7 +7,7 @@ import _ from 'lodash';
 import $ from 'jquery.transit';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
-import { goBack } from 'react-router-redux';
+import { goBack, push } from 'react-router-redux';
 import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
@@ -62,6 +62,7 @@ class MeView extends ReactComponent {
     this.onBodyScroll = this.onBodyScroll.bind(this);
     this.onConfigSave = this.onConfigSave.bind(this);
     this.onConfigViewDismiss = this.onConfigViewDismiss.bind(this);
+    this.onBackButton = this.onBackButton.bind(this);
   }
 
   componentDidMount() {
@@ -91,6 +92,8 @@ class MeView extends ReactComponent {
     });
 
     $(ReactDOM.findDOMNode(this)).on('click', this.onClickOutside);
+    $(window).on('popstate', this.onBackButton);
+    this.props.dispatch(push('/?editing'));
   }
 
   onFinishEditing() {
@@ -101,8 +104,10 @@ class MeView extends ReactComponent {
     }
 
     $(ReactDOM.findDOMNode(this)).off('click', this.onClickOutside);
+    $(window).off('popstate', this.onBackButton);
 
     this.props.dispatch(tiles.persistTiles());
+    this.props.dispatch(push('/'));
   }
 
   onClickOutside(e) {
@@ -344,6 +349,12 @@ class MeView extends ReactComponent {
       );
     }
     return null;
+  }
+
+  onBackButton() {
+    if (this.state.editing) {
+      this.onFinishEditing();
+    }
   }
 
   render() {
