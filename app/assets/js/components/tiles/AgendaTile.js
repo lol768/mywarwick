@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { forNewsItem, localMoment } from '../../dateFormats';
+import formatDateTime, { formatDate, formatTime, localMoment } from '../../dateFormats';
 import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';
@@ -126,34 +126,43 @@ export default class AgendaTile extends TileContent {
 
     return (
       <Hyperlink href={ event.href } style={{ display: 'inline-block' }}>
-          <div className="text-overflow-block">
-            <i className="fa fa-fw fa-clock-o"> </i>
-            { event.isAllDay ? 'All day today' :
-              `${forNewsItem(event.start)}–${forNewsItem(event.end)}` }
-          </div>
-          <div className="text-overflow-block">
-            <i className="fa fa-fw fa-calendar-check-o"> </i>
-            { event.title }
-          </div>
-          { event.location &&
-          <div className="text-overflow-block">
-            <i className="fa fa-fw fa-map-marker"> </i>
-            { event.location.name }
-          </div>
-          }
-          { event.organiser &&
-          <div className="text-overflow-block">
-            <i className="fa fa-fw fa-user-o"> </i>
-            { event.organiser.name }
-          </div>
-          }
+        <div className="text-overflow-block">
+          <i className="fa fa-fw fa-clock-o"> </i>
+          { event.isAllDay ?
+            `All day ${formatDate(event.start)}` :
+            `${formatDateTime(event.start)}–${formatTime(event.end)}` }
+        </div>
+        <div className="text-overflow-block">
+          <i className="fa fa-fw fa-calendar-check-o"> </i>
+          { event.title }
+        </div>
+        { event.location &&
+        <div className="text-overflow-block">
+          <i className="fa fa-fw fa-map-marker"> </i>
+          { event.location.name }
+        </div>
+        }
+        { event.organiser &&
+        <div className="text-overflow-block">
+          <i className="fa fa-fw fa-user-o"> </i>
+          { event.organiser.name }
+        </div>
+        }
       </Hyperlink>
     );
   }
 
   getWideBody() {
     const items = this.getEventsToday();
-    const [event1, event2] = items;
+    const [event1, event2] = this.getAgendaViewItems();
+
+    if (!event1) {
+      return (
+        <div>
+          { this.props.defaultText }
+        </div>
+      );
+    }
 
     return (
       <div className="container-fluid">
@@ -175,8 +184,15 @@ export default class AgendaTile extends TileContent {
 
   getSmallBody() {
     const items = this.getEventsToday();
+    const [event] = this.getAgendaViewItems();
 
-    const [event] = items;
+    if (!event) {
+      return (
+        <div>
+          { this.props.defaultText }
+        </div>
+      );
+    }
 
     return (
       <div>
@@ -208,14 +224,14 @@ export class AgendaTileItem extends React.Component {
     }
 
     if (!parent || (start && !end)) {
-      return localMoment(start).format('HH:mm');
+      return formatTime(start);
     }
 
     return (
       <div>
-        { localMoment(start).format('HH:mm') }&nbsp;–
+        { formatTime(start) }&nbsp;–
         <br />
-        { localMoment(end).format('HH:mm') }
+        { formatTime(end) }
       </div>
     );
   }
