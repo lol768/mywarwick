@@ -17,11 +17,7 @@ export default Hyperlink;
 
 Hyperlink.displayName = 'Hyperlink';
 Hyperlink.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-    PropTypes.element,
-  ]),
+  children: PropTypes.node,
   href: PropTypes.string,
 };
 
