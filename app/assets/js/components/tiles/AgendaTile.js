@@ -174,7 +174,9 @@ export default class AgendaTile extends TileContent {
             { AgendaTile.renderSingleEvent(event2) }
             { items.length > 2 &&
             <div className="text-right">
-              +{ items.length - 2 } more
+              <a href="#" onClick={ this.props.onClickExpand }>
+                +{ items.length - 2 } more
+              </a>
             </div> }
           </div>
         </div>
@@ -199,7 +201,9 @@ export default class AgendaTile extends TileContent {
         { AgendaTile.renderSingleEvent(event) }
         { items.length > 1 &&
         <div className="text-right">
-          +{ items.length - 1 } more
+          <a href="#" onClick={ this.props.onClickExpand }>
+            +{ items.length - 1 } more
+          </a>
         </div> }
       </div>
     );

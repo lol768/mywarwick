@@ -55,6 +55,7 @@ export default class Tile extends React.Component {
   }
 
   onClickExpand(e) {
+    e.preventDefault();
     this.props.onZoomIn(e);
   }
 
@@ -178,7 +179,10 @@ export default class Tile extends React.Component {
             <div className="tile__body">
               { React.cloneElement(
                 React.Children.only(this.props.children),
-                { ref: 'content' }
+                {
+                  ref: 'content',
+                  onClickExpand: this.onClickExpand,
+                }
               )}
             </div>
           </div>
