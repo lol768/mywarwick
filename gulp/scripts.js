@@ -64,7 +64,6 @@ function browserifyOptions(cacheName, entries) {
   };
 }
 
-
 function createBrowserify(options) {
   var factory = browserifyInc;
   if (options.incremental === false) {
@@ -91,16 +90,6 @@ function bundle(b, outputFile) {
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.scriptOut));
 }
-
-const UGLIFY_OPTIONS = {
-  compress: {
-    dead_code: true,
-    unsafe: true,
-    global_defs: {
-      'process.env.NODE_ENV': PRODUCTION ? 'production' : 'development'
-    }
-  }
-};
 
 // The base non-Gulp Webpack config is in the standard file
 const BASE_WEBPACK_CONFIG = require(path.join(__dirname, '../webpack.config.js'));
