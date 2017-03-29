@@ -2,7 +2,8 @@
 // Has to be up top to catch all possible JS errors.
 if (window.addEventListener) {
   window.addEventListener('error', () => {
-    document.getElementById('react-app-spinner').style.display = 'none';
+    const spinner = document.getElementById('react-app-spinner');
+    if (spinner) spinner.style.display = 'none';
   }, true);
 }
 
@@ -45,6 +46,8 @@ bridge({ store, tiles, notifications });
 
 log.enableAll(false);
 es6Promise.polyfill();
+
+log.debug(`Environment: ${process.env.NODE_ENV}`);
 
 localforage.config({
   name: 'Start',
