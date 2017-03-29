@@ -199,7 +199,7 @@ function receiveUserInfo(response) {
       if (data.refresh) {
         window.location = user.rewriteRefreshUrl(data.refresh, window.location.href);
       } else {
-        if (!data.user.authenticated && false) {
+        if (!data.user.authenticated) {
           window.location = data.links.permissionDenied;
         } else {
           store.dispatch(user.userReceive(data.user));
