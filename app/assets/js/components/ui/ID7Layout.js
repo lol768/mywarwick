@@ -113,7 +113,7 @@ class ID7Layout extends ReactComponent {
         </div>
 
         <div className="id7-fixed-width-container">
-          <main className="id7-main-content-area" id="main">
+          <main className="id7-main-content-area" id="main" data-scrollable>
             <header className="id7-main-content-header">
               { this.renderNotificationPermissionRequest() }
               <UpdatePopup />
