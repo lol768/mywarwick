@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import { takeFromStream, getStreamSize } from '../../stream';
 import { markNotificationsRead } from '../../state/notification-metadata';
 import * as notifications from '../../state/notifications';
+import log from 'loglevel';
 
 const SOME_MORE = 20;
 
@@ -54,7 +55,16 @@ class NotificationsView extends ReactComponent {
       this.showMore();
     } else if (this.props.olderItemsOnServer) {
       this.props.dispatch(notifications.fetchMoreNotifications())
-        .then(() => this.showMore());
+        .then(() => this.showMore())
+        .catch((e) => {
+          if (e instanceof notifications.UnnecessaryFetchError) {
+            log.debug(`Unnecessary fetch: ${e.message}`);
+          } else {
+            throw e;
+          }
+        });
+    } else {
+      this.render();
     }
   }
 
@@ -128,7 +138,7 @@ class NotificationsView extends ReactComponent {
           : null
         }
         { hasAny ?
-          <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore }>
+          <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore } showLoading>
             <GroupedList groupBy={ this.props.grouped ? groupItemsByDate : undefined }>
               { notificationItems }
             </GroupedList>

@@ -23,6 +23,15 @@ export const fetchedNotifications = createAction(NOTIFICATION_FETCH);
 
 const ITEM_FETCH_LIMIT = 100;
 
+export class UnnecessaryFetchError {
+
+  constructor(message) {
+    this.name = 'UnnecessaryFetchError';
+    this.message = message;
+  }
+
+}
+
 function fetchStream(name, options = {}) {
   const query = qs.stringify({
     limit: ITEM_FETCH_LIMIT,
@@ -96,8 +105,10 @@ export function fetchMoreNotifications() {
   return (dispatch, getState) => {
     const { notifications } = getState();
 
-    if (notifications.fetching || !notifications.olderItemsOnServer) {
-      return Promise.reject(null);
+    if (notifications.fetching) {
+      return Promise.reject(new UnnecessaryFetchError('Already fetching'));
+    } else if (!notifications.olderItemsOnServer) {
+      return Promise.reject(new UnnecessaryFetchError('No more to fetch'));
     }
 
     dispatch(fetchingNotifications());
@@ -120,8 +131,10 @@ export function fetchMoreActivities() {
   return (dispatch, getState) => {
     const { activities } = getState();
 
-    if (activities.fetching || !activities.olderItemsOnServer) {
-      return Promise.reject(null);
+    if (activities.fetching) {
+      return Promise.reject(new UnnecessaryFetchError('Already fetching'));
+    } else if (!activities.olderItemsOnServer) {
+      return Promise.reject(new UnnecessaryFetchError('No more to fetch'));
     }
 
     dispatch(fetchingActivities());

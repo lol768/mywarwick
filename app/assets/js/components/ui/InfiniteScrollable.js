@@ -7,7 +7,10 @@ export default class InfiniteScrollable extends ReactComponent {
 
   constructor(props) {
     super(props);
-
+    this.state = {
+      loading: false,
+    };
+    this.loadingShown = false;
     this.boundScrollListener = this.onScroll.bind(this);
   }
 
@@ -16,11 +19,21 @@ export default class InfiniteScrollable extends ReactComponent {
   }
 
   componentDidUpdate() {
+    if (this.state.loading && !this.loadingShown) {
+      this.loadingShown = true;
+    }
     this.attachScrollListener();
   }
 
   componentWillUnmount() {
     this.detachScrollListener();
+  }
+
+  componentWillReceiveProps() {
+    this.setState({
+      loading: false,
+    });
+    this.loadingShown = false;
   }
 
   attachScrollListener() {
@@ -61,13 +74,23 @@ export default class InfiniteScrollable extends ReactComponent {
 
     if (scrollTop >= loadMoreThreshold) {
       this.detachScrollListener();
-
+      if (!this.loadingShown) {
+        this.setState({
+          loading: true,
+        });
+      }
       this.props.onLoadMore();
     }
   }
 
   render() {
-    return <div>{this.props.children}</div>;
+    return (<div>
+        {this.props.children}
+        { this.props.showLoading && this.state.loading ? <div className="loading-spinner centered">
+            <i className="fa fa-spinner fa-pulse fa-2x" />
+          </div> : ''
+        }
+      </div>);
   }
 
 }

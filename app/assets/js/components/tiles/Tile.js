@@ -175,7 +175,7 @@ export default class Tile extends React.Component {
               <div className="tile__icon tile__icon--right">{zoomIcon()}</div>
               <div className="tile__title">{title}</div>
             </header>
-            <div className="tile__body">
+            <div className="tile__body" data-scrollable>
               { React.cloneElement(
                 React.Children.only(this.props.children),
                 { ref: 'content' }
