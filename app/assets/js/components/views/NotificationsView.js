@@ -51,21 +51,24 @@ class NotificationsView extends ReactComponent {
     const streamSize = getStreamSize(this.props.notifications);
     const hasOlderItemsLocally = this.state.numberToShow < streamSize;
 
-    if (hasOlderItemsLocally) {
-      this.showMore();
-    } else if (this.props.olderItemsOnServer) {
-      this.props.dispatch(notifications.fetchMoreNotifications())
-        .then(() => this.showMore())
-        .catch((e) => {
-          if (e instanceof notifications.UnnecessaryFetchError) {
-            log.debug(`Unnecessary fetch: ${e.message}`);
-          } else {
-            throw e;
-          }
-        });
-    } else {
-      this.render();
-    }
+    return new Promise((resolve) => {
+      if (hasOlderItemsLocally) {
+        resolve(this.showMore());
+      } else if (this.props.olderItemsOnServer) {
+        this.props.dispatch(notifications.fetchMoreNotifications())
+          .then(() => resolve(this.showMore()))
+          .catch((e) => {
+            if (e instanceof notifications.UnnecessaryFetchError) {
+              log.debug(`Unnecessary fetch: ${e.message}`);
+              resolve();
+            } else {
+              throw e;
+            }
+          });
+      } else {
+        resolve();
+      }
+    });
   }
 
   showMore() {

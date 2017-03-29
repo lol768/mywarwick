@@ -10,7 +10,6 @@ export default class InfiniteScrollable extends ReactComponent {
     this.state = {
       loading: false,
     };
-    this.loadingShown = false;
     this.boundScrollListener = this.onScroll.bind(this);
   }
 
@@ -19,9 +18,6 @@ export default class InfiniteScrollable extends ReactComponent {
   }
 
   componentDidUpdate() {
-    if (this.state.loading && !this.loadingShown) {
-      this.loadingShown = true;
-    }
     this.attachScrollListener();
   }
 
@@ -29,18 +25,11 @@ export default class InfiniteScrollable extends ReactComponent {
     this.detachScrollListener();
   }
 
-  componentWillReceiveProps() {
-    this.setState({
-      loading: false,
-    });
-    this.loadingShown = false;
-  }
-
   attachScrollListener() {
     this.detachScrollListener();
     this.detached = false;
 
-    if (this.props.hasMore) {
+    if (!this.state.loading && this.props.hasMore) {
       $(window).on('scroll resize', this.boundScrollListener);
       $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]')
         .on('scroll', this.boundScrollListener);
@@ -74,12 +63,19 @@ export default class InfiniteScrollable extends ReactComponent {
 
     if (scrollTop >= loadMoreThreshold) {
       this.detachScrollListener();
-      if (!this.loadingShown) {
-        this.setState({
-          loading: true,
-        });
-      }
-      this.props.onLoadMore();
+      this.setState({
+        loading: true,
+      });
+      this.props.onLoadMore().then(
+        () => {
+          this.setState({
+            loading: false,
+          })
+        },
+        () => this.setState({
+          loading: false,
+        })
+      );
     }
   }
 
