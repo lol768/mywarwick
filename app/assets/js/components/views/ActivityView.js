@@ -1,17 +1,14 @@
 import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
-
 import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
 import * as groupItemsByDate from '../../GroupItemsByDate';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 import EmptyState from '../ui/EmptyState';
-
 import { connect } from 'react-redux';
-
 import { takeFromStream, getStreamSize } from '../../stream';
-
 import * as notifications from '../../state/notifications';
+import log from 'loglevel';
 
 const SOME_MORE = 20;
 
@@ -31,11 +28,19 @@ class ActivityView extends ReactComponent {
     const hasOlderItemsLocally = this.state.numberToShow < streamSize;
 
     if (hasOlderItemsLocally) {
-      this.showMore();
+      return Promise.resolve(this.showMore());
     } else if (this.props.olderItemsOnServer) {
-      this.props.dispatch(notifications.fetchMoreActivities())
-        .then(() => this.showMore());
+      return this.props.dispatch(notifications.fetchMoreActivities())
+        .then(() => this.showMore())
+        .catch((e) => {
+          if (e instanceof notifications.UnnecessaryFetchError) {
+            log.debug(`Unnecessary fetch: ${e.message}`);
+          } else {
+            throw e;
+          }
+        });
     }
+    return Promise.resolve();
   }
 
   showMore() {
@@ -55,7 +60,7 @@ class ActivityView extends ReactComponent {
     return (
       <div>
         { hasAny ?
-          <InfiniteScrollable hasMore={hasMore} onLoadMore={ this.loadMore }>
+          <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore } showLoading>
             <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
               {activities}
             </GroupedList>
