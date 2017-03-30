@@ -13,7 +13,7 @@ import initErrorReporter from './errorreporter';
 initErrorReporter();
 
 import $ from 'jquery';
-import _ from 'lodash';
+import once from 'lodash/once';
 import moment from 'moment';
 import log from 'loglevel';
 import * as es6Promise from 'es6-promise';
@@ -172,7 +172,7 @@ const persistedUserLinks = persisted('user.links', user.receiveSSOLinks);
 
 /** Initial requests for data */
 
-const loadDataFromServer = _.once(() => {
+const loadDataFromServer = once(() => {
   store.dispatch(tiles.fetchTiles());
 
   if (hasAuthoritativeAuthenticatedUser(store.getState())) {

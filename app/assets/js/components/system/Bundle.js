@@ -11,7 +11,7 @@ import React, { Component } from 'react';
  * that's going to pull it into the main bundle.
  *
  * @param load the function that lazy-loads the module.
- *        usually using bundle-loader and importing 'bundle?lazy!yourmodule'
+ *        usually using dynamic import() returning a Promise for the module
  * @param initialise if your module needs one-time inialisation,
  *        it will run this and set the result as state.initial
  */
@@ -38,11 +38,12 @@ class Bundle extends Component {
   load(props) {
     this.setState({
       mod: null,
+      initial: null,
     });
-    props.load((mod) => {
+    props.load().then((mod) => {
+      // handle both es imports and cjs
       const newMod = mod.default ? mod.default : mod;
       this.setState({
-        // handle both es imports and cjs
         mod: newMod,
         initial: props.initialise ? props.initialise(newMod) : null,
       });

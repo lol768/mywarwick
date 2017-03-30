@@ -12,8 +12,6 @@ import { displayUpdateProgress } from './state/update';
 import { postJsonWithCredentials } from './serverpipe';
 import { createSelector } from 'reselect';
 import { hasAuthoritativeAuthenticatedUser } from './state';
-// FIXME won't work in Node (tests)
-import * as warwickSearch from 'bundle-loader?lazy!warwick-search-frontend';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -108,8 +106,8 @@ export default function init(opts) {
       },
 
       search(query) {
-        // warwickSearch is a lazy module.
-        warwickSearch(s => s.submitSearch(query));
+        // lazy load the Search module
+        import('warwick-search-frontend').then(s => s.submitSearch(query));
       },
 
       onApplicationDidBecomeActive() {

@@ -93,10 +93,10 @@ function bundle(b, outputFile) {
 
 // The base non-Gulp Webpack config is in the standard file
 const BASE_WEBPACK_CONFIG = require(path.join(__dirname, '../webpack.config.js'));
+// Then we merge some extra plugins.
 const WEBPACK_CONFIG = webpackMerge(BASE_WEBPACK_CONFIG, {
   plugins: [ new PlayFingerprintsPlugin() ]
 });
-// Then we merge some extra plugins.
 const WEBPACK_WATCH_CONFIG = webpackMerge(WEBPACK_CONFIG, {
   watch: true,
   plugins: [ new WatchEventsPlugin({ emitter: bundleEvents }) ]

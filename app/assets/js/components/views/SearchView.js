@@ -1,9 +1,13 @@
-// FIXME won't work in Node (tests)
-import warwickSearch from 'bundle-loader?lazy!warwick-search-frontend';
 import React from 'react';
 import Bundle from '../system/Bundle';
+import once from 'lodash/once';
 
 const Loading = () => <div />;
+
+// Returns a Promise for the module.
+// Using once() so it reuses the same value,
+// though import() may mostly handle that anyway.
+const importSearch = once(() => import('warwick-search-frontend'));
 
 // Do this once after module has loaded
 function initialiseSearch(mod) {
@@ -17,7 +21,7 @@ function renderSearch(mod, SearchComponent) {
 export default class SearchView extends React.Component {
   render() {
     return (
-      <Bundle load={warwickSearch} initialise={initialiseSearch}>
+      <Bundle load={importSearch} initialise={initialiseSearch}>
         { renderSearch }
       </Bundle>
     );
