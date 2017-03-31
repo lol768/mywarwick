@@ -1,5 +1,5 @@
 import React from 'react';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 export default class ColumnLayout extends React.Component {
 

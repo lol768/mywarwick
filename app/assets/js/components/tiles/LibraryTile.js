@@ -2,7 +2,7 @@ import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import Hyperlink from '../ui/Hyperlink';
 import TextTile from './TextTile';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 export default class LibraryTile extends TextTile {
 

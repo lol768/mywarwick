@@ -38,9 +38,11 @@ function getPlugins() {
     plugins.push(new webpack.optimize.UglifyJsPlugin({
       sourceMap: true,
       comments: false,
+      minify: true,
       compress: {
         unsafe: true,
         screw_ie8: true,
+        warnings: false,
       }
     }));
   }
@@ -51,6 +53,7 @@ module.exports = {
   entry: {
     bundle: './app/assets/js/main.js',
     'publish-bundle': './app/assets/js/publish.js',
+    vendor: ['react','react-dom','redux','react-redux','moment']
   },
   output: {
     path: path.resolve(__dirname, 'target/gulp/js'),
@@ -59,12 +62,17 @@ module.exports = {
     publicPath: '/assets/js/',
   },
   resolve: {
+    extensions: ['.js', '.jsx', '.es6'],
     alias: {
       // Force some duplicate modules to come from one place
       'whatwg-fetch' : topLevelModule('whatwg-fetch'),
       'reselect' : topLevelModule('reselect'),
       'draggable-core' : topLevelModule('draggable-core'),
-      'react-draggable' : topLevelModule('react-draggable'),
+      'react-draggable' : topLevelModule('react-draggable/index'),
+      // Force some modules to use the ES6 source, for better optimisation.
+      // May also need to add to babel-activate.js in the tests.
+      'lodash' : 'lodash-es',
+      'localforage' : 'localforage/src/localforage',
       // Replace some Search stuff we don't need with a big fake module
       './CuratedLinkForm' : path.resolve(__dirname, 'app/assets/js/components/FakeSearchModule.js'),
     }
@@ -76,11 +84,14 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.(es6|jsx?)$/,
         // Only run Babel on these modules:
         include: [
           path.resolve(__dirname, 'app/assets/js'),
-          path.resolve(__dirname, 'node_modules/warwick-search-frontend/app/assets/js'),
+          // Some 3rd party modules that need compiling too
+          topLevelModule('warwick-search-frontend/app/assets/js'),
+          topLevelModule('localforage/src'),
+          topLevelModule('react-draggable/lib'),
         ],
         loader: 'babel-loader',
         options: Object.assign({},

@@ -8,15 +8,16 @@ if (window.addEventListener) {
 }
 
 import 'core-js/modules/es6.object.assign';
+import promisePolyfill from 'es6-promise/lib/es6-promise/polyfill';
+promisePolyfill();
 
 import initErrorReporter from './errorreporter';
 initErrorReporter();
 
 import $ from 'jquery';
-import once from 'lodash/once';
+import _ from 'lodash-es';
 import moment from 'moment';
 import log from 'loglevel';
-import * as es6Promise from 'es6-promise';
 import localforage from 'localforage';
 
 import React from 'react';
@@ -45,8 +46,6 @@ import { hasAuthoritativeUser, hasAuthoritativeAuthenticatedUser } from './state
 bridge({ store, tiles, notifications });
 
 log.enableAll(false);
-es6Promise.polyfill();
-
 log.debug(`Environment: ${process.env.NODE_ENV}`);
 
 localforage.config({
@@ -149,7 +148,7 @@ SocketDatapipe.subscribe(data => {
 
 function freezeStream({ stream, olderItemsOnServer }) {
   return {
-    items: _(stream).values().flatten().value(),
+    items: _.flatten(stream),
     olderItemsOnServer,
   };
 }
@@ -172,7 +171,7 @@ const persistedUserLinks = persisted('user.links', user.receiveSSOLinks);
 
 /** Initial requests for data */
 
-const loadDataFromServer = once(() => {
+const loadDataFromServer = _.once(() => {
   store.dispatch(tiles.fetchTiles());
 
   if (hasAuthoritativeAuthenticatedUser(store.getState())) {

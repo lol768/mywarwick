@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import moment from 'moment';
 
 export const DATE_KEY = 'date';
@@ -27,8 +27,8 @@ export function mergeReceivedItems(stream = [], rx = []) {
 
   const uniqRx = uniqStream(rx);
 
-  const newest = _(stream).first();
-  const oldestRx = _(uniqRx).min((x) => x[DATE_KEY]);
+  const newest = _.first(stream);
+  const oldestRx = _.min(uniqRx, x => x[DATE_KEY]);
 
   // Short circuit if existing stream is empty
   if (stream.length === 0) {
@@ -42,7 +42,7 @@ export function mergeReceivedItems(stream = [], rx = []) {
 
   // Try and do the smallest possible merge
   // (>= to include identical items in dedupe later)
-  const mergeStart = _(stream).findLastIndex((x) => x[DATE_KEY] >= oldestRx[DATE_KEY]);
+  const mergeStart = _.findLastIndex(stream, (x) => x[DATE_KEY] >= oldestRx[DATE_KEY]);
 
   if (mergeStart >= 0) {
     const toMerge = stream.splice(0, mergeStart + 1).concat(uniqRx);
@@ -68,18 +68,18 @@ export function onStreamReceive(
   rx = []
 ) {
   const result = _.clone(stream);
-  _(rx).groupBy(grouper).each((v, k) => {
+  _.each(_.groupBy(rx, grouper), (v, k) => {
     result[k] = mergeReceivedItems(result[k] || [], v);
   });
   return result;
 }
 
 function getOrderedStreamPartitions(stream) {
-  return _(stream)
-    .toPairs()
-    .sortBy(([k]) => k).map(([, v]) => v) // eslint-disable-line no-unused-vars
-    .reverse()
-    .value();
+  return _.flow(
+    _.toPairs,
+    (pairs) => _.sortBy(pairs, ([k]) => k).map(([, v]) => v),
+    _.reverse,
+  )(stream);
 }
 
 /*
@@ -130,7 +130,7 @@ export function getNumItemsSince(stream, date) {
     return getStreamSize(stream);
   }
 
-  return _(stream).reduce(
+  return _.reduce(stream,
     (sum, part) => sum + part.filter(item => moment(item.date).isAfter(date)).length,
     0
   );

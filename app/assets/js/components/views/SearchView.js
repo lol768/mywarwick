@@ -1,6 +1,6 @@
 import React from 'react';
 import Bundle from '../system/Bundle';
-import once from 'lodash/once';
+import once from 'lodash-es/once';
 
 const Loading = () => <div />;
 
