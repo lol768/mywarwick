@@ -3,7 +3,7 @@ import formatDateTime, { formatDate, formatTime, localMoment } from '../../dateF
 import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import classNames from 'classnames';
 import Hyperlink from '../ui/Hyperlink';
 import { createSelector } from 'reselect';
@@ -55,8 +55,8 @@ const groupItemsForAgendaTile = {
 const agendaViewTransform = (items) => {
   const startOfToday = localMoment().startOf('day');
 
-  return _(items)
-    .flatMap(e => {
+  return _.flow(
+    i => _.flatMap(i, e => {
       if (e.isAllDay) {
         const date = localMoment(e.start);
         const end = localMoment(e.end);
@@ -76,10 +76,10 @@ const agendaViewTransform = (items) => {
       }
 
       return e;
-    })
-    .filter(e => startOfToday.isBefore(e.start))
-    .sortBy(e => e.start)
-    .value();
+    }),
+    i => _.filter(i, e => startOfToday.isBefore(e.start)),
+    i => _.sortBy(i, e => e.start)
+  )(items);
 };
 
 export default class AgendaTile extends TileContent {

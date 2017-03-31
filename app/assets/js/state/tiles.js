@@ -1,5 +1,5 @@
 import log from 'loglevel';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import update from 'react-addons-update';
 
 import { USER_CLEAR } from './user';
@@ -143,7 +143,7 @@ export function fetchTileContent(tileSpec = ALL_TILES) {
       return fetchWithCredentials(`/api/tiles/content/${tileId}`)
         .then(response => response.json())
         .then(json =>
-          _(json.data).each((result, tile) => {
+          _.each(json.data, (result, tile) => {
             if (result.content) {
               dispatch(fetchedTileContent(tile, result.content));
             } else {

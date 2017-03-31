@@ -2,20 +2,22 @@
 // Has to be up top to catch all possible JS errors.
 if (window.addEventListener) {
   window.addEventListener('error', () => {
-    document.getElementById('react-app-spinner').style.display = 'none';
+    const spinner = document.getElementById('react-app-spinner');
+    if (spinner) spinner.style.display = 'none';
   }, true);
 }
 
 import 'core-js/modules/es6.object.assign';
+import promisePolyfill from 'es6-promise/lib/es6-promise/polyfill';
+promisePolyfill();
 
 import initErrorReporter from './errorreporter';
 initErrorReporter();
 
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import moment from 'moment';
 import log from 'loglevel';
-import * as es6Promise from 'es6-promise';
 import localforage from 'localforage';
 
 import React from 'react';
@@ -44,7 +46,7 @@ import { hasAuthoritativeUser, hasAuthoritativeAuthenticatedUser } from './state
 bridge({ store, tiles, notifications });
 
 log.enableAll(false);
-es6Promise.polyfill();
+log.debug(`Environment: ${process.env.NODE_ENV}`);
 
 localforage.config({
   name: 'Start',
@@ -146,7 +148,7 @@ SocketDatapipe.subscribe(data => {
 
 function freezeStream({ stream, olderItemsOnServer }) {
   return {
-    items: _(stream).values().flatten().value(),
+    items: _.flatten(stream),
     olderItemsOnServer,
   };
 }

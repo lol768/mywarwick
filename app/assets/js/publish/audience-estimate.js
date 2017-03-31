@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import AudienceIndicator from './components/AudienceIndicator';

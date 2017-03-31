@@ -4,7 +4,7 @@ import TileContent from './TileContent';
 import Skycon from '../ui/Skycon';
 import { localMomentUnix } from '../../dateFormats';
 
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 function formatIconString(str) {
   return str.toUpperCase().replace(/-/g, '_');
