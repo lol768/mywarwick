@@ -7,6 +7,7 @@
 const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
+const webpackMerge = require('webpack-merge');
 
 if (global.PRODUCTION === undefined) {
   global.PRODUCTION = (process.env.PRODUCTION === 'true');
@@ -94,9 +95,16 @@ module.exports = {
           topLevelModule('react-draggable/lib'),
         ],
         loader: 'babel-loader',
-        options: Object.assign({},
+        options: webpackMerge(
           readJSON('.babelrc'),
-          { cacheDirectory: 'target/babel-loader-cache' }
+          {
+            presets: [
+              // modules:false keeps `import` statements as they are,
+              // and lets webpack take advantage of extra optimisations.
+              ['es2015', { modules: false }]
+            ],
+            cacheDirectory: 'target/babel-loader-cache'
+          }
         ),
       },
     ],
