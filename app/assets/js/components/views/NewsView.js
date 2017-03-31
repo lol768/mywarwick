@@ -61,7 +61,7 @@ export class NewsView extends React.Component {
   }
 
   loadMore() {
-    this.props.dispatch(news.fetch());
+    return Promise.resolve(this.props.dispatch(news.fetch()));
   }
 
   fetch() {

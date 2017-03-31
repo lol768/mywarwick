@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import Hyperlink from '../ui/Hyperlink';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import TileContent from './TileContent';
 
 export default class TextTile extends TileContent {

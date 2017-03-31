@@ -5,7 +5,7 @@ import TabBarItem from './ui/TabBarItem';
 import ID7Layout from './ui/ID7Layout';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import log from 'loglevel';
 import { getNumItemsSince } from '../stream';
 
@@ -53,7 +53,7 @@ export class AppLayout extends ReactComponent {
 function mapStateToProps(state) {
   return {
     notificationsCount:
-      getNumItemsSince(state.notifications.stream, _(state).get(['notificationsLastRead', 'date'])),
+      getNumItemsSince(state.notifications.stream, _.get(state, ['notificationsLastRead', 'date'])),
     layoutClassName: state.ui.className,
     user: state.user.data,
   };

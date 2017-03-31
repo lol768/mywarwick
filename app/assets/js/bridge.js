@@ -5,14 +5,13 @@
  */
 
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import * as stream from './stream';
 import { push } from 'react-router-redux';
 import { displayUpdateProgress } from './state/update';
 import { postJsonWithCredentials } from './serverpipe';
 import { createSelector } from 'reselect';
 import { hasAuthoritativeAuthenticatedUser } from './state';
-import * as warwickSearch from 'warwick-search-frontend';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -108,7 +107,8 @@ export default function init(opts) {
       },
 
       search(query) {
-        warwickSearch.submitSearch(query);
+        // lazy load the Search module
+        import('warwick-search-frontend').then(s => s.submitSearch(query));
       },
 
       onApplicationDidBecomeActive() {
