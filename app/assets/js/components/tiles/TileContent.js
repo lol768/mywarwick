@@ -1,7 +1,7 @@
 import React from 'react';
 import * as log from 'loglevel';
 import * as errorreporter from '../../errorreporter';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 export const TILE_SIZES = {
   SMALL: 'small',

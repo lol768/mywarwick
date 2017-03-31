@@ -1,6 +1,6 @@
 /* eslint react/sort-comp: 0 */
 import React from 'react';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 import { localMoment } from '../../dateFormats.js';
 import classNames from 'classnames';

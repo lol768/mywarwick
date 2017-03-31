@@ -2,7 +2,7 @@
 
 import $ from 'jquery';
 import log from 'loglevel';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import store from './store';
 
 /* eslint-disable */

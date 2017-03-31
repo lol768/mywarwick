@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect';
 import log from 'loglevel';
-import _ from 'lodash';
+import get from 'lodash-es/get';
 
 const identity = x => x;
 
@@ -41,7 +41,7 @@ export default function init(opts) {
       .then(() => {
         // Whenever the value at this key path changes
         const selector = createSelector(
-          state => _.get(state, keyPathArray),
+          state => get(state, keyPathArray),
           value => localforage.setItem(keyPath, freeze(value))
         );
 

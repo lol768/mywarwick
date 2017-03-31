@@ -1,15 +1,3 @@
-import fs from 'fs';
-
-const pathsToBabel = [
-  './test/assets/js',
-  './app/assets/js',
-  './node_modules/warwick-search-frontend/app/assets/js',
-].map(p => fs.realpathSync(p));
-
-require('babel-register')({
-  ignore: (filename) => !pathsToBabel.some(p => filename.startsWith(p))
-});
-
 import tk from 'timekeeper';
 import jsxChai from 'jsx-chai';
 
