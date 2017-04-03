@@ -12,11 +12,20 @@ import ActivityView from './views/ActivityView';
 import NotificationsView from './views/NotificationsView';
 import SearchView from './views/SearchView';
 
+function MaybeEditableMeView(props) {
+  if (location.pathname === '/edit') {
+    return <MeView editing {...props} />;
+  }
+
+  return <MeView editing={false} {...props} />;
+}
+
 const AppRoot = ({ history }) => (
   <Provider store={store}>
     <Router history={history}>
       <Route path="/" component={AppLayout}>
-        <IndexRoute component={MeView} />
+        <IndexRoute component={MaybeEditableMeView} />
+        <Route path="edit" component={MaybeEditableMeView} />;
         <Route path="tiles" component={MeView}>
           <IndexRedirect to="/" />
           <Route path=":id" component={TileView} />

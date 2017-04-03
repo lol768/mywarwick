@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import ReactGridLayoutBase from 'react-grid-layout';
@@ -53,7 +52,6 @@ class MeView extends ReactComponent {
   constructor(props) {
     super(props);
     this.state = {};
-    this.onClickOutside = this.onClickOutside.bind(this);
     this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
@@ -72,6 +70,12 @@ class MeView extends ReactComponent {
     $('.id7-main-content-area').off('touchstart', this.onBodyScroll);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (this.props.editing && !nextProps.editing) {
+      this.onFinishEditing();
+    }
+  }
+
   onBodyScroll(e) {
     // This event handler fixes an issue on iOS where initiating a scroll
     // into the overflow does not appear to do rubber banding, but scrolling
@@ -85,46 +89,20 @@ class MeView extends ReactComponent {
     }
   }
 
-  onBeginEditing(tile) {
-    this.setState({
-      editing: tile.id,
-    });
-
-    $(ReactDOM.findDOMNode(this)).on('click', this.onClickOutside);
-  }
-
   onFinishEditing() {
-    if (!this.unmounted) {
-      this.setState({
-        editing: null,
-      });
-    }
-
-    $(ReactDOM.findDOMNode(this)).off('click', this.onClickOutside);
-
     this.props.dispatch(tiles.persistTiles());
   }
 
-  onClickOutside(e) {
-    if (this.state.configuringTile) {
-      return;
-    }
+  onDragStart(layout, item, newItem, placeholder, e) {
+    e.preventDefault();
 
-    if (this.state.editing && $(e.target).parents('.tile--editing').length === 0) {
-      // Defer so this click is still considered to be happening in editing mode
-      _.defer(() => {
-        this.onFinishEditing();
-        this.onConfigViewDismiss();
-      });
-    }
-  }
-
-  onDragStart(layout, item) {
     // Disable rubber banding so the users' finger and the tile they are dragging
     // don't get out of sync.  (iOS)
     $('.id7-main-content-area').css('-webkit-overflow-scrolling', 'auto');
 
-    this.onBeginEditing({ id: item.i });
+    this.setState({
+      frontmost: item.i,
+    });
   }
 
   onDragStop() {
@@ -161,8 +139,9 @@ class MeView extends ReactComponent {
         key={id}
         id={id}
         view={this}
-        editing={this.state.editing === id}
-        editingAny={!!this.state.editing}
+        frontmost={this.state.frontmost === id}
+        editing={this.props.editing}
+        editingAny={!!this.props.editing}
         size={this.getTileSize(id)}
         layoutWidth={this.props.layoutWidth}
       />
@@ -222,7 +201,7 @@ class MeView extends ReactComponent {
   }
 
   getDragDelayForItem(item) {
-    return this.state.editing === item.i ? 0 : 400;
+    return this.props.editing === item.i ? 0 : 400;
   }
 
   getGridLayoutWidth() {
@@ -277,12 +256,11 @@ class MeView extends ReactComponent {
   }
 
   renderTiles() {
-    const { layoutWidth, isDesktop } = this.props;
+    const { layoutWidth, isDesktop, editing } = this.props;
     const visibleTiles = this.props.tiles.filter(t => !t.removed
     && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
     const hiddenTiles = this.props.tiles.filter(t => t.removed
     && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
-    const { editing } = this.state;
 
     // Show hidden tiles (if any) when editing, or if there are no visible tiles
     const showHiddenTiles = hiddenTiles.length > 0 && (editing || visibleTiles.length === 0);
@@ -303,7 +281,7 @@ class MeView extends ReactComponent {
         <div className="me-view__tiles">
           <ReactGridLayoutBase
             layout={layout}
-            isDraggable
+            isDraggable={!!this.props.editing}
             isResizable={false}
             cols={layoutWidth}
             rowHeight={rowHeight}
@@ -311,11 +289,10 @@ class MeView extends ReactComponent {
             useCSSTransformations
             onLayoutChange={this.onLayoutChange}
             verticalCompact
-            draggableCancel=".tile__edit-control, .toggle-tooltip"
             onDragStart={this.onDragStart}
             onDragStop={this.onDragStop}
-            getDragDelayForItem={this.getDragDelayForItem}
             width={this.getGridLayoutWidth()}
+            draggableHandle=".tile__drag-handle"
           >
             { tileComponents }
           </ReactGridLayoutBase>
@@ -330,7 +307,7 @@ class MeView extends ReactComponent {
   }
 
   renderTileOptionsView() {
-    if (this.state.configuringTile && this.state.editing) {
+    if (this.state.configuringTile && this.props.editing) {
       const configuringTile = this.state.configuringTile;
       return (
         <div>
@@ -347,7 +324,7 @@ class MeView extends ReactComponent {
   }
 
   render() {
-    const classes = classNames('me-view', { 'me-view--editing': this.state.editing });
+    const classes = classNames('me-view', { 'me-view--editing': this.props.editing });
     const { isDesktop } = this.props;
     const transitionProps = {
       transitionName: 'slider',

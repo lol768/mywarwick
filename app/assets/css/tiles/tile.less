@@ -58,3 +58,11 @@
   // Width must be a multiple of the tile gutter width
   width: floor(((@container-width - @grid-gutter-width) * (@cols / @grid-columns) - @grid-gutter-width) / @tile-gutter) * @tile-gutter;
 }
+
+.tile__drag-handle {
+  touch-action: none;
+}
+
+.tile--frontmost, .react-draggable-dragging {
+  z-index: 10;
+}

@@ -28,6 +28,7 @@ class TileView extends Component {
       size,
       option,
       user,
+      frontmost,
     } = this.props;
 
     if (tile === undefined) {
@@ -56,6 +57,7 @@ class TileView extends Component {
       editing,
       editingAny,
       isDesktop,
+      frontmost,
     };
 
     // Zooming
@@ -120,6 +122,7 @@ TileView.propTypes = {
   view: PropTypes.object,
   colour: React.PropTypes.number,
   user: PropTypes.object.isRequired,
+  frontmost: PropTypes.bool,
 };
 
 export default connect(select)(TileView);
