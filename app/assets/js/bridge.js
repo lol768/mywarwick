@@ -26,7 +26,10 @@ export default function init(opts) {
         state => state.user,
         user => {
           if (!user.empty) {
-            native.setUser(user.data);
+            native.setUser({
+              ...user.data,
+              authoritative: user.authoritative,
+            });
           }
         }
       ),
@@ -127,6 +130,10 @@ export default function init(opts) {
 
       registerForFCM(deviceToken) {
         postJsonWithCredentials('/api/push/fcm/subscribe', { deviceToken });
+      },
+
+      unregisterForPush(deviceToken) {
+        postJsonWithCredentials('/api/push/unsubscribe', { deviceToken });
       },
     };
 
