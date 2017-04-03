@@ -7,6 +7,7 @@ import _ from 'lodash-es';
 import classNames from 'classnames';
 import Hyperlink from '../ui/Hyperlink';
 import { createSelector } from 'reselect';
+import warning from 'warning';
 
 const moduleColours = [
   '#00b2dd', // Bright Sky blue
@@ -223,13 +224,13 @@ export default class AgendaTile extends TileContent {
 export class AgendaTileItem extends React.PureComponent {
 
   renderDate() {
-    const { isAllDay, start, end, parent } = this.props;
+    const { isAllDay, start, end } = this.props;
 
     if (isAllDay) {
       return 'All day';
     }
 
-    if (!parent || (start && !end)) {
+    if (start && !end) {
       return formatTime(start);
     }
 
@@ -310,18 +311,32 @@ export class AgendaTileItem extends React.PureComponent {
     );
   }
 
-  renderStaff() {
-    const { staff } = this.props;
+  renderUser() {
+    const { staff, organiser } = this.props;
 
-    if (!staff || staff.length === 0) {
+    warning(
+      !(staff && organiser),
+      'Event has both staff and organiser set - only one should be used: %s',
+      this.props
+    );
+
+    const users = staff || (organiser && [organiser]);
+
+    if (!users || users.length === 0) {
       return null;
+    }
+
+    function personToString(person) {
+      return person.firstName ?
+        `${person.firstName} ${person.lastName}`
+        : person.name;
     }
 
     return (
       <div className="text--translucent">
         <i className="fa fa-user-o"> </i>
         &nbsp;
-        { staff.map(person => `${person.firstName} ${person.lastName}`).join(', ') }
+        { users.map(personToString).join(', ') }
       </div>
     );
   }
@@ -338,7 +353,7 @@ export class AgendaTileItem extends React.PureComponent {
           { this.renderTitle() }
           { ' ' }
           { this.renderLocation() }
-          { this.renderStaff() }
+          { this.renderUser() }
         </div>
       </div>
     );
