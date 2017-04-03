@@ -125,29 +125,31 @@ export default class AgendaTile extends TileContent {
     }
 
     return (
-      <Hyperlink href={ event.href } style={{ display: 'inline-block' }}>
-        <div className="text-overflow-block">
-          <i className="fa fa-fw fa-clock-o"> </i>
-          { event.isAllDay ?
-            `All day ${formatDate(event.start)}` :
-            `${formatDateTime(event.start)}–${formatTime(event.end)}` }
-        </div>
-        <div className="text-overflow-block">
-          <i className="fa fa-fw fa-calendar-check-o"> </i>
-          { event.title }
-        </div>
-        { event.location &&
-        <div className="text-overflow-block">
-          <i className="fa fa-fw fa-map-marker"> </i>
-          { event.location.name }
-        </div>
-        }
-        { event.organiser &&
-        <div className="text-overflow-block">
-          <i className="fa fa-fw fa-user-o"> </i>
-          { event.organiser.name }
-        </div>
-        }
+      <Hyperlink href={ event.href } style={{ display: 'block' }}>
+        <ul className="list-unstyled">
+          <li className="text-overflow-block">
+            <i className="fa fa-fw fa-clock-o"> </i>
+            { event.isAllDay ?
+              `All day ${formatDate(event.start)}` :
+              `${formatDateTime(event.start)}–${formatTime(event.end)}` }
+          </li>
+          <li className="text-overflow-block">
+            <i className="fa fa-fw fa-calendar-check-o"> </i>
+            { event.title }
+          </li>
+          { event.location &&
+          <li className="text-overflow-block">
+            <i className="fa fa-fw fa-map-marker"> </i>
+            { event.location.name }
+          </li>
+          }
+          { event.organiser &&
+          <li className="text-overflow-block">
+            <i className="fa fa-fw fa-user-o"> </i>
+            { event.organiser.name }
+          </li>
+          }
+        </ul>
       </Hyperlink>
     );
   }
@@ -218,7 +220,7 @@ export default class AgendaTile extends TileContent {
   }
 }
 
-export class AgendaTileItem extends React.Component {
+export class AgendaTileItem extends React.PureComponent {
 
   renderDate() {
     const { isAllDay, start, end, parent } = this.props;
