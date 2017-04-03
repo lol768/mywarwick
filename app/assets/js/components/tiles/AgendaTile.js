@@ -29,7 +29,6 @@ const groupItemsForAgendaTile = {
 
   groupForItem(item, now = localMoment()) {
     const date = localMoment(item.props.start).startOf('day');
-
     if (date.isSame(now, 'day')) {
       return 0; // today
     } else if (date.isSame(now.clone().add(1, 'day'), 'day')) {
@@ -39,13 +38,12 @@ const groupItemsForAgendaTile = {
   },
 
   titleForGroup(group) {
-    if (group < 2) {
-      return [
-        'Today',
-        'Tomorrow',
-      ][group];
+    switch (group) {
+      case 0: return 'Today';
+      case 1: return 'Tomorrow';
+      default:
+        return moment.unix(group).tz('Europe/London').format('ddd Do MMMM');
     }
-    return moment.unix(group).tz('Europe/London').format('ddd DD/MM/YY');
   },
 };
 
@@ -108,16 +106,7 @@ export default class AgendaTile extends TileContent {
 
   getLargeBody() {
     const items = this.getAgendaViewItems();
-
-    const events = items.map(event =>
-      <AgendaTileItem key={event.id} {...event} />
-    );
-
-    return (
-      <GroupedList className="tile-list-group" groupBy={groupItemsForAgendaTile}>
-        {events}
-      </GroupedList>
-    );
+    return <LargeBody>{ items }</LargeBody>;
   }
 
   static renderSingleEvent(event) {
@@ -221,6 +210,19 @@ export default class AgendaTile extends TileContent {
   }
 }
 
+export class LargeBody extends React.PureComponent {
+  render() {
+    const { children } = this.props;
+    return (
+      <GroupedList className="tile-list-group" groupBy={groupItemsForAgendaTile}>
+        {children.map(event =>
+          <AgendaTileItem key={event.id} {...event} />
+        )}
+      </GroupedList>
+    );
+  }
+}
+
 export class AgendaTileItem extends React.PureComponent {
 
   renderDate() {
@@ -295,11 +297,11 @@ export class AgendaTileItem extends React.PureComponent {
     if (location.href) {
       return (
         <span className="tile-list-item__location text--light">
-          (<Hyperlink href={ location.href } className="text--dotted-underline">
+          <Hyperlink href={ location.href } className="text--dotted-underline">
             { location.name }
           &nbsp;
           <i className="fa fa-map-marker"> </i>
-          </Hyperlink>)
+          </Hyperlink>
         </span>
       );
     }
