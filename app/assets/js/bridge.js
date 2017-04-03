@@ -5,7 +5,7 @@
  */
 
 import $ from 'jquery';
-import get from 'lodash-es/get';
+import _ from 'lodash-es';
 import * as stream from './stream';
 import { push } from 'react-router-redux';
 import { displayUpdateProgress } from './state/update';
@@ -34,7 +34,8 @@ export default function init(opts) {
         }
       ),
       createSelector(
-        state => get(state, 'routing.locationBeforeTransitions.pathname', '/'),
+        state => _.get(state, 'routing.locationBeforeTransitions.pathname', '/')
+          + _.get(state, 'routing.locationBeforeTransitions.search', ''),
         path => native.setPath(path)
       ),
       createSelector(
