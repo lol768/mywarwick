@@ -1,7 +1,7 @@
 import log from 'loglevel';
 import { createAction } from 'redux-actions';
 import { fetchWithCredentials, postJsonWithCredentials } from '../serverpipe';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import * as news from './news';
 
 const NEWS_CATEGORIES_REQUEST = 'NEWS_CATEGORIES_REQUEST';

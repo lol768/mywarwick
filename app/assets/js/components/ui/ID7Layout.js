@@ -2,7 +2,7 @@ import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import log from 'loglevel';
 import Badge from './Badge';
 import MastheadSearch from './MastheadSearch';
@@ -14,13 +14,14 @@ import UtilityBar from './UtilityBar';
 import { connect } from 'react-redux';
 import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
-import { goBack } from 'react-router-redux';
+import { goBack, push } from 'react-router-redux';
 
 class ID7Layout extends ReactComponent {
 
   constructor(props) {
     super(props);
     this.onBackClick = this.onBackClick.bind(this);
+    this.onEdit = this.onEdit.bind(this);
   }
 
   componentWillMount() {
@@ -35,7 +36,7 @@ class ID7Layout extends ReactComponent {
   componentWillReceiveProps(nextProps) {
     nextProps.dispatch(ui.updateUIContext());
 
-    const hasZoomedTile = _(nextProps.path).startsWith('/tiles/');
+    const hasZoomedTile = _.startsWith(nextProps.path, '/tiles/');
     $('body').toggleClass('has-zoomed-tile', hasZoomedTile);
   }
 
@@ -92,6 +93,18 @@ class ID7Layout extends ReactComponent {
     return null;
   }
 
+  isEditing() {
+    return this.props.path === '/edit';
+  }
+
+  onEdit() {
+    if (this.isEditing()) {
+      this.props.dispatch(goBack());
+    } else {
+      this.props.dispatch(push('/edit'));
+    }
+  }
+
   renderMobile() {
     const { user, zoomedTile, path } = this.props;
     return (
@@ -107,13 +120,16 @@ class ID7Layout extends ReactComponent {
                 zoomedTile={zoomedTile}
                 onBackClick={this.onBackClick}
                 path={path}
+                onEdit={this.onEdit}
+                editing={this.isEditing()}
+                showEditButton={this.isEditing() || this.props.path === '/'}
               />
             </header>
           </div>
         </div>
 
         <div className="id7-fixed-width-container">
-          <main className="id7-main-content-area" id="main">
+          <main className="id7-main-content-area" id="main" data-scrollable>
             <header className="id7-main-content-header">
               { this.renderNotificationPermissionRequest() }
               <UpdatePopup />
@@ -222,7 +238,7 @@ class ID7Layout extends ReactComponent {
 const select = (state) => ({
   layoutClassName: state.ui.className,
   notificationsCount:
-    getNumItemsSince(state.notifications.stream, _(state).get(['notificationsLastRead', 'date'])),
+    getNumItemsSince(state.notifications.stream, _.get(state, ['notificationsLastRead', 'date'])),
   user: state.user,
   colourTheme: state.ui.colourTheme,
   zoomedTile: state.ui.zoomedTile,

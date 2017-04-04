@@ -5,14 +5,13 @@
  */
 
 import $ from 'jquery';
-import _ from 'lodash';
+import get from 'lodash-es/get';
 import * as stream from './stream';
 import { push } from 'react-router-redux';
 import { displayUpdateProgress } from './state/update';
 import { postJsonWithCredentials } from './serverpipe';
 import { createSelector } from 'reselect';
 import { hasAuthoritativeAuthenticatedUser } from './state';
-import * as warwickSearch from 'warwick-search-frontend';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -27,12 +26,15 @@ export default function init(opts) {
         state => state.user,
         user => {
           if (!user.empty) {
-            native.setUser(user.data);
+            native.setUser({
+              ...user.data,
+              authoritative: user.authoritative,
+            });
           }
         }
       ),
       createSelector(
-        state => _.get(state, 'routing.locationBeforeTransitions.pathname', '/'),
+        state => get(state, 'routing.locationBeforeTransitions.pathname', '/'),
         path => native.setPath(path)
       ),
       createSelector(
@@ -107,7 +109,8 @@ export default function init(opts) {
       },
 
       search(query) {
-        warwickSearch.submitSearch(query);
+        // lazy load the Search module
+        import('warwick-search-frontend').then(s => s.submitSearch(query));
       },
 
       onApplicationDidBecomeActive() {
@@ -127,6 +130,10 @@ export default function init(opts) {
 
       registerForFCM(deviceToken) {
         postJsonWithCredentials('/api/push/fcm/subscribe', { deviceToken });
+      },
+
+      unregisterForPush(deviceToken) {
+        postJsonWithCredentials('/api/push/unsubscribe', { deviceToken });
       },
     };
 

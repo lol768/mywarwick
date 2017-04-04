@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactComponent from 'react/lib/ReactComponent';
 
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 import ListHeader from './ListHeader';
 
@@ -14,11 +14,11 @@ export default class GroupedList extends ReactComponent {
       return groupBy.getGroupedItems(children);
     }
 
-    return _(this.props.children).chain()
-      .groupBy((obj) => this.props.groupBy.groupForItem(obj))
-      .toPairs()
-      .sortBy(([group]) => group)
-      .value();
+    return _.flow(
+      _.partialRight(_.groupBy, (obj) => this.props.groupBy.groupForItem(obj)),
+      _.toPairs,
+      _.partialRight(_.sortBy, ([group]) => group)
+    )(this.props.children);
   }
 
   render() {

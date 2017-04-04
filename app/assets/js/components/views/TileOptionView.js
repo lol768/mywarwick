@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import $ from 'jquery';
 
 export default class TileOptionView extends Component {

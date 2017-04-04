@@ -1,9 +1,9 @@
 import React, { PropTypes } from 'react';
-import { localMoment } from '../../dateFormats';
+import formatDateTime, { formatDate, formatTime, localMoment } from '../../dateFormats';
 import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import classNames from 'classnames';
 import Hyperlink from '../ui/Hyperlink';
 import { createSelector } from 'reselect';
@@ -55,8 +55,8 @@ const groupItemsForAgendaTile = {
 const agendaViewTransform = (items) => {
   const startOfToday = localMoment().startOf('day');
 
-  return _(items)
-    .flatMap(e => {
+  return _.flow(
+    i => _.flatMap(i, e => {
       if (e.isAllDay) {
         const date = localMoment(e.start);
         const end = localMoment(e.end);
@@ -76,69 +76,39 @@ const agendaViewTransform = (items) => {
       }
 
       return e;
-    })
-    .filter(e => startOfToday.isBefore(e.start))
-    .sortBy(e => e.start)
-    .value();
+    }),
+    i => _.filter(i, e => startOfToday.isBefore(e.start)),
+    i => _.sortBy(i, e => e.start)
+  )(items);
 };
 
 export default class AgendaTile extends TileContent {
 
   constructor(props) {
     super(props);
-    this.state = {
-      defaultMaxItems: { small: null, wide: 2, large: 5, tall: 100 }[props.size],
-    };
 
     this.agendaViewSelector = createSelector(_.identity, agendaViewTransform);
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.setState({
-      defaultMaxItems: { small: null, wide: 2, large: 5, tall: 100 }[nextProps.size],
-    });
-  }
+  getEventsToday() {
+    const events = this.getAgendaViewItems();
 
-  numEventsToday(events) {
     const startOfToday = localMoment().startOf('day');
     const startOfTomorrow = localMoment().add(1, 'day').startOf('day');
 
-    return _(events)
-      .filter(e => localMoment(e.start).isBetween(startOfToday, startOfTomorrow, null, '[)'))
-      .size();
+    return _.filter(events, e =>
+      localMoment(e.start).isBetween(startOfToday, startOfTomorrow, null, '[)')
+    );
   }
 
-  getNextEvent(items) {
-    const nextEvent = _.find(items, e => !e.isAllDay && localMoment(e.start).isSameOrAfter());
-    const trunc = text => _.truncate(text, { length: 30 });
-
-    if (!nextEvent) {
-      // items are all-day events
-      if (items.length === 1) {
-        return {
-          text: `All day: ${trunc(items[0].title)}`,
-          href: items[0].href,
-        };
-      }
-      return {
-        text: `You have ${items.length} all day events`,
-      };
-    }
-
-    return {
-      text: `Next: ${trunc(nextEvent.title)} at ${localMoment(nextEvent.start).format('HH:mm')}`,
-      href: nextEvent.href,
-    };
+  getAgendaViewItems() {
+    return this.agendaViewSelector(this.props.content.items);
   }
 
   getLargeBody() {
-    const items = this.agendaViewSelector(this.props.content.items);
+    const items = this.getAgendaViewItems();
 
-    const maxItemsToDisplay = this.props.maxItemsToDisplay || this.state.defaultMaxItems;
-    const itemsToDisplay = this.props.zoomed ?
-      items : _.take(items, maxItemsToDisplay);
-
-    const events = itemsToDisplay.map(event =>
+    const events = items.map(event =>
       <AgendaTileItem key={event.id} {...event} />
     );
 
@@ -149,39 +119,92 @@ export default class AgendaTile extends TileContent {
     );
   }
 
-  getSmallBody() {
-    const items = this.agendaViewSelector(this.props.content.items);
+  static renderSingleEvent(event) {
+    if (!event) {
+      return null;
+    }
 
-    const numEventsToday = this.numEventsToday(items);
-
-    const callout = (
-      <span>
-        <span className="tile__callout">
-          {numEventsToday}
-        </span>
-        &nbsp;event{numEventsToday === 1 ? null : 's'} today
-      </span>
+    return (
+      <Hyperlink href={ event.href } style={{ display: 'inline-block' }}>
+        <div className="text-overflow-block">
+          <i className="fa fa-fw fa-clock-o"> </i>
+          { event.isAllDay ?
+            `All day ${formatDate(event.start)}` :
+            `${formatDateTime(event.start)}–${formatTime(event.end)}` }
+        </div>
+        <div className="text-overflow-block">
+          <i className="fa fa-fw fa-calendar-check-o"> </i>
+          { event.title }
+        </div>
+        { event.location &&
+        <div className="text-overflow-block">
+          <i className="fa fa-fw fa-map-marker"> </i>
+          { event.location.name }
+        </div>
+        }
+        { event.organiser &&
+        <div className="text-overflow-block">
+          <i className="fa fa-fw fa-user-o"> </i>
+          { event.organiser.name }
+        </div>
+        }
+      </Hyperlink>
     );
+  }
 
-    if (numEventsToday === 0) {
+  getWideBody() {
+    const items = this.getEventsToday();
+    const [event1, event2] = this.getAgendaViewItems();
+
+    if (!event1) {
       return (
-        <div className="tile__item">
-          { callout }
+        <div>
+          { this.props.defaultText }
         </div>
       );
     }
 
-    // only getNextEvent when we know numEventsToday > 0
-    const { text, href } = this.getNextEvent(items);
+    return (
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col-xs-6">
+            { AgendaTile.renderSingleEvent(event1) }
+          </div>
+          <div className="col-xs-6">
+            { AgendaTile.renderSingleEvent(event2) }
+            { items.length > 2 &&
+            <div className="text-right">
+              <a href="#" onClick={ this.props.onClickExpand }>
+                +{ items.length - 2 } more
+              </a>
+            </div> }
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  getSmallBody() {
+    const items = this.getEventsToday();
+    const [event] = this.getAgendaViewItems();
+
+    if (!event) {
+      return (
+        <div>
+          { this.props.defaultText }
+        </div>
+      );
+    }
 
     return (
-      <div className="tile__item">
-        { callout }
-        <Hyperlink href={href}>
-          <span className="tile__text">
-           { text }
-          </span>
-        </Hyperlink>
+      <div>
+        { AgendaTile.renderSingleEvent(event) }
+        { items.length > 1 &&
+        <div className="text-right">
+          <a href="#" onClick={ this.props.onClickExpand }>
+            +{ items.length - 1 } more
+          </a>
+        </div> }
       </div>
     );
   }
@@ -205,14 +228,14 @@ export class AgendaTileItem extends React.Component {
     }
 
     if (!parent || (start && !end)) {
-      return localMoment(start).format('HH:mm');
+      return formatTime(start);
     }
 
     return (
       <div>
-        { localMoment(start).format('HH:mm') }&nbsp;–
+        { formatTime(start) }&nbsp;–
         <br />
-        { localMoment(end).format('HH:mm') }
+        { formatTime(end) }
       </div>
     );
   }
@@ -271,8 +294,8 @@ export class AgendaTileItem extends React.Component {
         <span className="tile-list-item__location text--light">
           (<Hyperlink href={ location.href } className="text--dotted-underline">
             { location.name }
-            &nbsp;
-            <i className="fa fa-map-marker"> </i>
+          &nbsp;
+          <i className="fa fa-map-marker"> </i>
           </Hyperlink>)
         </span>
       );

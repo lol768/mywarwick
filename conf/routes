@@ -10,6 +10,7 @@ GET         /news                                                 @controllers.H
 GET         /search                                               @controllers.HomeController.index
 GET         /tiles                                                @controllers.HomeController.redirectToIndex
 GET         /tiles/:id                                            @controllers.HomeController.tile(id: String)
+GET         /edit                                                 @controllers.HomeController.index
 
 # NEWSTART-253
 POST        /                                                     @controllers.HomeController.index
@@ -85,6 +86,7 @@ GET         /logout                                               @controllers.U
 POST        /api/push/apns/subscribe                              @controllers.api.APNSPushNotificationsController.subscribe
 POST        /api/push/web/subscribe                               @controllers.api.WebPushNotificationsController.subscribe
 POST        /api/push/fcm/subscribe                               @controllers.api.FCMPushNotificationsController.subscribe
+POST        /api/push/unsubscribe                                 @controllers.api.PushNotificationsController.unsubscribe
 
 # Handle trailing slashes in URLs
 GET         /*path/                                               @controllers.HomeController.redirectToPath(path: String)

@@ -1,6 +1,6 @@
 /* eslint react/sort-comp: 0 */
 import React from 'react';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 import { localMoment } from '../../dateFormats.js';
 import classNames from 'classnames';
@@ -55,6 +55,7 @@ export default class Tile extends React.Component {
   }
 
   onClickExpand(e) {
+    e.preventDefault();
     this.props.onZoomIn(e);
   }
 
@@ -104,22 +105,6 @@ export default class Tile extends React.Component {
     return null;
   }
 
-  shouldComponentUpdate(nextProps) {
-    if (this.props.size !== nextProps.size) {
-      return true;
-    }
-
-    if (this.props.editing !== nextProps.editing) {
-      return true;
-    }
-
-    if (nextProps.editing) {
-      return false;
-    }
-
-    return true;
-  }
-
   render() {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
@@ -167,6 +152,13 @@ export default class Tile extends React.Component {
             <i className="fa fa-fw fa-arrow-up"> </i>
           </div>
 
+          <div
+            className="tile__edit-control bottom-left tile__drag-handle"
+            title="Drag to re-arrange tile"
+          >
+            <i className="fa fa-fw fa-arrows"> </i>
+          </div>
+
           { this.displayConfigButton() }
 
           <div className="tile__wrap">
@@ -175,10 +167,13 @@ export default class Tile extends React.Component {
               <div className="tile__icon tile__icon--right">{zoomIcon()}</div>
               <div className="tile__title">{title}</div>
             </header>
-            <div className="tile__body">
+            <div className="tile__body" data-scrollable>
               { React.cloneElement(
                 React.Children.only(this.props.children),
-                { ref: 'content' }
+                {
+                  ref: 'content',
+                  onClickExpand: this.onClickExpand,
+                }
               )}
             </div>
           </div>
