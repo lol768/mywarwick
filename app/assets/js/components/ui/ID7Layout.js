@@ -14,13 +14,14 @@ import UtilityBar from './UtilityBar';
 import { connect } from 'react-redux';
 import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
-import { goBack } from 'react-router-redux';
+import { goBack, push } from 'react-router-redux';
 
 class ID7Layout extends ReactComponent {
 
   constructor(props) {
     super(props);
     this.onBackClick = this.onBackClick.bind(this);
+    this.onEdit = this.onEdit.bind(this);
   }
 
   componentWillMount() {
@@ -92,6 +93,18 @@ class ID7Layout extends ReactComponent {
     return null;
   }
 
+  isEditing() {
+    return this.props.path === '/edit';
+  }
+
+  onEdit() {
+    if (this.isEditing()) {
+      this.props.dispatch(goBack());
+    } else {
+      this.props.dispatch(push('/edit'));
+    }
+  }
+
   renderMobile() {
     const { user, zoomedTile, path } = this.props;
     return (
@@ -107,6 +120,9 @@ class ID7Layout extends ReactComponent {
                 zoomedTile={zoomedTile}
                 onBackClick={this.onBackClick}
                 path={path}
+                onEdit={this.onEdit}
+                editing={this.isEditing()}
+                showEditButton={this.isEditing() || this.props.path === '/'}
               />
             </header>
           </div>

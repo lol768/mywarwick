@@ -10,6 +10,7 @@ GET         /news                                                 @controllers.H
 GET         /search                                               @controllers.HomeController.index
 GET         /tiles                                                @controllers.HomeController.redirectToIndex
 GET         /tiles/:id                                            @controllers.HomeController.tile(id: String)
+GET         /edit                                                 @controllers.HomeController.index
 
 # NEWSTART-253
 POST        /                                                     @controllers.HomeController.index

@@ -105,22 +105,6 @@ export default class Tile extends React.Component {
     return null;
   }
 
-  shouldComponentUpdate(nextProps) {
-    if (this.props.size !== nextProps.size) {
-      return true;
-    }
-
-    if (this.props.editing !== nextProps.editing) {
-      return true;
-    }
-
-    if (nextProps.editing) {
-      return false;
-    }
-
-    return true;
-  }
-
   render() {
     const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
@@ -166,6 +150,13 @@ export default class Tile extends React.Component {
             title={`Make tile ${size !== 'tall' ? 'bigger' : 'smaller'}`}
           >
             <i className="fa fa-fw fa-arrow-up"> </i>
+          </div>
+
+          <div
+            className="tile__edit-control bottom-left tile__drag-handle"
+            title="Drag to re-arrange tile"
+          >
+            <i className="fa fa-fw fa-arrows"> </i>
           </div>
 
           { this.displayConfigButton() }
