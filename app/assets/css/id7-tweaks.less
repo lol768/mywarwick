@@ -20,6 +20,8 @@
 }
 
 .standalone.app {
+  // Content area sits above native tab bar, so don't need a gap.
+  margin-bottom: 0;
   .tab-bar {
     display: none;
   }
@@ -34,40 +36,20 @@
 }
 
 .screen-sm-orless({
-
   .id7-fixed-width-container,
   .id7-main-content-area {
     background: none;
   }
-
 });
 
 .screen-xs-orless({
-
+  .id7-main-content-area {
+    // ID7 sets overflow-x: hidden, which creates odd scrolling behaviour
+    overflow-x: unset;
+  }
   .id7-main-content-area .id7-main-content {
     padding: 0;
   }
-
-  .me-view {
-    // On mobile we make tile content flush with the edges, which causes
-    // a couple of pixels of nothing to overlap the side which causes an annoying
-    // scroll. There's no legitimate need for sideways scrolling in My Warwick, so
-    // just turn it off.
-    // (however this seems to cause some z-index problems, so keep an eye on it.)
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  // Native apps
-  .standalone {
-    // Content area sits above native tab bar, so don't need a gap.
-    .id7-main-content-area {
-      bottom: 0;
-    }
-  }
-
-
 });
 
 .fa > .badge {

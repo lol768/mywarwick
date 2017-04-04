@@ -56,35 +56,13 @@ class MeView extends ReactComponent {
     this.onLayoutChange = this.onLayoutChange.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
     this.onDragStop = this.onDragStop.bind(this);
-    this.onBodyScroll = this.onBodyScroll.bind(this);
     this.onConfigSave = this.onConfigSave.bind(this);
     this.onConfigViewDismiss = this.onConfigViewDismiss.bind(this);
-  }
-
-  componentDidMount() {
-    $('.id7-main-content-area').on('touchstart', this.onBodyScroll);
-  }
-
-  componentWillUnmount() {
-    $('.id7-main-content-area').off('touchstart', this.onBodyScroll);
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.editing && !nextProps.editing) {
       this.onFinishEditing();
-    }
-  }
-
-  onBodyScroll(e) {
-    // This event handler fixes an issue on iOS where initiating a scroll
-    // into the overflow does not appear to do rubber banding, but scrolling
-    // the view becomes disabled until the rubber banding effect would have completed.
-    const target = e.currentTarget;
-
-    if (target.scrollTop === 0) {
-      target.scrollTop = 1;
-    } else if (target.scrollHeight === target.scrollTop + target.offsetHeight) {
-      target.scrollTop -= 1;
     }
   }
 
@@ -121,7 +99,6 @@ class MeView extends ReactComponent {
       this.previousLayout = _.cloneDeep(layout);
     }
   }
-
 
   renderTile(props) {
     const { id } = props;
@@ -323,15 +300,17 @@ class MeView extends ReactComponent {
     };
 
     return (
-      <div className={classes}>
-        { this.props.children && isDesktop ?
-          <div className="tile-zoom-backdrop" onClick={ this.onTileDismiss }></div>
-          : null}
-        {this.renderTiles()}
-        {this.renderTileOptionsView()}
-        <ReactCSSTransitionGroup {...transitionProps}>
-          { this.props.children }
-        </ReactCSSTransitionGroup>
+      <div className="me-view-container">
+        <div className={classes}>
+          { this.props.children && isDesktop ?
+            <div className="tile-zoom-backdrop" onClick={ this.onTileDismiss }></div>
+            : null}
+          {this.renderTiles()}
+          {this.renderTileOptionsView()}
+          <ReactCSSTransitionGroup {...transitionProps}>
+            { this.props.children }
+          </ReactCSSTransitionGroup>
+        </div>
       </div>
     );
   }
