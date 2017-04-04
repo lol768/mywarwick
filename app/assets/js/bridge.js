@@ -18,7 +18,7 @@ import { hasAuthoritativeAuthenticatedUser } from './state';
  * with different dependencies.
  */
 export default function init(opts) {
-  const { store, tiles, notifications } = opts;
+  const { store, tiles, notifications, userinfo } = opts;
 
   function doInit(native) {
     const nativeSelectors = [
@@ -120,6 +120,8 @@ export default function init(opts) {
           if (hasAuthoritativeAuthenticatedUser(store.getState())) {
             store.dispatch(notifications.fetch());
           }
+
+          userinfo.fetchUserInfo().then(userinfo.receiveUserInfo);
         }
         store.dispatch(displayUpdateProgress);
       },
