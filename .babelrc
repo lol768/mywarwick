@@ -7,6 +7,7 @@
     "transform-class-properties",
     "transform-object-rest-spread",
     "syntax-dynamic-import",
-    "lodash"
+    "lodash",
+    "dev-expression"
   ]
 }
