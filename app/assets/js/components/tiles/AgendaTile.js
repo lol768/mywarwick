@@ -7,6 +7,7 @@ import _ from 'lodash-es';
 import classNames from 'classnames';
 import Hyperlink from '../ui/Hyperlink';
 import { createSelector } from 'reselect';
+import warning from 'warning';
 
 const moduleColours = [
   '#00b2dd', // Bright Sky blue
@@ -28,7 +29,6 @@ const groupItemsForAgendaTile = {
 
   groupForItem(item, now = localMoment()) {
     const date = localMoment(item.props.start).startOf('day');
-
     if (date.isSame(now, 'day')) {
       return 0; // today
     } else if (date.isSame(now.clone().add(1, 'day'), 'day')) {
@@ -38,13 +38,12 @@ const groupItemsForAgendaTile = {
   },
 
   titleForGroup(group) {
-    if (group < 2) {
-      return [
-        'Today',
-        'Tomorrow',
-      ][group];
+    switch (group) {
+      case 0: return 'Today';
+      case 1: return 'Tomorrow';
+      default:
+        return moment.unix(group).tz('Europe/London').format('ddd Do MMMM');
     }
-    return moment.unix(group).tz('Europe/London').format('ddd DD/MM/YY');
   },
 };
 
@@ -107,16 +106,7 @@ export default class AgendaTile extends TileContent {
 
   getLargeBody() {
     const items = this.getAgendaViewItems();
-
-    const events = items.map(event =>
-      <AgendaTileItem key={event.id} {...event} />
-    );
-
-    return (
-      <GroupedList className="tile-list-group" groupBy={groupItemsForAgendaTile}>
-        {events}
-      </GroupedList>
-    );
+    return <LargeBody>{ items }</LargeBody>;
   }
 
   static renderSingleEvent(event) {
@@ -125,29 +115,31 @@ export default class AgendaTile extends TileContent {
     }
 
     return (
-      <Hyperlink href={ event.href } style={{ display: 'inline-block' }}>
-        <div className="text-overflow-block">
-          <i className="fa fa-fw fa-clock-o"> </i>
-          { event.isAllDay ?
-            `All day ${formatDate(event.start)}` :
-            `${formatDateTime(event.start)}–${formatTime(event.end)}` }
-        </div>
-        <div className="text-overflow-block">
-          <i className="fa fa-fw fa-calendar-check-o"> </i>
-          { event.title }
-        </div>
-        { event.location &&
-        <div className="text-overflow-block">
-          <i className="fa fa-fw fa-map-marker"> </i>
-          { event.location.name }
-        </div>
-        }
-        { event.organiser &&
-        <div className="text-overflow-block">
-          <i className="fa fa-fw fa-user-o"> </i>
-          { event.organiser.name }
-        </div>
-        }
+      <Hyperlink href={ event.href } style={{ display: 'block' }}>
+        <ul className="list-unstyled">
+          <li className="text-overflow-block">
+            <i className="fa fa-fw fa-clock-o"> </i>
+            { event.isAllDay ?
+              `All day ${formatDate(event.start)}` :
+              `${formatDateTime(event.start)}–${formatTime(event.end)}` }
+          </li>
+          <li className="text-overflow-block">
+            <i className="fa fa-fw fa-calendar-check-o"> </i>
+            { event.title }
+          </li>
+          { event.location &&
+          <li className="text-overflow-block">
+            <i className="fa fa-fw fa-map-marker"> </i>
+            { event.location.name }
+          </li>
+          }
+          { event.organiser &&
+          <li className="text-overflow-block">
+            <i className="fa fa-fw fa-user-o"> </i>
+            { event.organiser.name }
+          </li>
+          }
+        </ul>
       </Hyperlink>
     );
   }
@@ -218,16 +210,29 @@ export default class AgendaTile extends TileContent {
   }
 }
 
-export class AgendaTileItem extends React.Component {
+export class LargeBody extends React.PureComponent {
+  render() {
+    const { children } = this.props;
+    return (
+      <GroupedList className="tile-list-group" groupBy={groupItemsForAgendaTile}>
+        {children.map(event =>
+          <AgendaTileItem key={event.id} {...event} />
+        )}
+      </GroupedList>
+    );
+  }
+}
+
+export class AgendaTileItem extends React.PureComponent {
 
   renderDate() {
-    const { isAllDay, start, end, parent } = this.props;
+    const { isAllDay, start, end } = this.props;
 
     if (isAllDay) {
       return 'All day';
     }
 
-    if (!parent || (start && !end)) {
+    if (start && !end) {
       return formatTime(start);
     }
 
@@ -292,11 +297,11 @@ export class AgendaTileItem extends React.Component {
     if (location.href) {
       return (
         <span className="tile-list-item__location text--light">
-          (<Hyperlink href={ location.href } className="text--dotted-underline">
+          <Hyperlink href={ location.href } className="text--dotted-underline">
             { location.name }
           &nbsp;
           <i className="fa fa-map-marker"> </i>
-          </Hyperlink>)
+          </Hyperlink>
         </span>
       );
     }
@@ -308,18 +313,32 @@ export class AgendaTileItem extends React.Component {
     );
   }
 
-  renderStaff() {
-    const { staff } = this.props;
+  renderUser() {
+    const { staff, organiser } = this.props;
 
-    if (!staff || staff.length === 0) {
+    warning(
+      !(staff && organiser),
+      'Event has both staff and organiser set - only one should be used: %s',
+      this.props
+    );
+
+    const users = staff || (organiser && [organiser]);
+
+    if (!users || users.length === 0) {
       return null;
+    }
+
+    function personToString(person) {
+      return person.firstName ?
+        `${person.firstName} ${person.lastName}`
+        : person.name;
     }
 
     return (
       <div className="text--translucent">
         <i className="fa fa-user-o"> </i>
         &nbsp;
-        { staff.map(person => `${person.firstName} ${person.lastName}`).join(', ') }
+        { users.map(personToString).join(', ') }
       </div>
     );
   }
@@ -336,7 +355,7 @@ export class AgendaTileItem extends React.Component {
           { this.renderTitle() }
           { ' ' }
           { this.renderLocation() }
-          { this.renderStaff() }
+          { this.renderUser() }
         </div>
       </div>
     );

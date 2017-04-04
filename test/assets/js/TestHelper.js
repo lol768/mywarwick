@@ -47,11 +47,19 @@ global.shallowRender = function shallowRender(component) {
   return renderer.getRenderOutput();
 };
 
+
 global.renderAtMoment = function (component, now = new Date(1989, 1, 7)) {
   tk.freeze(new Date(now));
   const renderedComponent = shallowRender(component);
   tk.reset();
   return renderedComponent;
+};
+
+global.atMoment = function(fn, now = new Date(1989, 1, 7)) {
+  tk.freeze(new Date(now));
+  const result = fn();
+  tk.reset();
+  return result;
 };
 
 /**
@@ -60,6 +68,8 @@ global.renderAtMoment = function (component, now = new Date(1989, 1, 7)) {
  * @param {object} elem find children of this rendered element
  * @param {number[]} path path of indicies to target child
  * @returns {object}
+ *
+ * @deprecated This is a bit brittle, try importing 'shallow' from 'enzyme' instead
  */
 global.findChild = function (elem, path) {
   if (elem === 'undefined' || path.length === 0) {
