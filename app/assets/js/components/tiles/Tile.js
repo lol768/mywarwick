@@ -106,8 +106,7 @@ export default class Tile extends React.Component {
   }
 
   render() {
-    const { type, title, size, colour, content,
-      editing, frontmost, zoomed, isDesktop } = this.props;
+    const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
 
     const zoomIcon = () => {
       if (zoomed) {
@@ -127,7 +126,6 @@ export default class Tile extends React.Component {
               'tile', `tile--${type}`, `tile--${size}`, `colour-${colour}`,
               {
                 'tile--editing': editing,
-                'tile--frontmost': frontmost,
                 'tile--zoomed': zoomed,
                 'cursor-pointer': content && content.href,
               }
@@ -197,7 +195,6 @@ Tile.propTypes = {
   icon: React.PropTypes.string.isRequired,
   size: React.PropTypes.oneOf(_.values(TILE_SIZES)),
   editing: React.PropTypes.bool.isRequired,
-  frontmost: React.PropTypes.bool.isRequired,
   editingAny: React.PropTypes.bool.isRequired,
   zoomed: React.PropTypes.bool.isRequired,
   isDesktop: React.PropTypes.bool.isRequired,

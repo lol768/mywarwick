@@ -13,12 +13,16 @@ import NotificationsView from './views/NotificationsView';
 import SearchView from './views/SearchView';
 
 function MaybeEditableMeView(props) {
-  if (location.pathname === '/edit') {
-    return <MeView editing {...props} />;
-  }
+  const editing = props.route.path === 'edit';
 
-  return <MeView editing={false} {...props} />;
+  return <MeView editing={editing} {...props} />;
 }
+
+MaybeEditableMeView.propTypes = {
+  route: React.PropTypes.shape({
+    path: React.PropTypes.string.isRequired,
+  }).isRequired,
+};
 
 const AppRoot = ({ history }) => (
   <Provider store={store}>

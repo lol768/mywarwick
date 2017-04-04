@@ -56,7 +56,6 @@ class MeView extends ReactComponent {
     this.onLayoutChange = this.onLayoutChange.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
     this.onDragStop = this.onDragStop.bind(this);
-    this.getDragDelayForItem = this.getDragDelayForItem.bind(this);
     this.onBodyScroll = this.onBodyScroll.bind(this);
     this.onConfigSave = this.onConfigSave.bind(this);
     this.onConfigViewDismiss = this.onConfigViewDismiss.bind(this);
@@ -99,10 +98,6 @@ class MeView extends ReactComponent {
     // Disable rubber banding so the users' finger and the tile they are dragging
     // don't get out of sync.  (iOS)
     $('.id7-main-content-area').css('-webkit-overflow-scrolling', 'auto');
-
-    this.setState({
-      frontmost: item.i,
-    });
   }
 
   onDragStop() {
@@ -139,7 +134,6 @@ class MeView extends ReactComponent {
         key={id}
         id={id}
         view={this}
-        frontmost={this.state.frontmost === id}
         editing={this.props.editing}
         editingAny={!!this.props.editing}
         size={this.getTileSize(id)}
@@ -198,10 +192,6 @@ class MeView extends ReactComponent {
     }
 
     return getSizeNameFromSize(layout);
-  }
-
-  getDragDelayForItem(item) {
-    return this.props.editing === item.i ? 0 : 400;
   }
 
   getGridLayoutWidth() {
