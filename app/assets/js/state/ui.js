@@ -76,7 +76,7 @@ export function updateUIContext() {
   };
 }
 
-export function scrollTopOnTabChange(scrollTops = {}) {
+export function scrollTopOnTabChange(scrollTops) {
   function isTopLevelUrl(location) {
     return (location.pathname.match(/\//g) || []).length === 1;
   }
