@@ -4,10 +4,11 @@ import TabBar from './ui/TabBar';
 import TabBarItem from './ui/TabBarItem';
 import ID7Layout from './ui/ID7Layout';
 import { connect } from 'react-redux';
-import { push } from 'react-router-redux';
+import { replace } from 'react-router-redux';
 import _ from 'lodash-es';
 import log from 'loglevel';
 import { getNumItemsSince } from '../stream';
+import { Routes } from './AppRoot';
 
 export class AppLayout extends ReactComponent {
 
@@ -33,15 +34,15 @@ export class AppLayout extends ReactComponent {
           <TabBar selectedItem={ location.pathname } onSelectItem={ this.onSelectItem }>
             <TabBarItem title="Me" icon="user" path="/" />
             <TabBarItem
-              title="Notifications" icon="inbox" path="/notifications"
+              title="Notifications" icon="inbox" path={ `/${Routes.NOTIFICATIONS}` }
               badge={ notificationsCount } isDisabled={ !user.authenticated }
             />
             <TabBarItem
-              title="Activity" icon="dashboard" path="/activity"
+              title="Activity" icon="dashboard" path={ `/${Routes.ACTIVITY}` }
               isDisabled={ !user.authenticated }
             />
-            <TabBarItem title="News" icon="mortar-board" path="/news" />
-            <TabBarItem title="Search" icon="search" path="/search" />
+            <TabBarItem title="News" icon="mortar-board" path={ `/${Routes.NEWS}` } />
+            <TabBarItem title="Search" icon="search" path={ `/${Routes.SEARCH}` } />
           </TabBar>
           : null }
       </div>
@@ -64,7 +65,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     onSelectItem: (p) => {
-      dispatch(push(p));
+      dispatch(replace(p));
     },
   };
 }

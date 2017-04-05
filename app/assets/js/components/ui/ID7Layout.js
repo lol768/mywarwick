@@ -15,6 +15,7 @@ import { connect } from 'react-redux';
 import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
 import { goBack, push } from 'react-router-redux';
+import { Routes } from '../AppRoot';
 
 class ID7Layout extends ReactComponent {
 
@@ -36,7 +37,7 @@ class ID7Layout extends ReactComponent {
   componentWillReceiveProps(nextProps) {
     nextProps.dispatch(ui.updateUIContext());
 
-    const hasZoomedTile = _.startsWith(nextProps.path, '/tiles/');
+    const hasZoomedTile = _.startsWith(nextProps.path, `/${Routes.TILES}/`);
     $('body').toggleClass('has-zoomed-tile', hasZoomedTile);
   }
 
@@ -94,14 +95,14 @@ class ID7Layout extends ReactComponent {
   }
 
   isEditing() {
-    return this.props.path === '/edit';
+    return this.props.path === `/${Routes.EDIT}`;
   }
 
   onEdit() {
     if (this.isEditing()) {
       this.props.dispatch(goBack());
     } else {
-      this.props.dispatch(push('/edit'));
+      this.props.dispatch(push(`/${Routes.EDIT}`));
     }
   }
 

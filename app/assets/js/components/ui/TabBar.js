@@ -3,6 +3,7 @@ import React, { Component, PropTypes } from 'react';
 import $ from 'jquery';
 import ReactDOM from 'react-dom';
 import _ from 'lodash-es';
+import { Routes } from '../AppRoot';
 
 export default class TabBar extends Component {
 
@@ -24,7 +25,9 @@ export default class TabBar extends Component {
   }
 
   itemIsActive(item, currentPath) {
-    if (item.path === '/' && (currentPath === '/' || _.startsWith(currentPath, '/tiles/'))) {
+    if (item.path === '/' && (currentPath === '/' ||
+      _.startsWith(currentPath, `/${Routes.TILES}/`))
+    ) {
       return true;
     }
 
