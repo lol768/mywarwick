@@ -64,7 +64,6 @@ if ('scrollRestoration' in history) {
 $(() => {
   $(window).on('scroll', () => {
     scrollTops[window.location.pathname] = $(window).scrollTop();
-    log.debug('scrollTops', scrollTops);
   });
 
   $(window).on('contextmenu', () => window.navigator.userAgent.indexOf('Mobile') < 0);
