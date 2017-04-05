@@ -7,7 +7,6 @@ const sourcemaps = require('gulp-sourcemaps');
 const replace = require('gulp-replace');
 const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
-const _ = require('lodash');
 const path = require('path');
 const mold = require('mold-source-map');
 const playAssets = require('gulp-play-assets');
@@ -111,7 +110,7 @@ function currentRevisionOf(file) {
 }
 
 function getCachedAssets() {
-  return _.map([
+  return [
     currentRevisionOf('/css/main.css'),
     currentRevisionOf('/js/bundle.js'),
     currentRevisionOf('/js/vendor.bundle.js'),
@@ -123,7 +122,7 @@ function getCachedAssets() {
     '/lib/id7/images/newwindow.gif',
     '/lib/id7/images/shim.gif',
     '/lib/id7/js/id7-bundle.min.js',
-  ], (asset) => `${paths.assetsOut}${asset}`);
+  ].map((asset) => `${paths.assetsOut}${asset}`);
 }
 
 function cacheName(name) {
