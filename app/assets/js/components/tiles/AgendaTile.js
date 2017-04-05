@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import formatDateTime, { formatDate, formatTime, localMoment } from '../../dateFormats';
+import { formatDate, formatTime, localMoment } from '../../dateFormats';
 import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';
@@ -113,11 +113,11 @@ export default class AgendaTile extends TileContent {
     if (!event) {
       return null;
     }
-    
-    const renderTime = event.start === event.end ? 
-      formatTime(event.start) : 
+
+    const renderTime = event.start === event.end ?
+      formatTime(event.start) :
       `${formatTime(event.start)}–${formatTime(event.end)}`;
-    
+
     return (
       <Hyperlink href={ event.href } style={{ display: 'block' }}>
         <ul className="list-unstyled">
