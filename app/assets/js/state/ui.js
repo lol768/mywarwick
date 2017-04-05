@@ -83,7 +83,7 @@ export function scrollTopOnTabChange(scrollTops = {}) {
 
   browserHistory.listen(location => {
     if (isTopLevelUrl(location)) {
-      const path = window.location.href;
+      const path = window.location.pathname;
       const scrolltop = scrollTops[path] || 0;
       log.debug(`path: ${path} => scrollTop: ${scrolltop}`);
       $(window).scrollTop(scrolltop);

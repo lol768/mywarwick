@@ -63,7 +63,7 @@ if ('scrollRestoration' in history) {
 
 $(() => {
   $(window).on('scroll', () => {
-    scrollTops[window.location.href] = $(window).scrollTop();
+    scrollTops[window.location.pathname] = $(window).scrollTop();
     log.debug('scrollTops', scrollTops);
   });
 
