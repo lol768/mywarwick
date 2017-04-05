@@ -1,6 +1,8 @@
 import log from 'loglevel';
 import { browserHistory } from 'react-router';
 import $ from 'jquery';
+import { Routes } from '../components/AppRoot';
+import { goBack, replace } from 'react-router-redux';
 
 let mq;
 try {
@@ -36,6 +38,8 @@ export function reducer(state = initialState, action) {
       return state;
     case 'ui.layout':
       return { ...state, isWideLayout: action.isWideLayout };
+    case 'ui.navRequest':
+      return { ...state, navRequest: action.navRequest };
     case 'ui.theme':
       return { ...state, colourTheme: action.theme };
     default:
@@ -87,5 +91,19 @@ export function scrollTopOnTabChange() {
       $('#main').scrollTop(0);
     }
   });
+}
+
+export function navRequest(path, dispatch) {
+  if (window.location.pathname.indexOf(Routes.TILES) !== -1 ||
+    window.location.pathname.indexOf(Routes.EDIT) !== -1
+  ) {
+    dispatch({
+      type: 'ui.navRequest',
+      navRequest: path,
+    });
+    dispatch(goBack());
+  } else {
+    dispatch(replace(path));
+  }
 }
 

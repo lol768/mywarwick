@@ -4,11 +4,11 @@ import TabBar from './ui/TabBar';
 import TabBarItem from './ui/TabBarItem';
 import ID7Layout from './ui/ID7Layout';
 import { connect } from 'react-redux';
-import { replace } from 'react-router-redux';
 import _ from 'lodash-es';
 import log from 'loglevel';
 import { getNumItemsSince } from '../stream';
 import { Routes } from './AppRoot';
+import { navRequest } from '../state/ui';
 
 export class AppLayout extends ReactComponent {
 
@@ -64,9 +64,7 @@ function mapStateToProps(state) {
 // so that the plain component doesn't depend on redux.
 function mapDispatchToProps(dispatch) {
   return {
-    onSelectItem: (p) => {
-      dispatch(replace(p));
-    },
+    onSelectItem: (p) => navRequest(p, dispatch),
   };
 }
 

@@ -1,18 +1,17 @@
 /* global MyWarwickNative */
-
 /**
  * API for native apps.
  */
-
 import $ from 'jquery';
 import get from 'lodash-es/get';
 import * as stream from './stream';
-import { push, replace } from 'react-router-redux';
+import { push } from 'react-router-redux';
 import { displayUpdateProgress } from './state/update';
 import { postJsonWithCredentials } from './serverpipe';
 import { createSelector } from 'reselect';
 import { hasAuthoritativeAuthenticatedUser } from './state';
 import { Routes } from './components/AppRoot';
+import { navRequest } from './state/ui';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -108,7 +107,7 @@ export default function init(opts) {
         if (path.indexOf(`/${Routes.EDIT}`) === 0 || path.indexOf(`/${Routes.TILES}`) === 0) {
           store.dispatch(push(path));
         } else {
-          store.dispatch(replace(path));
+          navRequest(path, store.dispatch);
         }
         window.scrollTo(0, 0);
       },
