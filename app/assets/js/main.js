@@ -55,7 +55,18 @@ localforage.config({
 const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
 
+const scrollTops = {};
+
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
 $(() => {
+  $(window).on('scroll', () => {
+    scrollTops[window.location.href] = $(window).scrollTop();
+    log.debug('scrollTops', scrollTops);
+  });
+
   $(window).on('contextmenu', () => window.navigator.userAgent.indexOf('Mobile') < 0);
 
   $(window).on('resize', () => store.dispatch(ui.updateUIContext()));
@@ -244,7 +255,7 @@ setInterval(() => {
 // Just for access from the console
 window.Store = store;
 
-ui.scrollTopOnTabChange();
+ui.scrollTopOnTabChange(scrollTops);
 
 // Actually render the app
 ReactDOM.render(
