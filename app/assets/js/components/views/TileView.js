@@ -75,7 +75,6 @@ class TileView extends Component {
       ...content,
       zoomed,
       size,
-      editingAny,
     };
 
     return (
