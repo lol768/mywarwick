@@ -2,17 +2,65 @@ import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import Hyperlink from '../ui/Hyperlink';
 import TextTile from './TextTile';
+import pluralize from 'pluralize';
 import _ from 'lodash-es';
 
 export default class LibraryTile extends TextTile {
 
   renderItems(items) {
-    return items.map(item =>
+    return items
+      .map(item => {
+        switch (item.type) {
+          case 'loan':
+            return this.makeLoanItem(item);
+          case 'hold':
+            return this.makeHoldItem(item);
+        }
+      }
+    );
+  }
+
+  makeSubtitle(type, length) {
+    return (
+      <span>
+        <span className="tile__callout">
+          {`${length} ${pluralize(type, length)}`}
+        </span>
+      </span>
+    );
+  }
+
+  makeLoanItems(items) {
+    return items
+      .filter((e) => e.type === 'loan')
+      .map(this.makeLoanItem);
+  }
+
+  makeLoanItem(item) {
+    return (
       <Hyperlink key={item.id} href={item.href}>
         <div key={item.id} className="tile__item">
           <span className="tile__text">
             {item.dueMessage}: {item.itemTitle}
             </span>
+        </div>
+      </Hyperlink>
+    );
+  }
+
+  makeHoldItems(items) {
+    return items
+      .filter((e) => e.type === 'hold')
+      .map(this.makeHoldItem);
+  }
+
+  makeHoldItem(item) {
+    return (
+      <Hyperlink key={item.id} href={item.href}>
+        <div key={item.id} className="tile__item">
+          <span className="tile__text">
+            {item.status}: {item.itemTitle}
+          </span>
         </div>
       </Hyperlink>
     );
@@ -28,7 +76,6 @@ export default class LibraryTile extends TextTile {
 
     return (
       <div className="container-fluid">
-        {this.getSubtitle()}
         {chunkedItems.map((children, i) => <div key={i} className="row">{children}</div>)}
       </div>
     );
@@ -42,8 +89,10 @@ export default class LibraryTile extends TextTile {
 
     return (
       <div>
-        {this.getSubtitle()}
-        {this.renderItems(itemsToDisplay)}
+        {this.makeSubtitle('loan', itemsToDisplay.length)}
+        {this.makeLoanItem(itemsToDisplay)}
+        {this.makeSubtitle('recall', itemsToDisplay.length)}
+        {this.makeHoldItems(itemsToDisplay)}
       </div>
     );
   }
@@ -57,23 +106,9 @@ export default class LibraryTile extends TextTile {
         transitionEnterTimeout={1000}
         transitionLeaveTimeout={1000}
       >
-        {this.getSubtitle()}
-        {this.renderItems([content.items[this.state.itemIndex]])}
+        {this.makeLoanItems([content.items[this.state.itemIndex]])}
+        {this.makeHoldItems([content.items[this.state.itemIndex]])}
       </ReactCSSTransitionGroup>
-    );
-  }
-
-  getSubtitle() {
-    const { content } = this.props;
-    let subtitleArray = ['', ''];
-    if (content.subtitle) subtitleArray = content.subtitle.split(' ');
-    return (
-      <span>
-        <span className="tile__callout">
-          {subtitleArray[0]}
-        </span>
-        &nbsp;{subtitleArray.slice(1)}
-      </span>
     );
   }
 }
