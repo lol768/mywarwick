@@ -25,7 +25,7 @@ export default class NewsTile extends TileContent {
   }
 
   getLargeBody() {
-    return <NewsView inTile />;
+    return <NewsView />;
   }
 
 }
