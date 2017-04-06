@@ -4,6 +4,7 @@ import Hyperlink from '../ui/Hyperlink';
 import TextTile from './TextTile';
 import pluralize from 'pluralize';
 import _ from 'lodash-es';
+import moment from 'moment';
 
 export default class LibraryTile extends TextTile {
 
@@ -63,7 +64,11 @@ export default class LibraryTile extends TextTile {
       <Hyperlink key={item.id} href={item.href}>
         <div key={item.id} className="tile__item">
           <span className="tile__text">
-            {item.dueMessage}: {item.itemTitle}
+            {item.recallDate ?
+              `Recalled on ${
+              moment(item.recallDate, 'YYYY-MM-DD').format('MMM Do YYYY')
+            }, ${item.dueMessage.toLowerCase()}` :
+              item.dueMessage}: {item.itemTitle}
             </span>
         </div>
       </Hyperlink>
@@ -81,7 +86,9 @@ export default class LibraryTile extends TextTile {
       <Hyperlink key={item.id} href={item.href}>
         <div key={item.id} className="tile__item">
           <span className="tile__text">
-            {item.status} at {item.pickupLocation}: {item.itemTitle}
+            {item.status.toLowerCase().includes('ready') ?
+              `${item.status} at ${item.pickupLocation}` :
+              item.status}: {item.itemTitle}
           </span>
         </div>
       </Hyperlink>
