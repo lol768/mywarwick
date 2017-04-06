@@ -27,7 +27,7 @@ import { syncHistoryWithStore } from 'react-router-redux';
 
 import * as notificationsGlue from './notifications-glue';
 import * as pushNotifications from './push-notifications';
-import * as serverpipe from './serverpipe';
+import * as userinfo from './userinfo';
 import persistedLib from './persisted';
 import SocketDatapipe from './SocketDatapipe';
 import * as notifications from './state/notifications';
@@ -43,7 +43,7 @@ import AppRoot from './components/AppRoot';
 import bridge from './bridge';
 import { hasAuthoritativeUser, hasAuthoritativeAuthenticatedUser } from './state';
 
-bridge({ store, tiles, notifications });
+bridge({ store, tiles, notifications, userinfo });
 
 log.enableAll(false);
 log.debug(`Environment: ${process.env.NODE_ENV}`);
@@ -200,48 +200,11 @@ store.dispatch(ui.updateUIContext());
 store.dispatch(update.displayUpdateProgress);
 store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));
 
-// kicks off the whole data flow - when user is received we fetch tile data
-function fetchUserInfo() {
-  return serverpipe.fetchWithCredentials('/user/info');
-}
-
-function receiveUserInfo(response) {
-  return response.json()
-    .then(data => {
-      if (data.refresh) {
-        window.location = user.rewriteRefreshUrl(data.refresh, window.location.href);
-      } else {
-        store.dispatch(user.receiveSSOLinks(data.links));
-
-        const analyticsData = data.user.analytics;
-        if (analyticsData !== undefined) {
-          analyticsData.dimensions.forEach(dimension =>
-            analytics.setDimension(dimension.index, dimension.value)
-          );
-
-          analytics.setUserId(analyticsData.identifier);
-        }
-
-        analytics.ready();
-
-        store.dispatch(user.userReceive(data.user)).then(() => {
-          if (!data.user.authenticated) {
-            window.location = data.links.login;
-          }
-        });
-      }
-    })
-    .catch(e => {
-      setTimeout(() => fetchUserInfo().then(receiveUserInfo), 5000);
-      throw e;
-    });
-}
-
 user.loadUserFromLocalStorage(store.dispatch);
-fetchUserInfo().then(res =>
+userinfo.fetchUserInfo().then(res =>
   // ensure local version is written first, then remote version if available.
   persistedUserLinks.then(() =>
-    receiveUserInfo(res)
+    userinfo.receiveUserInfo(res)
   )
 );
 
