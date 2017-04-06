@@ -39,7 +39,7 @@ const AppRoot = ({ history }) => (
       <Route path="/" component={AppLayout}>
         <IndexRoute component={MaybeEditableMeView} />
         <Route path={Routes.EDIT} component={MaybeEditableMeView} />;
-        <Route path={Routes.TILES} component={MeView}>
+        <Route path={Routes.TILES} component={MaybeEditableMeView}>
           <IndexRedirect to="/" />
           <Route path=":id" component={TileView} />
         </Route>
