@@ -115,7 +115,7 @@ export default class AgendaTile extends TileContent {
     }
 
     const renderDateTime = event.start === event.end ?
-      formatTime(event.start) :
+      formatDateTime(event.start) :
       `${formatDateTime(event.start)}–${formatTime(event.end)}`;
 
     return (

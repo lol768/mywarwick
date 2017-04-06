@@ -135,6 +135,24 @@ describe('AgendaTile', () => {
     findChild(html, [0, 0, 0, 0, 1, 1]).should.equal('Lunch tomorrow');
   });
 
+  it('include the date when rendering an event and start == end', () => {
+    const content = {
+      items: [
+        {
+          id: '1',
+          title: 'Cinema',
+          start: '2016-05-20T12:00:00+01:00',
+          end: '2016-05-20T12:00:00+01:00',
+          isAllDay: false,
+        },
+      ],
+    };
+
+    const html = renderAtMoment(<AgendaTile size="wide" content={ content }/>, now);
+
+    findChild(html, [0, 0, 0, 0, 0, 1]).should.equal('Fri 12:00');
+  });
+
   it('renders two events side-by-side when wide', () => {
     const content = {
       items: [
