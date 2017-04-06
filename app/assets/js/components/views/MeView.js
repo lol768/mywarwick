@@ -59,6 +59,12 @@ class MeView extends ReactComponent {
     this.onConfigSave = this.onConfigSave.bind(this);
     this.onConfigViewDismiss = this.onConfigViewDismiss.bind(this);
   }
+
+  /**
+   * The other half of this is in ui.navRequest.
+   * If we've been sent back only to go forward, get the requested path from the store, reset
+   * that state, and replace the current path.
+   */
   componentDidUpdate() {
     if (this.props.location.pathname === '/' && this.props.navRequest) {
       const path = this.props.navRequest;
