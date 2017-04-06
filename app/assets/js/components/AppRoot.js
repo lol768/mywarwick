@@ -29,7 +29,7 @@ function MaybeEditableMeView(props) {
 
 MaybeEditableMeView.propTypes = {
   route: React.PropTypes.shape({
-    path: React.PropTypes.string.isRequired,
+    path: React.PropTypes.string, // not initially set
   }).isRequired,
 };
 
