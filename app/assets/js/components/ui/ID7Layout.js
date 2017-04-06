@@ -83,7 +83,7 @@ class ID7Layout extends ReactComponent {
   }
 
   renderBetaWarning() {
-    if (!this.props.native) {
+    if (!this.props.native && this.props.showBetaWarning) {
       return (
         <div className="top-page-notice">
           My&nbsp;Warwick is currently being piloted and is not yet available for general use.
@@ -233,6 +233,7 @@ const select = (state) => ({
   colourTheme: state.ui.colourTheme,
   zoomedTile: state.ui.zoomedTile,
   native: state.ui.native,
+  showBetaWarning: state.ui.showBetaWarning,
 });
 
 export default connect(select)(ID7Layout);

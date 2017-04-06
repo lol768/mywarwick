@@ -40,7 +40,8 @@ class UserInfoControllerTest extends PlaySpec with MockitoSugar with Results {
     val ssoClient = new MockSSOClient(loginContext)
     new UserInfoController(ssoConfig, userCache, ssoClient, mock[UserInitialisationService], photoService, measurementService)
   }
-  val LOGIN_URL = "https://signon.example.com/login"
+  val REFRESH_URL = "https://signon.example.com/login"
+  val LOGIN_URL = s"$REFRESH_URL?permdenied"
   val LOGOUT_URL = s"https://example.warwick.ac.uk/logout?target=https://$HOSTNAME"
 
   def FakeRequestWithHost(hostname:String = HOSTNAME) =
@@ -62,7 +63,7 @@ class UserInfoControllerTest extends PlaySpec with MockitoSugar with Results {
       val result = controller().info(FakeRequestWithHost().withCookies(ssc))
       status(result) must be(200)
       val json = contentAsJson(result)
-      (json \ "refresh").as[String] mustBe LOGIN_URL
+      (json \ "refresh").as[String] mustBe REFRESH_URL
       (json \ "user" \ "authenticated").as[Boolean] mustBe false
       (json \ "links" \ "login").as[String] mustBe LOGIN_URL
       (json \ "links" \ "logout").as[String] mustBe LOGOUT_URL

@@ -55,7 +55,17 @@ localforage.config({
 const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
 
+const scrollTops = {};
+
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
 $(() => {
+  $(window).on('scroll', _.throttle(() => {
+    scrollTops[window.location.pathname] = $(window).scrollTop();
+  }, 250));
+
   $(window).on('contextmenu', () => window.navigator.userAgent.indexOf('Mobile') < 0);
 
   $(window).on('resize', () => store.dispatch(ui.updateUIContext()));
@@ -201,23 +211,24 @@ function receiveUserInfo(response) {
       if (data.refresh) {
         window.location = user.rewriteRefreshUrl(data.refresh, window.location.href);
       } else {
-        if (!data.user.authenticated) {
-          window.location = data.links.permissionDenied;
-        } else {
-          store.dispatch(user.userReceive(data.user));
-          store.dispatch(user.receiveSSOLinks(data.links));
+        store.dispatch(user.receiveSSOLinks(data.links));
 
-          const analyticsData = data.user.analytics;
-          if (analyticsData !== undefined) {
-            analyticsData.dimensions.forEach(dimension =>
-              analytics.setDimension(dimension.index, dimension.value)
-            );
+        const analyticsData = data.user.analytics;
+        if (analyticsData !== undefined) {
+          analyticsData.dimensions.forEach(dimension =>
+            analytics.setDimension(dimension.index, dimension.value)
+          );
 
-            analytics.setUserId(analyticsData.identifier);
-          }
-
-          analytics.ready();
+          analytics.setUserId(analyticsData.identifier);
         }
+
+        analytics.ready();
+
+        store.dispatch(user.userReceive(data.user)).then(() => {
+          if (!data.user.authenticated) {
+            window.location = data.links.login;
+          }
+        });
       }
     })
     .catch(e => {
@@ -244,7 +255,7 @@ setInterval(() => {
 // Just for access from the console
 window.Store = store;
 
-ui.scrollTopOnTabChange();
+ui.scrollTopOnTabChange(scrollTops);
 
 // Actually render the app
 ReactDOM.render(

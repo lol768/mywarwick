@@ -22,11 +22,14 @@ function isDesktop() {
 }
 const isWideLayout = () => mq('only all and (min-width: 992px)');
 
+const showBetaWarning = () => $('#app-container').attr('data-show-beta-warning') === 'true';
+
 const initialState = {
   className: undefined,
   isWideLayout: false,
   colourTheme: 'default',
   native: false,
+  showBetaWarning: false,
 };
 
 export function reducer(state = initialState, action) {
@@ -42,6 +45,8 @@ export function reducer(state = initialState, action) {
       return { ...state, navRequest: action.navRequest };
     case 'ui.theme':
       return { ...state, colourTheme: action.theme };
+    case 'ui.showBetaWarning':
+      return { ...state, showBetaWarning: action.showBetaWarning };
     default:
       return state;
   }
@@ -77,18 +82,26 @@ export function updateUIContext() {
       type: 'ui.native',
       native: isNative(),
     });
+
+    dispatch({
+      type: 'ui.showBetaWarning',
+      showBetaWarning: showBetaWarning(),
+    });
   };
 }
 
-// todo REMOVE ME WHEN YOU IMPLEMENT PER-TAB SCROLL POSITION REMEMBERING
-export function scrollTopOnTabChange() {
-  function isTopLevelUrl(location) {
-    return (location.pathname.match(/\//g) || []).length === 1;
+export function scrollTopOnTabChange(scrollTops) {
+  function isTopLevelUrlNotEdit(location) {
+    return (location.pathname.match(/\//g) || []).length === 1
+      && location.pathname !== `/${Routes.EDIT}`;
   }
 
   browserHistory.listen(location => {
-    if (isTopLevelUrl(location)) {
-      $('#main').scrollTop(0);
+    if (isTopLevelUrlNotEdit(location)) {
+      const path = window.location.pathname;
+      const scrolltop = scrollTops[path] || 0;
+      log.debug(`path: ${path} => scrollTop: ${scrolltop}`);
+      $(window).scrollTop(scrolltop);
     }
   });
 }
