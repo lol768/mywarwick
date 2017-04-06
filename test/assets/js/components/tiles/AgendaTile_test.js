@@ -96,7 +96,44 @@ describe('AgendaTile', () => {
     findChild(html, [0, 0, 2, 1]).should.equal('Location');
     findChild(html, [0, 0, 3, 1]).should.equal('John Smith');
   });
-  
+
+  it('include the weekday when rendering an event for tomorrow when small', () => {
+    const content = {
+      items: [
+        {
+          id: '1',
+          title: 'Lunch tomorrow',
+          start: '2016-05-20T12:00:00+01:00',
+          end: '2016-05-20T14:00:00+01:00',
+          isAllDay: false,
+        },
+      ],
+    };
+
+    const html = renderAtMoment(<AgendaTile size="small" content={ content }/>, now);
+
+    findChild(html, [0, 0, 0, 1]).should.equal('Fri 12:00–14:00');
+    findChild(html, [0, 0, 1, 1]).should.equal('Lunch tomorrow');
+  });
+
+  it('include the weekday when rendering an event for tomorrow when wide', () => {
+    const content = {
+      items: [
+        {
+          id: '1',
+          title: 'Lunch tomorrow',
+          start: '2016-05-20T12:00:00+01:00',
+          end: '2016-05-20T14:00:00+01:00',
+          isAllDay: false,
+        },
+      ],
+    };
+
+    const html = renderAtMoment(<AgendaTile size="wide" content={ content }/>, now);
+    
+    findChild(html, [0, 0, 0, 0, 0, 1]).should.equal('Fri 12:00–14:00');
+    findChild(html, [0, 0, 0, 0, 1, 1]).should.equal('Lunch tomorrow');
+  });
 
   it('renders two events side-by-side when wide', () => {
     const content = {
@@ -172,7 +209,7 @@ describe('AgendaTileItem', () => {
 
   it('renders correctly without a href', () => {
     const html = shallow(<AgendaTileItem zoomed={ true } { ...props } />);
-
+ 
     html.hasClass('tile-list-item').should.equal(true);
     const titleElement = html.find('.tile-list-item__title');
     titleElement.props().title.should.equal(props.title);
