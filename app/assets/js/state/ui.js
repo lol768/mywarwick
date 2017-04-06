@@ -1,6 +1,7 @@
 import log from 'loglevel';
 import { browserHistory } from 'react-router';
 import $ from 'jquery';
+import { Routes } from '../components/AppRoot';
 
 let mq;
 try {
@@ -77,12 +78,13 @@ export function updateUIContext() {
 }
 
 export function scrollTopOnTabChange(scrollTops) {
-  function isTopLevelUrl(location) {
-    return (location.pathname.match(/\//g) || []).length === 1;
+  function isTopLevelUrlNotEdit(location) {
+    return (location.pathname.match(/\//g) || []).length === 1
+      && location.pathname !== `/${Routes.EDIT}`;
   }
 
   browserHistory.listen(location => {
-    if (isTopLevelUrl(location)) {
+    if (isTopLevelUrlNotEdit(location)) {
       const path = window.location.pathname;
       const scrolltop = scrollTops[path] || 0;
       log.debug(`path: ${path} => scrollTop: ${scrolltop}`);
