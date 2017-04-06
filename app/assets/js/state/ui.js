@@ -21,11 +21,14 @@ function isDesktop() {
 }
 const isWideLayout = () => mq('only all and (min-width: 992px)');
 
+const showBetaWarning = () => $('#app-container').attr('data-show-beta-warning') === 'true';
+
 const initialState = {
   className: undefined,
   isWideLayout: false,
   colourTheme: 'default',
   native: false,
+  showBetaWarning: false,
 };
 
 export function reducer(state = initialState, action) {
@@ -39,6 +42,8 @@ export function reducer(state = initialState, action) {
       return { ...state, isWideLayout: action.isWideLayout };
     case 'ui.theme':
       return { ...state, colourTheme: action.theme };
+    case 'ui.showBetaWarning':
+      return { ...state, showBetaWarning: action.showBetaWarning };
     default:
       return state;
   }
@@ -73,6 +78,11 @@ export function updateUIContext() {
     dispatch({
       type: 'ui.native',
       native: isNative(),
+    });
+
+    dispatch({
+      type: 'ui.showBetaWarning',
+      showBetaWarning: showBetaWarning(),
     });
   };
 }
