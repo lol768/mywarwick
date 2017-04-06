@@ -15,6 +15,8 @@ export default class LibraryTile extends TextTile {
             return this.makeLoanItem(item);
           case 'hold':
             return this.makeHoldItem(item);
+          default:
+            return <div></div>;
         }
       }
     );
@@ -27,6 +29,26 @@ export default class LibraryTile extends TextTile {
           {`${length} ${pluralize(type, length)}`}
         </span>
       </span>
+    );
+  }
+
+  makeSingleSubtitle(items) {
+    const groupedItems = _.groupby(items, 'type');
+    let text = '';
+    _.forEach(groupedItems, (value, key) => {
+      text += `${value.length} ${pluralize(key, value.length)} `;
+    });
+
+    const chunks = text.split(/\s+/);
+    const titleArr = [chunks.shift(), chunks.join(' ')];
+
+    return (
+    <span>
+      <span className="tile__callout">
+        {titleArr[0]}
+      </span>
+      &nbsp;{titleArr[1]}
+    </span>
     );
   }
 
@@ -59,7 +81,7 @@ export default class LibraryTile extends TextTile {
       <Hyperlink key={item.id} href={item.href}>
         <div key={item.id} className="tile__item">
           <span className="tile__text">
-            {item.status}: {item.itemTitle}
+            {item.status} at {item.pickupLocation}: {item.itemTitle}
           </span>
         </div>
       </Hyperlink>
@@ -67,18 +89,7 @@ export default class LibraryTile extends TextTile {
   }
 
   getZoomedBody() {
-    const { content: { items } } = this.props;
-
-    const elements = _.zip(items, this.renderItems(items))
-      .map(([item, element]) => <div className="col-xs-6" key={item.id}>{element}</div>);
-
-    const chunkedItems = _.chunk(elements, 2);
-
-    return (
-      <div className="container-fluid">
-        {chunkedItems.map((children, i) => <div key={i} className="row">{children}</div>)}
-      </div>
-    );
+    return this.getLargeBody();
   }
 
   getLargeBody() {
@@ -87,12 +98,15 @@ export default class LibraryTile extends TextTile {
     const itemsToDisplay = this.props.zoomed ?
       content.items : _.take(content.items, content.items.length);
 
+    const loanItems = itemsToDisplay.filter((e) => e.type === 'loan');
+    const holdItlems = itemsToDisplay.filter((e) => e.type === 'hold');
+
     return (
       <div>
-        {this.makeSubtitle('loan', itemsToDisplay.length)}
-        {this.makeLoanItem(itemsToDisplay)}
-        {this.makeSubtitle('recall', itemsToDisplay.length)}
-        {this.makeHoldItems(itemsToDisplay)}
+        {this.makeSubtitle('loan', loanItems.length)}
+        {this.makeLoanItems(loanItems)}
+        {this.makeSubtitle('hold', holdItlems.length)}
+        {this.makeHoldItems(holdItlems)}
       </div>
     );
   }
@@ -106,8 +120,8 @@ export default class LibraryTile extends TextTile {
         transitionEnterTimeout={1000}
         transitionLeaveTimeout={1000}
       >
-        {this.makeLoanItems([content.items[this.state.itemIndex]])}
-        {this.makeHoldItems([content.items[this.state.itemIndex]])}
+        {this.makeSingleSubtitle(content.items)}
+        {this.renderItems([content.items[this.state.itemIndex]])}
       </ReactCSSTransitionGroup>
     );
   }
