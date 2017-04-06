@@ -6,7 +6,7 @@ import _ from 'lodash-es';
 import $ from 'jquery.transit';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
-import { goBack } from 'react-router-redux';
+import { goBack, replace } from 'react-router-redux';
 import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
@@ -58,6 +58,22 @@ class MeView extends ReactComponent {
     this.onDragStop = this.onDragStop.bind(this);
     this.onConfigSave = this.onConfigSave.bind(this);
     this.onConfigViewDismiss = this.onConfigViewDismiss.bind(this);
+  }
+
+  /**
+   * The other half of this is in ui.navRequest.
+   * If we've been sent back only to go forward, get the requested path from the store, reset
+   * that state, and replace the current path.
+   */
+  componentDidUpdate() {
+    if (this.props.location.pathname === '/' && this.props.navRequest) {
+      const path = this.props.navRequest;
+      this.props.dispatch({
+        type: 'ui.navRequest',
+        navRequest: null,
+      });
+      this.props.dispatch(replace(path));
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -322,6 +338,7 @@ const select = (state) => ({
   tiles: state.tiles.data.tiles,
   layout: state.tiles.data.layout,
   deviceWidth: state.device.width,
+  navRequest: state.ui.navRequest,
 });
 
 export default connect(select)(MeView);

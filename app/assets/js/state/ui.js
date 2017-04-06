@@ -2,6 +2,7 @@ import log from 'loglevel';
 import { browserHistory } from 'react-router';
 import $ from 'jquery';
 import { Routes } from '../components/AppRoot';
+import { goBack, replace } from 'react-router-redux';
 
 let mq;
 try {
@@ -40,6 +41,8 @@ export function reducer(state = initialState, action) {
       return state;
     case 'ui.layout':
       return { ...state, isWideLayout: action.isWideLayout };
+    case 'ui.navRequest':
+      return { ...state, navRequest: action.navRequest };
     case 'ui.theme':
       return { ...state, colourTheme: action.theme };
     case 'ui.showBetaWarning':
@@ -101,5 +104,28 @@ export function scrollTopOnTabChange(scrollTops) {
       $(window).scrollTop(scrolltop);
     }
   });
+}
+
+/**
+ * When we change tiles we want to replace the history, so going back will close the app.
+ * However if we're in /edit or /tiles we'd end up replacing just that path, so going back would go
+ * back to /.
+ * To sort out the history we need to go back _then_ replace, however react-router-redux gets into
+ * a race condition if you try and dispatch both at the same time.
+ * Therefore put the path we actually want to go to in the store separately, then just go back here.
+ * The MeView then handles sending you on to where you wanted.
+ */
+export function navRequest(path, dispatch) {
+  if (window.location.pathname.indexOf(Routes.TILES) !== -1 ||
+    window.location.pathname.indexOf(Routes.EDIT) !== -1
+  ) {
+    dispatch({
+      type: 'ui.navRequest',
+      navRequest: path,
+    });
+    dispatch(goBack());
+  } else {
+    dispatch(replace(path));
+  }
 }
 
