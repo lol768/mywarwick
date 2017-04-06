@@ -22,6 +22,9 @@ class HomeController @Inject()(
     configuration.getString("mywarwick.search.root").map(SearchRootUrl)
       .getOrElse(throw new IllegalStateException("Search root URL not configured - check mywarwick.search.root property"))
 
+  implicit val showBetaWarning: Boolean =
+    configuration.getBoolean("mywarwick.showBetaWarning").getOrElse(false)
+
   def index = Action(Ok(views.html.index()))
 
   def redirectToIndex = Action(Redirect(routes.HomeController.index()))
