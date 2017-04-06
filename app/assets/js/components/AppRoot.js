@@ -12,8 +12,17 @@ import ActivityView from './views/ActivityView';
 import NotificationsView from './views/NotificationsView';
 import SearchView from './views/SearchView';
 
+export const Routes = {
+  EDIT: 'edit',
+  TILES: 'tiles',
+  NOTIFICATIONS: 'notifications',
+  ACTIVITY: 'activity',
+  NEWS: 'news',
+  SEARCH: 'search',
+};
+
 function MaybeEditableMeView(props) {
-  const editing = props.route.path === 'edit';
+  const editing = props.route.path === Routes.EDIT;
 
   return <MeView editing={editing} {...props} />;
 }
@@ -29,15 +38,15 @@ const AppRoot = ({ history }) => (
     <Router history={history}>
       <Route path="/" component={AppLayout}>
         <IndexRoute component={MaybeEditableMeView} />
-        <Route path="edit" component={MaybeEditableMeView} />;
-        <Route path="tiles" component={MeView}>
+        <Route path={Routes.EDIT} component={MaybeEditableMeView} />;
+        <Route path={Routes.TILES} component={MeView}>
           <IndexRedirect to="/" />
           <Route path=":id" component={TileView} />
         </Route>
-        <Route path="notifications" component={NotificationsView} />
-        <Route path="activity" component={ActivityView} />
-        <Route path="news" component={NewsView} />
-        <Route path="search" component={SearchView} />
+        <Route path={Routes.NOTIFICATIONS} component={NotificationsView} />
+        <Route path={Routes.ACTIVITY} component={ActivityView} />
+        <Route path={Routes.NEWS} component={NewsView} />
+        <Route path={Routes.SEARCH} component={SearchView} />
       </Route>
     </Router>
   </Provider>

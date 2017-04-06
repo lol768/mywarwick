@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import formatDateTime, { formatDate, formatTime, localMoment } from '../../dateFormats';
+import { formatDate, formatTime, localMoment } from '../../dateFormats';
 import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';
@@ -114,14 +114,16 @@ export default class AgendaTile extends TileContent {
       return null;
     }
 
+    const renderTime = event.start === event.end ?
+      formatTime(event.start) :
+      `${formatTime(event.start)}–${formatTime(event.end)}`;
+
     return (
       <Hyperlink href={ event.href } style={{ display: 'block' }}>
         <ul className="list-unstyled">
           <li className="text-overflow-block">
             <i className="fa fa-fw fa-clock-o"> </i>
-            { event.isAllDay ?
-              `All day ${formatDate(event.start)}` :
-              `${formatDateTime(event.start)}–${formatTime(event.end)}` }
+            { event.isAllDay ? `All day ${formatDate(event.start)}` : renderTime }
           </li>
           <li className="text-overflow-block">
             <i className="fa fa-fw fa-calendar-check-o"> </i>
@@ -232,7 +234,7 @@ export class AgendaTileItem extends React.PureComponent {
       return 'All day';
     }
 
-    if (start && !end) {
+    if (start && !end || start === end) {
       return formatTime(start);
     }
 

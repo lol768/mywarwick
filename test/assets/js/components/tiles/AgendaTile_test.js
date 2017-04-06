@@ -84,6 +84,20 @@ describe('AgendaTile', () => {
     findChild(html, [0, 0, 3, 1]).should.equal('John Smith');
   });
 
+  it('renders an event with the start time only when start = end time', () => {
+    const content = {
+      items: [ ITEMS.secondEvent ]
+    };
+
+    const html = renderAtMoment(<AgendaTile size="small" content={ content }/>, now);
+
+    findChild(html, [0, 0, 0, 1]).should.equal('14:00');
+    findChild(html, [0, 0, 1, 1]).should.equal('Second Event');
+    findChild(html, [0, 0, 2, 1]).should.equal('Location');
+    findChild(html, [0, 0, 3, 1]).should.equal('John Smith');
+  });
+  
+
   it('renders two events side-by-side when wide', () => {
     const content = {
       items: [
@@ -97,7 +111,7 @@ describe('AgendaTile', () => {
     findChild(html, [0, 0, 0, 0, 0, 1]).should.equal('13:00–14:00');
     findChild(html, [0, 0, 0, 0, 1, 1]).should.equal('First Event');
 
-    findChild(html, [0, 1, 0, 0, 0, 1]).should.equal('14:00–14:00');
+    findChild(html, [0, 1, 0, 0, 0, 1]).should.equal('14:00');
     findChild(html, [0, 1, 0, 0, 1, 1]).should.equal('Second Event');
   });
 

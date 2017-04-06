@@ -5,11 +5,12 @@ import Tile from '../tiles/Tile';
 import { connect } from 'react-redux';
 import { push, goBack } from 'react-router-redux';
 import _ from 'lodash-es';
+import { Routes } from '../AppRoot';
 
 class TileView extends Component {
 
   onTileExpand(tile) {
-    this.props.dispatch(push(`/tiles/${tile.id}`));
+    this.props.dispatch(push(`/${Routes.TILES}/${tile.id}`));
   }
 
   onTileDismiss() {

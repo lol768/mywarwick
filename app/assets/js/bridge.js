@@ -1,9 +1,7 @@
 /* global MyWarwickNative */
-
 /**
  * API for native apps.
  */
-
 import $ from 'jquery';
 import get from 'lodash-es/get';
 import * as stream from './stream';
@@ -12,6 +10,8 @@ import { displayUpdateProgress } from './state/update';
 import { postJsonWithCredentials } from './serverpipe';
 import { createSelector } from 'reselect';
 import { hasAuthoritativeAuthenticatedUser } from './state';
+import { Routes } from './components/AppRoot';
+import { navRequest } from './state/ui';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -104,7 +104,11 @@ export default function init(opts) {
       navigate(path) {
         // click event to dismiss active tooltips
         document.dispatchEvent(new Event('click'));
-        store.dispatch(push(path));
+        if (path.indexOf(`/${Routes.EDIT}`) === 0 || path.indexOf(`/${Routes.TILES}`) === 0) {
+          store.dispatch(push(path));
+        } else {
+          navRequest(path, store.dispatch);
+        }
         window.scrollTo(0, 0);
       },
 

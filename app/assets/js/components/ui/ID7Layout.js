@@ -15,6 +15,7 @@ import { connect } from 'react-redux';
 import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
 import { goBack, push } from 'react-router-redux';
+import { Routes } from '../AppRoot';
 
 class ID7Layout extends ReactComponent {
 
@@ -36,7 +37,7 @@ class ID7Layout extends ReactComponent {
   componentWillReceiveProps(nextProps) {
     nextProps.dispatch(ui.updateUIContext());
 
-    const hasZoomedTile = _.startsWith(nextProps.path, '/tiles/');
+    const hasZoomedTile = _.startsWith(nextProps.path, `/${Routes.TILES}/`);
     $('body').toggleClass('has-zoomed-tile', hasZoomedTile);
   }
 
@@ -82,7 +83,7 @@ class ID7Layout extends ReactComponent {
   }
 
   renderBetaWarning() {
-    if (!this.props.native) {
+    if (!this.props.native && this.props.showBetaWarning) {
       return (
         <div className="top-page-notice">
           My&nbsp;Warwick is currently being piloted and is not yet available for general use.
@@ -94,14 +95,14 @@ class ID7Layout extends ReactComponent {
   }
 
   isEditing() {
-    return this.props.path === '/edit';
+    return this.props.path === `/${Routes.EDIT}`;
   }
 
   onEdit() {
     if (this.isEditing()) {
       this.props.dispatch(goBack());
     } else {
-      this.props.dispatch(push('/edit'));
+      this.props.dispatch(push(`/${Routes.EDIT}`));
     }
   }
 
@@ -232,6 +233,7 @@ const select = (state) => ({
   colourTheme: state.ui.colourTheme,
   zoomedTile: state.ui.zoomedTile,
   native: state.ui.native,
+  showBetaWarning: state.ui.showBetaWarning,
 });
 
 export default connect(select)(ID7Layout);
