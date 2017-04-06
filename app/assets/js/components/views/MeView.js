@@ -262,7 +262,7 @@ class MeView extends ReactComponent {
         <div className="me-view__tiles">
           <ReactGridLayoutBase
             layout={layout}
-            isDraggable={!!this.props.editing}
+            isDraggable
             isResizable={false}
             cols={layoutWidth}
             rowHeight={rowHeight}
