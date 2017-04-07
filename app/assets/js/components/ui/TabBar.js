@@ -25,9 +25,11 @@ export default class TabBar extends Component {
   }
 
   itemIsActive(item, currentPath) {
-    if (item.path === '/' && (currentPath === '/' ||
-      _.startsWith(currentPath, `/${Routes.TILES}/`))
-    ) {
+    if (item.path === '/' && (
+      currentPath === '/' ||
+        _.startsWith(currentPath, `/${Routes.TILES}/`) ||
+        _.startsWith(currentPath, `/${Routes.EDIT}`)
+    )) {
       return true;
     }
 
