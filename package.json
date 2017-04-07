@@ -92,7 +92,6 @@
     "messageformat": "^1.0.2",
     "moment": "~2.12.0",
     "moment-timezone": "UniversityofWarwick/moment-timezone#0.4.1-london",
-    "pluralize": "^4.0.0",
     "qs": "^6.2.1",
     "react": "^15.0.0",
     "react-addons-update": "^15.0.0",
