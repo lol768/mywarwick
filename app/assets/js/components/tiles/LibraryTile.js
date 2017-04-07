@@ -17,7 +17,7 @@ export default class LibraryTile extends TextTile {
           case 'hold':
             return this.makeHoldItem(item);
           default:
-            return <div></div>;
+            return null;
         }
       }
     );
