@@ -263,7 +263,9 @@ export class AgendaTileItem extends React.PureComponent {
     return null;
   }
 
-  static renderParent(parent) {
+  renderParent() {
+    const { parent } = this.props;
+
     if (parent) {
       return (
         <div>
@@ -275,7 +277,9 @@ export class AgendaTileItem extends React.PureComponent {
     return null;
   }
 
-  static renderTitle({ title, href }) {
+  renderTitle() {
+    const { title, href } = this.props;
+
     return (
       <span title={ title } className={ classNames({
         'tile-list-item__title': true,
@@ -344,7 +348,6 @@ export class AgendaTileItem extends React.PureComponent {
   }
 
   render() {
-    const { title, href, parent } = this.props;
     const content = (
       <div className="agenda-item">
         <div className="agenda-item__cell" style={{ paddingRight: '.25em' }}>
@@ -352,8 +355,8 @@ export class AgendaTileItem extends React.PureComponent {
         </div>
         { this.renderMarker() }
         <div className="agenda-item__cell" style={{ paddingLeft: '.5em' }}>
-          { this.renderParent({ parent }) }
-          { this.renderTitle({ title, href }) }
+          { this.renderParent() }
+          { this.renderTitle() }
           { ' ' }
           { this.renderLocation() }
           { this.renderUser() }
