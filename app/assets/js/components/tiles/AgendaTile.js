@@ -23,6 +23,8 @@ const colourForModule = _.memoize(() => {
   return nextColour;
 });
 
+const DATETIME_OPTIONS = { printToday: true };
+
 const groupItemsForAgendaTile = {
 
   description: 'by-date--agenda',
@@ -115,13 +117,13 @@ export default class AgendaTile extends TileContent {
     }
 
     const renderDateTime = event.start === event.end ?
-      formatDateTime(event.start) :
-      `${formatDateTime(event.start)}–${formatTime(event.end)}`;
+      formatDateTime(event.start, undefined, DATETIME_OPTIONS) :
+      `${formatDateTime(event.start, undefined, DATETIME_OPTIONS)}–${formatTime(event.end)}`;
 
     return (
       <Hyperlink href={ event.href } style={{ display: 'block' }}>
         <ul className="list-unstyled">
-          <li className="text-overflow-block">
+          <li className="text-overflow-block agenda__date">
             <i className="fa fa-fw fa-clock-o"> </i>
             { event.isAllDay ? `All day ${formatDate(event.start)}` : renderDateTime }
           </li>
@@ -261,9 +263,7 @@ export class AgendaTileItem extends React.PureComponent {
     return null;
   }
 
-  renderParent() {
-    const { parent } = this.props;
-
+  static renderParent(parent) {
     if (parent) {
       return (
         <div>
@@ -275,9 +275,7 @@ export class AgendaTileItem extends React.PureComponent {
     return null;
   }
 
-  renderTitle() {
-    const { title, href } = this.props;
-
+  static renderTitle({ title, href }) {
     return (
       <span title={ title } className={ classNames({
         'tile-list-item__title': true,
@@ -346,6 +344,7 @@ export class AgendaTileItem extends React.PureComponent {
   }
 
   render() {
+    const { title, href, parent } = this.props;
     const content = (
       <div className="agenda-item">
         <div className="agenda-item__cell" style={{ paddingRight: '.25em' }}>
@@ -353,8 +352,8 @@ export class AgendaTileItem extends React.PureComponent {
         </div>
         { this.renderMarker() }
         <div className="agenda-item__cell" style={{ paddingLeft: '.5em' }}>
-          { this.renderParent() }
-          { this.renderTitle() }
+          { this.renderParent({ parent }) }
+          { this.renderTitle({ title, href }) }
           { ' ' }
           { this.renderLocation() }
           { this.renderUser() }

@@ -1,9 +1,19 @@
 import moment from 'moment-timezone';
 
-export const localMoment = date => moment(date).tz('Europe/London');
-export const localMomentUnix = date => moment.unix(date).tz('Europe/London');
+const TZ = 'Europe/London';
+
+export const localMoment = date => moment(date).tz(TZ);
+export const localMomentUnix = date => moment.unix(date).tz(TZ);
+
+/**
+ * @typedef {Object} DateTimeOptions
+ * @property {boolean} [printToday=false] - whether to include "Today" if it's today.
+ */
+
+const NO_OPTIONS = {};
 
 const ONLY_TIME = 'HH:mm';
+const TODAY_TIME = '[Today] HH:mm';
 const YESTERDAY_TIME = '[Yesterday] HH:mm';
 const WEEKDAY_TIME = 'ddd HH:mm';
 const FULL_DATE_WITHOUT_YEAR_TIME = 'ddd D MMM, HH:mm';
@@ -39,16 +49,20 @@ export function formatTimeMoment(then) {
   return then.format('HH:mm');
 }
 
-function formatDateTimeMoment(then, now) {
+/**
+ * @param then The moment to format.
+ * @param now A relative date for calculating today/tomorrow formatting.
+ * @param {DateTimeOptions} options
+ */
+function formatDateTimeMoment(then, now, options = NO_OPTIONS) {
+  const { printToday = false } = options;
   if (then.isSame(now, 'day')) {
-    return then.format(ONLY_TIME);
+    return then.format(printToday ? TODAY_TIME : ONLY_TIME);
   }
 
-  if (then.isSame(now.subtract(1, 'day'), 'day')) {
+  if (then.isSame(now.clone().subtract(1, 'day'), 'day')) {
     return then.format(YESTERDAY_TIME);
   }
-
-  now.add(1, 'day');
 
   if (then.isSame(now, 'isoWeek')) {
     return then.format(WEEKDAY_TIME);
@@ -61,13 +75,26 @@ function formatDateTimeMoment(then, now) {
   return then.format(FULL_DATE_TIME);
 }
 
-export function forNewsItem(date, referenceDate = new Date()) {
+/**
+ * @param {Date} date
+ * @param {Date?} referenceDate=now
+ * @param {DateTimeOptions} options
+ * @returns {string}
+ */
+export function forNewsItem(date, referenceDate = new Date(), options) {
   if (date === undefined) throw new Error('No date specified'); // otherwise we render now :|
 
-  return formatDateTimeMoment(localMoment(date), localMoment(referenceDate));
+  return formatDateTimeMoment(localMoment(date), localMoment(referenceDate), options);
 }
 
-export function forActivity(date, grouped = false, referenceDate = new Date()) {
+/**
+ * @param {Date} date - The date to format.
+ * @param {boolean} grouped - Omits date for yesterday and tomorrow
+ * @param {Date} referenceDate=now - For relative formatting
+ * @param {DateTimeOptions} options
+ * @returns {string} The date formatted for an activity/notification item.
+ */
+export function forActivity(date, grouped = false, referenceDate = new Date(), options) {
   if (date === undefined) throw new Error('No date specified'); // otherwise we render now :|
   const then = localMoment(date);
   const now = localMoment(referenceDate);
@@ -88,11 +115,17 @@ export function forActivity(date, grouped = false, referenceDate = new Date()) {
     now.subtract(1, 'day');
   }
 
-  return formatDateTimeMoment(then, now);
+  return formatDateTimeMoment(then, now, options);
 }
 
-export default function formatDateTime(date, referenceDate = new Date()) {
-  return forNewsItem(date, referenceDate);
+/**
+ * @param {Date} date
+ * @param {Date?} referenceDate=now
+ * @param {DateTimeOptions} options
+ * @returns {string}
+ */
+export default function formatDateTime(date, referenceDate = new Date(), options) {
+  return forNewsItem(date, referenceDate, options);
 }
 
 export function formatDate(date, referenceDate = new Date()) {

@@ -46,12 +46,6 @@ const ITEMS = {
 
 describe('AgendaTile', () => {
 
-  const content = {
-    items: [
-      { id: '1' }, { id: '2' }, { id: '3' },
-    ],
-  };
-
   it('renders all-day events when small', () => {
     const content = {
       items: [
@@ -78,7 +72,7 @@ describe('AgendaTile', () => {
 
     const html = renderAtMoment(<AgendaTile size="small" content={ content }/>, now);
 
-    findChild(html, [0, 0, 0, 1]).should.equal('13:00–14:00');
+    findChild(html, [0, 0, 0, 1]).should.equal('Today 13:00–14:00');
     findChild(html, [0, 0, 1, 1]).should.equal('First Event');
     findChild(html, [0, 0, 2, 1]).should.equal('Location');
     findChild(html, [0, 0, 3, 1]).should.equal('John Smith');
@@ -91,7 +85,7 @@ describe('AgendaTile', () => {
 
     const html = renderAtMoment(<AgendaTile size="small" content={ content }/>, now);
 
-    findChild(html, [0, 0, 0, 1]).should.equal('14:00');
+    findChild(html, [0, 0, 0, 1]).should.equal('Today 14:00');
     findChild(html, [0, 0, 1, 1]).should.equal('Second Event');
     findChild(html, [0, 0, 2, 1]).should.equal('Location');
     findChild(html, [0, 0, 3, 1]).should.equal('John Smith');
@@ -135,7 +129,7 @@ describe('AgendaTile', () => {
     findChild(html, [0, 0, 0, 0, 1, 1]).should.equal('Lunch tomorrow');
   });
 
-  it('include the date when rendering an event and start == end', () => {
+  it('renders a single time when start == end', () => {
     const content = {
       items: [
         {
@@ -153,6 +147,32 @@ describe('AgendaTile', () => {
     findChild(html, [0, 0, 0, 0, 0, 1]).should.equal('Fri 12:00');
   });
 
+  it('renders a date for tomorrow', () => {
+    const content = {
+      items: [
+        {
+          id: '1',
+          title: 'Cinema',
+          start: '2016-05-21T12:00:00+01:00',
+          end: '2016-05-21T12:00:00+01:00',
+        },
+        {
+          id: '2',
+          title: 'Fun',
+          start: '2016-05-21T12:00:00+01:00',
+          end: '2016-05-21T14:00:00+01:00',
+        },
+      ],
+    };
+    atMoment(() => {
+      const html = shallow(<AgendaTile size="wide" content={ content } />);
+      html.find('.agenda__date').map(n => n.text()).should.deep.equal([
+        ' Sat 12:00',
+        ' Sat 12:00–14:00'
+      ]);
+    }, now);
+  });
+
   it('renders two events side-by-side when wide', () => {
     const content = {
       items: [
@@ -163,14 +183,19 @@ describe('AgendaTile', () => {
 
     const html = renderAtMoment(<AgendaTile size="wide" content={content}/>, now);
 
-    findChild(html, [0, 0, 0, 0, 0, 1]).should.equal('13:00–14:00');
+    findChild(html, [0, 0, 0, 0, 0, 1]).should.equal('Today 13:00–14:00');
     findChild(html, [0, 0, 0, 0, 1, 1]).should.equal('First Event');
 
-    findChild(html, [0, 1, 0, 0, 0, 1]).should.equal('14:00');
+    findChild(html, [0, 1, 0, 0, 0, 1]).should.equal('Today 14:00');
     findChild(html, [0, 1, 0, 0, 1, 1]).should.equal('Second Event');
   });
 
   it('displays all items when zoomed', () => {
+    const content = {
+      items: [
+        { id: '1' }, { id: '2' }, { id: '3' },
+      ],
+    };
     const html = shallowRender(<AgendaTile
       zoomed={ true }
       size="small"
