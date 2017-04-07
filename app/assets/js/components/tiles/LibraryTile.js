@@ -2,7 +2,6 @@ import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import Hyperlink from '../ui/Hyperlink';
 import TextTile from './TextTile';
-import pluralize from 'pluralize';
 import _ from 'lodash-es';
 import moment from 'moment';
 
@@ -27,7 +26,7 @@ export default class LibraryTile extends TextTile {
     return (
       <span>
         <span className="tile__callout">
-          {`${length} ${pluralize(type, length)}`}
+          {`${length} ${this._pluralise(type, length)}`}
         </span>
       </span>
     );
@@ -37,7 +36,7 @@ export default class LibraryTile extends TextTile {
     const groupedItems = _.groupby(items, 'type');
     let text = '';
     _.forEach(groupedItems, (value, key) => {
-      text += `${value.length} ${pluralize(key, value.length)} `;
+      text += `${value.length} ${this._pluralise(key, value.length)} `;
     });
 
     const chunks = text.split(/\s+/);
@@ -132,5 +131,8 @@ export default class LibraryTile extends TextTile {
       </ReactCSSTransitionGroup>
     );
   }
+
+  _pluralise = (unit, len) => `${unit}${len === 1 ? '' : 's'}`;
+
 }
 
