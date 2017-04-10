@@ -109,7 +109,6 @@ export default function init(opts) {
         } else {
           navRequest(path, store.dispatch);
         }
-        window.scrollTo(0, 0);
       },
 
       search(query) {
