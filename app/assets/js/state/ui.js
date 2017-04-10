@@ -3,6 +3,7 @@ import { browserHistory } from 'react-router';
 import $ from 'jquery';
 import { Routes } from '../components/AppRoot';
 import { goBack, replace } from 'react-router-redux';
+import _ from 'lodash-es';
 
 let mq;
 try {
@@ -91,14 +92,14 @@ export function updateUIContext() {
 }
 
 export function scrollTopOnTabChange(scrollTops) {
-  function isTopLevelUrlNotEdit(location) {
-    return (location.pathname.match(/\//g) || []).length === 1
-      && location.pathname !== `/${Routes.EDIT}`;
+  function isTopLevelUrl(location) {
+    return (location.pathname.match(/\//g) || []).length === 1;
   }
 
   browserHistory.listen(location => {
-    if (isTopLevelUrlNotEdit(location)) {
-      const path = window.location.pathname;
+    if (isTopLevelUrl(location)) {
+      const originalPath = window.location.pathname;
+      const path = (_.startsWith(originalPath, `/${Routes.EDIT}`)) ? '/' : originalPath;
       const scrolltop = scrollTops[path] || 0;
       log.debug(`path: ${path} => scrollTop: ${scrolltop}`);
       $(window).scrollTop(scrolltop);
