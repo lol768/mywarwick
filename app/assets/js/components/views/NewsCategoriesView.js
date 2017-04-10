@@ -32,7 +32,7 @@ export default class NewsCategoriesView extends React.Component {
     _.each(options, option => {
       const id = option.value;
 
-      if (subscribed.includes(id)) {
+      if (subscribed.indexOf(id) !== 1) {
         dispatch(newsCategories.unsubscribe(id));
       } else {
         dispatch(newsCategories.subscribe(id));
@@ -81,7 +81,7 @@ export default class NewsCategoriesView extends React.Component {
     const data = items.map(item => ({
       value: item.id,
       label: item.name,
-      selected: subscribed.includes(item.id),
+      selected: subscribed.indexOf(item.id) !== -1,
     }));
 
     return (
