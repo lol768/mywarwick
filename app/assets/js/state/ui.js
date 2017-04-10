@@ -117,7 +117,9 @@ export function scrollTopOnTabChange(scrollTops) {
  * The MeView then handles sending you on to where you wanted.
  */
 export function navRequest(path, dispatch) {
-  if (window.location.pathname.indexOf(Routes.TILES) !== -1 ||
+  if (path === window.location.pathname) {
+    window.scrollTo(0, 0);
+  } else if (window.location.pathname.indexOf(Routes.TILES) !== -1 ||
     window.location.pathname.indexOf(Routes.EDIT) !== -1
   ) {
     dispatch({
