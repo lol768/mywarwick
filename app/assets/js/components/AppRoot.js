@@ -1,6 +1,6 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { Router, Route, IndexRoute, IndexRedirect } from 'react-router';
+import { IndexRedirect, IndexRoute, Route, Router } from 'react-router';
 
 import store from '../store';
 

@@ -1,11 +1,10 @@
 import log from 'loglevel';
 
 import thunk from 'redux-thunk';
-import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
+import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
 import { browserHistory } from 'react-router';
 import { routerMiddleware, routerReducer } from 'react-router-redux';
 import { unstable_batchedUpdates } from 'react-dom'; // eslint-disable-line camelcase
-
 import * as allReducers from './state/all-reducers';
 
 // "Strategy for avoiding cascading renders": https://github.com/reactjs/redux/issues/125

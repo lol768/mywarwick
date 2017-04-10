@@ -3,7 +3,7 @@ import log from 'loglevel';
 import { fetchWithCredentials } from '../serverpipe';
 import { USER_CLEAR } from './user';
 import * as notificationMetadata from './notification-metadata';
-import { makeStream, onStreamReceive, takeFromStream, getLastItemInStream } from '../stream';
+import { getLastItemInStream, makeStream, onStreamReceive, takeFromStream } from '../stream';
 import { createAction } from 'redux-actions';
 import qs from 'qs';
 

@@ -1,8 +1,7 @@
 import React, { PropTypes } from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
 import classNames from 'classnames';
 
-export default class ToggleSwitch extends ReactComponent {
+export default class ToggleSwitch extends React.Component {
 
   constructor(props) {
     super(props);
@@ -47,6 +46,7 @@ ToggleSwitch.propTypes = {
   defaultToggleState: PropTypes.bool,
   handleToggle: PropTypes.func.isRequired,
   isDisabled: PropTypes.bool,
+  buttonText: PropTypes.string.isRequired,
 };
 
 ToggleSwitch.defaultProps = {

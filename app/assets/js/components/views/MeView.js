@@ -1,5 +1,4 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
+import React, { PropTypes } from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import ReactGridLayoutBase from 'react-grid-layout';
 import _ from 'lodash-es';
@@ -47,7 +46,22 @@ function getSizeNameFromSize(size) {
   return TILE_SIZES.LARGE;
 }
 
-class MeView extends ReactComponent {
+class MeView extends React.Component {
+
+  static propTypes = {
+    location: PropTypes.shape({
+      pathname: PropTypes.string,
+    }),
+    navRequest: PropTypes.string,
+    dispatch: PropTypes.func.isRequired,
+    editing: PropTypes.bool,
+    layoutWidth: PropTypes.number,
+    layout: PropTypes.array,
+    isDesktop: PropTypes.bool,
+    deviceWidth: PropTypes.number,
+    children: PropTypes.node,
+    tiles: PropTypes.array,
+  };
 
   constructor(props) {
     super(props);
@@ -55,9 +69,14 @@ class MeView extends ReactComponent {
     this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
-    this.onDragStop = this.onDragStop.bind(this);
     this.onConfigSave = this.onConfigSave.bind(this);
     this.onConfigViewDismiss = this.onConfigViewDismiss.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.editing && !nextProps.editing) {
+      this.onFinishEditing();
+    }
   }
 
   /**
@@ -76,12 +95,6 @@ class MeView extends ReactComponent {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.editing && !nextProps.editing) {
-      this.onFinishEditing();
-    }
-  }
-
   onFinishEditing() {
     this.props.dispatch(tiles.persistTiles());
   }
@@ -94,43 +107,11 @@ class MeView extends ReactComponent {
     $('.id7-main-content-area').css('-webkit-overflow-scrolling', 'auto');
   }
 
-  onDragStop() {
-  }
-
-  getTileLayout(layout) {
-    return layout
-      .filter(tile => tile.layoutWidth === this.props.layoutWidth)
-      .map(item => ({
-        i: item.tile,
-        x: item.x,
-        y: item.y,
-        w: item.width,
-        h: item.height,
-      }));
-  }
-
   onLayoutChange(layout) {
     if (this.previousLayout === undefined || !_.isEqual(layout, this.previousLayout)) {
       this.props.dispatch(tiles.tileLayoutChange(layout, this.props.layoutWidth));
       this.previousLayout = _.cloneDeep(layout);
     }
-  }
-
-  renderTile(props) {
-    const { id } = props;
-
-    return (
-      <TileView
-        ref={id}
-        key={id}
-        id={id}
-        view={this}
-        editing={this.props.editing}
-        editingAny={!!this.props.editing}
-        size={this.getTileSize(id)}
-        layoutWidth={this.props.layoutWidth}
-      />
-    );
   }
 
   onHideTile(tile) {
@@ -173,6 +154,10 @@ class MeView extends ReactComponent {
     this.onConfigViewDismiss();
   }
 
+  onTileDismiss() {
+    this.props.dispatch(goBack());
+  }
+
   getTileSize(id) {
     const layout = this.props.layout.filter(i =>
       i.tile === id && i.layoutWidth === this.props.layoutWidth
@@ -185,6 +170,18 @@ class MeView extends ReactComponent {
     return getSizeNameFromSize(layout);
   }
 
+  getTileLayout(layout) {
+    return layout
+      .filter(tile => tile.layoutWidth === this.props.layoutWidth)
+      .map(item => ({
+        i: item.tile,
+        x: item.x,
+        y: item.y,
+        w: item.width,
+        h: item.height,
+      }));
+  }
+
   getGridLayoutWidth() {
     const { isDesktop, deviceWidth } = this.props;
 
@@ -195,6 +192,23 @@ class MeView extends ReactComponent {
     }
 
     return deviceWidth + margins;
+  }
+
+  renderTile(props) {
+    const { id } = props;
+
+    return (
+      <TileView
+        ref={id}
+        key={id}
+        id={id}
+        view={this}
+        editing={this.props.editing}
+        editingAny={this.props.editing}
+        size={this.getTileSize(id)}
+        layoutWidth={this.props.layoutWidth}
+      />
+    );
   }
 
   renderHiddenTiles() {
@@ -271,7 +285,6 @@ class MeView extends ReactComponent {
             onLayoutChange={this.onLayoutChange}
             verticalCompact
             onDragStart={this.onDragStart}
-            onDragStop={this.onDragStop}
             width={this.getGridLayoutWidth()}
             draggableHandle=".tile__drag-handle"
           >
@@ -281,10 +294,6 @@ class MeView extends ReactComponent {
         { showHiddenTiles ? this.renderHiddenTiles() : null }
       </div>
     );
-  }
-
-  onTileDismiss() {
-    this.props.dispatch(goBack());
   }
 
   renderTileOptionsView() {
