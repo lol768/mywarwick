@@ -62,7 +62,8 @@ export default class TileOptionView extends Component {
             name={cbName}
             checked={
               (this.state.currentPreferences[cbName] &&
-              this.state.currentPreferences[cbName].includes(possibleChoice.value)) ? true : null
+              this.state.currentPreferences[cbName]
+                .indexOf(possibleChoice.value) !== -1) ? true : null
             }
             onChange={ this.handleCheckboxChange }
           />
