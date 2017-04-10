@@ -85,7 +85,7 @@ export default class LibraryTile extends TextTile {
       <Hyperlink key={item.id} href={item.href}>
         <div key={item.id} className="tile__item">
           <span className="tile__text">
-            {item.status.toLowerCase().includes('ready') ?
+            {item.status.toLowerCase().indexOf('ready') !== -1 ?
               `${item.status} at ${item.pickupLocation}` :
               item.status}: {item.itemTitle}
           </span>
