@@ -12,7 +12,7 @@ export default class Tile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      contentRef: null,
+      hasMounted: false,
     };
 
     this.onClick = this.onClick.bind(this);
@@ -20,12 +20,9 @@ export default class Tile extends React.Component {
   }
 
   getIcon() {
-    const { fetching, errors, icon, content } = this.props;
+    const { fetching, errors, icon } = this.props;
 
-    // FIXME: shouldn't have to pass content here, the TileContent component has its own content
-    const customIcon = (content && this.state.contentRef) ?
-      this.state.contentRef.getIcon(content)
-      : null;
+    const customIcon = this.getContentInstance() && this.getContentInstance().getIcon();
 
     const iconJsx = iconName => (
       <i className={`fa ${iconName} toggle-tooltip`} ref="icon" title={ this.getIconTitle() }
@@ -79,9 +76,15 @@ export default class Tile extends React.Component {
   }
 
   componentDidMount() {
+    // Trigger an immediate re-render after the initial mount so we can access the content instance
+
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
-      contentRef: this.refs.content,
+      hasMounted: true,
     });
+  }
+
+  getContentInstance() {
+    return this.refs.tileWrap && this.refs.tileWrap.refs.content;
   }
 
   shouldDisplayExpandIcon() {
@@ -132,9 +135,8 @@ export default class Tile extends React.Component {
             )
           }
           onClick={ this.onClick }
-          ref="tile"
         >
-          { this.state.contentRef && this.state.contentRef.isRemovable() &&
+          { this.getContentInstance() && this.getContentInstance().isRemovable() &&
             <div
               className="tile__edit-control top-left"
               onClick={ this.props.onHide }
@@ -167,6 +169,7 @@ export default class Tile extends React.Component {
             title={title}
             children={children}
             onClickExpand={this.onClickExpand}
+            ref="tileWrap"
           />
         </article>
       </div>
