@@ -1,9 +1,17 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
+import React, { PropTypes } from 'react';
 
 import { connect } from 'react-redux';
 
-class UpdatePopup extends ReactComponent {
+class UpdatePopup extends React.Component {
+
+  static propTypes = {
+    isUpdateReady: PropTypes.bool,
+  };
+
+  reload(e) {
+    e.preventDefault();
+    window.location.reload();
+  }
 
   render() {
     if (this.props.isUpdateReady) {
@@ -28,11 +36,6 @@ class UpdatePopup extends ReactComponent {
     return null;
   }
 
-  reload(e) {
-    e.preventDefault();
-    window.location.reload();
-  }
-
 }
 
-export default connect((state) => state.update)(UpdatePopup);
+export default connect(state => state.update)(UpdatePopup);

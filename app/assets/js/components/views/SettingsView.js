@@ -1,9 +1,11 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
+import React, { PropTypes } from 'react';
 import classNames from 'classnames';
 
+export class SettingsView extends React.Component {
 
-export class SettingsView extends ReactComponent {
+  static propTypes = {
+    settings: PropTypes.object.isRequired,
+  };
 
   constructor(props) {
     super(props);

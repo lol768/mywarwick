@@ -3,7 +3,7 @@ import * as TILE_TYPES from '../tiles';
 import log from 'loglevel';
 import Tile from '../tiles/Tile';
 import { connect } from 'react-redux';
-import { push, goBack } from 'react-router-redux';
+import { goBack, push } from 'react-router-redux';
 import _ from 'lodash-es';
 import { Routes } from '../AppRoot';
 
@@ -114,12 +114,18 @@ TileView.propTypes = {
   option: PropTypes.object,
   isDesktop: PropTypes.bool,
   zoomed: PropTypes.bool,
-  size: PropTypes.string,
-  editingAny: PropTypes.bool,
-  editing: PropTypes.bool,
+  size: PropTypes.string.isRequired,
+  editingAny: PropTypes.bool.isRequired,
+  editing: PropTypes.bool.isRequired,
   view: PropTypes.object,
   colour: React.PropTypes.number,
   user: PropTypes.object.isRequired,
+};
+
+TileView.defaultProps = {
+  editing: false,
+  editingAny: false,
+  size: 'large',
 };
 
 export default connect(select)(TileView);

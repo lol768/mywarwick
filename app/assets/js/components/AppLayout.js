@@ -1,5 +1,4 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
+import React, { PropTypes } from 'react';
 import TabBar from './ui/TabBar';
 import TabBarItem from './ui/TabBarItem';
 import ID7Layout from './ui/ID7Layout';
@@ -10,7 +9,20 @@ import { getNumItemsSince } from '../stream';
 import { Routes } from './AppRoot';
 import { navRequest } from '../state/ui';
 
-export class AppLayout extends ReactComponent {
+export class AppLayout extends React.Component {
+
+  static propTypes = {
+    onSelectItem: PropTypes.func.isRequired,
+    location: PropTypes.shape({
+      pathname: PropTypes.string.isRequired,
+    }).isRequired,
+    user: PropTypes.shape({
+      authenticated: PropTypes.bool.isRequired,
+    }).isRequired,
+    notificationsCount: PropTypes.number.isRequired,
+    layoutClassName: PropTypes.string.isRequired,
+    children: PropTypes.node.isRequired,
+  };
 
   constructor(props) {
     super();
@@ -18,10 +30,8 @@ export class AppLayout extends ReactComponent {
   }
 
   render() {
-    const { location, notificationsCount, layoutClassName, children }
+    const { location, notificationsCount, layoutClassName, children, user }
       = this.props;
-
-    const user = this.props.user;
 
     log.debug('AppLayout.render');
 

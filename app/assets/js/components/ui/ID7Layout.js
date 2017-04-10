@@ -1,5 +1,4 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
+import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import _ from 'lodash-es';
@@ -17,7 +16,24 @@ import * as ui from '../../state/ui';
 import { goBack, push } from 'react-router-redux';
 import { Routes } from '../AppRoot';
 
-class ID7Layout extends ReactComponent {
+class ID7Layout extends React.Component {
+
+  static propTypes = {
+    dispatch: PropTypes.func.isRequired,
+    colourTheme: PropTypes.string.isRequired,
+    user: PropTypes.shape({
+      data: PropTypes.shape({
+        authenticated: PropTypes.bool.isRequired,
+      }).isRequired,
+    }).isRequired,
+    native: PropTypes.bool,
+    showBetaWarning: PropTypes.bool,
+    path: PropTypes.string.isRequired,
+    zoomedTile: PropTypes.string,
+    notificationsCount: PropTypes.number,
+    children: PropTypes.node,
+    layoutClassName: PropTypes.oneOf(['desktop', 'mobile']),
+  };
 
   constructor(props) {
     super(props);
@@ -48,9 +64,16 @@ class ID7Layout extends ReactComponent {
     }
   }
 
-  updateHeaderHeight() {
-    const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
-    $(document.body).css('margin-top', headerHeight);
+  onBackClick() {
+    this.props.dispatch(goBack());
+  }
+
+  onEdit() {
+    if (this.isEditing()) {
+      this.props.dispatch(goBack());
+    } else {
+      this.props.dispatch(push(`/${Routes.EDIT}`));
+    }
   }
 
   /** Set the theme on the body element, so that we can style everything. */
@@ -60,18 +83,13 @@ class ID7Layout extends ReactComponent {
       .addClass(`theme-${newTheme}`);
   }
 
-  onBackClick() {
-    this.props.dispatch(goBack());
+  updateHeaderHeight() {
+    const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
+    $(document.body).css('margin-top', headerHeight);
   }
 
-  renderMasqueradeNotice() {
-    const user = this.props.user.data;
-
-    if (user.masquerading) {
-      return <MasqueradeNotice masqueradingAs={user} />;
-    }
-
-    return null;
+  isEditing() {
+    return this.props.path === `/${Routes.EDIT}`;
   }
 
   renderNotificationPermissionRequest() {
@@ -94,16 +112,14 @@ class ID7Layout extends ReactComponent {
     return null;
   }
 
-  isEditing() {
-    return this.props.path === `/${Routes.EDIT}`;
-  }
+  renderMasqueradeNotice() {
+    const user = this.props.user.data;
 
-  onEdit() {
-    if (this.isEditing()) {
-      this.props.dispatch(goBack());
-    } else {
-      this.props.dispatch(push(`/${Routes.EDIT}`));
+    if (user.masquerading) {
+      return <MasqueradeNotice masqueradingAs={user} />;
     }
+
+    return null;
   }
 
   renderMobile() {

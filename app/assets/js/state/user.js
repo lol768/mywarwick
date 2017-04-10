@@ -1,13 +1,12 @@
 import localforage from 'localforage';
 import log from 'loglevel';
+import url from 'url';
+import querystring from 'querystring';
 
 export const USER_LOAD = 'USER_LOAD';
 export const USER_RECEIVE = 'USER_RECEIVE';
 export const USER_CLEAR = 'USER_CLEAR';
 export const SSO_LINKS_RECEIVE = 'SSO_LINKS_RECEIVE';
-
-import url from 'url';
-import querystring from 'querystring';
 
 const initialState = {
   data: {

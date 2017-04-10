@@ -1,5 +1,4 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
+import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 
 import * as dateFormats from '../../dateFormats';
@@ -13,7 +12,24 @@ export const render = (content) =>
     .filter(t => t.length)
     .map((t, i) => <p key={i}>{t}</p>);
 
-class NewsItem extends ReactComponent {
+class NewsItem extends React.Component {
+
+  static propTypes = {
+    id: PropTypes.string.isRequired,
+    link: PropTypes.shape({
+      text: PropTypes.string.isRequired,
+    }),
+    title: PropTypes.string.isRequired,
+    publishDate: PropTypes.string.isRequired,
+    text: PropTypes.string.isRequired,
+    imageId: PropTypes.string,
+    categories: PropTypes.arrayOf(PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+    })),
+    width: PropTypes.number.isRequired,
+    analyticsClientId: PropTypes.string.isRequired,
+  };
 
   render() {
     const { id, link, title, publishDate, text, imageId, categories, width } = this.props;

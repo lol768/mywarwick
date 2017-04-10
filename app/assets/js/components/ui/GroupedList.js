@@ -1,11 +1,21 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
+import React, { PropTypes } from 'react';
 
 import _ from 'lodash-es';
 
 import ListHeader from './ListHeader';
 
-export default class GroupedList extends ReactComponent {
+export default class GroupedList extends React.Component {
+
+  static propTypes = {
+    groupBy: PropTypes.shape({
+      getGroupedItems: PropTypes.func,
+      groupForItem: PropTypes.func,
+      titleForGroup: PropTypes.func.isRequired,
+    }).isRequired,
+    children: PropTypes.node.isRequired,
+    className: PropTypes.string,
+    orderDescending: PropTypes.bool,
+  };
 
   getGroupedItems() {
     const { groupBy, children } = this.props;

@@ -1,18 +1,28 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
+import React, { PropTypes } from 'react';
 import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
 import * as groupItemsByDate from '../../GroupItemsByDate';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 import EmptyState from '../ui/EmptyState';
 import { connect } from 'react-redux';
-import { takeFromStream, getStreamSize } from '../../stream';
+import { getStreamSize, takeFromStream } from '../../stream';
 import * as notifications from '../../state/notifications';
 import log from 'loglevel';
 
 const SOME_MORE = 20;
 
-class ActivityView extends ReactComponent {
+class ActivityView extends React.Component {
+
+  static propTypes = {
+    activities: PropTypes.object,
+    olderItemsOnServer: PropTypes.bool,
+    dispatch: PropTypes.func.isRequired,
+    grouped: PropTypes.bool.isRequired,
+  };
+
+  static defaultProps = {
+    grouped: true,
+  };
 
   constructor(props) {
     super(props);
@@ -78,10 +88,6 @@ class ActivityView extends ReactComponent {
     );
   }
 }
-
-ActivityView.defaultProps = {
-  grouped: true,
-};
 
 function select(state) {
   return {

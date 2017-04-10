@@ -1,9 +1,20 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
-import ReactComponent from 'react/lib/ReactComponent';
 import $ from 'jquery';
 
-export default class UtilityBar extends ReactComponent {
+export default class UtilityBar extends React.Component {
+
+  static propTypes = {
+    user: PropTypes.shape({
+      links: PropTypes.shape({
+        login: PropTypes.string,
+      }),
+      data: PropTypes.shape({
+        authenticated: PropTypes.bool,
+      }),
+    }),
+    layoutClassName: PropTypes.oneOf(['desktop', 'mobile']),
+  };
 
   constructor(props) {
     super(props);
@@ -19,6 +30,12 @@ export default class UtilityBar extends ReactComponent {
     this.attachAccountPopover();
   }
 
+  onPhotoError() {
+    const photo = ReactDOM.findDOMNode(this.refs.photo);
+
+    photo.src = '/assets/images/no-photo.png';
+  }
+
   attachAccountPopover() {
     const $element = $(ReactDOM.findDOMNode(this.refs.accountLink));
 
@@ -27,7 +44,7 @@ export default class UtilityBar extends ReactComponent {
     }
   }
 
-  signInLink() {
+  renderSignInLink() {
     return (
       <a href={this.props.user.links.login} key="signInLink" className="sign-in-link">
         Sign in
@@ -35,24 +52,7 @@ export default class UtilityBar extends ReactComponent {
     );
   }
 
-  onPhotoError() {
-    const photo = ReactDOM.findDOMNode(this.refs.photo);
-
-    photo.src = '/assets/images/no-photo.png';
-  }
-
-  renderPhoto(user) {
-    return (
-      <img src={ user.photo.url }
-        ref="photo"
-        className="img-circle"
-        alt={ user.name }
-        onError={ this.onPhotoError }
-      />
-    );
-  }
-
-  accountLink() {
+  renderAccountLink() {
     const isMobile = this.props.layoutClassName === 'mobile';
 
     const ssoLinks = this.props.user.links;
@@ -75,6 +75,17 @@ export default class UtilityBar extends ReactComponent {
     );
   }
 
+  renderPhoto(user) {
+    return (
+      <img src={ user.photo.url }
+        ref="photo"
+        className="img-circle"
+        alt={ user.name }
+        onError={ this.onPhotoError }
+      />
+    );
+  }
+
   render() {
     const user = this.props.user || {};
     const userData = user.data || {};
@@ -82,7 +93,7 @@ export default class UtilityBar extends ReactComponent {
     return (
       <ul>
         {!user.empty ?
-          <li>{ userData.authenticated ? this.accountLink() : this.signInLink() }</li>
+          <li>{ userData.authenticated ? this.renderAccountLink() : this.renderSignInLink() }</li>
           : null}
       </ul>
     );
