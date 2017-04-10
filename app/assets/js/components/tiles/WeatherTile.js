@@ -22,9 +22,15 @@ export default class WeatherTile extends TileContent {
     return true;
   }
 
-  getIcon(content) {
-    const icon = formatIconString(content.currentConditions.icon);
-    return <Skycon className="skycon" icon={icon} />;
+  getIcon() {
+    const { content } = this.props;
+
+    if (content) {
+      const icon = formatIconString(content.currentConditions.icon);
+      return <Skycon className="skycon" icon={icon} />;
+    }
+
+    return null;
   }
 
   renderIfFresh(contentFunc) {
