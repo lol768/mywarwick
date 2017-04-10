@@ -18,7 +18,7 @@ import { navRequest } from './state/ui';
  * with different dependencies.
  */
 export default function init(opts) {
-  const { store, tiles, notifications, userinfo } = opts;
+  const { store, tiles, notifications, userinfo, news } = opts;
 
   function doInit(native) {
     const nativeSelectors = [
@@ -120,6 +120,7 @@ export default function init(opts) {
       onApplicationDidBecomeActive() {
         if (navigator.onLine) {
           store.dispatch(tiles.fetchTileContent());
+          store.dispatch(news.refresh());
 
           if (hasAuthoritativeAuthenticatedUser(store.getState())) {
             store.dispatch(notifications.fetch());
