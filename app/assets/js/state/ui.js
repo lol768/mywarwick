@@ -47,7 +47,10 @@ export function reducer(state = initialState, action) {
     case 'ui.theme':
       return { ...state, colourTheme: action.theme };
     case 'ui.showBetaWarning':
-      return { ...state, showBetaWarning: action.showBetaWarning };
+      if (action.showBetaWarning !== state.showBetaWarning) {
+        return { ...state, showBetaWarning: action.showBetaWarning };
+      }
+      return state;
     default:
       return state;
   }

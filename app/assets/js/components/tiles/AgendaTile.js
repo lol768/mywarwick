@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import formatDateTime, { formatDate, formatTime, localMoment } from '../../dateFormats';
+import { formatDateTime, formatDate, formatTime, localMoment } from '../../dateFormats';
 import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
 import TileContent from './TileContent';
@@ -22,8 +22,6 @@ const colourForModule = _.memoize(() => {
   moduleColours.push(nextColour);
   return nextColour;
 });
-
-const DATETIME_OPTIONS = { printToday: true };
 
 const groupItemsForAgendaTile = {
 
@@ -111,21 +109,27 @@ export default class AgendaTile extends TileContent {
     return <LargeBody>{ items }</LargeBody>;
   }
 
+  static renderSingleEventDate(event) {
+    if (event.isAllDay) {
+      return `All day ${formatDate(event.start)}`;
+    }
+    const DATETIME_OPTIONS = { printToday: true, onlyWeekday: true };
+    const renderedStart = formatDateTime(event.start, undefined, DATETIME_OPTIONS);
+    return event.start === event.end ?
+      renderedStart : `${renderedStart}–${formatTime(event.end)}`;
+  }
+
   static renderSingleEvent(event) {
     if (!event) {
       return null;
     }
-
-    const renderDateTime = event.start === event.end ?
-      formatDateTime(event.start, undefined, DATETIME_OPTIONS) :
-      `${formatDateTime(event.start, undefined, DATETIME_OPTIONS)}–${formatTime(event.end)}`;
 
     return (
       <Hyperlink href={ event.href } style={{ display: 'block' }}>
         <ul className="list-unstyled">
           <li className="text-overflow-block agenda__date">
             <i className="fa fa-fw fa-clock-o"> </i>
-            { event.isAllDay ? `All day ${formatDate(event.start)}` : renderDateTime }
+            { AgendaTile.renderSingleEventDate(event) }
           </li>
           <li className="text-overflow-block">
             <i className="fa fa-fw fa-calendar-check-o"> </i>

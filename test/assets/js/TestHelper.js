@@ -1,5 +1,6 @@
 import tk from 'timekeeper';
 import jsxChai from 'jsx-chai';
+import * as enzyme from 'enzyme';
 
 const chai = require('chai');
 global.expect = chai.expect;
@@ -17,7 +18,9 @@ class WebSocket {}
 global.WebSocket = WebSocket;
 
 global.React = require('react');
-global.ReactTestUtils = require('react-addons-test-utils');
+global.ReactTestUtils = require('react-dom/test-utils');
+
+const FROZEN_IN_TIME = new Date(1989, 1, 7);
 
 // Do helpful things with Spies.  Use inside a test suite (`describe' block).
 global.spy = function spy(object, method) {
@@ -48,18 +51,23 @@ global.shallowRender = function shallowRender(component) {
 };
 
 
-global.renderAtMoment = function (component, now = new Date(1989, 1, 7)) {
-  tk.freeze(new Date(now));
-  const renderedComponent = shallowRender(component);
-  tk.reset();
-  return renderedComponent;
-};
-
-global.atMoment = function(fn, now = new Date(1989, 1, 7)) {
+global.atMoment = function(fn, now = FROZEN_IN_TIME) {
   tk.freeze(new Date(now));
   const result = fn();
   tk.reset();
   return result;
+};
+
+/** shallow render at a given fake time, using React's standard shallow renderer. */
+global.renderAtMoment = function (component, now = FROZEN_IN_TIME) {
+  return atMoment(() => shallowRender(component), now);
+};
+
+/** shallow render at a given fake time, returning an Enzyme wrapper.
+ * {@link http://airbnb.io/enzyme/docs/api/shallow.html#shallowwrapper-api API docs}
+ */
+global.shallowAtMoment = function(component, now = FROZEN_IN_TIME) {
+  return atMoment(() => enzyme.shallow(component), now);
 };
 
 /**

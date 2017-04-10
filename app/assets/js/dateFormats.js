@@ -8,6 +8,7 @@ export const localMomentUnix = date => moment.unix(date).tz(TZ);
 /**
  * @typedef {Object} DateTimeOptions
  * @property {boolean} [printToday=false] - whether to include "Today" if it's today.
+ * @property {boolean} [onlyWeekday=false] - when printing date, only print the weekday.
  */
 
 const NO_OPTIONS = {};
@@ -55,7 +56,11 @@ export function formatTimeMoment(then) {
  * @param {DateTimeOptions} options
  */
 function formatDateTimeMoment(then, now, options = NO_OPTIONS) {
-  const { printToday = false } = options;
+  const {
+    printToday = false,
+    onlyWeekday = false,
+  } = options;
+
   if (then.isSame(now, 'day')) {
     return then.format(printToday ? TODAY_TIME : ONLY_TIME);
   }
@@ -64,7 +69,7 @@ function formatDateTimeMoment(then, now, options = NO_OPTIONS) {
     return then.format(YESTERDAY_TIME);
   }
 
-  if (then.isSame(now, 'isoWeek')) {
+  if (onlyWeekday || then.isSame(now, 'isoWeek')) {
     return then.format(WEEKDAY_TIME);
   }
 
@@ -78,13 +83,33 @@ function formatDateTimeMoment(then, now, options = NO_OPTIONS) {
 /**
  * @param {Date} date
  * @param {Date?} referenceDate=now
- * @param {DateTimeOptions} options
+ * @param {DateTimeOptions} [options]
  * @returns {string}
  */
-export function forNewsItem(date, referenceDate = new Date(), options) {
+export function formatDateTime(date, referenceDate = new Date(), options) {
   if (date === undefined) throw new Error('No date specified'); // otherwise we render now :|
 
   return formatDateTimeMoment(localMoment(date), localMoment(referenceDate), options);
+}
+
+export function formatDate(date, referenceDate = new Date()) {
+  if (date === undefined) throw new Error('No date specified'); // otherwise we render now :|
+  return formatDateMoment(localMoment(date), localMoment(referenceDate));
+}
+
+export function formatTime(date) {
+  if (date === undefined) throw new Error('No date specified'); // otherwise we render now :|
+  return formatTimeMoment(localMoment(date));
+}
+
+/**
+ * @param {Date} date
+ * @param {Date?} referenceDate=now
+ * @param {DateTimeOptions} [options]
+ * @returns {string}
+ */
+export function forNewsItem(date, referenceDate = new Date(), options) {
+  return formatDateTime(date, referenceDate, options);
 }
 
 /**
@@ -116,26 +141,4 @@ export function forActivity(date, grouped = false, referenceDate = new Date(), o
   }
 
   return formatDateTimeMoment(then, now, options);
-}
-
-/**
- * @param {Date} date
- * @param {Date?} referenceDate=now
- * @param {DateTimeOptions} options
- * @returns {string}
- */
-export default function formatDateTime(date, referenceDate = new Date(), options) {
-  return forNewsItem(date, referenceDate, options);
-}
-
-export function formatDate(date, referenceDate = new Date()) {
-  if (date === undefined) throw new Error('No date specified'); // otherwise we render now :|
-
-  return formatDateMoment(localMoment(date), localMoment(referenceDate));
-}
-
-export function formatTime(date) {
-  if (date === undefined) throw new Error('No date specified'); // otherwise we render now :|
-
-  return formatTimeMoment(localMoment(date));
 }

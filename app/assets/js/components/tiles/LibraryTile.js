@@ -1,3 +1,4 @@
+/* global PaymentRequest */
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import Hyperlink from '../ui/Hyperlink';

@@ -173,6 +173,21 @@ describe('AgendaTile', () => {
     }, now);
   });
 
+  it('renders a weekday only', () => {
+    const itemSingleTime = {
+      start: '2016-05-24T09:00:00+01:00',
+      end: '2016-05-24T09:00:00+01:00',
+    };
+    const itemWithEnd = {
+      start: '2016-05-24T09:00:00+01:00',
+      end: '2016-05-24T10:30:00+01:00',
+    };
+    atMoment(() => {
+      AgendaTile.renderSingleEventDate(itemSingleTime).should.equal('Tue 09:00');
+      AgendaTile.renderSingleEventDate(itemWithEnd).should.equal('Tue 09:00–10:30');
+    }, now);
+  });
+
   it('renders two events side-by-side when wide', () => {
     const content = {
       items: [
