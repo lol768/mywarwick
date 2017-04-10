@@ -101,7 +101,7 @@ export default class Tile extends React.Component {
           title="Change setting"
           onClick={this.props.onConfiguring}
         >
-          <i className="fa fa-fw fa-pencil"></i>
+          <i className="fa fa-fw fa-cog"></i>
         </div>
       );
     }

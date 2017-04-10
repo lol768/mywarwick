@@ -17,7 +17,7 @@ export default class MastheadMobile extends React.Component {
         <div className="edit-btn" onClick={this.props.onEdit}>
           { this.props.editing ?
             <i className="fa fa-fw fa-check"> </i> :
-            <i className="fa fa-fw fa-pencil"> </i>
+            <i className="fa fa-fw fa-cog"> </i>
           }
         </div>
         }
