@@ -9,7 +9,11 @@ if (window.addEventListener) {
 
 import 'core-js/modules/es6.object.assign';
 import promisePolyfill from 'es6-promise/lib/es6-promise/polyfill';
+promisePolyfill();
+
 import initErrorReporter from './errorreporter';
+initErrorReporter();
+
 import $ from 'jquery';
 import _ from 'lodash-es';
 import moment from 'moment';
@@ -37,10 +41,7 @@ import * as analytics from './analytics';
 import store from './store';
 import AppRoot from './components/AppRoot';
 import bridge from './bridge';
-import { hasAuthoritativeAuthenticatedUser, hasAuthoritativeUser } from './state';
-promisePolyfill();
-
-initErrorReporter();
+import { hasAuthoritativeUser, hasAuthoritativeAuthenticatedUser } from './state';
 
 bridge({ store, tiles, notifications, userinfo });
 
