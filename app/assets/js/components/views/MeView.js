@@ -1,5 +1,4 @@
 import React, { PropTypes } from 'react';
-import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import ReactGridLayoutBase from 'react-grid-layout';
 import _ from 'lodash-es';
 import $ from 'jquery.transit';
@@ -316,13 +315,6 @@ class MeView extends React.Component {
   render() {
     const classes = classNames('me-view', { 'me-view--editing': this.props.editing });
     const { isDesktop } = this.props;
-    const transitionProps = {
-      transitionName: 'slider',
-      transitionEnterTimeout: 300,
-      transitionLeaveTimeout: 300,
-      transitionEnter: !isDesktop,
-      transitionLeave: !isDesktop,
-    };
 
     return (
       <div className="me-view-container">
@@ -332,9 +324,6 @@ class MeView extends React.Component {
             : null}
           {this.renderTiles()}
           {this.renderTileOptionsView()}
-          <ReactCSSTransitionGroup {...transitionProps}>
-            { this.props.children }
-          </ReactCSSTransitionGroup>
         </div>
       </div>
     );
