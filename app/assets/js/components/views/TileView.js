@@ -5,9 +5,34 @@ import Tile from '../tiles/Tile';
 import { connect } from 'react-redux';
 import { goBack, push } from 'react-router-redux';
 import _ from 'lodash-es';
+import $ from 'jquery';
 import { Routes } from '../AppRoot';
 
 class TileView extends Component {
+
+  componentDidMount() {
+    if (this.props.tile && this.props.zoomed) {
+      $(document.body).addClass(`colour-${this.props.tile.colour}`);
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.zoomed) {
+      if (this.props.tile) {
+        $(document.body).removeClass(`colour-${this.props.tile.colour}`);
+      }
+
+      if (nextProps.tile) {
+        $(document.body).addClass(`colour-${nextProps.tile.colour}`);
+      }
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.props.tile && this.props.zoomed) {
+      $(document.body).removeClass(`colour-${this.props.tile.colour}`);
+    }
+  }
 
   onTileExpand(tile) {
     this.props.dispatch(push(`/${Routes.TILES}/${tile.id}`));
@@ -118,7 +143,6 @@ TileView.propTypes = {
   editingAny: PropTypes.bool.isRequired,
   editing: PropTypes.bool.isRequired,
   view: PropTypes.object,
-  colour: React.PropTypes.number,
   user: PropTypes.object.isRequired,
 };
 
