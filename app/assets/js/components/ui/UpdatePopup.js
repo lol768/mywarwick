@@ -16,7 +16,7 @@ class UpdatePopup extends React.Component {
   render() {
     if (this.props.isUpdateReady) {
       return (
-        <div className="alert alert-success" style={{ marginBottom: 15 }}>
+        <div className="alert alert-success update-popup" style={{ marginBottom: 15 }}>
           <div className="media">
             <div className="media-left">
               <i className="app-icon app-icon--lg fa fa-fw fa-check"
