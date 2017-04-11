@@ -41,8 +41,8 @@ const AppRoot = ({ history }) => (
         <Route path={Routes.EDIT} component={MaybeEditableMeView} />;
         <Route path={Routes.TILES} component={MaybeEditableMeView}>
           <IndexRedirect to="/" />
-          <Route path=":id" component={TileView} />
         </Route>
+        <Route path={`${Routes.TILES}/:id`} component={TileView} />
         <Route path={Routes.NOTIFICATIONS} component={NotificationsView} />
         <Route path={Routes.ACTIVITY} component={ActivityView} />
         <Route path={Routes.NEWS} component={NewsView} />
