@@ -103,9 +103,11 @@ export function scrollTopOnTabChange(scrollTops) {
     if (isTopLevelUrl(location)) {
       const originalPath = window.location.pathname;
       const path = (_.startsWith(originalPath, `/${Routes.EDIT}`)) ? '/' : originalPath;
-      const scrolltop = scrollTops[path] || 0;
-      log.debug(`path: ${path} => scrollTop: ${scrolltop}`);
-      $(window).scrollTop(scrolltop);
+      const scrollTop = scrollTops[path] || 0;
+      log.debug(`path: ${path} => scrollTop: ${scrollTop}`);
+      window.scrollTo(0, scrollTop);
+    } else {
+      window.scrollTo(0, 0);
     }
   });
 }
