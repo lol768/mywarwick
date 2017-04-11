@@ -58,7 +58,6 @@ class MeView extends React.Component {
     layout: PropTypes.array,
     isDesktop: PropTypes.bool,
     deviceWidth: PropTypes.number,
-    children: PropTypes.node,
     tiles: PropTypes.array,
   };
 
@@ -300,7 +299,6 @@ class MeView extends React.Component {
       const configuringTile = this.state.configuringTile;
       return (
         <div>
-          <div className="tile-zoom-backdrop" onClick={this.onConfigViewDismiss}></div>
           <TileOptionView
             tile={ configuringTile }
             onConfigViewDismiss= { this.onConfigViewDismiss }
@@ -314,14 +312,10 @@ class MeView extends React.Component {
 
   render() {
     const classes = classNames('me-view', { 'me-view--editing': this.props.editing });
-    const { isDesktop } = this.props;
 
     return (
       <div className="me-view-container">
         <div className={classes}>
-          { this.props.children && isDesktop ?
-            <div className="tile-zoom-backdrop" onClick={ this.onTileDismiss }></div>
-            : null}
           {this.renderTiles()}
           {this.renderTileOptionsView()}
         </div>
