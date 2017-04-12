@@ -11,6 +11,7 @@ GET         /search                                               @controllers.H
 GET         /tiles                                                @controllers.HomeController.redirectToIndex
 GET         /tiles/:id                                            @controllers.HomeController.tile(id: String)
 GET         /edit                                                 @controllers.HomeController.index
+GET         /edit/add                                                 @controllers.HomeController.index
 
 # NEWSTART-253
 POST        /                                                     @controllers.HomeController.index

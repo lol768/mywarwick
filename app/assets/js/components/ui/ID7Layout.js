@@ -53,8 +53,15 @@ class ID7Layout extends React.Component {
   componentWillReceiveProps(nextProps) {
     nextProps.dispatch(ui.updateUIContext());
 
-    const hasZoomedTile = _.startsWith(nextProps.path, `/${Routes.TILES}/`);
-    $('body').toggleClass('has-zoomed-tile', hasZoomedTile);
+    const $body = $('body').removeClass((i, className) =>
+      _.filter(className.split(' '), (singleClass) => _.startsWith(singleClass, 'in-')).join(' ')
+    );
+    const pathClasses = _.filter(nextProps.path.split('/'), (path) => path.length > 0);
+    if (pathClasses.length === 0) {
+      $body.addClass('in-root');
+    } else {
+      $body.addClass(_.map(pathClasses, (path) => `in-${path}`).join(' '));
+    }
   }
 
   componentDidUpdate(prevProps) {
