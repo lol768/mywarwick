@@ -1,8 +1,8 @@
 import java.util.logging.Level
 
-import helpers.FuncTestBase
+import helpers.{FuncTestBase, RemoteFuncTestBase}
 import org.scalatest.BeforeAndAfter
-import org.scalatestplus.play.BrowserInfo
+import org.scalatestplus.play.{BrowserInfo, PortNumber}
 import play.api.test.TestBrowser
 
 import scala.collection.JavaConversions._
@@ -12,7 +12,11 @@ import scala.collection.JavaConversions._
   * until the basics are actually working and we can split them up
   * better.
   */
-class BasicFuncTest extends FuncTestBase with BeforeAndAfter {
+class BasicFuncTest extends RemoteFuncTestBase with BeforeAndAfter {
+
+  after {
+    webDriver.close()
+  }
 
   override def sharedTests(info: BrowserInfo): Unit = {
 
@@ -23,46 +27,15 @@ class BasicFuncTest extends FuncTestBase with BeforeAndAfter {
 
     "An anonymous user" should {
 
-      s"see a cool home page ${info.name}" in withScreenshot {
-        resizeWindow(standardSize)
-
+      s"be sent to sign in ${info.name}" in withScreenshot {
         go to homepage
-
-        find("app-container") should be(defined)
-        pageTitle should be("My Warwick")
-
-        eventually {
-          find(className("sign-in-link")).get.text should be("Sign in")
-          findAll(cssSelector(".id7-main-content .tile")) shouldNot be(empty)
-        }
-
-        capture to browserScreenshot(info, "Anonymous homepage")
-
-        val tiles = findAll(cssSelector(".id7-main-content .tile")).toList
-        tiles.length should be(1)
-        tiles.head.text should be("Mail")
-      }
-
-      s"see a cool mobile home page ${info.name}" in withScreenshot {
-        resizeWindow(iphone5Size)
-
-        go to homepage
-
-        eventually {
-          find(mobileMasthead) should be(defined)
-          find(tabBar) should be(defined)
-          findAll(tabBarItems) should have length 5
-          findAll(cssSelector(".tab-bar-item.disabled .tab-label")).map(_.text).toSeq shouldBe Seq("Notifications", "Activity")
-
-          find(className("sign-in-link")).get.text should be("Sign in")
-        }
-
-        capture to browserScreenshot(info, "Anonymous mobile homepage")
+        eventually(currentUrl should include("/origin/hs"))
+        close
       }
 
     }
 
-    "A real user" should {
+    "A real user" ignore {
       s"see a cool home page ${info.name}" in withScreenshot {
         resizeWindow(standardSize)
 

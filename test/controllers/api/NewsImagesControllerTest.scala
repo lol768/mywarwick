@@ -2,13 +2,14 @@ package controllers.api
 
 import java.io.{File, FileInputStream}
 
-import helpers.WithActorSystem
+import helpers.{BaseSpec, WithActorSystem}
 import org.apache.commons.io.FileUtils
 import org.joda.time.DateTime
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
+import helpers.BaseSpec
 import org.scalatestplus.play.PlaySpec
 import play.api.cache.CacheApi
 import play.api.libs.Files.TemporaryFile

@@ -1,7 +1,7 @@
 package helpers
 
 import org.junit.AfterClass
-import org.scalatest.Suite
+import org.scalatest.{Suite, TestSuite}
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.db.Database
 
@@ -12,7 +12,9 @@ import play.api.db.Database
   */
 trait FunctionalAppPerSuite
   extends OneServerPerSuite
-  with SqlScriptRunner { self: Suite =>
+  with SqlScriptRunner { self: TestSuite =>
+
+  def origin = s"localhost:$port"
 
   override lazy val app = TestApplications.functional()
 

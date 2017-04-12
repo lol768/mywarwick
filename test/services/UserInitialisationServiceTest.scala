@@ -3,12 +3,12 @@ package services
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
+import org.scalatest.mockito.MockitoSugar
+import helpers.BaseSpec
 import services.dao.{NewsCategoryDao, UserNewsCategoryDao, UserPreferencesDao}
 import warwick.sso.Usercode
 
-class UserInitialisationServiceTest extends PlaySpec with MockitoSugar {
+class UserInitialisationServiceTest extends BaseSpec with MockitoSugar {
 
   val userPreferencesDao = mock[UserPreferencesDao]
   val newsCategoryDao = mock[NewsCategoryDao]

@@ -2,9 +2,9 @@ package services.dao
 
 import helpers.{Fixtures, OneStartAppPerSuite}
 import models.{ActivityTag, Audience, TagValue}
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 
-class ActivityTagDaoTest extends PlaySpec with OneStartAppPerSuite {
+class ActivityTagDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val dao = get[ActivityTagDao]
   val activityDao = get[ActivityDao]

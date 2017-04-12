@@ -1,9 +1,9 @@
 package models
 
 import org.joda.time.{DateTime, DateTimeZone}
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 
-class DateFormatsTest extends PlaySpec {
+class DateFormatsTest extends BaseSpec {
 
   import DateFormats._
 

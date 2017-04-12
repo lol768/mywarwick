@@ -20,3 +20,27 @@ To start the app, run `./activator "run 8080"`. You can choose a different port 
 to re-use your Apache/Nginx proxy config that you have working for Tomcat.
 
 You probably also need to run the `content-providers` app to generate content for your tiles.
+
+Functional tests
+----------------
+
+Still in progress.
+
+You need to populate `conf/functional-test.conf` based on the example file.
+
+Run them with the `fun:test` task.
+
+Will run using a default browser set (Firefox), but you can override this by
+passing `TEST_BROWSERS=chrome,firefox` environment variable when running.
+
+Most browsers typically don't support the standard WebDriver API directly, and
+need a driver program as glue between Selenium and the browser.
+Chrome requires `chromedriver` on the `PATH`, and Firefox requires `geckodriver`.
+If either of them stop working, it's generally because these are missing or because
+the version of the browser is not compatible with the version of the driver or
+the version of Selenium, so try upgrading everything to the latest.
+
+Main issues:
+
+ * There is only one test
+ * Browser windows don't close afterwards

@@ -1,14 +1,14 @@
 package models
 
 import models.API.Error
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 import play.api.libs.json.{JsError, Json}
 
 object APIObjectTest {
   case class ExampleData(items: Seq[String])
 }
 
-class APIObjectTest extends PlaySpec {
+class APIObjectTest extends BaseSpec {
   import APIObjectTest.ExampleData
 
   implicit val dataFormat = Json.format[ExampleData]

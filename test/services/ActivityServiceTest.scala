@@ -8,14 +8,14 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.quartz.JobKey
 import org.scalatest.LoneElement._
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
+import org.scalatest.mockito.MockitoSugar
+import helpers.BaseSpec
 import services.ActivityError.{InvalidActivityType, InvalidTagName, InvalidTagValue, _}
 import services.dao._
 import services.job.PublishActivityJob
 import warwick.sso.Usercode
 
-class ActivityServiceTest extends PlaySpec with MockitoSugar {
+class ActivityServiceTest extends BaseSpec with MockitoSugar {
 
 
   class Scope {

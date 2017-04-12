@@ -3,9 +3,9 @@ package services.dao
 import anorm.SQL
 import helpers.OneStartAppPerSuite
 import models.TileLayout
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 
-class TileLayoutDaoTest extends PlaySpec with OneStartAppPerSuite {
+class TileLayoutDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val tileLayoutDao = app.injector.instanceOf[TileLayoutDao]
 

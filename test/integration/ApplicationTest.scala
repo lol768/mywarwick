@@ -3,7 +3,7 @@ package integration
 import java.io.PrintWriter
 
 import controllers.HomeController
-import helpers.OneStartAppPerSuite
+import helpers.{BaseSpec, OneStartAppPerSuite}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.Configuration
 import play.api.Environment
@@ -21,7 +21,7 @@ import anorm.SqlParser._
   * drive the app and test what happens. For now this is good just to
   * check that the application starts and isn't horribly misconfigured.
   */
-class ApplicationTest extends PlaySpec with OneStartAppPerSuite {
+class ApplicationTest extends BaseSpec with OneStartAppPerSuite {
 
   "The application" should {
 

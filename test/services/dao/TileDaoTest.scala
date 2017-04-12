@@ -4,10 +4,10 @@ import anorm.SQL
 import anorm.SqlParser.scalar
 import helpers.OneStartAppPerSuite
 import models.UserTileSetting
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 import play.api.libs.json.Json
 
-class TileDaoTest extends PlaySpec with OneStartAppPerSuite {
+class TileDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val tileDao = app.injector.instanceOf[TileDao]
 

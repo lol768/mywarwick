@@ -1,19 +1,22 @@
 package helpers
 
+import com.typesafe.config.{Config, ConfigFactory}
 import org.openqa.selenium
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.scalatest.{Matchers, OptionValues, WordSpec}
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures, ScaledTimeSpans}
-import org.scalatestplus.play.{BrowserInfo, WsScalaTestClient}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures, ScaledTimeSpans}
+import org.scalatestplus.play.{BrowserInfo, PortNumber, WsScalaTestClient}
+import play.api.Configuration
+import play.api.libs.ws.{WS, WSRequest}
+import play.api.mvc.Call
 
 
 protected abstract class CommonFuncTestBase
   extends WordSpec
+    with Eventually
     with Matchers
     with OptionValues
-    with FunctionalAppPerSuite
-    with WsScalaTestClient
     with ScalaFutures
     with ScaledTimeSpans
     with IntegrationPatience
@@ -34,13 +37,22 @@ abstract class FuncTestBase
   extends CommonFuncTestBase
   with SelectBrowsersPerSuite {
 
+  val rawConfig: Config = ConfigFactory.load("functional-test")
+
+  object config {
+    def url: String = rawConfig.getString("url")
+  }
+
   def resizeWindow(d: Dimension)(implicit webDriver: WebDriver): Unit = {
     webDriver.manage.window.setSize(new selenium.Dimension(d.width, d.height))
   }
 
   def browserScreenshot(info: BrowserInfo, name: String) = s"${info.name} - ${name}"
 
-  def path(path: String) = s"http://localhost:${port}${path}"
+  /** https://hostname[:port] */
+  def baseUrl: String
+
+  def path(path: String) = s"$baseUrl$path"
 
   case class PathPage(p: String) extends org.scalatest.selenium.Page {
     override val url: String = path(p)
@@ -57,6 +69,14 @@ abstract class FuncTestBase
   setCaptureDir("target/functional-test/screenshots")
 
 }
+
+trait RemoteServerConfig { self: FuncTestBase =>
+  override def baseUrl = config.url
+
+  implicit val portNumber: PortNumber = PortNumber(443)
+}
+
+abstract class RemoteFuncTestBase extends FuncTestBase with RemoteServerConfig
 
 /**
   * Starts a server but doesn't drive any browsers - use the
