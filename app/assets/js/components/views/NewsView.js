@@ -20,10 +20,14 @@ export class NewsView extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.items.length === 0 && !this.props.failed) {
-      this.fetch();
+    if (!this.props.failed) {
+      if (this.props.newsCategories.items.length === 0) {
+        this.props.dispatch(newsCategories.fetch());
+      }
+      if (this.props.items.length === 0) {
+        this.props.dispatch(news.fetch());
+      }
     }
-
     this.updateWidth();
   }
 
