@@ -25,3 +25,19 @@
   transition: transform 500ms ease-in;
 }
 
+.grow-shrink-enter, .grow-shrink-appear {
+  transform: scale(0,0);
+  &.grow-shrink-enter-active, &.grow-shrink-appear-active {
+    transform: scale(1,1);
+    transition: transform 200ms ease-out;
+  }
+}
+
+.grow-shrink-leave {
+  transform: scale(1,1);
+  &.grow-shrink-leave-active {
+    transform: scale(0,0);
+    transition: transform 200ms ease-in;
+  }
+}
+

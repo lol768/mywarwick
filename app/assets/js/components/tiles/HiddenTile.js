@@ -13,7 +13,7 @@ export default class HiddenTile extends React.Component {
             title={ `Show ${title}` }
             onClick={ onShow }
           >
-            <i className="fa fa-fw fa-plus"> </i>
+            <i className="fa fa-plus"> </i>
           </div>
 
           <div className="tile__wrap">

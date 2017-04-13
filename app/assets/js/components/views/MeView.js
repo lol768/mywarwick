@@ -1,17 +1,17 @@
 import React, { PropTypes } from 'react';
 import ReactGridLayoutBase from 'react-grid-layout';
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import _ from 'lodash-es';
 import $ from 'jquery.transit';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
-import { goBack, replace } from 'react-router-redux';
+import { goBack, replace, push } from 'react-router-redux';
 import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
 import * as TILE_TYPES from '../tiles';
 import TileOptionView from './TileOptionView';
-
-import HiddenTile from '../tiles/HiddenTile';
+import { Routes } from '../AppRoot';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -54,6 +54,7 @@ class MeView extends React.Component {
     navRequest: PropTypes.string,
     dispatch: PropTypes.func.isRequired,
     editing: PropTypes.bool,
+    adding: PropTypes.bool,
     layoutWidth: PropTypes.number,
     layout: PropTypes.array,
     isDesktop: PropTypes.bool,
@@ -69,6 +70,7 @@ class MeView extends React.Component {
     this.onDragStart = this.onDragStart.bind(this);
     this.onConfigSave = this.onConfigSave.bind(this);
     this.onConfigViewDismiss = this.onConfigViewDismiss.bind(this);
+    this.onAdd = this.onAdd.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -83,13 +85,17 @@ class MeView extends React.Component {
    * that state, and replace the current path.
    */
   componentDidUpdate() {
-    if (this.props.location.pathname === '/' && this.props.navRequest) {
-      const path = this.props.navRequest;
-      this.props.dispatch({
-        type: 'ui.navRequest',
-        navRequest: null,
-      });
-      this.props.dispatch(replace(path));
+    if (this.props.navRequest) {
+      if (this.props.location.pathname === '/') {
+        const path = this.props.navRequest;
+        this.props.dispatch({
+          type: 'ui.navRequest',
+          navRequest: null,
+        });
+        this.props.dispatch(replace(path));
+      } else {
+        this.props.dispatch(goBack());
+      }
     }
   }
 
@@ -113,26 +119,24 @@ class MeView extends React.Component {
   }
 
   onHideTile(tile) {
+    // Block transitions until we really want them
+    $('.me-view-container .me-view').addClass('with-transitions');
+
     this.props.dispatch(tiles.hideTile(tile));
 
     this.onFinishEditing();
   }
 
   onResizeTile(tile) {
+    // Block transitions until we really want them
+    $('.me-view-container .me-view').addClass('with-transitions');
+
     const sizes = _.values(TILE_SIZES);
     const nextSize = sizes[(sizes.indexOf(tile.size || tile.defaultSize) + 1) % sizes.length];
 
     const { width, height } = getSizeFromSizeName(nextSize);
 
     this.props.dispatch(tiles.resizeTile(tile, this.props.layoutWidth, width, height));
-  }
-
-  onShowTile(tile) {
-    this.props.dispatch(tiles.showTile(tile));
-    this.props.dispatch(tiles.persistTiles());
-    this.props.dispatch(tiles.fetchTileContent(tile.id));
-
-    this.onFinishEditing();
   }
 
   onConfiguring(tileProps) {
@@ -154,6 +158,10 @@ class MeView extends React.Component {
 
   onTileDismiss() {
     this.props.dispatch(goBack());
+  }
+
+  onAdd() {
+    this.props.dispatch(push(`/${Routes.EDIT}/${Routes.ADD}`));
   }
 
   getTileSize(id) {
@@ -209,54 +217,12 @@ class MeView extends React.Component {
     );
   }
 
-  renderHiddenTiles() {
-    const { layoutWidth } = this.props;
-    const hiddenTiles = _.sortBy(this.props.tiles.filter(t => t.removed), 'title');
-
-    const layout = hiddenTiles
-      .map((item, i) => ({
-        i: item.id,
-        x: i % layoutWidth,
-        y: Math.floor(i / layoutWidth),
-        w: 1,
-        h: 1,
-      }));
-
-    const hiddenTileComponents = hiddenTiles.map(tile =>
-      <div key={ tile.id }>
-        <HiddenTile {...tile} onShow={ () => this.onShowTile(tile) } />
-      </div>
-    );
-
-    return (
-      <div>
-        <h3>More tiles</h3>
-        <ReactGridLayoutBase
-          layout={layout}
-          isDraggable={false}
-          isResizable={false}
-          cols={layoutWidth}
-          rowHeight={rowHeight}
-          margin={margin}
-          useCSSTransformations
-          verticalCompact
-          width={this.getGridLayoutWidth()}
-        >
-          { hiddenTileComponents }
-        </ReactGridLayoutBase>
-      </div>
-    );
-  }
-
   renderTiles() {
     const { layoutWidth, isDesktop, editing } = this.props;
     const visibleTiles = this.props.tiles.filter(t => !t.removed
     && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
     const hiddenTiles = this.props.tiles.filter(t => t.removed
     && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
-
-    // Show hidden tiles (if any) when editing, or if there are no visible tiles
-    const showHiddenTiles = hiddenTiles.length > 0 && (editing || visibleTiles.length === 0);
 
     const layout = this.getTileLayout(this.props.layout, layoutWidth);
     const tileComponents = visibleTiles.map(tile =>
@@ -279,7 +245,6 @@ class MeView extends React.Component {
             cols={layoutWidth}
             rowHeight={rowHeight}
             margin={margin}
-            useCSSTransformations
             onLayoutChange={this.onLayoutChange}
             verticalCompact
             onDragStart={this.onDragStart}
@@ -288,8 +253,19 @@ class MeView extends React.Component {
           >
             { tileComponents }
           </ReactGridLayoutBase>
+          <ReactCSSTransitionGroup
+            transitionName="grow-shrink"
+            transitionAppear
+            transitionAppearTimeout={500}
+            transitionEnterTimeout={500}
+            transitionLeaveTimeout={300}
+          >{ editing && hiddenTiles.length > 0 ?
+            <div key="add-tile-button" className="add-tile-button" onClick={this.onAdd}>
+              <i className="fa fa-plus" />
+            </div>
+            : null }
+          </ReactCSSTransitionGroup>
         </div>
-        { showHiddenTiles ? this.renderHiddenTiles() : null }
       </div>
     );
   }
