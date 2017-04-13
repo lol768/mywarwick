@@ -1,5 +1,4 @@
 import React, { PropTypes } from 'react';
-import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import ReactGridLayoutBase from 'react-grid-layout';
 import _ from 'lodash-es';
 import $ from 'jquery.transit';
@@ -59,7 +58,6 @@ class MeView extends React.Component {
     layout: PropTypes.array,
     isDesktop: PropTypes.bool,
     deviceWidth: PropTypes.number,
-    children: PropTypes.node,
     tiles: PropTypes.array,
   };
 
@@ -301,7 +299,6 @@ class MeView extends React.Component {
       const configuringTile = this.state.configuringTile;
       return (
         <div>
-          <div className="tile-zoom-backdrop" onClick={this.onConfigViewDismiss}></div>
           <TileOptionView
             tile={ configuringTile }
             onConfigViewDismiss= { this.onConfigViewDismiss }
@@ -315,26 +312,12 @@ class MeView extends React.Component {
 
   render() {
     const classes = classNames('me-view', { 'me-view--editing': this.props.editing });
-    const { isDesktop } = this.props;
-    const transitionProps = {
-      transitionName: 'slider',
-      transitionEnterTimeout: 300,
-      transitionLeaveTimeout: 300,
-      transitionEnter: !isDesktop,
-      transitionLeave: !isDesktop,
-    };
 
     return (
       <div className="me-view-container">
         <div className={classes}>
-          { this.props.children && isDesktop ?
-            <div className="tile-zoom-backdrop" onClick={ this.onTileDismiss }></div>
-            : null}
           {this.renderTiles()}
           {this.renderTileOptionsView()}
-          <ReactCSSTransitionGroup {...transitionProps}>
-            { this.props.children }
-          </ReactCSSTransitionGroup>
         </div>
       </div>
     );

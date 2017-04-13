@@ -35,6 +35,7 @@ import * as notificationMetadata from './state/notification-metadata';
 import * as tiles from './state/tiles';
 import * as update from './state/update';
 import * as user from './state/user';
+import * as news from './state/news';
 import * as ui from './state/ui';
 import * as device from './state/device';
 import * as analytics from './analytics';
@@ -43,7 +44,7 @@ import AppRoot from './components/AppRoot';
 import bridge from './bridge';
 import { hasAuthoritativeUser, hasAuthoritativeAuthenticatedUser } from './state';
 
-bridge({ store, tiles, notifications, userinfo });
+bridge({ store, tiles, notifications, userinfo, news });
 
 log.enableAll(false);
 log.debug(`Environment: ${process.env.NODE_ENV}`);
@@ -55,16 +56,12 @@ localforage.config({
 const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
 
-const scrollTops = {};
-
 if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
 }
 
 $(() => {
-  $(window).on('scroll', _.throttle(() => {
-    scrollTops[window.location.pathname] = $(window).scrollTop();
-  }, 250));
+  ui.scrollTopOnTabChange();
 
   $(window).on('contextmenu', () => window.navigator.userAgent.indexOf('Mobile') < 0);
 
@@ -215,10 +212,15 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
+// Refresh news every hour
+setInterval(() => {
+  if (navigator.onLine) {
+    store.dispatch(news.refresh());
+  }
+}, 60 * 60 * 1000);
+
 // Just for access from the console
 window.Store = store;
-
-ui.scrollTopOnTabChange(scrollTops);
 
 // Actually render the app
 ReactDOM.render(

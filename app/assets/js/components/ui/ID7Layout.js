@@ -76,9 +76,9 @@ class ID7Layout extends React.Component {
     }
   }
 
-  /** Set the theme on the body element, so that we can style everything. */
+  /** Set the theme on the html element, so that we can style everything. */
   setBodyTheme(newTheme, oldTheme = '') {
-    $(document.body)
+    $('html')
       .removeClass(`theme-${oldTheme}`)
       .addClass(`theme-${newTheme}`);
   }
