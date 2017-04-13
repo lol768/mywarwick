@@ -1,9 +1,9 @@
 package services.dao
 
 import helpers.OneStartAppPerSuite
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 
-class NewsImageDaoTest extends PlaySpec with OneStartAppPerSuite {
+class NewsImageDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val dao = app.injector.instanceOf[NewsImageDao]
 

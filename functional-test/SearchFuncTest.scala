@@ -1,8 +1,8 @@
-import helpers.FuncTestBase
+import helpers.{FuncTestBase, RemoteFuncTestBase}
 import org.scalatest.BeforeAndAfter
 import org.scalatestplus.play.BrowserInfo
 
-class SearchFuncTest extends FuncTestBase with BeforeAndAfter {
+class SearchFuncTest extends RemoteFuncTestBase with BeforeAndAfter {
 
   override def sharedTests(info: BrowserInfo): Unit = {
     val searchResults = className("search-result")

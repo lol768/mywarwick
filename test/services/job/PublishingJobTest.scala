@@ -10,15 +10,15 @@ import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.quartz.{JobDataMap, JobDetail, JobExecutionContext}
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
+import org.scalatest.mockito.MockitoSugar
+import helpers.BaseSpec
 import play.api.db.Database
 import services._
 import services.dao._
 import services.messaging.MessagingService
 import warwick.sso.{UserLookupService, Usercode}
 
-class PublishingJobTest extends PlaySpec with MockitoSugar with OneStartAppPerSuite {
+class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSuite {
 
   val db = get[Database]
   val audienceService = get[AudienceService]

@@ -3,12 +3,12 @@ package controllers.publish
 import models.Audience
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
+import org.scalatest.mockito.MockitoSugar
+import helpers.BaseSpec
 import play.api.data.FormError
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
 
-class AudienceBinderTest extends PlaySpec with MockitoSugar with ScalaFutures {
+class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
   "AudienceBinder" should {
 

@@ -4,8 +4,8 @@ import helpers.Fixtures
 import org.apache.commons.configuration.BaseConfiguration
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
+import org.scalatest.mockito.MockitoSugar
+import helpers.BaseSpec
 import play.api.http.HeaderNames
 import play.api.mvc._
 import play.api.test.Helpers._
@@ -18,7 +18,7 @@ import warwick.sso._
 
 import scala.concurrent.Future
 
-class UserInfoControllerTest extends PlaySpec with MockitoSugar with Results {
+class UserInfoControllerTest extends BaseSpec with MockitoSugar with Results {
   val baseConfig = new BaseConfiguration
   val ssoConfig = new SSOConfiguration(baseConfig)
   val userCache = mock[UserCache]

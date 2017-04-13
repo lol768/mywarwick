@@ -5,15 +5,15 @@ import java.io.{File, FileOutputStream, InputStream}
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
+import org.scalatest.mockito.MockitoSugar
+import helpers.BaseSpec
 import services.dao.{NewsImage, NewsImageDao, NewsImageSave}
 import warwick.objectstore.ObjectStorageService
 import warwick.objectstore.ObjectStorageService.Metadata
 
 import scala.util.Success
 
-class NewsImageServiceTest extends PlaySpec with MockitoSugar {
+class NewsImageServiceTest extends BaseSpec with MockitoSugar {
 
   val dao = mock[NewsImageDao]
   val objectStorageService = mock[ObjectStorageService]

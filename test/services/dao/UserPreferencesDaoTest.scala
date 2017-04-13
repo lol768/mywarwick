@@ -3,10 +3,10 @@ package services.dao
 import anorm.SqlParser._
 import anorm._
 import helpers.OneStartAppPerSuite
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 import warwick.sso.Usercode
 
-class UserPreferencesDaoTest extends PlaySpec with OneStartAppPerSuite {
+class UserPreferencesDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val dao = get[UserPreferencesDao]
 

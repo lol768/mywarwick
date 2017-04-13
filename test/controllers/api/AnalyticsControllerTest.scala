@@ -3,15 +3,15 @@ package controllers.api
 import helpers.WithActorSystem
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
+import org.scalatest.mockito.MockitoSugar
+import helpers.BaseSpec
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
 import services.analytics.{CombinedRow, NewsAnalyticsService}
 
-class AnalyticsControllerTest extends PlaySpec with MockitoSugar with Results with WithActorSystem {
+class AnalyticsControllerTest extends BaseSpec with MockitoSugar with Results with WithActorSystem {
 
   "AnalyticsControllerTest" should {
 

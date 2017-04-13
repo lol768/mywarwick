@@ -14,7 +14,7 @@ scalacOptions ++= Seq("-language:implicitConversions", "-unchecked", "-deprecati
 updateOptions := updateOptions.value.withCachedResolution(true)
 
 lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala)
-  .configs(FunTest)
+  .configs(config("fun").extend(Test))
   .settings(
     Gulp.settings,
     // Package up assets before we build tar.gz
@@ -51,7 +51,8 @@ val appDeps = Seq(
   "org.imgscalr" % "imgscalr-lib" % "4.2",
   "com.github.mumoshu" %% "play2-memcached-play24" % "0.7.0",
   "ch.qos.logback" % "logback-access" % "1.1.7",
-  "com.google.apis" % "google-api-services-analyticsreporting" % "v4-rev10-1.22.0",
+  "com.google.apis" % "google-api-services-analyticsreporting" % "v4-rev10-1.22.0"
+    exclude("com.google.guava","guava-jdk5"),
   "com.beachape" %% "enumeratum" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play-json" % enumeratumVersion,
@@ -60,19 +61,22 @@ val appDeps = Seq(
 
 val testDeps = Seq(
   "org.mockito" % "mockito-all" % "1.10.19",
-  "org.scalatest" %% "scalatest" % "2.2.5",
-  "org.scalatestplus" %% "play" % "1.4.0-M4",
+  "org.scalatest" %% "scalatest" % "3.0.1",
+  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0",
   "com.typesafe.akka" %% "akka-testkit" % "2.4.0",
   "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.18",
-  "org.eclipse.jetty" % "jetty-server" % "9.3.6.v20151106",
+  "org.eclipse.jetty" % "jetty-server" % "9.3.6.v20151106"
+).map(_ % Test)
+
+val funcTestDeps = Seq(
   // Note - from 2.53 selenium-htmlunit is not bundled so will need to
   // play with dependencies if you need to upgrade.
-  "org.seleniumhq.selenium" % "selenium-java" % "2.52.0"
-).map(_ % Test)
+  "org.seleniumhq.selenium" % "selenium-java" % "3.3.1"
+).map(_ % "fun")
 
 javaOptions in Test += "-Dlogger.resource=test-logging.xml"
 
-libraryDependencies ++= (appDeps ++ testDeps).map(_.excludeAll(
+libraryDependencies ++= (appDeps ++ testDeps ++ funcTestDeps).map(_.excludeAll(
   ExclusionRule(organization = "commons-logging"),
   // ehcache renamed ehcache-core, don't load in the old version
   ExclusionRule(organization = "net.sf.ehcache", name = "ehcache")

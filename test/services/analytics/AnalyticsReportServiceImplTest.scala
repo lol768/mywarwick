@@ -1,8 +1,8 @@
 package services.analytics
 
 import com.google.api.services.analyticsreporting.v4.model._
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
+import org.scalatest.mockito.MockitoSugar
+import helpers.BaseSpec
 import play.api.Configuration
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -11,7 +11,7 @@ import java.util.Arrays.asList
 import scala.collection.JavaConverters._
 
 
-class AnalyticsReportServiceImplTest extends PlaySpec with MockitoSugar {
+class AnalyticsReportServiceImplTest extends BaseSpec with MockitoSugar {
 
   def newReportRow(newsId: String, count: Int): ReportRow =
     new ReportRow()

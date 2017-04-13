@@ -7,11 +7,11 @@ import helpers.OneStartAppPerSuite
 import models.AudienceSize.{Finite, Public}
 import models.news.NewsItemSave
 import org.joda.time.DateTime
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 import services.NewsService
 import warwick.sso.Usercode
 
-class NewsDaoTest extends PlaySpec with OneStartAppPerSuite {
+class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
   val newsDao = get[NewsDao]
   val newsService = get[NewsService]
   val userNewsCategoryDao = get[UserNewsCategoryDao]
