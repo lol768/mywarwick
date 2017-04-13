@@ -25,17 +25,17 @@ export default class NewsCategoriesView extends React.Component {
   }
 
   onChange(options) {
-    const { subscribed, dispatch } = this.props;
+    const { subscribed } = this.props;
 
     this.setState({ changing: true });
 
     _.each(options, option => {
       const id = option.value;
 
-      if (subscribed.indexOf(id) !== 1) {
-        dispatch(newsCategories.unsubscribe(id));
+      if (subscribed.indexOf(id) !== -1) {
+        this.unsubscribe(id);
       } else {
-        dispatch(newsCategories.subscribe(id));
+        this.subscribe(id);
       }
     });
 
@@ -68,6 +68,16 @@ export default class NewsCategoriesView extends React.Component {
 
     // Revert to natural z position
     $node.parents('.react-grid-item').css({ zIndex: '' });
+  }
+
+  unsubscribe(id) {
+    const { dispatch } = this.props;
+    dispatch(newsCategories.unsubscribe(id));
+  }
+
+  subscribe(id) {
+    const { dispatch } = this.props;
+    dispatch(newsCategories.subscribe(id));
   }
 
   buttonText({ length: optionsLen }) {
