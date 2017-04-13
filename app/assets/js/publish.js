@@ -58,4 +58,22 @@ $(() => {
   $('[data-background-color]').each(function applyBackgroundColour() {
     $(this).css('background-color', $(this).data('background-color'));
   });
+
+  $(document).popover({
+    selector: '.toggle-popover',
+    container: '.id7-main-content-area',
+    trigger: 'click',
+  });
+
+  $(document).on('click', (e) => {
+    const $target = $(e.target);
+    if ($target.hasClass('toggle-popover') || $target.closest('.popover').length > 0) {
+      if (!$target.hasClass('popover-active')) {
+        $target.toggleClass('popover-active').popover('toggle');
+      }
+    } else {
+      // click elsewhere on body, dismiss all open popover
+      $('.popover-active').popover('hide').removeClass('popover-active');
+    }
+  });
 });

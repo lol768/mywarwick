@@ -67,7 +67,7 @@ class UserInfoController @Inject()(
         "refresh" -> (if (refresh) loginUrl else false),
         "user" -> userInfo,
         "links" -> Json.obj(
-          "login" -> loginUrl,
+          "login" -> links.getPermissionDeniedLink(request.context.user.nonEmpty),
           "logout" -> logoutUrl
         )
       )).withHeaders(CACHE_CONTROL -> "no-cache")
@@ -84,7 +84,7 @@ class UserInfoController @Inject()(
 
   private val WARWICK_ITS_CLASS = "warwickitsclass"
   private val WARWICK_YEAR_OF_STUDY = "warwickyearofstudy"
-  private var WARWICK_FINAL_YEAR = "warwickfinalyear"
+  private val WARWICK_FINAL_YEAR = "warwickfinalyear"
 
   private def contextUserInfo(context: LoginContext): Future[JsValue] = {
     context.user.map { user =>

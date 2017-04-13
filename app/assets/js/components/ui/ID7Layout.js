@@ -1,8 +1,7 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
+import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import log from 'loglevel';
 import Badge from './Badge';
 import MastheadSearch from './MastheadSearch';
@@ -14,13 +13,32 @@ import UtilityBar from './UtilityBar';
 import { connect } from 'react-redux';
 import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
-import { goBack } from 'react-router-redux';
+import { goBack, push } from 'react-router-redux';
+import { Routes } from '../AppRoot';
 
-class ID7Layout extends ReactComponent {
+class ID7Layout extends React.Component {
+
+  static propTypes = {
+    dispatch: PropTypes.func.isRequired,
+    colourTheme: PropTypes.string.isRequired,
+    user: PropTypes.shape({
+      data: PropTypes.shape({
+        authenticated: PropTypes.bool.isRequired,
+      }).isRequired,
+    }).isRequired,
+    native: PropTypes.bool,
+    showBetaWarning: PropTypes.bool,
+    path: PropTypes.string.isRequired,
+    zoomedTile: PropTypes.string,
+    notificationsCount: PropTypes.number,
+    children: PropTypes.node,
+    layoutClassName: PropTypes.oneOf(['desktop', 'mobile']),
+  };
 
   constructor(props) {
     super(props);
     this.onBackClick = this.onBackClick.bind(this);
+    this.onEdit = this.onEdit.bind(this);
   }
 
   componentWillMount() {
@@ -35,7 +53,7 @@ class ID7Layout extends ReactComponent {
   componentWillReceiveProps(nextProps) {
     nextProps.dispatch(ui.updateUIContext());
 
-    const hasZoomedTile = _(nextProps.path).startsWith('/tiles/');
+    const hasZoomedTile = _.startsWith(nextProps.path, `/${Routes.TILES}/`);
     $('body').toggleClass('has-zoomed-tile', hasZoomedTile);
   }
 
@@ -46,30 +64,32 @@ class ID7Layout extends ReactComponent {
     }
   }
 
-  updateHeaderHeight() {
-    const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
-    $('.id7-main-content-area').css('top', headerHeight);
-  }
-
-  /** Set the theme on the body element, so that we can style everything. */
-  setBodyTheme(newTheme, oldTheme = '') {
-    $(document.body)
-      .removeClass(`theme-${oldTheme}`)
-      .addClass(`theme-${newTheme}`);
-  }
-
   onBackClick() {
     this.props.dispatch(goBack());
   }
 
-  renderMasqueradeNotice() {
-    const user = this.props.user.data;
-
-    if (user.masquerading) {
-      return <MasqueradeNotice masqueradingAs={user} />;
+  onEdit() {
+    if (this.isEditing()) {
+      this.props.dispatch(goBack());
+    } else {
+      this.props.dispatch(push(`/${Routes.EDIT}`));
     }
+  }
 
-    return null;
+  /** Set the theme on the html element, so that we can style everything. */
+  setBodyTheme(newTheme, oldTheme = '') {
+    $('html')
+      .removeClass(`theme-${oldTheme}`)
+      .addClass(`theme-${newTheme}`);
+  }
+
+  updateHeaderHeight() {
+    const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
+    $(document.body).css('margin-top', headerHeight);
+  }
+
+  isEditing() {
+    return this.props.path === `/${Routes.EDIT}`;
   }
 
   renderNotificationPermissionRequest() {
@@ -81,7 +101,7 @@ class ID7Layout extends ReactComponent {
   }
 
   renderBetaWarning() {
-    if (!this.props.native) {
+    if (!this.props.native && this.props.showBetaWarning) {
       return (
         <div className="top-page-notice">
           My&nbsp;Warwick is currently being piloted and is not yet available for general use.
@@ -89,6 +109,16 @@ class ID7Layout extends ReactComponent {
         </div>
       );
     }
+    return null;
+  }
+
+  renderMasqueradeNotice() {
+    const user = this.props.user.data;
+
+    if (user.masquerading) {
+      return <MasqueradeNotice masqueradingAs={user} />;
+    }
+
     return null;
   }
 
@@ -107,6 +137,9 @@ class ID7Layout extends ReactComponent {
                 zoomedTile={zoomedTile}
                 onBackClick={this.onBackClick}
                 path={path}
+                onEdit={this.onEdit}
+                editing={this.isEditing()}
+                showEditButton={this.isEditing() || this.props.path === '/'}
               />
             </header>
           </div>
@@ -117,17 +150,6 @@ class ID7Layout extends ReactComponent {
             <header className="id7-main-content-header">
               { this.renderNotificationPermissionRequest() }
               <UpdatePopup />
-              <div className="id7-horizontal-divider">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg" x="0" y="0" version="1.1" width="1130"
-                  height="40" viewBox="0, 0, 1130, 40"
-                >
-                  <path
-                    d="m 0,0 1030.48, 0 22.8,40 16.96,-31.4 16.96,31.4 22.8,-40 20,0"
-                    className="divider" stroke="#383838" fill="none"
-                  />
-                </svg>
-              </div>
             </header>
 
             <div className="id7-main-content">
@@ -222,11 +244,12 @@ class ID7Layout extends ReactComponent {
 const select = (state) => ({
   layoutClassName: state.ui.className,
   notificationsCount:
-    getNumItemsSince(state.notifications.stream, _(state).get(['notificationsLastRead', 'date'])),
+    getNumItemsSince(state.notifications.stream, _.get(state, ['notificationsLastRead', 'date'])),
   user: state.user,
   colourTheme: state.ui.colourTheme,
   zoomedTile: state.ui.zoomedTile,
   native: state.ui.native,
+  showBetaWarning: state.ui.showBetaWarning,
 });
 
 export default connect(select)(ID7Layout);

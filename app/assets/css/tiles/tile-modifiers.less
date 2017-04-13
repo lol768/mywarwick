@@ -7,26 +7,19 @@
 }
 
 .tile--editing {
-  z-index: 10;
-
   .tile__edit-control {
     display: inline-block;
   }
 }
 
 .tile--zoomed {
-  position: fixed;
   margin: 0;
-  top: @start-masthead-height;
-  left: 0;
-  right: 0;
-  bottom: @start-tab-bar-height;
-  z-index: 100;
   height: auto;
   cursor: default;
 
   html.not-app & {
     @media (min-width: @screen-sm-min) {
+      position: fixed;
       top: 25%;
       left: 50%;
       right: auto;
@@ -44,4 +37,44 @@
   html.android.app & {
     top: 0;
   }
+}
+
+body.has-zoomed-tile {
+  overflow: visible;
+}
+
+@tile-header-height: 30px;
+
+html.mobile {
+  .tile--zoomed {
+    overflow: visible;
+
+    .tile__header {
+      position: fixed;
+      top: @start-masthead-height;
+      left: 0;
+      right: 0;
+      height: @tile-header-height;
+      z-index: 10;
+    }
+
+    .tile__wrap {
+      position: unset;
+      overflow: visible;
+    }
+
+    .tile__body {
+      position: unset;
+      overflow-y: visible;
+      padding-top: @tile-header-height;
+    }
+  }
+}
+
+html.android.app .tile--zoomed .tile__header {
+  top: 0;
+}
+
+html.mobile body.has-zoomed-tile .update-popup {
+  display: none;
 }

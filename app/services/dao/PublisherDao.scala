@@ -19,6 +19,8 @@ trait PublisherDao {
 
   def getPublisherPermissions(publisherId: String, usercode: Usercode)(implicit c: Connection): Seq[PublisherPermission]
 
+  def getAllPublisherPermissions(publisherId: String)(implicit c: Connection): Seq[PublisherPermission]
+
   def getPublisherDepartments(publisherId: String)(implicit c: Connection): Seq[String]
 
   def getPublishersForUser(usercode: Usercode)(implicit c: Connection): Seq[Publisher]
@@ -57,6 +59,11 @@ class PublisherDaoImpl extends PublisherDao {
 
   override def getPublisherPermissions(publisherId: String, usercode: Usercode)(implicit c: Connection) =
     SQL"SELECT * FROM PUBLISHER_PERMISSION WHERE PUBLISHER_ID = $publisherId AND USERCODE = ${usercode.string}"
+      .executeQuery()
+      .as(publisherPermissionParser.*)
+
+  override def getAllPublisherPermissions(publisherId: String)(implicit c: Connection) =
+    SQL"SELECT * FROM PUBLISHER_PERMISSION WHERE PUBLISHER_ID = $publisherId"
       .executeQuery()
       .as(publisherPermissionParser.*)
 

@@ -15,6 +15,7 @@ class HomeControllerTest extends PlaySpec with MockitoSugar with Results {
 
   val configuration = mock[Configuration]
   when(configuration.getString("mywarwick.search.root")).thenReturn(Some("https://search-dev.warwick.ac.uk"))
+  when(configuration.getBoolean("mywarwick.showBetaWarning")).thenReturn(Some(false))
 
   val measurementService = mock[AnalyticsMeasurementService]
   when(measurementService.trackingID).thenReturn(AnalyticsTrackingID("UA-123456-7"))

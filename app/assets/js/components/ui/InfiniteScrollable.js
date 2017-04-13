@@ -1,13 +1,21 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
+import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 
-export default class InfiniteScrollable extends ReactComponent {
+export default class InfiniteScrollable extends React.Component {
+
+  static propTypes = {
+    hasMore: PropTypes.bool,
+    onLoadMore: PropTypes.func.isRequired,
+    children: PropTypes.node,
+    showLoading: PropTypes.bool,
+  };
 
   constructor(props) {
     super(props);
-
+    this.state = {
+      loading: false,
+    };
     this.boundScrollListener = this.onScroll.bind(this);
   }
 
@@ -21,27 +29,6 @@ export default class InfiniteScrollable extends ReactComponent {
 
   componentWillUnmount() {
     this.detachScrollListener();
-  }
-
-  attachScrollListener() {
-    this.detachScrollListener();
-    this.detached = false;
-
-    if (this.props.hasMore) {
-      $(window).on('scroll resize', this.boundScrollListener);
-      $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]')
-        .on('scroll', this.boundScrollListener);
-
-      this.onScroll();
-    }
-  }
-
-  detachScrollListener() {
-    this.detached = true;
-    $(window).off('scroll resize', this.boundScrollListener);
-
-    $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]')
-      .off('scroll', this.boundScrollListener);
   }
 
   onScroll() {
@@ -61,13 +48,49 @@ export default class InfiniteScrollable extends ReactComponent {
 
     if (scrollTop >= loadMoreThreshold) {
       this.detachScrollListener();
+      this.setState({
+        loading: true,
+      });
+      this.props.onLoadMore().then(
+        () => this.setState({
+          loading: false,
+        }),
+        () => this.setState({
+          loading: false,
+        })
+      );
+    }
+  }
 
-      this.props.onLoadMore();
+  detachScrollListener() {
+    this.detached = true;
+    $(window).off('scroll resize', this.boundScrollListener);
+
+    $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]')
+      .off('scroll', this.boundScrollListener);
+  }
+
+  attachScrollListener() {
+    this.detachScrollListener();
+    this.detached = false;
+
+    if (!this.state.loading && this.props.hasMore) {
+      $(window).on('scroll resize', this.boundScrollListener);
+      $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]')
+        .on('scroll', this.boundScrollListener);
+
+      this.onScroll();
     }
   }
 
   render() {
-    return <div>{this.props.children}</div>;
+    return (<div>
+        {this.props.children}
+        { this.props.showLoading && this.state.loading ? <div className="loading-spinner centered">
+            <i className="fa fa-spinner fa-pulse fa-2x" />
+          </div> : ''
+        }
+      </div>);
   }
 
 }

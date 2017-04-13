@@ -1,6 +1,6 @@
 /* eslint react/sort-comp: 0 */
-import React from 'react';
-import _ from 'lodash';
+import React, { PropTypes } from 'react';
+import _ from 'lodash-es';
 
 import { localMoment } from '../../dateFormats.js';
 import classNames from 'classnames';
@@ -12,7 +12,7 @@ export default class Tile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      contentRef: null,
+      hasMounted: false,
     };
 
     this.onClick = this.onClick.bind(this);
@@ -20,12 +20,9 @@ export default class Tile extends React.Component {
   }
 
   getIcon() {
-    const { fetching, errors, icon, content } = this.props;
+    const { fetching, errors, icon } = this.props;
 
-    // FIXME: shouldn't have to pass content here, the TileContent component has its own content
-    const customIcon = (content && this.state.contentRef) ?
-      this.state.contentRef.getIcon(content)
-      : null;
+    const customIcon = this.getContentInstance() && this.getContentInstance().getIcon();
 
     const iconJsx = iconName => (
       <i className={`fa ${iconName} toggle-tooltip`} ref="icon" title={ this.getIconTitle() }
@@ -55,6 +52,7 @@ export default class Tile extends React.Component {
   }
 
   onClickExpand(e) {
+    e.preventDefault();
     this.props.onZoomIn(e);
   }
 
@@ -78,9 +76,15 @@ export default class Tile extends React.Component {
   }
 
   componentDidMount() {
+    // Trigger an immediate re-render after the initial mount so we can access the content instance
+
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
-      contentRef: this.refs.content,
+      hasMounted: true,
     });
+  }
+
+  getContentInstance() {
+    return this.refs.tileWrap && this.refs.tileWrap.refs.content;
   }
 
   shouldDisplayExpandIcon() {
@@ -97,31 +101,15 @@ export default class Tile extends React.Component {
           title="Change setting"
           onClick={this.props.onConfiguring}
         >
-          <i className="fa fa-fw fa-pencil"></i>
+          <i className="fa fa-fw fa-cog"></i>
         </div>
       );
     }
     return null;
   }
 
-  shouldComponentUpdate(nextProps) {
-    if (this.props.size !== nextProps.size) {
-      return true;
-    }
-
-    if (this.props.editing !== nextProps.editing) {
-      return true;
-    }
-
-    if (nextProps.editing) {
-      return false;
-    }
-
-    return true;
-  }
-
   render() {
-    const { type, title, size, colour, content, editing, zoomed, isDesktop } = this.props;
+    const { type, title, size, colour, content, editing, zoomed, isDesktop, children } = this.props;
 
     const zoomIcon = () => {
       if (zoomed) {
@@ -147,9 +135,8 @@ export default class Tile extends React.Component {
             )
           }
           onClick={ this.onClick }
-          ref="tile"
         >
-          { this.state.contentRef && this.state.contentRef.isRemovable() &&
+          { this.getContentInstance() && this.getContentInstance().isRemovable() &&
             <div
               className="tile__edit-control top-left"
               onClick={ this.props.onHide }
@@ -167,53 +154,94 @@ export default class Tile extends React.Component {
             <i className="fa fa-fw fa-arrow-up"> </i>
           </div>
 
+          <div
+            className="tile__edit-control bottom-left tile__drag-handle"
+            title="Drag to re-arrange tile"
+          >
+            <i className="fa fa-fw fa-arrows"> </i>
+          </div>
+
           { this.displayConfigButton() }
 
-          <div className="tile__wrap">
-            <header className="tile__header">
-              <div className="tile__icon tile__icon--left">{this.getIcon()}</div>
-              <div className="tile__icon tile__icon--right">{zoomIcon()}</div>
-              <div className="tile__title">{title}</div>
-            </header>
-            <div className="tile__body">
-              { React.cloneElement(
-                React.Children.only(this.props.children),
-                { ref: 'content' }
-              )}
-            </div>
-          </div>
+          <TileWrap
+            icon={this.getIcon()}
+            zoomIcon={zoomIcon()}
+            title={title}
+            children={children}
+            onClickExpand={this.onClickExpand}
+            ref="tileWrap"
+          />
         </article>
       </div>
     );
   }
+
+  static propTypes = {
+    children: PropTypes.node,
+    onConfiguring: PropTypes.func,
+    onResize: PropTypes.func.isRequired,
+    onHide: PropTypes.func.isRequired,
+    onZoomOut: PropTypes.func.isRequired,
+    onZoomIn: PropTypes.func.isRequired,
+    type: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    icon: PropTypes.string.isRequired,
+    size: PropTypes.oneOf(_.values(TILE_SIZES)),
+    editing: PropTypes.bool.isRequired,
+    editingAny: PropTypes.bool.isRequired,
+    zoomed: PropTypes.bool.isRequired,
+    isDesktop: PropTypes.bool.isRequired,
+    option: PropTypes.object,
+    id: PropTypes.string,
+    canZoom: PropTypes.bool.isRequired,
+    fetching: PropTypes.bool,
+    errors: PropTypes.arrayOf(PropTypes.shape({
+      message: PropTypes.string,
+    })),
+    content: PropTypes.shape({
+      href: PropTypes.string,
+    }),
+    colour: PropTypes.number.isRequired,
+    fetchedAt: PropTypes.number,
+    user: PropTypes.object,
+  }
 }
 
-Tile.propTypes = {
-  children: React.PropTypes.node,
-  onConfiguring: React.PropTypes.func,
-  onResize: React.PropTypes.func.isRequired,
-  onHide: React.PropTypes.func.isRequired,
-  onZoomOut: React.PropTypes.func.isRequired,
-  onZoomIn: React.PropTypes.func.isRequired,
-  type: React.PropTypes.string.isRequired,
-  title: React.PropTypes.string.isRequired,
-  icon: React.PropTypes.string.isRequired,
-  size: React.PropTypes.oneOf(_.values(TILE_SIZES)),
-  editing: React.PropTypes.bool.isRequired,
-  editingAny: React.PropTypes.bool.isRequired,
-  zoomed: React.PropTypes.bool.isRequired,
-  isDesktop: React.PropTypes.bool.isRequired,
-  option: React.PropTypes.object,
-  id: React.PropTypes.string,
-  canZoom: React.PropTypes.bool.isRequired,
-  fetching: React.PropTypes.bool,
-  errors: React.PropTypes.arrayOf(React.PropTypes.shape({
-    message: React.PropTypes.string,
-  })),
-  content: React.PropTypes.shape({
-    href: React.PropTypes.string,
-  }),
-  colour: React.PropTypes.number.isRequired,
-  fetchedAt: React.PropTypes.number,
-  user: React.PropTypes.object,
-};
+/**
+ * Header and body of the tile. Separate component so that we can
+ * toggle edit buttons without this one needing to trigger an update.
+ *
+ * (Still triggers an update, probably because the icons are always new objects.)
+ */
+class TileWrap extends React.PureComponent {
+  render() {
+    const { icon, zoomIcon, title, children, onClickExpand } = this.props;
+    return (
+      <div className="tile__wrap">
+        <header className="tile__header">
+          <div className="tile__icon tile__icon--left">{icon}</div>
+          <div className="tile__icon tile__icon--right">{zoomIcon}</div>
+          <div className="tile__title">{title}</div>
+        </header>
+        <div className="tile__body" data-scrollable>
+          { React.cloneElement(
+            React.Children.only(children),
+            {
+              ref: 'content',
+              onClickExpand,
+            }
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  static propTypes = {
+    children: PropTypes.node.isRequired,
+    icon: PropTypes.node.isRequired,
+    zoomIcon: PropTypes.node,
+    title: PropTypes.string.isRequired,
+    onClickExpand: PropTypes.func.isRequired,
+  }
+}
+

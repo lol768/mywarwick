@@ -1,42 +1,102 @@
+/* global PaymentRequest */
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
-import classNames from 'classnames';
 import Hyperlink from '../ui/Hyperlink';
 import TextTile from './TextTile';
-
-import _ from 'lodash';
+import _ from 'lodash-es';
+import moment from 'moment';
 
 export default class LibraryTile extends TextTile {
 
-  mapItems(itemsToDisplay, className) {
-    return itemsToDisplay.map(item => {
-      const tileItem = (<div key={item.id} className={classNames('tile__item', className)}>
-        <span className="tile__text">{item.dueMessage}: {item.itemTitle}</span>
-      </div>);
-
-      return <Hyperlink key={item.href} href={item.href}>{ tileItem }</Hyperlink>;
-    });
+  renderItems(items) {
+    return items
+      .map(item => {
+        switch (item.type) {
+          case 'loan':
+            return this.makeLoanItem(item);
+          case 'hold':
+            return this.makeHoldItem(item);
+          default:
+            return null;
+        }
+      }
+    );
   }
 
-  mapItemsForZoomedBody(itemsToDisplay, className) {
-    return itemsToDisplay.map(item => {
-      const tileItem = (<div key={item.id} className={classNames('tile__item', className)}>
-        <span className="tile__text">{item.dueMessage}: {item.itemTitle}</span>
-      </div>);
+  makeSubtitle(type, length) {
+    return (
+      <span>
+        <span className="tile__callout">
+          {`${length} ${this._pluralise(type, length)}`}
+        </span>
+      </span>
+    );
+  }
 
-      return <Hyperlink key={item.href} href={item.href}>{ tileItem }</Hyperlink>;
+  makeSingleSubtitle(items) {
+    const groupedItems = _.groupby(items, 'type');
+    let text = '';
+    _.forEach(groupedItems, (value, key) => {
+      text += `${value.length} ${this._pluralise(key, value.length)} `;
     });
+
+    const chunks = text.split(/\s+/);
+    const titleArr = [chunks.shift(), chunks.join(' ')];
+
+    return (
+    <span>
+      <span className="tile__callout">
+        {titleArr[0]}
+      </span>
+      &nbsp;{titleArr[1]}
+    </span>
+    );
+  }
+
+  makeLoanItems(items) {
+    return items
+      .filter((e) => e.type === 'loan')
+      .map(this.makeLoanItem);
+  }
+
+  makeLoanItem(item) {
+    return (
+      <Hyperlink key={item.id} href={item.href}>
+        <div key={item.id} className="tile__item">
+          <span className="tile__text">
+            {item.recallDate ?
+              `Recalled on ${
+              moment(item.recallDate, 'YYYY-MM-DD').format('MMM Do YYYY')
+            }, ${item.dueMessage.toLowerCase()}` :
+              item.dueMessage}: {item.itemTitle}
+            </span>
+        </div>
+      </Hyperlink>
+    );
+  }
+
+  makeHoldItems(items) {
+    return items
+      .filter((e) => e.type === 'hold')
+      .map(this.makeHoldItem);
+  }
+
+  makeHoldItem(item) {
+    return (
+      <Hyperlink key={item.id} href={item.href}>
+        <div key={item.id} className="tile__item">
+          <span className="tile__text">
+            {item.status.toLowerCase().indexOf('ready') !== -1 ?
+              `${item.status} at ${item.pickupLocation}` :
+              item.status}: {item.itemTitle}
+          </span>
+        </div>
+      </Hyperlink>
+    );
   }
 
   getZoomedBody() {
-    const items = _.chunk(this.mapItemsForZoomedBody(this.props.content.items, 'col-xs-6'), 2);
-
-    return (
-      <div className="container-fluid">
-        {this.getSubtitle()}
-        {items.map((children, i) => <div key={i} className="row">{children}</div>)}
-      </div>
-    );
+    return this.getLargeBody();
   }
 
   getLargeBody() {
@@ -45,10 +105,15 @@ export default class LibraryTile extends TextTile {
     const itemsToDisplay = this.props.zoomed ?
       content.items : _.take(content.items, content.items.length);
 
+    const loanItems = itemsToDisplay.filter((e) => e.type === 'loan');
+    const holdItlems = itemsToDisplay.filter((e) => e.type === 'hold');
+
     return (
       <div>
-        {this.getSubtitle()}
-        {this.mapItems(itemsToDisplay)}
+        {this.makeSubtitle('loan', loanItems.length)}
+        {this.makeLoanItems(loanItems)}
+        {this.makeSubtitle('hold', holdItlems.length)}
+        {this.makeHoldItems(holdItlems)}
       </div>
     );
   }
@@ -62,24 +127,13 @@ export default class LibraryTile extends TextTile {
         transitionEnterTimeout={1000}
         transitionLeaveTimeout={1000}
       >
-        {this.getSubtitle()}
-        {this.mapItems([content.items[this.state.itemIndex]])}
+        {this.makeSingleSubtitle(content.items)}
+        {this.renderItems([content.items[this.state.itemIndex]])}
       </ReactCSSTransitionGroup>
     );
   }
 
-  getSubtitle() {
-    const { content } = this.props;
-    let subtitleArray = ['', ''];
-    if (content.subtitle) subtitleArray = content.subtitle.split(' ');
-    return (
-      <span>
-        <span className="tile__callout">
-          {subtitleArray[0]}
-        </span>
-        &nbsp;{subtitleArray.slice(1)}
-      </span>
-    );
-  }
+  _pluralise = (unit, len) => `${unit}${len === 1 ? '' : 's'}`;
+
 }
 

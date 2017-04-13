@@ -1,7 +1,7 @@
 import React from 'react';
 import * as log from 'loglevel';
 import * as errorreporter from '../../errorreporter';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 export const TILE_SIZES = {
   SMALL: 'small',
@@ -10,7 +10,7 @@ export const TILE_SIZES = {
   TALL: 'tall',
 };
 
-export default class TileContent extends React.Component {
+export default class TileContent extends React.PureComponent {
 
   static isVisibleOnDesktopOnly() {
     return false;
@@ -106,10 +106,10 @@ export default class TileContent extends React.Component {
     return null;
   }
 
-}
+  static propTypes = {
+    content: React.PropTypes.object,
+    size: React.PropTypes.oneOf(_.values(TILE_SIZES)).isRequired,
+    zoomed: React.PropTypes.bool,
+  }
 
-TileContent.propTypes = {
-  content: React.PropTypes.object,
-  size: React.PropTypes.oneOf(_.values(TILE_SIZES)).isRequired,
-  zoomed: React.PropTypes.bool,
-};
+}

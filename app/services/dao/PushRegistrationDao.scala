@@ -41,7 +41,7 @@ class PushRegistrationDaoImpl extends PushRegistrationDao with Logging {
         PushRegistration(usercode, Platform(platform), token, createdAt, lastFetchedAt)
     }
 
-  override def updateLastFetched(token: String)(implicit c: Connection) = {
+  override def updateLastFetched(token: String)(implicit c: Connection): Unit = {
     SQL("UPDATE push_registration SET last_fetched_at = {now} WHERE token = {token}")
       .on(
         'now -> DateTime.now,
@@ -83,12 +83,22 @@ class PushRegistrationDaoImpl extends PushRegistrationDao with Logging {
       true
     } catch {
       case _: SQLIntegrityConstraintViolationException =>
-        // Token is already registered for this usercode
+        // Token is already registered.  Update the registration to make sure it's for this user
+        updateUsercodeForToken(token, usercode)
         true
       case e: Exception =>
         logger.error("Exception when saving push registration", e)
         false
     }
+  }
+
+  private def updateUsercodeForToken(token: String, usercode: Usercode)(implicit c: Connection): Boolean = {
+    SQL("UPDATE PUSH_REGISTRATION SET USERCODE = {usercode} WHERE TOKEN = {token}")
+      .on(
+        'token -> token,
+        'usercode -> usercode.string
+      )
+      .executeUpdate() == 1
   }
 
   override def removeRegistration(token: String)(implicit c: Connection): Boolean = {

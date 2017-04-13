@@ -1,7 +1,10 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
+import React, { PropTypes } from 'react';
 
-export default class ListHeader extends ReactComponent {
+export default class ListHeader extends React.Component {
+
+  static propTypes = {
+    title: PropTypes.string.isRequired,
+  };
 
   render() {
     return (

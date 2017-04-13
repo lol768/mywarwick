@@ -7,12 +7,14 @@ const sourcemaps = require('gulp-sourcemaps');
 const replace = require('gulp-replace');
 const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
-const _ = require('lodash');
 const path = require('path');
 const mold = require('mold-source-map');
 const playAssets = require('gulp-play-assets');
 
 const babelify = require('babelify');
+const webpackStream = require('webpack-stream');
+const webpack = require('webpack');
+const webpackMerge = require('webpack-merge');
 const browserify = require('browserify');
 const browserifyInc = require('browserify-incremental');
 const browserifyShim = require('browserify-shim');
@@ -26,6 +28,19 @@ const watchify = require('watchify');
 const merge = require('merge-stream');
 
 const bundleEvents = require('./events');
+
+const PlayFingerprintsPlugin = require('./PlayFingerprintsPlugin');
+
+const WatchEventsPlugin = function(options) {
+  this.apply = this.apply.bind(this, options);
+};
+WatchEventsPlugin.prototype.apply = (options, compiler) => {
+  const emitter = options.emitter;
+  compiler.plugin('after-emit', (compilation, done) => {
+    emitter.emit('scripts-updated');
+    done();
+  })
+};
 
 function browserifyOptions(cacheName, entries) {
   return {
@@ -75,11 +90,16 @@ function bundle(b, outputFile) {
     .pipe(gulp.dest(paths.scriptOut));
 }
 
-const SCRIPTS = {
-  // Mapping from bundle name to entry point
-  'bundle.js': 'main.js',
-  'publish-bundle.js': 'publish.js',
-};
+// The base non-Gulp Webpack config is in the standard file
+const BASE_WEBPACK_CONFIG = require(path.join(__dirname, '../webpack.config.js'));
+// Then we merge some extra plugins.
+const WEBPACK_CONFIG = webpackMerge(BASE_WEBPACK_CONFIG, {
+  plugins: [ new PlayFingerprintsPlugin() ]
+});
+const WEBPACK_WATCH_CONFIG = webpackMerge(WEBPACK_CONFIG, {
+  watch: true,
+  plugins: [ new WatchEventsPlugin({ emitter: bundleEvents }) ]
+});
 
 function currentRevisionOf(file) {
   const dirname = path.dirname(file);
@@ -90,9 +110,11 @@ function currentRevisionOf(file) {
 }
 
 function getCachedAssets() {
-  return _.map([
+  return [
     currentRevisionOf('/css/main.css'),
     currentRevisionOf('/js/bundle.js'),
+    currentRevisionOf('/js/vendor.bundle.js'),
+    currentRevisionOf('/js/0.js'),
     '/lib/id7/fonts/fontawesome-webfont.ttf',
     '/lib/id7/fonts/fontawesome-webfont.woff',
     '/lib/id7/images/masthead-logo-bleed-sm*',
@@ -100,38 +122,22 @@ function getCachedAssets() {
     '/lib/id7/images/newwindow.gif',
     '/lib/id7/images/shim.gif',
     '/lib/id7/js/id7-bundle.min.js',
-  ], (asset) => `${paths.assetsOut}${asset}`);
+  ].map((asset) => `${paths.assetsOut}${asset}`);
 }
 
 function cacheName(name) {
   return name.replace('.js', '');
 }
 
-gulp.task('scripts', [], () =>
-  merge(_.map(SCRIPTS, (entries, output) => {
-    const bopts = browserifyOptions(cacheName(output), entries);
-    const b = createBrowserify(bopts);
-    return bundle(b, output);
-  }))
-);
+gulp.task('scripts', () => {
+  return webpackStream(WEBPACK_CONFIG, webpack)
+    .pipe(gulp.dest('target/gulp/js/'));
+});
 
-// Recompile scripts on changes. Watchify is more efficient than
-// grunt.watch as it knows how to do incremental rebuilds.
-gulp.task('watch-scripts', [], () =>
-  merge(_.map(SCRIPTS, (entries, output) => {
-    // incremental doesn't play nice with watchify, so disable
-    const bopts = _.extend({ incremental: false }, watchify.args, browserifyOptions(cacheName(output), entries));
-    const b = watchify(createBrowserify(bopts));
-    b.on('update', () => {
-      bundleEvents.emit('scripts-updating');
-      bundle(b, output).on('end', () => {
-        bundleEvents.emit('scripts-updated');
-      });
-    });
-    b.on('log', gutil.log);
-    return bundle(b, output);
-  }))
-);
+gulp.task('watch-scripts', [], () => {
+  return webpackStream(WEBPACK_WATCH_CONFIG, webpack)
+    .pipe(gulp.dest('target/gulp/js/'));
+});
 
 gulp.task('lint', () => {
   return gulp.src([`${paths.assetPath}/js/**/*.js`])
@@ -144,8 +150,10 @@ function generateServiceWorker(watch) {
   const swPrecache = require('sw-precache');
   // Things that should cause fresh HTML to be downloaded
   const htmlDependencies = [
-    'target/gulp/css/main.css',
-    'target/gulp/js/bundle.js',
+    'target/gulp/css/main.css.md5',
+    'target/gulp/js/bundle.js.md5',
+    'target/gulp/js/vendor.bundle.js.md5',
+    'target/gulp/js/0.js.md5',
     'app/assets/js/push-worker.js',
     'app/views/index.scala.html',
     'app/views/common/head.scala.html',
@@ -243,12 +251,12 @@ gulp.task('appcache', ['all-static'], generateAppcache);
 
 /* The other watchers have been set up to emit some events that we can listen to */
 
-gulp.task('watch-service-worker', ['watch-styles', 'watch-scripts'], () => {
+gulp.task('watch-service-worker', ['watch-styles'], () => {
   bundleEvents.on('styles-updated', generateServiceWorker);
   bundleEvents.on('scripts-updated', generateServiceWorker);
 });
 
-gulp.task('watch-appcache', ['watch-styles', 'watch-scripts'], () => {
+gulp.task('watch-appcache', ['watch-styles'], () => {
   bundleEvents.on('styles-updated', generateAppcache);
   bundleEvents.on('scripts-updated', generateAppcache);
 });

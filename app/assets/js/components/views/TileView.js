@@ -3,13 +3,39 @@ import * as TILE_TYPES from '../tiles';
 import log from 'loglevel';
 import Tile from '../tiles/Tile';
 import { connect } from 'react-redux';
-import { push, goBack } from 'react-router-redux';
-import _ from 'lodash';
+import { goBack, push } from 'react-router-redux';
+import _ from 'lodash-es';
+import $ from 'jquery';
+import { Routes } from '../AppRoot';
 
 class TileView extends Component {
 
+  componentDidMount() {
+    if (this.props.tile && this.props.zoomed) {
+      $(document.body).addClass(`colour-${this.props.tile.colour}`);
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.zoomed) {
+      if (this.props.tile) {
+        $(document.body).removeClass(`colour-${this.props.tile.colour}`);
+      }
+
+      if (nextProps.tile) {
+        $(document.body).addClass(`colour-${nextProps.tile.colour}`);
+      }
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.props.tile && this.props.zoomed) {
+      $(document.body).removeClass(`colour-${this.props.tile.colour}`);
+    }
+  }
+
   onTileExpand(tile) {
-    this.props.dispatch(push(`/tiles/${tile.id}`));
+    this.props.dispatch(push(`/${Routes.TILES}/${tile.id}`));
   }
 
   onTileDismiss() {
@@ -75,7 +101,6 @@ class TileView extends Component {
       ...content,
       zoomed,
       size,
-      editingAny,
     };
 
     return (
@@ -90,7 +115,7 @@ class TileView extends Component {
 const select = (state, ownProps) => {
   const id = ownProps.id || ownProps.params.id;
 
-  const tile = _(state.tiles.data.tiles).find(t => t.id === id);
+  const tile = _.find(state.tiles.data.tiles, t => t.id === id);
   const content = state.tileContent[id];
   const option = state.tiles.data.options[id];
   const user = state.user.data;
@@ -114,12 +139,17 @@ TileView.propTypes = {
   option: PropTypes.object,
   isDesktop: PropTypes.bool,
   zoomed: PropTypes.bool,
-  size: PropTypes.string,
-  editingAny: PropTypes.bool,
-  editing: PropTypes.bool,
+  size: PropTypes.string.isRequired,
+  editingAny: PropTypes.bool.isRequired,
+  editing: PropTypes.bool.isRequired,
   view: PropTypes.object,
-  colour: React.PropTypes.number,
   user: PropTypes.object.isRequired,
+};
+
+TileView.defaultProps = {
+  editing: false,
+  editingAny: false,
+  size: 'large',
 };
 
 export default connect(select)(TileView);

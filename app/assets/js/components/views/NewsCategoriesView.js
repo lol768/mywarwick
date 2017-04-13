@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import Multiselect from 'react-bootstrap-multiselect';
 import * as newsCategories from '../../state/news-categories';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import $ from 'jquery';
 
 export default class NewsCategoriesView extends React.Component {
@@ -29,10 +29,10 @@ export default class NewsCategoriesView extends React.Component {
 
     this.setState({ changing: true });
 
-    _(options).each(option => {
+    _.each(options, option => {
       const id = option.value;
 
-      if (subscribed.includes(id)) {
+      if (subscribed.indexOf(id) !== 1) {
         dispatch(newsCategories.unsubscribe(id));
       } else {
         dispatch(newsCategories.subscribe(id));
@@ -81,7 +81,7 @@ export default class NewsCategoriesView extends React.Component {
     const data = items.map(item => ({
       value: item.id,
       label: item.name,
-      selected: subscribed.includes(item.id),
+      selected: subscribed.indexOf(item.id) !== -1,
     }));
 
     return (

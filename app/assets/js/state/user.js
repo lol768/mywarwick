@@ -1,13 +1,12 @@
 import localforage from 'localforage';
 import log from 'loglevel';
+import url from 'url';
+import querystring from 'querystring';
 
 export const USER_LOAD = 'USER_LOAD';
 export const USER_RECEIVE = 'USER_RECEIVE';
 export const USER_CLEAR = 'USER_CLEAR';
 export const SSO_LINKS_RECEIVE = 'SSO_LINKS_RECEIVE';
-
-import url from 'url';
-import querystring from 'querystring';
 
 const initialState = {
   data: {
@@ -91,12 +90,13 @@ function clearUserData() {
 export function rewriteRefreshUrl(location, currentLocation) {
   const parsed = url.parse(location, true);
   parsed.query.target = currentLocation;
+  parsed.query.myWarwickRefresh = true;
   parsed.search = querystring.stringify(parsed.query);
   return url.format(parsed);
 }
 
 export function userReceive(currentUser) {
-  return (dispatch) => {
+  return (dispatch) =>
     // If we are a different user than we were before (incl. anonymous),
     // nuke the store, which also clears local storage
     loadUserFromLocalStorage(dispatch).then(previousUser => {
@@ -108,5 +108,4 @@ export function userReceive(currentUser) {
         dispatch(receiveUserIdentity(currentUser));
       }
     });
-  };
 }

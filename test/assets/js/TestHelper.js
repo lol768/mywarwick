@@ -1,17 +1,6 @@
-import fs from 'fs';
-
-const pathsToBabel = [
-  './test/assets/js',
-  './app/assets/js',
-  './node_modules/warwick-search-frontend/app/assets/js',
-].map(p => fs.realpathSync(p));
-
-require('babel-register')({
-  ignore: (filename) => !pathsToBabel.some(p => filename.startsWith(p))
-});
-
 import tk from 'timekeeper';
 import jsxChai from 'jsx-chai';
+import * as enzyme from 'enzyme';
 
 const chai = require('chai');
 global.expect = chai.expect;
@@ -29,7 +18,9 @@ class WebSocket {}
 global.WebSocket = WebSocket;
 
 global.React = require('react');
-global.ReactTestUtils = require('react-addons-test-utils');
+global.ReactTestUtils = require('react-dom/test-utils');
+
+const FROZEN_IN_TIME = new Date(1989, 1, 7);
 
 // Do helpful things with Spies.  Use inside a test suite (`describe' block).
 global.spy = function spy(object, method) {
@@ -59,11 +50,24 @@ global.shallowRender = function shallowRender(component) {
   return renderer.getRenderOutput();
 };
 
-global.renderAtMoment = function (component, now = new Date(1989, 1, 7)) {
+
+global.atMoment = function(fn, now = FROZEN_IN_TIME) {
   tk.freeze(new Date(now));
-  const renderedComponent = shallowRender(component);
+  const result = fn();
   tk.reset();
-  return renderedComponent;
+  return result;
+};
+
+/** shallow render at a given fake time, using React's standard shallow renderer. */
+global.renderAtMoment = function (component, now = FROZEN_IN_TIME) {
+  return atMoment(() => shallowRender(component), now);
+};
+
+/** shallow render at a given fake time, returning an Enzyme wrapper.
+ * {@link http://airbnb.io/enzyme/docs/api/shallow.html#shallowwrapper-api API docs}
+ */
+global.shallowAtMoment = function(component, now = FROZEN_IN_TIME) {
+  return atMoment(() => enzyme.shallow(component), now);
 };
 
 /**
@@ -72,6 +76,8 @@ global.renderAtMoment = function (component, now = new Date(1989, 1, 7)) {
  * @param {object} elem find children of this rendered element
  * @param {number[]} path path of indicies to target child
  * @returns {object}
+ *
+ * @deprecated This is a bit brittle, try importing 'shallow' from 'enzyme' instead
  */
 global.findChild = function (elem, path) {
   if (elem === 'undefined' || path.length === 0) {

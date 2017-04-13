@@ -1,13 +1,23 @@
+// In case of JS error, hide the loading spinner.
+// Has to be up top to catch all possible JS errors.
+if (window.addEventListener) {
+  window.addEventListener('error', () => {
+    const spinner = document.getElementById('react-app-spinner');
+    if (spinner) spinner.style.display = 'none';
+  }, true);
+}
+
 import 'core-js/modules/es6.object.assign';
+import promisePolyfill from 'es6-promise/lib/es6-promise/polyfill';
+promisePolyfill();
 
 import initErrorReporter from './errorreporter';
 initErrorReporter();
 
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import moment from 'moment';
 import log from 'loglevel';
-import * as es6Promise from 'es6-promise';
 import localforage from 'localforage';
 
 import React from 'react';
@@ -17,7 +27,7 @@ import { syncHistoryWithStore } from 'react-router-redux';
 
 import * as notificationsGlue from './notifications-glue';
 import * as pushNotifications from './push-notifications';
-import * as serverpipe from './serverpipe';
+import * as userinfo from './userinfo';
 import persistedLib from './persisted';
 import SocketDatapipe from './SocketDatapipe';
 import * as notifications from './state/notifications';
@@ -25,6 +35,7 @@ import * as notificationMetadata from './state/notification-metadata';
 import * as tiles from './state/tiles';
 import * as update from './state/update';
 import * as user from './state/user';
+import * as news from './state/news';
 import * as ui from './state/ui';
 import * as device from './state/device';
 import * as analytics from './analytics';
@@ -33,10 +44,10 @@ import AppRoot from './components/AppRoot';
 import bridge from './bridge';
 import { hasAuthoritativeUser, hasAuthoritativeAuthenticatedUser } from './state';
 
-bridge({ store, tiles, notifications });
+bridge({ store, tiles, notifications, userinfo, news });
 
 log.enableAll(false);
-es6Promise.polyfill();
+log.debug(`Environment: ${process.env.NODE_ENV}`);
 
 localforage.config({
   name: 'Start',
@@ -45,7 +56,13 @@ localforage.config({
 const history = syncHistoryWithStore(browserHistory, store);
 history.listen(location => analytics.track(location.pathname));
 
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
 $(() => {
+  ui.scrollTopOnTabChange();
+
   $(window).on('contextmenu', () => window.navigator.userAgent.indexOf('Mobile') < 0);
 
   $(window).on('resize', () => store.dispatch(ui.updateUIContext()));
@@ -138,7 +155,7 @@ SocketDatapipe.subscribe(data => {
 
 function freezeStream({ stream, olderItemsOnServer }) {
   return {
-    items: _(stream).values().flatten().value(),
+    items: _.flatten(stream),
     olderItemsOnServer,
   };
 }
@@ -180,43 +197,11 @@ store.dispatch(ui.updateUIContext());
 store.dispatch(update.displayUpdateProgress);
 store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));
 
-// kicks off the whole data flow - when user is received we fetch tile data
-function fetchUserInfo() {
-  return serverpipe.fetchWithCredentials('/user/info');
-}
-
-function receiveUserInfo(response) {
-  return response.json()
-    .then(data => {
-      if (data.refresh) {
-        window.location = user.rewriteRefreshUrl(data.refresh, window.location.href);
-      } else {
-        store.dispatch(user.userReceive(data.user));
-        store.dispatch(user.receiveSSOLinks(data.links));
-
-        const analyticsData = data.user.analytics;
-        if (analyticsData !== undefined) {
-          analyticsData.dimensions.forEach(dimension =>
-            analytics.setDimension(dimension.index, dimension.value)
-          );
-
-          analytics.setUserId(analyticsData.identifier);
-        }
-
-        analytics.ready();
-      }
-    })
-    .catch(e => {
-      setTimeout(() => fetchUserInfo().then(receiveUserInfo), 5000);
-      throw e;
-    });
-}
-
 user.loadUserFromLocalStorage(store.dispatch);
-fetchUserInfo().then(res =>
+userinfo.fetchUserInfo().then(res =>
   // ensure local version is written first, then remote version if available.
   persistedUserLinks.then(() =>
-    receiveUserInfo(res)
+    userinfo.receiveUserInfo(res)
   )
 );
 
@@ -227,19 +212,24 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
+// Refresh news every hour
+setInterval(() => {
+  if (navigator.onLine) {
+    store.dispatch(news.refresh());
+  }
+}, 60 * 60 * 1000);
+
 // Just for access from the console
 window.Store = store;
-
-$(() => {
-  // this element contains a fallback error - once we're fairly
-  // sure that this script isn't completely broken, we can hide it.
-  document.getElementById('error-fallback').style.display = 'none';
-});
-
-ui.scrollTopOnTabChange();
 
 // Actually render the app
 ReactDOM.render(
   <AppRoot history={history} />,
   document.getElementById('app-container')
 );
+
+$(() => {
+  // this element contains a fallback error - once we're fairly
+  // sure that this script isn't completely broken, we can hide it.
+  document.getElementById('error-fallback').style.display = 'none';
+});

@@ -1,15 +1,28 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
+import React, { PropTypes } from 'react';
 import TabBar from './ui/TabBar';
 import TabBarItem from './ui/TabBarItem';
 import ID7Layout from './ui/ID7Layout';
 import { connect } from 'react-redux';
-import { push } from 'react-router-redux';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import log from 'loglevel';
 import { getNumItemsSince } from '../stream';
+import { Routes } from './AppRoot';
+import { navRequest } from '../state/ui';
 
-export class AppLayout extends ReactComponent {
+export class AppLayout extends React.Component {
+
+  static propTypes = {
+    onSelectItem: PropTypes.func.isRequired,
+    location: PropTypes.shape({
+      pathname: PropTypes.string.isRequired,
+    }).isRequired,
+    user: PropTypes.shape({
+      authenticated: PropTypes.bool.isRequired,
+    }).isRequired,
+    notificationsCount: PropTypes.number.isRequired,
+    layoutClassName: PropTypes.string.isRequired,
+    children: PropTypes.node.isRequired,
+  };
 
   constructor(props) {
     super();
@@ -17,10 +30,8 @@ export class AppLayout extends ReactComponent {
   }
 
   render() {
-    const { location, notificationsCount, layoutClassName, children }
+    const { location, notificationsCount, layoutClassName, children, user }
       = this.props;
-
-    const user = this.props.user;
 
     log.debug('AppLayout.render');
 
@@ -33,15 +44,15 @@ export class AppLayout extends ReactComponent {
           <TabBar selectedItem={ location.pathname } onSelectItem={ this.onSelectItem }>
             <TabBarItem title="Me" icon="user" path="/" />
             <TabBarItem
-              title="Notifications" icon="inbox" path="/notifications"
+              title="Notifications" icon="inbox" path={ `/${Routes.NOTIFICATIONS}` }
               badge={ notificationsCount } isDisabled={ !user.authenticated }
             />
             <TabBarItem
-              title="Activity" icon="dashboard" path="/activity"
+              title="Activity" icon="dashboard" path={ `/${Routes.ACTIVITY}` }
               isDisabled={ !user.authenticated }
             />
-            <TabBarItem title="News" icon="mortar-board" path="/news" />
-            <TabBarItem title="Search" icon="search" path="/search" />
+            <TabBarItem title="News" icon="mortar-board" path={ `/${Routes.NEWS}` } />
+            <TabBarItem title="Search" icon="search" path={ `/${Routes.SEARCH}` } />
           </TabBar>
           : null }
       </div>
@@ -53,7 +64,7 @@ export class AppLayout extends ReactComponent {
 function mapStateToProps(state) {
   return {
     notificationsCount:
-      getNumItemsSince(state.notifications.stream, _(state).get(['notificationsLastRead', 'date'])),
+      getNumItemsSince(state.notifications.stream, _.get(state, ['notificationsLastRead', 'date'])),
     layoutClassName: state.ui.className,
     user: state.user.data,
   };
@@ -63,9 +74,7 @@ function mapStateToProps(state) {
 // so that the plain component doesn't depend on redux.
 function mapDispatchToProps(dispatch) {
   return {
-    onSelectItem: (p) => {
-      dispatch(push(p));
-    },
+    onSelectItem: (p) => navRequest(p, dispatch),
   };
 }
 

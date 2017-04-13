@@ -1,7 +1,7 @@
 @import models.publishing.Publisher
 @import system.RequestContext
-
-@(publishers: Seq[Publisher])(implicit context: RequestContext)
+@import warwick.sso.User
+@(publishers: Seq[Publisher], publisherPermissions: Map[Publisher, Seq[User]])(implicit context: RequestContext)
 @common.admin("Select Publisher Account") {
 
   @if(publishers.isEmpty) {
@@ -20,6 +20,18 @@
     @for(publisher <- publishers) {
       <li>
         <a href="@controllers.publish.routes.PublishersController.show(publisher.id)">@publisher.name</a>
+        @if(publisherPermissions.get(publisher).nonEmpty && publisherPermissions(publisher).nonEmpty) {
+          (<a
+            href="#"
+            class="toggle-popover"
+            title="Users with permissions to use this publisher"
+            data-content="<ul>
+              @for(user <- publisherPermissions(publisher)) {
+                <li>@user.name.full.getOrElse("[Unknown]") (@user.usercode.string)</li>
+              }</ul>"
+            data-html="true"
+          >Who?</a>)
+        }
       </li>
     }
     </ul>

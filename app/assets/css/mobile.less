@@ -1,6 +1,10 @@
 .mobile {
   body {
     font-family: -apple-system, 'Roboto', 'Droid Sans', 'Segoe WP', Helvetica, sans-serif !important;
+
+    margin-bottom: @start-tab-bar-height;
+
+    overflow-x: hidden;
   }
 
   h1, h2, h3 {
@@ -27,11 +31,11 @@
 // MASTHEAD MOBILE
 .start-masthead {
   background-color: #8c6e96;
-  position: relative;
   z-index: 40;
   color: #fff;
   height: @start-masthead-height;
   line-height: 42px;
+  position: relative;
 
   .back-btn {
     visibility: hidden;
@@ -44,6 +48,20 @@
     opacity: 0;
     padding: 0 5px;
     transition: all .3s ease-in-out;
+    cursor: pointer;
+
+    i {
+      padding: 0 5px;
+    }
+  }
+
+  .edit-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    line-height: 44px;
+    font-size: 1.25em;
+    padding: 0 20px 0 10px;
     cursor: pointer;
 
     i {
@@ -74,14 +92,19 @@
     position: absolute;
     right: 0;
     top: 0;
-    padding: 0 10px 0 0;
+    padding: 0;
 
-    a {
-      display: block;
-    }
-    img {
-      width: 30px;
-      height: 30px;
+    > ul > li {
+      margin: 0 !important;
+      > a {
+        display: block;
+        padding: 0 10px 0 20px;
+        height: 44px;
+        > img {
+          width: 30px;
+          height: 30px;
+        }
+      }
     }
   }
 

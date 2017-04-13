@@ -1,25 +1,24 @@
 /* global MyWarwickNative */
-
 /**
  * API for native apps.
  */
-
 import $ from 'jquery';
-import _ from 'lodash';
+import get from 'lodash-es/get';
 import * as stream from './stream';
 import { push } from 'react-router-redux';
 import { displayUpdateProgress } from './state/update';
 import { postJsonWithCredentials } from './serverpipe';
 import { createSelector } from 'reselect';
 import { hasAuthoritativeAuthenticatedUser } from './state';
-import * as warwickSearch from 'warwick-search-frontend';
+import { Routes } from './components/AppRoot';
+import { navRequest } from './state/ui';
 
 /**
  * Factory method for bridge so you can create an instance
  * with different dependencies.
  */
 export default function init(opts) {
-  const { store, tiles, notifications } = opts;
+  const { store, tiles, notifications, userinfo, news } = opts;
 
   function doInit(native) {
     const nativeSelectors = [
@@ -27,12 +26,15 @@ export default function init(opts) {
         state => state.user,
         user => {
           if (!user.empty) {
-            native.setUser(user.data);
+            native.setUser({
+              ...user.data,
+              authoritative: user.authoritative,
+            });
           }
         }
       ),
       createSelector(
-        state => _.get(state, 'routing.locationBeforeTransitions.pathname', '/'),
+        state => get(state, 'routing.locationBeforeTransitions.pathname', '/'),
         path => native.setPath(path)
       ),
       createSelector(
@@ -102,21 +104,28 @@ export default function init(opts) {
       navigate(path) {
         // click event to dismiss active tooltips
         document.dispatchEvent(new Event('click'));
-        store.dispatch(push(path));
-        window.scrollTo(0, 0);
+        if (path.indexOf(`/${Routes.EDIT}`) === 0 || path.indexOf(`/${Routes.TILES}`) === 0) {
+          store.dispatch(push(path));
+        } else {
+          navRequest(path, store.dispatch);
+        }
       },
 
       search(query) {
-        warwickSearch.submitSearch(query);
+        // lazy load the Search module
+        import('warwick-search-frontend').then(s => s.submitSearch(query));
       },
 
       onApplicationDidBecomeActive() {
         if (navigator.onLine) {
           store.dispatch(tiles.fetchTileContent());
+          store.dispatch(news.refresh());
 
           if (hasAuthoritativeAuthenticatedUser(store.getState())) {
             store.dispatch(notifications.fetch());
           }
+
+          userinfo.fetchUserInfo().then(userinfo.receiveUserInfo);
         }
         store.dispatch(displayUpdateProgress);
       },
@@ -127,6 +136,10 @@ export default function init(opts) {
 
       registerForFCM(deviceToken) {
         postJsonWithCredentials('/api/push/fcm/subscribe', { deviceToken });
+      },
+
+      unregisterForPush(deviceToken) {
+        postJsonWithCredentials('/api/push/unsubscribe', { deviceToken });
       },
     };
 

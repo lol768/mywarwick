@@ -13,6 +13,14 @@ export default class MastheadMobile extends React.Component {
   render() {
     return (
       <div className="start-masthead use-popover">
+        { this.props.showEditButton &&
+        <div className="edit-btn" onClick={this.props.onEdit}>
+          { this.props.editing ?
+            <i className="fa fa-fw fa-check"> </i> :
+            <i className="fa fa-fw fa-cog"> </i>
+          }
+        </div>
+        }
         <div className="back-btn" onClick={this.props.onBackClick}>
           <i className="fa fa-chevron-left" />
           Back
@@ -33,4 +41,7 @@ MastheadMobile.propTypes = {
   zoomedTile: React.PropTypes.string,
   path: React.PropTypes.string,
   onBackClick: React.PropTypes.func,
+  onEdit: React.PropTypes.func,
+  editing: React.PropTypes.bool,
+  showEditButton: React.PropTypes.bool,
 };

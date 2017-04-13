@@ -4,7 +4,7 @@ import TileContent from './TileContent';
 import Skycon from '../ui/Skycon';
 import { localMomentUnix } from '../../dateFormats';
 
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 function formatIconString(str) {
   return str.toUpperCase().replace(/-/g, '_');
@@ -22,9 +22,15 @@ export default class WeatherTile extends TileContent {
     return true;
   }
 
-  getIcon(content) {
-    const icon = formatIconString(content.currentConditions.icon);
-    return <Skycon className="skycon" icon={icon} />;
+  getIcon() {
+    const { content } = this.props;
+
+    if (content) {
+      const icon = formatIconString(content.currentConditions.icon);
+      return <Skycon className="skycon" icon={icon} />;
+    }
+
+    return null;
   }
 
   renderIfFresh(contentFunc) {

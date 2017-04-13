@@ -12,7 +12,7 @@
 .tile-list-item {
   overflow: hidden;
   padding: 3px;
-  margin: 0 0 1rem;
+  margin: 0;
 }
 
 .tile-list-item--with-separator {
@@ -64,6 +64,7 @@
 
   &__cell {
     display: table-cell;
+    min-width: 3.6em; // width of time and a dash, to keep times and titles neatly aligned
   }
 }
 
@@ -74,5 +75,5 @@
 }
 
 .tile .list-group {
-  margin-bottom: 20px;
+  margin-bottom: 1em;
 }

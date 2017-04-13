@@ -1,14 +1,22 @@
-import React from 'react';
-import ReactComponent from 'react/lib/ReactComponent';
+import React, { PropTypes } from 'react';
 
 import { connect } from 'react-redux';
 
-class UpdatePopup extends ReactComponent {
+class UpdatePopup extends React.Component {
+
+  static propTypes = {
+    isUpdateReady: PropTypes.bool,
+  };
+
+  reload(e) {
+    e.preventDefault();
+    window.location.reload();
+  }
 
   render() {
     if (this.props.isUpdateReady) {
       return (
-        <div className="alert alert-success" style={{ marginBottom: 15 }}>
+        <div className="alert alert-success update-popup" style={{ marginBottom: 15 }}>
           <div className="media">
             <div className="media-left">
               <i className="app-icon app-icon--lg fa fa-fw fa-check"
@@ -28,11 +36,6 @@ class UpdatePopup extends ReactComponent {
     return null;
   }
 
-  reload(e) {
-    e.preventDefault();
-    window.location.reload();
-  }
-
 }
 
-export default connect((state) => state.update)(UpdatePopup);
+export default connect(state => state.update)(UpdatePopup);

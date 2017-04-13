@@ -61,11 +61,15 @@ class NotificationsController @Inject()(
         Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope)),
       (publish, audience) => {
         val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
+        val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
-        val activityId = activityService.save(notification, audience)
-        auditLog('CreateNotification, 'id -> activityId)
-
-        Redirect(routes.NotificationsController.list(publisherId)).flashing("success" -> "Notification created")
+        activityService.save(notification, audience).fold(
+          errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
+          activityId => {
+            auditLog('CreateNotification, 'id -> activityId)
+            redirect.flashing("success" -> "Notification created")
+          }
+        )
       }
     )
   }

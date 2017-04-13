@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import TileContent from './TileContent';
-import formatDate from '../../dateFormats';
-import _ from 'lodash';
+import { formatDateTime } from '../../dateFormats';
+import _ from 'lodash-es';
 
 export default class ListTile extends TileContent {
 
@@ -29,7 +29,7 @@ export const ListTileItem = (props) => (
   <li className="tile-list-item--with-separator">
     <a href={props.href} target="_blank" onClick={ props.onClickLink }>
       { props.title && <span className="list-group-item__title">{props.title}</span> }
-      { props.date && <span className="list-group-item__date">{formatDate(props.date)}</span> }
+      { props.date && <span className="list-group-item__date">{formatDateTime(props.date)}</span> }
       <span className="list-group-item__text">{props.text}</span>
     </a>
   </li>

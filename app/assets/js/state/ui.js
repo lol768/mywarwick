@@ -1,6 +1,9 @@
 import log from 'loglevel';
 import { browserHistory } from 'react-router';
 import $ from 'jquery';
+import { Routes } from '../components/AppRoot';
+import { goBack, replace } from 'react-router-redux';
+import _ from 'lodash-es';
 
 let mq;
 try {
@@ -20,11 +23,14 @@ function isDesktop() {
 }
 const isWideLayout = () => mq('only all and (min-width: 992px)');
 
+const showBetaWarning = () => $('#app-container').attr('data-show-beta-warning') === 'true';
+
 const initialState = {
   className: undefined,
   isWideLayout: false,
   colourTheme: 'default',
   native: false,
+  showBetaWarning: false,
 };
 
 export function reducer(state = initialState, action) {
@@ -36,8 +42,15 @@ export function reducer(state = initialState, action) {
       return state;
     case 'ui.layout':
       return { ...state, isWideLayout: action.isWideLayout };
+    case 'ui.navRequest':
+      return { ...state, navRequest: action.navRequest };
     case 'ui.theme':
       return { ...state, colourTheme: action.theme };
+    case 'ui.showBetaWarning':
+      if (action.showBetaWarning !== state.showBetaWarning) {
+        return { ...state, showBetaWarning: action.showBetaWarning };
+      }
+      return state;
     default:
       return state;
   }
@@ -73,19 +86,68 @@ export function updateUIContext() {
       type: 'ui.native',
       native: isNative(),
     });
+
+    dispatch({
+      type: 'ui.showBetaWarning',
+      showBetaWarning: showBetaWarning(),
+    });
   };
 }
 
-// todo REMOVE ME WHEN YOU IMPLEMENT PER-TAB SCROLL POSITION REMEMBERING
 export function scrollTopOnTabChange() {
-  function isTopLevelUrl(location) {
-    return (location.pathname.match(/\//g) || []).length === 1;
+  const scrollTops = {};
+
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+
+  // Store / and /edit in the same place
+  function translatedPath(originalPath) {
+    return ((originalPath === `/${Routes.EDIT}`) ? '/' : originalPath);
+  }
+
+  function isTopLevelUrl(path) {
+    return (path.match(/\//g) || []).length === 1;
   }
 
   browserHistory.listen(location => {
-    if (isTopLevelUrl(location)) {
-      $('#main').scrollTop(0);
+    const path = translatedPath(location.pathname);
+    if (isTopLevelUrl(path)) {
+      const scrollTop = scrollTops[path] || 0;
+      log.debug(`path: ${path} => scrollTop: ${scrollTop}`);
+      window.scrollTo(0, scrollTop);
+    } else {
+      window.scrollTo(0, 0);
     }
   });
+
+  $(window).on('scroll', _.throttle(() => {
+    scrollTops[translatedPath(window.location.pathname)] = $(window).scrollTop();
+  }, 250));
+}
+
+/**
+ * When we change tiles we want to replace the history, so going back will close the app.
+ * However if we're in /edit or /tiles we'd end up replacing just that path, so going back would go
+ * back to /.
+ * To sort out the history we need to go back _then_ replace, however react-router-redux gets into
+ * a race condition if you try and dispatch both at the same time.
+ * Therefore put the path we actually want to go to in the store separately, then just go back here.
+ * The MeView then handles sending you on to where you wanted.
+ */
+export function navRequest(path, dispatch) {
+  if (path === window.location.pathname) {
+    window.scrollTo(0, 0);
+  } else if (window.location.pathname.indexOf(Routes.TILES) !== -1 ||
+    window.location.pathname.indexOf(Routes.EDIT) !== -1
+  ) {
+    dispatch({
+      type: 'ui.navRequest',
+      navRequest: path,
+    });
+    dispatch(goBack());
+  } else {
+    dispatch(replace(path));
+  }
 }
 
