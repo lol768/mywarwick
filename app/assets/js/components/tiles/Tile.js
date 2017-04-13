@@ -101,7 +101,7 @@ export default class Tile extends React.Component {
           title="Change setting"
           onClick={this.props.onConfiguring}
         >
-          <i className="fa fa-cog"></i>
+          <div className="icon"><i className="fa fa-cog"></i></div>
         </div>
       );
     }
@@ -142,7 +142,7 @@ export default class Tile extends React.Component {
               onClick={ this.props.onHide }
               title={ `Hide ${title}` }
             >
-              <i className="fa fa-minus"> </i>
+              <div className="icon"><i className="fa fa-minus"> </i></div>
             </div>
           }
 
@@ -151,14 +151,14 @@ export default class Tile extends React.Component {
             onClick={ this.props.onResize }
             title={`Make tile ${size !== 'tall' ? 'bigger' : 'smaller'}`}
           >
-            <i className="fa fa-arrow-up"> </i>
+            <div className="icon"><i className="fa fa-arrow-up"> </i></div>
           </div>
 
           <div
             className="tile__edit-control bottom-left tile__drag-handle"
             title="Drag to re-arrange tile"
           >
-            <i className="fa fa-arrows"> </i>
+            <div className="icon"><i className="fa fa-arrows"> </i></div>
           </div>
 
           { this.displayConfigButton() }
