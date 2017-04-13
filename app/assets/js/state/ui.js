@@ -94,15 +94,25 @@ export function updateUIContext() {
   };
 }
 
-export function scrollTopOnTabChange(scrollTops) {
-  function isTopLevelUrl(location) {
-    return (location.pathname.match(/\//g) || []).length === 1;
+export function scrollTopOnTabChange() {
+  const scrollTops = {};
+
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+
+  // Store / and /edit in the same place
+  function translatedPath(originalPath) {
+    return ((originalPath === `/${Routes.EDIT}`) ? '/' : originalPath);
+  }
+
+  function isTopLevelUrl(path) {
+    return (path.match(/\//g) || []).length === 1;
   }
 
   browserHistory.listen(location => {
-    if (isTopLevelUrl(location)) {
-      const originalPath = window.location.pathname;
-      const path = (_.startsWith(originalPath, `/${Routes.EDIT}`)) ? '/' : originalPath;
+    const path = translatedPath(location.pathname);
+    if (isTopLevelUrl(path)) {
       const scrollTop = scrollTops[path] || 0;
       log.debug(`path: ${path} => scrollTop: ${scrollTop}`);
       window.scrollTo(0, scrollTop);
@@ -110,6 +120,10 @@ export function scrollTopOnTabChange(scrollTops) {
       window.scrollTo(0, 0);
     }
   });
+
+  $(window).on('scroll', _.throttle(() => {
+    scrollTops[translatedPath(window.location.pathname)] = $(window).scrollTop();
+  }, 250));
 }
 
 /**
