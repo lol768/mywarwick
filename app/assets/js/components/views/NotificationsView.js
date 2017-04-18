@@ -155,7 +155,8 @@ class NotificationsView extends React.Component {
             hasMore={ hasMore }
             onLoadMore={ this.loadMore }
             showLoading
-            type='NotificationsView'>
+            type="NotificationsView"
+          >
             <GroupedList groupBy={ this.props.grouped ? groupItemsByDate : undefined }>
               { notificationItems }
             </GroupedList>

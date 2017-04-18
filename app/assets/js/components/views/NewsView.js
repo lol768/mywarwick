@@ -96,7 +96,8 @@ export class NewsView extends React.Component {
           <InfiniteScrollable
             hasMore={moreAvailable}
             onLoadMore={this.loadMore}
-            type='NewsView'>
+            type="NewsView"
+          >
             {itemComponents}
           </InfiniteScrollable> : maybeMessage
         }

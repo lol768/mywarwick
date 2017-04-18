@@ -3,7 +3,6 @@ import React, { PropTypes } from 'react';
 export default class NoMoreItem extends React.PureComponent {
 
   static propTypes = {
-    visible: PropTypes.bool,
     type: PropTypes.String,
   };
 
@@ -19,8 +18,7 @@ export default class NoMoreItem extends React.PureComponent {
   render() {
     return (
       <div className="centered empty-state">
-        { this.props.visible ?
-          <p className="lead" id="no_more_item">{ this.phrases[this.props.type] }</p> : '' }
+          <p className="lead" id="no_more_item">{ this.phrases[this.props.type] }</p>
       </div>
     );
   }

@@ -74,7 +74,8 @@ class ActivityView extends React.Component {
             hasMore={ hasMore }
             onLoadMore={ this.loadMore }
             showLoading
-            type='ActivityView'>
+            type="ActivityView"
+          >
             <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
               {activities}
             </GroupedList>
