@@ -21,6 +21,8 @@ class WebGroupsController @Inject()(
 
     if (query.trim.isEmpty) {
       BadRequest(Json.obj(
+        "success" -> false,
+        "status" -> "bad_request",
         "groups" -> Json.arr()
       ))
     } else {
@@ -28,15 +30,19 @@ class WebGroupsController @Inject()(
         case Success(groups) =>
           val results = (scope match {
             case AllDepartments => groups
-            case Departments(departments) => groups.filter(d => departments.contains(d.department.code.get))
+            case Departments(departments) => groups.filter(_.department.code.exists(departments.contains))
           }).take(8)
 
           Ok(Json.obj(
+            "success" -> true,
+            "status" -> "ok",
             "groups" -> Json.toJson(results)
           ))
         case Failure(e) =>
           logger.warn(s"Error fetching WebGroups matching query '${query.trim}'", e)
           InternalServerError(Json.obj(
+            "success" -> false,
+            "status" -> "internal_server_error",
             "groups" -> Json.arr()
           ))
       }

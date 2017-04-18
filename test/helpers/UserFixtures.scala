@@ -6,14 +6,14 @@ import warwick.sso._
 /** Access via Fixtures.user */
 private[helpers] object UserFixtures {
 
-  def makeGroup(name: String = "in-elab", members: Seq[String] = Seq("a", "b")): Group =
+  def makeGroup(name: String = "in-elab", members: Seq[String] = Seq("a", "b"), title: String = "ITS web team", department: String = "in"): Group =
     Group(
       GroupName(name),
-      Some("ITS web team"),
+      Some(title),
       members.map(Usercode),
       Seq(Usercode("a")),
       "Arbitrary",
-      Department(None, Some("Information Technology Services"), Some("in")),
+      Department(None, Some("Information Technology Services"), Some(department)),
       DateTime.now(),
       restricted = false
     )
