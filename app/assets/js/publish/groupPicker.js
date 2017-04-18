@@ -6,11 +6,11 @@ import log from 'loglevel';
 $(() => {
   const publisherId = window.location.pathname.split('/')[2];
 
-  let currentQuery = null;
-
   $('.group-picker').each(function attachPicker() {
     const $input = $(this);
     const $checkbox = $input.prev('.checkbox').find('input:checkbox');
+
+    let currentQuery = null;
 
     $input.typeahead({
       source: (query, callback) => {
