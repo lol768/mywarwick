@@ -39,7 +39,7 @@
         <input type="text" class="form-control disabled" autocomplete="no" value="@component.groupName.string" readonly>
       }
 
-      @tags.seqCheckbox(form, audienceField, '_text -> "Members of a WebGroup", 'disabled -> true)
+      @tags.seqCheckbox(form, audienceField, '_text -> "Members of a WebGroup", 'value -> "WebGroup:", 'disabled -> true)
       <input type="text" class="form-control group-picker" autocomplete="no">
 
       <br>

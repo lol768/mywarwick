@@ -35,8 +35,11 @@ class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
       // Bits of audience not related to a department.
       val globalComponents = groupedComponents.getOrElse(false, Nil).flatMap {
         case Audience.ComponentParameter(component) => Some(component)
+
+        // Don't error for a blank audience such as "WebGroup:"
+        case unrecognised if unrecognised.endsWith(":") => None
         case unrecognised =>
-          errors :+= FormError("audience", "error.audience.invalid", unrecognised)
+          errors :+= FormError("audience", "error.audience.invalid", Seq(unrecognised))
           None
       }
 
@@ -45,7 +48,7 @@ class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
         .flatMap {
           case Audience.DepartmentSubset(subset) => Some(subset)
           case unrecognised =>
-            errors :+= FormError("audience", "error.audience.invalid", s"Dept:$unrecognised")
+            errors :+= FormError("audience", "error.audience.invalid", Seq(s"Dept:$unrecognised"))
             None
         }
 

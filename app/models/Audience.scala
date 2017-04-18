@@ -44,8 +44,8 @@ object Audience {
   case object TaughtPostgrads extends DepartmentSubset
   case object ResearchPostgrads extends DepartmentSubset
 
-  val moduleCodeRegex: Regex = "Module:(.+)".r
-  val webGroupRegex: Regex = "WebGroup:(.+)".r
+  val moduleCodeRegex: Regex = "^Module:(.+)".r
+  val webGroupRegex: Regex = "^WebGroup:(.+)".r
 
   object ComponentParameter {
     def unapply(paramValue: String): Option[Component] = paramValue match {
