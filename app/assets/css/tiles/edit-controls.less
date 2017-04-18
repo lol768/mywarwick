@@ -48,6 +48,9 @@
     height: @icon-size;
     margin: (@size - @icon-size) / 2;
     opacity: 0.8;
+    &:hover {
+      background-color: #e40404;
+    }
   }
 
   .center-aligned-icon(@size, @font-size);
@@ -56,9 +59,7 @@
     transition: transform .4s;
   }
 
-  &:hover {
-    background-color: #444;
-  }
+
 
   .edit-control-positions(-@size * 1/2);
 
