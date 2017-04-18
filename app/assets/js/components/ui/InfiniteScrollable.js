@@ -10,6 +10,7 @@ export default class InfiniteScrollable extends React.Component {
     onLoadMore: PropTypes.func.isRequired,
     children: PropTypes.node,
     showLoading: PropTypes.bool,
+    type: PropTypes.string,
   };
 
   constructor(props) {
@@ -92,7 +93,8 @@ export default class InfiniteScrollable extends React.Component {
           </div> : ''
         }
       <NoMoreItem
-        visible= { !this.state.loading }
+        visible= { !this.state.hasMore }
+        type= { this.props.type }
       />
       </div>);
   }
