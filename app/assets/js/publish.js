@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import FileUpload from './publish/components/FileUpload';
 import $ from 'jquery';
 import './publish/news';
+import './publish/groupPicker';
 
 /*
  Attempt to register service worker - we don't do notifications or offline but it's nice to keep it

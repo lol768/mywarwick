@@ -7,6 +7,7 @@ import models.Audience._
 import play.api.data.FormError
 import services.dao.DepartmentInfoDao
 import uk.ac.warwick.util.core.StringUtils
+import warwick.sso.GroupName
 
 import scala.concurrent.Future
 
@@ -88,6 +89,7 @@ class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
     } else {
       audience.components.flatMap {
         case DepartmentAudience(_, subsets) => subsets.map(_.entryName).map("Dept:".concat)
+        case WebGroupAudience(GroupName(groupName)) => Seq(s"WebGroup:$groupName")
         case component: Component => Seq(component.entryName)
         case _ => Seq.empty
       }

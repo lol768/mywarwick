@@ -91,7 +91,7 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
     }
 
     "send to a webgroup" in {
-      val groupAudience = Audience(Seq(Audience.WebgroupAudience(GroupName("in-trigue"))))
+      val groupAudience = Audience(Seq(Audience.WebGroupAudience(GroupName("in-trigue"))))
 
       when(publisherService.getRoleForUser(Matchers.eq(tabulaPublisherId), any())).thenReturn(APINotificationsManager)
       when(activityService.save(any(), Matchers.eq(groupAudience))).thenReturn(Right("created-activity-id"))

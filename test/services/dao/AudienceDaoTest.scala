@@ -37,7 +37,7 @@ class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "save Webgroup Component" in {
-      val audience = Audience(Seq(WebgroupAudience(GroupName("in-music"))))
+      val audience = Audience(Seq(WebGroupAudience(GroupName("in-music"))))
       val saved = audienceDao.audienceToComponents(audience)
 
       saved mustBe Seq(AudienceComponentSave("Webgroup", Some("in-music"), None))
@@ -79,7 +79,7 @@ class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
       audience.components must contain only(
         DepartmentAudience("ch", Seq(Staff, UndergradStudents)),
         ModuleAudience("music"),
-        WebgroupAudience(GroupName("in-elab")),
+        WebGroupAudience(GroupName("in-elab")),
         ModuleAudience("history")
       )
     }

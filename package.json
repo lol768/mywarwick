@@ -75,6 +75,7 @@
     "webpack-stream": "^3.2.0"
   },
   "dependencies": {
+    "bootstrap-3-typeahead": "^4.0.2",
     "bundle-loader": "^0.5.5",
     "classnames": "~2.2.3",
     "core-js": "~2.2.2",

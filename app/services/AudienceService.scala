@@ -31,7 +31,7 @@ class AudienceServiceImpl @Inject()(
       case PublicAudience => Seq(Usercode("*"))
       // webgroups has handy "all-" webgroups that subset all the departments.
       case ds: DepartmentSubset => resolveSubset("all", ds).get
-      case WebgroupAudience(name) => webgroupUsers(name).get
+      case WebGroupAudience(name) => webgroupUsers(name).get
       case ModuleAudience(code) => moduleWebgroupUsers(code).get
       case DepartmentAudience(code, subsets) => for {
         subset <- subsets

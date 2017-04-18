@@ -1,11 +1,13 @@
 @import models.publishing.PermissionScope
+@import models.Audience.WebGroupAudience
 @(
     form: Form[_],
     fieldName: String,
     departmentOptions: Seq[(String, String)],
     itemName: String,
     permissionScope: PermissionScope,
-    allowPublic: Boolean
+    allowPublic: Boolean,
+    audience: Audience
 )(implicit fc: b3.B3FieldConstructor, messages: Messages)
 @defining((s"$fieldName.audience", s"$fieldName.department")) { case (audienceField, departmentField) =>
 
@@ -31,6 +33,16 @@
           @tags.seqCheckbox(form, audienceField, 'id -> "pgt", '_text -> "PG Taught", 'value -> "TaughtPostgrads")
           @tags.seqCheckbox(form, audienceField, 'id -> "pgr", '_text -> "PG Research", 'value -> "ResearchPostgrads")
         }
+
+      @audience.components.filter(_.isInstanceOf[WebGroupAudience]).map(_.asInstanceOf[WebGroupAudience]).map { component =>
+        @tags.seqCheckbox(form, audienceField, '_text -> "Members of a WebGroup", 'value -> s"WebGroup:${component.groupName.string}")
+        <input type="text" class="form-control disabled" autocomplete="no" value="@component.groupName.string" readonly>
+      }
+
+      @tags.seqCheckbox(form, audienceField, '_text -> "Members of a WebGroup", 'disabled -> true)
+      <input type="text" class="form-control group-picker" autocomplete="no">
+
+      <br>
 
         @if(departmentOptions.size == 1) {
           @b3.static(){ @departmentOptions.head._2 }(b3.clear.fieldConstructorSpecific)

@@ -23,6 +23,8 @@ GET         /admin/sysadmin                                       @controllers.a
 GET         /admin/cluster                                        @controllers.admin.ClusterStateController.html
 GET         /admin/masquerade                                     @controllers.admin.MasqueradeController.masquerade
 
+GET         /publish/:publisher/webgroups                         @controllers.publish.WebGroupsController.results(publisher: String, query: String)
+
 GET         /publish                                              @controllers.publish.PublishersController.index
 GET         /publish/:publisher                                   @controllers.publish.PublishersController.show(publisher: String)
 GET         /publish/:publisher/news                              @controllers.publish.NewsController.list(publisher: String)

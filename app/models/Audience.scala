@@ -3,6 +3,8 @@ package models
 import enumeratum.EnumEntry
 import warwick.sso.{GroupName, Usercode}
 
+import scala.util.matching.Regex
+
 case class Audience(components: Seq[Audience.Component] = Nil) {
   val public = components.contains(Audience.PublicAudience)
 
@@ -31,7 +33,7 @@ object Audience {
 
   case class UsercodeAudience(usercode: Usercode) extends Component
 
-  case class WebgroupAudience(groupName: GroupName) extends Component
+  case class WebGroupAudience(groupName: GroupName) extends Component
   case class ModuleAudience(moduleCode: String) extends Component
   case class DepartmentAudience(deptCode: String, subset: Seq[DepartmentSubset]) extends Component
 
@@ -42,7 +44,8 @@ object Audience {
   case object TaughtPostgrads extends DepartmentSubset
   case object ResearchPostgrads extends DepartmentSubset
 
-  val moduleCodeRegex = "Module:(.+)".r
+  val moduleCodeRegex: Regex = "Module:(.+)".r
+  val webGroupRegex: Regex = "WebGroup:(.+)".r
 
   object ComponentParameter {
     def unapply(paramValue: String): Option[Component] = paramValue match {
@@ -51,9 +54,8 @@ object Audience {
       case "UndergradStudents" => Some(UndergradStudents)
       case "TaughtPostgrads" => Some(TaughtPostgrads)
       case "ResearchPostgrads" => Some(ResearchPostgrads)
-
-      // FIXME: not handling Module or Webgroup parameters
-      case moduleCodeRegex(code) => None
+      case webGroupRegex(webGroup) => Some(WebGroupAudience(GroupName(webGroup)))
+      case moduleCodeRegex(code) => Some(ModuleAudience(code))
       case _ => None
     }
   }
