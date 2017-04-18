@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
+import NoMoreItem from './noMoreItem.js';
 
 export default class InfiniteScrollable extends React.Component {
 
@@ -90,6 +91,9 @@ export default class InfiniteScrollable extends React.Component {
             <i className="fa fa-spinner fa-pulse fa-2x" />
           </div> : ''
         }
+      <NoMoreItem
+        visible= { !this.state.loading }
+      />
       </div>);
   }
 
