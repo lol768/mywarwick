@@ -5,18 +5,18 @@ import javax.inject.Inject
 import controllers.BaseController
 import models.publishing.PermissionScope.{AllDepartments, Departments}
 import play.api.libs.json._
-import play.api.mvc.Action
-import services.PublisherService
+import services.{NewsCategoryService, PublisherService, SecurityService}
 import warwick.sso.{Group, GroupService}
 
 import scala.util.{Failure, Success}
 
 class WebGroupsController @Inject()(
   groupService: GroupService,
-  publisherService: PublisherService
-) extends BaseController {
+  val publisherService: PublisherService,
+  val securityService: SecurityService
+) extends BaseController with PublishingActionRefiner {
 
-  def results(publisherId: String, query: String) = Action {
+  def results(publisherId: String, query: String) = PublisherAction(publisherId) {
     val scope = publisherService.getPermissionScope(publisherId)
 
     if (query.trim.isEmpty) {
