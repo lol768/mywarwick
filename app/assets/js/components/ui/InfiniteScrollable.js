@@ -1,7 +1,6 @@
 import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
-import NoMoreItem from './noMoreItem.js';
 
 export default class InfiniteScrollable extends React.Component {
 
@@ -10,7 +9,7 @@ export default class InfiniteScrollable extends React.Component {
     onLoadMore: PropTypes.func.isRequired,
     children: PropTypes.node,
     showLoading: PropTypes.bool,
-    type: PropTypes.string,
+    endOfListPhrase: PropTypes.string,
   };
 
   constructor(props) {
@@ -85,6 +84,14 @@ export default class InfiniteScrollable extends React.Component {
     }
   }
 
+  noMoreItems(phrase) {
+    return (
+      <div className="centered empty-state">
+        <p className="lead">{ phrase }</p>
+      </div>
+    );
+  }
+
   render() {
     return (<div>
         {this.props.children}
@@ -92,7 +99,7 @@ export default class InfiniteScrollable extends React.Component {
             <i className="fa fa-spinner fa-pulse fa-2x" />
           </div> : ''
         }
-      { !this.props.hasMore && <NoMoreItem type={ this.props.type } /> }
+      { !this.props.hasMore && this.noMoreItems(this.props.endOfListPhrase) }
       </div>);
   }
 

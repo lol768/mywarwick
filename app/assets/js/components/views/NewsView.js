@@ -96,7 +96,7 @@ export class NewsView extends React.Component {
           <InfiniteScrollable
             hasMore={moreAvailable}
             onLoadMore={this.loadMore}
-            type="NewsView"
+            endOfListPhrase="There is no older news."
           >
             {itemComponents}
           </InfiniteScrollable> : maybeMessage

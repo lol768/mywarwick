@@ -74,7 +74,7 @@ class ActivityView extends React.Component {
             hasMore={ hasMore }
             onLoadMore={ this.loadMore }
             showLoading
-            type="ActivityView"
+            endOfListPhrase="There are no older activities."
           >
             <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
               {activities}

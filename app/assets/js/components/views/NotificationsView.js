@@ -155,7 +155,7 @@ class NotificationsView extends React.Component {
             hasMore={ hasMore }
             onLoadMore={ this.loadMore }
             showLoading
-            type="NotificationsView"
+            endOfListPhrase="There are no older notifications."
           >
             <GroupedList groupBy={ this.props.grouped ? groupItemsByDate : undefined }>
               { notificationItems }
