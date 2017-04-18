@@ -1,10 +1,10 @@
-.center-aligned-icon(@base-size, @border-size, @font-size) {
-  @offset: @base-size / 2 - @border-size - @font-size / 2;
+.center-aligned-icon(@base-size, @font-size) {
+  @offset: @base-size / 2 - @font-size / 2;
   i {
     position: absolute;
     top: @offset;
     left: @offset;
-    color: #fff;
+    color: #f0f0f0;
     font-size: @font-size;
     line-height: @font-size;
     height: @font-size;
@@ -27,30 +27,39 @@
 
 .tile__edit-control {
   @size: 44px;
+  @icon-size: 36px;
   @font-size: 18px;
 
   display: none;
   position: absolute;
   z-index: 10;
 
-  background-color: #000;
-  color: #fff;
-  border: 2px solid #fff;
-  border-radius: 100%;
   width: @size;
   height: @size;
 
   cursor: pointer;
 
-  .center-aligned-icon(@size, 2px, @font-size);
+  .icon {
+    background-color: #404040;
+    color: #fff;
+    border: 2px solid #f0f0f0;
+    border-radius: 100%;
+    width: @icon-size;
+    height: @icon-size;
+    margin: (@size - @icon-size) / 2;
+    opacity: 0.8;
+    &:hover {
+      background-color: #444;
+    }
+  }
+
+  .center-aligned-icon(@size, @font-size);
 
   .fa-arrow-up {
     transition: transform .4s;
   }
 
-  &:hover {
-    background-color: #444;
-  }
+
 
   .edit-control-positions(-@size * 1/2);
 
@@ -93,7 +102,7 @@
   background-color: #8c6e96;
   border-radius: @base-size / 2;
   box-shadow: rgba(0, 0, 0, 0.16) 0 3px 10px, rgba(0, 0, 0, 0.23) 0 3px 10px;
-  .center-aligned-icon(@base-size, 0, @font-size);
+  .center-aligned-icon(@base-size, @font-size);
   .not-app & {
     bottom: 60px;
   }
