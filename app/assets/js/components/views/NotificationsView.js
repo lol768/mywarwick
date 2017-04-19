@@ -151,7 +151,12 @@ class NotificationsView extends React.Component {
           : null
         }
         { hasAny ?
-          <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore } showLoading>
+          <InfiniteScrollable
+            hasMore={ hasMore }
+            onLoadMore={ this.loadMore }
+            showLoading
+            endOfListPhrase="There are no older notifications."
+          >
             <GroupedList groupBy={ this.props.grouped ? groupItemsByDate : undefined }>
               { notificationItems }
             </GroupedList>
