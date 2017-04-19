@@ -98,10 +98,11 @@ class NotificationsView extends React.Component {
       return this.props.dispatch(notifications.fetchMoreNotifications())
         .then(() => this.showMore())
         .catch((e) => {
-          if (e instanceof notifications.UnnecessaryFetchError) {
-            log.debug(`Unnecessary fetch: ${e.message}`);
-          } else {
+          if (!(e instanceof notifications.UnnecessaryFetchError)) {
             throw e;
+          } else {
+            log.debug(`Unnecessary fetch: ${e.message}`);
+            return Promise.reject(e);
           }
         });
     }

@@ -54,9 +54,6 @@ export default class InfiniteScrollable extends React.Component {
       this.props.onLoadMore().then(
         () => this.setState({
           loading: false,
-        }),
-        () => this.setState({
-          loading: false,
         })
       );
     }
