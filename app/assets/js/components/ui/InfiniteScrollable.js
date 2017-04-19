@@ -99,7 +99,7 @@ export default class InfiniteScrollable extends React.Component {
             <i className="fa fa-spinner fa-pulse fa-2x" />
           </div> : ''
         }
-      { !this.props.hasMore && this.noMoreItems(this.props.endOfListPhrase) }
+      { this.props.hasMore || this.noMoreItems(this.props.endOfListPhrase) }
       </div>);
   }
 
