@@ -38,7 +38,7 @@ class UserActivitiesController @Inject()(
 
   def activities(since: Option[String], before: Option[String], limit: Int) = APIAction { implicit request =>
     val activities = request.context.user
-      .map(user => activityService.getActivitiesForUser(user, before, since))
+      .map(user => activityService.getActivitiesForUser(user, before, since, limit))
       .getOrElse(Nil)
 
     Ok(Json.toJson(API.Success(data = Json.obj(
