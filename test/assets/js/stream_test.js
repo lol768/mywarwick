@@ -1,6 +1,14 @@
 import moment from 'moment';
 import _ from 'lodash';
-import { onStreamReceive, getStreamPartition, mergeReceivedItems, takeFromStream, getStreamSize, getNumItemsSince } from '../../../app/assets/js/stream';
+import {
+  onStreamReceive,
+  getStreamPartition,
+  mergeReceivedItems,
+  takeFromStream,
+  getStreamSize,
+  getNumItemsSince,
+  freeze,
+} from '../../../app/assets/js/stream';
 
 let item = (id, date) => ({id: id, date: moment('2015-01-01').add(date, 'd').format()});
 
@@ -47,6 +55,23 @@ describe('stream', () => {
     expect(takeFromStream(onStreamReceive(undefined, grouper, []), 100)).to.eql([]);
   });
 
+});
+
+describe('stream.freeze', () => {
+  it('forms a flat array of items', () => {
+    const grouper = (n) => n.date.toString().substr(0, 7);
+    const items = [
+      item('a', 0), item('b', 31), item('c', 59)
+    ];
+    const stream = onStreamReceive(undefined, grouper, items);
+    const state = {
+      stream,
+      olderItemsOnServer: true
+    };
+    const frozen = freeze(state);
+    expect(frozen.olderItemsOnServer).to.eql(true);
+    expect(frozen.items).to.deep.eql(items);
+  })
 });
 
 describe('mergeReceivedItems', () => {
