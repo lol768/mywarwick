@@ -7,7 +7,6 @@ import EmptyState from '../ui/EmptyState';
 import { connect } from 'react-redux';
 import { getStreamSize, takeFromStream } from '../../stream';
 import * as notifications from '../../state/notifications';
-import log from 'loglevel';
 
 const SOME_MORE = 20;
 
@@ -41,14 +40,7 @@ class ActivityView extends React.Component {
       return Promise.resolve(this.showMore());
     } else if (this.props.olderItemsOnServer) {
       return this.props.dispatch(notifications.fetchMoreActivities())
-        .then(() => this.showMore())
-        .catch((e) => {
-          if (e instanceof notifications.UnnecessaryFetchError) {
-            log.debug(`Unnecessary fetch: ${e.message}`);
-          } else {
-            throw e;
-          }
-        });
+        .then(() => this.showMore());
     }
     return Promise.resolve();
   }
