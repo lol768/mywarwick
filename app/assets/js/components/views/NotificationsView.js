@@ -129,7 +129,7 @@ class NotificationsView extends React.Component {
       );
 
     const streamSize = getStreamSize(this.props.notifications);
-    const hasAny = streamSize > 0;
+    const hasAny = streamSize > 0 || this.props.olderItemsOnServer;
     const hasMore = this.state.numberToShow < streamSize || this.props.olderItemsOnServer;
     const browserPushDisabled = this.props.notificationPermission === 'denied';
 

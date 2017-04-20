@@ -56,7 +56,7 @@ class ActivityView extends React.Component {
       .map(n => <ActivityItem key={n.id} grouped={this.props.grouped} {...n} />);
 
     const streamSize = getStreamSize(this.props.activities);
-    const hasAny = streamSize > 0;
+    const hasAny = streamSize > 0 || this.props.olderItemsOnServer;
     const hasMore = this.state.numberToShow < streamSize || this.props.olderItemsOnServer;
 
     return (
