@@ -113,8 +113,8 @@ class NotificationsView extends React.Component {
   isUnread(notification) {
     const { notificationsLastRead } = this.props;
 
-    return notificationsLastRead.date === null
-      || moment(notification.date).isAfter(notificationsLastRead.date);
+    return notificationsLastRead.date !== null
+      && moment(notification.date).isAfter(notificationsLastRead.date);
   }
 
   render() {
