@@ -66,7 +66,7 @@ class WebGroupsControllerTest extends BaseSpec with MockitoSugar with Results {
       when(publisherService.getPermissionScope("test")).thenReturn(Departments(Seq("CS")))
       when(groupService.getGroupsForQuery("elab")).thenReturn(Success(Seq(
         Fixtures.user.makeGroup(name = "in-elab"),
-        Fixtures.user.makeGroup(name = "cs-cs118", title = "Programming for Computer Scientists", department = "CS")
+        Fixtures.user.makeGroup(name = "cs-elab", title = "Programming for Computer Scientists", department = "CS")
       )))
 
       val result = controller.results("test", "elab")(FakeRequest())
@@ -74,7 +74,7 @@ class WebGroupsControllerTest extends BaseSpec with MockitoSugar with Results {
       status(result) mustBe 200
       (contentAsJson(result) \ "success").as[Boolean] mustBe true
       (contentAsJson(result) \ "status").as[String] mustBe "ok"
-      (contentAsJson(result) \ "groups" \\ "name").map(_.as[String]) mustBe Seq("cs-cs118")
+      (contentAsJson(result) \ "groups" \\ "name").map(_.as[String]) mustBe Seq("cs-elab")
       (contentAsJson(result) \ "groups" \\ "title").map(_.as[String]) mustBe Seq("Programming for Computer Scientists")
     }
   }
