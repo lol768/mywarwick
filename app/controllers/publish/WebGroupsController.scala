@@ -5,7 +5,7 @@ import javax.inject.Inject
 import controllers.BaseController
 import models.publishing.PermissionScope.{AllDepartments, Departments}
 import play.api.libs.json._
-import services.{NewsCategoryService, PublisherService, SecurityService}
+import services.{PublisherService, SecurityService}
 import warwick.sso.{Group, GroupService}
 
 import scala.util.{Failure, Success}
@@ -16,22 +16,30 @@ class WebGroupsController @Inject()(
   val securityService: SecurityService
 ) extends BaseController with PublishingActionRefiner {
 
-  def results(publisherId: String, query: String) = PublisherAction(publisherId) {
+  def results(publisherId: String, rawQuery: String) = PublisherAction(publisherId) {
+    val query = rawQuery.trim
     val scope = publisherService.getPermissionScope(publisherId)
 
-    if (query.trim.isEmpty) {
+    if (query.isEmpty) {
       BadRequest(Json.obj(
         "success" -> false,
         "status" -> "bad_request",
         "groups" -> Json.arr()
       ))
     } else {
-      groupService.getGroupsForQuery(query.trim) match {
+      groupService.getGroupsForQuery(query) match {
         case Success(groups) =>
-          val results = (scope match {
+          val allMatches = scope match {
             case AllDepartments => groups
             case Departments(departments) => groups.filter(_.department.code.exists(departments.contains))
-          }).take(8)
+          }
+
+          val results = allMatches
+            .map(group => (group, group.name.string.indexOf(query)))
+            .filter { case (_, index) => index >= 0 }
+            .sortBy { case (_, index) => index }
+            .map { case (group, _) => group }
+            .take(8)
 
           Ok(Json.obj(
             "success" -> true,
