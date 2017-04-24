@@ -34,15 +34,19 @@
           @tags.seqCheckbox(form, audienceField, 'id -> "pgr", '_text -> "PG Research", 'value -> "ResearchPostgrads")
         }
 
-      @audience.components.filter(_.isInstanceOf[WebGroupAudience]).map(_.asInstanceOf[WebGroupAudience]).map { component =>
-        @tags.seqCheckbox(form, audienceField, '_text -> "Members of a WebGroup", 'value -> s"WebGroup:${component.groupName.string}")
-        <input type="text" class="form-control disabled" autocomplete="no" value="@component.groupName.string" readonly>
-      }
+        @defining(audience.components.filter(_.isInstanceOf[WebGroupAudience]).map(_.asInstanceOf[WebGroupAudience])) { webGroupComponents =>
+          @if(webGroupComponents.nonEmpty) {
+             @webGroupComponents.map { component =>
+               @tags.seqCheckbox(form, audienceField, '_text -> "Members of a WebGroup", 'value -> s"WebGroup:${component.groupName.string}")
+               <input type="text" class="form-control" autocomplete="no" value="@component.groupName.string">
+             }
+          } else {
+            @tags.seqCheckbox(form, audienceField, '_text -> "Members of a WebGroup", 'value -> "WebGroup:", 'disabled -> true)
+            <input type="text" class="form-control group-picker" autocomplete="no">
+          }
+        }
 
-      @tags.seqCheckbox(form, audienceField, '_text -> "Members of a WebGroup", 'value -> "WebGroup:", 'disabled -> true)
-      <input type="text" class="form-control group-picker" autocomplete="no">
-
-      <br>
+        <br>
 
         @if(departmentOptions.size == 1) {
           @b3.static(){ @departmentOptions.head._2 }(b3.clear.fieldConstructorSpecific)
