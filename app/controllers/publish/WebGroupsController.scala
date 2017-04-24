@@ -16,6 +16,18 @@ class WebGroupsController @Inject()(
   val securityService: SecurityService
 ) extends BaseController with PublishingActionRefiner {
 
+  val excludedGroupSuffixes = Seq(
+    "-all",
+    "-staff",
+    "-studenttype-undergraduate-full-time",
+    "-studenttype-undergraduate-part-time",
+    "-studenttype-postgraduate-full-time",
+    "-studenttype-postgraduate-part-time",
+    "-studenttype-postgraduate-taught-ft",
+    "-studenttype-postgraduate-taught-pt",
+    "-teaching"
+  )
+
   def results(publisherId: String, rawQuery: String) = PublisherAction(publisherId) {
     val query = rawQuery.trim
     val scope = publisherService.getPermissionScope(publisherId)
@@ -39,6 +51,7 @@ class WebGroupsController @Inject()(
             .filter { case (_, index) => index >= 0 }
             .sortBy { case (_, index) => index }
             .map { case (group, _) => group }
+            .filterNot(group => excludedGroupSuffixes.exists(group.name.string.endsWith))
             .take(8)
 
           Ok(Json.obj(
