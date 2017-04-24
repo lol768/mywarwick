@@ -1,6 +1,8 @@
 import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
+import log from 'loglevel';
+import * as notifications from '../../state/notifications';
 
 export default class InfiniteScrollable extends React.Component {
 
@@ -52,14 +54,19 @@ export default class InfiniteScrollable extends React.Component {
       this.setState({
         loading: true,
       });
-      this.props.onLoadMore().then(
-        () => this.setState({
-          loading: false,
-        }),
-        () => this.setState({
-          loading: false,
-        })
-      );
+      this.props.onLoadMore().then(() => this.setState({
+        loading: false,
+      })).catch((e) => {
+        if (!(e instanceof notifications.UnnecessaryFetchError)) {
+          this.setState({
+            loading: false,
+          });
+        } else {
+          log.debug(`Unnecessary fetch: ${e.message}`);
+          return Promise.resolve();
+        }
+        return Promise.reject(e);
+      });
     }
   }
 

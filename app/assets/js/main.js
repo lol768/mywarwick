@@ -39,6 +39,7 @@ import * as news from './state/news';
 import * as ui from './state/ui';
 import * as device from './state/device';
 import * as analytics from './analytics';
+import * as stream from './stream';
 import store from './store';
 import AppRoot from './components/AppRoot';
 import bridge from './bridge';
@@ -151,14 +152,6 @@ SocketDatapipe.subscribe(data => {
   }
 });
 
-/** Fetching/storing locally persisted data */
-
-function freezeStream({ stream, olderItemsOnServer }) {
-  return {
-    items: _.flatten(stream),
-    olderItemsOnServer,
-  };
-}
 
 const freezeDate = (d) => ((!!d && 'format' in d) ? d.format() : d);
 const thawDate = (d) => (!!d ? moment(d) : d);
@@ -168,8 +161,8 @@ const persisted = persistedLib({ store, localforage });
 persisted('notificationsLastRead.date', notificationMetadata.loadedNotificationsLastRead,
   freezeDate, thawDate);
 
-persisted('activities', notifications.fetchedActivities, freezeStream);
-persisted('notifications', notifications.fetchedNotifications, freezeStream);
+persisted('activities', notifications.fetchedActivities, stream.freeze);
+persisted('notifications', notifications.fetchedNotifications, stream.freeze);
 
 persisted('tiles.data', tiles.fetchedTiles);
 persisted('tileContent', tiles.loadedAllTileContent);
