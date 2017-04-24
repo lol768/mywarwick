@@ -38,7 +38,7 @@
           @if(webGroupComponents.nonEmpty) {
              @webGroupComponents.map { component =>
                @tags.seqCheckbox(form, audienceField, '_text -> "Members of a WebGroup", 'value -> s"WebGroup:${component.groupName.string}")
-               <input type="text" class="form-control" autocomplete="no" value="@component.groupName.string">
+               <input type="text" class="form-control group-picker" autocomplete="no" value="@component.groupName.string">
              }
           } else {
             @tags.seqCheckbox(form, audienceField, '_text -> "Members of a WebGroup", 'value -> "WebGroup:", 'disabled -> true)
@@ -46,7 +46,7 @@
           }
         }
 
-        <br>
+        <hr>
 
         @if(departmentOptions.size == 1) {
           @b3.static(){ @departmentOptions.head._2 }(b3.clear.fieldConstructorSpecific)
