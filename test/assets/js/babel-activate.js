@@ -22,7 +22,8 @@ require('babel-register')({
   only: [
     /assets\/js/,
     /lodash-es/,
-    /warwick-search/
+    /warwick-search/,
+    /es6-promise/,
   ],
   plugins: [
     'dynamic-import-node' // Webpack does our dynamic imports normally,

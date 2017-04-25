@@ -1,30 +1,26 @@
 package helpers
 
+import akka.stream.Materializer
 import com.typesafe.config.{Config, ConfigFactory}
 import org.openqa.selenium
 import org.openqa.selenium.WebDriver
-import org.openqa.selenium.chrome.ChromeOptions
-import org.scalatest.{Matchers, OptionValues, WordSpec}
+import org.scalactic.source.Position
+import org.scalatest._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures, ScaledTimeSpans}
+import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.{BrowserInfo, PortNumber, WsScalaTestClient}
-import play.api.Configuration
-import play.api.libs.ws.{WS, WSRequest}
-import play.api.mvc.Call
+import play.api.libs.json.JsValue
+import play.api.libs.ws.{WSAPI, WSClient, WSRequest}
+import play.api.libs.ws.ahc.{AhcConfigBuilder, AhcWSClient}
+
+import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext
 
 
-protected abstract class CommonFuncTestBase
-  extends WordSpec
-    with Eventually
-    with Matchers
-    with OptionValues
-    with ScalaFutures
-    with ScaledTimeSpans
-    with IntegrationPatience
+
 
 /**
-  * Base class for functional tests. Starts a test application
-  * for the lifetime of the test suite (class), and runs a list
-  * of tests against them.
+  * Base class for functional tests.
   *
   * By default, runs against a small subset of browsers. Set envvar
   * TEST_BROWSERS or system property test.browsers to a comma-separated
@@ -33,15 +29,9 @@ protected abstract class CommonFuncTestBase
   * (envvar probably works best through activator/SBT - system properties
   * don't seem to be passed through.)
   */
-abstract class FuncTestBase
+protected abstract class FuncTestBase
   extends CommonFuncTestBase
   with SelectBrowsersPerSuite {
-
-  val rawConfig: Config = ConfigFactory.load("functional-test")
-
-  object config {
-    def url: String = rawConfig.getString("url")
-  }
 
   def resizeWindow(d: Dimension)(implicit webDriver: WebDriver): Unit = {
     webDriver.manage.window.setSize(new selenium.Dimension(d.width, d.height))
@@ -61,6 +51,8 @@ abstract class FuncTestBase
   // constants you can use e.g. "go to homepage"
   lazy val homepage = PathPage("/")
   lazy val search = PathPage("/search")
+  lazy val notifications = PathPage("/notifications")
+  lazy val activity = PathPage("/activity")
 
   lazy val standardSize = Dimension(1024, 768)
   // virtual dimension
@@ -68,18 +60,38 @@ abstract class FuncTestBase
 
   setCaptureDir("target/functional-test/screenshots")
 
+  def scrollTo(x: Int, y: Int) = executeScript(s"window.scrollTo($x, $y)")
+  def scrollBy(x: Int, y: Int) = executeScript(s"window.scrollBy($x, $y)")
+
+  private val soonPatience = PatienceConfig(
+    timeout = scaled(Span(2, Seconds)),
+    interval = scaled(Span(50, Millis))
+  )
+
+  def soon(fn: => Any)(implicit pos: Position) = eventually(fn)(soonPatience, pos)
 }
-
-trait RemoteServerConfig { self: FuncTestBase =>
-  override def baseUrl = config.url
-
-  implicit val portNumber: PortNumber = PortNumber(443)
-}
-
-abstract class RemoteFuncTestBase extends FuncTestBase with RemoteServerConfig
 
 /**
   * Starts a server but doesn't drive any browsers - use the
   * ws* methods to make calls to controllers and check the response.
+  *
+  * This currently doesn't work because it needs to start an embedded Play app,
+  * which uses jclouds which needs an old version of Guava, but Selenium
+  * needs a newer version of Guava.
+  *
+  * We don't need Selenium for the API tests but we would for our other embedded app tests.
   */
-abstract class ApiFuncTestBase extends CommonFuncTestBase
+abstract class ApiFuncTestBase
+  extends CommonFuncTestBase
+    with EmbeddedServerConfig
+    with WsScalaTestClient
+    with WithActorSystem { // needed for WithWebClient
+
+  // for WsScalaTestClient
+  implicit def ws = web.client
+
+}
+
+
+
+

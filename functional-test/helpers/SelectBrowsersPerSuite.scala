@@ -21,7 +21,7 @@ import org.scalatestplus.play._
   * embedded Play instance, rather than an existing running
   * web server, otherwise we'd use it.)
   */
-trait SelectBrowsersPerSuite extends WebBrowser with TestSuiteMixin {
+protected trait SelectBrowsersPerSuite extends WebBrowser with TestSuiteMixin {
   self: TestSuite =>
 
   private var privateWebDriver: WebDriver = UninitializedDriver

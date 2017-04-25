@@ -1,22 +1,27 @@
-import helpers.{FuncTestBase, RemoteFuncTestBase}
-import org.scalatest.BeforeAndAfter
+import helpers.RemoteFuncTestBase
+import org.openqa.selenium.interactions.Actions
 import org.scalatestplus.play.BrowserInfo
 
-class SearchFuncTest extends RemoteFuncTestBase with BeforeAndAfter {
+class SearchFuncTest extends RemoteFuncTestBase {
 
   override def sharedTests(info: BrowserInfo): Unit = {
-    val searchResults = className("search-result")
 
     "Someone lost" should {
 
-      s"be able to search ${info.name}" in withScreenshot {
-        resizeWindow(iphone5Size)
+      s"be able to search ${info.name}" taggedAs(MobileTest) in withScreenshot {
+        val searchResults = className("search-result")
+
+        go to homepage
+
+        signInAs(config.users.student1)
 
         go to search
 
         eventually {
           val activeTabBarItem = find(className("tab-bar-item--active")).get
           activeTabBarItem.text shouldBe "Search"
+
+          find(cssSelector(".suggested-links")) shouldBe defined
 
           find(id("q-input")) shouldBe defined
           searchField("q-input").attribute("placeholder") should contain("Search Warwick")
@@ -34,18 +39,31 @@ class SearchFuncTest extends RemoteFuncTestBase with BeforeAndAfter {
           firstSearchResult.text should include("E-lab home page")
 
           val pageText = find(cssSelector("main")).get.text
-          pageText should include("Website search results")
+          pageText should include("Website Search Results")
         }
 
         val searchResultCount = findAll(searchResults).length
 
-        // Scroll to bottom of page so more results link is not occluded by the tab bar
-        // when Selenium tries to click it
-        executeScript("window.scrollTo(0, 10000)")
+        // Checking that we get more search results
 
-        click on linkText("More website search results")
+        val moreWebResultsLink = linkText("More website search results")
 
-        eventually(findAll(searchResults).length should be > searchResultCount)
+        // get more results.
+        // have to be able to see button first, so scroll to it
+        new Actions(webDriver)
+          .moveToElement(moreWebResultsLink.webElement)
+          .perform()
+
+        // plus some more pixels so it's not under a tab bar.
+        scrollBy(0, 200)
+
+        click on moreWebResultsLink
+
+        findAll(searchResults).length should be > searchResultCount
+
+        scrollTo(0,0)
+        click on cssSelector(".search-form .clearButton")
+        soon(find(cssSelector(".suggested-links")) shouldBe defined)
       }
 
     }
