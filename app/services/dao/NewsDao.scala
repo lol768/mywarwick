@@ -133,10 +133,10 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
           LEFT OUTER JOIN NEWS_ITEM_CATEGORY c
             ON c.NEWS_ITEM_ID = n.ID
         WHERE n.IGNORE_CATEGORIES = 1
-          OR c.NEWS_CATEGORY_ID IN (SELECT NEWS_CATEGORY_ID
-                                    FROM USER_NEWS_CATEGORY
-                                    WHERE USERCODE = {user})
-          OR {user} = '*'
+          OR c.NEWS_CATEGORY_ID NOT IN (
+            SELECT NEWS_CATEGORY_ID FROM USER_NEWS_CATEGORY
+            WHERE USERCODE = {user} AND SELECTED = 0
+          ) OR {user} = '*'
         ORDER BY n.PUBLISH_DATE DESC
        """))
       .on(
