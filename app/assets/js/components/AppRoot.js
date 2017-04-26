@@ -11,9 +11,11 @@ import TileView from './views/TileView';
 import ActivityView from './views/ActivityView';
 import NotificationsView from './views/NotificationsView';
 import SearchView from './views/SearchView';
+import AddingTilesView from './views/AddingTilesView';
 
 export const Routes = {
   EDIT: 'edit',
+  ADD: 'add',
   TILES: 'tiles',
   NOTIFICATIONS: 'notifications',
   ACTIVITY: 'activity',
@@ -38,7 +40,8 @@ const AppRoot = ({ history }) => (
     <Router history={history}>
       <Route path="/" component={AppLayout}>
         <IndexRoute component={MaybeEditableMeView} />
-        <Route path={Routes.EDIT} component={MaybeEditableMeView} />;
+        <Route path={Routes.EDIT} component={MaybeEditableMeView} />
+        <Route path={`${Routes.EDIT}/${Routes.ADD}`} component={AddingTilesView} />
         <Route path={Routes.TILES} component={MaybeEditableMeView}>
           <IndexRedirect to="/" />
         </Route>

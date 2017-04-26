@@ -5,10 +5,10 @@ import anorm.SqlParser._
 import helpers.{Fixtures, OneStartAppPerSuite}
 import models.Audience
 import org.joda.time.DateTime
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 import warwick.anorm.converters.ColumnConversions._
 
-class ActivityRecipientDaoTest extends PlaySpec with OneStartAppPerSuite {
+class ActivityRecipientDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val activityDao = get[ActivityDao]
   val activityRecipientDao = get[ActivityRecipientDao]

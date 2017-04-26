@@ -6,8 +6,8 @@ import models.publishing.PublishingRole.{APINotificationsManager, NotificationsM
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
+import org.scalatest.mockito.MockitoSugar
+import helpers.BaseSpec
 import play.api.cache.CacheApi
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsString, Json}
@@ -17,7 +17,7 @@ import play.api.test._
 import services._
 import warwick.sso._
 
-class IncomingActivitiesControllerTest extends PlaySpec with MockitoSugar with Results with WithActorSystem {
+class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with Results with WithActorSystem {
 
   val tabula = "tabula"
   val tabulaPublisherId = "tabulaPublisherId"

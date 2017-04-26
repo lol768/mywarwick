@@ -1,7 +1,7 @@
 package controllers.api
 
 import helpers.{Fixtures, OneStartAppPerSuite, TestApplications}
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 import play.api.db.Database
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -9,7 +9,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import warwick.sso._
 
-class IncomingActivitiesControllerAppTest extends PlaySpec with Results with OneStartAppPerSuite {
+class IncomingActivitiesControllerAppTest extends BaseSpec with Results with OneStartAppPerSuite {
 
   lazy val ron = Users.create(usercode = Usercode("ron"))
 

@@ -10,9 +10,13 @@ global.sinon = require('sinon');
 chai.use(require('sinon-chai'));
 chai.use(jsxChai);
 
-global.document = require('jsdom').jsdom();
-global.window = global.document.defaultView;
-global.navigator = global.window.navigator;
+function setupBlankDocument() {
+  global.document = require('jsdom').jsdom();
+  global.window = global.document.defaultView;
+  global.navigator = global.window.navigator;
+}
+
+setupBlankDocument();
 
 class WebSocket {}
 global.WebSocket = WebSocket;

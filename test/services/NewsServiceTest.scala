@@ -7,11 +7,11 @@ import org.joda.time.DateTime
 import org.quartz.JobKey
 import org.quartz.SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW
 import org.scalatest.concurrent.Eventually.eventually
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 import services.job.PublishNewsItemJob
 
 
-class NewsServiceTest extends PlaySpec with OneStartAppPerSuite {
+class NewsServiceTest extends BaseSpec with OneStartAppPerSuite {
 
   val newsService = get[NewsService]
   val categoryIds = get[NewsCategoryService].all().map(_.id)

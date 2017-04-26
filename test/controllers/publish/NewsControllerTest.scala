@@ -7,8 +7,8 @@ import models.publishing._
 import models.{Audience, NewsCategory}
 import org.mockito.Matchers
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
+import org.scalatest.mockito.MockitoSugar
+import helpers.BaseSpec
 import play.api.cache.CacheApi
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results
@@ -22,7 +22,7 @@ import warwick.sso._
 import scala.concurrent.Future
 import scala.util.Success
 
-class NewsControllerTest extends PlaySpec with MockitoSugar with Results with OneStartAppPerSuite {
+class NewsControllerTest extends BaseSpec with MockitoSugar with Results with OneStartAppPerSuite {
 
   val custard = Usercode("custard")
 

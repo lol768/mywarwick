@@ -2,9 +2,9 @@ package services.dao
 
 import anorm._
 import helpers.OneStartAppPerSuite
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 
-class ActivityTypeDaoTest extends PlaySpec with OneStartAppPerSuite {
+class ActivityTypeDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val dao = get[ActivityTypeDao]
 

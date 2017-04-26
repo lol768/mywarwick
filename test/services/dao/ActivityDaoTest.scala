@@ -8,11 +8,11 @@ import helpers.{Fixtures, OneStartAppPerSuite}
 import models.Output.Mobile
 import models._
 import org.joda.time.DateTime
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 import warwick.anorm.converters.ColumnConversions._
 import warwick.sso.Usercode
 
-class ActivityDaoTest extends PlaySpec with OneStartAppPerSuite {
+class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val activityDao = get[ActivityDao]
   val activityTagDao = get[ActivityTagDao]

@@ -7,7 +7,6 @@ import EmptyState from '../ui/EmptyState';
 import { connect } from 'react-redux';
 import { getStreamSize, takeFromStream } from '../../stream';
 import * as notifications from '../../state/notifications';
-import log from 'loglevel';
 
 const SOME_MORE = 20;
 
@@ -41,14 +40,7 @@ class ActivityView extends React.Component {
       return Promise.resolve(this.showMore());
     } else if (this.props.olderItemsOnServer) {
       return this.props.dispatch(notifications.fetchMoreActivities())
-        .then(() => this.showMore())
-        .catch((e) => {
-          if (e instanceof notifications.UnnecessaryFetchError) {
-            log.debug(`Unnecessary fetch: ${e.message}`);
-          } else {
-            throw e;
-          }
-        });
+        .then(() => this.showMore());
     }
     return Promise.resolve();
   }
@@ -64,13 +56,18 @@ class ActivityView extends React.Component {
       .map(n => <ActivityItem key={n.id} grouped={this.props.grouped} {...n} />);
 
     const streamSize = getStreamSize(this.props.activities);
-    const hasAny = streamSize > 0;
+    const hasAny = streamSize > 0 || this.props.olderItemsOnServer;
     const hasMore = this.state.numberToShow < streamSize || this.props.olderItemsOnServer;
 
     return (
       <div>
         { hasAny ?
-          <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore } showLoading>
+          <InfiniteScrollable
+            hasMore={ hasMore }
+            onLoadMore={ this.loadMore }
+            showLoading
+            endOfListPhrase="There are no older activities."
+          >
             <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
               {activities}
             </GroupedList>

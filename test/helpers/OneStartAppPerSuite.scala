@@ -2,13 +2,13 @@ package helpers
 
 import java.sql.Connection
 
-import org.scalatest.Suite
+import org.scalatest.{Suite, TestSuite}
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.db.Database
 
 import scala.reflect.ClassTag
 
-trait OneStartAppPerSuite extends Suite with OneAppPerSuite {
+trait OneStartAppPerSuite extends TestSuite with OneAppPerSuite {
 
   implicit override lazy val app = TestApplications.full()
   implicit lazy val mat = app.materializer

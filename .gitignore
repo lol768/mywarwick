@@ -1,8 +1,10 @@
 /conf/application.conf
+/conf/functional-test.conf
 /conf/worker.conf
 /conf/ehcache.properties
 /conf/*secret*
 /logs
+/classes
 /target
 /.idea_modules
 /.classpath

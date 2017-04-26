@@ -3,10 +3,10 @@ package services.dao
 import helpers.OneStartAppPerSuite
 import models.Audience
 import models.Audience._
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 import warwick.sso.{GroupName, Usercode}
 
-class AudienceDaoTest extends PlaySpec with OneStartAppPerSuite {
+class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val audienceDao = get[AudienceDaoImpl]
 

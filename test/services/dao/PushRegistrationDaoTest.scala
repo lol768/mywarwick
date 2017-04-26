@@ -3,11 +3,11 @@ package services.dao
 import helpers.OneStartAppPerSuite
 import models.{Platform, PushRegistration}
 import org.joda.time.DateTime
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 import warwick.sso.Usercode
 import warwick.anorm.converters.ColumnConversions._
 
-class PushRegistrationDaoTest extends PlaySpec with OneStartAppPerSuite {
+class PushRegistrationDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val dao = app.injector.instanceOf[PushRegistrationDao]
 

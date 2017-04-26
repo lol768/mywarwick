@@ -1,10 +1,10 @@
 package controllers.publish
 
 import org.joda.time.LocalDateTime
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 import warwick.sso.Usercode
 
-class NewsItemDataTest extends PlaySpec {
+class NewsItemDataTest extends BaseSpec {
 
   "NewsItemData" should {
 

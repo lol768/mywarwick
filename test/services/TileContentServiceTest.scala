@@ -5,9 +5,9 @@ import helpers.{ExternalServers, Fixtures}
 import models._
 import org.apache.http.client.methods.HttpUriRequest
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 import play.api.Configuration
 import play.api.cache._
 import play.api.libs.json.{JsObject, Json}
@@ -17,7 +17,7 @@ import uk.ac.warwick.sso.client.trusted.CurrentApplication
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-class TileContentServiceTest extends PlaySpec with ScalaFutures with MockitoSugar {
+class TileContentServiceTest extends BaseSpec with ScalaFutures with MockitoSugar {
 
   override implicit def patienceConfig =
     PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))

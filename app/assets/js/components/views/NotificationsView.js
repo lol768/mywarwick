@@ -9,7 +9,6 @@ import { connect } from 'react-redux';
 import { getStreamSize, takeFromStream } from '../../stream';
 import { markNotificationsRead } from '../../state/notification-metadata';
 import * as notifications from '../../state/notifications';
-import log from 'loglevel';
 
 const SOME_MORE = 20;
 
@@ -96,14 +95,7 @@ class NotificationsView extends React.Component {
       return Promise.resolve(this.showMore());
     } else if (this.props.olderItemsOnServer) {
       return this.props.dispatch(notifications.fetchMoreNotifications())
-        .then(() => this.showMore())
-        .catch((e) => {
-          if (e instanceof notifications.UnnecessaryFetchError) {
-            log.debug(`Unnecessary fetch: ${e.message}`);
-          } else {
-            throw e;
-          }
-        });
+        .then(() => this.showMore());
     }
     return Promise.resolve();
   }
@@ -121,8 +113,8 @@ class NotificationsView extends React.Component {
   isUnread(notification) {
     const { notificationsLastRead } = this.props;
 
-    return notificationsLastRead.date === null
-      || moment(notification.date).isAfter(notificationsLastRead.date);
+    return notificationsLastRead.date !== null
+      && moment(notification.date).isAfter(notificationsLastRead.date);
   }
 
   render() {
@@ -137,7 +129,7 @@ class NotificationsView extends React.Component {
       );
 
     const streamSize = getStreamSize(this.props.notifications);
-    const hasAny = streamSize > 0;
+    const hasAny = streamSize > 0 || this.props.olderItemsOnServer;
     const hasMore = this.state.numberToShow < streamSize || this.props.olderItemsOnServer;
     const browserPushDisabled = this.props.notificationPermission === 'denied';
 
@@ -151,7 +143,12 @@ class NotificationsView extends React.Component {
           : null
         }
         { hasAny ?
-          <InfiniteScrollable hasMore={ hasMore } onLoadMore={ this.loadMore } showLoading>
+          <InfiniteScrollable
+            hasMore={ hasMore }
+            onLoadMore={ this.loadMore }
+            showLoading
+            endOfListPhrase="There are no older notifications."
+          >
             <GroupedList groupBy={ this.props.grouped ? groupItemsByDate : undefined }>
               { notificationItems }
             </GroupedList>

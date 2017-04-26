@@ -3,10 +3,10 @@ package services.dao
 import anorm._
 import helpers.OneStartAppPerSuite
 import models.publishing.PublishingRole.{NewsManager, NotificationsManager}
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 import warwick.sso.Usercode
 
-class PublisherDaoTest extends PlaySpec with OneStartAppPerSuite {
+class PublisherDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val dao = get[PublisherDao]
 

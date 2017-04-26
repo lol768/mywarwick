@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
+import log from 'loglevel';
 
 export default class UtilityBar extends React.Component {
 
@@ -40,7 +41,11 @@ export default class UtilityBar extends React.Component {
     const $element = $(ReactDOM.findDOMNode(this.refs.accountLink));
 
     if ($element.data('id7.account-popover') === undefined) {
-      $element.accountPopover();
+      try {
+        $element.accountPopover();
+      } catch (e) {
+        log.warn('accountPopover plugin failed', e);
+      }
     }
   }
 

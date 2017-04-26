@@ -3,8 +3,8 @@ package services
 import akka.actor.ActorSystem
 import helpers.WithActorSystem
 import org.mockito.Mockito
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
+import org.scalatest.mockito.MockitoSugar
+import helpers.BaseSpec
 import services.messaging.MessagingService
 import org.mockito.Mockito._
 import org.mockito.Mockito.{atLeast => atLeastTimes}
@@ -16,7 +16,7 @@ import scala.concurrent.duration._
 /**
   *
   */
-class HealthCheckServiceTest extends PlaySpec with MockitoSugar with WithActorSystem with Eventually {
+class HealthCheckServiceTest extends BaseSpec with MockitoSugar with WithActorSystem with Eventually {
   override implicit def patienceConfig = PatienceConfig(scaled(Span(500, Millis)), scaled(Span(10, Millis)))
 
   "HealthCheckService" should {

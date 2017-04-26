@@ -1,9 +1,8 @@
 package helpers
 
 import akka.stream.ActorMaterializer
-import org.scalatestplus.play.PlaySpec
 
-class TestApplicationsSpec extends PlaySpec {
+class TestApplicationsSpec extends BaseSpec {
 
   "TestApplications.minimal" should {
     "work out of the box" in {

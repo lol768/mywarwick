@@ -4,9 +4,9 @@ import anorm.SqlParser._
 import anorm._
 import helpers.OneStartAppPerSuite
 import models.NewsCategory
-import org.scalatestplus.play.PlaySpec
+import helpers.BaseSpec
 
-class NewsCategoryDaoTest extends PlaySpec with OneStartAppPerSuite {
+class NewsCategoryDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val dao = get[NewsCategoryDao]
 
