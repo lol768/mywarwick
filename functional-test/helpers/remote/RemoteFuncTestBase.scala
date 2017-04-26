@@ -1,4 +1,6 @@
-package helpers
+package helpers.remote
+
+import helpers._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext

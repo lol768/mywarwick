@@ -1,4 +1,4 @@
-import helpers.RemoteFuncTestBase
+import helpers.remote.RemoteFuncTestBase
 import org.openqa.selenium.interactions.Actions
 import org.scalatestplus.play.BrowserInfo
 

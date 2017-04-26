@@ -1,4 +1,4 @@
-package helpers
+package helpers.selenium
 
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
 import org.openqa.selenium.remote.DesiredCapabilities

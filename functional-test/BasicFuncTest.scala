@@ -1,6 +1,7 @@
 import java.util.logging.Level
 
-import helpers.{FuncTestBase, RemoteFuncTestBase}
+import helpers.FuncTestBase
+import helpers.remote.RemoteFuncTestBase
 import org.scalatest.BeforeAndAfter
 import org.scalatestplus.play.{BrowserInfo, PortNumber}
 import play.api.test.TestBrowser
