@@ -45,6 +45,10 @@ abstract class RemoteFuncTestBase
       textField("userName").value = user.username
       pwdField("password").value = user.password
       submit()
+
+      withClue("Still on a login page; is the password correct?") {
+        find("userName") shouldNot be(defined)
+      }
     }
   }
 

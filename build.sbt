@@ -71,7 +71,7 @@ val testDeps = Seq(
 val funcTestDeps = Seq(
   // Note - from 2.53 selenium-htmlunit is not bundled so will need to
   // play with dependencies if you need to upgrade.
-  "org.seleniumhq.selenium" % "selenium-java" % "3.3.1"
+  "org.seleniumhq.selenium" % "selenium-java" % "3.4.0"
 ).map(_ % "fun")
 
 javaOptions in Test += "-Dlogger.resource=test-logging.xml"
