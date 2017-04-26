@@ -8,7 +8,8 @@
     form: PublishNotificationForm,
     departmentOptions: Seq[(String, String)],
     providerOptions: Seq[(String, String)],
-    permissionScope: PermissionScope
+    permissionScope: PermissionScope,
+    audience: Audience
 )(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
@@ -26,7 +27,7 @@
       @publish.notifications.contentForm(form, departmentOptions, providerOptions, permissionScope)
 
       <section>
-        @tags.audiencePicker(form, "audience", departmentOptions, "notification", permissionScope, allowPublic = false)
+        @tags.audiencePicker(form, "audience", departmentOptions, "notification", permissionScope, allowPublic = false, audience = audience)
         @tags.submitOrCancel("Update", controllers.publish.routes.NotificationsController.list(publisher.id))
       </section>
     </div>
