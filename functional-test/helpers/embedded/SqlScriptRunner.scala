@@ -1,4 +1,4 @@
-package helpers
+package helpers.embedded
 
 import java.io.InputStreamReader
 import java.sql.Connection

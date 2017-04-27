@@ -140,12 +140,12 @@ class NewsController @Inject()(
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNews) { implicit request =>
-    Ok(renderCreateForm(request.publisher, publishNewsForm))
+    Ok(renderCreateForm(request.publisher, publishNewsForm, Audience()))
   }
 
   def create(publisherId: String, submitted: Boolean) = PublisherAction(publisherId, CreateNews).async { implicit request =>
     bindFormWithAudience[PublishNewsItemData](publishNewsForm, submitted,
-      formWithErrors => Ok(renderCreateForm(request.publisher, formWithErrors)),
+      formWithErrors => Ok(renderCreateForm(request.publisher, formWithErrors, Audience())),
       (data, audience) => {
         val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
         val newsItemId = news.save(newsItem, audience, data.categoryIds)
@@ -157,30 +157,32 @@ class NewsController @Inject()(
     )
   }
 
-  def renderCreateForm(publisher: Publisher, form: Form[PublishNewsItemData])(implicit request: PublisherRequest[_]) = {
+  def renderCreateForm(publisher: Publisher, form: Form[PublishNewsItemData], audience: Audience)(implicit request: PublisherRequest[_]) = {
     views.html.publish.news.createForm(
       publisher = publisher,
       form = form,
       categories = categoryOptions,
       permissionScope = permissionScope,
-      departmentOptions = departmentOptions
+      departmentOptions = departmentOptions,
+      audience = audience
     )
   }
 
   def updateForm(publisherId: String, id: String) = EditAction(id, publisherId, EditNews).async { implicit request =>
     withNewsItem(id, publisherId, item => {
       val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
-      val audience = news.getAudience(id).map(audienceBinder.unbindAudience).get
-      val formWithData = publishNewsForm.fill(PublishNewsItemData(item.toData, categoryIds, audience))
+      val audience = news.getAudience(id).get
+      val unboundAudience = audienceBinder.unbindAudience(audience)
+      val formWithData = publishNewsForm.fill(PublishNewsItemData(item.toData, categoryIds, unboundAudience))
 
-      Future.successful(Ok(renderUpdateForm(publisherId, id, formWithData)))
+      Future.successful(Ok(renderUpdateForm(publisherId, id, formWithData, audience)))
     })
   }
 
   def update(publisherId: String, id: String, submitted: Boolean) = EditAction(id, publisherId, EditNews).async { implicit request =>
     withNewsItem(id, publisherId, _ => {
       bindFormWithAudience[PublishNewsItemData](publishNewsForm, submitted,
-        formWithErrors => Ok(renderUpdateForm(publisherId, id, formWithErrors)),
+        formWithErrors => Ok(renderUpdateForm(publisherId, id, formWithErrors, Audience())),
         (data, audience) => {
           val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
 
@@ -229,14 +231,15 @@ class NewsController @Inject()(
       .getOrElse(Future.successful(NotFound(views.html.errors.notFound())))
   }
 
-  private def renderUpdateForm(publisherId: String, id: String, form: Form[PublishNewsItemData])(implicit request: PublisherRequest[_]) = {
+  private def renderUpdateForm(publisherId: String, id: String, form: Form[PublishNewsItemData], audience: Audience)(implicit request: PublisherRequest[_]) = {
     views.html.publish.news.updateForm(
       publisher = request.publisher,
       id = id,
       form = form,
       categories = categoryOptions,
       permissionScope = permissionScope,
-      departmentOptions = departmentOptions
+      departmentOptions = departmentOptions,
+      audience = audience
     )
   }
 

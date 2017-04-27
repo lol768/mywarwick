@@ -1,7 +1,8 @@
-package helpers
+package helpers.embedded
 
+import helpers.TestApplications
 import org.junit.AfterClass
-import org.scalatest.{Suite, TestSuite}
+import org.scalatest.TestSuite
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.db.Database
 

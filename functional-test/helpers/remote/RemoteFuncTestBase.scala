@@ -1,4 +1,6 @@
-package helpers
+package helpers.remote
+
+import helpers._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext
@@ -45,6 +47,10 @@ abstract class RemoteFuncTestBase
       textField("userName").value = user.username
       pwdField("password").value = user.password
       submit()
+
+      withClue("Still on a login page; is the password correct?") {
+        find("userName") shouldNot be(defined)
+      }
     }
   }
 

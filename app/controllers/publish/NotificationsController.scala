@@ -52,13 +52,13 @@ class NotificationsController @Inject()(
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNotifications) { implicit request =>
-    Ok(renderCreateForm(request.publisher, publishNotificationForm))
+    Ok(renderCreateForm(request.publisher, publishNotificationForm, Audience()))
   }
 
   def create(publisherId: String, submitted: Boolean) = PublisherAction(publisherId, CreateNotifications).async { implicit request =>
     bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted,
       formWithErrors =>
-        Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope)),
+        Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope, Audience())),
       (publish, audience) => {
         val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
         val redirect = Redirect(routes.NotificationsController.list(publisherId))
@@ -91,16 +91,17 @@ class NotificationsController @Inject()(
       val form = publishNotificationForm.fill(PublishNotificationData(notificationData, audienceData))
 
       Future.successful(
-        Ok(views.updateForm(request.publisher, activity, form, departmentOptions, providerOptions, permissionScope))
+        Ok(views.updateForm(request.publisher, activity, form, departmentOptions, providerOptions, permissionScope, audience))
       )
     }
 
   def update(publisherId: String, id: String, submitted: Boolean) = EditAction(id, publisherId, EditNotifications).async { implicit request =>
       val activity = activityService.getActivityById(id).get
+      val audience = audienceService.getAudience(activity.id)
 
       bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted,
         formWithErrors =>
-          Ok(views.updateForm(request.publisher, activity, formWithErrors, departmentOptions, providerOptions, permissionScope)),
+          Ok(views.updateForm(request.publisher, activity, formWithErrors, departmentOptions, providerOptions, permissionScope, audience)),
         (publish, audience) => {
           val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
@@ -147,13 +148,14 @@ class NotificationsController @Inject()(
     }
   }
 
-  def renderCreateForm(publisher: Publisher, form: Form[PublishNotificationData])(implicit request: PublisherRequest[_]) =
+  def renderCreateForm(publisher: Publisher, form: Form[PublishNotificationData], audience: Audience)(implicit request: PublisherRequest[_]) =
     views.createForm(
       publisher = publisher,
       form = form,
       departmentOptions = departmentOptions,
       providerOptions = providerOptions,
-      permissionScope = permissionScope
+      permissionScope = permissionScope,
+      audience = audience
     )
 
   private def EditAction(id: String, publisherId: String, ability: Ability) = PublisherAction(publisherId, ability)

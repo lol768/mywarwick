@@ -138,5 +138,12 @@ describe('mergeReceivedItems', () => {
 
   });
 
+  it('merges identical streams', () => {
+    const existing = [item('a', 4), item('b', 3), item('c', 2), item('d', 1)];
+    let stream = mergeReceivedItems(existing, existing);
+
+    expect(stream.length).to.equal(4);
+  });
+
 });
 

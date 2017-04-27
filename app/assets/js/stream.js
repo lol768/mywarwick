@@ -28,7 +28,7 @@ export function mergeReceivedItems(stream = [], rx = []) {
   const uniqRx = uniqStream(rx);
 
   const newest = _.first(stream);
-  const oldestRx = _.min(uniqRx, x => x[DATE_KEY]);
+  const oldestRx = _.minBy(uniqRx, x => x[DATE_KEY]);
 
   // Short circuit if existing stream is empty
   if (stream.length === 0) {

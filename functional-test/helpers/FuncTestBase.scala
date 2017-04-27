@@ -1,23 +1,10 @@
 package helpers
 
-import akka.stream.Materializer
-import com.typesafe.config.{Config, ConfigFactory}
-import org.openqa.selenium
+import org.openqa
 import org.openqa.selenium.WebDriver
 import org.scalactic.source.Position
-import org.scalatest._
-import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures, ScaledTimeSpans}
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatestplus.play.{BrowserInfo, PortNumber, WsScalaTestClient}
-import play.api.libs.json.JsValue
-import play.api.libs.ws.{WSAPI, WSClient, WSRequest}
-import play.api.libs.ws.ahc.{AhcConfigBuilder, AhcWSClient}
-
-import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext
-
-
-
+import org.scalatestplus.play.BrowserInfo
 
 /**
   * Base class for functional tests.
@@ -34,7 +21,7 @@ protected abstract class FuncTestBase
   with SelectBrowsersPerSuite {
 
   def resizeWindow(d: Dimension)(implicit webDriver: WebDriver): Unit = {
-    webDriver.manage.window.setSize(new selenium.Dimension(d.width, d.height))
+    webDriver.manage.window.setSize(new openqa.selenium.Dimension(d.width, d.height))
   }
 
   def browserScreenshot(info: BrowserInfo, name: String) = s"${info.name} - ${name}"
@@ -68,29 +55,15 @@ protected abstract class FuncTestBase
     interval = scaled(Span(50, Millis))
   )
 
+  /**
+    * Version of `eventually` for things that shouldn't really take that long -
+    * allows tests to fail faster if something has gone wrong, without having
+    * to wait 15 seconds.
+    */
   def soon(fn: => Any)(implicit pos: Position) = eventually(fn)(soonPatience, pos)
 }
 
-/**
-  * Starts a server but doesn't drive any browsers - use the
-  * ws* methods to make calls to controllers and check the response.
-  *
-  * This currently doesn't work because it needs to start an embedded Play app,
-  * which uses jclouds which needs an old version of Guava, but Selenium
-  * needs a newer version of Guava.
-  *
-  * We don't need Selenium for the API tests but we would for our other embedded app tests.
-  */
-abstract class ApiFuncTestBase
-  extends CommonFuncTestBase
-    with EmbeddedServerConfig
-    with WsScalaTestClient
-    with WithActorSystem { // needed for WithWebClient
 
-  // for WsScalaTestClient
-  implicit def ws = web.client
-
-}
 
 
 

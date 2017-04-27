@@ -1,4 +1,6 @@
-package helpers
+package helpers.embedded
+
+import helpers.{FuncTestBase, UserData}
 
 /**
   *

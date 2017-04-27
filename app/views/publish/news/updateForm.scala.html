@@ -11,7 +11,8 @@
     form: Form[PublishNewsItemData],
     departmentOptions: Seq[(String, String)],
     categories: Seq[NewsCategory],
-    permissionScope: PermissionScope
+    permissionScope: PermissionScope,
+    audience: Audience
 )(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
@@ -24,7 +25,7 @@
 
     <div class="split-form__sections">
       <section>
-        @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true)
+        @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true, audience = audience)
         @tags.categoryPicker(form, "categories", categories, "news item")
       </section>
 
