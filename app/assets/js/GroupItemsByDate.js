@@ -1,5 +1,4 @@
 import { localMoment } from './dateFormats';
-import * as invariant from 'invariant';
 
 // A way to describe a grouping strategy
 
@@ -76,7 +75,8 @@ export function getGroupedItems(items, now) {
 
       if (newGroup !== currentGroup) {
         if (currentGroup !== null) {
-          invariant(groups.find((pair) => pair[0] === newGroup) !== undefined,
+          require('invariant')(
+            groups.find((pair) => pair[0] === newGroup) === undefined,
             'Tried to create new group with existing group number. '
              + 'Normally caused by items not in order'
           );
