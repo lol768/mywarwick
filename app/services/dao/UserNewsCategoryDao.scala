@@ -37,12 +37,8 @@ class UserNewsCategoryDaoImpl @Inject()(
       .execute()
 
     newsCategoryDao.all().map(_.id).foreach { categoryId =>
-      SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID, SELECTED) VALUES (${usercode.string}, $categoryId, 0)"
-        .execute()
-    }
-
-    categoryIds.foreach { categoryId =>
-      SQL"UPDATE USER_NEWS_CATEGORY SET SELECTED = 1 WHERE USERCODE = ${usercode.string} AND NEWS_CATEGORY_ID = $categoryId"
+      val selected = if (categoryIds.contains(categoryId)) 1 else 0
+      SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID, SELECTED) VALUES (${usercode.string}, $categoryId, $selected)"
         .execute()
     }
   }
