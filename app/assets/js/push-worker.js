@@ -27,9 +27,25 @@ self.addEventListener('push', event => {
     const notification = event.data.json();
     log('Push event payload', notification);
 
-    self.registration.showNotification(notification.title, {
-      body: notification.text,
-      icon: '/assets/images/notification-icon.png',
+    self.registration.getNotifications().then((visibleNotifications) => {
+      if (visibleNotifications.length < 3) {
+        self.registration.showNotification(notification.title, {
+          body: notification.text,
+          icon: '/assets/images/notification-icon.png',
+        });
+      } else {
+        const bodyText = visibleNotifications.map((n) => n.title)
+          .concat([notification.title])
+          .join('\n');
+        visibleNotifications.forEach((n) => n.close());
+        self.registration.showNotification(
+          `You have ${visibleNotifications.length + 1} notifications`,
+          {
+            body: bodyText,
+            icon: '/assets/images/notification-icon.png',
+          }
+        );
+      }
     });
   }
 });
