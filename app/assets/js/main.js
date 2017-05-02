@@ -161,9 +161,19 @@ export function launch(userData) {
     }
   });
 
-  const unsubscribe = store.subscribe(() => {
-    if (hasAuthoritativeUser(store.getState())) {
+  function checkForAuthoritativeUser() {
+    const shouldLoad = hasAuthoritativeUser(store.getState());
+    if (shouldLoad) {
       loadDataFromServer();
+    }
+    return shouldLoad;
+  }
+
+  // If user has already arrived:
+  checkForAuthoritativeUser();
+  // If user is going to get updated in store later:
+  const unsubscribe = store.subscribe(() => {
+    if (checkForAuthoritativeUser()) {
       unsubscribe();
     }
   });
@@ -203,9 +213,9 @@ export function launch(userData) {
     document.getElementById('app-container')
   );
 
-  $(() => {
-    // this element contains a fallback error - once we're fairly
-    // sure that this script isn't completely broken, we can hide it.
-    document.getElementById('error-fallback').style.display = 'none';
-  });
+  if (window.myWarwickErrorHandler) {
+    // Don't say "there was a problem loading My Warwick" once we're past the initial page load,
+    // even if some errors happen. We should already have some content.
+    window.removeEventListener('error', window.myWarwickErrorHandler);
+  }
 }

@@ -1,4 +1,3 @@
-import * as serverpipe from './serverpipe';
 import store from './store';
 import * as user from './state/user';
 import * as analytics from './analytics';
@@ -8,10 +7,8 @@ export { fetchUserInfo } from './userinfo-base';
 
 export function receiveUserInfo(response) {
   return handleRedirects(response)
-    .then((data, handled) => {
-      if (handled) {
-        return;
-      } else {
+    .then(([data, handled]) => {
+      if (!handled) {
         store.dispatch(user.receiveSSOLinks(data.links));
 
         const analyticsData = data.user.analytics;

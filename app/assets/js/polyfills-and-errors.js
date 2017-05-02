@@ -2,10 +2,14 @@
 // In case of JS error, hide the loading spinner.
 // Has to be up top to catch all possible JS errors.
 if (window.addEventListener) {
-  window.addEventListener('error', () => {
+  window.myWarwickErrorHandler = () => {
     const spinner = document.getElementById('react-app-spinner');
     if (spinner) spinner.style.display = 'none';
-  }, true);
+
+    const message = document.getElementById('error-fallback');
+    if (message) message.style.display = 'block';
+  };
+  window.addEventListener('error', window.myWarwickErrorHandler, true);
 }
 
 import 'core-js/modules/es6.object.assign';
