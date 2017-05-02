@@ -87,13 +87,6 @@ function clearUserData() {
     localforage.clear().then(() => dispatch({ type: USER_CLEAR }));
 }
 
-export function rewriteRefreshUrl(location, currentLocation) {
-  const parsed = url.parse(location, true);
-  parsed.query.target = currentLocation;
-  parsed.query.myWarwickRefresh = true;
-  parsed.search = querystring.stringify(parsed.query);
-  return url.format(parsed);
-}
 
 export function userReceive(currentUser) {
   return (dispatch) =>
