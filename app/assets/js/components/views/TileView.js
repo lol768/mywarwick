@@ -76,7 +76,9 @@ class TileView extends Component {
       user,
       zoomed,
       size,
-      canZoom: content ? tileContentComponent.canZoom(content.content) : false,
+      canZoom: content ? tileContentComponent.canZoom(content.content) : (
+        tileContentComponent.needsContentToRender() ? false : tileContentComponent.canZoom()
+      ),
       key: id,
       id,
       editing,

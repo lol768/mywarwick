@@ -5,6 +5,8 @@
     margin-bottom: @start-tab-bar-height;
 
     overflow-x: hidden;
+
+    min-height: unset;
   }
 
   h1, h2, h3 {
@@ -26,7 +28,6 @@
     overflow-y: auto;
   }
 }
-
 
 // MASTHEAD MOBILE
 .start-masthead {
@@ -134,5 +135,11 @@ html.android.app {
 
   .suggested-links > h3 {
     display: none;
+  }
+}
+
+html.mobile.standalone {
+  body {
+    margin-bottom: 0;
   }
 }

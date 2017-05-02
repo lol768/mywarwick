@@ -1,0 +1,29 @@
+.tile--map__container {
+  background: url(/assets/images/map.png) no-repeat;
+  background-size: cover;
+
+  .tile, .tile--map > .tile__wrap > .tile__header  {
+    background: transparent !important;
+  }
+
+}
+
+html.mobile {
+  .tile--map.tile--zoomed {
+    font-size: 0;
+
+    .tile__body {
+      padding: 0;
+    }
+
+    .tile__header {
+      display: none;
+    }
+
+    iframe {
+      border: 0;
+      width: 100%;
+      height: ~"calc(100vh - 88px)";
+    }
+  }
+}

@@ -84,14 +84,18 @@ export default class TileContent extends React.PureComponent {
     return true;
   }
 
-  needsContentToRender() {
+  static needsContentToRender() {
     return true;
+  }
+
+  expandsOnClick() {
+    return false;
   }
 
   render() {
     if (!this.isError()) {
       try {
-        if (this.props.content || !this.needsContentToRender()) {
+        if (this.props.content || !this.constructor.needsContentToRender()) {
           return this.contentOrDefault(this.getBody);
         }
       } catch (e) {

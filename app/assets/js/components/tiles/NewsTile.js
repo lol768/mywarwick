@@ -12,7 +12,7 @@ export default class NewsTile extends TileContent {
     return true;
   }
 
-  needsContentToRender() {
+  static needsContentToRender() {
     return false;
   }
 
