@@ -2,8 +2,6 @@
   body {
     font-family: -apple-system, 'Roboto', 'Droid Sans', 'Segoe WP', Helvetica, sans-serif !important;
 
-    margin-bottom: @start-tab-bar-height;
-
     overflow-x: hidden;
   }
 
@@ -24,6 +22,10 @@
   }
   .tile--zoomed .tile__body {
     overflow-y: auto;
+  }
+
+  &.not-app body, &.app.ios body {
+    margin-bottom: @start-tab-bar-height;
   }
 }
 

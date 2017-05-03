@@ -35,9 +35,9 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         audience,
         Some(departmentCode) //Arden house
       )
-      val departmentInforDao = mock[DepartmentInfoDao]
-      when(departmentInforDao.allDepartments).thenReturn(Seq[DepartmentInfo](DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
-      val audienceBinder = new AudienceBinder(departmentInforDao)
+      val departmentInfoDao = mock[DepartmentInfoDao]
+      when(departmentInfoDao.allDepartments).thenReturn(Seq[DepartmentInfo](DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
+      val audienceBinder = new AudienceBinder(departmentInfoDao)
       audienceBinder.bindAudience(audienceData).futureValue mustBe Right(Audience(Seq(Audience.DepartmentAudience(departmentCode, Seq(Audience.TeachingStaff)))))
 
     }
@@ -53,9 +53,9 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         audience,
         Some(departmentCode) //Arden house
       )
-      val departmentInforDao = mock[DepartmentInfoDao]
-      when(departmentInforDao.allDepartments).thenReturn(Seq[DepartmentInfo](DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
-      val audienceBinder = new AudienceBinder(departmentInforDao)
+      val departmentInfoDao = mock[DepartmentInfoDao]
+      when(departmentInfoDao.allDepartments).thenReturn(Seq[DepartmentInfo](DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
+      val audienceBinder = new AudienceBinder(departmentInfoDao)
 
       audienceBinder.bindAudience(audienceData).futureValue mustBe Right(Audience(Seq(Audience.DepartmentAudience(departmentCode, Seq(Audience.TeachingStaff, Audience.TaughtPostgrads)))))
 
@@ -103,12 +103,30 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         audience,
         Some(departmentCode) //Arden house
       )
-      val departmentInforDao = mock[DepartmentInfoDao]
-      when(departmentInforDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
-      val audienceBinder = new AudienceBinder(departmentInforDao)
+      val departmentInfoDao = mock[DepartmentInfoDao]
+      when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
+      val audienceBinder = new AudienceBinder(departmentInfoDao)
 
       audienceBinder.bindAudience(audienceData).futureValue mustBe Right(Audience(Seq(Audience.TeachingStaff, Audience.UndergradStudents, Audience.DepartmentAudience(departmentCode, Seq(Audience.TeachingStaff, Audience.ResearchPostgrads)))))
 
+    }
+
+    "not error when binding with empty WebGroup audience" in {
+      val audience = Seq(
+        "Staff",
+        "WebGroup:"
+      )
+
+      val audienceData = AudienceData(
+        audience,
+        None
+      )
+
+      val departmentInfoDao = mock[DepartmentInfoDao]
+      when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
+      val audienceBinder = new AudienceBinder(departmentInfoDao)
+
+      audienceBinder.bindAudience(audienceData).futureValue mustBe Right(Audience(Seq(Audience.Staff)))
     }
 
     "raise error message when binding with invalid department code" in {
@@ -123,9 +141,9 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         audience,
         Some(departmentCode)
       )
-      val departmentInforDao = mock[DepartmentInfoDao]
-      when(departmentInforDao.allDepartments).thenReturn(Seq(DepartmentInfo("BB", "BB", "BB", "BB", "BB")))
-      val audienceBinder = new AudienceBinder(departmentInforDao)
+      val departmentInfoDao = mock[DepartmentInfoDao]
+      when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("BB", "BB", "BB", "BB", "BB")))
+      val audienceBinder = new AudienceBinder(departmentInfoDao)
 
       audienceBinder.bindAudience(audienceData).futureValue mustBe Left(Seq(FormError("department", "error.department.invalid")))
     }
@@ -133,9 +151,9 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
     "raise error message when binding with invalid department audience" in {
 
       val departmentCode = "AH"
-      val unreconisedAudience = "Dept:TeachingApple"
+      val unrecognisedAudience = "Dept:TeachingApple"
       val audience = Seq(
-        unreconisedAudience,
+        unrecognisedAudience,
         "Dept:ResearchPostgrads"
       )
 
@@ -143,17 +161,17 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         audience,
         Some(departmentCode) //Arden house
       )
-      val departmentInforDao = mock[DepartmentInfoDao]
-      when(departmentInforDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
-      val audienceBinder = new AudienceBinder(departmentInforDao)
+      val departmentInfoDao = mock[DepartmentInfoDao]
+      when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
+      val audienceBinder = new AudienceBinder(departmentInfoDao)
 
-      audienceBinder.bindAudience(audienceData).futureValue mustBe Left(Seq(FormError("audience", "error.audience.invalid", unreconisedAudience)))
+      audienceBinder.bindAudience(audienceData).futureValue mustBe Left(Seq(FormError("audience", "error.audience.invalid", Seq(unrecognisedAudience))))
     }
 
     "raise error message when binding with invalid non-department audience" in {
-      val unreconisedAudience = "TeachingApple"
+      val unrecognisedAudience = "TeachingApple"
       val audience = Seq(
-        unreconisedAudience,
+        unrecognisedAudience,
         "ResearchPostgrads"
       )
 
@@ -164,7 +182,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
       val audienceBinder = new AudienceBinder(null)
 
-      audienceBinder.bindAudience(audienceData).futureValue mustBe Left(Seq(FormError("audience", "error.audience.invalid", unreconisedAudience)))
+      audienceBinder.bindAudience(audienceData).futureValue mustBe Left(Seq(FormError("audience", "error.audience.invalid", Seq(unrecognisedAudience))))
     }
 
 
@@ -175,7 +193,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         None
       )
       val audienceBinder = new AudienceBinder(null)
-      audienceBinder.bindAudience(audienceData).futureValue mustBe Left(Seq(FormError("audience", "error.audience.invalid") ,FormError("audience", "error.audience.empty")))
+      audienceBinder.bindAudience(audienceData).futureValue mustBe Left(Seq(FormError("audience", "error.audience.invalid", Seq("")), FormError("audience", "error.audience.empty")))
     }
 
   }

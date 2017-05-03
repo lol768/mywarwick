@@ -58,7 +58,7 @@ const agendaViewTransform = (items) => {
     i => _.flatMap(i, e => {
       if (e.isAllDay) {
         const date = localMoment(e.start);
-        const end = localMoment(e.end);
+        const end = (e.end !== undefined) ? localMoment(e.end) : localMoment(e.start);
 
         const instances = [];
 
@@ -69,6 +69,13 @@ const agendaViewTransform = (items) => {
           });
 
           date.add(1, 'day');
+        }
+
+        if (instances.length === 0) {
+          instances.push({
+            ...e,
+            start: date.format(),
+          });
         }
 
         return instances;
@@ -115,7 +122,7 @@ export default class AgendaTile extends TileContent {
     }
     const DATETIME_OPTIONS = { printToday: true, onlyWeekday: true };
     const renderedStart = formatDateTime(event.start, undefined, DATETIME_OPTIONS);
-    return event.start === event.end ?
+    return event.end === undefined || event.start === event.end ?
       renderedStart : `${renderedStart}–${formatTime(event.end)}`;
   }
 

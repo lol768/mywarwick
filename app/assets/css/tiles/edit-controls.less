@@ -95,7 +95,7 @@
   @font-size: 24px;
   line-height: @font-size;
   position: fixed;
-  bottom: 16px;
+  bottom: 60px;
   right: 16px;
   width: @base-size;
   height: @base-size;
@@ -103,8 +103,8 @@
   border-radius: @base-size / 2;
   box-shadow: rgba(0, 0, 0, 0.16) 0 3px 10px, rgba(0, 0, 0, 0.23) 0 3px 10px;
   .center-aligned-icon(@base-size, @font-size);
-  .not-app & {
-    bottom: 60px;
+  .app.android & {
+    bottom: 16px;
   }
 }
 

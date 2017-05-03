@@ -60,8 +60,8 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
     "search for combination of departmental subsets" in new Ctx {
       webgroupsIsEmpty
       service.resolve(Audience(Seq(
-        WebgroupAudience(GroupName("in-winners")),
-        WebgroupAudience(GroupName("in-losers")),
+        WebGroupAudience(GroupName("in-winners")),
+        WebGroupAudience(GroupName("in-losers")),
         ModuleAudience("CS102"),
         DepartmentAudience("CH", Seq(UndergradStudents)),
         DepartmentAudience("PH", Seq(UndergradStudents, TeachingStaff))

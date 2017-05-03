@@ -45,7 +45,7 @@ function fetchStream(name, options = {}) {
 
 export function fetchActivities() {
   return (dispatch, getState) => {
-    const { lastItemFetched } = getState().notifications;
+    const { lastItemFetched } = getState().activities;
 
     dispatch(fetchingActivities());
 

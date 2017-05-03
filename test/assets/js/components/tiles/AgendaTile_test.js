@@ -3,7 +3,7 @@ import AgendaTile, {
   LargeBody
 } from 'components/tiles/AgendaTile';
 import Hyperlink from 'components/ui/Hyperlink';
-import { shallow, render } from 'enzyme';
+import { shallow } from 'enzyme';
 
 const now = new Date('2016-05-19T13:00:00+01:00');
 const end = new Date('2016-05-19T14:00:00+01:00');
@@ -41,6 +41,12 @@ const ITEMS = {
     end: '2016-05-28T00:00:00Z',
     isAllDay: true,
     title: 'Two-week event'
+  },
+  singleDayAllDay: {
+    id: '3',
+    start: '2016-06-16T00:00:00Z',
+    isAllDay: true,
+    title: 'One day event'
   }
 };
 
@@ -124,7 +130,7 @@ describe('AgendaTile', () => {
     };
 
     const html = renderAtMoment(<AgendaTile size="wide" content={ content }/>, now);
-    
+
     findChild(html, [0, 0, 0, 0, 0, 1]).should.equal('Fri 12:00–14:00');
     findChild(html, [0, 0, 0, 0, 1, 1]).should.equal('Lunch tomorrow');
   });
@@ -176,6 +182,9 @@ describe('AgendaTile', () => {
   it('renders a weekday only', () => {
     const itemSingleTime = {
       start: '2016-05-24T09:00:00+01:00',
+    };
+    const itemDuplicateTime = {
+      start: '2016-05-24T09:00:00+01:00',
       end: '2016-05-24T09:00:00+01:00',
     };
     const itemWithEnd = {
@@ -184,6 +193,7 @@ describe('AgendaTile', () => {
     };
     atMoment(() => {
       AgendaTile.renderSingleEventDate(itemSingleTime).should.equal('Tue 09:00');
+      AgendaTile.renderSingleEventDate(itemDuplicateTime).should.equal('Tue 09:00');
       AgendaTile.renderSingleEventDate(itemWithEnd).should.equal('Tue 09:00–10:30');
     }, now);
   });
@@ -234,6 +244,21 @@ describe('AgendaTile', () => {
     html.props.children.length.should.equal(9);
   });
 
+  it('displays single-day all-day events', () => {
+    const content = {
+      items: [ ITEMS.singleDayAllDay ]
+    };
+    const html = renderAtMoment(
+      <AgendaTile
+        zoomed={ true }
+        content={ content }
+        size="large"
+      />
+      , now);
+    html.props.children.length.should.equal(1);
+  });
+
+
 });
 
 describe('LargeBody', () => {
@@ -267,7 +292,7 @@ describe('AgendaTileItem', () => {
 
   it('renders correctly without a href', () => {
     const html = shallow(<AgendaTileItem zoomed={ true } { ...props } />);
- 
+
     html.hasClass('tile-list-item').should.equal(true);
     const titleElement = html.find('.tile-list-item__title');
     titleElement.props().title.should.equal(props.title);

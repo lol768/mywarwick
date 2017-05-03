@@ -65,8 +65,8 @@ class AudienceDaoImpl extends AudienceDao {
         case ("Module", components) => components.collect {
           case AudienceComponentSave("Module", Some(code), _) => ModuleAudience(code)
         }
-        case ("Webgroup", components) => components.collect {
-          case AudienceComponentSave("Webgroup", Some(group), _) => WebgroupAudience(GroupName(group))
+        case ("WebGroup", components) => components.collect {
+          case AudienceComponentSave("WebGroup", Some(group), _) => WebGroupAudience(GroupName(group))
         }
         case ("Usercode", components) => components.flatMap(_.value).map(Usercode).map(UsercodeAudience.apply)
         case (_, components) => components.map(_.name).flatMap(ComponentParameter.unapply)
@@ -85,7 +85,7 @@ class AudienceDaoImpl extends AudienceDao {
       case ds: DepartmentSubset => resolveSubset(None, ds)
       case DepartmentAudience(code, subsets) => subsets.flatMap { subset => resolveSubset(Some(code), subset) }
       case ModuleAudience(code) => Seq(AudienceComponentSave("Module", Some(code), None))
-      case WebgroupAudience(group) => Seq(AudienceComponentSave("Webgroup", Some(group.string), None))
+      case WebGroupAudience(group) => Seq(AudienceComponentSave("WebGroup", Some(group.string), None))
       case UsercodeAudience(usercode) => Seq(AudienceComponentSave("Usercode", Some(usercode.string), None))
     }
 

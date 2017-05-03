@@ -1,5 +1,6 @@
 package helpers
 
+import helpers.selenium.ChromeMobileInfo
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.FirefoxProfile
@@ -21,7 +22,7 @@ import org.scalatestplus.play._
   * embedded Play instance, rather than an existing running
   * web server, otherwise we'd use it.)
   */
-trait SelectBrowsersPerSuite extends WebBrowser with TestSuiteMixin {
+protected trait SelectBrowsersPerSuite extends WebBrowser with TestSuiteMixin {
   self: TestSuite =>
 
   private var privateWebDriver: WebDriver = UninitializedDriver
