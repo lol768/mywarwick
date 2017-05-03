@@ -8,7 +8,9 @@ case class PushRegistration(
   platform: Platform,
   token: String,
   createdAt: DateTime,
-  lastFetchedAt: DateTime
+  lastFetchedAt: DateTime,
+  updatedAt: Option[DateTime],
+  deviceString: Option[String]
 )
 
 sealed abstract class Platform(val dbValue: String) extends EnumEntry
