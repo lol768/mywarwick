@@ -6,6 +6,18 @@
     background: transparent !important;
   }
 
+  .tile__body {
+    overflow: visible;
+  }
+
+  .map-tile-image {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    filter: saturate(0%) brightness(90%) contrast(50%);
+  }
 }
 
 html.mobile {
@@ -26,4 +38,9 @@ html.mobile {
       height: ~"calc(100vh - 88px)";
     }
   }
+}
+
+.tile__header {
+  position: relative;
+  z-index: 1;
 }
