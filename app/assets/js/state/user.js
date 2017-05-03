@@ -1,7 +1,5 @@
 import localforage from 'localforage';
 import log from 'loglevel';
-import url from 'url';
-import querystring from 'querystring';
 
 export const USER_LOAD = 'USER_LOAD';
 export const USER_RECEIVE = 'USER_RECEIVE';

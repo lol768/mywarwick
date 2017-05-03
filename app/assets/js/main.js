@@ -188,7 +188,7 @@ export function launch(userData) {
   // ensure local version is written first, then remote version if available.
   persistedUserLinks
     .then(() => userInfoPromise)
-    .then(data => userinfo.receiveUserInfo(data))
+    .then(data => userinfo.receiveUserInfo(data));
 
   // Refresh all tile content every five minutes
   setInterval(() => {
