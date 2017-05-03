@@ -15,26 +15,37 @@ export default class MapTile extends TileContent {
 
   componentDidMount() {
     if (this.state.hasGeolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          this.setState({
-            position: {
-              longitude: pos.coords.longitude,
-              latitude: pos.coords.latitude,
-            },
-          });
-        },
-        (e) => {
-          log.error('Error returned from geolocation', e);
+      this.updateLocation();
 
-          this.setState({
-            position: null,
-          })
-        },
-        {
-          enableHighAccuracy: true,
-        });
+      this.updateLocationInterval = setInterval(this.updateLocation.bind(this), 120000);
     }
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.updateLocationInterval);
+  }
+
+  updateLocation() {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        this.setState({
+          position: {
+            longitude: pos.coords.longitude,
+            latitude: pos.coords.latitude,
+          },
+        });
+      },
+      (e) => {
+        log.error('Error returned from geolocation', e);
+
+        this.setState({
+          position: null,
+        })
+      },
+      {
+        enableHighAccuracy: true,
+      }
+    );
   }
 
   static canZoom() {
