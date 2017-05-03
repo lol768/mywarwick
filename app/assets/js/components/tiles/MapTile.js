@@ -77,7 +77,7 @@ export default class MapTile extends TileContent {
 
       const src = `/service/map/${latitude.toFixed(5)}/${longitude.toFixed(5)}/${width}/${height}`;
 
-      return <img src={src} className="map-tile-image" role="presentation"/>;
+      return <img src={src} className="map-tile-image" role="presentation" />;
     }
 
     return null;
