@@ -8,8 +8,8 @@ import play.api.http.HttpEntity
 import play.api.libs.ws.{StreamedResponse, WSResponseHeaders}
 import play.api.mvc.{Action, AnyContent}
 import services.MapService
+import system.ThreadPools.externalData
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
