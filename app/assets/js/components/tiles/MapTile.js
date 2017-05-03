@@ -40,7 +40,7 @@ export default class MapTile extends TileContent {
 
         this.setState({
           position: null,
-        })
+        });
       },
       {
         enableHighAccuracy: true,
@@ -55,10 +55,12 @@ export default class MapTile extends TileContent {
   getLargeBody() {
     if (this.state.position) {
       const { latitude, longitude } = this.state.position;
-      const width = 400, height = 300;
-      const image = `/service/map/${latitude.toFixed(5)}/${longitude.toFixed(5)}/${width}/${height}`;
+      const width = 400;
+      const height = 300;
 
-      return <img src={image} className="map-tile-image"/>;
+      const src = `/service/map/${latitude.toFixed(5)}/${longitude.toFixed(5)}/${width}/${height}`;
+
+      return <img src={src} className="map-tile-image" role="presentation" />;
     }
 
     return null;
