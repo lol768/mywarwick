@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import log from 'loglevel';
 import * as notifications from '../../state/notifications';
+import { makeCancelable } from '../../promise';
 
 export default class InfiniteScrollable extends React.Component {
 
@@ -20,7 +21,7 @@ export default class InfiniteScrollable extends React.Component {
       loading: false,
     };
     this.boundScrollListener = this.onScroll.bind(this);
-    this.cancellableShowMorePromise = this.makeCancelable(Promise.resolve());
+    this.cancellableShowMorePromise = makeCancelable(Promise.resolve());
   }
 
   componentDidMount() {
@@ -54,7 +55,7 @@ export default class InfiniteScrollable extends React.Component {
     if (scrollTop >= loadMoreThreshold) {
       this.detachScrollListener();
       this.setState({ loading: true });
-      this.cancellableShowMorePromise = this.makeCancelable(this.props.onLoadMore());
+      this.cancellableShowMorePromise = makeCancelable(this.props.onLoadMore());
       this.cancellableShowMorePromise.promise.then(() =>
         this.setState({ loading: false })
       ).catch((e) => {
@@ -70,26 +71,6 @@ export default class InfiniteScrollable extends React.Component {
       });
     }
   }
-
-  makeCancelable = (promise) => {
-    let hasCanceled_ = false;
-
-    const wrappedPromise = new Promise((resolve, reject) => {
-      promise.then(val => (
-        hasCanceled_ ? reject({ isCanceled: true }) : resolve(val)
-      ));
-      promise.catch(error => (
-        hasCanceled_ ? reject({ isCanceled: true }) : reject(error)
-      ));
-    });
-
-    return {
-      promise: wrappedPromise,
-      cancel() {
-        hasCanceled_ = true;
-      },
-    };
-  };
 
   detachScrollListener() {
     this.detached = true;
