@@ -9,7 +9,7 @@ import warwick.sso.Usercode
 
 @ImplementedBy(classOf[PushRegistrationServiceImpl])
 trait PushRegistrationService {
-  def save(usercode: Usercode, platform: Platform, token: String, deviceString: String): Boolean
+  def save(usercode: Usercode, platform: Platform, token: String, deviceString: Option[String]): Boolean
 
   def remove(token: String): Boolean
 
@@ -21,7 +21,7 @@ class PushRegistrationServiceImpl @Inject()(
   pushRegistrationDao: PushRegistrationDao
 ) extends PushRegistrationService {
 
-  override def save(usercode: Usercode, platform: Platform, token: String, deviceString: String): Boolean =
+  override def save(usercode: Usercode, platform: Platform, token: String, deviceString: Option[String]): Boolean =
     db.withConnection { implicit c =>
       pushRegistrationDao.saveRegistration(usercode, platform, token, deviceString)
     }
