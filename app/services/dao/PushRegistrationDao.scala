@@ -1,12 +1,14 @@
 package services.dao
 
 import java.sql.{Connection, SQLIntegrityConstraintViolationException}
+import javax.inject.Inject
 
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.ImplementedBy
 import models.{Platform, PushRegistration}
 import org.joda.time.DateTime
+import play.api.Configuration
 import system.Logging
 import warwick.anorm.converters.ColumnConversions._
 import warwick.sso.Usercode
@@ -19,26 +21,30 @@ trait PushRegistrationDao {
 
   def updateLastFetched(token: String)(implicit c: Connection): Unit
 
-  def saveRegistration(usercode: Usercode, platform: Platform, token: String)(implicit c: Connection): Boolean
+  def saveRegistration(usercode: Usercode, platform: Platform, token: String, deviceString: Option[String])(implicit c: Connection): Boolean
 
   def registrationExists(token: String)(implicit c: Connection): Boolean
 
   def removeRegistration(token: String)(implicit c: Connection): Boolean
 
   def removeRegistrationIfNotRegisteredSince(token: String, date: DateTime)(implicit c: Connection): Boolean
-
 }
 
-class PushRegistrationDaoImpl extends PushRegistrationDao with Logging {
+class PushRegistrationDaoImpl @Inject()(config: Configuration) extends PushRegistrationDao with Logging {
+
+  private lazy val deviceStringMaxLength: Int = config.getInt("mywarwick.pushregistration.deviceStringMaxLength")
+    .getOrElse(throw new IllegalArgumentException("mywarwick.pushregistration.deviceStringMaxLength missing"))
 
   val pushRegistrationParser: RowParser[PushRegistration] =
     get[String]("USERCODE") ~
       get[String]("PLATFORM") ~
       get[String]("TOKEN") ~
       get[DateTime]("CREATED_AT") ~
-      get[DateTime]("LAST_FETCHED_AT") map {
-      case usercode ~ platform ~ token ~ createdAt ~ lastFetchedAt =>
-        PushRegistration(usercode, Platform(platform), token, createdAt, lastFetchedAt)
+      get[DateTime]("LAST_FETCHED_AT") ~
+      get[Option[DateTime]]("UPDATED_AT") ~
+      get[Option[String]]("DEVICE_STRING") map {
+      case usercode ~ platform ~ token ~ createdAt ~ lastFetchedAt ~ updatedAt ~ deviceString =>
+        PushRegistration(usercode, Platform(platform), token, createdAt, lastFetchedAt, updatedAt, deviceString)
     }
 
   override def updateLastFetched(token: String)(implicit c: Connection): Unit = {
@@ -70,21 +76,22 @@ class PushRegistrationDaoImpl extends PushRegistrationDao with Logging {
       ).as(scalar[Int].single) > 0
   }
 
-  override def saveRegistration(usercode: Usercode, platform: Platform, token: String)(implicit c: Connection): Boolean = {
+  override def saveRegistration(usercode: Usercode, platform: Platform, token: String, deviceString: Option[String])(implicit c: Connection): Boolean = {
     try {
-      SQL("INSERT INTO PUSH_REGISTRATION (TOKEN, usercode, platform, CREATED_AT, LAST_FETCHED_AT) VALUES ({token}, {usercode}, {platform}, {now}, {now})")
+      SQL("INSERT INTO PUSH_REGISTRATION (TOKEN, usercode, platform, CREATED_AT, LAST_FETCHED_AT, UPDATED_AT, DEVICE_STRING) VALUES ({token}, {usercode}, {platform}, {now}, {now}, {now}, {deviceString})")
         .on(
           'token -> token,
           'usercode -> usercode.string,
           'platform -> platform.dbValue,
-          'now -> DateTime.now
+          'now -> DateTime.now,
+          'deviceString -> deviceString.map(_.take(deviceStringMaxLength))
         )
         .execute()
       true
     } catch {
       case _: SQLIntegrityConstraintViolationException =>
         // Token is already registered.  Update the registration to make sure it's for this user
-        updateUsercodeForToken(token, usercode)
+        updateUsercodeForToken(token, usercode, deviceString)
         true
       case e: Exception =>
         logger.error("Exception when saving push registration", e)
@@ -92,11 +99,13 @@ class PushRegistrationDaoImpl extends PushRegistrationDao with Logging {
     }
   }
 
-  private def updateUsercodeForToken(token: String, usercode: Usercode)(implicit c: Connection): Boolean = {
-    SQL("UPDATE PUSH_REGISTRATION SET USERCODE = {usercode} WHERE TOKEN = {token}")
+  private def updateUsercodeForToken(token: String, usercode: Usercode, deviceString: Option[String])(implicit c: Connection): Boolean = {
+    SQL("UPDATE PUSH_REGISTRATION SET USERCODE = {usercode}, UPDATED_AT = {now}, DEVICE_STRING = {deviceString} WHERE TOKEN = {token}")
       .on(
         'token -> token,
-        'usercode -> usercode.string
+        'usercode -> usercode.string,
+        'now -> DateTime.now,
+        'deviceString -> deviceString.map(_.take(deviceStringMaxLength))
       )
       .executeUpdate() == 1
   }
