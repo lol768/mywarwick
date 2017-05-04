@@ -1,4 +1,4 @@
-function makeCancelable(promise) {
+export function makeCancelable(promise) {
   let hasCanceled_ = false;
 
   const wrappedPromise = new Promise((resolve, reject) => {
@@ -17,5 +17,3 @@ function makeCancelable(promise) {
     },
   };
 }
-
-export { makeCancelable };
