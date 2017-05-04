@@ -1,11 +1,17 @@
 package helpers
 
+import java.net.ServerSocket
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import org.eclipse.jetty.server
 import org.eclipse.jetty.server.handler.AbstractHandler
 import org.eclipse.jetty.server.{Handler, Server}
 import play.api.libs.json.{JsValue, Json}
+
+import scala.concurrent.Future
+import resource._
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object ExternalServers {
 
@@ -19,6 +25,27 @@ object ExternalServers {
       block(port)
     } finally {
       server.stop()
+    }
+  }
+
+  /**
+    * Run a TCP server that on connection prints some
+    * text and closes the connection.
+    */
+  def runBrokenServer[A](block: (Int) => A): A = {
+    val port = 19000
+    managed(new ServerSocket(port)).acquireAndGet { acceptor =>
+      @volatile var run = true
+      Future {
+        while (run) {
+          for (socket <- managed(acceptor.accept())) {
+            socket.getOutputStream.write("Error".getBytes("UTF-8"))
+            socket.close()
+          }
+        }
+      }
+      try block(port)
+      finally run = false
     }
   }
 
