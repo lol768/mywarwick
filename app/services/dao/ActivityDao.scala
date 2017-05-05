@@ -163,8 +163,8 @@ class ActivityDaoImpl @Inject()(
     val maybeBefore = if (beforeDate.nonEmpty)
       """
         AND (
-          ACTIVITY.PUBLISHED_AT < {beforeDate} OR (
-            ACTIVITY.PUBLISHED_AT = {beforeDate} AND ACTIVITY.ID < {before}
+          ACTIVITY_RECIPIENT.PUBLISHED_AT < {beforeDate} OR (
+            ACTIVITY_RECIPIENT.PUBLISHED_AT = {beforeDate} AND ACTIVITY_ID < {before}
           )
         )
       """
@@ -174,8 +174,8 @@ class ActivityDaoImpl @Inject()(
     val maybeSince = if (sinceDate.nonEmpty)
       """
         AND (
-          ACTIVITY.PUBLISHED_AT > {sinceDate} OR (
-            ACTIVITY.PUBLISHED_AT = {sinceDate} AND ACTIVITY.ID > {since}
+          ACTIVITY_RECIPIENT.PUBLISHED_AT > {sinceDate} OR (
+            ACTIVITY_RECIPIENT.PUBLISHED_AT = {sinceDate} AND ACTIVITY_ID > {since}
           )
         )
       """
@@ -185,9 +185,9 @@ class ActivityDaoImpl @Inject()(
     // to return, and they have the same publish time
     val conditions = if (beforeDate.nonEmpty && beforeDate == sinceDate)
       """
-        AND ACTIVITY.PUBLISHED_AT = {beforeDate}
-        AND ACTIVITY.ID > {since}
-        AND ACTIVITY.ID < {before}
+        AND ACTIVITY_RECIPIENT.PUBLISHED_AT = {beforeDate}
+        AND ACTIVITY_ID > {since}
+        AND ACTIVITY_ID < {before}
       """
     else maybeBefore + maybeSince
 
@@ -209,7 +209,7 @@ class ActivityDaoImpl @Inject()(
             AND ACTIVITY.REPLACED_BY_ID IS NULL
             $maybeNotifications
             $conditions
-          ORDER BY ACTIVITY_RECIPIENT.PUBLISHED_AT $publishedAtOrder, ACTIVITY.ID ASC"""
+          ORDER BY ACTIVITY_RECIPIENT.PUBLISHED_AT $publishedAtOrder, ACTIVITY_ID ASC"""
         )}
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC, ACTIVITY.ID ASC
