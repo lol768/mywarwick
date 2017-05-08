@@ -26,10 +26,10 @@ class MapController @Inject()(
 
   private def getContentType(resp: WSResponseHeaders) = resp.headers.get("Content-Type").flatMap(_.headOption).getOrElse("application/octet-stream")
 
-  def mapThumbnail(lon: String, lat: String, width: Int, height: Int): Action[AnyContent] = Action.async { implicit request =>
+  def mapThumbnail(lat: String, lon: String, width: Int, height: Int): Action[AnyContent] = Action.async { implicit request =>
     val now = DateTime.now().toString
 
-    mapService.thumbnailForLocation(lon, lat, width, height).flatMap {
+    mapService.thumbnailForLocation(lat, lon, width, height).flatMap {
       case StreamedResponse(response, body) if isOk(response) && isContentType(response, "image") =>
         val contentType = getContentType(response)
 

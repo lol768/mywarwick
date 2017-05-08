@@ -18,11 +18,11 @@ class MapService @Inject()(
     .map(_.split("=", 2))
     .map { case Array(key, value) => (key, value) }
 
-  def thumbnailForLocation(lon: String, lat: String, width: Int, height: Int): Future[StreamedResponse] = {
+  def thumbnailForLocation(lat: String, lon: String, width: Int, height: Int): Future[StreamedResponse] = {
     ws.url(url).withMethod("GET")
       .withQueryString(query: _*)
       .withQueryString(
-        "gps" -> s"$lon,$lat",
+        "gps" -> s"$lat,$lon",
         "crop" -> s"${width}x$height"
       )
       .stream

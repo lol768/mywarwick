@@ -97,4 +97,4 @@ GET         /*path/                                               @controllers.H
 GET         /service/search/*path                                 @controllers.SearchController.proxy(path: String)
 POST        /service/search/*path                                 @controllers.SearchController.proxy(path: String)
 
-GET         /service/map/:lon/:lat/:width/:height                 @controllers.MapController.mapThumbnail(lon: String, lat: String, width: Int, height: Int)
+GET         /service/map/:lat/:lon/:width/:height                 @controllers.MapController.mapThumbnail(lat: String, lon: String, width: Int, height: Int)

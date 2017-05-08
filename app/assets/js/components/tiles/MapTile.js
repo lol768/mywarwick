@@ -2,9 +2,9 @@ import React, { PropTypes } from 'react';
 import TileContent from './TileContent';
 import log from 'loglevel';
 
-function isPositionOnCampus({ longitude, latitude }) {
-  return latitude <= -1.548 && latitude >= -1.576
-    && longitude >= 52.373 && longitude <= 52.392;
+function isPositionOnCampus({ latitude, longitude }) {
+  return latitude >= 52.373 && latitude <= 52.392
+    && longitude <= -1.548 && longitude >= -1.576;
 }
 
 export default class MapTile extends TileContent {
@@ -81,10 +81,10 @@ export default class MapTile extends TileContent {
       const { position } = this.state;
       const { longitude, latitude } = position;
 
-      const src = `/service/map/${longitude.toFixed(5)}/${latitude.toFixed(5)}/${width}/${height}`;
+      const src = `/service/map/${latitude.toFixed(4)}/${longitude.toFixed(4)}/${width}/${height}`;
 
       if (isPositionOnCampus(position)) {
-        return <img src={src} className="map-tile-image" role="presentation" />;
+        return <img src={src} className="map-tile-image" role="presentation"/>;
       }
     }
 
@@ -92,7 +92,10 @@ export default class MapTile extends TileContent {
   }
 
   getZoomedBody() {
-    return <iframe src="https://campus.warwick.ac.uk"></iframe>;
+    return <div>
+      <i className="fa fa-spinner fa-pulse fa-2x"></i>
+      <iframe src="https://campus.warwick.ac.uk"></iframe>
+    </div>;
   }
 
   static needsContentToRender() {
