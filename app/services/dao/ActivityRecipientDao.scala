@@ -29,7 +29,7 @@ class ActivityRecipientDaoImpl @Inject()() extends ActivityRecipientDao {
     val now = DateTime.now
     val published: DateTime = publishedAt.getOrElse(now)
     SQL"""INSERT INTO ACTIVITY_RECIPIENT (ACTIVITY_ID, USERCODE, CREATED_AT, PUBLISHED_AT, SHOULD_NOTIFY)
-         VALUES ($activityId, $usercode, $now, $published, $shouldNotify)""".executeInsert()
+         VALUES ($activityId, $usercode, $now, $published, $shouldNotify)""".execute()
   }
 
   override def markSent(activityId: String, usercode: String)(implicit c: Connection): Unit =
