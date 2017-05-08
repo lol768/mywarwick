@@ -81,11 +81,9 @@ class ActivityDaoImpl @Inject()(
 
   def updateReplacedActivity(replacedById: String, replaces: Seq[String])(implicit c: Connection) =
     replaces.grouped(1000).foreach { group =>
-      SQL("UPDATE ACTIVITY SET replaced_by_id = {replacedById} WHERE id IN ({replaces})")
-        .on(
-          'replacedById -> replacedById,
-          'replaces -> group
-        )
+      SQL"UPDATE ACTIVITY SET replaced_by_id = $replacedById WHERE id IN ($replaces)"
+        .execute()
+      SQL"UPDATE ACTIVITY_RECIPIENT SET replaced = 1 WHERE ACTIVITY_ID IN ($replaces)"
         .execute()
     }
 
@@ -138,7 +136,7 @@ class ActivityDaoImpl @Inject()(
     SQL(
       """
       SELECT ACTIVITY.* FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
-      WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.PUBLISHED_AT > {sinceDate} AND ACTIVITY.ID IN (
+      WHERE USERCODE = {usercode} AND ACTIVITY.SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.PUBLISHED_AT > {sinceDate} AND ACTIVITY.ID IN (
       SELECT ACTIVITY.ID FROM MESSAGE_SEND WHERE USERCODE = {usercode} AND OUTPUT = {mobile})
       """)
       .on(
@@ -198,6 +196,18 @@ class ActivityDaoImpl @Inject()(
     // affects which activities are returned.
     val publishedAtOrder = if (sinceDate.nonEmpty) "ASC" else "DESC"
 
+    /**
+      * It's important that the inner query here (which gets the final 100 or whatever IDs
+      * we'll be returning) is fast, which is why:
+      *  - It only uses columns that are in the ACTIVITY_RECIPIENT_READ_INDEX,
+      *      so it can read the index and not need to read the table at all;
+      *  - It doesn't join on any other tables.
+      *
+      * If you're about to make a change that might break these two rules, it requires
+      * some discussion before you go ahead.
+      *
+      * TODO we still join here, awaiting migration to denormalise activity data
+      */
     val query = s"""
       $selectActivityRender
       WHERE ACTIVITY.ID IN (
