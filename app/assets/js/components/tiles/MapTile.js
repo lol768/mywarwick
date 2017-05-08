@@ -2,6 +2,11 @@ import React, { PropTypes } from 'react';
 import TileContent from './TileContent';
 import log from 'loglevel';
 
+function isPositionOnCampus({ longitude, latitude }) {
+  return latitude <= -1.548 && latitude >= -1.576
+    && longitude >= 52.373 && longitude <= 52.392;
+}
+
 export default class MapTile extends TileContent {
 
   static propTypes = {
@@ -73,11 +78,14 @@ export default class MapTile extends TileContent {
   getLargeBody() {
     if (this.state.position) {
       const { imageSize: { width, height } } = this.props;
-      const { longitude, latitude } = this.state.position;
+      const { position } = this.state;
+      const { longitude, latitude } = position;
 
       const src = `/service/map/${longitude.toFixed(5)}/${latitude.toFixed(5)}/${width}/${height}`;
 
-      return <img src={src} className="map-tile-image" role="presentation" />;
+      if (isPositionOnCampus(position)) {
+        return <img src={src} className="map-tile-image" role="presentation" />;
+      }
     }
 
     return null;
