@@ -84,7 +84,7 @@ export default class MapTile extends TileContent {
       const src = `/service/map/${latitude.toFixed(4)}/${longitude.toFixed(4)}/${width}/${height}`;
 
       if (isPositionOnCampus(position)) {
-        return <img src={src} className="map-tile-image" role="presentation"/>;
+        return <img src={src} className="map-tile-image" role="presentation" />;
       }
     }
 
@@ -92,10 +92,14 @@ export default class MapTile extends TileContent {
   }
 
   getZoomedBody() {
-    return <div>
-      <i className="fa fa-spinner fa-pulse fa-2x"></i>
-      <iframe src="https://campus.warwick.ac.uk"></iframe>
-    </div>;
+    return (
+      <div>
+        <div className="tile-loading">
+          <i className="fa fa-spinner fa-pulse"></i>
+        </div>
+        <iframe src="https://campus.warwick.ac.uk/" frameBorder="0"></iframe>
+      </div>
+    );
   }
 
   static needsContentToRender() {
