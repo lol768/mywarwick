@@ -73,9 +73,9 @@ export default class MapTile extends TileContent {
   getLargeBody() {
     if (this.state.position) {
       const { imageSize: { width, height } } = this.props;
-      const { latitude, longitude } = this.state.position;
+      const { longitude, latitude } = this.state.position;
 
-      const src = `/service/map/${latitude.toFixed(5)}/${longitude.toFixed(5)}/${width}/${height}`;
+      const src = `/service/map/${longitude.toFixed(5)}/${latitude.toFixed(5)}/${width}/${height}`;
 
       return <img src={src} className="map-tile-image" role="presentation" />;
     }
