@@ -72,6 +72,8 @@ export default class Tile extends React.Component {
       } else {
         window.open(content.href);
       }
+    } else if (this.getContentInstance().expandsOnClick()) {
+      this.props.onZoomIn(e);
     }
   }
 
@@ -122,7 +124,7 @@ export default class Tile extends React.Component {
     };
 
     return (
-      <div className="tile__container">
+      <div className={`tile__container tile--${type}__container`}>
         <article
           className={
             classNames(

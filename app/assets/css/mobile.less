@@ -3,6 +3,8 @@
     font-family: -apple-system, 'Roboto', 'Droid Sans', 'Segoe WP', Helvetica, sans-serif !important;
 
     overflow-x: hidden;
+
+    min-height: unset;
   }
 
   h1, h2, h3 {
@@ -28,7 +30,6 @@
     margin-bottom: @start-tab-bar-height;
   }
 }
-
 
 // MASTHEAD MOBILE
 .start-masthead {
@@ -136,5 +137,11 @@ html.android.app {
 
   .suggested-links > h3 {
     display: none;
+  }
+}
+
+html.mobile.standalone {
+  body {
+    margin-bottom: 0;
   }
 }

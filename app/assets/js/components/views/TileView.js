@@ -69,6 +69,13 @@ class TileView extends Component {
       return null;
     }
 
+    let canZoom = false;
+    if (content && tileContentComponent.needsContentToRender()) {
+      canZoom = tileContentComponent.canZoom(content.content);
+    } else {
+      canZoom = tileContentComponent.canZoom();
+    }
+
     const tileProps = {
       ...tile,
       ...content,
@@ -76,7 +83,7 @@ class TileView extends Component {
       user,
       zoomed,
       size,
-      canZoom: content ? tileContentComponent.canZoom(content.content) : false,
+      canZoom,
       key: id,
       id,
       editing,

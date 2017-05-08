@@ -12,7 +12,7 @@ export default class ActivityTile extends TileContent {
     return true;
   }
 
-  needsContentToRender() {
+  static needsContentToRender() {
     return false;
   }
 
