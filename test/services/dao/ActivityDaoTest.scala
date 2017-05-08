@@ -49,13 +49,13 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
 
     "find activities without tags" in transaction { implicit c =>
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
-      activityRecipientDao.create(activityId, "someone", None)
+      activityRecipientDao.create(activityId, "someone", None, shouldNotify=false)
       activityDao.getActivitiesForUser("someone").map(_.activity.id) must contain(activityId)
     }
 
     "find activities with tags" in transaction { implicit c =>
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
-      activityRecipientDao.create(activityId, "someone", None)
+      activityRecipientDao.create(activityId, "someone", None, shouldNotify=true)
       activityTagDao.save(activityId, ActivityTag("name", TagValue("value")))
       activityDao.getActivitiesForUser("someone").map(_.activity.id) must contain(activityId)
     }
@@ -74,8 +74,8 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
       SQL(
         """
       INSERT INTO activity_recipient VALUES
-      ({oldActivityId}, {usercode}, {oldDate}, null, null, null, {oldDate}),
-      ({newActivityId}, {usercode}, {nowDate}, null, null, null, {nowDate})
+      ({oldActivityId}, {usercode}, {oldDate}, null, null, null, {oldDate}, 1, 0),
+      ({newActivityId}, {usercode}, {nowDate}, null, null, null, {nowDate}, 1, 0)
         """)
         .on(
           'oldActivityId -> oldActivityId,
@@ -118,7 +118,7 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
 
       val activitySave = ActivitySave(Usercode("custard"), "default", "skynet", false, "beady-eye", "Watching You", None, None, Seq.empty, Map.empty, None)
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
-      activityRecipientDao.create(activityId, "nicduke", None)
+      activityRecipientDao.create(activityId, "nicduke", None, false)
 
       val response = activityDao.getActivitiesForUser("nicduke", limit = 1).head
 
@@ -187,7 +187,7 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
       val id = activityDao.save(activitySave.copy(publishedAt = Some(time)), audienceId, Nil)
       activityTagDao.save(id, ActivityTag("a", TagValue("apple")))
       activityTagDao.save(id, ActivityTag("b", TagValue("banana")))
-      activityRecipientDao.create(id, "someone", Some(time))
+      activityRecipientDao.create(id, "someone", Some(time), false)
       id
     }
 
