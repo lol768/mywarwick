@@ -50,14 +50,14 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
     "find activities without tags" in transaction { implicit c =>
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
       activityRecipientDao.create(activityId, "someone", None, shouldNotify=false)
-      activityDao.getActivitiesForUser("someone").map(_.activity.id) must contain(activityId)
+      activityDao.getActivitiesForUser("someone", false).map(_.activity.id) must contain(activityId)
     }
 
     "find activities with tags" in transaction { implicit c =>
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
       activityRecipientDao.create(activityId, "someone", None, shouldNotify=true)
       activityTagDao.save(activityId, ActivityTag("name", TagValue("value")))
-      activityDao.getActivitiesForUser("someone").map(_.activity.id) must contain(activityId)
+      activityDao.getActivitiesForUser("someone", true).map(_.activity.id) must contain(activityId)
     }
 
     "get notifications since date" in transaction { implicit c =>
@@ -120,7 +120,7 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
       activityRecipientDao.create(activityId, "nicduke", None, false)
 
-      val response = activityDao.getActivitiesForUser("nicduke", limit = 1).head
+      val response = activityDao.getActivitiesForUser("nicduke", notifications = false, limit = 1).head
 
       response.icon mustBe Some(ActivityIcon("eye-o", Some("greyish")))
     }
@@ -187,7 +187,7 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
       val id = activityDao.save(activitySave.copy(publishedAt = Some(time)), audienceId, Nil)
       activityTagDao.save(id, ActivityTag("a", TagValue("apple")))
       activityTagDao.save(id, ActivityTag("b", TagValue("banana")))
-      activityRecipientDao.create(id, "someone", Some(time), false)
+      activityRecipientDao.create(id, "someone", Some(time), activitySave.shouldNotify)
       id
     }
 
@@ -202,8 +202,8 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
         createActivity(time)
       ).sorted
 
-      activityDao.getActivitiesForUser("someone", since = ids.headOption, before = ids.lastOption).map(_.activity.id) must be(Seq(ids(1), ids(2), ids(3)))
-      activityDao.getActivitiesForUser("someone", since = ids.headOption, before = ids.lastOption, limit = 1).map(_.activity.id) must contain only ids(1)
+      activityDao.getActivitiesForUser("someone", notifications = true, since = ids.headOption, before = ids.lastOption).map(_.activity.id) must be(Seq(ids(1), ids(2), ids(3)))
+      activityDao.getActivitiesForUser("someone", notifications = true, since = ids.headOption, before = ids.lastOption, limit = 1).map(_.activity.id) must contain only ids(1)
     }
 
     "get activities before and since" in transaction { implicit c =>
@@ -211,15 +211,15 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
       val middle = createActivity(DateTime.now())
       val last = createActivity(DateTime.now().plusHours(1))
 
-      activityDao.getActivitiesForUser("someone", since = Some(first)).map(_.activity.id) must be(Seq(last, middle))
-      activityDao.getActivitiesForUser("someone", before = Some(last)).map(_.activity.id) must be(Seq(middle, first))
-      activityDao.getActivitiesForUser("someone", since = Some(first), before = Some(last)).map(_.activity.id) must contain only middle
+      activityDao.getActivitiesForUser("someone", notifications = true, since = Some(first)).map(_.activity.id) must be(Seq(last, middle))
+      activityDao.getActivitiesForUser("someone", notifications = true, before = Some(last)).map(_.activity.id) must be(Seq(middle, first))
+      activityDao.getActivitiesForUser("someone", notifications = true, since = Some(first), before = Some(last)).map(_.activity.id) must contain only middle
 
-      activityDao.getActivitiesForUser("someone", before = Some(last), limit = 1).map(_.activity.id) must contain only middle
-      activityDao.getActivitiesForUser("someone", before = Some(middle), limit = 1).map(_.activity.id) must contain only first
-      activityDao.getActivitiesForUser("someone", before = Some(first), limit = 1) must be(empty)
+      activityDao.getActivitiesForUser("someone", notifications = true, before = Some(last), limit = 1).map(_.activity.id) must contain only middle
+      activityDao.getActivitiesForUser("someone", notifications = true, before = Some(middle), limit = 1).map(_.activity.id) must contain only first
+      activityDao.getActivitiesForUser("someone", notifications = true, before = Some(first), limit = 1) must be(empty)
 
-      activityDao.getActivitiesForUser("someone", since = Some(first), before = Some(first)) must be(empty)
+      activityDao.getActivitiesForUser("someone", notifications = true, since = Some(first), before = Some(first)) must be(empty)
     }
 
     "count notifications since date" in transaction { implicit c =>

@@ -20,7 +20,7 @@ trait ActivityDao {
 
   def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity]
 
-  def getActivitiesForUser(usercode: String, notifications: Option[Boolean] = None, before: Option[String] = None, since: Option[String] = None, limit: Int = 20)(implicit c: Connection): Seq[ActivityRender]
+  def getActivitiesForUser(usercode: String, notifications: Boolean, before: Option[String] = None, since: Option[String] = None, limit: Int = 20)(implicit c: Connection): Seq[ActivityRender]
 
   def getActivityRenderById(id: String)(implicit c: Connection): Option[ActivityRender]
 
@@ -133,36 +133,26 @@ class ActivityDaoImpl @Inject()(
   }
 
   override def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity] = {
-    SQL(
-      """
+    SQL"""
       SELECT ACTIVITY.* FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
-      WHERE USERCODE = {usercode} AND ACTIVITY.SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.PUBLISHED_AT > {sinceDate} AND ACTIVITY.ID IN (
-      SELECT ACTIVITY.ID FROM MESSAGE_SEND WHERE USERCODE = {usercode} AND OUTPUT = {mobile})
-      """)
-      .on(
-        'usercode -> usercode,
-        'sinceDate -> sinceDate,
-        'mobile -> Mobile.name
+      WHERE USERCODE = $usercode AND ACTIVITY_RECIPIENT.SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.PUBLISHED_AT > $sinceDate AND ACTIVITY.ID IN (
+      SELECT ACTIVITY.ID FROM MESSAGE_SEND WHERE USERCODE = $usercode AND OUTPUT = ${Mobile.name}
       )
+      """
       .as(activityParser.*)
   }
 
-  override def getActivitiesForUser(usercode: String, notifications: Option[Boolean], before: Option[String], since: Option[String], limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
+  override def getActivitiesForUser(usercode: String, notifications: Boolean, before: Option[String], since: Option[String], limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
     // If before or since are specified, get the publish date for each
     val beforeDate = before.flatMap(getActivityById).map(_.publishedAt)
     val sinceDate = since.flatMap(getActivityById).map(_.publishedAt)
-
-    // Optionally only return notifications or activities - default is both
-    val maybeNotifications = if (notifications.nonEmpty)
-      "AND ACTIVITY.SHOULD_NOTIFY = {notifications}"
-    else ""
 
     // If the before activity exists, SQL to find only activities published before it
     val maybeBefore = if (beforeDate.nonEmpty)
       """
         AND (
-          ACTIVITY_RECIPIENT.PUBLISHED_AT < {beforeDate} OR (
-            ACTIVITY_RECIPIENT.PUBLISHED_AT = {beforeDate} AND ACTIVITY_ID < {before}
+          PUBLISHED_AT < {beforeDate} OR (
+            PUBLISHED_AT = {beforeDate} AND ACTIVITY_ID < {before}
           )
         )
       """
@@ -172,8 +162,8 @@ class ActivityDaoImpl @Inject()(
     val maybeSince = if (sinceDate.nonEmpty)
       """
         AND (
-          ACTIVITY_RECIPIENT.PUBLISHED_AT > {sinceDate} OR (
-            ACTIVITY_RECIPIENT.PUBLISHED_AT = {sinceDate} AND ACTIVITY_ID > {since}
+          PUBLISHED_AT > {sinceDate} OR (
+            PUBLISHED_AT = {sinceDate} AND ACTIVITY_ID > {since}
           )
         )
       """
@@ -183,7 +173,7 @@ class ActivityDaoImpl @Inject()(
     // to return, and they have the same publish time
     val conditions = if (beforeDate.nonEmpty && beforeDate == sinceDate)
       """
-        AND ACTIVITY_RECIPIENT.PUBLISHED_AT = {beforeDate}
+        AND PUBLISHED_AT = {beforeDate}
         AND ACTIVITY_ID > {since}
         AND ACTIVITY_ID < {before}
       """
@@ -205,8 +195,6 @@ class ActivityDaoImpl @Inject()(
       *
       * If you're about to make a change that might break these two rules, it requires
       * some discussion before you go ahead.
-      *
-      * TODO we still join here, awaiting migration to denormalise activity data
       */
     val query = s"""
       $selectActivityRender
@@ -214,12 +202,11 @@ class ActivityDaoImpl @Inject()(
         ${dialect.limitOffset(limit)(
           s"""SELECT ACTIVITY_ID
           FROM ACTIVITY_RECIPIENT
-            JOIN ACTIVITY ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
           WHERE USERCODE = {usercode}
-            AND ACTIVITY.REPLACED_BY_ID IS NULL
-            $maybeNotifications
+            AND REPLACED_BY_ID IS NULL
+            AND SHOULD_NOTIFY = {notifications}
             $conditions
-          ORDER BY ACTIVITY_RECIPIENT.PUBLISHED_AT $publishedAtOrder, ACTIVITY_ID ASC"""
+          ORDER BY PUBLISHED_AT $publishedAtOrder, ACTIVITY_ID ASC"""
         )}
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC, ACTIVITY.ID ASC
@@ -231,7 +218,7 @@ class ActivityDaoImpl @Inject()(
         'since -> since.orNull,
         'beforeDate -> beforeDate.orNull,
         'sinceDate -> sinceDate.orNull,
-        'notifications -> notifications.getOrElse(false)
+        'notifications -> notifications
       )
       .as(activityRenderParser.*)
   }
