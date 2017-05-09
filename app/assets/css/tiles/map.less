@@ -2,7 +2,7 @@
   background: url(/assets/images/map.png) no-repeat;
   background-size: cover;
 
-  .tile, .tile--map > .tile__wrap > .tile__header  {
+  .tile, .tile--map > .tile__wrap > .tile__header {
     background: transparent !important;
   }
 
@@ -36,10 +36,31 @@ html.mobile {
     iframe {
       border: 0;
       width: 100%;
-      height: ~"calc(100vh - 88px)";
       z-index: 2;
       position: relative;
+      // 44px nav bar, 44px tab bar
+      height: ~"calc(100vh - 88px)";
     }
   }
 }
 
+html.mobile.ios {
+  .tile--map.tile--zoomed iframe {
+    // Safari renders the page taller but doesn't show the whole thing
+    height: ~"calc(100vh - 157px)";
+  }
+}
+
+html.mobile.standalone {
+  .tile--map.tile--zoomed iframe {
+    // iOS app has a taller tab bar
+    height: ~"calc(100vh - 93px)";
+  }
+}
+
+html.android.standalone {
+  .tile--map.tile--zoomed iframe {
+    // Android app renders fixed UI elements natively
+    height: 100vh;
+  }
+}
