@@ -42,25 +42,23 @@ html.mobile {
       height: ~"calc(100vh - 88px)";
     }
   }
-}
 
-html.mobile.ios {
-  .tile--map.tile--zoomed iframe {
-    // Safari renders the page taller but doesn't show the whole thing
-    height: ~"calc(100vh - 157px)";
+  &.ios:not(.standalone) {
+    .tile--map.tile--zoomed iframe {
+      // Safari renders the page taller but doesn't show the whole thing
+      height: ~"calc(100vh - 157px)";
+    }
   }
-}
-
-html.mobile.standalone {
-  .tile--map.tile--zoomed iframe {
-    // iOS app has a taller tab bar
-    height: ~"calc(100vh - 93px)";
+  &.android.app {
+    .tile--map.tile--zoomed iframe {
+      // Android app renders fixed UI elements natively
+      height: 100vh;
+    }
   }
-}
-
-html.android.standalone {
-  .tile--map.tile--zoomed iframe {
-    // Android app renders fixed UI elements natively
-    height: 100vh;
+  &.ios.app {
+    .tile--map.tile--zoomed iframe {
+      // iOS app has a taller tab bar
+      height: ~"calc(100vh - 93px)";
+    }
   }
 }
