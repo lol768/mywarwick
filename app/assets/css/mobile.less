@@ -5,6 +5,12 @@
     overflow-x: hidden;
 
     min-height: unset;
+
+    margin-bottom: @start-tab-bar-height;
+
+    &.app.android body {
+      margin-bottom: 0;
+    }
   }
 
   h1, h2, h3 {
@@ -24,10 +30,6 @@
   }
   .tile--zoomed .tile__body {
     overflow-y: auto;
-  }
-
-  &.not-app body, &.app.ios body {
-    margin-bottom: @start-tab-bar-height;
   }
 }
 
