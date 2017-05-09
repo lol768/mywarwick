@@ -39,14 +39,14 @@ html.mobile {
       z-index: 2;
       position: relative;
       // 44px nav bar, 44px tab bar
-      height: ~"calc(100vh - 88px)";
+      height: ~"calc(100vh - @{start-masthead-and-tab-bar-height})";
     }
   }
 
   &.ios:not(.standalone) {
     .tile--map.tile--zoomed iframe {
       // Safari renders the page taller but doesn't show the whole thing
-      height: ~"calc(100vh - 157px)";
+      height: ~"calc(100vh - @{start-masthead-and-tab-bar-height} - 68px)";
     }
   }
   &.android.app {
@@ -57,8 +57,8 @@ html.mobile {
   }
   &.ios.app {
     .tile--map.tile--zoomed iframe {
-      // iOS app has a taller tab bar
-      height: ~"calc(100vh - 93px)";
+      // iOS native tab bar is 49px tall
+      height: ~"calc(100vh - @{start-masthead-height} - 49px)";
     }
   }
 }
