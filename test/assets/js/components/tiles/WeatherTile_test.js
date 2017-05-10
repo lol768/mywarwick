@@ -57,7 +57,7 @@ describe('WeatherTile', () => {
     caption.should.equal('Partly cloudy for the hour.');
   });
 
-  it('displays large layout when zoomed', () => {
+  function testWideLayout(theseProps) {
     const {
       props: {
         children: [
@@ -80,7 +80,7 @@ describe('WeatherTile', () => {
           weatherTable,
         ]
       }
-    } = renderAtMoment(<WeatherTile zoomed={ true } { ...props } />);
+    } = renderAtMoment(<WeatherTile { ...theseProps } />);
 
     const {
       props: {
@@ -126,6 +126,14 @@ describe('WeatherTile', () => {
     condition.should.equal('clear');
     precipProbability.should.equal(55);
     percentSymbol.should.equal('%');
+  }
+
+  it('displays wide layout when wide', () => {
+    testWideLayout({...props, size: 'wide' });
+  });
+
+  it('displays wide layout when zoomed', () => {
+    testWideLayout({...props, zoomed: true });
   });
 
   it('formats icon string to single word', () => {

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
+import TileContent, { DEFAULT_TILE_SIZES } from './TileContent';
 import Skycon from '../ui/Skycon';
 import { localMomentUnix } from '../../dateFormats';
 
@@ -23,7 +23,7 @@ export default class WeatherTile extends TileContent {
   }
 
   static supportedTileSizes() {
-    return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
+    return DEFAULT_TILE_SIZES;
   }
 
   getIcon() {
@@ -45,11 +45,11 @@ export default class WeatherTile extends TileContent {
     return contentFunc.call(this);
   }
 
-  getLargeBody() {
-    return this.renderIfFresh(this._getLargeBody);
+  getWideBody() {
+    return this.renderIfFresh(this._getWideBody);
   }
 
-  _getLargeBody() {
+  _getWideBody() {
     const { content } = this.props;
     return (
       <div className="container-fluid">

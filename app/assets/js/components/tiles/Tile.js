@@ -125,12 +125,7 @@ export default class Tile extends React.Component {
       return null;
     };
 
-    const allTileSizes = _.values(TILE_SIZES);
-
-    const tileSizeClasses = _.zipObject(
-      allTileSizes.map((s) => `tile-size-supported--${s}`),
-      allTileSizes.map((s) => supportedTileSizes.indexOf(s) !== -1)
-    );
+    const tileSizeClasses = supportedTileSizes.map((s) => `tile-size-supported--${s}`);
 
     return (
       <div className={`tile__container tile--${type}__container`}>
