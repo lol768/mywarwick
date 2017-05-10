@@ -9,12 +9,8 @@ import { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 
 export default class LibraryTile extends TextTile {
 
-  static extraTileSizes() {
-    return [TILE_SIZES.LARGE, TILE_SIZES.TALL];
-  }
-
   static supportedTileSizes() {
-    return DEFAULT_TILE_SIZES + LibraryTile.extraTileSizes();
+    return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
   }
 
   renderItems(items) {
