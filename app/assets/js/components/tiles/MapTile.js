@@ -75,7 +75,7 @@ export default class MapTile extends TileContent {
     return true;
   }
 
-  getLargeBody() {
+  getSmallBody() {
     if (this.state.position) {
       const { imageSize: { width, height } } = this.props;
       const { position } = this.state;

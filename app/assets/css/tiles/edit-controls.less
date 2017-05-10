@@ -14,12 +14,29 @@
 }
 
 .tile__edit-control .fa-arrow-up {
-  .tile--small & {
-    transform: rotate(90deg);
-  }
-  .tile--wide &, .tile--large & {
+
+  .tile--small.tile-size-supported--large &, .tile--small.tile-size-supported--tall & {
     transform: rotate(180deg);
   }
+  .tile--small.tile-size-supported--wide & {
+    transform: rotate(90deg);
+  }
+
+  .tile--wide & {
+    transform: rotate(270deg);
+  }
+  .tile--wide.tile-size-supported--large &, .tile--wide.tile-size-supported--tall & {
+    transform: rotate(180deg);
+  }
+
+  .tile--large & {
+    transform: rotate(315deg);
+  }
+  .tile--large.tile-size-supported--tall & {
+    transform: rotate(180deg);
+  }
+
+
   .tile--tall & {
     transform: rotate(315deg);
   }

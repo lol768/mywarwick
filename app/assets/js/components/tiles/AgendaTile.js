@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import { formatDateTime, formatDate, formatTime, localMoment } from '../../dateFormats';
 import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
-import TileContent from './TileContent';
+import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 import _ from 'lodash-es';
 import classNames from 'classnames';
 import Hyperlink from '../ui/Hyperlink';
@@ -222,6 +222,10 @@ export default class AgendaTile extends TileContent {
     }
 
     return false;
+  }
+
+  static supportedTileSizes() {
+    return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
   }
 }
 

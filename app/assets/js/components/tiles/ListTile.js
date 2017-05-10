@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import TileContent from './TileContent';
+import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 import { formatDateTime } from '../../dateFormats';
 import _ from 'lodash-es';
 
@@ -9,7 +9,11 @@ export default class ListTile extends TileContent {
     return true;
   }
 
-  getLargeBody() {
+  static supportedTileSizes() {
+    return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
+  }
+
+  getSmallBody() {
     const { content } = this.props;
 
     // only show the first maxItemsToDisplay items (defaults to 3) if not zoomed

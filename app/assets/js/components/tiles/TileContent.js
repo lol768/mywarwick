@@ -10,6 +10,8 @@ export const TILE_SIZES = {
   TALL: 'tall',
 };
 
+export const DEFAULT_TILE_SIZES = [TILE_SIZES.SMALL, TILE_SIZES.WIDE];
+
 export default class TileContent extends React.PureComponent {
 
   static isVisibleOnDesktopOnly() {
@@ -25,34 +27,42 @@ export default class TileContent extends React.PureComponent {
     this.error = false;
   }
 
+  static supportedTileSizes() {
+    return DEFAULT_TILE_SIZES;
+  }
+
   getBody() {
     if (this.props.zoomed) {
       return this.getZoomedBody();
     }
 
+    if (this.constructor.supportedTileSizes(this.props.content).indexOf(this.props.size) === -1) {
+      return this.getSmallBody();
+    }
+
     switch (this.props.size) {
+      case TILE_SIZES.LARGE:
+        return this.getLargeBody();
       case TILE_SIZES.TALL:
         return this.getZoomedBody();
       case TILE_SIZES.WIDE:
         return this.getWideBody();
       case TILE_SIZES.SMALL:
-        return this.getSmallBody();
-      case TILE_SIZES.LARGE:
       default:
-        return this.getLargeBody();
+        return this.getSmallBody();
     }
   }
 
-  getLargeBody() {
-    throw new TypeError('Must implement getLargeBody');
+  getSmallBody() {
+    throw new TypeError('Must implement getSmallBody');
   }
 
   getWideBody() {
-    return this.getLargeBody();
+    return this.getSmallBody();
   }
 
-  getSmallBody() {
-    return this.getLargeBody();
+  getLargeBody() {
+    return this.getWideBody();
   }
 
   getZoomedBody() {
