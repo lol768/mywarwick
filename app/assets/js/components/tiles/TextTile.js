@@ -2,7 +2,7 @@ import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import Hyperlink from '../ui/Hyperlink';
 import _ from 'lodash-es';
-import TileContent from './TileContent';
+import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 
 export default class TextTile extends TileContent {
 
@@ -131,6 +131,13 @@ export default class TextTile extends TileContent {
     }
 
     return false;
+  }
+
+  static supportedTileSizes(content) {
+    if (TextTile.canZoom(content)) {
+      return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
+    }
+    return DEFAULT_TILE_SIZES;
   }
 
 }

@@ -41,7 +41,7 @@ export default class TrafficTile extends TileContent {
     return true;
   }
 
-  _getLargeBody() {
+  _getSmallBody() {
     const { content, content: { alerts: { items } } } = this.props;
 
     return (
@@ -64,8 +64,8 @@ export default class TrafficTile extends TileContent {
     );
   }
 
-  getLargeBody() {
-    return this.renderIfFresh(this._getLargeBody);
+  getSmallBody() {
+    return this.renderIfFresh(this._getSmallBody);
   }
 
   _getZoomedBody() {

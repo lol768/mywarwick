@@ -70,10 +70,13 @@ class TileView extends Component {
     }
 
     let canZoom = false;
+    let supportedTileSizes = [];
     if (content && tileContentComponent.needsContentToRender()) {
       canZoom = tileContentComponent.canZoom(content.content);
+      supportedTileSizes = tileContentComponent.supportedTileSizes(content.content);
     } else {
       canZoom = tileContentComponent.canZoom();
+      supportedTileSizes = tileContentComponent.supportedTileSizes();
     }
 
     const tileProps = {
@@ -89,6 +92,7 @@ class TileView extends Component {
       editing,
       editingAny,
       isDesktop,
+      supportedTileSizes,
     };
 
     // Zooming

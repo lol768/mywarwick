@@ -1,6 +1,6 @@
 import React from 'react';
 
-import TileContent from './TileContent';
+import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 import Skycon from '../ui/Skycon';
 import { localMomentUnix } from '../../dateFormats';
 
@@ -20,6 +20,10 @@ export default class WeatherTile extends TileContent {
 
   static canZoom() {
     return true;
+  }
+
+  static supportedTileSizes() {
+    return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
   }
 
   getIcon() {

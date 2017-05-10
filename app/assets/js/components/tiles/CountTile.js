@@ -1,6 +1,6 @@
 import React from 'react';
 
-import TileContent from './TileContent';
+import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 import { ListTileItem } from './ListTile';
 
 export default class CountView extends TileContent {
@@ -19,7 +19,11 @@ export default class CountView extends TileContent {
     return !content.count && (!content.items || content.items.length === 0);
   }
 
-  getLargeBody() {
+  static supportedTileSizes() {
+    return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
+  }
+
+  getSmallBody() {
     const { content } = this.props;
 
     return (
