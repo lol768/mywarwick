@@ -97,7 +97,7 @@ export default class MapTile extends TileContent {
         <div className="tile-loading">
           <i className="fa fa-spinner fa-pulse"></i>
         </div>
-        <iframe src="https://campus.warwick.ac.uk/" frameBorder="0"></iframe>
+        <iframe src="https://campus.warwick.ac.uk/?lite=1" frameBorder="0"></iframe>
       </div>
     );
   }
