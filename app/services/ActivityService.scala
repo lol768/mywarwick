@@ -142,8 +142,7 @@ class ActivityServiceImpl @Inject()(
     val maybeActivityTypeError: Seq[ActivityError] = Nil
     activity.tags
       .foldLeft(maybeActivityTypeError) { (errors, tag) =>
-        if (activityTypeService.isValidActivityTagName(tag.name) &&
-          !activityTypeService.isValidActivityTag(tag.name, tag.value.internalValue)) {
+        if (!activityTypeService.isValidActivityTag(tag.name, tag.value.internalValue)) {
           errors :+ InvalidTagValue(tag.name, tag.value.internalValue)
         } else {
           errors
