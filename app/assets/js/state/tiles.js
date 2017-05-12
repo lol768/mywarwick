@@ -207,21 +207,26 @@ function updateTileById(state, id, callback) {
 
 export function formatPreferenceData(preferencesFromAction, availableTileOptions) {
   const preferences = {};
-  preferencesFromAction.forEach(e => {
-    const optionsType = availableTileOptions[e.name].type;
-    switch (optionsType) {
-      case 'array':
-        if (preferences[e.name]) {
-          preferences[e.name].push(e.value);
-        } else {
-          preferences[e.name] = [e.value];
-        }
+  _.keys(availableTileOptions).forEach(key => {
+    const option = availableTileOptions[key];
+    switch (option.type) {
+      case 'array': {
+        preferences[key] = {};
+        option.options.forEach((o) => (
+          preferences[key][o.value] = _.find(preferencesFromAction, (p) =>
+              p.name === key && p.value === o.value
+            ) !== undefined
+        ));
         break;
-      case 'string':
-        preferences[e.name] = e.value;
+      }
+      case 'string': {
+        const preference = _.find(preferencesFromAction, (p) => p.name === key);
+        preferences[key] = (preference !== undefined) ? preference.value : null;
         break;
-      default:
-        preferences[e.name] = null; // default case doing nothing
+      }
+      default: {
+        preferences[key] = null; // default case doing nothing
+      }
     }
   });
   return preferences;
