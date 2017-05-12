@@ -117,12 +117,22 @@ class NotificationsView extends React.Component {
       && moment(notification.date).isAfter(notificationsLastRead.date);
   }
 
+  shouldBeGrouped() {
+    const top = takeFromStream(this.props.notifications, 1);
+    if (top.length < 1) {
+      return false;
+    }
+    const item = <ActivityItem {...top[0]} />;
+    return groupItemsByDate.groupForItem(item) !== groupItemsByDate.maxGroup;
+  }
+
   render() {
+    const shouldBeGrouped = this.props.grouped && this.shouldBeGrouped();
     const notificationItems = takeFromStream(this.props.notifications, this.state.numberToShow)
       .map(n =>
         <ActivityItem
           key={ n.id }
-          grouped={ this.props.grouped }
+          grouped={ shouldBeGrouped }
           unread={ this.isUnread(n) }
           {...n}
         />
@@ -149,7 +159,7 @@ class NotificationsView extends React.Component {
             showLoading
             endOfListPhrase="There are no older notifications."
           >
-            <GroupedList groupBy={ this.props.grouped ? groupItemsByDate : undefined }>
+            <GroupedList groupBy={ shouldBeGrouped ? groupItemsByDate : undefined }>
               { notificationItems }
             </GroupedList>
           </InfiniteScrollable>

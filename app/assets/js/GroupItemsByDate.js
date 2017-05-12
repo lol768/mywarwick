@@ -7,6 +7,8 @@ import invariant from 'invariant';
 // Exposed as a CSS class on the grouped list
 export const description = 'by-date';
 
+export const maxGroup = 7;
+
 // Which group an item belongs in
 // Return an arbitrary identifier that is the same for all items in the same group
 export function groupForItem(item, now = localMoment()) {
