@@ -77,8 +77,8 @@ INSERT INTO ACTIVITY_TYPE VALUES ('MissedAttendanceMonitoringCheckpointsLow','Mi
 INSERT INTO ACTIVITY_TYPE VALUES ('MissedAttendanceMonitoringCheckpointsMedium','Missed monitoring points (medium)');
 INSERT INTO ACTIVITY_TYPE VALUES ('ModeratorRejected','Feedback rejected by moderator');
 INSERT INTO ACTIVITY_TYPE VALUES ('newMeetingRecordApproval','New meeting record requires approval');
-INSERT INTO ACTIVITY_TYPE VALUES ('OpenSmallGroupSets','Small group sets open');
-INSERT INTO ACTIVITY_TYPE VALUES ('OpenSmallGroupSetsOtherSignUp','Small group sets open');
+INSERT INTO ACTIVITY_TYPE VALUES ('OpenSmallGroupSets','Small group sets opened');
+INSERT INTO ACTIVITY_TYPE VALUES ('OpenSmallGroupSetsOtherSignUp','Small group sets opened');
 INSERT INTO ACTIVITY_TYPE VALUES ('ReleaseSmallGroupSets','Small group sets released');
 INSERT INTO ACTIVITY_TYPE VALUES ('ReleaseToMarker','Submissions released for marking');
 INSERT INTO ACTIVITY_TYPE VALUES ('RequestAssignmentAccess','Request assignment access');
