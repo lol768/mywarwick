@@ -38,7 +38,9 @@ class ErrorsController extends BaseController {
 }
 
 object JsException {
-  val lineRegex: Regex = "^\\s*at\\s(.+)(?:\\.(.+))*\\s\\((.+):(\\d+):\\d+\\)".r
+  val lineWithMethodRegex: Regex = "^\\s*at\\s(.+)(?:\\.(.+))\\s\\((.+):(\\d+):\\d+\\)".r
+  val lineNoMethodRegex: Regex = "^\\s*at\\s(.+)\\s\\((.+):(\\d+):\\d+\\)".r
+  val lineWithNativeRegex: Regex = "^\\s*at\\s(.+)(?:\\.(.+))\\s\\(native\\)".r
 }
 
 class JsException(errorMap: Map[String, JsValue]) extends RuntimeException {
@@ -57,9 +59,13 @@ class JsException(errorMap: Map[String, JsValue]) extends RuntimeException {
 
   private val stacktrace =
     Seq(new StackTraceElement("", "", source, line)) ++
-      stack.split("\n").drop(1).map {
-        case JsException.lineRegex(className, method, fileName, lineNumber) =>
+      stack.split("\n").drop(2).map {
+        case JsException.lineWithMethodRegex(className, method, fileName, lineNumber) =>
           new StackTraceElement(className, Option(method).getOrElse(""), fileName, lineNumber.toInt)
+        case JsException.lineNoMethodRegex(className, fileName, lineNumber) =>
+          new StackTraceElement(className, "", fileName, lineNumber.toInt)
+        case JsException.lineWithNativeRegex(className, method) =>
+          new StackTraceElement(className, method, "native", 0)
         case stackLine =>
           throw new IllegalArgumentException(s"Could not parse line $stackLine")
       }
