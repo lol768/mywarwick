@@ -126,7 +126,7 @@ export default function init(opts) {
 
       onApplicationDidBecomeActive() {
         if (navigator.onLine) {
-          store.dispatch(tiles.fetchTileContent());
+          store.dispatch(tiles.fetchTiles());
           store.dispatch(news.refresh());
 
           if (hasAuthoritativeAuthenticatedUser(store.getState())) {
