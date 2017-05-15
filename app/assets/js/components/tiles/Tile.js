@@ -72,6 +72,8 @@ export default class Tile extends React.Component {
       } else {
         window.open(content.href);
       }
+    } else if (this.getContentInstance().expandsOnClick()) {
+      this.props.onZoomIn(e);
     }
   }
 
@@ -109,7 +111,9 @@ export default class Tile extends React.Component {
   }
 
   render() {
-    const { type, title, size, colour, content, editing, zoomed, isDesktop, children } = this.props;
+    const {
+      type, title, size, colour, content, editing, zoomed, isDesktop, children, supportedTileSizes,
+    } = this.props;
 
     const zoomIcon = () => {
       if (zoomed) {
@@ -121,8 +125,10 @@ export default class Tile extends React.Component {
       return null;
     };
 
+    const tileSizeClasses = supportedTileSizes.map((s) => `tile-size-supported--${s}`);
+
     return (
-      <div className="tile__container">
+      <div className={`tile__container tile--${type}__container`}>
         <article
           className={
             classNames(
@@ -131,7 +137,7 @@ export default class Tile extends React.Component {
                 'tile--editing': editing,
                 'tile--zoomed': zoomed,
                 'cursor-pointer': content && content.href,
-              }
+              }, tileSizeClasses
             )
           }
           onClick={ this.onClick }
@@ -149,7 +155,7 @@ export default class Tile extends React.Component {
           <div
             className="tile__edit-control bottom-right"
             onClick={ this.props.onResize }
-            title={`Make tile ${size !== 'tall' ? 'bigger' : 'smaller'}`}
+            title={`Make tile ${_.last(supportedTileSizes) === size ? 'smaller' : 'bigger'}`}
           >
             <div className="icon"><i className="fa fa-arrow-up"> </i></div>
           </div>
@@ -204,6 +210,7 @@ export default class Tile extends React.Component {
     colour: PropTypes.number.isRequired,
     fetchedAt: PropTypes.number,
     user: PropTypes.object,
+    supportedTileSizes: PropTypes.arrayOf((t) => _.values(TILE_SIZES).indexOf(t) !== -1).isRequired,
   }
 }
 

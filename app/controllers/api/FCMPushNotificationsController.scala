@@ -18,9 +18,10 @@ class FCMPushNotificationsController @Inject()(
 
   def subscribe = RequiredUserAction { implicit request =>
     val deviceToken = request.body.asJson.flatMap(_.asInstanceOf[JsObject].value.get("deviceToken")).map(_.as[String])
+    val userAgent = request.request.headers.get("user-agent")
 
     deviceToken.map { token =>
-      val registered = pushRegistrationService.save(request.context.user.get.usercode, Google, token)
+      val registered = pushRegistrationService.save(request.context.user.get.usercode, Google, token, userAgent)
 
       if (registered) {
         auditLog('CreateFCMRegistration, 'token -> token)

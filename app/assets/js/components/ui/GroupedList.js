@@ -11,7 +11,7 @@ export default class GroupedList extends React.Component {
       getGroupedItems: PropTypes.func,
       groupForItem: PropTypes.func,
       titleForGroup: PropTypes.func.isRequired,
-    }).isRequired,
+    }),
     children: PropTypes.node.isRequired,
     className: PropTypes.string,
     orderDescending: PropTypes.bool,

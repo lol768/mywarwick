@@ -2,8 +2,8 @@ package helpers
 
 import akka.stream.Materializer
 import org.scalatest.{Args, Status, TestSuite, TestSuiteMixin}
-import play.api.libs.ws.{WSAPI, WSClient, WSRequest}
 import play.api.libs.ws.ahc.{AhcConfigBuilder, AhcWSClient}
+import play.api.libs.ws.{WSAPI, WSClient, WSRequest}
 
 
 class WebClient(mat: Materializer) extends WSAPI {

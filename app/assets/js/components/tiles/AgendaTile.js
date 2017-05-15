@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import { formatDateTime, formatDate, formatTime, localMoment } from '../../dateFormats';
 import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
-import TileContent from './TileContent';
+import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 import _ from 'lodash-es';
 import classNames from 'classnames';
 import Hyperlink from '../ui/Hyperlink';
@@ -58,7 +58,7 @@ const agendaViewTransform = (items) => {
     i => _.flatMap(i, e => {
       if (e.isAllDay) {
         const date = localMoment(e.start);
-        const end = localMoment(e.end);
+        const end = (e.end !== undefined) ? localMoment(e.end) : localMoment(e.start);
 
         const instances = [];
 
@@ -69,6 +69,13 @@ const agendaViewTransform = (items) => {
           });
 
           date.add(1, 'day');
+        }
+
+        if (instances.length === 0) {
+          instances.push({
+            ...e,
+            start: date.format(),
+          });
         }
 
         return instances;
@@ -115,7 +122,7 @@ export default class AgendaTile extends TileContent {
     }
     const DATETIME_OPTIONS = { printToday: true, onlyWeekday: true };
     const renderedStart = formatDateTime(event.start, undefined, DATETIME_OPTIONS);
-    return event.start === event.end ?
+    return event.end === undefined || event.start === event.end ?
       renderedStart : `${renderedStart}–${formatTime(event.end)}`;
   }
 
@@ -215,6 +222,10 @@ export default class AgendaTile extends TileContent {
     }
 
     return false;
+  }
+
+  static supportedTileSizes() {
+    return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
   }
 }
 

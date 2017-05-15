@@ -29,6 +29,7 @@
 @import 'tiles/tile-config';
 @import 'tiles/lists';
 @import 'tiles/overrides';
+@import 'tiles/map';
 @import 'search';
 @import 'multiselect';
 
@@ -78,13 +79,19 @@ body:not(.mobile) .tile {
   }
 }
 
-.react-loading {
+.react-loading, .tile-loading {
   position: fixed;
   top: 35vh;
   width: 100%;
   text-align: center;
   font-size: 2em;
   color: #666666;
+}
+
+.tile-loading {
+  color: #fff;
+  z-index: 1;
+  font-size: 32px;
 }
 
 .text-overflow-block {

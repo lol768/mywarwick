@@ -1,0 +1,64 @@
+.tile--map__container {
+  background: url(/assets/images/map.png) no-repeat;
+  background-size: cover;
+
+  .tile, .tile--map > .tile__wrap > .tile__header {
+    background: transparent !important;
+  }
+
+  .tile__body {
+    overflow: visible;
+  }
+
+  .map-tile-image {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    -webkit-filter: saturate(0%) brightness(90%) contrast(50%); // Android WebView seems to need this
+    filter: saturate(0%) brightness(90%) contrast(50%);
+  }
+}
+
+html.mobile {
+  .tile--map.tile--zoomed {
+    font-size: 0;
+
+    .tile__body {
+      padding: 0;
+    }
+
+    .tile__header {
+      display: none;
+    }
+
+    iframe {
+      border: 0;
+      width: 100%;
+      z-index: 2;
+      position: relative;
+      // 44px nav bar, 44px tab bar
+      height: ~"calc(100vh - @{start-masthead-and-tab-bar-height})";
+    }
+  }
+
+  &.ios:not(.standalone) {
+    .tile--map.tile--zoomed iframe {
+      // Safari renders the page taller but doesn't show the whole thing
+      height: ~"calc(100vh - @{start-masthead-and-tab-bar-height} - 68px)";
+    }
+  }
+  &.android.app {
+    .tile--map.tile--zoomed iframe {
+      // Android app renders fixed UI elements natively
+      height: 100vh;
+    }
+  }
+  &.ios.app {
+    .tile--map.tile--zoomed iframe {
+      // iOS native tab bar is 49px tall
+      height: ~"calc(100vh - @{start-masthead-height} - 49px)";
+    }
+  }
+}

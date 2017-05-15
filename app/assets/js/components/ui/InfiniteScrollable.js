@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import log from 'loglevel';
 import * as notifications from '../../state/notifications';
+import { makeCancelable } from '../../promise';
 
 export default class InfiniteScrollable extends React.Component {
 
@@ -20,6 +21,7 @@ export default class InfiniteScrollable extends React.Component {
       loading: false,
     };
     this.boundScrollListener = this.onScroll.bind(this);
+    this.cancellableShowMorePromise = makeCancelable(Promise.resolve());
   }
 
   componentDidMount() {
@@ -32,6 +34,7 @@ export default class InfiniteScrollable extends React.Component {
 
   componentWillUnmount() {
     this.detachScrollListener();
+    this.cancellableShowMorePromise.cancel();
   }
 
   onScroll() {
@@ -51,16 +54,15 @@ export default class InfiniteScrollable extends React.Component {
 
     if (scrollTop >= loadMoreThreshold) {
       this.detachScrollListener();
-      this.setState({
-        loading: true,
-      });
-      this.props.onLoadMore().then(() => this.setState({
-        loading: false,
-      })).catch((e) => {
-        if (!(e instanceof notifications.UnnecessaryFetchError)) {
-          this.setState({
-            loading: false,
-          });
+      this.setState({ loading: true });
+      this.cancellableShowMorePromise = makeCancelable(this.props.onLoadMore());
+      this.cancellableShowMorePromise.promise.then(() =>
+        this.setState({ loading: false })
+      ).catch((e) => {
+        if (e.isCanceled) {
+          return Promise.resolve();
+        } else if (!(e instanceof notifications.UnnecessaryFetchError)) {
+          this.setState({ loading: false });
         } else {
           log.debug(`Unnecessary fetch: ${e.message}`);
           return Promise.resolve();

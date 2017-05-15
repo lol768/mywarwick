@@ -1,11 +1,14 @@
 import { localMoment } from './dateFormats';
 import invariant from 'invariant';
+import * as _ from 'lodash-es';
 
 // A way to describe a grouping strategy
 
 // Describe how things are being grouped
 // Exposed as a CSS class on the grouped list
 export const description = 'by-date';
+
+export const maxGroup = 7;
 
 // Which group an item belongs in
 // Return an arbitrary identifier that is the same for all items in the same group
@@ -77,7 +80,7 @@ export function getGroupedItems(items, now) {
       if (newGroup !== currentGroup) {
         if (currentGroup !== null) {
           invariant(
-            groups.find((pair) => pair[0] === newGroup) === undefined,
+            _.find(groups, (pair) => pair[0] === newGroup) === undefined,
             'Tried to create new group with existing group number. '
              + 'Normally caused by items not in order'
           );

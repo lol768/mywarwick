@@ -51,9 +51,19 @@ class ActivityView extends React.Component {
     });
   }
 
+  shouldBeGrouped() {
+    const top = takeFromStream(this.props.activities, 1);
+    if (top.length < 1) {
+      return false;
+    }
+    const item = <ActivityItem {...top[0]} />;
+    return groupItemsByDate.groupForItem(item) !== groupItemsByDate.maxGroup;
+  }
+
   render() {
+    const shouldBeGrouped = this.props.grouped && this.shouldBeGrouped();
     const activities = takeFromStream(this.props.activities, this.state.numberToShow)
-      .map(n => <ActivityItem key={n.id} grouped={this.props.grouped} {...n} />);
+      .map(n => <ActivityItem key={n.id} grouped={shouldBeGrouped} {...n} />);
 
     const streamSize = getStreamSize(this.props.activities);
     const hasAny = streamSize > 0 || this.props.olderItemsOnServer;
@@ -68,7 +78,7 @@ class ActivityView extends React.Component {
             showLoading
             endOfListPhrase="There are no older activities."
           >
-            <GroupedList groupBy={this.props.grouped ? groupItemsByDate : undefined}>
+            <GroupedList groupBy={shouldBeGrouped ? groupItemsByDate : undefined}>
               {activities}
             </GroupedList>
           </InfiniteScrollable>

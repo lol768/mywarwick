@@ -139,21 +139,13 @@ class ActivityServiceImpl @Inject()(
   }
 
   private def validateActivity(activity: ActivitySave): Seq[ActivityError] = {
-    val maybeActivityTypeError: Seq[ActivityError] =
-      if (!activityTypeService.isValidActivityType(activity.`type`))
-        Seq(InvalidActivityType(activity.`type`))
-      else Nil
-
-    activity.tags
-      .foldLeft(maybeActivityTypeError) { (errors, tag) =>
-        if (!activityTypeService.isValidActivityTagName(tag.name)) {
-          errors :+ InvalidTagName(tag.name)
-        } else if (!activityTypeService.isValidActivityTag(tag.name, tag.value.internalValue)) {
-          errors :+ InvalidTagValue(tag.name, tag.value.internalValue)
-        } else {
-          errors
-        }
+    activity.tags.flatMap(tag => {
+      if (!activityTypeService.isValidActivityTag(tag.name, tag.value.internalValue)) {
+        Some(InvalidTagValue(tag.name, tag.value.internalValue))
+      } else {
+        None
       }
+    })
   }
 
   override def getNotificationsForUser(user: User, before: Option[String], since: Option[String], limit: Int): Seq[ActivityRender] =

@@ -62,22 +62,41 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       scheduler.triggeredJobs.map(_.getKey) must contain(new JobKey("activity-id", PublishActivityJob.name))
     }
 
-    "fail with invalid activity type and tag name" in new Scope {
+    "not fail with invalid activity type" in new Scope {
       when(activityTypeService.isValidActivityType(Matchers.any())).thenReturn(false)
+      when(audienceDao.saveAudience(Matchers.any())(any())).thenReturn("audience-id")
+      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
+
+      val activity = submissionDue
+      val result = service.save(activity, Audience.usercode(Usercode("custard")))
+
+      result must be a 'right
+    }
+
+    "not fail with invalid tag name" in new Scope {
       when(activityTypeService.isValidActivityTagName(Matchers.any())).thenReturn(false)
+      when(audienceDao.saveAudience(Matchers.any())(any())).thenReturn("audience-id")
+      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
+
+      val activity = submissionDue
+      val result = service.save(activity, Audience.usercode(Usercode("custard")))
+
+      result must be a 'right
+    }
+
+    "fail with valid tab name but invalid tag value" in new Scope {
+      when(activityTypeService.isValidActivityTagName(Matchers.any())).thenReturn(true)
+      when(activityTypeService.isValidActivityTag(Matchers.any(),Matchers.any())).thenReturn(false)
+      when(audienceDao.saveAudience(Matchers.any())(any())).thenReturn("audience-id")
+      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
 
       val activity = submissionDue.copy(tags = Seq(ActivityTag("module", TagValue("CS118", Some("CS118 Programming for Computer Scientists")))))
       val result = service.save(activity, Audience.usercode(Usercode("custard")))
 
       result must be a 'left
       val e = result.left.get
-      e must have length 2
 
-      e.head mustBe an[InvalidActivityType]
-      e.head must have('name ("due"))
-
-      e(1) mustBe an[InvalidTagName]
-      e(1) must have('name ("module"))
+      e.loneElement mustBe an[InvalidTagValue]
     }
 
     "fail with invalid activity tag value" in new Scope {
