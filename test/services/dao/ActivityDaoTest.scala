@@ -221,5 +221,14 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
 
       activityDao.getActivitiesForUser("someone", since = Some(first), before = Some(first)) must be(empty)
     }
+
+    "count notifications since date" in transaction { implicit c =>
+      activityDao.countNotificationsSinceDate("someone", DateTime.now.minusHours(2)) must be(0)
+
+      val activityId = activityDao.save(Fixtures.activitySave.submissionDue.copy(publishedAt = Some(DateTime.now.minusHours(1))), audienceId, Nil)
+      activityRecipientDao.create(activityId, "someone", None, true)
+
+      activityDao.countNotificationsSinceDate("someone", DateTime.now.minusHours(2)) must be(1)
+    }
   }
 }
