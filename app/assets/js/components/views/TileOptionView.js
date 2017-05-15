@@ -7,14 +7,13 @@ export default class TileOptionView extends Component {
   constructor(props) {
     super(props);
 
-    const defaultPref = {};
-    _.forOwn(props.tile.option, (value, key) => {
-      defaultPref[key] = value.default;
-    });
+    const currentPreferences = {};
+    _.keys(props.tile.option).forEach((key) => (currentPreferences[key] = undefined));
+
     this.state = {
       currentPreferences: {
-        ...defaultPref,
-        ...props.tile.preferences || {},
+        ...currentPreferences,
+        ...props.tile.preferences,
       },
     };
 
@@ -52,6 +51,22 @@ export default class TileOptionView extends Component {
   }
 
   makeCheckbox(possibleChoice, cbName) {
+    const currentPreference = this.state.currentPreferences[cbName];
+    let checked = null;
+    if (currentPreference !== undefined) {
+      if (_.isArray(currentPreference)) {
+        // NEWSTART-681 We can't use the defaults if it's an array
+        // Eventually all of these will go away
+        checked = currentPreference.indexOf(possibleChoice.value) !== -1;
+      } else if (currentPreference[possibleChoice.value] !== undefined) {
+        checked = currentPreference[possibleChoice.value];
+      } else {
+        checked = this.props.tile.option[cbName].default.indexOf(possibleChoice.value) !== -1;
+      }
+    } else {
+      checked = this.props.tile.option[cbName].default.indexOf(possibleChoice.value) !== -1;
+    }
+
     return (
       <div className="checkbox" key={`${cbName}:${possibleChoice.value}`}>
         <label>
@@ -60,11 +75,7 @@ export default class TileOptionView extends Component {
             id={possibleChoice.value}
             value={possibleChoice.value}
             name={cbName}
-            checked={
-              (this.state.currentPreferences[cbName] &&
-              this.state.currentPreferences[cbName]
-                .indexOf(possibleChoice.value) !== -1) ? true : null
-            }
+            checked={checked}
             onChange={ this.handleCheckboxChange }
           />
           {possibleChoice.name ? possibleChoice.name : possibleChoice.value }
@@ -74,6 +85,14 @@ export default class TileOptionView extends Component {
   }
 
   makeRadioBox(possibleChoice, radioName) {
+    const currentPreference = this.state.currentPreferences[radioName];
+    let checked = null;
+    if (currentPreference !== undefined && currentPreference.length > 0) {
+      checked = currentPreference === possibleChoice.value;
+    } else {
+      checked = this.props.tile.option[radioName].default === possibleChoice.value;
+    }
+
     return (
       <div key={`${radioName}:${possibleChoice.value}`} className="radio">
         <label>
@@ -82,10 +101,7 @@ export default class TileOptionView extends Component {
             name={radioName}
             id={possibleChoice.value}
             value={possibleChoice.value}
-            checked={
-              (this.state.currentPreferences[radioName] &&
-              this.state.currentPreferences[radioName] === possibleChoice.value) ? true : null
-            }
+            checked={checked}
             onChange={ this.handleRadioChange }
           />
           {possibleChoice.name ? possibleChoice.name : possibleChoice.value }
@@ -118,28 +134,17 @@ export default class TileOptionView extends Component {
     const name = target.name;
     const currentPref = _.clone(this.state.currentPreferences, true);
 
-    if (checked) {
-      const items = (currentPref[name] || []).concat([value]);
-      this.setState({
-        currentPreferences: {
-          ...currentPref,
-          [name]: items,
-        },
-      });
+    if (currentPref[name] === undefined) {
+      currentPref[name] = { [value]: checked };
     } else {
-      const currentItems = currentPref[name];
-      let items = [];
-      if (currentItems) {
-        items = currentPref[name].filter(e => !(e === value));
+      if (_.isArray(currentPref[name])) {
+        currentPref[name] = _.keyBy(currentPref[name]);
+        _.keys(currentPref[name]).forEach((key) => (currentPref[name][key] = true));
       }
-
-      this.setState({
-        currentPreferences: {
-          ...currentPref,
-          [name]: items,
-        },
-      });
+      currentPref[name][value] = checked;
     }
+
+    this.setState({ currentPreferences: currentPref });
   }
 
   saveConfig() {

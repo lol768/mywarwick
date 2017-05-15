@@ -1,6 +1,4 @@
-import { tilesReducer as reducer } from 'state/tiles';
-import { formatPreferenceData } from 'state/tiles';
-import * as tiles from 'state/tiles';
+import { formatPreferenceData, tilesReducer as reducer } from 'state/tiles';
 
 describe('tiles', () => {
 
@@ -35,18 +33,43 @@ describe('tiles', () => {
 
     const availableTileOptions = {
       stops: {
+        options: [
+          {
+            name: 'Stop 1',
+            value: '43000065301',
+          },
+          {
+            name: 'Stop 2',
+            value: '43000065302',
+          },
+          {
+            name: 'Stop 3',
+            value: '43000065303',
+          },
+        ],
         type: 'array',
       },
       location: {
+        options: [
+          {
+            name: 'Westwood',
+            value: 'warwick-westwood',
+          },
+          {
+            name: 'The Moon',
+            value: 'the-moon',
+          },
+        ],
         type: 'string',
       }
     };
 
     const expected = {
-      stops: [
-        '43000065301',
-        '43000065302',
-      ],
+      stops: {
+        '43000065301': true,
+        '43000065302': true,
+        '43000065303': false,
+      },
       location: 'warwick-westwood',
     };
     const result = formatPreferenceData(preferencesDataFromAction, availableTileOptions);
