@@ -84,7 +84,9 @@ export default class MapTile extends TileContent {
       const src = `/service/map/${latitude.toFixed(4)}/${longitude.toFixed(4)}/${width}/${height}`;
 
       if (isPositionOnCampus(position)) {
-        return <img src={src} className="map-tile-image" role="presentation" />;
+        return (<div className="reset-position">
+          <img src={src} className="map-tile-image" role="presentation" />
+        </div>);
       }
     }
 
