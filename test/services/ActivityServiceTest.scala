@@ -17,13 +17,13 @@ import warwick.sso.Usercode
 
 class ActivityServiceTest extends BaseSpec with MockitoSugar {
 
-
   class Scope {
     val activityDao = mock[ActivityDao]
     val activityTypeService = mock[ActivityTypeService]
     val activityTagDao = mock[ActivityTagDao]
     val activityRecipientDao = mock[ActivityRecipientDao]
     val audienceDao = mock[AudienceDao]
+    val activityMuteDao = mock[ActivityMuteDao]
     val scheduler = new MockSchedulerService()
 
     val service = new ActivityServiceImpl(
@@ -33,6 +33,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       activityTagDao,
       audienceDao,
       activityRecipientDao,
+      activityMuteDao,
       scheduler
     )
 
@@ -144,6 +145,93 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       result.right.get must be("activity")
 
       verify(activityDao).update(Matchers.eq("activity"), Matchers.eq(submissionDue), Matchers.eq("audience"))(Matchers.any())
+    }
+
+    "get mutes" in {
+      val activityMute = ActivityMute(
+        usercode = null,
+        createdAt = null,
+        expiresAt = None,
+        activityType = None,
+        providerId = None,
+        tags = Nil
+      )
+      // Null expires
+      new Scope {
+        private val activity = Fixtures.activity.fromSave("activity", submissionDue)
+        when(activityMuteDao.mutesForActivity(Matchers.eq(activity))(Matchers.any())).thenReturn(Seq(activityMute))
+        private val result = service.getActivityMutes(activity, Nil)
+        result must have length 1
+      }
+      // Expires in future
+      new Scope {
+        private val activity = Fixtures.activity.fromSave("activity", submissionDue)
+        private val now = DateTime.now
+        private val thisMute = activityMute.copy(expiresAt = Some(now.plusDays(1)))
+        when(activityMuteDao.mutesForActivity(Matchers.eq(activity))(Matchers.any())).thenReturn(Seq(thisMute))
+        private val result = service.getActivityMutes(activity, Nil, now)
+        result must have length 1
+      }
+      // Expires in past
+      new Scope {
+        private val activity = Fixtures.activity.fromSave("activity", submissionDue)
+        private val now = DateTime.now
+        private val thisMute = activityMute.copy(expiresAt = Some(now.minusDays(1)))
+        when(activityMuteDao.mutesForActivity(Matchers.eq(activity))(Matchers.any())).thenReturn(Seq(thisMute))
+        private val result = service.getActivityMutes(activity, Nil, now)
+        result must have length 0
+      }
+
+      val tag1 = ActivityTag("tag1", TagValue("value1"))
+      val tag2 = ActivityTag("tag2", TagValue("value1"))
+      val tag3 = ActivityTag("tag2", TagValue("value2"))
+      // Empty mute tags
+      new Scope {
+        private val activity = Fixtures.activity.fromSave("activity", submissionDue)
+        when(activityMuteDao.mutesForActivity(Matchers.eq(activity))(Matchers.any())).thenReturn(Seq(activityMute))
+        private val result = service.getActivityMutes(activity, Seq(tag1))
+        result must have length 1
+      }
+      // Empty activity tags
+      new Scope {
+        private val activity = Fixtures.activity.fromSave("activity", submissionDue)
+        private val thisMute = activityMute.copy(tags = Seq(tag1))
+        when(activityMuteDao.mutesForActivity(Matchers.eq(activity))(Matchers.any())).thenReturn(Seq(thisMute))
+        private val result = service.getActivityMutes(activity, Nil)
+        result must have length 1
+      }
+      // Incorrect tag name
+      new Scope {
+        private val activity = Fixtures.activity.fromSave("activity", submissionDue)
+        private val thisMute = activityMute.copy(tags = Seq(tag1))
+        when(activityMuteDao.mutesForActivity(Matchers.eq(activity))(Matchers.any())).thenReturn(Seq(thisMute))
+        private val result = service.getActivityMutes(activity, Seq(tag2))
+        result must have length 0
+      }
+      // Incorrect tag value
+      new Scope {
+        private val activity = Fixtures.activity.fromSave("activity", submissionDue)
+        private val thisMute = activityMute.copy(tags = Seq(tag2))
+        when(activityMuteDao.mutesForActivity(Matchers.eq(activity))(Matchers.any())).thenReturn(Seq(thisMute))
+        private val result = service.getActivityMutes(activity, Seq(tag3))
+        result must have length 0
+      }
+      // Tag match single
+      new Scope {
+        private val activity = Fixtures.activity.fromSave("activity", submissionDue)
+        private val thisMute = activityMute.copy(tags = Seq(tag3))
+        when(activityMuteDao.mutesForActivity(Matchers.eq(activity))(Matchers.any())).thenReturn(Seq(thisMute))
+        private val result = service.getActivityMutes(activity, Seq(tag3))
+        result must have length 1
+      }
+      // Tag match collection
+      new Scope {
+        private val activity = Fixtures.activity.fromSave("activity", submissionDue)
+        private val thisMute = activityMute.copy(tags = Seq(tag1, tag2))
+        when(activityMuteDao.mutesForActivity(Matchers.eq(activity))(Matchers.any())).thenReturn(Seq(thisMute))
+        private val result = service.getActivityMutes(activity, Seq(tag1, tag2, tag3))
+        result must have length 1
+      }
     }
 
     // TODO test when there are activities to replace

@@ -84,8 +84,9 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
     val activityDao = get[ActivityDao]
     val recipientDao = get[ActivityRecipientDao]
     val tagDao = get[ActivityTagDao]
+    val activityMuteDao = get[ActivityMuteDao]
     val messaging = mock[MessagingService]
-    val activityService = new ActivityServiceImpl(db, activityDao, activityTypeService, tagDao, audienceDao, recipientDao, scheduler)
+    val activityService = new ActivityServiceImpl(db, activityDao, activityTypeService, tagDao, audienceDao, recipientDao, activityMuteDao, scheduler)
 
     val publishNotificationJob = new PublishActivityJob(audienceService, activityService, messaging, pubSub, scheduler)
 

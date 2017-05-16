@@ -1,0 +1,125 @@
+package services.dao
+
+import helpers.{BaseSpec, OneStartAppPerSuite}
+import models.{Activity, ActivityMute, ActivityTag, TagValue}
+import org.joda.time.DateTime
+import warwick.sso.Usercode
+
+class ActivityMuteDaoTest extends BaseSpec with OneStartAppPerSuite {
+
+  private val dao = get[ActivityMuteDao]
+
+  "ActivityMuteDao" should {
+
+    "create a mute and return it" in transaction { implicit c =>
+      val activity = Activity(
+        id = null,
+        providerId = "providerId",
+        `type` = "activityType",
+        title = null,
+        text = null,
+        url = null,
+        replacedBy = null,
+        publishedAt = null,
+        createdAt = null,
+        shouldNotify = true,
+        audienceId = null,
+        publisherId = null
+      )
+
+      val mute = ActivityMute(
+        usercode = Usercode("cusfal"),
+        createdAt = null,
+        expiresAt = Some(DateTime.now.plusDays(1)),
+        activityType = Some(activity.`type`),
+        providerId = Some(activity.providerId),
+        tags = Seq(
+          ActivityTag(
+            name = "tagName",
+            value = TagValue("tagValue")
+          )
+        )
+      )
+
+      dao.save(mute)
+
+      val mutes = dao.mutesForActivity(activity)
+
+      mutes must have length 1
+      mutes.head.usercode.string must equal (mute.usercode.string)
+      mutes.head.createdAt must not be null
+      mutes.head.expiresAt.get must equal (mute.expiresAt.get)
+      mutes.head.activityType must equal (mute.activityType)
+      mutes.head.providerId must equal (mute.providerId)
+      mutes.head.tags must have length 1
+      mutes.head.tags.head.name must equal (mute.tags.head.name)
+      mutes.head.tags.head.value.internalValue must equal (mute.tags.head.value.internalValue)
+    }
+
+    "allows all optional fields to be empty and returns match" in transaction { implicit c =>
+      val mute = ActivityMute(
+        usercode = Usercode("cusfal"),
+        createdAt = null,
+        expiresAt = None,
+        activityType = None,
+        providerId = None,
+        tags = Nil
+      )
+
+      val id = dao.save(mute)
+      id must not be null
+
+      val activity = Activity(
+        id = null,
+        providerId = "providerId",
+        `type` = "activityType",
+        title = null,
+        text = null,
+        url = null,
+        replacedBy = null,
+        publishedAt = null,
+        createdAt = null,
+        shouldNotify = true,
+        audienceId = null,
+        publisherId = null
+      )
+
+      val mutes = dao.mutesForActivity(activity)
+      mutes must have length 1
+    }
+
+    "deletes old expired mutes" in transaction { implicit c =>
+      val mute = ActivityMute(
+        usercode = Usercode("cusfal"),
+        createdAt = null,
+        expiresAt = Some(DateTime.now.minusDays(1)),
+        activityType = None,
+        providerId = None,
+        tags = Nil
+      )
+      dao.save(mute)
+
+      val activity = Activity(
+        id = null,
+        providerId = "providerId",
+        `type` = "activityType",
+        title = null,
+        text = null,
+        url = null,
+        replacedBy = null,
+        publishedAt = null,
+        createdAt = null,
+        shouldNotify = true,
+        audienceId = null,
+        publisherId = null
+      )
+      dao.mutesForActivity(activity) must have length 1
+
+      val deleted = dao.deleteExpiredBefore(DateTime.now)
+      deleted must be (1)
+      dao.mutesForActivity(activity) must have length 0
+    }
+
+  }
+
+}
