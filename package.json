@@ -108,7 +108,7 @@
     "redux-thunk": "^2.1.0",
     "reselect": "~2.3.0",
     "skycons": "~1.0.0",
-    "warwick-search-frontend": "git+ssh://git@repo.elab.warwick.ac.uk/sch/omni.git#58d956ebe76"
+    "warwick-search-frontend": "git+ssh://git@repo.elab.warwick.ac.uk/sch/omni.git#c7d4b6fd572"
   },
   "scripts": {
     "lint": "gulp lint",
