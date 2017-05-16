@@ -267,7 +267,7 @@ class ActivityDaoImpl @Inject()(
     SQL"""
          SELECT COUNT(*) FROM ACTIVITY_RECIPIENT
          WHERE USERCODE = $usercode
-         AND ACTIVITY.SHOULD_NOTIFY = 1
+         AND SHOULD_NOTIFY = 1
          AND PUBLISHED_AT > $date
       """
       .as(scalar[Int].single)
