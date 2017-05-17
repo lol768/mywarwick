@@ -1,5 +1,5 @@
 .tile--map__container {
-  background: url(/assets/images/map.png) no-repeat;
+  background: url(/assets/images/map.png) center center no-repeat;
   background-size: cover;
 
   .tile, .tile--map > .tile__wrap > .tile__header {
@@ -10,12 +10,21 @@
     overflow: visible;
   }
 
-  .map-tile-image {
+  .reset-position {
     position: absolute;
-    top: -40px;
+    top: -@tile-header-height;
     left: 0;
     right: 0;
     bottom: 0;
+  }
+
+  .map-tile-image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    min-width: 400px;
     -webkit-filter: saturate(0%) brightness(90%) contrast(50%); // Android WebView seems to need this
     filter: saturate(0%) brightness(90%) contrast(50%);
   }
@@ -57,8 +66,7 @@ html.mobile {
   }
   &.ios.app {
     .tile--map.tile--zoomed iframe {
-      // iOS native tab bar is 49px tall
-      height: ~"calc(100vh - @{start-masthead-height} - 49px)";
+      height: ~"calc(100vh - @{start-masthead-height} - @{ios-tab-bar-height})";
     }
   }
 }
