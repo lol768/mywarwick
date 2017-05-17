@@ -20,6 +20,7 @@
     "babel-plugin-transform-class-properties": "^6.23.0",
     "babel-plugin-transform-object-rest-spread": "~6.6.5",
     "babel-polyfill": "^6.9.0",
+    "babel-preset-airbnb": "^2.2.3",
     "babel-preset-es2015": "^6",
     "babel-preset-es2015-loose": "^8.0.0",
     "babel-preset-react": "^6",
@@ -108,7 +109,7 @@
     "redux-thunk": "^2.1.0",
     "reselect": "~2.3.0",
     "skycons": "~1.0.0",
-    "warwick-search-frontend": "git+ssh://git@repo.elab.warwick.ac.uk/sch/omni.git#58d956ebe76"
+    "warwick-search-frontend": "git+ssh://git@repo.elab.warwick.ac.uk/sch/omni.git#c7d4b6fd572"
   },
   "scripts": {
     "lint": "gulp lint",
