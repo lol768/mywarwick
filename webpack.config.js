@@ -120,14 +120,11 @@ module.exports = {
             babelrc: false,
             plugins: [],
             presets: [
-              // modules:false keeps `import` statements as they are,
-              // and lets webpack take advantage of extra optimisations.
               'airbnb', 'react'
             ],
             cacheDirectory: 'target/babel-loader-search-cache'
           }
         }
-
       },
     ],
   },
