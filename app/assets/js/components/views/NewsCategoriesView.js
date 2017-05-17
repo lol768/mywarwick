@@ -47,10 +47,10 @@ export default class NewsCategoriesView extends React.Component {
 
     const $btn = $node.find('.btn');
     const $tile = $node.parents('.tile');
-    const offset = {
+    const offset = ($tile.length > 0) ? {
       top: $btn.offset().top - $tile.offset().top,
       left: $btn.offset().left - $tile.offset().left,
-    };
+    } : $btn.offset();
 
     // Bring the grid item (stacking context) to the front so the dropdown
     // menu appears in front of other tiles
