@@ -66,8 +66,7 @@ html.mobile {
   }
   &.ios.app {
     .tile--map.tile--zoomed iframe {
-      // iOS native tab bar is 49px tall
-      height: ~"calc(100vh - @{start-masthead-height} - 49px)";
+      height: ~"calc(100vh - @{start-masthead-height} - @{ios-tab-bar-height})";
     }
   }
 }
