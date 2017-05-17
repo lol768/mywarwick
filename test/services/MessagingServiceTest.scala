@@ -2,13 +2,12 @@ package services
 
 import helpers.{BaseSpec, Fixtures}
 import models.{ActivityMute, ActivityRender, Output}
-import org.joda.time.DateTime
 import org.mockito.Matchers
+import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import services.dao._
 import services.messaging.{MessagingServiceImpl, OutputService}
 import warwick.sso.{UserLookupService, Usercode}
-import org.mockito.Mockito._
 
 class MessagingServiceTest extends BaseSpec with MockitoSugar {
 
@@ -41,8 +40,9 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
         icon = None,
         tags = Nil
       )
+      private val recipients = Set(Usercode("cusebr"), Usercode("cusfal"))
       when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))
-      when(activityService.getActivityMutes(activityRender.activity, activityRender.tags)).thenReturn(Seq(
+      when(activityService.getActivityMutes(activityRender.activity, activityRender.tags, recipients)).thenReturn(Seq(
         ActivityMute(
           usercode = Usercode("cusfal"),
           createdAt = null,
@@ -53,10 +53,7 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
         )
       ))
 
-      service.send(
-        Set(Usercode("cusebr"), Usercode("cusfal")),
-        activity
-      )
+      service.send(recipients, activity)
 
       verify(messagingDao, times(1)).save(Matchers.eq(activity), Matchers.eq(Usercode("cusebr")), Matchers.eq(Output.Mobile))(Matchers.any())
       verify(messagingDao, times(0)).save(Matchers.eq(activity), Matchers.eq(Usercode("cusfal")), Matchers.eq(Output.Mobile))(Matchers.any())

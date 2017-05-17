@@ -75,10 +75,10 @@ class MessagingServiceImpl @Inject()(
 
   def unmutedRecipients(recipients: Set[Usercode], activity: Activity): Set[Usercode] = {
     activities.getActivityRenderById(activity.id).map { activityRender =>
-      val mutedUsercodes = activities.getActivityMutes(activityRender.activity, activityRender.tags)
-        .map(_.usercode)
-      logger.info(s"Muted sending activity ${activity.id} to: ${mutedUsercodes.map(_.string).mkString(",")}")
-      recipients.diff(mutedUsercodes.toSet)
+      val mutedUsercodes = activities.getActivityMutes(activityRender.activity, activityRender.tags, recipients)
+        .map(_.usercode).toSet
+      logger.info(s"Muted sending activity ${activity.id} to: ${mutedUsercodes.union(recipients).map(_.string).mkString(",")}")
+      recipients.diff(mutedUsercodes)
     }.getOrElse(recipients)
   }
 

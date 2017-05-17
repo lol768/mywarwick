@@ -38,7 +38,12 @@ trait ActivityService {
 
   def getActivityIcon(providerId: String): Option[ActivityIcon]
 
-  def getActivityMutes(activity: Activity, tags: Seq[ActivityTag], now: DateTime = DateTime.now): Seq[ActivityMute]
+  def getActivityMutes(
+    activity: Activity,
+    tags: Seq[ActivityTag],
+    recipients: Set[Usercode],
+    now: DateTime = DateTime.now
+  ): Seq[ActivityMute]
 
 }
 
@@ -172,8 +177,14 @@ class ActivityServiceImpl @Inject()(
   override def getActivityIcon(providerId: String): Option[ActivityIcon] =
     db.withConnection(implicit c => dao.getActivityIcon(providerId))
 
-  override def getActivityMutes(activity: Activity, tags: Seq[ActivityTag], now: DateTime = DateTime.now): Seq[ActivityMute] = {
-    val mutes = db.withConnection(implicit c => muteDao.mutesForActivity(activity))
+  override def getActivityMutes(
+    activity: Activity,
+    tags: Seq[ActivityTag],
+    recipients: Set[Usercode],
+    now: DateTime = DateTime.now
+  ): Seq[ActivityMute] = {
+    val recipientsToSend: Set[Usercode] = if (recipients.size < 100) recipients else Set.empty
+    val mutes = db.withConnection(implicit c => muteDao.mutesForActivity(activity, recipientsToSend))
     mutes.filterNot(_.expiresAt.exists(_.isBefore(now))).filter(_.matchesTags(tags))
   }
 

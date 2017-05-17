@@ -12,12 +12,14 @@ import play.api.libs.json.{JsArray, Json}
 import warwick.anorm.converters.ColumnConversions._
 import warwick.sso.Usercode
 
+import scala.collection.mutable
+
 @ImplementedBy(classOf[ActivityMuteDaoImpl])
 trait ActivityMuteDao {
 
   def save(mute: ActivityMute)(implicit c: Connection): String
 
-  def mutesForActivity(activity: Activity)(implicit c: Connection): Seq[ActivityMute]
+  def mutesForActivity(activity: Activity, recipients: Set[Usercode] = Set.empty)(implicit c: Connection): Seq[ActivityMute]
 
   def deleteExpiredBefore(expiredBefore: DateTime)(implicit c: Connection): Int
 
@@ -61,13 +63,24 @@ class ActivityMuteDaoImpl extends ActivityMuteDao {
         )
     }
 
-  override def mutesForActivity(activity: Activity)(implicit c: Connection): Seq[ActivityMute] = {
-    SQL(s"""
+  override def mutesForActivity(activity: Activity, recipients: Set[Usercode] = Set.empty)(implicit c: Connection): Seq[ActivityMute] = {
+    val q = new StringBuilder(s"""
       SELECT * FROM ACTIVITY_MUTE
         WHERE (ACTIVITY_TYPE IS NULL OR ACTIVITY_TYPE = {activityType})
         AND (PROVIDER_ID IS NULL OR PROVIDER_ID = {providerId})
     """)
-      .on("activityType" -> activity.`type`, "providerId" -> activity.providerId)
+    val args = mutable.ArrayBuffer[NamedParameter]("activityType" -> activity.`type`, "providerId" -> activity.providerId)
+
+    if (recipients.nonEmpty) {
+      assert(recipients.size <= 1000)
+      q.append(s"""
+        AND USERCODE IN ({usercodes})
+      """)
+      args.append(NamedParameter.string("usercodes", recipients.map(_.string)))
+    }
+
+    SQL(q.mkString)
+      .on(args:_*)
       .as(activityMuteParser.*)
   }
 

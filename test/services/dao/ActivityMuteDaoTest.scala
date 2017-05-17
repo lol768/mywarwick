@@ -120,6 +120,45 @@ class ActivityMuteDaoTest extends BaseSpec with OneStartAppPerSuite {
       dao.mutesForActivity(activity) must have length 0
     }
 
+    "matches recipients if specified" in transaction { implicit c =>
+      val mute1 = ActivityMute(
+        usercode = Usercode("cusfal"),
+        createdAt = null,
+        expiresAt = Some(DateTime.now.minusDays(1)),
+        activityType = None,
+        providerId = None,
+        tags = Nil
+      )
+      dao.save(mute1)
+      val mute2 = ActivityMute(
+        usercode = Usercode("cusebr"),
+        createdAt = null,
+        expiresAt = Some(DateTime.now.minusDays(1)),
+        activityType = None,
+        providerId = None,
+        tags = Nil
+      )
+      dao.save(mute2)
+
+      val activity = Activity(
+        id = null,
+        providerId = "providerId",
+        `type` = "activityType",
+        title = null,
+        text = null,
+        url = null,
+        replacedBy = null,
+        publishedAt = null,
+        createdAt = null,
+        shouldNotify = true,
+        audienceId = null,
+        publisherId = null
+      )
+      dao.mutesForActivity(activity) must have length 2
+      dao.mutesForActivity(activity, Set(Usercode("cusfal"))) must have length 1
+      dao.mutesForActivity(activity, Set(Usercode("cusfal"), Usercode("cusebr"))) must have length 2
+    }
+
   }
 
 }
