@@ -90,7 +90,6 @@ module.exports = {
         include: [
           path.resolve(__dirname, 'app/assets/js'),
           // Some 3rd party modules that need compiling too
-          topLevelModule('warwick-search-frontend/app/assets/js'),
           topLevelModule('localforage/src'),
           topLevelModule('react-draggable/lib'),
         ],
@@ -106,6 +105,29 @@ module.exports = {
             cacheDirectory: 'target/babel-loader-cache'
           }
         ),
+      },
+      // Search in a separate rule so we can override babelrc to disable
+      // a pesky babel-rewire plugin.
+      {
+        test: /\.(es6|jsx?)$/,
+        // Only run Babel on these modules:
+        include: [
+          topLevelModule('warwick-search-frontend/app/assets/js')
+        ],
+        use: {
+          loader: 'babel-loader',
+          query: {
+            babelrc: false,
+            plugins: [],
+            presets: [
+              // modules:false keeps `import` statements as they are,
+              // and lets webpack take advantage of extra optimisations.
+              'airbnb', 'react'
+            ],
+            cacheDirectory: 'target/babel-loader-search-cache'
+          }
+        }
+
       },
     ],
   },
