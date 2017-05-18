@@ -220,10 +220,13 @@ class MeView extends React.Component {
 
   renderTiles() {
     const { layoutWidth, isDesktop, editing } = this.props;
-    const visibleTiles = this.props.tiles.filter(t => !t.removed
-    && TILE_TYPES[t.type] && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true));
-    const hiddenTiles = this.props.tiles.filter(t => !TILE_TYPES[t.type] || (t.removed
-    && (TILE_TYPES[t.type].isVisibleOnDesktopOnly() ? isDesktop : true)));
+
+    const allTiles = this.props.tiles.filter(t =>
+      TILE_TYPES[t.type] && (!TILE_TYPES[t.type].isVisibleOnDesktopOnly() || isDesktop)
+    );
+
+    const visibleTiles = allTiles.filter(t => !t.removed);
+    const hiddenTiles = allTiles.filter(t => t.removed);
 
     const layout = this.getTileLayout(this.props.layout, layoutWidth);
     const tileComponents = visibleTiles.map(tile =>
