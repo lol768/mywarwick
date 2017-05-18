@@ -9,6 +9,8 @@ import { connect } from 'react-redux';
 import { getStreamSize, takeFromStream } from '../../stream';
 import { markNotificationsRead } from '../../state/notification-metadata';
 import * as notifications from '../../state/notifications';
+import ScrollRestore from '../ui/ScrollRestore';
+import { Routes } from '../AppRoot';
 
 const SOME_MORE = 20;
 
@@ -26,6 +28,7 @@ class NotificationsView extends React.Component {
     }),
     grouped: PropTypes.bool.isRequired,
     notificationPermission: PropTypes.string,
+    numberToShow: PropTypes.number.isRequired,
   };
 
   static defaultProps = {
@@ -36,7 +39,6 @@ class NotificationsView extends React.Component {
     super(props);
 
     this.state = {
-      numberToShow: SOME_MORE,
       browserPushDisabled: 'Notification' in window && Notification.permission === 'denied',
     };
 
@@ -89,7 +91,7 @@ class NotificationsView extends React.Component {
 
   loadMore() {
     const streamSize = getStreamSize(this.props.notifications);
-    const hasOlderItemsLocally = this.state.numberToShow < streamSize;
+    const hasOlderItemsLocally = this.props.numberToShow < streamSize;
 
     if (hasOlderItemsLocally) {
       return Promise.resolve(this.showMore());
@@ -101,9 +103,9 @@ class NotificationsView extends React.Component {
   }
 
   showMore() {
-    this.setState({
-      numberToShow: this.state.numberToShow + SOME_MORE,
-    });
+    this.props.dispatch(notifications.showMoreNotifications(
+      this.props.numberToShow + SOME_MORE
+    ));
   }
 
   markNotificationsRead() {
@@ -128,7 +130,7 @@ class NotificationsView extends React.Component {
 
   render() {
     const shouldBeGrouped = this.props.grouped && this.shouldBeGrouped();
-    const notificationItems = takeFromStream(this.props.notifications, this.state.numberToShow)
+    const notificationItems = takeFromStream(this.props.notifications, this.props.numberToShow)
       .map(n =>
         <ActivityItem
           key={ n.id }
@@ -140,7 +142,7 @@ class NotificationsView extends React.Component {
 
     const streamSize = getStreamSize(this.props.notifications);
     const hasAny = streamSize > 0 || this.props.olderItemsOnServer;
-    const hasMore = this.state.numberToShow < streamSize || this.props.olderItemsOnServer;
+    const hasMore = this.props.numberToShow < streamSize || this.props.olderItemsOnServer;
     const browserPushDisabled = this.props.notificationPermission === 'denied';
 
     return (
@@ -153,16 +155,18 @@ class NotificationsView extends React.Component {
           : null
         }
         { hasAny ?
-          <InfiniteScrollable
-            hasMore={ hasMore }
-            onLoadMore={ this.loadMore }
-            showLoading
-            endOfListPhrase="There are no older notifications."
-          >
-            <GroupedList groupBy={ shouldBeGrouped ? groupItemsByDate : undefined }>
-              { notificationItems }
-            </GroupedList>
-          </InfiniteScrollable>
+          <ScrollRestore url={`/${Routes.NOTIFICATIONS}`}>
+            <InfiniteScrollable
+              hasMore={ hasMore }
+              onLoadMore={ this.loadMore }
+              showLoading
+              endOfListPhrase="There are no older notifications."
+            >
+              <GroupedList groupBy={ shouldBeGrouped ? groupItemsByDate : undefined }>
+                { notificationItems }
+              </GroupedList>
+            </InfiniteScrollable>
+          </ScrollRestore>
           :
           <EmptyState lead="You don't have any notifications yet.">
             <p>
@@ -184,6 +188,7 @@ function select(state) {
     notificationsLastRead: state.notificationsLastRead,
     olderItemsOnServer: state.notifications.olderItemsOnServer,
     notificationPermission: state.device.notificationPermission,
+    numberToShow: state.notifications.numberToShow,
   };
 }
 

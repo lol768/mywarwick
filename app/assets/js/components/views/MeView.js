@@ -12,6 +12,7 @@ import TileView from './TileView';
 import * as TILE_TYPES from '../tiles';
 import TileOptionView from './TileOptionView';
 import { Routes } from '../AppRoot';
+import ScrollRestore from '../ui/ScrollRestore';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -291,12 +292,14 @@ class MeView extends React.Component {
     const classes = classNames('me-view', { 'me-view--editing': this.props.editing });
 
     return (
-      <div className="me-view-container">
-        <div className={classes}>
-          {this.renderTiles()}
-          {this.renderTileOptionsView()}
+      <ScrollRestore url="/">
+        <div className="me-view-container">
+          <div className={classes}>
+            {this.renderTiles()}
+            {this.renderTileOptionsView()}
+          </div>
         </div>
-      </div>
+      </ScrollRestore>
     );
   }
 }

@@ -7,6 +7,8 @@ import { connect } from 'react-redux';
 import * as news from '../../state/news';
 import * as newsCategories from '../../state/news-categories';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
+import ScrollRestore from '../ui/ScrollRestore';
+import { Routes } from '../AppRoot';
 
 export class NewsView extends React.Component {
 
@@ -93,13 +95,15 @@ export class NewsView extends React.Component {
           : null
         }
         { items.length ?
-          <InfiniteScrollable
-            hasMore={moreAvailable}
-            onLoadMore={this.loadMore}
-            endOfListPhrase="There is no older news."
-          >
-            {itemComponents}
-          </InfiniteScrollable> : maybeMessage
+          <ScrollRestore url={`/${Routes.NEWS}`}>
+            <InfiniteScrollable
+              hasMore={moreAvailable}
+              onLoadMore={this.loadMore}
+              endOfListPhrase="There is no older news."
+            >
+              {itemComponents}
+            </InfiniteScrollable>
+          </ScrollRestore> : maybeMessage
         }
         { fetching ?
           <div className="centered">

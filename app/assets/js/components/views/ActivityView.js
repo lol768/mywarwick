@@ -7,6 +7,8 @@ import EmptyState from '../ui/EmptyState';
 import { connect } from 'react-redux';
 import { getStreamSize, takeFromStream } from '../../stream';
 import * as notifications from '../../state/notifications';
+import { Routes } from '../AppRoot';
+import ScrollRestore from '../ui/ScrollRestore';
 
 const SOME_MORE = 20;
 
@@ -17,6 +19,7 @@ class ActivityView extends React.Component {
     olderItemsOnServer: PropTypes.bool,
     dispatch: PropTypes.func.isRequired,
     grouped: PropTypes.bool.isRequired,
+    numberToShow: PropTypes.number.isRequired,
   };
 
   static defaultProps = {
@@ -26,15 +29,12 @@ class ActivityView extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      numberToShow: SOME_MORE,
-    };
     this.loadMore = this.loadMore.bind(this);
   }
 
   loadMore() {
     const streamSize = getStreamSize(this.props.activities);
-    const hasOlderItemsLocally = this.state.numberToShow < streamSize;
+    const hasOlderItemsLocally = this.props.numberToShow < streamSize;
 
     if (hasOlderItemsLocally) {
       return Promise.resolve(this.showMore());
@@ -46,9 +46,9 @@ class ActivityView extends React.Component {
   }
 
   showMore() {
-    this.setState({
-      numberToShow: this.state.numberToShow + SOME_MORE,
-    });
+    this.props.dispatch(notifications.showMoreActivities(
+      this.props.numberToShow + SOME_MORE
+    ));
   }
 
   shouldBeGrouped() {
@@ -62,26 +62,28 @@ class ActivityView extends React.Component {
 
   render() {
     const shouldBeGrouped = this.props.grouped && this.shouldBeGrouped();
-    const activities = takeFromStream(this.props.activities, this.state.numberToShow)
+    const activities = takeFromStream(this.props.activities, this.props.numberToShow)
       .map(n => <ActivityItem key={n.id} grouped={shouldBeGrouped} {...n} />);
 
     const streamSize = getStreamSize(this.props.activities);
     const hasAny = streamSize > 0 || this.props.olderItemsOnServer;
-    const hasMore = this.state.numberToShow < streamSize || this.props.olderItemsOnServer;
+    const hasMore = this.props.numberToShow < streamSize || this.props.olderItemsOnServer;
 
     return (
       <div>
         { hasAny ?
-          <InfiniteScrollable
-            hasMore={ hasMore }
-            onLoadMore={ this.loadMore }
-            showLoading
-            endOfListPhrase="There are no older activities."
-          >
-            <GroupedList groupBy={shouldBeGrouped ? groupItemsByDate : undefined}>
-              {activities}
-            </GroupedList>
-          </InfiniteScrollable>
+          <ScrollRestore url={`/${Routes.ACTIVITY}`}>
+            <InfiniteScrollable
+              hasMore={ hasMore }
+              onLoadMore={ this.loadMore }
+              showLoading
+              endOfListPhrase="There are no older activities."
+            >
+              <GroupedList groupBy={shouldBeGrouped ? groupItemsByDate : undefined}>
+                {activities}
+              </GroupedList>
+            </InfiniteScrollable>
+          </ScrollRestore>
           :
           <EmptyState lead="You don't have any activity yet.">
             <p>
@@ -100,6 +102,7 @@ function select(state) {
   return {
     activities: state.activities.stream,
     olderItemsOnServer: state.activities.olderItemsOnServer,
+    numberToShow: state.activities.numberToShow,
   };
 }
 
