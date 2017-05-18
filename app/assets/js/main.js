@@ -62,8 +62,6 @@ if ('scrollRestoration' in history) {
 }
 
 $(() => {
-  ui.scrollTopOnTabChange();
-
   $(window).on('contextmenu', () => window.navigator.userAgent.indexOf('Mobile') < 0);
 
   $(window).on('resize', () => store.dispatch(ui.updateUIContext()));
