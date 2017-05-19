@@ -445,9 +445,10 @@ describe('MeView', () => {
     },
   };
 
-  it('should now render unknown tiles or removed tiles', () => {
+  it('should not render unknown tiles or removed tiles', () => {
     const wrapper = shallow(<MeView.WrappedComponent {...props} />);
     expect(wrapper.find(TileView)).to.have.length(10);
+
   });
 
 });
