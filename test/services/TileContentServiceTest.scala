@@ -1,13 +1,12 @@
 package services
 
 import helpers.ExternalServers._
-import helpers.{ExternalServers, Fixtures}
+import helpers._
 import models._
 import org.apache.http.client.methods.HttpUriRequest
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Seconds, Span}
-import helpers.BaseSpec
 import play.api.Configuration
 import play.api.cache._
 import play.api.libs.json.{JsObject, Json}
@@ -17,7 +16,7 @@ import uk.ac.warwick.sso.client.trusted.CurrentApplication
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-class TileContentServiceTest extends BaseSpec with ScalaFutures with MockitoSugar {
+class TileContentServiceTest extends BaseSpec with ScalaFutures with MockitoSugar with WithWebClient with WithActorSystem {
 
   override implicit def patienceConfig =
     PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
@@ -51,8 +50,8 @@ class TileContentServiceTest extends BaseSpec with ScalaFutures with MockitoSuga
 
   "TileContentService" should {
     val trusted = mock[CurrentApplication]
-    val ws = mock[WSClient]
-    val cache = mock[CacheApi]
+    val ws = web.client
+    val cache = new MockCacheApi
     val config = Configuration {
       "mywarwick.cache.tile-preferences.seconds" -> 1
     }
@@ -69,10 +68,18 @@ class TileContentServiceTest extends BaseSpec with ScalaFutures with MockitoSuga
       }
     }
 
-    "return a failed Future if the tile does not have a fetch URL" in {
+     "return a failed Future if the tile does not have a fetch URL" in {
       val content = service.getTileContent(Some(user), userPrinterTile(None))
 
       content.failed.futureValue mustBe an[IllegalArgumentException]
+    }
+
+    "return empty preferences if a backend fails" in {
+      ExternalServers.runBrokenServer { port =>
+        val ut = userPrinterTile(Some(s"http://localhost:${port}/content/printcredits"))
+        val fallbackResponse = List(("printcredits", Json.obj()))
+        service.getCachedTilesOptions(Seq(ut.tile)).futureValue mustBe fallbackResponse
+      }
     }
   }
 

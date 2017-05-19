@@ -35,10 +35,10 @@ class WorkerActor @Inject()(
           processing.onComplete {
             case Success(res) if res.success => messaging.success(message)
             case Success(res) =>
-              log.debug(s"Bad messsage ${res.message}")
+              log.warning(s"Message failed to send: ${res.message}")
               messaging.failure(message)
             case Failure(ex) =>
-              log.debug(s"Bad messsage ${ex}")
+              log.error(s"Message-sending threw an exception", ex)
               messaging.failure(message)
           }
           processing.onComplete {

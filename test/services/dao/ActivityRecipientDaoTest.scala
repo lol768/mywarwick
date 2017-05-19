@@ -22,7 +22,7 @@ class ActivityRecipientDaoTest extends BaseSpec with OneStartAppPerSuite {
     "create a recipient" in transaction { implicit c =>
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
 
-      activityRecipientDao.create(activityId, "someone", None)
+      activityRecipientDao.create(activityId, "someone", None, false)
 
       val count = SQL("SELECT COUNT(*) FROM ACTIVITY_RECIPIENT WHERE ACTIVITY_ID = {activityId} AND USERCODE = 'someone'")
         .on('activityId -> activityId)
@@ -34,7 +34,7 @@ class ActivityRecipientDaoTest extends BaseSpec with OneStartAppPerSuite {
     "mark an activity as sent" in transaction { implicit c =>
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
 
-      activityRecipientDao.create(activityId, "someone", None)
+      activityRecipientDao.create(activityId, "someone", None, false)
       activityRecipientDao.markSent(activityId, "someone")
 
       val date = SQL("SELECT SENT_AT FROM ACTIVITY_RECIPIENT WHERE ACTIVITY_ID = {activityId} AND USERCODE = 'someone'")

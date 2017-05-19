@@ -18,7 +18,7 @@ trait DatabaseDialect {
 class OracleDatabaseDialect extends DatabaseDialect {
 
   override def limitOffset(limit: Int, offset: Int = 0)(body: String) : String =
-    s"SELECT * FROM ( $body ) WHERE ROWNUM BETWEEN ${offset+1} AND $limit"
+    s"$body OFFSET $offset ROWS FETCH NEXT $limit ROWS ONLY"
 
 }
 

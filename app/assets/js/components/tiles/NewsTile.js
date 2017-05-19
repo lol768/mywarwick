@@ -1,5 +1,5 @@
 import React from 'react';
-import TileContent from './TileContent';
+import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 import NewsView from '../views/NewsView';
 
 export default class NewsTile extends TileContent {
@@ -12,7 +12,7 @@ export default class NewsTile extends TileContent {
     return true;
   }
 
-  needsContentToRender() {
+  static needsContentToRender() {
     return false;
   }
 
@@ -24,7 +24,11 @@ export default class NewsTile extends TileContent {
     return false;
   }
 
-  getLargeBody() {
+  static supportedTileSizes() {
+    return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
+  }
+
+  getSmallBody() {
     return <NewsView />;
   }
 

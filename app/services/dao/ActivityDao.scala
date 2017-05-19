@@ -81,11 +81,9 @@ class ActivityDaoImpl @Inject()(
 
   def updateReplacedActivity(replacedById: String, replaces: Seq[String])(implicit c: Connection) =
     replaces.grouped(1000).foreach { group =>
-      SQL("UPDATE ACTIVITY SET replaced_by_id = {replacedById} WHERE id IN ({replaces})")
-        .on(
-          'replacedById -> replacedById,
-          'replaces -> group
-        )
+      SQL"UPDATE ACTIVITY SET replaced_by_id = $replacedById WHERE id IN ($replaces)"
+        .execute()
+      SQL"UPDATE ACTIVITY_RECIPIENT SET replaced = 1 WHERE ACTIVITY_ID IN ($replaces)"
         .execute()
     }
 
@@ -138,7 +136,7 @@ class ActivityDaoImpl @Inject()(
     SQL(
       """
       SELECT ACTIVITY.* FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID
-      WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.PUBLISHED_AT > {sinceDate} AND ACTIVITY.ID IN (
+      WHERE USERCODE = {usercode} AND ACTIVITY.SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.PUBLISHED_AT > {sinceDate} AND ACTIVITY.ID IN (
       SELECT ACTIVITY.ID FROM MESSAGE_SEND WHERE USERCODE = {usercode} AND OUTPUT = {mobile})
       """)
       .on(
@@ -163,8 +161,8 @@ class ActivityDaoImpl @Inject()(
     val maybeBefore = if (beforeDate.nonEmpty)
       """
         AND (
-          ACTIVITY.PUBLISHED_AT < {beforeDate} OR (
-            ACTIVITY.PUBLISHED_AT = {beforeDate} AND ACTIVITY.ID < {before}
+          ACTIVITY_RECIPIENT.PUBLISHED_AT < {beforeDate} OR (
+            ACTIVITY_RECIPIENT.PUBLISHED_AT = {beforeDate} AND ACTIVITY_ID < {before}
           )
         )
       """
@@ -174,8 +172,8 @@ class ActivityDaoImpl @Inject()(
     val maybeSince = if (sinceDate.nonEmpty)
       """
         AND (
-          ACTIVITY.PUBLISHED_AT > {sinceDate} OR (
-            ACTIVITY.PUBLISHED_AT = {sinceDate} AND ACTIVITY.ID > {since}
+          ACTIVITY_RECIPIENT.PUBLISHED_AT > {sinceDate} OR (
+            ACTIVITY_RECIPIENT.PUBLISHED_AT = {sinceDate} AND ACTIVITY_ID > {since}
           )
         )
       """
@@ -185,9 +183,9 @@ class ActivityDaoImpl @Inject()(
     // to return, and they have the same publish time
     val conditions = if (beforeDate.nonEmpty && beforeDate == sinceDate)
       """
-        AND ACTIVITY.PUBLISHED_AT = {beforeDate}
-        AND ACTIVITY.ID > {since}
-        AND ACTIVITY.ID < {before}
+        AND ACTIVITY_RECIPIENT.PUBLISHED_AT = {beforeDate}
+        AND ACTIVITY_ID > {since}
+        AND ACTIVITY_ID < {before}
       """
     else maybeBefore + maybeSince
 
@@ -198,6 +196,18 @@ class ActivityDaoImpl @Inject()(
     // affects which activities are returned.
     val publishedAtOrder = if (sinceDate.nonEmpty) "ASC" else "DESC"
 
+    /**
+      * It's important that the inner query here (which gets the final 100 or whatever IDs
+      * we'll be returning) is fast, which is why:
+      *  - It only uses columns that are in the ACTIVITY_RECIPIENT_READ_INDEX,
+      *      so it can read the index and not need to read the table at all;
+      *  - It doesn't join on any other tables.
+      *
+      * If you're about to make a change that might break these two rules, it requires
+      * some discussion before you go ahead.
+      *
+      * TODO we still join here, awaiting migration to denormalise activity data
+      */
     val query = s"""
       $selectActivityRender
       WHERE ACTIVITY.ID IN (
@@ -209,7 +219,7 @@ class ActivityDaoImpl @Inject()(
             AND ACTIVITY.REPLACED_BY_ID IS NULL
             $maybeNotifications
             $conditions
-          ORDER BY ACTIVITY_RECIPIENT.PUBLISHED_AT $publishedAtOrder, ACTIVITY.ID ASC"""
+          ORDER BY ACTIVITY_RECIPIENT.PUBLISHED_AT $publishedAtOrder, ACTIVITY_ID ASC"""
         )}
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC, ACTIVITY.ID ASC
@@ -267,7 +277,7 @@ class ActivityDaoImpl @Inject()(
   }
 
   override def countNotificationsSinceDate(usercode: String, date: DateTime)(implicit c: Connection): Int =
-    SQL("SELECT COUNT(ACTIVITY.ID) FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID WHERE USERCODE = {usercode} AND SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.PUBLISHED_AT > {date}")
+    SQL("SELECT COUNT(ACTIVITY.ID) FROM ACTIVITY JOIN ACTIVITY_RECIPIENT ON ACTIVITY_RECIPIENT.ACTIVITY_ID = ACTIVITY.ID WHERE USERCODE = {usercode} AND ACTIVITY.SHOULD_NOTIFY = 1 AND ACTIVITY_RECIPIENT.PUBLISHED_AT > {date}")
       .on(
         'usercode -> usercode,
         'date -> date

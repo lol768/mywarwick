@@ -7,7 +7,7 @@ import org.quartz.CronScheduleBuilder._
 import org.quartz.JobBuilder._
 import org.quartz.TriggerBuilder._
 import org.quartz._
-import services.job.{APNSInactiveDeviceCleanupJob, MessageSendCleanupJob}
+import services.job.{APNSInactiveDeviceCleanupJob, ActivityMuteCleanupJob, MessageSendCleanupJob}
 
 @Singleton
 class SchedulerConfiguration @Inject()(
@@ -24,6 +24,12 @@ class SchedulerConfiguration @Inject()(
     "APNSInactiveDeviceCleanupJob",
     newJob(classOf[APNSInactiveDeviceCleanupJob]),
     dailyAtHourAndMinute(1, 30)
+  )
+
+  configureScheduledJob(
+    "ActivityMuteCleanupJob",
+    newJob(classOf[ActivityMuteCleanupJob]),
+    dailyAtHourAndMinute(3, 0)
   )
 
   scheduler.start()

@@ -127,16 +127,17 @@ class MeView extends React.Component {
     this.onFinishEditing();
   }
 
-  onResizeTile(tile) {
+  onResizeTile(tileProps) {
     // Block transitions until we really want them
     $('.me-view-container .me-view').addClass('with-transitions');
 
-    const sizes = _.values(TILE_SIZES);
-    const nextSize = sizes[(sizes.indexOf(tile.size || tile.defaultSize) + 1) % sizes.length];
+    const sizes = tileProps.supportedTileSizes;
+    const nextSizeIndex = sizes.indexOf(tileProps.size || tileProps.defaultSize) + 1;
+    const nextSize = sizes[nextSizeIndex % sizes.length];
 
     const { width, height } = getSizeFromSizeName(nextSize);
 
-    this.props.dispatch(tiles.resizeTile(tile, this.props.layoutWidth, width, height));
+    this.props.dispatch(tiles.resizeTile(tileProps, this.props.layoutWidth, width, height));
   }
 
   onConfiguring(tileProps) {

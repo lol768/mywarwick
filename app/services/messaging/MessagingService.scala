@@ -54,12 +54,12 @@ class MessagingServiceImpl @Inject()(
 
   override def send(recipients: Set[Usercode], activity: Activity): Unit = {
     def save(output: Output, user: Usercode)(implicit c: Connection) = {
-      if (logger.isDebugEnabled) logger.logger.debug(s"Sending ${output.name} to ${user} about ${activity.id}")
+      if (logger.isDebugEnabled) logger.logger.debug(s"Sending ${output.name} to $user about ${activity.id}")
       messagingDao.save(activity, user, output)
     }
 
     db.withTransaction { implicit c =>
-      recipients.foreach { user =>
+      unmutedRecipients(recipients, activity).foreach { user =>
         if (sendEmailFor(user, activity)) {
           save(Output.Email, user)
         }
@@ -71,6 +71,19 @@ class MessagingServiceImpl @Inject()(
         }
       }
     }
+  }
+
+  def unmutedRecipients(recipients: Set[Usercode], activity: Activity): Set[Usercode] = {
+    activities.getActivityRenderById(activity.id).map { activityRender =>
+      val mutedUsercodes = recipients.intersect(
+        activities.getActivityMutes(activityRender.activity, activityRender.tags, recipients)
+          .map(_.usercode).toSet
+      )
+      if (mutedUsercodes.nonEmpty) {
+        logger.info(s"Muted sending activity ${activity.id} to: ${mutedUsercodes.map(_.string).mkString(",")}")
+      }
+      recipients.diff(mutedUsercodes)
+    }.getOrElse(recipients)
   }
 
   /**

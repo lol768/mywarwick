@@ -86,7 +86,10 @@ class TileContentServiceImpl @Inject()(
                   logger.error(s"Error requesting preferences for a tile, res: $res")
                   (tile.id, Json.obj())
               }
-            )
+            ).recover { case e =>
+              logger.error(s"Error requesting preferences for a tile: $e")
+              (tile.id, Json.obj())
+            }
         }
       }.getOrElse(Future.successful((tile.id, Json.obj())))
     })

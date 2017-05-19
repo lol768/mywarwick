@@ -26,8 +26,9 @@ class WebPushNotificationsController @Inject()(
 
     maybeSubscription.map { subscription =>
       val token = Json.toJson(subscription).toString()
+      val userAgent = request.request.headers.get("user-agent")
 
-      pushRegistrationService.save(user.usercode, WebPush, token) match {
+      pushRegistrationService.save(user.usercode, WebPush, token, userAgent) match {
         case true =>
           auditLog('CreateWebPushSubscription, 'endpoint -> subscription.endpoint)
 

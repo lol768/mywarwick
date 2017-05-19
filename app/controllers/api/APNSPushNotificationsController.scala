@@ -18,9 +18,10 @@ class APNSPushNotificationsController @Inject()(
 
   def subscribe = RequiredUserAction { implicit request =>
     val deviceToken = request.body.asJson.flatMap(_.asInstanceOf[JsObject].value.get("deviceToken")).map(_.as[String])
+    val userAgent = request.request.headers.get("user-agent")
 
     deviceToken.map { token =>
-      val registered = pushRegistrationService.save(request.context.user.get.usercode, Apple, token)
+      val registered = pushRegistrationService.save(request.context.user.get.usercode, Apple, token, userAgent)
 
       if (registered) {
         auditLog('CreateAPNSRegistration, 'token -> token)

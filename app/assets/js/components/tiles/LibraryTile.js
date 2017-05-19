@@ -5,8 +5,13 @@ import Hyperlink from '../ui/Hyperlink';
 import TextTile from './TextTile';
 import _ from 'lodash-es';
 import moment from 'moment';
+import { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 
 export default class LibraryTile extends TextTile {
+
+  static supportedTileSizes() {
+    return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
+  }
 
   renderItems(items) {
     return items
