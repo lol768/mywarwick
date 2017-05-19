@@ -8,6 +8,8 @@
 <html lang="en-GB" class="no-js" manifest="@routes.Assets.versioned("appcache.manifest")">
   <head>
     @common.head(title = "")
+    <script defer src="@routes.Assets.versioned("js/vendor.bundle.js")"></script>
+    <script defer src="@routes.Assets.versioned("js/bundle.js")"></script>
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("css/main.css")">
   </head>
   <body>
@@ -20,8 +22,6 @@
         <i class="fa fa-spinner fa-pulse"></i>
       </div>
     </div>
-    <script src="@routes.Assets.versioned("js/vendor.bundle.js")"></script>
-    <script src="@routes.Assets.versioned("js/bundle.js")"></script>
     <div id="error-fallback" class="fatal-error">
       There was a problem loading My Warwick.<br>Please try again later.
     </div>
