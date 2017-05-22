@@ -121,7 +121,7 @@ export function attachScrollRestore(key) {
  * To sort out the history we need to go back _then_ replace, however react-router-redux gets into
  * a race condition if you try and dispatch both at the same time.
  * Therefore put the path we actually want to go to in the store separately, then just go back here.
- * The MeView then handles sending you on to where you wanted.
+ * The AppRoot then handles sending you on to where you wanted.
  */
 export function navRequest(path, dispatch) {
   if (path === window.location.pathname) {

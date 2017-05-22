@@ -22,7 +22,6 @@ import localforage from 'localforage';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
 
 import * as notificationsGlue from './notifications-glue';
@@ -40,10 +39,11 @@ import * as ui from './state/ui';
 import * as device from './state/device';
 import * as analytics from './analytics';
 import * as stream from './stream';
-import store from './store';
+import store, { browserHistory } from './store';
 import AppRoot from './components/AppRoot';
 import bridge from './bridge';
-import { hasAuthoritativeUser, hasAuthoritativeAuthenticatedUser } from './state';
+import { hasAuthoritativeAuthenticatedUser, hasAuthoritativeUser } from './state';
+import { Provider } from 'react-redux';
 
 bridge({ store, tiles, notifications, userinfo, news });
 
@@ -55,7 +55,7 @@ localforage.config({
 });
 
 const history = syncHistoryWithStore(browserHistory, store);
-history.listen(location => analytics.track(location.pathname));
+history.listen(location => ((location !== undefined) ? analytics.track(location.pathname) : null));
 
 if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
@@ -215,7 +215,9 @@ window.Store = store;
 
 // Actually render the app
 ReactDOM.render(
-  <AppRoot history={history} />,
+  <Provider store={store}>
+    <AppRoot history={history} />
+  </Provider>,
   document.getElementById('app-container')
 );
 

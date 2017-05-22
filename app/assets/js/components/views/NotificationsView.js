@@ -11,15 +11,17 @@ import { markNotificationsRead } from '../../state/notification-metadata';
 import * as notifications from '../../state/notifications';
 import ScrollRestore from '../ui/ScrollRestore';
 import { Routes } from '../AppRoot';
+import HideableView from './HideableView';
 
 const SOME_MORE = 20;
 
 // ms of continuous visibility required for notifications to be marked as read
 const NOTIFICATION_READ_TIMEOUT = 1500;
 
-class NotificationsView extends React.Component {
+class NotificationsView extends HideableView {
 
   static propTypes = {
+    hiddenView: PropTypes.bool.isRequired,
     notifications: PropTypes.object,
     olderItemsOnServer: PropTypes.bool,
     dispatch: PropTypes.func.isRequired,
@@ -46,11 +48,11 @@ class NotificationsView extends React.Component {
     this.beginMarkReadTimeout = this.beginMarkReadTimeout.bind(this);
   }
 
-  componentWillMount() {
+  componentWillShow() {
     this.beginMarkReadTimeout();
   }
 
-  componentDidMount() {
+  componentDidShow() {
     document.addEventListener('visibilitychange', this.beginMarkReadTimeout);
     window.addEventListener('focus', this.beginMarkReadTimeout);
     window.addEventListener('blur', this.beginMarkReadTimeout);
@@ -64,7 +66,7 @@ class NotificationsView extends React.Component {
     }
   }
 
-  componentWillUnmount() {
+  componentDidHide() {
     clearTimeout(this.timeout);
     this.markNotificationsRead();
 
@@ -155,12 +157,13 @@ class NotificationsView extends React.Component {
           : null
         }
         { hasAny ?
-          <ScrollRestore url={`/${Routes.NOTIFICATIONS}`}>
+          <ScrollRestore url={`/${Routes.NOTIFICATIONS}`} hiddenView={ this.props.hiddenView }>
             <InfiniteScrollable
               hasMore={ hasMore }
               onLoadMore={ this.loadMore }
               showLoading
               endOfListPhrase="There are no older notifications."
+              hiddenView={ this.props.hiddenView }
             >
               <GroupedList groupBy={ shouldBeGrouped ? groupItemsByDate : undefined }>
                 { notificationItems }
