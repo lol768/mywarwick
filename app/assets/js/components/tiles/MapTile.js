@@ -7,6 +7,10 @@ function isPositionOnCampus({ latitude, longitude }) {
     && longitude <= -1.548 && longitude >= -1.576;
 }
 
+function isAccuratePosition({ accuracy }) {
+  return accuracy <= 50;
+}
+
 export default class MapTile extends TileContent {
 
   static propTypes = {
@@ -51,10 +55,13 @@ export default class MapTile extends TileContent {
   updateLocation() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        const { longitude, latitude, accuracy } = pos.coords;
+
         this.setState({
           position: {
-            longitude: pos.coords.longitude,
-            latitude: pos.coords.latitude,
+            longitude,
+            latitude,
+            accuracy,
           },
         });
       },
@@ -83,7 +90,7 @@ export default class MapTile extends TileContent {
 
       const src = `/service/map/${latitude.toFixed(4)}/${longitude.toFixed(4)}/${width}/${height}`;
 
-      if (isPositionOnCampus(position)) {
+      if (isPositionOnCampus(position) && isAccuratePosition(position)) {
         return (<div className="reset-position">
           <img src={src} className="map-tile-image" role="presentation" />
         </div>);
