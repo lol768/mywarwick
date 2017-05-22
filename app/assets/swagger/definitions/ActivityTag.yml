@@ -5,7 +5,7 @@ properties:
     example: module
   value:
     type: string
-    example: CS118
+    example: cs118
   display_value:
     type: string
 required:
