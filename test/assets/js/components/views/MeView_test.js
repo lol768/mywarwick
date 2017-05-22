@@ -34,32 +34,7 @@ describe('MeView', () => {
             id: 'bus',
             colour: 0,
             icon: 'bus',
-            preferences: {
-              stops: [
-                '43000065301',
-                '43001060901',
-                '43000065202',
-                '43000065302',
-                '43000119602',
-                '43001063002',
-                '4200F157740',
-                '4200F106602',
-                '43000065303',
-                '43000065304',
-                '43000065305'
-              ],
-              routes: [
-                'U2',
-                'U17',
-                '360A',
-                '360C',
-                '11U',
-                '12X',
-                'X16',
-                'W1C',
-                '87'
-              ]
-            },
+            preferences: null,
             title: 'Buses',
             type: 'text',
             removed: false,
@@ -448,7 +423,20 @@ describe('MeView', () => {
   it('should not render unknown tiles or removed tiles', () => {
     const wrapper = shallow(<MeView.WrappedComponent {...props} />);
     expect(wrapper.find(TileView)).to.have.length(10);
-
+    const renderedTileIds = wrapper.find(TileView).map (node => node.key());
+    const expectedTileIds = [
+      'bus',
+      'coursework',
+      'eating',
+      'print',
+      'weather',
+      'timetable',
+      'traffic',
+      'library',
+      'mail',
+      'calendar',
+    ];
+    expect(renderedTileIds).to.eql(expectedTileIds);
   });
 
 });
