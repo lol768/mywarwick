@@ -57,7 +57,7 @@ export default class Tile extends React.Component {
   }
 
   onClick(e) {
-    if (e.target === this.refs.icon) {
+    if (e.target === this.refs.icon || e.target === this.refs.zoom) {
       // Do not apply default click action to icon
       return;
     }
@@ -118,9 +118,9 @@ export default class Tile extends React.Component {
     const zoomIcon = () => {
       if (zoomed) {
         return isDesktop ?
-          <i className="fa fa-times" onClick={this.props.onZoomOut}> </i> : null;
+          <i ref="zoom" className="fa fa-times" onClick={this.props.onZoomOut}> </i> : null;
       } else if (this.shouldDisplayExpandIcon()) {
-        return <i className="fa fa-expand" onClick={this.onClickExpand}> </i>;
+        return <i ref="zoom" className="fa fa-expand" onClick={this.onClickExpand}> </i>;
       }
       return null;
     };
