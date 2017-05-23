@@ -1,7 +1,5 @@
 import localforage from 'localforage';
 import log from 'loglevel';
-import url from 'url';
-import querystring from 'querystring';
 
 export const USER_LOAD = 'USER_LOAD';
 export const USER_RECEIVE = 'USER_RECEIVE';
@@ -87,13 +85,6 @@ function clearUserData() {
     localforage.clear().then(() => dispatch({ type: USER_CLEAR }));
 }
 
-export function rewriteRefreshUrl(location, currentLocation) {
-  const parsed = url.parse(location, true);
-  parsed.query.target = currentLocation;
-  parsed.query.myWarwickRefresh = true;
-  parsed.search = querystring.stringify(parsed.query);
-  return url.format(parsed);
-}
 
 export function userReceive(currentUser) {
   return (dispatch) =>
