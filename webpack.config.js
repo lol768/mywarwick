@@ -52,7 +52,7 @@ function getPlugins() {
 
 module.exports = {
   entry: {
-    bundle: './app/assets/js/main.js',
+    bundle: './app/assets/js/boot.js',
     'publish-bundle': './app/assets/js/publish.js',
     vendor: ['react','react-dom','redux','react-redux','moment']
   },
