@@ -22,6 +22,7 @@ export default class ListTile extends TileContent {
       case TILE_SIZES.LARGE:
         return 4;
       case TILE_SIZES.TALL:
+      default:
         return 8;
     }
   }

@@ -100,6 +100,7 @@ export default class TextTile extends TileContent {
         return 2;
       case TILE_SIZES.LARGE:
       case TILE_SIZES.TALL:
+      default:
         // Tall tile renders using getZoomedBody, which always renders everything
         return 4;
     }
