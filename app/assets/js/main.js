@@ -36,7 +36,9 @@ export function launch(userData) {
   });
 
   const history = syncHistoryWithStore(browserHistory, store);
-  history.listen(location => ((location !== undefined) ? analytics.track(location.pathname) : null));
+  history.listen(location =>
+    ((location !== undefined) ? analytics.track(location.pathname) : null)
+  );
 
   if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
