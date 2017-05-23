@@ -11,12 +11,12 @@ export default class WorkareaTile extends TextTile {
 
   renderItems(itemsToDisplay) {
     return itemsToDisplay.map(workarea => (
-      <Hyperlink key={workarea.id}>
+      <div key={workarea.id}>
         <div className="tile__item">
           {this.makeCallout(workarea)}
           {this.makeTileText(workarea)}
           </div>
-      </Hyperlink>
+      </div>
       )
     );
   }
