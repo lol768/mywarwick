@@ -16,7 +16,6 @@ export default class ListTile extends TileContent {
   getNumberOfItemsToDisplay() {
     switch (this.props.size) {
       case TILE_SIZES.SMALL:
-        return 2;
       case TILE_SIZES.WIDE:
         return 3;
       case TILE_SIZES.LARGE:
