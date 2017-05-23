@@ -44,7 +44,7 @@ class TilesController @Inject()(
         "tiles" -> tiles,
         "layout" -> layout,
         "options" -> options
-      )))).withHeaders("Content-Type" -> "application/json; charset=utf-8")
+      )))).as(withCharset(JSON))
     }
   }
 
@@ -77,7 +77,7 @@ class TilesController @Inject()(
       val tileResult = for ((tile, API.Success(_, content)) <- result) yield tile.tile.id -> Map("content" -> content)
       val errorResult = for ((tile, API.Failure(_, errors)) <- result) yield tile.tile.id -> Map("errors" -> Json.toJson(errors))
 
-      Ok(Json.toJson(API.Success(data = (tileResult ++ errorResult).toMap))).withHeaders("Content-Type" -> "application/json; charset=utf-8")
+      Ok(Json.toJson(API.Success(data = (tileResult ++ errorResult).toMap))).as(withCharset(JSON))
     }
   }
 
