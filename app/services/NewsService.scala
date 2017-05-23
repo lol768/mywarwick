@@ -3,7 +3,8 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import models.news.{NewsItemAudit, NewsItemRender, NewsItemRenderWithAudit, NewsItemSave}
+import models.Audience.DepartmentSubset
+import models.news.{NewsItemRender, NewsItemRenderWithAudit, NewsItemSave}
 import models.{Audience, AudienceSize}
 import org.joda.time.DateTime
 import org.quartz.JobBuilder.newJob
@@ -14,7 +15,7 @@ import play.api.db.Database
 import services.dao.{AudienceDao, NewsCategoryDao, NewsDao, NewsImageDao}
 import services.job.PublishNewsItemJob
 import system.ThreadPools.web
-import warwick.sso.{UserLookupService, Usercode}
+import warwick.sso.{GroupName, UserLookupService, Usercode}
 
 import scala.concurrent.Future
 
@@ -49,6 +50,8 @@ trait NewsService {
   def setRecipients(newsItemId: String, recipients: Seq[Usercode]): Unit
 
   def delete(newsItemId: String): Unit
+
+  def getNewsItemsMatchingAudience(webGroup: Option[GroupName], departmentCode: Option[String], departmentSubset: Option[DepartmentSubset], publisherId: Option[String], limit: Int): Seq[NewsItemRender]
 }
 
 class AnormNewsService @Inject()(
@@ -69,6 +72,11 @@ class AnormNewsService @Inject()(
     dao.deleteRecipients(newsId)
     dao.delete(newsId)
   }
+
+  override def getNewsItemsMatchingAudience(webGroup: Option[GroupName], departmentCode: Option[String], departmentSubset: Option[DepartmentSubset], publisherId: Option[String], limit: Int): Seq[NewsItemRender] =
+    db.withConnection { implicit c =>
+      dao.getNewsByIds(dao.getNewsItemsMatchingAudience(webGroup, departmentCode, departmentSubset, publisherId, limit))
+    }
 
   override def getNewsByPublisher(publisherId: String, limit: Int, offset: Int): Seq[NewsItemRender] =
     db.withConnection { implicit c =>
@@ -184,5 +192,5 @@ class AnormNewsService @Inject()(
     * @param recipients
     */
   override def setRecipients(newsItemId: String, recipients: Seq[Usercode]) =
-  db.withTransaction(implicit c => dao.setRecipients(newsItemId, recipients))
+    db.withTransaction(implicit c => dao.setRecipients(newsItemId, recipients))
 }

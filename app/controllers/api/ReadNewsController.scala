@@ -6,13 +6,15 @@ import com.google.inject.Inject
 import com.sun.syndication.feed.synd._
 import com.sun.syndication.io.WireFeedOutput
 import controllers.BaseController
+import models.Audience.DepartmentSubset
+import models.news.NewsItemRender
 import models.{API, PageViewHit}
 import org.jdom.{Element, Namespace}
 import play.api.libs.json._
-import play.api.mvc.RequestHeader
+import play.api.mvc.{Action, RequestHeader}
 import services.analytics.AnalyticsMeasurementService
 import services.{NewsService, SecurityService}
-import warwick.sso.User
+import warwick.sso.GroupName
 
 import scala.collection.JavaConverters._
 
@@ -33,16 +35,12 @@ class ReadNewsController @Inject()(
     Ok(Json.toJson(API.Success(data = userNews)))
   }
 
-  def rssFeed = UserAction { implicit request =>
-    val feed = buildFeedForUser(request.context.user)
-
-    Ok(writeFeedString(feed, "rss_2.0")).as("application/rss+xml")
+  def rssFeed = Action { implicit request =>
+    renderFeed("rss_2.0", "application/rss+xml")(request)
   }
 
-  def atomFeed = UserAction { implicit request =>
-    val feed = buildFeedForUser(request.context.user)
-
-    Ok(writeFeedString(feed, "atom_1.0")).as("application/atom+xml")
+  def atomFeed = Action { implicit request =>
+    renderFeed("atom_1.0", "application/atom+xml")(request)
   }
 
   def redirect(id: String) = UserAction { implicit request =>
@@ -61,14 +59,30 @@ class ReadNewsController @Inject()(
     )
   }
 
-  private def buildFeedForUser(user: Option[User])(implicit request: RequestHeader) = {
-    val userNews = news.latestNews(user.map(_.usercode), limit = 20)
+  private def renderFeed(feedFormat: String, contentType: String)(implicit request: RequestHeader) = {
+    val deptCode = request.getQueryString("deptCode")
+    val publisherId = request.getQueryString("publisher")
+    val userType = request.getQueryString("userType").flatMap(DepartmentSubset.unapply)
+    val webGroup = request.getQueryString("webGroup").map(GroupName)
 
+    if (request.getQueryString("userType").nonEmpty && userType.isEmpty) {
+      BadRequest("Invalid userType")
+    } else if (webGroup.isEmpty && deptCode.isEmpty && userType.isEmpty && publisherId.isEmpty) {
+      BadRequest("Must specify webGroup, deptCode, userType or publisherId")
+    } else {
+      val newsItems = news.getNewsItemsMatchingAudience(webGroup, deptCode, userType, publisherId, limit = 20)
+      val feed = buildFeed("News", newsItems)
+
+      Ok(writeFeedString(feed, feedFormat)).as(contentType)
+    }
+  }
+
+  private def buildFeed(title: String, userNews: Seq[NewsItemRender])(implicit request: RequestHeader) = {
     val feed = new SyndFeedImpl()
-    feed.setTitle("News for " + user.flatMap(_.name.first).getOrElse("everyone"))
-    feed.setDescription(if (user.isEmpty) "Public news" else "News for you")
+    feed.setTitle(title)
+    feed.setDescription(title)
     feed.setAuthor("University of Warwick")
-    feed.setLink("https://my.warwick.ac.uk")
+    feed.setLink(controllers.routes.HomeController.index().absoluteURL)
 
     val entries = userNews.map { item =>
       val entry: SyndEntry = new SyndEntryImpl()

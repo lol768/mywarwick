@@ -7,6 +7,7 @@ import javax.inject.{Inject, Singleton}
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.ImplementedBy
+import models.Audience.DepartmentSubset
 import models.news.{Link, NewsItemAudit, NewsItemRender, NewsItemSave}
 import models.{AudienceSize, NewsCategory}
 import org.joda.time.DateTime
@@ -14,7 +15,7 @@ import system.DatabaseDialect
 import uk.ac.warwick.util.web.Uri
 import uk.ac.warwick.util.web.Uri.UriException
 import warwick.anorm.converters.ColumnConversions._
-import warwick.sso.Usercode
+import warwick.sso.{GroupName, Usercode}
 
 @ImplementedBy(classOf[AnormNewsDao])
 trait NewsDao {
@@ -54,6 +55,8 @@ trait NewsDao {
   def delete(newsId: String)(implicit c: Connection): Int
 
   def deleteRecipients(id: String)(implicit c: Connection): Unit
+
+  def getNewsItemsMatchingAudience(webGroup: Option[GroupName], departmentCode: Option[String], departmentSubset: Option[DepartmentSubset], publisherId: Option[String], limit: Int)(implicit c: Connection): Seq[String]
 }
 
 @Singleton
@@ -270,6 +273,40 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
       .values
       .toSeq
       .sortBy(_.publishDate)(mostRecentFirst)
+  }
+
+  def getNewsItemsMatchingAudience(webGroup: Option[GroupName], departmentCode: Option[String], departmentSubset: Option[DepartmentSubset], publisherId: Option[String], limit: Int)(implicit c: Connection) = {
+    var or = Seq.empty[String]
+
+    if (departmentSubset.nonEmpty || departmentCode.nonEmpty) {
+      or :+=
+        s"""(AUDIENCE_COMPONENT.DEPT_CODE = {departmentCode}
+            ${departmentSubset.map(_ => " AND AUDIENCE_COMPONENT.NAME = {departmentSubset}").getOrElse("")})"""
+    }
+
+    if (webGroup.nonEmpty) {
+      or :+= "(AUDIENCE_COMPONENT.NAME = 'WebGroup' AND AUDIENCE_COMPONENT.VALUE = {webGroup})"
+    }
+
+    if (publisherId.nonEmpty) {
+      or :+= "(NEWS_ITEM.PUBLISHER_ID = {publisherId})"
+    }
+
+    val query = dialect.limitOffset(limit) {
+      s"""SELECT DISTINCT NEWS_ITEM.ID FROM NEWS_ITEM
+          JOIN AUDIENCE_COMPONENT ON NEWS_ITEM.AUDIENCE_ID = AUDIENCE_COMPONENT.AUDIENCE_ID
+          WHERE ${or.mkString(" OR ")} ORDER BY NEWS_ITEM.PUBLISH_DATE DESC"""
+    }
+
+    SQL(query)
+      .on(
+        'webGroup -> webGroup.map(_.string).orNull,
+        'departmentCode -> departmentCode.orNull,
+        'departmentSubset -> departmentSubset.map(_.entryName).orNull,
+        'publisherId -> publisherId.orNull
+      )
+      .executeQuery()
+      .as(scalar[String].*)
   }
 
 }
