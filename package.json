@@ -43,7 +43,7 @@
     "gulp-file": "~0.2.0",
     "gulp-filenames": "~2.0.0",
     "gulp-insert": "~0.5.0",
-    "gulp-less": "~3.0.5",
+    "gulp-less": "~3.3.0",
     "gulp-manifest": "~0.1.1",
     "gulp-play-assets": "^0.9.1",
     "gulp-postcss": "~6.1.0",
