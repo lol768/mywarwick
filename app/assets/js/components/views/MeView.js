@@ -5,7 +5,7 @@ import _ from 'lodash-es';
 import $ from 'jquery.transit';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
-import { goBack, replace, push } from 'react-router-redux';
+import { goBack, push } from 'react-router-redux';
 import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
@@ -49,10 +49,10 @@ function getSizeNameFromSize(size) {
 class MeView extends React.Component {
 
   static propTypes = {
+    hiddenView: PropTypes.bool.isRequired,
     location: PropTypes.shape({
       pathname: PropTypes.string,
     }),
-    navRequest: PropTypes.string,
     dispatch: PropTypes.func.isRequired,
     editing: PropTypes.bool,
     adding: PropTypes.bool,
@@ -77,26 +77,6 @@ class MeView extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (this.props.editing && !nextProps.editing) {
       this.onFinishEditing();
-    }
-  }
-
-  /**
-   * The other half of this is in ui.navRequest.
-   * If we've been sent back only to go forward, get the requested path from the store, reset
-   * that state, and replace the current path.
-   */
-  componentDidUpdate() {
-    if (this.props.navRequest) {
-      if (this.props.location.pathname === '/') {
-        const path = this.props.navRequest;
-        this.props.dispatch({
-          type: 'ui.navRequest',
-          navRequest: null,
-        });
-        this.props.dispatch(replace(path));
-      } else {
-        this.props.dispatch(goBack());
-      }
     }
   }
 
@@ -215,6 +195,7 @@ class MeView extends React.Component {
         editingAny={this.props.editing}
         size={this.getTileSize(id)}
         layoutWidth={this.props.layoutWidth}
+        hiddenView={this.props.hiddenView}
       />
     );
   }
@@ -292,7 +273,7 @@ class MeView extends React.Component {
     const classes = classNames('me-view', { 'me-view--editing': this.props.editing });
 
     return (
-      <ScrollRestore url="/">
+      <ScrollRestore url="/" hiddenView={ this.props.hiddenView }>
         <div className="me-view-container">
           <div className={classes}>
             {this.renderTiles()}

@@ -1,15 +1,17 @@
-import React, { PropTypes } from 'react';
+import { PropTypes } from 'react';
 import { attachScrollRestore, detachScrollRestore } from '../../state/ui';
+import HideableView from '../views/HideableView';
 
-export default class ScrollRestore extends React.Component {
+export default class ScrollRestore extends HideableView {
 
   static propTypes = {
+    hiddenView: PropTypes.bool.isRequired,
     url: PropTypes.string.isRequired,
     forceTop: PropTypes.bool,
     children: PropTypes.node,
   };
 
-  componentDidMount() {
+  componentDidShow() {
     if (this.props.forceTop) {
       window.scrollTo(0, 0);
     } else {
@@ -17,7 +19,7 @@ export default class ScrollRestore extends React.Component {
     }
   }
 
-  componentWillUnmount() {
+  componentWillHide() {
     detachScrollRestore(this.props.url);
   }
 

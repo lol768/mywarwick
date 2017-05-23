@@ -116,7 +116,7 @@ class TileView extends Component {
     };
 
     return (
-      <ScrollRestore url={`/${Routes.TILES}/${id}`} forceTop>
+      <ScrollRestore url={`/${Routes.TILES}/${id}`} forceTop hiddenView={ this.props.hiddenView }>
         <Tile { ...tileProps }>
           { React.createElement(tileContentComponent, contentProps) }
         </Tile>
@@ -158,6 +158,7 @@ TileView.propTypes = {
   editing: PropTypes.bool.isRequired,
   view: PropTypes.object,
   user: PropTypes.object.isRequired,
+  hiddenView: PropTypes.bool.isRequired,
 };
 
 TileView.defaultProps = {

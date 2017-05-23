@@ -4,10 +4,12 @@ import $ from 'jquery';
 import log from 'loglevel';
 import * as notifications from '../../state/notifications';
 import { makeCancelable } from '../../promise';
+import HideableView from '../views/HideableView';
 
-export default class InfiniteScrollable extends React.Component {
+export default class InfiniteScrollable extends HideableView {
 
   static propTypes = {
+    hiddenView: PropTypes.bool.isRequired,
     hasMore: PropTypes.bool,
     onLoadMore: PropTypes.func.isRequired,
     children: PropTypes.node,
@@ -24,15 +26,18 @@ export default class InfiniteScrollable extends React.Component {
     this.cancellableShowMorePromise = makeCancelable(Promise.resolve());
   }
 
-  componentDidMount() {
+  componentDidUpdate(prevProps, prevState) {
+    if (!this.props.hiddenView) {
+      this.attachScrollListener();
+    }
+    super.componentDidUpdate(prevProps, prevState);
+  }
+
+  componentDidShow() {
     this.attachScrollListener();
   }
 
-  componentDidUpdate() {
-    this.attachScrollListener();
-  }
-
-  componentWillUnmount() {
+  componentWillHide() {
     this.detachScrollListener();
     this.cancellableShowMorePromise.cancel();
   }

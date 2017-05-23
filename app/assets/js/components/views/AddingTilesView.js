@@ -14,6 +14,7 @@ const margin = [4, 4];
 class AddingTilesView extends React.Component {
 
   static propTypes = {
+    hiddenView: PropTypes.bool.isRequired,
     location: PropTypes.shape({
       pathname: PropTypes.string,
     }),
@@ -93,7 +94,11 @@ class AddingTilesView extends React.Component {
 
   render() {
     return (
-      <ScrollRestore url={`/${Routes.EDIT}/${Routes.ADD}`} forceTop>
+      <ScrollRestore
+        url={`/${Routes.EDIT}/${Routes.ADD}`}
+        forceTop
+        hiddenView={ this.props.hiddenView }
+      >
         <div className="me-view-container">
           <div className="me-view me-view--adding">
             {this.renderHiddenTiles()}

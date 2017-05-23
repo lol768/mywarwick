@@ -9,8 +9,9 @@ import * as newsCategories from '../../state/news-categories';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 import ScrollRestore from '../ui/ScrollRestore';
 import { Routes } from '../AppRoot';
+import HideableView from './HideableView';
 
-export class NewsView extends React.Component {
+export class NewsView extends HideableView {
 
   constructor(props) {
     super(props);
@@ -21,7 +22,7 @@ export class NewsView extends React.Component {
     this.state = {};
   }
 
-  componentDidMount() {
+  componentDidShow() {
     if (!this.props.failed) {
       if (this.props.newsCategories.items.length === 0) {
         this.props.dispatch(newsCategories.fetch());
@@ -33,8 +34,11 @@ export class NewsView extends React.Component {
     this.updateWidth();
   }
 
-  componentDidUpdate() {
-    this.updateWidth();
+  componentDidUpdate(prevProps, prevState) {
+    if (!this.props.hiddenView) {
+      this.updateWidth();
+    }
+    super.componentDidUpdate(prevProps, prevState);
   }
 
   updateWidth() {
@@ -95,11 +99,12 @@ export class NewsView extends React.Component {
           : null
         }
         { items.length ?
-          <ScrollRestore url={`/${Routes.NEWS}`}>
+          <ScrollRestore url={`/${Routes.NEWS}`} hiddenView={ this.props.hiddenView }>
             <InfiniteScrollable
               hasMore={moreAvailable}
               onLoadMore={this.loadMore}
               endOfListPhrase="There is no older news."
+              hiddenView={ this.props.hiddenView }
             >
               {itemComponents}
             </InfiniteScrollable>
@@ -107,7 +112,7 @@ export class NewsView extends React.Component {
         }
         { fetching ?
           <div className="centered">
-            <i className="fa fa-lg fa-refresh fa-spin"></i>
+            <i className="fa fa-lg fa-refresh fa-spin"> </i>
           </div> : null }
       </div>
     );
@@ -116,6 +121,7 @@ export class NewsView extends React.Component {
 }
 
 NewsView.propTypes = {
+  hiddenView: PropTypes.bool.isRequired,
   dispatch: PropTypes.func.isRequired,
   failed: PropTypes.bool.isRequired,
   fetching: PropTypes.bool.isRequired,
