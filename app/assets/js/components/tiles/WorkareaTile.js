@@ -1,5 +1,4 @@
 import React from 'react';
-import Hyperlink from '../ui/Hyperlink';
 import TextTile from './TextTile';
 import { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 
