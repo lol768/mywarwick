@@ -70,12 +70,8 @@ html.mobile {
     top: 0;
     line-height: 44px;
     font-size: 1.25em;
-    padding: 0 20px 0 10px;
+    padding: 0 20px 0 13px;
     cursor: pointer;
-
-    i {
-      padding: 0 5px;
-    }
   }
 
   .masthead-title {
@@ -119,6 +115,33 @@ html.mobile {
 
   .popover.account-information {
     max-width: none !important;
+  }
+}
+
+.in-edit .edit-btn {
+  line-height: normal;
+  padding: 2px;
+  border-radius: 100%;
+  background-color: transparent;
+  border: 2px solid rgba(255, 255, 255, 0);
+  margin: 7px 11px 7px 9px;
+}
+
+.in-edit .pulse {
+  animation: pulse 1.1s 2;
+}
+
+@keyframes pulse {
+  0% {
+    background-color: transparent;
+  }
+
+  50% {
+    background-color: #007aff;
+  }
+
+  100% {
+    background-color: transparent;
   }
 }
 

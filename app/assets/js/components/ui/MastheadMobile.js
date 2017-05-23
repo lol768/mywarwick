@@ -14,7 +14,7 @@ export default class MastheadMobile extends React.Component {
     return (
       <div className="start-masthead use-popover">
         { this.props.showEditButton &&
-        <div className="edit-btn" onClick={this.props.onEdit}>
+        <div className="edit-btn pulse" onClick={this.props.onEdit}>
           { this.props.editing ?
             <i className="fa fa-fw fa-check"> </i> :
             <i className="fa fa-fw fa-cog"> </i>
