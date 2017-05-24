@@ -5,6 +5,7 @@
 # Home page
 GET         /                                                     @controllers.HomeController.index
 GET         /notifications                                        @controllers.HomeController.index
+GET         /notifications/mute                                   @controllers.HomeController.index
 GET         /activity                                             @controllers.HomeController.index
 GET         /news                                                 @controllers.HomeController.index
 GET         /search                                               @controllers.HomeController.index
@@ -72,6 +73,10 @@ POST        /api/streams/read                                     @controllers.a
 
 GET         /api/streams/notifications                            @controllers.api.UserActivitiesController.notifications(since: Option[String], before: Option[String], limit: Int ?= 100)
 GET         /api/streams/activities                               @controllers.api.UserActivitiesController.activities(since: Option[String], before: Option[String], limit: Int ?= 100)
+
+GET         /api/streams/mute                                     @controllers.api.UserActivitiesController.listMutes
+PUT         /api/streams/mute                                     @controllers.api.UserActivitiesController.saveMute
+DELETE      /api/streams/mute                                     @controllers.api.UserActivitiesController.removeMute(id: String)
 
 POST        /api/streams/:providerId/notifications                @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
 POST        /api/streams/:providerId/activities                   @controllers.api.IncomingActivitiesController.postActivity(providerId: String)

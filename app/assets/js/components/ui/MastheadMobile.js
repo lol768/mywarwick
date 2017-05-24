@@ -38,7 +38,6 @@ export default class MastheadMobile extends React.Component {
 }
 
 MastheadMobile.propTypes = {
-  zoomedTile: React.PropTypes.string,
   path: React.PropTypes.string,
   onBackClick: React.PropTypes.func,
   onEdit: React.PropTypes.func,

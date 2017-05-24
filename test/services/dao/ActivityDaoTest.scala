@@ -14,17 +14,39 @@ import warwick.sso.Usercode
 
 class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
 
-  val activityDao = get[ActivityDao]
-  val activityTagDao = get[ActivityTagDao]
-  val activityRecipientDao = get[ActivityRecipientDao]
-  val messagingDao = get[MessagingDao]
+  val activityDao: ActivityDao = get[ActivityDao]
+  val activityTagDao: ActivityTagDao = get[ActivityTagDao]
+  val activityRecipientDao: ActivityRecipientDao = get[ActivityRecipientDao]
+  val messagingDao: MessagingDao = get[MessagingDao]
 
-  val activitySave = Fixtures.activitySave.submissionDue
+  val activitySave: ActivitySave = Fixtures.activitySave.submissionDue
 
   val insertSkynetProvider =
     SQL"""
         INSERT INTO provider (id, display_name, icon, colour, publisher_id) VALUES
         ('skynet', 'Skynet', 'eye-o', 'greyish', 'default')
+      """
+
+  val deleteFixtureProvider =
+    SQL"""
+        DELETE FROM provider WHERE ID = ${activitySave.providerId}
+       """
+
+  val insertFixtureProvider =
+    SQL"""
+        INSERT INTO provider (id, display_name, icon, colour, publisher_id) VALUES
+        (${activitySave.providerId}, 'Tabula display name', 'eye-o', 'greyish', 'default')
+      """
+
+  val deleteFixtureType =
+    SQL"""
+        DELETE FROM activity_type WHERE NAME = ${activitySave.`type`}
+       """
+
+  val insertFixtureType =
+    SQL"""
+        INSERT INTO activity_type (name, display_name) VALUES
+        (${activitySave.`type`}, 'The display name')
       """
 
   val audienceId = "audience"
@@ -56,7 +78,7 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
     "find activities with tags" in transaction { implicit c =>
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
       activityRecipientDao.create(activityId, "someone", None, shouldNotify=true)
-      activityTagDao.save(activityId, ActivityTag("name", TagValue("value")))
+      activityTagDao.save(activityId, ActivityTag("name", None, TagValue("value")))
       activityDao.getActivitiesForUser("someone").map(_.activity.id) must contain(activityId)
     }
 
@@ -116,9 +138,9 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
     "get provider's activity icon" in transaction { implicit c =>
       insertSkynetProvider.execute()
 
-      val activitySave = ActivitySave(Usercode("custard"), "default", "skynet", false, "beady-eye", "Watching You", None, None, Seq.empty, Map.empty, None)
+      val activitySave = ActivitySave(Usercode("custard"), "default", "skynet", shouldNotify = false, "beady-eye", "Watching You", None, None, Seq.empty, Map.empty, None)
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
-      activityRecipientDao.create(activityId, "nicduke", None, false)
+      activityRecipientDao.create(activityId, "nicduke", None, shouldNotify = false)
 
       val response = activityDao.getActivitiesForUser("nicduke", limit = 1).head
 
@@ -172,8 +194,8 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
 
     "retrieve all tags associated with an activity" in transaction { implicit c =>
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
-      activityTagDao.save(activityId, ActivityTag("a", TagValue("apple")))
-      activityTagDao.save(activityId, ActivityTag("b", TagValue("banana")))
+      activityTagDao.save(activityId, ActivityTag("a", None, TagValue("apple")))
+      activityTagDao.save(activityId, ActivityTag("b", None, TagValue("banana")))
 
       val maybeActivityRender = activityDao.getActivityRenderById(activityId)
       maybeActivityRender must not be empty
@@ -185,9 +207,9 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
 
     def createActivity(time: DateTime)(implicit c: Connection) = {
       val id = activityDao.save(activitySave.copy(publishedAt = Some(time)), audienceId, Nil)
-      activityTagDao.save(id, ActivityTag("a", TagValue("apple")))
-      activityTagDao.save(id, ActivityTag("b", TagValue("banana")))
-      activityRecipientDao.create(id, "someone", Some(time), false)
+      activityTagDao.save(id, ActivityTag("a", None, TagValue("apple")))
+      activityTagDao.save(id, ActivityTag("b", None, TagValue("banana")))
+      activityRecipientDao.create(id, "someone", Some(time), shouldNotify = false)
       id
     }
 
@@ -226,9 +248,35 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
       activityDao.countNotificationsSinceDate("someone", DateTime.now.minusHours(2)) must be(0)
 
       val activityId = activityDao.save(Fixtures.activitySave.submissionDue.copy(publishedAt = Some(DateTime.now.minusHours(1))), audienceId, Nil)
-      activityRecipientDao.create(activityId, "someone", None, true)
+      activityRecipientDao.create(activityId, "someone", None, shouldNotify = true)
 
       activityDao.countNotificationsSinceDate("someone", DateTime.now.minusHours(2)) must be(1)
+    }
+
+    "retrieve provider" in transaction { implicit c =>
+      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      deleteFixtureProvider.execute()
+      insertFixtureProvider.execute()
+
+      val maybeActivityRender = activityDao.getActivityRenderById(activityId)
+      maybeActivityRender must not be empty
+
+      val activityRender = maybeActivityRender.get
+      activityRender.activity.id must be(activityId)
+      activityRender.provider.displayName must not be empty
+    }
+
+    "retrieve type" in transaction { implicit c =>
+      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      deleteFixtureType.execute()
+      insertFixtureType.execute()
+
+      val maybeActivityRender = activityDao.getActivityRenderById(activityId)
+      maybeActivityRender must not be empty
+
+      val activityRender = maybeActivityRender.get
+      activityRender.activity.id must be(activityId)
+      activityRender.`type`.displayName must not be empty
     }
   }
 }

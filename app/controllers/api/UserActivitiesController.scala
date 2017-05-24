@@ -1,19 +1,30 @@
 package controllers.api
 
-import javax.inject.{Named, Singleton}
+import javax.inject.Singleton
 
 import com.google.inject.Inject
 import controllers.BaseController
 import models.API.Error
-import models.{API, DateFormats}
+import models._
 import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
-import services.messaging.{APNSOutputService, MobileOutputService}
+import services.messaging.MobileOutputService
 import services.{ActivityService, SecurityService}
 import system.ThreadPools.mobile
+import DateFormats.isoDateReads
 
 import scala.concurrent.Future
+
+case class SaveMuteRequest(
+  expiresAt: Option[DateTime],
+  activityType: Option[String],
+  providerId: Option[String],
+  tags: Seq[ActivityTag]
+)
+
+object SaveMuteRequest {
+  implicit val format: OFormat[SaveMuteRequest] = Json.format[SaveMuteRequest]
+}
 
 @Singleton
 class UserActivitiesController @Inject()(
@@ -64,6 +75,42 @@ class UserActivitiesController @Inject()(
           .get // APIAction - must be logged in
       })
       .recoverTotal(e => BadRequest(Json.toJson(API.Failure[JsObject]("error", API.Error.fromJsError(e)))))
+  }
+
+  def listMutes = RequiredUserAction { request =>
+    request.context.user.map { user =>
+      Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
+        "activityMutes" -> activityService.getActivityMutesForRecipient(user.usercode)
+      ))))
+    }.get // RequiredUserAction
+  }
+
+  def saveMute = RequiredUserAction { request =>
+    request.context.user.map { user =>
+      request.body.asJson.map { body =>
+        body.validate[SaveMuteRequest] match {
+          case JsSuccess(data, _) =>
+            activityService.save(ActivityMuteSave.fromRequest(data, user.usercode))
+            Ok(Json.toJson(API.Success("ok", "saved")))
+          case error: JsError =>
+            BadRequest(Json.toJson(API.Failure[JsObject]("error", API.Error.fromJsError(error))))
+        }
+      }.getOrElse(BadRequest(Json.toJson(API.Failure[JsObject]("bad request", Seq(API.Error("invalid-body", "Body must be JSON-formatted SaveMuteRequest"))))))
+    }.get // RequiredUserAction
+  }
+
+  def removeMute(id: String) = RequiredUserAction { implicit request =>
+    request.context.user.map { user =>
+      activityService.expireActivityMute(user.usercode, id).fold(
+        errors => BadRequest(Json.toJson(
+          API.Failure[JsObject]("error", errors.map(error => API.Error(error.getClass.getSimpleName, error.message)))
+        )),
+        id => {
+          auditLog('RemoveMute, 'id -> id)
+          Ok(Json.toJson(API.Success("ok", "removed")))
+        }
+      )
+    }.get // RequiredUserAction
   }
 
   private def apiFailure(id: String, message: String) = API.Failure[JsObject](id, Seq(Error(id, message)))

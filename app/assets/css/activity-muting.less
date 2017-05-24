@@ -1,0 +1,28 @@
+.activity-muting {
+  &__backdrop:extend(.modal-backdrop all) {
+    z-index: 1;
+  }
+
+  &__modal:extend(.modal all) {
+    display: block;
+    top: 6vh;
+  }
+
+  &__modal_body:extend(.modal-body all) {
+    height: ~"calc(100vh - 17em)";
+    overflow-y: auto;
+  }
+
+  &__modal_dialog:extend(.modal-dialog all) {
+    overflow-y: initial
+  }
+
+  &__modal_footer:extend(.modal-footer all) {
+
+  }
+
+  &__modal_content:extend(.modal-content all) {
+
+  }
+
+}

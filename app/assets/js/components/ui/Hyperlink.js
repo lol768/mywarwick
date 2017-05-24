@@ -10,7 +10,7 @@ const Hyperlink = (props) => {
   const el = React.isValidElement(child) ? child : <span>{ child }</span>;
   return props.href ?
     <a href={ props.href } target="_blank" {...props}>{ child }</a>
-    : el;
+    : <span>{ el }</span>;
 };
 
 export default Hyperlink;

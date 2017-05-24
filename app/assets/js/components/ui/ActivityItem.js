@@ -14,6 +14,11 @@ const ActivityItem = (props) => {
 
   return (
     <div className={ classNames }>
+      { (props.mutable) ?
+        <div className="muting" onClick={ props.onMuting }>
+          <i className="fa fa-chevron-down"></i>
+        </div> : null
+      }
       <Hyperlink href={ props.url }>
         <div className="media">
           <div className="media-left">
@@ -38,6 +43,7 @@ export default ActivityItem;
 ActivityItem.displayName = 'ActivityItem';
 ActivityItem.propTypes = {
   provider: PropTypes.string.isRequired,
+  providerDisplayName: PropTypes.string,
   title: PropTypes.string.isRequired,
   text: PropTypes.string,
   date: PropTypes.string.isRequired,
@@ -48,5 +54,7 @@ ActivityItem.propTypes = {
     colour: React.PropTypes.string,
   }),
   grouped: PropTypes.bool,
+  mutable: PropTypes.bool,
+  onMuting: PropTypes.func,
 };
 

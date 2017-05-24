@@ -12,6 +12,8 @@ import * as notifications from '../../state/notifications';
 import ScrollRestore from '../ui/ScrollRestore';
 import { Routes } from '../AppRoot';
 import HideableView from './HideableView';
+import ActivityMutingView from './ActivityMutingView';
+
 
 const SOME_MORE = 20;
 
@@ -42,10 +44,12 @@ class NotificationsView extends HideableView {
 
     this.state = {
       browserPushDisabled: 'Notification' in window && Notification.permission === 'denied',
+      mutingActivity: null,
     };
 
     this.loadMore = this.loadMore.bind(this);
     this.beginMarkReadTimeout = this.beginMarkReadTimeout.bind(this);
+    this.onMutingDismiss = this.onMutingDismiss.bind(this);
   }
 
   componentWillShow() {
@@ -73,6 +77,25 @@ class NotificationsView extends HideableView {
     document.removeEventListener('visibilitychange', this.beginMarkReadTimeout);
     window.removeEventListener('focus', this.beginMarkReadTimeout);
     window.removeEventListener('blur', this.beginMarkReadTimeout);
+  }
+
+  onMuting(activity) {
+    this.setState({
+      mutingActivity: activity,
+    });
+  }
+
+  onMutingDismiss() {
+    this.setState({
+      mutingActivity: null,
+    });
+  }
+
+  onMutingSave(activity) {
+    return (formValues) => {
+      this.props.dispatch(notifications.saveActivityMute(activity, formValues));
+      this.onMutingDismiss();
+    };
   }
 
   beginMarkReadTimeout() {
@@ -130,6 +153,22 @@ class NotificationsView extends HideableView {
     return groupItemsByDate.groupForItem(item) !== groupItemsByDate.maxGroup;
   }
 
+  renderMuting() {
+    if (this.state.mutingActivity) {
+      const activity = this.state.mutingActivity;
+      return (
+        <ActivityMutingView
+          {...activity}
+          onMutingDismiss={ this.onMutingDismiss }
+          onMutingSave={ this.onMutingSave(activity) }
+          activityType={ activity.type }
+          activityTypeDisplayName={ activity.typeDisplayName }
+        />
+      );
+    }
+    return null;
+  }
+
   render() {
     const shouldBeGrouped = this.props.grouped && this.shouldBeGrouped();
     const notificationItems = takeFromStream(this.props.notifications, this.props.numberToShow)
@@ -138,6 +177,8 @@ class NotificationsView extends HideableView {
           key={ n.id }
           grouped={ shouldBeGrouped }
           unread={ this.isUnread(n) }
+          mutable
+          onMuting={ () => this.onMuting(n) }
           {...n}
         />
       );
@@ -149,6 +190,9 @@ class NotificationsView extends HideableView {
 
     return (
       <div>
+        {
+          this.renderMuting()
+        }
         { browserPushDisabled ?
           <div className="permission-warning">
             You have blocked My Warwick from showing system notifications. You'll need to open

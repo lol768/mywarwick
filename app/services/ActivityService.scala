@@ -45,6 +45,12 @@ trait ActivityService {
     now: DateTime = DateTime.now
   ): Seq[ActivityMute]
 
+  def getActivityMutesForRecipient(recipient: Usercode, now: DateTime = DateTime.now): Seq[ActivityMuteRender]
+
+  def save(activityMute: ActivityMuteSave): String
+
+  def expireActivityMute(recipient: Usercode, id: String): Either[Seq[ActivityError], ActivityMuteRender]
+
 }
 
 class ActivityServiceImpl @Inject()(
@@ -188,6 +194,22 @@ class ActivityServiceImpl @Inject()(
     mutes.filterNot(_.expiresAt.exists(_.isBefore(now))).filter(_.matchesTags(tags))
   }
 
+  override def getActivityMutesForRecipient(recipient: Usercode, now: DateTime = DateTime.now): Seq[ActivityMuteRender] = {
+    val mutes = db.withConnection(implicit c => muteDao.mutesForRecipient(recipient))
+    mutes.filterNot(_.expiresAt.exists(_.isBefore(now)))
+  }
+
+  override def save(activityMute: ActivityMuteSave): String = {
+    db.withConnection(implicit c => muteDao.save(activityMute))
+  }
+
+  override def expireActivityMute(recipient: Usercode, id: String): Either[Seq[ActivityError], ActivityMuteRender] = {
+    db.withConnection(implicit c => muteDao.mutesForRecipient(recipient)).find(_.id == id).map { mute =>
+      db.withTransaction(implicit c => muteDao.expire(mute))
+      Right(mute)
+    }.getOrElse(Left(Seq(MuteDoesNotExist)))
+  }
+
   private def schedulePublishJob(activityId: String, audienceId: String, publishDate: DateTime): Unit = {
     val key = new JobKey(activityId, PublishActivityJob.name)
 
@@ -253,6 +275,10 @@ object ActivityError {
 
   object DoesNotExist extends ActivityError {
     val message = "This activity does not exist"
+  }
+
+  object MuteDoesNotExist extends ActivityError {
+    val message = "This activity mute does not exist"
   }
 
 }

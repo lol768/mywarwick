@@ -16,7 +16,7 @@ describe('TextTile', () => {
   it('initially renders the first item', () => {
     const html = shallowRender(<TextTile zoomed={ false } { ...props } />);
     const [ item ] = html.props.children;
-    const hyperlink = shallowRender(item);
+    const hyperlink = shallowRender(item).props.children;
     hyperlink.type.should.equal('div');
     hyperlink.props.className.should.equal('tile__item');
     const [callout, text] = hyperlink.props.children;
