@@ -4,14 +4,13 @@ import java.sql.Connection
 
 import anorm.SqlParser._
 import anorm._
-import helpers.{Fixtures, OneStartAppPerSuite}
+import helpers.{BaseSpec, Fixtures, OneStartAppPerSuite}
 import models.Audience
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.quartz.{JobDataMap, JobDetail, JobExecutionContext}
 import org.scalatest.mockito.MockitoSugar
-import helpers.BaseSpec
 import play.api.db.Database
 import services._
 import services.dao._
@@ -30,6 +29,8 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
   val jobDetail = mock[JobDetail]
   val jobDataMap = mock[JobDataMap]
 
+  val cache = new MockCacheApi
+
   when(context.getJobDetail).thenReturn(jobDetail)
   when(jobDetail.getJobDataMap).thenReturn(jobDataMap)
 
@@ -40,7 +41,7 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
     val newsImageDao = mock[NewsImageDao]
     val userInitialisationService = mock[UserInitialisationService]
     val userLookupService = mock[UserLookupService]
-    val newsService = new AnormNewsService(db, newsDao, audienceService, newsCategoryDao, newsImageDao, audienceDao, userInitialisationService, scheduler, userLookupService)
+    val newsService = new AnormNewsService(db, newsDao, audienceService, newsCategoryDao, newsImageDao, audienceDao, userInitialisationService, scheduler, userLookupService, cache)
 
     val publishNewsItemJob = new PublishNewsItemJob(audienceService, newsService, scheduler)
 
