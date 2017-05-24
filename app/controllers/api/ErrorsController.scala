@@ -1,6 +1,6 @@
 package controllers.api
 
-import collection.JavaConversions._
+import collection.JavaConverters._
 import javax.inject.Singleton
 
 import controllers.BaseController
@@ -16,7 +16,7 @@ class ErrorsController extends BaseController {
 
   def js = Action { implicit request =>
     request.body.asJson.flatMap(_.validate[Seq[Map[String, JsValue]]].asOpt).toSeq.flatten.foreach { allErrors =>
-      val errors = mapAsJavaMap(allErrors.filterKeys(key => key == "stack" || key == "message")
+      val errors = allErrors.filterKeys(key => key == "stack" || key == "message")
         .map { case (key, value) =>
           key match {
             case "stack" =>
@@ -24,7 +24,7 @@ class ErrorsController extends BaseController {
             case "message" =>
               "message" -> value.toString
           }
-        }).asInstanceOf[java.util.Map[java.lang.String, java.lang.String]]
+        }.asJava
       slf4jLogger.info("{}", StructuredArguments.entries(errors))
     }
     Ok("")
