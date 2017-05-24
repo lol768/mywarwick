@@ -16,17 +16,11 @@ class ErrorsController extends BaseController {
 
   def js = Action { implicit request =>
     request.body.asJson.flatMap(_.validate[Seq[Map[String, JsValue]]].asOpt).toSeq.flatten.foreach { allErrors =>
-      val errors = allErrors.filterKeys(key => key == "stack" || key == "message")
-        .map { case (key, value) =>
-          key match {
-            case "stack" =>
-              "stack_trace" -> value.toString
-            case "message" =>
-              "message" -> value.toString
-          }
-        }.asJava
-      slf4jLogger.info("{}", StructuredArguments.entries(errors))
+      val message = allErrors.getOrElse("message", "-").toString()
+      val stacktrce = StructuredArguments.keyValue("stack_trace", allErrors.getOrElse("stack", "-").toString())
+      slf4jLogger.info(message, stacktrce)
     }
     Ok("")
   }
 }
+
