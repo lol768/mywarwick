@@ -1,5 +1,6 @@
 package services
 
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
@@ -11,6 +12,7 @@ import org.quartz.JobBuilder.newJob
 import org.quartz.SimpleScheduleBuilder.simpleSchedule
 import org.quartz.TriggerBuilder.newTrigger
 import org.quartz._
+import play.api.cache.CacheApi
 import play.api.db.Database
 import services.dao.{AudienceDao, NewsCategoryDao, NewsDao, NewsImageDao}
 import services.job.PublishNewsItemJob
@@ -18,6 +20,7 @@ import system.ThreadPools.web
 import warwick.sso.{GroupName, UserLookupService, Usercode}
 
 import scala.concurrent.Future
+import scala.concurrent.duration.Duration
 
 @ImplementedBy(classOf[AnormNewsService])
 trait NewsService {
@@ -63,7 +66,8 @@ class AnormNewsService @Inject()(
   audienceDao: AudienceDao,
   userInitialisationService: UserInitialisationService,
   scheduler: SchedulerService,
-  userLookupService: UserLookupService
+  userLookupService: UserLookupService,
+  cache: CacheApi
 ) extends NewsService {
 
   override def delete(newsId: String) = db.withTransaction { implicit c =>
@@ -74,8 +78,10 @@ class AnormNewsService @Inject()(
   }
 
   override def getNewsItemsMatchingAudience(webGroup: Option[GroupName], departmentCode: Option[String], departmentSubset: Option[DepartmentSubset], publisherId: Option[String], limit: Int): Seq[NewsItemRender] =
-    db.withConnection { implicit c =>
-      dao.getNewsByIds(dao.getNewsItemsMatchingAudience(webGroup, departmentCode, departmentSubset, publisherId, limit))
+    cache.getOrElse(s"audienceNews:$webGroup:$departmentCode:$departmentSubset:$publisherId:$limit", Duration(10, TimeUnit.MINUTES)) {
+      db.withConnection(implicit c =>
+        dao.getNewsByIds(dao.getNewsItemsMatchingAudience(webGroup, departmentCode, departmentSubset, publisherId, limit))
+      )
     }
 
   override def getNewsByPublisher(publisherId: String, limit: Int, offset: Int): Seq[NewsItemRender] =

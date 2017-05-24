@@ -73,7 +73,9 @@ class ReadNewsController @Inject()(
       val newsItems = news.getNewsItemsMatchingAudience(webGroup, deptCode, userType, publisherId, limit = 20)
       val feed = buildFeed("News", newsItems)
 
-      Ok(writeFeedString(feed, feedFormat)).as(contentType)
+      Ok(writeFeedString(feed, feedFormat))
+        .as(contentType)
+        .withHeaders(CACHE_CONTROL -> "public, max-age=600")
     }
   }
 

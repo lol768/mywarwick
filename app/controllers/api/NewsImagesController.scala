@@ -51,7 +51,6 @@ class NewsImagesController @Inject()(
             }
           }
 
-          cache.set(cacheKey, byteArray)
           byteArray
         }
         .map { byteArray =>
