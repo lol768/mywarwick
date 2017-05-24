@@ -25,7 +25,7 @@ class ErrorsController extends BaseController {
               "message" -> value.toString
           }
         }).asInstanceOf[java.util.Map[java.lang.String, java.lang.String]]
-      slf4jLogger.info("{}", StructuredArguments.entries(errors));
+      slf4jLogger.info("{}", StructuredArguments.entries(errors))
     }
     Ok("")
   }
