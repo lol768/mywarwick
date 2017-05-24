@@ -16,8 +16,8 @@ class ErrorsController extends BaseController {
 
   def js = Action { implicit request =>
     request.body.asJson.flatMap(_.validate[Seq[Map[String, JsValue]]].asOpt).toSeq.flatten.foreach { error =>
-      val message = error.getOrElse("message", "-").toString()
-      val stacktrace = StructuredArguments.keyValue("stack_trace", error.getOrElse("stack", "-").toString())
+      val message = error.get("message").map(_.as[String]).getOrElse("-")
+      val stacktrace = StructuredArguments.keyValue("stack_trace", error.get("stack").map(_.as[String]).getOrElse("-"))
       slf4jLogger.info(message, stacktrace)
     }
     Ok("")
