@@ -13,13 +13,24 @@ export default class ListTile extends TileContent {
     return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
   }
 
+  getNumberOfItemsToDisplay() {
+    switch (this.props.size) {
+      case TILE_SIZES.SMALL:
+      case TILE_SIZES.WIDE:
+        return 3;
+      case TILE_SIZES.LARGE:
+        return 4;
+      case TILE_SIZES.TALL:
+      default:
+        return 8;
+    }
+  }
+
   getSmallBody() {
     const { content } = this.props;
 
-    // only show the first maxItemsToDisplay items (defaults to 3) if not zoomed
-    const maxItemsToDisplay = this.props.maxItemsToDisplay ? this.props.maxItemsToDisplay : 3;
     const itemsToDisplay = this.props.zoomed ?
-      content.items : _.take(content.items, maxItemsToDisplay);
+      content.items : _.take(content.items, this.getNumberOfItemsToDisplay());
     return (<ul className="list-unstyled tile-list-group">
       {itemsToDisplay.map(item =>
         <ListTileItem key={item.id} onClickLink={this.onClickLink} {...item} />

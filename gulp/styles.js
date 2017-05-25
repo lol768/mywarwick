@@ -32,7 +32,7 @@ function exportAssetModule(name, taskName, baseDir, extraExtensions) {
 
 exportAssetModule('id7', 'id7-static', 'dist');
 
-gulp.task('styles', () => {
+gulp.task('styles', cb => {
   const styleJob = gulp.src(paths.styleIn)
     .pipe(sourcemaps.init())
     .pipe(less({
@@ -43,6 +43,7 @@ gulp.task('styles', () => {
           path.join(__dirname, '..', 'node_modules', modulePath)
         )),
     }))
+    .on('error', err => cb(err.message))
     .pipe(postcss([
       autoprefix({ browsers: 'last 1 version' }),
     ]))

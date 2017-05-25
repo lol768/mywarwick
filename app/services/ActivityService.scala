@@ -163,10 +163,10 @@ class ActivityServiceImpl @Inject()(
   }
 
   override def getNotificationsForUser(user: User, before: Option[String], since: Option[String], limit: Int): Seq[ActivityRender] =
-    db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, notifications = Some(true), before, since, limit))
+    db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, notifications = true, before, since, limit))
 
   override def getActivitiesForUser(user: User, before: Option[String], since: Option[String], limit: Int): Seq[ActivityRender] =
-    db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, notifications = Some(false), before, since, limit))
+    db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, notifications = false, before, since, limit))
 
   override def getLastReadDate(user: User): Option[DateTime] =
     db.withConnection(implicit c => dao.getLastReadDate(user.usercode.string))
