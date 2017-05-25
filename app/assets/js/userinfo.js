@@ -1,19 +1,14 @@
-import * as serverpipe from './serverpipe';
 import store from './store';
 import * as user from './state/user';
 import * as analytics from './analytics';
 
-// kicks off the whole data flow - when user is received we fetch tile data
-export function fetchUserInfo() {
-  return serverpipe.fetchWithCredentials('/user/info');
-}
+import { fetchUserInfo, handleRedirects } from './userinfo-base';
+export { fetchUserInfo } from './userinfo-base';
 
 export function receiveUserInfo(response) {
-  return response.json()
-    .then(data => {
-      if (data.refresh) {
-        window.location = user.rewriteRefreshUrl(data.refresh, window.location.href);
-      } else {
+  return handleRedirects(response)
+    .then(([data, handled]) => {
+      if (!handled) {
         store.dispatch(user.receiveSSOLinks(data.links));
 
         const analyticsData = data.user.analytics;

@@ -135,3 +135,19 @@ object IncomingActivityData {
   import DateFormats.isoDateReads
   implicit val readsIncomingActivityData = Json.reads[IncomingActivityData]
 }
+
+case class ActivityMute(
+  usercode: Usercode,
+  createdAt: DateTime,
+  expiresAt: Option[DateTime],
+  activityType: Option[String],
+  providerId: Option[String],
+  tags: Seq[ActivityTag]
+) {
+  def matchesTags(matchTags: Seq[ActivityTag]): Boolean = {
+    tags.isEmpty || matchTags.isEmpty ||
+      tags.forall(tag => matchTags.exists(matchTag =>
+        matchTag.name == tag.name && matchTag.value.internalValue == tag.value.internalValue
+      ))
+  }
+}

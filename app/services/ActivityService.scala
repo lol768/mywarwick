@@ -38,6 +38,13 @@ trait ActivityService {
 
   def getActivityIcon(providerId: String): Option[ActivityIcon]
 
+  def getActivityMutes(
+    activity: Activity,
+    tags: Seq[ActivityTag],
+    recipients: Set[Usercode],
+    now: DateTime = DateTime.now
+  ): Seq[ActivityMute]
+
 }
 
 class ActivityServiceImpl @Inject()(
@@ -47,16 +54,17 @@ class ActivityServiceImpl @Inject()(
   tagDao: ActivityTagDao,
   audienceDao: AudienceDao,
   recipientDao: ActivityRecipientDao,
+  muteDao: ActivityMuteDao,
   scheduler: SchedulerService
 ) extends ActivityService {
 
   override def getActivityById(id: String): Option[Activity] =
     db.withConnection(implicit c => dao.getActivityById(id))
 
-  override def getActivityRenderById(id: String) =
+  override def getActivityRenderById(id: String): Option[ActivityRender] =
     db.withConnection(implicit c => dao.getActivityRenderById(id))
 
-  override def update(activityId: String, activity: ActivitySave, audience: Audience) = {
+  override def update(activityId: String, activity: ActivitySave, audience: Audience): Either[Seq[ActivityError], String] = {
     getActivityById(activityId).map { existingActivity =>
       if (existingActivity.publishedAt.isBeforeNow) {
         Left(Seq(AlreadyPublished))
@@ -84,7 +92,7 @@ class ActivityServiceImpl @Inject()(
     }
   }
 
-  override def delete(id: String) = {
+  override def delete(id: String): Either[Seq[ActivityError], Unit] = {
     getActivityById(id).map { existingActivity =>
       if (existingActivity.publishedAt.isBeforeNow) {
         Left(Seq(AlreadyPublished))
@@ -149,10 +157,10 @@ class ActivityServiceImpl @Inject()(
   }
 
   override def getNotificationsForUser(user: User, before: Option[String], since: Option[String], limit: Int): Seq[ActivityRender] =
-    db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, notifications = Some(true), before, since, limit))
+    db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, notifications = true, before, since, limit))
 
   override def getActivitiesForUser(user: User, before: Option[String], since: Option[String], limit: Int): Seq[ActivityRender] =
-    db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, notifications = Some(false), before, since, limit))
+    db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, notifications = false, before, since, limit))
 
   override def getLastReadDate(user: User): Option[DateTime] =
     db.withConnection(implicit c => dao.getLastReadDate(user.usercode.string))
@@ -160,14 +168,25 @@ class ActivityServiceImpl @Inject()(
   override def setLastReadDate(user: User, dateTime: DateTime): Boolean =
     db.withConnection(implicit c => dao.saveLastReadDate(user.usercode.string, dateTime))
 
-  override def getFutureActivitiesByPublisherId(publisherId: String, limit: Int) =
+  override def getFutureActivitiesByPublisherId(publisherId: String, limit: Int): Seq[ActivityRender] =
     db.withConnection(implicit c => dao.getFutureActivitiesByPublisherId(publisherId, limit))
 
-  override def getPastActivitiesByPublisherId(publisherId: String, limit: Int) =
+  override def getPastActivitiesByPublisherId(publisherId: String, limit: Int): Seq[ActivityRender] =
     db.withConnection(implicit c => dao.getPastActivitiesByPublisherId(publisherId, limit))
 
   override def getActivityIcon(providerId: String): Option[ActivityIcon] =
     db.withConnection(implicit c => dao.getActivityIcon(providerId))
+
+  override def getActivityMutes(
+    activity: Activity,
+    tags: Seq[ActivityTag],
+    recipients: Set[Usercode],
+    now: DateTime = DateTime.now
+  ): Seq[ActivityMute] = {
+    val recipientsToSend: Set[Usercode] = if (recipients.size < 100) recipients else Set.empty
+    val mutes = db.withConnection(implicit c => muteDao.mutesForActivity(activity, recipientsToSend))
+    mutes.filterNot(_.expiresAt.exists(_.isBefore(now))).filter(_.matchesTags(tags))
+  }
 
   private def schedulePublishJob(activityId: String, audienceId: String, publishDate: DateTime): Unit = {
     val key = new JobKey(activityId, PublishActivityJob.name)

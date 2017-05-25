@@ -93,11 +93,24 @@ export default class TextTile extends TileContent {
     );
   }
 
+  getNumberOfItemsToDisplay() {
+    switch (this.props.size) {
+      case TILE_SIZES.SMALL:
+      case TILE_SIZES.WIDE:
+        return 2;
+      case TILE_SIZES.LARGE:
+      case TILE_SIZES.TALL:
+      default:
+        // Tall tile renders using getZoomedBody, which always renders everything
+        return 4;
+    }
+  }
+
   getLargeBody() {
     const { content } = this.props;
 
     const itemsToDisplay = this.props.zoomed ?
-      content.items : _.take(content.items, this.props.maxItemsToDisplay || 4);
+      content.items : _.take(content.items, this.getNumberOfItemsToDisplay());
 
     return (
       <div>
