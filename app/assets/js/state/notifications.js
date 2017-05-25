@@ -10,9 +10,11 @@ import qs from 'qs';
 export const NOTIFICATION_FETCHING = 'notifications.fetching';
 export const NOTIFICATION_RECEIVE = 'notifications.receive';
 export const NOTIFICATION_FETCH = 'notifications.fetch';
+export const NOTIFICATION_NUMBER_TO_SHOW = 'notifications.numberToShow';
 export const ACTIVITY_FETCHING = 'activities.fetching';
 export const ACTIVITY_RECEIVE = 'activities.receive';
 export const ACTIVITY_FETCH = 'activities.fetch';
+export const ACTIVITY_NUMBER_TO_SHOW = 'activity.numberToShow';
 
 export const fetchingActivities = createAction(ACTIVITY_FETCHING);
 export const receivedActivity = createAction(ACTIVITY_RECEIVE);
@@ -153,6 +155,14 @@ export function fetchMoreActivities() {
   };
 }
 
+export function showMoreNotifications(numberToShow) {
+  return (dispatch) => dispatch(createAction(NOTIFICATION_NUMBER_TO_SHOW)({ numberToShow }));
+}
+
+export function showMoreActivities(numberToShow) {
+  return (dispatch) => dispatch(createAction(ACTIVITY_NUMBER_TO_SHOW)({ numberToShow }));
+}
+
 const partitionByYearAndMonth = (n) => n.date.toString().substr(0, 7);
 
 export function mergeNotifications(stream, newNotifications) {
@@ -164,6 +174,7 @@ const initialState = {
   fetching: false,
   olderItemsOnServer: true,
   lastItemFetched: null,
+  numberToShow: 20,
 };
 
 export function notificationsReducer(state = initialState, action) {
@@ -192,6 +203,11 @@ export function notificationsReducer(state = initialState, action) {
         lastItemFetched: lastItem && lastItem.id,
       };
     }
+    case NOTIFICATION_NUMBER_TO_SHOW:
+      return {
+        ...state,
+        numberToShow: action.payload.numberToShow,
+      };
     default:
       return state;
   }
@@ -223,6 +239,11 @@ export function activitiesReducer(state = initialState, action) {
         lastItemFetched: lastItem && lastItem.id,
       };
     }
+    case ACTIVITY_NUMBER_TO_SHOW:
+      return {
+        ...state,
+        numberToShow: action.payload.numberToShow,
+      };
     default:
       return state;
   }

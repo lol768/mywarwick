@@ -1,5 +1,4 @@
 import log from 'loglevel';
-import { browserHistory } from 'react-router';
 import $ from 'jquery';
 import { Routes } from '../components/AppRoot';
 import { goBack, replace } from 'react-router-redux';
@@ -94,35 +93,24 @@ export function updateUIContext() {
   };
 }
 
-export function scrollTopOnTabChange() {
-  const scrollTops = {};
+const scrollRestoreLookup = {};
 
+export function detachScrollRestore(key) {
+  return $(window).off(`scroll.scrollRestore.${key}`);
+}
+
+export function attachScrollRestore(key) {
   if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
   }
 
-  // Store / and /edit in the same place
-  function translatedPath(originalPath) {
-    return ((originalPath === `/${Routes.EDIT}`) ? '/' : originalPath);
-  }
+  const scrollTop = scrollRestoreLookup[key] || 0;
+  log.debug(`key: ${key} => attempt scrollTop: ${scrollTop}`);
+  window.scrollTo(0, scrollTop);
+  log.debug(`key: ${key} => actual scrollTop: ${document.body.scrollTop}`);
 
-  function isTopLevelUrl(path) {
-    return (path.match(/\//g) || []).length === 1;
-  }
-
-  browserHistory.listen(location => {
-    const path = translatedPath(location.pathname);
-    if (isTopLevelUrl(path)) {
-      const scrollTop = scrollTops[path] || 0;
-      log.debug(`path: ${path} => scrollTop: ${scrollTop}`);
-      window.scrollTo(0, scrollTop);
-    } else {
-      window.scrollTo(0, 0);
-    }
-  });
-
-  $(window).on('scroll', _.throttle(() => {
-    scrollTops[translatedPath(window.location.pathname)] = $(window).scrollTop();
+  detachScrollRestore(key).on(`scroll.scrollRestore.${key}`, _.throttle(() => {
+    scrollRestoreLookup[key] = $(window).scrollTop();
   }, 250));
 }
 
@@ -133,7 +121,7 @@ export function scrollTopOnTabChange() {
  * To sort out the history we need to go back _then_ replace, however react-router-redux gets into
  * a race condition if you try and dispatch both at the same time.
  * Therefore put the path we actually want to go to in the store separately, then just go back here.
- * The MeView then handles sending you on to where you wanted.
+ * The AppRoot then handles sending you on to where you wanted.
  */
 export function navRequest(path, dispatch) {
   if (path === window.location.pathname) {

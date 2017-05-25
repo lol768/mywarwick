@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import Bundle from '../system/Bundle';
 import once from 'lodash-es/once';
+import ScrollRestore from '../ui/ScrollRestore';
+import { Routes } from '../AppRoot';
 
 const Loading = () => <div />;
 
@@ -19,11 +21,18 @@ function renderSearch(mod, SearchComponent) {
 }
 
 export default class SearchView extends React.Component {
+
+  static propTypes = {
+    hiddenView: PropTypes.bool.isRequired,
+  };
+
   render() {
     return (
-      <Bundle load={importSearch} initialise={initialiseSearch}>
-        { renderSearch }
-      </Bundle>
+      <ScrollRestore url={`/${Routes.SEARCH}`} hiddenView={ this.props.hiddenView }>
+        <Bundle load={importSearch} initialise={initialiseSearch}>
+          { renderSearch }
+        </Bundle>
+      </ScrollRestore>
     );
   }
 }

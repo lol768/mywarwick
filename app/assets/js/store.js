@@ -2,10 +2,10 @@ import log from 'loglevel';
 
 import thunk from 'redux-thunk';
 import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
-import { browserHistory } from 'react-router';
 import { routerMiddleware, routerReducer } from 'react-router-redux';
 import { unstable_batchedUpdates } from 'react-dom'; // eslint-disable-line camelcase
 import * as allReducers from './state/all-reducers';
+import createHistory from 'history/lib/createBrowserHistory';
 
 // "Strategy for avoiding cascading renders": https://github.com/reactjs/redux/issues/125
 // A plugin, broken in React 0.14 https://github.com/acdlite/redux-batched-updates
@@ -30,6 +30,8 @@ const logger = (/* store */) => next => action => {
   }
   return next(action);
 };
+
+export const browserHistory = createHistory();
 
 export default createStore(
   reducer,
