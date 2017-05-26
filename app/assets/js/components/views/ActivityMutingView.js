@@ -41,7 +41,7 @@ export default class ActivityMutingView extends React.Component {
   handleCheckboxChange() {
     this.setState({
       someChecked: $(`#muting-${this.props.id}-form`)
-        .find('input[type="checkbox"]:checked').length > 0
+        .find('input[type="checkbox"]:checked').length > 0,
     });
   }
 
