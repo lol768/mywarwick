@@ -83,6 +83,9 @@ class ActivityServiceImpl @Inject()(
 
           dao.update(activityId, activity, audienceId)
 
+          // Might be more efficient to store job with replace=true
+          // instead of deleting separately.
+          unschedulePublishJob(activityId)
           schedulePublishJob(activityId, audienceId, activity.publishedAt.getOrElse(DateTime.now))
         }
         Right(activityId)
@@ -188,10 +191,11 @@ class ActivityServiceImpl @Inject()(
     mutes.filterNot(_.expiresAt.exists(_.isBefore(now))).filter(_.matchesTags(tags))
   }
 
-  private def schedulePublishJob(activityId: String, audienceId: String, publishDate: DateTime): Unit = {
-    val key = new JobKey(activityId, PublishActivityJob.name)
+  private def publishJobKey(activityId: String): JobKey =
+    new JobKey(activityId, PublishActivityJob.name)
 
-    scheduler.deleteJob(key)
+  private def schedulePublishJob(activityId: String, audienceId: String, publishDate: DateTime): Unit = {
+    val key = publishJobKey(activityId)
 
     val job = JobBuilder.newJob(classOf[PublishActivityJob])
       .withIdentity(key)
@@ -212,7 +216,7 @@ class ActivityServiceImpl @Inject()(
   }
 
   private def unschedulePublishJob(activityId: String): Unit = {
-    scheduler.deleteJob(new JobKey(activityId, PublishActivityJob.name))
+    scheduler.deleteJob(publishJobKey(activityId))
   }
 
 }
