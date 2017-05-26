@@ -233,6 +233,25 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       }
     }
 
+    "require option when saving mute" in {
+      new Scope {
+        private val mute = ActivityMuteSave(
+          Usercode("cusfal"),
+          None,
+          None,
+          None,
+          Nil
+        )
+        private val result = service.save(mute)
+        result.isLeft must be (true)
+        result.left.get must have size 1
+        (result.left.get.head match {
+          case MuteNoOptions => true
+          case _ => false
+        }) must be (true)
+      }
+    }
+
     // TODO test when there are activities to replace
 
   }
