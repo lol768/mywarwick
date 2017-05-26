@@ -23,14 +23,25 @@ export default class ActivityMutingView extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      duration: null,
+      someChecked: false,
+    };
     this.handleDurationChange = this.handleDurationChange.bind(this);
+    this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
     this.saveMuting = this.saveMuting.bind(this);
   }
 
   handleDurationChange(event) {
     this.setState({
       duration: event.target.value,
+    });
+  }
+
+  handleCheckboxChange() {
+    this.setState({
+      someChecked: $(`#muting-${this.props.id}-form`)
+        .find('input[type="checkbox"]:checked').length > 0
     });
   }
 
@@ -52,6 +63,7 @@ export default class ActivityMutingView extends React.Component {
                 name="activityType"
                 value={ this.props.activityType }
                 defaultChecked
+                onChange={ this.handleCheckboxChange }
               />
               { this.props.activityTypeDisplayName || this.props.activityType }
             </label>
@@ -63,6 +75,7 @@ export default class ActivityMutingView extends React.Component {
                 name="providerId"
                 value={ this.props.provider }
                 defaultChecked
+                onChange={ this.handleCheckboxChange }
               />
               { this.props.providerDisplayName || this.props.provider }
             </label>
@@ -76,6 +89,7 @@ export default class ActivityMutingView extends React.Component {
                     name={ `tags[${tag.name}]` }
                     value={ tag.value }
                     defaultChecked
+                    onChange={ this.handleCheckboxChange }
                   />
                   { tag.display_value || tag.value }
                 </label>
@@ -133,7 +147,7 @@ export default class ActivityMutingView extends React.Component {
                   type="button"
                   className="btn btn-primary"
                   onClick={ this.saveMuting }
-                  disabled={ !this.state.duration }
+                  disabled={ !this.state.duration || !this.state.someChecked }
                 >
                   Save changes
                 </button>

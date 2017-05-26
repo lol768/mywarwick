@@ -90,8 +90,12 @@ class UserActivitiesController @Inject()(
       request.body.asJson.map { body =>
         body.validate[SaveMuteRequest] match {
           case JsSuccess(data, _) =>
-            activityService.save(ActivityMuteSave.fromRequest(data, user.usercode))
-            Ok(Json.toJson(API.Success("ok", "saved")))
+            activityService.save(ActivityMuteSave.fromRequest(data, user.usercode)).fold(
+              errors => BadRequest(Json.toJson(
+                API.Failure[JsObject]("error", errors.map(error => API.Error(error.getClass.getSimpleName, error.message)))
+              )),
+              _ => Ok(Json.toJson(API.Success("ok", "saved")))
+            )
           case error: JsError =>
             BadRequest(Json.toJson(API.Failure[JsObject]("error", API.Error.fromJsError(error))))
         }

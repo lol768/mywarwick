@@ -47,7 +47,7 @@ trait ActivityService {
 
   def getActivityMutesForRecipient(recipient: Usercode, now: DateTime = DateTime.now): Seq[ActivityMuteRender]
 
-  def save(activityMute: ActivityMuteSave): String
+  def save(activityMute: ActivityMuteSave): Either[Seq[ActivityError], String]
 
   def expireActivityMute(recipient: Usercode, id: String): Either[Seq[ActivityError], ActivityMuteRender]
 
@@ -199,8 +199,12 @@ class ActivityServiceImpl @Inject()(
     mutes.filterNot(_.expiresAt.exists(_.isBefore(now)))
   }
 
-  override def save(activityMute: ActivityMuteSave): String = {
-    db.withConnection(implicit c => muteDao.save(activityMute))
+  override def save(activityMute: ActivityMuteSave): Either[Seq[ActivityError], String] = {
+    if (activityMute.activityType.isEmpty && activityMute.providerId.isEmpty && activityMute.tags.isEmpty) {
+      Left(Seq(MuteNoOptions))
+    } else {
+      Right(db.withConnection(implicit c => muteDao.save(activityMute)))
+    }
   }
 
   override def expireActivityMute(recipient: Usercode, id: String): Either[Seq[ActivityError], ActivityMuteRender] = {
@@ -275,6 +279,10 @@ object ActivityError {
 
   object DoesNotExist extends ActivityError {
     val message = "This activity does not exist"
+  }
+
+  object MuteNoOptions extends ActivityError {
+    val message = "Activity type or provider or at least one tag must be chosen"
   }
 
   object MuteDoesNotExist extends ActivityError {
