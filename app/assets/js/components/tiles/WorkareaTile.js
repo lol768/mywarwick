@@ -26,7 +26,7 @@ export default class WorkareaTile extends TextTile {
         <span className="tile__callout">
           {workarea.availableSeats}/{workarea.totalSeats}
         </span>
-        &nbsp;{workarea.availableSeats === 1 ? 'seat ' : 'seats '}available
+        &nbsp;{workarea.totalSeats === 1 ? 'seat ' : 'seats '}available
       </span>
     );
   }
