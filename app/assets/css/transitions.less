@@ -18,8 +18,7 @@
 
 .text-tile-enter-active {
   transform: translate(0, 0) !important;
-  transition: transform 500ms ease-out;
-  transition-delay: 400ms;
+  transition: transform 500ms ease-in-out;
 }
 
 .text-tile-leave {
@@ -27,8 +26,8 @@
 }
 
 .text-tile-leave-active {
-  transform: translate(130%, 0) !important;
-  transition: transform 500ms ease-in;
+  transform: translate(-130%, 0) !important;
+  transition: transform 500ms ease-in-out;
 }
 
 .grow-shrink-enter, .grow-shrink-appear {
