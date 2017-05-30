@@ -12,6 +12,7 @@ import { createSelector } from 'reselect';
 import { hasAuthoritativeAuthenticatedUser } from './state';
 import { Routes } from './components/AppRoot';
 import { navRequest } from './state/ui';
+import { showFeedbackForm } from './state/device';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -122,6 +123,10 @@ export default function init(opts) {
       search(query) {
         // lazy load the Search module
         import('warwick-search-frontend').then(s => s.submitSearch(query));
+      },
+
+      feedback(detailJson) {
+        showFeedbackForm(JSON.parse(detailJson));
       },
 
       onApplicationDidBecomeActive() {

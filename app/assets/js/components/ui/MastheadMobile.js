@@ -1,8 +1,8 @@
 import React from 'react';
 import UtilityBar from './UtilityBar';
-
 import $ from 'jquery';
 import ReactDOM from 'react-dom';
+import { loadDeviceDetails } from '../../state/device';
 
 export default class MastheadMobile extends React.Component {
 
@@ -24,6 +24,10 @@ export default class MastheadMobile extends React.Component {
         <div className="back-btn" onClick={this.props.onBackClick}>
           <i className="fa fa-chevron-left" />
           Back
+        </div>
+        <div className="feedback-btn" onClick={loadDeviceDetails}>
+          <i className="fa fa-comment-o fa-stack-2x"></i>
+          <strong className="fa-stack-1x fa-stack-text">!</strong>
         </div>
         <div className="masthead-title">
           <span className="light">My</span> Warwick
