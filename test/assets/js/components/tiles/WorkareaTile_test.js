@@ -2,7 +2,7 @@ import WorkareaTile from 'components/tiles/WorkareaTile';
 import { shallow } from 'enzyme';
 
 describe('WorkareaTile', () => {
-  it('should pluralise \"seat\" according to total seats available', () => {
+  it('should pluralise "seat" according to total seats available', () => {
     const props = {
       "content": {
         "href": "http://warwick.ac.uk/",
