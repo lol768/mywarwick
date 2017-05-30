@@ -43,7 +43,7 @@ class WebGroupsController @Inject()(
         case Success(groups) =>
           val allMatches = scope match {
             case AllDepartments => groups
-            case Departments(departments) => groups.filter(_.department.code.exists(departments.contains))
+            case Departments(departments) => groups.filter(_.department.code.flatMap(Option.apply).map(_.toUpperCase).exists(departments.map(_.toUpperCase).contains))
           }
 
           val results = allMatches
