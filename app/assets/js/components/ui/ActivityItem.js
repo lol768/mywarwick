@@ -20,16 +20,18 @@ const ActivityItem = (props) => {
         </div> : null
       }
       <Hyperlink href={ props.url }>
-        <div className="media">
-          <div className="media-left">
-            <AppIcon icon={ props.icon } size="lg" />
-          </div>
-          <div className="media-body">
-            <div className="activity-item__title">{ props.title }</div>
-            <div className="activity-item__text">{ props.text }</div>
+        <div>
+          <div className="media">
+            <div className="media-left">
+              <AppIcon icon={ props.icon } size="lg" />
+            </div>
+            <div className="media-body">
+              <div className="activity-item__title">{ props.title }</div>
+              <div className="activity-item__text">{ props.text }</div>
 
-            <div className="activity-item__date">
-              { dateFormats.forActivity(props.date, props.grouped) }
+              <div className="activity-item__date">
+                { dateFormats.forActivity(props.date, props.grouped) }
+              </div>
             </div>
           </div>
         </div>

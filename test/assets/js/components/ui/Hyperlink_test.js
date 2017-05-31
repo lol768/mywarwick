@@ -4,7 +4,7 @@ describe('Hyperlink', () => {
 
   it('renders plain text if no href', () => {
     const result = shallowRender(<Hyperlink>Wizard News</Hyperlink>);
-    result.should.deep.equal(<span><span>Wizard News</span></span>);
+    result.should.deep.equal(<span>Wizard News</span>);
   });
 
   it('renders a link if href is present', () => {

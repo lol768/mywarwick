@@ -25,7 +25,7 @@ export default class ActivityMutingView extends React.Component {
     super(props);
     this.state = {
       duration: null,
-      someChecked: false,
+      someChecked: true,
     };
     this.handleDurationChange = this.handleDurationChange.bind(this);
     this.handleCheckboxChange = this.handleCheckboxChange.bind(this);

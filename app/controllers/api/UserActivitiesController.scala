@@ -11,8 +11,6 @@ import play.api.libs.json._
 import services.messaging.MobileOutputService
 import services.{ActivityService, SecurityService}
 import system.ThreadPools.mobile
-import DateFormats.isoDateReads
-
 import scala.concurrent.Future
 
 case class SaveMuteRequest(
@@ -23,6 +21,7 @@ case class SaveMuteRequest(
 )
 
 object SaveMuteRequest {
+  import DateFormats.isoDateReads
   implicit val format: OFormat[SaveMuteRequest] = Json.format[SaveMuteRequest]
 }
 
