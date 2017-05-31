@@ -41,22 +41,22 @@ export function updateDeviceWidth() {
 export const updateNotificationPermissions = { type: 'UPDATE_NOTIFICATION_PERMISSIONS' };
 
 const feedbackFormLocation =
-  'http://www2.warwick.ac.uk/services/its/servicessupport/web/mywarwick/feedback';
+  'http://warwick.ac.uk/my/feedback';
+
+export function showFeedbackForm(deviceDetails) {
+  window.location = `${feedbackFormLocation}?${$.param(deviceDetails || {})}`;
+}
 
 export function loadDeviceDetails() {
   if (typeof MyWarwickNative !== 'undefined' && MyWarwickNative.loadDeviceDetails) {
     MyWarwickNative.loadDeviceDetails();
   } else {
     showFeedbackForm({
-      "os": navigator.platform,
-      "model": navigator.userAgent,
-      "screen-width": $(window).width(),
-      "screen-height": $(window).height(),
-      "path": window.location.pathname,
+      os: navigator.platform,
+      model: navigator.userAgent,
+      'screen-width': $(window).width(),
+      'screen-height': $(window).height(),
+      path: window.location.pathname,
     });
   }
-}
-
-export function showFeedbackForm(deviceDetails) {
-  window.location = `${feedbackFormLocation}?${$.param(deviceDetails || {})}`;
 }
