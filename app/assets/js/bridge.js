@@ -12,7 +12,7 @@ import { createSelector } from 'reselect';
 import { hasAuthoritativeAuthenticatedUser } from './state';
 import { Routes } from './components/AppRoot';
 import { navRequest } from './state/ui';
-import { showFeedbackForm } from './state/device';
+import { showFeedbackForm } from './userinfo';
 
 /**
  * Factory method for bridge so you can create an instance

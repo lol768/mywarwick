@@ -2,7 +2,7 @@ import React from 'react';
 import UtilityBar from './UtilityBar';
 import $ from 'jquery';
 import ReactDOM from 'react-dom';
-import { loadDeviceDetails } from '../../state/device';
+import { loadDeviceDetails } from '../../userinfo';
 
 export default class MastheadMobile extends React.Component {
 
