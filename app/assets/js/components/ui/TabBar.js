@@ -31,6 +31,11 @@ export default class TabBar extends Component {
         _.startsWith(currentPath, `/${Routes.EDIT}`)
     )) {
       return true;
+    } else if (
+      item.path === `/${Routes.NOTIFICATIONS}` &&
+        _.startsWith(currentPath, `/${Routes.NOTIFICATIONS}`)
+    ) {
+      return true;
     }
 
     return item.path === currentPath;

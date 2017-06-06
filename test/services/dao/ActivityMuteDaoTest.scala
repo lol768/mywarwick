@@ -1,7 +1,7 @@
 package services.dao
 
 import helpers.{BaseSpec, OneStartAppPerSuite}
-import models.{Activity, ActivityMute, ActivityTag, TagValue}
+import models._
 import org.joda.time.DateTime
 import warwick.sso.Usercode
 
@@ -27,15 +27,15 @@ class ActivityMuteDaoTest extends BaseSpec with OneStartAppPerSuite {
         publisherId = null
       )
 
-      val mute = ActivityMute(
+      val mute = ActivityMuteSave(
         usercode = Usercode("cusfal"),
-        createdAt = null,
         expiresAt = Some(DateTime.now.plusDays(1)),
         activityType = Some(activity.`type`),
         providerId = Some(activity.providerId),
         tags = Seq(
           ActivityTag(
             name = "tagName",
+            displayName = None,
             value = TagValue("tagValue")
           )
         )
@@ -57,9 +57,8 @@ class ActivityMuteDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "allows all optional fields to be empty and returns match" in transaction { implicit c =>
-      val mute = ActivityMute(
+      val mute = ActivityMuteSave(
         usercode = Usercode("cusfal"),
-        createdAt = null,
         expiresAt = None,
         activityType = None,
         providerId = None,
@@ -89,9 +88,8 @@ class ActivityMuteDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "deletes old expired mutes" in transaction { implicit c =>
-      val mute = ActivityMute(
+      val mute = ActivityMuteSave(
         usercode = Usercode("cusfal"),
-        createdAt = null,
         expiresAt = Some(DateTime.now.minusDays(1)),
         activityType = None,
         providerId = None,
@@ -121,18 +119,16 @@ class ActivityMuteDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "matches recipients if specified" in transaction { implicit c =>
-      val mute1 = ActivityMute(
+      val mute1 = ActivityMuteSave(
         usercode = Usercode("cusfal"),
-        createdAt = null,
         expiresAt = Some(DateTime.now.minusDays(1)),
         activityType = None,
         providerId = None,
         tags = Nil
       )
       dao.save(mute1)
-      val mute2 = ActivityMute(
+      val mute2 = ActivityMuteSave(
         usercode = Usercode("cusebr"),
-        createdAt = null,
         expiresAt = Some(DateTime.now.minusDays(1)),
         activityType = None,
         providerId = None,
@@ -159,6 +155,46 @@ class ActivityMuteDaoTest extends BaseSpec with OneStartAppPerSuite {
       dao.mutesForActivity(activity, Set(Usercode("cusfal"), Usercode("cusebr"))) must have length 2
     }
 
+  }
+
+  "expire a mute" in transaction { implicit c =>
+    val activity = Activity(
+      id = null,
+      providerId = "providerId",
+      `type` = "activityType",
+      title = null,
+      text = null,
+      url = null,
+      replacedBy = null,
+      publishedAt = null,
+      createdAt = null,
+      shouldNotify = true,
+      audienceId = null,
+      publisherId = null
+    )
+
+    val mute = ActivityMuteSave(
+      usercode = Usercode("cusfal"),
+      expiresAt = Some(DateTime.now.plusDays(1)),
+      activityType = Some(activity.`type`),
+      providerId = Some(activity.providerId),
+      tags = Seq(
+        ActivityTag(
+          name = "tagName",
+          displayName = None,
+          value = TagValue("tagValue")
+        )
+      )
+    )
+
+    val muteId = dao.save(mute)
+
+    dao.expire(ActivityMuteRender.fromActivityMuteSave(muteId, mute))
+
+    val expiredMute = dao.mutesForRecipient(mute.usercode)
+    expiredMute must have length 1
+    expiredMute.head.usercode.string must equal (mute.usercode.string)
+    expiredMute.head.expiresAt.get.isBeforeNow must be (true)
   }
 
 }

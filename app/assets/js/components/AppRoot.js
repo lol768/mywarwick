@@ -10,12 +10,14 @@ import AppLayout from './AppLayout';
 import * as _ from 'lodash-es';
 import { goBack, replace } from 'react-router-redux';
 import { connect } from 'react-redux';
+import ActivityMutesView from './views/ActivityMutesView';
 
 export const Routes = {
   EDIT: 'edit',
   ADD: 'add',
   TILES: 'tiles',
   NOTIFICATIONS: 'notifications',
+  MUTE: 'mute',
   ACTIVITY: 'activity',
   NEWS: 'news',
   SEARCH: 'search',
@@ -40,6 +42,10 @@ RouteViews[`/${Routes.EDIT}/${Routes.ADD}`] = {
 RouteViews[`/${Routes.NOTIFICATIONS}`] = {
   rendered: false,
   view: NotificationsView,
+};
+RouteViews[`/${Routes.NOTIFICATIONS}/${Routes.MUTE}`] = {
+  rendered: false,
+  view: ActivityMutesView,
 };
 RouteViews[`/${Routes.ACTIVITY}`] = {
   rendered: false,
@@ -71,7 +77,9 @@ class AppRoot extends React.Component {
     this.state = {
       location: window.location,
     };
+  }
 
+  componentDidMount() {
     this.props.history.listen(location => this.setState({ location }));
   }
 
@@ -82,7 +90,10 @@ class AppRoot extends React.Component {
    */
   componentDidUpdate(prevProps, prevState) {
     if (this.props.navRequest && prevState.location.pathname !== this.state.location.pathname) {
-      if (this.state.location.pathname === '/') {
+      if (
+        this.state.location.pathname === '/' ||
+          this.state.location.pathname === `/${Routes.NOTIFICATIONS}`
+      ) {
         const path = this.props.navRequest;
         this.props.dispatch({
           type: 'ui.navRequest',

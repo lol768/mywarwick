@@ -1,5 +1,6 @@
 package models
 
+import controllers.api.SaveMuteRequest
 import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -43,7 +44,9 @@ object ActivityRender {
         "id" -> o.activity.id,
         "notification" -> o.activity.shouldNotify,
         "provider" -> o.activity.providerId,
+        "providerDisplayName" -> o.provider.displayName,
         "type" -> o.activity.`type`,
+        "typeDisplayName" -> o.`type`.displayName,
         "title" -> o.activity.title,
         "text" -> o.activity.text,
         "url" -> o.activity.url,
@@ -62,12 +65,15 @@ object ActivityRender {
 case class ActivityRender(
   activity: Activity,
   icon: Option[ActivityIcon],
-  tags: Seq[ActivityTag]
+  tags: Seq[ActivityTag],
+  provider: ActivityProvider,
+  `type`: ActivityType
 )
 
 object ActivityTag {
   implicit val reads: Reads[ActivityTag] =
     ((__ \ "name").read[String] and
+      (__ \ "display_name").readNullable[String] and
       __.read[TagValue]((
         (__ \ "value").read[String] and
           (__ \ "display_value").readNullable[String]
@@ -77,6 +83,7 @@ object ActivityTag {
   implicit val writes: Writes[ActivityTag] = new Writes[ActivityTag] {
     override def writes(tag: ActivityTag): JsValue = Json.obj(
       "name" -> tag.name,
+      "display_name" -> tag.displayName,
       "value" -> tag.value.internalValue,
       "display_value" -> JsString(tag.value.displayValue.getOrElse(tag.value.internalValue))
     )
@@ -85,10 +92,15 @@ object ActivityTag {
 
 case class ActivityTag(
   name: String,
+  displayName: Option[String],
   value: TagValue
 )
 
 case class TagValue(internalValue: String, displayValue: Option[String] = None)
+
+case class ActivityProvider(id: String, displayName: Option[String] = None)
+
+case class ActivityType(name: String, displayName: Option[String] = None)
 
 case class ActivitySave(
   changedBy: Usercode,
@@ -150,4 +162,79 @@ case class ActivityMute(
         matchTag.name == tag.name && matchTag.value.internalValue == tag.value.internalValue
       ))
   }
+}
+
+object ActivityMute {
+  import DateFormats.isoDateWrites
+
+  implicit val writes: Writes[ActivityMute] = new Writes[ActivityMute] {
+    override def writes(mute: ActivityMute): JsValue = Json.obj(
+      "usercode" -> mute.usercode.string,
+      "createdAt" -> mute.createdAt,
+      "expiresAt" -> mute.expiresAt,
+      "activityType" -> mute.activityType,
+      "providerId" -> mute.providerId,
+      "tags" -> mute.tags
+    )
+  }
+}
+
+case class ActivityMuteRender(
+  id: String,
+  usercode: Usercode,
+  createdAt: DateTime,
+  expiresAt: Option[DateTime],
+  activityType: Option[ActivityType],
+  provider: Option[ActivityProvider],
+  tags: Seq[ActivityTag]
+)
+
+object ActivityMuteRender {
+  import DateFormats.isoDateWrites
+
+  implicit val writes: Writes[ActivityMuteRender] = new Writes[ActivityMuteRender] {
+    override def writes(mute: ActivityMuteRender): JsValue = Json.obj(
+      "id" -> mute.id,
+      "usercode" -> mute.usercode.string,
+      "createdAt" -> mute.createdAt,
+      "expiresAt" -> mute.expiresAt,
+      "activityType" -> mute.activityType.map(activityType => Json.obj(
+        "name" -> activityType.name,
+        "displayName" -> activityType.displayName
+      )),
+      "provider" -> mute.provider.map(provider => Json.obj(
+        "id" -> provider.id,
+        "displayName" -> provider.displayName
+      )),
+      "tags" -> mute.tags
+    )
+  }
+
+  def fromActivityMuteSave(id: String, activityMute: ActivityMuteSave) = ActivityMuteRender(
+    id,
+    activityMute.usercode,
+    DateTime.now,
+    activityMute.expiresAt,
+    activityMute.activityType.map(ActivityType(_)),
+    activityMute.providerId.map(ActivityProvider(_)),
+    activityMute.tags
+  )
+}
+
+case class ActivityMuteSave(
+  usercode: Usercode,
+  expiresAt: Option[DateTime],
+  activityType: Option[String],
+  providerId: Option[String],
+  tags: Seq[ActivityTag]
+)
+
+object ActivityMuteSave {
+  def fromRequest(request: SaveMuteRequest, usercode: Usercode): ActivityMuteSave = ActivityMuteSave(
+    usercode = usercode,
+    expiresAt = request.expiresAt,
+    activityType = request.activityType,
+    providerId = request.providerId,
+    tags = request.tags
+  )
 }

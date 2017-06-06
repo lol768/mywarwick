@@ -291,29 +291,36 @@ class ActivityDaoImpl @Inject()(
 
   private lazy val tagParser: RowParser[Option[ActivityTag]] =
     get[Option[String]]("TAG_NAME") ~ // Option because an activity can have no tags
+      get[Option[String]]("TAG_DISPLAY_NAME") ~
       get[Option[String]]("TAG_VALUE") ~
       get[Option[String]]("TAG_DISPLAY_VALUE") map {
-      case name ~ value ~ display =>
-        for (name <- name; value <- value) yield ActivityTag(name, TagValue(value, display))
+      case name ~ displayName ~ value ~ displayValue =>
+        for (name <- name; value <- value) yield ActivityTag(name, displayName, TagValue(value, displayValue))
     }
 
   val selectActivityRender =
     """
       SELECT
         ACTIVITY.*,
+        PROVIDER.DISPLAY_NAME          AS PROVIDER_DISPLAY_NAME,
         PROVIDER.ICON,
         PROVIDER.COLOUR,
-        ACTIVITY_TAG.NAME          AS TAG_NAME,
-        ACTIVITY_TAG.VALUE         AS TAG_VALUE,
-        ACTIVITY_TAG.DISPLAY_VALUE AS TAG_DISPLAY_VALUE
+        ACTIVITY_TAG.NAME              AS TAG_NAME,
+        ACTIVITY_TAG_TYPE.DISPLAY_NAME AS TAG_DISPLAY_NAME,
+        ACTIVITY_TAG.VALUE             AS TAG_VALUE,
+        ACTIVITY_TAG.DISPLAY_VALUE     AS TAG_DISPLAY_VALUE,
+        ACTIVITY_TYPE.DISPLAY_NAME     AS TYPE_DISPLAY_NAME
       FROM ACTIVITY
         LEFT JOIN ACTIVITY_TAG ON ACTIVITY_TAG.ACTIVITY_ID = ACTIVITY.ID
         LEFT JOIN PROVIDER ON PROVIDER.ID = ACTIVITY.PROVIDER_ID
+        LEFT JOIN ACTIVITY_TYPE ON ACTIVITY.TYPE = ACTIVITY_TYPE.NAME
+        LEFT JOIN ACTIVITY_TAG_TYPE ON ACTIVITY_TAG.NAME = ACTIVITY_TAG_TYPE.NAME
     """
 
   lazy val activityRenderParser: RowParser[ActivityRender] =
-    activityParser ~ activityIconParser.? ~ tagParser map {
-      case activity ~ icon ~ tag => ActivityRender(activity, icon, tag.toSeq)
+    activityParser ~ activityIconParser.? ~ tagParser ~ activityProviderParser ~ activityTypeParser map {
+      case activity ~ icon ~ tag ~ provider ~ activityType =>
+        ActivityRender(activity, icon, tag.toSeq, provider, activityType)
     }
 
   override def getActivityIcon(providerId: String)(implicit c: Connection): Option[ActivityIcon] =
@@ -324,5 +331,17 @@ class ActivityDaoImpl @Inject()(
     get[String]("ICON") ~
       get[Option[String]]("COLOUR") map {
       case icon ~ colour => ActivityIcon(icon, colour)
+    }
+
+  private lazy val activityProviderParser: RowParser[ActivityProvider] =
+    get[String]("PROVIDER_ID") ~
+      get[Option[String]]("PROVIDER_DISPLAY_NAME") map {
+      case id ~ displayName => ActivityProvider(id, displayName)
+    }
+
+  private lazy val activityTypeParser: RowParser[ActivityType] =
+    get[String]("TYPE") ~
+      get[Option[String]]("TYPE_DISPLAY_NAME") map {
+      case name ~ displayName => ActivityType(name, displayName)
     }
 }
