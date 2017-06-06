@@ -59,19 +59,18 @@ export default class InfiniteScrollable extends HideableView {
       this.setState({ loading: true });
       this.cancellableShowMorePromise = makeCancelable(this.props.onLoadMore());
       this.cancellableShowMorePromise.promise.then(() => {
-        if (this.unmounted) return;
-        return this.setState({ loading: false });
+        if (!this.unmounted) this.setState({ loading: false });
       }).catch((e) => {
         if (this.unmounted) return;
         if (e.isCanceled) {
-          return Promise.resolve();
+          return;
         } else if (!(e instanceof notifications.UnnecessaryFetchError)) {
           this.setState({ loading: false });
         } else {
           log.debug(`Unnecessary fetch: ${e.message}`);
-          return Promise.resolve();
+          return;
         }
-        return Promise.reject(e);
+        throw e;
       });
     }
   }

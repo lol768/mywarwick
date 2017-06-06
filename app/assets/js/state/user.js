@@ -21,12 +21,13 @@ const initialState = {
 
 export function reducer(state = initialState, action) {
   switch (action.type) {
-    case USER_LOAD:
+    case USER_LOAD: {
       const data = _.isEqual(state.data, action.data) ? state.data : action.data;
       return { ...state,
         data,
         empty: false,
       };
+    }
     case USER_RECEIVE:
       return { ...state,
         data: action.data,

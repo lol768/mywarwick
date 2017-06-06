@@ -84,10 +84,6 @@ class AppRoot extends React.Component {
     this.historyUnlisten = this.props.history.listen(location => this.setState({ location }));
   }
 
-  componentWillUnmount() {
-    this.historyUnlisten();
-  }
-
   /**
    * The other half of this is in ui.navRequest.
    * If we've been sent back only to go forward, get the requested path from the store, reset
@@ -109,6 +105,10 @@ class AppRoot extends React.Component {
         this.props.dispatch(goBack());
       }
     }
+  }
+
+  componentWillUnmount() {
+    this.historyUnlisten();
   }
 
   shouldRender(path) {

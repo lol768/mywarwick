@@ -86,7 +86,7 @@ export function updateUIContext() {
     if (native !== state.ui.native) {
       dispatch({
         type: 'ui.native',
-        native: native,
+        native,
       });
     }
 

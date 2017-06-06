@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react';
 import ReactGridLayoutBase from 'react-grid-layout';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import _ from 'lodash-es';
+import $ from 'jquery';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 import { goBack, push } from 'react-router-redux';

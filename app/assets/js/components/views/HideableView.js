@@ -10,10 +10,11 @@ export default class HideableView extends React.PureComponent {
   componentDidMount() {
     this.context.visibility.subscribe(event => {
       switch (event) {
-        case 'willShow': return this.componentWillShow();
-        case 'didShow': return this.componentDidShow();
-        case 'willHide': return this.componentWillHide();
-        case 'didHide': return this.componentDidHide();
+        case 'willShow': this.componentWillShow(); break;
+        case 'didShow': this.componentDidShow(); break;
+        case 'willHide': this.componentWillHide(); break;
+        case 'didHide': this.componentDidHide(); break;
+        default: throw new Error(`Unexpected value ${event}`);
       }
     });
   }

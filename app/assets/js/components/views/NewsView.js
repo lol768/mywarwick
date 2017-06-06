@@ -34,7 +34,7 @@ export class NewsView extends HideableView {
     this.updateWidth();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate() {
     this.updateWidth();
   }
 

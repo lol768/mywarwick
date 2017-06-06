@@ -7,7 +7,7 @@ export default class Visible extends React.PureComponent {
   };
 
   static childContextTypes = {
-    visibility: PropTypes.object
+    visibility: PropTypes.object,
   };
 
   constructor() {
@@ -17,13 +17,13 @@ export default class Visible extends React.PureComponent {
 
   getChildContext() {
     return {
-      visibility: this.observable
+      visibility: this.observable,
     };
   }
 
   componentWillMount() {
     if (this.props.visible) {
-      this.observable.set('willShow')
+      this.observable.set('willShow');
     }
   }
 
@@ -33,21 +33,22 @@ export default class Visible extends React.PureComponent {
     }
   }
 
-  componentWillUpdate(nextProps, nextState) {
+  componentWillUpdate(nextProps) {
     if (this.props.visible !== nextProps.visible) {
       this.observable.set(nextProps.visible ? 'willShow' : 'willHide');
     }
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (this.props.visible !== prevProps.visible) {
       this.observable.set(this.props.visible ? 'didShow' : 'didHide');
     }
   }
 
   render() {
-    return <div className={this.props.visible ? '' : 'hidden'}>
+    return (<div className={this.props.visible ? '' : 'hidden'}>
       { this.props.children }
-    </div>;
+    </div>);
   }
 }
+

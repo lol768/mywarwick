@@ -127,9 +127,9 @@ class TileView extends Component {
           {tileElement}
         </ScrollRestore>
       );
-    } else {
-      return tileElement;
     }
+
+    return tileElement;
   }
 
 }

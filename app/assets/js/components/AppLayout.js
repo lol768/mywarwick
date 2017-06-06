@@ -72,9 +72,7 @@ function mapStateToProps(state) {
 // so that the plain component doesn't depend on redux.
 function mapDispatchToProps(dispatch) {
   return {
-    onSelectItem: (p) => {
-      return navRequest(p, dispatch);
-    }
+    onSelectItem: (p) => navRequest(p, dispatch),
   };
 }
 

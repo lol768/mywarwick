@@ -1,4 +1,4 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
 import Bundle from '../system/Bundle';
 import once from 'lodash-es/once';
 import ScrollRestore from '../ui/ScrollRestore';
