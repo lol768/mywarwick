@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 
-export default class ListHeader extends React.Component {
+export default class ListHeader extends React.PureComponent {
 
   static propTypes = {
     title: PropTypes.string.isRequired,

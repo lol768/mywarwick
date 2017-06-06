@@ -80,7 +80,11 @@ class AppRoot extends React.Component {
   }
 
   componentDidMount() {
-    this.props.history.listen(location => this.setState({ location }));
+    this.historyUnlisten = this.props.history.listen(location => this.setState({ location }));
+  }
+
+  componentWillUnmount() {
+    this.historyUnlisten();
   }
 
   /**

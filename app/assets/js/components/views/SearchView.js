@@ -20,7 +20,7 @@ function renderSearch(mod, SearchComponent) {
   return SearchComponent ? <SearchComponent /> : <Loading />;
 }
 
-export default class SearchView extends React.Component {
+export default class SearchView extends React.PureComponent {
 
   static propTypes = {
     hiddenView: PropTypes.bool.isRequired,

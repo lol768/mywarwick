@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 
 import { connect } from 'react-redux';
 
-class UpdatePopup extends React.Component {
+class UpdatePopup extends React.PureComponent {
 
   static propTypes = {
     isUpdateReady: PropTypes.bool,

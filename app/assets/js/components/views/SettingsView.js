@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import classNames from 'classnames';
 
-export class SettingsView extends React.Component {
+export class SettingsView extends React.PureComponent {
 
   static propTypes = {
     settings: PropTypes.object.isRequired,

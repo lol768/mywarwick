@@ -1,5 +1,6 @@
 import localforage from 'localforage';
 import log from 'loglevel';
+import _ from 'lodash-es';
 
 export const USER_LOAD = 'USER_LOAD';
 export const USER_RECEIVE = 'USER_RECEIVE';
@@ -21,8 +22,9 @@ const initialState = {
 export function reducer(state = initialState, action) {
   switch (action.type) {
     case USER_LOAD:
+      const data = _.isEqual(state.data, action.data) ? state.data : action.data;
       return { ...state,
-        data: action.data,
+        data,
         empty: false,
       };
     case USER_RECEIVE:
@@ -36,6 +38,7 @@ export function reducer(state = initialState, action) {
         links: state.links,
       };
     case SSO_LINKS_RECEIVE:
+      if (_.isEqual(state.links, action.links)) return state;
       return { ...state,
         links: action.links,
       };

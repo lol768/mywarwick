@@ -66,6 +66,8 @@ export function updateUIContext() {
   return (dispatch, getState) => {
     const state = getState();
     const currentClassName = state.ui.className;
+    const betaWarn = showBetaWarning();
+    const native = isNative();
 
     if (currentClassName === undefined || isDesktop() !== (currentClassName === 'desktop')) {
       dispatch({
@@ -81,15 +83,19 @@ export function updateUIContext() {
       });
     }
 
-    dispatch({
-      type: 'ui.native',
-      native: isNative(),
-    });
+    if (native !== state.ui.native) {
+      dispatch({
+        type: 'ui.native',
+        native: native,
+      });
+    }
 
-    dispatch({
-      type: 'ui.showBetaWarning',
-      showBetaWarning: showBetaWarning(),
-    });
+    if (betaWarn !== state.ui.showBetaWarning) {
+      dispatch({
+        type: 'ui.showBetaWarning',
+        showBetaWarning: betaWarn,
+      });
+    }
   };
 }
 

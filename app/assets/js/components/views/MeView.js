@@ -2,7 +2,6 @@ import React, { PropTypes } from 'react';
 import ReactGridLayoutBase from 'react-grid-layout';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import _ from 'lodash-es';
-import $ from 'jquery.transit';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 import { goBack, push } from 'react-router-redux';
@@ -13,6 +12,7 @@ import * as TILE_TYPES from '../tiles';
 import TileOptionView from './TileOptionView';
 import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
+import HideableView from './HideableView';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -46,7 +46,7 @@ function getSizeNameFromSize(size) {
   return TILE_SIZES.LARGE;
 }
 
-class MeView extends React.Component {
+class MeView extends HideableView {
 
   static propTypes = {
     hiddenView: PropTypes.bool.isRequired,

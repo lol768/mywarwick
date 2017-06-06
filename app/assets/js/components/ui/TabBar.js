@@ -1,11 +1,11 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 
 import $ from 'jquery';
 import ReactDOM from 'react-dom';
 import _ from 'lodash-es';
 import { Routes } from '../AppRoot';
 
-export default class TabBar extends Component {
+export default class TabBar extends PureComponent {
 
   componentDidMount() {
     $(ReactDOM.findDOMNode(this)).on('touchmove', (e) => e.preventDefault());
@@ -17,7 +17,7 @@ export default class TabBar extends Component {
         key: el.props.title,
         ref: el.props.title.toLowerCase(),
         active: this.itemIsActive(el.props, this.props.selectedItem),
-        onClick: () => this.props.onSelectItem(el.props.path),
+        onSelectItem: this.props.onSelectItem,
         badge: el.props.badge,
         icon: el.props.icon,
       })

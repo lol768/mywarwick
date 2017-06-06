@@ -11,7 +11,7 @@ import { Routes } from '../AppRoot';
 const rowHeight = 125;
 const margin = [4, 4];
 
-class AddingTilesView extends React.Component {
+class AddingTilesView extends React.PureComponent {
 
   static propTypes = {
     hiddenView: PropTypes.bool.isRequired,

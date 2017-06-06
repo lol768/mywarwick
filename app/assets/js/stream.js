@@ -67,6 +67,7 @@ export function onStreamReceive(
   grouper = (item) => item.date,
   rx = []
 ) {
+  if (rx.length === 0) return stream;
   const result = _.clone(stream);
   _.each(_.groupBy(rx, grouper), (v, k) => {
     result[k] = mergeReceivedItems(result[k] || [], v);

@@ -4,7 +4,7 @@ import $ from 'jquery';
 import ReactDOM from 'react-dom';
 import { loadDeviceDetails } from '../../userinfo';
 
-export default class MastheadMobile extends React.Component {
+export default class MastheadMobile extends React.PureComponent {
 
   componentDidMount() {
     $(ReactDOM.findDOMNode(this)).on('touchmove', (e) => e.preventDefault());

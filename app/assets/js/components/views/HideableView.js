@@ -1,11 +1,23 @@
 /* eslint no-unused-vars:0 */
 import React, { PropTypes } from 'react';
+import shallowCompare from 'shallow-compare';
 
 export default class HideableView extends React.Component {
 
   static propTypes = {
     hiddenView: PropTypes.bool.isRequired,
   };
+
+  shouldComponentUpdate(newProps, newState) {
+    if (this.props.hiddenView || newProps.hiddenView) {
+      // it was hidden or will be hidden. Even if there were any changes
+      // we wouldn't see them
+      return false;
+    } else {
+      // otherwise mimic PureComponent
+      return shallowCompare(this, newProps, newState);
+    }
+  }
 
   componentWillMount() {
     if (!this.props.hiddenView) {

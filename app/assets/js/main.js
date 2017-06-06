@@ -28,6 +28,11 @@ import bridge from './bridge';
 import { hasAuthoritativeAuthenticatedUser, hasAuthoritativeUser } from './state';
 import { Provider } from 'react-redux';
 
+if (process.env.NODE_ENV !== 'production') {
+  const { whyDidYouUpdate } = require('why-did-you-update');
+  //whyDidYouUpdate(React);
+}
+
 export function launch(userData) {
   bridge({ store, tiles, notifications, userinfo, news });
 
