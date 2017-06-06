@@ -20,7 +20,7 @@ import store from './store';
     log.info('Caught error loading analytics.js', e);
     e.stopPropagation();
   };
-  m.parentNode.insertBefore(a, m)
+  if (m) m.parentNode.insertBefore(a, m)
 })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 /* eslint-enable */
 
