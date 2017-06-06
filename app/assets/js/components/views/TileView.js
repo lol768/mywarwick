@@ -115,13 +115,21 @@ class TileView extends Component {
       size,
     };
 
-    return (
-      <ScrollRestore url={`/${Routes.TILES}/${id}`} forceTop hiddenView={ this.props.hiddenView }>
-        <Tile { ...tileProps }>
-          { React.createElement(tileContentComponent, contentProps) }
-        </Tile>
-      </ScrollRestore>
+    const tileElement = (
+      <Tile { ...tileProps }>
+        { React.createElement(tileContentComponent, contentProps) }
+      </Tile>
     );
+
+    if (zoomed) {
+      return (
+        <ScrollRestore url={`/${Routes.TILES}/${id}`} forceTop={this.props.forceTop}>
+          {tileElement}
+        </ScrollRestore>
+      );
+    } else {
+      return tileElement;
+    }
   }
 
 }
@@ -158,7 +166,6 @@ TileView.propTypes = {
   editing: PropTypes.bool.isRequired,
   view: PropTypes.object,
   user: PropTypes.object.isRequired,
-  hiddenView: PropTypes.bool.isRequired,
 };
 
 TileView.defaultProps = {

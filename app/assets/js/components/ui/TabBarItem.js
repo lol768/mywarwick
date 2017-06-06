@@ -23,6 +23,7 @@ export default class TabBarItem extends React.PureComponent {
           disabled: this.props.isDisabled,
         }) }
         onClick={ this.onClick }
+        ref="li"
       >
         <i className={ `fa fa-${this.props.icon}` }>
           { (this.props.badge > 0) ?

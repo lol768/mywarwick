@@ -5,7 +5,6 @@ import HideableView from '../views/HideableView';
 export default class ScrollRestore extends HideableView {
 
   static propTypes = {
-    hiddenView: PropTypes.bool.isRequired,
     url: PropTypes.string.isRequired,
     forceTop: PropTypes.bool,
     children: PropTypes.node,
@@ -19,7 +18,7 @@ export default class ScrollRestore extends HideableView {
     }
   }
 
-  componentWillHide() {
+  componentDidHide() {
     detachScrollRestore(this.props.url);
   }
 

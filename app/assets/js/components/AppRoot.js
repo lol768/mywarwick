@@ -11,6 +11,7 @@ import * as _ from 'lodash-es';
 import { goBack, replace } from 'react-router-redux';
 import { connect } from 'react-redux';
 import ActivityMutesView from './views/ActivityMutesView';
+import Visible from './Visible';
 
 export const Routes = {
   EDIT: 'edit',
@@ -127,29 +128,24 @@ class AppRoot extends React.Component {
 
     const views = _.map(RouteViews, (args, path) => (
       this.shouldRender(path) ?
-        <div key={ path } className={(location.pathname !== path) ? 'hidden' : ''}>
+        <Visible key={ path } visible={ location.pathname === path }>
           {
             React.createElement(
               args.view,
               Object.assign(
                 {},
-                this.props,
-                {
-                  hiddenView: location.pathname !== path,
-                  location,
-                },
                 (args.extraProps || {})
               )
             )
           }
-        </div> : null
+        </Visible> : null
     ));
 
     if ((tilePath || []).length === 2) {
       views.push(
         <TileView
-          id={ tilePath[1] } params={{ id: tilePath[1] }}
-          hiddenView={ false }
+          id={ tilePath[1] }
+          params={{ id: tilePath[1] }}
           {...this.props}
         />
       );

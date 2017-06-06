@@ -22,13 +22,11 @@ function renderSearch(mod, SearchComponent) {
 
 export default class SearchView extends React.PureComponent {
 
-  static propTypes = {
-    hiddenView: PropTypes.bool.isRequired,
-  };
+  static propTypes = {};
 
   render() {
     return (
-      <ScrollRestore url={`/${Routes.SEARCH}`} hiddenView={ this.props.hiddenView }>
+      <ScrollRestore url={`/${Routes.SEARCH}`}>
         <Bundle load={importSearch} initialise={initialiseSearch}>
           { renderSearch }
         </Bundle>

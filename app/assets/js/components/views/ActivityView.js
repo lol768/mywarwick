@@ -9,14 +9,12 @@ import { getStreamSize, takeFromStream } from '../../stream';
 import * as notifications from '../../state/notifications';
 import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
-import HideableView from './HideableView';
 
 const SOME_MORE = 20;
 
-class ActivityView extends HideableView {
+class ActivityView extends React.PureComponent {
 
   static propTypes = {
-    hiddenView: PropTypes.bool.isRequired,
     activities: PropTypes.object,
     olderItemsOnServer: PropTypes.bool,
     dispatch: PropTypes.func.isRequired,
@@ -74,13 +72,12 @@ class ActivityView extends HideableView {
     return (
       <div>
         { hasAny ?
-          <ScrollRestore url={`/${Routes.ACTIVITY}`} hiddenView={ this.props.hiddenView }>
+          <ScrollRestore url={`/${Routes.ACTIVITY}`}>
             <InfiniteScrollable
               hasMore={ hasMore }
               onLoadMore={ this.loadMore }
               showLoading
               endOfListPhrase="There are no older activities."
-              hiddenView={ this.props.hiddenView }
             >
               <GroupedList groupBy={shouldBeGrouped ? groupItemsByDate : undefined}>
                 {activities}

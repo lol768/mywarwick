@@ -49,10 +49,6 @@ function getSizeNameFromSize(size) {
 class MeView extends HideableView {
 
   static propTypes = {
-    hiddenView: PropTypes.bool.isRequired,
-    location: PropTypes.shape({
-      pathname: PropTypes.string,
-    }),
     dispatch: PropTypes.func.isRequired,
     editing: PropTypes.bool,
     adding: PropTypes.bool,
@@ -195,7 +191,6 @@ class MeView extends HideableView {
         editingAny={this.props.editing}
         size={this.getTileSize(id)}
         layoutWidth={this.props.layoutWidth}
-        hiddenView={this.props.hiddenView}
       />
     );
   }
@@ -276,7 +271,7 @@ class MeView extends HideableView {
     const classes = classNames('me-view', { 'me-view--editing': this.props.editing });
 
     return (
-      <ScrollRestore url="/" hiddenView={ this.props.hiddenView }>
+      <ScrollRestore url="/">
         <div className="me-view-container">
           <div className={classes}>
             {this.renderTiles()}

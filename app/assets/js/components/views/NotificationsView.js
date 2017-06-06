@@ -23,7 +23,6 @@ const NOTIFICATION_READ_TIMEOUT = 1500;
 class NotificationsView extends HideableView {
 
   static propTypes = {
-    hiddenView: PropTypes.bool.isRequired,
     notifications: PropTypes.object,
     olderItemsOnServer: PropTypes.bool,
     dispatch: PropTypes.func.isRequired,
@@ -52,11 +51,8 @@ class NotificationsView extends HideableView {
     this.onMutingDismiss = this.onMutingDismiss.bind(this);
   }
 
-  componentWillShow() {
-    this.beginMarkReadTimeout();
-  }
-
   componentDidShow() {
+    this.beginMarkReadTimeout();
     document.addEventListener('visibilitychange', this.beginMarkReadTimeout);
     window.addEventListener('focus', this.beginMarkReadTimeout);
     window.addEventListener('blur', this.beginMarkReadTimeout);
@@ -201,13 +197,12 @@ class NotificationsView extends HideableView {
           : null
         }
         { hasAny ?
-          <ScrollRestore url={`/${Routes.NOTIFICATIONS}`} hiddenView={ this.props.hiddenView }>
+          <ScrollRestore url={`/${Routes.NOTIFICATIONS}`}>
             <InfiniteScrollable
               hasMore={ hasMore }
               onLoadMore={ this.loadMore }
               showLoading
               endOfListPhrase="There are no older notifications."
-              hiddenView={ this.props.hiddenView }
             >
               <GroupedList groupBy={ shouldBeGrouped ? groupItemsByDate : undefined }>
                 { notificationItems }
