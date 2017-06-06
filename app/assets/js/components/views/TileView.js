@@ -123,7 +123,7 @@ class TileView extends Component {
 
     if (zoomed) {
       return (
-        <ScrollRestore url={`/${Routes.TILES}/${id}`} forceTop={this.props.forceTop}>
+        <ScrollRestore url={`/${Routes.TILES}/${id}`} forceTop>
           {tileElement}
         </ScrollRestore>
       );
