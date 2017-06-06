@@ -3,19 +3,21 @@ package services.dao
 import java.sql.Connection
 
 import anorm._
-import helpers.OneStartAppPerSuite
+import helpers.{BaseSpec, OneStartAppPerSuite}
+import models.Audience
+import models.Audience.{DepartmentAudience, Staff, TeachingStaff, UndergradStudents}
 import models.AudienceSize.{Finite, Public}
 import models.news.NewsItemSave
 import org.joda.time.DateTime
-import helpers.BaseSpec
 import services.NewsService
-import warwick.sso.Usercode
+import warwick.sso.{GroupName, Usercode}
 
 class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
-  val newsDao = get[NewsDao]
-  val newsService = get[NewsService]
-  val userNewsCategoryDao = get[UserNewsCategoryDao]
-  val newsCategoryDao = get[NewsCategoryDao]
+  val newsDao: NewsDao = get[NewsDao]
+  val newsService: NewsService = get[NewsService]
+  val userNewsCategoryDao: UserNewsCategoryDao = get[UserNewsCategoryDao]
+  val newsCategoryDao: NewsCategoryDao = get[NewsCategoryDao]
+  val audienceDao: AudienceDao = get[AudienceDao]
 
   val ana = Usercode("cusana")
   val bob = Usercode("cusbob")
@@ -168,7 +170,7 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
       val id3 = save(futureNews, Seq(ana, bob, eli, jim))
       val id4 = save(futureNews, Seq(public)) // should be ignored
 
-      val counts = newsDao.countRecipients(Seq(id1,id2,id3))
+      val counts = newsDao.countRecipients(Seq(id1, id2, id3))
       counts mustBe Map(
         id1 -> Public,
         id2 -> Finite(2),
@@ -210,6 +212,80 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
       newsDao.getNewsById(id) mustNot be(empty)
     }
 
+  }
+
+  "getNewsItemsMatchingAudience" should {
+    "return an empty list if no parameters are specified" in transaction { implicit c =>
+      newsDao.getNewsItemsMatchingAudience(
+        webGroup = None,
+        departmentCode = None,
+        departmentSubset = None,
+        publisherId = None,
+        limit = 10
+      ) mustBe empty
+    }
+
+    "find news items for a department subset" in transaction { implicit c =>
+      val audienceId = audienceDao.saveAudience(Audience(Seq(DepartmentAudience("IN", Seq(Staff)))))
+      val newsItemId = newsDao.save(londonsBurning, audienceId)
+
+      newsDao.getNewsItemsMatchingAudience(
+        webGroup = None,
+        departmentCode = Some("IN"),
+        departmentSubset = Some(Staff),
+        publisherId = None,
+        limit = 10
+      ) must contain only newsItemId
+    }
+
+    "find all news items for a department" in transaction { implicit c =>
+      val audienceId = audienceDao.saveAudience(Audience(Seq(DepartmentAudience("IN", Seq(UndergradStudents, TeachingStaff)))))
+      val newsItemId = newsDao.save(londonsBurning, audienceId)
+
+      newsDao.getNewsItemsMatchingAudience(
+        webGroup = None,
+        departmentCode = Some("IN"),
+        departmentSubset = None,
+        publisherId = None,
+        limit = 10
+      ) must contain only newsItemId
+    }
+
+    "find news items for a webgroup" in transaction { implicit c =>
+      val audienceId = audienceDao.saveAudience(Audience.webGroup(GroupName("in-test")))
+      val newsItemId = newsDao.save(londonsBurning, audienceId)
+
+      newsDao.getNewsItemsMatchingAudience(
+        webGroup = Some(GroupName("in-test")),
+        departmentCode = None,
+        departmentSubset = None,
+        publisherId = None,
+        limit = 10
+      ) must contain only newsItemId
+    }
+
+    "find news items created by a publisher" in transaction { implicit c =>
+      val audienceId = audienceDao.saveAudience(Audience.Public)
+      val newsItemId = newsDao.save(londonsBurning, audienceId)
+
+      newsDao.getNewsItemsMatchingAudience(
+        webGroup = None,
+        departmentCode = None,
+        departmentSubset = None,
+        publisherId = Some("publisher"),
+        limit = 10
+      ) must contain only newsItemId
+    }
+
+    "not match anything" in transaction { implicit c =>
+      newsDao.getNewsItemsMatchingAudience(
+        webGroup = None,
+        departmentCode = None,
+        departmentSubset = None,
+        publisherId = Some("publisher"),
+        limit = 10
+      ) mustBe empty
+    }
   }
 
 }

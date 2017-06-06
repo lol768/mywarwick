@@ -1,14 +1,13 @@
 package services.dao
 
-import helpers.{Fixtures, OneStartAppPerSuite}
-import models.{ActivityTag, Audience, TagValue}
-import helpers.BaseSpec
+import helpers.{BaseSpec, Fixtures, OneStartAppPerSuite}
+import models.{ActivityTag, TagValue}
 
 class ActivityTagDaoTest extends BaseSpec with OneStartAppPerSuite {
 
-  val dao = get[ActivityTagDao]
-  val activityDao = get[ActivityDao]
-  val activitySave = Fixtures.activitySave.submissionDue
+  private val dao = get[ActivityTagDao]
+  private val activityDao = get[ActivityDao]
+  private val activitySave = Fixtures.activitySave.submissionDue
 
   val audienceId = "audience"
 
@@ -16,7 +15,7 @@ class ActivityTagDaoTest extends BaseSpec with OneStartAppPerSuite {
 
     "tag an activity then find it by the tag" in transaction { implicit c =>
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
-      dao.save(activityId, ActivityTag("name", TagValue("value", Some("Display value"))))
+      dao.save(activityId, ActivityTag("name", None, TagValue("value", Some("Display value"))))
 
       val activities = dao.getActivitiesWithTags(Map("name" -> "value"), "tabula")
 
@@ -25,8 +24,8 @@ class ActivityTagDaoTest extends BaseSpec with OneStartAppPerSuite {
 
     "return only activities with all tags" in transaction { implicit c =>
       val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
-      dao.save(activityId, ActivityTag("a", TagValue("a", None)))
-      dao.save(activityId, ActivityTag("b", TagValue("b", None)))
+      dao.save(activityId, ActivityTag("a", None, TagValue("a", None)))
+      dao.save(activityId, ActivityTag("b", None, TagValue("b", None)))
 
       dao.getActivitiesWithTags(Map("a" -> "a", "b" -> "b"), "tabula") must contain(activityId)
       dao.getActivitiesWithTags(Map("a" -> "a", "c" -> "c"), "tabula") mustNot contain(activityId)

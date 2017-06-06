@@ -42,8 +42,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
       case PermissionScope.AllDepartments =>
         true
       case PermissionScope.Departments(deptCodes: Seq[String]) =>
-        data.audience.forall(_.startsWith("Dept:")) &&
-          data.department.forall(deptCodes.contains)
+        data.audience.forall(a => a.startsWith("Dept:") || deptCodes.exists(dc => a.startsWith(s"WebGroup:${dc.toLowerCase}-"))) && data.department.forall(deptCodes.contains)
     }
   }
 

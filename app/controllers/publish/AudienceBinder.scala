@@ -56,15 +56,16 @@ class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
       val department = departmentParam.flatMap { code =>
         departments.allDepartments.find(_.code == code)
       }
+
       val deptComponent = department match {
         case Some(d) if deptComponentValues.nonEmpty => Some(DepartmentAudience(d.code, deptComponentValues))
-        case Some(d) =>
+        case Some(d) if globalComponents.isEmpty =>
           errors :+= FormError("audience", "error.audience.noDepartmentSubsets")
           None
         case None if data.department.isDefined =>
           errors :+= FormError("department", "error.department.invalid")
           None
-        case None => None // No department audience - no problem
+        case _ => None // No department audience - no problem
       }
 
       if (department.isEmpty && globalComponents.isEmpty) {

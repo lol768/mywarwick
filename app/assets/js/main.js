@@ -218,6 +218,8 @@ export function launch(userData) {
   if (window.myWarwickErrorHandler) {
     // Don't say "there was a problem loading My Warwick" once we're past the initial page load,
     // even if some errors happen. We should already have some content.
-    window.removeEventListener('error', window.myWarwickErrorHandler);
+    window.removeEventListener('error', window.myWarwickErrorHandler, true);
   }
+
+  $('#error-fallback').hide();
 }

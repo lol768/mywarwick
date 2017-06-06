@@ -113,7 +113,10 @@ export default function init(opts) {
       navigate(path) {
         // click event to dismiss active tooltips
         document.dispatchEvent(new Event('click'));
-        if (path.indexOf(`/${Routes.EDIT}`) === 0 || path.indexOf(`/${Routes.TILES}`) === 0) {
+        if (path.indexOf(`/${Routes.EDIT}`) === 0 ||
+          path.indexOf(`/${Routes.TILES}`) === 0 ||
+          path.indexOf(`/${Routes.NOTIFICATIONS}/${Routes.MUTE}`) === 0
+      ) {
           store.dispatch(push(path));
         } else {
           navRequest(path, store.dispatch);

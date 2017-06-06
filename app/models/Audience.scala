@@ -24,6 +24,10 @@ object Audience {
     usercodes(Seq(usercode))
   }
 
+  def webGroup(groupName: GroupName): Audience = {
+    Audience(Seq(WebGroupAudience(groupName)))
+  }
+
   // Pieces of audience
   sealed trait Component extends EnumEntry
   // Pieces of department

@@ -117,7 +117,7 @@ describe('MeView', () => {
       dispatch: () => {},
     };
     const wrapper = shallow(<MeView.WrappedComponent {...props} />);
-    const tileViews = wrapper.find(TileView)
+    const tileViews = wrapper.find(TileView);
     expect(tileViews).to.have.length(2);
     const renderedTileIds = tileViews.map(node => node.key());
     const expectedTileIds = [
