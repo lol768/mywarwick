@@ -69,7 +69,6 @@ class NotificationsView extends HideableView {
 
   componentDidHide() {
     clearTimeout(this.timeout);
-    this.markNotificationsRead();
 
     document.removeEventListener('visibilitychange', this.beginMarkReadTimeout);
     window.removeEventListener('focus', this.beginMarkReadTimeout);
