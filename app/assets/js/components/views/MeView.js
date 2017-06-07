@@ -13,7 +13,6 @@ import * as TILE_TYPES from '../tiles';
 import TileOptionView from './TileOptionView';
 import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
-import HideableView from './HideableView';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -47,7 +46,7 @@ function getSizeNameFromSize(size) {
   return TILE_SIZES.LARGE;
 }
 
-class MeView extends HideableView {
+class MeView extends React.PureComponent {
 
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
