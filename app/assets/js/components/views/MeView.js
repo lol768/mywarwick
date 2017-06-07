@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import ReactGridLayoutBase from 'react-grid-layout';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import _ from 'lodash-es';
-import $ from 'jquery.transit';
+import $ from 'jquery';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 import { goBack, push } from 'react-router-redux';
@@ -46,13 +46,9 @@ function getSizeNameFromSize(size) {
   return TILE_SIZES.LARGE;
 }
 
-class MeView extends React.Component {
+class MeView extends React.PureComponent {
 
   static propTypes = {
-    hiddenView: PropTypes.bool.isRequired,
-    location: PropTypes.shape({
-      pathname: PropTypes.string,
-    }),
     dispatch: PropTypes.func.isRequired,
     editing: PropTypes.bool,
     adding: PropTypes.bool,
@@ -195,7 +191,6 @@ class MeView extends React.Component {
         editingAny={this.props.editing}
         size={this.getTileSize(id)}
         layoutWidth={this.props.layoutWidth}
-        hiddenView={this.props.hiddenView}
       />
     );
   }
@@ -276,7 +271,7 @@ class MeView extends React.Component {
     const classes = classNames('me-view', { 'me-view--editing': this.props.editing });
 
     return (
-      <ScrollRestore url="/" hiddenView={ this.props.hiddenView }>
+      <ScrollRestore url="/">
         <div className="me-view-container">
           <div className={classes}>
             {this.renderTiles()}

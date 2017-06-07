@@ -4,7 +4,7 @@ import _ from 'lodash-es';
 
 import ListHeader from './ListHeader';
 
-export default class GroupedList extends React.Component {
+export default class GroupedList extends React.PureComponent {
 
   static propTypes = {
     groupBy: PropTypes.shape({

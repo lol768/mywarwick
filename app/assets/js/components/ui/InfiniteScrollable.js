@@ -9,7 +9,6 @@ import HideableView from '../views/HideableView';
 export default class InfiniteScrollable extends HideableView {
 
   static propTypes = {
-    hiddenView: PropTypes.bool.isRequired,
     hasMore: PropTypes.bool,
     onLoadMore: PropTypes.func.isRequired,
     children: PropTypes.node,
@@ -22,15 +21,13 @@ export default class InfiniteScrollable extends HideableView {
     this.state = {
       loading: false,
     };
+    this.unmounted = false;
     this.boundScrollListener = this.onScroll.bind(this);
     this.cancellableShowMorePromise = makeCancelable(Promise.resolve());
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (!this.props.hiddenView) {
-      this.attachScrollListener();
-    }
-    super.componentDidUpdate(prevProps, prevState);
+  componentWillUnmount() {
+    this.unmounted = true;
   }
 
   componentDidShow() {
@@ -43,7 +40,7 @@ export default class InfiniteScrollable extends HideableView {
   }
 
   onScroll() {
-    if (this.detached) {
+    if (this.detached || this.unmounted) {
       return;
     }
 
@@ -61,18 +58,19 @@ export default class InfiniteScrollable extends HideableView {
       this.detachScrollListener();
       this.setState({ loading: true });
       this.cancellableShowMorePromise = makeCancelable(this.props.onLoadMore());
-      this.cancellableShowMorePromise.promise.then(() =>
-        this.setState({ loading: false })
-      ).catch((e) => {
+      this.cancellableShowMorePromise.promise.then(() => {
+        if (!this.unmounted) this.setState({ loading: false });
+      }).catch((e) => {
+        if (this.unmounted) return;
         if (e.isCanceled) {
-          return Promise.resolve();
+          return;
         } else if (!(e instanceof notifications.UnnecessaryFetchError)) {
           this.setState({ loading: false });
         } else {
           log.debug(`Unnecessary fetch: ${e.message}`);
-          return Promise.resolve();
+          return;
         }
-        return Promise.reject(e);
+        throw e;
       });
     }
   }
@@ -81,8 +79,10 @@ export default class InfiniteScrollable extends HideableView {
     this.detached = true;
     $(window).off('scroll resize', this.boundScrollListener);
 
-    $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]')
-      .off('scroll', this.boundScrollListener);
+    if (!this.unmounted) {
+      $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]')
+        .off('scroll', this.boundScrollListener);
+    }
   }
 
   attachScrollListener() {

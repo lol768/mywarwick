@@ -1,61 +1,30 @@
 /* eslint no-unused-vars:0 */
 import React, { PropTypes } from 'react';
 
-export default class HideableView extends React.Component {
+export default class HideableView extends React.PureComponent {
 
-  static propTypes = {
-    hiddenView: PropTypes.bool.isRequired,
+  static contextTypes = {
+    visibility: PropTypes.object.isRequired,
   };
 
-  componentWillMount() {
-    if (!this.props.hiddenView) {
-      this.componentWillShow(true);
-    }
-  }
-
   componentDidMount() {
-    if (!this.props.hiddenView) {
-      this.componentDidShow(true);
-    }
+    this.context.visibility.subscribe(event => {
+      switch (event) {
+        case 'willShow': this.componentWillShow(); break;
+        case 'didShow': this.componentDidShow(); break;
+        case 'willHide': this.componentWillHide(); break;
+        case 'didHide': this.componentDidHide(); break;
+        default: throw new Error(`Unexpected value ${event}`);
+      }
+    });
   }
 
-  componentWillUpdate(nextProps, nextState) {
-    if (nextProps.hiddenView && !this.props.hiddenView) {
-      this.componentWillHide(false, nextProps, nextState);
-    } else if (!nextProps.hiddenView && this.props.hiddenView) {
-      this.componentWillShow(false, nextProps, nextState);
-    }
-  }
+  componentWillShow() {}
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.hiddenView && !this.props.hiddenView) {
-      this.componentDidShow(false, prevProps, prevState);
-    } else if (!prevProps.hiddenView && this.props.hiddenView) {
-      this.componentDidHide(prevProps, prevState);
-    }
-  }
+  componentDidShow() {}
 
-  componentWillUnmount() {
-    this.componentWillHide(true);
-  }
+  componentWillHide() {}
 
-  componentWillShow(isMount, nextProps, nextState) {
-    // Override this to mimic WillMount or WillUpdate
-    // nextProps/State will be undefined if isMount
-  }
-
-  componentDidShow(isMount, prevProps, prevState) {
-    // Override this to mimic DidMount or DidUpdate
-    // prevProps/State will be undefined if isMount
-  }
-
-  componentWillHide(isUnmount, nextProps, nextState) {
-    // Override this to mimic WillUnmount or WillUpdate
-    // nextProps/State may be undefined (if called on unmount)
-  }
-
-  componentDidHide(prevProps, prevState) {
-    // Override this to mimic DidUpdate
-  }
+  componentDidHide() {}
 
 }

@@ -9,16 +9,14 @@ import { getNumItemsSince } from '../stream';
 import { Routes } from './AppRoot';
 import { navRequest } from '../state/ui';
 
-export class AppLayout extends React.Component {
+export class AppLayout extends React.PureComponent {
 
   static propTypes = {
     onSelectItem: PropTypes.func.isRequired,
     location: PropTypes.shape({
       pathname: PropTypes.string.isRequired,
     }).isRequired,
-    user: PropTypes.shape({
-      authenticated: PropTypes.bool.isRequired,
-    }).isRequired,
+    authenticated: PropTypes.bool.isRequired,
     notificationsCount: PropTypes.number.isRequired,
     layoutClassName: PropTypes.string.isRequired,
     children: PropTypes.node.isRequired,
@@ -30,7 +28,7 @@ export class AppLayout extends React.Component {
   }
 
   render() {
-    const { location, notificationsCount, layoutClassName, children, user }
+    const { location, notificationsCount, layoutClassName, children, authenticated }
       = this.props;
 
     log.debug('AppLayout.render');
@@ -45,11 +43,11 @@ export class AppLayout extends React.Component {
             <TabBarItem title="Me" icon="user" path="/" />
             <TabBarItem
               title="Notifications" icon="inbox" path={ `/${Routes.NOTIFICATIONS}` }
-              badge={ notificationsCount } isDisabled={ !user.authenticated }
+              badge={ notificationsCount } isDisabled={ !authenticated }
             />
             <TabBarItem
               title="Activity" icon="dashboard" path={ `/${Routes.ACTIVITY}` }
-              isDisabled={ !user.authenticated }
+              isDisabled={ !authenticated }
             />
             <TabBarItem title="News" icon="mortar-board" path={ `/${Routes.NEWS}` } />
             <TabBarItem title="Search" icon="search" path={ `/${Routes.SEARCH}` } />
@@ -66,7 +64,7 @@ function mapStateToProps(state) {
     notificationsCount:
       getNumItemsSince(state.notifications.stream, _.get(state, ['notificationsLastRead', 'date'])),
     layoutClassName: state.ui.className,
-    user: state.user.data,
+    authenticated: state.user.data.authenticated,
   };
 }
 

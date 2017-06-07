@@ -3,6 +3,7 @@ import {
   receivedNotification,
   fetchedNotifications
 } from 'state/notifications';
+import { USER_CLEAR } from 'state/user';
 import { takeFromStream, getStreamSize } from '../../../app/assets/js/stream';
 
 describe('notifications', () => {
@@ -47,6 +48,15 @@ describe('notifications', () => {
     }));
 
     expect(state2.lastItemFetched).to.equal('abc');
+  });
+
+  it('keeps equality when adding nothing', () => {
+    const initialState = reducer(null, { type: USER_CLEAR });
+    const newState = reducer(initialState, fetchedNotifications({
+      items: []
+    }));
+    // must SHALLOW equal, i.e. be the same object.
+    expect(newState.stream).to.equal(initialState.stream);
   });
 
 });

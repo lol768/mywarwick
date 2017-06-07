@@ -7,7 +7,7 @@ import classNames from 'classnames';
 
 import { TILE_SIZES } from '../tiles/TileContent';
 
-export default class Tile extends React.Component {
+export default class Tile extends React.PureComponent {
 
   constructor(props) {
     super(props);

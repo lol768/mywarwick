@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import classNames from 'classnames';
 import * as pushNotifications from '../../push-notifications';
 
-export default class PermissionRequest extends React.Component {
+export default class PermissionRequest extends React.PureComponent {
 
   static propTypes = {
     isDisabled: PropTypes.bool,

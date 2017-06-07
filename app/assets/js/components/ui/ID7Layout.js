@@ -16,7 +16,7 @@ import * as ui from '../../state/ui';
 import { goBack, push } from 'react-router-redux';
 import { Routes } from '../AppRoot';
 
-class ID7Layout extends React.Component {
+class ID7Layout extends React.PureComponent {
 
   static propTypes = {
     dispatch: PropTypes.func.isRequired,

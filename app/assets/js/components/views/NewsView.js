@@ -34,11 +34,8 @@ export class NewsView extends HideableView {
     this.updateWidth();
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (!this.props.hiddenView) {
-      this.updateWidth();
-    }
-    super.componentDidUpdate(prevProps, prevState);
+  componentDidUpdate() {
+    this.updateWidth();
   }
 
   updateWidth() {
@@ -99,12 +96,11 @@ export class NewsView extends HideableView {
           : null
         }
         { items.length ?
-          <ScrollRestore url={`/${Routes.NEWS}`} hiddenView={ this.props.hiddenView }>
+          <ScrollRestore url={`/${Routes.NEWS}`}>
             <InfiniteScrollable
               hasMore={moreAvailable}
               onLoadMore={this.loadMore}
               endOfListPhrase="There is no older news."
-              hiddenView={ this.props.hiddenView }
             >
               {itemComponents}
             </InfiniteScrollable>
@@ -121,7 +117,6 @@ export class NewsView extends HideableView {
 }
 
 NewsView.propTypes = {
-  hiddenView: PropTypes.bool.isRequired,
   dispatch: PropTypes.func.isRequired,
   failed: PropTypes.bool.isRequired,
   fetching: PropTypes.bool.isRequired,

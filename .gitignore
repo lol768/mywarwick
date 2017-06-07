@@ -25,6 +25,7 @@ browserify-cache*.json
 *.key
 *.jks
 *.keystore
+*.swp
 
 npm-debug.log
 node_modules

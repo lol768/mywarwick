@@ -1,3 +1,4 @@
+import React from 'react';
 import TabBar from 'components/ui/TabBar';
 import TabBarItem from 'components/ui/TabBarItem';
 

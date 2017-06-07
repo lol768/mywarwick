@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import classNames from 'classnames';
 
-export default class ToggleSwitch extends React.Component {
+export default class ToggleSwitch extends React.PureComponent {
 
   constructor(props) {
     super(props);

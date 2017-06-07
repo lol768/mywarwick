@@ -9,7 +9,6 @@ import { Routes } from '../AppRoot';
 class ActivityMutesView extends React.Component {
 
   static propTypes = {
-    hiddenView: PropTypes.bool.isRequired,
     dispatch: React.PropTypes.func.isRequired,
     activityMutes: PropTypes.arrayOf(PropTypes.shape({
       id: PropTypes.string.isRequired,
@@ -46,7 +45,6 @@ class ActivityMutesView extends React.Component {
     return (
       <ScrollRestore
         url={`/${Routes.NOTIFICATIONS}/${Routes.MUTE}`}
-        hiddenView={ this.props.hiddenView }
       >
         <div>
           <h3>Muted notifications</h3>

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import log from 'loglevel';
 
-export default class UtilityBar extends React.Component {
+export default class UtilityBar extends React.PureComponent {
 
   static propTypes = {
     user: PropTypes.shape({
