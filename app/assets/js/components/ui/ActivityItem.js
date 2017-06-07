@@ -19,9 +19,18 @@ class ActivityItem extends React.PureComponent {
       colour: React.PropTypes.string,
     }),
     grouped: PropTypes.bool,
-    mutable: PropTypes.bool,
+    muteable: PropTypes.bool,
     onMuting: PropTypes.func,
   };
+
+  constructor(props) {
+    super(props);
+    this.onMuting = this.onMuting.bind(this);
+  }
+
+  onMuting() {
+    this.props.onMuting(this.props);
+  }
 
   render() {
     const classNames = classnames('activity-item',
@@ -33,8 +42,8 @@ class ActivityItem extends React.PureComponent {
 
     return (
       <div className={ classNames }>
-        { (this.props.mutable) ?
-          <div className="muting" onClick={ () => this.props.onMuting(this.props) }>
+        { (this.props.muteable) ?
+          <div className="muting" onClick={ this.onMuting }>
             <i className="fa fa-chevron-down"></i>
           </div> : null
         }
