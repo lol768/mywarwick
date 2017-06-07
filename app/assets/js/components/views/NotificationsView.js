@@ -48,6 +48,7 @@ class NotificationsView extends HideableView {
 
     this.loadMore = this.loadMore.bind(this);
     this.beginMarkReadTimeout = this.beginMarkReadTimeout.bind(this);
+    this.onMuting = this.onMuting.bind(this);
     this.onMutingDismiss = this.onMutingDismiss.bind(this);
   }
 
@@ -174,7 +175,7 @@ class NotificationsView extends HideableView {
           grouped={ shouldBeGrouped }
           unread={ this.isUnread(n) }
           mutable
-          onMuting={ () => this.onMuting(n) }
+          onMuting={ this.onMuting }
           {...n}
         />
       );
