@@ -40,7 +40,10 @@ export default class InfiniteScrollable extends HideableView {
   }
 
   onScroll() {
-    if (this.detached || this.unmounted) {
+    // detached - we've explicitly detached the listener
+    // unmounted - the component is/has unmounted
+    // suppressScroll - set while loading to avoid trying to load content twice
+    if (this.detached || this.unmounted || this.suppressScroll) {
       return;
     }
 
@@ -55,7 +58,7 @@ export default class InfiniteScrollable extends HideableView {
     const loadMoreThreshold = offsetTop + height - (windowHeight * 1.5);
 
     if (scrollTop >= loadMoreThreshold) {
-      this.detachScrollListener();
+      this.suppressScroll = true;
       this.setState({ loading: true });
       this.cancellableShowMorePromise = makeCancelable(this.props.onLoadMore());
       this.cancellableShowMorePromise.promise.then(() => {
@@ -64,14 +67,17 @@ export default class InfiniteScrollable extends HideableView {
         if (this.unmounted) return;
         if (e.isCanceled) {
           return;
-        } else if (!(e instanceof notifications.UnnecessaryFetchError)) {
-          this.setState({ loading: false });
-        } else {
+        } else if (e instanceof notifications.UnnecessaryFetchError) {
           log.debug(`Unnecessary fetch: ${e.message}`);
           return;
         }
+        this.setState({ loading: false });
         throw e;
       });
+
+      this.cancellableShowMorePromise.promise
+        .catch(() => {})
+        .then(() => { this.suppressScroll = false; });
     }
   }
 

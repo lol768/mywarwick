@@ -4,6 +4,7 @@ import _ from 'lodash-es';
 import * as dateFormats from '../../dateFormats';
 import * as notifications from '../../state/notifications';
 import ScrollRestore from '../ui/ScrollRestore';
+import EmptyState from '../ui/EmptyState';
 import { Routes } from '../AppRoot';
 
 class ActivityMutesView extends React.Component {
@@ -99,7 +100,11 @@ class ActivityMutesView extends React.Component {
                   </div>
                 </div>
               )
-              : <p>There are no muted notifications</p>
+              : <EmptyState>
+                  You haven't muted any notifications. Use the dropdown arrow next to each
+                  notification to specify similar types of notifications to mute in future.
+                  Muted notifications still appear here; they just don't pop up on your device.
+                </EmptyState>
           }
         </div>
       </ScrollRestore>

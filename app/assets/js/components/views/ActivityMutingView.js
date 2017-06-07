@@ -82,7 +82,7 @@ export default class ActivityMutingView extends React.Component {
           </div>
           {
             _.map(this.props.tags, (tag) => (
-              <div className="checkbox">
+              <div className="checkbox" key={tag.name}>
                 <label>
                   <input
                     type="checkbox"
@@ -101,7 +101,7 @@ export default class ActivityMutingView extends React.Component {
           <label>For:</label>
           {
             _.map(activityMuteDurations, (duration) => (
-              <div className="radio">
+              <div className="radio" key={ duration.value }>
                 <label>
                   <input
                     type="radio"
