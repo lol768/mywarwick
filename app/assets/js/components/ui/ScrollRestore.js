@@ -18,7 +18,7 @@ export default class ScrollRestore extends HideableView {
     }
   }
 
-  componentDidHide() {
+  componentWillHide() {
     detachScrollRestore(this.props.url);
   }
 

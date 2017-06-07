@@ -40,7 +40,7 @@ export default class InfiniteScrollable extends HideableView {
   }
 
   onScroll() {
-    if (this.detached) {
+    if (this.detached || this.unmounted) {
       return;
     }
 
