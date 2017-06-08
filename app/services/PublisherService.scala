@@ -1,6 +1,9 @@
 package services
 
+import java.sql.Connection
+
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import models.publishing.PublishingRole.Viewer
 import models.publishing._
 import play.api.db.{Database, NamedDatabase}
 import services.dao.PublisherDao
@@ -39,15 +42,20 @@ class PublisherServiceImpl @Inject()(
 
   val AllDepartmentsWildcard = "**"
 
-  override def all = db.withConnection(implicit c => dao.all)
+  override def all: Seq[Publisher] = db.withConnection(implicit c => dao.all)
 
-  override def find(id: String) = db.withConnection(implicit c => dao.find(id))
+  override def find(id: String): Option[Publisher] = db.withConnection(implicit c => dao.find(id))
 
-  override def getRoleForUser(publisherId: String, usercode: Usercode) = db.withConnection { implicit c =>
-    CompoundRole(dao.getPublisherPermissions(publisherId, usercode).map(_.role))
+  override def getRoleForUser(publisherId: String, usercode: Usercode): CompoundRole = db.withConnection { implicit c =>
+    val explicitRoles = dao.getPublisherPermissions(publisherId, usercode).map(_.role)
+    if (hasGlobalPermission(dao.getPublishersForUser(usercode))) {
+      CompoundRole(explicitRoles ++ Seq(Viewer))
+    } else {
+      CompoundRole(explicitRoles)
+    }
   }
 
-  override def getPermissionScope(publisherId: String) = db.withConnection { implicit c =>
+  override def getPermissionScope(publisherId: String): PermissionScope = db.withConnection { implicit c =>
     val departments = dao.getPublisherDepartments(publisherId)
 
     if (departments.contains(AllDepartmentsWildcard)) {
@@ -57,7 +65,7 @@ class PublisherServiceImpl @Inject()(
     }
   }
 
-  override def getParentPublisherId(providerId: String) = db.withConnection { implicit c =>
+  override def getParentPublisherId(providerId: String): Option[String] = db.withConnection { implicit c =>
     dao.getParentPublisherId(providerId)
   }
 
@@ -65,9 +73,19 @@ class PublisherServiceImpl @Inject()(
     dao.getProviders(publisherId)
   }
 
-  override def getPublishersForUser(usercode: Usercode) = db.withConnection(implicit c => dao.getPublishersForUser(usercode))
+  private def hasGlobalPermission(userPublishers: Seq[Publisher])(implicit c: Connection): Boolean =
+    userPublishers.exists(p => dao.getPublisherDepartments(p.id).contains(AllDepartmentsWildcard))
 
-  override def isPublisher(usercode: Usercode) = db.withConnection(implicit c => dao.isPublisher(usercode.string))
+  override def getPublishersForUser(usercode: Usercode): Seq[Publisher] = db.withConnection(implicit c => {
+    val explicitPublishers = dao.getPublishersForUser(usercode)
+    if (hasGlobalPermission(explicitPublishers)) {
+      dao.all
+    } else {
+      explicitPublishers
+    }
+  }).sortBy(_.name)
+
+  override def isPublisher(usercode: Usercode): Boolean = db.withConnection(implicit c => dao.isPublisher(usercode.string))
 
   override def getPublisherPermissions(publisherId: String): Seq[PublisherPermission] =
     db.withConnection(implicit c => dao.getAllPublisherPermissions(publisherId))
