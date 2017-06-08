@@ -33,9 +33,10 @@ class PublishersController @Inject()(
         )
 
     if (publishers.isEmpty) {
-      Forbidden(views.html.publish.publishers.index(Nil, Map.empty))
+      Forbidden(views.html.publish.publishers.index(Nil, Nil, Map.empty))
     } else {
-      Ok(views.html.publish.publishers.index(publishers, publisherUserPermissions))
+      val (globalPublishers, normalPublishers) = publisherService.partitionGlobalPublishers(publishers)
+      Ok(views.html.publish.publishers.index(globalPublishers, normalPublishers, publisherUserPermissions))
     }
   }
 
