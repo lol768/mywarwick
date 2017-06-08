@@ -32,6 +32,8 @@ trait PublisherService {
 
   def getPublisherPermissions(publisherId: String): Seq[PublisherPermission]
 
+  def partitionGlobalPublishers(publishers: Seq[Publisher]): (Seq[Publisher], Seq[Publisher])
+
 }
 
 @Singleton
@@ -90,4 +92,7 @@ class PublisherServiceImpl @Inject()(
   override def getPublisherPermissions(publisherId: String): Seq[PublisherPermission] =
     db.withConnection(implicit c => dao.getAllPublisherPermissions(publisherId))
 
+  override def partitionGlobalPublishers(publishers: Seq[Publisher]): (Seq[Publisher], Seq[Publisher]) = db.withConnection(implicit c =>
+    publishers.partition(p => dao.getPublisherDepartments(p.id).contains(AllDepartmentsWildcard))
+  )
 }
