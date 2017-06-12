@@ -40,17 +40,22 @@ export class AppLayout extends React.PureComponent {
         </ID7Layout>
         { layoutClassName === 'mobile' ?
           <TabBar selectedItem={ location.pathname } onSelectItem={ this.onSelectItem }>
-            <TabBarItem title="Me" icon="user" path="/" />
+            <TabBarItem title="Me" icon="user-o" selectedIcon="user" path="/" />
             <TabBarItem
-              title="Notifications" icon="inbox" path={ `/${Routes.NOTIFICATIONS}` }
-              badge={ notificationsCount } isDisabled={ !authenticated }
-            />
-            <TabBarItem
-              title="Activity" icon="dashboard" path={ `/${Routes.ACTIVITY}` }
+              title="Notifications" icon="bell-o" selectedIcon="bell"
+              path={ `/${Routes.NOTIFICATIONS}` } badge={ notificationsCount }
               isDisabled={ !authenticated }
             />
-            <TabBarItem title="News" icon="mortar-board" path={ `/${Routes.NEWS}` } />
-            <TabBarItem title="Search" icon="search" path={ `/${Routes.SEARCH}` } />
+            <TabBarItem
+              title="Activity" icon="tachometer" selectedIcon="tachometer"
+              path={ `/${Routes.ACTIVITY}` } isDisabled={ !authenticated }
+            />
+            <TabBarItem title="News" icon="newspaper-o" selectedIcon="newspaper-o"
+              path={ `/${Routes.NEWS}` }
+            />
+            <TabBarItem title="Search" icon="search" selectedIcon="search"
+              path={ `/${Routes.SEARCH}` }
+            />
           </TabBar>
           : null }
       </div>
