@@ -12,6 +12,18 @@ $(() => {
 
     let currentQuery = null;
 
+    $checkbox.on('change', () => {
+      if ($checkbox.is(':checked') && $input.val().trim().length === 0) {
+        $input.focus();
+      }
+    });
+
+    $input.on('input, blur', () => {
+      if ($input.val().trim().length === 0) {
+        $checkbox.prop('checked', false);
+      }
+    });
+
     $input.typeahead({
       source: (query, callback) => {
         currentQuery = query;
@@ -38,13 +50,12 @@ $(() => {
       afterSelect: item => {
         if (item) {
           $checkbox
-            .prop('disabled', false)
             .prop('checked', true)
-            .attr('value', `WebGroup:${item.name}`);
+            .val(`WebGroup:${item.name}`);
         } else {
           $checkbox
             .prop('checked', false)
-            .prop('disabled', true);
+            .val('WebGroup:');
         }
       },
     });

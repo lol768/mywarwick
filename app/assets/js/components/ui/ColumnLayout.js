@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash-es';
 
-export default class ColumnLayout extends React.Component {
+export default class ColumnLayout extends React.PureComponent {
 
   render() {
     const TOTAL_COLUMNS = 12;

@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 
-export default class SearchField extends React.Component {
+export default class SearchField extends React.PureComponent {
 
   constructor(props) {
     super(props);

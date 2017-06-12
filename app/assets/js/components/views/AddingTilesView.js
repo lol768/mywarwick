@@ -5,11 +5,13 @@ import $ from 'jquery.transit';
 import { connect } from 'react-redux';
 import * as tiles from '../../state/tiles';
 import HiddenTile from '../tiles/HiddenTile';
+import ScrollRestore from '../ui/ScrollRestore';
+import { Routes } from '../AppRoot';
 
 const rowHeight = 125;
 const margin = [4, 4];
 
-class AddingTilesView extends React.Component {
+class AddingTilesView extends React.PureComponent {
 
   static propTypes = {
     location: PropTypes.shape({
@@ -91,11 +93,16 @@ class AddingTilesView extends React.Component {
 
   render() {
     return (
-      <div className="me-view-container">
-        <div className="me-view me-view--adding">
-          {this.renderHiddenTiles()}
+      <ScrollRestore
+        url={`/${Routes.EDIT}/${Routes.ADD}`}
+        forceTop
+      >
+        <div className="me-view-container">
+          <div className="me-view me-view--adding">
+            {this.renderHiddenTiles()}
+          </div>
         </div>
-      </div>
+      </ScrollRestore>
     );
   }
 }

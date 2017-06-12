@@ -7,6 +7,7 @@ import { goBack, push } from 'react-router-redux';
 import _ from 'lodash-es';
 import $ from 'jquery';
 import { Routes } from '../AppRoot';
+import ScrollRestore from '../ui/ScrollRestore';
 
 class TileView extends Component {
 
@@ -114,11 +115,21 @@ class TileView extends Component {
       size,
     };
 
-    return (
+    const tileElement = (
       <Tile { ...tileProps }>
         { React.createElement(tileContentComponent, contentProps) }
       </Tile>
     );
+
+    if (zoomed) {
+      return (
+        <ScrollRestore url={`/${Routes.TILES}/${id}`} forceTop>
+          {tileElement}
+        </ScrollRestore>
+      );
+    }
+
+    return tileElement;
   }
 
 }

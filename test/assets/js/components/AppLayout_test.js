@@ -17,17 +17,17 @@ describe('AppLayout', () => {
     // comparing JSX with JSX. good idea? Who knows
     result.should.include(
       <TabBar selectedItem='/' onSelectItem={ () => {} }>
-        <TabBarItem title="Me" icon="user" path="/" />
+        <TabBarItem title="Me" icon="user-o" selectedIcon="user" path="/" />
         <TabBarItem
-          title="Notifications" icon="inbox" path="/notifications"
+          title="Notifications" icon="bell-o" selectedIcon="bell" path="/notifications"
           badge='7' isDisabled={ true }
         />
         <TabBarItem
-          title="Activity" icon="dashboard" path="/activity"
+          title="Activity" icon="tachometer" selectedIcon="tachometer" path="/activity"
           isDisabled={ true }
         />
-        <TabBarItem title="News" icon="mortar-board" path="/news" />
-        <TabBarItem title="Search" icon="search" path="/search" />
+        <TabBarItem title="News" icon="newspaper-o" selectedIcon="newspaper-o" path="/news" />
+        <TabBarItem title="Search" icon="search" selectedIcon="search" path="/search" />
       </TabBar>
     );
   })

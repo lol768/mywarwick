@@ -70,12 +70,31 @@ html.mobile {
     top: 0;
     line-height: 44px;
     font-size: 1.25em;
-    padding: 0 20px 0 10px;
+    padding: 0 20px 0 13px;
     cursor: pointer;
+  }
 
-    i {
-      padding: 0 5px;
+  .feedback-btn {
+    @font-size: 1.25em;
+    position: absolute;
+    left: 0;
+    top: 0;
+    line-height: 44px;
+    font-size: @font-size;
+    cursor: pointer;
+    height: 44px;
+    width: 44px;
+    .fa-stack-2x {
+      font-size: @font-size;
+      line-height: 44px;
     }
+    .fa-stack-1x {
+      font-size: @font-size / 2;
+    }
+  }
+
+  .edit-btn ~ .feedback-btn {
+    left: 44px;
   }
 
   .masthead-title {
@@ -122,6 +141,33 @@ html.mobile {
   }
 }
 
+.in-edit .edit-btn {
+  line-height: normal;
+  padding: 2px;
+  border-radius: 100%;
+  background-color: transparent;
+  border: 2px solid rgba(255, 255, 255, 0);
+  margin: 7px 11px 7px 9px;
+}
+
+.in-edit .pulse {
+  animation: pulse 1.1s 2;
+}
+
+@keyframes pulse {
+  0% {
+    background-color: transparent;
+  }
+
+  50% {
+    background-color: #007aff;
+  }
+
+  100% {
+    background-color: transparent;
+  }
+}
+
 .in-tiles {
   &, .id7-main-content-area {
     overflow-y: hidden;
@@ -132,6 +178,10 @@ html.mobile {
     visibility: visible;
     opacity: 1;
     transform: translate3d(0, 0, 0);
+  }
+
+  .feedback-btn {
+    display: none;
   }
 }
 

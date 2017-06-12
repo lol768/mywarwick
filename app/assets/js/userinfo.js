@@ -1,8 +1,10 @@
+/* global MyWarwickNative */
 import store from './store';
 import * as user from './state/user';
 import * as analytics from './analytics';
-
+import $ from 'jquery';
 import { fetchUserInfo, handleRedirects } from './userinfo-base';
+import { hasAuthoritativeAuthenticatedUser } from './state';
 export { fetchUserInfo } from './userinfo-base';
 
 export function receiveUserInfo(response) {
@@ -34,3 +36,33 @@ export function receiveUserInfo(response) {
       throw e;
     });
 }
+
+const feedbackFormLocation =
+  'http://warwick.ac.uk/my/feedback';
+
+export function showFeedbackForm(deviceDetails) {
+  const state = store.getState();
+  let userDetails = {};
+  if (state !== undefined && hasAuthoritativeAuthenticatedUser(state)) {
+    userDetails = {
+      usercode: state.user.data.usercode,
+      name: state.user.data.name,
+    };
+  }
+  window.location = `${feedbackFormLocation}?${$.param(Object.assign(deviceDetails, userDetails))}`;
+}
+
+export function loadDeviceDetails() {
+  if (typeof MyWarwickNative !== 'undefined' && MyWarwickNative.loadDeviceDetails) {
+    MyWarwickNative.loadDeviceDetails();
+  } else {
+    showFeedbackForm({
+      os: navigator.platform,
+      model: navigator.userAgent,
+      'screen-width': $(window).width(),
+      'screen-height': $(window).height(),
+      path: window.location.pathname,
+    });
+  }
+}
+

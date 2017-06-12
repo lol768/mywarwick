@@ -1,7 +1,7 @@
 package services
 
 import helpers.{BaseSpec, Fixtures}
-import models.{ActivityMute, ActivityRender, Output}
+import models._
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
@@ -12,7 +12,7 @@ import warwick.sso.{UserLookupService, Usercode}
 class MessagingServiceTest extends BaseSpec with MockitoSugar {
 
   class Scope {
-    val activityService = mock[ActivityService]
+    val activityService: ActivityService = mock[ActivityService]
     val activityServiceProvider = new javax.inject.Provider[ActivityService] {
       override def get(): ActivityService = activityService
     }
@@ -38,7 +38,9 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
       private val activityRender = ActivityRender(
         activity = activity,
         icon = None,
-        tags = Nil
+        tags = Nil,
+        provider = ActivityProvider(activity.providerId),
+        `type` = ActivityType(activity.`type`)
       )
       private val recipients = Set(Usercode("cusebr"), Usercode("cusfal"))
       when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))

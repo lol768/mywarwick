@@ -24,6 +24,7 @@ describe('NotificationsView', () => {
         fetched: true,
         date: moment(),
       },
+      numberToShow: 20,
     };
     const ungrouped = enzyme.render(<NotificationsView.WrappedComponent {...ungroupedProps} />);
     expect(ungrouped.find('.list-group')).to.have.length(0);
@@ -54,6 +55,7 @@ describe('NotificationsView', () => {
         fetched: true,
         date: moment(),
       },
+      numberToShow: 20,
     };
     const grouped = enzyme.render(<NotificationsView.WrappedComponent {...groupedProps} />);
     expect(grouped.find('.list-group')).to.have.length(2);

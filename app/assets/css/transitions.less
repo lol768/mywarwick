@@ -1,28 +1,35 @@
 /* text-tile */
 .text-tile-transition-group {
+  position: absolute;
+  top: 0;
+  left: @tile-padding;
+  right: @tile-padding;
+  bottom: @tile-padding;
+
   .tile__item {
     position: absolute;
-    width: 94%; // FIXME: MAGIC NUMBER. Using 100% width overflowed container, unable to set parent's position relative
+    width: 100%;
   }
 }
 
 .text-tile-enter {
+  display: block;
   transform: translate(130%, 0) !important;
 }
 
 .text-tile-enter-active {
   transform: translate(0, 0) !important;
-  transition: transform 500ms ease-out;
-  transition-delay: 400ms;
+  transition: transform 500ms ease-in-out;
 }
 
 .text-tile-leave {
+  display: block;
   transform: translate(0, 0) !important;
 }
 
 .text-tile-leave-active {
-  transform: translate(130%, 0) !important;
-  transition: transform 500ms ease-in;
+  transform: translate(-130%, 0) !important;
+  transition: transform 500ms ease-in-out;
 }
 
 .grow-shrink-enter, .grow-shrink-appear {

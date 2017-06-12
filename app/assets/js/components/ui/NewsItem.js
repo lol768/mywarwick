@@ -12,7 +12,7 @@ export const render = (content) =>
     .filter(t => t.length)
     .map((t, i) => <p key={i}>{t}</p>);
 
-class NewsItem extends React.Component {
+class NewsItem extends React.PureComponent {
 
   static propTypes = {
     id: PropTypes.string.isRequired,

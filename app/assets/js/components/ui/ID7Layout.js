@@ -16,7 +16,7 @@ import * as ui from '../../state/ui';
 import { goBack, push } from 'react-router-redux';
 import { Routes } from '../AppRoot';
 
-class ID7Layout extends React.Component {
+class ID7Layout extends React.PureComponent {
 
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
@@ -78,6 +78,8 @@ class ID7Layout extends React.Component {
   onEdit() {
     if (this.isEditing()) {
       this.props.dispatch(goBack());
+    } else if (this.props.path === `/${Routes.NOTIFICATIONS}`) {
+      this.props.dispatch(push(`/${Routes.NOTIFICATIONS}/${Routes.MUTE}`));
     } else {
       this.props.dispatch(push(`/${Routes.EDIT}`));
     }
@@ -130,7 +132,7 @@ class ID7Layout extends React.Component {
   }
 
   renderMobile() {
-    const { user, zoomedTile, path } = this.props;
+    const { user, path } = this.props;
     return (
       <div className="">
         <a className="sr-only sr-only-focusable" href="#main">Skip to main content</a>
@@ -141,12 +143,15 @@ class ID7Layout extends React.Component {
               { this.renderMasqueradeNotice() }
 
               <MastheadMobile user={user}
-                zoomedTile={zoomedTile}
                 onBackClick={this.onBackClick}
                 path={path}
                 onEdit={this.onEdit}
                 editing={this.isEditing()}
-                showEditButton={this.isEditing() || this.props.path === '/'}
+                showEditButton={
+                  this.isEditing() ||
+                  this.props.path === '/' ||
+                  this.props.path === `/${Routes.NOTIFICATIONS}`
+                }
               />
             </header>
           </div>

@@ -6,13 +6,17 @@ import * as notificationMetadata from './notification-metadata';
 import { getLastItemInStream, makeStream, onStreamReceive, takeFromStream } from '../stream';
 import { createAction } from 'redux-actions';
 import qs from 'qs';
+import _ from 'lodash-es';
 
 export const NOTIFICATION_FETCHING = 'notifications.fetching';
 export const NOTIFICATION_RECEIVE = 'notifications.receive';
 export const NOTIFICATION_FETCH = 'notifications.fetch';
+export const NOTIFICATION_NUMBER_TO_SHOW = 'notifications.numberToShow';
 export const ACTIVITY_FETCHING = 'activities.fetching';
 export const ACTIVITY_RECEIVE = 'activities.receive';
 export const ACTIVITY_FETCH = 'activities.fetch';
+export const ACTIVITY_NUMBER_TO_SHOW = 'activity.numberToShow';
+export const ACTIVITY_MUTE_FETCH = 'mutes.fetch';
 
 export const fetchingActivities = createAction(ACTIVITY_FETCHING);
 export const receivedActivity = createAction(ACTIVITY_RECEIVE);
@@ -20,6 +24,7 @@ export const fetchedActivities = createAction(ACTIVITY_FETCH);
 export const fetchingNotifications = createAction(NOTIFICATION_FETCHING);
 export const receivedNotification = createAction(NOTIFICATION_RECEIVE);
 export const fetchedNotifications = createAction(NOTIFICATION_FETCH);
+export const fetchedActivityMutes = createAction(ACTIVITY_MUTE_FETCH);
 
 const ITEM_FETCH_LIMIT = 100;
 
@@ -97,8 +102,23 @@ export function fetchNotifications() {
   };
 }
 
+export function fetchActivityMutes() {
+  return dispatch => fetchWithCredentials('/api/streams/mute')
+    .then(response => response.json())
+    .then(json => json.data.activityMutes)
+    .then(activityMutes => dispatch(fetchedActivityMutes({ activityMutes })))
+    .catch(e => {
+      log.warn('Failed to fetch activity mutes', e);
+      throw e;
+    });
+}
+
 export function fetch() {
-  return dispatch => Promise.all([dispatch(fetchActivities()), dispatch(fetchNotifications())]);
+  return dispatch => Promise.all([
+    dispatch(fetchActivities()),
+    dispatch(fetchNotifications()),
+    dispatch(fetchActivityMutes()),
+  ]);
 }
 
 export function fetchMoreNotifications() {
@@ -153,10 +173,82 @@ export function fetchMoreActivities() {
   };
 }
 
+export function showMoreNotifications(numberToShow) {
+  return (dispatch) => dispatch(createAction(NOTIFICATION_NUMBER_TO_SHOW)({ numberToShow }));
+}
+
+export function showMoreActivities(numberToShow) {
+  return (dispatch) => dispatch(createAction(ACTIVITY_NUMBER_TO_SHOW)({ numberToShow }));
+}
+
 const partitionByYearAndMonth = (n) => n.date.toString().substr(0, 7);
 
 export function mergeNotifications(stream, newNotifications) {
   return onStreamReceive(stream, partitionByYearAndMonth, newNotifications);
+}
+
+export const activityMuteDurations = [
+  {
+    value: '1hour',
+    displayValue: 'An hour',
+    toExpiryDate: () => moment().add(1, 'h'),
+  },
+  {
+    value: '1day',
+    displayValue: 'A day',
+    toExpiryDate: () => moment().add(1, 'd'),
+  },
+  {
+    value: '1week',
+    displayValue: 'A week',
+    toExpiryDate: () => moment().add(1, 'w'),
+  },
+  {
+    value: '1month',
+    displayValue: 'A month',
+    toExpiryDate: () => moment().add(1, 'M'),
+  },
+  {
+    value: 'indefinite',
+    displayValue: 'Until I turn them back on',
+    toExpiryDate: () => null,
+  },
+];
+
+export function saveActivityMute(activity, options) {
+  return dispatch => {
+    const optionsObject = _.mapValues(_.keyBy(options, o => o.name), v => v.value);
+
+    const duration = _.find(activityMuteDurations, (d) => d.value === optionsObject.duration);
+
+    const tags = _.filter(activity.tags, tag =>
+      optionsObject[`tags[${tag.name}]`] !== undefined &&
+        optionsObject[`tags[${tag.name}]`] === tag.value
+    );
+
+    const data = {
+      expiresAt: duration.toExpiryDate(),
+      activityType: optionsObject.activityType ? activity.type : null,
+      providerId: optionsObject.providerId ? activity.provider : null,
+      tags,
+    };
+
+    return global.fetch('/api/streams/mute', {
+      credentials: 'same-origin',
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    }).then(() => dispatch(fetchActivityMutes()));
+  };
+}
+
+export function deleteActivityMute(activity) {
+  return dispatch => global.fetch(`/api/streams/mute?id=${activity.id}`, {
+    credentials: 'same-origin',
+    method: 'DELETE',
+  }).then(() => dispatch(fetchActivityMutes()));
 }
 
 const initialState = {
@@ -164,6 +256,8 @@ const initialState = {
   fetching: false,
   olderItemsOnServer: true,
   lastItemFetched: null,
+  numberToShow: 20,
+  activityMutes: [],
 };
 
 export function notificationsReducer(state = initialState, action) {
@@ -190,6 +284,17 @@ export function notificationsReducer(state = initialState, action) {
         stream: updatedStream,
         fetching: false,
         lastItemFetched: lastItem && lastItem.id,
+      };
+    }
+    case NOTIFICATION_NUMBER_TO_SHOW:
+      return {
+        ...state,
+        numberToShow: action.payload.numberToShow,
+      };
+    case ACTIVITY_MUTE_FETCH: {
+      return {
+        ...state,
+        activityMutes: _.sortBy(action.payload.activityMutes, (mute) => (mute.expiresAt || 'ZZZ')),
       };
     }
     default:
@@ -223,6 +328,11 @@ export function activitiesReducer(state = initialState, action) {
         lastItemFetched: lastItem && lastItem.id,
       };
     }
+    case ACTIVITY_NUMBER_TO_SHOW:
+      return {
+        ...state,
+        numberToShow: action.payload.numberToShow,
+      };
     default:
       return state;
   }

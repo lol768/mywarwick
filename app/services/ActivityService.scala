@@ -45,6 +45,12 @@ trait ActivityService {
     now: DateTime = DateTime.now
   ): Seq[ActivityMute]
 
+  def getActivityMutesForRecipient(recipient: Usercode, now: DateTime = DateTime.now): Seq[ActivityMuteRender]
+
+  def save(activityMute: ActivityMuteSave): Either[Seq[ActivityError], String]
+
+  def expireActivityMute(recipient: Usercode, id: String): Either[Seq[ActivityError], ActivityMuteRender]
+
 }
 
 class ActivityServiceImpl @Inject()(
@@ -83,6 +89,9 @@ class ActivityServiceImpl @Inject()(
 
           dao.update(activityId, activity, audienceId)
 
+          // Might be more efficient to store job with replace=true
+          // instead of deleting separately.
+          unschedulePublishJob(activityId)
           schedulePublishJob(activityId, audienceId, activity.publishedAt.getOrElse(DateTime.now))
         }
         Right(activityId)
@@ -188,10 +197,31 @@ class ActivityServiceImpl @Inject()(
     mutes.filterNot(_.expiresAt.exists(_.isBefore(now))).filter(_.matchesTags(tags))
   }
 
-  private def schedulePublishJob(activityId: String, audienceId: String, publishDate: DateTime): Unit = {
-    val key = new JobKey(activityId, PublishActivityJob.name)
+  override def getActivityMutesForRecipient(recipient: Usercode, now: DateTime = DateTime.now): Seq[ActivityMuteRender] = {
+    val mutes = db.withConnection(implicit c => muteDao.mutesForRecipient(recipient))
+    mutes.filterNot(_.expiresAt.exists(_.isBefore(now)))
+  }
 
-    scheduler.deleteJob(key)
+  override def save(activityMute: ActivityMuteSave): Either[Seq[ActivityError], String] = {
+    if (activityMute.activityType.isEmpty && activityMute.providerId.isEmpty && activityMute.tags.isEmpty) {
+      Left(Seq(MuteNoOptions))
+    } else {
+      Right(db.withConnection(implicit c => muteDao.save(activityMute)))
+    }
+  }
+
+  override def expireActivityMute(recipient: Usercode, id: String): Either[Seq[ActivityError], ActivityMuteRender] = {
+    db.withConnection(implicit c => muteDao.mutesForRecipient(recipient)).find(_.id == id).map { mute =>
+      db.withTransaction(implicit c => muteDao.expire(mute))
+      Right(mute)
+    }.getOrElse(Left(Seq(MuteDoesNotExist)))
+  }
+
+  private def publishJobKey(activityId: String): JobKey =
+    new JobKey(activityId, PublishActivityJob.name)
+
+  private def schedulePublishJob(activityId: String, audienceId: String, publishDate: DateTime): Unit = {
+    val key = publishJobKey(activityId)
 
     val job = JobBuilder.newJob(classOf[PublishActivityJob])
       .withIdentity(key)
@@ -212,7 +242,7 @@ class ActivityServiceImpl @Inject()(
   }
 
   private def unschedulePublishJob(activityId: String): Unit = {
-    scheduler.deleteJob(new JobKey(activityId, PublishActivityJob.name))
+    scheduler.deleteJob(publishJobKey(activityId))
   }
 
 }
@@ -253,6 +283,14 @@ object ActivityError {
 
   object DoesNotExist extends ActivityError {
     val message = "This activity does not exist"
+  }
+
+  object MuteNoOptions extends ActivityError {
+    val message = "Activity type or provider or at least one tag must be chosen"
+  }
+
+  object MuteDoesNotExist extends ActivityError {
+    val message = "This activity mute does not exist"
   }
 
 }

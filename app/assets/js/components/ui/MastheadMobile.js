@@ -1,10 +1,10 @@
 import React from 'react';
 import UtilityBar from './UtilityBar';
-
 import $ from 'jquery';
 import ReactDOM from 'react-dom';
+import { loadDeviceDetails } from '../../userinfo';
 
-export default class MastheadMobile extends React.Component {
+export default class MastheadMobile extends React.PureComponent {
 
   componentDidMount() {
     $(ReactDOM.findDOMNode(this)).on('touchmove', (e) => e.preventDefault());
@@ -14,7 +14,7 @@ export default class MastheadMobile extends React.Component {
     return (
       <div className="start-masthead use-popover">
         { this.props.showEditButton &&
-        <div className="edit-btn" onClick={this.props.onEdit}>
+        <div className="edit-btn pulse" onClick={this.props.onEdit}>
           { this.props.editing ?
             <i className="fa fa-fw fa-check"> </i> :
             <i className="fa fa-fw fa-cog"> </i>
@@ -24,6 +24,10 @@ export default class MastheadMobile extends React.Component {
         <div className="back-btn" onClick={this.props.onBackClick}>
           <i className="fa fa-chevron-left" />
           Back
+        </div>
+        <div className="feedback-btn" onClick={loadDeviceDetails}>
+          <i className="fa fa-comment-o fa-stack-2x"></i>
+          <strong className="fa-stack-1x fa-stack-text">!</strong>
         </div>
         <div className="masthead-title">
           <span className="light">My</span> Warwick
@@ -38,7 +42,6 @@ export default class MastheadMobile extends React.Component {
 }
 
 MastheadMobile.propTypes = {
-  zoomedTile: React.PropTypes.string,
   path: React.PropTypes.string,
   onBackClick: React.PropTypes.func,
   onEdit: React.PropTypes.func,

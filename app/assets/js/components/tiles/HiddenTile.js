@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 
-export default class HiddenTile extends React.Component {
+export default class HiddenTile extends React.PureComponent {
 
   render() {
     const { icon, title, onShow, colour } = this.props;

@@ -37,3 +37,4 @@ export function updateDeviceWidth() {
 }
 
 export const updateNotificationPermissions = { type: 'UPDATE_NOTIFICATION_PERMISSIONS' };
+

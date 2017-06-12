@@ -4,8 +4,9 @@ import $ from 'jquery';
 import log from 'loglevel';
 import * as notifications from '../../state/notifications';
 import { makeCancelable } from '../../promise';
+import HideableView from '../views/HideableView';
 
-export default class InfiniteScrollable extends React.Component {
+export default class InfiniteScrollable extends HideableView {
 
   static propTypes = {
     hasMore: PropTypes.bool,
@@ -20,25 +21,29 @@ export default class InfiniteScrollable extends React.Component {
     this.state = {
       loading: false,
     };
+    this.unmounted = false;
     this.boundScrollListener = this.onScroll.bind(this);
     this.cancellableShowMorePromise = makeCancelable(Promise.resolve());
   }
 
-  componentDidMount() {
-    this.attachScrollListener();
-  }
-
-  componentDidUpdate() {
-    this.attachScrollListener();
-  }
-
   componentWillUnmount() {
+    this.unmounted = true;
+  }
+
+  componentDidShow() {
+    this.attachScrollListener();
+  }
+
+  componentWillHide() {
     this.detachScrollListener();
     this.cancellableShowMorePromise.cancel();
   }
 
   onScroll() {
-    if (this.detached) {
+    // detached - we've explicitly detached the listener
+    // unmounted - the component is/has unmounted
+    // suppressScroll - set while loading to avoid trying to load content twice
+    if (this.detached || this.unmounted || this.suppressScroll) {
       return;
     }
 
@@ -53,22 +58,26 @@ export default class InfiniteScrollable extends React.Component {
     const loadMoreThreshold = offsetTop + height - (windowHeight * 1.5);
 
     if (scrollTop >= loadMoreThreshold) {
-      this.detachScrollListener();
+      this.suppressScroll = true;
       this.setState({ loading: true });
       this.cancellableShowMorePromise = makeCancelable(this.props.onLoadMore());
-      this.cancellableShowMorePromise.promise.then(() =>
-        this.setState({ loading: false })
-      ).catch((e) => {
+      this.cancellableShowMorePromise.promise.then(() => {
+        if (!this.unmounted) this.setState({ loading: false });
+      }).catch((e) => {
+        if (this.unmounted) return;
         if (e.isCanceled) {
-          return Promise.resolve();
-        } else if (!(e instanceof notifications.UnnecessaryFetchError)) {
-          this.setState({ loading: false });
-        } else {
+          return;
+        } else if (e instanceof notifications.UnnecessaryFetchError) {
           log.debug(`Unnecessary fetch: ${e.message}`);
-          return Promise.resolve();
+          return;
         }
-        return Promise.reject(e);
+        this.setState({ loading: false });
+        throw e;
       });
+
+      this.cancellableShowMorePromise.promise
+        .catch(() => {})
+        .then(() => { this.suppressScroll = false; });
     }
   }
 
@@ -76,8 +85,10 @@ export default class InfiniteScrollable extends React.Component {
     this.detached = true;
     $(window).off('scroll resize', this.boundScrollListener);
 
-    $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]')
-      .off('scroll', this.boundScrollListener);
+    if (!this.unmounted) {
+      $(ReactDOM.findDOMNode(this)).parents('[data-scrollable]')
+        .off('scroll', this.boundScrollListener);
+    }
   }
 
   attachScrollListener() {

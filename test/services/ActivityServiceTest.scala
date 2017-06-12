@@ -17,12 +17,12 @@ import warwick.sso.Usercode
 class ActivityServiceTest extends BaseSpec with MockitoSugar {
 
   class Scope {
-    val activityDao = mock[ActivityDao]
-    val activityTypeService = mock[ActivityTypeService]
-    val activityTagDao = mock[ActivityTagDao]
-    val activityRecipientDao = mock[ActivityRecipientDao]
-    val audienceDao = mock[AudienceDao]
-    val activityMuteDao = mock[ActivityMuteDao]
+    val activityDao: ActivityDao = mock[ActivityDao]
+    val activityTypeService: ActivityTypeService = mock[ActivityTypeService]
+    val activityTagDao: ActivityTagDao = mock[ActivityTagDao]
+    val activityRecipientDao: ActivityRecipientDao = mock[ActivityRecipientDao]
+    val audienceDao: AudienceDao = mock[AudienceDao]
+    val activityMuteDao: ActivityMuteDao = mock[ActivityMuteDao]
     val scheduler = new MockSchedulerService()
 
     val service = new ActivityServiceImpl(
@@ -40,7 +40,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
     when(activityTypeService.isValidActivityTagName(Matchers.any())).thenReturn(true)
     when(activityTypeService.isValidActivityTag(Matchers.any(), Matchers.any())).thenReturn(true)
 
-    val submissionDue = Fixtures.activitySave.submissionDue
+    val submissionDue: ActivitySave = Fixtures.activitySave.submissionDue
 
     when(activityTagDao.getActivitiesWithTags(Matchers.eq(Map()), Matchers.eq("tabula"))(any())) thenReturn Nil
   }
@@ -52,7 +52,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
     }
 
     "save an item for each recipient" in new Scope {
-      val recipients = Audience.usercode(Usercode("cusebr"))
+      private val recipients = Audience.usercode(Usercode("cusebr"))
 
       when(audienceDao.saveAudience(Matchers.eq(recipients))(any())).thenReturn("audience-id")
       when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
@@ -67,8 +67,8 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       when(audienceDao.saveAudience(Matchers.any())(any())).thenReturn("audience-id")
       when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
 
-      val activity = submissionDue
-      val result = service.save(activity, Audience.usercode(Usercode("custard")))
+      private val activity = submissionDue
+      private val result = service.save(activity, Audience.usercode(Usercode("custard")))
 
       result must be a 'right
     }
@@ -78,8 +78,8 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       when(audienceDao.saveAudience(Matchers.any())(any())).thenReturn("audience-id")
       when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
 
-      val activity = submissionDue
-      val result = service.save(activity, Audience.usercode(Usercode("custard")))
+      private val activity = submissionDue
+      private val result = service.save(activity, Audience.usercode(Usercode("custard")))
 
       result must be a 'right
     }
@@ -90,11 +90,11 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       when(audienceDao.saveAudience(Matchers.any())(any())).thenReturn("audience-id")
       when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
 
-      val activity = submissionDue.copy(tags = Seq(ActivityTag("module", TagValue("CS118", Some("CS118 Programming for Computer Scientists")))))
-      val result = service.save(activity, Audience.usercode(Usercode("custard")))
+      private val activity = submissionDue.copy(tags = Seq(ActivityTag("module", None, TagValue("CS118", Some("CS118 Programming for Computer Scientists")))))
+      private val result = service.save(activity, Audience.usercode(Usercode("custard")))
 
       result must be a 'left
-      val e = result.left.get
+      private val e = result.left.get
 
       e.loneElement mustBe an[InvalidTagValue]
     }
@@ -102,11 +102,11 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
     "fail with invalid activity tag value" in new Scope {
       when(activityTypeService.isValidActivityTag(Matchers.any(), Matchers.any())).thenReturn(false)
 
-      val activity = submissionDue.copy(tags = Seq(ActivityTag("module", TagValue("CS118", Some("CS118 Programming for Computer Scientists")))))
-      val result = service.save(activity, Audience.usercode(Usercode("custard")))
+      private val activity = submissionDue.copy(tags = Seq(ActivityTag("module", None, TagValue("CS118", Some("CS118 Programming for Computer Scientists")))))
+      private val result = service.save(activity, Audience.usercode(Usercode("custard")))
 
       result must be a 'left
-      val e = result.left.get
+      private val e = result.left.get
 
       e.loneElement mustBe an[InvalidTagValue]
       e.loneElement must have('name ("module"), 'value ("CS118"))
@@ -115,30 +115,30 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
     "update - fail if activity does not exist" in new Scope {
       when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(None)
 
-      val result = service.update("activity", submissionDue, Audience.usercode(Usercode("custard")))
+      private val result = service.update("activity", submissionDue, Audience.usercode(Usercode("custard")))
 
       result must be a 'left
       result.left.get must contain(DoesNotExist)
     }
 
     "update - fail if activity is already published" in new Scope {
-      val existingActivity = Fixtures.activity.fromSave("activity", submissionDue).copy(publishedAt = DateTime.now.minusHours(1))
+      private val existingActivity = Fixtures.activity.fromSave("activity", submissionDue).copy(publishedAt = DateTime.now.minusHours(1))
       when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(Some(existingActivity))
 
-      val result = service.update("activity", submissionDue, Audience.usercode(Usercode("custard")))
+      private val result = service.update("activity", submissionDue, Audience.usercode(Usercode("custard")))
 
       result must be a 'left
       result.left.get must contain(AlreadyPublished)
     }
 
     "update an existing activity" in new Scope {
-      val existingActivity = Fixtures.activity.fromSave("activity", submissionDue).copy(publishedAt = DateTime.now.plusHours(1))
+      private val existingActivity = Fixtures.activity.fromSave("activity", submissionDue).copy(publishedAt = DateTime.now.plusHours(1))
       when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(Some(existingActivity))
 
-      val audience = Audience.usercode(Usercode("custard"))
+      private val audience = Audience.usercode(Usercode("custard"))
       when(audienceDao.saveAudience(Matchers.eq(audience))(any())).thenReturn("audience")
 
-      val result = service.update("activity", submissionDue, audience)
+      private val result = service.update("activity", submissionDue, audience)
 
       result must be a 'right
       result.right.get must be("activity")
@@ -181,9 +181,9 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
         result must have length 0
       }
 
-      val tag1 = ActivityTag("tag1", TagValue("value1"))
-      val tag2 = ActivityTag("tag2", TagValue("value1"))
-      val tag3 = ActivityTag("tag2", TagValue("value2"))
+      val tag1 = ActivityTag("tag1", None, TagValue("value1"))
+      val tag2 = ActivityTag("tag2", None, TagValue("value1"))
+      val tag3 = ActivityTag("tag2", None, TagValue("value2"))
       // Empty mute tags
       new Scope {
         private val activity = Fixtures.activity.fromSave("activity", submissionDue)
@@ -230,6 +230,25 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
         when(activityMuteDao.mutesForActivity(Matchers.eq(activity), Matchers.any[Set[Usercode]])(Matchers.any())).thenReturn(Seq(thisMute))
         private val result = service.getActivityMutes(activity, Seq(tag1, tag2, tag3), Set.empty)
         result must have length 1
+      }
+    }
+
+    "require option when saving mute" in {
+      new Scope {
+        private val mute = ActivityMuteSave(
+          Usercode("cusfal"),
+          None,
+          None,
+          None,
+          Nil
+        )
+        private val result = service.save(mute)
+        result.isLeft must be (true)
+        result.left.get must have size 1
+        (result.left.get.head match {
+          case MuteNoOptions => true
+          case _ => false
+        }) must be (true)
       }
     }
 

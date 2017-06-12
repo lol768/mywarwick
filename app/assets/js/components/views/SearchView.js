@@ -1,6 +1,8 @@
 import React from 'react';
 import Bundle from '../system/Bundle';
 import once from 'lodash-es/once';
+import ScrollRestore from '../ui/ScrollRestore';
+import { Routes } from '../AppRoot';
 
 const Loading = () => <div />;
 
@@ -18,12 +20,17 @@ function renderSearch(mod, SearchComponent) {
   return SearchComponent ? <SearchComponent /> : <Loading />;
 }
 
-export default class SearchView extends React.Component {
+export default class SearchView extends React.PureComponent {
+
+  static propTypes = {};
+
   render() {
     return (
-      <Bundle load={importSearch} initialise={initialiseSearch}>
-        { renderSearch }
-      </Bundle>
+      <ScrollRestore url={`/${Routes.SEARCH}`}>
+        <Bundle load={importSearch} initialise={initialiseSearch}>
+          { renderSearch }
+        </Bundle>
+      </ScrollRestore>
     );
   }
 }

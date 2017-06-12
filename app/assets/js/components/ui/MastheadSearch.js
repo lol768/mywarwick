@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default class MastheadSearch extends React.Component {
+export default class MastheadSearch extends React.PureComponent {
 
   render() {
     return (

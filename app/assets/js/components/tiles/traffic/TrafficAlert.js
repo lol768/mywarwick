@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 
-export default class TrafficAlert extends React.Component {
+export default class TrafficAlert extends React.PureComponent {
   render() {
     const { title, href } = this.props;
     return (

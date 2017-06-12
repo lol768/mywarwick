@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 const Skycons = require('skycons')(window);
 
-export default class Skycon extends React.Component {
+export default class Skycon extends React.PureComponent {
 
   constructor(props) {
     super(props);

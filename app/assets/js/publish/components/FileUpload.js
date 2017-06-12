@@ -4,7 +4,7 @@ import ProgressBar from '../../components/ui/ProgressBar';
 import * as newsImages from '../newsImages';
 import $ from 'jquery';
 
-export default class FileUpload extends React.Component {
+export default class FileUpload extends React.PureComponent {
 
   constructor(props) {
     super(props);

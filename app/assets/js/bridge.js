@@ -12,6 +12,7 @@ import { createSelector } from 'reselect';
 import { hasAuthoritativeAuthenticatedUser } from './state';
 import { Routes } from './components/AppRoot';
 import { navRequest } from './state/ui';
+import { showFeedbackForm } from './userinfo';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -112,7 +113,10 @@ export default function init(opts) {
       navigate(path) {
         // click event to dismiss active tooltips
         document.dispatchEvent(new Event('click'));
-        if (path.indexOf(`/${Routes.EDIT}`) === 0 || path.indexOf(`/${Routes.TILES}`) === 0) {
+        if (path.indexOf(`/${Routes.EDIT}`) === 0 ||
+          path.indexOf(`/${Routes.TILES}`) === 0 ||
+          path.indexOf(`/${Routes.NOTIFICATIONS}/${Routes.MUTE}`) === 0
+      ) {
           store.dispatch(push(path));
         } else {
           navRequest(path, store.dispatch);
@@ -122,6 +126,10 @@ export default function init(opts) {
       search(query) {
         // lazy load the Search module
         import('warwick-search-frontend').then(s => s.submitSearch(query));
+      },
+
+      feedback(detailJson) {
+        showFeedbackForm(JSON.parse(detailJson));
       },
 
       onApplicationDidBecomeActive() {

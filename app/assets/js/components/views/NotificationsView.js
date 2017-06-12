@@ -9,13 +9,18 @@ import { connect } from 'react-redux';
 import { getStreamSize, takeFromStream } from '../../stream';
 import { markNotificationsRead } from '../../state/notification-metadata';
 import * as notifications from '../../state/notifications';
+import ScrollRestore from '../ui/ScrollRestore';
+import { Routes } from '../AppRoot';
+import HideableView from './HideableView';
+import ActivityMutingView from './ActivityMutingView';
+
 
 const SOME_MORE = 20;
 
 // ms of continuous visibility required for notifications to be marked as read
 const NOTIFICATION_READ_TIMEOUT = 1500;
 
-class NotificationsView extends React.Component {
+class NotificationsView extends HideableView {
 
   static propTypes = {
     notifications: PropTypes.object,
@@ -26,6 +31,7 @@ class NotificationsView extends React.Component {
     }),
     grouped: PropTypes.bool.isRequired,
     notificationPermission: PropTypes.string,
+    numberToShow: PropTypes.number.isRequired,
   };
 
   static defaultProps = {
@@ -36,19 +42,18 @@ class NotificationsView extends React.Component {
     super(props);
 
     this.state = {
-      numberToShow: SOME_MORE,
       browserPushDisabled: 'Notification' in window && Notification.permission === 'denied',
+      mutingActivity: null,
     };
 
     this.loadMore = this.loadMore.bind(this);
     this.beginMarkReadTimeout = this.beginMarkReadTimeout.bind(this);
+    this.onMuting = this.onMuting.bind(this);
+    this.onMutingDismiss = this.onMutingDismiss.bind(this);
   }
 
-  componentWillMount() {
+  componentDidShow() {
     this.beginMarkReadTimeout();
-  }
-
-  componentDidMount() {
     document.addEventListener('visibilitychange', this.beginMarkReadTimeout);
     window.addEventListener('focus', this.beginMarkReadTimeout);
     window.addEventListener('blur', this.beginMarkReadTimeout);
@@ -62,13 +67,31 @@ class NotificationsView extends React.Component {
     }
   }
 
-  componentWillUnmount() {
+  componentDidHide() {
     clearTimeout(this.timeout);
-    this.markNotificationsRead();
 
     document.removeEventListener('visibilitychange', this.beginMarkReadTimeout);
     window.removeEventListener('focus', this.beginMarkReadTimeout);
     window.removeEventListener('blur', this.beginMarkReadTimeout);
+  }
+
+  onMuting(activity) {
+    this.setState({
+      mutingActivity: activity,
+    });
+  }
+
+  onMutingDismiss() {
+    this.setState({
+      mutingActivity: null,
+    });
+  }
+
+  onMutingSave(activity) {
+    return (formValues) => {
+      this.props.dispatch(notifications.saveActivityMute(activity, formValues));
+      this.onMutingDismiss();
+    };
   }
 
   beginMarkReadTimeout() {
@@ -89,7 +112,7 @@ class NotificationsView extends React.Component {
 
   loadMore() {
     const streamSize = getStreamSize(this.props.notifications);
-    const hasOlderItemsLocally = this.state.numberToShow < streamSize;
+    const hasOlderItemsLocally = this.props.numberToShow < streamSize;
 
     if (hasOlderItemsLocally) {
       return Promise.resolve(this.showMore());
@@ -101,9 +124,9 @@ class NotificationsView extends React.Component {
   }
 
   showMore() {
-    this.setState({
-      numberToShow: this.state.numberToShow + SOME_MORE,
-    });
+    this.props.dispatch(notifications.showMoreNotifications(
+      this.props.numberToShow + SOME_MORE
+    ));
   }
 
   markNotificationsRead() {
@@ -126,25 +149,46 @@ class NotificationsView extends React.Component {
     return groupItemsByDate.groupForItem(item) !== groupItemsByDate.maxGroup;
   }
 
+  renderMuting() {
+    if (this.state.mutingActivity) {
+      const activity = this.state.mutingActivity;
+      return (
+        <ActivityMutingView
+          {...activity}
+          onMutingDismiss={ this.onMutingDismiss }
+          onMutingSave={ this.onMutingSave(activity) }
+          activityType={ activity.type }
+          activityTypeDisplayName={ activity.typeDisplayName }
+        />
+      );
+    }
+    return null;
+  }
+
   render() {
     const shouldBeGrouped = this.props.grouped && this.shouldBeGrouped();
-    const notificationItems = takeFromStream(this.props.notifications, this.state.numberToShow)
+    const notificationItems = takeFromStream(this.props.notifications, this.props.numberToShow)
       .map(n =>
         <ActivityItem
           key={ n.id }
           grouped={ shouldBeGrouped }
           unread={ this.isUnread(n) }
+          muteable
+          onMuting={ this.onMuting }
           {...n}
         />
       );
 
     const streamSize = getStreamSize(this.props.notifications);
     const hasAny = streamSize > 0 || this.props.olderItemsOnServer;
-    const hasMore = this.state.numberToShow < streamSize || this.props.olderItemsOnServer;
+    const hasMore = this.props.numberToShow < streamSize || this.props.olderItemsOnServer;
     const browserPushDisabled = this.props.notificationPermission === 'denied';
 
     return (
       <div>
+        {
+          this.renderMuting()
+        }
         { browserPushDisabled ?
           <div className="permission-warning">
             You have blocked My Warwick from showing system notifications. You'll need to open
@@ -153,16 +197,18 @@ class NotificationsView extends React.Component {
           : null
         }
         { hasAny ?
-          <InfiniteScrollable
-            hasMore={ hasMore }
-            onLoadMore={ this.loadMore }
-            showLoading
-            endOfListPhrase="There are no older notifications."
-          >
-            <GroupedList groupBy={ shouldBeGrouped ? groupItemsByDate : undefined }>
-              { notificationItems }
-            </GroupedList>
-          </InfiniteScrollable>
+          <ScrollRestore url={`/${Routes.NOTIFICATIONS}`}>
+            <InfiniteScrollable
+              hasMore={ hasMore }
+              onLoadMore={ this.loadMore }
+              showLoading
+              endOfListPhrase="There are no older notifications."
+            >
+              <GroupedList groupBy={ shouldBeGrouped ? groupItemsByDate : undefined }>
+                { notificationItems }
+              </GroupedList>
+            </InfiniteScrollable>
+          </ScrollRestore>
           :
           <EmptyState lead="You don't have any notifications yet.">
             <p>
@@ -184,6 +230,7 @@ function select(state) {
     notificationsLastRead: state.notificationsLastRead,
     olderItemsOnServer: state.notifications.olderItemsOnServer,
     notificationPermission: state.device.notificationPermission,
+    numberToShow: state.notifications.numberToShow,
   };
 }
 

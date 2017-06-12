@@ -2,14 +2,13 @@ package controllers.api
 
 import java.io.{File, FileInputStream}
 
-import helpers.{BaseSpec, WithActorSystem}
+import helpers.WithActorSystem
 import org.apache.commons.io.FileUtils
 import org.joda.time.DateTime
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import helpers.BaseSpec
 import org.scalatestplus.play.PlaySpec
 import play.api.cache.CacheApi
 import play.api.libs.Files.TemporaryFile
@@ -45,7 +44,7 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
   private val service = mock[NewsImageService]
   private val imageManipulator = mock[NoopImageManipulator]
   private val publisherService = mock[PublisherService]
-  val cache = spy(new MockCacheApi)
+  val cache = new MockCacheApi
   val controller = new NewsImagesController(
     securityService,
     service,
@@ -96,14 +95,11 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
 
       when(service.fetchStream("frog")).thenReturn(Some(frogInputStream))
 
-      reset(cache)
       val result = call(controller.show("frog"), FakeRequest())
 
       status(result) mustBe OK
       headers(result).get("Content-Disposition") mustBe Some("inline")
       contentAsBytes(result) mustBe frogImageBytes
-
-      verify(cache).set("frog", frogImageBytes)
     }
 
     "send resized image" in {
@@ -112,15 +108,12 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
       when(service.fetchStream("frog")).thenReturn(Some(frogInputStream))
       when(imageManipulator.resizeToWidth(any(), any())).thenCallRealMethod()
 
-      reset(cache)
       val result = call(controller.show("frog"), FakeRequest("GET", "/?width=100"))
 
       status(result) mustBe OK
       headers(result).get("Content-Disposition") mustBe Some("inline")
 
       verify(imageManipulator).resizeToWidth(any(), Matchers.eq(100))
-
-      verify(cache).set("frog@100", contentAsBytes(result))
     }
 
   }
