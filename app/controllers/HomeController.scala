@@ -29,7 +29,7 @@ class HomeController @Inject()(
 
   def redirectToIndex = Action(Redirect(routes.HomeController.index()))
 
-  def tile(id: String) = index
+  def indexIgnoreParam(param: String) = index
 
   def redirectToPath(path: String, status: Int = MOVED_PERMANENTLY) = Action { implicit request =>
     Redirect(s"/${path.replaceFirst("^/", "")}", status)

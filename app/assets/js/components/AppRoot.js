@@ -1,4 +1,5 @@
 import React from 'react';
+import * as PropTypes from 'prop-types';
 import NewsView from './views/NewsView';
 import MeView from './views/MeView';
 import TileView from './views/TileView';
@@ -12,6 +13,8 @@ import { goBack, replace } from 'react-router-redux';
 import { connect } from 'react-redux';
 import ActivityMutesView from './views/ActivityMutesView';
 import Visible from './Visible';
+import OptInSettingsView from './views/OptInSettingsView';
+import LocationOptInSettingView from './views/optInSettings/LocationOptInSettingView';
 
 export const Routes = {
   EDIT: 'edit',
@@ -21,6 +24,10 @@ export const Routes = {
   MUTE: 'mute',
   ACTIVITY: 'activity',
   NEWS: 'news',
+  OPT_IN: 'optin',
+  OptInTypes: {
+    LOCATION: 'location',
+  },
   SEARCH: 'search',
 };
 
@@ -56,6 +63,10 @@ RouteViews[`/${Routes.NEWS}`] = {
   rendered: false,
   view: NewsView,
 };
+RouteViews[`/${Routes.NEWS}/${Routes.OPT_IN}`] = {
+  rendered: false,
+  view: OptInSettingsView,
+};
 RouteViews[`/${Routes.SEARCH}`] = {
   rendered: false,
   view: SearchView,
@@ -64,9 +75,16 @@ RouteViews[`/${Routes.SEARCH}`] = {
 class AppRoot extends React.Component {
 
   static propTypes = {
-    history: React.PropTypes.object.isRequired,
-    navRequest: React.PropTypes.string,
-    dispatch: React.PropTypes.func.isRequired,
+    history: PropTypes.object.isRequired,
+    navRequest: PropTypes.string,
+    newsOptInOptions: PropTypes.shape({
+      options: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.shape({
+        value: PropTypes.string.isRequired,
+        description: PropTypes.string.isRequired,
+      }))).isRequired,
+      selected: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string)).isRequired,
+    }).isRequired,
+    dispatch: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -119,12 +137,19 @@ class AppRoot extends React.Component {
   }
 
   expandedTile() {
-    return /^\/tiles\/(.+)/.exec(this.state.location.pathname);
+    return new RegExp(`^\/${Routes.TILES}\/(.+)`).exec(this.state.location.pathname);
+  }
+
+  singleOptInSetting() {
+    return new RegExp(`^\/${Routes.NEWS}/${Routes.OPT_IN}\/(.+)`).exec(
+      this.state.location.pathname
+    );
   }
 
   render() {
     const { location } = this.state;
     const tilePath = this.expandedTile();
+    const optInPath = this.singleOptInSetting();
 
     const views = _.map(RouteViews, (args, path) => (
       this.shouldRender(path) ?
@@ -153,6 +178,26 @@ class AppRoot extends React.Component {
       views.push(null);
     }
 
+    if ((optInPath || []).length === 2) {
+      switch (optInPath[1]) {
+        case Routes.OptInTypes.LOCATION:
+          views.push(
+            <Visible key={ `OptIn:${optInPath[1]}` } visible>
+              <OptInSettingsView options={ this.props.newsOptInOptions.options }
+                selected={ this.props.newsOptInOptions.selected } dispatch={ this.props.dispatch }
+                singleOptionView={ LocationOptInSettingView } singleOptionIdentifier={ 'Location' }
+              />
+            </Visible>
+          );
+          break;
+        default:
+          views.push(null);
+          break;
+      }
+    } else {
+      views.push(null);
+    }
+
     return (
       <AppLayout {...this.props} location={ location }>
         { views }
@@ -163,6 +208,7 @@ class AppRoot extends React.Component {
 
 const select = (state) => ({
   navRequest: state.ui.navRequest,
+  newsOptInOptions: state.newsOptIn,
 });
 
 export default connect(select)(AppRoot);
