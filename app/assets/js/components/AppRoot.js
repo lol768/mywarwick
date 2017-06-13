@@ -143,11 +143,13 @@ class AppRoot extends React.Component {
 
     if ((tilePath || []).length === 2) {
       views.push(
-        <TileView
-          id={ tilePath[1] }
-          params={{ id: tilePath[1] }}
-          {...this.props}
-        />
+        <Visible key={ tilePath[1] } visible>
+          <TileView
+            id={ tilePath[1] }
+            params={{ id: tilePath[1] }}
+            {...this.props}
+          />
+        </Visible>
       );
     } else {
       views.push(null);
