@@ -14,6 +14,10 @@ html.ios.not-app .modal-dialog {
   height: ~"calc(100vh - @{ios-tab-bar-height} - 6em)";
 }
 
+html.ios.app .modal-dialog {
+  height: ~"calc(100vh - @{ios-tab-bar-height} - 1em)";
+}
+
 .modal-content {
   display: flex;
   flex-direction: column;
