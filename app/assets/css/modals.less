@@ -1,0 +1,37 @@
+.modal {
+  display: flex;
+  flex-direction: column;
+}
+
+html.app .modal-dialog {
+  height: ~"calc(100vh - 1em)"; // No navbar in WebView
+}
+
+html.not-app .modal-dialog {
+  height: ~"calc(100vh - @{start-tab-bar-height} - 1em)";
+}
+html.ios.not-app .modal-dialog {
+  height: ~"calc(100vh - @{ios-tab-bar-height} - 1em)";
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+  max-height: 100%;
+}
+
+.modal-footer, .modal-header {
+  flex-shrink: 0;
+}
+
+.tile--config__modal_body:extend(.modal-body all) {
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.modal-dialog {
+  overflow-y: hidden;
+  max-height: 100%;
+}
