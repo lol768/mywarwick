@@ -17,7 +17,8 @@ import scala.concurrent.Future
   *
   * TODO serve JSON response when we requested a JSON API.
   */
-class ErrorHandler @Inject()(environment: Environment, metrics: Metrics, sso: SSOClient, securityService: SecurityService) extends HttpErrorHandler with Results {
+class ErrorHandler @Inject()(environment: Environment, metrics: Metrics, sso: SSOClient, securityService: SecurityService)
+  extends HttpErrorHandler with Results with Logging {
 
   lazy private val internalServerErrorMeter = metrics.defaultRegistry.meter(name(classOf[MetricsFilter], "500"))
 
@@ -32,6 +33,7 @@ class ErrorHandler @Inject()(environment: Environment, metrics: Metrics, sso: SS
 
   def onServerError(request: RequestHeader, exception: Throwable) = {
     markInternalServerError()
+    logger.error(exception.getMessage, exception)
     Future.successful(
       InternalServerError(views.html.errors.serverError(exception, environment.mode)(RequestContext.authenticated(sso, request)))
     )

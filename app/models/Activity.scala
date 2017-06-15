@@ -2,9 +2,12 @@ package models
 
 import controllers.api.SaveMuteRequest
 import org.joda.time.DateTime
+import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import warwick.sso.Usercode
+import play.api.libs.json.Reads.filter
+import uk.ac.warwick.util.core.StringUtils
 
 case class ActivityIcon(name: String, colour: Option[String])
 object ActivityIcon {
@@ -129,7 +132,10 @@ case class ActivityRecipients(
 )
 
 object ActivityRecipients {
-  implicit val readsActivityRecipients = Json.reads[ActivityRecipients]
+  implicit val readsActivityRecipients: Reads[ActivityRecipients] = (
+      (__ \ "users").readNullable[Seq[String]](filter(ValidationError("All usercodes must be non-empty"))(_.forall(StringUtils.hasText))) and
+      (__ \ "groups").readNullable[Seq[String]](filter(ValidationError("All group names must be non-empty"))(_.forall(StringUtils.hasText)))
+    )(ActivityRecipients.apply _)
 }
 
 case class IncomingActivityData(
