@@ -1,21 +1,37 @@
 .tile--config__modal:extend(.modal all) {
-  display: block;
-  top: 6vh;
+  display: flex;
+  flex-direction: column;
+}
+
+html.app .tile--config__modal {
+  height: 100vh; // No navbar in WebView
+}
+
+html.not-app .tile--config__modal {
+  height: ~"calc(100vh - @{start-tab-bar-height})";
+}
+html.ios.not-app .tile--config__modal {
+  height: ~"calc(100vh - @{ios-tab-bar-height})";
 }
 
 .tile--config__modal_body:extend(.modal-body all) {
-  height: ~"calc(100vh - 17em)";
   overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 auto;
 }
 
 .tile--config__modal_dialog:extend(.modal-dialog all) {
-  overflow-y: initial
+  overflow-y: hidden;
+  height: 100%;
 }
 
-.tile--config__modal_footer:extend(.modal-footer all) {
-
+.tile--config__modal_footer:extend(.modal-footer all), .tile--config__modal_header:extend(.modal-header all) {
+  flex-shrink: 0;
 }
 
 .tile--config__modal_content:extend(.modal-content all) {
-
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+  height: 100%;
 }
