@@ -10,7 +10,7 @@ import org.scalatest.mockito.MockitoSugar
 import helpers.BaseSpec
 import play.api.cache.CacheApi
 import play.api.i18n.MessagesApi
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
@@ -21,7 +21,7 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
 
   val tabula = "tabula"
   val tabulaPublisherId = "tabulaPublisherId"
-  val ron = Users.create(usercode = Usercode("ron"))
+  val ron: User = Users.create(usercode = Usercode("ron"))
 
   val mockSSOClient = new MockSSOClient(new LoginContext {
     override val user: Option[User] = Some(ron)
@@ -34,8 +34,8 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
     override def actualUserHasRole(role: RoleName) = false
   })
 
-  val publisherService = mock[PublisherService]
-  val activityService = mock[ActivityService]
+  val publisherService: PublisherService = mock[PublisherService]
+  val activityService: ActivityService = mock[ActivityService]
 
   val controller = new IncomingActivitiesController(
     new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], mock[CacheApi]),
@@ -44,10 +44,10 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
     mock[MessagesApi]
   ) {
     override val navigationService = new MockNavigationService()
-    override val ssoClient = mockSSOClient
+    override val ssoClient: MockSSOClient = mockSSOClient
   }
 
-  val body = Json.obj(
+  val body: JsObject = Json.obj(
     "type" -> "due",
     "title" -> "Coursework due soon",
     "url" -> "http://tabula.warwick.ac.uk",
@@ -143,6 +143,26 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
       val json = contentAsJson(result)
 
       (json \ "errors" \ 0 \ "message").as[String] mustBe s"No provider found with id '$tabula'"
+    }
+
+    "fail for invalid usercode" in {
+      when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(Json.obj(
+        "type" -> "due",
+        "title" -> "Coursework due soon",
+        "url" -> "http://tabula.warwick.ac.uk",
+        "text" -> "Your submission for CS118 is due tomorrow",
+        "recipients" -> Json.obj(
+          "users" -> Json.arr(
+            "    "
+          )
+        )
+      )))
+
+      status(result) mustBe BAD_REQUEST
+      val json = contentAsJson(result)
+
+      (json \ "errors" \ 0 \ "message").as[String] mustBe "All usercodes must be non-empty"
     }
   }
 }
