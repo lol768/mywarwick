@@ -156,47 +156,50 @@ export default class TileOptionView extends Component {
 
   render() {
     return (
-      <div
-        className="tile--config__modal fade in"
-        id={`config-${this.props.tile.id}`}
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="myModalLabel"
-      >
-        <div className="tile--config__modal_dialog" role="document">
-          <div className="tile--config__modal_content">
-            <div className="modal-header">
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
+      <div className="tile--config">
+        <div className="tile--config__backdrop fade in"> </div>
+        <div
+          className="tile--config__modal fade in"
+          id={`config-${this.props.tile.id}`}
+          tabIndex="-1"
+          role="dialog"
+          aria-labelledby="myModalLabel"
+        >
+          <div className="tile--config__modal_dialog" role="document">
+            <div className="tile--config__modal_content">
+              <div className="modal-header">
+                <button
+                  type="button"
+                  className="close"
+                  data-dismiss="modal"
+                  aria-label="Close"
+                >
                 <span
                   aria-hidden="true"
                   onClick={ this.props.onConfigViewDismiss }
                 >
                   &times;
                 </span>
-              </button>
-              <h4 className="modal-title" id={`title-${this.props.tile.id}`}>Change settings
-                for {this.props.tile.title}</h4>
-            </div>
-            <div className="tile--config__modal_body">
-              { this.makeFormBody(`config-${this.props.tile.id}-form`) }
-            </div>
-            <div className="tile--config__modal_footer">
-              <button
-                type="button"
-                className="btn btn-default"
-                data-dismiss="modal"
-                onClick={ this.props.onConfigViewDismiss }
-              >
-                Close
-              </button>
-              <button type="button" className="btn btn-primary" onClick={ this.saveConfig }>
-                Save changes
-              </button>
+                </button>
+                <h4 className="modal-title" id={`title-${this.props.tile.id}`}>Change settings
+                  for {this.props.tile.title}</h4>
+              </div>
+              <div className="tile--config__modal_body">
+                { this.makeFormBody(`config-${this.props.tile.id}-form`) }
+              </div>
+              <div className="tile--config__modal_footer">
+                <button
+                  type="button"
+                  className="btn btn-default"
+                  data-dismiss="modal"
+                  onClick={ this.props.onConfigViewDismiss }
+                >
+                  Close
+                </button>
+                <button type="button" className="btn btn-primary" onClick={ this.saveConfig }>
+                  Save changes
+                </button>
+              </div>
             </div>
           </div>
         </div>
