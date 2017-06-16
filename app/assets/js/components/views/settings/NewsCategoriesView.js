@@ -22,6 +22,8 @@ class NewsCategoriesView extends HideableView {
   constructor(props) {
     super(props);
     this.onClick = this.onClick.bind(this);
+    this.subscribe = this.subscribe.bind(this);
+    this.unsubscribe = this.unsubscribe.bind(this);
 
     this.state = this.buildState(props);
   }
@@ -38,10 +40,18 @@ class NewsCategoriesView extends HideableView {
     const checked = !this.state[id];
     this.setState({ [id]: checked });
     if (checked) {
-      this.props.dispatch(newsCategories.subscribe(id));
+      this.subscribe(id);
     } else {
-      this.props.dispatch(newsCategories.unsubscribe(id));
+      this.unsubscribe(id);
     }
+  }
+
+  subscribe(id) {
+    this.props.dispatch(newsCategories.subscribe(id));
+  }
+
+  unsubscribe(id) {
+    this.props.dispatch(newsCategories.unsubscribe(id));
   }
 
   buildState(props) {

@@ -14,9 +14,15 @@ export default class CheckboxListGroupItem extends React.PureComponent {
   constructor(props) {
     super(props);
     this.onClick = this.onClick.bind(this);
+    this.onChange = this.onChange.bind(this);
   }
 
   onClick() {
+    this.props.onClick(this.props.value);
+  }
+
+  onChange(e) {
+    e.stopPropagation();
     this.props.onClick(this.props.value);
   }
 
@@ -33,10 +39,7 @@ export default class CheckboxListGroupItem extends React.PureComponent {
           <div className="media-right">
             <div className="media-right">
               <input type="checkbox" value={ this.props.value }
-                checked={ this.props.checked } onChange={ e => {
-                  e.stopPropagation();
-                  this.props.onClick(this.props.value);
-                } }
+                checked={ this.props.checked } onChange={ this.onChange }
               />
             </div>
           </div>
