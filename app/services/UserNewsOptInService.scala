@@ -11,7 +11,7 @@ trait UserNewsOptInService {
 
   def get(usercode: Usercode): Seq[Audience.OptIn]
 
-  def set(usercode: Usercode, optIns: Seq[Audience.OptIn]): Unit
+  def set(usercode: Usercode, optInType: String, optIns: Seq[Audience.OptIn]): Unit
 
 }
 
@@ -24,7 +24,7 @@ class UserNewsOptInServiceImpl @Inject()(
   override def get(usercode: Usercode): Seq[Audience.OptIn] =
     db.withConnection(implicit c => dao.get(usercode))
 
-  override def set(usercode: Usercode, optIns: Seq[Audience.OptIn]): Unit =
-    db.withTransaction(implicit c => dao.save(usercode, optIns))
+  override def set(usercode: Usercode, optInType: String, optIns: Seq[Audience.OptIn]): Unit =
+    db.withTransaction(implicit c => dao.save(usercode, optInType, optIns))
 
 }

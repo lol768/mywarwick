@@ -36,19 +36,21 @@ class UserNewsOptInController @Inject()(
     Ok(Json.toJson(API.Success(data = data)))
   }
 
-  def update = RequiredUserAction { request =>
+  def update = RequiredUserAction { implicit request =>
     request.context.user.map { user =>
       request.body.asJson.collect { case o: JsObject => o }.map(_.value.mapValues {
         case jsArray: JsArray => jsArray.value.collect { case s: JsString => s.value }
         case _ => Seq()
-      }).map(_.flatMap { case (optInType, values) =>
-        optInType match {
+      }).map(_.flatMap { case (optInType, stringValues) => optInType match {
           case Audience.LocationOptIn.optInType =>
-            Some(values.flatMap(Audience.LocationOptIn.fromValue))
+            Some(optInType -> stringValues.flatMap(Audience.LocationOptIn.fromValue))
           case _ => None
         }
-      }.flatten).map { optIns =>
-        userNewsOptInService.set(user.usercode, optIns.toSeq)
+      }).map(_.map { case (optInType, optInValues) =>
+        userNewsOptInService.set(user.usercode, optInType, optInValues)
+        (optInType, optInType)
+      }).map { result =>
+        auditLog('SetOptIn, 'result -> result)
         Ok(Json.toJson(API.Success("ok", "saved")))
       }.getOrElse(BadRequest(Json.toJson(API.Failure[JsObject]("bad request", Seq(API.Error("invalid-body", "Body must be JSON-formatted"))))))
     }.get // RequiredUserAction

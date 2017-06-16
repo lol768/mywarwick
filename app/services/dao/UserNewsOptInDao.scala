@@ -15,7 +15,7 @@ trait UserNewsOptInDao {
 
   def get(usercode: Usercode)(implicit c: Connection): Seq[Audience.OptIn]
 
-  def save(usercode: Usercode, optIns: Seq[Audience.OptIn])(implicit c: Connection): Unit
+  def save(usercode: Usercode, optInType: String, optIns: Seq[Audience.OptIn])(implicit c: Connection): Unit
 
   def getUsercodes(optIn: Audience.OptIn)(implicit c: Connection): Set[Usercode]
 
@@ -38,17 +38,14 @@ class UserNewsOptInDaoImpl extends UserNewsOptInDao with Logging {
       }}
   }
 
-  override def save(usercode: Usercode, optIns: Seq[Audience.OptIn])(implicit c: Connection): Unit = {
-    optIns.groupBy(_.optInType).foreach { case (optInType, groupedOptIns) =>
-      SQL"DELETE FROM USER_NEWS_OPT_IN WHERE USERCODE = ${usercode.string} AND NAME = $optInType"
+  override def save(usercode: Usercode, optInType: String, optIns: Seq[Audience.OptIn])(implicit c: Connection): Unit = {
+    SQL"DELETE FROM USER_NEWS_OPT_IN WHERE USERCODE = ${usercode.string} AND NAME = $optInType"
+      .execute()
+
+    optIns.foreach(optIn =>
+      SQL"INSERT INTO USER_NEWS_OPT_IN (USERCODE, NAME, VALUE) VALUES (${usercode.string}, $optInType, ${optIn.optInValue})"
         .execute()
-
-      groupedOptIns.foreach(optIn =>
-        SQL"INSERT INTO USER_NEWS_OPT_IN (USERCODE, NAME, VALUE) VALUES (${usercode.string}, $optInType, ${optIn.optInValue})"
-          .execute()
-      )
-
-    }
+    )
   }
 
   override def getUsercodes(optIn: Audience.OptIn)(implicit c: Connection): Set[Usercode] = {

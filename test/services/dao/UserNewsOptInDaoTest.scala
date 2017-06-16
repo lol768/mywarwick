@@ -19,15 +19,15 @@ class UserNewsOptInDaoTest extends BaseSpec with OneStartAppPerSuite {
       dao.get(Usercode("cusfal")) mustBe Seq(LocationOptIn.Coventry)
     }
 
-    "save single opt-in type" in transaction { implicit c =>
+    "save opt-in" in transaction { implicit c =>
       SQL"INSERT INTO USER_NEWS_OPT_IN (USERCODE, NAME, VALUE) VALUES ('cusfal', 'Location', 'Coventry')".execute()
 
       dao.get(Usercode("cusfal")) mustBe Seq(LocationOptIn.Coventry)
-      dao.save(Usercode("cusfal"), Seq(LocationOptIn.CentralCampusResidences, LocationOptIn.Kenilworth))
+      dao.save(Usercode("cusfal"), LocationOptIn.optInType, Seq(LocationOptIn.CentralCampusResidences, LocationOptIn.Kenilworth))
       dao.get(Usercode("cusfal")) mustBe Seq(LocationOptIn.CentralCampusResidences, LocationOptIn.Kenilworth)
+      dao.save(Usercode("cusfal"), LocationOptIn.optInType, Seq.empty)
+      dao.get(Usercode("cusfal")) mustBe Seq.empty
     }
-
-    // TODO if/when other opt-in types exist check that only those passed in are replaced
 
     "get for opt-in" in transaction { implicit c =>
       SQL"INSERT INTO USER_NEWS_OPT_IN (USERCODE, NAME, VALUE) VALUES ('cusfal', 'Location', 'Coventry')".execute()
