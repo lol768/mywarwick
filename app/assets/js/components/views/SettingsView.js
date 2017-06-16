@@ -1,74 +1,198 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { connect } from 'react-redux';
+import { push } from 'react-router-redux';
+import { Routes } from '../AppRoot';
+import HideableView from './HideableView';
+import * as newsCategories from '../../state/news-categories';
+import * as newsOptIn from '../../state/news-optin';
+import { loadDeviceDetails } from '../../userinfo';
 
-export class SettingsView extends React.PureComponent {
+class SettingsView extends HideableView {
 
   static propTypes = {
-    settings: PropTypes.object.isRequired,
+    mutes: PropTypes.number.isRequired,
+    newsCategories: PropTypes.shape({
+      fetching: PropTypes.bool.isRequired,
+      failed: PropTypes.bool.isRequired,
+      selected: PropTypes.number.isRequired,
+      total: PropTypes.number.isRequired,
+    }).isRequired,
+    newsOptIn: PropTypes.shape({
+      fetching: PropTypes.bool.isRequired,
+      failed: PropTypes.bool.isRequired,
+      location: PropTypes.shape({
+        selected: PropTypes.number.isRequired,
+        total: PropTypes.number.isRequired,
+      }).isRequired,
+    }).isRequired,
+    dispatch: PropTypes.func.isRequired,
   };
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      browserPushDisabled: 'Notification' in window && Notification.permission === 'denied',
-    };
-
-    if ('permissions' in navigator) {
-      navigator.permissions.query({ name: 'notifications' })
-        .then(notificationPermissions => {
-          /* eslint-disable no-param-reassign */
-          /*
-           * function parameter reassignment is valid here. See the Permissions API docs ...
-           * https://developers.google.com/web/updates/2015/04/permissions-api-for-the-web?hl=en
-           */
-          notificationPermissions.onchange = this.onBrowserPermissionChange.bind(this);
-          /* eslint-enable no-param-reassign */
-        });
-    }
+  static renderSetting(icon, title, rightView) {
+    return (
+      <div className="media">
+        <div className="media-left">
+          <i className={ `fa fa-fw fa-${icon}` } />
+        </div>
+        <div className="media-body">
+          { title }
+        </div>
+        <div className="media-right">
+          { rightView }
+        </div>
+      </div>
+    );
   }
 
-  onBrowserPermissionChange() {
-    this.setState({
-      browserPushDisabled: 'Notification' in window && Notification.permission === 'denied',
-    });
+  static renderSingleCount(number) {
+    return (
+      <div>
+        <span className={ classNames({ 'badge progress-bar-danger': number > 0 }) }>
+          { number }
+        </span>
+        <i className="fa fa-fw fa-chevron-right" />
+      </div>
+    );
+  }
+
+  static renderFractionCount(number, total) {
+    return (
+      <div>
+        { `${number}/${total}` }
+        <i className="fa fa-fw fa-chevron-right" />
+      </div>
+    );
+  }
+
+  static renderFetchedCount(props) {
+    const { fetching, failed, selected, total } = props;
+    if (fetching) {
+      return (
+        <div>
+          <i className="fa fa-spinner fa-pulse" />
+          <i className="fa fa-fw fa-chevron-right" />
+        </div>
+      );
+    } else if (failed) {
+      return (
+        <div>
+          <i className="fa fa-explamation-circle text-danger" />
+          <i className="fa fa-fw fa-chevron-right" />
+        </div>
+      );
+    }
+    return SettingsView.renderFractionCount(selected, total);
+  }
+
+  componentDidShow() {
+    this.props.dispatch(newsCategories.fetch());
+    this.props.dispatch(newsOptIn.fetch());
   }
 
   render() {
     return (
       <div>
-        { this.state.browserPushDisabled ?
-          <div className="permission-warning">
-            You have blocked My Warwick from showing system notifications. You'll need to open
-            your browser preferences to change that.
+        <div className="list-group">
+          <div className="list-group-item">
+            <div className="list-group-item-heading">
+              <h3>Settings</h3>
+            </div>
           </div>
-          : null
-        }
-        <ul className={ classNames('settings-list') }>
-          { this.props.settings.map((item) => {
-            const disabled = item.props.isDisabled ? 'disabled' : '';
-            return (
-              <li
-                key={ item.id }
-                className={ classNames('settings-list-item', 'well', disabled) }
-              >
-                {item}
-              </li>
-            );
-          }) }
-        </ul>
+        </div>
+
+        <div className="list-group setting-colour-1">
+          <div className="list-group-item"
+            onClick={ () =>
+              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`))
+            }
+          >
+            { SettingsView.renderSetting(
+              'bell-slash-o',
+              'Muted notifications',
+              SettingsView.renderSingleCount(this.props.mutes)
+            ) }
+          </div>
+        </div>
+
+        <div className="list-group setting-colour-2">
+          <div className="list-group-item"
+            onClick={ () =>
+              this.props.dispatch(
+                push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`)
+              )
+            }
+          >
+            { SettingsView.renderSetting(
+              'newspaper-o',
+              'News categories',
+              SettingsView.renderFetchedCount(this.props.newsCategories)
+            ) }
+          </div>
+          <div className="list-group-item"
+            onClick={ () =>
+              this.props.dispatch(
+                push(
+                  `/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}/` +
+                  `${Routes.SettingsRoutes.OptInTypes.LOCATION}`
+                )
+              )
+            }
+          >
+            { SettingsView.renderSetting(
+              'map-signs',
+              'Location preferences',
+              SettingsView.renderFetchedCount({
+                fetching: this.props.newsOptIn.fetching,
+                failed: this.props.newsOptIn.failed,
+                selected: this.props.newsOptIn.location.selected,
+                total: this.props.newsOptIn.location.total,
+              })
+            ) }
+          </div>
+        </div>
+
+        <div className="list-group setting-colour-4">
+          <div className="list-group-item" onClick={ loadDeviceDetails }>
+            <div className="media">
+              <div className="media-left feedback">
+                <span className="fa-stack">
+                  <i className="fa fa-fw fa-comment-o fa-stack-2x" />
+                  <strong className="fa-fw fa-stack-1x">!</strong>
+                </span>
+              </div>
+              <div className="media-body">
+                Send feedback
+              </div>
+              <div className="media-right">
+                <i className="fa fa-fw fa-chevron-right" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 }
 
-// TODO: implement settings props fed in from top of app
-const appSettings = [
-  // TODO: If your adding the first settings to the app remember to ...
-  // Remove the notification permissions stuff from NotificationsView. It will live here instead.
-  // Put the settings MastheadNavItem back in ID7Layout
-];
+const select = (state) => ({
+  mutes: state.notifications.activityMutes.length,
+  subscribedNewsCategories: state.newsCategories.subscribed.length,
+  newsCategories: {
+    fetching: state.newsCategories.fetching,
+    failed: state.newsCategories.failed,
+    selected: state.newsCategories.subscribed.length,
+    total: state.newsCategories.items.length,
+  },
+  newsOptIn: {
+    fetching: state.newsOptIn.fetching,
+    failed: state.newsOptIn.failed,
+    location: {
+      selected: (state.newsOptIn.selected.Location || []).length,
+      total: (state.newsOptIn.options.Location || []).length,
+    },
+  },
+});
 
-SettingsView.defaultProps = {
-  settings: appSettings,
-};
+export default connect(select)(SettingsView);

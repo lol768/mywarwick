@@ -17,7 +17,6 @@ class AddingTilesView extends React.PureComponent {
     location: PropTypes.shape({
       pathname: PropTypes.string,
     }),
-    navRequest: PropTypes.string,
     dispatch: PropTypes.func.isRequired,
     editing: PropTypes.bool,
     adding: PropTypes.bool,

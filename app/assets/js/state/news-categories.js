@@ -2,7 +2,6 @@ import log from 'loglevel';
 import { createAction } from 'redux-actions';
 import { fetchWithCredentials, postJsonWithCredentials } from '../serverpipe';
 import _ from 'lodash-es';
-import * as news from './news';
 
 const NEWS_CATEGORIES_REQUEST = 'NEWS_CATEGORIES_REQUEST';
 const NEWS_CATEGORIES_RECEIVE = 'NEWS_CATEGORIES_RECEIVE';
@@ -32,9 +31,8 @@ export function fetch() {
   };
 }
 
-const persistSubscribedCategories = categories => dispatch =>
-  postJsonWithCredentials('/api/news/categories', { categories })
-    .then(() => dispatch(news.refresh()));
+const persistSubscribedCategories = categories => () =>
+  postJsonWithCredentials('/api/news/categories', { categories });
 
 let store = {};
 const persistSubscriptionsDebounced = _.debounce(() =>

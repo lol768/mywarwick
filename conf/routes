@@ -5,16 +5,15 @@
 # Home page
 GET         /                                                     @controllers.HomeController.index
 GET         /notifications                                        @controllers.HomeController.index
-GET         /notifications/mute                                   @controllers.HomeController.index
 GET         /activity                                             @controllers.HomeController.index
 GET         /news                                                 @controllers.HomeController.index
-GET         /news/optin                                           @controllers.HomeController.index
-GET         /news/optin/:option                                   @controllers.HomeController.indexIgnoreParam(option: String)
 GET         /search                                               @controllers.HomeController.index
 GET         /tiles                                                @controllers.HomeController.redirectToIndex
 GET         /tiles/:id                                            @controllers.HomeController.indexIgnoreParam(id: String)
 GET         /edit                                                 @controllers.HomeController.index
 GET         /edit/add                                             @controllers.HomeController.index
+GET         /settings                                             @controllers.HomeController.index
+GET         /settings/*setting                                    @controllers.HomeController.indexIgnoreParam(setting: String)
 
 # NEWSTART-253
 POST        /                                                     @controllers.HomeController.index

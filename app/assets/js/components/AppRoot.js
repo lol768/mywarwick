@@ -11,25 +11,40 @@ import AppLayout from './AppLayout';
 import * as _ from 'lodash-es';
 import { goBack, replace } from 'react-router-redux';
 import { connect } from 'react-redux';
-import ActivityMutesView from './views/ActivityMutesView';
+import ActivityMutesView from './views/settings/ActivityMutesView';
 import Visible from './Visible';
-import OptInSettingsView from './views/OptInSettingsView';
-import LocationOptInSettingView from './views/optInSettings/LocationOptInSettingView';
+import SettingsView from './views/SettingsView';
+import NewsCategoriesView from './views/settings/NewsCategoriesView';
+import OptInSettingsView from './views/settings/OptInSettingsView';
+import LocationOptInSettingView from './views/settings/optInSettings/LocationOptInSettingView';
+
 
 export const Routes = {
   EDIT: 'edit',
   ADD: 'add',
   TILES: 'tiles',
   NOTIFICATIONS: 'notifications',
-  MUTE: 'mute',
   ACTIVITY: 'activity',
   NEWS: 'news',
-  OPT_IN: 'optin',
-  OptInTypes: {
-    LOCATION: 'location',
-  },
   SEARCH: 'search',
+  SETTINGS: 'settings',
+  SettingsRoutes: {
+    MUTES: 'mutes',
+    NEWS_CATEGORIES: 'newscategories',
+    OPT_IN: 'optin',
+    OptInTypes: {
+      LOCATION: 'location',
+    },
+  },
 };
+
+const TabRoutes = [
+  '/',
+  `/${Routes.NOTIFICATIONS}`,
+  `/${Routes.ACTIVITY}`,
+  `/${Routes.NEWS}`,
+  `/${Routes.SEARCH}`,
+];
 
 const RouteViews = {};
 RouteViews['/'] = {
@@ -51,10 +66,6 @@ RouteViews[`/${Routes.NOTIFICATIONS}`] = {
   rendered: false,
   view: NotificationsView,
 };
-RouteViews[`/${Routes.NOTIFICATIONS}/${Routes.MUTE}`] = {
-  rendered: false,
-  view: ActivityMutesView,
-};
 RouteViews[`/${Routes.ACTIVITY}`] = {
   rendered: false,
   view: ActivityView,
@@ -63,13 +74,25 @@ RouteViews[`/${Routes.NEWS}`] = {
   rendered: false,
   view: NewsView,
 };
-RouteViews[`/${Routes.NEWS}/${Routes.OPT_IN}`] = {
-  rendered: false,
-  view: OptInSettingsView,
-};
 RouteViews[`/${Routes.SEARCH}`] = {
   rendered: false,
   view: SearchView,
+};
+RouteViews[`/${Routes.SETTINGS}`] = {
+  rendered: false,
+  view: SettingsView,
+};
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`] = {
+  rendered: false,
+  view: ActivityMutesView,
+};
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`] = {
+  rendered: false,
+  view: NewsCategoriesView,
+};
+RouteViews[`/${Routes.SETTINGS}/${Routes.OPT_IN}`] = {
+  rendered: false,
+  view: OptInSettingsView,
 };
 
 class AppRoot extends React.Component {
@@ -109,10 +132,7 @@ class AppRoot extends React.Component {
    */
   componentDidUpdate(prevProps, prevState) {
     if (this.props.navRequest && prevState.location.pathname !== this.state.location.pathname) {
-      if (
-        this.state.location.pathname === '/' ||
-          this.state.location.pathname === `/${Routes.NOTIFICATIONS}`
-      ) {
+      if (_.includes(TabRoutes, this.state.location.pathname)) {
         const path = this.props.navRequest;
         this.props.dispatch({
           type: 'ui.navRequest',
@@ -141,7 +161,7 @@ class AppRoot extends React.Component {
   }
 
   singleOptInSetting() {
-    return new RegExp(`^\/${Routes.NEWS}/${Routes.OPT_IN}\/(.+)`).exec(
+    return new RegExp(`^\/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}\/(.+)`).exec(
       this.state.location.pathname
     );
   }
@@ -182,7 +202,7 @@ class AppRoot extends React.Component {
 
     if ((optInPath || []).length === 2) {
       switch (optInPath[1]) {
-        case Routes.OptInTypes.LOCATION:
+        case Routes.SettingsRoutes.OptInTypes.LOCATION:
           views.push(
             <Visible key={ `OptIn:${optInPath[1]}` } visible>
               <OptInSettingsView options={ this.props.newsOptInOptions.options }

@@ -1,11 +1,9 @@
 import $ from 'jquery';
 import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
-import NewsCategoriesView from './NewsCategoriesView';
 import NewsItem from '../ui/NewsItem';
 import { connect } from 'react-redux';
 import * as news from '../../state/news';
-import * as newsCategories from '../../state/news-categories';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 import ScrollRestore from '../ui/ScrollRestore';
 import { Routes } from '../AppRoot';
@@ -24,9 +22,6 @@ export class NewsView extends HideableView {
 
   componentDidShow() {
     if (!this.props.failed) {
-      if (this.props.newsCategories.items.length === 0) {
-        this.props.dispatch(newsCategories.fetch());
-      }
       if (this.props.items.length === 0) {
         this.props.dispatch(news.fetch());
       }
@@ -53,11 +48,10 @@ export class NewsView extends HideableView {
 
   fetch() {
     this.props.dispatch(news.fetch());
-    this.props.dispatch(newsCategories.fetch());
   }
 
   render() {
-    const { failed, fetching, items, moreAvailable, user } = this.props;
+    const { failed, fetching, items, moreAvailable } = this.props;
 
     const width = this.state.width || this.props.width;
 
@@ -90,11 +84,7 @@ export class NewsView extends HideableView {
       </div> : null;
 
     return (
-      <div className="margin-top-1">
-        { user && user.authenticated ?
-          <NewsCategoriesView { ...this.props.newsCategories } dispatch={ this.props.dispatch } />
-          : null
-        }
+      <div>
         { items.length ?
           <ScrollRestore url={`/${Routes.NEWS}`}>
             <InfiniteScrollable
@@ -121,7 +111,6 @@ NewsView.propTypes = {
   failed: PropTypes.bool.isRequired,
   fetching: PropTypes.bool.isRequired,
   items: PropTypes.array.isRequired,
-  newsCategories: PropTypes.object.isRequired,
   moreAvailable: PropTypes.bool.isRequired,
   user: PropTypes.object.isRequired,
   width: PropTypes.number,
@@ -129,11 +118,9 @@ NewsView.propTypes = {
 
 const select = (state) => ({
   ...state.news,
-  newsCategories: state.newsCategories,
   user: state.user.data,
   // Never read, but kicks the component into updating when the device width changes
   pixelWidth: state.device.pixelWidth,
 });
 
 export default connect(select)(NewsView);
-

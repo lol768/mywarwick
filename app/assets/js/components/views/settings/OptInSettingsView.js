@@ -1,12 +1,10 @@
-import $ from 'jquery';
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
-import { Routes } from '../AppRoot';
-import ScrollRestore from '../ui/ScrollRestore';
+import { Routes } from '../../AppRoot';
+import ScrollRestore from '../../ui/ScrollRestore';
 import LocationOptInSettingView from './optInSettings/LocationOptInSettingView';
-import HideableView from './HideableView';
-import * as newsOptIn from '../../state/news-optin';
+import HideableView from '../HideableView';
+import * as newsOptIn from '../../../state/news-optin';
 import { connect } from 'react-redux';
 
 class OptInSettingsView extends HideableView {
@@ -27,11 +25,12 @@ class OptInSettingsView extends HideableView {
     this.onChange = this.onChange.bind(this);
   }
 
-  onChange() {
-    const $node = $(ReactDOM.findDOMNode(this));
-    const $form = $node.closest('form');
-    const $fields = $form.serializeArray();
-    this.props.dispatch(newsOptIn.persist($fields));
+  componentDidShow() {
+    this.props.dispatch(newsOptIn.fetch());
+  }
+
+  onChange(optinType, values) {
+    this.props.dispatch(newsOptIn.persist(optinType, values));
   }
 
   render() {
