@@ -14,6 +14,7 @@ import persistedLib from './persisted';
 import SocketDatapipe from './SocketDatapipe';
 import * as notifications from './state/notifications';
 import * as notificationMetadata from './state/notification-metadata';
+import * as newsOptIn from './state/news-optin';
 import * as tiles from './state/tiles';
 import * as update from './state/update';
 import * as user from './state/user';
@@ -158,6 +159,7 @@ export function launch(userData) {
 
     if (hasAuthoritativeAuthenticatedUser(store.getState())) {
       store.dispatch(notifications.fetch());
+      store.dispatch(newsOptIn.fetch());
     }
   });
 

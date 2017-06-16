@@ -8,9 +8,11 @@ GET         /notifications                                        @controllers.H
 GET         /notifications/mute                                   @controllers.HomeController.index
 GET         /activity                                             @controllers.HomeController.index
 GET         /news                                                 @controllers.HomeController.index
+GET         /news/optin                                           @controllers.HomeController.index
+GET         /news/optin/:option                                   @controllers.HomeController.indexIgnoreParam(option: String)
 GET         /search                                               @controllers.HomeController.index
 GET         /tiles                                                @controllers.HomeController.redirectToIndex
-GET         /tiles/:id                                            @controllers.HomeController.tile(id: String)
+GET         /tiles/:id                                            @controllers.HomeController.indexIgnoreParam(id: String)
 GET         /edit                                                 @controllers.HomeController.index
 GET         /edit/add                                             @controllers.HomeController.index
 
@@ -63,6 +65,8 @@ POST        /api/news/categories                                  @controllers.a
 POST        /api/news/images                                      @controllers.api.NewsImagesController.create
 GET         /api/news/images/:id                                  @controllers.api.NewsImagesController.show(id: String)
 POST        /api/news/analytics                                   @controllers.api.AnalyticsController.newsItemReport
+GET         /api/news/optin                                       @controllers.api.UserNewsOptInController.list
+POST        /api/news/optin                                       @controllers.api.UserNewsOptInController.update
 
 GET         /news/:id/redirect                                    @controllers.api.ReadNewsController.redirect(id: String)
 

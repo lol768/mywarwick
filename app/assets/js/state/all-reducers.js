@@ -9,6 +9,7 @@
 
 export { reducer as news } from './news';
 export { reducer as newsCategories } from './news-categories';
+export { reducer as newsOptIn } from './news-optin';
 export { reducer as notificationsLastRead } from './notification-metadata';
 export { notificationsReducer as notifications } from './notifications';
 export { activitiesReducer as activities } from './notifications';

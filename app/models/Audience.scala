@@ -48,8 +48,27 @@ object Audience {
   case object TaughtPostgrads extends DepartmentSubset
   case object ResearchPostgrads extends DepartmentSubset
 
+  sealed abstract class OptIn(val optInType: String, val optInValue: String, val description: String) extends Component
+
+  sealed abstract class LocationOptIn(val value: String, override val description: String) extends OptIn(LocationOptIn.optInType, value, description)
+
+  object LocationOptIn {
+    val optInType = "Location"
+
+    case object CentralCampusResidences extends LocationOptIn("CentralCampusResidences", "Central campus residences")
+    case object WestwoodResidences extends LocationOptIn("WestwoodResidences", "Westwood residences")
+    case object Coventry extends LocationOptIn("Coventry", "Coventry")
+    case object Kenilworth extends LocationOptIn("Kenilworth", "Kenilworth")
+    case object LeamingtonSpa extends LocationOptIn("LeamingtonSpa", "Leamington Spa")
+
+    def values = Seq(CentralCampusResidences, WestwoodResidences, Coventry, Kenilworth, LeamingtonSpa)
+
+    def fromValue(value: String): Option[OptIn] = values.find(_.value == value)
+  }
+
   val moduleCodeRegex: Regex = "^Module:(.+)".r
   val webGroupRegex: Regex = "^WebGroup:(.+)".r
+  val optInRegex: Regex = "^OptIn:(.+):(.+)".r
 
   object ComponentParameter {
     def unapply(paramValue: String): Option[Component] = paramValue match {
@@ -60,6 +79,7 @@ object Audience {
       case "ResearchPostgrads" => Some(ResearchPostgrads)
       case webGroupRegex(webGroup) => Some(WebGroupAudience(GroupName(webGroup)))
       case moduleCodeRegex(code) => Some(ModuleAudience(code))
+      case optInRegex(optInType, optInValue) if optInType == LocationOptIn.optInType => LocationOptIn.fromValue(optInValue)
       case _ => None
     }
   }
