@@ -289,7 +289,6 @@ const select = (state) => ({
   tiles: state.tiles.data.tiles,
   layout: state.tiles.data.layout,
   deviceWidth: state.device.width,
-  navRequest: state.ui.navRequest,
 });
 
 export default connect(select)(MeView);

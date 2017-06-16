@@ -29,7 +29,9 @@ class HomeController @Inject()(
 
   def redirectToIndex = Action(Redirect(routes.HomeController.index()))
 
-  def indexIgnoreParam(param: String) = index
+  def indexIgnoreParams1(param: String): Action[AnyContent] = index
+  def indexIgnoreParams2(param1: String, param2: String): Action[AnyContent] = index
+  def indexIgnoreParams3(param1: String, param2: String, param3: String): Action[AnyContent] = index
 
   def redirectToPath(path: String, status: Int = MOVED_PERMANENTLY) = Action { implicit request =>
     Redirect(s"/${path.replaceFirst("^/", "")}", status)

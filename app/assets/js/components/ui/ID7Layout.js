@@ -39,6 +39,7 @@ class ID7Layout extends React.PureComponent {
     super(props);
     this.onBackClick = this.onBackClick.bind(this);
     this.onEdit = this.onEdit.bind(this);
+    this.onSettings = this.onSettings.bind(this);
   }
 
   componentWillMount() {
@@ -78,11 +79,13 @@ class ID7Layout extends React.PureComponent {
   onEdit() {
     if (this.isEditing()) {
       this.props.dispatch(goBack());
-    } else if (this.props.path === `/${Routes.NOTIFICATIONS}`) {
-      this.props.dispatch(push(`/${Routes.NOTIFICATIONS}/${Routes.MUTE}`));
     } else {
       this.props.dispatch(push(`/${Routes.EDIT}`));
     }
+  }
+
+  onSettings() {
+    this.props.dispatch(push(`/${Routes.SETTINGS}`));
   }
 
   /** Set the theme on the html element, so that we can style everything. */
@@ -144,14 +147,16 @@ class ID7Layout extends React.PureComponent {
 
               <MastheadMobile user={user}
                 onBackClick={this.onBackClick}
+                backButtonText={(this.props.path === `/${Routes.SETTINGS}`) ? 'Done' : 'Back'}
                 path={path}
                 onEdit={this.onEdit}
                 editing={this.isEditing()}
                 showEditButton={
                   this.isEditing() ||
-                  this.props.path === '/' ||
-                  this.props.path === `/${Routes.NOTIFICATIONS}`
+                  this.props.path === '/'
                 }
+                onSettings={this.onSettings}
+                showSettingsButton={ !this.props.path.startsWith(`/${Routes.SETTINGS}`) }
               />
             </header>
           </div>
