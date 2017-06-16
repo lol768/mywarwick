@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
 import CheckboxListGroupItem from '../../../ui/CheckboxListGroupItem';
 
-export default class LocationOptInSettingsView extends Component {
+export default class LocationOptInSettingsView extends React.PureComponent {
 
   static propTypes = {
     options: PropTypes.arrayOf(PropTypes.shape({

@@ -1,7 +1,7 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 
-export default class CheckboxListGroupView extends React.PureComponent {
+export default class CheckboxListGroupItem extends React.PureComponent {
 
   static propTypes = {
     icon: PropTypes.string.isRequired,
@@ -11,9 +11,18 @@ export default class CheckboxListGroupView extends React.PureComponent {
     checked: PropTypes.bool.isRequired,
   };
 
+  constructor(props) {
+    super(props);
+    this.onClick = this.onClick.bind(this);
+  }
+
+  onClick() {
+    this.props.onClick(this.props.value);
+  }
+
   render() {
     return (
-      <div className="list-group-item" onClick={ () => this.props.onClick(this.props.value) }>
+      <div className="list-group-item" onClick={ this.onClick }>
         <div className="media">
           <div className="media-left">
             <i className={ `fa fa-fw fa-${this.props.icon}` } />

@@ -9,13 +9,11 @@ GET         /activity                                             @controllers.H
 GET         /news                                                 @controllers.HomeController.index
 GET         /search                                               @controllers.HomeController.index
 GET         /tiles                                                @controllers.HomeController.redirectToIndex
-GET         /tiles/:id                                            @controllers.HomeController.indexIgnoreParams1(id: String)
+GET         /tiles/:id                                            @controllers.HomeController.indexIgnoreParam(id: String)
 GET         /edit                                                 @controllers.HomeController.index
 GET         /edit/add                                             @controllers.HomeController.index
 GET         /settings                                             @controllers.HomeController.index
-GET         /settings/:setting1                                   @controllers.HomeController.indexIgnoreParams1(setting1: String)
-GET         /settings/:setting1/:setting2                         @controllers.HomeController.indexIgnoreParams2(setting1: String, setting2: String)
-GET         /settings/:setting1/:setting2/:setting3               @controllers.HomeController.indexIgnoreParams3(setting1: String, setting2: String, setting3: String)
+GET         /settings/*setting                                    @controllers.HomeController.indexIgnoreParam(setting: String)
 
 # NEWSTART-253
 POST        /                                                     @controllers.HomeController.index

@@ -8,7 +8,7 @@ import EmptyState from '../../ui/EmptyState';
 import { Routes } from '../../AppRoot';
 import * as PropTypes from 'prop-types';
 
-class ActivityMutesView extends React.Component {
+class ActivityMutesView extends React.PureComponent {
 
   static propTypes = {
     dispatch: React.PropTypes.func.isRequired,
@@ -102,7 +102,7 @@ class ActivityMutesView extends React.Component {
                         data-dismiss="modal"
                         onClick={ () => this.onDelete(mute) }
                       >
-                        <i className="fa fa-times"></i>
+                        <i className="fa fa-times" />
                       </button>
                     </div>
                   </div>
