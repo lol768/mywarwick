@@ -1,6 +1,7 @@
 package system
 
 import play.api.mvc.{Flash, RequestHeader}
+import play.filters.csrf.CSRF
 import services.Navigation
 import warwick.sso.{AuthenticatedRequest, SSOClient, User}
 
@@ -15,25 +16,26 @@ case class RequestContext(
   loginUrl: String,
   logoutUrl: String,
   navigation: Seq[Navigation],
-  flash: Flash
+  flash: Flash,
+  csrfHelper : CSRFPageHelper
 )
 
 object RequestContext {
 
-  def authenticated(sso: SSOClient, request: AuthenticatedRequest[_], navigation: Seq[Navigation]) =
-    RequestContext(sso, request, request.context.user, request.context.actualUser, navigation)
+  def authenticated(sso: SSOClient, request: AuthenticatedRequest[_], navigation: Seq[Navigation], csrfHelper: CSRFPageHelper) =
+    RequestContext(sso, request, request.context.user, request.context.actualUser, navigation, csrfHelper)
 
-  def authenticated(sso: SSOClient, request: RequestHeader): RequestContext = {
+  def authenticated(sso: SSOClient, request: RequestHeader, csrfHelper: CSRFPageHelper): RequestContext = {
     val eventualRequestContext = sso.withUser(request) { loginContext =>
-      Future.successful(Right(RequestContext(sso, request, loginContext.user, loginContext.actualUser, Nil)))
+      Future.successful(Right(RequestContext(sso, request, loginContext.user, loginContext.actualUser, Nil, csrfHelper)))
     }.map(_.right.get)
 
     Await.result(eventualRequestContext, Duration.Inf)
   }
 
-  def anonymous(sso: SSOClient, request: RequestHeader, navigation: Seq[Navigation]) = RequestContext(sso, request, None, None, navigation)
+  def anonymous(sso: SSOClient, request: RequestHeader, navigation: Seq[Navigation], csrfHelper: CSRFPageHelper) = RequestContext(sso, request, None, None, navigation, csrfHelper)
 
-  def apply(sso: SSOClient, request: RequestHeader, user: Option[User], actualUser: Option[User], navigation: Seq[Navigation]): RequestContext = {
+  def apply(sso: SSOClient, request: RequestHeader, user: Option[User], actualUser: Option[User], navigation: Seq[Navigation], csrfHelper: CSRFPageHelper): RequestContext = {
     val target = (if (request.secure) "https://" else "http://") + request.host + request.uri
     val linkGenerator = sso.linkGenerator(request)
     linkGenerator.setTarget(target)
@@ -45,7 +47,8 @@ object RequestContext {
       loginUrl = linkGenerator.getLoginUrl,
       logoutUrl = linkGenerator.getLogoutUrl,
       navigation = navigation,
-      flash = request.flash
+      flash = request.flash,
+      csrfHelper = csrfHelper
     )
   }
 

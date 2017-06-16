@@ -1,5 +1,6 @@
-@import views.html.helper.CSRF
-@(title: String)
+@import system.CSRFPageHelper
+@import system.RequestContext
+@(title: String)(implicit context: RequestContext)
 
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -30,8 +31,8 @@
 <meta name="msapplication-TileColor" content="#5b3069">
 <meta name="msapplication-TileImage" content="/assets/lib/id7/images/mstile-144x144.png">
 
-<meta name="_csrf" content="TODO"/>
-<meta name="_csrf_header" content="X-CSRF-Token TODO: pull through"/>
+@context.csrfHelper.metaElementToken
+@context.csrfHelper.metaElementHeader
 
 <title>@Seq("My Warwick", title).filter(_.nonEmpty).mkString(" - ")</title>
 

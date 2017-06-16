@@ -1,8 +1,10 @@
 @import services.analytics.AnalyticsTrackingID
+@import system.RequestContext
 @()(
     implicit analyticsTrackingId: Option[AnalyticsTrackingID],
     searchRootUrl: SearchRootUrl,
-    showBetaWarning: Boolean
+    showBetaWarning: Boolean,
+    context: RequestContext
 )
 <!DOCTYPE html>
 <html lang="en-GB" class="no-js" manifest="@routes.Assets.versioned("appcache.manifest")">
