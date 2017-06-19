@@ -23,11 +23,11 @@ class RouteExemptCsrfFilter @Inject() (csrfFilter: CSRFFilter, configuration: Co
 
       val routePath = rh.path
 
-      val matchingRegexps = whitelistRegexps.exists(r => {
+      val matchesWhitelist = whitelistRegexps.exists(r => {
         r.findFirstMatchIn(routePath).nonEmpty
       })
 
-      val next = if (matchingRegexps) { proposedNext } else { csrfFilter(next) }
+      val next = if (matchesWhitelist) { proposedNext } else { csrfFilter(proposedNext) }
       next(rh)
     }
   }
