@@ -108,7 +108,7 @@ export function persistTiles() {
 
     return fetchWithCredentials('/api/tiles', {
       method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tiles, layout }),
     });
   };

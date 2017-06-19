@@ -28,8 +28,8 @@ export function persist(optInType, values) {
     const data = { [optInType]: values };
 
     return fetchWithCredentials('/api/news/optin', {
-        method: 'POST',
-        body: JSON.stringify(data)
+      method: 'POST',
+      body: JSON.stringify(data),
     }).then(() => dispatch(fetch()));
   };
 }

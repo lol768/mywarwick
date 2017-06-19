@@ -13,7 +13,7 @@ import scala.util.matching.Regex
 
 class RouteExemptCsrfFilter @Inject() (csrfFilter: CSRFFilter, configuration: Configuration, env: play.Environment) extends EssentialFilter {
 
-  var whitelistCache: Option[List[Regex]] = None
+  lazy val whitelistRegexps: List[Regex] = configuration.getStringList("mywarwick.csrfWhitelist").map(_.asScala).getOrElse(Nil).map(_.r).toList
 
   override def apply(next: EssentialAction) = new EssentialAction {
     override def apply(rh: RequestHeader): Accumulator[ByteString, Result] = {
@@ -23,15 +23,11 @@ class RouteExemptCsrfFilter @Inject() (csrfFilter: CSRFFilter, configuration: Co
 
       val routePath = rh.path
 
-      lazy val regexStrings = configuration.getStringList("mywarwick.csrfWhitelist").map(_.asScala).getOrElse(Nil).map(_.r)
-      val whitelistRegexps = whitelistCache.getOrElse(regexStrings)
-      whitelistCache = Some(whitelistRegexps.toList)
-
-      val matchingRegexps = whitelistRegexps.filter(r => {
+      val matchingRegexps = whitelistRegexps.find(r => {
         r.findFirstMatchIn(routePath).fold(false)(_ => true)
       })
 
-      matchingRegexps.headOption.fold(csrfFilter(next))(_ => next).apply(rh)
+      matchingRegexps.fold(csrfFilter(next))(_ => next).apply(rh)
     }
   }
 }

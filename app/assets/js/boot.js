@@ -1,7 +1,7 @@
 import './polyfills-and-errors';
 import log from 'loglevel';
 import * as u from './userinfo-base';
-import {setMethod} from "./csrfToken";
+import { setMethod } from './csrfToken';
 
 
 log.enableAll(false);
@@ -13,7 +13,7 @@ function boot() {
     .catch(() => [null, false])
     .then(([userData, handled]) => {
       if (!handled) {
-        setMethod("userInfo", userData);
+        setMethod('userInfo', userData);
         return import('./main').then(main =>
           main.launch(userData)
         );

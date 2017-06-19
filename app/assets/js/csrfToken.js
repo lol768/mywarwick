@@ -1,7 +1,15 @@
-const TOKEN_META_ELEMENT_SELECTOR = "meta[name=_csrf]";
-const HEADER_META_ELEMENT_SELECTOR = "meta[name=_csrf_header]";
-let method = "element";
+const TOKEN_META_ELEMENT_SELECTOR = 'meta[name=_csrf]';
+const HEADER_META_ELEMENT_SELECTOR = 'meta[name=_csrf_header]';
+let method = 'element';
 let data = {};
+
+class MissingCsrfError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'MissingCsrfError';
+  }
+}
+
 /**
  * Helper function to grab value from an element given a selector.
  *
@@ -9,11 +17,11 @@ let data = {};
  * @returns String The value attribute's contents.
  */
 function helperGetMetaElementValue(selector) {
-  let el = document.querySelector(selector);
+  const el = document.querySelector(selector);
   if (el === null) {
-    throw new MissingCsrfError(`Couldn't find element ${selector}`)
+    throw new MissingCsrfError(`Couldn't find element ${selector}`);
   }
-  return el.getAttribute("content");
+  return el.getAttribute('content');
 }
 
 /**
@@ -22,11 +30,12 @@ function helperGetMetaElementValue(selector) {
  */
 export function getCsrfToken() {
   switch (method) {
-    case "element":
+    case 'element':
       return helperGetMetaElementValue(TOKEN_META_ELEMENT_SELECTOR);
-    case "userInfo":
-      return data['csrfToken'];
-      break;
+    case 'userInfo':
+      return data.csrfToken;
+    default:
+      throw new Error(`Unknown method for accessing CSRF token, ${method}.`);
   }
 }
 
@@ -36,29 +45,23 @@ export function getCsrfToken() {
  */
 export function getCsrfHeaderName() {
   switch (method) {
-    case "element":
+    case 'element':
       return helperGetMetaElementValue(HEADER_META_ELEMENT_SELECTOR);
-    case "userInfo":
-      return data['csrfHeader'];
-      break;
+    case 'userInfo':
+      return data.csrfHeader;
+    default:
+      throw new Error(`Unknown method for accessing CSRF token, ${method}.`);
   }
 }
 
-export function setMethod(methodName, additionalData={}) {
+export function setMethod(methodName, additionalData = {}) {
   method = methodName;
   switch (methodName) {
-    case "element": return;
-    case "userInfo":
-      console.info("[CSRF] Getting data via userInfo system");
-      data = additionalData['user'];
+    case 'element': return;
+    case 'userInfo':
+      data = additionalData.user;
       return;
-  }
-  throw new Error(`Unknown method for accessing CSRF token, ${methodName}.`)
-}
-
-class MissingCsrfError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = 'MissingCsrfError';
+    default:
+      throw new Error(`Unknown method for accessing CSRF token, ${methodName}.`);
   }
 }

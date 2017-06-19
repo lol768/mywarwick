@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect';
-import {fetchWithCredentials} from "./serverpipe";
+import { fetchWithCredentials } from './serverpipe';
 
 export const persistNotificationsLastRead =
   createSelector(state => state.notificationsLastRead, (lastRead) => {
