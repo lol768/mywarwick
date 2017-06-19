@@ -1,9 +1,13 @@
-.tile--config__modal:extend(.modal all) {}
+.tile--config {
+  &__backdrop:extend(.modal-backdrop all) {}
 
-.tile--config__modal_dialog:extend(.modal-dialog all) {}
+  &__modal:extend(.modal all) {}
 
-.tile--config__modal_footer:extend(.modal-footer all), .tile--config__modal_header:extend(.modal-header all) {}
+  &__modal_dialog:extend(.modal-dialog all) {}
 
-.tile--config__modal_content:extend(.modal-content all) {}
+  &__modal_footer:extend(.modal-footer all), &__modal_header:extend(.modal-header all) {}
 
-.tile--config__modal_body:extend(.modal-body all) {}
+  &__modal_content:extend(.modal-content all) {}
+
+  &__modal_body:extend(.modal-body all) {}
+}
