@@ -1,7 +1,6 @@
 package system
 
-import play.api.mvc.{Flash, RequestHeader}
-import play.filters.csrf.CSRF
+import play.api.mvc.{Flash, Request, RequestHeader}
 import services.Navigation
 import warwick.sso.{AuthenticatedRequest, SSOClient, User}
 
@@ -23,11 +22,11 @@ case class RequestContext(
 object RequestContext {
 
   def authenticated(sso: SSOClient, request: AuthenticatedRequest[_], navigation: Seq[Navigation], csrfHelper: CSRFPageHelper) =
-    RequestContext(sso, request, request.context.user, request.context.actualUser, navigation, csrfHelper)
+    RequestContext(sso, request, request.context.user, request.context.actualUser, navigation, transformCsrfHelper(csrfHelper, request))
 
   def authenticated(sso: SSOClient, request: RequestHeader, csrfHelper: CSRFPageHelper): RequestContext = {
     val eventualRequestContext = sso.withUser(request) { loginContext =>
-      Future.successful(Right(RequestContext(sso, request, loginContext.user, loginContext.actualUser, Nil, csrfHelper)))
+      Future.successful(Right(RequestContext(sso, request, loginContext.user, loginContext.actualUser, Nil, transformCsrfHelper(csrfHelper, request))))
     }.map(_.right.get)
 
     Await.result(eventualRequestContext, Duration.Inf)
@@ -48,8 +47,14 @@ object RequestContext {
       logoutUrl = linkGenerator.getLogoutUrl,
       navigation = navigation,
       flash = request.flash,
-      csrfHelper = csrfHelper
+      csrfHelper = transformCsrfHelper(csrfHelper, request)
     )
+  }
+
+  private[this] def transformCsrfHelper(helper: CSRFPageHelper, req: RequestHeader): CSRFPageHelper = {
+    val token = play.filters.csrf.CSRF.getToken(req).getOrElse(sys.error("No CSRF token present!"))
+    helper.token = token
+    helper
   }
 
 }

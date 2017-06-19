@@ -1,11 +1,11 @@
 import { createSelector } from 'reselect';
+import {fetchWithCredentials} from "./serverpipe";
 
 export const persistNotificationsLastRead =
   createSelector(state => state.notificationsLastRead, (lastRead) => {
     const { date, fetched } = lastRead;
-
     if (date && fetched) {
-      fetch('/api/streams/read', {
+      fetchWithCredentials('/api/streams/read', {
         method: 'post',
         headers: {
           Accept: 'application/json',
@@ -14,7 +14,6 @@ export const persistNotificationsLastRead =
         body: JSON.stringify({
           lastRead: date.format(),
         }),
-        credentials: 'same-origin',
       });
     }
   });

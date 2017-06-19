@@ -12,7 +12,7 @@
       (@request.context.user.get.usercode.string).
     </p>
     <form action="/sso/unmask" method="post">
-      @CSRF.formField
+      @context.csrfHelper.formField
       <p>
         <button class="btn btn-default">Unmask</button>
       </p>
@@ -27,7 +27,7 @@
   <p>Masquerading allows you to see the site exactly as another user would see it.</p>
 
   <form action="/sso/masquerade" method="post">
-    @CSRF.formField
+    @context.csrfHelper.formField
     <div class="input-group" style="max-width: 300px">
       <input type="text" class="form-control" name="usercode" placeholder="Type a usercode" autofocus autocomplete="off">
       <span class="input-group-btn">

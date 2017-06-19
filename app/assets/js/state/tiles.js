@@ -106,12 +106,9 @@ export function persistTiles() {
 
     const layout = getState().tiles.data.layout;
 
-    return fetch('/api/tiles', {
-      credentials: 'same-origin',
+    return fetchWithCredentials('/api/tiles', {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ tiles, layout }),
     });
   };

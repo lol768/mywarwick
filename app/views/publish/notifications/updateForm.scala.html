@@ -2,6 +2,8 @@
 @import models.publishing.{PermissionScope, Publisher}
 @import system.RequestContext
 @import views.html._
+@import views.html.helper.CSRF
+
 @(
     publisher: Publisher,
     activity: Activity,
@@ -18,7 +20,7 @@
 
 @common.admin("Update notification") {
   @b3.form(action = controllers.publish.routes.NotificationsController.update(publisher.id, activity.id, true), 'class -> "split-form") {
-
+    @context.csrfHelper.formField
     @form.globalErrors.map { error =>
       <div class="alert alert-danger">@error.message</div>
     }

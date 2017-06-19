@@ -1,10 +1,10 @@
 import javax.inject.Inject
 
 import com.kenshoo.play.metrics.MetricsFilter
+import filters.RouteExemptCsrfFilter
 import org.databrary.PlayLogbackAccessFilter
 import play.api.http.HttpFilters
 import play.filters.cors.CORSFilter
-import play.filters.csrf.CSRFFilter
 import play.filters.gzip.GzipFilter
 import play.filters.headers.SecurityHeadersFilter
 
@@ -14,7 +14,7 @@ class Filters @Inject()(
   metricsFilter: MetricsFilter,
   gzipFilter: GzipFilter,
   corsFilter: CORSFilter,
-  csrfFilter: CSRFFilter
+  rxCsrfFilter: RouteExemptCsrfFilter
 ) extends HttpFilters {
-  def filters = Seq(csrfFilter, corsFilter, securityHeadersFilter, accessLog, gzipFilter, metricsFilter)
+  def filters = Seq(rxCsrfFilter, corsFilter, securityHeadersFilter, accessLog, gzipFilter, metricsFilter)
 }
