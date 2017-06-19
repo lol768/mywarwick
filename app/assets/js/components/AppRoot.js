@@ -90,7 +90,7 @@ RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`] = {
   rendered: false,
   view: NewsCategoriesView,
 };
-RouteViews[`/${Routes.SETTINGS}/${Routes.OPT_IN}`] = {
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}`] = {
   rendered: false,
   view: OptInSettingsView,
 };

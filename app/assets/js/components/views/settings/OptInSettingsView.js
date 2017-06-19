@@ -35,7 +35,7 @@ class OptInSettingsView extends HideableView {
 
   render() {
     return (
-      <ScrollRestore url={`/${Routes.OPT_IN}`} forceTop>
+      <ScrollRestore url={`/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}`} forceTop>
         <form>
           { (this.props.singleOptionView) ?
             React.createElement(
