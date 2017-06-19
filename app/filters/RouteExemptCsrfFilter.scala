@@ -15,10 +15,10 @@ class RouteExemptCsrfFilter @Inject() (csrfFilter: CSRFFilter, configuration: Co
 
   lazy val whitelistRegexps: List[Regex] = configuration.getStringList("mywarwick.csrfWhitelist").map(_.asScala).getOrElse(Nil).map(_.r).toList
 
-  override def apply(next: EssentialAction) = new EssentialAction {
+  override def apply(proposedNext: EssentialAction) = new EssentialAction {
     override def apply(rh: RequestHeader): Accumulator[ByteString, Result] = {
       if (env.isTest) {
-        next(rh)
+        proposedNext(rh)
       }
 
       val routePath = rh.path
@@ -27,7 +27,8 @@ class RouteExemptCsrfFilter @Inject() (csrfFilter: CSRFFilter, configuration: Co
         r.findFirstMatchIn(routePath).nonEmpty
       })
 
-      matchingRegexps.fold(csrfFilter(next))(_ => next).apply(rh)
+      val next = if (matchingRegexps.nonEmpty) { proposedNext } else { csrfFilter(next) }
+      next(rh)
     }
   }
 }
