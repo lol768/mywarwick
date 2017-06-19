@@ -63,7 +63,7 @@ class UserInfoController @Inject()(
       .foreach(userInitialisationService.maybeInitialiseUser)
 
     contextUserInfo(request.context).map { userInfo =>
-      val token = csrfHelper.token
+      val token = requestContext.csrfHelper.token
       val augmentedInfo = userInfo +
         ("csrfToken" -> JsString(token.map(_.value).getOrElse("Missing"))) +
         ("csrfHeader" -> JsString(requestContext.csrfHelper.headerName()))

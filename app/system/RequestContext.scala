@@ -22,20 +22,20 @@ case class RequestContext(
 
 object RequestContext {
 
-  def authenticated(sso: SSOClient, request: AuthenticatedRequest[_], navigation: Seq[Navigation], csrfHelper: CSRFPageHelper) =
-    RequestContext(sso, request, request.context.user, request.context.actualUser, navigation, transformCsrfHelper(csrfHelper, request))
+  def authenticated(sso: SSOClient, request: AuthenticatedRequest[_], navigation: Seq[Navigation], csrfHelperFactory: CSRFPageHelperFactory) =
+    RequestContext(sso, request, request.context.user, request.context.actualUser, navigation, csrfHelperFactory)
 
-  def authenticated(sso: SSOClient, request: RequestHeader, csrfHelper: CSRFPageHelper): RequestContext = {
+  def authenticated(sso: SSOClient, request: RequestHeader, csrfHelperFactory: CSRFPageHelperFactory): RequestContext = {
     val eventualRequestContext = sso.withUser(request) { loginContext =>
-      Future.successful(Right(RequestContext(sso, request, loginContext.user, loginContext.actualUser, Nil, transformCsrfHelper(csrfHelper, request))))
+      Future.successful(Right(RequestContext(sso, request, loginContext.user, loginContext.actualUser, Nil, csrfHelperFactory)))
     }.map(_.right.get)
 
     Await.result(eventualRequestContext, Duration.Inf)
   }
 
-  def anonymous(sso: SSOClient, request: RequestHeader, navigation: Seq[Navigation], csrfHelper: CSRFPageHelper) = RequestContext(sso, request, None, None, navigation, csrfHelper)
+  def anonymous(sso: SSOClient, request: RequestHeader, navigation: Seq[Navigation], csrfHelperFactory: CSRFPageHelperFactory) = RequestContext(sso, request, None, None, navigation, csrfHelperFactory)
 
-  def apply(sso: SSOClient, request: RequestHeader, user: Option[User], actualUser: Option[User], navigation: Seq[Navigation], csrfHelper: CSRFPageHelper): RequestContext = {
+  def apply(sso: SSOClient, request: RequestHeader, user: Option[User], actualUser: Option[User], navigation: Seq[Navigation], csrfPageHelperFactory: CSRFPageHelperFactory): RequestContext = {
     val target = (if (request.secure) "https://" else "http://") + request.host + request.uri
     val linkGenerator = sso.linkGenerator(request)
     linkGenerator.setTarget(target)
@@ -48,13 +48,14 @@ object RequestContext {
       logoutUrl = linkGenerator.getLogoutUrl,
       navigation = navigation,
       flash = request.flash,
-      csrfHelper = transformCsrfHelper(csrfHelper, request)
+      csrfHelper = transformCsrfHelper(csrfPageHelperFactory, request)
     )
   }
 
-  private[this] def transformCsrfHelper(helper: CSRFPageHelper, req: RequestHeader): CSRFPageHelper = {
+  private[this] def transformCsrfHelper(helperFactory: CSRFPageHelperFactory, req: RequestHeader): CSRFPageHelper = {
     val token = play.filters.csrf.CSRF.getToken(req)
-    helper.token = token
+
+    val helper = helperFactory.getInstance(token)
     helper
   }
 

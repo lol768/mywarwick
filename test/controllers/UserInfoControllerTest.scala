@@ -6,15 +6,17 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import helpers.BaseSpec
+import org.mockito.Matchers
 import play.api.http.HeaderNames
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
 import play.filters.csrf.CSRF
+import play.filters.csrf.CSRF.Token
 import play.twirl.api.Html
 import services.analytics.AnalyticsMeasurementService
 import services.{MockNavigationService, PhotoService, UserInitialisationService}
-import system.CSRFPageHelper
+import system.{CSRFPageHelper, CSRFPageHelperFactory}
 import uk.ac.warwick.sso.client.cache.{UserCache, UserCacheItem}
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import warwick.sso._
@@ -52,12 +54,18 @@ class UserInfoControllerTest extends BaseSpec with MockitoSugar with Results {
     val ssoClient = new MockSSOClient(loginContext)
     val mockCsrfHelper = mock[CSRFPageHelper]
 
+    val mockCsrfPageHelperFactory = mock[CSRFPageHelperFactory]
+
+
     when(mockCsrfHelper.token).thenReturn(Some(CSRF.Token("Name", "TokenValue")))
     when(mockCsrfHelper.formField()).thenReturn(Html(s"""<input type="hidden" name="Name" value="TokenValue">"""))
     when(mockCsrfHelper.metaElementHeader()).thenReturn(Html(s"""<meta name="_csrf_header" content="Csrf-Token"/>"""))
     when(mockCsrfHelper.metaElementToken()).thenReturn(Html(s"""<meta name="_csrf" content="TokenValue"/>"""))
+
+    when(mockCsrfPageHelperFactory.getInstance(Matchers.any[Option[Token]])).thenReturn(mockCsrfHelper)
+
     new UserInfoController(ssoConfig, userCache, ssoClient, mock[UserInitialisationService], photoService, measurementService) {
-      override val csrfHelper: CSRFPageHelper = mockCsrfHelper
+      override val csrfPageHelperFactory: CSRFPageHelperFactory = mockCsrfPageHelperFactory
       override val navigationService = new MockNavigationService()
       override val ssoClient: SSOClient = mockSSOClient
     }

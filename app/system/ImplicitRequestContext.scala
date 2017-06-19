@@ -14,15 +14,15 @@ trait ImplicitRequestContext {
   val ssoClient: SSOClient = null
 
   @Inject
-  val csrfHelper: CSRFPageHelper = null
+  val csrfPageHelperFactory: CSRFPageHelperFactory = null
 
   implicit def requestContext(implicit request: Request[_]): RequestContext = request match {
     case req: AuthenticatedRequest[_] =>
       val nav = navigationService.getNavigation(req.context)
-      RequestContext.authenticated(ssoClient, req, nav, csrfHelper)
+      RequestContext.authenticated(ssoClient, req, nav, csrfPageHelperFactory)
     case _ =>
       // Assumes anonymous users have no navigation
-      RequestContext.anonymous(ssoClient, request, Seq.empty, csrfHelper)
+      RequestContext.anonymous(ssoClient, request, Seq.empty, csrfPageHelperFactory)
   }
 
 }

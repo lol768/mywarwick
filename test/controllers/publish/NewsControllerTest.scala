@@ -1,6 +1,6 @@
 package controllers.publish
 
-import helpers.{Fixtures, OneStartAppPerSuite}
+import helpers.{BaseSpec, Fixtures, OneStartAppPerSuite}
 import models.Audience.Staff
 import models.publishing.PublishingRole.NewsManager
 import models.publishing._
@@ -8,17 +8,17 @@ import models.{Audience, NewsCategory}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import helpers.BaseSpec
 import play.api.cache.CacheApi
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results
 import play.api.test.Helpers._
 import play.api.test._
 import play.filters.csrf.CSRF
-import play.twirl.api.{Html, HtmlFormat}
+import play.filters.csrf.CSRF.Token
+import play.twirl.api.Html
 import services._
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
-import system.{CSRFPageHelper, ErrorHandler}
+import system.{CSRFPageHelper, CSRFPageHelperFactory, ErrorHandler}
 import warwick.sso._
 
 import scala.concurrent.Future
@@ -53,16 +53,20 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
   when(newsCategoryService.all()).thenReturn(Seq(NewsCategory("abc", "Campus")))
 
   private val mockCsrfHelper = mock[CSRFPageHelper]
+  private val mockCsrfPageHelperFactory = mock[CSRFPageHelperFactory]
+
 
   when(mockCsrfHelper.token).thenReturn(Some(CSRF.Token("Name", "TokenValue")))
   when(mockCsrfHelper.formField()).thenReturn(Html(s"""<input type="hidden" name="Name" value="TokenValue">"""))
   when(mockCsrfHelper.metaElementHeader()).thenReturn(Html(s"""<meta name="_csrf_header" content="Csrf-Token"/>"""))
   when(mockCsrfHelper.metaElementToken()).thenReturn(Html(s"""<meta name="_csrf" content="TokenValue"/>"""))
 
+  when(mockCsrfPageHelperFactory.getInstance(Matchers.any[Option[Token]])).thenReturn(mockCsrfHelper)
+
   val newsController = new NewsController(securityServiceImpl, publisherService, messagesApi, newsService, departmentInfoDao, audienceBinder, newsCategoryService, userNewsCategoryService, mock[ErrorHandler], audienceService, userPreferencesService) {
     override val navigationService = new MockNavigationService()
     override val ssoClient = mockSSOClient
-    override val csrfHelper: CSRFPageHelper = mockCsrfHelper
+    override val csrfPageHelperFactory: CSRFPageHelperFactory = mockCsrfPageHelperFactory
   }
 
   "NewsController#list" should {

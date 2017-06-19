@@ -1,21 +1,17 @@
 package system
 
-import javax.inject.Inject
-
-import play.api.mvc.RequestHeader
 import play.filters.csrf.CSRF.Token
 import play.filters.csrf.CSRFConfig
 import play.twirl.api.{Html, HtmlFormat}
 
-class CSRFPageHelper @Inject() (csrfConfig: CSRFConfig) {
+class CSRFPageHelper (csrfConfig: CSRFConfig, _token: Option[Token]) {
 
-  var token: Option[Token] = _
-
+  def token: Option[Token] = _token
 
   def metaElementToken(): Html = {
     // If the token is missing, there's not much we can do
     // Avoid an exception by just using some stand-in text
-    Html(s"""<meta name="_csrf" content="${HtmlFormat.escape(token.fold("Missing")(_.value))}"/>""")
+    Html(s"""<meta name="_csrf" content="${HtmlFormat.escape(_token.fold("Missing")(_.value))}"/>""")
   }
 
   def metaElementHeader(): Html = {
@@ -26,10 +22,10 @@ class CSRFPageHelper @Inject() (csrfConfig: CSRFConfig) {
     csrfConfig.headerName
   }
 
-  // Provide a convenience method which doesn't require an implicit RequestHeader in
+  // Provide a convenience method which doesn't require Some(token)an implicit RequestHeader in
   // each view that we wish to have a CSRF field in.
   def formField(): Html = {
-    Html(s"""<input type="hidden" name="${csrfConfig.tokenName}" value="${HtmlFormat.escape(token.fold("Missing")(_.value))}">""")
+    Html(s"""<input type="hidden" name="${csrfConfig.tokenName}" value="${HtmlFormat.escape(_token.fold("Missing")(_.value))}">""")
   }
 
 }
