@@ -102,7 +102,21 @@ class SettingsView extends HideableView {
           </div>
         </div>
 
-        <div className="list-group setting-colour-1">
+        <div className="list-group setting-colour-0">
+          <div className="list-group-item"
+            onClick={ () =>
+              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}`))
+            }
+          >
+            { SettingsView.renderSetting(
+              'check-square-o',
+              'Tile preferences',
+              <i className="fa fa-fw fa-chevron-right" />
+            ) }
+          </div>
+        </div>
+
+        <div className="list-group setting-colour-0">
           <div className="list-group-item"
             onClick={ () =>
               this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`))
@@ -116,7 +130,7 @@ class SettingsView extends HideableView {
           </div>
         </div>
 
-        <div className="list-group setting-colour-2">
+        <div className="list-group setting-colour-1">
           <div className="list-group-item"
             onClick={ () =>
               this.props.dispatch(
@@ -153,7 +167,7 @@ class SettingsView extends HideableView {
           </div>
         </div>
 
-        <div className="list-group setting-colour-4">
+        <div className="list-group setting-colour-3">
           <div className="list-group-item" onClick={ loadDeviceDetails }>
             <div className="media">
               <div className="media-left feedback">

@@ -42,7 +42,7 @@ export default class LocationOptInSettingsView extends React.PureComponent {
   render() {
     return (
       <div>
-        <div className="list-group setting-colour-2">
+        <div className="list-group setting-colour-1">
           <div className="list-group-item">
             <div className="list-group-item-heading">
               <h3>Location preferences</h3>
@@ -56,7 +56,7 @@ export default class LocationOptInSettingsView extends React.PureComponent {
           (or just leave them all unchecked if not).
         </p>
 
-        <div className="list-group setting-colour-2">
+        <div className="list-group setting-colour-1">
           { _.map(this.props.options, location =>
             <CheckboxListGroupItem key={ `OptIn:Locations:${location.value}` } icon="map-signs"
               description={ location.description } value={ location.value } onClick={ this.onClick }

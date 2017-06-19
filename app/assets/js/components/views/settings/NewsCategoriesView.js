@@ -64,7 +64,7 @@ class NewsCategoriesView extends HideableView {
   render() {
     return (
       <div>
-        <div className="list-group setting-colour-2">
+        <div className="list-group setting-colour-1">
           <div className="list-group-item">
             <div className="list-group-item-heading">
               <h3>News categories</h3>
@@ -72,7 +72,7 @@ class NewsCategoriesView extends HideableView {
           </div>
         </div>
 
-        <div className="list-group setting-colour-2">
+        <div className="list-group setting-colour-1">
           { _.map(this.props.categories, category =>
             <CheckboxListGroupItem key={ category.id } icon="newspaper-o"
               description={ category.name } value={ category.id } onClick={ this.onClick }

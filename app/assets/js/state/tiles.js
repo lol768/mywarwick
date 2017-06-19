@@ -213,15 +213,12 @@ export function formatPreferenceData(preferencesFromAction, availableTileOptions
       case 'array': {
         preferences[key] = {};
         option.options.forEach((o) => (
-          preferences[key][o.value] = _.find(preferencesFromAction, (p) =>
-              p.name === key && p.value === o.value
-            ) !== undefined
+          preferences[key][o.value] = (preferencesFromAction[key][o.value] || false)
         ));
         break;
       }
       case 'string': {
-        const preference = _.find(preferencesFromAction, (p) => p.name === key);
-        preferences[key] = (preference !== undefined) ? preference.value : null;
+        preferences[key] = preferencesFromAction[key];
         break;
       }
       default: {

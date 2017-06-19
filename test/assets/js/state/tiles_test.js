@@ -16,20 +16,13 @@ describe('tiles', () => {
 
   it('format preference data properly', () => {
 
-    const preferencesDataFromAction = [
-      {
-        name: 'stops',
-        value: '43000065301',
+    const preferencesDataFromAction = {
+      stops: {
+        '43000065301': true,
+        '43000065302': true,
       },
-      {
-        name: 'stops',
-        value: '43000065302',
-      },
-      {
-        name: 'location',
-        value: 'warwick-westwood',
-      },
-    ];
+      location: 'warwick-westwood',
+    };
 
     const availableTileOptions = {
       stops: {
