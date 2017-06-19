@@ -1,6 +1,7 @@
 package system
 
 import play.api.mvc.{Flash, Request, RequestHeader}
+import play.filters.csrf.CSRF
 import services.Navigation
 import warwick.sso.{AuthenticatedRequest, SSOClient, User}
 
@@ -16,7 +17,7 @@ case class RequestContext(
   logoutUrl: String,
   navigation: Seq[Navigation],
   flash: Flash,
-  csrfHelper : CSRFPageHelper
+  csrfHelper: CSRFPageHelper
 )
 
 object RequestContext {
@@ -52,7 +53,7 @@ object RequestContext {
   }
 
   private[this] def transformCsrfHelper(helper: CSRFPageHelper, req: RequestHeader): CSRFPageHelper = {
-    val token = play.filters.csrf.CSRF.getToken(req).getOrElse(sys.error("No CSRF token present!"))
+    val token = play.filters.csrf.CSRF.getToken(req)
     helper.token = token
     helper
   }

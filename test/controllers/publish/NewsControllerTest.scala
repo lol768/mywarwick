@@ -14,9 +14,11 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Results
 import play.api.test.Helpers._
 import play.api.test._
+import play.filters.csrf.CSRF
+import play.twirl.api.{Html, HtmlFormat}
 import services._
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
-import system.ErrorHandler
+import system.{CSRFPageHelper, ErrorHandler}
 import warwick.sso._
 
 import scala.concurrent.Future
@@ -50,9 +52,17 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
   when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("IN", "IT Services", "IT Services", "ITS", "SERVICE")))
   when(newsCategoryService.all()).thenReturn(Seq(NewsCategory("abc", "Campus")))
 
+  private val mockCsrfHelper = mock[CSRFPageHelper]
+
+  when(mockCsrfHelper.token).thenReturn(Some(CSRF.Token("Name", "TokenValue")))
+  when(mockCsrfHelper.formField()).thenReturn(Html(s"""<input type="hidden" name="Name" value="TokenValue">"""))
+  when(mockCsrfHelper.metaElementHeader()).thenReturn(Html(s"""<meta name="_csrf_header" content="Csrf-Token"/>"""))
+  when(mockCsrfHelper.metaElementToken()).thenReturn(Html(s"""<meta name="_csrf" content="TokenValue"/>"""))
+
   val newsController = new NewsController(securityServiceImpl, publisherService, messagesApi, newsService, departmentInfoDao, audienceBinder, newsCategoryService, userNewsCategoryService, mock[ErrorHandler], audienceService, userPreferencesService) {
     override val navigationService = new MockNavigationService()
     override val ssoClient = mockSSOClient
+    override val csrfHelper: CSRFPageHelper = mockCsrfHelper
   }
 
   "NewsController#list" should {

@@ -10,8 +10,11 @@ import play.api.http.HeaderNames
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
+import play.filters.csrf.CSRF
+import play.twirl.api.Html
 import services.analytics.AnalyticsMeasurementService
-import services.{PhotoService, UserInitialisationService}
+import services.{MockNavigationService, PhotoService, UserInitialisationService}
+import system.CSRFPageHelper
 import uk.ac.warwick.sso.client.cache.{UserCache, UserCacheItem}
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import warwick.sso._
@@ -35,10 +38,29 @@ class UserInfoControllerTest extends BaseSpec with MockitoSugar with Results {
   val measurementService = mock[AnalyticsMeasurementService]
   when(measurementService.getUserIdentifier(Usercode("user"))).thenReturn("user-identifier")
 
+  val mockSSOClient = new MockSSOClient(new LoginContext {
+    override def loginUrl(target: Option[String]) = ""
+    override def actualUserHasRole(role: RoleName) = false
+    override def userHasRole(role: RoleName) = false
+
+    override val user: Option[User] = Some(Users.create(Usercode("test")))
+    override val actualUser: Option[User] = user
+  })
+
   def controller(user: Option[User] = None) = {
     val loginContext = Fixtures.user.loginContext(user)
     val ssoClient = new MockSSOClient(loginContext)
-    new UserInfoController(ssoConfig, userCache, ssoClient, mock[UserInitialisationService], photoService, measurementService)
+    val mockCsrfHelper = mock[CSRFPageHelper]
+
+    when(mockCsrfHelper.token).thenReturn(Some(CSRF.Token("Name", "TokenValue")))
+    when(mockCsrfHelper.formField()).thenReturn(Html(s"""<input type="hidden" name="Name" value="TokenValue">"""))
+    when(mockCsrfHelper.metaElementHeader()).thenReturn(Html(s"""<meta name="_csrf_header" content="Csrf-Token"/>"""))
+    when(mockCsrfHelper.metaElementToken()).thenReturn(Html(s"""<meta name="_csrf" content="TokenValue"/>"""))
+    new UserInfoController(ssoConfig, userCache, ssoClient, mock[UserInitialisationService], photoService, measurementService) {
+      override val csrfHelper: CSRFPageHelper = mockCsrfHelper
+      override val navigationService = new MockNavigationService()
+      override val ssoClient: SSOClient = mockSSOClient
+    }
   }
   val REFRESH_URL = "https://signon.example.com/login"
   val LOGIN_URL = s"$REFRESH_URL?permdenied"

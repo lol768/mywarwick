@@ -11,12 +11,16 @@ import play.filters.csrf.CSRFFilter
 import scala.collection.JavaConverters._
 import scala.util.matching.Regex
 
-class RouteExemptCsrfFilter @Inject() (csrfFilter: CSRFFilter, configuration: Configuration) extends EssentialFilter {
+class RouteExemptCsrfFilter @Inject() (csrfFilter: CSRFFilter, configuration: Configuration, env: play.Environment) extends EssentialFilter {
 
   var whitelistCache: Option[List[Regex]] = None
 
   override def apply(next: EssentialAction) = new EssentialAction {
     override def apply(rh: RequestHeader): Accumulator[ByteString, Result] = {
+      if (env.isTest) {
+        next(rh)
+      }
+
       val routePath = rh.path
 
       lazy val regexStrings = configuration.getStringList("mywarwick.csrfWhitelist").map(_.asScala).getOrElse(Nil).map(_.r)

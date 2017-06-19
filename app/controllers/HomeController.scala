@@ -25,7 +25,7 @@ class HomeController @Inject()(
   implicit val showBetaWarning: Boolean =
     configuration.getBoolean("mywarwick.showBetaWarning").getOrElse(false)
 
-  def index = Action { implicit request =>
+  def index = Action {
     Ok(views.html.index())
   }
 
