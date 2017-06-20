@@ -17,6 +17,8 @@ import SettingsView from './views/SettingsView';
 import NewsCategoriesView from './views/settings/NewsCategoriesView';
 import OptInSettingsView from './views/settings/OptInSettingsView';
 import LocationOptInSettingView from './views/settings/optInSettings/LocationOptInSettingView';
+import TilePreferencesView from './views/settings/TilePreferencesView';
+import TileOptionView from './views/settings/TileOptionView';
 
 
 export const Routes = {
@@ -29,6 +31,7 @@ export const Routes = {
   SEARCH: 'search',
   SETTINGS: 'settings',
   SettingsRoutes: {
+    TILES: 'tiles',
     MUTES: 'mutes',
     NEWS_CATEGORIES: 'newscategories',
     OPT_IN: 'optin',
@@ -82,6 +85,10 @@ RouteViews[`/${Routes.SETTINGS}`] = {
   rendered: false,
   view: SettingsView,
 };
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}`] = {
+  rendered: false,
+  view: TilePreferencesView,
+};
 RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`] = {
   rendered: false,
   view: ActivityMutesView,
@@ -106,6 +113,16 @@ class AppRoot extends React.Component {
         description: PropTypes.string.isRequired,
       }))).isRequired,
       selected: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string)).isRequired,
+    }).isRequired,
+    tileData: PropTypes.shape({
+      tiles: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        colour: PropTypes.number.isRequired,
+        icon: PropTypes.string.isRequired,
+        title: PropTypes.string.isRequired,
+        preferences: PropTypes.object,
+      })),
+      options: PropTypes.object.isRequired,
     }).isRequired,
     dispatch: PropTypes.func.isRequired,
   };
@@ -160,6 +177,12 @@ class AppRoot extends React.Component {
     return new RegExp(`^\/${Routes.TILES}\/(.+)`).exec(this.state.location.pathname);
   }
 
+  tileOption() {
+    return new RegExp(`^\/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}\/(.+)`).exec(
+      this.state.location.pathname
+    );
+  }
+
   singleOptInSetting() {
     return new RegExp(`^\/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}\/(.+)`).exec(
       this.state.location.pathname
@@ -169,6 +192,7 @@ class AppRoot extends React.Component {
   render() {
     const { location } = this.state;
     const tilePath = this.expandedTile();
+    const tileOptionPath = this.tileOption();
     const optInPath = this.singleOptInSetting();
 
     const views = _.map(RouteViews, (args, path) => (
@@ -193,6 +217,20 @@ class AppRoot extends React.Component {
             id={ tilePath[1] }
             params={{ id: tilePath[1] }}
             {...this.props}
+          />
+        </Visible>
+      );
+    } else {
+      views.push(null);
+    }
+
+    if ((tileOptionPath || []).length === 2 && this.props.tileData.tiles.length > 0) {
+      views.push(
+        <Visible key={ tileOptionPath[1] } visible>
+          <TileOptionView
+            tile={ _.find(this.props.tileData.tiles, tile => tile.id === tileOptionPath[1]) }
+            tileOptions={ this.props.tileData.options[tileOptionPath[1]] }
+            dispatch={ this.props.dispatch }
           />
         </Visible>
       );
@@ -231,6 +269,7 @@ class AppRoot extends React.Component {
 const select = (state) => ({
   navRequest: state.ui.navRequest,
   newsOptInOptions: state.newsOptIn,
+  tileData: state.tiles.data,
 });
 
 export default connect(select)(AppRoot);

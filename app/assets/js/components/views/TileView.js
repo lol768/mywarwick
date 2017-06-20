@@ -105,9 +105,6 @@ class TileView extends Component {
     tileProps.onHide = () => view.onHideTile(tileProps);
     tileProps.onResize = () => view.onResizeTile(tileProps);
 
-    // Configuring
-    tileProps.onConfiguring = () => view.onConfiguring(tileProps);
-
     // subset of config needed by TileContent subclasses
     const contentProps = {
       ...content,

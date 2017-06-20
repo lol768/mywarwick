@@ -1,5 +1,6 @@
 import NewsCategoriesView from 'components/views/settings/NewsCategoriesView';
 import { shallow } from 'enzyme';
+import * as React from 'react';
 
 describe('NewsCategoriesView', () => {
 

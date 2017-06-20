@@ -93,23 +93,6 @@ export default class Tile extends React.PureComponent {
     return this.props.editing ? false : this.props.canZoom;
   }
 
-  displayConfigButton() {
-    const hasOption = !_.isEmpty(this.props.option);
-    const userLoggedIn = this.props.user ? this.props.user.authenticated : false;
-    if (hasOption && userLoggedIn) {
-      return (
-        <div
-          className="tile__edit-control top-right"
-          title="Change setting"
-          onClick={this.props.onConfiguring}
-        >
-          <div className="icon"><i className="fa fa-cog"></i></div>
-        </div>
-      );
-    }
-    return null;
-  }
-
   render() {
     const {
       type, title, size, colour, content, editing, zoomed, isDesktop, children, supportedTileSizes,
@@ -167,8 +150,6 @@ export default class Tile extends React.PureComponent {
             <div className="icon"><i className="fa fa-arrows"> </i></div>
           </div>
 
-          { this.displayConfigButton() }
-
           <TileWrap
             icon={this.getIcon()}
             zoomIcon={zoomIcon()}
@@ -184,7 +165,6 @@ export default class Tile extends React.PureComponent {
 
   static propTypes = {
     children: PropTypes.node,
-    onConfiguring: PropTypes.func,
     onResize: PropTypes.func.isRequired,
     onHide: PropTypes.func.isRequired,
     onZoomOut: PropTypes.func.isRequired,
