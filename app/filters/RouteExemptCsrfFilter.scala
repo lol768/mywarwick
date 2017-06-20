@@ -18,7 +18,7 @@ class RouteExemptCsrfFilter @Inject() (csrfFilter: CSRFFilter, configuration: Co
   override def apply(proposedNext: EssentialAction) = new EssentialAction {
     override def apply(rh: RequestHeader): Accumulator[ByteString, Result] = {
       if (env.isTest) {
-        proposedNext(rh)
+        return proposedNext(rh)
       }
 
       val routePath = rh.path
