@@ -73,6 +73,7 @@ GET         /service/metrics                                      @controllers.M
 GET         /service/gtg                                          @controllers.ServiceCheckController.gtg
 GET         /service/healthcheck                                  @controllers.ServiceCheckController.healthcheck
 GET         /service/cluster/state                                @controllers.admin.ClusterStateController.get
+GET         /service/revision                                     @controllers.VersionController.revision
 
 POST        /api/streams/read                                     @controllers.api.UserActivitiesController.markAsRead
 
