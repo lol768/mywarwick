@@ -5,6 +5,9 @@ import log from 'loglevel';
 import _ from 'lodash-es';
 import store from './store';
 
+const MAX_ITEMS_IN_QUEUE = 100;
+const LOCAL_STORAGE_KEY = 'gaQueue';
+
 /* eslint-disable */
 (function (i, s, o, g, r, a, m) {
   i['GoogleAnalyticsObject'] = r;
@@ -47,7 +50,19 @@ if (trackingId === undefined) {
   });
 }
 
-let analyticsQueue = [];
+/**
+ * Grabs a (truncated) stored analytics queue if there is one,
+ * or just an empty array.
+ */
+function getQueueFromLocalStorage() {
+  const storageItem = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+  if (storageItem !== null && Array.isArray(JSON.parse(storageItem))) {
+    return JSON.parse(storageItem).slice(-1 * MAX_ITEMS_IN_QUEUE);
+  }
+  return [];
+}
+
+let analyticsQueue = getQueueFromLocalStorage();
 
 let postNextItemThrottled;
 
@@ -60,6 +75,10 @@ function queue(...args) {
     { args, time },
   ];
 
+  if (analyticsQueue.length === MAX_ITEMS_IN_QUEUE) {
+    analyticsQueue = analyticsQueue.shift();
+  }
+
   if (isReady) {
     postNextItemThrottled();
   }
@@ -70,13 +89,28 @@ function getTimeSpentInQueue(timeQueued) {
   return _.now() - timeQueued;
 }
 
+/**
+ * Encodes the queue as JSON, and stores to localStorage.
+ */
+function persistAnalyticsQueue() {
+  window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(analyticsQueue));
+}
+
 function postNextItem() {
-  if (!navigator.onLine || !analyticsQueue.length) {
+  if (!analyticsQueue.length) {
+    return;
+  }
+
+  if (!navigator.onLine) {
+    persistAnalyticsQueue();
     return;
   }
 
   const { args: [command, fields], time } = analyticsQueue[0];
   analyticsQueue = analyticsQueue.slice(1);
+
+  // ensure items get cleared out of the queue
+  persistAnalyticsQueue();
 
   ga(command, {
     ...fields,
