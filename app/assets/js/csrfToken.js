@@ -75,7 +75,7 @@ export function setMethod(methodName, additionalData = {}) {
  */
 function updateTokenViaAjax() {
   u.fetchUserInfo().then((responseData) => {
-    if (responseData !== null && "user" in responseData) {
+    if (responseData !== null && 'user' in responseData) {
       data = responseData;
     }
   });
