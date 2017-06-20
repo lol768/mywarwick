@@ -1,4 +1,5 @@
 import * as u from './userinfo-base';
+import $ from 'jquery';
 
 const TOKEN_META_ELEMENT_SELECTOR = 'meta[name=_csrf]';
 const HEADER_META_ELEMENT_SELECTOR = 'meta[name=_csrf_header]';
