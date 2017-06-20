@@ -1,3 +1,5 @@
+import * as u from './userinfo-base';
+
 const TOKEN_META_ELEMENT_SELECTOR = 'meta[name=_csrf]';
 const HEADER_META_ELEMENT_SELECTOR = 'meta[name=_csrf_header]';
 let method = 'element';
@@ -65,3 +67,20 @@ export function setMethod(methodName, additionalData = {}) {
       throw new Error(`Unknown method for accessing CSRF token, ${methodName}.`);
   }
 }
+
+/**
+ * When we're back online, we'll perform an AJAX request
+ * to try and grab the CSRF token to prevent future POSTs
+ * from failing, which would be bad.
+ */
+function updateTokenViaAjax() {
+  u.fetchUserInfo().then((responseData) => {
+    if (responseData !== null && "user" in responseData) {
+      data = responseData;
+    }
+  });
+}
+
+$(() => {
+  $(window).on('online', updateTokenViaAjax);
+});
