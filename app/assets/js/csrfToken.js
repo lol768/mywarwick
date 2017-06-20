@@ -74,9 +74,13 @@ export function setMethod(methodName, additionalData = {}) {
  * from failing, which would be bad.
  */
 function updateTokenViaAjax() {
+  if (method === 'userInfo' && 'csrfHeader' in data) {
+    return; // we already have a token
+  }
+
   u.fetchUserInfo().then((responseData) => {
     if (responseData !== null && 'user' in responseData) {
-      data = responseData;
+      setMethod('userInfo', responseData);
     }
   });
 }
