@@ -1,3 +1,6 @@
+import * as app from './app';
+import fetch from 'isomorphic-fetch';
+
 const UPDATE_READY = 'UPDATE_READY';
 
 const initialState = {
@@ -26,7 +29,11 @@ let updateTimerInterval;
 export function displayUpdateProgress(dispatch) {
   function onUpdateReady() {
     clearInterval(updateTimerInterval);
-    dispatch(updateReady());
+
+    fetch('/service/revision')
+      .then(res => res.text())
+      .then(rev => dispatch(app.updateAssets({ revision: rev })))
+      .then(() => dispatch(updateReady()));
   }
 
   function updateTimer() {

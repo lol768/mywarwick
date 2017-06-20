@@ -91,6 +91,38 @@ class SettingsView extends HideableView {
     this.props.dispatch(newsOptIn.fetch());
   }
 
+  static getNativeAppVersion() {
+    if ('MyWarwickNative' in window && 'getAppVersion' in window.MyWarwickNative) {
+      return window.MyWarwickNative.getAppVersion();
+    }
+
+    return null;
+  }
+
+  getVersionString() {
+    const { assetsRevision } = this.props;
+    const userAgent = window.navigator.userAgent;
+    const appVersion = SettingsView.getNativeAppVersion();
+
+    const versions = [];
+
+    if (appVersion !== null) {
+      if (userAgent.indexOf('Android') >= 0) {
+        versions.push(`Android ${appVersion}`);
+      } else if (/iPad|iPhone|iPod/.test(userAgent)) {
+        versions.push(`iOS ${appVersion}`);
+      } else {
+        versions.push(`App ${appVersion}`);
+      }
+    }
+
+    if (assetsRevision !== null) {
+      versions.push(`Web ${assetsRevision}`);
+    }
+
+    return versions.join(', ');
+  }
+
   render() {
     return (
       <div>
@@ -184,6 +216,9 @@ class SettingsView extends HideableView {
               </div>
             </div>
           </div>
+          <div className="list-group-item">
+            { SettingsView.renderSetting('info-circle', this.getVersionString(), null) }
+          </div>
         </div>
       </div>
     );
@@ -207,6 +242,7 @@ const select = (state) => ({
       total: (state.newsOptIn.options.Location || []).length,
     },
   },
+  assetsRevision: state.app.assets.revision,
 });
 
 export default connect(select)(SettingsView);

@@ -7,6 +7,7 @@
  * this file.
  */
 
+export { reducer as app } from './app';
 export { reducer as news } from './news';
 export { reducer as newsCategories } from './news-categories';
 export { reducer as newsOptIn } from './news-optin';
