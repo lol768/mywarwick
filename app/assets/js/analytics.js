@@ -51,6 +51,8 @@ if (trackingId === undefined) {
   });
 }
 
+let analyticsQueue = [];
+
 /**
  * Grabs a (truncated) stored analytics queue if there is one,
  * or just an empty array.
@@ -62,8 +64,6 @@ function getQueueFromLocalStorage() {
     }
   });
 }
-
-let analyticsQueue = [];
 
 let postNextItemThrottled;
 
@@ -93,8 +93,8 @@ function getTimeSpentInQueue(timeQueued) {
  * Encodes the queue as JSON, and stores to localStorage.
  */
 function persistAnalyticsQueue() {
-  return localforage.setItem(QUEUE_STORAGE_KEY, analyticsQueue).then(d => {
-    log.info("Persist finished for GA queue");
+  return localforage.setItem(QUEUE_STORAGE_KEY, analyticsQueue).then(() => {
+    log.info('Persist finished for GA queue');
   });
 }
 
@@ -112,7 +112,7 @@ function postNextItem() {
   analyticsQueue = analyticsQueue.slice(1);
 
   // ensure items get cleared out of the queue
-  persistAnalyticsQueue().then(param => {
+  persistAnalyticsQueue().then(() => {
     ga(command, {
       ...fields,
       queueTime: getTimeSpentInQueue(time),
