@@ -1,12 +1,13 @@
 /* global ga */
 
+import localforage from 'localforage';
 import $ from 'jquery';
 import log from 'loglevel';
 import _ from 'lodash-es';
 import store from './store';
 
 const MAX_ITEMS_IN_QUEUE = 100;
-const LOCAL_STORAGE_KEY = 'gaQueue';
+const QUEUE_STORAGE_KEY = 'gaQueue';
 
 /* eslint-disable */
 (function (i, s, o, g, r, a, m) {
@@ -55,14 +56,14 @@ if (trackingId === undefined) {
  * or just an empty array.
  */
 function getQueueFromLocalStorage() {
-  const storageItem = window.localStorage.getItem(LOCAL_STORAGE_KEY);
-  if (storageItem !== null && Array.isArray(JSON.parse(storageItem))) {
-    return JSON.parse(storageItem).slice(-1 * MAX_ITEMS_IN_QUEUE);
-  }
-  return [];
+  localforage.getItem(QUEUE_STORAGE_KEY).then(storageItem => {
+    if (storageItem !== null && Array.isArray(storageItem)) {
+      analyticsQueue = [...storageItem, ...analyticsQueue].slice(-100);
+    }
+  });
 }
 
-let analyticsQueue = getQueueFromLocalStorage();
+let analyticsQueue = [];
 
 let postNextItemThrottled;
 
@@ -84,7 +85,6 @@ function queue(...args) {
   }
 }
 
-
 function getTimeSpentInQueue(timeQueued) {
   return _.now() - timeQueued;
 }
@@ -93,7 +93,9 @@ function getTimeSpentInQueue(timeQueued) {
  * Encodes the queue as JSON, and stores to localStorage.
  */
 function persistAnalyticsQueue() {
-  window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(analyticsQueue));
+  return localforage.setItem(QUEUE_STORAGE_KEY, analyticsQueue).then(d => {
+    log.info("Persist finished for GA queue");
+  });
 }
 
 function postNextItem() {
@@ -102,7 +104,7 @@ function postNextItem() {
   }
 
   if (!navigator.onLine) {
-    persistAnalyticsQueue();
+    persistAnalyticsQueue(); // fire and forget
     return;
   }
 
@@ -110,19 +112,20 @@ function postNextItem() {
   analyticsQueue = analyticsQueue.slice(1);
 
   // ensure items get cleared out of the queue
-  persistAnalyticsQueue();
+  persistAnalyticsQueue().then(param => {
+    ga(command, {
+      ...fields,
+      queueTime: getTimeSpentInQueue(time),
+    });
 
-  ga(command, {
-    ...fields,
-    queueTime: getTimeSpentInQueue(time),
+    if (analyticsQueue.length) {
+      postNextItemThrottled();
+    }
   });
-
-  if (analyticsQueue.length) {
-    postNextItemThrottled();
-  }
 }
 
 $(() => {
+  getQueueFromLocalStorage();
   if (isReady) {
     $(window).on('online', postNextItemThrottled);
   }
