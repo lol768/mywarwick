@@ -6,6 +6,7 @@ import LocationOptInSettingView from './optInSettings/LocationOptInSettingView';
 import HideableView from '../HideableView';
 import * as newsOptIn from '../../../state/news-optin';
 import { connect } from 'react-redux';
+import { replace } from 'react-router-redux';
 
 class OptInSettingsView extends HideableView {
 
@@ -23,6 +24,7 @@ class OptInSettingsView extends HideableView {
   constructor(props) {
     super(props);
     this.onChange = this.onChange.bind(this);
+    this.onFinish = this.onFinish.bind(this);
   }
 
   componentDidShow() {
@@ -31,6 +33,10 @@ class OptInSettingsView extends HideableView {
 
   onChange(optinType, values) {
     this.props.dispatch(newsOptIn.persist(optinType, values));
+  }
+
+  onFinish() {
+    this.props.dispatch(replace('/'));
   }
 
   render() {
@@ -46,9 +52,17 @@ class OptInSettingsView extends HideableView {
                 onChange: this.onChange,
               }
             ) :
-            <LocationOptInSettingView options={ this.props.options.Location || [] }
-              selected={ this.props.selected.Location || [] } onChange={ this.onChange }
-            />
+            <div>
+              <LocationOptInSettingView options={ this.props.options.Location || [] }
+                selected={ this.props.selected.Location || [] } onChange={ this.onChange }
+              />
+
+              <div className="container">
+                <a href="#" className="btn btn-default btn-lg btn-block" onClick={ this.onFinish }>
+                  Finish
+                </a>
+              </div>
+            </div>
           }
         </form>
       </ScrollRestore>
