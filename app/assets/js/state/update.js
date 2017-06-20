@@ -1,5 +1,6 @@
 import * as app from './app';
 import fetch from 'isomorphic-fetch';
+import log from 'loglevel';
 
 const UPDATE_READY = 'UPDATE_READY';
 
@@ -33,6 +34,7 @@ export function displayUpdateProgress(dispatch) {
     fetch('/service/revision')
       .then(res => res.text())
       .then(rev => dispatch(app.updateAssets({ revision: rev })))
+      .catch(e => log.error('Error fetching revision information', e))
       .then(() => dispatch(updateReady()));
   }
 

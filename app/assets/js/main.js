@@ -7,6 +7,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { syncHistoryWithStore } from 'react-router-redux';
 import fetch from 'isomorphic-fetch';
+import log from 'loglevel';
 
 import * as notificationsGlue from './notifications-glue';
 import * as pushNotifications from './push-notifications';
@@ -118,6 +119,7 @@ export function launch(userData) {
               fetch('/service/revision')
                 .then(res => res.text())
                 .then(rev => store.dispatch(app.updateAssets({ revision: rev })))
+                .catch(e => log.error('Error fetching revision information', e))
                 .then(() => {
                   if (navigator.serviceWorker.controller) {
                     // The new service worker is ready to go, but there's an old service worker
