@@ -22,6 +22,27 @@ to re-use your Apache/Nginx proxy config that you have working for Tomcat.
 
 You probably also need to run the `content-providers` app to generate content for your tiles.
 
+CSRF and Forms
+--------------
+
+Forms are protected against cross-site request forgery by default, which means you'll need to
+include the appropriate CSRF token in your forms and AJAX requests. For forms templated in Twirl,
+you can include a form field with the following code:
+
+```twirl
+@context.csrfHelper.formField
+```
+
+You my need to add an `(implicit context: RequestContext)` to the view if it's not already there.
+
+For JavaScript, use the `csrfToken` module with exported functions `getCsrfHeaderName` and
+`getCsrfToken` *or* the `fetchWithCredentials`/`postJsonWithCredentials` helper functions which
+have CSRF support baked in.
+
+If there is an exceptional reason why your route needs to be exempt from the CSRF protection,
+you can add a regexp-based path exception in the `mywarwick.csrfWhitelist` configuration list. By
+default the SSO access control route is covered with this.
+
 Functional tests
 ----------------
 

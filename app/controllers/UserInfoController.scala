@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.mvc.{Action, Cookie, DiscardingCookie}
 import services.analytics.AnalyticsMeasurementService
 import services.{PhotoService, UserInitialisationService}
@@ -47,7 +47,7 @@ class UserInfoController @Inject()(
     * the SSC to hang around forever, so instead we check that our local cached copy
     * of the user's session is missing (meaning it probably expired away).
     */
-  def info = Lenient.disallowRedirect.async { request =>
+  def info = Lenient.disallowRedirect.async { implicit request =>
     val ltc = request.cookies.get(GLOBAL_LOGIN_COOKIE_NAME).filter(hasValue)
     val ssc = request.cookies.get(SSC_NAME).filter(hasValue)
 
@@ -63,9 +63,14 @@ class UserInfoController @Inject()(
       .foreach(userInitialisationService.maybeInitialiseUser)
 
     contextUserInfo(request.context).map { userInfo =>
+      val token = requestContext.csrfHelper.token
+      val augmentedInfo = userInfo +
+        ("csrfToken" -> JsString(token.map(_.value).getOrElse("Missing"))) +
+        ("csrfHeader" -> JsString(requestContext.csrfHelper.headerName()))
+
       Ok(Json.obj(
         "refresh" -> (if (refresh) loginUrl else false),
-        "user" -> userInfo,
+        "user" -> augmentedInfo,
         "links" -> Json.obj(
           "login" -> links.getPermissionDeniedLink(request.context.user.nonEmpty),
           "logout" -> logoutUrl
@@ -86,7 +91,7 @@ class UserInfoController @Inject()(
   private val WARWICK_YEAR_OF_STUDY = "warwickyearofstudy"
   private val WARWICK_FINAL_YEAR = "warwickfinalyear"
 
-  private def contextUserInfo(context: LoginContext): Future[JsValue] = {
+  private def contextUserInfo(context: LoginContext): Future[JsObject] = {
     context.user.map { user =>
       photoService.photoUrl(user.universityId)
         .recover { case _ => routes.Assets.versioned("images/no-photo.png").toString }

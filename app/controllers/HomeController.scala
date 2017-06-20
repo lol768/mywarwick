@@ -25,7 +25,10 @@ class HomeController @Inject()(
   implicit val showBetaWarning: Boolean =
     configuration.getBoolean("mywarwick.showBetaWarning").getOrElse(false)
 
-  def index = Action(Ok(views.html.index()))
+  def index = Action {
+    Ok(views.html.index())
+  }
+
 
   def redirectToIndex = Action(Redirect(routes.HomeController.index()))
 

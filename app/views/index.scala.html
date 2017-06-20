@@ -8,6 +8,8 @@
 <html lang="en-GB" class="no-js" manifest="@routes.Assets.versioned("appcache.manifest")">
   <head>
     @common.head(title = "")
+    <meta name="_csrf_header" content="Csrf-Token">
+    <meta name="_csrf" content="uninitialised">
     <script defer src="@routes.Assets.versioned("js/vendor.bundle.js")"></script>
     <script defer src="@routes.Assets.versioned("js/bundle.js")"></script>
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("css/main.css")">

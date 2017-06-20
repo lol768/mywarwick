@@ -2,7 +2,10 @@
 @import publishing.Role
 @import models.publishing.Ability.EditNotifications
 @import models.publishing.Ability.DeleteNotifications
-@(publisher: Publisher, item: ActivityRender, user: Role)
+@import views.html.helper.CSRF
+
+@import system.RequestContext
+@(publisher: Publisher, item: ActivityRender, user: Role)(implicit context: RequestContext)
 
 <div class="activity-item row">
   <div class="media">
@@ -38,6 +41,7 @@
       <div class="btn-toolbar pull-right confirm-delete">
         <p>Are you sure?</p>
         @helper.form(controllers.publish.routes.NotificationsController.delete(publisher.id, item.activity.id)) {
+          @context.csrfHelper.formField
           <button type="submit" class="btn btn-danger">Delete</button>
         }
         <button class="btn btn-default cancel">Cancel</button>

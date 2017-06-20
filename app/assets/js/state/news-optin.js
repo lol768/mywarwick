@@ -27,12 +27,8 @@ export function persist(optInType, values) {
   return dispatch => {
     const data = { [optInType]: values };
 
-    return global.fetch('/api/news/optin', {
-      credentials: 'same-origin',
+    return fetchWithCredentials('/api/news/optin', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     }).then(() => dispatch(fetch()));
   };
