@@ -66,7 +66,7 @@ GET         /api/news/images/:id                                  @controllers.a
 POST        /api/news/analytics                                   @controllers.api.AnalyticsController.newsItemReport
 GET         /api/news/optin                                       @controllers.api.UserNewsOptInController.list
 POST        /api/news/optin                                       @controllers.api.UserNewsOptInController.update
-GET         /api/id7/notifications                                @controllers.api.NotificationsSnapshotController.unreads
+GET         /api/id7/notifications/unreads                        @controllers.api.NotificationsSnapshotController.unreads
 
 GET         /news/:id/redirect                                    @controllers.api.ReadNewsController.redirect(id: String)
 

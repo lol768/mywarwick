@@ -7,11 +7,13 @@ import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import play.api.libs.json.Json
 import play.api.mvc.Action
+import services.ActivityService
 import services.dao.ActivityDao
 import uk.ac.warwick.userlookup.UserLookupInterface
+import warwick.sso.Usercode
 
 @Singleton
-class NotificationsSnapshotController @Inject() (@NamedDatabase("default") db: Database, lookup: UserLookupInterface, activityDao: ActivityDao) extends BaseController {
+class NotificationsSnapshotController @Inject() (@NamedDatabase("default") db: Database, lookup: UserLookupInterface, activityService: ActivityService) extends BaseController {
 
   val WARWICK_SSO_COOKIE_NAME: String = "WarwickSSO"
 
@@ -30,10 +32,8 @@ class NotificationsSnapshotController @Inject() (@NamedDatabase("default") db: D
       val user = optionUser.get
       val userCode = user.getUserId
       db.withConnection { implicit c =>
-        val concreteLastReadDate = activityDao.getLastReadDate(userCode).getOrElse(new DateTime(0))
-
         Ok(Json.obj(
-          "unreads" -> activityDao.countNotificationsSinceDate(userCode, concreteLastReadDate)
+          "unreads" -> activityService.countUnreadNotificationsForUsercode(Usercode(userCode))
         ))
       }
     }
