@@ -31,24 +31,20 @@ class NotificationsSnapshotController @Inject()(
     * ideal, but the data returned is of trivial significance.
     */
   def unreads = Action { implicit request =>
-    val cookie = request.cookies.get(WARWICK_SSO_COOKIE_NAME)
-    val optionUser = cookie.map(_.value).map(lookup.getUserByToken)
-
     val originHeader = request.headers.get(ORIGIN)
-    if (optionUser.isEmpty || invalidOrigin(originHeader)) {
-      Forbidden("Not permitted.")
-    } else {
-      val user = optionUser.get
-      val userCode = user.getUserId
-      Ok(Json.obj(
-        "unreads" -> activityService.countUnreadNotificationsForUsercode(Usercode(userCode))
-      )).withHeaders(ACCESS_CONTROL_ALLOW_ORIGIN -> originHeader.get)
-        .withHeaders(ACCESS_CONTROL_ALLOW_METHODS -> "GET")
-        .withHeaders(ACCESS_CONTROL_ALLOW_CREDENTIALS -> "true")
-        .withHeaders(VARY -> ORIGIN)
-    }
+    val cookie = request.cookies.get(WARWICK_SSO_COOKIE_NAME)
 
+    if (invalidOrigin(originHeader))
+      Forbidden("Not permitted: CORS origin not allowed.")
+    else
+      cookie.map(_.value).map(lookup.getUserByToken).map { user =>
+        val userCode = user.getUserId
+        Ok(Json.obj(
+          "unreads" -> activityService.countUnreadNotificationsForUsercode(Usercode(userCode))
+        )).withHeaders(ACCESS_CONTROL_ALLOW_ORIGIN -> originHeader.get)
+          .withHeaders(ACCESS_CONTROL_ALLOW_METHODS -> "GET")
+          .withHeaders(ACCESS_CONTROL_ALLOW_CREDENTIALS -> "true")
+          .withHeaders(VARY -> ORIGIN)
+      }.getOrElse(Forbidden("Not permitted: unauthenticated."))
   }
-
 }
-
