@@ -42,7 +42,7 @@ export const Routes = {
     OptInTypes: {
       LOCATION: 'location',
     },
-    ACTIVITY_FILTER: 'actvitityfilter',
+    ACTIVITY_FILTER: 'activityfilter',
     NOTIFICATION_FILTER: 'notificationfilter',
   },
 };
