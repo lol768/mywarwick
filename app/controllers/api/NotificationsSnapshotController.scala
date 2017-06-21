@@ -49,6 +49,7 @@ class NotificationsSnapshotController @Inject()(
           "unreads" -> activityService.countUnreadNotificationsForUsercode(Usercode(userCode))
         )).withHeaders(ACCESS_CONTROL_ALLOW_ORIGIN -> originHeader.get)
           .withHeaders(ACCESS_CONTROL_ALLOW_METHODS -> "GET")
+          .withHeaders(ACCESS_CONTROL_ALLOW_HEADERS -> "x-requested-by")
           .withHeaders(ACCESS_CONTROL_ALLOW_CREDENTIALS -> "true")
           .withHeaders(VARY -> ORIGIN)
       }.getOrElse(Forbidden("Not permitted: unauthenticated."))
