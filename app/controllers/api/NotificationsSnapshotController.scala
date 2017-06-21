@@ -40,7 +40,7 @@ class NotificationsSnapshotController @Inject()(
     if (invalidOrigin(originHeader))
       Forbidden("Not permitted: CORS origin not allowed.")
     else
-      cookie.map(_.value).map(lookup.getUserByToken).map { user =>
+      cookie.map(_.value).map(lookup.getUserByToken).filter(_.isFoundUser).map { user =>
         val userCode = user.getUserId
         // Be careful what you return here, the data is exposed
         // in a less secure manner.
