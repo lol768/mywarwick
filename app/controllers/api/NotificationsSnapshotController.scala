@@ -21,7 +21,10 @@ class NotificationsSnapshotController @Inject()(
 
   def invalidOrigin(headerOption: Option[String]): Boolean = {
     headerOption.fold(true)(headerToCheck => {
-      !(headerToCheck.startsWith("https://") && headerToCheck.endsWith(".warwick.ac.uk"))
+      !(
+        (headerToCheck.startsWith("https://") && headerToCheck.endsWith(".warwick.ac.uk")) ||
+        headerToCheck.equals("http://www2.warwick.ac.uk") // special case for sitebuilder
+        )
     })
   }
 
@@ -39,6 +42,9 @@ class NotificationsSnapshotController @Inject()(
     else
       cookie.map(_.value).map(lookup.getUserByToken).map { user =>
         val userCode = user.getUserId
+        // Be careful what you return here, the data is exposed
+        // in a less secure manner.
+        // SiteBuilder notably needs access, but it can be HTTP at time of writing.
         Ok(Json.obj(
           "unreads" -> activityService.countUnreadNotificationsForUsercode(Usercode(userCode))
         )).withHeaders(ACCESS_CONTROL_ALLOW_ORIGIN -> originHeader.get)
