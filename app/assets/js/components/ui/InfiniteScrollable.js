@@ -39,6 +39,10 @@ export default class InfiniteScrollable extends HideableView {
     this.cancellableShowMorePromise.cancel();
   }
 
+  componentDidUpdate() {
+    this.onScroll();
+  }
+
   onScroll() {
     // detached - we've explicitly detached the listener
     // unmounted - the component is/has unmounted

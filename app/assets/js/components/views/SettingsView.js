@@ -8,6 +8,7 @@ import HideableView from './HideableView';
 import * as newsCategories from '../../state/news-categories';
 import * as newsOptIn from '../../state/news-optin';
 import { loadDeviceDetails } from '../../userinfo';
+import _ from 'lodash-es';
 
 class SettingsView extends HideableView {
 
@@ -26,6 +27,14 @@ class SettingsView extends HideableView {
         selected: PropTypes.number.isRequired,
         total: PropTypes.number.isRequired,
       }).isRequired,
+    }).isRequired,
+    activityFilter: PropTypes.shape({
+      selected: PropTypes.number.isRequired,
+      total: PropTypes.number.isRequired,
+    }).isRequired,
+    notificationFilter: PropTypes.shape({
+      selected: PropTypes.number.isRequired,
+      total: PropTypes.number.isRequired,
     }).isRequired,
     dispatch: PropTypes.func.isRequired,
   };
@@ -58,9 +67,10 @@ class SettingsView extends HideableView {
   }
 
   static renderFractionCount(number, total) {
+    const fraction = (number === total) ? 'All' : `${number}/${total}`;
     return (
       <div>
-        { `${number}/${total}` }
+        { fraction }
         <i className="fa fa-fw fa-chevron-right" />
       </div>
     );
@@ -167,6 +177,41 @@ class SettingsView extends HideableView {
           </div>
         </div>
 
+        <div className="list-group setting-colour-2">
+          <div className="list-group-item"
+            onClick={ () =>
+              this.props.dispatch(
+                push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.ACTIVITY_FILTER}`)
+              )
+            }
+          >
+            { SettingsView.renderSetting(
+              'dashboard',
+              'Activity filter',
+              SettingsView.renderFractionCount(
+                this.props.activityFilter.selected,
+                this.props.activityFilter.total
+              )
+            ) }
+          </div>
+          <div className="list-group-item"
+            onClick={ () =>
+              this.props.dispatch(
+                push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NOTIFICATION_FILTER}`)
+              )
+            }
+          >
+            { SettingsView.renderSetting(
+              'bell-o',
+              'Notifications filter',
+              SettingsView.renderFractionCount(
+                this.props.notificationFilter.selected,
+                this.props.notificationFilter.total
+              )
+            ) }
+          </div>
+        </div>
+
         <div className="list-group setting-colour-3">
           <div className="list-group-item" onClick={ loadDeviceDetails }>
             <div className="media">
@@ -190,23 +235,51 @@ class SettingsView extends HideableView {
   }
 }
 
-const select = (state) => ({
-  mutes: state.notifications.activityMutes.length,
-  subscribedNewsCategories: state.newsCategories.subscribed.length,
-  newsCategories: {
-    fetching: state.newsCategories.fetching,
-    failed: state.newsCategories.failed,
-    selected: state.newsCategories.subscribed.length,
-    total: state.newsCategories.items.length,
-  },
-  newsOptIn: {
-    fetching: state.newsOptIn.fetching,
-    failed: state.newsOptIn.failed,
-    location: {
-      selected: (state.newsOptIn.selected.Location || []).length,
-      total: (state.newsOptIn.options.Location || []).length,
+const select = (state) => {
+  const activityFilterTotal = _.reduce(
+    state.activities.filterOptions,
+    (total, o) => total + o.length,
+    0
+  );
+  const notificationFilterTotal = _.reduce(
+    state.notifications.filterOptions,
+    (total, o) => total + o.length,
+    0
+  );
+  return {
+    mutes: state.notifications.activityMutes.length,
+    subscribedNewsCategories: state.newsCategories.subscribed.length,
+    newsCategories: {
+      fetching: state.newsCategories.fetching,
+      failed: state.newsCategories.failed,
+      selected: state.newsCategories.subscribed.length,
+      total: state.newsCategories.items.length,
     },
-  },
-});
+    newsOptIn: {
+      fetching: state.newsOptIn.fetching,
+      failed: state.newsOptIn.failed,
+      location: {
+        selected: (state.newsOptIn.selected.Location || []).length,
+        total: (state.newsOptIn.options.Location || []).length,
+      },
+    },
+    activityFilter: {
+      selected: activityFilterTotal - _.reduce(
+        state.activities.filter,
+        (total, o) => total + _.filter(o, v => !v).length,
+        0
+      ),
+      total: activityFilterTotal,
+    },
+    notificationFilter: {
+      selected: notificationFilterTotal - _.reduce(
+        state.notifications.filter,
+        (total, o) => total + _.filter(o, v => !v).length,
+        0
+      ),
+      total: notificationFilterTotal,
+    },
+  };
+};
 
 export default connect(select)(SettingsView);

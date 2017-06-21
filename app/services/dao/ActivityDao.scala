@@ -42,6 +42,8 @@ trait ActivityDao {
   def saveLastReadDate(usercode: String, read: DateTime)(implicit c: Connection): Boolean
 
   def getActivityIcon(providerId: String)(implicit c: Connection): Option[ActivityIcon]
+
+  def allProviders(implicit c: Connection): Seq[ActivityProvider]
 }
 
 class ActivityDaoImpl @Inject()(
@@ -326,6 +328,10 @@ class ActivityDaoImpl @Inject()(
   override def getActivityIcon(providerId: String)(implicit c: Connection): Option[ActivityIcon] =
     SQL"SELECT icon, colour FROM PROVIDER WHERE ID = $providerId"
       .as(activityIconParser.singleOpt)
+
+  override def allProviders(implicit c: Connection): Seq[ActivityProvider] =
+    SQL"SELECT ID AS PROVIDER_ID, DISPLAY_NAME AS PROVIDER_DISPLAY_NAME FROM PROVIDER"
+      .as(activityProviderParser.*)
 
   private lazy val activityIconParser: RowParser[ActivityIcon] =
     get[String]("ICON") ~

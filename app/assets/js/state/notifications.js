@@ -3,7 +3,13 @@ import log from 'loglevel';
 import { fetchWithCredentials } from '../serverpipe';
 import { USER_CLEAR } from './user';
 import * as notificationMetadata from './notification-metadata';
-import { getLastItemInStream, makeStream, onStreamReceive, takeFromStream } from '../stream';
+import {
+  getLastItemInStream,
+  makeStream,
+  onStreamReceive,
+  takeFromStream,
+  filterStream,
+} from '../stream';
 import { createAction } from 'redux-actions';
 import qs from 'qs';
 import _ from 'lodash-es';
@@ -12,18 +18,22 @@ export const NOTIFICATION_FETCHING = 'notifications.fetching';
 export const NOTIFICATION_RECEIVE = 'notifications.receive';
 export const NOTIFICATION_FETCH = 'notifications.fetch';
 export const NOTIFICATION_NUMBER_TO_SHOW = 'notifications.numberToShow';
+export const NOTIFICATION_FILTER_FETCH = 'notifications.filter.fetch';
 export const ACTIVITY_FETCHING = 'activities.fetching';
 export const ACTIVITY_RECEIVE = 'activities.receive';
 export const ACTIVITY_FETCH = 'activities.fetch';
 export const ACTIVITY_NUMBER_TO_SHOW = 'activity.numberToShow';
+export const ACTIVITY_FILTER_FETCH = 'activities.filter.fetch';
 export const ACTIVITY_MUTE_FETCH = 'mutes.fetch';
 
 export const fetchingActivities = createAction(ACTIVITY_FETCHING);
 export const receivedActivity = createAction(ACTIVITY_RECEIVE);
 export const fetchedActivities = createAction(ACTIVITY_FETCH);
+export const fetchedActivityFilter = createAction(ACTIVITY_FILTER_FETCH);
 export const fetchingNotifications = createAction(NOTIFICATION_FETCHING);
 export const receivedNotification = createAction(NOTIFICATION_RECEIVE);
 export const fetchedNotifications = createAction(NOTIFICATION_FETCH);
+export const fetchedNotificationFilter = createAction(NOTIFICATION_FILTER_FETCH);
 export const fetchedActivityMutes = createAction(ACTIVITY_MUTE_FETCH);
 
 const ITEM_FETCH_LIMIT = 100;
@@ -113,8 +123,32 @@ export function fetchActivityMutes() {
     });
 }
 
+export function fetchNotificationFilter() {
+  return dispatch => fetchWithCredentials('/api/streams/notifications/filter')
+    .then(response => response.json())
+    .then(json => json.data)
+    .then(data => dispatch(fetchedNotificationFilter(data)))
+    .catch(e => {
+      log.warn('Failed to fetch notification filter', e);
+      throw e;
+    });
+}
+
+export function fetchActivityFilter() {
+  return dispatch => fetchWithCredentials('/api/streams/activities/filter')
+    .then(response => response.json())
+    .then(json => json.data)
+    .then(data => dispatch(fetchedActivityFilter(data)))
+    .catch(e => {
+      log.warn('Failed to fetch activity filter', e);
+      throw e;
+    });
+}
+
 export function fetch() {
   return dispatch => Promise.all([
+    dispatch(fetchNotificationFilter()),
+    dispatch(fetchActivityFilter()),
     dispatch(fetchActivities()),
     dispatch(fetchNotifications()),
     dispatch(fetchActivityMutes()),
@@ -251,6 +285,28 @@ export function deleteActivityMute(activity) {
   }).then(() => dispatch(fetchActivityMutes()));
 }
 
+export function persistActivityFilter(filter) {
+  return dispatch => global.fetch('/api/streams/activities/filter', {
+    credentials: 'same-origin',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(filter),
+  }).then(() => dispatch(fetchActivityFilter()));
+}
+
+export function persistNotificationFilter(filter) {
+  return dispatch => global.fetch('/api/streams/notifications/filter', {
+    credentials: 'same-origin',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(filter),
+  }).then(() => dispatch(fetchNotificationFilter()));
+}
+
 const initialState = {
   stream: makeStream(),
   fetching: false,
@@ -258,6 +314,9 @@ const initialState = {
   lastItemFetched: null,
   numberToShow: 20,
   activityMutes: [],
+  filter: {},
+  filteredStream: makeStream(),
+  filterOptions: {},
 };
 
 export function notificationsReducer(state = initialState, action) {
@@ -269,19 +328,25 @@ export function notificationsReducer(state = initialState, action) {
         ...state,
         fetching: true,
       };
-    case NOTIFICATION_RECEIVE:
+    case NOTIFICATION_RECEIVE: {
+      const updatedStream = mergeNotifications(state.stream, [action.payload]);
+      const updatedFilteredStream = filterStream(updatedStream, state.filter);
       return {
         ...state,
-        stream: mergeNotifications(state.stream, [action.payload]),
+        stream: updatedStream,
+        filteredStream: updatedFilteredStream,
       };
+    }
     case NOTIFICATION_FETCH: {
       const updatedStream = mergeNotifications(state.stream, action.payload.items);
+      const updatedFilteredStream = filterStream(updatedStream, state.filter);
       const [lastItem] = takeFromStream(updatedStream, 1);
 
       return {
         ...state,
         ...action.payload.meta,
         stream: updatedStream,
+        filteredStream: updatedFilteredStream,
         fetching: false,
         lastItemFetched: lastItem && lastItem.id,
       };
@@ -295,6 +360,15 @@ export function notificationsReducer(state = initialState, action) {
       return {
         ...state,
         activityMutes: _.sortBy(action.payload.activityMutes, (mute) => (mute.expiresAt || 'ZZZ')),
+      };
+    }
+    case NOTIFICATION_FILTER_FETCH: {
+      const updatedFilteredStream = filterStream(state.stream, action.payload.filter);
+      return {
+        ...state,
+        filteredStream: updatedFilteredStream,
+        filter: action.payload.filter,
+        filterOptions: action.payload.options,
       };
     }
     default:
@@ -311,19 +385,25 @@ export function activitiesReducer(state = initialState, action) {
         ...state,
         fetching: true,
       };
-    case ACTIVITY_RECEIVE:
+    case ACTIVITY_RECEIVE: {
+      const updatedStream = mergeNotifications(state.stream, [action.payload]);
+      const updatedFilteredStream = filterStream(updatedStream, state.filter);
       return {
         ...state,
-        stream: mergeNotifications(state.stream, [action.payload]),
+        stream: updatedStream,
+        filteredStream: updatedFilteredStream,
       };
+    }
     case ACTIVITY_FETCH: {
       const updatedStream = mergeNotifications(state.stream, action.payload.items);
+      const updatedFilteredStream = filterStream(updatedStream, state.filter);
       const [lastItem] = takeFromStream(updatedStream, 1);
 
       return {
         ...state,
         ...action.payload.meta,
         stream: updatedStream,
+        filteredStream: updatedFilteredStream,
         fetching: false,
         lastItemFetched: lastItem && lastItem.id,
       };
@@ -333,6 +413,15 @@ export function activitiesReducer(state = initialState, action) {
         ...state,
         numberToShow: action.payload.numberToShow,
       };
+    case ACTIVITY_FILTER_FETCH: {
+      const updatedFilteredStream = filterStream(state.stream, action.payload.filter);
+      return {
+        ...state,
+        filteredStream: updatedFilteredStream,
+        filter: action.payload.filter,
+        filterOptions: action.payload.options,
+      };
+    }
     default:
       return state;
   }

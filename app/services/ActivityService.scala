@@ -51,6 +51,8 @@ trait ActivityService {
 
   def expireActivityMute(recipient: Usercode, id: String): Either[Seq[ActivityError], ActivityMuteRender]
 
+  def allProviders: Seq[(ActivityProvider, Option[ActivityIcon])]
+
 }
 
 class ActivityServiceImpl @Inject()(
@@ -243,6 +245,11 @@ class ActivityServiceImpl @Inject()(
 
   private def unschedulePublishJob(activityId: String): Unit = {
     scheduler.deleteJob(publishJobKey(activityId))
+  }
+
+  def allProviders: Seq[(ActivityProvider, Option[ActivityIcon])] = {
+    val providers = db.withConnection(implicit c => dao.allProviders)
+    providers.map(p => (p, db.withConnection(implicit c => dao.getActivityIcon(p.id))))
   }
 
 }

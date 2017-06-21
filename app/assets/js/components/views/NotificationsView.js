@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import moment from 'moment';
 import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
@@ -13,6 +14,7 @@ import ScrollRestore from '../ui/ScrollRestore';
 import { Routes } from '../AppRoot';
 import HideableView from './HideableView';
 import ActivityMutingView from './ActivityMutingView';
+import _ from 'lodash-es';
 
 
 const SOME_MORE = 20;
@@ -32,11 +34,33 @@ class NotificationsView extends HideableView {
     grouped: PropTypes.bool.isRequired,
     notificationPermission: PropTypes.string,
     numberToShow: PropTypes.number.isRequired,
+    isFiltered: PropTypes.bool.isRequired,
   };
 
   static defaultProps = {
     grouped: true,
   };
+
+  static renderEmpty(isFiltered) {
+    if (isFiltered) {
+      return (
+        <EmptyState lead="You don't have any notifications to display.">
+          <p>
+            There may be others hidden due to your Notification filter settings.
+          </p>
+        </EmptyState>
+      );
+    }
+    return (
+      <EmptyState lead="You don't have any notifications yet.">
+        <p>
+          When there are things that need your attention &ndash;
+          coursework due in, library books due back, that kind of thing &ndash;
+          you'll see those notifications here.
+        </p>
+      </EmptyState>
+    );
+  }
 
   constructor(props) {
     super(props);
@@ -209,14 +233,7 @@ class NotificationsView extends HideableView {
               </GroupedList>
             </InfiniteScrollable>
           </ScrollRestore>
-          :
-          <EmptyState lead="You don't have any notifications yet.">
-            <p>
-              When there are things that need your attention &ndash;
-              coursework due in, library books due back, that kind of thing &ndash;
-              you'll see those notifications here.
-            </p>
-          </EmptyState>
+          : NotificationsView.renderEmpty(this.props.isFiltered)
         }
       </div>
     );
@@ -226,8 +243,12 @@ class NotificationsView extends HideableView {
 
 function select(state) {
   return {
-    notifications: state.notifications.stream,
+    notifications: state.notifications.filteredStream,
     notificationsLastRead: state.notificationsLastRead,
+    isFiltered: _.filter(
+      _.keys(state.notifications.filter),
+      value => value !== undefined
+    ).length > 0,
     olderItemsOnServer: state.notifications.olderItemsOnServer,
     notificationPermission: state.device.notificationPermission,
     numberToShow: state.notifications.numberToShow,

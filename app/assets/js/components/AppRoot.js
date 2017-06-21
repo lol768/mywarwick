@@ -19,6 +19,10 @@ import OptInSettingsView from './views/settings/OptInSettingsView';
 import LocationOptInSettingView from './views/settings/optInSettings/LocationOptInSettingView';
 import TilePreferencesView from './views/settings/TilePreferencesView';
 import TileOptionView from './views/settings/TileOptionView';
+import {
+  ActivityStreamFilterOptionView,
+  NotificationStreamFilterOptionView,
+} from './views/settings/StreamFilterOptionView';
 
 
 export const Routes = {
@@ -38,6 +42,8 @@ export const Routes = {
     OptInTypes: {
       LOCATION: 'location',
     },
+    ACTIVITY_FILTER: 'actvitityfilter',
+    NOTIFICATION_FILTER: 'notificationfilter',
   },
 };
 
@@ -100,6 +106,14 @@ RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`] = {
 RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}`] = {
   rendered: false,
   view: OptInSettingsView,
+};
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.ACTIVITY_FILTER}`] = {
+  rendered: false,
+  view: ActivityStreamFilterOptionView,
+};
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NOTIFICATION_FILTER}`] = {
+  rendered: false,
+  view: NotificationStreamFilterOptionView,
 };
 
 class AppRoot extends React.Component {
