@@ -11,6 +11,7 @@ import MasqueradeNotice from './MasqueradeNotice';
 import UpdatePopup from './UpdatePopup';
 import UtilityBar from './UtilityBar';
 import { connect } from 'react-redux';
+import { isEmbedded } from '../../embedHelper';
 import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
 import { goBack, push } from 'react-router-redux';
@@ -105,7 +106,7 @@ class ID7Layout extends React.PureComponent {
   }
 
   renderNotificationPermissionRequest() {
-    if ('Notification' in window && Notification.permission === 'default') {
+    if ('Notification' in window && Notification.permission === 'default' && !isEmbedded()) {
       return <PermissionRequest isDisabled={ !this.props.user.data.authenticated } />;
     }
 
