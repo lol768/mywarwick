@@ -11,7 +11,11 @@ import uk.ac.warwick.userlookup.UserLookupInterface
 import warwick.sso.Usercode
 
 @Singleton
-class NotificationsSnapshotController @Inject() (@NamedDatabase("default") db: Database, lookup: UserLookupInterface, activityService: ActivityService) extends BaseController {
+class NotificationsSnapshotController @Inject()(
+  @NamedDatabase("default") db: Database,
+  lookup: UserLookupInterface,
+  activityService: ActivityService
+) extends BaseController {
 
   val WARWICK_SSO_COOKIE_NAME: String = "WarwickSSO"
 
@@ -36,14 +40,12 @@ class NotificationsSnapshotController @Inject() (@NamedDatabase("default") db: D
     } else {
       val user = optionUser.get
       val userCode = user.getUserId
-      db.withConnection { implicit c =>
-        Ok(Json.obj(
-          "unreads" -> activityService.countUnreadNotificationsForUsercode(Usercode(userCode))
-        )).withHeaders(ACCESS_CONTROL_ALLOW_ORIGIN -> originHeader.get)
-          .withHeaders(ACCESS_CONTROL_ALLOW_METHODS -> "GET")
-          .withHeaders(ACCESS_CONTROL_ALLOW_CREDENTIALS -> "true")
-          .withHeaders(VARY -> ORIGIN)
-      }
+      Ok(Json.obj(
+        "unreads" -> activityService.countUnreadNotificationsForUsercode(Usercode(userCode))
+      )).withHeaders(ACCESS_CONTROL_ALLOW_ORIGIN -> originHeader.get)
+        .withHeaders(ACCESS_CONTROL_ALLOW_METHODS -> "GET")
+        .withHeaders(ACCESS_CONTROL_ALLOW_CREDENTIALS -> "true")
+        .withHeaders(VARY -> ORIGIN)
     }
 
   }
