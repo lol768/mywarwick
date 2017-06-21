@@ -170,7 +170,7 @@ class SettingsView extends HideableView {
         <div className="list-group setting-colour-3">
           <div className="list-group-item" onClick={ loadDeviceDetails }>
             <div className="media">
-              <div className="media-left feedback">
+              <div className="media-left">
                 <span className="fa-stack">
                   <i className="fa fa-fw fa-comment-o fa-stack-2x" />
                   <strong className="fa-fw fa-stack-1x">!</strong>
