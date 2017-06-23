@@ -1,4 +1,4 @@
-.switch {
+.switch { // comment
   display: inline-block;
   height: auto;
   font-size: 4px;
@@ -14,7 +14,8 @@
 }
 
 .switch__length:before {
-  background-color: rgba(91, 48, 105, 0.62);
+  background-color: #a5a5a5;
+
   height: 3.2em;
   width: 9em;
   border-radius: 2em;
@@ -26,10 +27,10 @@
 .switch__length:after {
   bottom: -1.4em;
   height: 5.5em;
-  margin-left: 4.5em;
+  margin-left: -1em;
   width: 5.5em;
   border-radius: 100%;
-  background-color: #5b3069;
+  background-color: #ebebeb;
   box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.5);
   transition: 0.3s margin ease-in-out, 0.3s background ease-in-out;
 }
@@ -56,10 +57,57 @@
 }
 
 .switch__checkbox:checked + .switch__length:before {
-  background-color: #a5a5a5;
+  background-color: rgba(91, 48, 105, 0.62);
 }
 
 .switch__checkbox:checked + .switch__length:after {
-  background-color: #ebebeb;
-  margin-left: -1em;
+  background-color: #5b3069;
+  margin-left: 4.5em;
+
+}
+
+
+html.ios {
+  // most styles from http://callmenick.com/_development/css-toggle-switch/
+
+  .switch {
+    display: inline;
+  }
+
+  .switch__length {
+    padding: 0.2em;
+    width: 10em;
+    height: 6em;
+    background-color: #ddd;
+    border-radius: 6em;
+  }
+
+  .switch__checkbox + .switch__length:before {
+    background-color: #f1f1f1;
+    border-radius: 6em;
+    right: 0.1em;
+    height: auto;
+    width: auto;
+  }
+
+  .switch__checkbox + .switch__length:after {
+    width: 5.8em;
+    background-color: #fff;
+    border-radius: 100%;
+    box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.3);
+    transition: margin 0.4s;
+    top: 0.1em;
+    left: 0.1em;
+    bottom: 0.1em;
+    content: "";
+    margin-left: 0;
+  }
+
+  .switch__checkbox:checked + .switch__length:after {
+    margin-left: 4em;
+  }
+
+  .switch__checkbox:checked + .switch__length:before {
+    background-color: #8ce196;
+  }
 }
