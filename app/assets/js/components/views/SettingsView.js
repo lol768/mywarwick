@@ -8,6 +8,7 @@ import HideableView from './HideableView';
 import * as newsCategories from '../../state/news-categories';
 import * as newsOptIn from '../../state/news-optin';
 import { loadDeviceDetails } from '../../userinfo';
+import Switch from '../ui/Switch';
 
 class SettingsView extends HideableView {
 
@@ -126,6 +127,17 @@ class SettingsView extends HideableView {
               'bell-slash-o',
               'Muted notifications',
               SettingsView.renderSingleCount(this.props.mutes)
+            ) }
+          </div>
+          <div className="list-group-item"
+               onClick={ () =>
+                 1+1
+               }
+          >
+            { SettingsView.renderSetting(
+              'envelope',
+              'Copy my notifications to email',
+              <Switch/>
             ) }
           </div>
         </div>
