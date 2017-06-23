@@ -78,7 +78,6 @@
     "why-did-you-update": "0.0.8"
   },
   "dependencies": {
-    "bluebird": "https://registry.npmjs.org/bluebird/-/bluebird-3.5.0.tgz",
     "bootstrap-3-typeahead": "^4.0.2",
     "bundle-loader": "^0.5.5",
     "classnames": "~2.2.3",
