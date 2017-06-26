@@ -35,9 +35,9 @@ export function reducer(state = initialState, action) {
             revisionOnNextLoad: null,
           },
         };
-      } else {
-        return state;
       }
+
+      return state;
     default:
       return state;
   }

@@ -168,6 +168,8 @@ export function launch(userData) {
           .then(rev => store.dispatch(app.loadAssets({ revision: rev })))
           .catch(e => log.error('Error fetching current revision information', e));
       }
+
+      return Promise.resolve();
     })
     .then(() => store.dispatch(app.promoteNextRevision()));
 
