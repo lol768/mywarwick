@@ -38,8 +38,8 @@
 .switch__length {
   width: 2.25em;
   height: 0.8em;
-  margin-top: 0.25em;
-  margin-bottom: 0.25em;
+  margin-top: -10px;
+  margin-bottom: -10px;
   margin-right: 0.375em;
   border-radius: 1.5em;
   display: block;
@@ -71,7 +71,7 @@ html.ios {
   // most styles from http://callmenick.com/_development/css-toggle-switch/
 
   .switch {
-    display: inline;
+    display: inline-block;
   }
 
   .switch__length {
@@ -81,6 +81,8 @@ html.ios {
     background-color: #ddd;
     margin-right: 0;
     border-radius: 1.5em;
+    margin-top: -10px;
+    margin-bottom: -10px;
   }
 
   .switch__checkbox + .switch__length:before {
@@ -92,15 +94,15 @@ html.ios {
   }
 
   .switch__checkbox + .switch__length:after {
-    width: 1.9375em;
-    height: 1.9375em;
+    width: 1.75em;
+    height: 1.75em;
     background-color: #fff;
     border-radius: 100%;
     box-shadow: 0 0.05em 0.125em rgba(0, 0, 0, 0.3);
     transition: margin 0.4s;
-    top: 0.025em;
-    left: 0.025em;
-    bottom: 0.025em;
+    top: 0.075em;
+    left: 0.075em;
+    bottom: 0.075em;
     content: "";
     margin-left: 0;
   }
