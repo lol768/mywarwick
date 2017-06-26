@@ -80,6 +80,11 @@ POST        /api/streams/read                                     @controllers.a
 GET         /api/streams/notifications                            @controllers.api.UserActivitiesController.notifications(since: Option[String], before: Option[String], limit: Int ?= 100)
 GET         /api/streams/activities                               @controllers.api.UserActivitiesController.activities(since: Option[String], before: Option[String], limit: Int ?= 100)
 
+GET         /api/streams/notifications/filter                     @controllers.api.UserStreamFilterController.notificationFilter
+GET         /api/streams/activities/filter                        @controllers.api.UserStreamFilterController.activityFilter
+POST        /api/streams/notifications/filter                     @controllers.api.UserStreamFilterController.updateNotificationFilter
+POST        /api/streams/activities/filter                        @controllers.api.UserStreamFilterController.updateActivityFilter
+
 GET         /api/streams/mute                                     @controllers.api.UserActivitiesController.listMutes
 PUT         /api/streams/mute                                     @controllers.api.UserActivitiesController.saveMute
 DELETE      /api/streams/mute                                     @controllers.api.UserActivitiesController.removeMute(id: String)
