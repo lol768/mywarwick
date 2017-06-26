@@ -9,6 +9,7 @@ import * as newsCategories from '../../state/news-categories';
 import * as newsOptIn from '../../state/news-optin';
 import { loadDeviceDetails } from '../../userinfo';
 import _ from 'lodash-es';
+import Switch from '../ui/Switch';
 
 class SettingsView extends HideableView {
 
@@ -130,7 +131,16 @@ class SettingsView extends HideableView {
       versions.push(`Web ${assetsRevision}`);
     }
 
+
     return versions.join(', ');
+  }
+
+  static notificationEmailCopyChange(optedIn) {
+    if (optedIn) {
+
+    } else {
+
+    }
   }
 
   render() {
@@ -168,6 +178,13 @@ class SettingsView extends HideableView {
               'bell-slash-o',
               'Muted notifications',
               SettingsView.renderSingleCount(this.props.mutes)
+            ) }
+          </div>
+          <div className="list-group-item">
+            { SettingsView.renderSetting(
+              'envelope',
+              'Copy my notifications to email',
+              <Switch onClick={ SettingsView.notificationEmailCopyChange } id="copy-notifications" />
             ) }
           </div>
         </div>

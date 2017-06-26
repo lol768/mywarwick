@@ -109,7 +109,7 @@ class MessagingServiceImpl @Inject()(
   }
 
   // TODO actually decide whether this user should receive this sort of notification
-  def sendEmailFor(user: Usercode, activity: Activity): Boolean = false
+  def sendEmailFor(user: Usercode, activity: Activity): Boolean = true
 
   def sendSmsFor(user: Usercode, activity: Activity): Boolean = false
 
