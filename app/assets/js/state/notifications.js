@@ -316,7 +316,9 @@ const initialState = {
   activityMutes: [],
   filter: {},
   filteredStream: makeStream(),
-  filterOptions: {},
+  filterOptions: {
+    provider: [],
+  },
 };
 
 export function notificationsReducer(state = initialState, action) {

@@ -7,9 +7,7 @@ import { connect } from 'react-redux';
 class StreamFilterOptionView extends React.PureComponent {
 
   static propTypes = {
-    dispatch: PropTypes.func.isRequired,
     filterType: PropTypes.string.isRequired,
-    filter: PropTypes.object.isRequired,
     filterOptions: PropTypes.shape({
       provider: PropTypes.arrayOf(PropTypes.shape({
         id: PropTypes.string.isRequired,
