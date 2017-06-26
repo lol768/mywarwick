@@ -6,7 +6,7 @@ export default class Switch extends React.PureComponent {
   constructor(props) {
     super(props);
     this.onChange = this.onChange.bind(this);
-    this.state = { checked: true} ;
+    this.state = { checked: true };
   }
 
   onChange(e) {
@@ -28,7 +28,7 @@ export default class Switch extends React.PureComponent {
     return (
       <div className="switch">
         <input type="checkbox" id={ this.props.id } className="switch__checkbox"
-               checked={ this.state.checked } onChange={ this.onChange }
+          checked={ this.state.checked } onChange={ this.onChange }
         />
         <label className="switch__length" htmlFor={ this.props.id } />
       </div>
