@@ -99,6 +99,10 @@ GET         /api/tiles/content                                    @controllers.a
 GET         /api/tiles/content/:id                                @controllers.api.TilesController.contentById(id: String)
 PUT         /api/tiles                                            @controllers.api.TilesController.saveLayout
 
+GET         /api/emailNotificationPreferences                     @controllers.api.EmailNotificationsPrefController.get
+POST        /api/emailNotificationPreferences                     @controllers.api.EmailNotificationsPrefController.update
+
+
 POST        /api/errors/js                                        @controllers.api.ErrorsController.js
 
 GET         /user/info                                            @controllers.UserInfoController.info

@@ -1,7 +1,7 @@
 package services
 
 import javax.inject.Inject
-
+import javax.inject.Singleton
 import com.google.inject.ImplementedBy
 import play.api.db.{Database, NamedDatabase}
 import services.dao.EmailNotificationsPrefDao
@@ -22,9 +22,9 @@ dao: EmailNotificationsPrefDao,
 @NamedDatabase("default") db: Database
 ) extends EmailNotificationsPrefService {
 
-  override def get(usercode: Usercode): Boolean = dao.getUserPreference(usercode)
+  override def get(usercode: Usercode): Boolean = db.withConnection(implicit c => dao.getUserPreference(usercode))
 
   override def set(usercode: Usercode, wantsEmail: Boolean): Unit =
-    dao.setUserPreference(usercode, wantsEmail)
+    db.withConnection(implicit c => dao.setUserPreference(usercode, wantsEmail))
 
 }

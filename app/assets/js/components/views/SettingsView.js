@@ -10,6 +10,8 @@ import * as newsOptIn from '../../state/news-optin';
 import { loadDeviceDetails } from '../../userinfo';
 import _ from 'lodash-es';
 import Switch from '../ui/Switch';
+import { postJsonWithCredentials } from '../../serverpipe';
+
 
 class SettingsView extends HideableView {
 
@@ -136,11 +138,8 @@ class SettingsView extends HideableView {
   }
 
   static notificationEmailCopyChange(optedIn) {
-    if (optedIn) {
-
-    } else {
-
-    }
+    const data = {'wantsEmails': optedIn};
+    postJsonWithCredentials("/api/emailNotificationPreferences", data);
   }
 
   render() {
