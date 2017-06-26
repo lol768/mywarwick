@@ -38,7 +38,7 @@ class TilePreferencesView extends React.PureComponent {
               }
             >
               <div className="media">
-                <div className="media-left feedback">
+                <div className="media-left">
                   <i className={ `fa fa-fw fa-${
                       (tile.id === 'weather') ? 'sun-o' : tile.icon
                     }` }

@@ -62,7 +62,7 @@ export default class TileOptionView extends React.PureComponent {
         onClick={ this.handleCheckboxItemClick }
       >
         <div className="media">
-          <div className="media-left feedback">
+          <div className="media-left">
             <i className={ `fa fa-fw fa-${
                 (tile.id === 'weather') ? 'sun-o' : tile.icon
               }` }
@@ -102,7 +102,7 @@ export default class TileOptionView extends React.PureComponent {
         onClick={ this.handleRadioItemClick }
       >
         <div className="media">
-          <div className="media-left feedback">
+          <div className="media-left">
             <i className={ `fa fa-fw fa-${
               (tile.id === 'weather') ? 'sun-o' : tile.icon
               }` }
