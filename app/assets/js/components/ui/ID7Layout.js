@@ -157,7 +157,7 @@ class ID7Layout extends React.PureComponent {
                   this.props.path === '/'
                 }
                 onSettings={this.onSettings}
-                showSettingsButton={ !this.props.path.startsWith(`/${Routes.SETTINGS}`) }
+                showSettingsButton={ !(this.props.path.startsWith(`/${Routes.SETTINGS}`) || this.props.path.startsWith(`/${Routes.POST_TOUR}`)) }
               />
             </header>
           </div>

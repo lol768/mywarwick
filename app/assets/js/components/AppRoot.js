@@ -19,6 +19,7 @@ import OptInSettingsView from './views/settings/OptInSettingsView';
 import LocationOptInSettingView from './views/settings/optInSettings/LocationOptInSettingView';
 import TilePreferencesView from './views/settings/TilePreferencesView';
 import TileOptionView from './views/settings/TileOptionView';
+import PostTourView from './views/PostTourView';
 
 
 export const Routes = {
@@ -39,6 +40,7 @@ export const Routes = {
       LOCATION: 'location',
     },
   },
+  POST_TOUR: 'post_tour',
 };
 
 const TabRoutes = [
@@ -100,6 +102,10 @@ RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`] = {
 RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}`] = {
   rendered: false,
   view: OptInSettingsView,
+};
+RouteViews[`/${Routes.POST_TOUR}`] = {
+  rendered: false,
+  view: PostTourView,
 };
 
 class AppRoot extends React.Component {
