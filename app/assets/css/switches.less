@@ -1,7 +1,7 @@
 .switch { // comment
   display: inline-block;
   height: auto;
-  font-size: 4px;
+  font-size: 16px;
   padding-top: 0.1em;
 }
 
@@ -10,38 +10,38 @@
   display: block;
   position: absolute;
   content: "";
-  left: 0.1em;
+  left: 0.025em;
 }
 
 .switch__length:before {
   background-color: #a5a5a5;
 
-  height: 3.2em;
-  width: 9em;
-  border-radius: 2em;
-  top: 0.1em;
-  bottom: 0.1em;
+  height: 0.8em;
+  width: 2.25em;
+  border-radius: 0.5em;
+  top: 0.025em;
+  bottom: 0.025em;
   content: "";
 }
 
 .switch__length:after {
-  bottom: -1.4em;
-  height: 5.5em;
-  margin-left: -1em;
-  width: 5.5em;
+  bottom: -0.35em;
+  height: 1.375em;
+  margin-left: -0.25em;
+  width: 1.375em;
   border-radius: 100%;
   background-color: #ebebeb;
-  box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0.05em 0.125em rgba(0, 0, 0, 0.5);
   transition: 0.3s margin ease-in-out, 0.3s background ease-in-out;
 }
 
 .switch__length {
-  width: 9em;
-  height: 3.2em;
-  margin-top: 1em;
-  margin-bottom: 1em;
-  margin-right: 1.5em;
-  border-radius: 6em;
+  width: 2.25em;
+  height: 0.8em;
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+  margin-right: 0.375em;
+  border-radius: 1.5em;
   display: block;
   position: relative;
   cursor: pointer;
@@ -62,7 +62,7 @@
 
 .switch__checkbox:checked + .switch__length:after {
   background-color: #5b3069;
-  margin-left: 4.5em;
+  margin-left: 1.125em;
 
 }
 
@@ -75,36 +75,36 @@ html.ios {
   }
 
   .switch__length {
-    padding: 0.2em;
-    width: 10em;
-    height: 6em;
+    padding: 0.05em;
+    width: 2.5em;
+    height: 1.5em;
     background-color: #ddd;
-    border-radius: 6em;
+    border-radius: 1.5em;
   }
 
   .switch__checkbox + .switch__length:before {
     background-color: #f1f1f1;
-    border-radius: 6em;
-    right: 0.1em;
+    border-radius: 1.5em;
+    right: 0.025em;
     height: auto;
     width: auto;
   }
 
   .switch__checkbox + .switch__length:after {
-    width: 5.8em;
+    width: 1.45em;
     background-color: #fff;
     border-radius: 100%;
-    box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0.05em 0.125em rgba(0, 0, 0, 0.3);
     transition: margin 0.4s;
-    top: 0.1em;
-    left: 0.1em;
-    bottom: 0.1em;
+    top: 0.025em;
+    left: 0.025em;
+    bottom: 0.025em;
     content: "";
     margin-left: 0;
   }
 
   .switch__checkbox:checked + .switch__length:after {
-    margin-left: 4em;
+    margin-left: 1em;
   }
 
   .switch__checkbox:checked + .switch__length:before {
