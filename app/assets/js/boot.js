@@ -13,7 +13,9 @@ function boot() {
     .catch(() => [null, false])
     .then(([userData, handled]) => {
       if (!handled) {
-        setMethod('userInfo', userData);
+        if (userData !== null) {
+          setMethod('userInfo', userData);
+        }
         return import('./main').then(main =>
           main.launch(userData)
         );

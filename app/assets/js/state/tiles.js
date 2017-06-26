@@ -210,7 +210,9 @@ export function formatPreferenceData(preferencesFromAction, availableTileOptions
       case 'array': {
         preferences[key] = {};
         option.options.forEach((o) => (
-          preferences[key][o.value] = (preferencesFromAction[key][o.value] || false)
+          preferences[key][o.value] = (
+            (preferencesFromAction[key] && preferencesFromAction[key][o.value]) || false
+          )
         ));
         break;
       }

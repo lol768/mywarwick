@@ -1,9 +1,13 @@
 /* global ga */
 
+import localforage from 'localforage';
 import $ from 'jquery';
 import log from 'loglevel';
 import _ from 'lodash-es';
 import store from './store';
+
+const MAX_ITEMS_IN_QUEUE = 100;
+const QUEUE_STORAGE_KEY = 'gaQueue';
 
 /* eslint-disable */
 (function (i, s, o, g, r, a, m) {
@@ -49,6 +53,18 @@ if (trackingId === undefined) {
 
 let analyticsQueue = [];
 
+/**
+ * Grabs a (truncated) stored analytics queue if there is one,
+ * or just an empty array.
+ */
+function getQueueFromLocalStorage() {
+  localforage.getItem(QUEUE_STORAGE_KEY).then(storageItem => {
+    if (storageItem !== null && Array.isArray(storageItem)) {
+      analyticsQueue = [...storageItem, ...analyticsQueue].slice(-100);
+    }
+  });
+}
+
 let postNextItemThrottled;
 
 let isReady = false;
@@ -60,35 +76,56 @@ function queue(...args) {
     { args, time },
   ];
 
+  if (analyticsQueue.length === MAX_ITEMS_IN_QUEUE) {
+    analyticsQueue = analyticsQueue.shift();
+  }
+
   if (isReady) {
     postNextItemThrottled();
   }
 }
 
-
 function getTimeSpentInQueue(timeQueued) {
   return _.now() - timeQueued;
 }
 
+/**
+ * Encodes the queue as JSON, and stores to localStorage.
+ */
+function persistAnalyticsQueue() {
+  return localforage.setItem(QUEUE_STORAGE_KEY, analyticsQueue).then(() => {
+    log.info('Persist finished for GA queue');
+  });
+}
+
 function postNextItem() {
-  if (!navigator.onLine || !analyticsQueue.length) {
+  if (!analyticsQueue.length) {
+    return;
+  }
+
+  if (!navigator.onLine) {
+    persistAnalyticsQueue(); // fire and forget
     return;
   }
 
   const { args: [command, fields], time } = analyticsQueue[0];
   analyticsQueue = analyticsQueue.slice(1);
 
-  ga(command, {
-    ...fields,
-    queueTime: getTimeSpentInQueue(time),
-  });
+  // ensure items get cleared out of the queue
+  persistAnalyticsQueue().then(() => {
+    ga(command, {
+      ...fields,
+      queueTime: getTimeSpentInQueue(time),
+    });
 
-  if (analyticsQueue.length) {
-    postNextItemThrottled();
-  }
+    if (analyticsQueue.length) {
+      postNextItemThrottled();
+    }
+  });
 }
 
 $(() => {
+  getQueueFromLocalStorage();
   if (isReady) {
     $(window).on('online', postNextItemThrottled);
   }

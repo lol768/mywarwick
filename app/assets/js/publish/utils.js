@@ -1,3 +1,4 @@
+import '../polyfills-and-errors';
 import $ from 'jquery';
 import 'jquery-form/jquery.form.js';
 
