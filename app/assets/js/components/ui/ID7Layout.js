@@ -137,6 +137,12 @@ class ID7Layout extends React.PureComponent {
 
   renderMobile() {
     const { user, path } = this.props;
+
+    const showSettingsButton = !(
+      path.startsWith(`/${Routes.SETTINGS}`) ||
+      path.startsWith(`/${Routes.POST_TOUR}`)
+    );
+
     return (
       <div className="">
         <a className="sr-only sr-only-focusable" href="#main">Skip to main content</a>
@@ -148,16 +154,16 @@ class ID7Layout extends React.PureComponent {
 
               <MastheadMobile user={user}
                 onBackClick={this.onBackClick}
-                backButtonText={(this.props.path === `/${Routes.SETTINGS}`) ? 'Done' : 'Back'}
+                backButtonText={(path === `/${Routes.SETTINGS}`) ? 'Done' : 'Back'}
                 path={path}
                 onEdit={this.onEdit}
                 editing={this.isEditing()}
                 showEditButton={
                   this.isEditing() ||
-                  this.props.path === '/'
+                  path === '/'
                 }
                 onSettings={this.onSettings}
-                showSettingsButton={ !(this.props.path.startsWith(`/${Routes.SETTINGS}`) || this.props.path.startsWith(`/${Routes.POST_TOUR}`)) }
+                showSettingsButton={showSettingsButton}
               />
             </header>
           </div>
