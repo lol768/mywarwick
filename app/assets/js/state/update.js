@@ -33,7 +33,7 @@ export function displayUpdateProgress(dispatch) {
 
     fetch('/service/revision')
       .then(res => res.text())
-      .then(rev => dispatch(app.updateAssets({ revision: rev })))
+      .then(rev => dispatch(app.updateAssets(rev)))
       .catch(e => log.error('Error fetching revision information', e))
       .then(() => dispatch(updateReady()));
   }

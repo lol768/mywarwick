@@ -118,7 +118,7 @@ export function launch(userData) {
             if (installingWorker.state === 'installed') {
               fetch('/service/revision')
                 .then(res => res.text())
-                .then(rev => store.dispatch(app.updateAssets({ revision: rev })))
+                .then(rev => store.dispatch(app.updateAssets(rev)))
                 .catch(e => log.error('Error fetching revision information', e))
                 .then(() => {
                   if (navigator.serviceWorker.controller) {
@@ -160,7 +160,16 @@ export function launch(userData) {
   persisted('tiles.data', tiles.fetchedTiles);
   persisted('tileContent', tiles.loadedAllTileContent);
 
-  persisted('app.assets', app.updateAssets);
+  persisted('app.assets', app.loadAssets)
+    .then(() => {
+      if (store.getState().app.assets.revision === null) {
+        return fetch('/service/revision')
+          .then(res => res.text())
+          .then(rev => store.dispatch(app.loadAssets({ revision: rev })))
+          .catch(e => log.error('Error fetching current revision information', e));
+      }
+    })
+    .then(() => store.dispatch(app.promoteNextRevision()));
 
   const persistedUserLinks = persisted('user.links', user.receiveSSOLinks);
 
