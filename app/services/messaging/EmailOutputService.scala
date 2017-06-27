@@ -43,7 +43,7 @@ class EmailOutputService @Inject() (
     val rootUrl = config.getString("mywarwick.rootUrl")
     require(rootUrl.nonEmpty, "Valid mywarwick.rootUrl not present")
 
-    val optOutUrl = s"$rootUrl${controllers.routes.HomeController.settings().url}"
+    val optOutUrl = s"${rootUrl.get}${controllers.routes.HomeController.settings().url}"
 
     Email(
       subject = EmailSanitiser.sanitiseUserInputForHeader(activity.title),
