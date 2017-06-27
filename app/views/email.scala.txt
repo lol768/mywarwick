@@ -4,7 +4,13 @@
 Hi@user.name.first.map(" "+_).getOrElse(""), you have a new notification from My Warwick:
 ---
 
-@activity.text
+@if(activity.text.nonEmpty) {
+  @activity.title
+
+  @activity.text
+} else {
+  @activity.title
+}
 
 ---
 This email was sent by My Warwick at @date because your account
