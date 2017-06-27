@@ -111,8 +111,8 @@ class ActivityMutesView extends React.PureComponent {
               : <EmptyState>
                   You haven't muted any notifications. Use the dropdown arrow next to each
                   notification to specify similar types of notifications to mute in future.
-                  Muted notifications still appear in the list of notifications
-                  ; they just don't pop up on your device.
+                  Muted notifications still appear in the list of notifications;
+                  they just don't pop up on your device.
                 </EmptyState>
           }
         </div>

@@ -144,3 +144,19 @@ export function freeze({ stream, olderItemsOnServer }) {
     olderItemsOnServer,
   };
 }
+
+export function filterStream(stream, filter) {
+  return _.pickBy(
+    _.mapValues(stream, part =>
+      _.filter(part, item =>
+        _.every(_.keys(filter), key =>
+          item[key] === undefined ||
+          filter[key] === undefined ||
+          filter[key][item[key]] === undefined ||
+          filter[key][item[key]]
+        )
+      )
+    ),
+    part => part.length > 0
+  );
+}
