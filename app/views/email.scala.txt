@@ -13,6 +13,6 @@ Hi@user.name.first.map(" "+_).getOrElse(""), you have a new notification from My
 }
 
 ---
-This email was sent by My Warwick at @date because your account
-is set to have your notifications copied to email. If you'd like
-to disable this, you can visit @optOutUrl
+This email was sent by My Warwick at @date because your
+account is set to have your notifications copied to email. If you'd like to disable this,
+you can visit @optOutUrl
