@@ -27,8 +27,6 @@ export function fetch() {
 }
 
 export function persist(wantsEmails) {
-  console.info("Getting ready to do ", wantsEmails);
-  console.info(JSON.stringify(wantsEmails));
   return dispatch => {
     return postJsonWithCredentials('/api/emailNotificationPreferences', { wantsEmails })
       .then(() => dispatch(fetch()));

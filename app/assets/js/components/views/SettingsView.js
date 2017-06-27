@@ -15,10 +15,14 @@ import CheckboxListGroupItem from '../ui/CheckboxListGroupItem';
 
 class SettingsView extends HideableView {
 
-
   constructor(props) {
     super(props);
+    this.state = props;
     this.onNotificationEmailCopyChange = this.onNotificationEmailCopyChange.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState(nextProps);
   }
 
   static propTypes = {
@@ -150,6 +154,12 @@ class SettingsView extends HideableView {
   }
 
   onNotificationEmailCopyChange() {
+    this.setState((previousState) => {
+      let newState = Object.assign({}, previousState.emailNotificationsOptIn);
+      newState.wantsEmails = !newState.wantsEmails;
+      return {'emailNotificationsOptIn' : newState};
+    });
+
     this.props.dispatch(emailNotificationsOptIn.persist(!this.props.emailNotificationsOptIn.wantsEmails));
   }
 
@@ -194,7 +204,7 @@ class SettingsView extends HideableView {
                                  value={ true }
                                  icon="envelope"
                                  description="Copy my notifications to email"
-                                 onClick={ this.onNotificationEmailCopyChange } checked={ this.props.emailNotificationsOptIn.wantsEmails }
+                                 onClick={ this.onNotificationEmailCopyChange } checked={ this.state.emailNotificationsOptIn.wantsEmails }
            />
         </div>
 
