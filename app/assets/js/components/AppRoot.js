@@ -20,6 +20,10 @@ import LocationOptInSettingView from './views/settings/optInSettings/LocationOpt
 import TilePreferencesView from './views/settings/TilePreferencesView';
 import TileOptionView from './views/settings/TileOptionView';
 import PostTourView from './views/PostTourView';
+import {
+  ActivityStreamFilterOptionView,
+  NotificationStreamFilterOptionView,
+} from './views/settings/StreamFilterOptionView';
 
 
 export const Routes = {
@@ -39,6 +43,8 @@ export const Routes = {
     OptInTypes: {
       LOCATION: 'location',
     },
+    ACTIVITY_FILTER: 'activityfilter',
+    NOTIFICATION_FILTER: 'notificationfilter',
   },
   POST_TOUR: 'post_tour',
 };
@@ -106,6 +112,14 @@ RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}`] = {
 RouteViews[`/${Routes.POST_TOUR}`] = {
   rendered: false,
   view: PostTourView,
+};
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.ACTIVITY_FILTER}`] = {
+  rendered: false,
+  view: ActivityStreamFilterOptionView,
+};
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NOTIFICATION_FILTER}`] = {
+  rendered: false,
+  view: NotificationStreamFilterOptionView,
 };
 
 class AppRoot extends React.Component {

@@ -29,6 +29,9 @@ export function persist(optInType, values) {
 
     return fetchWithCredentials('/api/news/optin', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(data),
     }).then(() => dispatch(fetch()));
   };
