@@ -131,22 +131,24 @@ export default class TileOptionView extends React.PureComponent {
         </div>
 
         { _.flatMap(this.props.tileOptions, (tileOption, key) =>
-          <div key={ key } className={ `list-group setting-colour-${this.props.tile.colour}` }>
-            <div className="list-group-item list-group-item--header">
+          <div key={ key }>
+            <p className="hint-text container-fluid">
               { tileOption.description }
+            </p>
+            <div key={ key } className={ `list-group setting-colour-${this.props.tile.colour}` }>
+              { _.map(_.sortBy(tileOption.options, o => (o.name ? o.name : o.value)), option => {
+                switch (tileOption.type.toLowerCase()) {
+                  case 'array':
+                    return this.makeCheckboxItem(option, key);
+                  case 'string':
+                    return this.makeRadioItem(option, key);
+                  default:
+                    return (
+                      <div />
+                    );
+                }
+              }) }
             </div>
-            { _.map(_.sortBy(tileOption.options, o => (o.name ? o.name : o.value)), option => {
-              switch (tileOption.type.toLowerCase()) {
-                case 'array':
-                  return this.makeCheckboxItem(option, key);
-                case 'string':
-                  return this.makeRadioItem(option, key);
-                default:
-                  return (
-                    <div />
-                  );
-              }
-            }) }
           </div>
         ) }
       </div>
