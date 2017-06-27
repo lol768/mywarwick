@@ -138,10 +138,14 @@ export function getNumItemsSince(stream, date) {
 }
 
 /** Convert to a regular array for the persisted module */
-export function freeze({ stream, olderItemsOnServer }) {
+export function freeze({ stream, olderItemsOnServer, filter, filterOptions }) {
   return {
     items: _.flatten(_.values(stream)),
-    olderItemsOnServer,
+    meta: {
+      olderItemsOnServer,
+      filter,
+      filterOptions,
+    },
   };
 }
 

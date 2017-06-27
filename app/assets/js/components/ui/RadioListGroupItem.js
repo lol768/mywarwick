@@ -1,11 +1,9 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import Switch from './Switch';
 
-export default class CheckboxListGroupItem extends React.PureComponent {
+export default class RadioListGroupItem extends React.PureComponent {
 
   static propTypes = {
-    id: PropTypes.string.isRequired,
     icon: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     name: PropTypes.string,
@@ -35,7 +33,7 @@ export default class CheckboxListGroupItem extends React.PureComponent {
           </div>
           <div className="media-right">
             <div className="media-right">
-              <Switch id={ this.props.id } checked={ this.props.checked } />
+              <input type="radio" checked={ this.props.checked } readOnly />
             </div>
           </div>
         </div>
