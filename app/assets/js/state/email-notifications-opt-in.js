@@ -57,6 +57,7 @@ export function reducer(state = initialState, action) {
         ...state,
         fetching: false,
         failed: false,
+        ...action.payload,
       };
     default:
       return state;
