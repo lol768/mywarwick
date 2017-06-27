@@ -14,6 +14,7 @@ GET         /edit                                                 @controllers.H
 GET         /edit/add                                             @controllers.HomeController.index
 GET         /settings                                             @controllers.HomeController.index
 GET         /settings/*setting                                    @controllers.HomeController.indexIgnoreParam(setting: String)
+GET         /post_tour                                            @controllers.HomeController.index
 
 # NEWSTART-253
 POST        /                                                     @controllers.HomeController.index

@@ -46,9 +46,9 @@ class OptInSettingsView extends HideableView {
                 onChange: this.onChange,
               }
             ) :
-            <LocationOptInSettingView options={ this.props.options.Location || [] }
-              selected={ this.props.selected.Location || [] } onChange={ this.onChange }
-            />
+              <LocationOptInSettingView options={ this.props.options.Location || [] }
+                selected={ this.props.selected.Location || [] } onChange={ this.onChange }
+              />
           }
         </form>
       </ScrollRestore>

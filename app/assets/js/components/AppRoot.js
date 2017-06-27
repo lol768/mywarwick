@@ -19,6 +19,7 @@ import OptInSettingsView from './views/settings/OptInSettingsView';
 import LocationOptInSettingView from './views/settings/optInSettings/LocationOptInSettingView';
 import TilePreferencesView from './views/settings/TilePreferencesView';
 import TileOptionView from './views/settings/TileOptionView';
+import PostTourView from './views/PostTourView';
 import {
   ActivityStreamFilterOptionView,
   NotificationStreamFilterOptionView,
@@ -45,6 +46,7 @@ export const Routes = {
     ACTIVITY_FILTER: 'activityfilter',
     NOTIFICATION_FILTER: 'notificationfilter',
   },
+  POST_TOUR: 'post_tour',
 };
 
 const TabRoutes = [
@@ -106,6 +108,10 @@ RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`] = {
 RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}`] = {
   rendered: false,
   view: OptInSettingsView,
+};
+RouteViews[`/${Routes.POST_TOUR}`] = {
+  rendered: false,
+  view: PostTourView,
 };
 RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.ACTIVITY_FILTER}`] = {
   rendered: false,
