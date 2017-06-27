@@ -7,13 +7,19 @@ import { Routes } from '../AppRoot';
 import HideableView from './HideableView';
 import * as newsCategories from '../../state/news-categories';
 import * as newsOptIn from '../../state/news-optin';
+import * as emailNotificationsOptIn from '../../state/email-notifications-opt-in';
 import { loadDeviceDetails } from '../../userinfo';
 import _ from 'lodash-es';
-import Switch from '../ui/Switch';
-import { postJsonWithCredentials } from '../../serverpipe';
+import CheckboxListGroupItem from '../ui/CheckboxListGroupItem';
 
 
 class SettingsView extends HideableView {
+
+
+  constructor(props) {
+    super(props);
+    this.onNotificationEmailCopyChange = this.onNotificationEmailCopyChange.bind(this);
+  }
 
   static propTypes = {
     mutes: PropTypes.number.isRequired,
@@ -23,6 +29,11 @@ class SettingsView extends HideableView {
       selected: PropTypes.number.isRequired,
       total: PropTypes.number.isRequired,
     }).isRequired,
+    emailNotificationsOptIn: PropTypes.shape({
+      fetching: PropTypes.bool.isRequired,
+      failed: PropTypes.bool.isRequired,
+      wantsEmails: PropTypes.bool.isRequired,
+    }),
     newsOptIn: PropTypes.shape({
       fetching: PropTypes.bool.isRequired,
       failed: PropTypes.bool.isRequired,
@@ -102,6 +113,7 @@ class SettingsView extends HideableView {
   componentDidShow() {
     this.props.dispatch(newsCategories.fetch());
     this.props.dispatch(newsOptIn.fetch());
+    this.props.dispatch(emailNotificationsOptIn.fetch());
   }
 
   static getNativeAppVersion() {
@@ -137,9 +149,8 @@ class SettingsView extends HideableView {
     return versions.join(', ');
   }
 
-  static notificationEmailCopyChange(optedIn) {
-    const data = {'wantsEmails': optedIn};
-    postJsonWithCredentials("/api/emailNotificationPreferences", data);
+  onNotificationEmailCopyChange() {
+    this.props.dispatch(emailNotificationsOptIn.persist(!this.props.emailNotificationsOptIn.wantsEmails));
   }
 
   render() {
@@ -179,13 +190,12 @@ class SettingsView extends HideableView {
               SettingsView.renderSingleCount(this.props.mutes)
             ) }
           </div>
-          <div className="list-group-item">
-            { SettingsView.renderSetting(
-              'envelope',
-              'Copy my notifications to email',
-              <Switch onClick={ SettingsView.notificationEmailCopyChange } id="copy-notifications" />
-            ) }
-          </div>
+          <CheckboxListGroupItem id="copyNotificationsEmail"
+                                 value={ true }
+                                 icon="envelope"
+                                 description="Copy my notifications to email"
+                                 onClick={ this.onNotificationEmailCopyChange } checked={ this.props.emailNotificationsOptIn.wantsEmails }
+           />
         </div>
 
         <div className="list-group setting-colour-1">
@@ -300,6 +310,11 @@ const select = (state) => {
   return {
     mutes: state.notifications.activityMutes.length,
     subscribedNewsCategories: state.newsCategories.subscribed.length,
+    emailNotificationsOptIn: {
+      wantsEmails: state.emailNotificationsOptIn.wantsEmails,
+      fetching: state.emailNotificationsOptIn.fetching,
+      failed: state.emailNotificationsOptIn.failed,
+    },
     newsCategories: {
       fetching: state.newsCategories.fetching,
       failed: state.newsCategories.failed,
