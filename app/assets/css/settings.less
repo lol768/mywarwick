@@ -86,4 +86,14 @@
     opacity: 1;
     transform: translate3d(0, 0, 0);
   }
+
+  .list-group:first-of-type {
+    position: fixed;
+    z-index: 1;
+    width: 100%;
+
+    & + * {
+      padding-top: 20px + 2.6 * ceil((@main-font-size * @font-scale-xs)) + 2px;
+    }
+  }
 }
