@@ -341,7 +341,9 @@ export function notificationsReducer(state = initialState, action) {
     }
     case NOTIFICATION_FETCH: {
       const updatedStream = mergeNotifications(state.stream, action.payload.items);
-      const updatedFilteredStream = filterStream(updatedStream, state.filter);
+      const filter = action.payload.meta && action.payload.meta.filter ?
+        action.payload.meta.filter : state.filter;
+      const updatedFilteredStream = filterStream(updatedStream, filter);
       const [lastItem] = takeFromStream(updatedStream, 1);
 
       return {
@@ -398,7 +400,9 @@ export function activitiesReducer(state = initialState, action) {
     }
     case ACTIVITY_FETCH: {
       const updatedStream = mergeNotifications(state.stream, action.payload.items);
-      const updatedFilteredStream = filterStream(updatedStream, state.filter);
+      const filter = action.payload.meta && action.payload.meta.filter ?
+        action.payload.meta.filter : state.filter;
+      const updatedFilteredStream = filterStream(updatedStream, filter);
       const [lastItem] = takeFromStream(updatedStream, 1);
 
       return {

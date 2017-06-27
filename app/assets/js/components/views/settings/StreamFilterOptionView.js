@@ -3,11 +3,13 @@ import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
 import * as notifications from '../../../state/notifications';
 import { connect } from 'react-redux';
+import Switch from '../../ui/Switch';
 
 class StreamFilterOptionView extends React.PureComponent {
 
   static propTypes = {
     filterType: PropTypes.string.isRequired,
+    filter: PropTypes.object.isRequired,
     filterOptions: PropTypes.shape({
       provider: PropTypes.arrayOf(PropTypes.shape({
         id: PropTypes.string.isRequired,
@@ -29,9 +31,7 @@ class StreamFilterOptionView extends React.PureComponent {
     super(props);
 
     this.state = this.buildState(props);
-
-    this.handleItemClick = this.handleItemClick.bind(this);
-    this.handleChange = this.handleChange.bind(this);
+    this.onClick = this.onClick.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -52,18 +52,13 @@ class StreamFilterOptionView extends React.PureComponent {
     return updatedState;
   }
 
-  handleItemClick(event) {
+  onClick(event) {
     const value = event.currentTarget.dataset.value;
     const name = event.currentTarget.dataset.name;
     const newOption = _.cloneDeep(this.state[name]);
     newOption[value] = !newOption[value];
 
     this.setState({ [name]: newOption }, () => this.props.saveFilter(this.state));
-  }
-
-  handleChange(event) {
-    event.stopPropagation();
-    this.handleItemClick(event);
   }
 
   render() {
@@ -88,10 +83,10 @@ class StreamFilterOptionView extends React.PureComponent {
               option =>
                 <div key={ `provider:${option.id}` } className="list-group-item"
                   data-name="provider" data-value={option.id}
-                  onClick={ this.handleItemClick }
+                  onClick={ this.onClick }
                 >
                   <div className="media">
-                    <div className="media-left feedback">
+                    <div className="media-left">
                       <i className={ `fa fa-fw fa-${option.icon ? option.icon : 'cog'}` }
                         style={{ color: (option.colour ? option.colour : 'black') }}
                       />
@@ -100,12 +95,8 @@ class StreamFilterOptionView extends React.PureComponent {
                       { option.displayName ? option.displayName : option.name }
                     </div>
                     <div className="media-right">
-                      <input
-                        type="checkbox"
-                        data-value={option.id}
-                        data-name="provider"
+                      <Switch id={ `${this.props.filterType}:provider:${option.id}` }
                         checked={ this.state.provider[option.id] }
-                        onChange={ this.handleChange }
                       />
                     </div>
                   </div>

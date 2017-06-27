@@ -3,20 +3,8 @@ import * as PropTypes from 'prop-types';
 
 export default class Switch extends React.PureComponent {
 
-  constructor(props) {
-    super(props);
-    this.onChange = this.onChange.bind(this);
-    this.state = { checked: true };
-  }
-
-  onChange(e) {
-    this.setState({ checked: e.target.checked });
-    this.props.onClick(e.target.checked);
-  }
-
   static propTypes = {
-    onClick: PropTypes.func.isRequired, // naming for consistency
-    checked: PropTypes.bool.optional,
+    checked: PropTypes.bool.isRequired,
     id: PropTypes.string.isRequired,
   };
 
@@ -24,13 +12,19 @@ export default class Switch extends React.PureComponent {
     checked: true,
   };
 
+  static stopPropagation(e) {
+    e.stopPropagation();
+  }
+
   render() {
     return (
       <div className="switch">
         <input type="checkbox" id={ this.props.id } className="switch__checkbox"
-          checked={ this.state.checked } onChange={ this.onChange }
+          checked={ this.props.checked } readOnly
         />
-        <label className="switch__length" htmlFor={ this.props.id } />
+        <label className="switch__length" htmlFor={ this.props.id }
+          onClick={ Switch.stopPropagation }
+        />
       </div>
     );
   }

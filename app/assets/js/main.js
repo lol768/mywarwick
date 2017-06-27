@@ -143,8 +143,6 @@ export function launch(userData) {
   persisted('notificationsLastRead.date', notificationMetadata.loadedNotificationsLastRead,
     freezeDate, thawDate);
 
-  persisted('activities.filter', notifications.fetchedActivityFilter);
-  persisted('notifications.filter', notifications.fetchedNotificationFilter);
   persisted('activities', notifications.fetchedActivities, stream.freeze);
   persisted('notifications', notifications.fetchedNotifications, stream.freeze);
 

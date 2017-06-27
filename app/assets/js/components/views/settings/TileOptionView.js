@@ -2,6 +2,8 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
 import * as tiles from '../../../state/tiles';
+import CheckboxListGroupItem from '../../ui/CheckboxListGroupItem';
+import RadioListGroupItem from '../../ui/RadioListGroupItem';
 
 export default class TileOptionView extends React.PureComponent {
 
@@ -31,10 +33,8 @@ export default class TileOptionView extends React.PureComponent {
     };
 
     this.saveConfig = this.saveConfig.bind(this);
-    this.handleCheckboxItemClick = this.handleCheckboxItemClick.bind(this);
-    this.handleRadioItemClick = this.handleRadioItemClick.bind(this);
-    this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
-    this.handleRadioChange = this.handleRadioChange.bind(this);
+    this.onCheckboxClick = this.onCheckboxClick.bind(this);
+    this.onRadioClick = this.onRadioClick.bind(this);
   }
 
   makeCheckboxItem(possibleChoice, cbName) {
@@ -57,31 +57,12 @@ export default class TileOptionView extends React.PureComponent {
     }
 
     return (
-      <div key={ `${cbName}:${possibleChoice.value}` } className="list-group-item"
-        data-name={cbName} data-value={possibleChoice.value}
-        onClick={ this.handleCheckboxItemClick }
-      >
-        <div className="media">
-          <div className="media-left">
-            <i className={ `fa fa-fw fa-${
-                (tile.id === 'weather') ? 'sun-o' : tile.icon
-              }` }
-            />
-          </div>
-          <div className="media-body">
-            {possibleChoice.name ? possibleChoice.name : possibleChoice.value }
-          </div>
-          <div className="media-right">
-            <input
-              type="checkbox"
-              data-value={possibleChoice.value}
-              data-name={cbName}
-              checked={checked}
-              onChange={ this.handleCheckboxChange }
-            />
-          </div>
-        </div>
-      </div>
+      <CheckboxListGroupItem key={ `${cbName}:${possibleChoice.value}` }
+        id={ `${cbName}:${possibleChoice.value}` } value={ possibleChoice.value }
+        icon={ (tile.id === 'weather') ? 'sun-o' : tile.icon }
+        description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
+        onClick={ this.onCheckboxClick } checked={ checked } name={ cbName }
+      />
     );
   }
 
@@ -97,57 +78,16 @@ export default class TileOptionView extends React.PureComponent {
     }
 
     return (
-      <div key={ `${radioName}:${possibleChoice.value}` } data-name={radioName}
-        data-value={possibleChoice.value} className="list-group-item"
-        onClick={ this.handleRadioItemClick }
-      >
-        <div className="media">
-          <div className="media-left">
-            <i className={ `fa fa-fw fa-${
-              (tile.id === 'weather') ? 'sun-o' : tile.icon
-              }` }
-            />
-          </div>
-          <div className="media-body">
-            {possibleChoice.name ? possibleChoice.name : possibleChoice.value }
-          </div>
-          <div className="media-right">
-            <input
-              type="radio"
-              data-name={radioName}
-              data-value={possibleChoice.value}
-              checked={checked}
-              onChange={ this.handleRadioChange }
-            />
-          </div>
-        </div>
-      </div>
+      <RadioListGroupItem key={ `${radioName}:${possibleChoice.value}` }
+        icon={ (tile.id === 'weather') ? 'sun-o' : tile.icon }
+        description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
+        onClick={ this.onRadioClick } checked={ checked } name={ radioName }
+        value={ possibleChoice.value }
+      />
     );
   }
 
-  handleRadioItemClick(event) {
-    const value = event.currentTarget.dataset.value;
-    const name = event.currentTarget.dataset.name;
-    const currentPref = _.clone(this.state.currentPreferences, true);
-
-    const newPreferences = {
-      ...currentPref,
-      [name]: value,
-    };
-    this.setState({
-      currentPreferences: newPreferences,
-    });
-    this.saveConfig(newPreferences);
-  }
-
-  handleRadioChange(event) {
-    event.stopPropagation();
-    this.handleRadioItemClick(event);
-  }
-
-  handleCheckboxItemClick(event) {
-    const value = event.currentTarget.dataset.value;
-    const name = event.currentTarget.dataset.name;
+  onCheckboxClick(value, name) {
     const currentPref = _.clone(this.state.currentPreferences, true);
 
     if (currentPref[name] === undefined) {
@@ -164,9 +104,15 @@ export default class TileOptionView extends React.PureComponent {
     this.saveConfig(currentPref);
   }
 
-  handleCheckboxChange(event) {
-    event.stopPropagation();
-    this.handleCheckboxItemClick(event);
+  onRadioClick(value, name) {
+    const currentPref = _.clone(this.state.currentPreferences, true);
+
+    const newPreferences = {
+      ...currentPref,
+      [name]: value,
+    };
+    this.setState({ currentPreferences: newPreferences });
+    this.saveConfig(newPreferences);
   }
 
   saveConfig(currentPreferences) {

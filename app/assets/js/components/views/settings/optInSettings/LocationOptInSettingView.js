@@ -60,7 +60,7 @@ export default class LocationOptInSettingsView extends React.PureComponent {
           { _.map(this.props.options, location =>
             <CheckboxListGroupItem key={ `OptIn:Locations:${location.value}` } icon="map-signs"
               description={ location.description } value={ location.value } onClick={ this.onClick }
-              checked={ this.state[location.value] }
+              checked={ this.state[location.value] } id={ `OptIn:Locations:${location.value}` }
             />
           ) }
         </div>
