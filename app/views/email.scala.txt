@@ -1,10 +1,12 @@
 @import warwick.sso.User
 @import models.Activity
-@(user: User, activity: Activity, date: String)
+@(user: User, activity: Activity, date: String, optOutUrl: String)
 Hi@user.name.first.map(" "+_).getOrElse(""), you have a new notification from My Warwick:
 ---
 
 @activity.text
 
 ---
-This notification was generated automatically by My Warwick at @date.
+This notification was generated automatically by My Warwick at @date because your account
+is set to have your notifications copied to email. If you'd like to disable this, you can visit
+@optOutUrl.

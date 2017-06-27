@@ -12,7 +12,7 @@ GET         /tiles                                                @controllers.H
 GET         /tiles/:id                                            @controllers.HomeController.indexIgnoreParam(id: String)
 GET         /edit                                                 @controllers.HomeController.index
 GET         /edit/add                                             @controllers.HomeController.index
-GET         /settings                                             @controllers.HomeController.index
+GET         /settings                                             @controllers.HomeController.settings
 GET         /settings/*setting                                    @controllers.HomeController.indexIgnoreParam(setting: String)
 GET         /post_tour                                            @controllers.HomeController.index
 

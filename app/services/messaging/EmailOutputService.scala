@@ -40,11 +40,16 @@ class EmailOutputService @Inject() (
   def build(address: String, user: User, activity: Activity): Email = {
     val fullAddress = user.name.full.map(full => s"${full} <${address}>").getOrElse(address)
     val date = DateFormats.emailDateTime(activity.publishedAt)
+    val rootUrl = config.getString("mywarwick.rootUrl")
+    require(rootUrl.nonEmpty, "Valid mywarwick.rootUrl not present")
+
+    val optOutUrl = s"$rootUrl${controllers.routes.HomeController.settings().url}"
+
     Email(
       subject = EmailSanitiser.sanitiseUserInputForHeader(activity.title),
       from = from,
       to = Seq(fullAddress),
-      bodyText = Some(views.txt.email(user, activity, date).body)
+      bodyText = Some(views.txt.email(user, activity, date, optOutUrl).body)
     )
   }
 }
