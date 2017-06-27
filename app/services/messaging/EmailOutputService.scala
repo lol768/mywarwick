@@ -3,9 +3,10 @@ package services.messaging
 import javax.inject.{Inject, Named}
 
 import actors.MessageProcessing.ProcessingResult
-import models.{MessageSend, DateFormats, Activity}
+import models.{Activity, DateFormats, MessageSend}
 import play.api.Configuration
 import play.api.libs.mailer.{Email, MailerClient}
+import system.EmailSanitiser
 import warwick.sso.User
 
 import scala.concurrent.Future
@@ -40,7 +41,7 @@ class EmailOutputService @Inject() (
     val fullAddress = user.name.full.map(full => s"${full} <${address}>").getOrElse(address)
     val date = DateFormats.emailDateTime(activity.publishedAt)
     Email(
-      subject = activity.title,
+      subject = EmailSanitiser.sanitiseUserInputForHeader(activity.title),
       from = from,
       to = Seq(fullAddress),
       bodyText = Some(views.txt.email(user, activity, date).body)
