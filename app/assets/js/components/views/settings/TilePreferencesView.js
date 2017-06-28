@@ -8,6 +8,7 @@ import { Routes } from '../../AppRoot';
 class TilePreferencesView extends React.PureComponent {
 
   static propTypes = {
+    isOnline: PropTypes.bool.isRequired,
     dispatch: PropTypes.func.isRequired,
     tiles: PropTypes.arrayOf(PropTypes.shape({
       id: PropTypes.string.isRequired,
@@ -44,7 +45,7 @@ class TilePreferencesView extends React.PureComponent {
                     }` }
                   />
                 </div>
-                <div className="media-body">
+                <div className={`media-body${this.props.isOnline ? '' : ' media-body-disabled'}`}>
                   { tile.title }
                 </div>
                 <div className="media-right">
@@ -67,6 +68,7 @@ function select(state) {
     options => _.keys(options).length > 0
   ));
   return {
+    isOnline: state.device.isOnline,
     tiles: _.filter(state.tiles.data.tiles, tile => _.includes(tilesWithPreferences, tile.id)),
   };
 }
