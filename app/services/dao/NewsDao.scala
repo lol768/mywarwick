@@ -32,14 +32,12 @@ trait NewsDao {
     * @param item the news item to save
     * @return the ID of the created item
     */
-  def save(item: NewsItemSave, audienceId: String)(implicit c: Connection): String
+  def save(item: NewsItemSave, audienceId: String, audienceSize: AudienceSize)(implicit c: Connection): String
 
   // TODO too many args? define an object?
   def setRecipients(newsId: String, recipients: Seq[Usercode])(implicit c: Connection): Unit
 
-  def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, AudienceSize]
-
-  def updateNewsItem(newsId: String, item: NewsItemSave)(implicit c: Connection): Int
+  def updateNewsItem(newsId: String, item: NewsItemSave, audienceSize: AudienceSize)(implicit c: Connection): Int
 
   def getNewsById(id: String)(implicit c: Connection): Option[NewsItemRender] =
     getNewsByIds(Seq(id)).headOption
@@ -57,6 +55,8 @@ trait NewsDao {
   def deleteRecipients(id: String)(implicit c: Connection): Unit
 
   def getNewsItemsMatchingAudience(webGroup: Option[GroupName], departmentCode: Option[String], departmentSubset: Option[DepartmentSubset], publisherId: Option[String], limit: Int)(implicit c: Connection): Seq[String]
+
+  def updateAudienceCount(newsId: String, audienceSize: AudienceSize)(implicit c: Connection): Int
 }
 
 @Singleton
@@ -72,7 +72,7 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     }
   }
 
-  val newsParser = for {
+  private val newsParser = for {
     id <- str("id")
     title <- str("title")
     text <- str("text")
@@ -91,14 +91,15 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     NewsItemRender(id, title, text, link, publishDate, imageId, category.toSeq, ignoreCategories, publisherId)
   }
 
-  val newsAuditParser = for {
+  private val newsAuditParser = for {
     id <- str("id")
     created <- get[DateTime]("created_at")
     createdBy <- str("created_by")
     updated <- get[DateTime]("updated_at").?
     updatedBy <- str("updated_by").?
+    audienceSize <- get[Option[Int]]("audience_size")
   } yield {
-    NewsItemAudit(id, created, Some(Usercode(createdBy)), updated, updatedBy.map(Usercode))
+    NewsItemAudit(id, created, Some(Usercode(createdBy)), updated, updatedBy.map(Usercode), AudienceSize.fromOption(audienceSize))
   }
 
   override def allNews(publisherId: String, limit: Int, offset: Int)(implicit c: Connection): Seq[NewsItemRender] = {
@@ -151,14 +152,14 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
   /**
     * Save a news item with a specific set of recipients.
     */
-  override def save(item: NewsItemSave, audienceId: String)(implicit c: Connection): String = {
+  override def save(item: NewsItemSave, audienceId: String, audienceSize: AudienceSize)(implicit c: Connection): String = {
     import item._
     val id = newId
     val linkText = link.map(_.text).orNull
     val linkHref = link.map(_.href.toString).orNull
     SQL"""
-    INSERT INTO NEWS_ITEM (id, title, text, link_text, link_href, news_image_id, created_at, publish_date, audience_id, ignore_categories, publisher_id, created_by)
-    VALUES ($id, $title, $text, $linkText, $linkHref, $imageId, SYSDATE, $publishDate, $audienceId, $ignoreCategories, $publisherId, ${usercode.string})
+    INSERT INTO NEWS_ITEM (id, title, text, link_text, link_href, news_image_id, created_at, publish_date, audience_id, ignore_categories, publisher_id, created_by, audience_size)
+    VALUES ($id, $title, $text, $linkText, $linkHref, $imageId, SYSDATE, $publishDate, $audienceId, $ignoreCategories, $publisherId, ${usercode.string}, ${audienceSize.toOption})
     """.executeUpdate()
     id
   }
@@ -174,69 +175,35 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
     }
   }
 
-  override def delete(newsId: String)(implicit c: Connection) =
+  override def delete(newsId: String)(implicit c: Connection): Int =
     SQL"DELETE FROM news_item WHERE id=$newsId".executeUpdate()
 
   /**
     * Deletes all the recipients of a news item.
     */
-  override def deleteRecipients(id: String)(implicit c: Connection) = {
+  override def deleteRecipients(id: String)(implicit c: Connection): Unit = {
     SQL"DELETE FROM NEWS_RECIPIENT WHERE news_item_id = $id".executeUpdate()
   }
 
-  override def getAudienceId(newsId: String)(implicit c: Connection) = {
+  override def getAudienceId(newsId: String)(implicit c: Connection): Option[String] = {
     SQL"SELECT AUDIENCE_ID FROM NEWS_ITEM WHERE ID = $newsId"
       .executeQuery()
       .as(scalar[String].singleOpt)
   }
 
-  override def setAudienceId(newsId: String, audienceId: String)(implicit c: Connection) = {
+  override def setAudienceId(newsId: String, audienceId: String)(implicit c: Connection): Unit = {
     SQL"UPDATE NEWS_ITEM SET AUDIENCE_ID = $audienceId WHERE ID = $newsId"
       .execute()
   }
 
-  private val countParser = (str("id") ~ int("c")).map(flatten)
-
-  override def countRecipients(newsIds: Seq[String])(implicit c: Connection): Map[String, AudienceSize] = {
-    import AudienceSize._
-    if (newsIds.isEmpty) {
-      Map.empty
-    } else {
-      val publicNews =
-        SQL"""
-        SELECT NEWS_ITEM_ID ID FROM NEWS_RECIPIENT WHERE USERCODE = '*'
-        AND NEWS_ITEM_ID IN ($newsIds)
-      """.as(str("id").*).map(_ -> Public).toMap
-
-      val audienceNews =
-        SQL"""
-           SELECT
-             nr.NEWS_ITEM_ID ID,
-             COUNT(*)        C
-           FROM NEWS_RECIPIENT nr
-             JOIN NEWS_ITEM ni ON ni.ID = nr.NEWS_ITEM_ID
-           WHERE nr.USERCODE != '*' AND nr.NEWS_ITEM_ID IN ($newsIds)
-                 AND (ni.IGNORE_CATEGORIES = 1 OR nr.USERCODE IN
-                                                  (SELECT unc.USERCODE
-                                                   FROM USER_NEWS_CATEGORY unc
-                                                     JOIN NEWS_ITEM_CATEGORY nic
-                                                       ON unc.NEWS_CATEGORY_ID = nic.NEWS_CATEGORY_ID
-                                                          AND nr.NEWS_ITEM_ID = nic.NEWS_ITEM_ID))
-           GROUP BY nr.NEWS_ITEM_ID
-      """.as(countParser.*).toMap.mapValues(Finite)
-
-      publicNews ++ audienceNews
-    }
-  }
-
-  override def updateNewsItem(newsId: String, item: NewsItemSave)(implicit c: Connection): Int = {
+  override def updateNewsItem(newsId: String, item: NewsItemSave, audienceSize: AudienceSize)(implicit c: Connection): Int = {
     import item._
     val linkText = link.map(_.text).orNull
     val linkHref = link.map(_.href.toString).orNull
     SQL"""
       UPDATE NEWS_ITEM SET title=$title, text=$text, link_text=$linkText,
       link_href=$linkHref, publish_date=$publishDate, news_image_id=$imageId,
-      updated_at=SYSDATE, updated_by=${usercode.string}
+      updated_at=SYSDATE, updated_by=${usercode.string}, audience_size=${audienceSize.toOption}
       WHERE id=$newsId
       """.executeUpdate()
   }
@@ -275,7 +242,7 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
       .sortBy(_.publishDate)(mostRecentFirst)
   }
 
-  def getNewsItemsMatchingAudience(webGroup: Option[GroupName], departmentCode: Option[String], departmentSubset: Option[DepartmentSubset], publisherId: Option[String], limit: Int)(implicit c: Connection) = {
+  def getNewsItemsMatchingAudience(webGroup: Option[GroupName], departmentCode: Option[String], departmentSubset: Option[DepartmentSubset], publisherId: Option[String], limit: Int)(implicit c: Connection): List[String] = {
     if (webGroup.isEmpty && departmentCode.isEmpty && departmentSubset.isEmpty && publisherId.isEmpty) {
       Nil
     } else {
@@ -312,5 +279,13 @@ class AnormNewsDao @Inject()(dialect: DatabaseDialect) extends NewsDao {
         .as(scalar[String].*)
     }
   }
+
+  override def updateAudienceCount(newsId: String, audienceSize: AudienceSize)(implicit c: Connection): Int = {
+    SQL"""
+      UPDATE NEWS_ITEM SET audience_size=${audienceSize.toOption}
+      WHERE id=$newsId
+    """.executeUpdate()
+  }
+
 
 }
