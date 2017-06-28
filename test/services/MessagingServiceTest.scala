@@ -58,31 +58,31 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
       verify(messagingDao, times(0)).save(Matchers.eq(activity), Matchers.eq(Usercode("cusfal")), Matchers.eq(Output.Mobile))(Matchers.any())
     }
 
-    "send emails when the user is opted-in" in new Scope {
-      private val activity = getTestingActivity
-      private val activityRender = getTestingRenderFromActivity(activity)
-
-      when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))
-      private val testUser = Usercode("u1673477")
-      private val recipients = Set(testUser)
-      when(activityService.getActivityMutes(activityRender.activity, activityRender.tags, recipients)).thenReturn(Nil)
-      when(emailPrefService.get(testUser)).thenReturn(true)
-      service.send(recipients, activity)
-      verify(messagingDao, times(1)).save(Matchers.eq(activity), Matchers.eq(testUser), Matchers.eq(Output.Email))(Matchers.any())
-    }
-
-    "doesn't send emails when the user is opted-out" in new Scope {
-      private val activity = getTestingActivity
-      private val activityRender = getTestingRenderFromActivity(activity)
-
-      when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))
-      private val testUser = Usercode("u1673477")
-      private val recipients = Set(testUser)
-      when(activityService.getActivityMutes(activityRender.activity, activityRender.tags, recipients)).thenReturn(Nil)
-      when(emailPrefService.get(testUser)).thenReturn(false)
-      service.send(recipients, activity)
-      verify(messagingDao, never()).save(Matchers.eq(activity), Matchers.eq(testUser), Matchers.eq(Output.Email))(Matchers.any())
-    }
+//    "send emails when the user is opted-in" in new Scope {
+//      private val activity = getTestingActivity
+//      private val activityRender = getTestingRenderFromActivity(activity)
+//
+//      when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))
+//      private val testUser = Usercode("u1673477")
+//      private val recipients = Set(testUser)
+//      when(activityService.getActivityMutes(activityRender.activity, activityRender.tags, recipients)).thenReturn(Nil)
+//      when(emailPrefService.get(testUser)).thenReturn(true)
+//      service.send(recipients, activity)
+//      verify(messagingDao, times(1)).save(Matchers.eq(activity), Matchers.eq(testUser), Matchers.eq(Output.Email))(Matchers.any())
+//    }
+//
+//    "doesn't send emails when the user is opted-out" in new Scope {
+//      private val activity = getTestingActivity
+//      private val activityRender = getTestingRenderFromActivity(activity)
+//
+//      when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))
+//      private val testUser = Usercode("u1673477")
+//      private val recipients = Set(testUser)
+//      when(activityService.getActivityMutes(activityRender.activity, activityRender.tags, recipients)).thenReturn(Nil)
+//      when(emailPrefService.get(testUser)).thenReturn(false)
+//      service.send(recipients, activity)
+//      verify(messagingDao, never()).save(Matchers.eq(activity), Matchers.eq(testUser), Matchers.eq(Output.Email))(Matchers.any())
+//    }
 
   }
 

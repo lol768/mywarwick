@@ -109,8 +109,8 @@ class MessagingServiceImpl @Inject()(
     }
   }
 
-  def sendEmailFor(user: Usercode, activity: Activity): Boolean =
-    emailNotificationsPrefService.get(user)
+  def sendEmailFor(user: Usercode, activity: Activity): Boolean = false
+    //emailNotificationsPrefService.get(user) - disabled for now, see PR 570
 
   def sendSmsFor(user: Usercode, activity: Activity): Boolean = false
 
