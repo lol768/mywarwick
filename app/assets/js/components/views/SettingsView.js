@@ -7,10 +7,28 @@ import { Routes } from '../AppRoot';
 import HideableView from './HideableView';
 import * as newsCategories from '../../state/news-categories';
 import * as newsOptIn from '../../state/news-optin';
+import * as emailNotificationsOptIn from '../../state/email-notifications-opt-in';
 import { loadDeviceDetails } from '../../userinfo';
 import _ from 'lodash-es';
+import CheckboxListGroupItem from '../ui/CheckboxListGroupItem';
+
 
 class SettingsView extends HideableView {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      emailNotificationsOptIn: {
+        wantsEmails: props.emailNotificationsOptIn.wantsEmails,
+        fetchedOnce: false,
+      },
+    };
+    this.onNotificationEmailCopyChange = this.onNotificationEmailCopyChange.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState(nextProps);
+  }
 
   static propTypes = {
     mutes: PropTypes.number.isRequired,
@@ -20,6 +38,12 @@ class SettingsView extends HideableView {
       selected: PropTypes.number.isRequired,
       total: PropTypes.number.isRequired,
     }).isRequired,
+    emailNotificationsOptIn: PropTypes.shape({
+      fetchedOnce: PropTypes.bool.isRequired,
+      fetching: PropTypes.bool.isRequired,
+      failed: PropTypes.bool.isRequired,
+      wantsEmails: PropTypes.bool.isRequired,
+    }),
     newsOptIn: PropTypes.shape({
       fetching: PropTypes.bool.isRequired,
       failed: PropTypes.bool.isRequired,
@@ -99,6 +123,7 @@ class SettingsView extends HideableView {
   componentDidShow() {
     this.props.dispatch(newsCategories.fetch());
     this.props.dispatch(newsOptIn.fetch());
+    this.props.dispatch(emailNotificationsOptIn.fetch());
   }
 
   static getNativeAppVersion() {
@@ -130,7 +155,24 @@ class SettingsView extends HideableView {
       versions.push(`Web ${assetsRevision}`);
     }
 
+
     return versions.join(', ');
+  }
+
+  onNotificationEmailCopyChange() {
+    const consensus = !this.props.emailNotificationsOptIn.wantsEmails;
+
+    this.setState((previousState) => {
+      const newState = Object.assign({}, previousState.emailNotificationsOptIn);
+      newState.wantsEmails = consensus;
+      return { emailNotificationsOptIn: newState };
+    });
+
+    this.props.dispatch(
+      emailNotificationsOptIn.persist(
+        consensus
+      )
+    );
   }
 
   render() {
@@ -170,6 +212,16 @@ class SettingsView extends HideableView {
               SettingsView.renderSingleCount(this.props.mutes)
             ) }
           </div>
+          <CheckboxListGroupItem id="copyNotificationsEmail"
+            value
+            icon="envelope"
+            description="Copy my notifications to email"
+            onClick={ this.onNotificationEmailCopyChange }
+            checked={ this.state.emailNotificationsOptIn.wantsEmails }
+            failure={ this.state.emailNotificationsOptIn.failed }
+            loading={ !this.state.emailNotificationsOptIn.fetchedOnce &&
+              this.props.emailNotificationsOptIn.fetching }
+          />
         </div>
 
         <div className="list-group setting-colour-1">
@@ -284,6 +336,12 @@ const select = (state) => {
   return {
     mutes: state.notifications.activityMutes.length,
     subscribedNewsCategories: state.newsCategories.subscribed.length,
+    emailNotificationsOptIn: {
+      wantsEmails: state.emailNotificationsOptIn.wantsEmails,
+      fetchedOnce: state.emailNotificationsOptIn.fetchedOnce,
+      fetching: state.emailNotificationsOptIn.fetching,
+      failed: state.emailNotificationsOptIn.failed,
+    },
     newsCategories: {
       fetching: state.newsCategories.fetching,
       failed: state.newsCategories.failed,

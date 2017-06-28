@@ -8,7 +8,7 @@ import com.google.inject.ImplementedBy
 import models._
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
-import services.ActivityService
+import services.{ActivityService, EmailNotificationsPrefService}
 import services.dao.MessagingDao
 import system.Logging
 import warwick.sso.{UserLookupService, Usercode}
@@ -44,6 +44,7 @@ class MessagingServiceImpl @Inject()(
   @NamedDatabase("default") db: Database,
   activitiesProvider: Provider[ActivityService],
   users: UserLookupService,
+  emailNotificationsPrefService: EmailNotificationsPrefService,
   @Named("email") emailer: OutputService,
   @Named("mobile") mobile: OutputService,
   messagingDao: MessagingDao
@@ -108,8 +109,8 @@ class MessagingServiceImpl @Inject()(
     }
   }
 
-  // TODO actually decide whether this user should receive this sort of notification
   def sendEmailFor(user: Usercode, activity: Activity): Boolean = false
+    //emailNotificationsPrefService.get(user) - disabled for now, see PR 570
 
   def sendSmsFor(user: Usercode, activity: Activity): Boolean = false
 

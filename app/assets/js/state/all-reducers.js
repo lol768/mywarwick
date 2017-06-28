@@ -16,6 +16,7 @@ export { notificationsReducer as notifications } from './notifications';
 export { activitiesReducer as activities } from './notifications';
 export { tilesReducer as tiles } from './tiles';
 export { tileContentReducer as tileContent } from './tiles';
+export { reducer as emailNotificationsOptIn } from './email-notifications-opt-in';
 export { reducer as update } from './update';
 export { reducer as user } from './user';
 export { reducer as ui } from './ui';

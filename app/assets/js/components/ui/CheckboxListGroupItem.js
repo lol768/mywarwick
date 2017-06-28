@@ -12,6 +12,13 @@ export default class CheckboxListGroupItem extends React.PureComponent {
     value: PropTypes.string.isRequired,
     onClick: PropTypes.func.isRequired,
     checked: PropTypes.bool.isRequired,
+    loading: PropTypes.bool.optional,
+    failure: PropTypes.bool.optional,
+  };
+
+  static defaultProps = {
+    loading: false,
+    failure: false,
   };
 
   constructor(props) {
@@ -24,6 +31,18 @@ export default class CheckboxListGroupItem extends React.PureComponent {
   }
 
   render() {
+    let mediaRight = <Switch id={ this.props.id } checked={ this.props.checked } />;
+    if (this.props.loading) {
+      mediaRight = (
+        <i className="fa fa-spinner fa-pulse fa-2x" />
+      );
+    }
+
+    if (this.props.failure) {
+      mediaRight = (
+        <i className="fa fa-exclamation-triangle fa-2x" />
+      );
+    }
     return (
       <div className="list-group-item" onClick={ this.onClick }>
         <div className="media">
@@ -35,7 +54,7 @@ export default class CheckboxListGroupItem extends React.PureComponent {
           </div>
           <div className="media-right">
             <div className="media-right">
-              <Switch id={ this.props.id } checked={ this.props.checked } />
+              { mediaRight }
             </div>
           </div>
         </div>

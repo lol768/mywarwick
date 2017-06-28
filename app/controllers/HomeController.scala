@@ -29,6 +29,7 @@ class HomeController @Inject()(
     Ok(views.html.index())
   }
 
+  def settings: Action[AnyContent] = index
 
   def redirectToIndex = Action(Redirect(routes.HomeController.index()))
 
