@@ -9,6 +9,7 @@ import CheckboxListGroupItem from '../../ui/CheckboxListGroupItem';
 class NewsCategoriesView extends HideableView {
 
   static propTypes = {
+    isOnline: PropTypes.bool.isRequired,
     dispatch: PropTypes.func.isRequired,
     fetching: PropTypes.bool.isRequired,
     failed: PropTypes.bool.isRequired,
@@ -37,6 +38,7 @@ class NewsCategoriesView extends HideableView {
   }
 
   onClick(id) {
+    if (!this.props.isOnline) return;
     const checked = !this.state[id];
     this.setState({ [id]: checked });
     if (checked) {
@@ -77,6 +79,7 @@ class NewsCategoriesView extends HideableView {
             <CheckboxListGroupItem key={ category.id } id={ `category-${category.id}` }
               icon="newspaper-o" description={ category.name } value={ category.id }
               onClick={ this.onClick } checked={ this.state[category.id] }
+              disabled={ !this.props.isOnline }
             />
           ) }
         </div>
@@ -92,6 +95,7 @@ function select(state) {
     failed: state.newsCategories.failed,
     subscribed: state.newsCategories.subscribed,
     categories: state.newsCategories.items,
+    isOnline: state.device.isOnline,
   };
 }
 

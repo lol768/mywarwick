@@ -19,6 +19,7 @@ class StreamFilterOptionView extends React.PureComponent {
       })).isRequired,
     }).isRequired,
     saveFilter: PropTypes.func.isRequired,
+    isOnline: PropTypes.bool.isRequired,
   };
 
   static defaultProps = {
@@ -53,6 +54,7 @@ class StreamFilterOptionView extends React.PureComponent {
   }
 
   onClick(event) {
+    if (!this.props.isOnline) return;
     const value = event.currentTarget.dataset.value;
     const name = event.currentTarget.dataset.name;
     const newOption = _.cloneDeep(this.state[name]);
@@ -91,12 +93,13 @@ class StreamFilterOptionView extends React.PureComponent {
                         style={{ color: (option.colour ? option.colour : 'black') }}
                       />
                     </div>
-                    <div className="media-body">
+                    <div className={`media-body${this.props.isOnline ? '': ' media-body-disabled'}`}>
                       { option.displayName ? option.displayName : option.name }
                     </div>
                     <div className="media-right">
                       <Switch id={ `${this.props.filterType}:provider:${option.id}` }
                         checked={ this.state.provider[option.id] }
+                        disabled={ !this.props.isOnline }
                       />
                     </div>
                   </div>
@@ -113,6 +116,7 @@ function selectActivity(state) {
     filterType: 'Activity',
     filter: state.activities.filter,
     filterOptions: state.activities.filterOptions,
+    isOnline: state.device.isOnline,
   };
 }
 
@@ -121,6 +125,7 @@ function selectNotification(state) {
     filterType: 'Notifications',
     filter: state.notifications.filter,
     filterOptions: state.notifications.filterOptions,
+    isOnline: state.device.isOnline,
   };
 }
 

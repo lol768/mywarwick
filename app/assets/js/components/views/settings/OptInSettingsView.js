@@ -18,6 +18,7 @@ class OptInSettingsView extends HideableView {
     selected: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string)),
     singleOptionView: PropTypes.func,
     singleOptionIdentifier: PropTypes.string,
+    isOnline: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -48,6 +49,7 @@ class OptInSettingsView extends HideableView {
             ) :
               <LocationOptInSettingView options={ this.props.options.Location || [] }
                 selected={ this.props.selected.Location || [] } onChange={ this.onChange }
+                disabled={ !this.props.isOnline }
               />
           }
         </form>
@@ -60,6 +62,7 @@ class OptInSettingsView extends HideableView {
 const select = (state) => ({
   options: state.newsOptIn.options,
   selected: state.newsOptIn.selected,
+  isOnline: state.device.isOnline,
 });
 
 export default connect(select)(OptInSettingsView);
