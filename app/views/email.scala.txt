@@ -3,12 +3,12 @@
 @(user: User, activity: Activity, date: String, optOutUrl: String)
 Hi@user.name.first.map(" "+_).getOrElse(""), you have a new notification from My Warwick:
 
-> @activity.title@(activity.url.map(u => " ("+u+")").getOrElse(""))
+> @activity.title@(activity.url.map(u => s" ($u)").getOrElse(""))
 @if(activity.text.nonEmpty) {
 >
 > @activity.text
 }
--- 
+@("-- ")
 
 This email was sent by My Warwick because your account
 is set to have your notifications copied to email.
