@@ -204,6 +204,12 @@ export function launch(userData) {
 
   store.dispatch(ui.updateUIContext());
   store.dispatch(update.displayUpdateProgress);
+  window.addEventListener('offline', () => {
+    store.dispatch(device.updateOnlineStatus(false));
+  });
+  window.addEventListener('online', () => {
+    store.dispatch(device.updateOnlineStatus(true));
+  });
   store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));
 
   user.loadUserFromLocalStorage(store.dispatch);
