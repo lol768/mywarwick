@@ -145,6 +145,7 @@ class AppRoot extends React.Component {
       options: PropTypes.object.isRequired,
     }).isRequired,
     dispatch: PropTypes.func.isRequired,
+    isOnline: PropTypes.bool.isRequired,
   };
 
   constructor(props) {

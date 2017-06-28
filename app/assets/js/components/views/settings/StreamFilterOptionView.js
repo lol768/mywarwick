@@ -93,7 +93,9 @@ class StreamFilterOptionView extends React.PureComponent {
                         style={{ color: (option.colour ? option.colour : 'black') }}
                       />
                     </div>
-                    <div className={`media-body${this.props.isOnline ? '': ' media-body-disabled'}`}>
+                    <div
+                      className={`media-body${this.props.isOnline ? '' : ' media-body-disabled'}`}
+                    >
                       { option.displayName ? option.displayName : option.name }
                     </div>
                     <div className="media-right">
