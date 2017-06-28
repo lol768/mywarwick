@@ -44,6 +44,8 @@ trait ActivityDao {
   def getActivityIcon(providerId: String)(implicit c: Connection): Option[ActivityIcon]
 
   def allProviders(implicit c: Connection): Seq[ActivityProvider]
+
+  def getProvider(id: String)(implicit c: Connection): Option[ActivityProvider]
 }
 
 class ActivityDaoImpl @Inject()(
@@ -57,8 +59,8 @@ class ActivityDaoImpl @Inject()(
     val publishedAtOrNow = publishedAt.getOrElse(now)
 
     SQL"""
-      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by)
-      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $publishedAtOrNow, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string})
+      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by, send_email)
+      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $publishedAtOrNow, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string}, $sendEmail)
     """
       .execute()
 
@@ -286,9 +288,10 @@ class ActivityDaoImpl @Inject()(
       get[DateTime]("CREATED_AT") ~
       get[Boolean]("SHOULD_NOTIFY") ~
       get[Option[String]]("AUDIENCE_ID") ~
-      get[Option[String]]("PUBLISHER_ID") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ publishedAt ~ createdAt ~ shouldNotify ~ audienceId ~ publisherId =>
-        Activity(id, providerId, activityType, title, text, url, replacedById, publishedAt, createdAt, shouldNotify, audienceId, publisherId)
+      get[Option[String]]("PUBLISHER_ID") ~
+      get[Option[Boolean]]("SEND_EMAIL") map {
+      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ publishedAt ~ createdAt ~ shouldNotify ~ audienceId ~ publisherId ~ sendEmail =>
+        Activity(id, providerId, activityType, title, text, url, replacedById, publishedAt, createdAt, shouldNotify, audienceId, publisherId, sendEmail)
     }
 
   private lazy val tagParser: RowParser[Option[ActivityTag]] =
@@ -304,6 +307,7 @@ class ActivityDaoImpl @Inject()(
     """
       SELECT
         ACTIVITY.*,
+        PROVIDER.SEND_EMAIL            AS PROVIDER_SEND_EMAIL,
         PROVIDER.DISPLAY_NAME          AS PROVIDER_DISPLAY_NAME,
         PROVIDER.ICON,
         PROVIDER.COLOUR,
@@ -330,8 +334,24 @@ class ActivityDaoImpl @Inject()(
       .as(activityIconParser.singleOpt)
 
   override def allProviders(implicit c: Connection): Seq[ActivityProvider] =
-    SQL"SELECT ID AS PROVIDER_ID, DISPLAY_NAME AS PROVIDER_DISPLAY_NAME FROM PROVIDER"
+    SQL"""
+      SELECT
+        ID AS PROVIDER_ID,
+        SEND_EMAIL AS PROVIDER_SEND_EMAIL,
+        DISPLAY_NAME AS PROVIDER_DISPLAY_NAME
+      FROM PROVIDER
+    """
       .as(activityProviderParser.*)
+
+  override def getProvider(id: String)(implicit c: Connection): Option[ActivityProvider] =
+    SQL"""
+      SELECT
+        ID AS PROVIDER_ID,
+        SEND_EMAIL AS PROVIDER_SEND_EMAIL,
+        DISPLAY_NAME AS PROVIDER_DISPLAY_NAME
+      FROM PROVIDER WHERE ID = $id
+    """
+      .as(activityProviderParser.singleOpt)
 
   private lazy val activityIconParser: RowParser[ActivityIcon] =
     get[String]("ICON") ~
@@ -341,8 +361,9 @@ class ActivityDaoImpl @Inject()(
 
   private lazy val activityProviderParser: RowParser[ActivityProvider] =
     get[String]("PROVIDER_ID") ~
+      get[Boolean]("PROVIDER_SEND_EMAIL") ~
       get[Option[String]]("PROVIDER_DISPLAY_NAME") map {
-      case id ~ displayName => ActivityProvider(id, displayName)
+      case id ~ sendEmail ~ displayName => ActivityProvider(id, sendEmail, displayName)
     }
 
   private lazy val activityTypeParser: RowParser[ActivityType] =

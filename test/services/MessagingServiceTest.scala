@@ -58,41 +58,85 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
       verify(messagingDao, times(0)).save(Matchers.eq(activity), Matchers.eq(Usercode("cusfal")), Matchers.eq(Output.Mobile))(Matchers.any())
     }
 
-//    "send emails when the user is opted-in" in new Scope {
-//      private val activity = getTestingActivity
-//      private val activityRender = getTestingRenderFromActivity(activity)
-//
-//      when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))
-//      private val testUser = Usercode("u1673477")
-//      private val recipients = Set(testUser)
-//      when(activityService.getActivityMutes(activityRender.activity, activityRender.tags, recipients)).thenReturn(Nil)
-//      when(emailPrefService.get(testUser)).thenReturn(true)
-//      service.send(recipients, activity)
-//      verify(messagingDao, times(1)).save(Matchers.eq(activity), Matchers.eq(testUser), Matchers.eq(Output.Email))(Matchers.any())
-//    }
-//
-//    "doesn't send emails when the user is opted-out" in new Scope {
-//      private val activity = getTestingActivity
-//      private val activityRender = getTestingRenderFromActivity(activity)
-//
-//      when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))
-//      private val testUser = Usercode("u1673477")
-//      private val recipients = Set(testUser)
-//      when(activityService.getActivityMutes(activityRender.activity, activityRender.tags, recipients)).thenReturn(Nil)
-//      when(emailPrefService.get(testUser)).thenReturn(false)
-//      service.send(recipients, activity)
-//      verify(messagingDao, never()).save(Matchers.eq(activity), Matchers.eq(testUser), Matchers.eq(Output.Email))(Matchers.any())
-//    }
+    "doesn't send emails when the user is opted-out" in new Scope {
+      private val activity = getTestingActivity
+      private val activityRender = getTestingRenderFromActivity(activity)
+
+      when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))
+      when(activityService.getProvider(activity.providerId)).thenReturn(Some(activityRender.provider))
+      private val testUser = Usercode("u1673477")
+      private val recipients = Set(testUser)
+      when(activityService.getActivityMutes(activityRender.activity, activityRender.tags, recipients)).thenReturn(Nil)
+      when(emailPrefService.get(testUser)).thenReturn(false)
+      service.send(recipients, activity)
+      verify(messagingDao, never()).save(Matchers.eq(activity), Matchers.eq(testUser), Matchers.eq(Output.Email))(Matchers.any())
+    }
+
+    "doesn't send emails when the user is opted-in but the activity isn't" in new Scope {
+      private val activity = getTestingActivity.copy(sendEmail = Some(false))
+      private val activityRender = getTestingRenderFromActivity(activity)
+
+      when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))
+      private val testUser = Usercode("u1673477")
+      private val recipients = Set(testUser)
+      when(activityService.getActivityMutes(activityRender.activity, activityRender.tags, recipients)).thenReturn(Nil)
+      when(emailPrefService.get(testUser)).thenReturn(true)
+      service.send(recipients, activity)
+      verify(messagingDao, never()).save(Matchers.eq(activity), Matchers.eq(testUser), Matchers.eq(Output.Email))(Matchers.any())
+      verify(activityService, never()).getProvider(activity.providerId)
+    }
+
+    "doesn't send emails when the user is opted-in and the provider isn't" in new Scope {
+      private val activity = getTestingActivity
+      private val activityRender = getTestingRenderFromActivity(activity)
+
+      when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))
+      when(activityService.getProvider(activity.providerId)).thenReturn(Some(activityRender.provider.copy(sendEmail = false)))
+      private val testUser = Usercode("u1673477")
+      private val recipients = Set(testUser)
+      when(activityService.getActivityMutes(activityRender.activity, activityRender.tags, recipients)).thenReturn(Nil)
+      when(emailPrefService.get(testUser)).thenReturn(true)
+      service.send(recipients, activity)
+      verify(messagingDao, never()).save(Matchers.eq(activity), Matchers.eq(testUser), Matchers.eq(Output.Email))(Matchers.any())
+    }
+
+    "send emails when the user is opted-in and the activity is" in new Scope {
+      private val activity = getTestingActivity.copy(sendEmail = Some(true))
+      private val activityRender = getTestingRenderFromActivity(activity)
+
+      when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))
+      private val testUser = Usercode("u1673477")
+      private val recipients = Set(testUser)
+      when(activityService.getActivityMutes(activityRender.activity, activityRender.tags, recipients)).thenReturn(Nil)
+      when(emailPrefService.get(testUser)).thenReturn(true)
+      service.send(recipients, activity)
+      verify(messagingDao, times(1)).save(Matchers.eq(activity), Matchers.eq(testUser), Matchers.eq(Output.Email))(Matchers.any())
+      verify(activityService, never()).getProvider(activity.providerId)
+    }
+
+    "send emails when the user is opted-in and the activity is undefined and the provider is" in new Scope {
+      private val activity = getTestingActivity
+      private val activityRender = getTestingRenderFromActivity(activity)
+
+      when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))
+      when(activityService.getProvider(activity.providerId)).thenReturn(Some(activityRender.provider))
+      private val testUser = Usercode("u1673477")
+      private val recipients = Set(testUser)
+      when(activityService.getActivityMutes(activityRender.activity, activityRender.tags, recipients)).thenReturn(Nil)
+      when(emailPrefService.get(testUser)).thenReturn(true)
+      service.send(recipients, activity)
+      verify(messagingDao, times(1)).save(Matchers.eq(activity), Matchers.eq(testUser), Matchers.eq(Output.Email))(Matchers.any())
+    }
 
   }
 
   private def getTestingActivity = Fixtures.activity.fromSave("123", Fixtures.activitySave.submissionDue)
 
-  private def getTestingRenderFromActivity(activity: Activity) = ActivityRender(
+  private def getTestingRenderFromActivity(activity: Activity, providerSendEmail: Boolean = true) = ActivityRender(
     activity = activity,
     icon = None,
     tags = Nil,
-    provider = ActivityProvider(activity.providerId),
+    provider = ActivityProvider(activity.providerId, providerSendEmail),
     `type` = ActivityType(activity.`type`)
   )
 }

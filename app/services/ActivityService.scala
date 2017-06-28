@@ -55,6 +55,8 @@ trait ActivityService {
 
   def allProviders: Seq[(ActivityProvider, Option[ActivityIcon])]
 
+  def getProvider(id: String): Option[ActivityProvider]
+
 }
 
 class ActivityServiceImpl @Inject()(
@@ -255,9 +257,13 @@ class ActivityServiceImpl @Inject()(
     scheduler.deleteJob(publishJobKey(activityId))
   }
 
-  def allProviders: Seq[(ActivityProvider, Option[ActivityIcon])] = {
+  override def allProviders: Seq[(ActivityProvider, Option[ActivityIcon])] = {
     val providers = db.withConnection(implicit c => dao.allProviders)
     providers.map(p => (p, db.withConnection(implicit c => dao.getActivityIcon(p.id))))
+  }
+
+  override def getProvider(id: String): Option[ActivityProvider] = {
+    db.withConnection(implicit c => dao.getProvider(id))
   }
 
 }
