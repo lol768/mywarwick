@@ -29,6 +29,10 @@ trait UserPreferencesDao {
 
   def setActivityFilter(usercode: Usercode, filter: JsObject)(implicit c: Connection): Unit
 
+  def getUserEmailsPreference(usercode: Usercode)(implicit c: Connection): Boolean
+
+  def setUserEmailsPreference(usercode: Usercode, wantsEmail: Boolean)(implicit c: Connection): Unit
+
 }
 
 @Singleton
@@ -70,10 +74,25 @@ class UserPreferencesDaoImpl extends UserPreferencesDao {
         _.flatten.map(Json.parse(_).as[JsObject]).getOrElse(JsObject(Nil))
       ))
 
-  def setNotificationFilter(usercode: Usercode, filter: JsObject)(implicit c: Connection): Unit =
+  override def setNotificationFilter(usercode: Usercode, filter: JsObject)(implicit c: Connection): Unit =
     SQL"UPDATE USER_PREFERENCE SET NOTIFICATION_FILTER = ${filter.toString} WHERE USERCODE = ${usercode.string}".execute()
 
-  def setActivityFilter(usercode: Usercode, filter: JsObject)(implicit c: Connection): Unit =
+  override def setActivityFilter(usercode: Usercode, filter: JsObject)(implicit c: Connection): Unit =
     SQL"UPDATE USER_PREFERENCE SET ACTIVITY_FILTER = ${filter.toString} WHERE USERCODE = ${usercode.string}".execute()
+
+  override def getUserEmailsPreference(usercode: Usercode)(implicit c: Connection): Boolean = {
+    val result =
+      SQL"SELECT WANTS_EMAILS FROM USER_PREFERENCE WHERE USERCODE = ${usercode.string}".as(scalar[Boolean].singleOpt)
+
+    result.getOrElse(true)
+  }
+
+  override def setUserEmailsPreference(usercode: Usercode, wantsEmail: Boolean)(implicit c: Connection): Unit = {
+    if (!exists(usercode)) {
+      save(usercode)
+    }
+
+    SQL"""UPDATE USER_PREFERENCE SET WANTS_EMAILS = $wantsEmail WHERE USERCODE = ${usercode.string}""".execute()
+  }
 
 }

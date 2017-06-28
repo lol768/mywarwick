@@ -1,10 +1,10 @@
 package services
 
-import javax.inject.Inject
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
+
 import com.google.inject.ImplementedBy
 import play.api.db.{Database, NamedDatabase}
-import services.dao.EmailNotificationsPrefDao
+import services.dao.UserPreferencesDao
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[EmailNotificationsPrefServiceImpl])
@@ -18,13 +18,15 @@ trait EmailNotificationsPrefService {
 
 @Singleton
 class EmailNotificationsPrefServiceImpl @Inject()(
-dao: EmailNotificationsPrefDao,
+dao: UserPreferencesDao,
 @NamedDatabase("default") db: Database
 ) extends EmailNotificationsPrefService {
 
-  override def get(usercode: Usercode): Boolean = db.withConnection(implicit c => dao.getUserPreference(usercode))
+  override def get(usercode: Usercode): Boolean =
+    db.withConnection(implicit c => dao.getUserEmailsPreference(usercode))
 
   override def set(usercode: Usercode, wantsEmail: Boolean): Unit =
-    db.withConnection(implicit c => dao.setUserPreference(usercode, wantsEmail))
-
+    db.withConnection(
+      implicit c => dao.setUserEmailsPreference(usercode, wantsEmail)
+    )
 }
