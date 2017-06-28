@@ -33,11 +33,11 @@ export default class CheckboxListGroupItem extends React.PureComponent {
   }
 
   render() {
-    let mediaRight = <Switch
+    let mediaRight = (<Switch
       id={ this.props.id }
       checked={ this.props.checked }
       disabled={ this.props.disabled }
-    />;
+    />);
     if (this.props.loading) {
       mediaRight = (
         <i className="fa fa-spinner fa-pulse fa-2x" />
