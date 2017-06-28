@@ -61,6 +61,7 @@ class SettingsView extends HideableView {
       total: PropTypes.number.isRequired,
     }).isRequired,
     dispatch: PropTypes.func.isRequired,
+    isOnline: PropTypes.bool.isRequired,
   };
 
   static renderSetting(icon, title, rightView) {
@@ -101,7 +102,7 @@ class SettingsView extends HideableView {
   }
 
   static renderFetchedCount(props) {
-    const { fetching, failed, selected, total } = props;
+    const { fetching, failed, selected, total, isOnline } = props;
     if (fetching) {
       return (
         <div>
@@ -109,10 +110,10 @@ class SettingsView extends HideableView {
           <i className="fa fa-fw fa-chevron-right" />
         </div>
       );
-    } else if (failed) {
+    } else if (failed || !isOnline) {
       return (
         <div>
-          <i className="fa fa-explamation-circle text-danger" />
+          <i className="fa fa-exclamation-circle text-danger" />
           <i className="fa fa-fw fa-chevron-right" />
         </div>
       );
@@ -226,26 +227,29 @@ class SettingsView extends HideableView {
 
         <div className="list-group setting-colour-1">
           <div className="list-group-item"
-            onClick={ () =>
+            onClick={ this.props.isOnline ? () =>
               this.props.dispatch(
                 push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`)
-              )
+              ) : null
             }
           >
             { SettingsView.renderSetting(
               'newspaper-o',
               'News categories',
-              SettingsView.renderFetchedCount(this.props.newsCategories)
+              SettingsView.renderFetchedCount({
+                ...this.props.newsCategories,
+                isOnline: this.props.isOnline,
+              })
             ) }
           </div>
           <div className="list-group-item"
-            onClick={ () =>
+            onClick={ this.props.isOnline ? () =>
               this.props.dispatch(
                 push(
                   `/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}/` +
                   `${Routes.SettingsRoutes.OptInTypes.LOCATION}`
                 )
-              )
+              ) : null
             }
           >
             { SettingsView.renderSetting(
@@ -256,6 +260,7 @@ class SettingsView extends HideableView {
                 failed: this.props.newsOptIn.failed,
                 selected: this.props.newsOptIn.location.selected,
                 total: this.props.newsOptIn.location.total,
+                isOnline: this.props.isOnline,
               })
             ) }
           </div>
@@ -373,6 +378,7 @@ const select = (state) => {
       total: notificationFilterTotal,
     },
     assetsRevision: state.app.assets.revision,
+    isOnline: state.device.isOnline,
   };
 };
 

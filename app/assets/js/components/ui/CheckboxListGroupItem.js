@@ -14,6 +14,7 @@ export default class CheckboxListGroupItem extends React.PureComponent {
     checked: PropTypes.bool.isRequired,
     loading: PropTypes.bool.optional,
     failure: PropTypes.bool.optional,
+    disabled: PropTypes.bool.isRequired,
   };
 
   static defaultProps = {
@@ -27,11 +28,16 @@ export default class CheckboxListGroupItem extends React.PureComponent {
   }
 
   onClick() {
+    if (this.props.disabled) return;
     this.props.onClick(this.props.value, this.props.name);
   }
 
   render() {
-    let mediaRight = <Switch id={ this.props.id } checked={ this.props.checked } />;
+    let mediaRight = <Switch
+      id={ this.props.id }
+      checked={ this.props.checked }
+      disabled={ this.props.disabled }
+    />;
     if (this.props.loading) {
       mediaRight = (
         <i className="fa fa-spinner fa-pulse fa-2x" />
@@ -49,7 +55,7 @@ export default class CheckboxListGroupItem extends React.PureComponent {
           <div className="media-left">
             <i className={ `fa fa-fw fa-${this.props.icon}` } />
           </div>
-          <div className="media-body">
+          <div className={`media-body${this.props.disabled ? ' media-body-disabled' : ''}`}>
             { this.props.description }
           </div>
           <div className="media-right">
