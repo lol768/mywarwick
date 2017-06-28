@@ -11,9 +11,6 @@ import warwick.sso.User
 
 import scala.concurrent.Future
 
-/**
-  *
-  */
 @Named("email")
 class EmailOutputService @Inject() (
   mailer: MailerClient,
