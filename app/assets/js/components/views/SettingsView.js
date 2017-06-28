@@ -17,7 +17,12 @@ class SettingsView extends HideableView {
 
   constructor(props) {
     super(props);
-    this.state = props;
+    this.state = {
+      emailNotificationsOptIn: {
+        wantsEmails: props.emailNotificationsOptIn.wantsEmails,
+        fetchedOnce: false,
+      },
+    };
     this.onNotificationEmailCopyChange = this.onNotificationEmailCopyChange.bind(this);
   }
 
@@ -34,6 +39,7 @@ class SettingsView extends HideableView {
       total: PropTypes.number.isRequired,
     }).isRequired,
     emailNotificationsOptIn: PropTypes.shape({
+      fetchedOnce: PropTypes.bool.isRequired,
       fetching: PropTypes.bool.isRequired,
       failed: PropTypes.bool.isRequired,
       wantsEmails: PropTypes.bool.isRequired,
@@ -210,6 +216,9 @@ class SettingsView extends HideableView {
             description="Copy my notifications to email"
             onClick={ this.onNotificationEmailCopyChange }
             checked={ this.state.emailNotificationsOptIn.wantsEmails }
+            failure={ this.state.emailNotificationsOptIn.failed }
+            loading={ !this.state.emailNotificationsOptIn.fetchedOnce &&
+              this.props.emailNotificationsOptIn.fetching }
           />
         </div>
 
@@ -327,6 +336,7 @@ const select = (state) => {
     subscribedNewsCategories: state.newsCategories.subscribed.length,
     emailNotificationsOptIn: {
       wantsEmails: state.emailNotificationsOptIn.wantsEmails,
+      fetchedOnce: state.emailNotificationsOptIn.fetchedOnce,
       fetching: state.emailNotificationsOptIn.fetching,
       failed: state.emailNotificationsOptIn.failed,
     },

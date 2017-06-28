@@ -34,7 +34,9 @@ export function persist(wantsEmails) {
 
 const initialState = {
   fetching: false,
+  failed: false,
   wantsEmails: true,
+  fetchedOnce: false,
 };
 
 export function reducer(state = initialState, action) {
@@ -54,6 +56,7 @@ export function reducer(state = initialState, action) {
         ...state,
         fetching: false,
         failed: false,
+        fetchedOnce: true,
         ...action.payload,
       };
     default:
