@@ -2,12 +2,10 @@ package services.dao
 
 import java.sql.Connection
 
-import anorm._
 import helpers.{BaseSpec, OneStartAppPerSuite}
-import models.Audience
 import models.Audience.{DepartmentAudience, Staff, TeachingStaff, UndergradStudents}
-import models.AudienceSize.{Finite, Public}
 import models.news.NewsItemSave
+import models.{Audience, AudienceSize}
 import org.joda.time.DateTime
 import services.NewsService
 import warwick.sso.{GroupName, Usercode}
@@ -26,7 +24,7 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
   val public = Usercode("*")
 
   def save(item: NewsItemSave, recipients: Seq[Usercode])(implicit c: Connection): String = {
-    val id = newsDao.save(item, "audienceId")
+    val id = newsDao.save(item, "audienceId", AudienceSize.Finite(recipients.size))
     newsDao.setRecipients(id, recipients)
     id
   }
@@ -144,41 +142,6 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
   }
 
-  "countRecipients" should {
-    "return an empty result for an empty input" in transaction { implicit c =>
-      newsDao.countRecipients(Nil) mustBe Map()
-    }
-
-    "return value inclusive of user news-category preferences" in transaction { implicit c =>
-      val CATS_ON_FIRE = "cats-on-fire"
-      val londonsBurningWithCat = londonsBurning.copy(ignoreCategories = false)
-      val id = save(londonsBurningWithCat, Seq(ana, eli, jim))
-
-      SQL"INSERT INTO news_category VALUES ($CATS_ON_FIRE, $CATS_ON_FIRE)".execute()
-      userNewsCategoryDao.setSubscribedCategories(ana, Seq(CATS_ON_FIRE))
-      newsCategoryDao.saveNewsCategories(id, Seq(CATS_ON_FIRE))
-
-      val count = newsDao.countRecipients(Seq(id))
-      count mustBe Map(
-        id -> Finite(1)
-      )
-    }
-
-    "return results for public and non-public news" in transaction { implicit c =>
-      val id1 = save(londonsBurning, Seq(public))
-      val id2 = save(brumPanic, Seq(ana, eli))
-      val id3 = save(futureNews, Seq(ana, bob, eli, jim))
-      val id4 = save(futureNews, Seq(public)) // should be ignored
-
-      val counts = newsDao.countRecipients(Seq(id1, id2, id3))
-      counts mustBe Map(
-        id1 -> Public,
-        id2 -> Finite(2),
-        id3 -> Finite(4)
-      )
-    }
-  }
-
   "getNewsByIds" should {
 
     "return nothing" in transaction { implicit c =>
@@ -227,7 +190,7 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
 
     "find news items for a department subset" in transaction { implicit c =>
       val audienceId = audienceDao.saveAudience(Audience(Seq(DepartmentAudience("IN", Seq(Staff)))))
-      val newsItemId = newsDao.save(londonsBurning, audienceId)
+      val newsItemId = newsDao.save(londonsBurning, audienceId, AudienceSize.Finite(1))
 
       newsDao.getNewsItemsMatchingAudience(
         webGroup = None,
@@ -240,7 +203,7 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
 
     "find all news items for a department" in transaction { implicit c =>
       val audienceId = audienceDao.saveAudience(Audience(Seq(DepartmentAudience("IN", Seq(UndergradStudents, TeachingStaff)))))
-      val newsItemId = newsDao.save(londonsBurning, audienceId)
+      val newsItemId = newsDao.save(londonsBurning, audienceId, AudienceSize.Finite(1))
 
       newsDao.getNewsItemsMatchingAudience(
         webGroup = None,
@@ -253,7 +216,7 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
 
     "find news items for a webgroup" in transaction { implicit c =>
       val audienceId = audienceDao.saveAudience(Audience.webGroup(GroupName("in-test")))
-      val newsItemId = newsDao.save(londonsBurning, audienceId)
+      val newsItemId = newsDao.save(londonsBurning, audienceId, AudienceSize.Finite(1))
 
       newsDao.getNewsItemsMatchingAudience(
         webGroup = Some(GroupName("in-test")),
@@ -266,7 +229,7 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
 
     "find news items created by a publisher" in transaction { implicit c =>
       val audienceId = audienceDao.saveAudience(Audience.Public)
-      val newsItemId = newsDao.save(londonsBurning, audienceId)
+      val newsItemId = newsDao.save(londonsBurning, audienceId, AudienceSize.Finite(1))
 
       newsDao.getNewsItemsMatchingAudience(
         webGroup = None,

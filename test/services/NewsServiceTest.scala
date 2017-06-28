@@ -1,7 +1,7 @@
 package services
 
 import helpers.{Fixtures, MockSchedulerService, OneStartAppPerSuite}
-import models.Audience
+import models.{Audience, AudienceSize}
 import models.Audience._
 import org.joda.time.DateTime
 import org.quartz.JobKey
@@ -13,12 +13,12 @@ import services.job.PublishNewsItemJob
 
 class NewsServiceTest extends BaseSpec with OneStartAppPerSuite {
 
-  val newsService = get[NewsService]
-  val categoryIds = get[NewsCategoryService].all().map(_.id)
-  val scheduler = get[SchedulerService].asInstanceOf[MockSchedulerService]
+  private val newsService = get[NewsService]
+  private val categoryIds = get[NewsCategoryService].all().map(_.id)
+  private val scheduler = get[SchedulerService].asInstanceOf[MockSchedulerService]
 
-  val staffAudience = Audience(Seq(DepartmentAudience("IN", Seq(Staff))))
-  val item = Fixtures.news.save().copy(publishDate = DateTime.now.plusDays(1))
+  private val staffAudience = Audience(Seq(DepartmentAudience("IN", Seq(Staff))))
+  private val item = Fixtures.news.save().copy(publishDate = DateTime.now.plusDays(1))
 
   "NewsService" should {
 
@@ -28,8 +28,10 @@ class NewsServiceTest extends BaseSpec with OneStartAppPerSuite {
       val id = newsService.save(item, Audience.Public, categoryIds.take(2))
 
       val render = newsService.getNewsItem(id).get
-
       render must have('title (item.title))
+
+      val renderWithAudit = newsService.getNewsByPublisherWithAudits(item.publisherId, 100).find(_.id == id).get
+      renderWithAudit.audienceSize mustBe AudienceSize.Public
 
       scheduler.scheduledJobs.map(_.job.getKey) must contain(new JobKey(id, PublishNewsItemJob.name))
       scheduler.scheduledJobs.map(_.trigger.getStartTime) must contain(item.publishDate.toDate)
@@ -47,6 +49,10 @@ class NewsServiceTest extends BaseSpec with OneStartAppPerSuite {
 
       render.categories.map(_.id) mustBe categoryIds.take(2)
       newsService.getAudience(id) must contain(staffAudience)
+
+      val audienceService = get[AudienceService]
+      val renderWithAudit = newsService.getNewsByPublisherWithAudits(item.publisherId, 100).find(_.id == id).get
+      renderWithAudit.audienceSize mustBe AudienceSize.Finite(audienceService.resolve(staffAudience).get.size)
 
       val jobKey = new JobKey(id, PublishNewsItemJob.name)
       scheduler.deletedJobs must contain(jobKey)

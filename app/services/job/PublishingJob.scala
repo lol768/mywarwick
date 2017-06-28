@@ -45,6 +45,7 @@ class PublishNewsItemJob @Inject()(
       audienceService.getAudience(audienceId)
     ).get // FIXME Try.get throws
     newsService.setRecipients(newsItemId, recipients)
+    newsService.updateAudienceCount(newsItemId)
   }
 }
 
