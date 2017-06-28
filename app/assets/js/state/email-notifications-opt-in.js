@@ -4,8 +4,8 @@ import { fetchWithCredentials, postJsonWithCredentials } from '../serverpipe';
 // following news-optin here.
 
 
-export const EMAIL_NOTIFICATIONS_OPT_IN_REQUEST = "email-notifications.request";
-export const EMAIL_NOTIFICATIONS_OPT_IN_RECEIVE = "email-notifications.receive";
+export const EMAIL_NOTIFICATIONS_OPT_IN_REQUEST = 'email-notifications.request';
+export const EMAIL_NOTIFICATIONS_OPT_IN_RECEIVE = 'email-notifications.receive';
 
 const start = createAction(EMAIL_NOTIFICATIONS_OPT_IN_REQUEST);
 const receive = createAction(EMAIL_NOTIFICATIONS_OPT_IN_RECEIVE);
@@ -27,15 +27,14 @@ export function fetch() {
 }
 
 export function persist(wantsEmails) {
-  return dispatch => {
-    return postJsonWithCredentials('/api/emailNotificationPreferences', { wantsEmails })
+  return dispatch =>
+    postJsonWithCredentials('/api/emailNotificationPreferences', { wantsEmails })
       .then(() => dispatch(fetch()));
-  };
 }
 
 const initialState = {
   fetching: false,
-  wantsEmails: true
+  wantsEmails: true,
 };
 
 export function reducer(state = initialState, action) {

@@ -155,12 +155,16 @@ class SettingsView extends HideableView {
 
   onNotificationEmailCopyChange() {
     this.setState((previousState) => {
-      let newState = Object.assign({}, previousState.emailNotificationsOptIn);
+      const newState = Object.assign({}, previousState.emailNotificationsOptIn);
       newState.wantsEmails = !newState.wantsEmails;
-      return {'emailNotificationsOptIn' : newState};
+      return { emailNotificationsOptIn: newState };
     });
 
-    this.props.dispatch(emailNotificationsOptIn.persist(!this.props.emailNotificationsOptIn.wantsEmails));
+    this.props.dispatch(
+      emailNotificationsOptIn.persist(
+        !this.props.emailNotificationsOptIn.wantsEmails
+      )
+    );
   }
 
   render() {
@@ -201,11 +205,12 @@ class SettingsView extends HideableView {
             ) }
           </div>
           <CheckboxListGroupItem id="copyNotificationsEmail"
-                                 value={ true }
-                                 icon="envelope"
-                                 description="Copy my notifications to email"
-                                 onClick={ this.onNotificationEmailCopyChange } checked={ this.state.emailNotificationsOptIn.wantsEmails }
-           />
+            value
+            icon="envelope"
+            description="Copy my notifications to email"
+            onClick={ this.onNotificationEmailCopyChange }
+            checked={ this.state.emailNotificationsOptIn.wantsEmails }
+          />
         </div>
 
         <div className="list-group setting-colour-1">
