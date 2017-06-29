@@ -2,7 +2,7 @@
 @import models.publishing.Ability.EditNews
 @import models.publishing.Ability.DeleteNews
 @import models.news.NewsItemRenderWithAudit
-@(publisher: String, item: NewsItemRenderWithAudit, count: Option[AudienceSize], user: Role)
+@(publisher: String, item: NewsItemRenderWithAudit, user: Role)
 <article id="@item.id" class="news-item row">
   <div class="col-xs-10">
     <div class="news-item__body">
@@ -25,11 +25,11 @@
           @models.DateFormats.emailDateTime(item.created)
         }
         <div class="click-count"><i class="fa fa-spin fa-refresh"></i></div>
-        @count match {
-          case Some(AudienceSize.Public) => {
+        @item.audienceSize match {
+          case AudienceSize.Public => {
             <span>- public</span>
           }
-          case Some(AudienceSize.Finite(c)) => {
+          case AudienceSize.Finite(c) => {
             <span>
             - @c
               @if(c == 1) { recipient } else { recipients }

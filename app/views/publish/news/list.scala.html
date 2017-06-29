@@ -7,7 +7,6 @@
     publisher: Publisher,
     newsPending: Seq[NewsItemRenderWithAudit],
     newsPublished: Seq[NewsItemRenderWithAudit],
-    counts: Map[String, AudienceSize],
     user: Role
 )(implicit context: RequestContext)
 
@@ -24,7 +23,7 @@
       <p>No pending news.</p>
     } else {
       @newsPending.map { item =>
-        @publish.news.newsItemInfo(publisher.id, item, counts.get(item.id), user)
+        @publish.news.newsItemInfo(publisher.id, item, user)
       }
     }
 
@@ -33,7 +32,7 @@
       <p>No published news.</p>
     } else {
       @newsPublished.map { item =>
-        @publish.news.newsItemInfo(publisher.id, item, counts.get(item.id), user)
+        @publish.news.newsItemInfo(publisher.id, item, user)
       }
     }
   }

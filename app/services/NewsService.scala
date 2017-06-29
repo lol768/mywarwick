@@ -46,8 +46,6 @@ trait NewsService {
   //   - the job to publish the news item has been scheduled
   def update(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): Future[Unit]
 
-  def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize]
-
   def getNewsItem(id: String): Option[NewsItemRender]
 
   def setRecipients(newsItemId: String, recipients: Seq[Usercode]): Unit
@@ -55,6 +53,8 @@ trait NewsService {
   def delete(newsItemId: String): Unit
 
   def getNewsItemsMatchingAudience(webGroup: Option[GroupName], departmentCode: Option[String], departmentSubset: Option[DepartmentSubset], publisherId: Option[String], limit: Int): Seq[NewsItemRender]
+
+  def updateAudienceCount(id: String): Unit
 }
 
 class AnormNewsService @Inject()(
@@ -70,7 +70,7 @@ class AnormNewsService @Inject()(
   cache: CacheApi
 ) extends NewsService {
 
-  override def delete(newsId: String) = db.withTransaction { implicit c =>
+  override def delete(newsId: String): Unit = db.withTransaction { implicit c =>
     newsImageDao.deleteForNewsItemId(newsId)
     newsCategoryDao.deleteNewsCategories(newsId)
     dao.deleteRecipients(newsId)
@@ -137,23 +137,18 @@ class AnormNewsService @Inject()(
   override def save(item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): String =
     db.withTransaction { implicit c =>
       val audienceId = audienceDao.saveAudience(audience)
-      val id = dao.save(item, audienceId)
+      val audienceSize = audience match {
+        case Audience.Public => AudienceSize.Public
+        case _ => AudienceSize.Finite(audienceService.resolve(audience).toOption.map(_.size).getOrElse(0))
+      }
+      val id = dao.save(item, audienceId, audienceSize)
       newsCategoryDao.saveNewsCategories(id, categoryIds)
       schedulePublishNewsItem(id, audienceId, item.publishDate)
       id
     }
 
-  override def countRecipients(newsIds: Seq[String]): Map[String, AudienceSize] =
-    db.withConnection { implicit c =>
-      dao.countRecipients(newsIds)
-    }
-
-  override def update(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String]) = {
+  override def update(id: String, item: NewsItemSave, audience: Audience, categoryIds: Seq[String]): Future[Unit] = {
     val (existingAudience, audienceId) = db.withTransaction { implicit c =>
-      dao.updateNewsItem(id, item)
-      newsCategoryDao.deleteNewsCategories(id)
-      newsCategoryDao.saveNewsCategories(id, categoryIds)
-
       val existingAudienceId = dao.getAudienceId(id)
       val existingAudience = existingAudienceId.map(audienceDao.getAudience)
 
@@ -168,6 +163,15 @@ class AnormNewsService @Inject()(
           audienceId
       }
 
+      val audienceSize = audience match {
+        case Audience.Public => AudienceSize.Public
+        case _ => AudienceSize.Finite(audienceService.resolve(audience).toOption.map(_.size).getOrElse(0))
+      }
+
+      dao.updateNewsItem(id, item, audienceSize)
+      newsCategoryDao.deleteNewsCategories(id)
+      newsCategoryDao.saveNewsCategories(id, categoryIds)
+
       (existingAudience, audienceId)
     }
 
@@ -181,7 +185,7 @@ class AnormNewsService @Inject()(
     }
   }
 
-  override def getAudience(newsId: String) =
+  override def getAudience(newsId: String): Option[Audience] =
     db.withConnection { implicit c =>
       dao.getAudienceId(newsId).map(audienceDao.getAudience)
     }
@@ -197,6 +201,16 @@ class AnormNewsService @Inject()(
     * @param newsItemId
     * @param recipients
     */
-  override def setRecipients(newsItemId: String, recipients: Seq[Usercode]) =
+  override def setRecipients(newsItemId: String, recipients: Seq[Usercode]): Unit =
     db.withTransaction(implicit c => dao.setRecipients(newsItemId, recipients))
+
+  override def updateAudienceCount(id: String): Unit =
+    db.withTransaction { implicit c =>
+      val audienceSize = dao.getAudienceId(id).map(audienceDao.getAudience) match {
+        case Some(Audience.Public) => AudienceSize.Public
+        case Some(audience) => AudienceSize.Finite(audienceService.resolve(audience).toOption.map(_.size).getOrElse(0))
+        case _ => AudienceSize.Finite(0)
+      }
+      dao.updateAudienceCount(id, audienceSize)
+    }
 }

@@ -68,7 +68,7 @@ class NewsController @Inject()(
   userPreferencesService: UserPreferencesService
 ) extends BaseController with I18nSupport with Publishing {
 
-  val newsItemMapping = mapping(
+  private val newsItemMapping = mapping(
     "title" -> nonEmptyText,
     "text" -> nonEmptyText,
     "linkText" -> optional(text),
@@ -93,9 +93,8 @@ class NewsController @Inject()(
 
   def list(publisherId: String) = PublisherAction(publisherId, ViewNews) { implicit request =>
     val theNews = news.getNewsByPublisherWithAudits(publisherId, limit = 100)
-    val counts = news.countRecipients(theNews.map(_.id))
     val (newsPending, newsPublished) = partitionNews(theNews)
-    Ok(views.html.publish.news.list(request.publisher, newsPending, newsPublished, counts, request.userRole))
+    Ok(views.html.publish.news.list(request.publisher, newsPending, newsPublished, request.userRole))
   }
 
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNews).async { implicit request =>
