@@ -203,8 +203,8 @@ class SettingsView extends HideableView {
 
         <div className="list-group setting-colour-0">
           <div className="list-group-item"
-            onClick={ () =>
-              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`))
+            onClick={ this.props.isOnline ? () =>
+              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`)) : null
             }
           >
             { SettingsView.renderSetting(
@@ -219,9 +219,10 @@ class SettingsView extends HideableView {
             description="Copy my notifications to email"
             onClick={ this.onNotificationEmailCopyChange }
             checked={ this.state.emailNotificationsOptIn.wantsEmails }
-            failure={ this.state.emailNotificationsOptIn.failed }
+            failure={ this.state.emailNotificationsOptIn.failed && !this.props.isOnline}
             loading={ !this.state.emailNotificationsOptIn.fetchedOnce &&
               this.props.emailNotificationsOptIn.fetching }
+            disabled={ !this.props.isOnline }
           />
         </div>
 
