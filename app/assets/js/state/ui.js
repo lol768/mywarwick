@@ -27,7 +27,7 @@ const showBetaWarning = () => $('#app-container').attr('data-show-beta-warning')
 const initialState = {
   className: undefined,
   isWideLayout: false,
-  colourTheme: 'default',
+  colourTheme: 'transparent',
   native: false,
   showBetaWarning: false,
 };

@@ -3,7 +3,7 @@
 // TODO should work together with the ID7 theme, rather than fighting it.
 
 .behind-tiles({
-  background-color: @behind-tiles-colour !important;
+  background-color: @behind-tiles-colour;
 });
 
 // DEFAULT COLOUR THEME
@@ -53,6 +53,53 @@
   });
 
   .id7-left-border, .id7-right-border, .id7-utility-masthead { background-color: gold; }
+}
+
+.theme-transparent {
+  .screen-sm-ormore({
+    .id7-fixed-width-container,
+    .id7-main-content-area {
+      .theme-default();
+    }
+  });
+
+  .screen-xs-orless({
+    html {
+      height: 100%;
+    }
+    @transparent: rgba(0,0,0,0.25);
+    .id7-fixed-width-container,
+    .id7-main-content-area {
+      background: transparent;
+    }
+    .in-root, .in-edit {
+      background: #0278e4 url(/assets/images/bg01.jpg) fixed 0 0 no-repeat;
+      background-size: cover;
+      &.in-add h3 {
+        margin: 0;
+        padding: 20px 0 20px 14px;
+        background: @transparent;
+        color: #fff;
+      }
+      html.app& {
+        // Native apps render the background image internally
+        background: transparent;
+      }
+    }
+    .colour-0, .colour-1, .colour-2, .colour-3 {
+      background-color: @transparent;
+    }
+    .in-tiles {
+      background-color: #5F858F;
+      .tile--zoomed {
+        background: transparent;
+      }
+    }
+    .tile--map__container .map-tile-image {
+      -webkit-filter: saturate(0%) brightness(90%) contrast(50%) opacity(25%); // Android WebView seems to need this
+      filter: saturate(0%) brightness(90%) contrast(50%) opacity(25%);
+    }
+  });
 }
 
 .behind-tiles(@rules) {
