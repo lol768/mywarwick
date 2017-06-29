@@ -32,6 +32,7 @@ class ActivityMutesView extends React.PureComponent {
         display_value: PropTypes.string,
       })),
     })).isRequired,
+    isOnline: React.PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -101,6 +102,7 @@ class ActivityMutesView extends React.PureComponent {
                         className="btn btn-danger"
                         data-dismiss="modal"
                         onClick={ () => this.onDelete(mute) }
+                        disabled={ !this.props.isOnline }
                       >
                         <i className="fa fa-times" />
                       </button>
@@ -125,6 +127,7 @@ class ActivityMutesView extends React.PureComponent {
 function select(state) {
   return {
     activityMutes: state.notifications.activityMutes,
+    isOnline: state.device.isOnline,
   };
 }
 

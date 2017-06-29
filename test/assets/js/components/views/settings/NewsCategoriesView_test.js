@@ -14,6 +14,7 @@ describe('NewsCategoriesView', () => {
     dispatch={() => {}}
     categories={categories}
     subscribed={['red','green']}
+    isOnline={true}
   />);
 
   it('dispatches subscribe and unsubscribe', () => {

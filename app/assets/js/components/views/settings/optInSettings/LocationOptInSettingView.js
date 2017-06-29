@@ -12,6 +12,7 @@ export default class LocationOptInSettingsView extends React.PureComponent {
     })),
     selected: PropTypes.arrayOf(PropTypes.string),
     onChange: PropTypes.func.isRequired,
+    disabled: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -26,6 +27,7 @@ export default class LocationOptInSettingsView extends React.PureComponent {
   }
 
   onClick(value) {
+    if (this.props.disabled) return;
     const checked = !this.state[value];
     const newState = Object.assign({}, this.state, { [value]: checked });
     this.setState(newState);
@@ -61,6 +63,7 @@ export default class LocationOptInSettingsView extends React.PureComponent {
             <CheckboxListGroupItem key={ `OptIn:Locations:${location.value}` } icon="map-signs"
               description={ location.description } value={ location.value } onClick={ this.onClick }
               checked={ this.state[location.value] } id={ `OptIn:Locations:${location.value}` }
+              disabled={ this.props.disabled }
             />
           ) }
         </div>

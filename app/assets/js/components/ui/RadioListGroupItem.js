@@ -10,6 +10,7 @@ export default class RadioListGroupItem extends React.PureComponent {
     value: PropTypes.string.isRequired,
     onClick: PropTypes.func.isRequired,
     checked: PropTypes.bool.isRequired,
+    disabled: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -18,7 +19,7 @@ export default class RadioListGroupItem extends React.PureComponent {
   }
 
   onClick() {
-    this.props.onClick(this.props.value, this.props.name);
+    if (!this.props.disabled) this.props.onClick(this.props.value, this.props.name);
   }
 
   render() {
@@ -28,12 +29,17 @@ export default class RadioListGroupItem extends React.PureComponent {
           <div className="media-left">
             <i className={ `fa fa-fw fa-${this.props.icon}` } />
           </div>
-          <div className="media-body">
+          <div className={`media-body${this.props.disabled ? ' media-body-disabled' : ''}`}>
             { this.props.description }
           </div>
           <div className="media-right">
             <div className="media-right">
-              <input type="radio" checked={ this.props.checked } readOnly />
+              <input
+                type="radio"
+                checked={ this.props.checked }
+                readOnly
+                disabled={ this.props.disabled }
+              />
             </div>
           </div>
         </div>

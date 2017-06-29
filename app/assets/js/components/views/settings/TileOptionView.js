@@ -4,8 +4,9 @@ import _ from 'lodash-es';
 import * as tiles from '../../../state/tiles';
 import CheckboxListGroupItem from '../../ui/CheckboxListGroupItem';
 import RadioListGroupItem from '../../ui/RadioListGroupItem';
+import { connect } from 'react-redux';
 
-export default class TileOptionView extends React.PureComponent {
+export class TileOptionView extends React.PureComponent {
 
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
@@ -17,6 +18,7 @@ export default class TileOptionView extends React.PureComponent {
       preferences: PropTypes.object,
     }).isRequired,
     tileOptions: PropTypes.object.isRequired,
+    isOnline: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -62,6 +64,7 @@ export default class TileOptionView extends React.PureComponent {
         icon={ (tile.id === 'weather') ? 'sun-o' : tile.icon }
         description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         onClick={ this.onCheckboxClick } checked={ checked } name={ cbName }
+        disabled={ !this.props.isOnline }
       />
     );
   }
@@ -83,6 +86,7 @@ export default class TileOptionView extends React.PureComponent {
         description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         onClick={ this.onRadioClick } checked={ checked } name={ radioName }
         value={ possibleChoice.value }
+        disabled={ !this.props.isOnline }
       />
     );
   }
@@ -155,3 +159,9 @@ export default class TileOptionView extends React.PureComponent {
     );
   }
 }
+
+const select = (state) => ({
+  isOnline: state.device.isOnline,
+});
+
+export default connect(select)(TileOptionView);
