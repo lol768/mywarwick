@@ -361,9 +361,9 @@ class ActivityDaoImpl @Inject()(
 
   private lazy val activityProviderParser: RowParser[ActivityProvider] =
     get[String]("PROVIDER_ID") ~
-      get[Boolean]("PROVIDER_SEND_EMAIL") ~
+      get[Option[Boolean]]("PROVIDER_SEND_EMAIL") ~
       get[Option[String]]("PROVIDER_DISPLAY_NAME") map {
-      case id ~ sendEmail ~ displayName => ActivityProvider(id, sendEmail, displayName)
+      case id ~ sendEmail ~ displayName => ActivityProvider(id, sendEmail.getOrElse(false), displayName)
     }
 
   private lazy val activityTypeParser: RowParser[ActivityType] =
