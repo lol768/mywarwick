@@ -154,7 +154,6 @@ class ID7Layout extends React.PureComponent {
 
               <MastheadMobile user={user}
                 onBackClick={this.onBackClick}
-                backButtonText={(path === `/${Routes.SETTINGS}`) ? 'Done' : 'Back'}
                 path={path}
                 onEdit={this.onEdit}
                 editing={this.isEditing()}
