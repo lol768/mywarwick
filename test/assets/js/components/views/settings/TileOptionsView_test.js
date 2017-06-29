@@ -1,4 +1,4 @@
-import TileOptionView from 'components/views/settings/TileOptionView';
+import { TileOptionView } from 'components/views/settings/TileOptionView';
 import RadioListGroupItem from 'components/ui/RadioListGroupItem';
 import CheckboxListGroupItem from 'components/ui/CheckboxListGroupItem';
 import * as enzyme from 'enzyme';
@@ -6,6 +6,7 @@ import * as React from 'react';
 import * as _ from 'lodash-es';
 
 const props = {
+  isOnline: true,
   dispatch: () => {},
   tile: {
     id: 'foo',
@@ -60,7 +61,7 @@ describe('Radio button', () => {
     thisProps.tileOptions.radioOption.default = '';
     thisProps.tile.preferences = {};
 
-    const result = enzyme.shallow(<TileOptionView {...thisProps} />);
+    const result = enzyme.shallow(<TileOptionView {...thisProps}  />);
     const radios = result.find(RadioListGroupItem);
     checkRadios(radios);
     radios.find('[checked="true"]').forEach((input) =>
