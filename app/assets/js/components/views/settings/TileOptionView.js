@@ -6,7 +6,7 @@ import CheckboxListGroupItem from '../../ui/CheckboxListGroupItem';
 import RadioListGroupItem from '../../ui/RadioListGroupItem';
 import { connect } from 'react-redux';
 
-export default class TileOptionView extends React.PureComponent {
+class TileOptionView extends React.PureComponent {
 
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
