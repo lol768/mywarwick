@@ -45,6 +45,7 @@ class OptInSettingsView extends HideableView {
                 options: this.props.options[this.props.singleOptionIdentifier] || [],
                 selected: this.props.selected[this.props.singleOptionIdentifier] || [],
                 onChange: this.onChange,
+                disabled: !this.props.isOnline,
               }
             ) :
               <LocationOptInSettingView options={ this.props.options.Location || [] }
