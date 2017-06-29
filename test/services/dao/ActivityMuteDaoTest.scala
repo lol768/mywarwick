@@ -1,5 +1,6 @@
 package services.dao
 
+import anorm._
 import helpers.{BaseSpec, OneStartAppPerSuite}
 import models._
 import org.joda.time.DateTime
@@ -8,6 +9,16 @@ import warwick.sso.Usercode
 class ActivityMuteDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   private val dao = get[ActivityMuteDao]
+
+  transaction(rollback = false) { implicit c =>
+    SQL"DELETE FROM PROVIDER".execute()
+    SQL"DELETE FROM PUBLISHER".execute()
+
+    SQL"INSERT INTO PUBLISHER (ID, NAME) VALUES ('publisher', 'publisher')"
+      .execute()
+    SQL"INSERT INTO PROVIDER (ID, PUBLISHER_ID, SEND_EMAIL) VALUES ('providerId', 'publisher', false)"
+      .execute()
+  }
 
   "ActivityMuteDao" should {
 
