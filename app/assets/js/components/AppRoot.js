@@ -145,7 +145,6 @@ class AppRoot extends React.Component {
       options: PropTypes.object.isRequired,
     }).isRequired,
     dispatch: PropTypes.func.isRequired,
-    isOnline: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -252,7 +251,6 @@ class AppRoot extends React.Component {
             tile={ _.find(this.props.tileData.tiles, tile => tile.id === tileOptionPath[1]) }
             tileOptions={ this.props.tileData.options[tileOptionPath[1]] }
             dispatch={ this.props.dispatch }
-            isOnline={ this.props.isOnline }
           />
         </Visible>
       );
@@ -268,7 +266,6 @@ class AppRoot extends React.Component {
               <OptInSettingsView options={ this.props.newsOptInOptions.options }
                 selected={ this.props.newsOptInOptions.selected } dispatch={ this.props.dispatch }
                 singleOptionView={ LocationOptInSettingView } singleOptionIdentifier={ 'Location' }
-                isOnline={ this.props.isOnline }
               />
             </Visible>
           );
@@ -293,7 +290,6 @@ const select = (state) => ({
   navRequest: state.ui.navRequest,
   newsOptInOptions: state.newsOptIn,
   tileData: state.tiles.data,
-  isOnline: state.device.isOnline,
 });
 
 export default connect(select)(AppRoot);

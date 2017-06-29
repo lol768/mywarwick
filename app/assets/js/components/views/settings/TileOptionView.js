@@ -4,6 +4,7 @@ import _ from 'lodash-es';
 import * as tiles from '../../../state/tiles';
 import CheckboxListGroupItem from '../../ui/CheckboxListGroupItem';
 import RadioListGroupItem from '../../ui/RadioListGroupItem';
+import { connect } from 'react-redux';
 
 export default class TileOptionView extends React.PureComponent {
 
@@ -158,3 +159,9 @@ export default class TileOptionView extends React.PureComponent {
     );
   }
 }
+
+const select = (state) => ({
+  isOnline: state.device.isOnline,
+});
+
+export default connect(select)(TileOptionView);
