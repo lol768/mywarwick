@@ -5,7 +5,7 @@ const NEWS_OPT_IN_REQUEST = 'NEWS_OPT_IN_REQUEST';
 const NEWS_OPT_IN_RECEIVE = 'NEWS_OPT_IN_RECEIVE';
 
 const start = createAction(NEWS_OPT_IN_REQUEST);
-const receive = createAction(NEWS_OPT_IN_RECEIVE);
+export const receive = createAction(NEWS_OPT_IN_RECEIVE);
 
 export function fetch() {
   return dispatch => {
@@ -40,6 +40,7 @@ export function persist(optInType, values) {
 const initialState = {
   fetching: false,
   failed: false,
+  fetched: false,
   options: {},
   selected: {},
 };
@@ -50,6 +51,7 @@ export function reducer(state = initialState, action) {
       return {
         ...state,
         fetching: true,
+        fetched: false,
         failed: false,
       };
     case NEWS_OPT_IN_RECEIVE:
@@ -57,10 +59,12 @@ export function reducer(state = initialState, action) {
         ...state,
         fetching: false,
         failed: true,
+        fetched: true,
       } : {
         ...state,
         fetching: false,
         failed: false,
+        fetched: true,
         options: action.payload.options,
         selected: action.payload.selected,
       };

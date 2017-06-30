@@ -34,6 +34,7 @@ class NewsCategoriesView extends HideableView {
   }
 
   componentDidShow() {
+    if (!this.props.isOnline) return;
     this.props.dispatch(newsCategories.fetch());
   }
 
