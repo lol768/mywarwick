@@ -35,6 +35,7 @@ class SettingsView extends HideableView {
     newsCategories: PropTypes.shape({
       fetching: PropTypes.bool.isRequired,
       failed: PropTypes.bool.isRequired,
+      fetched: PropTypes.bool.isRequired,
       selected: PropTypes.number.isRequired,
       total: PropTypes.number.isRequired,
     }).isRequired,
@@ -47,6 +48,7 @@ class SettingsView extends HideableView {
     newsOptIn: PropTypes.shape({
       fetching: PropTypes.bool.isRequired,
       failed: PropTypes.bool.isRequired,
+      fetched: PropTypes.bool.isRequired,
       location: PropTypes.shape({
         selected: PropTypes.number.isRequired,
         total: PropTypes.number.isRequired,
@@ -102,7 +104,7 @@ class SettingsView extends HideableView {
   }
 
   static renderFetchedCount(props) {
-    const { fetching, failed, selected, total, isOnline } = props;
+    const { fetching, failed, selected, total, fetched } = props;
     if (fetching) {
       return (
         <div>
@@ -110,7 +112,7 @@ class SettingsView extends HideableView {
           <i className="fa fa-fw fa-chevron-right" />
         </div>
       );
-    } else if (failed || !isOnline) {
+    } else if ( ( failed && fetched ) || !fetched ) {
       return (
         <div>
           <i className="fa fa-exclamation-circle text-danger" />
@@ -122,8 +124,10 @@ class SettingsView extends HideableView {
   }
 
   componentDidShow() {
-    this.props.dispatch(newsCategories.fetch());
-    this.props.dispatch(newsOptIn.fetch());
+    if (this.props.isOnline) {
+      this.props.dispatch(newsCategories.fetch());
+      this.props.dispatch(newsOptIn.fetch());
+    }
     this.props.dispatch(emailNotificationsOptIn.fetch());
   }
 
@@ -203,8 +207,8 @@ class SettingsView extends HideableView {
 
         <div className="list-group setting-colour-0">
           <div className="list-group-item"
-            onClick={ this.props.isOnline ? () =>
-              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`)) : null
+            onClick={ () =>
+              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`))
             }
           >
             { SettingsView.renderSetting(
@@ -228,7 +232,7 @@ class SettingsView extends HideableView {
 
         <div className="list-group setting-colour-1">
           <div className="list-group-item"
-            onClick={ this.props.isOnline ? () =>
+            onClick={ this.props.newsCategories.fetched && !this.props.newsCategories.failed ? () =>
               this.props.dispatch(
                 push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`)
               ) : null
@@ -239,12 +243,11 @@ class SettingsView extends HideableView {
               'News categories',
               SettingsView.renderFetchedCount({
                 ...this.props.newsCategories,
-                isOnline: this.props.isOnline,
               })
             ) }
           </div>
           <div className="list-group-item"
-            onClick={ this.props.isOnline ? () =>
+            onClick={ this.props.newsOptIn.fetched && !this.props.newsOptIn.failed ? () =>
               this.props.dispatch(
                 push(
                   `/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}/` +
@@ -259,6 +262,7 @@ class SettingsView extends HideableView {
               SettingsView.renderFetchedCount({
                 fetching: this.props.newsOptIn.fetching,
                 failed: this.props.newsOptIn.failed,
+                fetched: this.props.newsOptIn.fetched,
                 selected: this.props.newsOptIn.location.selected,
                 total: this.props.newsOptIn.location.total,
                 isOnline: this.props.isOnline,
@@ -351,12 +355,14 @@ const select = (state) => {
     newsCategories: {
       fetching: state.newsCategories.fetching,
       failed: state.newsCategories.failed,
+      fetched: state.newsCategories.fetched,
       selected: state.newsCategories.subscribed.length,
       total: state.newsCategories.items.length,
     },
     newsOptIn: {
       fetching: state.newsOptIn.fetching,
       failed: state.newsOptIn.failed,
+      fetched: state.newsOptIn.fetched,
       location: {
         selected: (state.newsOptIn.selected.Location || []).length,
         total: (state.newsOptIn.options.Location || []).length,

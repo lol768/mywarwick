@@ -21,6 +21,8 @@ import * as tiles from './state/tiles';
 import * as update from './state/update';
 import * as user from './state/user';
 import * as news from './state/news';
+import * as newsCategories from './state/news-categories';
+import * as newsOptIn from './state/news-optin';
 import * as ui from './state/ui';
 import * as device from './state/device';
 import * as analytics from './analytics';
@@ -159,6 +161,9 @@ export function launch(userData) {
 
   persisted('tiles.data', tiles.fetchedTiles);
   persisted('tileContent', tiles.loadedAllTileContent);
+
+  persisted('newsCategories', newsCategories.receive);
+  persisted('newsOptIn', newsOptIn.receive);
 
   persisted('app.assets', app.loadAssets)
     .then(() => {
