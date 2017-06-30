@@ -84,3 +84,13 @@
     margin-bottom: 0;
   }
 }
+
+.in-settings .list-group:first-of-type {
+  position: fixed;
+  z-index: 1;
+  width: 100%;
+
+  & + * {
+    padding-top: 20px + 2.6 * ceil((@main-font-size * @font-scale-xs)) + 2px;
+  }
+}
