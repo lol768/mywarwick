@@ -6,6 +6,7 @@ import actors.MessageProcessing.ProcessingResult
 import models.{Activity, DateFormats, MessageSend}
 import play.api.Configuration
 import play.api.libs.mailer.{Email, MailerClient}
+import services.UserPreferencesService
 import system.EmailSanitiser
 import warwick.sso.User
 
@@ -14,7 +15,8 @@ import scala.concurrent.Future
 @Named("email")
 class EmailOutputService @Inject() (
   mailer: MailerClient,
-  config: Configuration
+  config: Configuration,
+  userPreferencesService: UserPreferencesService
 ) extends OutputService {
 
   import system.ThreadPools.email
@@ -40,13 +42,14 @@ class EmailOutputService @Inject() (
     val rootUrl = config.getString("mywarwick.rootUrl")
     require(rootUrl.nonEmpty, "Valid mywarwick.rootUrl not present")
 
-    val optOutUrl = s"${rootUrl.get}${controllers.routes.HomeController.settings().url}"
-
+    val optOutRoute = s"${controllers.routes.HomeController.settings().url}"
+    val baseUrl = s"${rootUrl.get}"
+    val loggedInBefore = userPreferencesService.exists(user.usercode)
     Email(
       subject = EmailSanitiser.sanitiseUserInputForHeader(activity.title),
       from = from,
       to = Seq(fullAddress),
-      bodyText = Some(views.txt.email(user, activity, date, optOutUrl).body)
+      bodyText = Some(views.txt.email(user, activity, date, baseUrl, optOutRoute, loggedInBefore).body)
     )
   }
 }
