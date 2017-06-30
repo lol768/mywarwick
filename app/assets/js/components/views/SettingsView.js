@@ -112,7 +112,7 @@ class SettingsView extends HideableView {
           <i className="fa fa-fw fa-chevron-right" />
         </div>
       );
-    } else if ( ( failed && fetched ) || !fetched ) {
+    } else if ((failed && fetched) || !fetched) {
       return (
         <div>
           <i className="fa fa-exclamation-circle text-danger" />
