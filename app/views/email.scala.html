@@ -1,5 +1,7 @@
 @import warwick.sso.User
 @import models.Activity
+@import views.utils.MarkdownRenderer
+
 @(user: User, activity: Activity, date: String, baseUrl: String, optOutRoute: String, loggedInBefore: Boolean)
 <!doctype html>
 <html lang="en">
@@ -13,7 +15,7 @@
 
     <blockquote style="font-style: italic"><p>@activity.title@(activity.url.map(u => s" ($u)").getOrElse(""))</p>
       @if(activity.text.nonEmpty) {
-        <p>@activity.text</p>
+        <p>@Html(MarkdownRenderer.renderMarkdown(activity.text.get))</p>
       }
     </blockquote>
 
