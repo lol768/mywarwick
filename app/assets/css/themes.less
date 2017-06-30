@@ -73,7 +73,11 @@
       background: transparent;
     }
     .in-root, .in-edit, .in-tiles {
-      background: #0278e4 url(/assets/images/bg01.jpg) fixed 0 0 no-repeat;
+      background-image: linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674);
+      background-image: url(/assets/images/bg01.jpg);
+      background-attachment: fixed;
+      background-position: 0 0;
+      background-repeat: no-repeat;
       background-size: cover;
       &.in-add h3 {
         margin: 0;
