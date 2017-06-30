@@ -57,12 +57,18 @@ class ActivityDaoImpl @Inject()(
     val id = UUID.randomUUID().toString
     val now = DateTime.now
     val publishedAtOrNow = publishedAt.getOrElse(now)
-
-    SQL"""
+    val sql = sendEmail match {
+    case Some(sendEmailValue) => SQL"""
       INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by, send_email)
-      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $publishedAtOrNow, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string}, $sendEmail)
-    """
-      .execute()
+      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $publishedAtOrNow, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string}, $sendEmailValue)
+      """
+    case None => SQL"""
+      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by, send_email)
+      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $publishedAtOrNow, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string}, NULL)
+      """
+    }
+
+    sql.execute()
 
     updateReplacedActivity(id, replaces)
 
