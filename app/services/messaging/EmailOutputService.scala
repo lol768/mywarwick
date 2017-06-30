@@ -22,8 +22,8 @@ class EmailOutputService @Inject() (
   import system.ThreadPools.email
 
   val from = config.getString("mywarwick.mail.notifications.from")
-            .orElse(config.getString("mywarwick.mail.from"))
-            .getOrElse(throw new IllegalStateException("No From address - set mywarwick.mail[.notifications].from"))
+    .orElse(config.getString("mywarwick.mail.from"))
+    .getOrElse(throw new IllegalStateException("No From address - set mywarwick.mail[.notifications].from"))
 
   override def send(message: MessageSend.Heavy): Future[ProcessingResult] = Future {
     import message.{user, activity}
@@ -49,7 +49,8 @@ class EmailOutputService @Inject() (
       subject = EmailSanitiser.sanitiseUserInputForHeader(activity.title),
       from = from,
       to = Seq(fullAddress),
-      bodyText = Some(views.txt.email(user, activity, date, baseUrl, optOutRoute, loggedInBefore).body)
+      bodyText = Some(views.txt.email(user, activity, date, baseUrl, optOutRoute, loggedInBefore).body),
+      bodyHtml = Some(views.html.email(user, activity, date, baseUrl, optOutRoute, loggedInBefore).body)
     )
   }
 }

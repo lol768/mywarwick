@@ -61,7 +61,9 @@ val appDeps = Seq(
   "com.beachape" %% "enumeratum" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play-json" % enumeratumVersion,
-  "nl.martijndwars" % "web-push" % "2.0.0"
+  "nl.martijndwars" % "web-push" % "2.0.0",
+  "com.vladsch.flexmark" % "flexmark" % "0.18.5",
+  "com.vladsch.flexmark" % "flexmark-ext-autolink" % "0.18.5"
 )
 
 val testDeps = Seq(
