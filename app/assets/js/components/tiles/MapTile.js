@@ -83,30 +83,32 @@ export default class MapTile extends TileContent {
   }
 
   getSmallBody() {
+    let src = '/assets/images/map.jpg';
+
     if (this.state.position) {
       const { imageSize: { width, height } } = this.props;
       const { position } = this.state;
       const { longitude, latitude } = position;
 
-      const src = `/service/map/${latitude.toFixed(4)}/${longitude.toFixed(4)}/${width}/${height}`;
-
       if (isPositionOnCampus(position) && isAccuratePosition(position)) {
-        return (<div className="reset-position">
-          <img src={src} className="map-tile-image" role="presentation" />
-        </div>);
+        src = `/service/map/${latitude.toFixed(4)}/${longitude.toFixed(4)}/${width}/${height}`;
       }
     }
 
-    return null;
+    return (
+      <div className="reset-position">
+        <img src={src} className="map-tile-image" role="presentation" />
+      </div>
+    );
   }
 
   getZoomedBody() {
     return (
       <div>
         <div className="tile-loading">
-          <i className="fa fa-spinner fa-pulse"></i>
+          <i className="fa fa-spinner fa-pulse" />
         </div>
-        <iframe src="https://campus.warwick.ac.uk/?lite=1" frameBorder="0"></iframe>
+        <iframe src="https://campus.warwick.ac.uk/?lite=1" frameBorder="0" />
       </div>
     );
   }
