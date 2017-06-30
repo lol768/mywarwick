@@ -27,6 +27,7 @@ class OptInSettingsView extends HideableView {
   }
 
   componentDidShow() {
+    if (!this.props.isOnline) return;
     this.props.dispatch(newsOptIn.fetch());
   }
 
