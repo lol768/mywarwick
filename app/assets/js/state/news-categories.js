@@ -9,7 +9,7 @@ const NEWS_CATEGORY_SUBSCRIBE = 'NEWS_CATEGORY_SUBSCRIBE';
 const NEWS_CATEGORY_UNSUBSCRIBE = 'NEWS_CATEGORY_UNSUBSCRIBE';
 
 const start = createAction(NEWS_CATEGORIES_REQUEST);
-const receive = createAction(NEWS_CATEGORIES_RECEIVE);
+export const receive = createAction(NEWS_CATEGORIES_RECEIVE);
 
 const sub = createAction(NEWS_CATEGORY_SUBSCRIBE);
 const unsub = createAction(NEWS_CATEGORY_UNSUBSCRIBE);
@@ -58,6 +58,7 @@ export function unsubscribe(id) {
 const initialState = {
   fetching: false,
   failed: false,
+  fetched: false,
   items: [],
   subscribed: [],
 };
@@ -69,16 +70,19 @@ export function reducer(state = initialState, action) {
         ...state,
         fetching: true,
         failed: false,
+        fetched: false,
       };
     case NEWS_CATEGORIES_RECEIVE:
       return action.error ? {
         ...state,
         fetching: false,
         failed: true,
+        fetched: true,
       } : {
         ...state,
         fetching: false,
         failed: false,
+        fetched: true,
         items: action.payload.data.items,
         subscribed: _.uniq(action.payload.data.subscribed),
       };
