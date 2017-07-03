@@ -332,6 +332,18 @@ class SettingsView extends HideableView {
   }
 }
 
+// Remove from the user's filter choice any keys that are not present in the filter options
+function ensureValidFilterChoice(filter, filterOptions) {
+  return _.mapValues(filter, (options, optionType) =>
+    _.pickBy(options, (v, option) =>
+      filterOptions[optionType] !== undefined &&
+      _.find(filterOptions[optionType], filterOption =>
+        filterOption.id === option
+      ) !== undefined
+    )
+  );
+}
+
 const select = (state) => {
   const activityFilterTotal = _.reduce(
     state.activities.filterOptions,
@@ -343,6 +355,7 @@ const select = (state) => {
     (total, o) => total + o.length,
     0
   );
+
   return {
     mutes: state.notifications.activityMutes.length,
     subscribedNewsCategories: state.newsCategories.subscribed.length,
@@ -370,7 +383,7 @@ const select = (state) => {
     },
     activityFilter: {
       selected: activityFilterTotal - _.reduce(
-        state.activities.filter,
+        ensureValidFilterChoice(state.activities.filter, state.activities.filterOptions),
         (total, o) => total + _.filter(o, v => !v).length,
         0
       ),
@@ -378,7 +391,7 @@ const select = (state) => {
     },
     notificationFilter: {
       selected: notificationFilterTotal - _.reduce(
-        state.notifications.filter,
+        ensureValidFilterChoice(state.notifications.filter, state.notifications.filterOptions),
         (total, o) => total + _.filter(o, v => !v).length,
         0
       ),
