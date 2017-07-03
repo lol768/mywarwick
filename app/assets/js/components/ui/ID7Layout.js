@@ -51,7 +51,7 @@ class ID7Layout extends React.PureComponent {
   componentDidMount() {
     this.updateHeaderHeight();
     if (isEmbedded()) {
-      const type = 'message.id7.mw-popover.layoutDidMount';
+      const type = 'message.id7.account-popover.layoutDidMount';
       window.parent.postMessage(JSON.stringify({ type }), '*');
     }
   }
