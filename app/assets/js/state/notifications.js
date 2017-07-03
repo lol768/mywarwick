@@ -9,6 +9,7 @@ import {
   onStreamReceive,
   takeFromStream,
   filterStream,
+  getStreamSize,
 } from '../stream';
 import { createAction } from 'redux-actions';
 import qs from 'qs';
@@ -316,10 +317,25 @@ const initialState = {
   activityMutes: [],
   filter: {},
   filteredStream: makeStream(),
+  originalFilterOptions: {
+    provider: [],
+  },
   filterOptions: {
     provider: [],
   },
 };
+
+function filterFilterOptions(stream, filterOptions) {
+  return _.mapValues(filterOptions, (options, optionType) =>
+    _.filter(options, option => {
+      // Include this option is there's at least 1 item in the stream that matches this option
+      // Items are only removed if the filter option is explicitly false, so check for that
+      const streamSizeWithThisOptionRemoved =
+        getStreamSize(filterStream(stream, { [optionType]: { [option.id]: false } }));
+      return getStreamSize(stream) !== streamSizeWithThisOptionRemoved;
+    })
+  );
+}
 
 export function notificationsReducer(state = initialState, action) {
   switch (action.type) {
@@ -333,10 +349,12 @@ export function notificationsReducer(state = initialState, action) {
     case NOTIFICATION_RECEIVE: {
       const updatedStream = mergeNotifications(state.stream, [action.payload]);
       const updatedFilteredStream = filterStream(updatedStream, state.filter);
+
       return {
         ...state,
         stream: updatedStream,
         filteredStream: updatedFilteredStream,
+        filterOptions: filterFilterOptions(updatedStream, state.originalFilterOptions),
       };
     }
     case NOTIFICATION_FETCH: {
@@ -351,6 +369,7 @@ export function notificationsReducer(state = initialState, action) {
         ...action.payload.meta,
         stream: updatedStream,
         filteredStream: updatedFilteredStream,
+        filterOptions: filterFilterOptions(updatedStream, state.originalFilterOptions),
         fetching: false,
         lastItemFetched: lastItem && lastItem.id,
       };
@@ -372,7 +391,8 @@ export function notificationsReducer(state = initialState, action) {
         ...state,
         filteredStream: updatedFilteredStream,
         filter: action.payload.filter,
-        filterOptions: action.payload.options,
+        originalFilterOptions: action.payload.options,
+        filterOptions: filterFilterOptions(state.stream, action.payload.options),
       };
     }
     default:
@@ -392,10 +412,12 @@ export function activitiesReducer(state = initialState, action) {
     case ACTIVITY_RECEIVE: {
       const updatedStream = mergeNotifications(state.stream, [action.payload]);
       const updatedFilteredStream = filterStream(updatedStream, state.filter);
+
       return {
         ...state,
         stream: updatedStream,
         filteredStream: updatedFilteredStream,
+        filterOptions: filterFilterOptions(updatedStream, state.originalFilterOptions),
       };
     }
     case ACTIVITY_FETCH: {
@@ -410,6 +432,7 @@ export function activitiesReducer(state = initialState, action) {
         ...action.payload.meta,
         stream: updatedStream,
         filteredStream: updatedFilteredStream,
+        filterOptions: filterFilterOptions(updatedStream, state.originalFilterOptions),
         fetching: false,
         lastItemFetched: lastItem && lastItem.id,
       };
@@ -425,7 +448,8 @@ export function activitiesReducer(state = initialState, action) {
         ...state,
         filteredStream: updatedFilteredStream,
         filter: action.payload.filter,
-        filterOptions: action.payload.options,
+        originalFilterOptions: action.payload.options,
+        filterOptions: filterFilterOptions(state.stream, action.payload.options),
       };
     }
     default:
