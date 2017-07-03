@@ -11,6 +11,7 @@ import models._
 import org.joda.time.DateTime
 import system.DatabaseDialect
 import warwick.anorm.converters.ColumnConversions._
+import java.lang.{Integer => JInt}
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
@@ -57,18 +58,13 @@ class ActivityDaoImpl @Inject()(
     val id = UUID.randomUUID().toString
     val now = DateTime.now
     val publishedAtOrNow = publishedAt.getOrElse(now)
-    val sql = sendEmail match {
-    case Some(sendEmailValue) => SQL"""
-      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by, send_email)
-      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $publishedAtOrNow, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string}, $sendEmailValue)
-      """
-    case None => SQL"""
-      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by, send_email)
-      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $publishedAtOrNow, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string}, NULL)
-      """
-    }
+    val sendEmailObj = sendEmail.map[JInt] { if (_) 1 else 0 }.orNull
 
-    sql.execute()
+    SQL"""
+      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by, send_email)
+      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $publishedAtOrNow, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string}, $sendEmailObj)
+    """
+      .execute()
 
     updateReplacedActivity(id, replaces)
 
