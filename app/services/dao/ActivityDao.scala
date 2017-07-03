@@ -58,7 +58,7 @@ class ActivityDaoImpl @Inject()(
     val id = UUID.randomUUID().toString
     val now = DateTime.now
     val publishedAtOrNow = publishedAt.getOrElse(now)
-    val sendEmailObj = sendEmail.fold(null.asInstanceOf[JInt])(a => JInt.valueOf(if (a) 1 else 0))
+    val sendEmailObj = sendEmail.map[JInt] { if (_) 1 else 0 }.orNull
 
     SQL"""
       INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by, send_email)
