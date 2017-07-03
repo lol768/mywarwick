@@ -12,6 +12,7 @@ import TileView from './TileView';
 import * as TILE_TYPES from '../tiles';
 import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
+import { isEmbedded } from '../../embedHelper';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -150,7 +151,7 @@ class MeView extends React.PureComponent {
 
     const margins = _.sum(margin);
 
-    if (isDesktop) {
+    if (isDesktop || isEmbedded()) {
       return $('.id7-main-content').width() + margins;
     }
 
