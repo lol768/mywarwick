@@ -67,16 +67,6 @@ class MeView extends React.PureComponent {
     this.onAdd = this.onAdd.bind(this);
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.editing && !nextProps.editing) {
-      this.onFinishEditing();
-    }
-  }
-
-  onFinishEditing() {
-    this.props.dispatch(tiles.persistTiles());
-  }
-
   onDragStart(layout, item, newItem, placeholder, e) {
     e.preventDefault();
 
@@ -89,6 +79,7 @@ class MeView extends React.PureComponent {
     if (this.previousLayout === undefined || !_.isEqual(layout, this.previousLayout)) {
       this.props.dispatch(tiles.tileLayoutChange(layout, this.props.layoutWidth));
       this.previousLayout = _.cloneDeep(layout);
+      this.props.dispatch(tiles.persistTiles());
     }
   }
 
@@ -97,8 +88,7 @@ class MeView extends React.PureComponent {
     $('.me-view-container .me-view').addClass('with-transitions');
 
     this.props.dispatch(tiles.hideTile(tile));
-
-    this.onFinishEditing();
+    this.props.dispatch(tiles.persistTiles());
   }
 
   onResizeTile(tileProps) {
