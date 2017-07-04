@@ -5,12 +5,11 @@ import _ from 'lodash-es';
 import $ from 'jquery';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
-import { goBack, push } from 'react-router-redux';
+import { goBack } from 'react-router-redux';
 import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
 import * as TILE_TYPES from '../tiles';
-import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
 import { GridSizingHelper } from '../../GridSizingHelper';
 
@@ -197,9 +196,7 @@ class MeView extends React.PureComponent {
             transitionAppearTimeout={500}
             transitionEnterTimeout={500}
             transitionLeaveTimeout={300}
-          >{ false && editing && hiddenTiles.length > 0 ?
-            null
-            : null }
+          >
           </ReactCSSTransitionGroup>
         </div>
       </div>
