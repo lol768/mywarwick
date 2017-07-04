@@ -101,7 +101,6 @@ class TileView extends Component {
     tileProps.onZoomOut = () => this.onTileDismiss();
 
     // Editing
-    tileProps.onBeginEditing = () => view.onBeginEditing(tileProps);
     tileProps.onHide = () => view.onHideTile(tileProps);
     tileProps.onResize = () => view.onResizeTile(tileProps);
 
