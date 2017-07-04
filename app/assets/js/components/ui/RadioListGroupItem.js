@@ -33,13 +33,14 @@ export default class RadioListGroupItem extends React.PureComponent {
             { this.props.description }
           </div>
           <div className="media-right">
-            <div className="media-right">
+            <div className="md-radio">
               <input
                 type="radio"
                 checked={ this.props.checked }
                 readOnly
                 disabled={ this.props.disabled }
               />
+              <label />
             </div>
           </div>
         </div>
