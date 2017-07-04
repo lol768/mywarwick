@@ -16,6 +16,7 @@ import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
 import { goBack, push } from 'react-router-redux';
 import { Routes } from '../AppRoot';
+import * as TILE_TYPES from '../tiles';
 
 class ID7Layout extends React.PureComponent {
 
@@ -147,6 +148,12 @@ class ID7Layout extends React.PureComponent {
   renderMobile() {
     const { user, path } = this.props;
 
+    const allTiles = this.props.tiles.filter(t =>
+      TILE_TYPES[t.type] && (!TILE_TYPES[t.type].isVisibleOnDesktopOnly())
+    );
+
+    const hiddenTiles = allTiles.filter(t => t.removed);
+
     const showSettingsButton = !(
       path.startsWith(`/${Routes.SETTINGS}`) ||
       path.startsWith(`/${Routes.POST_TOUR}`)
@@ -176,9 +183,10 @@ class ID7Layout extends React.PureComponent {
             </header>
           </div>
         </div>
+        {this.isEditing() && hiddenTiles.length > 0 ?
         <div key="add-tile-button" className="add-tile-button" onClick={this.onAdd}>
           <i className="fa fa-plus" />
-        </div>
+        </div> : null}
         <div>
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
@@ -288,6 +296,7 @@ const select = (state) => ({
   zoomedTile: state.ui.zoomedTile,
   native: state.ui.native,
   showBetaWarning: state.ui.showBetaWarning,
+  tiles: state.tiles.data.tiles,
 });
 
 export default connect(select)(ID7Layout);
