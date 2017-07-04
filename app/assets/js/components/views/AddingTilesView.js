@@ -7,7 +7,7 @@ import * as tiles from '../../state/tiles';
 import HiddenTile from '../tiles/HiddenTile';
 import ScrollRestore from '../ui/ScrollRestore';
 import { Routes } from '../AppRoot';
-import { isEmbedded } from '../../embedHelper';
+import { GridSizingHelper } from '../../GridSizingHelper';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -39,14 +39,7 @@ class AddingTilesView extends React.PureComponent {
   }
 
   getGridLayoutWidth() {
-    const { isDesktop, deviceWidth } = this.props;
-
-    const margins = _.sum(margin);
-    if (isDesktop || isEmbedded()) {
-      return $('.id7-main-content').width() + margins;
-    }
-
-    return deviceWidth + margins;
+    return GridSizingHelper.getGridLayoutWidth(this.props, margin);
   }
 
   renderHiddenTiles() {

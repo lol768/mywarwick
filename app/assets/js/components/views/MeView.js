@@ -12,7 +12,7 @@ import TileView from './TileView';
 import * as TILE_TYPES from '../tiles';
 import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
-import { isEmbedded } from '../../embedHelper';
+import { GridSizingHelper } from '../../GridSizingHelper';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -137,16 +137,7 @@ class MeView extends React.PureComponent {
   }
 
   getGridLayoutWidth() {
-    const { isDesktop, deviceWidth } = this.props;
-
-    const margins = _.sum(margin);
-
-    // FIXME isDesktop is always false
-    if (isDesktop || isEmbedded() || true) {
-      return $('.main-content').width() + margins;
-    }
-
-    return deviceWidth + margins;
+    return GridSizingHelper.getGridLayoutWidth(this.props, margin);
   }
 
   renderTile(props) {
