@@ -102,7 +102,11 @@ const WEBPACK_WATCH_CONFIG = webpackMerge(WEBPACK_CONFIG, {
   plugins: [new WatchEventsPlugin({ emitter: bundleEvents })]
 });
 
-function currentRevisionOfAsync(file, i = 0) {
+function currentRevisionOfAsync(file, i) {
+  if (i === undefined) {
+    i = 0;
+  }
+
   const dirname = path.dirname(file);
   const basename = path.basename(file);
   const md5Path = `${paths.assetsOut}/${file}.md5`;
