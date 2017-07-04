@@ -40,6 +40,7 @@ class ID7Layout extends React.PureComponent {
     super(props);
     this.onBackClick = this.onBackClick.bind(this);
     this.onEdit = this.onEdit.bind(this);
+    this.onAdd = this.onAdd.bind(this);
     this.onSettings = this.onSettings.bind(this);
   }
 
@@ -129,6 +130,10 @@ class ID7Layout extends React.PureComponent {
     return null;
   }
 
+  onAdd() {
+    this.props.dispatch(push(`/${Routes.EDIT}/${Routes.ADD}`));
+  }
+
   renderMasqueradeNotice() {
     const user = this.props.user.data;
 
@@ -171,7 +176,9 @@ class ID7Layout extends React.PureComponent {
             </header>
           </div>
         </div>
-
+        <div key="add-tile-button" className="add-tile-button" onClick={this.onAdd}>
+          <i className="fa fa-plus" />
+        </div>
         <div>
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">

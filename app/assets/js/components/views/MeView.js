@@ -64,7 +64,6 @@ class MeView extends React.PureComponent {
     this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
-    this.onAdd = this.onAdd.bind(this);
   }
 
   onDragStart(layout, item, newItem, placeholder, e) {
@@ -106,10 +105,6 @@ class MeView extends React.PureComponent {
 
   onTileDismiss() {
     this.props.dispatch(goBack());
-  }
-
-  onAdd() {
-    this.props.dispatch(push(`/${Routes.EDIT}/${Routes.ADD}`));
   }
 
   getTileSize(id) {
@@ -202,10 +197,8 @@ class MeView extends React.PureComponent {
             transitionAppearTimeout={500}
             transitionEnterTimeout={500}
             transitionLeaveTimeout={300}
-          >{ editing && hiddenTiles.length > 0 ?
-            <div key="add-tile-button" className="add-tile-button" onClick={this.onAdd}>
-              <i className="fa fa-plus" />
-            </div>
+          >{ false && editing && hiddenTiles.length > 0 ?
+            null
             : null }
           </ReactCSSTransitionGroup>
         </div>
