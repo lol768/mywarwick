@@ -231,7 +231,10 @@ function generateAppcache() {
     return Promise.all([
       getFontAwesomeVersion(),
       getCachedAssetsAsync(),
-    ]).then(([faVersion, cachedAssets]) => {
+    ]).then((results) => {
+      const faVersion = results[0];
+      const cachedAssets = results[1];
+
       const cacheableAssets = merge(
         gulp.src(cachedAssets, { base: paths.assetsOut, }),
         gulp.src(['public/**/*'], { base: 'public' })
