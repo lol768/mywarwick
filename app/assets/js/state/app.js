@@ -16,7 +16,10 @@ export function reducer(state = initialState, action) {
     case 'assets.load':
       return {
         ...state,
-        assets: action.payload,
+        assets: {
+          ...state.assets,
+          ...action.payload,
+        },
       };
     case 'assets.update':
       return {
