@@ -21,7 +21,7 @@ class TilePreferencesView extends React.PureComponent {
   render() {
     return (
       <div>
-        <div className="list-group setting-colour-0">
+        <div className="list-group fixed setting-colour-0">
           <div className="list-group-item">
             <div className="list-group-item-heading">
               <h3>Tile preferences</h3>

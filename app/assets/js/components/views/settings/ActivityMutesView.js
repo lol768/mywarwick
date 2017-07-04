@@ -51,7 +51,7 @@ class ActivityMutesView extends React.PureComponent {
         forceTop
       >
         <div>
-          <div className="list-group setting-colour-0">
+          <div className="list-group fixed setting-colour-0">
             <div className="list-group-item">
               <div className="list-group-item-heading">
                 <h3>Muted notifications</h3>

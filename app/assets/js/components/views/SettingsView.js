@@ -164,25 +164,26 @@ class SettingsView extends HideableView {
   }
 
   onNotificationEmailCopyChange() {
-    const consensus = !this.props.emailNotificationsOptIn.wantsEmails;
-
     this.setState((previousState) => {
+      const consensus = !previousState.emailNotificationsOptIn.wantsEmails;
+
       const newState = Object.assign({}, previousState.emailNotificationsOptIn);
       newState.wantsEmails = consensus;
+
+      this.props.dispatch(
+        emailNotificationsOptIn.persist(
+          consensus
+        )
+      );
+
       return { emailNotificationsOptIn: newState };
     });
-
-    this.props.dispatch(
-      emailNotificationsOptIn.persist(
-        consensus
-      )
-    );
   }
 
   render() {
     return (
       <div>
-        <div className="list-group">
+        <div className="list-group fixed">
           <div className="list-group-item">
             <div className="list-group-item-heading">
               <h3>Settings</h3>

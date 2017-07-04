@@ -13,6 +13,11 @@
         </div>
       }
       <div class="news-item__content">@item.text</div>
+      @item.link.map { link =>
+        <div class="news-item__footer">
+          <a href="@link.href" target="_blank">@link.text</a>
+        </div>
+      }
       <div class="news-item__footer">
         Published @models.DateFormats.emailDateTime(item.publishDate),
         @item.updated.map { updated =>
