@@ -104,7 +104,6 @@ export class TileOptionView extends React.PureComponent {
       currentPref[name][value] = !currentPref[name][value];
     }
 
-    this.setState({ currentPreferences: currentPref });
     this.saveConfig(currentPref);
   }
 
@@ -115,12 +114,14 @@ export class TileOptionView extends React.PureComponent {
       ...currentPref,
       [name]: value,
     };
-    this.setState({ currentPreferences: newPreferences });
+
     this.saveConfig(newPreferences);
   }
 
   saveConfig(currentPreferences) {
-    this.props.dispatch(tiles.saveTilePreferences(this.props.tile, currentPreferences));
+    this.setState({ currentPreferences }, () =>
+      this.props.dispatch(tiles.saveTilePreferences(this.props.tile, currentPreferences))
+    );
   }
 
   render() {

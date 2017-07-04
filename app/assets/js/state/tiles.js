@@ -159,8 +159,7 @@ export function fetchTileContent(tileSpec = ALL_TILES) {
 export function saveTilePreferences(tile, preferences) {
   return dispatch => {
     dispatch(storeTilePreferences(tile, preferences));
-    return dispatch(persistTiles())
-      .then(() => dispatch(fetchTileContent()));
+    return dispatch(persistTiles());
   };
 }
 

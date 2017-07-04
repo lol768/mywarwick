@@ -4,8 +4,10 @@ import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import * as PropTypes from 'prop-types';
 import { Routes } from '../../AppRoot';
+import HideableView from '../HideableView';
+import * as tiles from '../../../state/tiles';
 
-class TilePreferencesView extends React.PureComponent {
+class TilePreferencesView extends HideableView {
 
   static propTypes = {
     isOnline: PropTypes.bool.isRequired,
@@ -17,6 +19,10 @@ class TilePreferencesView extends React.PureComponent {
       title: PropTypes.string.isRequired,
     })),
   };
+
+  componentDidShow() {
+    this.props.dispatch(tiles.fetchTileContent());
+  }
 
   render() {
     return (
