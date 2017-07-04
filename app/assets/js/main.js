@@ -162,8 +162,13 @@ export function launch(userData) {
   persisted('tiles.data', tiles.fetchedTiles);
   persisted('tileContent', tiles.loadedAllTileContent);
 
-  persisted('newsCategories', newsCategories.receive);
-  persisted('newsOptIn', newsOptIn.receive);
+  persisted(
+    'newsCategories',
+    newsCategories.receive,
+    ({ items, subscribed }) => ({ items, subscribed }),
+    ({ items, subscribed }) => ({ data: { items, subscribed } }),
+  );
+  persisted('newsOptIn', newsOptIn.receive, ({ options, selected }) => ({ options, selected }));
 
   persisted('app.assets', app.loadAssets)
     .then(() => {
