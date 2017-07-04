@@ -39,8 +39,8 @@
   .list-group-item {
     .media-right {
       white-space: nowrap;
-      color: #c7c7cc;
       .fa-chevron-right {
+        color: #c7c7cc;
         margin-left: 5px;
       }
     }
@@ -94,3 +94,89 @@
     padding-top: 20px + 2.6 * ceil((@main-font-size * @font-scale-xs)) + 2px;
   }
 }
+
+// Modified from https://codepen.io/hansmaad/pen/zBdzxp
+
+@md-radio-checked-color: #8c6e96;
+@md-radio-border-color: rgba(0, 0, 0, 0.54);
+@md-radio-size: 20px;
+@md-radio-checked-size: 10px;
+@md-radio-ripple-size: 8px;
+
+@keyframes ripple {
+  0% {
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.0);
+  }
+  50% {
+    box-shadow: 0 0 0 @md-radio-ripple-size rgba(0, 0, 0, 0.1);
+  }
+  100% {
+    box-shadow: 0 0 0 @md-radio-ripple-size rgba(0, 0, 0, 0);
+  }
+}
+
+.md-radio {
+  margin-top: -1px;
+
+  &.md-radio-inline {
+    display: inline-block;
+  }
+
+  input[type="radio"] {
+    display: none;
+    &:checked + label:before {
+      border-color: @md-radio-checked-color;
+    }
+    &:checked + label:after {
+      transform: scale(1);
+    }
+  }
+
+  label {
+    display: inline-block;
+    height: @md-radio-size;
+    position: relative;
+    padding: 0 10px;
+    margin-bottom: 0;
+    cursor: pointer;
+    vertical-align: bottom;
+    &:before, &:after {
+      position: absolute;
+      content: '';
+      border-radius: 50%;
+    }
+    &:before {
+      left: 0;
+      top: 0;
+      width: @md-radio-size;
+      height: @md-radio-size;
+      border: 2px solid @md-radio-border-color;
+    }
+    &:after {
+      top: @md-radio-size / 2 - @md-radio-checked-size / 2;
+      left: @md-radio-size / 2 - @md-radio-checked-size / 2;
+      width: @md-radio-checked-size;
+      height: @md-radio-checked-size;
+      transform: scale(0);
+      background: @md-radio-checked-color;
+    }
+  }
+}
+
+html.android {
+  .md-radio {
+    input[type="radio"] {
+      &:checked + label:before {
+        animation: ripple 0.2s linear forwards;
+      }
+    }
+
+    label {
+      &:before, &:after {
+        transition: all .3s ease;
+        transition-property: transform, border-color;
+      }
+    }
+  }
+}
+
