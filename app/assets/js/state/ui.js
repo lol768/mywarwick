@@ -20,7 +20,8 @@ function isDesktop() {
   // We make the same 'native is mobile' assumption in bridge.js
   return !isNative() && mq('only all and (min-width: 768px)');
 }
-const isWideLayout = () => mq('only all and (min-width: 992px)');
+
+const isWideLayout = () => false;
 
 const showBetaWarning = () => $('#app-container').attr('data-show-beta-warning') === 'true';
 
@@ -69,10 +70,10 @@ export function updateUIContext() {
     const betaWarn = showBetaWarning();
     const native = isNative();
 
-    if (currentClassName === undefined || isDesktop() !== (currentClassName === 'desktop')) {
+    if (currentClassName === undefined ) {
       dispatch({
         type: 'ui.class',
-        className: isDesktop() ? 'desktop' : 'mobile',
+        className: 'mobile',
       });
     }
 

@@ -3,13 +3,13 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import _ from 'lodash-es';
 import log from 'loglevel';
-import Badge from './Badge';
-import MastheadSearch from './MastheadSearch';
+// import Badge from './Badge';
+// import MastheadSearch from './MastheadSearch';
 import MastheadMobile from './MastheadMobile';
 import PermissionRequest from './PermissionRequest';
 import MasqueradeNotice from './MasqueradeNotice';
 import UpdatePopup from './UpdatePopup';
-import UtilityBar from './UtilityBar';
+// import UtilityBar from './UtilityBar';
 import { connect } from 'react-redux';
 import { isEmbedded } from '../../embedHelper';
 import { getNumItemsSince } from '../../stream';
@@ -151,7 +151,7 @@ class ID7Layout extends React.PureComponent {
       <div className="">
         <a className="sr-only sr-only-focusable" href="#main">Skip to main content</a>
         <div className="fixed-header at-top">
-          <div className="id7-fixed-width-container">
+          <div>
             <header className="id7-page-header" ref="header">
               { this.renderBetaWarning() }
               { this.renderMasqueradeNotice() }
@@ -172,14 +172,14 @@ class ID7Layout extends React.PureComponent {
           </div>
         </div>
 
-        <div className="id7-fixed-width-container">
+        <div>
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
               { this.renderNotificationPermissionRequest() }
               <UpdatePopup />
             </header>
 
-            <div className="id7-main-content">
+            <div className="main-content">
               { this.props.children }
             </div>
           </main>
@@ -188,6 +188,7 @@ class ID7Layout extends React.PureComponent {
     );
   }
 
+  /** SWOO EDIT
   renderDesktop() {
     const { notificationsCount, user } = this.props;
 
@@ -253,18 +254,21 @@ class ID7Layout extends React.PureComponent {
       </div>
     );
   }
+   **/
 
   render() {
-    if (this.props.layoutClassName === 'mobile') {
-      log.debug('ID7Layout.render:mobile');
-      return this.renderMobile();
-    }
-    if (!this.props.layoutClassName) {
+    // SWOO EDIT if (this.props.layoutClassName === 'mobile') {
+    log.debug('ID7Layout.render:mobile');
+    return this.renderMobile();
+    // SWOO EDIT }
+
+    /** SWOO EDIT if (!this.props.layoutClassName) {
       log.warn('props.layoutClassName not set');
     }
+     */
 
-    log.debug('ID7Layout.render:desktop');
-    return this.renderDesktop();
+    // SWOO EDIT log.debug('ID7Layout.render:desktop');
+    // SWOO EDIT return this.renderDesktop();
   }
 }
 

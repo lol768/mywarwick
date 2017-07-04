@@ -141,8 +141,9 @@ class MeView extends React.PureComponent {
 
     const margins = _.sum(margin);
 
-    if (isDesktop || isEmbedded()) {
-      return $('.id7-main-content').width() + margins;
+    // FIXME isDesktop is always false
+    if (isDesktop || isEmbedded() || true) {
+      return $('.main-content').width() + margins;
     }
 
     return deviceWidth + margins;
