@@ -156,10 +156,9 @@ class SettingsView extends HideableView {
       }
     }
 
-    if (assetsRevision !== null) {
+    if (assetsRevision !== null && assetsRevision !== undefined) {
       versions.push(`Web ${assetsRevision}`);
     }
-
 
     return versions.join(', ');
   }
