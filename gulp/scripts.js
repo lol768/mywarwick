@@ -185,7 +185,8 @@ function generateServiceWorker(watch) {
       /^\/notifications/,
       /^\/activities/,
       /^\/search/,
-      /^\/news\/?$/
+      /^\/news\/?$/,
+      /^\/settings/,
     ],
     maximumFileSizeToCacheInBytes: 10 * 1000 * 1000,
   })

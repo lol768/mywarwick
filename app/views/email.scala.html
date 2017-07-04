@@ -1,0 +1,41 @@
+@import warwick.sso.User
+@import models.Activity
+@import views.utils.MarkdownRenderer
+
+@(user: User, activity: Activity, date: String, baseUrl: String, optOutRoute: String, loggedInBefore: Boolean)
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  </head>
+  <body style="font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif">
+    <p>Hi@user.name.first.map(" " + _).getOrElse(""), you have a new notification from My Warwick:</p>
+
+    <blockquote style="font-style: italic"><p>@activity.title@(activity.url.map(u => s" ($u)").getOrElse(""))</p>
+      @if(activity.text.nonEmpty) {
+        <p>@Html(MarkdownRenderer.renderMarkdown(activity.text.get))</p>
+      }
+    </blockquote>
+
+    <hr>
+
+    @if(loggedInBefore) {
+      <p>
+        This email was sent by My Warwick because your account is
+        set to have your notifications copied to email.
+      </p>
+
+      <p>You can <a href="@baseUrl @optOutRoute">disable this</a>.</p>
+    } else {
+      <p>
+        This email was sent by My Warwick. You can receive future
+        messages as push notifications to your phone by <a href="@baseUrl">downloading</a>
+        the My Warwick app, or you can <a href="@baseUrl @optOutRoute">disable these emails</a>
+        entirely.
+      </p>
+    }
+
+  </body>
+</html>

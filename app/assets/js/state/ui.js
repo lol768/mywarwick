@@ -27,7 +27,7 @@ const showBetaWarning = () => $('#app-container').attr('data-show-beta-warning')
 const initialState = {
   className: undefined,
   isWideLayout: false,
-  colourTheme: 'default',
+  colourTheme: 'transparent',
   native: false,
   showBetaWarning: false,
 };
@@ -133,7 +133,8 @@ export function navRequest(path, dispatch) {
   if (path === window.location.pathname) {
     window.scrollTo(0, 0);
   } else if (window.location.pathname.indexOf(Routes.TILES) !== -1 ||
-    window.location.pathname.indexOf(Routes.EDIT) !== -1
+    window.location.pathname.indexOf(Routes.EDIT) !== -1 ||
+    window.location.pathname.indexOf(Routes.SETTINGS) !== -1
   ) {
     dispatch({
       type: 'ui.navRequest',

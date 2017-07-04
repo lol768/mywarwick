@@ -1,13 +1,14 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import _ from 'lodash-es';
-import * as dateFormats from '../../dateFormats';
-import * as notifications from '../../state/notifications';
-import ScrollRestore from '../ui/ScrollRestore';
-import EmptyState from '../ui/EmptyState';
-import { Routes } from '../AppRoot';
+import * as dateFormats from '../../../dateFormats';
+import * as notifications from '../../../state/notifications';
+import ScrollRestore from '../../ui/ScrollRestore';
+import EmptyState from '../../ui/EmptyState';
+import { Routes } from '../../AppRoot';
+import * as PropTypes from 'prop-types';
 
-class ActivityMutesView extends React.Component {
+class ActivityMutesView extends React.PureComponent {
 
   static propTypes = {
     dispatch: React.PropTypes.func.isRequired,
@@ -31,6 +32,7 @@ class ActivityMutesView extends React.Component {
         display_value: PropTypes.string,
       })),
     })).isRequired,
+    isOnline: React.PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -45,10 +47,17 @@ class ActivityMutesView extends React.Component {
   render() {
     return (
       <ScrollRestore
-        url={`/${Routes.NOTIFICATIONS}/${Routes.MUTE}`}
+        url={`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`}
+        forceTop
       >
         <div>
-          <h3>Muted notifications</h3>
+          <div className="list-group setting-colour-0">
+            <div className="list-group-item">
+              <div className="list-group-item-heading">
+                <h3>Muted notifications</h3>
+              </div>
+            </div>
+          </div>
           {
             this.props.activityMutes.length > 0 ?
               _.map(this.props.activityMutes, (mute) =>
@@ -93,8 +102,9 @@ class ActivityMutesView extends React.Component {
                         className="btn btn-danger"
                         data-dismiss="modal"
                         onClick={ () => this.onDelete(mute) }
+                        disabled={ !this.props.isOnline }
                       >
-                        <i className="fa fa-times"></i>
+                        <i className="fa fa-times" />
                       </button>
                     </div>
                   </div>
@@ -103,7 +113,8 @@ class ActivityMutesView extends React.Component {
               : <EmptyState>
                   You haven't muted any notifications. Use the dropdown arrow next to each
                   notification to specify similar types of notifications to mute in future.
-                  Muted notifications still appear here; they just don't pop up on your device.
+                  Muted notifications still appear in the list of notifications;
+                  they just don't pop up on your device.
                 </EmptyState>
           }
         </div>
@@ -116,6 +127,7 @@ class ActivityMutesView extends React.Component {
 function select(state) {
   return {
     activityMutes: state.notifications.activityMutes,
+    isOnline: state.device.isOnline,
   };
 }
 

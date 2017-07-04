@@ -1,10 +1,22 @@
 @import warwick.sso.User
 @import models.Activity
-@(user: User, activity: Activity, date: String)
+@(user: User, activity: Activity, date: String, baseUrl: String, optOutRoute: String, loggedInBefore: Boolean)
 Hi@user.name.first.map(" "+_).getOrElse(""), you have a new notification from My Warwick:
----
 
-@activity.text
+> @activity.title@(activity.url.map(u => s" ($u)").getOrElse(""))
+@if(activity.text.nonEmpty) {
+>
+> @activity.text
+}
+@("-- ")
+@if(loggedInBefore) {
+This email was sent by My Warwick because your account
+is set to have your notifications copied to email.
 
----
-This notification was generated automatically by My Warwick at @date.
+If you'd like to disable this, you can visit @baseUrl@optOutRoute
+} else {
+This email was sent by My Warwick. You can receive future
+messages as push notifications to your phone by downloading
+the My Warwick app at @baseUrl, or you can visit
+@baseUrl@optOutRoute to disable these emails entirely.
+}

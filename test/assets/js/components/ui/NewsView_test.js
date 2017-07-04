@@ -30,29 +30,4 @@ describe('NewsView', () => {
 
   });
 
-  it('render NewsCategoriesView for logged in users', () =>  {
-
-    const props = {
-      ...defaults,
-      user: { authenticated: true },
-    };
-
-    const result = shallowRender(<NewsView {...props} />);
-
-    result.should.include('veryStrangeThings9380182');
-    result.should.include('NewsCategoriesView');
-
-  });
-
-  it('does not render NewsCategoriesView for guests', () =>  {
-
-    const props = {
-      ...defaults,
-    };
-
-    const result = shallowRender(<NewsView {...props} />);
-    result.should.not.include('NewsCategoriesView');
-    result.should.not.include('veryStrangeThings9380182');
-
-  });
 });

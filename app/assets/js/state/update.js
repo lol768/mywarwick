@@ -1,3 +1,7 @@
+import * as app from './app';
+import fetch from 'isomorphic-fetch';
+import log from 'loglevel';
+
 const UPDATE_READY = 'UPDATE_READY';
 
 const initialState = {
@@ -26,7 +30,12 @@ let updateTimerInterval;
 export function displayUpdateProgress(dispatch) {
   function onUpdateReady() {
     clearInterval(updateTimerInterval);
-    dispatch(updateReady());
+
+    fetch('/service/revision')
+      .then(res => res.text())
+      .then(rev => dispatch(app.updateAssets(rev)))
+      .catch(e => log.error('Error fetching revision information', e))
+      .then(() => dispatch(updateReady()));
   }
 
   function updateTimer() {

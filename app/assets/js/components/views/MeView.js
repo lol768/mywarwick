@@ -10,9 +10,9 @@ import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
 import * as TILE_TYPES from '../tiles';
-import TileOptionView from './TileOptionView';
 import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
+import { isEmbedded } from '../../embedHelper';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -61,12 +61,9 @@ class MeView extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.state = {};
     this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
-    this.onConfigSave = this.onConfigSave.bind(this);
-    this.onConfigViewDismiss = this.onConfigViewDismiss.bind(this);
     this.onAdd = this.onAdd.bind(this);
   }
 
@@ -117,23 +114,6 @@ class MeView extends React.PureComponent {
     this.props.dispatch(tiles.resizeTile(tileProps, this.props.layoutWidth, width, height));
   }
 
-  onConfiguring(tileProps) {
-    this.setState({
-      configuringTile: tileProps,
-    });
-  }
-
-  onConfigViewDismiss() {
-    this.setState({
-      configuringTile: null,
-    });
-  }
-
-  onConfigSave(tile, preferences) {
-    this.props.dispatch(tiles.saveTilePreferences(tile, preferences));
-    this.onConfigViewDismiss();
-  }
-
   onTileDismiss() {
     this.props.dispatch(goBack());
   }
@@ -171,7 +151,7 @@ class MeView extends React.PureComponent {
 
     const margins = _.sum(margin);
 
-    if (isDesktop) {
+    if (isDesktop || isEmbedded()) {
       return $('.id7-main-content').width() + margins;
     }
 
@@ -251,22 +231,6 @@ class MeView extends React.PureComponent {
     );
   }
 
-  renderTileOptionsView() {
-    if (this.state.configuringTile && this.props.editing) {
-      const configuringTile = this.state.configuringTile;
-      return (
-        <div>
-          <TileOptionView
-            tile={ configuringTile }
-            onConfigViewDismiss= { this.onConfigViewDismiss }
-            onConfigSave = { this.onConfigSave }
-          />
-        </div>
-      );
-    }
-    return null;
-  }
-
   render() {
     const classes = classNames('me-view', { 'me-view--editing': this.props.editing });
 
@@ -275,7 +239,6 @@ class MeView extends React.PureComponent {
         <div className="me-view-container">
           <div className={classes}>
             {this.renderTiles()}
-            {this.renderTileOptionsView()}
           </div>
         </div>
       </ScrollRestore>
@@ -289,7 +252,6 @@ const select = (state) => ({
   tiles: state.tiles.data.tiles,
   layout: state.tiles.data.layout,
   deviceWidth: state.device.width,
-  navRequest: state.ui.navRequest,
 });
 
 export default connect(select)(MeView);

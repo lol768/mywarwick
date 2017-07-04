@@ -48,3 +48,26 @@
   }
 }
 
+.btn-slide-enter, .btn-slide-appear {
+  transition: all .3s ease-in-out;
+  visibility: hidden;
+  opacity: 0;
+  transform: translate3d(25px, 0, 0);
+  &.btn-slide-enter-active, &.btn-slide-appear-active {
+    visibility: visible;
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.btn-slide-leave {
+  transition: all .3s ease-in-out;
+  visibility: visible;
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  &.btn-slide-leave-active {
+    visibility: hidden;
+    opacity: 0;
+    transform: translate3d(25px, 0, 0);
+  }
+}

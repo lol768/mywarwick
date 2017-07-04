@@ -25,11 +25,15 @@ class HomeController @Inject()(
   implicit val showBetaWarning: Boolean =
     configuration.getBoolean("mywarwick.showBetaWarning").getOrElse(false)
 
-  def index = Action(Ok(views.html.index()))
+  def index = Action {
+    Ok(views.html.index())
+  }
+
+  def settings: Action[AnyContent] = index
 
   def redirectToIndex = Action(Redirect(routes.HomeController.index()))
 
-  def tile(id: String) = index
+  def indexIgnoreParam(param: String): Action[AnyContent] = index
 
   def redirectToPath(path: String, status: Int = MOVED_PERMANENTLY) = Action { implicit request =>
     Redirect(s"/${path.replaceFirst("^/", "")}", status)

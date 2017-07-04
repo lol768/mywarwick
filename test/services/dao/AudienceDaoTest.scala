@@ -50,6 +50,13 @@ class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
       saved mustBe Seq(AudienceComponentSave("Usercode", Some("a"), None), AudienceComponentSave("Usercode", Some("b"), None))
     }
 
+    "save Location opt-in component" in {
+      val audience = Audience(Seq(Audience.LocationOptIn.CentralCampusResidences))
+      val saved = audienceDao.audienceToComponents(audience)
+
+      saved mustBe Seq(AudienceComponentSave("OptIn:Location", Some("CentralCampusResidences"), None))
+    }
+
     "reconstitute usercodes audience" in {
       val components = Seq(
         AudienceComponentSave("Usercode", Some("a"), None),

@@ -1,25 +1,27 @@
-import NewsCategoriesView from 'components/views/NewsCategoriesView';
+import NewsCategoriesView from 'components/views/settings/NewsCategoriesView';
 import { shallow } from 'enzyme';
+import * as React from 'react';
 
 describe('NewsCategoriesView', () => {
 
-  const items = [
+  const categories = [
     {id:'yellow',name:'Yellow'},
     {id:'red',name:'Red'},
     {id:'green',name:'Green'},
   ];
 
-  const baseJsx = (<NewsCategoriesView
+  const baseJsx = (<NewsCategoriesView.WrappedComponent
     dispatch={() => {}}
-    items={items}
+    categories={categories}
     subscribed={['red','green']}
+    isOnline={true}
   />);
 
   it('dispatches subscribe and unsubscribe', () => {
     const view = shallow(baseJsx);
     const instance = view.instance();
     const subscribe = sinon.spy(instance, 'subscribe');
-    instance.onChange([{value: 'yellow'}]);
+    instance.onClick('yellow');
 
     subscribe.should.have.been.called;
   });
@@ -28,7 +30,7 @@ describe('NewsCategoriesView', () => {
     const view = shallow(baseJsx);
     const instance = view.instance();
     const unsubscribe = sinon.spy(instance, 'unsubscribe');
-    instance.onChange([{value: 'red'}]);
+    instance.onClick('red');
 
     unsubscribe.should.have.been.called;
   });

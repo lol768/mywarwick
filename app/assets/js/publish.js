@@ -28,11 +28,11 @@ if (fileUploadContainer) {
 function wireEventListeners() {
   $('.audience-picker').each((i, el) => {
     const $el = $(el);
-    const $deptBoxes = $(el).find('input[value*="Dept:"]');
+    const $deptBoxes = $el.find('input[value*="Dept:"]');
     const $deptSelect = $el.find('[data-select=department]');
 
-    const $publicBox = $(el).find('input[value=Public]');
-    const $otherInputs = $(el).find('input, select').not($publicBox);
+    const $publicBox = $el.find('input[value=Public]');
+    const $otherInputs = $el.add($('.audience-picker-extra')).find('input, select').not($publicBox);
     $publicBox.on('change', () => {
       if ($publicBox.is(':checked')) {
         $otherInputs.attr('disabled', true);

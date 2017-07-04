@@ -2,9 +2,12 @@ package models
 
 import controllers.api.SaveMuteRequest
 import org.joda.time.DateTime
+import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import warwick.sso.Usercode
+import play.api.libs.json.Reads.filter
+import uk.ac.warwick.util.core.StringUtils
 
 case class ActivityIcon(name: String, colour: Option[String])
 object ActivityIcon {
@@ -27,7 +30,8 @@ case class Activity(
   createdAt: DateTime,
   shouldNotify: Boolean,
   audienceId: Option[String] = None,
-  publisherId: Option[String] = None
+  publisherId: Option[String] = None,
+  sendEmail: Option[Boolean] = None
 )
 
 object Activity {
@@ -98,7 +102,7 @@ case class ActivityTag(
 
 case class TagValue(internalValue: String, displayValue: Option[String] = None)
 
-case class ActivityProvider(id: String, displayName: Option[String] = None)
+case class ActivityProvider(id: String, sendEmail: Boolean, displayName: Option[String] = None)
 
 case class ActivityType(name: String, displayName: Option[String] = None)
 
@@ -113,13 +117,27 @@ case class ActivitySave(
   url: Option[String] = None,
   tags: Seq[ActivityTag] = Seq.empty,
   replace: Map[String, String] = Map.empty,
-  publishedAt: Option[DateTime] = None
+  publishedAt: Option[DateTime] = None,
+  sendEmail: Option[Boolean] = None
 )
 
 object ActivitySave {
   def fromApi(usercode: Usercode, publisherId: String, providerId: String, shouldNotify: Boolean, data: IncomingActivityData): ActivitySave = {
     import data._
-    ActivitySave(usercode, publisherId, providerId, shouldNotify, `type`, title, text, url, tags.getOrElse(Seq.empty), replace.getOrElse(Map.empty), generated_at)
+    ActivitySave(
+      changedBy = usercode,
+      publisherId = publisherId,
+      providerId = providerId,
+      shouldNotify = shouldNotify,
+      `type` = `type`,
+      title = title,
+      text = text,
+      url = url,
+      tags = tags.getOrElse(Seq.empty),
+      replace = replace.getOrElse(Map.empty),
+      publishedAt = generated_at,
+      sendEmail = send_email
+    )
   }
 }
 
@@ -129,7 +147,10 @@ case class ActivityRecipients(
 )
 
 object ActivityRecipients {
-  implicit val readsActivityRecipients = Json.reads[ActivityRecipients]
+  implicit val readsActivityRecipients: Reads[ActivityRecipients] = (
+      (__ \ "users").readNullable[Seq[String]](filter(ValidationError("All usercodes must be non-empty"))(_.forall(StringUtils.hasText))) and
+      (__ \ "groups").readNullable[Seq[String]](filter(ValidationError("All group names must be non-empty"))(_.forall(StringUtils.hasText)))
+    )(ActivityRecipients.apply _)
 }
 
 case class IncomingActivityData(
@@ -140,7 +161,8 @@ case class IncomingActivityData(
   tags: Option[Seq[ActivityTag]],
   replace: Option[Map[String, String]],
   generated_at: Option[DateTime],
-  recipients: ActivityRecipients
+  recipients: ActivityRecipients,
+  send_email: Option[Boolean]
 )
 
 object IncomingActivityData {
@@ -216,7 +238,7 @@ object ActivityMuteRender {
     DateTime.now,
     activityMute.expiresAt,
     activityMute.activityType.map(ActivityType(_)),
-    activityMute.providerId.map(ActivityProvider(_)),
+    activityMute.providerId.map(ActivityProvider(_, sendEmail = false)),
     activityMute.tags
   )
 }

@@ -106,12 +106,9 @@ export function persistTiles() {
 
     const layout = getState().tiles.data.layout;
 
-    return fetch('/api/tiles', {
-      credentials: 'same-origin',
+    return fetchWithCredentials('/api/tiles', {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tiles, layout }),
     });
   };
@@ -213,15 +210,14 @@ export function formatPreferenceData(preferencesFromAction, availableTileOptions
       case 'array': {
         preferences[key] = {};
         option.options.forEach((o) => (
-          preferences[key][o.value] = _.find(preferencesFromAction, (p) =>
-              p.name === key && p.value === o.value
-            ) !== undefined
+          preferences[key][o.value] = (
+            (preferencesFromAction[key] && preferencesFromAction[key][o.value]) || false
+          )
         ));
         break;
       }
       case 'string': {
-        const preference = _.find(preferencesFromAction, (p) => p.name === key);
-        preferences[key] = (preference !== undefined) ? preference.value : null;
+        preferences[key] = preferencesFromAction[key];
         break;
       }
       default: {

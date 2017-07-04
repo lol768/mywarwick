@@ -4,6 +4,7 @@
 @import models.publishing.PermissionScope
 @import models.publishing.Publisher
 @import org.joda.time.LocalDateTime
+@import views.html.helper.CSRF
 
 @(
     publisher: Publisher,
@@ -21,6 +22,7 @@
 
 @common.admin("Update news") {
   @b3.form(action = controllers.publish.routes.NewsController.update(publisher.id, id, true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.publish.routes.NewsController.audienceInfo(publisher.id)) {
+    @context.csrfHelper.formField
     <div class="audience-indicator"></div>
 
     <div class="split-form__sections">

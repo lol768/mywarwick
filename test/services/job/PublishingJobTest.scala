@@ -5,7 +5,7 @@ import java.sql.Connection
 import anorm.SqlParser._
 import anorm._
 import helpers.{BaseSpec, Fixtures, OneStartAppPerSuite}
-import models.Audience
+import models.{Audience, AudienceSize}
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -19,15 +19,15 @@ import warwick.sso.{UserLookupService, Usercode}
 
 class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSuite {
 
-  val db = get[Database]
-  val audienceService = get[AudienceService]
-  val audienceDao = get[AudienceDao]
-  val pubSub = mock[PubSub]
-  val scheduler = mock[SchedulerService]
+  private val db = get[Database]
+  private val audienceService = get[AudienceService]
+  private val audienceDao = get[AudienceDao]
+  private val pubSub = mock[PubSub]
+  private val scheduler = mock[SchedulerService]
 
-  val context = mock[JobExecutionContext]
-  val jobDetail = mock[JobDetail]
-  val jobDataMap = mock[JobDataMap]
+  private val context = mock[JobExecutionContext]
+  private val jobDetail = mock[JobDetail]
+  private val jobDataMap = mock[JobDataMap]
 
   val cache = new MockCacheApi
 
@@ -50,7 +50,7 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
         Audience.UsercodeAudience(Usercode("dave")),
         Audience.UsercodeAudience(Usercode("james"))
       )))
-      val newsItemId = newsDao.save(Fixtures.news.save(), audienceId)
+      val newsItemId = newsDao.save(Fixtures.news.save(), audienceId, AudienceSize.Finite(2))
 
       when(jobDataMap.getString("newsItemId")).thenReturn(newsItemId)
       when(jobDataMap.getString("audienceId")).thenReturn(audienceId)
@@ -61,11 +61,14 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
         .as(str("usercode").*)
 
       recipientsSet must contain allOf("dave", "james")
+
+      val newsItemAudit = newsDao.getNewsAuditByIds(Seq(newsItemId))
+      newsItemAudit.head.audienceSize mustBe AudienceSize.Finite(2)
     }
 
     "save public audience for news item" in db.withConnection { implicit c =>
       val audienceId = audienceDao.saveAudience(Audience.Public)
-      val newsItemId = newsDao.save(Fixtures.news.save(), audienceId)
+      val newsItemId = newsDao.save(Fixtures.news.save(), audienceId, AudienceSize.Public)
 
       when(jobDataMap.getString("newsItemId")).thenReturn(newsItemId)
       when(jobDataMap.getString("audienceId")).thenReturn(audienceId)
@@ -75,7 +78,10 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
       val recipientsSet = SQL"SELECT usercode FROM news_recipient WHERE news_item_id=$newsItemId"
         .as(str("usercode").*)
 
-      recipientsSet must contain only("*")
+      recipientsSet must contain only "*"
+
+      val newsItemAudit = newsDao.getNewsAuditByIds(Seq(newsItemId))
+      newsItemAudit.head.audienceSize mustBe AudienceSize.Public
     }
   }
 
@@ -122,7 +128,7 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
     }
   }
 
-  def getRecipients(activityId: String)(implicit c: Connection) =
+  def getRecipients(activityId: String)(implicit c: Connection): List[String] =
     SQL"SELECT usercode FROM activity_recipient WHERE activity_id = $activityId"
       .as(str("usercode").*)
 }

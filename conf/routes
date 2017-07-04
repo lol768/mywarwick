@@ -5,14 +5,16 @@
 # Home page
 GET         /                                                     @controllers.HomeController.index
 GET         /notifications                                        @controllers.HomeController.index
-GET         /notifications/mute                                   @controllers.HomeController.index
 GET         /activity                                             @controllers.HomeController.index
 GET         /news                                                 @controllers.HomeController.index
 GET         /search                                               @controllers.HomeController.index
 GET         /tiles                                                @controllers.HomeController.redirectToIndex
-GET         /tiles/:id                                            @controllers.HomeController.tile(id: String)
+GET         /tiles/:id                                            @controllers.HomeController.indexIgnoreParam(id: String)
 GET         /edit                                                 @controllers.HomeController.index
 GET         /edit/add                                             @controllers.HomeController.index
+GET         /settings                                             @controllers.HomeController.settings
+GET         /settings/*setting                                    @controllers.HomeController.indexIgnoreParam(setting: String)
+GET         /post_tour                                            @controllers.HomeController.index
 
 # NEWSTART-253
 POST        /                                                     @controllers.HomeController.index
@@ -63,6 +65,9 @@ POST        /api/news/categories                                  @controllers.a
 POST        /api/news/images                                      @controllers.api.NewsImagesController.create
 GET         /api/news/images/:id                                  @controllers.api.NewsImagesController.show(id: String)
 POST        /api/news/analytics                                   @controllers.api.AnalyticsController.newsItemReport
+GET         /api/news/optin                                       @controllers.api.UserNewsOptInController.list
+POST        /api/news/optin                                       @controllers.api.UserNewsOptInController.update
+GET         /api/id7/notifications/unreads                        @controllers.api.NotificationsSnapshotController.unreads
 
 GET         /news/:id/redirect                                    @controllers.api.ReadNewsController.redirect(id: String)
 
@@ -70,11 +75,17 @@ GET         /service/metrics                                      @controllers.M
 GET         /service/gtg                                          @controllers.ServiceCheckController.gtg
 GET         /service/healthcheck                                  @controllers.ServiceCheckController.healthcheck
 GET         /service/cluster/state                                @controllers.admin.ClusterStateController.get
+GET         /service/revision                                     @controllers.VersionController.revision
 
 POST        /api/streams/read                                     @controllers.api.UserActivitiesController.markAsRead
 
 GET         /api/streams/notifications                            @controllers.api.UserActivitiesController.notifications(since: Option[String], before: Option[String], limit: Int ?= 100)
 GET         /api/streams/activities                               @controllers.api.UserActivitiesController.activities(since: Option[String], before: Option[String], limit: Int ?= 100)
+
+GET         /api/streams/notifications/filter                     @controllers.api.UserStreamFilterController.notificationFilter
+GET         /api/streams/activities/filter                        @controllers.api.UserStreamFilterController.activityFilter
+POST        /api/streams/notifications/filter                     @controllers.api.UserStreamFilterController.updateNotificationFilter
+POST        /api/streams/activities/filter                        @controllers.api.UserStreamFilterController.updateActivityFilter
 
 GET         /api/streams/mute                                     @controllers.api.UserActivitiesController.listMutes
 PUT         /api/streams/mute                                     @controllers.api.UserActivitiesController.saveMute
@@ -87,6 +98,10 @@ GET         /api/tiles                                            @controllers.a
 GET         /api/tiles/content                                    @controllers.api.TilesController.content
 GET         /api/tiles/content/:id                                @controllers.api.TilesController.contentById(id: String)
 PUT         /api/tiles                                            @controllers.api.TilesController.saveLayout
+
+GET         /api/emailNotificationPreferences                     @controllers.api.EmailNotificationsPrefController.get
+POST        /api/emailNotificationPreferences                     @controllers.api.EmailNotificationsPrefController.update
+
 
 POST        /api/errors/js                                        @controllers.api.ErrorsController.js
 

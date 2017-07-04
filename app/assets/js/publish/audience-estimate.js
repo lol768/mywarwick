@@ -52,6 +52,7 @@ $('.split-form').each((i, form) => {
         '.audience-picker :input',
         '#item_category_field :input',
         '#item_ignoreCategories_field :input',
+        '.audience-picker-extra :input',
       ].join(', '),
       // Defer so any changes to other fields made as a result of this change
       // propagate before requesting the audience size estimate.  Debounce

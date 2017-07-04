@@ -13,13 +13,18 @@ scalacOptions ++= Seq("-language:implicitConversions", "-unchecked", "-deprecati
 // Avoid some of the constant SBT "Updating"
 updateOptions := updateOptions.value.withCachedResolution(true)
 
-lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala)
+val gitRevision = SettingKey[String]("gitRevision")
+gitRevision := git.gitHeadCommit.value.getOrElse("Unset")
+
+lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala, BuildInfoPlugin)
   .configs(config("fun").extend(Test))
   .settings(
     Gulp.settings,
     // Package up assets before we build tar.gz
     packageZipTarball in Universal := (packageZipTarball in Universal).dependsOn(Gulp.gulpAssets).value,
-    funSettings
+    funSettings,
+    buildInfoKeys := Seq[BuildInfoKey](name, version, gitRevision),
+    buildInfoPackage := "info"
   )
 
 // Versions of things for below
@@ -56,7 +61,9 @@ val appDeps = Seq(
   "com.beachape" %% "enumeratum" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play-json" % enumeratumVersion,
-  "nl.martijndwars" % "web-push" % "2.0.0"
+  "nl.martijndwars" % "web-push" % "2.0.0",
+  "com.vladsch.flexmark" % "flexmark" % "0.18.5",
+  "com.vladsch.flexmark" % "flexmark-ext-autolink" % "0.18.5"
 )
 
 val testDeps = Seq(

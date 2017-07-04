@@ -99,18 +99,19 @@ class ActivityMuteDaoImpl extends ActivityMuteDao {
       get[DateTime]("CREATED_AT") ~
       get[Option[DateTime]]("EXPIRES_AT") ~
       get[Option[String]]("PROVIDER_ID") ~
+      get[Boolean]("PROVIDER_SEND_EMAIL") ~
       get[Option[String]]("PROVIDER_DISPLAY_NAME") ~
       get[Option[String]]("ACTIVITY_TYPE") ~
       get[Option[String]]("ACTIVITY_TYPE_DISPLAY_NAME") ~
       get[Option[String]]("TAGS") map {
-      case id ~ usercode ~ createdAt ~ expiresAt ~ providerOption ~ providerDisplayName ~ activityTypeOption ~ activityTypeDisplayName ~ tagString =>
+      case id ~ usercode ~ createdAt ~ expiresAt ~ providerOption ~ providerSendEmail ~ providerDisplayName ~ activityTypeOption ~ activityTypeDisplayName ~ tagString =>
         ActivityMuteRender(
           id,
           Usercode(usercode),
           createdAt,
           expiresAt,
           activityTypeOption.map(activityType => ActivityType(activityType, activityTypeDisplayName)),
-          providerOption.map(provider => ActivityProvider(provider, providerDisplayName)),
+          providerOption.map(provider => ActivityProvider(provider, providerSendEmail, providerDisplayName)),
           tagString
             .map(Json.parse(_).as[JsArray].value.map(_.as[ActivityTag]))
             .getOrElse(Nil)
@@ -121,6 +122,7 @@ class ActivityMuteDaoImpl extends ActivityMuteDao {
     SQL(s"""
       SELECT
         ACTIVITY_MUTE.*,
+        PROVIDER.SEND_EMAIL        AS PROVIDER_SEND_EMAIL,
         PROVIDER.DISPLAY_NAME      AS PROVIDER_DISPLAY_NAME,
         ACTIVITY_TYPE.DISPLAY_NAME AS ACTIVITY_TYPE_DISPLAY_NAME
       FROM ACTIVITY_MUTE

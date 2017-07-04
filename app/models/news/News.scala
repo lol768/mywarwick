@@ -1,7 +1,7 @@
 package models.news
 
 import controllers.publish.NewsItemData
-import models.{DateFormats, NewsCategory}
+import models.{AudienceSize, DateFormats, NewsCategory}
 import org.joda.time.DateTime
 import play.api.libs.json._
 import uk.ac.warwick.util.web.Uri
@@ -64,7 +64,7 @@ case class NewsItemRender (
 
 object NewsItemRender {
   implicit private val dateWriter = DateFormats.isoDateWrites
-  implicit val format = Json.format[NewsItemRender]
+  implicit val format: OFormat[NewsItemRender] = Json.format[NewsItemRender]
 }
 
 sealed trait NewsItemAuditFields[U] {
@@ -73,6 +73,7 @@ sealed trait NewsItemAuditFields[U] {
   val createdBy: Option[U]
   val updated: Option[DateTime]
   val updatedBy: Option[U]
+  val audienceSize: AudienceSize
 }
 
 case class NewsItemAudit[U] (
@@ -80,7 +81,8 @@ case class NewsItemAudit[U] (
   created: DateTime,
   createdBy: Option[U],
   updated: Option[DateTime],
-  updatedBy: Option[U]
+  updatedBy: Option[U],
+  audienceSize: AudienceSize
 ) extends NewsItemAuditFields[U]
 
 object NewsItemAudit {
@@ -101,7 +103,8 @@ case class NewsItemRenderWithAudit (
   created: DateTime,
   createdBy: Option[User],
   updated: Option[DateTime],
-  updatedBy: Option[User]
+  updatedBy: Option[User],
+  audienceSize: AudienceSize
 ) extends NewsItemRenderFields with NewsItemAuditFields[User]
 
 object NewsItemRenderWithAudit {
@@ -118,7 +121,8 @@ object NewsItemRenderWithAudit {
     created = audit.created,
     createdBy = audit.createdBy,
     updated = audit.updated,
-    updatedBy = audit.updatedBy
+    updatedBy = audit.updatedBy,
+    audienceSize = audit.audienceSize
   )
 }
 

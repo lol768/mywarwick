@@ -113,7 +113,6 @@ describe('MeView', () => {
       tiles: state.tiles.data.tiles,
       layout: [],
       deviceWidth: 428,
-      navRequest: null,
       dispatch: () => {},
     };
     const wrapper = shallow(<MeView.WrappedComponent {...props} />);

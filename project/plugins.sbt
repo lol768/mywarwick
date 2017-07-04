@@ -15,3 +15,7 @@ addSbtPlugin("de.johoop" % "jacoco4sbt" % "2.1.6")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.4.0")
 
 addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "4.0.0")
+
+addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.9.3")
+
+addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.7.0")

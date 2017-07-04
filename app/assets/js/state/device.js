@@ -9,6 +9,7 @@ function getDevicePixelWidth() {
 const initialState = {
   pixelWidth: getDevicePixelWidth(),
   width: window.innerWidth,
+  isOnline: navigator.onLine,
 };
 
 export function reducer(state = initialState, action) {
@@ -18,6 +19,11 @@ export function reducer(state = initialState, action) {
     case 'UPDATE_NOTIFICATION_PERMISSIONS':
       return { ...state,
         notificationPermission: window.Notification && Notification.permission,
+      };
+    case 'UPDATE_DEVICE_ONLINE_STATUS':
+      return {
+        ...state,
+        isOnline: action.isOnline,
       };
     default:
       return state;
@@ -36,5 +42,13 @@ export function updateDeviceWidth() {
   };
 }
 
-export const updateNotificationPermissions = { type: 'UPDATE_NOTIFICATION_PERMISSIONS' };
+export function updateOnlineStatus(isOnline) {
+  return dispatch => {
+    dispatch({
+      type: 'UPDATE_DEVICE_ONLINE_STATUS',
+      isOnline,
+    });
+  };
+}
 
+export const updateNotificationPermissions = { type: 'UPDATE_NOTIFICATION_PERMISSIONS' };

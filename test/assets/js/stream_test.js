@@ -69,7 +69,7 @@ describe('stream.freeze', () => {
       olderItemsOnServer: true
     };
     const frozen = freeze(state);
-    expect(frozen.olderItemsOnServer).to.eql(true);
+    expect(frozen.meta.olderItemsOnServer).to.eql(true);
     expect(frozen.items).to.deep.eql(items);
   })
 });

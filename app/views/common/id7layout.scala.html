@@ -2,7 +2,8 @@
 @(title: String = "")(content: Html)(implicit context: RequestContext)
 @common.htmlelement {
   <head>
-
+    @context.csrfHelper.metaElementToken
+    @context.csrfHelper.metaElementHeader
     @common.head(title)
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("css/admin.css")">
 

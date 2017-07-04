@@ -20,6 +20,8 @@ trait ActivityService {
 
   def getNotificationsForUser(user: User, before: Option[String], since: Option[String], limit: Int): Seq[ActivityRender]
 
+  def countUnreadNotificationsForUsercode(usercode: Usercode): Int
+
   def save(activity: ActivitySave, audience: Audience): Either[Seq[ActivityError], String]
 
   def setRecipients(activity: Activity, recipients: Set[Usercode]): Either[Seq[ActivityError], Unit]
@@ -50,6 +52,10 @@ trait ActivityService {
   def save(activityMute: ActivityMuteSave): Either[Seq[ActivityError], String]
 
   def expireActivityMute(recipient: Usercode, id: String): Either[Seq[ActivityError], ActivityMuteRender]
+
+  def allProviders: Seq[(ActivityProvider, Option[ActivityIcon])]
+
+  def getProvider(id: String): Option[ActivityProvider]
 
 }
 
@@ -168,6 +174,12 @@ class ActivityServiceImpl @Inject()(
   override def getNotificationsForUser(user: User, before: Option[String], since: Option[String], limit: Int): Seq[ActivityRender] =
     db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, notifications = true, before, since, limit))
 
+  override def countUnreadNotificationsForUsercode(usercode: Usercode): Int =
+    db.withConnection(implicit c => {
+      val concreteLastReadDate = dao.getLastReadDate(usercode.string).getOrElse(new DateTime(0))
+      dao.countNotificationsSinceDate(usercode.string, concreteLastReadDate)
+    })
+
   override def getActivitiesForUser(user: User, before: Option[String], since: Option[String], limit: Int): Seq[ActivityRender] =
     db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, notifications = false, before, since, limit))
 
@@ -243,6 +255,15 @@ class ActivityServiceImpl @Inject()(
 
   private def unschedulePublishJob(activityId: String): Unit = {
     scheduler.deleteJob(publishJobKey(activityId))
+  }
+
+  override def allProviders: Seq[(ActivityProvider, Option[ActivityIcon])] = {
+    val providers = db.withConnection(implicit c => dao.allProviders)
+    providers.map(p => (p, db.withConnection(implicit c => dao.getActivityIcon(p.id))))
+  }
+
+  override def getProvider(id: String): Option[ActivityProvider] = {
+    db.withConnection(implicit c => dao.getProvider(id))
   }
 
 }

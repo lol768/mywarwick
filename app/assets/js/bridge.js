@@ -115,7 +115,7 @@ export default function init(opts) {
         document.dispatchEvent(new Event('click'));
         if (path.indexOf(`/${Routes.EDIT}`) === 0 ||
           path.indexOf(`/${Routes.TILES}`) === 0 ||
-          path.indexOf(`/${Routes.NOTIFICATIONS}/${Routes.MUTE}`) === 0
+          path.indexOf(`/${Routes.SETTINGS}`) === 0
       ) {
           store.dispatch(push(path));
         } else {

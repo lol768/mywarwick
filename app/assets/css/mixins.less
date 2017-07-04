@@ -13,3 +13,8 @@
 .screen-xs-orless(@rules) {
   @media screen and (max-width: @screen-xs-max) { @rules(); }
 }
+
+// Inverse of screen-xs-orless
+.screen-sm-ormore(@rules) {
+  @media screen and (min-width: @screen-sm-min) { @rules(); }
+}

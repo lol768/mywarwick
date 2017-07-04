@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
 import * as groupItemsByDate from '../../GroupItemsByDate';
@@ -9,6 +10,7 @@ import { getStreamSize, takeFromStream } from '../../stream';
 import * as notifications from '../../state/notifications';
 import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
+import _ from 'lodash-es';
 
 const SOME_MORE = 20;
 
@@ -20,11 +22,33 @@ class ActivityView extends React.PureComponent {
     dispatch: PropTypes.func.isRequired,
     grouped: PropTypes.bool.isRequired,
     numberToShow: PropTypes.number.isRequired,
+    isFiltered: PropTypes.bool.isRequired,
   };
 
   static defaultProps = {
     grouped: true,
   };
+
+  static renderEmpty(isFiltered) {
+    if (isFiltered) {
+      return (
+        <EmptyState lead="You don't have any activity to display.">
+          <p>
+            There may be others hidden due to your Activity filter settings.
+          </p>
+        </EmptyState>
+      );
+    }
+    return (
+      <EmptyState lead="You don't have any activity yet.">
+        <p>
+          When you do something at Warwick &ndash;
+          like signing in, submitting your coursework, or enrolling for a module &ndash;
+          you'll see a record of it here.
+        </p>
+      </EmptyState>
+    );
+  }
 
   constructor(props) {
     super(props);
@@ -84,14 +108,7 @@ class ActivityView extends React.PureComponent {
               </GroupedList>
             </InfiniteScrollable>
           </ScrollRestore>
-          :
-          <EmptyState lead="You don't have any activity yet.">
-            <p>
-              When you do something at Warwick &ndash;
-              like signing in, submitting your coursework, or enrolling for a module &ndash;
-              you'll see a record of it here.
-            </p>
-          </EmptyState>
+          : ActivityView.renderEmpty(this.props.isFiltered)
         }
       </div>
     );
@@ -100,7 +117,8 @@ class ActivityView extends React.PureComponent {
 
 function select(state) {
   return {
-    activities: state.activities.stream,
+    activities: state.activities.filteredStream,
+    isFiltered: _.filter(_.keys(state.activities.filter), value => value !== undefined).length > 0,
     olderItemsOnServer: state.activities.olderItemsOnServer,
     numberToShow: state.activities.numberToShow,
   };

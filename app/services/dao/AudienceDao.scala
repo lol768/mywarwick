@@ -58,9 +58,9 @@ class AudienceDaoImpl extends AudienceDao {
       SQL"SELECT * FROM audience_component WHERE audience_id=$audienceId".as(componentParser.*)
     )
 
-  def audienceFromComponents(components: Seq[AudienceComponentSave]): Audience = Audience(
-    components.groupBy(_.deptCode).flatMap {
-      case (None, components) => components.groupBy(_.name).flatMap {
+  def audienceFromComponents(audienceComponents: Seq[AudienceComponentSave]): Audience = Audience(
+    audienceComponents.groupBy(_.deptCode).flatMap {
+      case (None, groupedComponents) => groupedComponents.groupBy(_.name).flatMap {
         case ("Public", _) => Seq(PublicAudience)
         case ("Module", components) => components.collect {
           case AudienceComponentSave("Module", Some(code), _) => ModuleAudience(code)
@@ -87,6 +87,7 @@ class AudienceDaoImpl extends AudienceDao {
       case ModuleAudience(code) => Seq(AudienceComponentSave("Module", Some(code), None))
       case WebGroupAudience(group) => Seq(AudienceComponentSave("WebGroup", Some(group.string), None))
       case UsercodeAudience(usercode) => Seq(AudienceComponentSave("Usercode", Some(usercode.string), None))
+      case optIn: OptIn => Seq(AudienceComponentSave(s"OptIn:${optIn.optInType}", Some(optIn.optInValue), None))
     }
 
   private def resolveSubset(deptCode: Option[String], subset: DepartmentSubset): Seq[AudienceComponentSave] =

@@ -11,6 +11,7 @@ import MasqueradeNotice from './MasqueradeNotice';
 import UpdatePopup from './UpdatePopup';
 import UtilityBar from './UtilityBar';
 import { connect } from 'react-redux';
+import { isEmbedded } from '../../embedHelper';
 import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
 import { goBack, push } from 'react-router-redux';
@@ -39,6 +40,7 @@ class ID7Layout extends React.PureComponent {
     super(props);
     this.onBackClick = this.onBackClick.bind(this);
     this.onEdit = this.onEdit.bind(this);
+    this.onSettings = this.onSettings.bind(this);
   }
 
   componentWillMount() {
@@ -48,6 +50,10 @@ class ID7Layout extends React.PureComponent {
 
   componentDidMount() {
     this.updateHeaderHeight();
+    if (isEmbedded()) {
+      const type = 'message.id7.account-popover.layoutDidMount';
+      window.parent.postMessage(JSON.stringify({ type }), '*');
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -78,11 +84,13 @@ class ID7Layout extends React.PureComponent {
   onEdit() {
     if (this.isEditing()) {
       this.props.dispatch(goBack());
-    } else if (this.props.path === `/${Routes.NOTIFICATIONS}`) {
-      this.props.dispatch(push(`/${Routes.NOTIFICATIONS}/${Routes.MUTE}`));
     } else {
       this.props.dispatch(push(`/${Routes.EDIT}`));
     }
+  }
+
+  onSettings() {
+    this.props.dispatch(push(`/${Routes.SETTINGS}`));
   }
 
   /** Set the theme on the html element, so that we can style everything. */
@@ -102,7 +110,7 @@ class ID7Layout extends React.PureComponent {
   }
 
   renderNotificationPermissionRequest() {
-    if ('Notification' in window && Notification.permission === 'default') {
+    if ('Notification' in window && Notification.permission === 'default' && !isEmbedded()) {
       return <PermissionRequest isDisabled={ !this.props.user.data.authenticated } />;
     }
 
@@ -133,6 +141,12 @@ class ID7Layout extends React.PureComponent {
 
   renderMobile() {
     const { user, path } = this.props;
+
+    const showSettingsButton = !(
+      path.startsWith(`/${Routes.SETTINGS}`) ||
+      path.startsWith(`/${Routes.POST_TOUR}`)
+    );
+
     return (
       <div className="">
         <a className="sr-only sr-only-focusable" href="#main">Skip to main content</a>
@@ -149,9 +163,10 @@ class ID7Layout extends React.PureComponent {
                 editing={this.isEditing()}
                 showEditButton={
                   this.isEditing() ||
-                  this.props.path === '/' ||
-                  this.props.path === `/${Routes.NOTIFICATIONS}`
+                  path === '/'
                 }
+                onSettings={this.onSettings}
+                showSettingsButton={showSettingsButton}
               />
             </header>
           </div>

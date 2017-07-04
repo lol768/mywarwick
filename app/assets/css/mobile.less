@@ -47,16 +47,12 @@ html.mobile {
   position: relative;
 
   .back-btn {
-    visibility: hidden;
     position: absolute;
     left: 0;
     top: 0;
     line-height: 44px;
     font-size: 1.25em;
-    transform: translate3d(25px, 0, 0);
-    opacity: 0;
     padding: 0 5px;
-    transition: all .3s ease-in-out;
     cursor: pointer;
 
     i {
@@ -64,37 +60,24 @@ html.mobile {
     }
   }
 
-  .edit-btn {
+  .settings-btn {
     position: absolute;
     left: 0;
     top: 0;
     line-height: 44px;
     font-size: 1.25em;
-    padding: 0 20px 0 13px;
+    padding: 0 13px;
     cursor: pointer;
   }
 
-  .feedback-btn {
-    @font-size: 1.25em;
+  .edit-btn {
     position: absolute;
-    left: 0;
+    left: 44px;
     top: 0;
     line-height: 44px;
-    font-size: @font-size;
+    font-size: 1.25em;
+    padding: 0 13px;
     cursor: pointer;
-    height: 44px;
-    width: 44px;
-    .fa-stack-2x {
-      font-size: @font-size;
-      line-height: 44px;
-    }
-    .fa-stack-1x {
-      font-size: @font-size / 2;
-    }
-  }
-
-  .edit-btn ~ .feedback-btn {
-    left: 44px;
   }
 
   .masthead-title {
@@ -174,20 +157,13 @@ html.mobile {
     -webkit-overflow-scrolling: auto;
   }
 
-  .back-btn {
-    visibility: visible;
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-
-  .feedback-btn {
+  .settings-btn {
     display: none;
   }
 }
 
 html.android.app {
-  .start-masthead,
-  .search-form {
+  .start-masthead {
     display: none;
   }
 

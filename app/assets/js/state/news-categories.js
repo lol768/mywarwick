@@ -2,7 +2,6 @@ import log from 'loglevel';
 import { createAction } from 'redux-actions';
 import { fetchWithCredentials, postJsonWithCredentials } from '../serverpipe';
 import _ from 'lodash-es';
-import * as news from './news';
 
 const NEWS_CATEGORIES_REQUEST = 'NEWS_CATEGORIES_REQUEST';
 const NEWS_CATEGORIES_RECEIVE = 'NEWS_CATEGORIES_RECEIVE';
@@ -10,7 +9,7 @@ const NEWS_CATEGORY_SUBSCRIBE = 'NEWS_CATEGORY_SUBSCRIBE';
 const NEWS_CATEGORY_UNSUBSCRIBE = 'NEWS_CATEGORY_UNSUBSCRIBE';
 
 const start = createAction(NEWS_CATEGORIES_REQUEST);
-const receive = createAction(NEWS_CATEGORIES_RECEIVE);
+export const receive = createAction(NEWS_CATEGORIES_RECEIVE);
 
 const sub = createAction(NEWS_CATEGORY_SUBSCRIBE);
 const unsub = createAction(NEWS_CATEGORY_UNSUBSCRIBE);
@@ -32,9 +31,8 @@ export function fetch() {
   };
 }
 
-const persistSubscribedCategories = categories => dispatch =>
-  postJsonWithCredentials('/api/news/categories', { categories })
-    .then(() => dispatch(news.refresh()));
+const persistSubscribedCategories = categories => () =>
+  postJsonWithCredentials('/api/news/categories', { categories });
 
 let store = {};
 const persistSubscriptionsDebounced = _.debounce(() =>
@@ -60,6 +58,7 @@ export function unsubscribe(id) {
 const initialState = {
   fetching: false,
   failed: false,
+  fetched: false,
   items: [],
   subscribed: [],
 };
@@ -71,16 +70,19 @@ export function reducer(state = initialState, action) {
         ...state,
         fetching: true,
         failed: false,
+        fetched: false,
       };
     case NEWS_CATEGORIES_RECEIVE:
       return action.error ? {
         ...state,
         fetching: false,
         failed: true,
+        fetched: true,
       } : {
         ...state,
         fetching: false,
         failed: false,
+        fetched: true,
         items: action.payload.data.items,
         subscribed: _.uniq(action.payload.data.subscribed),
       };

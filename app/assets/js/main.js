@@ -6,6 +6,8 @@ import localforage from 'localforage';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { syncHistoryWithStore } from 'react-router-redux';
+import fetch from 'isomorphic-fetch';
+import log from 'loglevel';
 
 import * as notificationsGlue from './notifications-glue';
 import * as pushNotifications from './push-notifications';
@@ -14,10 +16,13 @@ import persistedLib from './persisted';
 import SocketDatapipe from './SocketDatapipe';
 import * as notifications from './state/notifications';
 import * as notificationMetadata from './state/notification-metadata';
+import * as app from './state/app';
 import * as tiles from './state/tiles';
 import * as update from './state/update';
 import * as user from './state/user';
 import * as news from './state/news';
+import * as newsCategories from './state/news-categories';
+import * as newsOptIn from './state/news-optin';
 import * as ui from './state/ui';
 import * as device from './state/device';
 import * as analytics from './analytics';
@@ -112,10 +117,18 @@ export function launch(userData) {
           const installingWorker = reg.installing;
 
           installingWorker.onstatechange = () => {
-            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // The new service worker is ready to go, but there's an old service worker
-              // handling network operations.  Notify the user to refresh.
-              store.dispatch(update.updateReady());
+            if (installingWorker.state === 'installed') {
+              fetch('/service/revision')
+                .then(res => res.text())
+                .then(rev => store.dispatch(app.updateAssets(rev)))
+                .catch(e => log.error('Error fetching revision information', e))
+                .then(() => {
+                  if (navigator.serviceWorker.controller) {
+                    // The new service worker is ready to go, but there's an old service worker
+                    // handling network operations.  Notify the user to refresh.
+                    store.dispatch(update.updateReady());
+                  }
+                });
             }
           };
         };
@@ -149,6 +162,27 @@ export function launch(userData) {
   persisted('tiles.data', tiles.fetchedTiles);
   persisted('tileContent', tiles.loadedAllTileContent);
 
+  persisted(
+    'newsCategories',
+    newsCategories.receive,
+    ({ items, subscribed }) => ({ items, subscribed }),
+    ({ items, subscribed }) => ({ data: { items, subscribed } }),
+  );
+  persisted('newsOptIn', newsOptIn.receive, ({ options, selected }) => ({ options, selected }));
+
+  persisted('app.assets', app.loadAssets)
+    .then(() => {
+      if (store.getState().app.assets.revision === null) {
+        return fetch('/service/revision')
+          .then(res => res.text())
+          .then(rev => store.dispatch(app.loadAssets({ revision: rev })))
+          .catch(e => log.error('Error fetching current revision information', e));
+      }
+
+      return Promise.resolve();
+    })
+    .then(() => store.dispatch(app.promoteNextRevision()));
+
   const persistedUserLinks = persisted('user.links', user.receiveSSOLinks);
 
   /** Initial requests for data */
@@ -180,6 +214,12 @@ export function launch(userData) {
 
   store.dispatch(ui.updateUIContext());
   store.dispatch(update.displayUpdateProgress);
+  window.addEventListener('offline', () => {
+    store.dispatch(device.updateOnlineStatus(false));
+  });
+  window.addEventListener('online', () => {
+    store.dispatch(device.updateOnlineStatus(true));
+  });
   store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));
 
   user.loadUserFromLocalStorage(store.dispatch);
