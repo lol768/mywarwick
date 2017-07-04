@@ -1,6 +1,5 @@
 import React, { PropTypes } from 'react';
 import ReactGridLayoutBase from 'react-grid-layout';
-import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import _ from 'lodash-es';
 import $ from 'jquery';
 import { connect } from 'react-redux';
@@ -159,7 +158,6 @@ class MeView extends React.PureComponent {
     );
 
     const visibleTiles = allTiles.filter(t => !t.removed);
-    const hiddenTiles = allTiles.filter(t => t.removed);
 
     const layout = this.getTileLayout(this.props.layout, layoutWidth);
     const tileComponents = visibleTiles.map(tile =>
@@ -190,14 +188,6 @@ class MeView extends React.PureComponent {
           >
             { tileComponents }
           </ReactGridLayoutBase>
-          <ReactCSSTransitionGroup
-            transitionName="grow-shrink"
-            transitionAppear
-            transitionAppearTimeout={500}
-            transitionEnterTimeout={500}
-            transitionLeaveTimeout={300}
-          >
-          </ReactCSSTransitionGroup>
         </div>
       </div>
     );

@@ -17,6 +17,7 @@ import * as ui from '../../state/ui';
 import { goBack, push } from 'react-router-redux';
 import { Routes } from '../AppRoot';
 import * as TILE_TYPES from '../tiles';
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 class ID7Layout extends React.PureComponent {
 
@@ -183,10 +184,18 @@ class ID7Layout extends React.PureComponent {
             </header>
           </div>
         </div>
-        {this.isEditing() && hiddenTiles.length > 0 ?
-        <div key="add-tile-button" className="add-tile-button" onClick={this.onAdd}>
-          <i className="fa fa-plus" />
-        </div> : null}
+        <ReactCSSTransitionGroup
+          transitionName="grow-shrink"
+          transitionAppear
+          transitionAppearTimeout={500}
+          transitionEnterTimeout={500}
+          transitionLeaveTimeout={300}
+        >
+          {this.isEditing() && hiddenTiles.length > 0 ?
+            <div key="add-tile-button" className="add-tile-button" onClick={this.onAdd}>
+              <i className="fa fa-plus" />
+            </div> : null}
+        </ReactCSSTransitionGroup>
         <div>
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
