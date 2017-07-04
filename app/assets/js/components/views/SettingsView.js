@@ -182,7 +182,7 @@ class SettingsView extends HideableView {
   render() {
     return (
       <div>
-        <div className="list-group">
+        <div className="list-group fixed">
           <div className="list-group-item">
             <div className="list-group-item-heading">
               <h3>Settings</h3>

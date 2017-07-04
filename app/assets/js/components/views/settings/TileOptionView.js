@@ -126,7 +126,7 @@ export class TileOptionView extends React.PureComponent {
   render() {
     return (
       <div>
-        <div className={ `list-group setting-colour-${this.props.tile.colour}` }>
+        <div className={ `list-group fixed setting-colour-${this.props.tile.colour}` }>
           <div className="list-group-item">
             <div className="list-group-item-heading">
               <h3>{ `${this.props.tile.title} tile preferences` }</h3>
