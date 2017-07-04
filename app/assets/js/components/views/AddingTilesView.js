@@ -1,7 +1,6 @@
 import React, { PropTypes } from 'react';
 import ReactGridLayoutBase from 'react-grid-layout';
 import _ from 'lodash-es';
-import $ from 'jquery.transit';
 import { connect } from 'react-redux';
 import * as tiles from '../../state/tiles';
 import HiddenTile from '../tiles/HiddenTile';
