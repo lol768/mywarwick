@@ -68,7 +68,7 @@ class StreamFilterOptionView extends React.PureComponent {
 
     return (
       <div>
-        <div className="list-group setting-colour-2">
+        <div className="list-group fixed setting-colour-2">
           <div className="list-group-item">
             <div className="list-group-item-heading">
               <h3>{ `${this.props.filterType} filter` }</h3>
