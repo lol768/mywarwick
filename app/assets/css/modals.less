@@ -1,6 +1,11 @@
 .modal {
   display: flex;
   flex-direction: column;
+  position: absolute;
+}
+
+.modal-backdrop {
+  position: absolute;
 }
 
 html.app .modal-dialog {
@@ -38,6 +43,7 @@ html.ios.app .modal-dialog {
 .modal-dialog {
   overflow-y: hidden;
   max-height: 100%;
+  max-width: 95%;
 }
 
 // More native looking mobile modals
