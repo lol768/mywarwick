@@ -1,5 +1,4 @@
 import React, { PropTypes } from 'react';
-import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import _ from 'lodash-es';
 import log from 'loglevel';
@@ -16,8 +15,6 @@ import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
 import { goBack, push } from 'react-router-redux';
 import { Routes } from '../AppRoot';
-import * as TILE_TYPES from '../tiles';
-import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 class ID7Layout extends React.PureComponent {
 
@@ -104,9 +101,9 @@ class ID7Layout extends React.PureComponent {
   }
 
   updateHeaderHeight() {
-    const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
+    // const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
     // TODO: Sort this out
-    //$(document.body).css('margin-top', headerHeight);
+    // $(document.body).css('margin-top', headerHeight);
   }
 
   isEditing() {
@@ -150,12 +147,6 @@ class ID7Layout extends React.PureComponent {
   renderMobile() {
     const { user, path } = this.props;
 
-    const allTiles = this.props.tiles.filter(t =>
-      TILE_TYPES[t.type] && (!TILE_TYPES[t.type].isVisibleOnDesktopOnly())
-    );
-
-    const hiddenTiles = allTiles.filter(t => t.removed);
-
     const showSettingsButton = !(
       path.startsWith(`/${Routes.SETTINGS}`) ||
       path.startsWith(`/${Routes.POST_TOUR}`)
@@ -185,14 +176,6 @@ class ID7Layout extends React.PureComponent {
             </header>
           </div>
         </div>
-        <ReactCSSTransitionGroup
-          transitionName="grow-shrink"
-          transitionAppear
-          transitionAppearTimeout={500}
-          transitionEnterTimeout={500}
-          transitionLeaveTimeout={300}
-        >
-        </ReactCSSTransitionGroup>
         <div className="outer-container">
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
@@ -302,7 +285,6 @@ const select = (state) => ({
   zoomedTile: state.ui.zoomedTile,
   native: state.ui.native,
   showBetaWarning: state.ui.showBetaWarning,
-  tiles: state.tiles.data.tiles,
 });
 
 export default connect(select)(ID7Layout);
