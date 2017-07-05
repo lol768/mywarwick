@@ -1,0 +1,26 @@
+body {
+  max-width: @desktop-rendition-width;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+.fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
+  position: fixed;
+  max-width: @desktop-rendition-width;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.add-tile-container {
+  display: flex;
+  flex-direction: row-reverse;
+  left: 0;
+  right: 0;
+  bottom: @start-tab-bar-height;
+  padding: 1.5em;
+}
+
+.id7-main-content-area {
+  overflow-y: visible !important;
+}

@@ -105,14 +105,13 @@
   @base-size: 56px;
   @font-size: 24px;
   line-height: @font-size;
-  position: absolute;
-  bottom: 60px;
-  right: 25px;
   z-index: 2000;
   width: @base-size;
   height: @base-size;
   background-color: #8c6e96;
   border-radius: @base-size / 2;
+  position: relative;
+
   box-shadow: rgba(0, 0, 0, 0.16) 0 3px 10px, rgba(0, 0, 0, 0.23) 0 3px 10px;
   .center-aligned-icon(@base-size, @font-size);
   .app.android & {

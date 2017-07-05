@@ -105,7 +105,8 @@ class ID7Layout extends React.PureComponent {
 
   updateHeaderHeight() {
     const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
-    $(document.body).css('margin-top', headerHeight);
+    // TODO: Sort this out
+    //$(document.body).css('margin-top', headerHeight);
   }
 
   isEditing() {
@@ -191,12 +192,8 @@ class ID7Layout extends React.PureComponent {
           transitionEnterTimeout={500}
           transitionLeaveTimeout={300}
         >
-          {this.isEditing() && hiddenTiles.length > 0 ?
-            <div key="add-tile-button" className="add-tile-button" onClick={this.onAdd}>
-              <i className="fa fa-plus" />
-            </div> : null}
         </ReactCSSTransitionGroup>
-        <div>
+        <div className="outer-container">
           <main className="id7-main-content-area" id="main">
             <header className="id7-main-content-header">
               { this.renderNotificationPermissionRequest() }

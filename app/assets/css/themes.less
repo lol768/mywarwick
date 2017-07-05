@@ -65,19 +65,22 @@
     background: transparent;
   }
   .in-root, .in-edit, .in-tiles {
+
+    background-image: linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674);
+    background-image: url(/assets/images/bg01.jpg);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: @desktop-rendition-width 100vh;
+
+    background-position: 50% 50%;
+
     &.in-add h3 {
       margin: 0;
       padding: 20px 0 20px 14px;
       background: @transparent;
       color: #fff;
     }
-    #app-container {
-      background-image: linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674);
-      background-image: url(/assets/images/bg01.jpg);
-      background-position: 0 0;
-      background-repeat: no-repeat;
-      background-size: cover;
-    }
+
     html.app& {
       // Native apps render the background image internally
       background: transparent;

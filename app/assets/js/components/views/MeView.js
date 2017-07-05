@@ -4,13 +4,15 @@ import _ from 'lodash-es';
 import $ from 'jquery';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
-import { goBack } from 'react-router-redux';
+import { goBack, push } from 'react-router-redux';
 import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
 import * as TILE_TYPES from '../tiles';
 import ScrollRestore from '../ui/ScrollRestore';
 import { GridSizingHelper } from '../../GridSizingHelper';
+import { Routes } from '../AppRoot';
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -62,6 +64,7 @@ class MeView extends React.PureComponent {
     this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
+    this.onAdd = this.onAdd.bind(this);
   }
 
   onDragStart(layout, item, newItem, placeholder, e) {
@@ -117,6 +120,10 @@ class MeView extends React.PureComponent {
     return getSizeNameFromSize(layout);
   }
 
+  onAdd() {
+    this.props.dispatch(push(`/${Routes.EDIT}/${Routes.ADD}`));
+  }
+
   getTileLayout(layout) {
     return layout
       .filter(tile => tile.layoutWidth === this.props.layoutWidth)
@@ -158,6 +165,7 @@ class MeView extends React.PureComponent {
     );
 
     const visibleTiles = allTiles.filter(t => !t.removed);
+    const hiddenTiles = allTiles.filter(t => t.removed);
 
     const layout = this.getTileLayout(this.props.layout, layoutWidth);
     const tileComponents = visibleTiles.map(tile =>
@@ -188,6 +196,20 @@ class MeView extends React.PureComponent {
           >
             { tileComponents }
           </ReactGridLayoutBase>
+          <ReactCSSTransitionGroup
+            transitionName="grow-shrink"
+            transitionAppear
+            transitionAppearTimeout={500}
+            transitionEnterTimeout={500}
+            transitionLeaveTimeout={300}
+          >{ editing && hiddenTiles.length > 0 ?
+            <div className="add-tile-container">
+              <div key="add-tile-button" className="add-tile-button" onClick={this.onAdd}>
+                <i className="fa fa-plus" />
+              </div>
+            </div>
+            : null }
+          </ReactCSSTransitionGroup>
         </div>
       </div>
     );
