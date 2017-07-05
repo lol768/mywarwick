@@ -35,6 +35,7 @@ export class TileOptionView extends React.PureComponent {
     };
 
     this.saveConfig = this.saveConfig.bind(this);
+    this.saveTilePreferences = _.debounce(this.saveTilePreferences.bind(this), 1000);
     this.onCheckboxClick = this.onCheckboxClick.bind(this);
     this.onRadioClick = this.onRadioClick.bind(this);
   }
@@ -118,10 +119,12 @@ export class TileOptionView extends React.PureComponent {
     this.saveConfig(newPreferences);
   }
 
+  saveTilePreferences() {
+    this.props.dispatch(tiles.saveTilePreferences(this.props.tile, this.state.currentPreferences));
+  }
+
   saveConfig(currentPreferences) {
-    this.setState({ currentPreferences }, () =>
-      this.props.dispatch(tiles.saveTilePreferences(this.props.tile, currentPreferences))
-    );
+    this.setState({ currentPreferences }, this.saveTilePreferences);
   }
 
   render() {
