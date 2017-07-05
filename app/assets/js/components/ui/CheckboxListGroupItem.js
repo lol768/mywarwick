@@ -40,13 +40,13 @@ export default class CheckboxListGroupItem extends React.PureComponent {
     />);
     if (this.props.loading) {
       mediaRight = (
-        <i className="fa fa-spinner fa-pulse fa-2x" />
+        <i className="fa fa-spinner fa-pulse" />
       );
     }
 
     if (this.props.failure) {
       mediaRight = (
-        <i className="fa fa-exclamation-triangle fa-2x" />
+        <i className="fa fa-exclamation-triangle" />
       );
     }
     return (

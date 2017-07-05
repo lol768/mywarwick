@@ -218,7 +218,7 @@ class SettingsView extends HideableView {
             ) }
           </div>
           <CheckboxListGroupItem id="copyNotificationsEmail"
-            value
+            value=""
             icon="envelope"
             description="Copy my notifications to email"
             onClick={ this.onNotificationEmailCopyChange }
