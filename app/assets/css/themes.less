@@ -72,7 +72,12 @@
     background-repeat: no-repeat;
     background-size: @desktop-rendition-width 100%;
 
-    background-position: 50% 50%;
+    background-position: @desktop-rendition-width-from-center 50%;
+
+    @media screen and (max-width: @desktop-rendition-width) {
+      background-position: 0 50%;
+    }
+
 
     &.in-add h3 {
       margin: 0;

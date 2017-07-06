@@ -1,15 +1,13 @@
-body {
+
+
+body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
   max-width: @desktop-rendition-width;
-  margin-left: auto;
+  margin-left: @desktop-rendition-width-from-center;
   margin-right: auto;
 }
 
-
 .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
   position: fixed;
-  max-width: @desktop-rendition-width;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .add-tile-container {
@@ -29,5 +27,9 @@ body {
 @media screen and (max-width: @desktop-rendition-width) {
   body {
     max-width: 100vw;
+  }
+
+  body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
+    margin-left: 0;
   }
 }
