@@ -111,10 +111,7 @@ export default class AccountTile extends TileContent {
           <div>{ member.fullName }</div>
           <div>{ member.email }</div>
           <div>{ `${member.userId}, ${member.universityId}` }</div>
-          <div>
-            { (member.jobTitle) ? `${member.jobTitle}, ` : null }
-            { `${member.userType}, ${member.homeDepartment.name}` }
-          </div>
+          <div>{ `${member.userType}, ${member.homeDepartment.name}` }</div>
           { AccountTile.getLink() }
         </div>
       </div>
@@ -140,10 +137,8 @@ export default class AccountTile extends TileContent {
             <li>{ member.fullName }</li>
             <li>{ member.email }</li>
             <li>{ `${member.userId}, ${member.universityId}` }</li>
-            <li>
-              { (member.jobTitle) ? `${member.jobTitle}, ` : null }
-              { `${member.userType}, ${member.homeDepartment.name}` }
-            </li>
+            { (member.jobTitle) ? <li>{ member.jobTitle }</li> : null }
+            <li>{ `${member.userType}, ${member.homeDepartment.name}` }</li>
             { AccountTile.realInactivationDate(member.inactivationDate) }
             { member.phoneNumber && <li><i className="fa fa-phone" /> { member.phoneNumber }</li> }
             { (scd) && <li>Course: { scd.course.name }</li> }
@@ -151,6 +146,7 @@ export default class AccountTile extends TileContent {
               <li>Route: { scd.currentRoute.code.toUpperCase() } { scd.currentRoute.name }</li>
             }
             { (scd) && <li>Year of study: { scd.levelCode }</li> }
+            <li>&nbsp;</li>
           </ul>
           { AccountTile.getLink() }
         </div>
