@@ -1,6 +1,6 @@
 // non-redux version
 import UtilityBar from 'components/ui/UtilityBar';
-import sinon from 'sinon';
+import * as React from 'react';
 
 describe('UtilityBar', () => {
 
@@ -45,7 +45,7 @@ describe('UtilityBar', () => {
     const link = result.props.children.props.children;
     expect(link).to.have.property('type', 'a');
     const [ img ] = link.props.children;
-    expect(img).to.have.deep.property('props.alt', 'Ron Swanson');
+    expect(shallowRender(img)).to.have.deep.property('props.alt', 'Ron Swanson');
   })
 
 });

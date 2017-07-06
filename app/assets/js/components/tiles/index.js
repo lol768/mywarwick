@@ -11,3 +11,4 @@ export { default as activity } from './ActivityTile';
 export { default as notifications } from './NotificationsTile';
 export { default as map } from './MapTile';
 export { default as workarea } from './WorkareaTile';
+export { default as account } from './AccountTile';
