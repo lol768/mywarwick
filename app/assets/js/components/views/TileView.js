@@ -109,6 +109,7 @@ class TileView extends Component {
       ...content,
       zoomed,
       size,
+      user,
     };
 
     const tileElement = (

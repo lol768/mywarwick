@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import log from 'loglevel';
+import AccountPhoto from './AccountPhoto';
 
 export default class UtilityBar extends React.PureComponent {
 
@@ -17,24 +18,12 @@ export default class UtilityBar extends React.PureComponent {
     layoutClassName: PropTypes.oneOf(['desktop', 'mobile']),
   };
 
-  constructor(props) {
-    super(props);
-
-    this.onPhotoError = this.onPhotoError.bind(this);
-  }
-
   componentDidMount() {
     this.attachAccountPopover();
   }
 
   componentDidUpdate() {
     this.attachAccountPopover();
-  }
-
-  onPhotoError() {
-    const photo = ReactDOM.findDOMNode(this.refs.photo);
-
-    photo.src = '/assets/images/no-photo.png';
   }
 
   attachAccountPopover() {
@@ -62,7 +51,7 @@ export default class UtilityBar extends React.PureComponent {
 
     const ssoLinks = this.props.user.links;
     const user = this.props.user.data || {};
-    const link = isMobile ? this.renderPhoto(user) : user.name;
+    const link = isMobile ? <AccountPhoto user={ user } className="img-circle" /> : user.name;
 
     return (
       <a
@@ -75,19 +64,8 @@ export default class UtilityBar extends React.PureComponent {
         data-logoutlink={ssoLinks.logout}
       >
         { link }
-        <span className="caret"></span>
+        <span className="caret" />
       </a>
-    );
-  }
-
-  renderPhoto(user) {
-    return (
-      <img src={ user.photo.url }
-        ref="photo"
-        className="img-circle"
-        alt={ user.name }
-        onError={ this.onPhotoError }
-      />
     );
   }
 
