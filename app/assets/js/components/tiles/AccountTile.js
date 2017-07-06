@@ -61,6 +61,17 @@ export default class AccountTile extends TileContent {
     return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE]);
   }
 
+  static realInactivationDate(dateString) {
+    if (dateString) {
+      const date = moment(dateString);
+      if (date.isAfter(moment().add(1000, 'years'))) {
+        return null;
+      }
+      return <li>{ `Expected end date ${dateFormats.formatDateMoment(date)}` }</li>;
+    }
+    return null;
+  }
+
   isEmpty() {
     return false;
   }
@@ -129,15 +140,7 @@ export default class AccountTile extends TileContent {
               { (member.jobTitle) ? `${member.jobTitle}, ` : null }
               { `${member.userType}, ${member.homeDepartment.name}` }
             </li>
-            { member.inactivationDate &&
-              <li>
-                {
-                  /* eslint-disable max-len */
-                  `Expected end date ${dateFormats.formatDateMoment(moment(member.inactivationDate))}`
-                  /* eslint-enable max-len */
-                }
-              </li>
-            }
+            { AccountTile.realInactivationDate(member.inactivationDate) }
             { member.phoneNumber && <li><i className="fa fa-phone" /> { member.phoneNumber }</li> }
             { (scd) && <li>Course: { scd.course.name }</li> }
             { (scd) &&
