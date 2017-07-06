@@ -29,7 +29,7 @@ export default class ActivityTile extends TileContent {
   }
 
   getSmallBody() {
-    return <ActivityView />;
+    return <span>No</span>;
   }
 
 }
