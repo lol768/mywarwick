@@ -50,7 +50,7 @@ export default class AccountTile extends TileContent {
   static getLink() {
     return (
       <div className="bottom-right">
-        <Hyperlink href="http://warwick.ac.uk/myaccount" className="text--dotted-underline">
+        <Hyperlink href="//warwick.ac.uk/myaccount" className="text--dotted-underline">
           Account settings
         </Hyperlink>
       </div>
@@ -70,6 +70,18 @@ export default class AccountTile extends TileContent {
       return <li>{ `Expected end date ${dateFormats.formatDateMoment(date)}` }</li>;
     }
     return null;
+  }
+
+  static getMediaLeft(user) {
+    return (
+      <div className="media-left">
+        { user.photo && user.photo.url &&
+          <Hyperlink href="//photos.warwick.ac.uk">
+            <AccountPhoto user={ user } className="media-object media-object-img-fix" />
+          </Hyperlink>
+        }
+      </div>
+    );
   }
 
   isEmpty() {
@@ -94,11 +106,7 @@ export default class AccountTile extends TileContent {
     const user = this.props.user;
     return (
       <div className="media">
-        <div className="media-left">
-          { user.photo && user.photo.url &&
-            <AccountPhoto user={ user } className="media-object media-object-img-fix" />
-          }
-        </div>
+        { AccountTile.getMediaLeft(user) }
         <div className="media-body">
           <div>{ member.fullName }</div>
           <div>{ member.email }</div>
@@ -126,11 +134,7 @@ export default class AccountTile extends TileContent {
 
     return (
       <div className="media">
-        <div className="media-left">
-          { user.photo && user.photo.url &&
-          <AccountPhoto user={ user } className="media-object media-object-img-fix" />
-          }
-        </div>
+        { AccountTile.getMediaLeft(user) }
         <div className="media-body">
           <ul className="list-unstyled">
             <li>{ member.fullName }</li>
