@@ -4,22 +4,22 @@ import { Routes } from '../components/AppRoot';
 import { goBack, replace } from 'react-router-redux';
 import _ from 'lodash-es';
 
-// let mq;
-// try {
-//   mq = require('modernizr').mq;
-// } catch (e) {
-//   log.warn('modernizr not present, using fallback.');
-//   mq = () => global.mqResult;
-// }
+let mq;
+try {
+  mq = require('modernizr').mq;
+} catch (e) {
+  log.warn('modernizr not present, using fallback.');
+  mq = () => global.mqResult;
+}
 
 function isNative() {
   return ('navigator' in window) && navigator.userAgent.indexOf('MyWarwick/') > -1;
 }
 
-// function isDesktop() {
-//   // We make the same 'native is mobile' assumption in bridge.js
-//   return !isNative() && mq('only all and (min-width: 768px)');
-// }
+function isDesktop() {
+  // We make the same 'native is mobile' assumption in bridge.js
+  return !isNative() && mq('only all and (min-width: 768px)');
+}
 
 const isWideLayout = () => false;
 
@@ -70,10 +70,10 @@ export function updateUIContext() {
     const betaWarn = showBetaWarning();
     const native = isNative();
 
-    if (currentClassName === undefined) {
+    if (currentClassName === undefined || isDesktop() !== (currentClassName === 'desktop')) {
       dispatch({
         type: 'ui.class',
-        className: 'mobile',
+        className: isDesktop() ? 'desktop' : 'mobile',
       });
     }
 

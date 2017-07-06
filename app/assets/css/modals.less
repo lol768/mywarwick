@@ -48,7 +48,7 @@ html.ios.app .modal-dialog {
 
 // More native looking mobile modals
 
-html.mobile {
+html {
   // styles common to all platforms
 
   .modal-dialog button.close {
@@ -57,7 +57,7 @@ html.mobile {
 
 }
 
-html.android {
+html.android, html:not(.ios) {
   // make modals resemble native Android modals on Android
 
   .modal-header h4.modal-title {
