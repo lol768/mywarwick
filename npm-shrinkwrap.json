@@ -2603,9 +2603,9 @@
       "resolved": "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.4.17.tgz"
     },
     "id7": {
-      "version": "1.3.2",
-      "from": "universityofwarwick/id7#9f89803",
-      "resolved": "git://github.com/universityofwarwick/id7.git#9f898031e1f66c50701442d6c29345b318d9eb2f"
+      "version": "1.3.4",
+      "from": "universityofwarwick/id7#v1.3.4",
+      "resolved": "git://github.com/universityofwarwick/id7.git#fc303330d815e4217d363a6f4fa4506d8aa92238"
     },
     "ieee754": {
       "version": "1.1.8",
