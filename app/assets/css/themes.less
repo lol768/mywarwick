@@ -70,9 +70,9 @@
     background-image: url(/assets/images/bg01.jpg);
     background-attachment: fixed;
     background-repeat: no-repeat;
-    background-size: @desktop-rendition-width 100%;
+    background-size: calc(@desktop-rendition-width + 150px) 100%;
 
-    background-position: 50vw 50%;
+    background-position: ~"calc(50vw - 50px)" 50%;
 
     @media screen and (max-width: @desktop-rendition-width) {
       background-position: 0 50%;
