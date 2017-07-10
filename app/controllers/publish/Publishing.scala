@@ -49,6 +49,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
   def bindFormWithAudience[A <: PublishableWithAudience](
     baseForm: Form[A],
     submitted: Boolean,
+    restrictedRecipients: Boolean,
     renderForm: (Form[A]) => Result,
     onSubmit: ((A, Audience) => Result)
   )(implicit request: PublisherRequest[AnyContent]): Future[Result] = {
@@ -62,7 +63,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
         // form.
         val boundForm = audienceForm.bindFromRequest.fold(
           _ => Future.successful(formWithErrors),
-          audienceData => audienceBinder.bindAudience(audienceData).map {
+          audienceData => audienceBinder.bindAudience(audienceData, restrictedRecipients).map {
             case Left(errors) => addFormErrors(formWithErrors, errors)
             case Right(_) => formWithErrors
           }
@@ -71,7 +72,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
         boundForm.map(renderForm)
       },
       publish => {
-        audienceBinder.bindAudience(publish.audience).map {
+        audienceBinder.bindAudience(publish.audience, restrictedRecipients).map {
           case Left(errors) =>
             renderForm(addFormErrors(form, errors))
           case Right(audience) =>

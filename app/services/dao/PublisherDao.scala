@@ -36,7 +36,7 @@ trait PublisherDao {
 @Singleton
 class PublisherDaoImpl extends PublisherDao {
 
-  val publisherParser = str("id") ~ str("name") map { case id ~ name => Publisher(id, name) }
+  val publisherParser = str("id") ~ str("name") ~ get[Option[Int]]("max_recipients") map { case id ~ name ~ maxRecipients => Publisher(id, name, maxRecipients) }
 
   val publisherPermissionParser = str("usercode") ~ str("role") map { case usercode ~ role => PublisherPermission(Usercode(usercode), PublishingRole.withName(role)) }
 

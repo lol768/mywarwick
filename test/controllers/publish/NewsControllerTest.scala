@@ -65,14 +65,16 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
 
   val newsController = new NewsController(securityServiceImpl, publisherService, messagesApi, newsService, departmentInfoDao, audienceBinder, newsCategoryService, userNewsCategoryService, mock[ErrorHandler], audienceService, userPreferencesService) {
     override val navigationService = new MockNavigationService()
-    override val ssoClient = mockSSOClient
+    override val ssoClient: MockSSOClient = mockSSOClient
     override val csrfPageHelperFactory: CSRFPageHelperFactory = mockCsrfPageHelperFactory
   }
+
+  private val publisher = Publisher("xyz", "Test Publisher")
 
   "NewsController#list" should {
 
     "return Forbidden if user has no permission" in {
-      when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
+      when(publisherService.find("xyz")).thenReturn(Some(publisher))
       when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NullRole)
 
       val result = call(newsController.list("xyz"), FakeRequest())
@@ -89,7 +91,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
     }
 
     "show a page with no news items" in {
-      when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
+      when(publisherService.find("xyz")).thenReturn(Some(publisher))
       when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
 
       when(newsService.getNewsByPublisherWithAudits("xyz", 100)).thenReturn(Nil)
@@ -107,7 +109,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
   "NewsController#createForm" should {
 
     "return Forbidden if user does not have Create permission" in {
-      when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
+      when(publisherService.find("xyz")).thenReturn(Some(publisher))
       when(publisherService.getRoleForUser("xyz", custard)).thenReturn(PublishingRole.Viewer)
 
       val result = call(newsController.createForm("xyz"), FakeRequest())
@@ -116,7 +118,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
     }
 
     "display news form" in {
-      when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
+      when(publisherService.find("xyz")).thenReturn(Some(publisher))
       when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
       when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.AllDepartments)
 
@@ -140,13 +142,18 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
 
   "NewsController#create" should {
 
-    when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
+    when(publisherService.find("xyz")).thenReturn(Some(publisher))
     when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
     when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
 
     "create a news item" in {
       val audience = Audience(Seq(Audience.DepartmentAudience("IN", Seq(Audience.Staff))))
-      when(audienceBinder.bindAudience(AudienceData(Seq("Dept:Staff"), Some("IN")))).thenReturn(Future.successful(Right(audience)))
+      when(
+        audienceBinder.bindAudience(
+          Matchers.eq(AudienceData(Seq("Dept:Staff"), Some("IN"))),
+          Matchers.eq(false)
+        )(Matchers.any())
+      ).thenReturn(Future.successful(Right(audience)))
 
       val result = call(newsController.create("xyz", submitted = true), FakeRequest("POST", "/").withFormUrlEncodedBody(validData: _*))
 
@@ -164,7 +171,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
         "audience.audience[]" -> "Public"
       )
 
-      when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
+      when(publisherService.find("xyz")).thenReturn(Some(publisher))
       when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
       when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
 
@@ -177,7 +184,12 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
       reset(newsService)
 
       val audience = Audience(Seq(Audience.DepartmentAudience("IN", Seq(Audience.Staff))))
-      when(audienceBinder.bindAudience(AudienceData(Seq("Dept:Staff"), Some("IN")))).thenReturn(Future.successful(Right(audience)))
+      when(
+        audienceBinder.bindAudience(
+          Matchers.eq(AudienceData(Seq("Dept:Staff"), Some("IN"))),
+          Matchers.eq(false)
+        )(Matchers.any())
+      ).thenReturn(Future.successful(Right(audience)))
 
       val result = call(newsController.create("xyz", submitted = false), FakeRequest("POST", "/").withFormUrlEncodedBody(validData: _*))
 
@@ -191,7 +203,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
   "NewsController#updateForm" should {
 
     "return Not Found if the news item does not exist" in {
-      when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
+      when(publisherService.find("xyz")).thenReturn(Some(publisher))
       when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
       when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
       when(newsService.getNewsItem("news")).thenReturn(None)
@@ -203,7 +215,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
     }
 
     "return Not Found if the news item does not belong to the requested publisher" in {
-      when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
+      when(publisherService.find("xyz")).thenReturn(Some(publisher))
       when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
       when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
       when(newsService.getNewsItem("news")).thenReturn(Some(Fixtures.news.render.copy(publisherId = "another")))
@@ -215,7 +227,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
     }
 
     "display the update form" in {
-      when(publisherService.find("xyz")).thenReturn(Some(Publisher("xyz", "Test Publisher")))
+      when(publisherService.find("xyz")).thenReturn(Some(publisher))
       when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
       when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
       when(newsCategoryService.getNewsCategories("news")).thenReturn(Seq.empty)
@@ -233,7 +245,14 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
   "NewsController#audienceInfo" should {
 
     "respond with audience size" in {
-      when(audienceService.resolve(Audience(Seq(Audience.DepartmentAudience("IN", Seq(Staff)))))).thenReturn(Success(Seq("a", "b", "c").map(Usercode)))
+      val audience = Audience(Seq(Audience.DepartmentAudience("IN", Seq(Staff))))
+      when(
+        audienceBinder.bindAudience(
+          Matchers.eq(AudienceData(Seq("Dept:Staff"), Some("IN"))),
+          Matchers.eq(false)
+        )(Matchers.any())
+      ).thenReturn(Future.successful(Right(audience)))
+      when(audienceService.resolve(audience)).thenReturn(Success(Seq("a", "b", "c").map(Usercode)))
       when(userPreferencesService.countInitialisedUsers(Seq("a", "b", "c").map(Usercode))).thenReturn(2)
       when(userNewsCategoryService.getRecipientsOfNewsInCategories(Seq("abc"))).thenReturn(Seq("a", "e").map(Usercode))
 
@@ -248,7 +267,12 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
     }
 
     "respond with public" in {
-      when(audienceBinder.bindAudience(AudienceData(Seq("Public"), None))).thenReturn(Future.successful(Right(Audience.Public)))
+      when(
+        audienceBinder.bindAudience(
+          Matchers.eq(AudienceData(Seq("Public"), None)),
+          Matchers.eq(false)
+        )(Matchers.any())
+      ).thenReturn(Future.successful(Right(Audience.Public)))
       when(audienceService.resolve(Audience.Public)).thenReturn(Success(Seq(Usercode("*"))))
       when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.AllDepartments)
 

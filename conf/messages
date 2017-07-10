@@ -1,5 +1,7 @@
 error.path.missing=A value is required for the property ''{0}''.
 error.audience.invalid=Unrecognised audience ''{0}''.
 error.audience.empty=You need to choose somebody to send it to.
+error.audience.tooMany.public=You do not have permission to send to everyone.
+error.audience.tooMany=You can only send to {0} recipients at a time.
 error.department.invalid=Unrecognised department.
 error.audience.noDepartmentSubsets=You need to choose an audience within the department.

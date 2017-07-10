@@ -143,7 +143,7 @@ class NewsController @Inject()(
   }
 
   def create(publisherId: String, submitted: Boolean) = PublisherAction(publisherId, CreateNews).async { implicit request =>
-    bindFormWithAudience[PublishNewsItemData](publishNewsForm, submitted,
+    bindFormWithAudience[PublishNewsItemData](publishNewsForm, submitted, restrictedRecipients = false,
       formWithErrors => Ok(renderCreateForm(request.publisher, formWithErrors, Audience())),
       (data, audience) => {
         val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
@@ -180,7 +180,7 @@ class NewsController @Inject()(
 
   def update(publisherId: String, id: String, submitted: Boolean) = EditAction(id, publisherId, EditNews).async { implicit request =>
     withNewsItem(id, publisherId, _ => {
-      bindFormWithAudience[PublishNewsItemData](publishNewsForm, submitted,
+      bindFormWithAudience[PublishNewsItemData](publishNewsForm, submitted, restrictedRecipients = false,
         formWithErrors => Ok(renderUpdateForm(publisherId, id, formWithErrors, Audience())),
         (data, audience) => {
           val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
