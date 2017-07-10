@@ -1,20 +1,18 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
+import ListGroupItem from './ListGroupItem';
 
 export default class RadioListGroupItem extends React.PureComponent {
 
   static propTypes = {
-    icon: PropTypes.string,
-    description: PropTypes.string.isRequired,
+    ...ListGroupItem.propTypes,
     name: PropTypes.string,
     value: PropTypes.string.isRequired,
-    onClick: PropTypes.func.isRequired,
     checked: PropTypes.bool.isRequired,
-    disabled: PropTypes.bool,
   };
 
   static defaultProps = {
-    disabled: false,
+    ...ListGroupItem.defaultProps,
   };
 
   constructor(props) {
@@ -23,33 +21,26 @@ export default class RadioListGroupItem extends React.PureComponent {
   }
 
   onClick() {
-    if (!this.props.disabled) this.props.onClick(this.props.value, this.props.name);
+    this.props.onClick(this.props.value, this.props.name);
+  }
+
+  renderRadio() {
+    return (
+      <div className="md-radio">
+        <input
+          type="radio"
+          checked={ this.props.checked }
+          readOnly
+          disabled={ this.props.disabled }
+        />
+        <label />
+      </div>
+    );
   }
 
   render() {
     return (
-      <div className="list-group-item" onClick={ this.onClick }>
-        <div className="media">
-          { this.props.icon &&
-          <div className="media-left">
-            <i className={ `fa fa-fw fa-${this.props.icon}` } />
-          </div> }
-          <div className={`media-body${this.props.disabled ? ' media-body-disabled' : ''}`}>
-            { this.props.description }
-          </div>
-          <div className="media-right">
-            <div className="md-radio">
-              <input
-                type="radio"
-                checked={ this.props.checked }
-                readOnly
-                disabled={ this.props.disabled }
-              />
-              <label />
-            </div>
-          </div>
-        </div>
-      </div>
+      <ListGroupItem {...this.props} onClick={this.onClick} uiControl={this.renderRadio()} />
     );
   }
 

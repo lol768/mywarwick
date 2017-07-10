@@ -78,9 +78,9 @@ class NewsCategoriesView extends HideableView {
         <div className="list-group setting-colour-1">
           { _.map(this.props.categories, category =>
             <SwitchListGroupItem key={ category.id } id={ `category-${category.id}` }
-                                 icon="newspaper-o" description={ category.name } value={ category.id }
-                                 onClick={ this.onClick } checked={ this.state[category.id] }
-                                 disabled={ !this.props.isOnline }
+              icon="newspaper-o" description={ category.name } value={ category.id }
+              onClick={ this.onClick } checked={ this.state[category.id] }
+              disabled={ !this.props.isOnline }
             />
           ) }
         </div>

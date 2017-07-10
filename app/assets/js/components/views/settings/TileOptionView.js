@@ -61,11 +61,11 @@ export class TileOptionView extends React.PureComponent {
 
     return (
       <SwitchListGroupItem key={ `${cbName}:${possibleChoice.value}` }
-                           id={ `${cbName}:${possibleChoice.value}` } value={ possibleChoice.value }
-                           icon={ (tile.id === 'weather') ? 'sun-o' : tile.icon }
-                           description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
-                           onClick={ this.onCheckboxClick } checked={ checked } name={ cbName }
-                           disabled={ !this.props.isOnline }
+        id={ `${cbName}:${possibleChoice.value}` } value={ possibleChoice.value }
+        icon={ (tile.id === 'weather') ? 'sun-o' : tile.icon }
+        description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
+        onClick={ this.onCheckboxClick } checked={ checked } name={ cbName }
+        disabled={ !this.props.isOnline }
       />
     );
   }

@@ -218,15 +218,15 @@ class SettingsView extends HideableView {
             ) }
           </div>
           <SwitchListGroupItem id="copyNotificationsEmail"
-                               value=""
-                               icon="envelope"
-                               description="Copy my notifications to email"
-                               onClick={ this.onNotificationEmailCopyChange }
-                               checked={ this.state.emailNotificationsOptIn.wantsEmails }
-                               failure={ this.state.emailNotificationsOptIn.failed && !this.props.isOnline}
-                               loading={ !this.state.emailNotificationsOptIn.fetchedOnce &&
+            value=""
+            icon="envelope"
+            description="Copy my notifications to email"
+            onClick={ this.onNotificationEmailCopyChange }
+            checked={ this.state.emailNotificationsOptIn.wantsEmails }
+            failure={ this.state.emailNotificationsOptIn.failed && !this.props.isOnline}
+            loading={ !this.state.emailNotificationsOptIn.fetchedOnce &&
               this.props.emailNotificationsOptIn.fetching }
-                               disabled={ !this.props.isOnline }
+            disabled={ !this.props.isOnline }
           />
         </div>
 
