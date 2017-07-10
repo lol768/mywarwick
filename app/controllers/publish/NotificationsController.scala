@@ -56,7 +56,7 @@ class NotificationsController @Inject()(
   }
 
   def create(publisherId: String, submitted: Boolean) = PublisherAction(publisherId, CreateNotifications).async { implicit request =>
-    bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted,
+    bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted, restrictedRecipients = true,
       formWithErrors =>
         Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope, Audience())),
       (publish, audience) => {
@@ -99,7 +99,7 @@ class NotificationsController @Inject()(
       val activity = activityService.getActivityById(id).get
       val audience = audienceService.getAudience(activity.id)
 
-      bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted,
+      bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted, restrictedRecipients = true,
         formWithErrors =>
           Ok(views.updateForm(request.publisher, activity, formWithErrors, departmentOptions, providerOptions, permissionScope, audience)),
         (publish, audience) => {

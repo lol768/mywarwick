@@ -18,6 +18,7 @@ class IncomingActivitiesController @Inject()(
   securityService: SecurityService,
   activityService: ActivityService,
   publisherService: PublisherService,
+  audienceService: AudienceService,
   val messagesApi: MessagesApi
 ) extends BaseController with I18nSupport {
 
@@ -44,10 +45,18 @@ class IncomingActivitiesController @Inject()(
 
               val audience = Audience(usercodes ++ webgroups)
 
-              activityService.save(activity, audience).fold(badRequest, id => {
-                auditLog('CreateActivity, 'id -> id, 'provider -> activity.providerId)
-                created(id)
-              })
+              val publisher = publisherService.find(publisherId).get
+              lazy val recipients = audienceService.resolve(audience).toOption.map(_.size).getOrElse(0)
+              publisher.maxRecipients match {
+                case Some(max) if shouldNotify && recipients > max =>
+                  BadRequest(Json.toJson(API.Failure[JsObject]("bad_request", Seq(API.Error("too-many-recipients", s"You can only send to $max recipients at a time")))))
+                case _ =>
+                  activityService.save(activity, audience).fold(badRequest, id => {
+                    auditLog('CreateActivity, 'id -> id, 'provider -> activity.providerId)
+                    created(id)
+                  })
+              }
+
             }.recoverTotal(validationError)
           } else {
             forbidden(providerId, user)

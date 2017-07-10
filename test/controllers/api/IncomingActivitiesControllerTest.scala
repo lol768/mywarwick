@@ -8,6 +8,7 @@ import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import helpers.BaseSpec
+import models.publishing.Publisher
 import play.api.cache.CacheApi
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsObject, JsString, Json}
@@ -17,10 +18,13 @@ import play.api.test._
 import services._
 import warwick.sso._
 
+import scala.util.Try
+
 class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with Results with WithActorSystem {
 
   val tabula = "tabula"
   val tabulaPublisherId = "tabulaPublisherId"
+  val tabulaPublisher = Publisher(tabulaPublisherId, "Tabula")
   val ron: User = Users.create(usercode = Usercode("ron"))
 
   val mockSSOClient = new MockSSOClient(new LoginContext {
@@ -36,11 +40,13 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
 
   val publisherService: PublisherService = mock[PublisherService]
   val activityService: ActivityService = mock[ActivityService]
+  val audienceService: AudienceService = mock[AudienceService]
 
   val controller = new IncomingActivitiesController(
     new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], mock[CacheApi]),
     activityService,
     publisherService,
+    audienceService,
     mock[MessagesApi]
   ) {
     override val navigationService = new MockNavigationService()
@@ -62,6 +68,7 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
   "IncomingActivitiesController#postNotification" should {
 
     when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
+    when(publisherService.find(tabulaPublisherId)).thenReturn(Some(tabulaPublisher))
 
     "return forbidden when user is not authorised to post on behalf of Publisher" in {
       when(publisherService.getRoleForUser(tabulaPublisherId, ron.usercode)).thenReturn(NotificationsManager) // requires APINotificationsManager role
@@ -163,6 +170,29 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
       val json = contentAsJson(result)
 
       (json \ "errors" \ 0 \ "message").as[String] mustBe "All usercodes must be non-empty"
+    }
+
+    "fail for too many recipients" in {
+      when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
+      when(publisherService.find(tabulaPublisherId)).thenReturn(Some(tabulaPublisher.copy(maxRecipients = Some(1))))
+      when(audienceService.resolve(Audience(Seq(Audience.UsercodeAudience(Usercode("cusfal")), Audience.UsercodeAudience(Usercode("cusebr")))))).thenReturn(Try(Seq(Usercode("cusfal"), Usercode("cusebr"))))
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(Json.obj(
+        "type" -> "due",
+        "title" -> "Coursework due soon",
+        "url" -> "http://tabula.warwick.ac.uk",
+        "text" -> "Your submission for CS118 is due tomorrow",
+        "recipients" -> Json.obj(
+          "users" -> Json.arr(
+            "cusfal",
+            "cusebr"
+          )
+        )
+      )))
+
+      status(result) mustBe BAD_REQUEST
+      val json = contentAsJson(result)
+
+      (json \ "errors" \ 0 \ "message").as[String] mustBe "You can only send to 1 recipients at a time"
     }
   }
 }

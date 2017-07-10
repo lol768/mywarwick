@@ -5,6 +5,7 @@ import javax.inject.{Inject, Singleton}
 import models.Audience
 import models.Audience._
 import play.api.data.FormError
+import services.AudienceService
 import services.dao.DepartmentInfoDao
 import uk.ac.warwick.util.core.StringUtils
 import warwick.sso.GroupName
@@ -15,7 +16,10 @@ import scala.concurrent.Future
   * For converting bits of a raw request Form into an actual Audience.
   */
 @Singleton
-class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
+class AudienceBinder @Inject() (
+  departments: DepartmentInfoDao,
+  audienceService: AudienceService
+) {
 
   /**
     * Attempts to convert the request parameters into an Audience object.
@@ -23,11 +27,15 @@ class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
     *
     * Return type is a future because it depends on the list of departments.
     */
-  def bindAudience(data: AudienceData): Future[Either[Seq[FormError], Audience]] = {
+  def bindAudience(data: AudienceData, restrictedRecipients: Boolean = false)(implicit publisherRequest: PublisherRequest[_]): Future[Either[Seq[FormError], Audience]] = {
     var errors = Seq.empty[FormError]
 
     if (data.audience.contains("Public")) {
-      Future.successful(Right(Audience.Public))
+      if (restrictedRecipients) {
+        Future.successful(Left(Seq(FormError("audience", "error.audience.tooMany.public"))))
+      } else {
+        Future.successful(Right(Audience.Public))
+      }
     } else {
 
       val groupedComponents = data.audience.groupBy(_.startsWith("Dept:"))
@@ -70,6 +78,15 @@ class AudienceBinder @Inject() (departments: DepartmentInfoDao) {
 
       if (department.isEmpty && globalComponents.isEmpty) {
         errors :+= FormError("audience", "error.audience.empty")
+      }
+
+      if (errors.isEmpty && restrictedRecipients) {
+        publisherRequest.publisher.maxRecipients.foreach { maxRecipients =>
+          val recipients = audienceService.resolve(Audience(globalComponents ++ deptComponent.toSeq)).toOption.map(_.size).getOrElse(0)
+          if (recipients > maxRecipients) {
+            errors :+= FormError("audience", "error.audience.tooMany", Seq(maxRecipients))
+          }
+        }
       }
 
       Future.successful {
