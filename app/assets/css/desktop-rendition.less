@@ -121,10 +121,10 @@ main#main:not(.in-root) {
       position: fixed;
       height: @desktop-rendition-vertical-border;
       background-color: #8c6e96;
-      max-width: (@desktop-rendition-width + 4);
-      margin-right: ~"calc(50vw - 770px )";
+      max-width: @desktop-rendition-vertical-border-width;
+      margin-right: ~"calc(50vw - @{desktop-rendition-vertical-border-right})";
       margin-left: auto;
-      width: (@desktop-rendition-width + 4);
+      width: @desktop-rendition-vertical-border-width;
       left: 0;
       right: 0;
       z-index: 9999;
