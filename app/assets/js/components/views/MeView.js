@@ -232,7 +232,7 @@ class MeView extends React.PureComponent {
 
 const select = (state) => ({
   isDesktop: state.ui.className === 'desktop',
-  layoutWidth: state.ui.isWideLayout === true ? 5 : 2,
+  layoutWidth: state.ui.layoutWidth,
   tiles: state.tiles.data.tiles,
   layout: state.tiles.data.layout,
   deviceWidth: state.device.width,

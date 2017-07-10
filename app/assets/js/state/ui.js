@@ -21,13 +21,11 @@ function isDesktop() {
   return !isNative() && mq('only all and (min-width: 768px)');
 }
 
-const isWideLayout = () => false;
-
 const showBetaWarning = () => $('#app-container').attr('data-show-beta-warning') === 'true';
 
 const initialState = {
   className: undefined,
-  isWideLayout: false,
+  layoutWidth: 2, // 2 columns by default
   colourTheme: 'transparent',
   native: false,
   showBetaWarning: false,
@@ -40,8 +38,6 @@ export function reducer(state = initialState, action) {
     case 'ui.native':
       if (action.native !== state.native) return { ...state, native: action.native };
       return state;
-    case 'ui.layout':
-      return { ...state, isWideLayout: action.isWideLayout };
     case 'ui.navRequest':
       return { ...state, navRequest: action.navRequest };
     case 'ui.theme':
@@ -74,13 +70,6 @@ export function updateUIContext() {
       dispatch({
         type: 'ui.class',
         className: isDesktop() ? 'desktop' : 'mobile',
-      });
-    }
-
-    if (isWideLayout() !== state.ui.isWideLayout) {
-      dispatch({
-        type: 'ui.layout',
-        isWideLayout: isWideLayout(),
       });
     }
 
