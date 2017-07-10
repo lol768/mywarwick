@@ -1,7 +1,8 @@
 import React, { PropTypes } from 'react';
 import * as _ from 'lodash-es';
-import $ from 'jquery';
 import { activityMuteDurations } from '../../state/notifications';
+import SwitchListGroupItem from '../ui/SwitchListGroupItem';
+import RadioListGroupItem from '../ui/RadioListGroupItem';
 
 export default class ActivityMutingView extends React.Component {
 
@@ -25,93 +26,86 @@ export default class ActivityMutingView extends React.Component {
     super(props);
     this.state = {
       duration: null,
-      someChecked: true,
+      formValues: {
+        activityType: true,
+        providerId: true,
+      },
     };
     this.handleDurationChange = this.handleDurationChange.bind(this);
     this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
     this.saveMuting = this.saveMuting.bind(this);
   }
 
-  handleDurationChange(event) {
+  handleDurationChange(value) {
     this.setState({
-      duration: event.target.value,
+      duration: value,
     });
   }
 
-  handleCheckboxChange() {
+  handleCheckboxChange(value, name) {
     this.setState({
-      someChecked: $(`#muting-${this.props.id}-form`)
-        .find('input[type="checkbox"]:checked').length > 0,
+      formValues: {
+        ...this.state.formValues,
+        [name]: !this.state.formValues[name],
+      },
     });
   }
 
   saveMuting() {
-    const formId = `#muting-${this.props.id}-form`;
-    const formValues = $(formId).serializeArray();
-    this.props.onMutingSave(formValues);
+    this.props.onMutingSave({
+      ...this.state.formValues,
+      duration: this.state.duration,
+    });
   }
 
   renderForm() {
     return (
       <form className="form" id={ `muting-${this.props.id}-form` }>
         <div className="form-group">
-          <label>Don't send me notifications for:</label>
-          <div className="checkbox">
-            <label>
-              <input
-                type="checkbox"
-                name="activityType"
-                value={ this.props.activityType }
-                defaultChecked
-                onChange={ this.handleCheckboxChange }
-              />
-              { this.props.activityTypeDisplayName || this.props.activityType }
-            </label>
-          </div>
-          <div className="checkbox">
-            <label>
-              <input
-                type="checkbox"
-                name="providerId"
-                value={ this.props.provider }
-                defaultChecked
-                onChange={ this.handleCheckboxChange }
-              />
-              { this.props.providerDisplayName || this.props.provider }
-            </label>
+          <label>Mute notifications about:</label>
+          <div className="list-group">
+            <SwitchListGroupItem
+              id="activityType"
+              name="activityType"
+              value={this.props.activityType}
+              onClick={this.handleCheckboxChange}
+              description={this.props.activityTypeDisplayName || this.props.activityType}
+              checked={this.state.formValues.activityType}
+            />
+            <SwitchListGroupItem
+              id="providerId"
+              name="providerId"
+              value={this.props.provider}
+              onClick={this.handleCheckboxChange}
+              description={this.props.providerDisplayName || this.props.provider}
+              checked={this.state.formValues.providerId}
+            />
           </div>
           {
             _.map(this.props.tags, (tag) => (
-              <div className="checkbox" key={tag.name}>
-                <label>
-                  <input
-                    type="checkbox"
-                    name={ `tags[${tag.name}]` }
-                    value={ tag.value }
-                    defaultChecked
-                    onChange={ this.handleCheckboxChange }
-                  />
-                  { tag.display_value || tag.value }
-                </label>
-              </div>
+              <SwitchListGroupItem
+                key={tag.name}
+                id={`tag-${tag.name}`}
+                name={`tags[${tag.name}]`}
+                value={tag.value}
+                onClick={this.handleCheckboxChange}
+                description={tag.display_value || tag.value}
+                checked={this.state.formValues[tag.name]}
+              />
             ))
           }
         </div>
-        <div className="form-group">
+        <div className="list-group">
           <label>For:</label>
           {
             _.map(activityMuteDurations, (duration) => (
-              <div className="radio" key={ duration.value }>
-                <label>
-                  <input
-                    type="radio"
-                    name="duration"
-                    value={ duration.value }
-                    onChange={ this.handleDurationChange }
-                  />
-                  { duration.displayValue }
-                </label>
-              </div>
+              <RadioListGroupItem
+                key={duration.value}
+                description={duration.displayValue}
+                value={duration.value}
+                onClick={this.handleDurationChange}
+                checked={this.state.duration === duration.value}
+              />
             ))
           }
         </div>
@@ -120,9 +114,11 @@ export default class ActivityMutingView extends React.Component {
   }
 
   render() {
+    const someChecked = _.find(this.state.formValues, value => value === true) !== undefined;
+
     return (
       <div className="activity-muting">
-        <div className="activity-muting__backdrop fade in"> </div>
+        <div className="activity-muting__backdrop fade in" />
         <div
           className="activity-muting__modal fade in"
           id={`muting-${this.props.id}`}
@@ -147,7 +143,7 @@ export default class ActivityMutingView extends React.Component {
                   type="button"
                   className="btn btn-primary"
                   onClick={ this.saveMuting }
-                  disabled={ !this.state.duration || !this.state.someChecked }
+                  disabled={ !this.state.duration || !someChecked }
                 >
                   Save changes
                 </button>

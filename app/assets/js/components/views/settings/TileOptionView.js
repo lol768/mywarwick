@@ -2,7 +2,7 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
 import * as tiles from '../../../state/tiles';
-import CheckboxListGroupItem from '../../ui/CheckboxListGroupItem';
+import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 import RadioListGroupItem from '../../ui/RadioListGroupItem';
 import { connect } from 'react-redux';
 
@@ -60,12 +60,12 @@ export class TileOptionView extends React.PureComponent {
     }
 
     return (
-      <CheckboxListGroupItem key={ `${cbName}:${possibleChoice.value}` }
-        id={ `${cbName}:${possibleChoice.value}` } value={ possibleChoice.value }
-        icon={ (tile.id === 'weather') ? 'sun-o' : tile.icon }
-        description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
-        onClick={ this.onCheckboxClick } checked={ checked } name={ cbName }
-        disabled={ !this.props.isOnline }
+      <SwitchListGroupItem key={ `${cbName}:${possibleChoice.value}` }
+                           id={ `${cbName}:${possibleChoice.value}` } value={ possibleChoice.value }
+                           icon={ (tile.id === 'weather') ? 'sun-o' : tile.icon }
+                           description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
+                           onClick={ this.onCheckboxClick } checked={ checked } name={ cbName }
+                           disabled={ !this.props.isOnline }
       />
     );
   }

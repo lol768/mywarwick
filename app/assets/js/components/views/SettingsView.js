@@ -10,7 +10,7 @@ import * as newsOptIn from '../../state/news-optin';
 import * as emailNotificationsOptIn from '../../state/email-notifications-opt-in';
 import { loadDeviceDetails } from '../../userinfo';
 import _ from 'lodash-es';
-import CheckboxListGroupItem from '../ui/CheckboxListGroupItem';
+import SwitchListGroupItem from '../ui/SwitchListGroupItem';
 
 
 class SettingsView extends HideableView {
@@ -217,16 +217,16 @@ class SettingsView extends HideableView {
               SettingsView.renderSingleCount(this.props.mutes)
             ) }
           </div>
-          <CheckboxListGroupItem id="copyNotificationsEmail"
-            value=""
-            icon="envelope"
-            description="Copy my notifications to email"
-            onClick={ this.onNotificationEmailCopyChange }
-            checked={ this.state.emailNotificationsOptIn.wantsEmails }
-            failure={ this.state.emailNotificationsOptIn.failed && !this.props.isOnline}
-            loading={ !this.state.emailNotificationsOptIn.fetchedOnce &&
+          <SwitchListGroupItem id="copyNotificationsEmail"
+                               value=""
+                               icon="envelope"
+                               description="Copy my notifications to email"
+                               onClick={ this.onNotificationEmailCopyChange }
+                               checked={ this.state.emailNotificationsOptIn.wantsEmails }
+                               failure={ this.state.emailNotificationsOptIn.failed && !this.props.isOnline}
+                               loading={ !this.state.emailNotificationsOptIn.fetchedOnce &&
               this.props.emailNotificationsOptIn.fetching }
-            disabled={ !this.props.isOnline }
+                               disabled={ !this.props.isOnline }
           />
         </div>
 

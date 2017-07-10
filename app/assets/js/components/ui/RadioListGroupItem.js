@@ -4,13 +4,17 @@ import * as PropTypes from 'prop-types';
 export default class RadioListGroupItem extends React.PureComponent {
 
   static propTypes = {
-    icon: PropTypes.string.isRequired,
+    icon: PropTypes.string,
     description: PropTypes.string.isRequired,
     name: PropTypes.string,
     value: PropTypes.string.isRequired,
     onClick: PropTypes.func.isRequired,
     checked: PropTypes.bool.isRequired,
-    disabled: PropTypes.bool.isRequired,
+    disabled: PropTypes.bool,
+  };
+
+  static defaultProps = {
+    disabled: false,
   };
 
   constructor(props) {
@@ -26,9 +30,10 @@ export default class RadioListGroupItem extends React.PureComponent {
     return (
       <div className="list-group-item" onClick={ this.onClick }>
         <div className="media">
+          { this.props.icon &&
           <div className="media-left">
             <i className={ `fa fa-fw fa-${this.props.icon}` } />
-          </div>
+          </div> }
           <div className={`media-body${this.props.disabled ? ' media-body-disabled' : ''}`}>
             { this.props.description }
           </div>

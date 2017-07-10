@@ -252,19 +252,17 @@ export const activityMuteDurations = [
 
 export function saveActivityMute(activity, options) {
   return dispatch => {
-    const optionsObject = _.mapValues(_.keyBy(options, o => o.name), v => v.value);
-
-    const duration = _.find(activityMuteDurations, (d) => d.value === optionsObject.duration);
+    const duration = _.find(activityMuteDurations, (d) => d.value === options.duration);
 
     const tags = _.filter(activity.tags, tag =>
-      optionsObject[`tags[${tag.name}]`] !== undefined &&
-        optionsObject[`tags[${tag.name}]`] === tag.value
+      options[`tags[${tag.name}]`] !== undefined &&
+        options[`tags[${tag.name}]`] === tag.value
     );
 
     const data = {
       expiresAt: duration.toExpiryDate(),
-      activityType: optionsObject.activityType ? activity.type : null,
-      providerId: optionsObject.providerId ? activity.provider : null,
+      activityType: options.activityType ? activity.type : null,
+      providerId: options.providerId ? activity.provider : null,
       tags,
     };
 
