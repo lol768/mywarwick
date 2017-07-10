@@ -36,7 +36,6 @@ class ID7Layout extends React.PureComponent {
     super(props);
     this.onBackClick = this.onBackClick.bind(this);
     this.onEdit = this.onEdit.bind(this);
-    this.onAdd = this.onAdd.bind(this);
     this.onSettings = this.onSettings.bind(this);
   }
 
@@ -117,10 +116,6 @@ class ID7Layout extends React.PureComponent {
       );
     }
     return null;
-  }
-
-  onAdd() {
-    this.props.dispatch(push(`/${Routes.EDIT}/${Routes.ADD}`));
   }
 
   renderMasqueradeNotice() {
