@@ -66,18 +66,6 @@
   }
   .in-root, .in-edit, .in-tiles {
 
-    background-image: linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674);
-    background-image: url(/assets/images/bg01.jpg);
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    background-size: calc(@desktop-rendition-width + 150px) 100%;
-
-    background-position: ~"calc(50vw - 50px)" 50%;
-
-    @media screen and (max-width: @desktop-rendition-width) {
-      background-position: 0 50%;
-    }
-
 
     &.in-add h3 {
       margin: 0;
@@ -86,7 +74,7 @@
       color: #fff;
     }
 
-    html.app& {
+    html& {
       // Native apps render the background image internally
       background: transparent;
     }

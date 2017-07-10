@@ -77,11 +77,19 @@ main#main:not(.in-root) {
     display: none;
   }
 
-  html.theme-transparent body.in-root {
+  html.theme-transparent .bg-stand-in {
     max-width: 100vw;
-    background-size: initial;
+    background-image: linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674);
+    background-image: url(/assets/images/bg01.jpg);
     background-attachment: fixed;
-    background-position: 0 50%;
+    background-repeat: no-repeat;
+    background-size: calc(@desktop-rendition-width + 150px) 100%;
+
+    background-position: ~"calc(50vw - 50px)" 50%;
+
+    @media screen and (max-width: @desktop-rendition-width) {
+      background-position: 0 50%;
+    }
   }
 
   body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
