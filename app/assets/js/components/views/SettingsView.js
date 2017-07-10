@@ -10,7 +10,7 @@ import * as newsOptIn from '../../state/news-optin';
 import * as emailNotificationsOptIn from '../../state/email-notifications-opt-in';
 import { loadDeviceDetails } from '../../userinfo';
 import _ from 'lodash-es';
-import CheckboxListGroupItem from '../ui/CheckboxListGroupItem';
+import SwitchListGroupItem from '../ui/SwitchListGroupItem';
 
 
 class SettingsView extends HideableView {
@@ -217,7 +217,7 @@ class SettingsView extends HideableView {
               SettingsView.renderSingleCount(this.props.mutes)
             ) }
           </div>
-          <CheckboxListGroupItem id="copyNotificationsEmail"
+          <SwitchListGroupItem id="copyNotificationsEmail"
             value=""
             icon="envelope"
             description="Copy my notifications to email"

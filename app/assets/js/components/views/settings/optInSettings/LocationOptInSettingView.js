@@ -1,7 +1,7 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
-import CheckboxListGroupItem from '../../../ui/CheckboxListGroupItem';
+import SwitchListGroupItem from '../../../ui/SwitchListGroupItem';
 
 export default class LocationOptInSettingsView extends React.PureComponent {
 
@@ -60,7 +60,7 @@ export default class LocationOptInSettingsView extends React.PureComponent {
 
         <div className="list-group setting-colour-1">
           { _.map(this.props.options, location =>
-            <CheckboxListGroupItem key={ `OptIn:Locations:${location.value}` } icon="map-signs"
+            <SwitchListGroupItem key={ `OptIn:Locations:${location.value}` } icon="map-signs"
               description={ location.description } value={ location.value } onClick={ this.onClick }
               checked={ this.state[location.value] } id={ `OptIn:Locations:${location.value}` }
               disabled={ this.props.disabled }
