@@ -137,7 +137,7 @@ class MeView extends React.PureComponent {
   }
 
   getGridLayoutWidth() {
-    return GridSizingHelper.getGridLayoutWidth(this.props, margin);
+    return GridSizingHelper.getGridLayoutWidth(margin);
   }
 
   renderTile(props) {

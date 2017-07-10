@@ -2,13 +2,10 @@ import React, { PropTypes } from 'react';
 import $ from 'jquery';
 import _ from 'lodash-es';
 import log from 'loglevel';
-// import Badge from './Badge';
-// import MastheadSearch from './MastheadSearch';
 import MastheadMobile from './MastheadMobile';
 import PermissionRequest from './PermissionRequest';
 import MasqueradeNotice from './MasqueradeNotice';
 import UpdatePopup from './UpdatePopup';
-// import UtilityBar from './UtilityBar';
 import { connect } from 'react-redux';
 import { isEmbedded } from '../../embedHelper';
 import { getNumItemsSince } from '../../stream';
@@ -49,7 +46,6 @@ class ID7Layout extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.updateHeaderHeight();
     if (isEmbedded()) {
       const type = 'message.id7.account-popover.layoutDidMount';
       window.parent.postMessage(JSON.stringify({ type }), '*');
@@ -71,7 +67,6 @@ class ID7Layout extends React.PureComponent {
   }
 
   componentDidUpdate(prevProps) {
-    this.updateHeaderHeight();
     if (prevProps.colourTheme !== this.props.colourTheme) {
       this.setBodyTheme(this.props.colourTheme, prevProps.colourTheme);
     }
@@ -98,12 +93,6 @@ class ID7Layout extends React.PureComponent {
     $('html')
       .removeClass(`theme-${oldTheme}`)
       .addClass(`theme-${newTheme}`);
-  }
-
-  updateHeaderHeight() {
-    // const headerHeight = $(ReactDOM.findDOMNode(this.refs.header)).height();
-    // TODO: Sort this out
-    // $(document.body).css('margin-top', headerHeight);
   }
 
   isEditing() {
@@ -192,87 +181,9 @@ class ID7Layout extends React.PureComponent {
     );
   }
 
-  /** SWOO EDIT
-  renderDesktop() {
-    const { notificationsCount, user } = this.props;
-
-    return (
-      <div>
-        <a className="sr-only sr-only-focusable" href="#main">Skip to main content</a>
-        <div className="id7-left-border"></div>
-        <div className="fixed-header at-top">
-          <div className="id7-fixed-width-container">
-            <header className="id7-page-header" ref="header">
-              { this.renderBetaWarning() }
-              { this.renderMasqueradeNotice() }
-              <div className="id7-utility-masthead">
-                <nav className="id7-utility-bar" id="utility-bar-container">
-                  <UtilityBar user={user} layoutClassName="desktop" />
-                </nav>
-                <div className="id7-masthead">
-                  <div className="id7-masthead-contents">
-                    <div className="clearfix">
-                      <div className="id7-logo-column">
-                        <div className="id7-logo-row">
-                          <div className="id7-logo">
-                            <a href="http://warwick.ac.uk" title="Warwick homepage">
-                              <img src="" alt="Warwick" />
-                            </a>
-                            <Badge count={ notificationsCount } className="badge--red" />
-                          </div>
-                        </div>
-                      </div>
-                      <MastheadSearch />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </header>
-          </div>
-        </div>
-
-        <div className="id7-fixed-width-container">
-          <main className="id7-main-content-area" id="main">
-            <header className="id7-main-content-header">
-              { this.renderNotificationPermissionRequest() }
-              <UpdatePopup />
-              <div className="id7-horizontal-divider">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg" x="0" y="0" version="1.1" width="1130"
-                  height="40" viewBox="0, 0, 1130, 40"
-                >
-                  <path
-                    d="m 0,0 1030.48, 0 22.8,40 16.96,-31.4 16.96,31.4 22.8,-40 20,0"
-                    className="divider" stroke="#383838" fill="none"
-                  />
-                </svg>
-              </div>
-            </header>
-
-            <div className="id7-main-content">
-              { this.props.children }
-            </div>
-          </main>
-        </div>
-        <div className="id7-right-border"></div>
-      </div>
-    );
-  }
-   **/
-
   render() {
-    // SWOO EDIT if (this.props.layoutClassName === 'mobile') {
     log.debug('ID7Layout.render:mobile');
     return this.renderMobile();
-    // SWOO EDIT }
-
-    /** SWOO EDIT if (!this.props.layoutClassName) {
-      log.warn('props.layoutClassName not set');
-    }
-     */
-
-    // SWOO EDIT log.debug('ID7Layout.render:desktop');
-    // SWOO EDIT return this.renderDesktop();
   }
 }
 
