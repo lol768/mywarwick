@@ -121,12 +121,13 @@ main#main:not(.in-root) {
       position: fixed;
       height: @desktop-rendition-vertical-border;
       background-color: #8c6e96;
-      max-width: @desktop-rendition-width;
-      margin-right: ~"calc(50vw - 768px )";
+      max-width: (@desktop-rendition-width + 4);
+      margin-right: ~"calc(50vw - 770px )";
       margin-left: auto;
-      width: @desktop-rendition-width;
+      width: (@desktop-rendition-width + 4);
       left: 0;
       right: 0;
+      z-index: 9999;
     }
 
     nav.tab-bar:after {
@@ -135,7 +136,10 @@ main#main:not(.in-root) {
 
     header.id7-page-header:before {
       top: 0;
-      border-bottom: 1px solid white;
+    }
+
+    header.id7-page-header {
+      border-top: 1px solid white;
     }
 
     #app-container, header.id7-page-header {
