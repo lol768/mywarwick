@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import * as _ from 'lodash-es';
 import { activityMuteDurations } from '../../state/notifications';
-import SwitchListGroupItem from '../ui/SwitchListGroupItem';
+import CheckboxListGroupItem from '../ui/CheckboxListGroupItem';
 import RadioListGroupItem from '../ui/RadioListGroupItem';
 
 export default class ActivityMutingView extends React.Component {
@@ -64,7 +64,7 @@ export default class ActivityMutingView extends React.Component {
         <div className="form-group">
           <label>Mute notifications about:</label>
           <div className="list-group">
-            <SwitchListGroupItem
+            <CheckboxListGroupItem
               id="activityType"
               name="activityType"
               value={this.props.activityType}
@@ -72,7 +72,7 @@ export default class ActivityMutingView extends React.Component {
               description={this.props.activityTypeDisplayName || this.props.activityType}
               checked={this.state.formValues.activityType}
             />
-            <SwitchListGroupItem
+            <CheckboxListGroupItem
               id="providerId"
               name="providerId"
               value={this.props.provider}
@@ -83,7 +83,7 @@ export default class ActivityMutingView extends React.Component {
           </div>
           {
             _.map(this.props.tags, (tag) => (
-              <SwitchListGroupItem
+              <CheckboxListGroupItem
                 key={tag.name}
                 id={`tag-${tag.name}`}
                 name={`tags[${tag.name}]`}
