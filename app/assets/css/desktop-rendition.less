@@ -103,3 +103,45 @@ main#main:not(.in-root) {
     background: #f9f9f9;
   }
 }
+
+
+@media screen and (min-width: @desktop-rendition-min-body) {
+
+  .not-app {
+    .fixed-header { top: 60px; }
+    .tab-bar { bottom: 60px; }
+
+    .main-content {
+      padding-bottom: 120px;
+      padding-top: 60px;
+    }
+
+    nav.tab-bar:after, header.id7-page-header:before {
+      content: "";
+      position: fixed;
+      height:60px;
+      background-color: #8c6e96;
+      max-width: 768px;
+      margin-right: ~"calc(50vw - 768px )";
+      margin-left: auto;
+      width:768px;
+      left:0;
+      right:0
+    }
+
+    nav.tab-bar:after {
+      bottom: 0;
+    }
+
+    header.id7-page-header:before {
+      top: 0;
+      border-bottom:1px solid white;
+    }
+
+    #app-container, header.id7-page-header {
+      border-left:1px solid white;
+      border-right:1px solid white;
+    }
+  }
+}
+
