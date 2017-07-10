@@ -69,7 +69,8 @@ main#main:not(.in-root) {
 
 html.theme-transparent.not-app .bg-stand-in {
   width: 100vw;
-  height: 100vh;
+  top: 60px;
+  height: ~"calc(100vh - 120px)";
   z-index: -1;
   background-attachment: fixed;
   background-repeat: no-repeat;
@@ -100,6 +101,11 @@ html.theme-transparent.not-app .bg-stand-in {
   html.not-app {
     background: #f9f9f9;
   }
+
+  html.theme-transparent.not-app .bg-stand-in {
+    top: 0;
+    height: 100vh;
+  }
 }
 
 
@@ -111,7 +117,6 @@ html.theme-transparent.not-app .bg-stand-in {
 
     .main-content {
       padding-bottom: (@desktop-rendition-vertical-border * 2);
-      padding-top: @desktop-rendition-vertical-border;
     }
 
     nav.tab-bar:after, header.id7-page-header:before {
@@ -130,7 +135,6 @@ html.theme-transparent.not-app .bg-stand-in {
 
     html&.theme-transparent .bg-stand-in {
       width: @desktop-rendition-width;
-      height: 100vh;
       background-attachment: initial;
     }
 
@@ -145,16 +149,21 @@ html.theme-transparent.not-app .bg-stand-in {
 
     header.id7-page-header {
       border-top: 1px solid white;
-    }
-
-    header.id7-page-header {
       border-left: 1px solid white;
       border-right: 1px solid white;
+
     }
     .bg-stand-in {
       border-left: 1px solid #fff;
       border-right: 1px solid #fff;
     }
+    .id7-main-content-header {
+      padding-top: @desktop-rendition-vertical-border;
+    }
   }
+}
+
+html.theme-transparent .in-settings .bg-stand-in {
+  background-image: none;
 }
 
