@@ -1,8 +1,3 @@
-body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
-  max-width: @desktop-rendition-width;
-  margin-right: @desktop-rendition-width-from-center;
-  margin-left: auto;
-}
 
 .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
   position: fixed;
@@ -24,7 +19,7 @@ body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, 
   align-items: center;
   justify-content: center;
   height: 100vh;
-  display: flex;
+  display: none;
   right: ~"calc("(@desktop-rendition-width-from-center)~"+" (@desktop-rendition-width)~")";
   .inner-content {
     width: 100%;
@@ -58,10 +53,6 @@ body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, 
   }
 }
 
-html {
-  background: #8c6e96;
-}
-
 
 main#main:not(.in-root) {
   height: ~"calc(100vh -" (@start-masthead-height) ~")";
@@ -78,38 +69,37 @@ html.theme-transparent.not-app .bg-stand-in {
   position: fixed;
 }
 
-@media screen and (max-width: @desktop-rendition-min-body) {
-  .marketing {
-    display: none;
-  }
-
-  body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
-    margin-right: 0;
-    margin-left: 0;
-    max-width: 100vw;
-  }
-
-  .tile--zoomed  .tile__header {
-    margin-right: 0;
-    margin-left: 0;
-  }
-
-  html {
-    background: transparent;
-  }
-
-  html.not-app {
-    background: #f9f9f9;
-  }
-
-  html.theme-transparent.not-app .bg-stand-in {
-    top: 0;
-    height: 100vh;
-  }
+body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
+  margin-right: 0;
+  margin-left: 0;
+  max-width: 100vw;
 }
 
+.tile--zoomed  .tile__header {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+html {
+  background: transparent;
+}
+
+html.not-app {
+  background: #f9f9f9;
+}
+
+html.theme-transparent.not-app .bg-stand-in {
+  top: 0;
+  height: 100vh;
+}
 
 @media screen and (min-width: @desktop-rendition-min-body) {
+
+  body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
+    max-width: @desktop-rendition-width;
+    margin-right: @desktop-rendition-width-from-center;
+    margin-left: auto;
+  }
 
   .not-app {
     .fixed-header { top: @desktop-rendition-vertical-border; }
@@ -131,6 +121,10 @@ html.theme-transparent.not-app .bg-stand-in {
       left: 0;
       right: 0;
       z-index: 9999;
+    }
+
+    .marketing {
+      display: flex;
     }
 
     html&.theme-transparent .bg-stand-in {
@@ -158,13 +152,18 @@ html.theme-transparent.not-app .bg-stand-in {
       border-right: 1px solid white;
 
     }
+
     .bg-stand-in {
       border-left: 1px solid #fff;
       border-right: 1px solid #fff;
     }
+
     .id7-main-content-header {
       padding-top: @desktop-rendition-vertical-border;
     }
+  }
+  html, html.not-app {
+    background: #8c6e96;
   }
 }
 
