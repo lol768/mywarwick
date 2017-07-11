@@ -42,7 +42,7 @@ export class AppLayout extends React.PureComponent {
           <TabBar selectedItem={ location.pathname } onSelectItem={ this.onSelectItem }>
             <TabBarItem title="Me" icon="user-o" selectedIcon="user" path="/" />
             <TabBarItem
-              title="Notifications" icon="bell-o" selectedIcon="bell"
+              title="Alerts" icon="bell-o" selectedIcon="bell"
               path={ `/${Routes.NOTIFICATIONS}` } badge={ notificationsCount }
               isDisabled={ !authenticated }
             />
