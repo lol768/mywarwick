@@ -143,8 +143,8 @@ class ID7Layout extends React.PureComponent {
     const { user, path } = this.props;
 
     const showSettingsButton = !(
-      path.startsWith(`/${Routes.SETTINGS}`) ||
-      path.startsWith(`/${Routes.POST_TOUR}`)
+      _.startsWith(path, `/${Routes.SETTINGS}`) ||
+      _.startsWith(path, `/${Routes.POST_TOUR}`)
     );
 
     return (
