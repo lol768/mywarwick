@@ -69,33 +69,29 @@ html.theme-transparent.not-app .bg-stand-in {
   position: fixed;
 }
 
-//@media screen and (max-width: @desktop-rendition-min-body) {
+body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
+  margin-right: 0;
+  margin-left: 0;
+  max-width: 100vw;
+}
 
-  body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
-    margin-right: 0;
-    margin-left: 0;
-    max-width: 100vw;
-  }
+.tile--zoomed  .tile__header {
+  margin-right: 0;
+  margin-left: 0;
+}
 
-  .tile--zoomed  .tile__header {
-    margin-right: 0;
-    margin-left: 0;
-  }
+html {
+  background: transparent;
+}
 
-  html {
-    background: transparent;
-  }
+html.not-app {
+  background: #f9f9f9;
+}
 
-  html.not-app {
-    background: #f9f9f9;
-  }
-
-  html.theme-transparent.not-app .bg-stand-in {
-    top: 0;
-    height: 100vh;
-  }
-//}
-
+html.theme-transparent.not-app .bg-stand-in {
+  top: 0;
+  height: 100vh;
+}
 
 @media screen and (min-width: @desktop-rendition-min-body) {
 
