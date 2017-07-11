@@ -192,7 +192,7 @@ class SettingsView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-0">
-          <div className="list-group-item"
+          <div className="list-group-item cursor-pointer"
             onClick={ () =>
               this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}`))
             }
@@ -206,7 +206,7 @@ class SettingsView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-0">
-          <div className="list-group-item"
+          <div className="list-group-item cursor-pointer"
             onClick={ () =>
               this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`))
             }
@@ -231,7 +231,7 @@ class SettingsView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-1">
-          <div className="list-group-item"
+          <div className="list-group-item cursor-pointer"
             onClick={ this.props.newsCategories.fetched && !this.props.newsCategories.failed ? () =>
               this.props.dispatch(
                 push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`)
@@ -246,7 +246,7 @@ class SettingsView extends HideableView {
               })
             ) }
           </div>
-          <div className="list-group-item"
+          <div className="list-group-item cursor-pointer"
             onClick={ this.props.newsOptIn.fetched && !this.props.newsOptIn.failed ? () =>
               this.props.dispatch(
                 push(
@@ -272,7 +272,7 @@ class SettingsView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-2">
-          <div className="list-group-item"
+          <div className="list-group-item cursor-pointer"
             onClick={ () =>
               this.props.dispatch(
                 push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.ACTIVITY_FILTER}`)
@@ -307,7 +307,7 @@ class SettingsView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-3">
-          <div className="list-group-item" onClick={ loadDeviceDetails }>
+          <div className="list-group-item cursor-pointer" onClick={ loadDeviceDetails }>
             <div className="media">
               <div className="media-left feedback">
                 <span className="fa-stack">

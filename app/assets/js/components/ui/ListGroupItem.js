@@ -23,10 +23,15 @@ export default class ListGroupItem extends React.PureComponent {
   constructor(props) {
     super(props);
     this.onClick = this.onClick.bind(this);
+    this.isClickable = this.isClickable.bind(this);
+  }
+
+  isClickable() {
+    return typeof this.props.onClick === 'function' && !this.props.disabled;
   }
 
   onClick() {
-    if (typeof this.props.onClick === 'function' && !this.props.disabled) {
+    if (this.isClickable()) {
       this.props.onClick();
     }
   }
@@ -49,7 +54,9 @@ export default class ListGroupItem extends React.PureComponent {
 
   render() {
     return (
-      <div className="list-group-item" onClick={ this.onClick }>
+      <div className={ classNames('list-group-item', { 'cursor-pointer': this.isClickable() })}
+        onClick={ this.onClick }
+      >
         <div className="media">
           { this.props.icon &&
           <div className="media-left">

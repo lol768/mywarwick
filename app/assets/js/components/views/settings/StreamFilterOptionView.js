@@ -83,7 +83,7 @@ class StreamFilterOptionView extends React.PureComponent {
             { _.map(
               _.sortBy(filterOptions.provider, o => (o.displayName ? o.displayName : o.name)),
               option =>
-                <div key={ `provider:${option.id}` } className="list-group-item"
+                <div key={ `provider:${option.id}` } className="list-group-item cursor-pointer"
                   data-name="provider" data-value={option.id}
                   onClick={ this.onClick }
                 >
