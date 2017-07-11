@@ -95,10 +95,28 @@ html.theme-transparent.not-app .bg-stand-in {
 
 @media screen and (min-width: @desktop-rendition-min-body) {
 
+  #app-container {
+    background: transparent;
+  }
+
+  .react-loading svg path {
+    fill: #fff;
+  }
+
+  html:not(.app):not(.not-app) body {
+    background: transparent;
+  }
+
   body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
     max-width: @desktop-rendition-width;
     margin-right: @desktop-rendition-width-from-center;
     margin-left: auto;
+  }
+
+  body .react-loading {
+    position: fixed;
+    left: 0;
+    right: 0;
   }
 
   .not-app {
