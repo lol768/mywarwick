@@ -37,7 +37,8 @@ class TilePreferencesView extends HideableView {
 
         <div className="list-group">
           { _.map(_.sortBy(this.props.tiles, 'title'), tile =>
-            <div key={ tile.id } className={ `list-group-item setting-colour-${tile.colour}` }
+            <div key={ tile.id }
+              className={ `list-group-item cursor-pointer setting-colour-${tile.colour}` }
               onClick={ () =>
                 this.props.dispatch(
                  push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}/${tile.id}`)

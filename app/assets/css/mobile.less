@@ -172,3 +172,10 @@ html.android.app {
   }
 }
 
+.list-group-item.cursor-pointer {
+  transition: background-color 0.1s;
+  &:active {
+    background-color: darken(@list-group-bg, 3%);
+  }
+}
+
