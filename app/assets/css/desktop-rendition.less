@@ -1,0 +1,195 @@
+
+.fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
+  position: fixed;
+}
+
+.add-tile-container {
+  right: 0px;
+  bottom: @start-tab-bar-height;
+  padding: 1.5em;
+}
+
+.id7-main-content-area {
+  overflow-y: visible !important;
+}
+
+.marketing {
+  user-select: text;
+  position: fixed;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  display: none;
+  right: ~"calc("(@desktop-rendition-width-from-center)~"+" (@desktop-rendition-width)~")";
+  .inner-content {
+    width: 100%;
+    max-width: @desktop-rendition-width;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 2rem;
+    font-size: 18px;
+    color: #fff;
+  }
+  .app-dl {
+    width: 160px;
+  }
+}
+
+.marketing .inner-content {
+  h1 {
+    color: white;
+    font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 50px;
+    text-align: center;
+    letter-spacing: -0.2px;
+    text-transform: uppercase;
+    border-bottom: 0;
+    padding-bottom: 0;
+    margin-bottom: 11px;
+
+    .light {
+      opacity: 0.6;
+    }
+  }
+}
+
+
+main#main:not(.in-root) {
+  height: ~"calc(100vh -" (@start-masthead-height) ~")";
+}
+
+html.theme-transparent.not-app .bg-stand-in {
+  width: 100vw;
+  top: 60px;
+  height: ~"calc(100vh - 120px)";
+  z-index: -1;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: fixed;
+}
+
+body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
+  margin-right: 0;
+  margin-left: 0;
+  max-width: 100vw;
+}
+
+.tile--zoomed  .tile__header {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+html {
+  background: transparent;
+}
+
+html.not-app {
+  background: #f9f9f9;
+}
+
+html.theme-transparent.not-app .bg-stand-in {
+  top: 0;
+  height: 100vh;
+}
+
+@media screen and (min-width: @desktop-rendition-min-body) {
+
+  #app-container {
+    background: transparent;
+  }
+
+  .react-loading svg path {
+    fill: #fff;
+  }
+
+  html:not(.app):not(.not-app) body { // loading condition
+    background: transparent;
+  }
+
+  body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
+    max-width: @desktop-rendition-width;
+    margin-right: @desktop-rendition-width-from-center;
+    margin-left: auto;
+  }
+
+  body .react-loading {
+    position: fixed;
+    left: 0;
+    right: 0;
+  }
+
+  .not-app {
+    body {
+      overflow-y: scroll;
+    }
+
+    .fixed-header { top: @desktop-rendition-vertical-border; }
+    .tab-bar { bottom: @desktop-rendition-vertical-border; }
+
+    .main-content {
+      padding-bottom: (@desktop-rendition-vertical-border * 2);
+    }
+
+    #app-container:after, header.id7-page-header:before {
+      content: "";
+      position: fixed;
+      height: @desktop-rendition-vertical-border;
+      background-color: #8c6e96;
+      max-width: @desktop-rendition-vertical-border-width;
+      margin-right: ~"calc(50vw - @{desktop-rendition-vertical-border-right})";
+      margin-left: auto;
+      width: @desktop-rendition-vertical-border-width;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+    }
+
+    .marketing {
+      display: flex;
+    }
+
+    html&.theme-transparent .bg-stand-in {
+      width: @desktop-rendition-width;
+      background-attachment: initial;
+    }
+
+    .add-tile-container {
+      right: 0;
+      bottom: (@start-tab-bar-height + @desktop-rendition-vertical-border);
+      padding: 1.5em;
+    }
+
+    #app-container:after {
+      bottom: 0;
+    }
+
+    header.id7-page-header:before {
+      top: 0;
+    }
+
+    header.id7-page-header {
+      border-top: 1px solid white;
+      border-left: 1px solid white;
+      border-right: 1px solid white;
+
+    }
+
+    .bg-stand-in {
+      border-left: 1px solid #fff;
+      border-right: 1px solid #fff;
+    }
+
+    .id7-main-content-header {
+      padding-top: @desktop-rendition-vertical-border;
+    }
+  }
+  html, html.not-app {
+    background: #8c6e96;
+  }
+}
+
+html.theme-transparent .in-settings .bg-stand-in {
+  background-image: none;
+}
+

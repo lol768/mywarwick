@@ -1,6 +1,13 @@
 .modal {
   display: flex;
   flex-direction: column;
+  position: absolute;
+  z-index: 2020;
+}
+
+.modal-backdrop {
+  position: absolute;
+  z-index: 2010;
 }
 
 html.app .modal-dialog {
@@ -38,11 +45,12 @@ html.ios.app .modal-dialog {
 .modal-dialog {
   overflow-y: hidden;
   max-height: 100%;
+  max-width: 95%;
 }
 
 // More native looking mobile modals
 
-html.mobile {
+html {
   // styles common to all platforms
 
   .modal-dialog button.close {
@@ -51,7 +59,7 @@ html.mobile {
 
 }
 
-html.android {
+html:not(.ios) {
   // make modals resemble native Android modals on Android
 
   .modal-header h4.modal-title {

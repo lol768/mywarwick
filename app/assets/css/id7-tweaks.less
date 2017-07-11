@@ -1,12 +1,7 @@
 @import 'mixins';
 
-.mobile {
-  .fixed-header {
-     z-index: 101;
-  }
-}
-
 .fixed-header {
+  z-index: 101;
   position: fixed;
   top: 0;
   left: 0;
@@ -17,6 +12,10 @@
     height: auto !important;
     background: transparent !important;
   }
+}
+
+.id7-main-content-area > header {
+  width: auto;
 }
 
 .app {
@@ -35,24 +34,36 @@
   padding-bottom: 14px;
 }
 
-.screen-sm-orless({
-  .id7-fixed-width-container,
-  .id7-main-content-area {
-    background: none;
-  }
-});
+.id7-fixed-width-container,
+.id7-main-content-area {
+  background: none;
+}
 
-.screen-xs-orless({
-  .id7-main-content-area {
-    // ID7 sets overflow-x: hidden, which creates odd scrolling behaviour
-    overflow-x: unset;
-  }
-  .id7-main-content-area .id7-main-content {
-    padding: 0;
-  }
-});
+
+
+.id7-main-content-area {
+  // ID7 sets overflow-x: hidden, which creates odd scrolling behaviour
+  overflow-x: unset;
+}
+.id7-main-content-area .id7-main-content {
+  padding: 0;
+}
+
 
 .fa > .badge {
   // Ensure an icon badge uses the base font-family, not the FA icon font
   font-family: @font-family-base;
+}
+
+
+main#main {
+  padding: 50px 0;
+}
+
+html.android.app main#main {
+  padding: 0 0 50px;
+}
+
+.main-content {
+  padding-bottom: @start-tab-bar-height;
 }

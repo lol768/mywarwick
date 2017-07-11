@@ -15,6 +15,29 @@
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("css/main.css")">
   </head>
   <body>
+    <div class="bg-stand-in"></div>
+    <div class="marketing">
+      <div class="inner-content">
+        <h1><span class="light">My</span> Warwick</h1>
+        <p>
+          My Warwick is a mobile app that brings together information about many aspects of your
+          life at Warwick. You can use it to view your timetable, check your email, get bus times,
+          see a weather forecast, and more.
+        </p>
+        <p>
+          My Warwick sends you notifications when something needs your attention. You'll get a
+          notification when an assignment is due soon, a library book is due back soon, and so on.
+          Your department can send you notifications if a lecture is moved or cancelled.
+          So you'll always be in the loop.
+        </p>
+        <p>
+          <img src="@routes.Assets.versioned("images/google_play_badge.png")" class="app-dl">
+
+          <img src="@routes.Assets.versioned("images/apple_store_badge.svg")" class="app-dl">
+
+        </p>
+      </div>
+    </div>
     <div id="app-container"
       @for(trackingId <- analyticsTrackingId) {data-analytics-tracking-id="@{trackingId.string}"}
       data-search-root-url="@searchRootUrl.string"
