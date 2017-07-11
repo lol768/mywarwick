@@ -54,7 +54,7 @@ class ActivityMutesView extends React.PureComponent {
           <div className="list-group fixed setting-colour-0">
             <div className="list-group-item">
               <div className="list-group-item-heading">
-                <h3>Muted notifications</h3>
+                <h3>Muted alerts</h3>
               </div>
             </div>
           </div>
@@ -111,9 +111,9 @@ class ActivityMutesView extends React.PureComponent {
                 </div>
               )
               : <EmptyState>
-                  You haven't muted any notifications. Use the dropdown arrow next to each
-                  notification to specify similar types of notifications to mute in future.
-                  Muted notifications still appear in the list of notifications;
+                  You haven't muted any alerts. Use the dropdown arrow next to each
+                  alert to specify similar types of alerts to mute in future.
+                  Muted alerts still appear in the list of alerts;
                   they just don't pop up on your device.
                 </EmptyState>
           }

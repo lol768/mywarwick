@@ -44,19 +44,19 @@ class NotificationsView extends HideableView {
   static renderEmpty(isFiltered) {
     if (isFiltered) {
       return (
-        <EmptyState lead="You don't have any notifications to display.">
+        <EmptyState lead="You don't have any alerts to display.">
           <p>
-            There may be others hidden due to your Notification filter settings.
+            There may be others hidden due to your Alert filter settings.
           </p>
         </EmptyState>
       );
     }
     return (
-      <EmptyState lead="You don't have any notifications yet.">
+      <EmptyState lead="You don't have any alerts yet.">
         <p>
           When there are things that need your attention &ndash;
           coursework due in, library books due back, that kind of thing &ndash;
-          you'll see those notifications here.
+          you'll see those alerts here.
         </p>
       </EmptyState>
     );
@@ -226,7 +226,7 @@ class NotificationsView extends HideableView {
               hasMore={ hasMore }
               onLoadMore={ this.loadMore }
               showLoading
-              endOfListPhrase="There are no older notifications."
+              endOfListPhrase="There are no older alerts."
             >
               <GroupedList groupBy={ shouldBeGrouped ? groupItemsByDate : undefined }>
                 { notificationItems }

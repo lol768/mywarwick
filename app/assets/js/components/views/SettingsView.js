@@ -213,14 +213,14 @@ class SettingsView extends HideableView {
           >
             { SettingsView.renderSetting(
               'bell-slash-o',
-              'Muted notifications',
+              'Muted alerts',
               SettingsView.renderSingleCount(this.props.mutes)
             ) }
           </div>
           <SwitchListGroupItem id="copyNotificationsEmail"
             value=""
             icon="envelope"
-            description="Copy my notifications to email"
+            description="Copy my alerts to email"
             onClick={ this.onNotificationEmailCopyChange }
             checked={ this.state.emailNotificationsOptIn.wantsEmails }
             failure={ this.state.emailNotificationsOptIn.failed && !this.props.isOnline}
@@ -297,7 +297,7 @@ class SettingsView extends HideableView {
           >
             { SettingsView.renderSetting(
               'bell-o',
-              'Notifications filter',
+              'Alerts filter',
               SettingsView.renderFractionCount(
                 this.props.notificationFilter.selected,
                 this.props.notificationFilter.total
