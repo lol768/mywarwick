@@ -41,7 +41,7 @@ class NotificationsController @Inject()(
 
   def publishNotificationForm(implicit request: PublisherRequest[_]) = Form(mapping(
     "item" -> notificationMapping,
-    "audience" -> audienceMapping.verifying("Notifications cannot be public", !_.audience.contains("Public"))
+    "audience" -> audienceMapping.verifying("Alerts cannot be public", !_.audience.contains("Public"))
   )(PublishNotificationData.apply)(PublishNotificationData.unapply))
 
   def list(publisherId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>

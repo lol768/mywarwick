@@ -9,25 +9,25 @@
     user: Role
 )(implicit context: RequestContext)
 
-@common.admin("Notifications") {
+@common.admin("Alerts") {
   @if(user can CreateNotifications) {
     <p>
       <a class="btn btn-default" href="@controllers.publish.routes.NotificationsController.createForm(publisher.id)">
-        Create notification
+        Create alert
       </a>
     </p>
   }
 
   <h3>Pending</h3>
   @if(futureNotifications.isEmpty) {
-    <p>No pending notifications.</p>
+    <p>No pending alerts.</p>
   } else {
     @futureNotifications.map(n => views.html.publish.notifications.notificationItem(publisher, n, user))
   }
 
   <h3>Sent</h3>
   @if(pastNotifications.isEmpty) {
-    <p>No sent notifications.</p>
+    <p>No sent alerts.</p>
   } else {
     @pastNotifications.map(n => views.html.publish.notifications.notificationItem(publisher, n, user))
   }

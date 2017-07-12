@@ -20,7 +20,7 @@
   @b3.select(form("item.provider"), providerOptions,
     '_label -> "Source",
     '_default -> "",
-    '_help -> "Select the source of this notification"
+    '_help -> "Select the source of this alert"
   )
 }
 
@@ -43,7 +43,7 @@
 
 @tags.datetimePicker(form("item.publishDate"),
   '_label -> "Publish date",
-  '_help -> "Select a time in the future to automatically deliver this notification at that time",
+  '_help -> "Select a time in the future to automatically deliver this alert at that time",
   'value -> LocalDateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
 )
 </section>
