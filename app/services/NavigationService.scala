@@ -77,7 +77,7 @@ class NavigationServiceImpl @Inject()(
 
     val children = Seq(
       ViewNews -> NavigationPage("News", publishRoutes.NewsController.list(publisher.id)),
-      ViewNotifications -> NavigationPage("Notifications", publishRoutes.NotificationsController.list(publisher.id))
+      ViewNotifications -> NavigationPage("Alerts", publishRoutes.NotificationsController.list(publisher.id))
     ).collect { case (ability, page) if publishingRole.can(ability) => page }
 
     NavigationPage(publisher.name, publishRoutes.PublishersController.show(publisher.id), children)
