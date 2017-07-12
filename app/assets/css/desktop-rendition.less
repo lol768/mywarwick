@@ -2,6 +2,16 @@
   display: none;
 }
 
+html.theme-transparent.not-app .bg-stand-in {
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: fixed;
+}
+
 @media screen and (min-width: @screen-md-min) {
   .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
     position: fixed;
@@ -57,17 +67,6 @@
 
   main#main:not(.in-root) {
     height: ~"calc(100vh -" (@start-masthead-height) ~")";
-  }
-
-  html.theme-transparent.not-app .bg-stand-in {
-    width: 100vw;
-    top: 60px;
-    height: ~"calc(100vh - 120px)";
-    z-index: -1;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    background-size: cover;
-    position: fixed;
   }
 
   body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
