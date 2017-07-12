@@ -1,0 +1,13 @@
+// https://css-tricks.com/forums/topic/fixed-position-misbehaviour-in-ie11/#post-204032
+
+
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+  body, .fixed-header, .tab-bar.nav, nav.tab-bar, .in-settings .fixed.list-group, .add-tile-container {
+    margin-left: 0;
+  }
+  @media (min-width: @screen-md-min)  {
+    body, .fixed-header, .tab-bar.nav, nav.tab-bar, .in-settings .fixed.list-group, .add-tile-container {
+      margin-left: 50vw;
+    }
+  }
+}
