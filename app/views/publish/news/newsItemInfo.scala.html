@@ -2,7 +2,8 @@
 @import models.publishing.Ability.EditNews
 @import models.publishing.Ability.DeleteNews
 @import models.news.NewsItemRenderWithAudit
-@(publisher: String, item: NewsItemRenderWithAudit, user: Role)
+@import system.RequestContext
+@(publisher: String, item: NewsItemRenderWithAudit, user: Role)(implicit context: RequestContext)
 <article id="@item.id" class="news-item row">
   <div class="col-xs-10">
     <div class="news-item__body">
@@ -68,6 +69,7 @@
     <div class="btn-toolbar pull-right confirm-delete">
       <p>Are you sure?</p>
       @helper.form(controllers.publish.routes.NewsController.delete(publisher, item.id)) {
+        @context.csrfHelper.formField
         <button type="submit" class="btn btn-danger">Delete</button>
       }
       <button class="btn btn-default cancel">Cancel</button>
