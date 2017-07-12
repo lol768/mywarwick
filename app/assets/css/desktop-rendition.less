@@ -1,67 +1,6 @@
-
-.fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
-  position: fixed;
-}
-
-.add-tile-container {
-  right: 0px;
-  bottom: @start-tab-bar-height;
-  padding: 1.5em;
-}
-
-.id7-main-content-area {
-  overflow-y: visible !important;
-}
-
-.marketing {
-  user-select: text;
-  position: fixed;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  display: none;
-  right: ~"calc("(@desktop-rendition-width-from-center)~"+" (@desktop-rendition-width)~")";
-  .inner-content {
-    width: 100%;
-    max-width: @desktop-rendition-width;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 2rem;
-    font-size: 18px;
-    color: #fff;
-  }
-  .app-dl {
-    width: 160px;
-  }
-}
-
-.marketing .inner-content {
-  h1 {
-    color: white;
-    font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 50px;
-    text-align: center;
-    letter-spacing: -0.2px;
-    text-transform: uppercase;
-    border-bottom: 0;
-    padding-bottom: 0;
-    margin-bottom: 11px;
-
-    .light {
-      opacity: 0.6;
-    }
-  }
-}
-
-
-main#main:not(.in-root) {
-  height: ~"calc(100vh -" (@start-masthead-height) ~")";
-}
-
 html.theme-transparent.not-app .bg-stand-in {
   width: 100vw;
-  top: 60px;
-  height: ~"calc(100vh - 120px)";
+  height: 100vh;
   z-index: -1;
   background-attachment: fixed;
   background-repeat: no-repeat;
@@ -69,31 +8,89 @@ html.theme-transparent.not-app .bg-stand-in {
   position: fixed;
 }
 
-body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
-  margin-right: 0;
-  margin-left: 0;
-  max-width: 100vw;
+.marketing {
+  display: none;
 }
 
-.tile--zoomed  .tile__header {
-  margin-right: 0;
-  margin-left: 0;
-}
+@media screen and (min-width: @screen-md-min) {
+  .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
+    position: fixed;
+  }
 
-html {
-  background: transparent;
-}
+  .add-tile-container {
+    right: 0;
+    bottom: @start-tab-bar-height;
+    padding: 1.5em;
+  }
 
-html.not-app {
-  background: #f9f9f9;
-}
+  .id7-main-content-area {
+    overflow-y: visible !important;
+  }
 
-html.theme-transparent.not-app .bg-stand-in {
-  top: 0;
-  height: 100vh;
-}
+  .marketing {
+    user-select: text;
+    position: fixed;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    .inner-content {
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 2rem;
+      font-size: 18px;
+      color: #fff;
+    }
+    .app-dl {
+      width: 160px;
+    }
+  }
 
-@media screen and (min-width: @desktop-rendition-min-body) {
+  .marketing .inner-content {
+    h1 {
+      color: white;
+      font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 50px;
+      text-align: center;
+      letter-spacing: -0.2px;
+      text-transform: uppercase;
+      border-bottom: 0;
+      padding-bottom: 0;
+      margin-bottom: 11px;
+
+      .light {
+        opacity: 0.6;
+      }
+    }
+  }
+
+  main#main:not(.in-root) {
+    height: ~"calc(100vh -" (@start-masthead-height) ~")";
+  }
+
+  body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
+    margin-right: 0;
+    margin-left: 0;
+    max-width: 100vw;
+  }
+
+  .tile--zoomed  .tile__header {
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  html {
+    background: transparent;
+  }
+
+  html.not-app {
+    background: #f9f9f9;
+  }
+
+  html.theme-transparent.not-app .bg-stand-in {
+    top: 0;
+    height: 100vh;
+  }
 
   #app-container {
     background: transparent;
@@ -109,14 +106,6 @@ html.theme-transparent.not-app .bg-stand-in {
 
   body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed,
   .add-tile-container {
-    max-width: @desktop-rendition-width;
-    margin-right: @desktop-rendition-width-from-center;
-    margin-left: auto;
-  }
-  // Account for body's border
-  .tile--zoomed  .tile__header {
-    max-width: @desktop-rendition-width - 2;
-    margin-right: ~"calc(50vw -" (@desktop-rendition-width - 1) ~")";
     margin-left: auto;
   }
 
@@ -131,39 +120,22 @@ html.theme-transparent.not-app .bg-stand-in {
       overflow-y: scroll;
     }
 
-    .fixed-header { top: @desktop-rendition-vertical-border; }
-    .tab-bar { bottom: @desktop-rendition-vertical-border; }
-
-    .main-content {
-      padding-bottom: (@desktop-rendition-vertical-border * 2);
-    }
-
     #app-container:after, header.id7-page-header:before {
       content: "";
       position: fixed;
-      height: @desktop-rendition-vertical-border;
       background-color: #8c6e96;
-      max-width: @desktop-rendition-vertical-border-width;
-      margin-right: ~"calc(50vw - @{desktop-rendition-vertical-border-right})";
       margin-left: auto;
-      width: @desktop-rendition-vertical-border-width;
       left: 0;
       right: 0;
       z-index: 9999;
     }
 
-    .marketing {
-      display: flex;
-    }
-
     html&.theme-transparent .bg-stand-in {
-      width: @desktop-rendition-width;
       background-attachment: initial;
     }
 
     .add-tile-container {
       right: 0;
-      bottom: (@start-tab-bar-height + @desktop-rendition-vertical-border);
       padding: 1.5em;
     }
 
@@ -186,23 +158,87 @@ html.theme-transparent.not-app .bg-stand-in {
       border-left: 1px solid #fff;
       border-right: 1px solid #fff;
     }
-
-    .id7-main-content-header {
-      padding-top: @desktop-rendition-vertical-border;
-    }
-
-    .me-view-container, .tile--zoomed {
-      // Account for body's border
-      width: @desktop-rendition-width - 2;
-      margin-left: 1px;
-    }
   }
-  html, html.not-app {
+  html.not-app {
     background: #8c6e96;
   }
+
+  html.theme-transparent .in-settings .bg-stand-in {
+    background-image: none;
+  }
 }
 
-html.theme-transparent .in-settings .bg-stand-in {
-  background-image: none;
+.desktop-rendition(@min-width) {
+  @desktop-rendition-width: @min-width / 2;
+  @desktop-rendition-width-from-center: ~"calc(50vw -" (@desktop-rendition-width) ~")";
+  @desktop-rendition-vertical-border: 60px;
+  @desktop-rendition-vertical-border-width: @desktop-rendition-width + 4;
+  @desktop-rendition-vertical-border-right: @desktop-rendition-width + 2;
+
+  .marketing {
+    right: 50vw;
+    .inner-content {
+      max-width: @desktop-rendition-width;
+    }
+  }
+
+  @media screen and (min-width: @min-width) {
+
+    .not-app {
+      div.marketing {
+        .inner-content {
+          max-width: @desktop-rendition-width;
+        }
+        display: flex !important;
+      }
+
+      body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed,
+      .add-tile-container {
+        max-width: @desktop-rendition-width;
+        margin-right: @desktop-rendition-width-from-center;
+      }
+
+      // Account for body's border
+      .tile--zoomed  .tile__header {
+        max-width: @desktop-rendition-width - 2;
+        margin-right: ~"calc(50vw -" (@desktop-rendition-width - 1) ~")";
+        margin-left: auto;
+      }
+
+      .fixed-header { top: @desktop-rendition-vertical-border; }
+      .tab-bar { bottom: @desktop-rendition-vertical-border; }
+
+      .main-content {
+        padding-bottom: (@desktop-rendition-vertical-border * 2);
+      }
+
+      #app-container:after, header.id7-page-header:before {
+        height: @desktop-rendition-vertical-border;
+        max-width: @desktop-rendition-vertical-border-width;
+        margin-right: ~"calc(50vw - @{desktop-rendition-vertical-border-right})";
+        width: @desktop-rendition-vertical-border-width;
+      }
+
+      html&.theme-transparent .bg-stand-in {
+        width: @desktop-rendition-width;
+      }
+
+      .add-tile-container {
+        bottom: (@start-tab-bar-height + @desktop-rendition-vertical-border);
+      }
+
+      .id7-main-content-header {
+        padding-top: @desktop-rendition-vertical-border;
+      }
+
+      .me-view-container, .tile--zoomed {
+        // Account for body's border
+        width: @desktop-rendition-width - 2;
+        margin-left: 1px;
+      }
+    }
+  }
 }
 
+.desktop-rendition(@screen-md-min);
+.desktop-rendition(@screen-lg-min);
