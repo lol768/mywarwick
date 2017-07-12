@@ -1,9 +1,15 @@
 @import models.publishing.Role
 @import models.publishing.Ability.EditNews
 @import models.publishing.Ability.DeleteNews
-@import models.news.NewsItemRenderWithAudit
+@import models.news.NewsItemRenderWithAuditAndAudience
 @import system.RequestContext
-@(publisher: String, item: NewsItemRenderWithAudit, user: Role)(implicit context: RequestContext)
+@import services.dao.DepartmentInfo
+@(
+    publisher: String,
+    item: NewsItemRenderWithAuditAndAudience,
+    user: Role,
+    allDepartments: Seq[DepartmentInfo]
+)(implicit context: RequestContext)
 <article id="@item.id" class="news-item row">
   <div class="col-xs-10">
     <div class="news-item__body">
@@ -39,6 +45,9 @@
             <span>
             - @c
               @if(c == 1) { recipient } else { recipients }
+              @if(item.audienceComponents.nonEmpty) {
+                (@tags.audienceComponents(item.audienceComponents, allDepartments))
+              }
           </span>
           }
           case _ => {}

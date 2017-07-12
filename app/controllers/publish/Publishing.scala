@@ -6,7 +6,7 @@ import models.publishing._
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import play.api.mvc.{ActionRefiner, AnyContent, Result, Results}
-import services.dao.DepartmentInfoDao
+import services.dao.{DepartmentInfo, DepartmentInfoDao}
 import services.{NewsCategoryService, PublisherService, SecurityService}
 import system.ImplicitRequestContext
 import warwick.sso.AuthenticatedRequest
@@ -113,8 +113,10 @@ trait DepartmentOptions {
 
   private val audienceDepartmentTypes = Set("ACADEMIC", "SERVICE")
 
+  lazy val allDepartments: Seq[DepartmentInfo] = departmentInfoDao.allDepartments
+
   lazy val allPublishableDepartments =
-    departmentInfoDao.allDepartments
+    allDepartments
       .filter(dept => audienceDepartmentTypes.contains(dept.`type`))
       .sortBy(_.name)
 
