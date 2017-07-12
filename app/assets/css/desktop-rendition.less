@@ -108,9 +108,15 @@ html.theme-transparent.not-app .bg-stand-in {
   }
 
   body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed,
-  .add-tile-container, .tile--zoomed  .tile__header {
+  .add-tile-container {
     max-width: @desktop-rendition-width;
     margin-right: @desktop-rendition-width-from-center;
+    margin-left: auto;
+  }
+  // Account for body's border
+  .tile--zoomed  .tile__header {
+    max-width: @desktop-rendition-width - 2;
+    margin-right: ~"calc(50vw -" (@desktop-rendition-width - 1) ~")";
     margin-left: auto;
   }
 
@@ -183,6 +189,12 @@ html.theme-transparent.not-app .bg-stand-in {
 
     .id7-main-content-header {
       padding-top: @desktop-rendition-vertical-border;
+    }
+
+    .me-view-container, .tile--zoomed {
+      // Account for body's border
+      width: @desktop-rendition-width - 2;
+      margin-left: 1px;
     }
   }
   html, html.not-app {
