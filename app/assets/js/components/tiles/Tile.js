@@ -90,19 +90,16 @@ export default class Tile extends React.PureComponent {
   }
 
   shouldDisplayExpandIcon() {
-    return this.props.editing ? false : this.props.canZoom;
+    return this.props.editing ? false : this.props.canZoom && !this.props.zoomed;
   }
 
   render() {
     const {
-      type, title, size, colour, content, editing, zoomed, isDesktop, children, supportedTileSizes,
+      type, title, size, colour, content, editing, zoomed, children, supportedTileSizes,
     } = this.props;
 
     const zoomIcon = () => {
-      if (zoomed) {
-        return isDesktop ?
-          <i ref="zoom" className="fa fa-times" onClick={this.props.onZoomOut}> </i> : null;
-      } else if (this.shouldDisplayExpandIcon()) {
+      if (this.shouldDisplayExpandIcon()) {
         return <i ref="zoom" className="fa fa-expand" onClick={this.onClickExpand}> </i>;
       }
       return null;
