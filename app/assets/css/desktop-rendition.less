@@ -131,10 +131,6 @@ html.theme-transparent.not-app .bg-stand-in {
       z-index: 9999;
     }
 
-    .marketing {
-      display: flex;
-    }
-
     html&.theme-transparent .bg-stand-in {
       background-attachment: initial;
     }
@@ -188,27 +184,29 @@ html.theme-transparent.not-app .bg-stand-in {
   }
 
   @media screen and (min-width: @min-width) {
-    .marketing {
-      right: ~"calc("(@desktop-rendition-width-from-center)~"+" (@desktop-rendition-width)~")";
-      .inner-content {
-        max-width: @desktop-rendition-width;
-      }
-    }
-
-    body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed,
-    .add-tile-container {
-      max-width: @desktop-rendition-width;
-      margin-right: @desktop-rendition-width-from-center;
-    }
-
-    // Account for body's border
-    .tile--zoomed  .tile__header {
-      max-width: @desktop-rendition-width - 2;
-      margin-right: ~"calc(50vw -" (@desktop-rendition-width - 1) ~")";
-      margin-left: auto;
-    }
 
     .not-app {
+      .marketing {
+        right: ~"calc("(@desktop-rendition-width-from-center)~"+" (@desktop-rendition-width)~")";
+        .inner-content {
+          max-width: @desktop-rendition-width;
+        }
+        display: flex;
+      }
+
+      body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed,
+      .add-tile-container {
+        max-width: @desktop-rendition-width;
+        margin-right: @desktop-rendition-width-from-center;
+      }
+
+      // Account for body's border
+      .tile--zoomed  .tile__header {
+        max-width: @desktop-rendition-width - 2;
+        margin-right: ~"calc(50vw -" (@desktop-rendition-width - 1) ~")";
+        margin-left: auto;
+      }
+
       .fixed-header { top: @desktop-rendition-vertical-border; }
       .tab-bar { bottom: @desktop-rendition-vertical-border; }
 
