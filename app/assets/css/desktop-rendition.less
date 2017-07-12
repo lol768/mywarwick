@@ -1,7 +1,3 @@
-.marketing {
-  display: none;
-}
-
 html.theme-transparent.not-app .bg-stand-in {
   width: 100vw;
   height: 100vh;
@@ -10,6 +6,10 @@ html.theme-transparent.not-app .bg-stand-in {
   background-repeat: no-repeat;
   background-size: cover;
   position: fixed;
+}
+
+.marketing {
+  display: none;
 }
 
 @media screen and (min-width: @screen-md-min) {
@@ -33,7 +33,6 @@ html.theme-transparent.not-app .bg-stand-in {
     align-items: center;
     justify-content: center;
     height: 100vh;
-    display: none;
     .inner-content {
       width: 100%;
       margin-left: auto;
@@ -177,7 +176,7 @@ html.theme-transparent.not-app .bg-stand-in {
   @desktop-rendition-vertical-border-right: @desktop-rendition-width + 2;
 
   .marketing {
-    right: ~"calc("(@desktop-rendition-width-from-center)~"+" (@desktop-rendition-width)~")";
+    right: 50vw;
     .inner-content {
       max-width: @desktop-rendition-width;
     }
@@ -186,12 +185,11 @@ html.theme-transparent.not-app .bg-stand-in {
   @media screen and (min-width: @min-width) {
 
     .not-app {
-      .marketing {
-        right: ~"calc("(@desktop-rendition-width-from-center)~"+" (@desktop-rendition-width)~")";
+      div.marketing {
         .inner-content {
           max-width: @desktop-rendition-width;
         }
-        display: flex;
+        display: flex !important;
       }
 
       body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed,
