@@ -2,7 +2,6 @@
 @import models.publishing.{PermissionScope, Publisher}
 @import system.RequestContext
 @import views.html._
-@import views.html.helper.CSRF
 
 @(
     publisher: Publisher,
@@ -19,20 +18,8 @@
 }
 
 @common.admin("Update alert") {
-  @b3.form(action = controllers.publish.routes.NotificationsController.update(publisher.id, activity.id, true), 'class -> "split-form") {
-    @context.csrfHelper.formField
-    @form.globalErrors.map { error =>
-      <div class="alert alert-danger">@error.message</div>
-    }
-
-    <div class="split-form__sections">
-      @publish.notifications.contentForm(form, departmentOptions, providerOptions, permissionScope)
-
-      <section>
-        @tags.audiencePicker(form, "audience", departmentOptions, "alert", permissionScope, allowPublic = false, audience = audience)
-        @tags.submitOrCancel("Update", controllers.publish.routes.NotificationsController.list(publisher.id))
-      </section>
-    </div>
+  @b3.form(action = controllers.publish.routes.NotificationsController.update(publisher.id, activity.id, submitted = true), 'class -> "split-form") {
+    @publish.notifications.contentForm(form, publisher, departmentOptions, providerOptions, permissionScope, audience, "Update")
   }
 }
 
