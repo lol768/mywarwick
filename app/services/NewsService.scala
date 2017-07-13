@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
 import models.Audience.DepartmentSubset
-import models.news.{NewsItemRender, NewsItemRenderWithAudit, NewsItemSave}
+import models.news.{NewsItemRender, NewsItemRenderWithAuditAndAudience, NewsItemSave}
 import models.{Audience, AudienceSize}
 import org.joda.time.DateTime
 import org.quartz.JobBuilder.newJob
@@ -28,7 +28,7 @@ trait NewsService {
 
   def getNewsByPublisher(publisherId: String, limit: Int, offset: Int = 0): Seq[NewsItemRender]
 
-  def getNewsByPublisherWithAudits(publisherId: String, limit: Int, offset: Int = 0): Seq[NewsItemRenderWithAudit]
+  def getNewsByPublisherWithAuditsAndAudience(publisherId: String, limit: Int, offset: Int = 0): Seq[NewsItemRenderWithAuditAndAudience]
 
   def latestNews(user: Option[Usercode], limit: Int, offset: Int = 0): Seq[NewsItemRender]
 
@@ -89,7 +89,7 @@ class AnormNewsService @Inject()(
       dao.allNews(publisherId, limit, offset)
     }
 
-  def getNewsByPublisherWithAudits(publisherId: String, limit: Int, offset: Int = 0): Seq[NewsItemRenderWithAudit] = {
+  def getNewsByPublisherWithAuditsAndAudience(publisherId: String, limit: Int, offset: Int = 0): Seq[NewsItemRenderWithAuditAndAudience] = {
     val news = getNewsByPublisher(publisherId, limit, offset)
     val audits = db.withConnection { implicit c =>
       val audits = dao.getNewsAuditByIds(news.map(_.id))
@@ -99,7 +99,8 @@ class AnormNewsService @Inject()(
         updatedBy = audit.updatedBy.flatMap(u => users.get(u))
       ))
     }.groupBy(_.id).mapValues(_.head)
-    news.map(n => NewsItemRenderWithAudit.applyWithAudit(n, audits(n.id)))
+    val audiences = news.map(n => n.id -> getAudience(n.id).getOrElse(Audience())).toMap
+    news.map(n => NewsItemRenderWithAuditAndAudience.applyWithAudit(n, audits(n.id), audiences(n.id)))
   }
 
   override def latestNews(user: Option[Usercode], limit: Int, offset: Int): Seq[NewsItemRender] = {

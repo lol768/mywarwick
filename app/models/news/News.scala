@@ -1,7 +1,7 @@
 package models.news
 
 import controllers.publish.NewsItemData
-import models.{AudienceSize, DateFormats, NewsCategory}
+import models.{Audience, AudienceSize, DateFormats, NewsCategory}
 import org.joda.time.DateTime
 import play.api.libs.json._
 import uk.ac.warwick.util.web.Uri
@@ -90,7 +90,7 @@ object NewsItemAudit {
   type Heavy = NewsItemAudit[User]
 }
 
-case class NewsItemRenderWithAudit (
+case class NewsItemRenderWithAuditAndAudience (
   id: String,
   title: String,
   text: String, // This is plain newline-separated text
@@ -104,11 +104,12 @@ case class NewsItemRenderWithAudit (
   createdBy: Option[User],
   updated: Option[DateTime],
   updatedBy: Option[User],
-  audienceSize: AudienceSize
+  audienceSize: AudienceSize,
+  audienceComponents: Seq[Audience.Component]
 ) extends NewsItemRenderFields with NewsItemAuditFields[User]
 
-object NewsItemRenderWithAudit {
-  def applyWithAudit(news: NewsItemRender, audit: NewsItemAudit[User]) = NewsItemRenderWithAudit(
+object NewsItemRenderWithAuditAndAudience {
+  def applyWithAudit(news: NewsItemRender, audit: NewsItemAudit[User], audience: Audience) = NewsItemRenderWithAuditAndAudience(
     id = news.id,
     title = news.title,
     text = news.text,
@@ -122,7 +123,8 @@ object NewsItemRenderWithAudit {
     createdBy = audit.createdBy,
     updated = audit.updated,
     updatedBy = audit.updatedBy,
-    audienceSize = audit.audienceSize
+    audienceSize = audit.audienceSize,
+    audienceComponents = audience.components
   )
 }
 

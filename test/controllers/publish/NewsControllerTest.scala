@@ -94,7 +94,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
       when(publisherService.find("xyz")).thenReturn(Some(publisher))
       when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
 
-      when(newsService.getNewsByPublisherWithAudits("xyz", 100)).thenReturn(Nil)
+      when(newsService.getNewsByPublisherWithAuditsAndAudience("xyz", 100)).thenReturn(Nil)
 
       val result = call(newsController.list("xyz"), FakeRequest())
 
