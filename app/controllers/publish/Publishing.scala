@@ -1,20 +1,21 @@
 package controllers.publish
 
 import controllers.admin.addFormErrors
-import models.Audience
+import models.{API, Audience}
 import models.publishing._
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
-import play.api.mvc.{ActionRefiner, AnyContent, Result, Results}
+import play.api.libs.json.{JsObject, Json}
+import play.api.mvc._
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
-import services.{NewsCategoryService, PublisherService, SecurityService}
+import services.{AudienceService, NewsCategoryService, PublisherService, SecurityService}
 import system.ImplicitRequestContext
-import warwick.sso.AuthenticatedRequest
+import warwick.sso.{AuthenticatedRequest, Usercode}
 
 import scala.concurrent.Future
 
 trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOptions with PublishingActionRefiner {
-  self: ImplicitRequestContext =>
+  self: ImplicitRequestContext with Controller =>
 
   implicit val executionContext = system.ThreadPools.web
 
@@ -88,7 +89,31 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
     )
   }
 
-
+  def sharedAudienceInfo(
+    audienceService: AudienceService,
+    processUsercodes: Seq[Usercode] => JsObject
+  )(implicit request: PublisherRequest[_]): Future[Result] = {
+    audienceForm.bindFromRequest.fold(
+      formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
+      audienceData => {
+        audienceBinder.bindAudience(audienceData).map {
+          case Left(errors) => BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", errors.map(e => API.Error(e.key, e.message)))))
+          case Right(audience) =>
+            if (audience.public) {
+              Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
+                "public" -> true
+              ))))
+            } else {
+              audienceService.resolve(audience)
+                .toOption
+                .map(processUsercodes)
+                .map(usercodes => Ok(Json.toJson(API.Success[JsObject](data = usercodes))))
+                .getOrElse(InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience"))))))
+            }
+        }
+      }
+    )
+  }
 }
 
 trait PublishableWithAudience {

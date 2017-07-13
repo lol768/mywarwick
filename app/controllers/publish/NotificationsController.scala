@@ -4,12 +4,13 @@ import javax.inject.Inject
 
 import controllers.BaseController
 import models.news.NotificationData
-import models.publishing.Ability.{CreateNotifications, DeleteNotifications, EditNotifications, ViewNotifications}
+import models.publishing.Ability._
 import models.publishing.{Ability, Publisher}
-import models.{Audience, DateFormats}
+import models.{API, Audience, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{ActionFilter, ActionRefiner, Result}
 import services._
 import services.dao.DepartmentInfoDao
@@ -49,6 +50,14 @@ class NotificationsController @Inject()(
     val pastNotifications = activityService.getPastActivitiesByPublisherId(publisherId)
 
     Ok(views.list(request.publisher, futureNotifications, pastNotifications, request.userRole))
+  }
+
+  def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
+    sharedAudienceInfo(audienceService, usercodesInAudience =>
+      Json.obj(
+        "baseAudience" -> usercodesInAudience.length
+      )
+    )
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNotifications) { implicit request =>

@@ -43,6 +43,7 @@ POST        /publish/:publisher/news/:id/delete                   @controllers.p
 GET         /publish/:publisher/notifications                     @controllers.publish.NotificationsController.list(publisher: String)
 GET         /publish/:publisher/notifications/new                 @controllers.publish.NotificationsController.createForm(publisher: String)
 POST        /publish/:publisher/notifications/validate            @controllers.publish.NotificationsController.create(publisher: String, submitted: Boolean = false)
+POST        /publish/:publisher/notifications/audience            @controllers.publish.NotificationsController.audienceInfo(publisher: String)
 POST        /publish/:publisher/notifications                     @controllers.publish.NotificationsController.create(publisher: String, submitted: Boolean = true)
 GET         /publish/:publisher/notifications/:id/edit            @controllers.publish.NotificationsController.updateForm(publisher: String, id: String)
 POST        /publish/:publisher/notifications/:id/validate        @controllers.publish.NotificationsController.update(publisher: String, id: String, submitted: Boolean = false)
