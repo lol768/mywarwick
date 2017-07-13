@@ -1,15 +1,14 @@
 import React from 'react';
-import ListTile from './ListTile';
-import { formatDateTime, localMoment } from '../../dateFormats';
 import _ from 'lodash-es';
+import ListTile from './ListTile';
 import Hyperlink from '../ui/Hyperlink';
+import { formatDateTime, localMoment } from '../../dateFormats';
 
 export default class CourseworkTile extends ListTile {
-
   getSmallBody() {
     function numAssignmentsDue(assignments) {
       const nextMonth = localMoment().add(1, 'month');
-      const items = _.takeWhile(assignments, (a) =>
+      const items = _.takeWhile(assignments, a =>
         localMoment(a.date).isBefore(nextMonth));
       return items.length;
     }

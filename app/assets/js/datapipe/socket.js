@@ -1,3 +1,5 @@
+/* eslint-env browser */
+
 import log from 'loglevel';
 import DataPipe from '../datapipe';
 
@@ -32,7 +34,7 @@ export default class SocketDataPipe extends DataPipe {
   messageReceived(event) {
     log.debug('Message event received:', event);
     const data = JSON.parse(event.data);
-    this.subscribers.forEach(sub => {
+    this.subscribers.forEach((sub) => {
       sub(data);
     });
   }

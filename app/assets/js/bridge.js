@@ -1,14 +1,16 @@
+/* eslint-env browser */
 /* global MyWarwickNative */
+
 /**
  * API for native apps.
  */
 import $ from 'jquery';
 import get from 'lodash-es/get';
-import * as stream from './stream';
 import { push } from 'react-router-redux';
+import { createSelector } from 'reselect';
+import * as stream from './stream';
 import { displayUpdateProgress } from './state/update';
 import { postJsonWithCredentials } from './serverpipe';
-import { createSelector } from 'reselect';
 import { hasAuthoritativeAuthenticatedUser } from './state';
 import { Routes } from './components/AppRoot';
 import { navRequest } from './state/ui';
@@ -25,28 +27,28 @@ export default function init(opts) {
     const nativeSelectors = [
       createSelector(
         state => state.user,
-        user => {
+        (user) => {
           if (!user.empty) {
             native.setUser({
               ...user.data,
               authoritative: user.authoritative,
             });
           }
-        }
+        },
       ),
       createSelector(
         state => get(state, 'routing.locationBeforeTransitions.pathname', '/'),
-        path => native.setPath(path)
+        path => native.setPath(path),
       ),
       createSelector(
         state => state.user.links,
-        ({ login, logout }) => native.setWebSignOnUrls(login, logout)
+        ({ login, logout }) => native.setWebSignOnUrls(login, logout),
       ),
       createSelector(
         state => [state.notifications.stream, state.notificationsLastRead.date],
         ([strm, lastReadDate]) => native.setUnreadNotificationCount(
-          stream.getNumItemsSince(strm, lastReadDate)
-        )
+          stream.getNumItemsSince(strm, lastReadDate),
+        ),
       ),
     ];
 
@@ -116,7 +118,7 @@ export default function init(opts) {
         if (path.indexOf(`/${Routes.EDIT}`) === 0 ||
           path.indexOf(`/${Routes.TILES}`) === 0 ||
           path.indexOf(`/${Routes.SETTINGS}`) === 0
-      ) {
+        ) {
           store.dispatch(push(path));
         } else {
           navRequest(path, store.dispatch);

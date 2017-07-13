@@ -1,7 +1,6 @@
 import React from 'react';
-import TileContent from '../TileContent';
 import classNames from 'classnames';
-
+import TileContent from '../TileContent';
 import TrafficAlert from './TrafficAlert';
 import TrafficCondition from './TrafficCondition';
 
@@ -11,7 +10,6 @@ const HOME_TIME = 15;
 const STALE_AFTER = 1200000;
 
 export default class TrafficTile extends TileContent {
-
   conditionList() {
     const itsHomeTime = new Date().getHours() >= HOME_TIME;
     const trafficConditions = this.props.content.items.filter(r => r.route.inbound !== itsHomeTime)
@@ -50,7 +48,7 @@ export default class TrafficTile extends TileContent {
         {
           items.length > 0 ?
             <div className="tile__item">
-              <i className={classNames('fa', 'fa-exclamation-triangle')}> </i>
+              <i className={classNames('fa', 'fa-exclamation-triangle')} />
               <a href={items.length === 1 ? items[0].url.href : content.alerts.href}>
                 <strong className="alert-count">
                   {`${content.alerts.items.length} traffic alert` +
@@ -78,7 +76,7 @@ export default class TrafficTile extends TileContent {
         </div>
         <div className={classNames('col-xs-12', 'col-sm-8')}>
           { content.alerts.items.slice(0, 2).map(a =>
-            <TrafficAlert key={a.title} title={a.title} href={a.url.href} />
+            <TrafficAlert key={a.title} title={a.title} href={a.url.href} />,
           )}
           {
             content.alerts.items.length > 2 ?

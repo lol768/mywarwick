@@ -1,12 +1,11 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import classnames from 'classnames';
+import $ from 'jquery';
 import ProgressBar from '../../components/ui/ProgressBar';
 import * as newsImages from '../newsImages';
-import $ from 'jquery';
 
 export default class FileUpload extends React.PureComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -39,7 +38,7 @@ export default class FileUpload extends React.PureComponent {
       const progress = (loaded, total) => this.setState({ loaded, total });
 
       newsImages.put(file, progress)
-        .then(imageId => {
+        .then((imageId) => {
           this.setState({ imageId });
         })
         .catch((ex) => {
@@ -72,7 +71,7 @@ export default class FileUpload extends React.PureComponent {
     if (imageId) {
       return (
         <div className="form-group">
-          <label className="control-label col-md-3">Choose an image</label>
+          <label className="control-label col-md-3" htmlFor={`${inputName}_different`}>Choose an image</label>
 
           <div className="col-md-9">
             <div>
@@ -80,7 +79,12 @@ export default class FileUpload extends React.PureComponent {
             </div>
 
             <div>
-              <button type="button" onClick={ this.onClear } className="btn btn-default">
+              <button
+                type="button"
+                onClick={ this.onClear }
+                id={`${inputName}_different`}
+                className="btn btn-default"
+              >
                 Use a different image
               </button>
             </div>
@@ -102,8 +106,12 @@ export default class FileUpload extends React.PureComponent {
             </p>
             : null }
 
-          <input type="file" id={ inputName } onChange={this.onChange}
-            disabled={ uploading } accept="image/*"
+          <input
+            type="file"
+            id={ inputName }
+            onChange={this.onChange}
+            disabled={ uploading }
+            accept="image/*"
           />
 
           { uploading ?
@@ -118,7 +126,6 @@ export default class FileUpload extends React.PureComponent {
       </div>
     );
   }
-
 }
 
 FileUpload.propTypes = {
@@ -129,6 +136,7 @@ FileUpload.propTypes = {
 
 FileUpload.defaultProps = {
   uploadLimit: 1000 * 1000, // 1MB
+  imageId: null,
 };
 
 const ImagePreview = ({ imageId, width }) => {
@@ -144,4 +152,8 @@ const ImagePreview = ({ imageId, width }) => {
 ImagePreview.propTypes = {
   imageId: PropTypes.string.isRequired,
   width: PropTypes.number,
+};
+
+ImagePreview.defaultProps = {
+  width: 100,
 };

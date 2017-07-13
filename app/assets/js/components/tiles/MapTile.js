@@ -1,7 +1,9 @@
+/* eslint-env browser */
+
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import TileContent from './TileContent';
 import log from 'loglevel';
+import TileContent from './TileContent';
 
 function isPositionOnCampus({ latitude, longitude }) {
   return latitude >= 52.373 && latitude <= 52.392
@@ -13,7 +15,6 @@ function isAccuratePosition({ accuracy }) {
 }
 
 export default class MapTile extends TileContent {
-
   static propTypes = {
     imageSize: PropTypes.shape({
       width: PropTypes.number.isRequired,
@@ -75,7 +76,7 @@ export default class MapTile extends TileContent {
       },
       {
         enableHighAccuracy: true,
-      }
+      },
     );
   }
 
@@ -98,7 +99,7 @@ export default class MapTile extends TileContent {
 
     return (
       <div className="reset-position">
-        <img src={src} className="map-tile-image" role="presentation" />
+        <img src={src} className="map-tile-image" alt="Campus Map Tile" />
       </div>
     );
   }
@@ -109,7 +110,7 @@ export default class MapTile extends TileContent {
         <div className="tile-loading">
           <i className="fa fa-spinner fa-pulse" />
         </div>
-        <iframe src="https://campus.warwick.ac.uk/?lite=1" frameBorder="0" />
+        <iframe src="https://campus.warwick.ac.uk/?lite=1" frameBorder="0" title="Interactive Campus Map" />
       </div>
     );
   }
@@ -125,5 +126,4 @@ export default class MapTile extends TileContent {
   expandsOnClick() {
     return true;
   }
-
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 
-const formatBadgeCount = (n) => (n > 99 ? '99+' : n);
+const formatBadgeCount = n => (n > 99 ? '99+' : n);
 
 export default function Badge(props) {
   if (props.count > 0) {

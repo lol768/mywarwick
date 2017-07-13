@@ -1,21 +1,20 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
+import _ from 'lodash-es';
+import { connect } from 'react-redux';
 import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
 import * as groupItemsByDate from '../../GroupItemsByDate';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 import EmptyState from '../ui/EmptyState';
-import { connect } from 'react-redux';
 import { getStreamSize, takeFromStream } from '../../stream';
 import * as notifications from '../../state/notifications';
 import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
-import _ from 'lodash-es';
 
 const SOME_MORE = 20;
 
 class ActivityView extends React.PureComponent {
-
   static propTypes = {
     activities: PropTypes.object,
     olderItemsOnServer: PropTypes.bool,
@@ -44,7 +43,7 @@ class ActivityView extends React.PureComponent {
         <p>
           When you do something at Warwick &ndash;
           like signing in, submitting your coursework, or enrolling for a module &ndash;
-          you'll see a record of it here.
+          you&apos;ll see a record of it here.
         </p>
       </EmptyState>
     );
@@ -71,7 +70,7 @@ class ActivityView extends React.PureComponent {
 
   showMore() {
     this.props.dispatch(notifications.showMoreActivities(
-      this.props.numberToShow + SOME_MORE
+      this.props.numberToShow + SOME_MORE,
     ));
   }
 

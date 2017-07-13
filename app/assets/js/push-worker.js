@@ -1,4 +1,6 @@
+/* eslint-env browser */
 /* global clients */
+/* global self */
 
 /**
  * This code ends up in service-worker, so it wants to be as minimal as possible.
@@ -20,7 +22,7 @@ self.addEventListener('install', () => {
   // Perform install steps
 });
 
-self.addEventListener('push', event => {
+self.addEventListener('push', (event) => {
   log('Push event', event);
 
   if (event.data) {
@@ -34,34 +36,34 @@ self.addEventListener('push', event => {
           icon: '/assets/images/notification-icon.png',
         });
       } else {
-        const bodyText = visibleNotifications.map((n) => n.title)
+        const bodyText = visibleNotifications.map(n => n.title)
           .concat([notification.title])
           .join('\n');
-        visibleNotifications.forEach((n) => n.close());
+        visibleNotifications.forEach(n => n.close());
         self.registration.showNotification(
           `You have ${visibleNotifications.length + 1} notifications`,
           {
             body: bodyText,
             icon: '/assets/images/notification-icon.png',
-          }
+          },
         );
       }
     });
   }
 });
 
-self.addEventListener('message', event => {
+self.addEventListener('message', (event) => {
   self.token = event.data.token;
 });
 
-self.addEventListener('notificationclick', event => {
+self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   event.waitUntil(
     clients.matchAll({
       type: 'window',
-    }).then(clientList => {
-      clientList.forEach(client => {
+    }).then((clientList) => {
+      clientList.forEach((client) => {
         if (/\/notifications$/i.test(client.url) && 'focus' in client) {
           return client.focus();
         }
@@ -73,6 +75,6 @@ self.addEventListener('notificationclick', event => {
       }
 
       return null;
-    })
+    }),
   );
 });

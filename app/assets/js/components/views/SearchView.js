@@ -1,6 +1,6 @@
 import React from 'react';
-import Bundle from '../system/Bundle';
 import once from 'lodash-es/once';
+import Bundle from '../system/Bundle';
 import ScrollRestore from '../ui/ScrollRestore';
 import { Routes } from '../AppRoot';
 
@@ -21,7 +21,6 @@ function renderSearch(mod, SearchComponent) {
 }
 
 export default class SearchView extends React.PureComponent {
-
   static propTypes = {};
 
   render() {

@@ -2,7 +2,6 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 
 export default class Switch extends React.PureComponent {
-
   static propTypes = {
     checked: PropTypes.bool.isRequired,
     id: PropTypes.string.isRequired,
@@ -20,12 +19,21 @@ export default class Switch extends React.PureComponent {
   render() {
     return (
       <div className="switch">
-        <input type="checkbox" id={ this.props.id } className="switch__checkbox"
-          checked={ this.props.checked } readOnly
+        <input
+          type="checkbox"
+          id={ this.props.id }
+          className="switch__checkbox"
+          checked={ this.props.checked }
+          readOnly
           disabled={ this.props.disabled }
         />
-        <label className="switch__length" htmlFor={ this.props.id }
+        <label
+          className="switch__length"
+          htmlFor={ this.props.id }
           onClick={ Switch.stopPropagation }
+          role="switch"
+          aria-checked={ this.props.checked }
+          tabIndex={0}
         />
       </div>
     );

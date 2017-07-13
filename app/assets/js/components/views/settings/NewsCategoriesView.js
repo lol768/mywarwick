@@ -1,13 +1,12 @@
 import React from 'react';
-import * as newsCategories from '../../../state/news-categories';
 import _ from 'lodash-es';
 import { connect } from 'react-redux';
 import * as PropTypes from 'prop-types';
+import * as newsCategories from '../../../state/news-categories';
 import HideableView from '../HideableView';
 import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 
 class NewsCategoriesView extends HideableView {
-
   static propTypes = {
     isOnline: PropTypes.bool.isRequired,
     dispatch: PropTypes.func.isRequired,
@@ -20,17 +19,24 @@ class NewsCategoriesView extends HideableView {
     })).isRequired,
   };
 
+  static buildState(categories, subscribed) {
+    return _.mapValues(
+      _.keyBy(categories, v => v.id),
+      (v, key) => _.includes(subscribed, key),
+    );
+  }
+
   constructor(props) {
     super(props);
     this.onClick = this.onClick.bind(this);
     this.subscribe = this.subscribe.bind(this);
     this.unsubscribe = this.unsubscribe.bind(this);
 
-    this.state = this.buildState(props);
+    this.state = NewsCategoriesView.buildState(props.categories, props.subscribed);
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState(this.buildState(nextProps));
+    this.setState(this.buildState(nextProps.categories, nextProps.subscribed));
   }
 
   componentDidShow() {
@@ -57,13 +63,6 @@ class NewsCategoriesView extends HideableView {
     this.props.dispatch(newsCategories.unsubscribe(id));
   }
 
-  buildState(props) {
-    return _.mapValues(
-      _.keyBy(props.categories, v => v.id),
-      (v, key) => _.includes(props.subscribed, key)
-    );
-  }
-
   render() {
     return (
       <div>
@@ -77,17 +76,21 @@ class NewsCategoriesView extends HideableView {
 
         <div className="list-group setting-colour-1">
           { _.map(this.props.categories, category =>
-            <SwitchListGroupItem key={ category.id } id={ `category-${category.id}` }
-              icon="newspaper-o" description={ category.name } value={ category.id }
-              onClick={ this.onClick } checked={ this.state[category.id] }
+            (<SwitchListGroupItem
+              key={ category.id }
+              id={ `category-${category.id}` }
+              icon="newspaper-o"
+              description={ category.name }
+              value={ category.id }
+              onClick={ this.onClick }
+              checked={ this.state[category.id] }
               disabled={ !this.props.isOnline }
-            />
+            />),
           ) }
         </div>
       </div>
     );
   }
-
 }
 
 function select(state) {

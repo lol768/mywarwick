@@ -3,7 +3,6 @@ import * as PropTypes from 'prop-types';
 import ListGroupItem from './ListGroupItem';
 
 export default class RadioListGroupItem extends React.PureComponent {
-
   static propTypes = {
     ...ListGroupItem.propTypes,
     name: PropTypes.string,
@@ -43,5 +42,4 @@ export default class RadioListGroupItem extends React.PureComponent {
       <ListGroupItem {...this.props} onClick={this.onClick} uiControl={this.renderRadio()} />
     );
   }
-
 }

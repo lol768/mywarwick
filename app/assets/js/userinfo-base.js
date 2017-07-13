@@ -1,6 +1,8 @@
-import * as serverpipe from './serverpipe';
+/* eslint-env browser */
+
 import querystring from 'querystring';
 import url from 'url';
+import * as serverpipe from './serverpipe';
 
 /**
  * A minimal set of methods for fetching the current user before
@@ -22,7 +24,7 @@ export function rewriteRefreshUrl(location, currentLocation) {
 
 export function handleRedirects(response) {
   const json = response.json ? response.json() : Promise.resolve(response);
-  return json.then(data => {
+  return json.then((data) => {
     if (data.refresh) {
       window.location = rewriteRefreshUrl(data.refresh, window.location.href);
       return [data, true];

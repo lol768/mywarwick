@@ -1,3 +1,5 @@
+/* eslint-env browser */
+
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
@@ -5,7 +7,6 @@ import ReactDOM from 'react-dom';
 const Skycons = require('skycons')(window);
 
 export default class Skycon extends React.PureComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -38,12 +39,7 @@ export default class Skycon extends React.PureComponent {
   }
 
   render() {
-    const props = {};
-    for (const prop in this.props) {
-      if (this.props.hasOwnProperty(prop)) {
-        props[prop] = this.props[prop];
-      }
-    }
+    const props = { ...this.props };
     delete props.autoplay;
     return (
       <canvas {...props} />

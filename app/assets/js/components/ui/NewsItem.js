@@ -1,12 +1,13 @@
+/* eslint-env browser */
+
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-
 import * as dateFormats from '../../dateFormats';
 import Hyperlink from './Hyperlink';
 
 // Convert newlines to paragraphs.
-export const render = (content) =>
+export const render = content =>
   content
     .split('\n')
     .map(t => t.trim())
@@ -14,7 +15,6 @@ export const render = (content) =>
     .map((t, i) => <p key={i}>{t}</p>);
 
 class NewsItem extends React.PureComponent {
-
   static propTypes = {
     id: PropTypes.string.isRequired,
     link: PropTypes.shape({
@@ -86,15 +86,15 @@ NewsItemImage.propTypes = {
 };
 
 const NewsItemTag = props =>
-  <span className="badge">
+  (<span className="badge">
     { props.name }
-  </span>;
+  </span>);
 
 NewsItemTag.propTypes = {
   name: PropTypes.string.isRequired,
 };
 
-const select = (state) => ({
+const select = state => ({
   analyticsClientId: state.analytics.clientId,
 });
 export default connect(select)(NewsItem);

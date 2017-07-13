@@ -3,13 +3,12 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 
 export default class HideableView extends React.PureComponent {
-
   static contextTypes = {
     visibility: PropTypes.object.isRequired,
   };
 
   componentDidMount() {
-    this.context.visibility.subscribe(event => {
+    this.context.visibility.subscribe((event) => {
       switch (event) {
         case 'willShow': this.componentWillShow(); break;
         case 'didShow': this.componentDidShow(); break;
@@ -27,5 +26,4 @@ export default class HideableView extends React.PureComponent {
   componentWillHide() {}
 
   componentDidHide() {}
-
 }

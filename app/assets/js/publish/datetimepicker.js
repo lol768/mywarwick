@@ -31,7 +31,7 @@ $('.datetimepicker').each(function setUpDateTimePicker() {
     allowInputToggle: true,
     stepping: 1,
   }).on('dp.change', ({ date }) =>
-    hiddenField.val(moment(date, textFieldFormat).format(hiddenFieldFormat))
+    hiddenField.val(moment(date, textFieldFormat).format(hiddenFieldFormat)),
   );
 });
 

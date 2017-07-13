@@ -9,6 +9,29 @@ const TRAFFIC_STATE = {
 };
 
 export default class TrafficCondition extends React.PureComponent {
+  static propTypes = {
+    route: PropTypes.shape({
+      name: PropTypes.string,
+      inbound: PropTypes.bool,
+      start: PropTypes.shape({
+        latitude: PropTypes.number,
+        longitude: PropTypes.number,
+      }),
+      end: PropTypes.shape({
+        latitude: PropTypes.number,
+        longitude: PropTypes.number,
+      }),
+    }).isRequired,
+    usualDuration: PropTypes.shape({
+      text: PropTypes.string,
+      value: PropTypes.number,
+    }).isRequired,
+    actualDuration: PropTypes.shape({
+      text: PropTypes.string,
+      value: PropTypes.number,
+    }).isRequired,
+  };
+
   render() {
     const { route, usualDuration, actualDuration } = this.props;
 
@@ -32,15 +55,8 @@ export default class TrafficCondition extends React.PureComponent {
     }
 
     return (<li>
-      <i className={classNames('fa', 'fa-fw', status)}> </i>
+      <i className={classNames('fa', 'fa-fw', status)} />
       <span className="route-name">{route.name}</span>{message}
     </li>);
   }
 }
-
-TrafficCondition.propTypes = {
-  route: PropTypes.object,
-  summary: PropTypes.string,
-  usualDuration: PropTypes.object,
-  actualDuration: PropTypes.object,
-};

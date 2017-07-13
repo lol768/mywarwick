@@ -1,5 +1,7 @@
-import * as u from './userinfo-base';
+/* eslint-env browser */
+
 import $ from 'jquery';
+import * as u from './userinfo-base';
 
 const TOKEN_META_ELEMENT_SELECTOR = 'meta[name=_csrf]';
 const HEADER_META_ELEMENT_SELECTOR = 'meta[name=_csrf_header]';

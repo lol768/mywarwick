@@ -1,11 +1,10 @@
+import _ from 'lodash-es';
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 import { formatDateTime } from '../../dateFormats';
-import _ from 'lodash-es';
 
 export default class ListTile extends TileContent {
-
   static canZoom() {
     return true;
   }
@@ -34,14 +33,13 @@ export default class ListTile extends TileContent {
       content.items : _.take(content.items, this.getNumberOfItemsToDisplay());
     return (<ul className="list-unstyled tile-list-group">
       {itemsToDisplay.map(item =>
-        <ListTileItem key={item.id} onClickLink={this.onClickLink} {...item} />
+        <ListTileItem key={item.id} onClickLink={this.onClickLink} {...item} />,
       )}
     </ul>);
   }
-
 }
 
-export const ListTileItem = (props) => (
+export const ListTileItem = props => (
   <li className="tile-list-item--with-separator">
     <a href={props.href} target="_blank" onClick={ props.onClickLink }>
       { props.title && <span className="list-group-item__title">{props.title}</span> }

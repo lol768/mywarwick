@@ -1,14 +1,13 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { Routes } from '../../AppRoot';
 import ScrollRestore from '../../ui/ScrollRestore';
 import LocationOptInSettingView from './optInSettings/LocationOptInSettingView';
 import HideableView from '../HideableView';
 import * as newsOptIn from '../../../state/news-optin';
-import { connect } from 'react-redux';
 
 class OptInSettingsView extends HideableView {
-
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     options: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.shape({
@@ -47,21 +46,22 @@ class OptInSettingsView extends HideableView {
                 selected: this.props.selected[this.props.singleOptionIdentifier] || [],
                 onChange: this.onChange,
                 disabled: !this.props.isOnline,
-              }
+              },
             ) :
-              <LocationOptInSettingView options={ this.props.options.Location || [] }
-                selected={ this.props.selected.Location || [] } onChange={ this.onChange }
-                disabled={ !this.props.isOnline }
-              />
+            <LocationOptInSettingView
+              options={ this.props.options.Location || [] }
+              selected={ this.props.selected.Location || [] }
+              onChange={ this.onChange }
+              disabled={ !this.props.isOnline }
+            />
           }
         </form>
       </ScrollRestore>
     );
   }
-
 }
 
-const select = (state) => ({
+const select = state => ({
   options: state.newsOptIn.options,
   selected: state.newsOptIn.selected,
   isOnline: state.device.isOnline,

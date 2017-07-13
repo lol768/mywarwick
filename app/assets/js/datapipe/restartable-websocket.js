@@ -1,3 +1,5 @@
+/* eslint-env browser */
+
 import log from 'loglevel';
 
 /**
@@ -72,7 +74,7 @@ export default class RestartableWebSocket {
         if (this.buffer.length) {
           log.debug(`${this.buffer.length} messages were waiting to be sent. Sending...`);
         }
-        this.buffer.forEach((m) => this.send(m));
+        this.buffer.forEach(m => this.send(m));
         this.buffer = [];
 
         this.backoff.success();
@@ -98,5 +100,4 @@ export default class RestartableWebSocket {
       };
     }
   }
-
 }

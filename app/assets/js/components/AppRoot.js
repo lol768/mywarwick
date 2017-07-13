@@ -1,5 +1,10 @@
+/* eslint-env browser */
+
 import React from 'react';
 import * as PropTypes from 'prop-types';
+import * as _ from 'lodash-es';
+import { goBack, replace } from 'react-router-redux';
+import { connect } from 'react-redux';
 import NewsView from './views/NewsView';
 import MeView from './views/MeView';
 import TileView from './views/TileView';
@@ -8,9 +13,6 @@ import NotificationsView from './views/NotificationsView';
 import SearchView from './views/SearchView';
 import AddingTilesView from './views/AddingTilesView';
 import AppLayout from './AppLayout';
-import * as _ from 'lodash-es';
-import { goBack, replace } from 'react-router-redux';
-import { connect } from 'react-redux';
 import ActivityMutesView from './views/settings/ActivityMutesView';
 import Visible from './Visible';
 import SettingsView from './views/SettingsView';
@@ -24,7 +26,6 @@ import {
   ActivityStreamFilterOptionView,
   NotificationStreamFilterOptionView,
 } from './views/settings/StreamFilterOptionView';
-
 
 export const Routes = {
   EDIT: 'edit',
@@ -123,7 +124,6 @@ RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NOTIFICATION_FILTER}`] =
 };
 
 class AppRoot extends React.Component {
-
   static propTypes = {
     history: PropTypes.object.isRequired,
     navRequest: PropTypes.string,
@@ -194,18 +194,18 @@ class AppRoot extends React.Component {
   }
 
   expandedTile() {
-    return new RegExp(`^\/${Routes.TILES}\/(.+)`).exec(this.state.location.pathname);
+    return new RegExp(`^/${Routes.TILES}/(.+)`).exec(this.state.location.pathname);
   }
 
   tileOption() {
-    return new RegExp(`^\/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}\/(.+)`).exec(
-      this.state.location.pathname
+    return new RegExp(`^/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}/(.+)`).exec(
+      this.state.location.pathname,
     );
   }
 
   singleOptInSetting() {
-    return new RegExp(`^\/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}\/(.+)`).exec(
-      this.state.location.pathname
+    return new RegExp(`^/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}/(.+)`).exec(
+      this.state.location.pathname,
     );
   }
 
@@ -223,8 +223,8 @@ class AppRoot extends React.Component {
               args.view,
               Object.assign(
                 {},
-                (args.extraProps || {})
-              )
+                (args.extraProps || {}),
+              ),
             )
           }
         </Visible> : null
@@ -238,7 +238,7 @@ class AppRoot extends React.Component {
             params={{ id: tilePath[1] }}
             {...this.props}
           />
-        </Visible>
+        </Visible>,
       );
     } else {
       views.push(null);
@@ -252,7 +252,7 @@ class AppRoot extends React.Component {
             tileOptions={ this.props.tileData.options[tileOptionPath[1]] }
             dispatch={ this.props.dispatch }
           />
-        </Visible>
+        </Visible>,
       );
     } else {
       views.push(null);
@@ -263,11 +263,14 @@ class AppRoot extends React.Component {
         case Routes.SettingsRoutes.OptInTypes.LOCATION:
           views.push(
             <Visible key={ `OptIn:${optInPath[1]}` } visible>
-              <OptInSettingsView options={ this.props.newsOptInOptions.options }
-                selected={ this.props.newsOptInOptions.selected } dispatch={ this.props.dispatch }
-                singleOptionView={ LocationOptInSettingView } singleOptionIdentifier={ 'Location' }
+              <OptInSettingsView
+                options={ this.props.newsOptInOptions.options }
+                selected={ this.props.newsOptInOptions.selected }
+                dispatch={ this.props.dispatch }
+                singleOptionView={ LocationOptInSettingView }
+                singleOptionIdentifier={ 'Location' }
               />
-            </Visible>
+            </Visible>,
           );
           break;
         default:
@@ -286,7 +289,7 @@ class AppRoot extends React.Component {
   }
 }
 
-const select = (state) => ({
+const select = state => ({
   navRequest: state.ui.navRequest,
   newsOptInOptions: state.newsOptIn,
   tileData: state.tiles.data,

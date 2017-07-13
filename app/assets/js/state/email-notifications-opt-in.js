@@ -11,18 +11,18 @@ const start = createAction(EMAIL_NOTIFICATIONS_OPT_IN_REQUEST);
 const receive = createAction(EMAIL_NOTIFICATIONS_OPT_IN_RECEIVE);
 
 export function fetch() {
-  return dispatch => {
+  return (dispatch) => {
     dispatch(start());
     return fetchWithCredentials('/api/emailNotificationPreferences')
       .then(response => response.json())
-      .then(json => {
+      .then((json) => {
         if (json.data !== undefined && 'wantsEmails' in json.data) {
           dispatch(receive(json.data));
         } else {
           throw new Error('Invalid response returned from email notification pref API');
         }
       })
-      .catch((e) => dispatch(receive(e)));
+      .catch(e => dispatch(receive(e)));
   };
 }
 

@@ -1,7 +1,9 @@
+/* eslint-env browser */
+
 import $ from 'jquery';
-import { promiseSubmit } from './utils';
-import 'jquery-form/jquery.form.js';
 import log from 'loglevel';
+import 'jquery-form/jquery.form';
+import promiseSubmit from './utils';
 
 const SPLIT_FORM = 'form.split-form';
 const SLIDE_DURATION = 350;
@@ -83,7 +85,7 @@ $(SPLIT_FORM).each((i, form) => {
 
     const $groupsWithErrors = $(html).find(`section:eq(${currentPage}) .has-error`);
 
-    $.map($groupsWithErrors, group => {
+    $.map($groupsWithErrors, (group) => {
       const $errors = $(group).find('*[id*=_error_]');
       const $groupInPage = $(`#${group.id}`);
 
@@ -106,7 +108,7 @@ $(SPLIT_FORM).each((i, form) => {
     const $button = $(this).prop('disabled', true);
 
     validate()
-      .then(html => {
+      .then((html) => {
         updateFormGroupErrors(html);
 
         if (!hasErrors()) {
@@ -117,7 +119,7 @@ $(SPLIT_FORM).each((i, form) => {
       .then(() => $button.prop('disabled', false));
   });
 
-  window.onpopstate = e => {
+  window.onpopstate = (e) => {
     if (e.state !== null) {
       showSection(e.state.pageNum);
     }
@@ -129,7 +131,7 @@ $(SPLIT_FORM).each((i, form) => {
 
   $form.on('submit', () => {
     validate()
-      .then(html => {
+      .then((html) => {
         updateFormGroupErrors(html);
 
         if (!hasErrors()) {

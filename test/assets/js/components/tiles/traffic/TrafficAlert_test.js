@@ -12,7 +12,7 @@ describe('TrafficAlert', () => {
 
     html.should.deep.equal(
       <div className="traffic-alert">
-        <i className="fa fa-fw fa-exclamation-triangle"> </i>
+        <i className="fa fa-fw fa-exclamation-triangle" />
         <a href={props.href}>{props.title}</a>
       </div>
     );

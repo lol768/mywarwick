@@ -6,7 +6,6 @@ import log from 'loglevel';
 import AccountPhoto from './AccountPhoto';
 
 export default class UtilityBar extends React.PureComponent {
-
   static propTypes = {
     user: PropTypes.shape({
       links: PropTypes.shape({

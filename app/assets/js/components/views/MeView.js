@@ -5,15 +5,15 @@ import _ from 'lodash-es';
 import $ from 'jquery';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import { goBack, push } from 'react-router-redux';
 import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
 import * as TILE_TYPES from '../tiles';
 import ScrollRestore from '../ui/ScrollRestore';
-import { GridSizingHelper } from '../../GridSizingHelper';
+import GridSizingHelper from '../../GridSizingHelper';
 import { Routes } from '../AppRoot';
-import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -48,7 +48,6 @@ function getSizeNameFromSize(size) {
 }
 
 class MeView extends React.PureComponent {
-
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     editing: PropTypes.bool,
@@ -108,9 +107,13 @@ class MeView extends React.PureComponent {
     this.props.dispatch(goBack());
   }
 
+  onAdd() {
+    this.props.dispatch(push(`/${Routes.EDIT}/${Routes.ADD}`));
+  }
+
   getTileSize(id) {
     const layout = this.props.layout.filter(i =>
-      i.tile === id && i.layoutWidth === this.props.layoutWidth
+      i.tile === id && i.layoutWidth === this.props.layoutWidth,
     )[0];
 
     if (!layout) {
@@ -118,10 +121,6 @@ class MeView extends React.PureComponent {
     }
 
     return getSizeNameFromSize(layout);
-  }
-
-  onAdd() {
-    this.props.dispatch(push(`/${Routes.EDIT}/${Routes.ADD}`));
   }
 
   getTileLayout(layout) {
@@ -167,15 +166,17 @@ class MeView extends React.PureComponent {
 
     const layout = this.getTileLayout(this.props.layout, layoutWidth);
     const tileComponents = visibleTiles.map(tile =>
-      <div
+      (<div
         key={tile.id}
         className={editing === tile.id ? 'react-grid-item--editing' : ''}
         style={{ touchAction: 'auto' }} // Allow touches to scroll (overrides react-draggable)
       >
         { this.renderTile(tile) }
-      </div>
+      </div>),
     );
 
+    /* eslint-disable */
+    // Justification: conflicting rules here result in a wild goose chase
     return (
       <div>
         <div className="me-view__tiles">
@@ -202,7 +203,13 @@ class MeView extends React.PureComponent {
               transitionEnterTimeout={500}
               transitionLeaveTimeout={300}
             >{ editing && hiddenTiles.length > 0 ?
-                <div key="add-tile-button" className="add-tile-button" onClick={this.onAdd}>
+                <div
+                  key="add-tile-button"
+                  className="add-tile-button"
+                  onClick={this.onAdd}
+                  role="button"
+                  tabIndex={0}
+                >
                   <i className="fa fa-plus" />
                 </div>
               : null }
@@ -211,6 +218,7 @@ class MeView extends React.PureComponent {
         </div>
       </div>
     );
+    /* eslint-enable */
   }
 
   render() {
@@ -228,7 +236,7 @@ class MeView extends React.PureComponent {
   }
 }
 
-const select = (state) => ({
+const select = state => ({
   layoutWidth: state.ui.layoutWidth,
   tiles: state.tiles.data.tiles,
   layout: state.tiles.data.layout,

@@ -1,3 +1,5 @@
+/* eslint-env browser */
+
 import $ from 'jquery';
 
 export const API_BASE = '/api/news/images';
@@ -39,7 +41,7 @@ export function put(file, progressCallback) {
       },
       xhr: () => {
         const xhr = $.ajaxSettings.xhr();
-        xhr.upload.addEventListener('progress', (e) => progressCallback(e.loaded, e.total));
+        xhr.upload.addEventListener('progress', e => progressCallback(e.loaded, e.total));
         return xhr;
       },
     });
