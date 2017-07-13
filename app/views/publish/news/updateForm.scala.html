@@ -3,8 +3,6 @@
 @import views.html._
 @import models.publishing.PermissionScope
 @import models.publishing.Publisher
-@import org.joda.time.LocalDateTime
-@import views.html.helper.CSRF
 
 @(
     publisher: Publisher,
@@ -21,37 +19,7 @@
 }
 
 @common.admin("Update news") {
-  @b3.form(action = controllers.publish.routes.NewsController.update(publisher.id, id, true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.publish.routes.NewsController.audienceInfo(publisher.id)) {
-    @context.csrfHelper.formField
-    <div class="audience-indicator"></div>
-
-    <div class="split-form__sections">
-      <section>
-        @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true, audience = audience)
-        @tags.categoryPicker(form, "categories", categories, "news item")
-      </section>
-
-      <section>
-        @publish.news.contentForm(form)
-      </section>
-
-      <section>
-        @b3.radio(form("item.publishDateSet"),
-          Seq(
-            "false" -> "Now",
-            "true" -> "Select a time"
-          ),
-          '_label -> "Publish time",
-          'value -> false
-        )
-        @tags.datetimePicker(form("item.publishDate"),
-          '_label -> "Publish date",
-          '_help -> "You can select a time in the future, and this news item will appear to users after that time",
-          'value -> LocalDateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
-        )
-
-        @tags.submitOrCancel("Update", controllers.publish.routes.NewsController.list(publisher.id))
-      </section>
-    </div>
+  @b3.form(action = controllers.publish.routes.NewsController.update(publisher.id, id, submitted = true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.publish.routes.NewsController.audienceInfo(publisher.id)) {
+    @publish.news.contentForm(form, publisher, departmentOptions, categories, permissionScope, audience, "Update")
   }
 }

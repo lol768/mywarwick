@@ -1,23 +1,65 @@
-@(form: Form[_])(implicit fc: b3.B3FieldConstructor, messages: Messages)
+@import models.publishing.PermissionScope
+@import system.RequestContext
+@import org.joda.time.LocalDateTime
+@import models.publishing.Publisher
+@(
+    form: Form[_],
+    publisher: Publisher,
+    departmentOptions: Seq[(String, String)],
+    categories: Seq[NewsCategory],
+    permissionScope: PermissionScope,
+    audience: Audience,
+    createOrUpdate: String
+)(implicit fc: b3.B3FieldConstructor, messages: Messages, context: RequestContext)
 
-@b3.text(form("item.title"),
-  'class -> "input-lg",
-  '_label -> "Title",
-  Symbol("data-autofocus") -> true,
-  'required -> true)
+@context.csrfHelper.formField
+<div class="audience-indicator"></div>
 
-@b3.textarea(form("item.text"),
-  '_label -> "Text",
-  '_help -> "Keep it short",
-  'rows -> 7
-)
+<div class="split-form__sections">
+  <section>
+    @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true, audience = audience)
+    @tags.categoryPicker(form, "categories", categories, "news item")
+  </section>
 
-<div id="file-upload-container" data-input-name="item.imageId" data-image-id="@form.data.get("item.imageId")"></div>
+  <section>
+    @b3.text(form("item.title"),
+      'class -> "input-lg",
+      '_label -> "Title",
+      Symbol("data-autofocus") -> true,
+      'required -> true)
 
-@b3.text(form("item.linkHref"),
-  '_label -> "Link URL"
-)
+    @b3.textarea(form("item.text"),
+      '_label -> "Text",
+      '_help -> "Keep it short",
+      'rows -> 7
+    )
 
-@b3.text(form("item.linkText"),
-  '_label -> "Link title"
-)
+    <div id="file-upload-container" data-input-name="item.imageId" data-image-id="@form.data.get("item.imageId")"></div>
+
+    @b3.text(form("item.linkHref"),
+      '_label -> "Link URL"
+    )
+
+    @b3.text(form("item.linkText"),
+      '_label -> "Link title"
+    )
+  </section>
+
+  <section>
+    @b3.radio(form("item.publishDateSet"),
+      Seq(
+        "false" -> "Now",
+        "true" -> "Select a time"
+      ),
+      '_label -> "Publish time",
+      'value -> false
+    )
+    @tags.datetimePicker(form("item.publishDate"),
+      '_label -> "Publish date",
+      '_help -> "You can select a time in the future, and this news item will appear to users after that time",
+      'value -> LocalDateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
+    )
+
+    @tags.submitOrCancel(createOrUpdate, controllers.publish.routes.NewsController.list(publisher.id))
+  </section>
+</div>
