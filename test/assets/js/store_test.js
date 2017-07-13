@@ -7,8 +7,8 @@ describe('store', () => {
   });
 
   it('handles a basic action', () => {
-    store.dispatch({type:'ui.class',className:'xyz'});
-    store.getState().ui.className.should.equal('xyz');
+    store.dispatch({type:'ui.theme',theme:'xyz'});
+    store.getState().ui.colourTheme.should.equal('xyz');
   });
 
 });

@@ -173,7 +173,6 @@ export default class Tile extends React.PureComponent {
     editing: PropTypes.bool.isRequired,
     editingAny: PropTypes.bool.isRequired,
     zoomed: PropTypes.bool.isRequired,
-    isDesktop: PropTypes.bool.isRequired,
     option: PropTypes.object,
     id: PropTypes.string,
     canZoom: PropTypes.bool.isRequired,

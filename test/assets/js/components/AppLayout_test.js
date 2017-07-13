@@ -9,7 +9,6 @@ describe('AppLayout', () => {
     const location = { pathname: '/' };
     const result = shallowRender(<AppLayout
       location={location}
-      layoutClassName="mobile"
       user={({})}
       notificationsCount="7"
       onSelectItem={()=>{}} />);

@@ -29,7 +29,6 @@ class ID7Layout extends React.PureComponent {
     zoomedTile: PropTypes.string,
     notificationsCount: PropTypes.number,
     children: PropTypes.node,
-    layoutClassName: PropTypes.oneOf(['desktop', 'mobile']),
   };
 
   constructor(props) {
@@ -183,7 +182,6 @@ class ID7Layout extends React.PureComponent {
 }
 
 const select = (state) => ({
-  layoutClassName: state.ui.className,
   notificationsCount:
     getNumItemsSince(state.notifications.stream, _.get(state, ['notificationsLastRead', 'date'])),
   user: state.user,

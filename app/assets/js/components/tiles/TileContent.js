@@ -14,10 +14,6 @@ export const DEFAULT_TILE_SIZES = [TILE_SIZES.SMALL, TILE_SIZES.WIDE];
 
 export default class TileContent extends React.PureComponent {
 
-  static isVisibleOnDesktopOnly() {
-    return false;
-  }
-
   static canZoom() {
     return false;
   }

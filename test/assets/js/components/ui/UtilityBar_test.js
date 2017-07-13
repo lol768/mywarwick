@@ -20,20 +20,8 @@ describe('UtilityBar', () => {
     expect(li.props.children).to.have.property('key', 'signInLink');
   });
 
-  it('renders name when we are signed in on desktop', () => {
-    const data = { name: 'Ron Swanson', authenticated: true };
-    const bar = <UtilityBar user={{ data, links: { login: '', logout: '' } }}/>;
-    const result = shallowRender(bar);
-    expect(result).to.have.property('type', 'ul');
-    const link = result.props.children.props.children;
-    expect(link).to.have.property('key', 'accountLink');
-    expect(link).to.have.deep.property('props.data-toggle', 'id7:account-popover');
-    expect(link).to.have.deep.property('props.children[0]', 'Ron Swanson');
-  });
-
-  it('renders image when we are signed in on mobile', () => {
+  it('renders image when we are signed', () => {
     const props = {
-      layoutClassName: 'mobile',
       user: {
         data: { name: 'Ron Swanson', authenticated: true, photo: { url: 'http://photos/photo/123' } },
         links: { login: '', logout: '' },

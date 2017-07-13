@@ -22,7 +22,6 @@ class AddingTilesView extends React.PureComponent {
     adding: PropTypes.bool,
     layoutWidth: PropTypes.number,
     layout: PropTypes.array,
-    isDesktop: PropTypes.bool,
     deviceWidth: PropTypes.number,
     tiles: PropTypes.array,
   };
@@ -100,7 +99,6 @@ class AddingTilesView extends React.PureComponent {
 }
 
 const select = (state) => ({
-  isDesktop: state.ui.className === 'desktop',
   layoutWidth: state.ui.layoutWidth,
   tiles: state.tiles.data.tiles,
   layout: state.tiles.data.layout,

@@ -54,7 +54,6 @@ class MeView extends React.PureComponent {
     adding: PropTypes.bool,
     layoutWidth: PropTypes.number,
     layout: PropTypes.array,
-    isDesktop: PropTypes.bool,
     deviceWidth: PropTypes.number,
     tiles: PropTypes.array,
   };
@@ -158,11 +157,9 @@ class MeView extends React.PureComponent {
   }
 
   renderTiles() {
-    const { layoutWidth, isDesktop, editing } = this.props;
+    const { layoutWidth, editing } = this.props;
 
-    const allTiles = this.props.tiles.filter(t =>
-      TILE_TYPES[t.type] && (!TILE_TYPES[t.type].isVisibleOnDesktopOnly() || isDesktop)
-    );
+    const allTiles = this.props.tiles.filter(t => TILE_TYPES[t.type]);
 
     const visibleTiles = allTiles.filter(t => !t.removed);
     const hiddenTiles = allTiles.filter(t => t.removed);
@@ -231,7 +228,6 @@ class MeView extends React.PureComponent {
 }
 
 const select = (state) => ({
-  isDesktop: state.ui.className === 'desktop',
   layoutWidth: state.ui.layoutWidth,
   tiles: state.tiles.data.tiles,
   layout: state.tiles.data.layout,

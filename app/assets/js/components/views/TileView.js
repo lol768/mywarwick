@@ -49,7 +49,6 @@ class TileView extends Component {
       zoomed,
       editing,
       editingAny,
-      isDesktop,
       tile,
       content,
       size,
@@ -92,7 +91,6 @@ class TileView extends Component {
       id,
       editing,
       editingAny,
-      isDesktop,
       supportedTileSizes,
     };
 
@@ -144,7 +142,6 @@ const select = (state, ownProps) => {
     content,
     option,
     user,
-    isDesktop: state.ui.className === 'desktop',
     zoomed: ownProps.params !== undefined,
   };
 };
@@ -156,7 +153,6 @@ TileView.propTypes = {
   tile: PropTypes.object,
   content: PropTypes.object,
   option: PropTypes.object,
-  isDesktop: PropTypes.bool,
   zoomed: PropTypes.bool,
   size: PropTypes.string.isRequired,
   editingAny: PropTypes.bool.isRequired,
