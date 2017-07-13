@@ -277,9 +277,9 @@ export function tilesReducer(state = initialState, action) {
       }));
     case TILE_RESIZE: {
       const layout = state.data.layout;
-      const index = _.findIndex(layout, (i =>
+      const index = _.findIndex(layout, i =>
         i.layoutWidth === action.layoutWidth && i.tile === action.tile.id
-      ));
+      );
       return {
         ...state,
         data: {
