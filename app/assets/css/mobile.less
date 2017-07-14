@@ -1,4 +1,4 @@
-html.mobile {
+html {
   body {
     font-family: -apple-system, 'Roboto', 'Droid Sans', 'Segoe WP', Helvetica, sans-serif !important;
 
@@ -169,6 +169,13 @@ html.android.app {
 
   .suggested-links > h3 {
     display: none;
+  }
+}
+
+.list-group-item.cursor-pointer {
+  transition: background-color 0.1s;
+  &:active {
+    background-color: darken(@list-group-bg, 3%);
   }
 }
 

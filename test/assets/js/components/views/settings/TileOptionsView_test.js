@@ -1,6 +1,6 @@
 import { TileOptionView } from 'components/views/settings/TileOptionView';
 import RadioListGroupItem from 'components/ui/RadioListGroupItem';
-import CheckboxListGroupItem from 'components/ui/CheckboxListGroupItem';
+import SwitchListGroupItem from 'components/ui/SwitchListGroupItem';
 import * as enzyme from 'enzyme';
 import * as React from 'react';
 import * as _ from 'lodash-es';
@@ -157,7 +157,7 @@ describe('Checkboxes', () => {
     thisProps.tile.preferences = [];
 
     const result = enzyme.shallow(<TileOptionView {...thisProps} />);
-    const checkboxes = result.find(CheckboxListGroupItem);
+    const checkboxes = result.find(SwitchListGroupItem);
     checkCheckboxes(checkboxes);
     checkboxes.find('[checked="true"]').forEach((input) =>
       expect(input.props().checked).to.equal(false)
@@ -172,7 +172,7 @@ describe('Checkboxes', () => {
     };
 
     const result = enzyme.shallow(<TileOptionView {...thisProps} />);
-    const checkboxes = result.find(CheckboxListGroupItem);
+    const checkboxes = result.find(SwitchListGroupItem);
     checkCheckboxes(checkboxes);
     checkboxes.find('[checked="true"]').forEach((input) =>
       expect(input.props().checked).to.equal(false)
@@ -191,7 +191,7 @@ describe('Checkboxes', () => {
     };
 
     const result = enzyme.shallow(<TileOptionView {...thisProps} />);
-    const checkboxes = result.find(CheckboxListGroupItem);
+    const checkboxes = result.find(SwitchListGroupItem);
     checkCheckboxes(checkboxes);
     checkboxes.find('[checked="true"]').forEach((input) =>
       expect(input.props().checked).to.equal(false)
@@ -208,7 +208,7 @@ describe('Checkboxes', () => {
     };
 
     const result = enzyme.shallow(<TileOptionView {...thisProps} />);
-    const checkboxes = result.find(CheckboxListGroupItem);
+    const checkboxes = result.find(SwitchListGroupItem);
     checkCheckboxes(checkboxes);
     checkboxes.find('[checked="true"]').forEach((input) =>
       expect(input.props().checked).to.equal(false)
@@ -225,7 +225,7 @@ describe('Checkboxes', () => {
     };
 
     const result = enzyme.shallow(<TileOptionView {...thisProps} />);
-    const checkboxes = result.find(CheckboxListGroupItem);
+    const checkboxes = result.find(SwitchListGroupItem);
     checkCheckboxes(checkboxes);
     const checked = checkboxes.findWhere((input) => input.props().checked);
     expect(checked).to.have.length(1);
@@ -242,7 +242,7 @@ describe('Checkboxes', () => {
     };
 
     const result = enzyme.shallow(<TileOptionView {...thisProps} />);
-    const checkboxes = result.find(CheckboxListGroupItem);
+    const checkboxes = result.find(SwitchListGroupItem);
     checkCheckboxes(checkboxes);
     const checked = checkboxes.findWhere((input) => input.props().checked);
     expect(checked).to.have.length(1);
@@ -254,7 +254,7 @@ describe('Checkboxes', () => {
     thisProps.tile.preferences = {};
 
     const result = enzyme.shallow(<TileOptionView {...thisProps} />);
-    const checkboxes = result.find(CheckboxListGroupItem);
+    const checkboxes = result.find(SwitchListGroupItem);
     checkCheckboxes(checkboxes);
     const checked = checkboxes.findWhere((input) => input.props().checked);
     expect(checked).to.have.length(2);
@@ -270,7 +270,7 @@ describe('Checkboxes', () => {
     };
 
     const result = enzyme.shallow(<TileOptionView {...thisProps} />);
-    const checkboxes = result.find(CheckboxListGroupItem);
+    const checkboxes = result.find(SwitchListGroupItem);
     checkCheckboxes(checkboxes);
     const checked = checkboxes.findWhere((input) => input.props().checked);
     expect(checked).to.have.length(1);
@@ -286,7 +286,7 @@ describe('Checkboxes', () => {
     };
 
     const result = enzyme.shallow(<TileOptionView {...thisProps} />);
-    const checkboxes = result.find(CheckboxListGroupItem);
+    const checkboxes = result.find(SwitchListGroupItem);
     checkCheckboxes(checkboxes);
     const checked = checkboxes.findWhere((input) => input.props().checked);
     // Even though value2 defaults to true

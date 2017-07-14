@@ -1,6 +1,5 @@
 import React, { PropTypes } from 'react';
 import ReactGridLayoutBase from 'react-grid-layout';
-import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import _ from 'lodash-es';
 import $ from 'jquery';
 import { connect } from 'react-redux';
@@ -10,9 +9,10 @@ import * as tiles from '../../state/tiles';
 import { TILE_SIZES } from '../tiles/TileContent';
 import TileView from './TileView';
 import * as TILE_TYPES from '../tiles';
-import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
-import { isEmbedded } from '../../embedHelper';
+import { GridSizingHelper } from '../../GridSizingHelper';
+import { Routes } from '../AppRoot';
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -108,10 +108,6 @@ class MeView extends React.PureComponent {
     this.props.dispatch(goBack());
   }
 
-  onAdd() {
-    this.props.dispatch(push(`/${Routes.EDIT}/${Routes.ADD}`));
-  }
-
   getTileSize(id) {
     const layout = this.props.layout.filter(i =>
       i.tile === id && i.layoutWidth === this.props.layoutWidth
@@ -122,6 +118,10 @@ class MeView extends React.PureComponent {
     }
 
     return getSizeNameFromSize(layout);
+  }
+
+  onAdd() {
+    this.props.dispatch(push(`/${Routes.EDIT}/${Routes.ADD}`));
   }
 
   getTileLayout(layout) {
@@ -137,15 +137,7 @@ class MeView extends React.PureComponent {
   }
 
   getGridLayoutWidth() {
-    const { isDesktop, deviceWidth } = this.props;
-
-    const margins = _.sum(margin);
-
-    if (isDesktop || isEmbedded()) {
-      return $('.id7-main-content').width() + margins;
-    }
-
-    return deviceWidth + margins;
+    return GridSizingHelper.getGridLayoutWidth(margin);
   }
 
   renderTile(props) {
@@ -204,18 +196,20 @@ class MeView extends React.PureComponent {
           >
             { tileComponents }
           </ReactGridLayoutBase>
-          <ReactCSSTransitionGroup
-            transitionName="grow-shrink"
-            transitionAppear
-            transitionAppearTimeout={500}
-            transitionEnterTimeout={500}
-            transitionLeaveTimeout={300}
-          >{ editing && hiddenTiles.length > 0 ?
-            <div key="add-tile-button" className="add-tile-button" onClick={this.onAdd}>
-              <i className="fa fa-plus" />
-            </div>
-            : null }
-          </ReactCSSTransitionGroup>
+          <div className="add-tile-container">
+            <ReactCSSTransitionGroup
+              transitionName="grow-shrink"
+              transitionAppear
+              transitionAppearTimeout={500}
+              transitionEnterTimeout={500}
+              transitionLeaveTimeout={300}
+            >{ editing && hiddenTiles.length > 0 ?
+                <div key="add-tile-button" className="add-tile-button" onClick={this.onAdd}>
+                  <i className="fa fa-plus" />
+                </div>
+              : null }
+            </ReactCSSTransitionGroup>
+          </div>
         </div>
       </div>
     );
@@ -238,7 +232,7 @@ class MeView extends React.PureComponent {
 
 const select = (state) => ({
   isDesktop: state.ui.className === 'desktop',
-  layoutWidth: state.ui.isWideLayout === true ? 5 : 2,
+  layoutWidth: state.ui.layoutWidth,
   tiles: state.tiles.data.tiles,
   layout: state.tiles.data.layout,
   deviceWidth: state.device.width,

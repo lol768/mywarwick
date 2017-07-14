@@ -10,7 +10,7 @@ import * as newsOptIn from '../../state/news-optin';
 import * as emailNotificationsOptIn from '../../state/email-notifications-opt-in';
 import { loadDeviceDetails } from '../../userinfo';
 import _ from 'lodash-es';
-import CheckboxListGroupItem from '../ui/CheckboxListGroupItem';
+import SwitchListGroupItem from '../ui/SwitchListGroupItem';
 
 
 class SettingsView extends HideableView {
@@ -192,7 +192,7 @@ class SettingsView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-0">
-          <div className="list-group-item"
+          <div className="list-group-item cursor-pointer"
             onClick={ () =>
               this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}`))
             }
@@ -206,21 +206,21 @@ class SettingsView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-0">
-          <div className="list-group-item"
+          <div className="list-group-item cursor-pointer"
             onClick={ () =>
               this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`))
             }
           >
             { SettingsView.renderSetting(
               'bell-slash-o',
-              'Muted notifications',
+              'Muted alerts',
               SettingsView.renderSingleCount(this.props.mutes)
             ) }
           </div>
-          <CheckboxListGroupItem id="copyNotificationsEmail"
-            value
+          <SwitchListGroupItem id="copyNotificationsEmail"
+            value=""
             icon="envelope"
-            description="Copy my notifications to email"
+            description="Copy my alerts to email"
             onClick={ this.onNotificationEmailCopyChange }
             checked={ this.state.emailNotificationsOptIn.wantsEmails }
             failure={ this.state.emailNotificationsOptIn.failed && !this.props.isOnline}
@@ -231,7 +231,7 @@ class SettingsView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-1">
-          <div className="list-group-item"
+          <div className="list-group-item cursor-pointer"
             onClick={ this.props.newsCategories.fetched && !this.props.newsCategories.failed ? () =>
               this.props.dispatch(
                 push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`)
@@ -246,7 +246,7 @@ class SettingsView extends HideableView {
               })
             ) }
           </div>
-          <div className="list-group-item"
+          <div className="list-group-item cursor-pointer"
             onClick={ this.props.newsOptIn.fetched && !this.props.newsOptIn.failed ? () =>
               this.props.dispatch(
                 push(
@@ -272,7 +272,7 @@ class SettingsView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-2">
-          <div className="list-group-item"
+          <div className="list-group-item cursor-pointer"
             onClick={ () =>
               this.props.dispatch(
                 push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.ACTIVITY_FILTER}`)
@@ -297,7 +297,7 @@ class SettingsView extends HideableView {
           >
             { SettingsView.renderSetting(
               'bell-o',
-              'Notifications filter',
+              'Alerts filter',
               SettingsView.renderFractionCount(
                 this.props.notificationFilter.selected,
                 this.props.notificationFilter.total
@@ -307,7 +307,7 @@ class SettingsView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-3">
-          <div className="list-group-item" onClick={ loadDeviceDetails }>
+          <div className="list-group-item cursor-pointer" onClick={ loadDeviceDetails }>
             <div className="media">
               <div className="media-left feedback">
                 <span className="fa-stack">

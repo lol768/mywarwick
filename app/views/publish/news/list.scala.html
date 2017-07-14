@@ -1,13 +1,15 @@
-@import models.news.NewsItemRenderWithAudit
+@import models.news.NewsItemRenderWithAuditAndAudience
 @import models.publishing.Ability.CreateNews
 @import models.publishing.{Publisher, Role}
 @import system.RequestContext
 @import views.html._
+@import services.dao.DepartmentInfo
 @(
     publisher: Publisher,
-    newsPending: Seq[NewsItemRenderWithAudit],
-    newsPublished: Seq[NewsItemRenderWithAudit],
-    user: Role
+    newsPending: Seq[NewsItemRenderWithAuditAndAudience],
+    newsPublished: Seq[NewsItemRenderWithAuditAndAudience],
+    user: Role,
+    allDepartments: Seq[DepartmentInfo]
 )(implicit context: RequestContext)
 
   @common.admin("News") {
@@ -23,7 +25,7 @@
       <p>No pending news.</p>
     } else {
       @newsPending.map { item =>
-        @publish.news.newsItemInfo(publisher.id, item, user)
+        @publish.news.newsItemInfo(publisher.id, item, user, allDepartments)
       }
     }
 
@@ -32,7 +34,7 @@
       <p>No published news.</p>
     } else {
       @newsPublished.map { item =>
-        @publish.news.newsItemInfo(publisher.id, item, user)
+        @publish.news.newsItemInfo(publisher.id, item, user, allDepartments)
       }
     }
   }

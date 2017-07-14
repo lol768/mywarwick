@@ -2,7 +2,7 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
 import * as tiles from '../../../state/tiles';
-import CheckboxListGroupItem from '../../ui/CheckboxListGroupItem';
+import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 import RadioListGroupItem from '../../ui/RadioListGroupItem';
 import { connect } from 'react-redux';
 
@@ -35,6 +35,7 @@ export class TileOptionView extends React.PureComponent {
     };
 
     this.saveConfig = this.saveConfig.bind(this);
+    this.saveTilePreferences = _.debounce(this.saveTilePreferences.bind(this), 1000);
     this.onCheckboxClick = this.onCheckboxClick.bind(this);
     this.onRadioClick = this.onRadioClick.bind(this);
   }
@@ -59,7 +60,7 @@ export class TileOptionView extends React.PureComponent {
     }
 
     return (
-      <CheckboxListGroupItem key={ `${cbName}:${possibleChoice.value}` }
+      <SwitchListGroupItem key={ `${cbName}:${possibleChoice.value}` }
         id={ `${cbName}:${possibleChoice.value}` } value={ possibleChoice.value }
         icon={ (tile.id === 'weather') ? 'sun-o' : tile.icon }
         description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
@@ -104,7 +105,6 @@ export class TileOptionView extends React.PureComponent {
       currentPref[name][value] = !currentPref[name][value];
     }
 
-    this.setState({ currentPreferences: currentPref });
     this.saveConfig(currentPref);
   }
 
@@ -115,12 +115,16 @@ export class TileOptionView extends React.PureComponent {
       ...currentPref,
       [name]: value,
     };
-    this.setState({ currentPreferences: newPreferences });
+
     this.saveConfig(newPreferences);
   }
 
+  saveTilePreferences() {
+    this.props.dispatch(tiles.saveTilePreferences(this.props.tile, this.state.currentPreferences));
+  }
+
   saveConfig(currentPreferences) {
-    this.props.dispatch(tiles.saveTilePreferences(this.props.tile, currentPreferences));
+    this.setState({ currentPreferences }, this.saveTilePreferences);
   }
 
   render() {

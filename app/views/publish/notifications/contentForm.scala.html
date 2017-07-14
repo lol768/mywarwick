@@ -1,49 +1,67 @@
 @import controllers.publish.NotificationsController.PublishNotificationForm
 @import models.publishing.PermissionScope
 @import org.joda.time.LocalDateTime
+@import system.RequestContext
+@import models.publishing.Publisher
 @(
     form: PublishNotificationForm,
+    publisher: Publisher,
     departmentOptions: Seq[(String, String)],
     providerOptions: Seq[(String, String)],
-    permissionScope: PermissionScope
-)(implicit fc: b3.B3FieldConstructor, messages: Messages)
+    permissionScope: PermissionScope,
+    audience: Audience,
+    createOrUpdate: String
+)(implicit fc: b3.B3FieldConstructor, messages: Messages, context: RequestContext)
 
-<section>
-@b3.textarea(form("item.text"),
-  '_label -> "Text",
-  '_help -> "Keep it super short"
-)
-
-@if(providerOptions.size == 1) {
-  @b3.hidden("item.provider", providerOptions.head._1)
-} else {
-  @b3.select(form("item.provider"), providerOptions,
-    '_label -> "Source",
-    '_default -> "",
-    '_help -> "Select the source of this notification"
-  )
+@context.csrfHelper.formField
+@form.globalErrors.map { error =>
+  <div class="alert alert-danger">@error.message</div>
 }
 
+<div class="split-form__sections">
+  <section>
+    @tags.audiencePicker(form, "audience", departmentOptions, "alert", permissionScope, allowPublic = false, audience = audience)
+  </section>
 
-@b3.text(form("item.linkHref"),
-  '_label -> "Link URL",
-  '_help -> "Optional"
-)
-</section>
+  <section>
+    @b3.textarea(form("item.text"),
+      '_label -> "Text",
+      '_help -> "Keep it super short"
+    )
 
-<section>
-@b3.radio(form("item.publishDateSet"),
-  Seq(
-    "false" -> "Now",
-    "true" -> "Select a time"
-  ),
-  '_label -> "Publish time",
-  'value -> false
-)
+    @if(providerOptions.size == 1) {
+      @b3.hidden("item.provider", providerOptions.head._1)
+    } else {
+      @b3.select(form("item.provider"), providerOptions,
+        '_label -> "Source",
+        '_default -> "",
+        '_help -> "Select the source of this alert"
+      )
+    }
 
-@tags.datetimePicker(form("item.publishDate"),
-  '_label -> "Publish date",
-  '_help -> "Select a time in the future to automatically deliver this notification at that time",
-  'value -> LocalDateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
-)
-</section>
+    @b3.text(form("item.linkHref"),
+      '_label -> "Link URL",
+      '_help -> "Optional"
+    )
+  </section>
+
+  <section>
+    @b3.radio(form("item.publishDateSet"),
+      Seq(
+        "false" -> "Now",
+        "true" -> "Select a time"
+      ),
+      '_label -> "Publish time",
+      'value -> false
+    )
+
+    @tags.datetimePicker(form("item.publishDate"),
+      '_label -> "Publish date",
+      '_help -> "Select a time in the future to automatically deliver this alert at that time",
+      'value -> LocalDateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
+    )
+
+    @tags.submitOrCancel(createOrUpdate, controllers.publish.routes.NotificationsController.list(publisher.id))
+  </section>
+
+</div>

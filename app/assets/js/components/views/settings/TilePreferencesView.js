@@ -4,8 +4,10 @@ import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import * as PropTypes from 'prop-types';
 import { Routes } from '../../AppRoot';
+import HideableView from '../HideableView';
+import * as tiles from '../../../state/tiles';
 
-class TilePreferencesView extends React.PureComponent {
+class TilePreferencesView extends HideableView {
 
   static propTypes = {
     isOnline: PropTypes.bool.isRequired,
@@ -17,6 +19,10 @@ class TilePreferencesView extends React.PureComponent {
       title: PropTypes.string.isRequired,
     })),
   };
+
+  componentDidShow() {
+    this.props.dispatch(tiles.fetchTileContent());
+  }
 
   render() {
     return (
@@ -31,7 +37,8 @@ class TilePreferencesView extends React.PureComponent {
 
         <div className="list-group">
           { _.map(_.sortBy(this.props.tiles, 'title'), tile =>
-            <div key={ tile.id } className={ `list-group-item setting-colour-${tile.colour}` }
+            <div key={ tile.id }
+              className={ `list-group-item cursor-pointer setting-colour-${tile.colour}` }
               onClick={ () =>
                 this.props.dispatch(
                  push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}/${tile.id}`)

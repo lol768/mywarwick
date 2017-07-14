@@ -6,7 +6,7 @@ import models.publishing._
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import play.api.mvc.{ActionRefiner, AnyContent, Result, Results}
-import services.dao.DepartmentInfoDao
+import services.dao.{DepartmentInfo, DepartmentInfoDao}
 import services.{NewsCategoryService, PublisherService, SecurityService}
 import system.ImplicitRequestContext
 import warwick.sso.AuthenticatedRequest
@@ -49,6 +49,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
   def bindFormWithAudience[A <: PublishableWithAudience](
     baseForm: Form[A],
     submitted: Boolean,
+    restrictedRecipients: Boolean,
     renderForm: (Form[A]) => Result,
     onSubmit: ((A, Audience) => Result)
   )(implicit request: PublisherRequest[AnyContent]): Future[Result] = {
@@ -62,7 +63,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
         // form.
         val boundForm = audienceForm.bindFromRequest.fold(
           _ => Future.successful(formWithErrors),
-          audienceData => audienceBinder.bindAudience(audienceData).map {
+          audienceData => audienceBinder.bindAudience(audienceData, restrictedRecipients).map {
             case Left(errors) => addFormErrors(formWithErrors, errors)
             case Right(_) => formWithErrors
           }
@@ -71,7 +72,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
         boundForm.map(renderForm)
       },
       publish => {
-        audienceBinder.bindAudience(publish.audience).map {
+        audienceBinder.bindAudience(publish.audience, restrictedRecipients).map {
           case Left(errors) =>
             renderForm(addFormErrors(form, errors))
           case Right(audience) =>
@@ -112,8 +113,10 @@ trait DepartmentOptions {
 
   private val audienceDepartmentTypes = Set("ACADEMIC", "SERVICE")
 
+  lazy val allDepartments: Seq[DepartmentInfo] = departmentInfoDao.allDepartments
+
   lazy val allPublishableDepartments =
-    departmentInfoDao.allDepartments
+    allDepartments
       .filter(dept => audienceDepartmentTypes.contains(dept.`type`))
       .sortBy(_.name)
 

@@ -15,20 +15,6 @@
 .tile--zoomed {
   margin: 0;
   height: auto;
-  cursor: default;
-
-  html.not-app & {
-    @media (min-width: @screen-sm-min) {
-      position: fixed;
-      top: 25%;
-      left: 50%;
-      right: auto;
-      bottom: auto;
-      margin-left: -(@screen-sm-min - 100px) / 2;
-      width: @screen-sm-min - 100px;
-      height: 50%;
-    }
-  }
 
   html.app & {
     bottom: 0;
@@ -45,29 +31,29 @@ body.in-tiles {
 
 @tile-header-height: 30px;
 
-@media (max-width: @screen-sm-max) {
-  .tile--zoomed {
+
+.tile--zoomed {
+  overflow: visible;
+
+  .tile__header {
+    position: fixed;
+    max-width: 100vw;
+    margin-left: auto;
+    left: 0;
+    right: 0;
+    height: @tile-header-height;
+    z-index: 10;
+  }
+
+  .tile__wrap {
+    position: unset;
     overflow: visible;
+  }
 
-    .tile__header {
-      position: fixed;
-      top: @start-masthead-height;
-      left: 0;
-      right: 0;
-      height: @tile-header-height;
-      z-index: 10;
-    }
-
-    .tile__wrap {
-      position: unset;
-      overflow: visible;
-    }
-
-    .tile__body {
-      position: unset;
-      overflow-y: visible;
-      padding-top: @tile-header-height;
-    }
+  .tile__body {
+    position: unset;
+    overflow-y: visible;
+    padding-top: @tile-header-height;
   }
 }
 
@@ -75,6 +61,6 @@ html.android.app .tile--zoomed .tile__header {
   top: 0;
 }
 
-html.mobile body.in-tiles .update-popup {
+html body.in-tiles .update-popup {
   display: none;
 }

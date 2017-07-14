@@ -26,12 +26,13 @@ const rename = require('gulp-rename');
 const uglify = require('gulp-uglify');
 const watchify = require('watchify');
 const merge = require('merge-stream');
+const _ = require('lodash');
 
 const bundleEvents = require('./events');
 
 const PlayFingerprintsPlugin = require('./PlayFingerprintsPlugin');
 
-const WatchEventsPlugin = function(options) {
+const WatchEventsPlugin = function (options) {
   this.apply = this.apply.bind(this, options);
 };
 WatchEventsPlugin.prototype.apply = (options, compiler) => {
@@ -84,7 +85,7 @@ function bundle(b, outputFile) {
     .pipe(source(outputFile))
     .pipe(buffer())
     .pipe(sourcemaps.init({ loadMaps: true }))
-      .pipe(UGLIFY ? uglify() : gutil.noop())
+    .pipe(UGLIFY ? uglify() : gutil.noop())
     .pipe(playAssets())
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.scriptOut));
@@ -94,36 +95,52 @@ function bundle(b, outputFile) {
 const BASE_WEBPACK_CONFIG = require(path.join(__dirname, '../webpack.config.js'));
 // Then we merge some extra plugins.
 const WEBPACK_CONFIG = webpackMerge(BASE_WEBPACK_CONFIG, {
-  plugins: [ new PlayFingerprintsPlugin() ]
+  plugins: [new PlayFingerprintsPlugin()]
 });
 const WEBPACK_WATCH_CONFIG = webpackMerge(WEBPACK_CONFIG, {
   watch: true,
-  plugins: [ new WatchEventsPlugin({ emitter: bundleEvents }) ]
+  plugins: [new WatchEventsPlugin({ emitter: bundleEvents })]
 });
 
-function currentRevisionOf(file) {
+function currentRevisionOfAsync(file, i) {
+  if (i === undefined) {
+    i = 0;
+  }
+
   const dirname = path.dirname(file);
   const basename = path.basename(file);
-  const md5 = fs.readFileSync(`${paths.assetsOut}/${file}.md5`);
+  const md5Path = `${paths.assetsOut}/${file}.md5`;
 
-  return `${dirname}/${md5}-${basename}`;
+  if (i >= 20) {
+    throw new Error(`File ${md5Path} could not be read`);
+  }
+
+  return new Promise((resolve) => {
+    fs.readFile(md5Path, (err, md5) => {
+      if (err) {
+        setTimeout(() => resolve(currentRevisionOfAsync(file, i + 1)), 500);
+      } else {
+        resolve(`${dirname}/${md5}-${basename}`);
+      }
+    });
+  });
 }
 
-function getCachedAssets() {
-  return [
-    currentRevisionOf('/css/main.css'),
-    currentRevisionOf('/js/bundle.js'),
-    currentRevisionOf('/js/vendor.bundle.js'),
-    currentRevisionOf('/js/0.js'),
-    currentRevisionOf('/js/3.js'),
-    '/lib/id7/fonts/fontawesome-webfont.ttf',
-    '/lib/id7/fonts/fontawesome-webfont.woff',
-    '/lib/id7/images/masthead-logo-bleed-sm*',
-    '/lib/id7/images/masthead-logo-bleed-xs*',
-    '/lib/id7/images/newwindow.gif',
-    '/lib/id7/images/shim.gif',
-    '/lib/id7/js/id7-bundle.min.js',
-  ].map((asset) => `${paths.assetsOut}${asset}`);
+function getCachedAssetsAsync() {
+  return Promise.all([
+    currentRevisionOfAsync('/css/main.css'),
+    currentRevisionOfAsync('/js/bundle.js'),
+    currentRevisionOfAsync('/js/vendor.bundle.js'),
+    currentRevisionOfAsync('/js/0.js'),
+    currentRevisionOfAsync('/js/3.js'),
+    Promise.resolve('/lib/id7/fonts/fontawesome-webfont.ttf'),
+    Promise.resolve('/lib/id7/fonts/fontawesome-webfont.woff'),
+    Promise.resolve('/lib/id7/images/masthead-logo-bleed-sm*'),
+    Promise.resolve('/lib/id7/images/masthead-logo-bleed-xs*'),
+    Promise.resolve('/lib/id7/images/newwindow.gif'),
+    Promise.resolve('/lib/id7/images/shim.gif'),
+    Promise.resolve('/lib/id7/js/id7-bundle.min.js'),
+  ]).then(array => array.map(asset => path.join(paths.assetsOut, asset)));
 }
 
 function cacheName(name) {
@@ -163,59 +180,67 @@ function generateServiceWorker(watch) {
     'app/views/common/id7layout.scala.html',
   ];
 
-  return swPrecache.generate({
-    cacheId: 'start',
-    handleFetch: OFFLINE_WORKERS,
-    staticFileGlobs: [
-      'public/**/*',
-    ].concat(getCachedAssets()),
-    stripPrefixMulti: {
-      'target/gulp/' : 'assets/',
-      'public/': 'assets/'
-    },
-    ignoreUrlParametersMatching: [/^v$/],
-    logger: gutil.log,
-    dynamicUrlToDependencies: {
-      '/': htmlDependencies
-    },
-    // If any of these other URLs are hit, use the same cache entry as /
-    // because the HTML is the same for all of them.
-    navigateFallback: '/',
-    navigateFallbackWhitelist: [
-      /^\/notifications/,
-      /^\/activities/,
-      /^\/search/,
-      /^\/news\/?$/,
-      /^\/settings/,
-    ],
-    maximumFileSizeToCacheInBytes: 10 * 1000 * 1000,
-  })
-  .then((offlineWorker) => {
-    const bopts = browserifyOptions(cacheName('push-worker'), 'push-worker.js');
-    bopts.debug = false; // no sourcemaps, uglify removes them and they're broken here anyway.
-    const b = createBrowserify(bopts);
-    return b.bundle()
-      .on('error', (e) => {
-        gutil.log(gutil.colors.red(e.toString()));
-      })
-      .pipe(source('service-worker.js'))
-      .pipe(buffer())
-      .pipe(insert.prepend(offlineWorker))
-      .pipe(UGLIFY ? uglify() : gutil.noop())
-      .pipe(gulp.dest(paths.assetsOut));
-  });
+  return getCachedAssetsAsync().then(cachedAssets =>
+    swPrecache.generate({
+      cacheId: 'start',
+      handleFetch: OFFLINE_WORKERS,
+      staticFileGlobs: [
+        'public/**/*',
+      ].concat(cachedAssets),
+      stripPrefixMulti: {
+        'target/gulp/': 'assets/',
+        'public/': 'assets/'
+      },
+      ignoreUrlParametersMatching: [/^v$/],
+      logger: gutil.log,
+      dynamicUrlToDependencies: {
+        '/': htmlDependencies
+      },
+      // If any of these other URLs are hit, use the same cache entry as /
+      // because the HTML is the same for all of them.
+      navigateFallback: '/',
+      navigateFallbackWhitelist: [
+        /^\/notifications/,
+        /^\/activities/,
+        /^\/search/,
+        /^\/news\/?$/,
+        /^\/settings/,
+      ],
+      maximumFileSizeToCacheInBytes: 10 * 1000 * 1000,
+    })
+  )
+    .then((offlineWorker) => {
+      const bopts = browserifyOptions(cacheName('push-worker'), 'push-worker.js');
+      bopts.debug = false; // no sourcemaps, uglify removes them and they're broken here anyway.
+      const b = createBrowserify(bopts);
+      return b.bundle()
+        .on('error', (e) => {
+          gutil.log(gutil.colors.red(e.toString()));
+        })
+        .pipe(source('service-worker.js'))
+        .pipe(buffer())
+        .pipe(insert.prepend(offlineWorker))
+        .pipe(UGLIFY ? uglify() : gutil.noop())
+        .pipe(gulp.dest(paths.assetsOut));
+    });
 }
 
 // Not strictly a script thing, but here it is in scripts.js.
 function generateAppcache() {
   if (OFFLINE_WORKERS) {
-    const cacheableAssets = merge(
-      gulp.src(getCachedAssets(), { base: paths.assetsOut, }),
-      gulp.src(['public/**/*'], { base: 'public' })
-    );
+    return Promise.all([
+      getFontAwesomeVersion(),
+      getCachedAssetsAsync(),
+    ]).then((results) => {
+      const faVersion = results[0];
+      const cachedAssets = results[1];
 
-    return getFontAwesomeVersion().then(faVersion =>
-      cacheableAssets
+      const cacheableAssets = merge(
+        gulp.src(cachedAssets, { base: paths.assetsOut, }),
+        gulp.src(['public/**/*'], { base: 'public' })
+      );
+
+      return cacheableAssets
         .pipe(rename(p => {
           if (p.basename === 'fontawesome-webfont') {
             p.extname += `?v=${faVersion}`;
@@ -236,8 +261,8 @@ function generateAppcache() {
           filename: 'appcache.manifest'
         }))
         .pipe(insert.append('\n# extra cache buster: 1\n'))
-        .pipe(gulp.dest(paths.assetsOut))
-    );
+        .pipe(gulp.dest(paths.assetsOut));
+    });
   } else {
     // Produce an empty manifest file
     return gulp.src([])
@@ -255,13 +280,19 @@ gulp.task('appcache', ['all-static'], generateAppcache);
 /* The other watchers have been set up to emit some events that we can listen to */
 
 gulp.task('watch-service-worker', ['watch-styles'], () => {
-  bundleEvents.on('styles-updated', generateServiceWorker);
-  bundleEvents.on('scripts-updated', generateServiceWorker);
+  bundleEvents.once('scripts-updated', (watch) => {
+    generateServiceWorker(watch);
+    bundleEvents.on('styles-updated', generateServiceWorker);
+    bundleEvents.on('scripts-updated', generateServiceWorker);
+  });
 });
 
 gulp.task('watch-appcache', ['watch-styles'], () => {
-  bundleEvents.on('styles-updated', generateAppcache);
-  bundleEvents.on('scripts-updated', generateAppcache);
+  bundleEvents.once('scripts-updated', (watch) => {
+    generateAppcache(watch);
+    bundleEvents.on('styles-updated', generateAppcache);
+    bundleEvents.on('scripts-updated', generateAppcache);
+  });
 });
 
 // Get the current FA version for use in the cache manifest

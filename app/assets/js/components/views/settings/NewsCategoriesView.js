@@ -4,7 +4,7 @@ import _ from 'lodash-es';
 import { connect } from 'react-redux';
 import * as PropTypes from 'prop-types';
 import HideableView from '../HideableView';
-import CheckboxListGroupItem from '../../ui/CheckboxListGroupItem';
+import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 
 class NewsCategoriesView extends HideableView {
 
@@ -77,7 +77,7 @@ class NewsCategoriesView extends HideableView {
 
         <div className="list-group setting-colour-1">
           { _.map(this.props.categories, category =>
-            <CheckboxListGroupItem key={ category.id } id={ `category-${category.id}` }
+            <SwitchListGroupItem key={ category.id } id={ `category-${category.id}` }
               icon="newspaper-o" description={ category.name } value={ category.id }
               onClick={ this.onClick } checked={ this.state[category.id] }
               disabled={ !this.props.isOnline }

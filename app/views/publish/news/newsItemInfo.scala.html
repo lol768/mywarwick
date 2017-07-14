@@ -1,8 +1,15 @@
 @import models.publishing.Role
 @import models.publishing.Ability.EditNews
 @import models.publishing.Ability.DeleteNews
-@import models.news.NewsItemRenderWithAudit
-@(publisher: String, item: NewsItemRenderWithAudit, user: Role)
+@import models.news.NewsItemRenderWithAuditAndAudience
+@import system.RequestContext
+@import services.dao.DepartmentInfo
+@(
+    publisher: String,
+    item: NewsItemRenderWithAuditAndAudience,
+    user: Role,
+    allDepartments: Seq[DepartmentInfo]
+)(implicit context: RequestContext)
 <article id="@item.id" class="news-item row">
   <div class="col-xs-10">
     <div class="news-item__body">
@@ -38,6 +45,9 @@
             <span>
             - @c
               @if(c == 1) { recipient } else { recipients }
+              @if(item.audienceComponents.nonEmpty) {
+                (@tags.audienceComponents(item.audienceComponents, allDepartments))
+              }
           </span>
           }
           case _ => {}
@@ -68,6 +78,7 @@
     <div class="btn-toolbar pull-right confirm-delete">
       <p>Are you sure?</p>
       @helper.form(controllers.publish.routes.NewsController.delete(publisher, item.id)) {
+        @context.csrfHelper.formField
         <button type="submit" class="btn btn-danger">Delete</button>
       }
       <button class="btn btn-default cancel">Cancel</button>

@@ -30,7 +30,7 @@ class NewsServiceTest extends BaseSpec with OneStartAppPerSuite {
       val render = newsService.getNewsItem(id).get
       render must have('title (item.title))
 
-      val renderWithAudit = newsService.getNewsByPublisherWithAudits(item.publisherId, 100).find(_.id == id).get
+      val renderWithAudit = newsService.getNewsByPublisherWithAuditsAndAudience(item.publisherId, 100).find(_.id == id).get
       renderWithAudit.audienceSize mustBe AudienceSize.Public
 
       scheduler.scheduledJobs.map(_.job.getKey) must contain(new JobKey(id, PublishNewsItemJob.name))
@@ -51,7 +51,7 @@ class NewsServiceTest extends BaseSpec with OneStartAppPerSuite {
       newsService.getAudience(id) must contain(staffAudience)
 
       val audienceService = get[AudienceService]
-      val renderWithAudit = newsService.getNewsByPublisherWithAudits(item.publisherId, 100).find(_.id == id).get
+      val renderWithAudit = newsService.getNewsByPublisherWithAuditsAndAudience(item.publisherId, 100).find(_.id == id).get
       renderWithAudit.audienceSize mustBe AudienceSize.Finite(audienceService.resolve(staffAudience).get.size)
 
       val jobKey = new JobKey(id, PublishNewsItemJob.name)

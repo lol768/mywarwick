@@ -1,12 +1,13 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import classNames from 'classnames';
+import Switch from './Switch';
 import ListGroupItem from './ListGroupItem';
 
-export default class CheckboxListGroupItem extends React.PureComponent {
+export default class SwitchListGroupItem extends React.PureComponent {
 
   static propTypes = {
     ...ListGroupItem.propTypes,
+    id: PropTypes.string.isRequired,
     name: PropTypes.string,
     value: PropTypes.string.isRequired,
     checked: PropTypes.bool.isRequired,
@@ -25,22 +26,19 @@ export default class CheckboxListGroupItem extends React.PureComponent {
     this.props.onClick(this.props.value, this.props.name);
   }
 
-  renderCheckbox() {
+  renderSwitch() {
     return (
-      <span
-        className={ classNames('checkbox', {
-          'checkbox--checked': this.props.checked,
-          'checkbox--disabled': this.props.disabled,
-        }) }
-      >
-      <i className="fa fa-check" />
-    </span>
+      <Switch
+        id={ this.props.id }
+        checked={ this.props.checked }
+        disabled={ this.props.disabled }
+      />
     );
   }
 
   render() {
     return (
-      <ListGroupItem {...this.props} onClick={this.onClick} uiControl={this.renderCheckbox()} />
+      <ListGroupItem {...this.props} onClick={this.onClick} uiControl={this.renderSwitch()} />
     );
   }
 

@@ -18,7 +18,6 @@ export class AppLayout extends React.PureComponent {
     }).isRequired,
     authenticated: PropTypes.bool.isRequired,
     notificationsCount: PropTypes.number.isRequired,
-    layoutClassName: PropTypes.string.isRequired,
     children: PropTypes.node.isRequired,
   };
 
@@ -28,7 +27,7 @@ export class AppLayout extends React.PureComponent {
   }
 
   render() {
-    const { location, notificationsCount, layoutClassName, children, authenticated }
+    const { location, notificationsCount, children, authenticated }
       = this.props;
 
     log.debug('AppLayout.render');
@@ -38,11 +37,11 @@ export class AppLayout extends React.PureComponent {
         <ID7Layout path={ location.pathname }>
           { children }
         </ID7Layout>
-        { layoutClassName === 'mobile' ?
+        {
           <TabBar selectedItem={ location.pathname } onSelectItem={ this.onSelectItem }>
             <TabBarItem title="Me" icon="user-o" selectedIcon="user" path="/" />
             <TabBarItem
-              title="Notifications" icon="bell-o" selectedIcon="bell"
+              title="Alerts" icon="bell-o" selectedIcon="bell"
               path={ `/${Routes.NOTIFICATIONS}` } badge={ notificationsCount }
               isDisabled={ !authenticated }
             />
@@ -57,7 +56,7 @@ export class AppLayout extends React.PureComponent {
               path={ `/${Routes.SEARCH}` }
             />
           </TabBar>
-          : null }
+        }
       </div>
     );
   }

@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import controllers.BaseController
 import models._
-import models.news.{Link, NewsItemRender, NewsItemRenderWithAudit, NewsItemSave}
+import models.news.{Link, NewsItemRender, NewsItemRenderWithAuditAndAudience, NewsItemSave}
 import models.publishing.Ability._
 import models.publishing.{Ability, Publisher}
 import org.joda.time.LocalDateTime
@@ -92,9 +92,9 @@ class NewsController @Inject()(
   )(NewsItemAudienceData.apply)(NewsItemAudienceData.unapply))
 
   def list(publisherId: String) = PublisherAction(publisherId, ViewNews) { implicit request =>
-    val theNews = news.getNewsByPublisherWithAudits(publisherId, limit = 100)
+    val theNews = news.getNewsByPublisherWithAuditsAndAudience(publisherId, limit = 100)
     val (newsPending, newsPublished) = partitionNews(theNews)
-    Ok(views.html.publish.news.list(request.publisher, newsPending, newsPublished, request.userRole))
+    Ok(views.html.publish.news.list(request.publisher, newsPending, newsPublished, request.userRole, allDepartments))
   }
 
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNews).async { implicit request =>
@@ -143,7 +143,7 @@ class NewsController @Inject()(
   }
 
   def create(publisherId: String, submitted: Boolean) = PublisherAction(publisherId, CreateNews).async { implicit request =>
-    bindFormWithAudience[PublishNewsItemData](publishNewsForm, submitted,
+    bindFormWithAudience[PublishNewsItemData](publishNewsForm, submitted, restrictedRecipients = false,
       formWithErrors => Ok(renderCreateForm(request.publisher, formWithErrors, Audience())),
       (data, audience) => {
         val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
@@ -180,7 +180,7 @@ class NewsController @Inject()(
 
   def update(publisherId: String, id: String, submitted: Boolean) = EditAction(id, publisherId, EditNews).async { implicit request =>
     withNewsItem(id, publisherId, _ => {
-      bindFormWithAudience[PublishNewsItemData](publishNewsForm, submitted,
+      bindFormWithAudience[PublishNewsItemData](publishNewsForm, submitted, restrictedRecipients = false,
         formWithErrors => Ok(renderUpdateForm(publisherId, id, formWithErrors, Audience())),
         (data, audience) => {
           val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
@@ -242,7 +242,7 @@ class NewsController @Inject()(
     )
   }
 
-  private def partitionNews(news: Seq[NewsItemRenderWithAudit]) = news.partition(_.publishDate.isAfterNow)
+  private def partitionNews(news: Seq[NewsItemRenderWithAuditAndAudience]) = news.partition(_.publishDate.isAfterNow)
 
   private def EditAction(id: String, publisherId: String, ability: Ability) = PublisherAction(publisherId, ability)
     .andThen(NewsBelongsToPublisher(id, publisherId))

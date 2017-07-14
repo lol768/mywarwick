@@ -159,8 +159,7 @@ export function fetchTileContent(tileSpec = ALL_TILES) {
 export function saveTilePreferences(tile, preferences) {
   return dispatch => {
     dispatch(storeTilePreferences(tile, preferences));
-    return dispatch(persistTiles())
-      .then(() => dispatch(fetchTileContent()));
+    return dispatch(persistTiles());
   };
 }
 
@@ -191,7 +190,7 @@ const initialState = {
 
 function updateTileById(state, id, callback) {
   const tiles = state.data.tiles;
-  const index = tiles.findIndex(tile => tile.id === id);
+  const index = _.findIndex(tiles, tile => tile.id === id);
   const newTiles = Object.assign([], tiles, {
     [index]: callback(tiles[index]),
   });
@@ -278,7 +277,7 @@ export function tilesReducer(state = initialState, action) {
       }));
     case TILE_RESIZE: {
       const layout = state.data.layout;
-      const index = layout.findIndex(i =>
+      const index = _.findIndex(layout, i =>
         i.layoutWidth === action.layoutWidth && i.tile === action.tile.id
       );
       return {
