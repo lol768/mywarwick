@@ -13,14 +13,8 @@ html.theme-transparent.not-app .bg-stand-in {
 }
 
 @media screen and (min-width: @screen-md-min) {
-  .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
+  .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed {
     position: fixed;
-  }
-
-  .add-tile-container {
-    right: 0;
-    bottom: @start-tab-bar-height;
-    padding: 1.5em;
   }
 
   .id7-main-content-area {
@@ -134,11 +128,6 @@ html.theme-transparent.not-app .bg-stand-in {
       background-attachment: initial;
     }
 
-    .add-tile-container {
-      right: 0;
-      padding: 1.5em;
-    }
-
     #app-container:after {
       bottom: 0;
     }
@@ -237,7 +226,7 @@ html.theme-transparent.not-app .bg-stand-in {
       }
 
       .add-tile-container {
-        bottom: (@start-tab-bar-height + @desktop-rendition-vertical-border);
+        bottom: @desktop-rendition-vertical-border;
       }
 
       .id7-main-content-header {
