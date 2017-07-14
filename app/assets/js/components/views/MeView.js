@@ -196,20 +196,20 @@ class MeView extends React.PureComponent {
           >
             { tileComponents }
           </ReactGridLayoutBase>
-          <ReactCSSTransitionGroup
-            transitionName="grow-shrink"
-            transitionAppear
-            transitionAppearTimeout={500}
-            transitionEnterTimeout={500}
-            transitionLeaveTimeout={300}
-          >{ editing && hiddenTiles.length > 0 ?
-            <div className="add-tile-container">
-              <div key="add-tile-button" className="add-tile-button" onClick={this.onAdd}>
-                <i className="fa fa-plus" />
-              </div>
-            </div>
-            : null }
-          </ReactCSSTransitionGroup>
+          <div className="add-tile-container">
+            <ReactCSSTransitionGroup
+              transitionName="grow-shrink"
+              transitionAppear
+              transitionAppearTimeout={500}
+              transitionEnterTimeout={500}
+              transitionLeaveTimeout={300}
+            >{ editing && hiddenTiles.length > 0 ?
+                <div key="add-tile-button" className="add-tile-button" onClick={this.onAdd}>
+                  <i className="fa fa-plus" />
+                </div>
+              : null }
+            </ReactCSSTransitionGroup>
+          </div>
         </div>
       </div>
     );

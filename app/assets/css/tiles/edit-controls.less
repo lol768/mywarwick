@@ -101,21 +101,28 @@
   }
 }
 
-.add-tile-button {
-  @base-size: 56px;
-  @font-size: 24px;
-  line-height: @font-size;
-  z-index: 2000;
-  width: @base-size;
-  height: @base-size;
-  background-color: #8c6e96;
-  border-radius: @base-size / 2;
-  position: relative;
+.add-tile-container {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
 
-  box-shadow: rgba(0, 0, 0, 0.16) 0 3px 10px, rgba(0, 0, 0, 0.23) 0 3px 10px;
-  .center-aligned-icon(@base-size, @font-size);
-  .app.android & {
-    bottom: 16px;
+  .add-tile-button {
+    @base-size: 56px;
+    @font-size: 24px;
+    line-height: @font-size;
+    bottom: 60px;
+    right: 25px;
+    z-index: 2000;
+    width: @base-size;
+    height: @base-size;
+    background-color: #8c6e96;
+    border-radius: @base-size / 2;
+    position: absolute;
+    box-shadow: rgba(0, 0, 0, 0.16) 0 3px 10px, rgba(0, 0, 0, 0.23) 0 3px 10px;
+    .center-aligned-icon(@base-size, @font-size);
+    .app.android & {
+      bottom: 24px;
+    }
   }
 }
 
