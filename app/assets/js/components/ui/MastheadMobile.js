@@ -1,13 +1,12 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import * as PropTypes from 'prop-types';
-import UtilityBar from './UtilityBar';
 import $ from 'jquery';
 import ReactDOM from 'react-dom';
+import UtilityBar from './UtilityBar';
 import { Routes } from '../AppRoot';
 
 export default class MastheadMobile extends React.PureComponent {
-
   static buildState(props) {
     return {
       backButtonVisible:
@@ -25,7 +24,7 @@ export default class MastheadMobile extends React.PureComponent {
   }
 
   componentDidMount() {
-    $(ReactDOM.findDOMNode(this)).on('touchmove', (e) => e.preventDefault());
+    $(ReactDOM.findDOMNode(this)).on('touchmove', e => e.preventDefault());
   }
 
   componentWillReceiveProps(newProps) {
@@ -36,15 +35,25 @@ export default class MastheadMobile extends React.PureComponent {
     return (
       <div className="start-masthead use-popover">
         { this.props.showSettingsButton &&
-        <div className="settings-btn" onClick={this.props.onSettings}>
-          <i className="fa fa-fw fa-cog"> </i>
+        <div
+          className="settings-btn"
+          onClick={this.props.onSettings}
+          role="button"
+          tabIndex={0}
+        >
+          <i className="fa fa-fw fa-cog" />
         </div>
         }
         { this.props.showEditButton &&
-        <div className="edit-btn pulse" onClick={this.props.onEdit}>
+        <div
+          className="edit-btn pulse"
+          onClick={this.props.onEdit}
+          role="button"
+          tabIndex={0}
+        >
           { this.props.editing ?
-            <i className="fa fa-fw fa-check"> </i> :
-            <i className="fa fa-fw fa-arrows"> </i>
+            <i className="fa fa-fw fa-check" /> :
+            <i className="fa fa-fw fa-arrows" />
           }
         </div>
         }
@@ -56,7 +65,12 @@ export default class MastheadMobile extends React.PureComponent {
           transitionLeaveTimeout={300}
         >
           { this.state.backButtonVisible &&
-          <div className="back-btn" onClick={this.props.onBackClick}>
+          <div
+            className="back-btn"
+            onClick={this.props.onBackClick}
+            role="button"
+            tabIndex={0}
+          >
             <i className="fa fa-chevron-left" />
             { this.state.backButtonText }
           </div>
@@ -72,7 +86,6 @@ export default class MastheadMobile extends React.PureComponent {
       </div>
     );
   }
-
 }
 
 MastheadMobile.propTypes = {

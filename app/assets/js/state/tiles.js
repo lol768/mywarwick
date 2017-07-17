@@ -101,7 +101,7 @@ export function resizeTile(tile, layoutWidth, width, height) {
 export function persistTiles() {
   return (dispatch, getState) => {
     const tiles = getState().tiles.data.tiles.map(item =>
-      _.pick(item, ['id', 'preferences', 'removed'])
+      _.pick(item, ['id', 'preferences', 'removed']),
     );
 
     const layout = getState().tiles.data.layout;
@@ -131,7 +131,7 @@ export function fetchTileContent(tileSpec = ALL_TILES) {
         .map(tile => tile.id) :
       [tileSpec];
 
-    return Promise.all(tilesToFetch.map(tileId => {
+    return Promise.all(tilesToFetch.map((tileId) => {
       dispatch({
         type: TILE_CONTENT_FETCH,
         tile: tileId,
@@ -146,9 +146,9 @@ export function fetchTileContent(tileSpec = ALL_TILES) {
             } else {
               dispatch(failedTileContentFetch(tile, result.errors));
             }
-          })
+          }),
         )
-        .catch(err => {
+        .catch((err) => {
           log.warn('Tile fetch failed because', err);
           return dispatch(failedTileContentFetch(tileId, NETWORK_ERRORS));
         });
@@ -157,14 +157,14 @@ export function fetchTileContent(tileSpec = ALL_TILES) {
 }
 
 export function saveTilePreferences(tile, preferences) {
-  return dispatch => {
+  return (dispatch) => {
     dispatch(storeTilePreferences(tile, preferences));
     return dispatch(persistTiles());
   };
 }
 
 export function fetchTiles() {
-  return dispatch => {
+  return (dispatch) => {
     dispatch({ type: TILES_FETCH });
 
     return fetchWithCredentials('/api/tiles')
@@ -203,12 +203,12 @@ function updateTileById(state, id, callback) {
 
 export function formatPreferenceData(preferencesFromAction, availableTileOptions) {
   const preferences = {};
-  _.keys(availableTileOptions).forEach(key => {
+  _.keys(availableTileOptions).forEach((key) => {
     const option = availableTileOptions[key];
     switch (option.type) {
       case 'array': {
         preferences[key] = {};
-        option.options.forEach((o) => (
+        option.options.forEach(o => (
           preferences[key][o.value] = (
             (preferencesFromAction[key] && preferencesFromAction[key][o.value]) || false
           )
@@ -230,11 +230,11 @@ export function formatPreferenceData(preferencesFromAction, availableTileOptions
 export function tilesReducer(state = initialState, action) {
   switch (action.type) {
     case TILE_PREFERENCES_SAVE:
-      return updateTileById(state, action.tile.id, (tile) => ({
+      return updateTileById(state, action.tile.id, tile => ({
         ...tile,
         preferences: formatPreferenceData(
           action.preferences,
-          state.data.options[tile.id]
+          state.data.options[tile.id],
         ),
       }));
     case USER_CLEAR:
@@ -266,19 +266,19 @@ export function tilesReducer(state = initialState, action) {
         },
       };
     case TILE_HIDE:
-      return updateTileById(state, action.tile.id, (tile) => ({
+      return updateTileById(state, action.tile.id, tile => ({
         ...tile,
         removed: true,
       }));
     case TILE_SHOW:
-      return updateTileById(state, action.tile.id, (tile) => ({
+      return updateTileById(state, action.tile.id, tile => ({
         ...tile,
         removed: false,
       }));
     case TILE_RESIZE: {
       const layout = state.data.layout;
       const index = _.findIndex(layout, i =>
-        i.layoutWidth === action.layoutWidth && i.tile === action.tile.id
+        i.layoutWidth === action.layoutWidth && i.tile === action.tile.id,
       );
       return {
         ...state,

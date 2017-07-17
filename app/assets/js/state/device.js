@@ -1,3 +1,5 @@
+/* eslint-env browser */
+
 import _ from 'lodash-es';
 
 function getDevicePixelWidth() {
@@ -43,7 +45,7 @@ export function updateDeviceWidth() {
 }
 
 export function updateOnlineStatus(isOnline) {
-  return dispatch => {
+  return (dispatch) => {
     dispatch({
       type: 'UPDATE_DEVICE_ONLINE_STATUS',
       isOnline,

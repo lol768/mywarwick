@@ -1,14 +1,13 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
+import moment from 'moment';
+import _ from 'lodash-es';
 import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 import Hyperlink from '../ui/Hyperlink';
 import AccountPhoto from '../ui/AccountPhoto';
-import moment from 'moment';
 import * as dateFormats from '../../dateFormats';
-import _ from 'lodash-es';
 
 export default class AccountTile extends TileContent {
-
   static propTypes = {
     content: PropTypes.shape({
       fullName: PropTypes.string.isRequired,
@@ -121,7 +120,7 @@ export default class AccountTile extends TileContent {
   getLargeBody() {
     const member = this.props.content;
     const user = this.props.user;
-    let scd = undefined;
+    let scd;
     if (member.studentCourseDetails) {
       scd = _.find(member.studentCourseDetails, c => c.mostSignificant);
       if (scd === undefined) {
@@ -153,5 +152,4 @@ export default class AccountTile extends TileContent {
       </div>
     );
   }
-
 }

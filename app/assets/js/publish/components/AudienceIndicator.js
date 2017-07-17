@@ -5,7 +5,7 @@ export default function AudienceIndicator(props) {
   if (props.fetching) {
     return (
       <div className="alert alert-info">
-        <i className="fa fa-spin fa-refresh"> </i>
+        <i className="fa fa-spin fa-refresh" />
       </div>
     );
   }
@@ -26,7 +26,10 @@ export default function AudienceIndicator(props) {
   return (
     <div className="alert alert-info">
       <div className="pull-right">
-        <i className="fa fa-info-circle" data-toggle="tooltip" data-placement="left"
+        <i
+          className="fa fa-info-circle"
+          data-toggle="tooltip"
+          data-placement="left"
           title="Estimated audience size will be shown here, when audience and categories
         have been selected"
         />

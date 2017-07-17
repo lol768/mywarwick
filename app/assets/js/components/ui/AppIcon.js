@@ -8,7 +8,7 @@ const AppIcon = (props) => {
     <i
       className={ `app-icon ${sizeClass} fa fa-fw fa-${name}` }
       style={{ backgroundColor: `${colour}`, color: 'white' }}
-    > </i>
+    />
   );
 };
 

@@ -6,7 +6,6 @@ import CheckboxListGroupItem from '../ui/CheckboxListGroupItem';
 import RadioListGroupItem from '../ui/RadioListGroupItem';
 
 export default class ActivityMutingView extends React.Component {
-
   static propTypes = {
     id: PropTypes.string.isRequired,
     provider: PropTypes.string.isRequired,
@@ -83,7 +82,7 @@ export default class ActivityMutingView extends React.Component {
             />
           </div>
           {
-            _.map(this.props.tags, (tag) => (
+            _.map(this.props.tags, tag => (
               <CheckboxListGroupItem
                 key={tag.name}
                 id={`tag-${tag.name}`}
@@ -99,7 +98,7 @@ export default class ActivityMutingView extends React.Component {
         <div className="list-group">
           <label>For:</label>
           {
-            _.map(activityMuteDurations, (duration) => (
+            _.map(activityMuteDurations, duration => (
               <RadioListGroupItem
                 key={duration.value}
                 description={duration.displayValue}
@@ -155,5 +154,4 @@ export default class ActivityMutingView extends React.Component {
       </div>
     );
   }
-
 }

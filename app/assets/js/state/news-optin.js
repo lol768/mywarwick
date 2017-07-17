@@ -8,23 +8,23 @@ const start = createAction(NEWS_OPT_IN_REQUEST);
 export const receive = createAction(NEWS_OPT_IN_RECEIVE);
 
 export function fetch() {
-  return dispatch => {
+  return (dispatch) => {
     dispatch(start());
     return fetchWithCredentials('/api/news/optin')
       .then(response => response.json())
-      .then(json => {
+      .then((json) => {
         if (json.data !== undefined) {
           dispatch(receive(json.data));
         } else {
           throw new Error('Invalid response returned from news opt-in');
         }
       })
-      .catch((e) => dispatch(receive(e)));
+      .catch(e => dispatch(receive(e)));
   };
 }
 
 export function persist(optInType, values) {
-  return dispatch => {
+  return (dispatch) => {
     const data = { [optInType]: values };
 
     return fetchWithCredentials('/api/news/optin', {

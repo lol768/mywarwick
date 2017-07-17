@@ -17,7 +17,6 @@ import * as PropTypes from 'prop-types';
  *        it will run this and set the result as state.initial
  */
 class Bundle extends React.Component {
-
   constructor() {
     super();
     this.state = {

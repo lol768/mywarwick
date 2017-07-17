@@ -4,7 +4,6 @@ import classNames from 'classnames';
 import ListGroupItem from './ListGroupItem';
 
 export default class CheckboxListGroupItem extends React.PureComponent {
-
   static propTypes = {
     ...ListGroupItem.propTypes,
     name: PropTypes.string,
@@ -33,8 +32,8 @@ export default class CheckboxListGroupItem extends React.PureComponent {
           'checkbox--disabled': this.props.disabled,
         }) }
       >
-      <i className="fa fa-check" />
-    </span>
+        <i className="fa fa-check" />
+      </span>
     );
   }
 
@@ -43,5 +42,4 @@ export default class CheckboxListGroupItem extends React.PureComponent {
       <ListGroupItem {...this.props} onClick={this.onClick} uiControl={this.renderCheckbox()} />
     );
   }
-
 }

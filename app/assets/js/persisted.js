@@ -31,7 +31,7 @@ export default function init(opts) {
 
     // Load whatever we have in local storage
     return localforage.getItem(keyPath)
-      .then(value => {
+      .then((value) => {
         if (value !== null) {
           return store.dispatch(action(thaw(value)));
         }
@@ -42,7 +42,7 @@ export default function init(opts) {
         // Whenever the value at this key path changes
         const selector = createSelector(
           state => get(state, keyPathArray),
-          value => localforage.setItem(keyPath, freeze(value))
+          value => localforage.setItem(keyPath, freeze(value)),
         );
 
         store.subscribe(() => selector(store.getState()));

@@ -1,12 +1,15 @@
+/* eslint-env browser */
+
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import moment from 'moment';
+import _ from 'lodash-es';
+import { connect } from 'react-redux';
 import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
 import * as groupItemsByDate from '../../GroupItemsByDate';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 import EmptyState from '../ui/EmptyState';
-import { connect } from 'react-redux';
 import { getStreamSize, takeFromStream } from '../../stream';
 import { markNotificationsRead } from '../../state/notification-metadata';
 import * as notifications from '../../state/notifications';
@@ -14,7 +17,6 @@ import ScrollRestore from '../ui/ScrollRestore';
 import { Routes } from '../AppRoot';
 import HideableView from './HideableView';
 import ActivityMutingView from './ActivityMutingView';
-import _ from 'lodash-es';
 
 
 const SOME_MORE = 20;
@@ -23,7 +25,6 @@ const SOME_MORE = 20;
 const NOTIFICATION_READ_TIMEOUT = 1500;
 
 class NotificationsView extends HideableView {
-
   static propTypes = {
     notifications: PropTypes.object,
     olderItemsOnServer: PropTypes.bool,
@@ -56,7 +57,7 @@ class NotificationsView extends HideableView {
         <p>
           When there are things that need your attention &ndash;
           coursework due in, library books due back, that kind of thing &ndash;
-          you'll see those alerts here.
+          you&apos;ll see those alerts here.
         </p>
       </EmptyState>
     );
@@ -149,7 +150,7 @@ class NotificationsView extends HideableView {
 
   showMore() {
     this.props.dispatch(notifications.showMoreNotifications(
-      this.props.numberToShow + SOME_MORE
+      this.props.numberToShow + SOME_MORE,
     ));
   }
 
@@ -193,14 +194,14 @@ class NotificationsView extends HideableView {
     const shouldBeGrouped = this.props.grouped && this.shouldBeGrouped();
     const notificationItems = takeFromStream(this.props.notifications, this.props.numberToShow)
       .map(n =>
-        <ActivityItem
+        (<ActivityItem
           key={ n.id }
           grouped={ shouldBeGrouped }
           unread={ this.isUnread(n) }
           muteable
           onMuting={ this.onMuting }
           {...n}
-        />
+        />),
       );
 
     const streamSize = getStreamSize(this.props.notifications);
@@ -215,7 +216,7 @@ class NotificationsView extends HideableView {
         }
         { browserPushDisabled ?
           <div className="permission-warning">
-            You have blocked My Warwick from showing system notifications. You'll need to open
+            You have blocked My Warwick from showing system notifications. You&apos;ll need to open
             your browser preferences to change that.
           </div>
           : null
@@ -238,7 +239,6 @@ class NotificationsView extends HideableView {
       </div>
     );
   }
-
 }
 
 function select(state) {
@@ -247,7 +247,7 @@ function select(state) {
     notificationsLastRead: state.notificationsLastRead,
     isFiltered: _.filter(
       _.keys(state.notifications.filter),
-      value => value !== undefined
+      value => value !== undefined,
     ).length > 0,
     olderItemsOnServer: state.notifications.olderItemsOnServer,
     notificationPermission: state.device.notificationPermission,

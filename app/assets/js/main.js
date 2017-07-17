@@ -1,3 +1,5 @@
+/* eslint-env browser */
+
 import $ from 'jquery';
 import _ from 'lodash-es';
 import moment from 'moment';
@@ -5,11 +7,12 @@ import localforage from 'localforage';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 import { syncHistoryWithStore } from 'react-router-redux';
 import fetch from 'isomorphic-fetch';
 import log from 'loglevel';
 
-import * as notificationsGlue from './notifications-glue';
+import notificationsGlue from './notifications-glue';
 import * as pushNotifications from './push-notifications';
 import * as userinfo from './userinfo';
 import persistedLib from './persisted';
@@ -31,7 +34,6 @@ import store, { browserHistory } from './store';
 import AppRoot from './components/AppRoot';
 import bridge from './bridge';
 import { hasAuthoritativeAuthenticatedUser, hasAuthoritativeUser } from './state';
-import { Provider } from 'react-redux';
 
 export function launch(userData) {
   bridge({ store, tiles, notifications, userinfo, news });
@@ -42,7 +44,7 @@ export function launch(userData) {
 
   const history = syncHistoryWithStore(browserHistory, store);
   history.listen(location =>
-    ((location !== undefined) ? analytics.track(location.pathname) : null)
+    ((location !== undefined) ? analytics.track(location.pathname) : null),
   );
 
   if ('scrollRestoration' in history) {
@@ -79,7 +81,7 @@ export function launch(userData) {
     }
 
     // Prevent the body element from scrolling on touch.
-    $(document.body).on('touchmove', (e) => e.preventDefault());
+    $(document.body).on('touchmove', e => e.preventDefault());
     $(document.body).on('touchmove', '.id7-main-content-area', (e) => {
       e.stopPropagation();
       closeTooltips();
@@ -135,7 +137,7 @@ export function launch(userData) {
       });
   }
 
-  SocketDatapipe.subscribe(data => {
+  SocketDatapipe.subscribe((data) => {
     switch (data.type) {
       case 'activity':
         store.dispatch(data.activity.notification ?
@@ -148,8 +150,8 @@ export function launch(userData) {
   });
 
 
-  const freezeDate = (d) => ((!!d && 'format' in d) ? d.format() : d);
-  const thawDate = (d) => (!!d ? moment(d) : d);
+  const freezeDate = d => ((!!d && 'format' in d) ? d.format() : d);
+  const thawDate = d => (d ? moment(d) : d);
 
   const persisted = persistedLib({ store, localforage });
 
@@ -220,7 +222,7 @@ export function launch(userData) {
   window.addEventListener('online', () => {
     store.dispatch(device.updateOnlineStatus(true));
   });
-  store.subscribe(() => notificationsGlue.persistNotificationsLastRead(store.getState()));
+  store.subscribe(() => notificationsGlue(store.getState()));
 
   user.loadUserFromLocalStorage(store.dispatch);
   //
@@ -252,7 +254,7 @@ export function launch(userData) {
     <Provider store={store}>
       <AppRoot history={history} />
     </Provider>,
-    document.getElementById('app-container')
+    document.getElementById('app-container'),
   );
 
   if (window.myWarwickErrorHandler) {

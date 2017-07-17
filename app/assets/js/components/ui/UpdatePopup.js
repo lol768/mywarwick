@@ -1,14 +1,14 @@
+/* eslint-env browser */
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 class UpdatePopup extends React.PureComponent {
-
   static propTypes = {
     isUpdateReady: PropTypes.bool,
   };
 
-  reload(e) {
+  static reload(e) {
     e.preventDefault();
     window.location.reload();
   }
@@ -19,13 +19,14 @@ class UpdatePopup extends React.PureComponent {
         <div className="alert alert-success update-popup" style={{ marginBottom: 15 }}>
           <div className="media">
             <div className="media-left">
-              <i className="app-icon app-icon--lg fa fa-fw fa-check"
+              <i
+                className="app-icon app-icon--lg fa fa-fw fa-check"
                 style={{ backgroundColor: '#8c6e96', color: '#fff' }}
-              > </i>
+              />
             </div>
             <div className="media-body" style={{ paddingTop: 2 }}>
               A new version of My Warwick is available. Just&nbsp;
-              <a href="#" onClick={this.reload}>refresh the page</a>
+              <a href="#update-refresh" onClick={UpdatePopup.reload}>refresh the page</a>
               &nbsp;to upgrade.
             </div>
           </div>
@@ -35,7 +36,6 @@ class UpdatePopup extends React.PureComponent {
 
     return null;
   }
-
 }
 
 export default connect(state => state.update)(UpdatePopup);

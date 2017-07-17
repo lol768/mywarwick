@@ -3,7 +3,6 @@ import * as PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 
 export default class SearchField extends React.PureComponent {
-
   constructor(props) {
     super(props);
 
@@ -46,12 +45,21 @@ export default class SearchField extends React.PureComponent {
             <div className="search-container">
               <form onSubmit={ this.onSubmit }>
                 <input
-                  ref="input" type="search" className="form-control input-lg"
-                  value={ this.props.value } onChange={ this.onChange }
-                  onFocus={ this.props.onFocus } onBlur={ this.props.onBlur }
+                  ref="input"
+                  type="search"
+                  className="form-control input-lg"
+                  value={ this.props.value }
+                  onChange={ this.onChange }
+                  onFocus={ this.props.onFocus }
+                  onBlur={ this.props.onBlur }
                   placeholder="Search Warwick"
                 />
-                <i className="fa fa-search fa-2x" onClick={ this.onClickSearch }> </i>
+                <i
+                  className="fa fa-search fa-2x"
+                  onClick={ this.onClickSearch }
+                  role="button"
+                  tabIndex={0}
+                />
               </form>
             </div>
           </div>
@@ -59,7 +67,6 @@ export default class SearchField extends React.PureComponent {
       </div>
     );
   }
-
 }
 
 SearchField.propTypes = {

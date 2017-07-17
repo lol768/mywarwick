@@ -1,16 +1,16 @@
+/* global document */
 import React, { Component, PropTypes } from 'react';
-import * as TILE_TYPES from '../tiles';
 import log from 'loglevel';
-import Tile from '../tiles/Tile';
-import { connect } from 'react-redux';
-import { goBack, push } from 'react-router-redux';
 import _ from 'lodash-es';
 import $ from 'jquery';
+import { connect } from 'react-redux';
+import { goBack, push } from 'react-router-redux';
+import * as TILE_TYPES from '../tiles';
+import Tile from '../tiles/Tile';
 import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
 
 class TileView extends Component {
-
   componentDidMount() {
     if (this.props.tile && this.props.zoomed) {
       $(document.body).addClass(`colour-${this.props.tile.colour}`);
@@ -126,7 +126,6 @@ class TileView extends Component {
 
     return tileElement;
   }
-
 }
 
 const select = (state, ownProps) => {

@@ -1,15 +1,14 @@
 /* eslint react/sort-comp: 0 */
+/* eslint-env browser */
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
-
-import { localMoment } from '../../dateFormats.js';
 import classNames from 'classnames';
-
+import { localMoment } from '../../dateFormats';
+import TileWrap from './TileWrap';
 import { TILE_SIZES } from '../tiles/TileContent';
 
 export default class Tile extends React.PureComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -26,8 +25,12 @@ export default class Tile extends React.PureComponent {
     const customIcon = this.getContentInstance() && this.getContentInstance().getIcon();
 
     const iconJsx = iconName => (
-      <i className={`fa ${iconName} toggle-tooltip`} ref="icon" title={ this.getIconTitle() }
-        data-toggle="tooltip" data-placement="auto"
+      <i
+        className={`fa ${iconName} toggle-tooltip`}
+        ref="icon"
+        title={ this.getIconTitle() }
+        data-toggle="tooltip"
+        data-placement="auto"
       />);
 
     if (fetching) {
@@ -101,12 +104,12 @@ export default class Tile extends React.PureComponent {
 
     const zoomIcon = () => {
       if (this.shouldDisplayExpandIcon()) {
-        return <i ref="zoom" className="fa fa-expand" onClick={this.onClickExpand}> </i>;
+        return <i ref="zoom" className="fa fa-expand" role="button" tabIndex={0} onClick={this.onClickExpand} />;
       }
       return null;
     };
 
-    const tileSizeClasses = supportedTileSizes.map((s) => `tile-size-supported--${s}`);
+    const tileSizeClasses = supportedTileSizes.map(s => `tile-size-supported--${s}`);
 
     return (
       <div className={`tile__container tile--${type}__container`}>
@@ -118,34 +121,40 @@ export default class Tile extends React.PureComponent {
                 'tile--editing': editing,
                 'tile--zoomed': zoomed,
                 'cursor-pointer': content && content.href,
-              }, tileSizeClasses
+              }, tileSizeClasses,
             )
           }
           onClick={ this.onClick }
+          role="button"
+          tabIndex={0}
         >
-          { this.getContentInstance() && this.getContentInstance().isRemovable() &&
+          { this.getContentInstance() && this.getContentInstance().constructor.isRemovable() &&
             <div
               className="tile__edit-control top-left"
               onClick={ this.props.onHide }
+              role="button"
+              tabIndex={0}
               title={ `Hide ${title}` }
             >
-              <div className="icon"><i className="fa fa-minus"> </i></div>
+              <div className="icon"><i className="fa fa-minus" /></div>
             </div>
           }
 
           <div
             className="tile__edit-control bottom-right"
             onClick={ this.props.onResize }
+            role="button"
+            tabIndex={0}
             title={`Make tile ${_.last(supportedTileSizes) === size ? 'smaller' : 'bigger'}`}
           >
-            <div className="icon"><i className="fa fa-arrow-up"> </i></div>
+            <div className="icon"><i className="fa fa-arrow-up" /></div>
           </div>
 
           <div
             className="tile__edit-control bottom-left tile__drag-handle"
             title="Drag to re-arrange tile"
           >
-            <div className="icon"><i className="fa fa-arrows"> </i></div>
+            <div className="icon"><i className="fa fa-arrows" /></div>
           </div>
 
           <TileWrap
@@ -187,45 +196,6 @@ export default class Tile extends React.PureComponent {
     colour: PropTypes.number.isRequired,
     fetchedAt: PropTypes.number,
     user: PropTypes.object,
-    supportedTileSizes: PropTypes.arrayOf((t) => _.values(TILE_SIZES).indexOf(t) !== -1).isRequired,
+    supportedTileSizes: PropTypes.arrayOf(t => _.values(TILE_SIZES).indexOf(t) !== -1).isRequired,
   }
 }
-
-/**
- * Header and body of the tile. Separate component so that we can
- * toggle edit buttons without this one needing to trigger an update.
- *
- * (Still triggers an update, probably because the icons are always new objects.)
- */
-class TileWrap extends React.PureComponent {
-  render() {
-    const { icon, zoomIcon, title, children, onClickExpand } = this.props;
-    return (
-      <div className="tile__wrap">
-        <header className="tile__header">
-          <div className="tile__icon tile__icon--left">{icon}</div>
-          <div className="tile__icon tile__icon--right">{zoomIcon}</div>
-          <div className="tile__title">{title}</div>
-        </header>
-        <div className="tile__body" data-scrollable>
-          { React.cloneElement(
-            React.Children.only(children),
-            {
-              ref: 'content',
-              onClickExpand,
-            }
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  static propTypes = {
-    children: PropTypes.node.isRequired,
-    icon: PropTypes.node.isRequired,
-    zoomIcon: PropTypes.node,
-    title: PropTypes.string.isRequired,
-    onClickExpand: PropTypes.func.isRequired,
-  }
-}
-

@@ -1,11 +1,10 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
-import Hyperlink from '../ui/Hyperlink';
 import _ from 'lodash-es';
+import Hyperlink from '../ui/Hyperlink';
 import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 
 export default class TextTile extends TileContent {
-
   constructor(props) {
     super(props);
 
@@ -62,7 +61,7 @@ export default class TextTile extends TileContent {
   }
 
   renderItems(itemsToDisplay) {
-    return itemsToDisplay.map(item => {
+    return itemsToDisplay.map((item) => {
       if (!item) {
         return null;
       }
@@ -152,5 +151,4 @@ export default class TextTile extends TileContent {
     }
     return DEFAULT_TILE_SIZES;
   }
-
 }

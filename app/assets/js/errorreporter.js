@@ -1,10 +1,12 @@
+/* eslint-env browser */
+
 /**
  * Catches Javascript errors and sends them to the
  * server for reporting purposes.
  */
 
 import log from 'loglevel';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { postJsonWithCredentials } from './serverpipe';
 
 let errors = [];

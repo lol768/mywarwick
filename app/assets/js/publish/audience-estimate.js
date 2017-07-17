@@ -2,9 +2,9 @@ import $ from 'jquery';
 import _ from 'lodash-es';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import AudienceIndicator from './components/AudienceIndicator';
-import { promiseSubmit } from './utils';
 import log from 'loglevel';
+import AudienceIndicator from './components/AudienceIndicator';
+import promiseSubmit from './utils';
 
 $('.split-form').each((i, form) => {
   const $form = $(form);
@@ -16,7 +16,7 @@ $('.split-form').each((i, form) => {
     const timeout = setTimeout(() => {
       ReactDOM.render(
         <AudienceIndicator fetching />,
-        container
+        container,
       );
     }, 200);
 
@@ -24,17 +24,17 @@ $('.split-form').each((i, form) => {
       url: $form.attr('data-audience-action'),
       dataType: 'json',
     })
-      .then(response => {
+      .then((response) => {
         ReactDOM.render(
           <AudienceIndicator {...response.data} />,
-          container
+          container,
         );
       })
-      .catch(e => {
+      .catch((e) => {
         log.error('Audience estimate returned error', e);
         ReactDOM.render(
           <AudienceIndicator error />,
-          container
+          container,
         );
       })
       .then(() => clearTimeout(timeout));
@@ -43,7 +43,7 @@ $('.split-form').each((i, form) => {
   if (container !== undefined) {
     ReactDOM.render(
       <AudienceIndicator empty />,
-      container
+      container,
     );
 
     $form.on(
@@ -57,7 +57,7 @@ $('.split-form').each((i, form) => {
       // Defer so any changes to other fields made as a result of this change
       // propagate before requesting the audience size estimate.  Debounce
       // to place a rate limit on requests.
-      () => _.defer(_.debounce(updateAudienceEstimate, 500))
+      () => _.defer(_.debounce(updateAudienceEstimate, 500)),
     );
   }
 

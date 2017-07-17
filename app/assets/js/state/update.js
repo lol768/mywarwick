@@ -1,6 +1,8 @@
-import * as app from './app';
+/* eslint-env browser */
+
 import fetch from 'isomorphic-fetch';
 import log from 'loglevel';
+import * as app from './app';
 
 const UPDATE_READY = 'UPDATE_READY';
 

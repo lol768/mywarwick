@@ -1,8 +1,8 @@
 import $ from 'jquery';
+import log from 'loglevel';
 import './datetimepicker';
 import './form-pagination';
 import './audience-estimate';
-import log from 'loglevel';
 
 const NEWS_ITEM = '.news-item';
 
@@ -62,7 +62,7 @@ $(`${NEWS_ITEM}, .activity-item`).each((i, item) => {
   const $delete = $item.find('a.delete');
   const $cancel = $item.find('.confirm-delete > button.cancel');
 
-  $delete.on('click', e => {
+  $delete.on('click', (e) => {
     e.preventDefault();
     const $toolbar = $(e.currentTarget).parent('.btn-toolbar');
     const $confirmToolbar = $toolbar.siblings('.confirm-delete');
@@ -71,7 +71,7 @@ $(`${NEWS_ITEM}, .activity-item`).each((i, item) => {
     $confirmToolbar.show().animate({ left: '0%', opacity: 1 });
   });
 
-  $cancel.on('click', e => {
+  $cancel.on('click', (e) => {
     e.preventDefault();
     const $confirmToolbar = $(e.currentTarget).parent('.confirm-delete');
     const $toolbar = $confirmToolbar.siblings('.btn-toolbar');

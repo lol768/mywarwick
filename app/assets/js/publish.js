@@ -1,7 +1,9 @@
+/* eslint-env browser */
+
 import React from 'react';
 import ReactDOM from 'react-dom';
-import FileUpload from './publish/components/FileUpload';
 import $ from 'jquery';
+import FileUpload from './publish/components/FileUpload';
 import './publish/news';
 import './publish/groupPicker';
 
@@ -21,7 +23,7 @@ if (fileUploadContainer) {
 
   ReactDOM.render(
     <FileUpload inputName={ inputName.value } imageId={ imageId } />,
-    fileUploadContainer
+    fileUploadContainer,
   );
 }
 
@@ -44,7 +46,7 @@ function wireEventListeners() {
       $deptSelect.trigger('change');
     }).trigger('change');
 
-    $deptSelect.on('change', e => {
+    $deptSelect.on('change', (e) => {
       const deptSelected = e.target.value && !$deptSelect.is(':disabled');
       const $subsets = $deptBoxes.closest('.checkbox');
       $deptBoxes.attr('disabled', !deptSelected);

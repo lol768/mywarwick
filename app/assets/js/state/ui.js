@@ -1,8 +1,20 @@
+/* eslint-env browser */
+
 import log from 'loglevel';
 import $ from 'jquery';
-import { Routes } from '../components/AppRoot';
 import { goBack, replace } from 'react-router-redux';
 import _ from 'lodash-es';
+import { Routes } from '../components/AppRoot';
+
+/* eslint-disable */
+let mq;
+try {
+  mq = require('modernizr').mq;
+} catch (e) {
+  log.warn('modernizr not present, using fallback.');
+  mq = () => global.mqResult;
+}
+/* eslint-enable */
 
 function isNative() {
   return ('navigator' in window) && navigator.userAgent.indexOf('MyWarwick/') > -1;

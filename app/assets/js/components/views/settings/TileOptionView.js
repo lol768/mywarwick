@@ -1,13 +1,12 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
+import { connect } from 'react-redux';
 import * as tiles from '../../../state/tiles';
 import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 import RadioListGroupItem from '../../ui/RadioListGroupItem';
-import { connect } from 'react-redux';
 
 export class TileOptionView extends React.PureComponent {
-
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     tile: PropTypes.shape({
@@ -25,7 +24,7 @@ export class TileOptionView extends React.PureComponent {
     super(props);
 
     const currentPreferences = {};
-    _.keys(props.tileOptions).forEach((key) => (currentPreferences[key] = undefined));
+    _.keys(props.tileOptions).forEach(key => (currentPreferences[key] = undefined));
 
     this.state = {
       currentPreferences: {
@@ -38,6 +37,58 @@ export class TileOptionView extends React.PureComponent {
     this.saveTilePreferences = _.debounce(this.saveTilePreferences.bind(this), 1000);
     this.onCheckboxClick = this.onCheckboxClick.bind(this);
     this.onRadioClick = this.onRadioClick.bind(this);
+  }
+
+  onCheckboxClick(value, name) {
+    const currentPref = _.clone(this.state.currentPreferences);
+
+    if (currentPref[name] === undefined) {
+      currentPref[name] = { [value]: true };
+    } else {
+      if (_.isArray(currentPref[name])) {
+        currentPref[name] = _.keyBy(currentPref[name]);
+        _.keys(currentPref[name]).forEach(key => (currentPref[name][key] = true));
+      }
+      currentPref[name][value] = !currentPref[name][value];
+    }
+
+    this.saveConfig(currentPref);
+  }
+
+  onRadioClick(value, name) {
+    const currentPref = _.clone(this.state.currentPreferences);
+
+    const newPreferences = {
+      ...currentPref,
+      [name]: value,
+    };
+
+    this.saveConfig(newPreferences);
+  }
+
+  makeRadioItem(possibleChoice, radioName) {
+    const currentPreference = this.state.currentPreferences[radioName];
+    const { tile, tileOptions } = this.props;
+
+    let checked = null;
+    if (currentPreference !== undefined && currentPreference.length > 0) {
+      checked = currentPreference === possibleChoice.value;
+    } else {
+      checked = tileOptions[radioName].default === possibleChoice.value;
+    }
+
+    return (
+      <RadioListGroupItem
+        key={ `${radioName}:${possibleChoice.value}` }
+        icon={ (tile.id === 'weather') ? 'sun-o' : tile.icon }
+        description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
+        onClick={ this.onRadioClick }
+        checked={ checked }
+        name={ radioName }
+        value={ possibleChoice.value }
+        disabled={ !this.props.isOnline }
+      />
+    );
   }
 
   makeCheckboxItem(possibleChoice, cbName) {
@@ -60,63 +111,18 @@ export class TileOptionView extends React.PureComponent {
     }
 
     return (
-      <SwitchListGroupItem key={ `${cbName}:${possibleChoice.value}` }
-        id={ `${cbName}:${possibleChoice.value}` } value={ possibleChoice.value }
-        icon={ (tile.id === 'weather') ? 'sun-o' : tile.icon }
-        description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
-        onClick={ this.onCheckboxClick } checked={ checked } name={ cbName }
-        disabled={ !this.props.isOnline }
-      />
-    );
-  }
-
-  makeRadioItem(possibleChoice, radioName) {
-    const currentPreference = this.state.currentPreferences[radioName];
-    const { tile, tileOptions } = this.props;
-
-    let checked = null;
-    if (currentPreference !== undefined && currentPreference.length > 0) {
-      checked = currentPreference === possibleChoice.value;
-    } else {
-      checked = tileOptions[radioName].default === possibleChoice.value;
-    }
-
-    return (
-      <RadioListGroupItem key={ `${radioName}:${possibleChoice.value}` }
-        icon={ (tile.id === 'weather') ? 'sun-o' : tile.icon }
-        description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
-        onClick={ this.onRadioClick } checked={ checked } name={ radioName }
+      <SwitchListGroupItem
+        key={ `${cbName}:${possibleChoice.value}` }
+        id={ `${cbName}:${possibleChoice.value}` }
         value={ possibleChoice.value }
+        icon={ (tile.id === 'weather') ? 'sun-o' : tile.icon }
+        description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
+        onClick={ this.onCheckboxClick }
+        checked={ checked }
+        name={ cbName }
         disabled={ !this.props.isOnline }
       />
     );
-  }
-
-  onCheckboxClick(value, name) {
-    const currentPref = _.clone(this.state.currentPreferences, true);
-
-    if (currentPref[name] === undefined) {
-      currentPref[name] = { [value]: true };
-    } else {
-      if (_.isArray(currentPref[name])) {
-        currentPref[name] = _.keyBy(currentPref[name]);
-        _.keys(currentPref[name]).forEach((key) => (currentPref[name][key] = true));
-      }
-      currentPref[name][value] = !currentPref[name][value];
-    }
-
-    this.saveConfig(currentPref);
-  }
-
-  onRadioClick(value, name) {
-    const currentPref = _.clone(this.state.currentPreferences, true);
-
-    const newPreferences = {
-      ...currentPref,
-      [name]: value,
-    };
-
-    this.saveConfig(newPreferences);
   }
 
   saveTilePreferences() {
@@ -139,12 +145,12 @@ export class TileOptionView extends React.PureComponent {
         </div>
 
         { _.flatMap(this.props.tileOptions, (tileOption, key) =>
-          <div key={ key }>
+          (<div key={ key }>
             <p className="hint-text container-fluid">
               { tileOption.description }
             </p>
             <div key={ key } className={ `list-group setting-colour-${this.props.tile.colour}` }>
-              { _.map(_.sortBy(tileOption.options, o => (o.name ? o.name : o.value)), option => {
+              { _.map(_.sortBy(tileOption.options, o => (o.name ? o.name : o.value)), (option) => {
                 switch (tileOption.type.toLowerCase()) {
                   case 'array':
                     return this.makeCheckboxItem(option, key);
@@ -157,14 +163,14 @@ export class TileOptionView extends React.PureComponent {
                 }
               }) }
             </div>
-          </div>
+          </div>),
         ) }
       </div>
     );
   }
 }
 
-const select = (state) => ({
+const select = state => ({
   isOnline: state.device.isOnline,
 });
 

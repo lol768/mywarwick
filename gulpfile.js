@@ -8,6 +8,7 @@
 const gulp = require('gulp');
 const fs = require('fs');
 const gutil = require('gulp-util');
+const eslint = require('gulp-eslint');
 
 /* Recommended gulpopts.json:
 
@@ -74,3 +75,10 @@ gulp.task('yer-a-wizard', () => {
   gutil.log(gutil.colors.yellow('* * ' + gutil.colors.green('Yer a lizard, Gary!') + '* * '));
 });
 gulp.task('default', ['yer-a-wizard', 'wizard']);
+
+gulp.task('lint-fix', () => {
+  return gulp.src(global.paths.assetPath + '/js/**/*.js')
+    .pipe(eslint({ fix: true }))
+    .pipe(eslint.format())
+    .pipe(gulp.dest(global.paths.assetPath + '/js/'));
+});
