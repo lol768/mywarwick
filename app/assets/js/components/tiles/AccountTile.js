@@ -34,12 +34,12 @@ export default class AccountTile extends TileContent {
         levelCode: PropTypes.string.isRequired,
         mostSignificant: PropTypes.bool.isRequired,
       })),
-    }).isRequired,
+    }),
     user: PropTypes.shape({
       photo: PropTypes.shape({
         url: PropTypes.string,
       }),
-      name: PropTypes.string.isRequired,
+      name: PropTypes.string,
     }).isRequired,
   };
 
