@@ -1,4 +1,5 @@
 import React from 'react';
+import * as PropTypes from 'prop-types';
 
 export default function AudienceIndicator(props) {
   if (props.fetching) {
@@ -37,10 +38,10 @@ export default function AudienceIndicator(props) {
 }
 
 AudienceIndicator.propTypes = {
-  fetching: React.PropTypes.bool,
-  error: React.PropTypes.bool,
-  empty: React.PropTypes.bool,
-  public: React.PropTypes.bool,
-  baseAudience: React.PropTypes.number,
-  categorySubset: React.PropTypes.number,
+  fetching: PropTypes.bool,
+  error: PropTypes.bool,
+  empty: PropTypes.bool,
+  public: PropTypes.bool,
+  baseAudience: PropTypes.number,
+  categorySubset: PropTypes.number,
 };

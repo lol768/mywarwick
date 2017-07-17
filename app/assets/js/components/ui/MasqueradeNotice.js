@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 
-export default class MasqueradeNotice extends Component {
+export default class MasqueradeNotice extends React.PureComponent {
 
   render() {
     return (
@@ -15,7 +16,7 @@ export default class MasqueradeNotice extends Component {
 
 MasqueradeNotice.propTypes = {
   masqueradingAs: {
-    name: React.PropTypes.string.isRequired,
-    usercode: React.PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    usercode: PropTypes.string.isRequired,
   },
 };

@@ -1,5 +1,5 @@
-import React, { PropTypes } from 'react';
-
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 class UpdatePopup extends React.PureComponent {

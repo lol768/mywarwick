@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import * as _ from 'lodash-es';
 import { activityMuteDurations } from '../../state/notifications';
 import CheckboxListGroupItem from '../ui/CheckboxListGroupItem';

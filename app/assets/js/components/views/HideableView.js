@@ -1,5 +1,6 @@
 /* eslint no-unused-vars:0 */
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 
 export default class HideableView extends React.PureComponent {
 

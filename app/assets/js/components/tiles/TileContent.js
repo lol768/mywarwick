@@ -1,4 +1,5 @@
 import React from 'react';
+import * as PropTypes from 'prop-types';
 import * as log from 'loglevel';
 import * as errorreporter from '../../errorreporter';
 import _ from 'lodash-es';
@@ -117,9 +118,9 @@ export default class TileContent extends React.PureComponent {
   }
 
   static propTypes = {
-    content: React.PropTypes.object,
-    size: React.PropTypes.oneOf(_.values(TILE_SIZES)).isRequired,
-    zoomed: React.PropTypes.bool,
+    content: PropTypes.object,
+    size: PropTypes.oneOf(_.values(TILE_SIZES)).isRequired,
+    zoomed: PropTypes.bool,
   }
 
 }

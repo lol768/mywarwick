@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 const formatBadgeCount = (n) => (n > 99 ? '99+' : n);

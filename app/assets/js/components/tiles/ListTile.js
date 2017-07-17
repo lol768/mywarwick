@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 import { formatDateTime } from '../../dateFormats';
 import _ from 'lodash-es';

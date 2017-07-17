@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 
 export const EmptyState = ({ lead, children }) => (
   <div className="empty-state">

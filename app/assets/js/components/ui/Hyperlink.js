@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 
 /**
  * Wraps text in hyperlink if href is defined and not null

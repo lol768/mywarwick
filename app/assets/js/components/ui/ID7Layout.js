@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import $ from 'jquery';
 import _ from 'lodash-es';
 import log from 'loglevel';

@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import TabBar from './ui/TabBar';
 import TabBarItem from './ui/TabBarItem';
 import ID7Layout from './ui/ID7Layout';

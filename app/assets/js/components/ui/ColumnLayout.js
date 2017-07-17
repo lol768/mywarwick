@@ -1,4 +1,5 @@
 import React from 'react';
+import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
 
 export default class ColumnLayout extends React.PureComponent {
@@ -25,7 +26,7 @@ export default class ColumnLayout extends React.PureComponent {
 }
 
 ColumnLayout.propTypes = {
-  columns: React.PropTypes.number.isRequired,
-  children: React.PropTypes.arrayOf(React.PropTypes.node),
+  columns: PropTypes.number.isRequired,
+  children: PropTypes.arrayOf(PropTypes.node),
 };
 

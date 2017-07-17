@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import classnames from 'classnames';
 import ProgressBar from '../../components/ui/ProgressBar';
 import * as newsImages from '../newsImages';

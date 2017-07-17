@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import Hyperlink from './Hyperlink';
 import * as dateFormats from '../../dateFormats';
 import classnames from 'classnames';
@@ -14,9 +15,9 @@ class ActivityItem extends React.PureComponent {
     date: PropTypes.string.isRequired,
     url: PropTypes.string,
     unread: PropTypes.bool,
-    icon: React.PropTypes.shape({
-      name: React.PropTypes.string,
-      colour: React.PropTypes.string,
+    icon: PropTypes.shape({
+      name: PropTypes.string,
+      colour: PropTypes.string,
     }),
     grouped: PropTypes.bool,
     muteable: PropTypes.bool,

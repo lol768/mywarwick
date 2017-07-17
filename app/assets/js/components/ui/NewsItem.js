@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import * as dateFormats from '../../dateFormats';
@@ -79,9 +80,9 @@ export function NewsItemImage({ id, width, alt }) {
 }
 
 NewsItemImage.propTypes = {
-  id: React.PropTypes.string.isRequired,
-  width: React.PropTypes.number.isRequired,
-  alt: React.PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
+  width: PropTypes.number.isRequired,
+  alt: PropTypes.string.isRequired,
 };
 
 const NewsItemTag = props =>
@@ -90,7 +91,7 @@ const NewsItemTag = props =>
   </span>;
 
 NewsItemTag.propTypes = {
-  name: React.PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
 };
 
 const select = (state) => ({

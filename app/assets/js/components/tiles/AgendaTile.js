@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import { formatDateTime, formatDate, formatTime, localMoment } from '../../dateFormats';
 import moment from 'moment-timezone';
 import GroupedList from '../ui/GroupedList';
@@ -393,21 +394,21 @@ AgendaTileItem.propTypes = {
   end: PropTypes.string,
   isAllDay: PropTypes.bool,
   title: PropTypes.string,
-  location: React.PropTypes.shape({
-    name: React.PropTypes.string,
-    href: React.PropTypes.string,
+  location: PropTypes.shape({
+    name: PropTypes.string,
+    href: PropTypes.string,
   }),
   href: PropTypes.string,
-  parent: React.PropTypes.shape({
-    shortName: React.PropTypes.string,
-    fullName: React.PropTypes.string,
+  parent: PropTypes.shape({
+    shortName: PropTypes.string,
+    fullName: PropTypes.string,
   }),
   type: PropTypes.string,
-  staff: React.PropTypes.arrayOf(React.PropTypes.shape({
-    email: React.PropTypes.string,
-    lastName: React.PropTypes.string,
-    firstName: React.PropTypes.string,
-    userType: React.PropTypes.string,
-    universityId: React.PropTypes.string,
+  staff: PropTypes.arrayOf(PropTypes.shape({
+    email: PropTypes.string,
+    lastName: PropTypes.string,
+    firstName: PropTypes.string,
+    userType: PropTypes.string,
+    universityId: PropTypes.string,
   })),
 };

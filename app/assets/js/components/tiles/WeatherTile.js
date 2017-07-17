@@ -1,5 +1,5 @@
 import React from 'react';
-
+import * as PropTypes from 'prop-types';
 import TileContent, { DEFAULT_TILE_SIZES } from './TileContent';
 import Skycon from '../ui/Skycon';
 import { localMomentUnix } from '../../dateFormats';
@@ -95,7 +95,7 @@ const WeatherTable = ({ items }) =>
   </div>;
 
 WeatherTable.propTypes = {
-  items: React.PropTypes.array,
+  items: PropTypes.array,
 };
 
 const Callout = ({ temperature }) => (
@@ -105,5 +105,5 @@ const Callout = ({ temperature }) => (
 );
 
 Callout.propTypes = {
-  temperature: React.PropTypes.number,
+  temperature: PropTypes.number,
 };

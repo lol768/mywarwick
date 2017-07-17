@@ -11,7 +11,7 @@ import * as PropTypes from 'prop-types';
 class ActivityMutesView extends React.PureComponent {
 
   static propTypes = {
-    dispatch: React.PropTypes.func.isRequired,
+    dispatch: PropTypes.func.isRequired,
     activityMutes: PropTypes.arrayOf(PropTypes.shape({
       id: PropTypes.string.isRequired,
       usercode: PropTypes.string.isRequired,
@@ -32,7 +32,7 @@ class ActivityMutesView extends React.PureComponent {
         display_value: PropTypes.string,
       })),
     })).isRequired,
-    isOnline: React.PropTypes.bool.isRequired,
+    isOnline: PropTypes.bool.isRequired,
   };
 
   constructor(props) {

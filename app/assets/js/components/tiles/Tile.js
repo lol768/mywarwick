@@ -1,5 +1,6 @@
 /* eslint react/sort-comp: 0 */
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
 
 import { localMoment } from '../../dateFormats.js';

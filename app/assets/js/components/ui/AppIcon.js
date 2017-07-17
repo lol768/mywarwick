@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 
 const AppIcon = (props) => {
   const { size, icon: { name, colour } } = props;
@@ -12,11 +13,11 @@ const AppIcon = (props) => {
 };
 
 AppIcon.propTypes = {
-  icon: React.PropTypes.shape({
-    name: React.PropTypes.string,
-    colour: React.PropTypes.string,
+  icon: PropTypes.shape({
+    name: PropTypes.string,
+    colour: PropTypes.string,
   }),
-  colour: React.PropTypes.string,
+  colour: PropTypes.string,
   size: PropTypes.string,
 };
 
