@@ -108,7 +108,6 @@ describe('MeView', () => {
 
   it('should not render unknown tiles or removed tiles', () => {
     const props = {
-      isDesktop: false,
       layoutWidth: 2,
       tiles: state.tiles.data.tiles,
       layout: [],

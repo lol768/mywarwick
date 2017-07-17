@@ -67,7 +67,6 @@ function mapStateToProps(state) {
   return {
     notificationsCount:
       getNumItemsSince(state.notifications.stream, _.get(state, ['notificationsLastRead', 'date'])),
-    layoutClassName: state.ui.className,
     authenticated: state.user.data.authenticated,
   };
 }

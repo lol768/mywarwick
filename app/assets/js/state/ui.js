@@ -4,27 +4,13 @@ import { Routes } from '../components/AppRoot';
 import { goBack, replace } from 'react-router-redux';
 import _ from 'lodash-es';
 
-let mq;
-try {
-  mq = require('modernizr').mq;
-} catch (e) {
-  log.warn('modernizr not present, using fallback.');
-  mq = () => global.mqResult;
-}
-
 function isNative() {
   return ('navigator' in window) && navigator.userAgent.indexOf('MyWarwick/') > -1;
-}
-
-function isDesktop() {
-  // We make the same 'native is mobile' assumption in bridge.js
-  return !isNative() && mq('only all and (min-width: 768px)');
 }
 
 const showBetaWarning = () => $('#app-container').attr('data-show-beta-warning') === 'true';
 
 const initialState = {
-  className: undefined,
   layoutWidth: 2, // 2 columns by default
   colourTheme: 'transparent',
   native: false,
@@ -33,8 +19,6 @@ const initialState = {
 
 export function reducer(state = initialState, action) {
   switch (action.type) {
-    case 'ui.class':
-      return { ...state, className: action.className };
     case 'ui.native':
       if (action.native !== state.native) return { ...state, native: action.native };
       return state;
@@ -62,16 +46,8 @@ export function updateColourTheme(theme) {
 export function updateUIContext() {
   return (dispatch, getState) => {
     const state = getState();
-    const currentClassName = state.ui.className;
     const betaWarn = showBetaWarning();
     const native = isNative();
-
-    if (currentClassName === undefined || isDesktop() !== (currentClassName === 'desktop')) {
-      dispatch({
-        type: 'ui.class',
-        className: isDesktop() ? 'desktop' : 'mobile',
-      });
-    }
 
     if (native !== state.ui.native) {
       dispatch({
