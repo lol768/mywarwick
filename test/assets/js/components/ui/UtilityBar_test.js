@@ -20,7 +20,7 @@ describe('UtilityBar', () => {
     expect(li.props.children).to.have.property('key', 'signInLink');
   });
 
-  it('renders image when we are signed', () => {
+  it('renders image when we are signed in', () => {
     const props = {
       user: {
         data: { name: 'Ron Swanson', authenticated: true, photo: { url: 'http://photos/photo/123' } },
