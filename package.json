@@ -118,7 +118,8 @@
     "warwick-search-frontend": "git+ssh://git@repo.elab.warwick.ac.uk/sch/omni.git#c7d4b6fd572",
     "wrappy": "^1.0.2",
     "invariant": "^2.2.2",
-    "warning": "^3.0.0"
+    "warning": "^3.0.0",
+    "eslint-plugin-mw": "file:scripts/eslint-rules"
   },
   "scripts": {
     "lint": "gulp lint",
