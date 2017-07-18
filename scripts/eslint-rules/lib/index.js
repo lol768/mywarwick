@@ -13,7 +13,11 @@ module.exports.rules = {
             }
 
             if (calleeObj.name !== '_' && calleeProp.name === 'findIndex') {
-              context.report(node, "Potential use of Array.prototype.findIndex, which isn't compatible with IE11.");
+              context.report(node, "Potential use of Array.prototype.findIndex, which isn't compatible with IE11. Consider using lodash.");
+            }
+
+            if (calleeObj.name !== '_' && (calleeProp.name === 'startsWith' || calleeProp.name === 'endsWith')) {
+              context.report(node, "Potential use of String.prototype.[starts/ends]With, which isn't compatible with IE11. Consider using lodash or indexOf.");
             }
           }
         },
