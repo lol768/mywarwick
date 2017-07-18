@@ -75,7 +75,9 @@ class MeView extends React.PureComponent {
   }
 
   onLayoutChange(layout) {
-    if (this.previousLayout === undefined || !_.isEqual(layout, this.previousLayout)) {
+    if (this.previousLayout === undefined) {
+      this.previousLayout = _.cloneDeep(layout);
+    } else if (!_.isEqual(layout, this.previousLayout)) {
       this.props.dispatch(tiles.tileLayoutChange(layout, this.props.layoutWidth));
       this.previousLayout = _.cloneDeep(layout);
       this.props.dispatch(tiles.persistTiles());
