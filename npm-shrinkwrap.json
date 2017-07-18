@@ -3881,6 +3881,9 @@
         "jsx-ast-utils": "1.4.1"
       }
     },
+    "eslint-plugin-mw": {
+      "version": "file:scripts/eslint-rules"
+    },
     "eslint-plugin-react": {
       "version": "7.1.0",
       "resolved": "https://registry.npmjs.org/eslint-plugin-react/-/eslint-plugin-react-7.1.0.tgz",
