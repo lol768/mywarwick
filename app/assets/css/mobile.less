@@ -174,10 +174,13 @@ html.android.app {
   }
 }
 
-.list-group-item.cursor-pointer {
+.list-group-item[role="button"] {
   transition: background-color 0.1s;
   &:active {
     background-color: darken(@list-group-bg, 3%);
+  }
+  &[disabled] {
+    cursor: default;
   }
 }
 

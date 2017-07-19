@@ -54,9 +54,9 @@ export default class ListGroupItem extends React.PureComponent {
   render() {
     return (
       <div
-        className={ classNames('list-group-item', { 'cursor-pointer': this.isClickable() })}
+        className="list-group-item"
         role="button"
-        aria-disabled={ !this.isClickable() }
+        disabled={ !this.isClickable() }
         tabIndex={ this.isClickable() ? 0 : -1 }
         onClick={ this.onClick }
       >

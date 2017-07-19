@@ -111,22 +111,25 @@ export default class Tile extends React.PureComponent {
 
     const tileSizeClasses = supportedTileSizes.map(s => `tile-size-supported--${s}`);
 
+    const clickProps = (content && content.href) ? {
+      onClick: this.onClick,
+      role: 'button',
+      tabIndex: 0,
+    } : { onClick: this.onClick };
+
     return (
       <div className={`tile__container tile--${type}__container`}>
         <article
+          { ...clickProps }
           className={
             classNames(
               'tile', `tile--${type}`, `tile--${size}`, `colour-${colour}`,
               {
                 'tile--editing': editing,
                 'tile--zoomed': zoomed,
-                'cursor-pointer': content && content.href,
               }, tileSizeClasses,
             )
           }
-          onClick={ this.onClick }
-          role="button"
-          tabIndex={0}
         >
           { this.getContentInstance() && this.getContentInstance().constructor.isRemovable() &&
             <div
