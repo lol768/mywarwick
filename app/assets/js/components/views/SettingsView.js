@@ -194,7 +194,7 @@ class SettingsView extends HideableView {
 
         <div className="list-group setting-colour-0">
           <div
-            className="list-group-item cursor-pointer"
+            className="list-group-item"
             role="button"
             tabIndex={0}
             onClick={ () =>
@@ -211,7 +211,7 @@ class SettingsView extends HideableView {
 
         <div className="list-group setting-colour-0">
           <div
-            className="list-group-item cursor-pointer"
+            className="list-group-item"
             role="button"
             tabIndex={0}
             onClick={ () =>
@@ -242,7 +242,7 @@ class SettingsView extends HideableView {
 
         <div className="list-group setting-colour-1">
           <div
-            className="list-group-item cursor-pointer"
+            className="list-group-item"
             role="button"
             tabIndex={0}
             onClick={ this.props.newsCategories.fetched && !this.props.newsCategories.failed ? () =>
@@ -260,7 +260,7 @@ class SettingsView extends HideableView {
             ) }
           </div>
           <div
-            className="list-group-item cursor-pointer"
+            className="list-group-item"
             role="button"
             tabIndex={0}
             onClick={ this.props.newsOptIn.fetched && !this.props.newsOptIn.failed ? () =>
@@ -289,7 +289,7 @@ class SettingsView extends HideableView {
 
         <div className="list-group setting-colour-2">
           <div
-            className="list-group-item cursor-pointer"
+            className="list-group-item"
             role="button"
             tabIndex={0}
             onClick={ () =>
@@ -330,7 +330,7 @@ class SettingsView extends HideableView {
 
         <div className="list-group setting-colour-3">
           <div
-            className="list-group-item cursor-pointer"
+            className="list-group-item"
             role="button"
             tabIndex={0}
             onClick={ loadDeviceDetails }

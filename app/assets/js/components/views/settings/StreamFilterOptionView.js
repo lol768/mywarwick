@@ -84,7 +84,7 @@ class StreamFilterOptionView extends React.PureComponent {
             option =>
               (<div
                 key={ `provider:${option.id}` }
-                className="list-group-item cursor-pointer"
+                className="list-group-item"
                 data-name="provider"
                 data-value={option.id}
                 role="button"
