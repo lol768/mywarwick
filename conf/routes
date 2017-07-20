@@ -102,6 +102,8 @@ PUT         /api/tiles                                            @controllers.a
 
 GET         /api/emailNotificationPreferences                     @controllers.api.EmailNotificationsPrefController.get
 POST        /api/emailNotificationPreferences                     @controllers.api.EmailNotificationsPrefController.update
+GET         /api/smsNotificationPreferences                       @controllers.api.SmsNotificationsPrefController.get
+POST        /api/smsNotificationPreferences                       @controllers.api.SmsNotificationsPrefController.update
 
 
 POST        /api/errors/js                                        @controllers.api.ErrorsController.js

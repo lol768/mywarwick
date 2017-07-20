@@ -1,6 +1,7 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import classNames from 'classnames';
+import NetworkAwareControl from './NetworkAwareControl';
 
 export default class ListGroupItem extends React.PureComponent {
   static propTypes = {
@@ -35,22 +36,6 @@ export default class ListGroupItem extends React.PureComponent {
     return typeof this.props.onClick === 'function' && !this.props.disabled;
   }
 
-  renderMediaRight() {
-    if (this.props.loading) {
-      return (
-        <i className="fa fa-spinner fa-pulse" />
-      );
-    }
-
-    if (this.props.failure) {
-      return (
-        <i className="fa fa-exclamation-triangle" />
-      );
-    }
-
-    return this.props.uiControl;
-  }
-
   render() {
     return (
       <div
@@ -71,7 +56,9 @@ export default class ListGroupItem extends React.PureComponent {
             { this.props.description }
           </div>
           <div className="media-right">
-            { this.renderMediaRight() }
+            <NetworkAwareControl {...this.props}>
+              { this.props.uiControl }
+            </NetworkAwareControl>
           </div>
         </div>
       </div>

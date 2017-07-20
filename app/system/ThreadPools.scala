@@ -15,6 +15,7 @@ object ThreadPools {
 
   implicit val email = shared
   implicit val mobile = shared
+  implicit val sms = shared
 
   implicit val externalData = shared
 
