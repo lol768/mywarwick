@@ -1,5 +1,5 @@
-import './polyfills-and-errors';
 import log from 'loglevel';
+import './polyfills-and-errors';
 import * as u from './userinfo-base';
 import { setMethod } from './csrfToken';
 
@@ -17,7 +17,7 @@ function boot() {
           setMethod('userInfo', userData);
         }
         return import('./main').then(main =>
-          main.launch(userData)
+          main.launch(userData),
         );
       }
       // we are redirecting to SSO, so do nothing else.

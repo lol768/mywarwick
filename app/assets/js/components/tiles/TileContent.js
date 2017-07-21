@@ -1,7 +1,8 @@
 import React from 'react';
+import * as PropTypes from 'prop-types';
 import * as log from 'loglevel';
-import * as errorreporter from '../../errorreporter';
 import _ from 'lodash-es';
+import * as errorreporter from '../../errorreporter';
 
 export const TILE_SIZES = {
   SMALL: 'small',
@@ -13,22 +14,32 @@ export const TILE_SIZES = {
 export const DEFAULT_TILE_SIZES = [TILE_SIZES.SMALL, TILE_SIZES.WIDE];
 
 export default class TileContent extends React.PureComponent {
+  static propTypes = {
+    content: PropTypes.object,
+    size: PropTypes.oneOf(_.values(TILE_SIZES)).isRequired,
+    zoomed: PropTypes.bool,
+  };
 
-  static isVisibleOnDesktopOnly() {
+  static supportedTileSizes() {
+    return DEFAULT_TILE_SIZES;
+  }
+
+  static needsContentToRender() {
+    return true;
+  }
+
+  static isRemovable() {
+    return true;
+  }
+
+  static expandsOnClick() {
     return false;
   }
 
-  static canZoom() {
-    return false;
-  }
 
   constructor(props) {
     super(props);
     this.error = false;
-  }
-
-  static supportedTileSizes() {
-    return DEFAULT_TILE_SIZES;
   }
 
   getBody() {
@@ -73,6 +84,17 @@ export default class TileContent extends React.PureComponent {
     return null;
   }
 
+  isEmpty() {
+    const { content } = this.props;
+    return !content.items || content.items.length === 0;
+  }
+
+  canZoom() {
+    return this._canZoom;
+  }
+
+  _canZoom = false;
+
   contentOrDefault(contentFunction) {
     if (this.isEmpty()) {
       return <span>{ this.props.content.defaultText || 'Nothing to show.' }</span>;
@@ -83,23 +105,6 @@ export default class TileContent extends React.PureComponent {
 
   isError() {
     return this.error;
-  }
-
-  isEmpty() {
-    const { content } = this.props;
-    return !content.items || content.items.length === 0;
-  }
-
-  isRemovable() {
-    return true;
-  }
-
-  static needsContentToRender() {
-    return true;
-  }
-
-  expandsOnClick() {
-    return false;
   }
 
   render() {
@@ -119,11 +124,4 @@ export default class TileContent extends React.PureComponent {
     }
     return null;
   }
-
-  static propTypes = {
-    content: React.PropTypes.object,
-    size: React.PropTypes.oneOf(_.values(TILE_SIZES)).isRequired,
-    zoomed: React.PropTypes.bool,
-  }
-
 }

@@ -1,10 +1,13 @@
 /* global MyWarwickNative */
+/* eslint-env browser */
+
+import $ from 'jquery';
 import store from './store';
 import * as user from './state/user';
 import * as analytics from './analytics';
-import $ from 'jquery';
 import { fetchUserInfo, handleRedirects } from './userinfo-base';
 import { hasAuthoritativeAuthenticatedUser } from './state';
+
 export { fetchUserInfo } from './userinfo-base';
 
 export function receiveUserInfo(response) {
@@ -16,7 +19,7 @@ export function receiveUserInfo(response) {
         const analyticsData = data.user.analytics;
         if (analyticsData !== undefined) {
           analyticsData.dimensions.forEach(dimension =>
-            analytics.setDimension(dimension.index, dimension.value)
+            analytics.setDimension(dimension.index, dimension.value),
           );
 
           analytics.setUserId(analyticsData.identifier);
@@ -31,7 +34,7 @@ export function receiveUserInfo(response) {
         });
       }
     })
-    .catch(e => {
+    .catch((e) => {
       setTimeout(() => fetchUserInfo().then(receiveUserInfo), 5000);
       throw e;
     });

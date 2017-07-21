@@ -1,17 +1,16 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import _ from 'lodash-es';
+import * as PropTypes from 'prop-types';
 import * as dateFormats from '../../../dateFormats';
 import * as notifications from '../../../state/notifications';
 import ScrollRestore from '../../ui/ScrollRestore';
-import EmptyState from '../../ui/EmptyState';
 import { Routes } from '../../AppRoot';
-import * as PropTypes from 'prop-types';
+import EmptyState from '../../ui/EmptyState';
 
 class ActivityMutesView extends React.PureComponent {
-
   static propTypes = {
-    dispatch: React.PropTypes.func.isRequired,
+    dispatch: PropTypes.func.isRequired,
     activityMutes: PropTypes.arrayOf(PropTypes.shape({
       id: PropTypes.string.isRequired,
       usercode: PropTypes.string.isRequired,
@@ -32,7 +31,7 @@ class ActivityMutesView extends React.PureComponent {
         display_value: PropTypes.string,
       })),
     })).isRequired,
-    isOnline: React.PropTypes.bool.isRequired,
+    isOnline: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -60,8 +59,8 @@ class ActivityMutesView extends React.PureComponent {
           </div>
           {
             this.props.activityMutes.length > 0 ?
-              _.map(this.props.activityMutes, (mute) =>
-                <div className="activity-item" key={ mute.id }>
+              _.map(this.props.activityMutes, mute =>
+                (<div className="activity-item" key={ mute.id }>
                   <div className="media">
                     <div className="media-body">
                       <div className="activity-item__title">{
@@ -85,9 +84,9 @@ class ActivityMutesView extends React.PureComponent {
                           }
                           {
                             _.map(mute.tags, tag =>
-                              <li key={ `${mute.id}-tag-${tag.name}-${tag.value}` }>
+                              (<li key={ `${mute.id}-tag-${tag.name}-${tag.value}` }>
                                 { tag.display_value || tag.value }
-                              </li>
+                              </li>),
                             )
                           }
                         </ul>
@@ -108,20 +107,19 @@ class ActivityMutesView extends React.PureComponent {
                       </button>
                     </div>
                   </div>
-                </div>
+                </div>),
               )
               : <EmptyState>
-                  You haven't muted any alerts. Use the dropdown arrow next to each
+                  You haven&apos;t muted any alerts. Use the dropdown arrow next to each
                   alert to specify similar types of alerts to mute in future.
                   Muted alerts still appear in the list of alerts;
-                  they just don't pop up on your device.
-                </EmptyState>
+                  they just don&apos;t pop up on your device.
+              </EmptyState>
           }
         </div>
       </ScrollRestore>
     );
   }
-
 }
 
 function select(state) {

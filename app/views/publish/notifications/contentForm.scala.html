@@ -18,6 +18,8 @@
   <div class="alert alert-danger">@error.message</div>
 }
 
+<div class="audience-indicator"></div>
+
 <div class="split-form__sections">
   <section>
     @tags.audiencePicker(form, "audience", departmentOptions, "alert", permissionScope, allowPublic = false, audience = audience)

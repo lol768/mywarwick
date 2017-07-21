@@ -1,20 +1,22 @@
-import React, { PropTypes } from 'react';
+/* eslint-env browser */
+
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import $ from 'jquery';
 import _ from 'lodash-es';
 import log from 'loglevel';
+import { goBack, push } from 'react-router-redux';
+import { connect } from 'react-redux';
 import MastheadMobile from './MastheadMobile';
 import PermissionRequest from './PermissionRequest';
 import MasqueradeNotice from './MasqueradeNotice';
 import UpdatePopup from './UpdatePopup';
-import { connect } from 'react-redux';
-import { isEmbedded } from '../../embedHelper';
+import isEmbedded from '../../embedHelper';
 import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
-import { goBack, push } from 'react-router-redux';
 import { Routes } from '../AppRoot';
 
 class ID7Layout extends React.PureComponent {
-
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     colourTheme: PropTypes.string.isRequired,
@@ -29,7 +31,6 @@ class ID7Layout extends React.PureComponent {
     zoomedTile: PropTypes.string,
     notificationsCount: PropTypes.number,
     children: PropTypes.node,
-    layoutClassName: PropTypes.oneOf(['desktop', 'mobile']),
   };
 
   constructor(props) {
@@ -55,13 +56,13 @@ class ID7Layout extends React.PureComponent {
     nextProps.dispatch(ui.updateUIContext());
 
     const $body = $('body').removeClass((i, className) =>
-      _.filter(className.split(' '), (singleClass) => _.startsWith(singleClass, 'in-')).join(' ')
+      _.filter(className.split(' '), singleClass => _.startsWith(singleClass, 'in-')).join(' '),
     );
-    const pathClasses = _.filter(nextProps.path.split('/'), (path) => path.length > 0);
+    const pathClasses = _.filter(nextProps.path.split('/'), path => path.length > 0);
     if (pathClasses.length === 0) {
       $body.addClass('in-root');
     } else {
-      $body.addClass(_.map(pathClasses, (path) => `in-${path}`).join(' '));
+      $body.addClass(_.map(pathClasses, path => `in-${path}`).join(' '));
     }
   }
 
@@ -145,7 +146,8 @@ class ID7Layout extends React.PureComponent {
               { this.renderBetaWarning() }
               { this.renderMasqueradeNotice() }
 
-              <MastheadMobile user={user}
+              <MastheadMobile
+                user={user}
                 onBackClick={this.onBackClick}
                 path={path}
                 onEdit={this.onEdit}
@@ -182,8 +184,7 @@ class ID7Layout extends React.PureComponent {
   }
 }
 
-const select = (state) => ({
-  layoutClassName: state.ui.className,
+const select = state => ({
   notificationsCount:
     getNumItemsSince(state.notifications.stream, _.get(state, ['notificationsLastRead', 'date'])),
   user: state.user,

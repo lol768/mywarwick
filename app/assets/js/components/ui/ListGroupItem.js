@@ -3,7 +3,6 @@ import * as PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 export default class ListGroupItem extends React.PureComponent {
-
   static propTypes = {
     icon: PropTypes.string,
     description: PropTypes.string.isRequired,
@@ -26,14 +25,14 @@ export default class ListGroupItem extends React.PureComponent {
     this.isClickable = this.isClickable.bind(this);
   }
 
-  isClickable() {
-    return typeof this.props.onClick === 'function' && !this.props.disabled;
-  }
-
   onClick() {
     if (this.isClickable()) {
       this.props.onClick();
     }
+  }
+
+  isClickable() {
+    return typeof this.props.onClick === 'function' && !this.props.disabled;
   }
 
   renderMediaRight() {
@@ -54,7 +53,11 @@ export default class ListGroupItem extends React.PureComponent {
 
   render() {
     return (
-      <div className={ classNames('list-group-item', { 'cursor-pointer': this.isClickable() })}
+      <div
+        className="list-group-item"
+        role="button"
+        aria-disabled={ !this.isClickable() }
+        tabIndex={ this.isClickable() ? 0 : -1 }
         onClick={ this.onClick }
       >
         <div className="media">
@@ -74,5 +77,4 @@ export default class ListGroupItem extends React.PureComponent {
       </div>
     );
   }
-
 }

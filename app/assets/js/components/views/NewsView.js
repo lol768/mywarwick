@@ -1,8 +1,9 @@
 import $ from 'jquery';
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import NewsItem from '../ui/NewsItem';
 import { connect } from 'react-redux';
+import NewsItem from '../ui/NewsItem';
 import * as news from '../../state/news';
 import InfiniteScrollable from '../ui/InfiniteScrollable';
 import ScrollRestore from '../ui/ScrollRestore';
@@ -10,7 +11,6 @@ import { Routes } from '../AppRoot';
 import HideableView from './HideableView';
 
 export class NewsView extends HideableView {
-
   constructor(props) {
     super(props);
     this.onClickRefresh = this.fetch.bind(this);
@@ -63,7 +63,7 @@ export class NewsView extends HideableView {
           </p>
           <p>
             <button type="button" onClick={ this.onClickRefresh } className="btn btn-default">
-              <i className="fa fa-refresh fa-fw"> </i>
+              <i className="fa fa-refresh fa-fw" />
               Retry
             </button>
           </p>
@@ -79,9 +79,9 @@ export class NewsView extends HideableView {
       .map(item => <NewsItem key={item.id} width={width} {...item} />);
 
     const maybeMessage = !fetching ?
-      <div className="container-fluid">
+      (<div className="container-fluid">
         <p>No news to show you yet.</p>
-      </div> : null;
+      </div>) : null;
 
     return (
       <div>
@@ -98,12 +98,11 @@ export class NewsView extends HideableView {
         }
         { fetching ?
           <div className="centered">
-            <i className="fa fa-lg fa-refresh fa-spin"> </i>
+            <i className="fa fa-lg fa-refresh fa-spin" />
           </div> : null }
       </div>
     );
   }
-
 }
 
 NewsView.propTypes = {
@@ -116,7 +115,7 @@ NewsView.propTypes = {
   width: PropTypes.number,
 };
 
-const select = (state) => ({
+const select = state => ({
   ...state.news,
   user: state.user.data,
   // Never read, but kicks the component into updating when the device width changes

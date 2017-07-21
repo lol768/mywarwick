@@ -1,8 +1,8 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 
 export default class AccountPhoto extends React.PureComponent {
-
   static propTypes = {
     user: PropTypes.shape({
       photo: PropTypes.shape({
@@ -29,7 +29,8 @@ export default class AccountPhoto extends React.PureComponent {
     const { user } = this.props;
     const className = this.props.className || '';
     return (
-      <img src={ user.photo.url }
+      <img
+        src={ user.photo.url }
         ref="photo"
         className={ className }
         alt={ user.name }

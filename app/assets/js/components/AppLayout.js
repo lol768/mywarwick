@@ -1,16 +1,16 @@
-import React, { PropTypes } from 'react';
-import TabBar from './ui/TabBar';
-import TabBarItem from './ui/TabBarItem';
-import ID7Layout from './ui/ID7Layout';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import _ from 'lodash-es';
 import log from 'loglevel';
+import TabBar from './ui/TabBar';
+import TabBarItem from './ui/TabBarItem';
+import ID7Layout from './ui/ID7Layout';
 import { getNumItemsSince } from '../stream';
 import { Routes } from './AppRoot';
 import { navRequest } from '../state/ui';
 
 export class AppLayout extends React.PureComponent {
-
   static propTypes = {
     onSelectItem: PropTypes.func.isRequired,
     location: PropTypes.shape({
@@ -41,18 +41,30 @@ export class AppLayout extends React.PureComponent {
           <TabBar selectedItem={ location.pathname } onSelectItem={ this.onSelectItem }>
             <TabBarItem title="Me" icon="user-o" selectedIcon="user" path="/" />
             <TabBarItem
-              title="Alerts" icon="bell-o" selectedIcon="bell"
-              path={ `/${Routes.NOTIFICATIONS}` } badge={ notificationsCount }
+              title="Alerts"
+              icon="bell-o"
+              selectedIcon="bell"
+              path={ `/${Routes.NOTIFICATIONS}` }
+              badge={ notificationsCount }
               isDisabled={ !authenticated }
             />
             <TabBarItem
-              title="Activity" icon="tachometer" selectedIcon="tachometer"
-              path={ `/${Routes.ACTIVITY}` } isDisabled={ !authenticated }
+              title="Activity"
+              icon="tachometer"
+              selectedIcon="tachometer"
+              path={ `/${Routes.ACTIVITY}` }
+              isDisabled={ !authenticated }
             />
-            <TabBarItem title="News" icon="newspaper-o" selectedIcon="newspaper-o"
+            <TabBarItem
+              title="News"
+              icon="newspaper-o"
+              selectedIcon="newspaper-o"
               path={ `/${Routes.NEWS}` }
             />
-            <TabBarItem title="Search" icon="search" selectedIcon="search"
+            <TabBarItem
+              title="Search"
+              icon="search"
+              selectedIcon="search"
               path={ `/${Routes.SEARCH}` }
             />
           </TabBar>
@@ -60,14 +72,12 @@ export class AppLayout extends React.PureComponent {
       </div>
     );
   }
-
 }
 
 function mapStateToProps(state) {
   return {
     notificationsCount:
       getNumItemsSince(state.notifications.stream, _.get(state, ['notificationsLastRead', 'date'])),
-    layoutClassName: state.ui.className,
     authenticated: state.user.data.authenticated,
   };
 }
@@ -76,7 +86,7 @@ function mapStateToProps(state) {
 // so that the plain component doesn't depend on redux.
 function mapDispatchToProps(dispatch) {
   return {
-    onSelectItem: (p) => navRequest(p, dispatch),
+    onSelectItem: p => navRequest(p, dispatch),
   };
 }
 

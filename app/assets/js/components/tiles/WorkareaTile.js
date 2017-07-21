@@ -3,7 +3,6 @@ import TextTile from './TextTile';
 import { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 
 export default class WorkareaTile extends TextTile {
-
   static supportedTileSizes() {
     return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
   }
@@ -14,9 +13,9 @@ export default class WorkareaTile extends TextTile {
         <div className="tile__item">
           {this.makeCallout(workarea)}
           {this.makeTileText(workarea)}
-          </div>
+        </div>
       </div>
-      )
+    ),
     );
   }
 

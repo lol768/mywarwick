@@ -71,14 +71,14 @@ export function receiveSSOLinks(links) {
 
 export function loadUserFromLocalStorage(dispatch) {
   return localforage.getItem('user')
-    .then(user => {
+    .then((user) => {
       if (user) {
         dispatch(loadCachedUserIdentity(user));
         return user;
       }
       return {};
     })
-    .catch(err => {
+    .catch((err) => {
       log.warn('Could not load user from local storage', err);
       return {};
     });
@@ -91,10 +91,10 @@ function clearUserData() {
 
 
 export function userReceive(currentUser) {
-  return (dispatch) =>
+  return dispatch =>
     // If we are a different user than we were before (incl. anonymous),
     // nuke the store, which also clears local storage
-    loadUserFromLocalStorage(dispatch).then(previousUser => {
+    loadUserFromLocalStorage(dispatch).then((previousUser) => {
       if (previousUser.usercode !== currentUser.usercode) {
         dispatch(clearUserData())
           .then(() => localforage.setItem('user', currentUser))

@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import ReactGridLayoutBase from 'react-grid-layout';
 import _ from 'lodash-es';
 import { connect } from 'react-redux';
@@ -6,13 +7,12 @@ import * as tiles from '../../state/tiles';
 import HiddenTile from '../tiles/HiddenTile';
 import ScrollRestore from '../ui/ScrollRestore';
 import { Routes } from '../AppRoot';
-import { GridSizingHelper } from '../../GridSizingHelper';
+import GridSizingHelper from '../../GridSizingHelper';
 
 const rowHeight = 125;
 const margin = [4, 4];
 
 class AddingTilesView extends React.PureComponent {
-
   static propTypes = {
     location: PropTypes.shape({
       pathname: PropTypes.string,
@@ -22,7 +22,6 @@ class AddingTilesView extends React.PureComponent {
     adding: PropTypes.bool,
     layoutWidth: PropTypes.number,
     layout: PropTypes.array,
-    isDesktop: PropTypes.bool,
     deviceWidth: PropTypes.number,
     tiles: PropTypes.array,
   };
@@ -56,9 +55,9 @@ class AddingTilesView extends React.PureComponent {
       }));
 
     const hiddenTileComponents = hiddenTiles.map(tile =>
-      <div key={ tile.id }>
+      (<div key={ tile.id }>
         <HiddenTile {...tile} onShow={ () => this.onShowTile(tile) } />
-      </div>
+      </div>),
     );
 
     return (
@@ -99,8 +98,7 @@ class AddingTilesView extends React.PureComponent {
   }
 }
 
-const select = (state) => ({
-  isDesktop: state.ui.className === 'desktop',
+const select = state => ({
   layoutWidth: state.ui.layoutWidth,
   tiles: state.tiles.data.tiles,
   layout: state.tiles.data.layout,

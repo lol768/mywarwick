@@ -1,9 +1,11 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import Observable from './system/Observable';
 
 export default class Visible extends React.PureComponent {
   static propTypes = {
     visible: PropTypes.bool.isRequired,
+    children: React.PropTypes.element.isRequired,
   };
 
   static childContextTypes = {

@@ -1,13 +1,14 @@
-import React, { PropTypes } from 'react';
-import { formatDateTime, formatDate, formatTime, localMoment } from '../../dateFormats';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import moment from 'moment-timezone';
-import GroupedList from '../ui/GroupedList';
-import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
-import _ from 'lodash-es';
-import classNames from 'classnames';
-import Hyperlink from '../ui/Hyperlink';
 import { createSelector } from 'reselect';
 import warning from 'warning';
+import _ from 'lodash-es';
+import classNames from 'classnames';
+import GroupedList from '../ui/GroupedList';
+import { formatDateTime, formatDate, formatTime, localMoment } from '../../dateFormats';
+import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
+import Hyperlink from '../ui/Hyperlink';
 
 const moduleColours = [
   '#00b2dd', // Bright Sky blue
@@ -55,7 +56,7 @@ const agendaViewTransform = (items) => {
   const startOfToday = localMoment().startOf('day');
 
   return _.flow(
-    i => _.flatMap(i, e => {
+    i => _.flatMap(i, (e) => {
       if (e.isAllDay) {
         const date = localMoment(e.start);
         const end = (e.end !== undefined) ? localMoment(e.end) : localMoment(e.start);
@@ -84,12 +85,11 @@ const agendaViewTransform = (items) => {
       return e;
     }),
     i => _.filter(i, e => startOfToday.isBefore(e.start)),
-    i => _.sortBy(i, e => e.start)
+    i => _.sortBy(i, e => e.start),
   )(items);
 };
 
 export default class AgendaTile extends TileContent {
-
   constructor(props) {
     super(props);
 
@@ -103,7 +103,7 @@ export default class AgendaTile extends TileContent {
     const startOfTomorrow = localMoment().add(1, 'day').startOf('day');
 
     return _.filter(events, e =>
-      localMoment(e.start).isBetween(startOfToday, startOfTomorrow, null, '[)')
+      localMoment(e.start).isBetween(startOfToday, startOfTomorrow, null, '[)'),
     );
   }
 
@@ -135,22 +135,22 @@ export default class AgendaTile extends TileContent {
       <Hyperlink href={ event.href } style={{ display: 'block' }}>
         <ul className="list-unstyled">
           <li className="text-overflow-block agenda__date">
-            <i className="fa fa-fw fa-clock-o"> </i>
+            <i className="fa fa-fw fa-clock-o" />
             { AgendaTile.renderSingleEventDate(event) }
           </li>
           <li className="text-overflow-block">
-            <i className="fa fa-fw fa-calendar-check-o"> </i>
+            <i className="fa fa-fw fa-calendar-check-o" />
             { event.title }
           </li>
           { event.location &&
           <li className="text-overflow-block">
-            <i className="fa fa-fw fa-map-marker"> </i>
+            <i className="fa fa-fw fa-map-marker" />
             { event.location.name }
           </li>
           }
           { event.organiser &&
           <li className="text-overflow-block">
-            <i className="fa fa-fw fa-user-o"> </i>
+            <i className="fa fa-fw fa-user-o" />
             { event.organiser.name }
           </li>
           }
@@ -181,7 +181,7 @@ export default class AgendaTile extends TileContent {
             { AgendaTile.renderSingleEvent(event2) }
             { items.length > 2 &&
             <div className="text-right">
-              <a href="#" onClick={ this.props.onClickExpand }>
+              <a href="#event-expanded" onClick={ this.props.onClickExpand }>
                 +{ items.length - 2 } more
               </a>
             </div> }
@@ -208,7 +208,7 @@ export default class AgendaTile extends TileContent {
         { AgendaTile.renderSingleEvent(event) }
         { items.length > 1 &&
         <div className="text-right">
-          <a href="#" onClick={ this.props.onClickExpand }>
+          <a href="#event-expanded" onClick={ this.props.onClickExpand }>
             +{ items.length - 1 } more
           </a>
         </div> }
@@ -230,12 +230,16 @@ export default class AgendaTile extends TileContent {
 }
 
 export class LargeBody extends React.PureComponent {
+  static propTypes = {
+    children: PropTypes.element.isRequired,
+  };
+
   render() {
     const { children } = this.props;
     return (
       <GroupedList className="tile-list-group" groupBy={groupItemsForAgendaTile}>
         {children.map(event =>
-          <AgendaTileItem key={event.id} {...event} />
+          <AgendaTileItem key={event.id} {...event} />,
         )}
       </GroupedList>
     );
@@ -243,7 +247,6 @@ export class LargeBody extends React.PureComponent {
 }
 
 export class AgendaTileItem extends React.PureComponent {
-
   renderDate() {
     const { isAllDay, start, end } = this.props;
 
@@ -251,7 +254,7 @@ export class AgendaTileItem extends React.PureComponent {
       return 'All day';
     }
 
-    if (start && !end || start === end) {
+    if ((start && !end) || start === end) {
       return formatTime(start);
     }
 
@@ -270,7 +273,7 @@ export class AgendaTileItem extends React.PureComponent {
     if (parent) {
       return (
         <div className="agenda-item__cell" style={{ paddingLeft: '.5em', paddingRight: '.25em' }}>
-          <i className="fa fa-circle" style={{ color: colourForModule(parent.shortName) }}> </i>
+          <i className="fa fa-circle" style={{ color: colourForModule(parent.shortName) }} />
         </div>
       );
     }
@@ -296,10 +299,12 @@ export class AgendaTileItem extends React.PureComponent {
     const { title, href } = this.props;
 
     return (
-      <span title={ title } className={ classNames({
-        'tile-list-item__title': true,
-        'text--dotted-underline': href,
-      }) }
+      <span
+        title={ title }
+        className={ classNames({
+          'tile-list-item__title': true,
+          'text--dotted-underline': href,
+        }) }
       >
         <Hyperlink href={ href }>{ title }</Hyperlink>
       </span>
@@ -319,7 +324,7 @@ export class AgendaTileItem extends React.PureComponent {
           <Hyperlink href={ location.href } className="text--dotted-underline">
             { location.name }
           &nbsp;
-          <i className="fa fa-map-marker"> </i>
+            <i className="fa fa-map-marker" />
           </Hyperlink>
         </span>
       );
@@ -338,7 +343,7 @@ export class AgendaTileItem extends React.PureComponent {
     warning(
       !(staff && organiser),
       'Event has both staff and organiser set - only one should be used: %s',
-      this.props
+      this.props,
     );
 
     const users = staff || (organiser && [organiser]);
@@ -355,7 +360,7 @@ export class AgendaTileItem extends React.PureComponent {
 
     return (
       <div className="text--translucent">
-        <i className="fa fa-user-o"> </i>
+        <i className="fa fa-user-o" />
         &nbsp;
         { users.map(personToString).join(', ') }
       </div>
@@ -393,21 +398,25 @@ AgendaTileItem.propTypes = {
   end: PropTypes.string,
   isAllDay: PropTypes.bool,
   title: PropTypes.string,
-  location: React.PropTypes.shape({
-    name: React.PropTypes.string,
-    href: React.PropTypes.string,
+  children: PropTypes.element.isRequired,
+  organiser: PropTypes.shape({
+    name: PropTypes.string,
+  }),
+  location: PropTypes.shape({
+    name: PropTypes.string,
+    href: PropTypes.string,
   }),
   href: PropTypes.string,
-  parent: React.PropTypes.shape({
-    shortName: React.PropTypes.string,
-    fullName: React.PropTypes.string,
+  parent: PropTypes.shape({
+    shortName: PropTypes.string,
+    fullName: PropTypes.string,
   }),
   type: PropTypes.string,
-  staff: React.PropTypes.arrayOf(React.PropTypes.shape({
-    email: React.PropTypes.string,
-    lastName: React.PropTypes.string,
-    firstName: React.PropTypes.string,
-    userType: React.PropTypes.string,
-    universityId: React.PropTypes.string,
+  staff: PropTypes.arrayOf(PropTypes.shape({
+    email: PropTypes.string,
+    lastName: PropTypes.string,
+    firstName: PropTypes.string,
+    userType: PropTypes.string,
+    universityId: PropTypes.string,
   })),
 };

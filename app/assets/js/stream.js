@@ -6,9 +6,9 @@ export const ID_KEY = 'id';
 
 const DESC = 'desc';
 
-const sortStream = (stream) => _.orderBy(stream, [DATE_KEY, ID_KEY], [DESC, DESC]);
+const sortStream = stream => _.orderBy(stream, [DATE_KEY, ID_KEY], [DESC, DESC]);
 
-const uniqStream = (stream) => _.uniqBy(stream, ID_KEY);
+const uniqStream = stream => _.uniqBy(stream, ID_KEY);
 
 export function makeStream() {
   return {};
@@ -42,7 +42,7 @@ export function mergeReceivedItems(stream = [], rx = []) {
 
   // Try and do the smallest possible merge
   // (>= to include identical items in dedupe later)
-  const mergeStart = _.findLastIndex(stream, (x) => x[DATE_KEY] >= oldestRx[DATE_KEY]);
+  const mergeStart = _.findLastIndex(stream, x => x[DATE_KEY] >= oldestRx[DATE_KEY]);
 
   if (mergeStart >= 0) {
     const toMerge = stream.splice(0, mergeStart + 1).concat(uniqRx);
@@ -64,8 +64,8 @@ export function mergeReceivedItems(stream = [], rx = []) {
  */
 export function onStreamReceive(
   stream = {},
-  grouper = (item) => item.date,
-  rx = []
+  grouper = item => item.date,
+  rx = [],
 ) {
   if (rx.length === 0) return stream;
   const result = _.clone(stream);
@@ -78,7 +78,7 @@ export function onStreamReceive(
 function getOrderedStreamPartitions(stream) {
   return _.flow(
     _.toPairs,
-    (pairs) => _.sortBy(pairs, ([k]) => k).map(([, v]) => v),
+    pairs => _.sortBy(pairs, ([k]) => k).map(([, v]) => v),
     _.reverse,
   )(stream);
 }
@@ -98,19 +98,19 @@ export function getStreamPartition(stream, i) {
  */
 export function takeFromStream(stream, n) {
   return _.reduce(getOrderedStreamPartitions(stream),
-      (result, part) => {
-        if (result.length >= n) return result;
-        return result.concat(_.take(part, n - result.length));
-      },
-      []
-    );
+    (result, part) => {
+      if (result.length >= n) return result;
+      return result.concat(_.take(part, n - result.length));
+    },
+    [],
+  );
 }
 
 export function getLastItemInStream(stream) {
   return _.last(
     getOrderedStreamPartitions(stream)
       .map(part => _.last(part))
-      .filter(part => !!part)
+      .filter(part => !!part),
   );
 }
 
@@ -133,7 +133,7 @@ export function getNumItemsSince(stream, date) {
 
   return _.reduce(stream,
     (sum, part) => sum + part.filter(item => moment(item.date).isAfter(date)).length,
-    0
+    0,
   );
 }
 
@@ -157,10 +157,10 @@ export function filterStream(stream, filter) {
           item[key] === undefined ||
           filter[key] === undefined ||
           filter[key][item[key]] === undefined ||
-          filter[key][item[key]]
-        )
-      )
+          filter[key][item[key]],
+        ),
+      ),
     ),
-    part => part.length > 0
+    part => part.length > 0,
   );
 }

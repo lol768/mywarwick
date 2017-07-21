@@ -173,8 +173,8 @@ describe('AgendaTile', () => {
     atMoment(() => {
       const html = shallow(<AgendaTile size="wide" content={ content } />);
       html.find('.agenda__date').map(n => n.text()).should.deep.equal([
-        ' Sat 12:00',
-        ' Sat 12:00–14:00'
+        'Sat 12:00',
+        'Sat 12:00–14:00'
       ]);
     }, now);
   });

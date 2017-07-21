@@ -1,3 +1,5 @@
+/* eslint-env browser */
+
 import log from 'loglevel';
 import { fetchWithCredentials } from './serverpipe';
 import store from './store';
@@ -37,7 +39,7 @@ export function init() {
   // Do we already have a push message subscription?
   navigator.serviceWorker.ready
     .then(registration => registration.pushManager.getSubscription())
-    .then(subscription => {
+    .then((subscription) => {
       if (!subscription) {
         return null;
       }
@@ -52,7 +54,7 @@ export function subscribe() {
     navigator.serviceWorker.ready
       .then(registration => registration.pushManager.subscribe({ userVisibleOnly: true }))
       .then(subscription => uploadSubscription(subscription))
-      .catch(e => {
+      .catch((e) => {
         if (Notification.permission === 'denied') {
           log.warn('Permission for Notifications was denied', e);
         } else {

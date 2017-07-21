@@ -1,6 +1,6 @@
-import { localMoment } from './dateFormats';
 import invariant from 'invariant';
 import * as _ from 'lodash-es';
+import { localMoment } from './dateFormats';
 
 // A way to describe a grouping strategy
 
@@ -68,7 +68,7 @@ export function getGroupedItems(items, now) {
   let currentGroup = null;
   let currentGroupItems = null;
 
-  items.forEach(item => {
+  items.forEach((item) => {
     const date = localMoment(item.props.date);
 
     if (!date.isSame(currentDate, 'day')) {
@@ -80,9 +80,9 @@ export function getGroupedItems(items, now) {
       if (newGroup !== currentGroup) {
         if (currentGroup !== null) {
           invariant(
-            _.find(groups, (pair) => pair[0] === newGroup) === undefined,
+            _.find(groups, pair => pair[0] === newGroup) === undefined,
             'Tried to create new group with existing group number. '
-             + 'Normally caused by items not in order'
+             + 'Normally caused by items not in order',
           );
           // The previous group is finished; add it to the list
           groups.push([currentGroup, currentGroupItems]);

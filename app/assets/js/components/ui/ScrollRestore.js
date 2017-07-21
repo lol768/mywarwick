@@ -1,9 +1,10 @@
-import { PropTypes } from 'react';
+/* eslint-env browser */
+
+import * as PropTypes from 'prop-types';
 import { attachScrollRestore, detachScrollRestore } from '../../state/ui';
 import HideableView from '../views/HideableView';
 
 export default class ScrollRestore extends HideableView {
-
   static propTypes = {
     url: PropTypes.string.isRequired,
     forceTop: PropTypes.bool,
@@ -25,5 +26,4 @@ export default class ScrollRestore extends HideableView {
   render() {
     return this.props.children;
   }
-
 }

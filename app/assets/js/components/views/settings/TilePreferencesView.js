@@ -8,7 +8,6 @@ import HideableView from '../HideableView';
 import * as tiles from '../../../state/tiles';
 
 class TilePreferencesView extends HideableView {
-
   static propTypes = {
     isOnline: PropTypes.bool.isRequired,
     dispatch: PropTypes.func.isRequired,
@@ -37,19 +36,22 @@ class TilePreferencesView extends HideableView {
 
         <div className="list-group">
           { _.map(_.sortBy(this.props.tiles, 'title'), tile =>
-            <div key={ tile.id }
-              className={ `list-group-item cursor-pointer setting-colour-${tile.colour}` }
+            (<div
+              key={ tile.id }
+              className={ `list-group-item setting-colour-${tile.colour}` }
+              role="button"
+              tabIndex={0}
               onClick={ () =>
                 this.props.dispatch(
-                 push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}/${tile.id}`)
+                  push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}/${tile.id}`),
                 )
               }
             >
               <div className="media">
                 <div className="media-left">
                   <i className={ `fa fa-fw fa-${
-                      (tile.id === 'weather') ? 'sun-o' : tile.icon
-                    }` }
+                    (tile.id === 'weather') ? 'sun-o' : tile.icon
+                  }` }
                   />
                 </div>
                 <div className={`media-body${this.props.isOnline ? '' : ' media-body-disabled'}`}>
@@ -59,20 +61,19 @@ class TilePreferencesView extends HideableView {
                   <i className="fa fa-fw fa-chevron-right" />
                 </div>
               </div>
-            </div>
-            )
+            </div>),
+          )
           }
         </div>
       </div>
     );
   }
-
 }
 
 function select(state) {
   const tilesWithPreferences = _.keys(_.pickBy(
     state.tiles.data.options,
-    options => _.keys(options).length > 0
+    options => _.keys(options).length > 0,
   ));
   return {
     isOnline: state.device.isOnline,

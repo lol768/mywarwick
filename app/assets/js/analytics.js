@@ -1,3 +1,4 @@
+/* eslint-env browser */
 /* global ga */
 
 import localforage from 'localforage';
@@ -41,7 +42,7 @@ if (trackingId === undefined) {
     cookieDomain: 'auto',
   });
 
-  ga(tracker => {
+  ga((tracker) => {
     const clientId = tracker.get('clientId');
 
     store.dispatch({
@@ -58,7 +59,7 @@ let analyticsQueue = [];
  * or just an empty array.
  */
 function getQueueFromLocalStorage() {
-  localforage.getItem(QUEUE_STORAGE_KEY).then(storageItem => {
+  localforage.getItem(QUEUE_STORAGE_KEY).then((storageItem) => {
     if (storageItem !== null && Array.isArray(storageItem)) {
       analyticsQueue = [...storageItem, ...analyticsQueue].slice(-100);
     }

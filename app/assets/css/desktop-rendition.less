@@ -121,7 +121,7 @@ html.theme-transparent.not-app .bg-stand-in {
       margin-left: auto;
       left: 0;
       right: 0;
-      z-index: 9999;
+      z-index: 300;
     }
 
     html&.theme-transparent .bg-stand-in {
@@ -161,7 +161,7 @@ html.theme-transparent.not-app .bg-stand-in {
     position: fixed;
     left: 0;
     top:0;
-    z-index: 10000;
+    z-index: 310;
   }
 }
 
@@ -211,7 +211,7 @@ html.theme-transparent.not-app .bg-stand-in {
       .tab-bar { bottom: @desktop-rendition-vertical-border; }
 
       .main-content {
-        padding-bottom: (@desktop-rendition-vertical-border * 2);
+        padding-bottom: (@desktop-rendition-vertical-border + @start-tab-bar-height);
       }
 
       #app-container:after, header.id7-page-header:before {

@@ -1,16 +1,16 @@
+/* global document */
 import React, { Component, PropTypes } from 'react';
-import * as TILE_TYPES from '../tiles';
 import log from 'loglevel';
-import Tile from '../tiles/Tile';
-import { connect } from 'react-redux';
-import { goBack, push } from 'react-router-redux';
 import _ from 'lodash-es';
 import $ from 'jquery';
+import { connect } from 'react-redux';
+import { goBack, push } from 'react-router-redux';
+import * as TILE_TYPES from '../tiles';
+import Tile from '../tiles/Tile';
 import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
 
 class TileView extends Component {
-
   componentDidMount() {
     if (this.props.tile && this.props.zoomed) {
       $(document.body).addClass(`colour-${this.props.tile.colour}`);
@@ -49,7 +49,6 @@ class TileView extends Component {
       zoomed,
       editing,
       editingAny,
-      isDesktop,
       tile,
       content,
       size,
@@ -92,7 +91,6 @@ class TileView extends Component {
       id,
       editing,
       editingAny,
-      isDesktop,
       supportedTileSizes,
     };
 
@@ -128,7 +126,6 @@ class TileView extends Component {
 
     return tileElement;
   }
-
 }
 
 const select = (state, ownProps) => {
@@ -144,7 +141,6 @@ const select = (state, ownProps) => {
     content,
     option,
     user,
-    isDesktop: state.ui.className === 'desktop',
     zoomed: ownProps.params !== undefined,
   };
 };
@@ -156,7 +152,6 @@ TileView.propTypes = {
   tile: PropTypes.object,
   content: PropTypes.object,
   option: PropTypes.object,
-  isDesktop: PropTypes.bool,
   zoomed: PropTypes.bool,
   size: PropTypes.string.isRequired,
   editingAny: PropTypes.bool.isRequired,

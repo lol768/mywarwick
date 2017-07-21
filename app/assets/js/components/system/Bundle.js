@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 
 /**
  * From https://reacttraining.com/react-router/web/guides/code-splitting
@@ -15,8 +16,7 @@ import React, { Component } from 'react';
  * @param initialise if your module needs one-time inialisation,
  *        it will run this and set the result as state.initial
  */
-class Bundle extends Component {
-
+class Bundle extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -56,9 +56,9 @@ class Bundle extends Component {
 }
 
 Bundle.propTypes = {
-  load: React.PropTypes.func.isRequired,
-  initialise: React.PropTypes.func,
-  children: React.PropTypes.func.isRequired,
+  load: PropTypes.func.isRequired,
+  initialise: PropTypes.func,
+  children: PropTypes.func.isRequired,
 };
 
 export default Bundle;

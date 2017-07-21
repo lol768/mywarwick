@@ -1,0 +1,11 @@
+# --- !Ups
+UPDATE TILE_GROUP_LAYOUT SET Y = Y + 1 WHERE GROUP_ID IN ('student', 'staff') AND LAYOUT_WIDTH = 2;
+INSERT INTO TILE_GROUP VALUES ('account', 'student');
+INSERT INTO TILE_GROUP VALUES ('account', 'staff');
+INSERT INTO TILE_GROUP_LAYOUT VALUES ('student', 'account', 2, 0, 0, 2, 1);
+INSERT INTO TILE_GROUP_LAYOUT VALUES ('staff', 'account', 2, 0, 0, 2, 1);
+
+# --- !Downs
+UPDATE TILE_GROUP_LAYOUT SET Y = Y - 1 WHERE GROUP_ID IN ('student', 'staff');
+DELETE FROM TILE_GROUP_LAYOUT WHERE TILE_ID = 'account';
+DELETE FROM TILE_GROUP WHERE TILE_ID = 'account';

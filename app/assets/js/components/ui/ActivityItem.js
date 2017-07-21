@@ -1,11 +1,11 @@
-import React, { PropTypes } from 'react';
+import classnames from 'classnames';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import Hyperlink from './Hyperlink';
 import * as dateFormats from '../../dateFormats';
-import classnames from 'classnames';
 import AppIcon from './AppIcon';
 
 class ActivityItem extends React.PureComponent {
-
   static propTypes = {
     provider: PropTypes.string.isRequired,
     providerDisplayName: PropTypes.string,
@@ -14,9 +14,9 @@ class ActivityItem extends React.PureComponent {
     date: PropTypes.string.isRequired,
     url: PropTypes.string,
     unread: PropTypes.bool,
-    icon: React.PropTypes.shape({
-      name: React.PropTypes.string,
-      colour: React.PropTypes.string,
+    icon: PropTypes.shape({
+      name: PropTypes.string,
+      colour: PropTypes.string,
     }),
     grouped: PropTypes.bool,
     muteable: PropTypes.bool,
@@ -37,14 +37,14 @@ class ActivityItem extends React.PureComponent {
       {
         'activity-item--with-url': this.props.url,
         'activity-item--unread': this.props.unread,
-      }
+      },
     );
 
     return (
       <div className={ classNames }>
         { (this.props.muteable) ?
-          <div className="muting" onClick={ this.onMuting }>
-            <i className="fa fa-chevron-down"></i>
+          <div className="muting" onClick={ this.onMuting } role="button" tabIndex={0}>
+            <i className="fa fa-chevron-down" />
           </div> : null
         }
         <Hyperlink href={ this.props.url }>

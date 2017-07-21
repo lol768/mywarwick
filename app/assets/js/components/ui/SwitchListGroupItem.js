@@ -4,7 +4,6 @@ import Switch from './Switch';
 import ListGroupItem from './ListGroupItem';
 
 export default class SwitchListGroupItem extends React.PureComponent {
-
   static propTypes = {
     ...ListGroupItem.propTypes,
     id: PropTypes.string.isRequired,
@@ -41,5 +40,4 @@ export default class SwitchListGroupItem extends React.PureComponent {
       <ListGroupItem {...this.props} onClick={this.onClick} uiControl={this.renderSwitch()} />
     );
   }
-
 }

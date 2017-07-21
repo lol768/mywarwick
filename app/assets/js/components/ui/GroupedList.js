@@ -1,11 +1,11 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 
 import _ from 'lodash-es';
 
 import ListHeader from './ListHeader';
 
 export default class GroupedList extends React.PureComponent {
-
   static propTypes = {
     groupBy: PropTypes.shape({
       getGroupedItems: PropTypes.func,
@@ -25,9 +25,9 @@ export default class GroupedList extends React.PureComponent {
     }
 
     return _.flow(
-      _.partialRight(_.groupBy, (obj) => this.props.groupBy.groupForItem(obj)),
+      _.partialRight(_.groupBy, obj => this.props.groupBy.groupForItem(obj)),
       _.toPairs,
-      _.partialRight(_.sortBy, ([group]) => group)
+      _.partialRight(_.sortBy, ([group]) => group),
     )(this.props.children);
   }
 
@@ -64,5 +64,4 @@ export default class GroupedList extends React.PureComponent {
       </div>
     );
   }
-
 }

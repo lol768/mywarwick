@@ -1,7 +1,7 @@
 import log from 'loglevel';
+import _ from 'lodash-es';
 import { createAction } from 'redux-actions';
 import { fetchWithCredentials, postJsonWithCredentials } from '../serverpipe';
-import _ from 'lodash-es';
 
 const NEWS_CATEGORIES_REQUEST = 'NEWS_CATEGORIES_REQUEST';
 const NEWS_CATEGORIES_RECEIVE = 'NEWS_CATEGORIES_RECEIVE';
@@ -15,19 +15,19 @@ const sub = createAction(NEWS_CATEGORY_SUBSCRIBE);
 const unsub = createAction(NEWS_CATEGORY_UNSUBSCRIBE);
 
 export function fetch() {
-  return dispatch => {
+  return (dispatch) => {
     log.debug('Fetching news categories.');
     dispatch(start());
     return fetchWithCredentials('/api/news/categories')
       .then(response => response.json())
-      .then(json => {
+      .then((json) => {
         if (json.data !== undefined) {
           dispatch(receive(json));
         } else {
           throw new Error('Invalid response returned from news categories');
         }
       })
-      .catch((e) => dispatch(receive(e)));
+      .catch(e => dispatch(receive(e)));
   };
 }
 
@@ -37,7 +37,7 @@ const persistSubscribedCategories = categories => () =>
 let store = {};
 const persistSubscriptionsDebounced = _.debounce(() =>
   store.dispatch(persistSubscribedCategories(store.getState().newsCategories.subscribed))
-, 500);
+  , 500);
 
 export function subscribe(id) {
   return (dispatch, getState) => {

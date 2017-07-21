@@ -1,11 +1,11 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import log from 'loglevel';
 import AccountPhoto from './AccountPhoto';
 
 export default class UtilityBar extends React.PureComponent {
-
   static propTypes = {
     user: PropTypes.shape({
       links: PropTypes.shape({
@@ -15,7 +15,6 @@ export default class UtilityBar extends React.PureComponent {
         authenticated: PropTypes.bool,
       }),
     }),
-    layoutClassName: PropTypes.oneOf(['desktop', 'mobile']),
   };
 
   componentDidMount() {
@@ -47,11 +46,8 @@ export default class UtilityBar extends React.PureComponent {
   }
 
   renderAccountLink() {
-    const isMobile = this.props.layoutClassName === 'mobile';
-
     const ssoLinks = this.props.user.links;
     const user = this.props.user.data || {};
-    const link = isMobile ? <AccountPhoto user={ user } className="img-circle" /> : user.name;
 
     return (
       <a
@@ -63,7 +59,7 @@ export default class UtilityBar extends React.PureComponent {
         data-loginlink={ssoLinks.login}
         data-logoutlink={ssoLinks.logout}
       >
-        { link }
+        <AccountPhoto user={ user } className="img-circle" />
         <span className="caret" />
       </a>
     );

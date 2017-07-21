@@ -6,6 +6,7 @@ html {
 
     min-height: unset;
 
+    margin-top: @start-masthead-height;
     margin-bottom: @start-tab-bar-height;
   }
 
@@ -14,6 +15,7 @@ html {
   }
 
   &.app.android body {
+    margin-top: 0;
     margin-bottom: 0;
   }
 
@@ -172,10 +174,17 @@ html.android.app {
   }
 }
 
-.list-group-item.cursor-pointer {
+.list-group-item[role="button"] {
   transition: background-color 0.1s;
   &:active {
     background-color: darken(@list-group-bg, 3%);
   }
+  &[aria-disabled="true"] {
+    cursor: default;
+  }
+}
+
+html.mobile :focus {
+  outline: none;
 }
 

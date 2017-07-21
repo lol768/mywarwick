@@ -1,9 +1,20 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-const formatBadgeCount = (n) => (n > 99 ? '99+' : n);
+const formatBadgeCount = n => (n > 99 ? '99+' : n);
 
 export default class TabBarItem extends React.PureComponent {
+  static propTypes = {
+    onSelectItem: PropTypes.func,
+    isDisabled: PropTypes.bool,
+    active: PropTypes.bool,
+    badge: PropTypes.number,
+    icon: PropTypes.string.isRequired,
+    selectedIcon: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    path: PropTypes.string.isRequired,
+  };
 
   constructor() {
     super();
@@ -22,6 +33,8 @@ export default class TabBarItem extends React.PureComponent {
           'tab-bar-item--active': this.props.active,
           disabled: this.props.isDisabled,
         }) }
+        role="button"
+        tabIndex={0}
         onClick={ this.onClick }
         ref="li"
       >
@@ -40,15 +53,4 @@ export default class TabBarItem extends React.PureComponent {
       </li>
     );
   }
-
-  static propTypes = {
-    onSelectItem: PropTypes.func,
-    isDisabled: PropTypes.bool,
-    active: PropTypes.bool,
-    badge: PropTypes.number,
-    icon: PropTypes.string.isRequired,
-    selectedIcon: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-  }
-
 }

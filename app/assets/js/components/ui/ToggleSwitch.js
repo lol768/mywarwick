@@ -1,8 +1,8 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 export default class ToggleSwitch extends React.PureComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -24,18 +24,20 @@ export default class ToggleSwitch extends React.PureComponent {
         { this.props.buttonText }
         { this.state.switchOn ?
           <i
+            tabIndex={0}
+            role="button"
             className={ classNames('fa', 'fa-toggle-on', 'fa-2x', 'active', 'pull-right') }
             onClick={ this.handleClick }
-          >
-          </i>
+          />
           :
           <i
+            tabIndex={0}
+            role="button"
             className={
               classNames('fa', 'fa-toggle-on', 'fa-rotate-180', 'fa-2x', 'inactive', 'pull-right')
             }
-            onClick={ this.handleClick}
-          >
-          </i>
+            onClick={ this.handleClick }
+          />
         }
       </div>
     );

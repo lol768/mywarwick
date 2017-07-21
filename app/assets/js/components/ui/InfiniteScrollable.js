@@ -1,13 +1,15 @@
-import React, { PropTypes } from 'react';
+/* eslint-env browser */
+
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import log from 'loglevel';
 import * as notifications from '../../state/notifications';
-import { makeCancelable } from '../../promise';
+import makeCancelable from '../../promise';
 import HideableView from '../views/HideableView';
 
 export default class InfiniteScrollable extends HideableView {
-
   static propTypes = {
     hasMore: PropTypes.bool,
     onLoadMore: PropTypes.func.isRequired,
@@ -59,7 +61,7 @@ export default class InfiniteScrollable extends HideableView {
     const windowHeight = $(window).height();
     const scrollTop = $(window).scrollTop();
 
-    const loadMoreThreshold = offsetTop + height - (windowHeight * 1.5);
+    const loadMoreThreshold = (offsetTop + height) - (windowHeight * 1.5);
 
     if (scrollTop >= loadMoreThreshold) {
       this.suppressScroll = true;
@@ -108,7 +110,7 @@ export default class InfiniteScrollable extends HideableView {
     }
   }
 
-  noMoreItems(phrase) {
+  static noMoreItems(phrase) {
     return (
       <div className="centered empty-state">
         <p className="lead">{ phrase }</p>
@@ -118,13 +120,12 @@ export default class InfiniteScrollable extends HideableView {
 
   render() {
     return (<div>
-        {this.props.children}
-        { this.props.showLoading && this.state.loading ? <div className="loading-spinner centered">
-            <i className="fa fa-spinner fa-pulse fa-2x" />
-          </div> : ''
-        }
-      { this.props.hasMore || this.noMoreItems(this.props.endOfListPhrase) }
-      </div>);
+      {this.props.children}
+      { this.props.showLoading && this.state.loading ? <div className="loading-spinner centered">
+        <i className="fa fa-spinner fa-pulse fa-2x" />
+      </div> : ''
+      }
+      { this.props.hasMore || InfiniteScrollable.noMoreItems(this.props.endOfListPhrase) }
+    </div>);
   }
-
 }

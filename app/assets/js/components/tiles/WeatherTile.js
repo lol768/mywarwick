@@ -1,23 +1,22 @@
 import React from 'react';
-
+import _ from 'lodash-es';
+import * as PropTypes from 'prop-types';
 import TileContent, { DEFAULT_TILE_SIZES } from './TileContent';
 import Skycon from '../ui/Skycon';
 import { localMomentUnix } from '../../dateFormats';
 
-import _ from 'lodash-es';
 
 function formatIconString(str) {
   return str.toUpperCase().replace(/-/g, '_');
 }
 
-const formatTime = (d) => localMomentUnix(d).format('ha');
+const formatTime = d => localMomentUnix(d).format('ha');
 
 export function oneWordWeather(icon) {
   return icon.replace(/.*(clear|rain|snow|sleet|wind|fog|cloudy).*/, '$1');
 }
 
 export default class WeatherTile extends TileContent {
-
   static canZoom() {
     return true;
   }
@@ -82,7 +81,7 @@ export default class WeatherTile extends TileContent {
 }
 
 const WeatherTable = ({ items }) =>
-  <div className="row text--light">
+  (<div className="row text--light">
     {_.take(items, 6).map(item => (
       <div className="col-xs-2" key={item.id}>
         <div>{formatTime(item.time)}</div>
@@ -92,10 +91,10 @@ const WeatherTable = ({ items }) =>
         </div>
       </div>
     ))}
-  </div>;
+  </div>);
 
 WeatherTable.propTypes = {
-  items: React.PropTypes.array,
+  items: PropTypes.array,
 };
 
 const Callout = ({ temperature }) => (
@@ -105,5 +104,5 @@ const Callout = ({ temperature }) => (
 );
 
 Callout.propTypes = {
-  temperature: React.PropTypes.number,
+  temperature: PropTypes.number,
 };

@@ -26,19 +26,19 @@ export function fetch() {
 
     return fetchWithCredentials(url)
       .then(response => response.json())
-      .then(json => {
+      .then((json) => {
         if (json.data !== undefined) {
           dispatch(receive(json));
         } else {
           throw new Error('Invalid response returned from news feed');
         }
       })
-      .catch((e) => dispatch(receive(e)));
+      .catch(e => dispatch(receive(e)));
   };
 }
 
 export function refresh() {
-  return dispatch => {
+  return (dispatch) => {
     dispatch(startRefresh());
     return dispatch(fetch());
   };

@@ -1,21 +1,19 @@
-/* global PaymentRequest */
 import React from 'react';
+import _ from 'lodash-es';
+import moment from 'moment';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import Hyperlink from '../ui/Hyperlink';
 import TextTile from './TextTile';
-import _ from 'lodash-es';
-import moment from 'moment';
 import { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 
 export default class LibraryTile extends TextTile {
-
   static supportedTileSizes() {
     return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
   }
 
   renderItems(items) {
     return items
-      .map(item => {
+      .map((item) => {
         switch (item.type) {
           case 'loan':
             return this.makeLoanItem(item);
@@ -24,8 +22,8 @@ export default class LibraryTile extends TextTile {
           default:
             return null;
         }
-      }
-    );
+      },
+      );
   }
 
   makeSubtitle(type, length) {
@@ -49,18 +47,18 @@ export default class LibraryTile extends TextTile {
     const titleArr = [chunks.shift(), chunks.join(' ')];
 
     return (
-    <span>
-      <span className="tile__callout">
-        {titleArr[0]}
+      <span>
+        <span className="tile__callout">
+          {titleArr[0]}
+        </span>
+        {titleArr[1]}
       </span>
-      &nbsp;{titleArr[1]}
-    </span>
     );
   }
 
   makeLoanItems(items) {
     return items
-      .filter((e) => e.type === 'loan')
+      .filter(e => e.type === 'loan')
       .map(this.makeLoanItem);
   }
 
@@ -71,10 +69,10 @@ export default class LibraryTile extends TextTile {
           <span className="tile__text">
             {item.recallDate ?
               `Recalled on ${
-              moment(item.recallDate, 'YYYY-MM-DD').format('MMM Do YYYY')
-            }, ${item.dueMessage.toLowerCase()}` :
+                moment(item.recallDate, 'YYYY-MM-DD').format('MMM Do YYYY')
+              }, ${item.dueMessage.toLowerCase()}` :
               item.dueMessage}: {item.itemTitle}
-            </span>
+          </span>
         </div>
       </Hyperlink>
     );
@@ -82,7 +80,7 @@ export default class LibraryTile extends TextTile {
 
   makeHoldItems(items) {
     return items
-      .filter((e) => e.type === 'hold')
+      .filter(e => e.type === 'hold')
       .map(this.makeHoldItem);
   }
 
@@ -110,8 +108,8 @@ export default class LibraryTile extends TextTile {
     const itemsToDisplay = this.props.zoomed ?
       content.items : _.take(content.items, content.items.length);
 
-    const loanItems = itemsToDisplay.filter((e) => e.type === 'loan');
-    const holdItlems = itemsToDisplay.filter((e) => e.type === 'hold');
+    const loanItems = itemsToDisplay.filter(e => e.type === 'loan');
+    const holdItlems = itemsToDisplay.filter(e => e.type === 'hold');
 
     return (
       <div>
@@ -139,6 +137,5 @@ export default class LibraryTile extends TextTile {
   }
 
   _pluralise = (unit, len) => `${unit}${len === 1 ? '' : 's'}`;
-
 }
 

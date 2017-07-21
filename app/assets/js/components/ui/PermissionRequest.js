@@ -1,9 +1,11 @@
-import React, { PropTypes } from 'react';
+/* eslint-env browser */
+
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import classNames from 'classnames';
 import * as pushNotifications from '../../push-notifications';
 
 export default class PermissionRequest extends React.PureComponent {
-
   static propTypes = {
     isDisabled: PropTypes.bool,
   };
@@ -32,16 +34,26 @@ export default class PermissionRequest extends React.PureComponent {
   render() {
     return (
       window.Notification && !this.props.isDisabled && this.state.visible ?
-      <div className={classNames('permission-request')}>
-        <div className="permission-notice">
-          My Warwick needs your permission to <a onClick={ this.requestPermission }>
-          show system notifications</a>
-        </div>
-        <div className="permission-dismiss">
-          <i className={classNames('fa', 'fa-fw', 'fa-times')} onClick={this.hide}> </i>
-        </div>
-      </div> : null
+        <div className={classNames('permission-request')}>
+          <div className="permission-notice">
+            My Warwick needs your permission to
+            <a
+              onClick={ this.requestPermission }
+              role="button"
+              tabIndex={0}
+            >
+              show system notifications
+            </a>
+          </div>
+          <div className="permission-dismiss">
+            <i
+              className={classNames('fa', 'fa-fw', 'fa-times')}
+              role="button"
+              tabIndex={0}
+              onClick={this.hide}
+            />
+          </div>
+        </div> : null
     );
   }
-
 }

@@ -1,5 +1,8 @@
 import moment from 'moment';
 import log from 'loglevel';
+import { createAction } from 'redux-actions';
+import qs from 'qs';
+import _ from 'lodash-es';
 import { fetchWithCredentials } from '../serverpipe';
 import { USER_CLEAR } from './user';
 import * as notificationMetadata from './notification-metadata';
@@ -11,9 +14,6 @@ import {
   filterStream,
   getStreamSize,
 } from '../stream';
-import { createAction } from 'redux-actions';
-import qs from 'qs';
-import _ from 'lodash-es';
 
 export const NOTIFICATION_FETCHING = 'notifications.fetching';
 export const NOTIFICATION_RECEIVE = 'notifications.receive';
@@ -40,12 +40,10 @@ export const fetchedActivityMutes = createAction(ACTIVITY_MUTE_FETCH);
 const ITEM_FETCH_LIMIT = 100;
 
 export class UnnecessaryFetchError {
-
   constructor(message) {
     this.name = 'UnnecessaryFetchError';
     this.message = message;
   }
-
 }
 
 function fetchStream(name, options = {}) {
@@ -68,7 +66,7 @@ export function fetchActivities() {
     return fetchStream('activities', {
       since: lastItemFetched,
     })
-      .then(data => {
+      .then((data) => {
         dispatch(fetchedActivities({
           items: data.activities,
         }));
@@ -78,7 +76,7 @@ export function fetchActivities() {
           dispatch(fetchActivities());
         }
       })
-      .catch(e => {
+      .catch((e) => {
         log.warn('Failed to fetch activities', e);
         throw e;
       });
@@ -94,7 +92,7 @@ export function fetchNotifications() {
     return fetchStream('notifications', {
       since: lastItemFetched,
     })
-      .then(data => {
+      .then((data) => {
         const date = data.read && moment(data.read);
         dispatch(notificationMetadata.fetchedNotificationsLastRead(date));
 
@@ -106,7 +104,7 @@ export function fetchNotifications() {
           dispatch(fetchNotifications());
         }
       })
-      .catch(e => {
+      .catch((e) => {
         log.warn('Failed to fetch notifications', e);
         throw e;
       });
@@ -118,7 +116,7 @@ export function fetchActivityMutes() {
     .then(response => response.json())
     .then(json => json.data.activityMutes)
     .then(activityMutes => dispatch(fetchedActivityMutes({ activityMutes })))
-    .catch(e => {
+    .catch((e) => {
       log.warn('Failed to fetch activity mutes', e);
       throw e;
     });
@@ -129,7 +127,7 @@ export function fetchNotificationFilter() {
     .then(response => response.json())
     .then(json => json.data)
     .then(data => dispatch(fetchedNotificationFilter(data)))
-    .catch(e => {
+    .catch((e) => {
       log.warn('Failed to fetch notification filter', e);
       throw e;
     });
@@ -140,7 +138,7 @@ export function fetchActivityFilter() {
     .then(response => response.json())
     .then(json => json.data)
     .then(data => dispatch(fetchedActivityFilter(data)))
-    .catch(e => {
+    .catch((e) => {
       log.warn('Failed to fetch activity filter', e);
       throw e;
     });
@@ -209,14 +207,14 @@ export function fetchMoreActivities() {
 }
 
 export function showMoreNotifications(numberToShow) {
-  return (dispatch) => dispatch(createAction(NOTIFICATION_NUMBER_TO_SHOW)({ numberToShow }));
+  return dispatch => dispatch(createAction(NOTIFICATION_NUMBER_TO_SHOW)({ numberToShow }));
 }
 
 export function showMoreActivities(numberToShow) {
-  return (dispatch) => dispatch(createAction(ACTIVITY_NUMBER_TO_SHOW)({ numberToShow }));
+  return dispatch => dispatch(createAction(ACTIVITY_NUMBER_TO_SHOW)({ numberToShow }));
 }
 
-const partitionByYearAndMonth = (n) => n.date.toString().substr(0, 7);
+const partitionByYearAndMonth = n => n.date.toString().substr(0, 7);
 
 export function mergeNotifications(stream, newNotifications) {
   return onStreamReceive(stream, partitionByYearAndMonth, newNotifications);
@@ -251,12 +249,12 @@ export const activityMuteDurations = [
 ];
 
 export function saveActivityMute(activity, options) {
-  return dispatch => {
-    const duration = _.find(activityMuteDurations, (d) => d.value === options.duration);
+  return (dispatch) => {
+    const duration = _.find(activityMuteDurations, d => d.value === options.duration);
 
     const tags = _.filter(activity.tags, tag =>
       options[`tags[${tag.name}]`] !== undefined &&
-        options[`tags[${tag.name}]`] === tag.value
+        options[`tags[${tag.name}]`] === tag.value,
     );
 
     const data = {
@@ -325,13 +323,13 @@ const initialState = {
 
 function filterFilterOptions(stream, filterOptions) {
   return _.mapValues(filterOptions, (options, optionType) =>
-    _.filter(options, option => {
+    _.filter(options, (option) => {
       // Include this option is there's at least 1 item in the stream that matches this option
       // Items are only removed if the filter option is explicitly false, so check for that
       const streamSizeWithThisOptionRemoved =
         getStreamSize(filterStream(stream, { [optionType]: { [option.id]: false } }));
       return getStreamSize(stream) !== streamSizeWithThisOptionRemoved;
-    })
+    }),
   );
 }
 
@@ -380,7 +378,7 @@ export function notificationsReducer(state = initialState, action) {
     case ACTIVITY_MUTE_FETCH: {
       return {
         ...state,
-        activityMutes: _.sortBy(action.payload.activityMutes, (mute) => (mute.expiresAt || 'ZZZ')),
+        activityMutes: _.sortBy(action.payload.activityMutes, mute => (mute.expiresAt || 'ZZZ')),
       };
     }
     case NOTIFICATION_FILTER_FETCH: {

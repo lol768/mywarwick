@@ -1,0 +1,23 @@
+{
+  "name": "eslint-plugin-mw",
+  "version": "0.0.1",
+  "description": "Custom ESLint rules, for My Warwick",
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "eslint-plugin"
+  ],
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "mocha tests --recursive"
+  },
+  "devDependencies": {
+    "eslint": "~3.9.1",
+    "mocha": "^3.1.2"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "author": "IT Services",
+  "license": "SEE LICENSE IN repo"
+}

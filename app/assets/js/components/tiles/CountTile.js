@@ -4,7 +4,6 @@ import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 import { ListTileItem } from './ListTile';
 
 export default class CountView extends TileContent {
-
   static canZoom(content) {
     if (content && content.items) {
       return content.items.length > 1;
@@ -43,5 +42,4 @@ export default class CountView extends TileContent {
       </ul>
     );
   }
-
 }

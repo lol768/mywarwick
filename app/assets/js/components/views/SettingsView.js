@@ -1,20 +1,21 @@
+/* eslint-env browser */
+
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
+import _ from 'lodash-es';
 import { Routes } from '../AppRoot';
 import HideableView from './HideableView';
 import * as newsCategories from '../../state/news-categories';
 import * as newsOptIn from '../../state/news-optin';
 import * as emailNotificationsOptIn from '../../state/email-notifications-opt-in';
 import { loadDeviceDetails } from '../../userinfo';
-import _ from 'lodash-es';
 import SwitchListGroupItem from '../ui/SwitchListGroupItem';
 
 
 class SettingsView extends HideableView {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -172,8 +173,8 @@ class SettingsView extends HideableView {
 
       this.props.dispatch(
         emailNotificationsOptIn.persist(
-          consensus
-        )
+          consensus,
+        ),
       );
 
       return { emailNotificationsOptIn: newState };
@@ -192,7 +193,10 @@ class SettingsView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-0">
-          <div className="list-group-item cursor-pointer"
+          <div
+            className="list-group-item"
+            role="button"
+            tabIndex={0}
             onClick={ () =>
               this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}`))
             }
@@ -200,13 +204,16 @@ class SettingsView extends HideableView {
             { SettingsView.renderSetting(
               'check-square-o',
               'Tile preferences',
-              <i className="fa fa-fw fa-chevron-right" />
+              <i className="fa fa-fw fa-chevron-right" />,
             ) }
           </div>
         </div>
 
         <div className="list-group setting-colour-0">
-          <div className="list-group-item cursor-pointer"
+          <div
+            className="list-group-item"
+            role="button"
+            tabIndex={0}
             onClick={ () =>
               this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`))
             }
@@ -214,13 +221,16 @@ class SettingsView extends HideableView {
             { SettingsView.renderSetting(
               'bell-slash-o',
               'Muted alerts',
-              SettingsView.renderSingleCount(this.props.mutes)
+              SettingsView.renderSingleCount(this.props.mutes),
             ) }
           </div>
-          <SwitchListGroupItem id="copyNotificationsEmail"
+          <SwitchListGroupItem
+            id="copyNotificationsEmail"
             value=""
             icon="envelope"
             description="Copy my alerts to email"
+            role="button"
+            tabIndex={0}
             onClick={ this.onNotificationEmailCopyChange }
             checked={ this.state.emailNotificationsOptIn.wantsEmails }
             failure={ this.state.emailNotificationsOptIn.failed && !this.props.isOnline}
@@ -231,10 +241,13 @@ class SettingsView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-1">
-          <div className="list-group-item cursor-pointer"
+          {/* <div
+            className="list-group-item"
+            role="button"
+            tabIndex={0}
             onClick={ this.props.newsCategories.fetched && !this.props.newsCategories.failed ? () =>
               this.props.dispatch(
-                push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`)
+                push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`),
               ) : null
             }
           >
@@ -243,16 +256,19 @@ class SettingsView extends HideableView {
               'News categories',
               SettingsView.renderFetchedCount({
                 ...this.props.newsCategories,
-              })
+              }),
             ) }
-          </div>
-          <div className="list-group-item cursor-pointer"
+          </div>*/}
+          <div
+            className="list-group-item"
+            role="button"
+            tabIndex={0}
             onClick={ this.props.newsOptIn.fetched && !this.props.newsOptIn.failed ? () =>
               this.props.dispatch(
                 push(
                   `/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}/` +
-                  `${Routes.SettingsRoutes.OptInTypes.LOCATION}`
-                )
+                  `${Routes.SettingsRoutes.OptInTypes.LOCATION}`,
+                ),
               ) : null
             }
           >
@@ -266,16 +282,19 @@ class SettingsView extends HideableView {
                 selected: this.props.newsOptIn.location.selected,
                 total: this.props.newsOptIn.location.total,
                 isOnline: this.props.isOnline,
-              })
+              }),
             ) }
           </div>
         </div>
 
         <div className="list-group setting-colour-2">
-          <div className="list-group-item cursor-pointer"
+          <div
+            className="list-group-item"
+            role="button"
+            tabIndex={0}
             onClick={ () =>
               this.props.dispatch(
-                push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.ACTIVITY_FILTER}`)
+                push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.ACTIVITY_FILTER}`),
               )
             }
           >
@@ -284,14 +303,17 @@ class SettingsView extends HideableView {
               'Activity filter',
               SettingsView.renderFractionCount(
                 this.props.activityFilter.selected,
-                this.props.activityFilter.total
-              )
+                this.props.activityFilter.total,
+              ),
             ) }
           </div>
-          <div className="list-group-item"
+          <div
+            className="list-group-item"
+            role="button"
+            tabIndex={0}
             onClick={ () =>
               this.props.dispatch(
-                push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NOTIFICATION_FILTER}`)
+                push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NOTIFICATION_FILTER}`),
               )
             }
           >
@@ -300,14 +322,19 @@ class SettingsView extends HideableView {
               'Alerts filter',
               SettingsView.renderFractionCount(
                 this.props.notificationFilter.selected,
-                this.props.notificationFilter.total
-              )
+                this.props.notificationFilter.total,
+              ),
             ) }
           </div>
         </div>
 
         <div className="list-group setting-colour-3">
-          <div className="list-group-item cursor-pointer" onClick={ loadDeviceDetails }>
+          <div
+            className="list-group-item"
+            role="button"
+            tabIndex={0}
+            onClick={ loadDeviceDetails }
+          >
             <div className="media">
               <div className="media-left feedback">
                 <span className="fa-stack">
@@ -338,9 +365,9 @@ function ensureValidFilterChoice(filter, filterOptions) {
     _.pickBy(options, (v, option) =>
       filterOptions[optionType] !== undefined &&
       _.find(filterOptions[optionType], filterOption =>
-        filterOption.id === option
-      ) !== undefined
-    )
+        filterOption.id === option,
+      ) !== undefined,
+    ),
   );
 }
 
@@ -348,12 +375,12 @@ const select = (state) => {
   const activityFilterTotal = _.reduce(
     state.activities.filterOptions,
     (total, o) => total + o.length,
-    0
+    0,
   );
   const notificationFilterTotal = _.reduce(
     state.notifications.filterOptions,
     (total, o) => total + o.length,
-    0
+    0,
   );
 
   return {
@@ -385,7 +412,7 @@ const select = (state) => {
       selected: activityFilterTotal - _.reduce(
         ensureValidFilterChoice(state.activities.filter, state.activities.filterOptions),
         (total, o) => total + _.filter(o, v => !v).length,
-        0
+        0,
       ),
       total: activityFilterTotal,
     },
@@ -393,7 +420,7 @@ const select = (state) => {
       selected: notificationFilterTotal - _.reduce(
         ensureValidFilterChoice(state.notifications.filter, state.notifications.filterOptions),
         (total, o) => total + _.filter(o, v => !v).length,
-        0
+        0,
       ),
       total: notificationFilterTotal,
     },

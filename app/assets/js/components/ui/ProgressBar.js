@@ -1,7 +1,7 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 
 export default class ProgressBar extends React.PureComponent {
-
   static propTypes = {
     value: PropTypes.number.isRequired,
     max: PropTypes.number.isRequired,
@@ -25,5 +25,4 @@ export default class ProgressBar extends React.PureComponent {
       </div>
     );
   }
-
 }

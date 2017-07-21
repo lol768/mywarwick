@@ -1,7 +1,7 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 
 export default class HiddenTile extends React.PureComponent {
-
   render() {
     const { icon, title, onShow, colour } = this.props;
 
@@ -12,13 +12,15 @@ export default class HiddenTile extends React.PureComponent {
             className="tile__edit-control top-left"
             title={ `Show ${title}` }
             onClick={ onShow }
+            role="button"
+            tabIndex={0}
           >
-            <i className="fa fa-plus"> </i>
+            <i className="fa fa-plus" />
           </div>
 
           <div className="tile__wrap">
             <div className="tile__body">
-              <i className={`fa fa-fw fa-${icon} tile--hidden__icon`}> </i>
+              <i className={`fa fa-fw fa-${icon} tile--hidden__icon`} />
               <div className="tile--hidden__title">{ title }</div>
             </div>
           </div>
@@ -26,7 +28,6 @@ export default class HiddenTile extends React.PureComponent {
       </div>
     );
   }
-
 }
 
 HiddenTile.propTypes = {
