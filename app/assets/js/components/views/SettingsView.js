@@ -241,7 +241,7 @@ class SettingsView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-1">
-          <div
+          {/* <div
             className="list-group-item"
             role="button"
             tabIndex={0}
@@ -258,7 +258,7 @@ class SettingsView extends HideableView {
                 ...this.props.newsCategories,
               }),
             ) }
-          </div>
+          </div>*/}
           <div
             className="list-group-item"
             role="button"
