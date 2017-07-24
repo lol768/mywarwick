@@ -1,8 +1,8 @@
 import { createSelector } from 'reselect';
 import { fetchWithCredentials } from './serverpipe';
 
-export default function persistNotificationsLastRead() {
-  return createSelector(state => state.notificationsLastRead, (lastRead) => {
+export const persistNotificationsLastRead =
+  createSelector(state => state.notificationsLastRead, (lastRead) => {
     const { date, fetched } = lastRead;
     if (date && fetched) {
       fetchWithCredentials('/api/streams/read', {
@@ -17,4 +17,3 @@ export default function persistNotificationsLastRead() {
       });
     }
   });
-}
