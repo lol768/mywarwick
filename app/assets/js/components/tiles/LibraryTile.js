@@ -51,7 +51,7 @@ export default class LibraryTile extends TextTile {
         <span className="tile__callout">
           {titleArr[0]}
         </span>
-        {titleArr[1]}
+        {' ' + titleArr[1]}
       </span>
     );
   }
