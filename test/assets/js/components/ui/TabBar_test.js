@@ -8,7 +8,7 @@ describe('TabBar', () => {
     let tabBar = (
       <TabBar onSelectItem={fn}>
         <TabBarItem title="Me" icon="user" path="/"/>
-        <TabBarItem title="Notifications" icon="inbox" path="/notifications"/>
+        <TabBarItem title="Notifications" icon="inbox" path="/alerts"/>
       </TabBar>
     );
 

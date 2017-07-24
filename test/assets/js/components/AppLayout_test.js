@@ -18,7 +18,7 @@ describe('AppLayout', () => {
       <TabBar selectedItem='/' onSelectItem={ () => {} }>
         <TabBarItem title="Me" icon="user-o" selectedIcon="user" path="/" />
         <TabBarItem
-          title="Alerts" icon="bell-o" selectedIcon="bell" path="/notifications"
+          title="Alerts" icon="bell-o" selectedIcon="bell" path="/alerts"
           badge='7' isDisabled={ true }
         />
         <TabBarItem

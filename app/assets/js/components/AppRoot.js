@@ -31,7 +31,7 @@ export const Routes = {
   EDIT: 'edit',
   ADD: 'add',
   TILES: 'tiles',
-  NOTIFICATIONS: 'notifications',
+  NOTIFICATIONS: 'alerts',
   ACTIVITY: 'activity',
   NEWS: 'news',
   SEARCH: 'search',

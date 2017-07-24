@@ -123,7 +123,7 @@ export function fetchActivityMutes() {
 }
 
 export function fetchNotificationFilter() {
-  return dispatch => fetchWithCredentials('/api/streams/notifications/filter')
+  return dispatch => fetchWithCredentials('/api/streams/alerts/filter')
     .then(response => response.json())
     .then(json => json.data)
     .then(data => dispatch(fetchedNotificationFilter(data)))
@@ -294,7 +294,7 @@ export function persistActivityFilter(filter) {
 }
 
 export function persistNotificationFilter(filter) {
-  return dispatch => global.fetch('/api/streams/notifications/filter', {
+  return dispatch => global.fetch('/api/streams/alerts/filter', {
     credentials: 'same-origin',
     method: 'POST',
     headers: {
