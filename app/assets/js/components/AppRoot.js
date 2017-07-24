@@ -78,6 +78,10 @@ RouteViews[`/${Routes.NOTIFICATIONS}`] = {
   rendered: false,
   view: NotificationsView,
 };
+RouteViews['/notifications'] = {
+  rendered: false,
+  view: NotificationsView,
+};
 RouteViews[`/${Routes.ACTIVITY}`] = {
   rendered: false,
   view: ActivityView,
