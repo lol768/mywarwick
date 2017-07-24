@@ -80,20 +80,20 @@ export default class ActivityMutingView extends React.Component {
               description={this.props.providerDisplayName || this.props.provider}
               checked={this.state.formValues.providerId}
             />
+            {
+              _.map(this.props.tags, tag => (
+                <CheckboxListGroupItem
+                  key={tag.name}
+                  id={`tag-${tag.name}`}
+                  name={`tags[${tag.name}]`}
+                  value={tag.value}
+                  onClick={this.handleCheckboxChange}
+                  description={tag.display_value || tag.value}
+                  checked={this.state.formValues[tag.name]}
+                />
+              ))
+            }
           </div>
-          {
-            _.map(this.props.tags, tag => (
-              <CheckboxListGroupItem
-                key={tag.name}
-                id={`tag-${tag.name}`}
-                name={`tags[${tag.name}]`}
-                value={tag.value}
-                onClick={this.handleCheckboxChange}
-                description={tag.display_value || tag.value}
-                checked={this.state.formValues[tag.name]}
-              />
-            ))
-          }
         </div>
         <div className="list-group">
           <label>For:</label>
