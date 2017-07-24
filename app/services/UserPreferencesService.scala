@@ -23,6 +23,8 @@ trait UserPreferencesService {
 
   def setActivityFilter(usercode: Usercode, filter: JsObject): Unit
 
+  def getChosenColourScheme(usercode: Usercode): Int
+
 }
 
 @Singleton
@@ -49,5 +51,8 @@ class UserPreferencesServiceImpl @Inject()(
 
   override def setActivityFilter(usercode: Usercode, filter: JsObject): Unit =
     db.withConnection(implicit c => dao.setActivityFilter(usercode, filter))
+
+  override def getChosenColourScheme(usercode: Usercode): Int =
+    db.withConnection(implicit c => dao.getColourSchemePreference(usercode))
 
 }

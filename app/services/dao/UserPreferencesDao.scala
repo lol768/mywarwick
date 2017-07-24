@@ -33,6 +33,10 @@ trait UserPreferencesDao {
 
   def setUserEmailsPreference(usercode: Usercode, wantsEmail: Boolean)(implicit c: Connection): Unit
 
+  def getColourSchemePreference(usercode: Usercode)(implicit c: Connection): Int
+
+  def setColourSchemePreference(usercode: Usercode, schemeId: Int)(implicit c: Connection): Boolean
+
   def getUserSmsPreference(usercode: Usercode)(implicit c: Connection): Boolean
 
   def setUserSmsPreference(usercode: Usercode, wantsSms: Boolean)(implicit c: Connection): Unit
@@ -132,4 +136,18 @@ class UserPreferencesDaoImpl extends UserPreferencesDao {
     SQL"""UPDATE USER_PREFERENCE SET SMS_NUMBER = $phoneNumber WHERE USERCODE = ${usercode.string}""".execute()
   }
 
+  override def getColourSchemePreference(usercode: Usercode)(implicit c: Connection): Int = {
+    val result =
+      SQL"SELECT CHOSEN_COLOUR_SCHEME FROM USER_PREFERENCE WHERE USERCODE = ${usercode.string}".as(scalar[Int].singleOpt)
+
+    result.get
+  }
+
+  override def setColourSchemePreference(usercode: Usercode, schemeId: Int)(implicit c: Connection): Boolean = {
+    if (!exists(usercode)) {
+      save(usercode)
+    }
+
+    SQL"""UPDATE USER_PREFERENCE SET CHOSEN_COLOUR_SCHEME = $$schemeId WHERE USERCODE = ${usercode.string}""".execute()
+  }
 }
