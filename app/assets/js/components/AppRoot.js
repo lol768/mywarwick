@@ -20,6 +20,7 @@ import NewsCategoriesView from './views/settings/NewsCategoriesView';
 import OptInSettingsView from './views/settings/OptInSettingsView';
 import LocationOptInSettingView from './views/settings/optInSettings/LocationOptInSettingView';
 import TilePreferencesView from './views/settings/TilePreferencesView';
+import ColourSchemesView from './views/settings/ColourSchemesView';
 import TileOptionView from './views/settings/TileOptionView';
 import PostTourView from './views/PostTourView';
 import {
@@ -39,6 +40,7 @@ export const Routes = {
   SETTINGS: 'settings',
   SettingsRoutes: {
     TILES: 'tiles',
+    COLOUR_SCHEMES: 'colourschemes',
     MUTES: 'mutes',
     NEWS_CATEGORIES: 'newscategories',
     OPT_IN: 'optin',
@@ -103,6 +105,10 @@ RouteViews[`/${Routes.SETTINGS}`] = {
 RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}`] = {
   rendered: false,
   view: TilePreferencesView,
+};
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.COLOUR_SCHEMES}`] = {
+  rendered: false,
+  view: ColourSchemesView,
 };
 RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`] = {
   rendered: false,

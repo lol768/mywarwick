@@ -63,6 +63,11 @@ class SettingsView extends HideableView {
         total: PropTypes.number.isRequired,
       }).isRequired,
     }).isRequired,
+    colourSchemes: PropTypes.shape({
+      fetching: PropTypes.bool.isRequired,
+      failed: PropTypes.bool.isRequired,
+      fetched: PropTypes.bool.isRequired,
+    }).isRequired,
     activityFilter: PropTypes.shape({
       selected: PropTypes.number.isRequired,
       total: PropTypes.number.isRequired,
@@ -250,6 +255,20 @@ class SettingsView extends HideableView {
               'check-square-o',
               'Tile preferences',
               <i className="fa fa-fw fa-chevron-right" />,
+            ) }
+          </div>
+          <div
+            className="list-group-item"
+            role="button"
+            tabIndex={0}
+            onClick={ () =>
+              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.COLOUR_SCHEMES}`))
+            }
+          >
+            { SettingsView.renderSetting(
+              'paint-brush',
+              'Colour scheme',
+              (<span className="colour-scheme__current">Bluebell <i className="fa fa-fw fa-chevron-right" /></span>),
             ) }
           </div>
         </div>
@@ -512,6 +531,11 @@ const select = (state) => {
         selected: (state.newsOptIn.selected.Location || []).length,
         total: (state.newsOptIn.options.Location || []).length,
       },
+    },
+    colourSchemes: {
+      fetching: state.colourSchemes.fetching,
+      failed: state.colourSchemes.failed,
+      fetched: state.colourSchemes.fetched,
     },
     activityFilter: {
       selected: activityFilterTotal - _.reduce(
