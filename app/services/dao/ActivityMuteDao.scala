@@ -99,7 +99,7 @@ class ActivityMuteDaoImpl extends ActivityMuteDao {
       get[DateTime]("CREATED_AT") ~
       get[Option[DateTime]]("EXPIRES_AT") ~
       get[Option[String]]("PROVIDER_ID") ~
-      get[Boolean]("PROVIDER_SEND_EMAIL") ~
+      get[Option[Boolean]]("PROVIDER_SEND_EMAIL") ~
       get[Option[String]]("PROVIDER_DISPLAY_NAME") ~
       get[Option[String]]("ACTIVITY_TYPE") ~
       get[Option[String]]("ACTIVITY_TYPE_DISPLAY_NAME") ~
@@ -111,7 +111,7 @@ class ActivityMuteDaoImpl extends ActivityMuteDao {
           createdAt,
           expiresAt,
           activityTypeOption.map(activityType => ActivityType(activityType, activityTypeDisplayName)),
-          providerOption.map(provider => ActivityProvider(provider, providerSendEmail, providerDisplayName)),
+          providerOption.map(provider => ActivityProvider(provider, providerSendEmail.get, providerDisplayName)),
           tagString
             .map(Json.parse(_).as[JsArray].value.map(_.as[ActivityTag]))
             .getOrElse(Nil)
