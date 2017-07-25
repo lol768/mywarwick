@@ -22,20 +22,19 @@ class ColourSchemesView extends HideableView {
 
         <div className="list-group">
           <div
-            className={ `list-group-item setting-colour-1` }
+            className="list-group-item setting-colour-1"
             role="button"
             tabIndex={0}
           >
             <div className="media">
               <div className="media-left">
-                <i className={ `fa fa-fw fa-sun-o` }
-                />
+                <i className="fa fa-fw fa-sun-o" />
               </div>
-              <div className={`media-body`}>
+              <div className="media-body">
                 Some media body!
               </div>
               <div className="media-right">
-                <i className="fa fa-fw fa-chevron-right"/>
+                <i className="fa fa-fw fa-chevron-right" />
               </div>
             </div>
           </div>
