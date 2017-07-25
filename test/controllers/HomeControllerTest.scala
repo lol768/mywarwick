@@ -8,13 +8,23 @@ import play.api.Configuration
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import services.{SecurityService, UserPreferencesService}
+import services.{NullSecurityService, SecurityService, UserPreferencesService}
 import services.analytics.{AnalyticsMeasurementService, AnalyticsTrackingID}
 import system.AppMetrics
+import warwick.sso._
 
 class HomeControllerTest extends BaseSpec with MockitoSugar with Results {
 
-  val securityService = mock[SecurityService]
+  val securityService = new NullSecurityService(new LoginContext {
+    override def loginUrl(target: Option[String]) = ""
+
+    override def actualUserHasRole(role: RoleName) = false
+
+    override def userHasRole(role: RoleName) = false
+
+    override val user: Option[User] = Some(Users.create(Usercode("test")))
+    override val actualUser: Option[User] = user
+  })
 
   val metrics = mock[AppMetrics]
 
