@@ -1,36 +1,47 @@
 package controllers.api
 
 import javax.inject.Singleton
-
 import com.google.inject.Inject
-import com.sun.syndication.feed.synd._
-import com.sun.syndication.io.WireFeedOutput
 import controllers.BaseController
-import models.Audience.DepartmentSubset
-import models.news.NewsItemRender
 import models.{API, PageViewHit}
-import org.jdom.{Element, Namespace}
+import play.api.Configuration
 import play.api.libs.json._
 import play.api.mvc.{Action, RequestHeader}
-import services.analytics.AnalyticsMeasurementService
 import services.{NewsService, SecurityService}
-import warwick.sso.GroupName
-
 import scala.collection.JavaConverters._
 
 @Singleton
 class ColourSchemesController @Inject()(
-  security: SecurityService
+  security: SecurityService,
+  configuration: Configuration
 ) extends BaseController {
 
+  sealed case class Background(
+    id: Int,
+    url: String,
+    name: String
+  )
+
+  implicit private val BackgroundWriter = Json.writes[Background]
+
+
+
+  val backgrounds: Seq[Background] = configuration.getConfigList("mywarwick.backgrounds")
+    .getOrElse(throw new IllegalStateException("mywarwick.backgrounds is not configured in default.conf."))
+    .asScala.map(e => {
+    Background(
+      e.getInt("id").getOrElse(throw new IllegalStateException("id is not set for this background")),
+      e.getString("url").getOrElse(throw new IllegalStateException("url is not set for this background")),
+      e.getString("name").getOrElse(throw new IllegalStateException("name is not set for this background"))
+    )
+  })
 
   import security._
-
   def getChoice = RequiredUserAction { request =>
     val user = request.context.user.get
 
     val data = JsObject(Map(
-      "chosenColourScheme" -> JsNumber(1)
+      "chosenColourScheme" -> JsNumber(1) // TODO get the chosen one from db
     ))
 
     Ok(Json.toJson(API.Success(data = data)))
@@ -38,17 +49,9 @@ class ColourSchemesController @Inject()(
 
   def getAvailable = Action { request =>
     val data = JsObject(Map(
-      "schemes" -> JsArray(Seq[JsObject](
-        JsObject(Map(
-          "id" -> JsNumber(1),
-          "friendlyName" -> JsString("Bluebell"),
-          "url" -> JsString("bg01.jpg")
-        )),
-        JsObject(Map(
-          "id" -> JsNumber(2),
-          "friendlyName" -> JsString("Westwood")
-        ))
-      ))
+      "schemes" -> JsArray(backgrounds.map(e => {
+        Json.toJson(e)
+      }))
     ))
 
     Ok(Json.toJson(API.Success(data = data)))
