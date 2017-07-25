@@ -7,6 +7,13 @@ class ColourSchemesView extends HideableView {
   static propTypes = {
     fetching: PropTypes.bool.isRequired,
     failed: PropTypes.bool.isRequired,
+    fetched: PropTypes.bool.isRequired,
+    chosen: PropTypes.number.isRequired,
+    schemes: PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      url: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+    }).isRequired,
   };
 
   render() {
@@ -49,6 +56,8 @@ function select(state) {
     fetching: state.colourSchemes.fetching,
     failed: state.colourSchemes.failed,
     fetched: state.colourSchemes.fetched,
+    chosen: state.colourSchemes.chosen,
+    schemes: state.colourSchemes.schemes,
   };
 }
 
