@@ -1,5 +1,6 @@
 package services.dao
 
+import java.lang.{Integer => JInt}
 import java.sql.Connection
 import java.util.UUID
 
@@ -8,6 +9,7 @@ import anorm._
 import com.google.inject.{ImplementedBy, Inject}
 import models.Output.Mobile
 import models._
+import models.publishing.PublisherActivityCount
 import org.joda.time.DateTime
 import system.DatabaseDialect
 import warwick.anorm.converters.ColumnConversions._
@@ -47,6 +49,8 @@ trait ActivityDao {
   def allProviders(implicit c: Connection): Seq[ActivityProvider]
 
   def getProvider(id: String)(implicit c: Connection): Option[ActivityProvider]
+
+  def countNotificationsSinceDateGroupedByPublisher(activityType: String, since: DateTime)(implicit c: Connection): Seq[PublisherActivityCount]
 }
 
 class ActivityDaoImpl @Inject()(
@@ -219,13 +223,13 @@ class ActivityDaoImpl @Inject()(
       """
 
     SQL(query).on(
-        'usercode -> usercode,
-        'before -> before.orNull,
-        'since -> since.orNull,
-        'beforeDate -> beforeDate.orNull,
-        'sinceDate -> sinceDate.orNull,
-        'notifications -> notifications
-      )
+      'usercode -> usercode,
+      'before -> before.orNull,
+      'since -> since.orNull,
+      'beforeDate -> beforeDate.orNull,
+      'sinceDate -> sinceDate.orNull,
+      'notifications -> notifications
+    )
       .as(activityRenderParser.*)
   }
 
@@ -355,6 +359,17 @@ class ActivityDaoImpl @Inject()(
     """
       .as(activityProviderParser.singleOpt)
 
+  override def countNotificationsSinceDateGroupedByPublisher(activityType: String, since: DateTime)(implicit c: Connection): Seq[PublisherActivityCount] = {
+    SQL"""
+      SELECT ID, NAME,
+        (SELECT COUNT(*)
+         FROM ACTIVITY
+         WHERE PUBLISHER_ID = PUBLISHER.ID AND PUBLISHED_AT >= $since AND TYPE = $activityType AND SHOULD_NOTIFY = 1) AS COUNT
+      FROM PUBLISHER
+      """
+      .as(publisherActivityCountParser.*)
+  }
+
   private lazy val activityIconParser: RowParser[ActivityIcon] =
     get[String]("ICON") ~
       get[Option[String]]("COLOUR") map {
@@ -373,4 +388,12 @@ class ActivityDaoImpl @Inject()(
       get[Option[String]]("TYPE_DISPLAY_NAME") map {
       case name ~ displayName => ActivityType(name, displayName)
     }
+
+  private lazy val publisherActivityCountParser: RowParser[PublisherActivityCount] =
+    get[String]("ID") ~
+      get[String]("NAME") ~
+      get[Int]("COUNT") map {
+      case id ~ name ~ count => PublisherActivityCount(id, name, count)
+    }
 }
+

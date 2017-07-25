@@ -3,6 +3,7 @@ package services
 import akka.actor.ActorSystem
 import com.google.inject.{Inject, Singleton}
 import models.QueueStatus
+import models.publishing.PublisherActivityCount
 import org.joda.time.DateTime
 import services.messaging.MessagingService
 import system.Logging
@@ -17,7 +18,8 @@ object HealthCheckService {
 @Singleton
 class HealthCheckService @Inject()(
   messagingService: MessagingService,
-  system: ActorSystem
+  system: ActorSystem,
+  activityService: ActivityService
 ) extends Logging {
 
   def frequency: FiniteDuration = HealthCheckService.defaultFrequency
@@ -25,11 +27,13 @@ class HealthCheckService @Inject()(
   var healthCheckLastRunAt: DateTime = null
   var messagingQueueStatus: Seq[QueueStatus] = null
   var oldestUnsentMessageCreatedAt: Option[DateTime] = None
+  var notificationCountByPublisher: Seq[PublisherActivityCount] = Nil
 
   def runNow(): Unit = try {
     healthCheckLastRunAt = DateTime.now
     messagingQueueStatus = messagingService.getQueueStatus()
     oldestUnsentMessageCreatedAt = messagingService.getOldestUnsentMessageCreatedAt()
+    notificationCountByPublisher = activityService.countNotificationsByPublishersInLast48Hours
   } catch {
     case e: Exception => logger.error("Error updating health checks", e)
   }
