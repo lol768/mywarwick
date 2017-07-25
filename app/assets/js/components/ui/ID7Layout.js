@@ -38,6 +38,9 @@ class ID7Layout extends React.PureComponent {
     this.onBackClick = this.onBackClick.bind(this);
     this.onEdit = this.onEdit.bind(this);
     this.onSettings = this.onSettings.bind(this);
+    this.dismissBetaWarning = this.dismissBetaWarning.bind(this);
+
+    this.state = { betaWarningDismissed: false };
   }
 
   componentWillMount() {
@@ -99,6 +102,10 @@ class ID7Layout extends React.PureComponent {
     return this.props.path === `/${Routes.EDIT}`;
   }
 
+  dismissBetaWarning() {
+    this.setState({ betaWarningDismissed: true });
+  }
+
   renderNotificationPermissionRequest() {
     if ('Notification' in window && Notification.permission === 'default' && !isEmbedded()) {
       return <PermissionRequest isDisabled={ !this.props.user.data.authenticated } />;
@@ -108,11 +115,12 @@ class ID7Layout extends React.PureComponent {
   }
 
   renderBetaWarning() {
-    if (!this.props.native && this.props.showBetaWarning) {
+    if (!this.props.native && this.props.showBetaWarning && !this.state.betaWarningDismissed) {
       return (
         <div className="top-page-notice">
           My&nbsp;Warwick is currently being piloted and is not yet available for general use.
           Please visit our <a href="http://warwick.ac.uk/webteam/mywarwick/">My&nbsp;Warwick support pages</a> for more information.
+          {' '}<a role="button" tabIndex={0} className="dismiss" onClick={ this.dismissBetaWarning }>Hide</a>
         </div>
       );
     }
@@ -121,11 +129,14 @@ class ID7Layout extends React.PureComponent {
 
   renderMasqueradeNotice() {
     const user = this.props.user.data;
+    const $body = $('body');
 
     if (user.masquerading) {
+      $body.addClass('masquerading');
       return <MasqueradeNotice masqueradingAs={user} />;
     }
 
+    $body.removeClass('masquerading');
     return null;
   }
 

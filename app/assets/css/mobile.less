@@ -7,6 +7,9 @@ html {
     min-height: unset;
 
     margin-top: @start-masthead-height;
+    &.masquerading {
+      margin-top: calc(@start-masthead-height + @top-page-notice-height);
+    }
     margin-bottom: @start-tab-bar-height;
   }
 
