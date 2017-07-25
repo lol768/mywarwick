@@ -24,8 +24,6 @@ class ColourSchemesController @Inject()(
 
   implicit private val BackgroundWriter = Json.writes[Background]
 
-
-
   val backgrounds: Seq[Background] = configuration.getConfigList("mywarwick.backgrounds")
     .getOrElse(throw new IllegalStateException("mywarwick.backgrounds is not configured in default.conf."))
     .asScala.map(e => {
@@ -36,19 +34,20 @@ class ColourSchemesController @Inject()(
     )
   })
 
-  import security._
-  def getChoice = RequiredUserAction { request =>
-    val user = request.context.user.get
+  //  import security._
+  //  def getChoice = RequiredUserAction { request =>
+  //    val user = request.context.user.get
+  //
+  //    val data = JsObject(Map(
+  //      "chosenColourScheme" -> JsNumber(1) // TODO get the chosen one from db
+  //    ))
+  //
+  //    Ok(Json.toJson(API.Success(data = data)))
+  //  }
 
+  def get = Action { request =>
     val data = JsObject(Map(
-      "chosenColourScheme" -> JsNumber(1) // TODO get the chosen one from db
-    ))
-
-    Ok(Json.toJson(API.Success(data = data)))
-  }
-
-  def getAvailable = Action { request =>
-    val data = JsObject(Map(
+      "chosen" -> JsNumber(1), // TODO get the chosen one from db
       "schemes" -> JsArray(backgrounds.map(e => {
         Json.toJson(e)
       }))
