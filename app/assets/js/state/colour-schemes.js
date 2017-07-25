@@ -36,7 +36,6 @@ const initialState = {
   fetching: false,
   failed: false,
   fetched: false,
-  chosenSchemeId: 1,
 };
 
 export function reducer(state = initialState, action) {
@@ -59,7 +58,8 @@ export function reducer(state = initialState, action) {
         fetching: false,
         failed: false,
         fetched: true,
-        chosenSchemeId: action.payload.data.chosenSchemeId,
+        chosen: action.payload.data.chosen,
+        schemes: action.payload.data.scheme,
       };
     default:
       return state;
