@@ -59,7 +59,7 @@ export function reducer(state = initialState, action) {
         failed: false,
         fetched: true,
         chosen: action.payload.data.chosen,
-        schemes: action.payload.data.scheme,
+        schemes: action.payload.data.schemes,
       };
     default:
       return state;
