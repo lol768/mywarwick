@@ -3,29 +3,14 @@ package controllers
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import helpers.BaseSpec
-import org.mockito.Matchers.any
 import play.api.Configuration
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import services.{NullSecurityService, SecurityService, UserPreferencesService}
 import services.analytics.{AnalyticsMeasurementService, AnalyticsTrackingID}
 import system.AppMetrics
-import warwick.sso._
 
 class HomeControllerTest extends BaseSpec with MockitoSugar with Results {
-
-  val securityService = new NullSecurityService(new LoginContext {
-    override def loginUrl(target: Option[String]) = ""
-
-    override def actualUserHasRole(role: RoleName) = false
-
-    override def userHasRole(role: RoleName) = false
-
-    override val user: Option[User] = Some(Users.create(Usercode("test")))
-    override val actualUser: Option[User] = user
-  })
-
   val metrics = mock[AppMetrics]
 
   val configuration = mock[Configuration]
@@ -35,10 +20,7 @@ class HomeControllerTest extends BaseSpec with MockitoSugar with Results {
   val measurementService = mock[AnalyticsMeasurementService]
   when(measurementService.trackingID).thenReturn(AnalyticsTrackingID("UA-123456-7"))
 
-  val userPrefService = mock[UserPreferencesService]
-  when(userPrefService.getChosenColourScheme(any())).thenReturn(1)
-
-  val controller = new HomeController(securityService, metrics, configuration, measurementService, userPrefService)
+  val controller = new HomeController(metrics, configuration, measurementService)
 
   "ApplicationController#index" should {
     "render" in {
