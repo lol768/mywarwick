@@ -4,15 +4,10 @@ import HideableView from '../HideableView';
 import { connect } from 'react-redux';
 
 class ColourSchemesView extends HideableView {
-
   static propTypes = {
     fetching: PropTypes.bool.isRequired,
     failed: PropTypes.bool.isRequired,
   };
-
-  componentDidShow() {
-    //this.props.dispatch(tiles.fetchTileContent());
-  }
 
   render() {
     return (

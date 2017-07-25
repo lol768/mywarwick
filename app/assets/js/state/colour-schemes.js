@@ -32,8 +32,6 @@ export function persist(chosenSchemeId) {
   return persistColourSchemeChoice(chosenSchemeId);
 }
 
-let store = {};
-
 const initialState = {
   fetching: false,
   failed: false,
@@ -61,7 +59,7 @@ export function reducer(state = initialState, action) {
         fetching: false,
         failed: false,
         fetched: true,
-        chosenSchemeId: action.payload.data.chosenSchemeId
+        chosenSchemeId: action.payload.data.chosenSchemeId,
       };
     default:
       return state;
