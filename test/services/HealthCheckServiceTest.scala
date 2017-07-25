@@ -24,7 +24,11 @@ class HealthCheckServiceTest extends BaseSpec with MockitoSugar with WithActorSy
       val messaging = mock[MessagingService]
       when(messaging.getQueueStatus()).thenReturn(Nil)
       when(messaging.getOldestUnsentMessageCreatedAt()).thenThrow(new RuntimeException("DB ERROR"))
-      val service = new HealthCheckService(messaging, akka) {
+
+      val activityService = mock[ActivityService]
+      when(activityService.countNotificationsByPublishersInLast48Hours).thenReturn(Nil)
+
+      val service = new HealthCheckService(messaging, akka, activityService) {
         override def frequency: FiniteDuration = 1.millis
       }
 

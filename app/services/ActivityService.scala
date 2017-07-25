@@ -1,6 +1,7 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject}
+import models.publishing.PublisherActivityCount
 import models.{Audience, _}
 import org.joda.time.DateTime
 import org.quartz._
@@ -57,6 +58,7 @@ trait ActivityService {
 
   def getProvider(id: String): Option[ActivityProvider]
 
+  def countNotificationsByPublishersInLast48Hours: Seq[PublisherActivityCount]
 }
 
 class ActivityServiceImpl @Inject()(
@@ -266,6 +268,8 @@ class ActivityServiceImpl @Inject()(
     db.withConnection(implicit c => dao.getProvider(id))
   }
 
+  override def countNotificationsByPublishersInLast48Hours: Seq[PublisherActivityCount] =
+    db.withConnection(implicit c => dao.countNotificationsSinceDateGroupedByPublisher("news", DateTime.now.minusHours(48)))
 }
 
 sealed trait ActivityError {
