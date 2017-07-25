@@ -1,11 +1,12 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import HideableView from '../HideableView';
+import classNames from 'classnames';
 import _ from 'lodash-es';
 import RadioListGroupItem from '../../ui/RadioListGroupItem';
 import { connect } from 'react-redux';
 
-class ColourSchemesView {
+class ColourSchemesView extends React.PureComponent {
   static propTypes = {
     fetching: PropTypes.bool.isRequired,
     failed: PropTypes.bool.isRequired,
@@ -38,30 +39,27 @@ class ColourSchemesView {
   makeItem(scheme) {
     return (
       <div
-        className="list-group-item"
+        className={`list-group-item list-group-item-colour-scheme list-group-item-colour-scheme-choice list-group-item-colour-scheme-choice-${scheme.id}`}
         role="button"
         onClick={ this.onClick }
       >
-        <div className="media">
-
-
-          <div className="media-left">
-            <div className="md-radio">
-              <input
-                type="radio"
-                checked={ scheme.id === this.props.chosen }
-                readOnly
-                disabled={ !this.props.isOnline }
-              />
-              <label />
+        <div className="media media-colour-scheme-choice">
+          <div className="media media-colour-scheme-block">
+            <div className="media-left">
+              <div className="md-radio-colour-scheme-choice">
+                <input
+                  type="radio"
+                  checked={ scheme.id === this.props.chosen }
+                  readOnly
+                  disabled={ !this.props.isOnline }
+                />
+                <label />
+              </div>
+            </div>
+            <div className="media-body media-body-colour-scheme-choice">
+              { scheme.name }
             </div>
           </div>
-
-          <div
-            className={ classNames('media-body', { 'media-body-disabled': !this.props.isOnline })}>
-            { scheme.name }
-          </div>
-          {scheme.name}
           <div className="media-right">
           </div>
         </div>
@@ -76,7 +74,7 @@ class ColourSchemesView {
   render() {
     return (
       <div>
-        <div className="list-group fixed setting-colour-0">
+        <div className="list-group fixed">
           <div className="list-group-item">
             <div className="list-group-item-heading">
               <h3>Colour schemes</h3>
