@@ -14,7 +14,7 @@ const SPACE_KEYCODE = 32;
  */
 export default function wrapKeyboardSelect(callback, event) {
   if (event.type === 'click') {
-    event.target.blur(); // for outline removal
+    event.currentTarget.blur(); // for outline removal
     callback(event);
   } else if (event.type === 'keyup' &&
     (event.keyCode === ENTER_KEYCODE || event.keyCode === SPACE_KEYCODE)) {
