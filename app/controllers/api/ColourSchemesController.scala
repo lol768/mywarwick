@@ -1,20 +1,26 @@
 package controllers.api
 
 import javax.inject.Singleton
+
 import com.google.inject.Inject
 import controllers.BaseController
 import models.{API, PageViewHit}
 import play.api.Configuration
 import play.api.libs.json._
 import play.api.mvc.{Action, RequestHeader}
-import services.{NewsService, SecurityService}
+import services.{NewsService, SecurityService, UserPreferencesService}
+
 import scala.collection.JavaConverters._
 
 @Singleton
 class ColourSchemesController @Inject()(
   security: SecurityService,
-  configuration: Configuration
+  configuration: Configuration,
+  userPreferencesService: UserPreferencesService
 ) extends BaseController {
+
+  import security._
+
 
   sealed case class Background(
     id: Int,
@@ -34,20 +40,15 @@ class ColourSchemesController @Inject()(
     )
   })
 
-  //  import security._
-  //  def getChoice = RequiredUserAction { request =>
-  //    val user = request.context.user.get
-  //
-  //    val data = JsObject(Map(
-  //      "chosenColourScheme" -> JsNumber(1) // TODO get the chosen one from db
-  //    ))
-  //
-  //    Ok(Json.toJson(API.Success(data = data)))
-  //  }
 
-  def get = Action { request =>
+  def get = RequiredUserAction { request =>
+
+    val chosenColourScheme = request.context.user.map(
+      u => userPreferencesService.getChosenColourScheme(u.usercode)
+    )
+
     val data = JsObject(Map(
-      "chosen" -> JsNumber(1), // TODO get the chosen one from db
+      "chosen" -> JsNumber(BigDecimal(chosenColourScheme.getOrElse(1))),
       "schemes" -> JsArray(backgrounds.map(e => {
         Json.toJson(e)
       }))
