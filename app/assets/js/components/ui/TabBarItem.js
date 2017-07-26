@@ -19,9 +19,14 @@ export default class TabBarItem extends React.PureComponent {
   constructor() {
     super();
     this.onClick = this.onClick.bind(this);
+    this.listItem = null;
   }
 
   onClick() {
+    if (this.listItem) {
+      // Remove focus
+      this.listItem.blur();
+    }
     if (!this.props.isDisabled) this.props.onSelectItem(this.props.path);
   }
 
@@ -36,7 +41,7 @@ export default class TabBarItem extends React.PureComponent {
         role="button"
         tabIndex={0}
         onClick={ this.onClick }
-        ref="li"
+        ref={(li) => { this.listItem = li; }}
       >
         <i
           className={ this.props.active ?

@@ -54,15 +54,16 @@ class UserInfoController @Inject()(
     val refresh = ssc.exists(tokenNotInUserCache) || (ssc.isEmpty && ltc.nonEmpty)
 
     val links = ssoClient.linkGenerator(request)
-    links.setTarget(s"https://${request.host}")
+    val baseUrl = s"https://${request.host}"
+    links.setTarget(baseUrl)
 
     val loginUrl = links.getLoginUrl
-    val logoutUrl = s"https://${request.host}/logout?target=https://${request.host}"
+    val logoutUrl = s"$baseUrl/logout?target=$baseUrl"
 
     request.context.user.map(_.usercode)
       .foreach(userInitialisationService.maybeInitialiseUser)
 
-    contextUserInfo(request.context).map { userInfo =>
+    contextUserInfo(request.context, baseUrl).map { userInfo =>
       val token = requestContext.csrfHelper.token
       val augmentedInfo = userInfo +
         ("csrfToken" -> JsString(token.map(_.value).getOrElse("Missing"))) +
@@ -91,10 +92,10 @@ class UserInfoController @Inject()(
   private val WARWICK_YEAR_OF_STUDY = "warwickyearofstudy"
   private val WARWICK_FINAL_YEAR = "warwickfinalyear"
 
-  private def contextUserInfo(context: LoginContext): Future[JsObject] = {
+  private def contextUserInfo(context: LoginContext, baseUrl: String): Future[JsObject] = {
     context.user.map { user =>
       photoService.photoUrl(user.universityId)
-        .recover { case _ => routes.Assets.versioned("images/no-photo.png").toString }
+        .recover { case _ => baseUrl + routes.Assets.versioned("images/no-photo.png").toString }
         .map { photo =>
           Json.obj(
             "authenticated" -> true,

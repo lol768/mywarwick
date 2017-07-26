@@ -22,11 +22,13 @@ class APNSOutputService @Inject()(
   import apnsProvider.apns
   import system.ThreadPools.mobile
 
+  private val LINK_EMOJI = "🔗"
+
   override def send(message: MessageSend.Heavy): Future[ProcessingResult] = Future {
     import message._
 
     val payload = makePayload(
-      title = activity.title,
+      title = activity.url.map(_ => s"${activity.title} $LINK_EMOJI").getOrElse(activity.title),
       badge = getUnreadNotificationCount(user.usercode)
     )
 

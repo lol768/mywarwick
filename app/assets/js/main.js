@@ -12,7 +12,7 @@ import { syncHistoryWithStore } from 'react-router-redux';
 import fetch from 'isomorphic-fetch';
 import log from 'loglevel';
 
-import notificationsGlue from './notifications-glue';
+import { persistNotificationsLastRead } from './notifications-glue';
 import * as pushNotifications from './push-notifications';
 import * as userinfo from './userinfo';
 import persistedLib from './persisted';
@@ -222,7 +222,7 @@ export function launch(userData) {
   window.addEventListener('online', () => {
     store.dispatch(device.updateOnlineStatus(true));
   });
-  store.subscribe(() => notificationsGlue(store.getState()));
+  store.subscribe(() => persistNotificationsLastRead(store.getState()));
 
   user.loadUserFromLocalStorage(store.dispatch);
   //

@@ -113,8 +113,8 @@ class NotificationsView extends HideableView {
   }
 
   onMutingSave(activity) {
-    return (formValues) => {
-      this.props.dispatch(notifications.saveActivityMute(activity, formValues));
+    return (formNameValues) => {
+      this.props.dispatch(notifications.saveActivityMute(activity, formNameValues));
       this.onMutingDismiss();
     };
   }
