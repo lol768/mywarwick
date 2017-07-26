@@ -128,7 +128,7 @@ class UserInfoControllerTest extends BaseSpec with MockitoSugar with Results {
       (json \ "user" \ "analytics" \ "dimensions" \\ "value").map(_.as[String]) mustBe Seq("IT Services", "Staff", "3", "true")
       (json \ "links" \ "login").as[String] mustBe LOGIN_URL
       (json \ "links" \ "logout").as[String] mustBe LOGOUT_URL
-      (json \ "user" \ "photo" \ "url").as[String] mustBe "/assets/images/no-photo.png"
+      assert((json \ "user" \ "photo" \ "url").as[String].endsWith("/assets/images/no-photo.png"))
     }
 
     "include photo URL when one is available" in {
