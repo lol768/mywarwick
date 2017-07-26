@@ -81,7 +81,7 @@ export default class ActivityMutingView extends React.PureComponent {
     return (
       <form className="form" id={ `muting-${this.props.id}-form` }>
         <div className="form-group">
-          <label>Mute notifications about:</label>
+          <label>Mute alerts about:</label>
           <div className="list-group">
             <CheckboxListGroupItem
               id="activityType"
