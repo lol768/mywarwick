@@ -1,8 +1,8 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
-import RadioListGroupItem from '../../ui/RadioListGroupItem';
 import { connect } from 'react-redux';
+import wrapKeyboardSelect from '../../../keyboard-nav';
 
 class ColourSchemesView extends React.PureComponent {
   static propTypes = {
@@ -18,8 +18,22 @@ class ColourSchemesView extends React.PureComponent {
     isOnline: PropTypes.bool.isRequired,
   };
 
-  onClick() {
 
+  constructor(props) {
+    super(props);
+    this.state = props;
+  }
+
+  onClick(e, choiceId) {
+    alert(e.type);
+
+    e.target.blur();
+    this.onSelect(choiceId);
+  }
+
+  onSelect(choiceId) {
+    if (!this.state.isOnline) return;
+    this.setState({'chosen': choiceId});
   }
 
   makeItem(scheme) {
@@ -27,7 +41,8 @@ class ColourSchemesView extends React.PureComponent {
       <div
         className={`list-group-item list-group-item-colour-scheme list-group-item-colour-scheme-choice list-group-item-colour-scheme-choice-${scheme.id}`}
         role="button"
-        onClick={ this.onClick }
+        onClick={ e => wrapKeyboardSelect(() => this.onSelect(scheme.id), e) }
+        onKeyUp={ e => wrapKeyboardSelect(() => this.onSelect(scheme.id), e) }
         tabIndex={ 0 }
       >
         <div className="media media-colour-scheme-choice">
@@ -36,9 +51,9 @@ class ColourSchemesView extends React.PureComponent {
               <div className="md-radio-colour-scheme-choice">
                 <input
                   type="radio"
-                  checked={ scheme.id === this.props.chosen }
+                  checked={ scheme.id === this.state.chosen }
                   readOnly
-                  disabled={ !this.props.isOnline }
+                  disabled={ !this.state.isOnline }
                 />
                 <label />
               </div>
@@ -54,29 +69,13 @@ class ColourSchemesView extends React.PureComponent {
     );
   }
 
-  makeRadioItem(choice, groupName) {
-    const chosen = this.props.chosen;
-    return (
-      <RadioListGroupItem
-        key={ `${groupName}:${choice.id}` }
-        icon="cog"
-        description={ choice.name }
-        onClick={ this.onClick }
-        checked={ choice.id === chosen }
-        name={ groupName }
-        value={ choice.id }
-        disabled={ !this.props.isOnline }
-      />
-    );
-  }
-
   render() {
     return (
       <div>
         <div className="list-group fixed">
           <div className="list-group-item">
             <div className="list-group-item-heading">
-              <h3>Colour schemes</h3>
+              <h3>Colour scheme</h3>
             </div>
           </div>
         </div>

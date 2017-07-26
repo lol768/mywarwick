@@ -65,6 +65,7 @@
       width: auto;
       display: inline-block;
       background: rgba(0,0,0,0.4);
+      font-size: 1.2em;
     }
 
     .media-left {
@@ -92,13 +93,17 @@
 
   .list-group-item-colour-scheme {
     padding-left: 0;
-    height: 60px;
+    height: 105px;
     margin-top: 25px;
     margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .list-group-item-colour-scheme-choice {
-    background-size: 100% 250%;
+    background-size: cover;
+    background-position: 50% 35%;
   }
 
   .list-group-item-colour-scheme-choice-1 {
@@ -165,8 +170,6 @@
 }
 
 .md-radio-colour-scheme-choice {
-  margin-top: -3px;
-
   &.md-radio-inline {
     display: inline-block;
   }
@@ -188,7 +191,7 @@
     padding: 0 10px;
     margin-bottom: 0;
     cursor: pointer;
-    vertical-align: bottom;
+    vertical-align: middle;
     &:before, &:after {
       position: absolute;
       content: '';
