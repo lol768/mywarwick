@@ -32,7 +32,7 @@ class ColourSchemesView extends React.PureComponent {
   makeItem(scheme) {
     return (
       <div
-        className={`list-group-item list-group-item-colour-scheme list-group-item-colour-scheme-choice list-group-item-colour-scheme-choice-${scheme.id}`}
+        className={`list-group-item list-group-item--colour-scheme list-group-item__choice--colour-scheme list-group-item__choice--colour-scheme-${scheme.id}`}
         role="button"
         onClick={ e => wrapKeyboardSelect(() => this.onSelect(scheme.id), e) }
         onKeyUp={ e => wrapKeyboardSelect(() => this.onSelect(scheme.id), e) }

@@ -40,7 +40,7 @@ describe('ColourSchemesViews', () => {
 
   it('selects the correct scheme after it is clicked', () => {
     const result = shallow(<ColourSchemesView.WrappedComponent {...propsTestData} />);
-    result.find('.list-group-item-colour-scheme').last().simulate('click', {
+    result.find('.list-group-item--colour-scheme').last().simulate('click', {
       type: 'click',
       currentTarget: { blur: () => {} }
     });
@@ -53,7 +53,7 @@ describe('ColourSchemesViews', () => {
 
   it('selects the correct scheme after enter pressed', () => {
     const result = shallow(<ColourSchemesView.WrappedComponent {...propsTestData} />);
-    result.find('.list-group-item-colour-scheme').last().simulate('click', {
+    result.find('.list-group-item--colour-scheme').last().simulate('click', {
       type: 'keyup',
       keyCode: 13,
       preventDefault: () => {}
