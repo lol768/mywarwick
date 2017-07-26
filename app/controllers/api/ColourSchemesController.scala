@@ -40,8 +40,9 @@ class ColourSchemesController @Inject()(
     )
   })
 
+  lazy val backgroundsMap = backgrounds.groupBy(_.id)
 
-  def get = RequiredUserAction { request =>
+  def get = UserAction { request =>
 
     val chosenColourScheme = request.context.user.map(
       u => userPreferencesService.getChosenColourScheme(u.usercode)
@@ -55,6 +56,23 @@ class ColourSchemesController @Inject()(
     ))
 
     Ok(Json.toJson(API.Success(data = data)))
+  }
+
+  def persist = RequiredUserAction { request =>
+    val user = request.context.user.get
+
+    request.body.asJson.collect { case o: JsObject => o }.map { jsObject =>
+      // generally be forgiving here and default to 1
+      val intendedValue = jsObject.value.getOrElse("colourScheme", 1)
+      val chosenScheme = intendedValue match {
+        case a: JsNumber => if (backgroundsMap.contains(a.value.intValue())) a.value.intValue() else 1
+        case _ => 1
+      }
+
+      userPreferencesService.setChosenColourScheme(user.usercode, chosenScheme)
+      Ok(Json.toJson(API.Success("ok", Json.toJson(backgroundsMap.get(chosenScheme)))))
+    }.getOrElse(BadRequest(Json.toJson(API.Failure[JsObject]("bad request", Seq(API.Error("invalid-body", "Body must be JSON-formatted"))))))
+
   }
 
 }
