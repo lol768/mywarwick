@@ -6,6 +6,7 @@ import CheckboxListGroupItem from '../ui/CheckboxListGroupItem';
 import RadioListGroupItem from '../ui/RadioListGroupItem';
 
 const TagKeyPrefix = 'tag-';
+const PublishNotificationType = 'mywarwick-user-publish-notification';
 
 export default class ActivityMutingView extends React.PureComponent {
   static propTypes = {
@@ -77,45 +78,56 @@ export default class ActivityMutingView extends React.PureComponent {
     this.props.onMutingSave(nameValues);
   }
 
+  renderCheckboxes() {
+    return (
+      <div className="form-group">
+        <div className="list-group">
+          <label>Mute alerts about:</label>
+          <CheckboxListGroupItem
+            id="activityType"
+            name="activityType"
+            value={this.props.activityType}
+            onClick={this.handleCheckboxChange}
+            description={this.props.activityTypeDisplayName || this.props.activityType}
+            checked={this.state.formValues.activityType}
+          />
+          <CheckboxListGroupItem
+            id="providerId"
+            name="providerId"
+            value={this.props.provider}
+            onClick={this.handleCheckboxChange}
+            description={this.props.providerDisplayName || this.props.provider}
+            checked={this.state.formValues.providerId}
+          />
+          {
+            _.map(this.props.tags, tag => (
+              <CheckboxListGroupItem
+                key={tag.name}
+                id={`tag-${tag.name}`}
+                name={`tag-${tag.name}`}
+                value={tag.value}
+                onClick={this.handleCheckboxChange}
+                description={tag.display_value || tag.value}
+                checked={this.state.formValues[ActivityMutingView.toTagKey(tag)]}
+              />
+            ))
+          }
+        </div>
+      </div>
+    );
+  }
+
   renderForm() {
     return (
       <form className="form" id={ `muting-${this.props.id}-form` }>
-        <div className="form-group">
-          <label>Mute alerts about:</label>
-          <div className="list-group">
-            <CheckboxListGroupItem
-              id="activityType"
-              name="activityType"
-              value={this.props.activityType}
-              onClick={this.handleCheckboxChange}
-              description={this.props.activityTypeDisplayName || this.props.activityType}
-              checked={this.state.formValues.activityType}
-            />
-            <CheckboxListGroupItem
-              id="providerId"
-              name="providerId"
-              value={this.props.provider}
-              onClick={this.handleCheckboxChange}
-              description={this.props.providerDisplayName || this.props.provider}
-              checked={this.state.formValues.providerId}
-            />
-            {
-              _.map(this.props.tags, tag => (
-                <CheckboxListGroupItem
-                  key={tag.name}
-                  id={`tag-${tag.name}`}
-                  name={`tag-${tag.name}`}
-                  value={tag.value}
-                  onClick={this.handleCheckboxChange}
-                  description={tag.display_value || tag.value}
-                  checked={this.state.formValues[ActivityMutingView.toTagKey(tag)]}
-                />
-              ))
-            }
-          </div>
-        </div>
+        { (this.props.activityType !== PublishNotificationType) ? this.renderCheckboxes() : null }
         <div className="list-group">
-          <label>For:</label>
+          <label>
+            { (this.props.activityType === PublishNotificationType) ?
+              `Mute alerts from ${this.props.providerDisplayName || this.props.provider} for:`
+              : 'For:'
+            }
+          </label>
           {
             _.map(activityMuteDurations, duration => (
               <RadioListGroupItem
