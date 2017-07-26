@@ -13,7 +13,7 @@ describe('TabBar', () => {
     );
 
     let instance = ReactTestUtils.renderIntoDocument(tabBar);
-    ReactTestUtils.Simulate.click(instance.refs.notifications.refs.li);
+    ReactTestUtils.Simulate.click(instance.refs.notifications.listItem);
 
     assert(fn.called);
   });
