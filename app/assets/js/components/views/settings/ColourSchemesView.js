@@ -1,7 +1,5 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import HideableView from '../HideableView';
-import classNames from 'classnames';
 import _ from 'lodash-es';
 import RadioListGroupItem from '../../ui/RadioListGroupItem';
 import { connect } from 'react-redux';
@@ -20,20 +18,8 @@ class ColourSchemesView extends React.PureComponent {
     isOnline: PropTypes.bool.isRequired,
   };
 
-  makeRadioItem(choice, groupName) {
-    const chosen = this.props.chosen;
-    return (
-      <RadioListGroupItem
-        key={ `${name}:${choice.id}` }
-        icon={ `cog` }
-        description={ choice.name }
-        onClick={ this.onClick }
-        checked={ choice.id === chosen }
-        name={ groupName }
-        value={ choice.id }
-        disabled={ !this.props.isOnline }
-      />
-    );
+  onClick() {
+
   }
 
   makeItem(scheme) {
@@ -42,6 +28,7 @@ class ColourSchemesView extends React.PureComponent {
         className={`list-group-item list-group-item-colour-scheme list-group-item-colour-scheme-choice list-group-item-colour-scheme-choice-${scheme.id}`}
         role="button"
         onClick={ this.onClick }
+        tabIndex={ 0 }
       >
         <div className="media media-colour-scheme-choice">
           <div className="media media-colour-scheme-block">
@@ -60,15 +47,27 @@ class ColourSchemesView extends React.PureComponent {
               { scheme.name }
             </div>
           </div>
-          <div className="media-right">
-          </div>
+
+          <div className="media-right" />
         </div>
       </div>
     );
   }
 
-  onClick() {
-
+  makeRadioItem(choice, groupName) {
+    const chosen = this.props.chosen;
+    return (
+      <RadioListGroupItem
+        key={ `${groupName}:${choice.id}` }
+        icon="cog"
+        description={ choice.name }
+        onClick={ this.onClick }
+        checked={ choice.id === chosen }
+        name={ groupName }
+        value={ choice.id }
+        disabled={ !this.props.isOnline }
+      />
+    );
   }
 
   render() {
@@ -83,9 +82,7 @@ class ColourSchemesView extends React.PureComponent {
         </div>
 
         <div className="list-group">
-          {_.map(this.props.schemes, (scheme) => {
-            return this.makeItem(scheme);
-          })}
+          {_.map(this.props.schemes, scheme => this.makeItem(scheme))}
         </div>
       </div>
     );
