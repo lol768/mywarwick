@@ -1,8 +1,5 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
-import $ from 'jquery';
-import log from 'loglevel';
 import AccountPhoto from './AccountPhoto';
 
 export default class UtilityBar extends React.PureComponent {
