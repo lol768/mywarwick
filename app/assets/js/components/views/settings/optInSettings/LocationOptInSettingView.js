@@ -31,7 +31,7 @@ export default class LocationOptInSettingsView extends React.PureComponent {
     super(props);
     this.onClick = this.onClick.bind(this);
 
-    this.state = LocationOptInSettingsView.buildState(this.options, this.props);
+    this.state = LocationOptInSettingsView.buildState(this.props.options, this.props.selected);
   }
 
   componentWillReceiveProps(nextProps) {
