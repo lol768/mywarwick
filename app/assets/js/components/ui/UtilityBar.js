@@ -26,7 +26,7 @@ export default class UtilityBar extends React.PureComponent {
     const user = this.props.user.data || {};
 
     return (
-        <AccountPhoto user={ user } className="img-circle" />
+      <AccountPhoto user={ user } className="img-circle" />
     );
   }
 
