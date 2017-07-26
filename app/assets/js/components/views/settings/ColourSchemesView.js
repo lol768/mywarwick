@@ -24,16 +24,9 @@ class ColourSchemesView extends React.PureComponent {
     this.state = props;
   }
 
-  onClick(e, choiceId) {
-    alert(e.type);
-
-    e.target.blur();
-    this.onSelect(choiceId);
-  }
-
   onSelect(choiceId) {
     if (!this.state.isOnline) return;
-    this.setState({'chosen': choiceId});
+    this.setState({ chosen: choiceId });
   }
 
   makeItem(scheme) {
