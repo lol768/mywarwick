@@ -69,3 +69,8 @@ export function loadDeviceDetails() {
   }
 }
 
+export function signOut() {
+  const state = store.getState();
+  window.location = state.user.links.logout;
+}
+
