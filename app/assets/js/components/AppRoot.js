@@ -26,6 +26,7 @@ import {
   ActivityStreamFilterOptionView,
   NotificationStreamFilterOptionView,
 } from './views/settings/StreamFilterOptionView';
+import SmsNotificationsView from './views/settings/SmsNotificationsView';
 
 export const Routes = {
   EDIT: 'edit',
@@ -46,6 +47,7 @@ export const Routes = {
     },
     ACTIVITY_FILTER: 'activityfilter',
     NOTIFICATION_FILTER: 'notificationfilter',
+    SMS: 'sms',
   },
   POST_TOUR: 'post_tour',
 };
@@ -121,6 +123,10 @@ RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.ACTIVITY_FILTER}`] = {
 RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NOTIFICATION_FILTER}`] = {
   rendered: false,
   view: NotificationStreamFilterOptionView,
+};
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.SMS}`] = {
+  rendered: false,
+  view: SmsNotificationsView,
 };
 
 class AppRoot extends React.Component {

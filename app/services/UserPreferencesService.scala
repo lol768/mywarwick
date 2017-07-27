@@ -1,7 +1,5 @@
 package services
 
-import java.sql.Connection
-
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.db.{Database, NamedDatabase}
 import play.api.libs.json.JsObject

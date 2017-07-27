@@ -76,7 +76,7 @@ class NotificationsController @Inject()(
           errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
           activityId => {
             auditLog('CreateNotification, 'id -> activityId)
-            redirect.flashing("success" -> "Notification created")
+            redirect.flashing("success" -> "Alert created")
           }
         )
       }
@@ -120,7 +120,7 @@ class NotificationsController @Inject()(
             errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
             id => {
               auditLog('UpdateNotification, 'id -> id)
-              redirect.flashing("success" -> "Notification updated")
+              redirect.flashing("success" -> "Alert updated")
             }
           )
         }
@@ -134,7 +134,7 @@ class NotificationsController @Inject()(
         errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
         _ => {
           auditLog('DeleteNotification, 'id -> id)
-          redirect.flashing("success" -> "Notification deleted")
+          redirect.flashing("success" -> "Alert deleted")
         }
       )
     }

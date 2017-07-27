@@ -11,6 +11,7 @@ import HideableView from './HideableView';
 import * as newsCategories from '../../state/news-categories';
 import * as newsOptIn from '../../state/news-optin';
 import * as emailNotificationsOptIn from '../../state/email-notifications-opt-in';
+import * as smsNotifications from '../../state/sms-notifications';
 import { loadDeviceDetails, signOut } from '../../userinfo';
 import SwitchListGroupItem from '../ui/SwitchListGroupItem';
 
@@ -45,6 +46,13 @@ class SettingsView extends HideableView {
       fetching: PropTypes.bool.isRequired,
       failed: PropTypes.bool.isRequired,
       wantsEmails: PropTypes.bool.isRequired,
+    }),
+    smsNotifications: PropTypes.shape({
+      fetching: PropTypes.bool.isRequired,
+      fetched: PropTypes.bool.isRequired,
+      failed: PropTypes.bool.isRequired,
+      enabled: PropTypes.bool.isRequired,
+      smsNumber: PropTypes.string,
     }),
     newsOptIn: PropTypes.shape({
       fetching: PropTypes.bool.isRequired,
@@ -124,12 +132,38 @@ class SettingsView extends HideableView {
     return SettingsView.renderFractionCount(selected, total);
   }
 
+  static renderFetchedBool(props) {
+    const { fetching, failed, enabled, fetched } = props;
+    if (fetching) {
+      return (
+        <div>
+          <i className="fa fa-spinner fa-pulse" />
+          <i className="fa fa-fw fa-chevron-right" />
+        </div>
+      );
+    } else if ((failed && fetched) || !fetched) {
+      return (
+        <div>
+          <i className="fa fa-exclamation-circle text-danger" />
+          <i className="fa fa-fw fa-chevron-right" />
+        </div>
+      );
+    }
+    return (
+      <div>
+        { (enabled) ? 'Enabled' : 'Disabled' }
+        <i className="fa fa-fw fa-chevron-right" />
+      </div>
+    );
+  }
+
   componentDidShow() {
     if (this.props.isOnline) {
       this.props.dispatch(newsCategories.fetch());
       this.props.dispatch(newsOptIn.fetch());
+      this.props.dispatch(emailNotificationsOptIn.fetch());
+      this.props.dispatch(smsNotifications.fetch());
     }
-    this.props.dispatch(emailNotificationsOptIn.fetch());
   }
 
   static getNativeAppVersion() {
@@ -238,6 +272,22 @@ class SettingsView extends HideableView {
               this.props.emailNotificationsOptIn.fetching }
             disabled={ !this.props.isOnline }
           />
+          <div
+            className="list-group-item"
+            role="button"
+            tabIndex={0}
+            onClick={ () =>
+              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.SMS}`))
+            }
+          >
+            { SettingsView.renderSetting(
+              'mobile',
+              'Copy my alerts to SMS',
+              SettingsView.renderFetchedBool({
+                ...this.props.smsNotifications,
+              }),
+            ) }
+          </div>
         </div>
 
         <div className="list-group setting-colour-1">
@@ -414,6 +464,13 @@ const select = (state) => {
       fetchedOnce: state.emailNotificationsOptIn.fetchedOnce,
       fetching: state.emailNotificationsOptIn.fetching,
       failed: state.emailNotificationsOptIn.failed,
+    },
+    smsNotifications: {
+      enabled: state.smsNotifications.wantsSms,
+      smsNumber: state.smsNotifications.smsNumber,
+      fetching: state.smsNotifications.fetching,
+      fetched: state.smsNotifications.fetched,
+      failed: state.smsNotifications.failed,
     },
     newsCategories: {
       fetching: state.newsCategories.fetching,

@@ -24,16 +24,18 @@ class HealthCheckService @Inject()(
 
   def frequency: FiniteDuration = HealthCheckService.defaultFrequency
 
-  var healthCheckLastRunAt: DateTime = null
-  var messagingQueueStatus: Seq[QueueStatus] = null
+  var healthCheckLastRunAt: DateTime = _
+  var messagingQueueStatus: Seq[QueueStatus] = _
   var oldestUnsentMessageCreatedAt: Option[DateTime] = None
   var notificationCountByPublisher: Seq[PublisherActivityCount] = Nil
+  var smsSentLast24Hours: Int = 0
 
   def runNow(): Unit = try {
     healthCheckLastRunAt = DateTime.now
-    messagingQueueStatus = messagingService.getQueueStatus()
-    oldestUnsentMessageCreatedAt = messagingService.getOldestUnsentMessageCreatedAt()
     notificationCountByPublisher = activityService.countNotificationsByPublishersInLast48Hours
+    messagingQueueStatus = messagingService.getQueueStatus
+    oldestUnsentMessageCreatedAt = messagingService.getOldestUnsentMessageCreatedAt
+    smsSentLast24Hours = messagingService.getSmsSentLast24Hours
   } catch {
     case e: Exception => logger.error("Error updating health checks", e)
   }
