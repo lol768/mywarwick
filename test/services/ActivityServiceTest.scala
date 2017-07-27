@@ -14,6 +14,8 @@ import services.dao._
 import services.job.PublishActivityJob
 import warwick.sso.Usercode
 
+import scala.util.Try
+
 class ActivityServiceTest extends BaseSpec with MockitoSugar {
 
   class Scope {
@@ -21,6 +23,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
     val activityTypeService: ActivityTypeService = mock[ActivityTypeService]
     val activityTagDao: ActivityTagDao = mock[ActivityTagDao]
     val activityRecipientDao: ActivityRecipientDao = mock[ActivityRecipientDao]
+    val audienceService: AudienceService = mock[AudienceService]
     val audienceDao: AudienceDao = mock[AudienceDao]
     val activityMuteDao: ActivityMuteDao = mock[ActivityMuteDao]
     val scheduler = new MockSchedulerService()
@@ -30,6 +33,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       activityDao,
       activityTypeService,
       activityTagDao,
+      audienceService,
       audienceDao,
       activityRecipientDao,
       activityMuteDao,
@@ -55,7 +59,8 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       private val recipients = Audience.usercode(Usercode("cusebr"))
 
       when(audienceDao.saveAudience(Matchers.eq(recipients))(any())).thenReturn("audience-id")
-      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
+      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(AudienceSize.Finite(1)), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
+      when(audienceService.resolve(recipients)).thenReturn(Try(Seq(Usercode("cusebr"))))
 
       service.save(submissionDue, recipients) must be(Right("activity-id"))
 
@@ -63,23 +68,27 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
     }
 
     "not fail with invalid activity type" in new Scope {
+      private val recipients = Audience.usercode(Usercode("custard"))
       when(activityTypeService.isValidActivityType(Matchers.any())).thenReturn(false)
       when(audienceDao.saveAudience(Matchers.any())(any())).thenReturn("audience-id")
-      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
+      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(AudienceSize.Finite(1)), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
+      when(audienceService.resolve(recipients)).thenReturn(Try(Seq(Usercode("custard"))))
 
       private val activity = submissionDue
-      private val result = service.save(activity, Audience.usercode(Usercode("custard")))
+      private val result = service.save(activity, recipients)
 
       result must be a 'right
     }
 
     "not fail with invalid tag name" in new Scope {
+      private val recipients = Audience.usercode(Usercode("custard"))
       when(activityTypeService.isValidActivityTagName(Matchers.any())).thenReturn(false)
       when(audienceDao.saveAudience(Matchers.any())(any())).thenReturn("audience-id")
-      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
+      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(AudienceSize.Finite(1)), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
+      when(audienceService.resolve(recipients)).thenReturn(Try(Seq(Usercode("custard"))))
 
       private val activity = submissionDue
-      private val result = service.save(activity, Audience.usercode(Usercode("custard")))
+      private val result = service.save(activity, recipients)
 
       result must be a 'right
     }
@@ -88,7 +97,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       when(activityTypeService.isValidActivityTagName(Matchers.any())).thenReturn(true)
       when(activityTypeService.isValidActivityTag(Matchers.any(),Matchers.any())).thenReturn(false)
       when(audienceDao.saveAudience(Matchers.any())(any())).thenReturn("audience-id")
-      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
+      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(AudienceSize.Finite(1)), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
 
       private val activity = submissionDue.copy(tags = Seq(ActivityTag("module", None, TagValue("CS118", Some("CS118 Programming for Computer Scientists")))))
       private val result = service.save(activity, Audience.usercode(Usercode("custard")))
@@ -137,13 +146,14 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
 
       private val audience = Audience.usercode(Usercode("custard"))
       when(audienceDao.saveAudience(Matchers.eq(audience))(any())).thenReturn("audience")
+      when(audienceService.resolve(audience)).thenReturn(Try(Seq(Usercode("custard"))))
 
       private val result = service.update("activity", submissionDue, audience)
 
       result must be a 'right
       result.right.get must be("activity")
 
-      verify(activityDao).update(Matchers.eq("activity"), Matchers.eq(submissionDue), Matchers.eq("audience"))(Matchers.any())
+      verify(activityDao).update(Matchers.eq("activity"), Matchers.eq(submissionDue), Matchers.eq("audience"), Matchers.eq(AudienceSize.Finite(1)))(Matchers.any())
     }
 
     "get mutes" in {

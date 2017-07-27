@@ -93,7 +93,7 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
     val tagDao = get[ActivityTagDao]
     val activityMuteDao = get[ActivityMuteDao]
     val messaging = mock[MessagingService]
-    val activityService = new ActivityServiceImpl(db, activityDao, activityTypeService, tagDao, audienceDao, recipientDao, activityMuteDao, scheduler)
+    val activityService = new ActivityServiceImpl(db, activityDao, activityTypeService, tagDao, audienceService, audienceDao, recipientDao, activityMuteDao, scheduler)
 
     val publishNotificationJob = new PublishActivityJob(audienceService, activityService, messaging, pubSub, scheduler)
 
@@ -106,7 +106,7 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
         )))
         when(jobDataMap.getString("audienceId")).thenReturn(audienceId)
 
-        val activityId = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, Seq.empty)
+        val activityId = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, AudienceSize.Public, Seq.empty)
         when(jobDataMap.getString("activityId")).thenReturn(activityId)
 
         publishNotificationJob.execute(context)

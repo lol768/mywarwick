@@ -66,13 +66,44 @@ object ActivityRender {
   }
 }
 
+sealed trait ActivityRenderFields {
+  val activity: Activity
+  val icon: Option[ActivityIcon]
+  val tags: Seq[ActivityTag]
+  val provider: ActivityProvider
+  val `type`: ActivityType
+}
+
 case class ActivityRender(
   activity: Activity,
   icon: Option[ActivityIcon],
   tags: Seq[ActivityTag],
   provider: ActivityProvider,
   `type`: ActivityType
-)
+) extends ActivityRenderFields
+
+object ActivityRenderWithAudience {
+  def applyWithAudience(activityRender: ActivityRender, audienceSize: AudienceSize, audience: Audience) =
+    ActivityRenderWithAudience(
+      activity = activityRender.activity,
+      icon = activityRender.icon,
+      tags = activityRender.tags,
+      provider = activityRender.provider,
+      `type` = activityRender.`type`,
+      audienceSize = audienceSize,
+      audienceComponents = audience.components
+    )
+}
+
+case class ActivityRenderWithAudience(
+  activity: Activity,
+  icon: Option[ActivityIcon],
+  tags: Seq[ActivityTag],
+  provider: ActivityProvider,
+  `type`: ActivityType,
+  audienceSize: AudienceSize,
+  audienceComponents: Seq[Audience.Component]
+) extends ActivityRenderFields
 
 object ActivityTag {
   implicit val reads: Reads[ActivityTag] =

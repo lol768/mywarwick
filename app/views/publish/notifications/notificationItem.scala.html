@@ -3,7 +3,13 @@
 @import models.publishing.Ability.EditNotifications
 @import models.publishing.Ability.DeleteNotifications
 @import system.RequestContext
-@(publisher: Publisher, item: ActivityRender, user: Role)(implicit context: RequestContext)
+@import services.dao.DepartmentInfo
+@(
+    publisher: Publisher,
+    item: ActivityRenderWithAudience,
+    user: Role,
+    allDepartments: Seq[DepartmentInfo]
+)(implicit context: RequestContext)
 
 <div class="activity-item row">
   <div class="media">
@@ -18,6 +24,23 @@
         @item.activity.text.map { text =>
           <div class="activity-item__text">@text</div>
         }
+        <div class="activity-item__audience">
+          @item.audienceSize match {
+            case AudienceSize.Public => {
+              <span>To: public</span>
+            }
+            case AudienceSize.Finite(c) => {
+              <span>
+              To: @c
+                @if(c == 1) { recipient } else { recipients }
+                @if(item.audienceComponents.nonEmpty) {
+                  (@tags.audienceComponents(item.audienceComponents, allDepartments))
+              }
+              </span>
+            }
+            case _ => {}
+          }
+        </div>
         <div class="activity-item__date">@models.DateFormats.emailDateTime(item.activity.publishedAt)</div>
         @item.activity.url.map { url =>
           <a href="@url">Link to @url</a>
