@@ -148,6 +148,6 @@ class UserPreferencesDaoImpl extends UserPreferencesDao {
       save(usercode)
     }
 
-    SQL"""UPDATE USER_PREFERENCE SET CHOSEN_COLOUR_SCHEME = $$schemeId WHERE USERCODE = ${usercode.string}""".execute()
+    SQL"""UPDATE USER_PREFERENCE SET CHOSEN_COLOUR_SCHEME = $schemeId WHERE USERCODE = ${usercode.string}""".execute()
   }
 }
