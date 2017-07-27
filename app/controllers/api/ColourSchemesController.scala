@@ -59,8 +59,6 @@ class ColourSchemesController @Inject()(
 
   def persist = RequiredUserAction { request =>
     val user = request.context.user.get
-    println("QZY We have this header " + request.headers("Content-Type"))
-    println("QZY This body " + request.body.asJson.getOrElse("Not present!"))
     request.body.asJson.collect { case o: JsObject => o }.map { jsObject =>
       // generally be forgiving here and default to 1
       val intendedValue = jsObject.value.getOrElse("colourScheme", 1)

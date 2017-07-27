@@ -95,10 +95,8 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
       val secService = new SecurityServiceImpl(mockSSOClientLoggedIn, mock[BasicAuth], mock[CacheApi])
 
       val controller = new ColourSchemesController(secService, confMock, prefsMock)
-      val result = call(controller.persist, FakeRequest().withHeaders("Content-Type" -> "application/json").withJsonBody(Json.obj("colourScheme" -> JsNumber(1))))
+      val result = call(controller.persist, FakeRequest("POST", "/").withHeaders("Content-Type" -> "application/json").withJsonBody(Json.obj("colourScheme" -> JsNumber(1))))
       status(result) mustBe OK
-      System.out.println("QQ " + contentAsString(result))
-      val json = contentAsJson(result)
       verify(prefsMock.setChosenColourScheme(fox.usercode, 1), times(1))
 
       (json \ "success").as[Boolean] mustBe true
