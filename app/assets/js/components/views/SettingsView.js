@@ -12,7 +12,7 @@ import * as newsCategories from '../../state/news-categories';
 import * as newsOptIn from '../../state/news-optin';
 import * as emailNotificationsOptIn from '../../state/email-notifications-opt-in';
 import * as smsNotifications from '../../state/sms-notifications';
-import { loadDeviceDetails } from '../../userinfo';
+import { loadDeviceDetails, signOut } from '../../userinfo';
 import SwitchListGroupItem from '../ui/SwitchListGroupItem';
 
 
@@ -291,7 +291,7 @@ class SettingsView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-1">
-          <div
+          {/* <div
             className="list-group-item"
             role="button"
             tabIndex={0}
@@ -308,7 +308,7 @@ class SettingsView extends HideableView {
                 ...this.props.newsCategories,
               }),
             ) }
-          </div>
+          </div>*/}
           <div
             className="list-group-item"
             role="button"
@@ -404,6 +404,29 @@ class SettingsView extends HideableView {
             { SettingsView.renderSetting('info-circle', this.getVersionString(), null) }
           </div>
         </div>
+
+        <div className="list-group setting-colour-3">
+          <div
+            className="list-group-item"
+            role="button"
+            tabIndex={0}
+            onClick={ signOut }
+          >
+            <div className="media">
+              <div className="media-left signout">
+                <i className="fa fa-fw fa-sign-out" />
+              </div>
+              <div className="media-body">
+                Sign out
+              </div>
+              <div className="media-right">
+                <i className="fa fa-fw fa-chevron-right" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+
       </div>
     );
   }

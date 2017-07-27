@@ -7,6 +7,9 @@ html {
     min-height: unset;
 
     margin-top: @start-masthead-height;
+    &.masquerading {
+      margin-top: calc(@start-masthead-height + @top-page-notice-height);
+    }
     margin-bottom: @start-tab-bar-height;
   }
 
@@ -109,14 +112,10 @@ html {
 
     > ul > li {
       margin: 0 !important;
-      > a {
-        display: block;
-        padding: 0 10px 0 20px;
-        height: 44px;
-        > img {
-          width: 30px;
-          height: 30px;
-        }
+      > img {
+        width: 30px;
+        height: 30px;
+        margin: 2px 10px 0;
       }
     }
   }
@@ -182,5 +181,9 @@ html.android.app {
   &[aria-disabled="true"] {
     cursor: default;
   }
+}
+
+html :hover {
+  outline: none;
 }
 

@@ -20,15 +20,7 @@
               <ul>
                 @context.user.map { user =>
                   <li>
-                    <a href="http://warwick.ac.uk/myaccount"
-                      data-toggle="id7:account-popover"
-                      data-name="@user.name.full"
-                      data-loginlink="@context.loginUrl"
-                      data-logoutlink="@context.logoutUrl"
-                    >
-                      @user.name.full
-                      <span class="caret"></span>
-                    </a>
+                    @user.name.full
                   </li>
                 }.getOrElse {
                   <li>

@@ -54,7 +54,10 @@ class ActivityItem extends React.PureComponent {
                 <AppIcon icon={ this.props.icon } size="lg" />
               </div>
               <div className="media-body">
-                <div className="activity-item__title">{ this.props.title }</div>
+                <div className="activity-item__title">
+                  { this.props.title }
+                  { this.props.url && <i className="fa fa-external-link activity-item__link-indicator" /> }
+                </div>
                 <div className="activity-item__text">{ this.props.text }</div>
 
                 <div className="activity-item__date">

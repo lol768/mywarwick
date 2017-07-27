@@ -44,6 +44,10 @@ abstract class HealthCheck[T](implicit num: Numeric[T]) {
     }
   }
 
+  def outerMessage: String = {
+    s"$message (warning: $warning, critical: $critical)"
+  }
+
   def message: String
 
   def value: T
@@ -60,8 +64,7 @@ abstract class HealthCheck[T](implicit num: Numeric[T]) {
     "name" -> name,
     "status" -> status.string,
     "perfData" -> (Seq(PerfData(name.replace("-", "_"), value, Some(warning), Some(critical)).formatted) ++ perfData.map(_.formatted)),
-    "message" -> s"$message (warning: $warning, critical: $critical)",
+    "message" -> outerMessage,
     "testedAt" -> testedAt
   )
-
 }

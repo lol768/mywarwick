@@ -4,7 +4,7 @@ import * as PropTypes from 'prop-types';
 export default class MasqueradeNotice extends React.PureComponent {
   render() {
     return (
-      <div className="top-page-notice">
+      <div className="top-page-notice masquerade">
         Masquerading as <strong>{this.props.masqueradingAs.name}</strong>
         ({this.props.masqueradingAs.usercode}). <a href="/admin/masquerade">Change</a>
       </div>

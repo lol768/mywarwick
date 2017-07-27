@@ -24,6 +24,8 @@ class FCMOutputService @Inject()(
 
   import system.ThreadPools.mobile
 
+  private val ARROW_EMOJI = "↗️"
+
   val apiKey = configuration.getString("mywarwick.fcm.apiKey")
     .getOrElse(throw new IllegalStateException("Missing FCM API key - set mywarwick.fcm.apiKey"))
 
@@ -45,7 +47,7 @@ class FCMOutputService @Inject()(
     val body = Json.obj(
       "to" -> token,
       "notification" -> Json.obj(
-        "title" -> message.activity.title,
+        "title" -> JsString(message.activity.url.map(_ => s"${message.activity.title} $ARROW_EMOJI").getOrElse(message.activity.title)),
         "body" -> message.activity.text
       )
     )

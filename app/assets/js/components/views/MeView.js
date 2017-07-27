@@ -75,13 +75,17 @@ class MeView extends React.PureComponent {
   }
 
   onLayoutChange(layout) {
-    if (this.previousLayout === undefined) {
+    if (this.props.tiles.length === 0) {
+      // If the store has been cleared don't save the new layout
+      return false;
+    } else if (this.previousLayout === undefined) {
       this.previousLayout = _.cloneDeep(layout);
     } else if (!_.isEqual(layout, this.previousLayout)) {
       this.props.dispatch(tiles.tileLayoutChange(layout, this.props.layoutWidth));
       this.previousLayout = _.cloneDeep(layout);
       this.props.dispatch(tiles.persistTiles());
     }
+    return true;
   }
 
   onHideTile(tile) {

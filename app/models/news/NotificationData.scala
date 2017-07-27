@@ -5,6 +5,10 @@ import org.joda.time.LocalDateTime
 import system.TimeZones
 import warwick.sso.Usercode
 
+object NotificationData {
+  val publishNotificationType = "mywarwick-user-publish-notification"
+}
+
 case class NotificationData(
   text: String,
   providerId: String,
@@ -17,7 +21,7 @@ case class NotificationData(
     publisherId,
     providerId = providerId,
     shouldNotify = true,
-    `type` = "news",
+    `type` = NotificationData.publishNotificationType,
     title = text,
     url = linkHref,
     publishedAt = if (publishDateSet) Some(publishDate.toDateTime(TimeZones.LONDON)) else None
