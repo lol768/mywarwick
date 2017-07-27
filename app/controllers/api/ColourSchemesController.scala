@@ -39,7 +39,7 @@ class ColourSchemesController @Inject()(
     )
   })
 
-  lazy val backgroundsMap: Map[Int, Background] = backgrounds.groupBy(_.id).map(i => i._1 -> i._2.head)
+  lazy val backgroundsMap: Map[Int, Background] = backgrounds.groupBy(_.id).mapValues(_.head)
 
   def get = UserAction { request =>
 
