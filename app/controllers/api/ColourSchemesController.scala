@@ -4,11 +4,10 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import controllers.BaseController
-import models.{API, PageViewHit}
+import models.API
 import play.api.Configuration
 import play.api.libs.json._
-import play.api.mvc.{Action, RequestHeader}
-import services.{NewsService, SecurityService, UserPreferencesService}
+import services.{SecurityService, UserPreferencesService}
 
 import scala.collection.JavaConverters._
 
@@ -40,7 +39,7 @@ class ColourSchemesController @Inject()(
     )
   })
 
-  lazy val backgroundsMap = backgrounds.groupBy(_.id)
+  lazy val backgroundsMap: Map[Int, Background] = backgrounds.groupBy(_.id).map(i => i._1 -> i._2.head)
 
   def get = UserAction { request =>
 
@@ -70,7 +69,7 @@ class ColourSchemesController @Inject()(
       }
 
       userPreferencesService.setChosenColourScheme(user.usercode, chosenScheme)
-      Ok(Json.toJson(API.Success("ok", Json.toJson(backgroundsMap.get(chosenScheme)))))
+      Ok(Json.toJson(API.Success("ok", Json.toJson(backgroundsMap(chosenScheme)))))
     }.getOrElse(BadRequest(Json.toJson(API.Failure[JsObject]("bad request", Seq(API.Error("invalid-body", "Body must be JSON-formatted"))))))
 
   }
