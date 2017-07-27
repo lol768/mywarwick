@@ -7,7 +7,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.Configuration
 import play.api.cache.CacheApi
-import play.api.libs.json.{JsArray, JsValue, Json}
+import play.api.libs.json.{JsArray, JsNumber, JsValue, Json}
 import play.api.test.Helpers._
 import play.api.test._
 import play.api.mvc.Results
@@ -95,15 +95,15 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
       val secService = new SecurityServiceImpl(mockSSOClientLoggedIn, mock[BasicAuth], mock[CacheApi])
 
       val controller = new ColourSchemesController(secService, confMock, prefsMock)
+      val result = call(controller.persist, FakeRequest().withHeaders("Content-Type" -> "application/json").withJsonBody(Json.obj("colourScheme" -> JsNumber(1))))
+      status(result) mustBe OK
+      System.out.println("QQ " + contentAsString(result))
+      val json = contentAsJson(result)
+      verify(prefsMock.setChosenColourScheme(fox.usercode, 1), times(1))
 
-      val result = call(controller.persist, FakeRequest().withJsonBody(Json.toJson(Map("colourScheme" -> 1))))
-//      status(result) mustBe OK
-//      val json = contentAsJson(result)
-//      verify(prefsMock.setChosenColourScheme(fox.usercode, 1), times(1))
-//
-//      (json \ "success").as[Boolean] mustBe true
-//      (json \ "data" \ "id").as[Int] mustBe 1
-//      (json \ "data" \ "name").as[String] mustBe "Geese invasion"
+      (json \ "success").as[Boolean] mustBe true
+      (json \ "data" \ "id").as[Int] mustBe 1
+      (json \ "data" \ "name").as[String] mustBe "Geese invasion"
     }
 
   }
