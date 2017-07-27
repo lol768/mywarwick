@@ -26,6 +26,8 @@ trait MessagingDao {
 
   def getOldestUnsentMessageCreatedAt()(implicit c: Connection): Option[DateTime]
 
+  def getSmsSentLast24Hours()(implicit c: Connection): Int
+
 }
 
 class MessagingDaoImpl extends MessagingDao {
@@ -45,6 +47,10 @@ class MessagingDaoImpl extends MessagingDao {
   override def getOldestUnsentMessageCreatedAt()(implicit c: Connection): Option[DateTime] =
     SQL("SELECT UPDATED_AT FROM MESSAGE_SEND WHERE STATE = 'A' AND ROWNUM = 1 ORDER BY UPDATED_AT ASC")
       .as(scalar[DateTime].singleOpt)
+
+  override def getSmsSentLast24Hours()(implicit c: Connection): Int =
+    SQL"SELECT COUNT(*) FROM MESSAGE_SEND WHERE OUTPUT = ${Output.SMS.name} AND UPDATED_AT > SYSDATE - 1"
+      .as(scalar[Int].single)
 
   override def save(activity: Activity, usercode: Usercode, output: Output)(implicit c: Connection): Unit = {
     SQL("INSERT INTO MESSAGE_SEND (ID, ACTIVITY_ID, USERCODE, OUTPUT, UPDATED_AT) VALUES ({id}, {activityId}, {usercode}, {output}, {updatedAt})")

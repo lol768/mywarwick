@@ -33,6 +33,14 @@ trait UserPreferencesDao {
 
   def setUserEmailsPreference(usercode: Usercode, wantsEmail: Boolean)(implicit c: Connection): Unit
 
+  def getUserSmsPreference(usercode: Usercode)(implicit c: Connection): Boolean
+
+  def setUserSmsPreference(usercode: Usercode, wantsSms: Boolean)(implicit c: Connection): Unit
+
+  def getUserSmsNumber(usercode: Usercode)(implicit c: Connection): Option[String]
+
+  def setUserSmsNumber(usercode: Usercode, phoneNumber: String)(implicit c: Connection): Unit
+
 }
 
 @Singleton
@@ -93,6 +101,35 @@ class UserPreferencesDaoImpl extends UserPreferencesDao {
     }
 
     SQL"""UPDATE USER_PREFERENCE SET WANTS_EMAILS = $wantsEmail WHERE USERCODE = ${usercode.string}""".execute()
+  }
+
+  override def getUserSmsPreference(usercode: Usercode)(implicit c: Connection): Boolean = {
+    val result =
+      SQL"SELECT WANTS_SMS FROM USER_PREFERENCE WHERE USERCODE = ${usercode.string}".as(scalar[Boolean].singleOpt)
+
+    result.getOrElse(true)
+  }
+
+  override def setUserSmsPreference(usercode: Usercode, wantsSms: Boolean)(implicit c: Connection): Unit = {
+    if (!exists(usercode)) {
+      save(usercode)
+    }
+
+    SQL"""UPDATE USER_PREFERENCE SET WANTS_SMS = $wantsSms WHERE USERCODE = ${usercode.string}""".execute()
+  }
+
+  override def getUserSmsNumber(usercode: Usercode)(implicit c: Connection): Option[String] = {
+    SQL"SELECT SMS_NUMBER FROM USER_PREFERENCE WHERE USERCODE = ${usercode.string}"
+      .as(get[Option[String]]("sms_number").singleOpt)
+      .flatten
+  }
+
+  override def setUserSmsNumber(usercode: Usercode, phoneNumber: String)(implicit c: Connection): Unit = {
+    if (!exists(usercode)) {
+      save(usercode)
+    }
+
+    SQL"""UPDATE USER_PREFERENCE SET SMS_NUMBER = $phoneNumber WHERE USERCODE = ${usercode.string}""".execute()
   }
 
 }
