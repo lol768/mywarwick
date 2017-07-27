@@ -113,7 +113,7 @@ GET           /api/smsNotificationPreferences                @controllers.api.Sm
 POST          /api/smsNotificationPreferences                @controllers.api.SmsNotificationsPrefController.update
 
 GET         /api/colour-schemes                                   @controllers.api.ColourSchemesController.get
-POST        /api/colour-schemes/choice                            @controllers.api.ColourSchemesController.persist
+POST        /api/colour-schemes                                   @controllers.api.ColourSchemesController.persist
 
 POST          /api/errors/js                                 @controllers.api.ErrorsController.js
 

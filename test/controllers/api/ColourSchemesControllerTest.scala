@@ -69,7 +69,6 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
   when(confMock.getConfigList("mywarwick.backgrounds")).thenReturn(Some(configList))
 
   "ColourSchemesControllerTest#get" should {
-
     "correctly retrieve fox's chosen colour scheme" in {
       // we're logged in
       val secService = new SecurityServiceImpl(mockSSOClientLoggedIn, mock[BasicAuth], mock[CacheApi])
@@ -89,7 +88,9 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
       (json \ "data" \ "schemes" \ 1 \ "name").as[String] mustBe "Fox den"
       (json \ "data" \ "schemes" \ 1 \ "url").as[String] mustBe "fox_den.jpg"
     }
+  }
 
+  "ColourSchemesControllerTest#persist" should {
     "correctly set fox's colour scheme" in {
       // we're logged in
       val secService = new SecurityServiceImpl(mockSSOClientLoggedIn, mock[BasicAuth], mock[CacheApi])
@@ -105,7 +106,6 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
       (json \ "data" \ "id").as[Int] mustBe 1
       (json \ "data" \ "name").as[String] mustBe "Geese invasion"
     }
-
   }
 
 }
