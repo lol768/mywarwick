@@ -174,6 +174,17 @@ class SettingsView extends HideableView {
     return null;
   }
 
+  static canLaunchTour() {
+    return 'MyWarwickNative' in window && 'launchTour' in window.MyWarwickNative;
+  }
+
+  static launchTour() {
+    if (SettingsView.canLaunchTour()) {
+      return window.MyWarwickNative.launchTour();
+    }
+    return null;
+  }
+
   getVersionString() {
     const { assetsRevision } = this.props;
     const userAgent = window.navigator.userAgent;
@@ -400,6 +411,20 @@ class SettingsView extends HideableView {
               </div>
             </div>
           </div>
+          { SettingsView.canLaunchTour() &&
+            <div
+              className="list-group-item"
+              role="button"
+              tabIndex={0}
+              onClick={ SettingsView.launchTour }
+            >
+              { SettingsView.renderSetting(
+                'arrow-circle-o-right',
+                'Take a tour',
+                <i className="fa fa-fw fa-chevron-right" />,
+              ) }
+            </div>
+          }
           <div className="list-group-item">
             { SettingsView.renderSetting('info-circle', this.getVersionString(), null) }
           </div>
