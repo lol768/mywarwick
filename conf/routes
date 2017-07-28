@@ -26,6 +26,8 @@ GET         /admin/sysadmin                                       @controllers.a
 GET         /admin/cluster                                        @controllers.admin.ClusterStateController.html
 GET         /admin/masquerade                                     @controllers.admin.MasqueradeController.masquerade
 
+GET         /admin/publishers                                     @controllers.admin.publishers.PublishersController.index
+
 GET         /publish/:publisher/webgroups                         @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 
 GET         /publish                                              @controllers.publish.PublishersController.index
