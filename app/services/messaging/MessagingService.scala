@@ -8,8 +8,8 @@ import com.google.inject.ImplementedBy
 import models._
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
-import services.{ActivityService, EmailNotificationsPrefService, SmsNotificationsPrefService}
 import services.dao.MessagingDao
+import services.{ActivityService, EmailNotificationsPrefService, SmsNotificationsPrefService}
 import system.Logging
 import warwick.sso.{UserLookupService, Usercode}
 
@@ -86,6 +86,8 @@ class MessagingServiceImpl @Inject()(
       )
       if (mutedUsercodes.nonEmpty) {
         logger.info(s"Muted sending activity ${activity.id} to: ${mutedUsercodes.map(_.string).mkString(",")}")
+
+        mutedUsercodes.foreach(activities.markSent(activity.id, _))
       }
       recipients.diff(mutedUsercodes)
     }.getOrElse(recipients)
@@ -127,6 +129,8 @@ class MessagingServiceImpl @Inject()(
   override def processNow(message: MessageSend.Light): Future[ProcessingResult] = {
     activities.getActivityById(message.activity).map { activity =>
       users.getUsers(Seq(message.user)).get.get(message.user).map { user =>
+        activities.markSent(activity.id, message.user)
+
         val heavyMessage = message.fill(user, activity)
         heavyMessage.output match {
           case Output.Email => emailer.send(heavyMessage)

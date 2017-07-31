@@ -3,6 +3,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
+import fetch from 'isomorphic-fetch';
 import FileUpload from './publish/components/FileUpload';
 import './publish/news';
 import './publish/groupPicker';
@@ -79,4 +80,31 @@ $(() => {
       $('.popover-active').popover('hide').removeClass('popover-active');
     }
   });
+
+  $('.activity-item__send-progress').each(function watchSendStatus() {
+    const $activity = $(this).parents('.activity-item');
+    const activityId = $activity.data('activity-id');
+
+    const interval = setInterval(() => {
+      fetch(`notifications/${activityId}/status`, {
+        credentials: 'same-origin',
+      })
+        .then(response => response.text())
+        .then(text => JSON.parse(text))
+        .then(response => {
+          if (response.sendingNow) {
+            $activity.find('.activity-item__sent-count').text(response.sentCount);
+          } else {
+            clearInterval(interval);
+            $activity.find('.activity-item__send-progress').remove();
+
+            if ($('.activity-item__send-progress').length === 0) {
+              $('#sending-empty').removeClass('hidden');
+            }
+
+            $activity.prependTo('#sent-activities');
+          }
+        });
+    }, 2000);
+  })
 });

@@ -38,6 +38,8 @@ trait ActivityService {
 
   def getFutureActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int = 50): Seq[ActivityRenderWithAudience]
 
+  def getSendingActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int = 50): Seq[ActivityRenderWithAudience]
+
   def getPastActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int = 50): Seq[ActivityRenderWithAudience]
 
   def getActivityIcon(providerId: String): Option[ActivityIcon]
@@ -62,6 +64,10 @@ trait ActivityService {
   def countNotificationsByPublishersInLast48Hours: Seq[PublisherActivityCount]
 
   def updateAudienceCount(activityId: String, audienceId: String, recipients: Seq[Usercode]): Unit
+
+  def markSent(id: String, usercode: Usercode): Unit
+
+  def getActivityWithAudience(id: String): Option[ActivityRenderWithAudience]
 }
 
 class ActivityServiceImpl @Inject()(
@@ -206,14 +212,21 @@ class ActivityServiceImpl @Inject()(
   override def getFutureActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int): Seq[ActivityRenderWithAudience] =
     mixinAudience(db.withConnection(implicit c => dao.getFutureActivitiesByPublisherId(publisherId, limit)))
 
+  override def getSendingActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int): Seq[ActivityRenderWithAudience] =
+    mixinAudience(db.withConnection(implicit c => dao.getSendingActivitiesByPublisherId(publisherId, limit)))
+
   override def getPastActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int): Seq[ActivityRenderWithAudience] =
     mixinAudience(db.withConnection(implicit c => dao.getPastActivitiesByPublisherId(publisherId, limit)))
+
+  override def getActivityWithAudience(id: String): Option[ActivityRenderWithAudience] =
+    mixinAudience(db.withConnection(implicit c => dao.getActivityRenderById(id).toSeq)).headOption
 
   private def mixinAudience(activities: Seq[ActivityRender]): Seq[ActivityRenderWithAudience] = {
     db.withConnection { implicit c =>
       val audiences = activities.map(a => a.activity.id -> a.activity.audienceId.map(audienceDao.getAudience).getOrElse(Audience())).toMap
       val audienceSizes = dao.getAudienceSizes(activities.map(_.activity.id))
-      activities.map(a => ActivityRenderWithAudience.applyWithAudience(a, audienceSizes(a.activity.id), audiences(a.activity.id)))
+      val sentCounts = dao.getSentCounts(activities.map(_.activity.id))
+      activities.map(a => ActivityRenderWithAudience.applyWithAudience(a, audienceSizes(a.activity.id), audiences(a.activity.id), sentCounts(a.activity.id)))
     }
   }
 
@@ -304,6 +317,9 @@ class ActivityServiceImpl @Inject()(
       }
       dao.updateAudienceCount(activityId, audienceSize)
     }
+
+  override def markSent(id: String, usercode: Usercode): Unit =
+    db.withTransaction(implicit c => recipientDao.markSent(id, usercode.string))
 }
 
 sealed trait ActivityError {

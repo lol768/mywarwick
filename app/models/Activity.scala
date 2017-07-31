@@ -83,7 +83,7 @@ case class ActivityRender(
 ) extends ActivityRenderFields
 
 object ActivityRenderWithAudience {
-  def applyWithAudience(activityRender: ActivityRender, audienceSize: AudienceSize, audience: Audience) =
+  def applyWithAudience(activityRender: ActivityRender, audienceSize: AudienceSize, audience: Audience, sentCount: Int) =
     ActivityRenderWithAudience(
       activity = activityRender.activity,
       icon = activityRender.icon,
@@ -91,7 +91,8 @@ object ActivityRenderWithAudience {
       provider = activityRender.provider,
       `type` = activityRender.`type`,
       audienceSize = audienceSize,
-      audienceComponents = audience.components
+      audienceComponents = audience.components,
+      sentCount = sentCount
     )
 }
 
@@ -102,8 +103,11 @@ case class ActivityRenderWithAudience(
   provider: ActivityProvider,
   `type`: ActivityType,
   audienceSize: AudienceSize,
-  audienceComponents: Seq[Audience.Component]
-) extends ActivityRenderFields
+  audienceComponents: Seq[Audience.Component],
+  sentCount: Int
+) extends ActivityRenderFields {
+  def isSendingNow = !activity.publishedAt.isAfterNow && audienceSize.toOption.exists(as => sentCount < as)
+}
 
 object ActivityTag {
   implicit val reads: Reads[ActivityTag] =

@@ -32,6 +32,7 @@ class SchedulerConfiguration @Inject()(
     dailyAtHourAndMinute(3, 0)
   )
 
+  logger.info("Starting the scheduler")
   scheduler.start()
 
   def configureScheduledJob[SBT <: Trigger](name: String, jobBuilder: JobBuilder, schedule: ScheduleBuilder[SBT])(implicit scheduler: Scheduler): Option[Date] = {

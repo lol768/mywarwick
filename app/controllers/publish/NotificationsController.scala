@@ -6,12 +6,12 @@ import controllers.BaseController
 import models.news.NotificationData
 import models.publishing.Ability._
 import models.publishing.{Ability, Publisher}
-import models.{API, Audience, DateFormats}
+import models.{Audience, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.{ActionFilter, ActionRefiner, Result}
+import play.api.libs.json.Json
+import play.api.mvc.{ActionFilter, Result}
 import services._
 import services.dao.DepartmentInfoDao
 import system.Validation
@@ -47,9 +47,10 @@ class NotificationsController @Inject()(
 
   def list(publisherId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
     val futureNotifications = activityService.getFutureActivitiesWithAudienceByPublisherId(publisherId)
+    val sendingNotifications = activityService.getSendingActivitiesWithAudienceByPublisherId(publisherId)
     val pastNotifications = activityService.getPastActivitiesWithAudienceByPublisherId(publisherId)
 
-    Ok(views.list(request.publisher, futureNotifications, pastNotifications, request.userRole, allDepartments))
+    Ok(views.list(request.publisher, futureNotifications, sendingNotifications, pastNotifications, request.userRole, allDepartments))
   }
 
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
@@ -58,6 +59,18 @@ class NotificationsController @Inject()(
         "baseAudience" -> usercodesInAudience.length
       )
     )
+  }
+
+  def status(publisherId: String, activityId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
+    activityService.getActivityWithAudience(activityId)
+      .filter(_.activity.publisherId.contains(publisherId))
+      .map { activity =>
+        Ok(Json.obj(
+          "audienceSize" -> activity.audienceSize.toOption,
+          "sentCount" -> activity.sentCount,
+          "sendingNow" -> activity.isSendingNow
+        ))
+      }.getOrElse(NotFound(Json.obj("error" -> "not_found")))
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNotifications) { implicit request =>
@@ -84,60 +97,60 @@ class NotificationsController @Inject()(
   }
 
   def updateForm(publisherId: String, id: String) = EditAction(id, publisherId, EditNotifications).async { implicit request =>
-      val activity = activityService.getActivityById(id).get
-      val audience = audienceService.getAudience(activity.audienceId.get)
+    val activity = activityService.getActivityById(id).get
+    val audience = audienceService.getAudience(activity.audienceId.get)
 
-      val notificationData = NotificationData(
-        text = activity.title,
-        providerId = activity.providerId,
-        linkHref = activity.url,
-        publishDateSet = true,
-        publishDate = activity.publishedAt.toLocalDateTime
-      )
+    val notificationData = NotificationData(
+      text = activity.title,
+      providerId = activity.providerId,
+      linkHref = activity.url,
+      publishDateSet = true,
+      publishDate = activity.publishedAt.toLocalDateTime
+    )
 
-      val audienceData = audienceBinder.unbindAudience(audience)
+    val audienceData = audienceBinder.unbindAudience(audience)
 
-      val form = publishNotificationForm.fill(PublishNotificationData(notificationData, audienceData))
+    val form = publishNotificationForm.fill(PublishNotificationData(notificationData, audienceData))
 
-      Future.successful(
-        Ok(views.updateForm(request.publisher, activity, form, departmentOptions, providerOptions, permissionScope, audience))
-      )
-    }
+    Future.successful(
+      Ok(views.updateForm(request.publisher, activity, form, departmentOptions, providerOptions, permissionScope, audience))
+    )
+  }
 
   def update(publisherId: String, id: String, submitted: Boolean) = EditAction(id, publisherId, EditNotifications).async { implicit request =>
-      val activity = activityService.getActivityById(id).get
-      val audience = audienceService.getAudience(activity.id)
+    val activity = activityService.getActivityById(id).get
+    val audience = audienceService.getAudience(activity.id)
 
-      bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted, restrictedRecipients = true,
-        formWithErrors =>
-          Ok(views.updateForm(request.publisher, activity, formWithErrors, departmentOptions, providerOptions, permissionScope, audience)),
-        (publish, audience) => {
-          val redirect = Redirect(routes.NotificationsController.list(publisherId))
+    bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted, restrictedRecipients = true,
+      formWithErrors =>
+        Ok(views.updateForm(request.publisher, activity, formWithErrors, departmentOptions, providerOptions, permissionScope, audience)),
+      (publish, audience) => {
+        val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
-          val activity = publish.item.toSave(request.context.user.get.usercode, publisherId)
+        val activity = publish.item.toSave(request.context.user.get.usercode, publisherId)
 
-          activityService.update(id, activity, audience).fold(
-            errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
-            id => {
-              auditLog('UpdateNotification, 'id -> id)
-              redirect.flashing("success" -> "Alert updated")
-            }
-          )
-        }
-      )
-    }
+        activityService.update(id, activity, audience).fold(
+          errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
+          id => {
+            auditLog('UpdateNotification, 'id -> id)
+            redirect.flashing("success" -> "Alert updated")
+          }
+        )
+      }
+    )
+  }
 
   def delete(publisherId: String, id: String) = EditAction(id, publisherId, DeleteNotifications) { implicit request =>
-      val redirect = Redirect(routes.NotificationsController.list(publisherId))
+    val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
-      activityService.delete(id).fold(
-        errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
-        _ => {
-          auditLog('DeleteNotification, 'id -> id)
-          redirect.flashing("success" -> "Alert deleted")
-        }
-      )
-    }
+    activityService.delete(id).fold(
+      errors => redirect.flashing("error" -> errors.map(_.message).mkString(", ")),
+      _ => {
+        auditLog('DeleteNotification, 'id -> id)
+        redirect.flashing("success" -> "Alert deleted")
+      }
+    )
+  }
 
   private def NotificationBelongsToPublisher(id: String, publisherId: String) = new ActionFilter[PublisherRequest] {
     override protected def filter[A](request: PublisherRequest[A]): Future[Option[Result]] = {
