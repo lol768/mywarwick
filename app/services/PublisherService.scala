@@ -34,7 +34,9 @@ trait PublisherService {
 
   def partitionGlobalPublishers(publishers: Seq[Publisher]): (Seq[Publisher], Seq[Publisher])
 
-  def save(publisher: Publisher): String
+  def save(id: String, data: PublisherSave): String
+
+  def update(id: String, data: PublisherSave): Unit
 
 }
 
@@ -98,6 +100,9 @@ class PublisherServiceImpl @Inject()(
     publishers.partition(p => dao.getPublisherDepartments(p.id).contains(AllDepartmentsWildcard))
   )
 
-  override def save(publisher: Publisher): String =
-    db.withConnection(implicit c => dao.save(publisher))
+  override def save(id: String, data: PublisherSave): String =
+    db.withConnection(implicit c => dao.save(id, data))
+
+  override def update(id: String, data: PublisherSave): Unit =
+    db.withConnection(implicit c => dao.update(id, data))
 }

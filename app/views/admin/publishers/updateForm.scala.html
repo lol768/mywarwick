@@ -1,0 +1,33 @@
+@import models.publishing.PublisherSave
+@import system.RequestContext
+@(
+    publisherId: String,
+    form: Form[PublisherSave]
+)(implicit messages: Messages, context: RequestContext)
+
+@implicitFieldConstructor = @{
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
+}
+
+@common.admin("Administration", "Publishers", "Update") {
+
+  @b3.form(controllers.admin.publishers.routes.PublishersController.update(publisherId)) {
+
+    @context.csrfHelper.formField
+
+    @b3.static('_label -> "ID") {
+      @publisherId
+    }
+
+    @b3.text(form("name"),
+      '_label -> "Name",
+      'required -> true)
+
+    @b3.text(form("maxRecipients"),
+      '_label -> "Max recipients for alerts",
+      'placeholder -> "None if blank")
+
+    @tags.submitOrCancel("Update", controllers.admin.publishers.routes.PublishersController.index())
+  }
+
+}

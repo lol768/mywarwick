@@ -4,12 +4,13 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import controllers.BaseController
-import models.publishing.Publisher
+import models.publishing.{Publisher, PublisherSave}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.Result
 import services.{PublisherService, SecurityService}
-import system.Roles
+import system.{RequestContext, Roles}
 
 @Singleton
 class PublishersController @Inject() (
@@ -23,11 +24,14 @@ class PublishersController @Inject() (
 
   def allPublishers: Seq[Publisher] = publisherService.all
 
+  def createPublisherIdForm = Form(mapping(
+    "id" -> nonEmptyText.verifying("ID already exists", id => !allPublishers.exists(_.id == id))
+  )(s => s)(s => Option(s)))
+
   def publisherForm = Form(mapping(
-    "id" -> nonEmptyText.verifying("ID already exists", id => !allPublishers.exists(_.id == id)),
     "name" -> nonEmptyText,
     "maxRecipients" -> optional(number)
-  )(Publisher.apply)(Publisher.unapply))
+  )(PublisherSave.apply)(PublisherSave.unapply))
 
   def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     val publishers = allPublishers
@@ -38,18 +42,49 @@ class PublishersController @Inject() (
   }
 
   def createForm = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    Ok(views.html.admin.publishers.createForm(publisherForm))
+    Ok(views.html.admin.publishers.createForm(createPublisherIdForm, publisherForm))
   }
 
   def create = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    publisherForm.bindFromRequest.fold(
-      formWithErrors => Ok(views.html.admin.publishers.createForm(formWithErrors)),
-      data => {
-        publisherService.save(data)
-        auditLog('CreatePublisher, 'id -> data.id)
-        Redirect(routes.PublishersController.index()).flashing("success" -> "Publisher created")
+    createPublisherIdForm.bindFromRequest.fold(
+      idFormWithErrors => Ok(views.html.admin.publishers.createForm(idFormWithErrors, publisherForm.bindFromRequest)),
+      id => {
+        publisherForm.bindFromRequest.fold(
+          formWithErrors => Ok(views.html.admin.publishers.createForm(createPublisherIdForm.bindFromRequest, formWithErrors)),
+          data => {
+            publisherService.save(id, data)
+            auditLog('CreatePublisher, 'id -> id)
+            Redirect(routes.PublishersController.index()).flashing("success" -> "Publisher created")
+          }
+        )
       }
     )
+
+  }
+
+  def updateForm(publisherId: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
+    withPublisher(publisherId, { publisher =>
+      Ok(views.html.admin.publishers.updateForm(publisherId, publisherForm.fill(PublisherSave(publisher.name, publisher.maxRecipients))))
+    })
+  }
+
+  def update(publisherId: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
+    withPublisher(publisherId, { _ =>
+      publisherForm.bindFromRequest.fold(
+        formWithErrors => Ok(views.html.admin.publishers.updateForm(publisherId, formWithErrors)),
+        data => {
+          publisherService.update(publisherId, data)
+          auditLog('UpdatePublisher, 'id -> publisherId)
+          Redirect(routes.PublishersController.index()).flashing("success" -> "Publisher updated")
+        }
+      )
+    })
+  }
+
+  private def withPublisher(publisherId: String, block: (Publisher) => Result)(implicit request: RequestContext): Result = {
+    publisherService.find(publisherId)
+      .map(block)
+      .getOrElse(NotFound(views.html.errors.notFound()))
   }
 
 }

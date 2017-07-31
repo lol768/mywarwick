@@ -29,6 +29,8 @@ GET         /admin/masquerade                                     @controllers.a
 GET         /admin/publishers                                     @controllers.admin.publishers.PublishersController.index
 GET         /admin/publishers/new                                 @controllers.admin.publishers.PublishersController.createForm
 POST        /admin/publishers                                     @controllers.admin.publishers.PublishersController.create
+GET         /admin/publishers/:publisher                          @controllers.admin.publishers.PublishersController.updateForm(publisher: String)
+POST        /admin/publishers/:publisher                          @controllers.admin.publishers.PublishersController.update(publisher: String)
 
 GET         /publish/:publisher/webgroups                         @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 
