@@ -91,7 +91,7 @@ $(() => {
       })
         .then(response => response.text())
         .then(text => JSON.parse(text))
-        .then(response => {
+        .then((response) => {
           if (response.sendingNow) {
             $activity.find('.activity-item__sent-count').text(response.sentCount);
           } else {
@@ -106,5 +106,5 @@ $(() => {
           }
         });
     }, 2000);
-  })
+  });
 });
