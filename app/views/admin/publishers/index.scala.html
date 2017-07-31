@@ -1,7 +1,67 @@
 @import system.RequestContext
-@()(implicit context: RequestContext)
+@import models.publishing.Publisher
+@import services.Provider
+@import models.publishing.PublisherPermission
+@import models.publishing.PermissionScope
+@(
+    publishers: Seq[Publisher],
+    providerMap: Map[Publisher, Seq[Provider]],
+    userPermissionsMap: Map[Publisher, Seq[PublisherPermission]],
+    permissionScopeMap: Map[Publisher, PermissionScope]
+)(implicit context: RequestContext)
 @common.admin("Administration", "Publishers") {
-  <p>
-    List of publishers
-  </p>
+  @for(publisher <- publishers.sortBy(_.name)) {
+    <div class="panel panel-default">
+
+      <div class="panel-heading">
+        <div class="pull-right">
+          <a href="#" class="btn btn-default btn-xs">Edit publisher</a>
+          <a href="#" class="btn btn-default btn-xs">Edit permissions</a>
+          <a href="#" class="btn btn-default btn-xs">Edit departments</a>
+        </div>
+        <div class="panel-title">
+          @publisher.name (@publisher.id)
+        </div>
+      </div>
+
+      <div class="panel-body">
+        @if(providerMap(publisher).isEmpty) {
+          <div class="alert alert-warning">
+            No Providers found. Each publisher should have at least one provider.
+              <a href="#" class="btn btn-primary btn-sm">Create</a>
+          </div>
+        } else {
+          <table class="table table-hover table-striped">
+            <thead>
+              <tr>
+                <th>Providers</th>
+                <th><a href="#" class="btn btn-default btn-xs">Create</a></th>
+              </tr>
+            </thead>
+            <tbody>
+            @for(provider <- providerMap(publisher).sortBy(_.name)) {
+              <tr>
+                <td>@provider.name (@provider.id)</td>
+                <td><a href="#" class="btn btn-default btn-xs">Edit</a></td>
+              </tr>
+            }
+            </tbody>
+          </table>
+        }
+        @if(userPermissionsMap(publisher).isEmpty) {
+          <div class="alert alert-warning">
+            No users have permission to use this publisher. <a href="#" class="btn btn-primary btn-sm">Add</a>
+          </div>
+        }
+        @permissionScopeMap(publisher) match {
+          case PermissionScope.Departments(depts) if depts.isEmpty => {
+            <div class="alert alert-warning">
+              No departments assigned to this publisher. <a href="#" class="btn btn-primary btn-sm">Add</a>
+            </div>
+          }
+          case _ => {}
+        }
+      </div>
+    </div>
+  }
 }
