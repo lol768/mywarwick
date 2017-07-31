@@ -46,10 +46,10 @@ class NotificationsController @Inject()(
   )(PublishNotificationData.apply)(PublishNotificationData.unapply))
 
   def list(publisherId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
-    val futureNotifications = activityService.getFutureActivitiesByPublisherId(publisherId)
-    val pastNotifications = activityService.getPastActivitiesByPublisherId(publisherId)
+    val futureNotifications = activityService.getFutureActivitiesWithAudienceByPublisherId(publisherId)
+    val pastNotifications = activityService.getPastActivitiesWithAudienceByPublisherId(publisherId)
 
-    Ok(views.list(request.publisher, futureNotifications, pastNotifications, request.userRole))
+    Ok(views.list(request.publisher, futureNotifications, pastNotifications, request.userRole, allDepartments))
   }
 
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request =>

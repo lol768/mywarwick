@@ -54,32 +54,32 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
   "ActivityDao" should {
 
     "get activity by id" in transaction { implicit c =>
-      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
       activityDao.getActivityById(activityId).map(_.id) mustBe Some(activityId)
     }
 
     "get activities by ids" in transaction { implicit c =>
-      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
       activityDao.getActivitiesByIds(Seq(activityId)).map(_.id) mustBe Seq(activityId)
     }
 
     "replace activities" in transaction { implicit c =>
-      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
-      val newActivityId = activityDao.save(activitySave, audienceId, Seq(activityId))
+      val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
+      val newActivityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq(activityId))
       activityDao.getActivityById(activityId).flatMap(_.replacedBy) mustBe Some(newActivityId)
     }
 
     "find activities without tags" in transaction { implicit c =>
-      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
       activityRecipientDao.create(activityId, "someone", None, shouldNotify=false)
-      activityDao.getActivitiesForUser("someone", false).map(_.activity.id) must contain(activityId)
+      activityDao.getActivitiesForUser("someone", notifications = false).map(_.activity.id) must contain(activityId)
     }
 
     "find activities with tags" in transaction { implicit c =>
-      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
       activityRecipientDao.create(activityId, "someone", None, shouldNotify=true)
       activityTagDao.save(activityId, ActivityTag("name", None, TagValue("value")))
-      activityDao.getActivitiesForUser("someone", true).map(_.activity.id) must contain(activityId)
+      activityDao.getActivitiesForUser("someone", notifications = true).map(_.activity.id) must contain(activityId)
     }
 
     "get notifications since date" in transaction { implicit c =>
@@ -88,8 +88,8 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
       val oldDate = nowDate.minusMonths(1)
       val lastFetchedDate = nowDate.minusDays(1)
 
-      val oldActivityId = activityDao.save(activitySave, audienceId, Seq.empty)
-      val newActivityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val oldActivityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
+      val newActivityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
 
       val newActivity = activityDao.getActivityById(newActivityId).get
 
@@ -139,7 +139,7 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
       insertSkynetProvider.execute()
 
       val activitySave = ActivitySave(Usercode("custard"), "default", "skynet", shouldNotify = false, "beady-eye", "Watching You", None, None, Seq.empty, Map.empty, None)
-      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
       activityRecipientDao.create(activityId, "nicduke", None, shouldNotify = false)
 
       val response = activityDao.getActivitiesForUser("nicduke", notifications = false, limit = 1).head
@@ -157,23 +157,23 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "get past activities created by publisher" in transaction { implicit c =>
-      val id = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, Nil)
-      val id2 = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, Nil)
+      val id = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, AudienceSize.Public, Nil)
+      val id2 = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, AudienceSize.Public, Nil)
 
       activityDao.getPastActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must contain allOf(id, id2)
       activityDao.getFutureActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must be(empty)
     }
 
     "get future activities created by publisher" in transaction { implicit c =>
-      val id = activityDao.save(Fixtures.activitySave.submissionDue.copy(publishedAt = Some(DateTime.now.plusDays(1))), audienceId, Nil)
-      val id2 = activityDao.save(Fixtures.activitySave.submissionDue.copy(publishedAt = Some(DateTime.now.plusDays(2))), audienceId, Nil)
+      val id = activityDao.save(Fixtures.activitySave.submissionDue.copy(publishedAt = Some(DateTime.now.plusDays(1))), audienceId, AudienceSize.Public, Nil)
+      val id2 = activityDao.save(Fixtures.activitySave.submissionDue.copy(publishedAt = Some(DateTime.now.plusDays(2))), audienceId, AudienceSize.Public, Nil)
 
       activityDao.getPastActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must be(empty)
       activityDao.getFutureActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must contain allOf(id, id2)
     }
 
     "delete an activity" in transaction { implicit c =>
-      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
 
       activityDao.delete(activityId)
 
@@ -183,9 +183,9 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "update an activity" in transaction { implicit c =>
-      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
 
-      activityDao.update(activityId, activitySave.copy(title = "New title"), audienceId)
+      activityDao.update(activityId, activitySave.copy(title = "New title"), audienceId, AudienceSize.Public)
 
       SQL"SELECT TITLE FROM ACTIVITY WHERE ID = $activityId"
         .executeQuery()
@@ -193,7 +193,7 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "retrieve all tags associated with an activity" in transaction { implicit c =>
-      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
       activityTagDao.save(activityId, ActivityTag("a", None, TagValue("apple")))
       activityTagDao.save(activityId, ActivityTag("b", None, TagValue("banana")))
 
@@ -206,7 +206,7 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     def createActivity(time: DateTime)(implicit c: Connection) = {
-      val id = activityDao.save(activitySave.copy(publishedAt = Some(time)), audienceId, Nil)
+      val id = activityDao.save(activitySave.copy(publishedAt = Some(time)), audienceId, AudienceSize.Public, Nil)
       activityTagDao.save(id, ActivityTag("a", None, TagValue("apple")))
       activityTagDao.save(id, ActivityTag("b", None, TagValue("banana")))
       activityRecipientDao.create(id, "someone", Some(time), activitySave.shouldNotify)
@@ -247,14 +247,14 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
     "count notifications since date" in transaction { implicit c =>
       activityDao.countNotificationsSinceDate("someone", DateTime.now.minusHours(2)) must be(0)
 
-      val activityId = activityDao.save(Fixtures.activitySave.submissionDue.copy(publishedAt = Some(DateTime.now.minusHours(1))), audienceId, Nil)
+      val activityId = activityDao.save(Fixtures.activitySave.submissionDue.copy(publishedAt = Some(DateTime.now.minusHours(1))), audienceId, AudienceSize.Public, Nil)
       activityRecipientDao.create(activityId, "someone", None, shouldNotify = true)
 
       activityDao.countNotificationsSinceDate("someone", DateTime.now.minusHours(2)) must be(1)
     }
 
     "retrieve provider" in transaction { implicit c =>
-      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
       deleteFixtureProvider.execute()
       insertFixtureProvider.execute()
 
@@ -267,7 +267,7 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "retrieve type" in transaction { implicit c =>
-      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
       deleteFixtureType.execute()
       insertFixtureType.execute()
 
