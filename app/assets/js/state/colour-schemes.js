@@ -28,15 +28,15 @@ export function fetch() {
   };
 }
 
-
-let store = {};
-const postToServer = _.debounce(() =>
-  store.dispatch(doPostToServer(store.getState().colourSchemes.chosen), 500)
-);
-
 const doPostToServer = (colourScheme) => {
   postJsonWithCredentials('/api/colour-schemes', { colourScheme });
 };
+
+let store = {};
+const postToServer = _.debounce(() =>
+  store.dispatch(doPostToServer(store.getState().colourSchemes.chosen), 500),
+);
+
 
 export function changeColourScheme(chosen) {
   return (dispatch, getState) => {
@@ -44,7 +44,7 @@ export function changeColourScheme(chosen) {
     dispatch(persist(chosen));
     postToServer();
   };
-};
+}
 
 const initialState = {
   fetching: false,
@@ -76,11 +76,10 @@ export function reducer(state = initialState, action) {
         schemes: action.payload.data.schemes,
       };
     case SAVE_CHOICE:
-      console.log(action.payload);
       return {
         ...state,
         chosen: action.payload,
-      }
+      };
     default:
       return state;
   }
