@@ -3,10 +3,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
-import fetch from 'isomorphic-fetch';
 import FileUpload from './publish/components/FileUpload';
 import './publish/news';
 import './publish/groupPicker';
+import './serverpipe';
 
 /*
  Attempt to register service worker - we don't do notifications or offline but it's nice to keep it
@@ -86,9 +86,7 @@ $(() => {
     const activityId = $activity.data('activity-id');
 
     const interval = setInterval(() => {
-      fetch(`notifications/${activityId}/status`, {
-        credentials: 'same-origin',
-      })
+      fetchWithCredentials(`notifications/${activityId}/status`)
         .then(response => response.text())
         .then(text => JSON.parse(text))
         .then((response) => {
