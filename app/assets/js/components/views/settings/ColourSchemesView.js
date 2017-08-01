@@ -3,10 +3,13 @@ import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
 import { connect } from 'react-redux';
 import wrapKeyboardSelect from '../../../keyboard-nav';
+import * as colourSchemes from '../../../state/colour-schemes';
+import HideableView from '../HideableView';
 
-class ColourSchemesView extends React.PureComponent {
+class ColourSchemesView extends HideableView {
   static propTypes = {
     fetching: PropTypes.bool.isRequired,
+    dispatch: PropTypes.func.isRequired,
     failed: PropTypes.bool.isRequired,
     fetched: PropTypes.bool.isRequired,
     chosen: PropTypes.number.isRequired,
@@ -21,12 +24,17 @@ class ColourSchemesView extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.state = props;
+    this.onSelect = this.onSelect.bind(this);
   }
 
-  onSelect(choiceId) {
-    if (!this.state.isOnline) return;
-    this.setState({ chosen: choiceId });
+  onSelect(chosen) {
+    if (!this.props.isOnline) return;
+    this.props.dispatch(colourSchemes.changeColourScheme(chosen));
+  }
+
+  componentDidShow() {
+    if (!this.props.isOnline) return;
+    this.props.dispatch(colourSchemes.fetch());
   }
 
   makeItem(scheme) {
@@ -44,9 +52,9 @@ class ColourSchemesView extends React.PureComponent {
               <div className="md-radio-colour-scheme-choice">
                 <input
                   type="radio"
-                  checked={ scheme.id === this.state.chosen }
+                  checked={ scheme.id === this.props.chosen }
                   readOnly
-                  disabled={ !this.state.isOnline }
+                  disabled={ !this.props.isOnline }
                 />
                 <label />
               </div>
@@ -81,14 +89,14 @@ class ColourSchemesView extends React.PureComponent {
   }
 }
 
-function select(state) {
+function select(store) {
   return {
-    fetching: state.colourSchemes.fetching,
-    failed: state.colourSchemes.failed,
-    fetched: state.colourSchemes.fetched,
-    chosen: state.colourSchemes.chosen,
-    schemes: state.colourSchemes.schemes,
-    isOnline: state.device.isOnline,
+    fetching: store.colourSchemes.fetching,
+    failed: store.colourSchemes.failed,
+    fetched: store.colourSchemes.fetched,
+    chosen: store.colourSchemes.chosen,
+    schemes: store.colourSchemes.schemes,
+    isOnline: store.device.isOnline,
   };
 }
 
