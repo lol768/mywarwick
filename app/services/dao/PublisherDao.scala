@@ -31,6 +31,8 @@ trait PublisherDao {
 
   def isPublisher(usercode: String)(implicit  c: Connection): Boolean
 
+  def save(publisher: Publisher)(implicit c: Connection): String
+
 }
 
 @Singleton
@@ -83,10 +85,18 @@ class PublisherDaoImpl extends PublisherDao {
       .as(providerParser.*)
 
   override def isPublisher(usercode: String)(implicit c: Connection): Boolean =
-
     SQL"SELECT COUNT(*) FROM PUBLISHER_PERMISSION WHERE USERCODE = $usercode"
       .executeQuery()
       .as(scalar[Int].single) > 0
+
+  override def save(publisher: Publisher)(implicit c: Connection): String = {
+    import publisher._
+    SQL"""
+      INSERT INTO PUBLISHER (id, name, max_recipients)
+      VALUES ($id, $name, $maxRecipients)
+    """.executeUpdate()
+    id
+  }
 }
 
 

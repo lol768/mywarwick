@@ -27,6 +27,8 @@ GET         /admin/cluster                                        @controllers.a
 GET         /admin/masquerade                                     @controllers.admin.MasqueradeController.masquerade
 
 GET         /admin/publishers                                     @controllers.admin.publishers.PublishersController.index
+GET         /admin/publishers/new                                 @controllers.admin.publishers.PublishersController.createForm
+POST        /admin/publishers                                     @controllers.admin.publishers.PublishersController.create
 
 GET         /publish/:publisher/webgroups                         @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 
