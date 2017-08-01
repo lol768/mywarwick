@@ -4,10 +4,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import FileUpload from './publish/components/FileUpload';
-import { fetchWithCredentials } from './serverpipe'
+import { fetchWithCredentials } from './serverpipe';
 import './publish/news';
 import './publish/groupPicker';
-import './serverpipe';
 
 /*
  Attempt to register service worker - we don't do notifications or offline but it's nice to keep it
@@ -24,7 +23,7 @@ if (fileUploadContainer) {
   const imageId = fileUploadContainer.attributes['data-image-id'].value;
 
   ReactDOM.render(
-    <FileUpload inputName={inputName.value} imageId={imageId}/>,
+    <FileUpload inputName={inputName.value} imageId={imageId} />,
     fileUploadContainer,
   );
 }
