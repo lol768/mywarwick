@@ -11,7 +11,7 @@
     allDepartments: Seq[DepartmentInfo]
 )(implicit context: RequestContext)
 
-<div class="activity-item row">
+<div class="activity-item row" data-activity-id="@item.activity.id">
   <div class="media">
     <div class="col-xs-10">
       <div class="media-left">
@@ -41,6 +41,22 @@
             case _ => {}
           }
         </div>
+        @if(item.isSendingNow) {
+        <div class="activity-item__audience activity-item__send-progress">
+          <i class="fa fa-spin fa-refresh"></i>
+          Sent to
+          <span class="activity-item__sent-count">
+            @("%,d".format(item.sentCount))
+          </span>
+          @item.audienceSize match {
+            case AudienceSize.Finite(size) => {
+              of @("%,d".format(size))
+            }
+            case _ => {}
+          }
+          recipients
+        </div>
+        }
         <div class="activity-item__date">@models.DateFormats.emailDateTime(item.activity.publishedAt)</div>
         @item.activity.url.map { url =>
           <a href="@url">Link to @url</a>

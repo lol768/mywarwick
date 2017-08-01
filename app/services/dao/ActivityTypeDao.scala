@@ -1,7 +1,6 @@
 package services.dao
 
 import java.sql.Connection
-import java.util.regex.Pattern
 
 import anorm.SqlParser._
 import anorm._

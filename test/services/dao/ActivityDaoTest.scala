@@ -157,16 +157,31 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "get past activities created by publisher" in transaction { implicit c =>
-      val id = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, AudienceSize.Public, Nil)
-      val id2 = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, AudienceSize.Public, Nil)
+      val id = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, AudienceSize.Finite(10), Nil)
+      val id2 = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, AudienceSize.Finite(10), Nil)
+
+      activityDao.setSentCount(id, 10)
+      activityDao.setSentCount(id2, 10)
 
       activityDao.getPastActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must contain allOf(id, id2)
       activityDao.getFutureActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must be(empty)
     }
 
+    "get sending activities created by a publisher" in transaction { implicit c =>
+      val id = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, AudienceSize.Finite(10), Nil)
+      val id2 = activityDao.save(Fixtures.activitySave.submissionDue, audienceId, AudienceSize.Finite(10), Nil)
+
+      activityDao.setSentCount(id, 0)
+      activityDao.setSentCount(id2, 5)
+
+      activityDao.getPastActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must be(empty)
+      activityDao.getSendingActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must contain allOf(id, id2)
+      activityDao.getFutureActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must be(empty)
+    }
+
     "get future activities created by publisher" in transaction { implicit c =>
-      val id = activityDao.save(Fixtures.activitySave.submissionDue.copy(publishedAt = Some(DateTime.now.plusDays(1))), audienceId, AudienceSize.Public, Nil)
-      val id2 = activityDao.save(Fixtures.activitySave.submissionDue.copy(publishedAt = Some(DateTime.now.plusDays(2))), audienceId, AudienceSize.Public, Nil)
+      val id = activityDao.save(Fixtures.activitySave.submissionDue.copy(publishedAt = Some(DateTime.now.plusDays(1))), audienceId, AudienceSize.Finite(20), Nil)
+      val id2 = activityDao.save(Fixtures.activitySave.submissionDue.copy(publishedAt = Some(DateTime.now.plusDays(2))), audienceId, AudienceSize.Finite(20), Nil)
 
       activityDao.getPastActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must be(empty)
       activityDao.getFutureActivitiesByPublisherId("elab", limit = 100).map(_.activity.id) must contain allOf(id, id2)

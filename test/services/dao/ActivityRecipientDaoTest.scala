@@ -41,6 +41,12 @@ class ActivityRecipientDaoTest extends BaseSpec with OneStartAppPerSuite {
         .as(scalar[DateTime].singleOpt)
 
       date must not be None
+
+      val count = SQL("SELECT SENT_COUNT FROM ACTIVITY WHERE ID = {activityId}")
+        .on('activityId -> activityId)
+        .as(scalar[Int].single)
+
+      count mustBe 1
     }
 
   }
