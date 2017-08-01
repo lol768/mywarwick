@@ -40,33 +40,31 @@ describe('ColourSchemesViews', () => {
     expect(radios.first().props().checked).to.equal(true);
   });
 
-  // it('selects the correct scheme after it is clicked', () => {
-  //   const result = shallow(<ColourSchemesView.WrappedComponent {...propsTestData} />);
-  //   result.find('.list-group-item--colour-scheme').last().simulate('click', {
-  //     type: 'click',
-  //     currentTarget: {
-  //       blur: () => {
-  //       }
-  //     }
-  //   });
-  //
-  //   const radios = result.find('[type="radio"]');
-  //
-  //   expect(radios.last().props().checked).to.equal(true);
-  //   expect(radios.first().props().checked).to.equal(false);
-  // });
-  //
-  // it('selects the correct scheme after enter pressed', () => {
-  //   const result = shallow(<ColourSchemesView.WrappedComponent {...propsTestData} />);
-  //   result.find('.list-group-item--colour-scheme').last().simulate('click', {
-  //     type: 'keyup',
-  //     keyCode: 13,
-  //     preventDefault: () => {
-  //     }
-  //   });
-  //   const radios = result.find('[type="radio"]');
-  //
-  //   expect(radios.last().props().checked).to.equal(true);
-  //   expect(radios.first().props().checked).to.equal(false);
-  // });
+  it('fire the correct event after it is clicked', () => {
+    const result = shallow(<ColourSchemesView.WrappedComponent {...propsTestData} />);
+    const instance = result.instance();
+    const click = sinon.spy(instance, 'persist');
+    result.find('.list-group-item--colour-scheme').last().simulate('click', {
+      type: 'click',
+      currentTarget: {
+        blur: () => {
+        }
+      }
+    });
+    click.should.have.been.called;
+
+  });
+
+  it('fire the correct event after enter pressed', () => {
+    const result = shallow(<ColourSchemesView.WrappedComponent {...propsTestData} />);
+    const instance = result.instance();
+    const click = sinon.spy(instance, 'persist');
+    result.find('.list-group-item--colour-scheme').last().simulate('click', {
+      type: 'keyup',
+      keyCode: 13,
+      preventDefault: () => {
+      }
+    });
+    click.should.have.been.called;
+  });
 });
