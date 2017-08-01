@@ -34,9 +34,8 @@ const doPostToServer = (colourScheme) => {
 
 let store = {};
 const postToServer = _.debounce(() =>
-  store.dispatch(doPostToServer(store.getState().colourSchemes.chosen), 500),
+  doPostToServer(store.getState().colourSchemes.chosen), 500,
 );
-
 
 export function changeColourScheme(chosen) {
   return (dispatch, getState) => {
@@ -50,6 +49,13 @@ const initialState = {
   fetching: false,
   failed: false,
   fetched: false,
+  chosen: 1,
+  schemes: [
+    {
+      id: 1,
+      url: 'bg01.jpg',
+    },
+  ],
 };
 
 export function reducer(state = initialState, action) {
