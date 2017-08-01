@@ -103,7 +103,7 @@ paths:
             readOnly: true
             $ref: '#/definitions/ErrorResponse'
 
-  /streams/{provider_id}/notifications:
+  /streams/{provider_id}/alerts:
     post:
       security:
         - basicAuth: []
