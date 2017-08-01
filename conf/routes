@@ -5,6 +5,7 @@
 # Home page
 GET         /                                                     @controllers.HomeController.index
 GET         /notifications                                        @controllers.HomeController.index
+GET         /alerts                                               @controllers.HomeController.index
 GET         /activity                                             @controllers.HomeController.index
 GET         /news                                                 @controllers.HomeController.index
 GET         /search                                               @controllers.HomeController.index
@@ -50,6 +51,16 @@ POST        /publish/:publisher/notifications/:id/validate        @controllers.p
 POST        /publish/:publisher/notifications/:id                 @controllers.publish.NotificationsController.update(publisher: String, id: String, submitted: Boolean = true)
 POST        /publish/:publisher/notifications/:id/delete          @controllers.publish.NotificationsController.delete(publisher: String, id: String)
 
+GET         /publish/:publisher/alerts                            @controllers.publish.NotificationsController.list(publisher: String)
+GET         /publish/:publisher/alerts/new                        @controllers.publish.NotificationsController.createForm(publisher: String)
+POST        /publish/:publisher/alerts/validate                   @controllers.publish.NotificationsController.create(publisher: String, submitted: Boolean = false)
+POST        /publish/:publisher/alerts/audience                   @controllers.publish.NotificationsController.audienceInfo(publisher: String)
+POST        /publish/:publisher/alerts                            @controllers.publish.NotificationsController.create(publisher: String, submitted: Boolean = true)
+GET         /publish/:publisher/alerts/:id/edit                   @controllers.publish.NotificationsController.updateForm(publisher: String, id: String)
+POST        /publish/:publisher/alerts/:id/validate               @controllers.publish.NotificationsController.update(publisher: String, id: String, submitted: Boolean = false)
+POST        /publish/:publisher/alerts/:id                        @controllers.publish.NotificationsController.update(publisher: String, id: String, submitted: Boolean = true)
+POST        /publish/:publisher/alerts/:id/delete                 @controllers.publish.NotificationsController.delete(publisher: String, id: String)
+
 GET         /websockets/page/                                     @controllers.WebSocketController.socket
 
 GET         /assets/manifest.json                                 @controllers.AppManifestController.getAppManifest
@@ -69,6 +80,7 @@ POST        /api/news/analytics                                   @controllers.a
 GET         /api/news/optin                                       @controllers.api.UserNewsOptInController.list
 POST        /api/news/optin                                       @controllers.api.UserNewsOptInController.update
 GET         /api/id7/notifications/unreads                        @controllers.api.NotificationsSnapshotController.unreads
+GET         /api/id7/alerts/unreads                               @controllers.api.NotificationsSnapshotController.unreads
 
 GET         /news/:id/redirect                                    @controllers.api.ReadNewsController.redirect(id: String)
 
@@ -81,11 +93,14 @@ GET         /service/revision                                     @controllers.V
 POST        /api/streams/read                                     @controllers.api.UserActivitiesController.markAsRead
 
 GET         /api/streams/notifications                            @controllers.api.UserActivitiesController.notifications(since: Option[String], before: Option[String], limit: Int ?= 100)
+GET         /api/streams/alerts                                   @controllers.api.UserActivitiesController.notifications(since: Option[String], before: Option[String], limit: Int ?= 100)
 GET         /api/streams/activities                               @controllers.api.UserActivitiesController.activities(since: Option[String], before: Option[String], limit: Int ?= 100)
 
 GET         /api/streams/notifications/filter                     @controllers.api.UserStreamFilterController.notificationFilter
+GET         /api/streams/alerts/filter                            @controllers.api.UserStreamFilterController.notificationFilter
 GET         /api/streams/activities/filter                        @controllers.api.UserStreamFilterController.activityFilter
 POST        /api/streams/notifications/filter                     @controllers.api.UserStreamFilterController.updateNotificationFilter
+POST        /api/streams/alerts/filter                            @controllers.api.UserStreamFilterController.updateNotificationFilter
 POST        /api/streams/activities/filter                        @controllers.api.UserStreamFilterController.updateActivityFilter
 
 GET         /api/streams/mute                                     @controllers.api.UserActivitiesController.listMutes
@@ -93,6 +108,7 @@ PUT         /api/streams/mute                                     @controllers.a
 DELETE      /api/streams/mute                                     @controllers.api.UserActivitiesController.removeMute(id: String)
 
 POST        /api/streams/:providerId/notifications                @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
+POST        /api/streams/:providerId/alerts                       @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
 POST        /api/streams/:providerId/activities                   @controllers.api.IncomingActivitiesController.postActivity(providerId: String)
 
 GET         /api/tiles                                            @controllers.api.TilesController.getLayout

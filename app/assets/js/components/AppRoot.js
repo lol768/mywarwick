@@ -32,7 +32,7 @@ export const Routes = {
   EDIT: 'edit',
   ADD: 'add',
   TILES: 'tiles',
-  NOTIFICATIONS: 'notifications',
+  NOTIFICATIONS: 'alerts',
   ACTIVITY: 'activity',
   NEWS: 'news',
   SEARCH: 'search',
@@ -77,6 +77,10 @@ RouteViews[`/${Routes.EDIT}/${Routes.ADD}`] = {
   view: AddingTilesView,
 };
 RouteViews[`/${Routes.NOTIFICATIONS}`] = {
+  rendered: false,
+  view: NotificationsView,
+};
+RouteViews['/notifications'] = {
   rendered: false,
   view: NotificationsView,
 };

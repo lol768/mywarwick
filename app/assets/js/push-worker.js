@@ -64,14 +64,14 @@ self.addEventListener('notificationclick', (event) => {
       type: 'window',
     }).then((clientList) => {
       clientList.forEach((client) => {
-        if (/\/notifications$/i.test(client.url) && 'focus' in client) {
+        if (/\/alerts$/i.test(client.url) && 'focus' in client) {
           return client.focus();
         }
 
         return null;
       });
       if (clients.openWindow) {
-        return clients.openWindow('/notifications');
+        return clients.openWindow('/alerts');
       }
 
       return null;
