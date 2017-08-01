@@ -165,8 +165,6 @@ export function launch(userData) {
   persisted('tiles.data', tiles.fetchedTiles);
   persisted('tileContent', tiles.loadedAllTileContent);
   persisted('tileContent', tiles.loadedAllTileContent);
-  persisted('colourSchemes', colourSchemes.receive);
-
 
   persisted(
     'newsCategories',
