@@ -32,16 +32,14 @@ const doPostToServer = (colourScheme) => {
   postJsonWithCredentials('/api/colour-schemes', { colourScheme });
 };
 
-let store = {};
-const postToServer = _.debounce(() =>
-  doPostToServer(store.getState().colourSchemes.chosen), 500,
+const postToServer = _.debounce(getState =>
+  doPostToServer(getState().colourSchemes.chosen), 500,
 );
 
 export function changeColourScheme(chosen) {
   return (dispatch, getState) => {
-    store = { dispatch, getState };
     dispatch(persist(chosen));
-    postToServer();
+    postToServer(getState);
   };
 }
 
