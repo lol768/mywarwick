@@ -55,54 +55,91 @@
   .id7-left-border, .id7-right-border, .id7-utility-masthead { background-color: gold; }
 }
 
-.theme-transparent {
-  .bg-stand-in {
-    background: @behind-tiles-colour;
-  }
+.transparent-theme-maker(@gradBg, @gradTh, @imageUrl, @n) {
+  .theme-transparent-@{n} {
 
-  @transparent: rgba(0, 0, 0, 0.25);
-  .id7-fixed-width-container,
-  .id7-main-content-area {
-    background: transparent;
-  }
-
-  .in-root, .in-edit, .in-tiles {
-
-    html& .bg-stand-in {
-      background-image: linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674);
-      background-image: url(/assets/images/bg01.jpg);
-    }
-
-    &.in-add h3 {
-      margin: 0;
-      padding: 20px 0 20px 14px;
-      background: @transparent;
-      color: #fff;
-    }
-
-    html& {
-      // Native apps render the background image internally
-      background: transparent;
-    }
-  }
-
-  .in-settings.in-tiles {
-
-    html& , html& .bg-stand-in {
+    .bg-stand-in {
       background: @behind-tiles-colour;
     }
-  }
-  .colour-0, .colour-1, .colour-2, .colour-3 {
-    background-color: @transparent;
-    .tile--zoomed .tile__header {
-      background: linear-gradient(to right, rgba(70, 59, 120, 0.8) 0%, rgba(37, 91, 165, 0.8) 100%);
+
+    @transparent: rgba(0, 0, 0, 0.25);
+    .id7-fixed-width-container,
+    .id7-main-content-area {
+      background: transparent;
+    }
+
+    .in-root, .in-edit, .in-tiles {
+
+      html& .bg-stand-in {
+        background-image: url(@imageUrl), @gradBg;
+      }
+
+      &.in-add h3 {
+        margin: 0;
+        padding: 20px 0 20px 14px;
+        background: @transparent;
+        color: #fff;
+      }
+
+      html& {
+        // Native apps render the background image internally
+        background: transparent;
+      }
+    }
+
+    .in-settings.in-tiles {
+
+      html& .bg-stand-in {
+        background: @behind-tiles-colour;
+      }
+    }
+    .colour-0, .colour-1, .colour-2, .colour-3 {
+      background-color: @transparent;
+      .tile--zoomed .tile__header {
+        background: @gradTh;
+      }
+    }
+    .tile--map__container .map-tile-image {
+      -webkit-filter: saturate(0%) brightness(90%) contrast(50%) opacity(25%); // Android WebView seems to need this
+      filter: saturate(0%) brightness(90%) contrast(50%) opacity(25%);
     }
   }
-  .tile--map__container .map-tile-image {
-    -webkit-filter: saturate(0%) brightness(90%) contrast(50%) opacity(25%); // Android WebView seems to need this
-    filter: saturate(0%) brightness(90%) contrast(50%) opacity(25%);
-  }
 }
+
+.transparent-theme-maker(
+  linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
+  linear-gradient(to right, rgba(70, 59, 120, 0.8) 0%, rgba(37, 91, 165, 0.8) 100%),
+  '/assets/images/bg01.jpg',
+  1
+);
+
+.transparent-theme-maker(
+  linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
+  linear-gradient(to right, #A7655C 0%, #B5A7A4 100%),
+  '/assets/images/bg02.jpg',
+  2
+);
+
+.transparent-theme-maker(
+  linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
+  linear-gradient(to right, #62A79E 0%, #A5B3AA 100%),
+  '/assets/images/bg03.jpg',
+  3
+);
+
+.transparent-theme-maker(
+  linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
+  linear-gradient(to right, #39797E 0%, #0D5D6C 100%),
+  '/assets/images/bg04.jpg',
+  4
+);
+
+.transparent-theme-maker(
+  linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
+  linear-gradient(to right, #B39E1E 0%, #BD8F4D 100%),
+  '/assets/images/bg05.jpg',
+  5
+);
 
 .behind-tiles(@rules) {
   .id7-fixed-width-container,

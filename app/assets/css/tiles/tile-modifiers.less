@@ -30,7 +30,7 @@ body.in-tiles {
 }
 
 @tile-header-height: 30px;
-
+@tile-header-zoomed-padding: 8px;
 
 .tile--zoomed {
   overflow: visible;
@@ -53,7 +53,7 @@ body.in-tiles {
   .tile__body {
     position: unset;
     overflow-y: visible;
-    padding-top: @tile-header-height;
+    padding-top: (@tile-header-zoomed-padding + @tile-header-height);
   }
 }
 
