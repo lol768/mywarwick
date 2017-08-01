@@ -24,8 +24,7 @@ const reducer = combineReducers({
   routing: routerReducer,
 });
 
-const logger = (/* store */) => next => (ac) => {
-  const action = ac || { type: '-' };
+const logger = (/* store */) => next => (action) => {
   log.debug(`store.dispatch(${action.type})`);
   if (action.error && action.payload && action.payload.message) {
     log.warn('Error in action:', action.payload);
