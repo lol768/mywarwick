@@ -1,6 +1,9 @@
-@import models.publishing.Publisher
+@import models.publishing.PublisherSave
 @import system.RequestContext
-@(form: Form[Publisher])(implicit messages: Messages, context: RequestContext)
+@(
+    idForm: Form[String],
+    publisherForm: Form[PublisherSave]
+)(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
   b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
@@ -12,16 +15,16 @@
 
     @context.csrfHelper.formField
 
-    @b3.text(form("id"),
+    @b3.text(idForm("id"),
       '_label -> "ID",
       Symbol("data-autofocus") -> true,
       'required -> true)
 
-    @b3.text(form("name"),
+    @b3.text(publisherForm("name"),
       '_label -> "Name",
       'required -> true)
 
-    @b3.text(form("maxRecipients"),
+    @b3.text(publisherForm("maxRecipients"),
       '_label -> "Max recipients for alerts",
       'placeholder -> "None if blank")
 

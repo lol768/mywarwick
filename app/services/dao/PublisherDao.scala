@@ -5,8 +5,7 @@ import java.sql.Connection
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Singleton}
-import models.publishing.{Publisher, PublisherPermission}
-import models.publishing.PublishingRole
+import models.publishing.{Publisher, PublisherPermission, PublisherSave, PublishingRole}
 import services.Provider
 import warwick.sso.Usercode
 
@@ -31,7 +30,9 @@ trait PublisherDao {
 
   def isPublisher(usercode: String)(implicit  c: Connection): Boolean
 
-  def save(publisher: Publisher)(implicit c: Connection): String
+  def save(id: String, data: PublisherSave)(implicit c: Connection): String
+
+  def update(id: String, data: PublisherSave)(implicit c: Connection): Unit
 
 }
 
@@ -89,13 +90,21 @@ class PublisherDaoImpl extends PublisherDao {
       .executeQuery()
       .as(scalar[Int].single) > 0
 
-  override def save(publisher: Publisher)(implicit c: Connection): String = {
-    import publisher._
+  override def save(id: String, data: PublisherSave)(implicit c: Connection): String = {
+    import data._
     SQL"""
       INSERT INTO PUBLISHER (id, name, max_recipients)
       VALUES ($id, $name, $maxRecipients)
     """.executeUpdate()
     id
+  }
+
+  override def update(id: String, data: PublisherSave)(implicit c: Connection): Unit = {
+    import data._
+    SQL"""
+      UPDATE PUBLISHER SET name = $name, max_recipients = $maxRecipients
+      WHERE id = $id
+    """.execute()
   }
 }
 
