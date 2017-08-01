@@ -25,10 +25,15 @@ class ColourSchemesView extends HideableView {
   constructor(props) {
     super(props);
     this.onSelect = this.onSelect.bind(this);
+    this.persist = this.persist.bind(this);
   }
 
   onSelect(chosen) {
     if (!this.props.isOnline) return;
+    this.persist(chosen);
+  }
+
+  persist(chosen) {
     this.props.dispatch(colourSchemes.changeColourScheme(chosen));
   }
 
