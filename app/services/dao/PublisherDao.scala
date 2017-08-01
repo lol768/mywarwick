@@ -6,7 +6,7 @@ import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Singleton}
 import models.publishing.{Publisher, PublisherPermission, PublisherSave, PublishingRole}
-import services.Provider
+import services.{Provider, PublisherService}
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[PublisherDaoImpl])
@@ -33,6 +33,8 @@ trait PublisherDao {
   def save(id: String, data: PublisherSave)(implicit c: Connection): String
 
   def update(id: String, data: PublisherSave)(implicit c: Connection): Unit
+
+  def updatePermissionScope(publisherId: String, isAllDepartments: Boolean, departmentCodes: Seq[String])(implicit c: Connection): Unit
 
 }
 
@@ -105,6 +107,17 @@ class PublisherDaoImpl extends PublisherDao {
       UPDATE PUBLISHER SET name = $name, max_recipients = $maxRecipients
       WHERE id = $id
     """.execute()
+  }
+
+  override def updatePermissionScope(publisherId: String, isAllDepartments: Boolean, departmentCodes: Seq[String])(implicit c: Connection): Unit = {
+    SQL"DELETE FROM PUBLISHER_DEPARTMENT WHERE publisher_id = $publisherId".execute()
+    if (isAllDepartments) {
+      SQL"INSERT INTO PUBLISHER_DEPARTMENT VALUES ($publisherId, ${PublisherService.AllDepartmentsWildcard})".executeUpdate()
+    } else {
+      departmentCodes.foreach(deptCode =>
+        SQL"INSERT INTO PUBLISHER_DEPARTMENT VALUES ($publisherId, $deptCode)".executeUpdate()
+      )
+    }
   }
 }
 

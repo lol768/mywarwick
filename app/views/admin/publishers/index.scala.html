@@ -26,7 +26,7 @@
           <div class="pull-right">
             <a href="@controllers.admin.publishers.routes.PublishersController.updateForm(publisher.id)" class="btn btn-default btn-xs">Edit publisher</a>
             <a href="#" class="btn btn-default btn-xs">Edit permissions</a>
-            <a href="#" class="btn btn-default btn-xs">Edit departments</a>
+            <a href="@controllers.admin.publishers.routes.PublishersController.departmentsForm(publisher.id)" class="btn btn-default btn-xs">Edit departments</a>
           </div>
           <div class="panel-title">
             @publisher.name (@publisher.id)
@@ -55,7 +55,7 @@
               @permissionScopeMap(publisher) match {
                 case PermissionScope.Departments(depts) if depts.isEmpty => {
                   <div class="alert alert-warning">
-                  No departments assigned to this publisher. <a href="#" class="btn btn-primary btn-sm">Add</a>
+                  No departments assigned to this publisher. <a href="@controllers.admin.publishers.routes.PublishersController.departmentsForm(publisher.id)" class="btn btn-primary btn-sm">Add</a>
                 </div>
                 }
                 case _ => {}

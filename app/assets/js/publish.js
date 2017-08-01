@@ -27,6 +27,52 @@ if (fileUploadContainer) {
   );
 }
 
+function setupPublisherDepartmentsForm() {
+  function toggleAllDepartments($checkbox, $form) {
+    if ($checkbox.is(':checked')) {
+      $form.find('.departments .btn').prop('disabled', true);
+      $form.find('.add-department').find('select, .btn').prop('disabled', true);
+    } else {
+      $form.find('.departments .btn').prop('disabled', false);
+      $form.find('.add-department').find('select, .btn').prop('disabled', false);
+    }
+  }
+
+  $('.edit-publisher-departments').each((i, form) => {
+    const $form = $(form);
+
+    const $departmentsContainer = $form.find('.departments');
+    $departmentsContainer.on('click', '.btn-danger', (e) => {
+      $(e.target).closest('p').remove();
+    });
+
+    $form.find('.add-department .btn').on('click', (e) => {
+      const $option = $(e.target).closest('div').find('select option:selected');
+      $departmentsContainer.append(
+        $('<p/>')
+          .addClass('form-control-static')
+          .append(`${$option.text()} (${$option.val()}) `)
+          .append(
+            $('<button/>').prop('type', 'button').addClass('btn btn-danger btn-xs').html('Remove'),
+          )
+          .append(
+            $('<input/>').prop({
+              type: 'hidden',
+              name: 'departments[]',
+              value: $option.val(),
+            }),
+          ),
+      );
+    });
+
+    const $checkbox = $form.find('[name="isAllDepartments"]');
+    $checkbox.on('change', () => {
+      toggleAllDepartments($checkbox, $form);
+    });
+    toggleAllDepartments($checkbox, $form);
+  });
+}
+
 function wireEventListeners() {
   $('.audience-picker').each((i, el) => {
     const $el = $(el);
@@ -57,6 +103,7 @@ function wireEventListeners() {
 
 $(() => {
   wireEventListeners();
+  setupPublisherDepartmentsForm();
 
   $('[data-background-color]').each(function applyBackgroundColour() {
     $(this).css('background-color', $(this).data('background-color'));

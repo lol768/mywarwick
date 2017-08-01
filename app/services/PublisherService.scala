@@ -11,6 +11,10 @@ import warwick.sso.Usercode
 
 case class Provider(id: String, name: String)
 
+object PublisherService {
+  val AllDepartmentsWildcard = "**"
+}
+
 @ImplementedBy(classOf[PublisherServiceImpl])
 trait PublisherService {
 
@@ -38,6 +42,8 @@ trait PublisherService {
 
   def update(id: String, data: PublisherSave): Unit
 
+  def updatePermissionScope(publisherId: String, isAllDepartments: Boolean, departmentCodes: Seq[String]): Unit
+
 }
 
 @Singleton
@@ -45,8 +51,6 @@ class PublisherServiceImpl @Inject()(
   dao: PublisherDao,
   @NamedDatabase("default") db: Database
 ) extends PublisherService {
-
-  val AllDepartmentsWildcard = "**"
 
   override def all: Seq[Publisher] = db.withConnection(implicit c => dao.all)
 
@@ -64,7 +68,7 @@ class PublisherServiceImpl @Inject()(
   override def getPermissionScope(publisherId: String): PermissionScope = db.withConnection { implicit c =>
     val departments = dao.getPublisherDepartments(publisherId)
 
-    if (departments.contains(AllDepartmentsWildcard)) {
+    if (departments.contains(PublisherService.AllDepartmentsWildcard)) {
       PermissionScope.AllDepartments
     } else {
       PermissionScope.Departments(departments)
@@ -80,7 +84,7 @@ class PublisherServiceImpl @Inject()(
   }
 
   private def hasGlobalPermission(userPublishers: Seq[Publisher])(implicit c: Connection): Boolean =
-    userPublishers.exists(p => dao.getPublisherDepartments(p.id).contains(AllDepartmentsWildcard))
+    userPublishers.exists(p => dao.getPublisherDepartments(p.id).contains(PublisherService.AllDepartmentsWildcard))
 
   override def getPublishersForUser(usercode: Usercode): Seq[Publisher] = db.withConnection(implicit c => {
     val explicitPublishers = dao.getPublishersForUser(usercode)
@@ -97,7 +101,7 @@ class PublisherServiceImpl @Inject()(
     db.withConnection(implicit c => dao.getAllPublisherPermissions(publisherId))
 
   override def partitionGlobalPublishers(publishers: Seq[Publisher]): (Seq[Publisher], Seq[Publisher]) = db.withConnection(implicit c =>
-    publishers.partition(p => dao.getPublisherDepartments(p.id).contains(AllDepartmentsWildcard))
+    publishers.partition(p => dao.getPublisherDepartments(p.id).contains(PublisherService.AllDepartmentsWildcard))
   )
 
   override def save(id: String, data: PublisherSave): String =
@@ -105,4 +109,7 @@ class PublisherServiceImpl @Inject()(
 
   override def update(id: String, data: PublisherSave): Unit =
     db.withConnection(implicit c => dao.update(id, data))
+
+  override def updatePermissionScope(publisherId: String, isAllDepartments: Boolean, departmentCodes: Seq[String]): Unit =
+    db.withConnection(implicit c => dao.updatePermissionScope(publisherId, isAllDepartments, departmentCodes))
 }
