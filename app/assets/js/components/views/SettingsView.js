@@ -235,7 +235,8 @@ class SettingsView extends HideableView {
 
   chosenSchemeName() {
     const colourSchemes = this.props.colourSchemes;
-    return _.filter(colourSchemes.schemes, e => e.id === colourSchemes.chosen)[0].name;
+    const condition = e => e.id === colourSchemes.chosen;
+    return _.find(colourSchemes.schemes, condition).name;
   }
 
   render() {
