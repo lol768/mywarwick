@@ -1,11 +1,11 @@
 @import system.RequestContext
 @import models.publishing.Publisher
-@import services.Provider
+@import services.ProviderRender
 @import models.publishing.PublisherPermission
 @import models.publishing.PermissionScope
 @(
     publishers: Seq[Publisher],
-    providerMap: Map[Publisher, Seq[Provider]],
+    providerMap: Map[Publisher, Seq[ProviderRender]],
     userPermissionsMap: Map[Publisher, Seq[PublisherPermission]],
     permissionScopeMap: Map[Publisher, PermissionScope]
 )(implicit context: RequestContext)
@@ -43,7 +43,7 @@
               @if(providerMap(publisher).isEmpty) {
                 <div class="alert alert-warning">
                   No Providers found. Each publisher should have at least one provider.
-                  <a href="#" class="btn btn-primary btn-sm">Create</a>
+                  <a href="@controllers.admin.publishers.routes.ProvidersController.createForm(publisher.id)" class="btn btn-primary btn-sm">Create</a>
                 </div>
               }
               @if(userPermissionsMap(publisher).isEmpty) {
@@ -67,14 +67,14 @@
               <thead>
                 <tr>
                   <th>Providers</th>
-                  <th><a href="#" class="btn btn-default btn-xs">Create</a></th>
+                  <th><a href="@controllers.admin.publishers.routes.ProvidersController.createForm(publisher.id)" class="btn btn-default btn-xs">Create</a></th>
                 </tr>
               </thead>
               <tbody>
               @for(provider <- providerMap(publisher).sortBy(_.name)) {
                 <tr>
                   <td>@provider.name (@provider.id)</td>
-                  <td><a href="#" class="btn btn-default btn-xs">Edit</a></td>
+                  <td><a href="@controllers.admin.publishers.routes.ProvidersController.updateForm(publisher.id, provider.id)" class="btn btn-default btn-xs">Edit</a></td>
                 </tr>
               }
               </tbody>

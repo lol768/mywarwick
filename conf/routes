@@ -33,6 +33,10 @@ GET         /admin/publishers/:publisher                          @controllers.a
 POST        /admin/publishers/:publisher                          @controllers.admin.publishers.PublishersController.update(publisher: String)
 GET         /admin/publishers/:publisher/departments              @controllers.admin.publishers.PublishersController.departmentsForm(publisher: String)
 POST        /admin/publishers/:publisher/departments              @controllers.admin.publishers.PublishersController.departments(publisher: String)
+GET         /admin/publishers/:publisher/providers/new            @controllers.admin.publishers.ProvidersController.createForm(publisher: String)
+POST        /admin/publishers/:publisher/providers                @controllers.admin.publishers.ProvidersController.create(publisher: String)
+GET         /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.updateForm(publisher: String, provider: String)
+POST        /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.update(publisher: String, provider: String)
 
 GET         /publish/:publisher/webgroups                         @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 
