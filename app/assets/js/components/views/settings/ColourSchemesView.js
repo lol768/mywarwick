@@ -13,11 +13,11 @@ class ColourSchemesView extends HideableView {
     failed: PropTypes.bool.isRequired,
     fetched: PropTypes.bool.isRequired,
     chosen: PropTypes.number.isRequired,
-    schemes: PropTypes.shape({
+    schemes: PropTypes.arrayOf(PropTypes.shape({
       id: PropTypes.number.isRequired,
       url: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
-    }).isRequired,
+    })).isRequired,
     isOnline: PropTypes.bool.isRequired,
   };
 

@@ -68,7 +68,11 @@ class SettingsView extends HideableView {
       failed: PropTypes.bool.isRequired,
       fetched: PropTypes.bool.isRequired,
       chosen: PropTypes.number.isRequired,
-      schemes: PropTypes.array.isRequired,
+      schemes: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        url: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+      })).isRequired,
     }).isRequired,
     activityFilter: PropTypes.shape({
       selected: PropTypes.number.isRequired,
