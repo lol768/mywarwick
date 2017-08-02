@@ -24,8 +24,10 @@ export function updateUi() {
   return (dispatch, getState) => {
     const chosen = getState().colourSchemes.chosen;
     dispatch(theme.updateColourTheme(`transparent-${chosen}`));
+    /* eslint-disable */
     'MyWarwickNative' in window && window.MyWarwickNative.setBackgroundToDisplay(chosen);
-  }
+    /* eslint-enable */
+  };
 }
 
 export function changeColourScheme(chosen) {
@@ -40,7 +42,7 @@ export function changeColourScheme(chosen) {
 }
 
 export function fetch() {
-  return (dispatch, getState) => {
+  return (dispatch) => {
     log.debug('Fetching colour scheme preference.');
     dispatch(start());
     return fetchWithCredentials('/api/colour-schemes')
