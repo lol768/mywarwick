@@ -4,7 +4,6 @@ import _ from 'lodash-es';
 import { connect } from 'react-redux';
 import wrapKeyboardSelect from '../../../keyboard-nav';
 import * as colourSchemes from '../../../state/colour-schemes';
-import * as theme from '../../../state/ui';
 import HideableView from '../HideableView';
 
 class ColourSchemesView extends HideableView {
@@ -36,7 +35,6 @@ class ColourSchemesView extends HideableView {
 
   persist(chosen) {
     this.props.dispatch(colourSchemes.changeColourScheme(chosen));
-    this.props.dispatch(theme.updateColourTheme('transparent-' + chosen));
   }
 
   componentDidShow() {

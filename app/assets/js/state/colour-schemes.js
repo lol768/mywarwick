@@ -1,5 +1,6 @@
 import log from 'loglevel';
 import _ from 'lodash-es';
+import * as theme from './ui';
 import { createAction } from 'redux-actions';
 import { fetchWithCredentials, postJsonWithCredentials } from '../serverpipe';
 
@@ -38,8 +39,10 @@ const postToServer = _.debounce(getState =>
 
 export function changeColourScheme(chosen) {
   return (dispatch, getState) => {
-    dispatch(persist(chosen));
-    postToServer(getState);
+    const currentPref = getState().colourSchemes.chosen;
+    dispatch(persist(chosen || currentPref));
+    dispatch(theme.updateColourTheme(`transparent-${chosen || currentPref}`));
+    if (chosen !== currentPref) postToServer(getState);
   };
 }
 
