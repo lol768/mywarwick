@@ -67,6 +67,8 @@ class SettingsView extends HideableView {
       fetching: PropTypes.bool.isRequired,
       failed: PropTypes.bool.isRequired,
       fetched: PropTypes.bool.isRequired,
+      chosen: PropTypes.number.isRequired,
+      schemes: PropTypes.array.isRequired,
     }).isRequired,
     activityFilter: PropTypes.shape({
       selected: PropTypes.number.isRequired,
@@ -231,6 +233,11 @@ class SettingsView extends HideableView {
     });
   }
 
+  chosenSchemeName() {
+    const colourSchemes = this.props.colourSchemes;
+    return _.filter(colourSchemes.schemes, (e) => e.id === colourSchemes.chosen)[0].name;
+  }
+
   render() {
     return (
       <div>
@@ -268,7 +275,7 @@ class SettingsView extends HideableView {
             { SettingsView.renderSetting(
               'paint-brush',
               'Colour scheme',
-              (<span className="colour-scheme__current">Bluebell <i className="fa fa-fw fa-chevron-right" /></span>),
+              (<span className="colour-scheme__current">{this.chosenSchemeName()} <i className="fa fa-fw fa-chevron-right" /></span>),
             ) }
           </div>
         </div>
@@ -536,6 +543,8 @@ const select = (state) => {
       fetching: state.colourSchemes.fetching,
       failed: state.colourSchemes.failed,
       fetched: state.colourSchemes.fetched,
+      chosen: state.colourSchemes.chosen,
+      schemes: state.colourSchemes.schemes,
     },
     activityFilter: {
       selected: activityFilterTotal - _.reduce(
