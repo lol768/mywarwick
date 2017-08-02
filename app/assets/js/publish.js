@@ -51,7 +51,7 @@ function setupPublisherDepartmentsForm() {
       $departmentsContainer.append(
         $('<p/>')
           .addClass('form-control-static')
-          .append(`${$option.text()} (${$option.val()}) `)
+          .append(document.createTextNode(`${$option.text()} (${$option.val()}) `))
           .append(
             $('<button/>').prop('type', 'button').addClass('btn btn-danger btn-xs').html('Remove'),
           )
