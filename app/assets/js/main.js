@@ -196,7 +196,6 @@ export function launch(userData) {
     store.dispatch(tiles.fetchTiles());
     store.dispatch(colourSchemes.fetch());
     store.dispatch(colourSchemes.changeColourScheme());
-    
     if (hasAuthoritativeAuthenticatedUser(store.getState())) {
       store.dispatch(notifications.fetch());
     }
