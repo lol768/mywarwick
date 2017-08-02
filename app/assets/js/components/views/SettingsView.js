@@ -239,8 +239,36 @@ class SettingsView extends HideableView {
 
   chosenSchemeName() {
     const colourSchemes = this.props.colourSchemes;
+    const fetching = colourSchemes.fetching;
+    const failed = colourSchemes.failed;
+    const fetched = colourSchemes.fetched;
+
+    if (fetching) {
+      return (
+        <div>
+          <i className="fa fa-spinner fa-pulse" />
+          <i className="fa fa-fw fa-chevron-right" />
+        </div>
+      );
+    } else if ((failed && fetched) || !fetched) {
+      return (
+        <div>
+          <i className="fa fa-exclamation-circle text-danger" />
+          <i className="fa fa-fw fa-chevron-right" />
+        </div>
+      );
+    }
+
     const condition = e => e.id === colourSchemes.chosen;
-    return _.find(colourSchemes.schemes, condition).name;
+    const chosenSchemeName = _.find(colourSchemes.schemes, condition).name;
+    return (
+      <div>
+        <span className="colour-scheme__current">
+          {chosenSchemeName}
+        </span>
+        <i className="fa fa-fw fa-chevron-right" />
+      </div>
+    );
   }
 
   render() {
@@ -280,7 +308,7 @@ class SettingsView extends HideableView {
             { SettingsView.renderSetting(
               'paint-brush',
               'Colour scheme',
-              (<span className="colour-scheme__current">{this.chosenSchemeName()} <i className="fa fa-fw fa-chevron-right" /></span>),
+              this.chosenSchemeName(),
             ) }
           </div>
         </div>
