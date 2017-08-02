@@ -195,7 +195,6 @@ export function launch(userData) {
   const loadDataFromServer = _.once(() => {
     store.dispatch(tiles.fetchTiles());
     store.dispatch(colourSchemes.fetch());
-    store.dispatch(colourSchemes.changeColourScheme());
     if (hasAuthoritativeAuthenticatedUser(store.getState())) {
       store.dispatch(notifications.fetch());
     }

@@ -21,6 +21,7 @@ export function fetch() {
       .then((json) => {
         if (json.data !== undefined) {
           dispatch(receive(json));
+          dispatch(changeColourScheme());
         } else {
           throw new Error('Invalid response returned from colour scheme API');
         }
