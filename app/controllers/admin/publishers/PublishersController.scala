@@ -4,19 +4,21 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import controllers.BaseController
-import models.publishing.{Publisher, PublisherSave}
+import models.publishing.{PermissionScope, Publisher, PublisherSave}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Result
-import services.{PublisherService, SecurityService}
+import services.dao.DepartmentInfoDao
+import services.{DepartmentInfoService, PublisherService, SecurityService}
 import system.{RequestContext, Roles}
 
 @Singleton
 class PublishersController @Inject() (
   security: SecurityService,
   val messagesApi: MessagesApi,
-  publisherService: PublisherService
+  publisherService: PublisherService,
+  departmentInfoService: DepartmentInfoService
 ) extends BaseController with I18nSupport {
 
   import Roles._
@@ -32,6 +34,13 @@ class PublishersController @Inject() (
     "name" -> nonEmptyText,
     "maxRecipients" -> optional(number)
   )(PublisherSave.apply)(PublisherSave.unapply))
+
+  case class DepartmentsData(isAllDepartments: Boolean, departments: Seq[String])
+
+  def departmentDataForm = Form(mapping(
+    "isAllDepartments" -> boolean,
+    "departments" -> seq(nonEmptyText)
+  )(DepartmentsData.apply)(DepartmentsData.unapply))
 
   def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     val publishers = allPublishers
@@ -76,6 +85,30 @@ class PublishersController @Inject() (
           publisherService.update(publisherId, data)
           auditLog('UpdatePublisher, 'id -> publisherId)
           Redirect(routes.PublishersController.index()).flashing("success" -> "Publisher updated")
+        }
+      )
+    })
+  }
+
+  def departmentsForm(publisherId: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
+    withPublisher(publisherId, { publisher =>
+      val permissionScope = publisherService.getPermissionScope(publisherId)
+      val (isAllDepartments, currentDepartmentCodes) = permissionScope match {
+        case PermissionScope.AllDepartments => (true, Nil)
+        case PermissionScope.Departments(depts) => (false, depts)
+      }
+      Ok(views.html.admin.publishers.departmentsForm(publisher, isAllDepartments, currentDepartmentCodes, departmentInfoService.allPublishableDepartments))
+    })
+  }
+
+  def departments(publisherId: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
+    withPublisher(publisherId, { _ =>
+      departmentDataForm.bindFromRequest.fold(
+        formWithErrors => BadRequest(s"${formWithErrors.errors.map(_.message).mkString(", ")}"),
+        data => {
+          publisherService.updatePermissionScope(publisherId, data.isAllDepartments, data.departments.distinct)
+          auditLog('UpdatePublisherDepartments, 'id -> publisherId)
+          Redirect(routes.PublishersController.index()).flashing("success" -> "Publisher departments updated")
         }
       )
     })

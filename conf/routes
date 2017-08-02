@@ -31,6 +31,8 @@ GET         /admin/publishers/new                                 @controllers.a
 POST        /admin/publishers                                     @controllers.admin.publishers.PublishersController.create
 GET         /admin/publishers/:publisher                          @controllers.admin.publishers.PublishersController.updateForm(publisher: String)
 POST        /admin/publishers/:publisher                          @controllers.admin.publishers.PublishersController.update(publisher: String)
+GET         /admin/publishers/:publisher/departments              @controllers.admin.publishers.PublishersController.departmentsForm(publisher: String)
+POST        /admin/publishers/:publisher/departments              @controllers.admin.publishers.PublishersController.departments(publisher: String)
 
 GET         /publish/:publisher/webgroups                         @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 
