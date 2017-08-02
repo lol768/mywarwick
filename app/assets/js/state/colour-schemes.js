@@ -20,12 +20,20 @@ const postToServer = _.debounce(getState =>
   doPostToServer(getState().colourSchemes.chosen), 500,
 );
 
+export function updateUi() {
+  return (dispatch, getState) => {
+    const chosen = getState().colourSchemes.chosen;
+    dispatch(theme.updateColourTheme(`transparent-${chosen}`));
+    'MyWarwickNative' in window && window.MyWarwickNative.setBackgroundToDisplay(chosen);
+  }
+}
+
 export function changeColourScheme(chosen) {
   return (dispatch, getState) => {
     const currentPref = getState().colourSchemes.chosen;
     if (chosen && (currentPref !== chosen)) {
       dispatch(save(chosen));
-      dispatch(theme.updateColourTheme(`transparent-${chosen}`));
+      dispatch(updateUi());
       postToServer(getState);
     }
   };
@@ -40,7 +48,7 @@ export function fetch() {
       .then((json) => {
         if (json.data !== undefined) {
           dispatch(receive(json));
-          dispatch(theme.updateColourTheme(`transparent-${getState().colourSchemes.chosen}`));
+          dispatch(updateUi());
         } else {
           throw new Error('Invalid response returned from colour scheme API');
         }
