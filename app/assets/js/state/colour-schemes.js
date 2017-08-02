@@ -10,25 +10,7 @@ const SAVE_CHOICE = 'SAVE_CHOICE';
 
 const start = createAction(COLOUR_SCHEME_PREFERENCE_REQUEST);
 export const receive = createAction(COLOUR_SCHEME_PREFERENCE_RECEIVE);
-const persist = createAction(SAVE_CHOICE);
-
-export function fetch() {
-  return (dispatch) => {
-    log.debug('Fetching colour scheme preference.');
-    dispatch(start());
-    return fetchWithCredentials('/api/colour-schemes')
-      .then(response => response.json())
-      .then((json) => {
-        if (json.data !== undefined) {
-          dispatch(receive(json));
-          dispatch(changeColourScheme());
-        } else {
-          throw new Error('Invalid response returned from colour scheme API');
-        }
-      })
-      .catch(e => dispatch(receive(e)));
-  };
-}
+const save = createAction(SAVE_CHOICE);
 
 const doPostToServer = (colourScheme) => {
   postJsonWithCredentials('/api/colour-schemes', { colourScheme });
@@ -41,9 +23,29 @@ const postToServer = _.debounce(getState =>
 export function changeColourScheme(chosen) {
   return (dispatch, getState) => {
     const currentPref = getState().colourSchemes.chosen;
-    dispatch(persist(chosen || currentPref));
-    dispatch(theme.updateColourTheme(`transparent-${chosen || currentPref}`));
-    if (chosen !== currentPref) postToServer(getState);
+    if (chosen && (currentPref !== chosen)) {
+      dispatch(save(chosen));
+      dispatch(theme.updateColourTheme(`transparent-${chosen}`));
+      postToServer(getState);
+    }
+  };
+}
+
+export function fetch() {
+  return (dispatch, getState) => {
+    log.debug('Fetching colour scheme preference.');
+    dispatch(start());
+    return fetchWithCredentials('/api/colour-schemes')
+      .then(response => response.json())
+      .then((json) => {
+        if (json.data !== undefined) {
+          dispatch(receive(json));
+          dispatch(theme.updateColourTheme(`transparent-${getState().colourSchemes.chosen}`));
+        } else {
+          throw new Error('Invalid response returned from colour scheme API');
+        }
+      })
+      .catch(e => dispatch(receive(e)));
   };
 }
 
