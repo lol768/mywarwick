@@ -87,12 +87,14 @@ export function reducer(state = initialState, action) {
         fetched: false,
       };
     case COLOUR_SCHEME_PREFERENCE_RECEIVE:
-      if (action.error) return {
-        ...state,
-        fetching: false,
-        failed: true,
-        fetched: true,
-      };
+      if (action.error) {
+        return {
+          ...state,
+          fetching: false,
+          failed: true,
+          fetched: true,
+        };
+      }
       return action.payload.data ? {
         ...state,
         fetching: false,
