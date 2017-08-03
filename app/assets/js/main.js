@@ -165,7 +165,7 @@ export function launch(userData) {
   persisted('tiles.data', tiles.fetchedTiles);
   persisted('tileContent', tiles.loadedAllTileContent);
   persisted('tileContent', tiles.loadedAllTileContent);
-  persisted('colourSchemes', colourSchemes.fetch);
+  persisted('colourSchemes', colourSchemes.receive);
 
   persisted(
     'newsCategories',
@@ -194,8 +194,8 @@ export function launch(userData) {
 
   const loadDataFromServer = _.once(() => {
     store.dispatch(tiles.fetchTiles());
-    store.dispatch(colourSchemes.fetch());
     if (hasAuthoritativeAuthenticatedUser(store.getState())) {
+      store.dispatch(colourSchemes.fetch());
       store.dispatch(notifications.fetch());
     }
   });
