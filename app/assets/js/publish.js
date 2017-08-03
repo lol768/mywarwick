@@ -7,6 +7,7 @@ import FileUpload from './publish/components/FileUpload';
 import './publish/news';
 import './publish/groupPicker';
 import _ from 'lodash-es';
+import './flexi-picker';
 
 /*
  Attempt to register service worker - we don't do notifications or offline but it's nice to keep it
@@ -74,6 +75,66 @@ function setupPublisherDepartmentsForm() {
   });
 }
 
+function setupPublisherPermissionsForm() {
+  $('.edit-publisher-permissions').each((i, form) => {
+    const $form = $(form);
+    const $permissionsContainer = $form.find('.permissions');
+
+    function updateIndexes() {
+      $permissionsContainer.find('.form-control-static').each((index, item) => {
+        $(item)
+          .find('input[name$=".usercode"]')
+          .prop('name', `permissions[${index}].usercode`)
+          .end()
+          .find('input[name$=".role"]')
+          .prop('name', `permissions[${index}].role`);
+      });
+    }
+
+    $permissionsContainer.on('click', '.btn-danger', (e) => {
+      $(e.target).closest('p').remove();
+      updateIndexes();
+    });
+
+    const $addButton = $form.find('.add-permission .btn.btn-default').on('click', () => {
+      const userData = $form.find('.add-permission input[name=usercode]').data('item');
+      const $option = $form.find('.add-permission select option:selected');
+      const roleName = $option.text();
+      const roleType = $option.val();
+      $permissionsContainer.append(
+        $('<p/>')
+          .addClass('form-control-static')
+          .append(document.createTextNode(`${userData.title} (${userData.value}) : ${roleName} `))
+          .append(
+            $('<button/>').prop('type', 'button').addClass('btn btn-danger btn-xs').html('Remove'),
+          )
+          .append(
+            $('<input/>').prop({
+              type: 'hidden',
+              name: 'permissions[].usercode',
+              value: userData.value,
+            }),
+          )
+          .append(
+            $('<input/>').prop({
+              type: 'hidden',
+              name: 'permissions[].role',
+              value: roleType,
+            }),
+          ),
+      );
+      updateIndexes();
+    }).prop('disabled', true);
+    $form.find('.add-permission input[name=usercode]')
+      .on('richResultField.store', () => {
+        $addButton.prop('disabled', false);
+      })
+      .on('richResultField.edit', () => {
+        $addButton.prop('disabled', true);
+      });
+  });
+}
+
 function wireEventListeners() {
   $('.audience-picker').each((i, el) => {
     const $el = $(el);
@@ -105,6 +166,7 @@ function wireEventListeners() {
 $(() => {
   wireEventListeners();
   setupPublisherDepartmentsForm();
+  setupPublisherPermissionsForm();
 
   $('[data-background-color]').each(function applyBackgroundColour() {
     $(this).css('background-color', $(this).data('background-color'));

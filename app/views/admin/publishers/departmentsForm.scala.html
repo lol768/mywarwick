@@ -14,7 +14,7 @@
 
 @common.admin("Administration", "Publishers", publisher.name, "Departments") {
 
-  @b3.form(controllers.admin.publishers.routes.PublishersController.departments(publisher.id), 'class -> "edit-publisher-departments") {
+  @b3.form(controllers.admin.publishers.routes.PublisherDepartmentsController.update(publisher.id), 'class -> "edit-publisher-departments") {
 
     @context.csrfHelper.formField
 

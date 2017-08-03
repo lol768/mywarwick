@@ -25,8 +25,8 @@
         <div class="panel-heading">
           <div class="pull-right">
             <a href="@controllers.admin.publishers.routes.PublishersController.updateForm(publisher.id)" class="btn btn-default btn-xs">Edit publisher</a>
-            <a href="#" class="btn btn-default btn-xs">Edit permissions</a>
-            <a href="@controllers.admin.publishers.routes.PublishersController.departmentsForm(publisher.id)" class="btn btn-default btn-xs">Edit departments</a>
+            <a href="@controllers.admin.publishers.routes.PublisherPermissionsController.form(publisher.id)" class="btn btn-default btn-xs">Edit permissions</a>
+            <a href="@controllers.admin.publishers.routes.PublisherDepartmentsController.form(publisher.id)" class="btn btn-default btn-xs">Edit departments</a>
           </div>
           <div class="panel-title">
             @publisher.name (@publisher.id)
@@ -48,14 +48,14 @@
               }
               @if(userPermissionsMap(publisher).isEmpty) {
                 <div class="alert alert-warning">
-                  No users have permission to use this publisher. <a href="#" class="btn btn-primary btn-sm">
+                  No users have permission to use this publisher. <a href="@controllers.admin.publishers.routes.PublisherPermissionsController.form(publisher.id)" class="btn btn-primary btn-sm">
                   Add</a>
                 </div>
               }
               @permissionScopeMap(publisher) match {
                 case PermissionScope.Departments(depts) if depts.isEmpty => {
                   <div class="alert alert-warning">
-                  No departments assigned to this publisher. <a href="@controllers.admin.publishers.routes.PublishersController.departmentsForm(publisher.id)" class="btn btn-primary btn-sm">Add</a>
+                  No departments assigned to this publisher. <a href="@controllers.admin.publishers.routes.PublisherDepartmentsController.form(publisher.id)" class="btn btn-primary btn-sm">Add</a>
                 </div>
                 }
                 case _ => {}

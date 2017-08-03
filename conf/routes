@@ -31,8 +31,10 @@ GET         /admin/publishers/new                                 @controllers.a
 POST        /admin/publishers                                     @controllers.admin.publishers.PublishersController.create
 GET         /admin/publishers/:publisher                          @controllers.admin.publishers.PublishersController.updateForm(publisher: String)
 POST        /admin/publishers/:publisher                          @controllers.admin.publishers.PublishersController.update(publisher: String)
-GET         /admin/publishers/:publisher/departments              @controllers.admin.publishers.PublishersController.departmentsForm(publisher: String)
-POST        /admin/publishers/:publisher/departments              @controllers.admin.publishers.PublishersController.departments(publisher: String)
+GET         /admin/publishers/:publisher/departments              @controllers.admin.publishers.PublisherDepartmentsController.form(publisher: String)
+POST        /admin/publishers/:publisher/departments              @controllers.admin.publishers.PublisherDepartmentsController.update(publisher: String)
+GET         /admin/publishers/:publisher/permissions              @controllers.admin.publishers.PublisherPermissionsController.form(publisher: String)
+POST        /admin/publishers/:publisher/permissions              @controllers.admin.publishers.PublisherPermissionsController.update(publisher: String)
 GET         /admin/publishers/:publisher/providers/new            @controllers.admin.publishers.ProvidersController.createForm(publisher: String)
 POST        /admin/publishers/:publisher/providers                @controllers.admin.publishers.ProvidersController.create(publisher: String)
 GET         /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.updateForm(publisher: String, provider: String)
@@ -135,3 +137,5 @@ GET         /service/search/*path                                 @controllers.S
 POST        /service/search/*path                                 @controllers.SearchController.proxy(path: String)
 
 GET         /service/map/:lat/:lon/:width/:height                 @controllers.MapController.mapThumbnail(lat: String, lon: String, width: Int, height: Int)
+
+POST        /service/flexipicker                                  @controllers.FlexiPickerController.queryJson
