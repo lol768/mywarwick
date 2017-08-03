@@ -13,7 +13,6 @@ import models.publishing.PublisherActivityCount
 import org.joda.time.DateTime
 import system.DatabaseDialect
 import warwick.anorm.converters.ColumnConversions._
-import java.lang.{Integer => JInt}
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {

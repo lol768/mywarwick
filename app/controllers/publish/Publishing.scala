@@ -123,9 +123,9 @@ trait PublishableWithAudience {
 trait ProviderOptions {
   val publisherService: PublisherService
 
-  def providerOptions(implicit publisherRequest: PublisherRequest[_]) =
+  def providerOptions(implicit publisherRequest: PublisherRequest[_]): Seq[(String, String)] =
     publisherService.getProviders(publisherRequest.publisher.id)
-      .map(provider => provider.id -> provider.name)
+      .map(provider => provider.id -> provider.name.getOrElse(provider.id))
 
 }
 

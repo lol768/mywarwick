@@ -9,7 +9,20 @@ import play.api.db.{Database, NamedDatabase}
 import services.dao.PublisherDao
 import warwick.sso.Usercode
 
-case class Provider(id: String, name: String)
+case class ProviderRender(
+  id: String,
+  name: Option[String],
+  icon: Option[String],
+  colour: Option[String],
+  sendEmail: Boolean
+)
+
+case class ProviderSave(
+  name: Option[String],
+  icon: Option[String],
+  colour: Option[String],
+  sendEmail: Boolean
+)
 
 object PublisherService {
   val AllDepartmentsWildcard = "**"
@@ -30,7 +43,7 @@ trait PublisherService {
 
   def getParentPublisherId(providerId: String): Option[String]
 
-  def getProviders(publisherId: String): Seq[Provider]
+  def getProviders(publisherId: String): Seq[ProviderRender]
 
   def isPublisher(usercode: Usercode): Boolean
 
@@ -43,6 +56,10 @@ trait PublisherService {
   def update(id: String, data: PublisherSave): Unit
 
   def updatePermissionScope(publisherId: String, isAllDepartments: Boolean, departmentCodes: Seq[String]): Unit
+
+  def saveProvider(publisherId: String, providerId: String, data: ProviderSave): String
+
+  def updateProvider(publisherId: String, providerId: String, data: ProviderSave): Unit
 
 }
 
@@ -79,7 +96,7 @@ class PublisherServiceImpl @Inject()(
     dao.getParentPublisherId(providerId)
   }
 
-  override def getProviders(publisherId: String): Seq[Provider] = db.withConnection { implicit c =>
+  override def getProviders(publisherId: String): Seq[ProviderRender] = db.withConnection { implicit c =>
     dao.getProviders(publisherId)
   }
 
@@ -112,4 +129,10 @@ class PublisherServiceImpl @Inject()(
 
   override def updatePermissionScope(publisherId: String, isAllDepartments: Boolean, departmentCodes: Seq[String]): Unit =
     db.withConnection(implicit c => dao.updatePermissionScope(publisherId, isAllDepartments, departmentCodes))
+
+  override def saveProvider(publisherId: String, providerId: String, data: ProviderSave): String =
+    db.withConnection(implicit c => dao.saveProvider(publisherId, providerId, data))
+
+  override def updateProvider(publisherId: String, providerId: String, data: ProviderSave): Unit =
+    db.withConnection(implicit c => dao.updateProvider(publisherId, providerId, data))
 }

@@ -6,6 +6,7 @@ import $ from 'jquery';
 import FileUpload from './publish/components/FileUpload';
 import './publish/news';
 import './publish/groupPicker';
+import _ from 'lodash-es';
 
 /*
  Attempt to register service worker - we don't do notifications or offline but it's nice to keep it
@@ -125,5 +126,16 @@ $(() => {
       // click elsewhere on body, dismiss all open popover
       $('.popover-active').popover('hide').removeClass('popover-active');
     }
+  });
+
+  $('.fa-picker-preview').each((i, input) => {
+    const $input = $(input);
+    const debouncedPicker = _.debounce(() => {
+      $input
+        .closest('div.input-group')
+        .find('.input-group-addon i')
+        .prop('class', `fa fa-fw fa-${$input.val()}`);
+    }, 500);
+    $input.on('keydown', debouncedPicker);
   });
 });

@@ -8,18 +8,16 @@ import models.publishing.{PermissionScope, Publisher, PublisherSave}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Result
-import services.dao.DepartmentInfoDao
 import services.{DepartmentInfoService, PublisherService, SecurityService}
-import system.{RequestContext, Roles}
+import system.Roles
 
 @Singleton
 class PublishersController @Inject() (
   security: SecurityService,
   val messagesApi: MessagesApi,
-  publisherService: PublisherService,
+  val publisherService: PublisherService,
   departmentInfoService: DepartmentInfoService
-) extends BaseController with I18nSupport {
+) extends BaseController with I18nSupport with WithPublisher {
 
   import Roles._
   import security._
@@ -112,12 +110,6 @@ class PublishersController @Inject() (
         }
       )
     })
-  }
-
-  private def withPublisher(publisherId: String, block: (Publisher) => Result)(implicit request: RequestContext): Result = {
-    publisherService.find(publisherId)
-      .map(block)
-      .getOrElse(NotFound(views.html.errors.notFound()))
   }
 
 }
