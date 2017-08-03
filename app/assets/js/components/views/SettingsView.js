@@ -106,7 +106,7 @@ class SettingsView extends HideableView {
     /* eslint-disable no-undef */
     const native = window.MyWarwickNative;
     /* eslint-enable no-undef */
-    return !native || (native && ('setBackgroundToDisplay' in native));
+    return !native || ('setBackgroundToDisplay' in native);
   }
 
   static renderSingleCount(number) {
