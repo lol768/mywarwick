@@ -294,34 +294,31 @@ class SettingsView extends HideableView {
             className="list-group-item"
             role="button"
             tabIndex={0}
-            onClick={ () =>
+            onClick={() =>
               this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}`))
             }
           >
-            { SettingsView.renderSetting(
+            {SettingsView.renderSetting(
               'check-square-o',
               'Tile preferences',
               <i className="fa fa-fw fa-chevron-right" />,
-            ) }
+            )}
           </div>
-          { SettingsView.shouldShowColourSchemes() &&
-            <div
-              className="list-group-item"
-              role="button"
-              tabIndex={0}
-              onClick={ () =>
-                this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.COLOUR_SCHEMES}`))
-              }
-            >
-              { SettingsView.renderSetting(
-                'paint-brush',
-                'Colour scheme',
-                (<span className="colour-scheme__current">
-                  { this.chosenSchemeName() }
-                  <i className="fa fa-fw fa-chevron-right" />
-                </span>),
-              ) }
-            </div>
+          {SettingsView.shouldShowColourSchemes() &&
+          <div
+            className="list-group-item"
+            role="button"
+            tabIndex={0}
+            onClick={() =>
+              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.COLOUR_SCHEMES}`))
+            }
+          >
+            {SettingsView.renderSetting(
+              'paint-brush',
+              'Colour scheme',
+              this.chosenSchemeName(),
+            )}
+          </div>
           }
         </div>
 
