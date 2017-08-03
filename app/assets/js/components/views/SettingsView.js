@@ -86,17 +86,17 @@ class SettingsView extends HideableView {
     isOnline: PropTypes.bool.isRequired,
   };
 
-  static renderSetting(icon, title, rightView) {
+  static renderSetting(icon, title, rightView, disabled = false) {
     return (
       <div className="media">
         <div className="media-left">
-          <i className={ `fa fa-fw fa-${icon}` } />
+          <i className={`fa fa-fw fa-${icon}`} />
         </div>
-        <div className="media-body">
-          { title }
+        <div className={`media-body ${disabled ? 'media-body-disabled' : ''}`}>
+          {title}
         </div>
         <div className="media-right">
-          { rightView }
+          {rightView}
         </div>
       </div>
     );
@@ -309,14 +309,15 @@ class SettingsView extends HideableView {
             className="list-group-item"
             role="button"
             tabIndex={0}
-            onClick={() =>
-              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.COLOUR_SCHEMES}`))
+            onClick={this.props.isOnline ? () =>
+              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.COLOUR_SCHEMES}`)) : null
             }
           >
             {SettingsView.renderSetting(
               'paint-brush',
               'Colour scheme',
               this.chosenSchemeName(),
+              !this.props.isOnline,
             )}
           </div>
           }
