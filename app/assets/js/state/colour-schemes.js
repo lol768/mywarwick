@@ -6,11 +6,11 @@ import { fetchWithCredentials, postJsonWithCredentials } from '../serverpipe';
 
 const COLOUR_SCHEME_PREFERENCE_REQUEST = 'COLOUR_SCHEME_PREFERENCE_REQUEST';
 const COLOUR_SCHEME_PREFERENCE_RECEIVE = 'COLOUR_SCHEME_PREFERENCE_RECEIVE';
-const SAVE_CHOICE = 'SAVE_CHOICE';
+const COLOUR_SCHEME_SAVE_CHOICE = 'COLOUR_SCHEME_SAVE_CHOICE';
 
 const start = createAction(COLOUR_SCHEME_PREFERENCE_REQUEST);
 export const receive = createAction(COLOUR_SCHEME_PREFERENCE_RECEIVE);
-const save = createAction(SAVE_CHOICE);
+const save = createAction(COLOUR_SCHEME_SAVE_CHOICE);
 
 const doPostToServer = (colourScheme) => {
   postJsonWithCredentials('/api/colour-schemes', { colourScheme });
@@ -24,11 +24,14 @@ export function updateUi() {
   return (dispatch, getState) => {
     const chosen = getState().colourSchemes.chosen;
     dispatch(theme.updateColourTheme(`transparent-${chosen}`));
+
     /* eslint-disable no-undef */
     const native = window.MyWarwickNative;
     /* eslint-enable no-undef */
-    const call = native ? native.setBackgroundToDisplay : null;
-    if (native && call) call(chosen);
+
+    const isNativeAvailable = (native && 'setBackgroundToDisplay' in native);
+    const call = isNativeAvailable ? native.setBackgroundToDisplay : null;
+    if (call) call(chosen);
   };
 }
 
@@ -97,7 +100,7 @@ export function reducer(state = initialState, action) {
         chosen: action.payload.data.chosen,
         schemes: action.payload.data.schemes,
       };
-    case SAVE_CHOICE:
+    case COLOUR_SCHEME_SAVE_CHOICE:
       return {
         ...state,
         chosen: action.payload,

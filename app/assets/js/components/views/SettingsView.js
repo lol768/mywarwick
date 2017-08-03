@@ -102,6 +102,13 @@ class SettingsView extends HideableView {
     );
   }
 
+  static shouldShowColourSchemes() {
+    /* eslint-disable no-undef */
+    const native = window.MyWarwickNative;
+    /* eslint-enable no-undef */
+    return !native || (native && !('setBackgroundToDisplay' in native));
+  }
+
   static renderSingleCount(number) {
     return (
       <div>
@@ -297,20 +304,25 @@ class SettingsView extends HideableView {
               <i className="fa fa-fw fa-chevron-right" />,
             ) }
           </div>
-          <div
-            className="list-group-item"
-            role="button"
-            tabIndex={0}
-            onClick={ () =>
-              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.COLOUR_SCHEMES}`))
-            }
-          >
-            { SettingsView.renderSetting(
-              'paint-brush',
-              'Colour scheme',
-              this.chosenSchemeName(),
-            ) }
-          </div>
+          { SettingsView.shouldShowColourSchemes() &&
+            <div
+              className="list-group-item"
+              role="button"
+              tabIndex={0}
+              onClick={ () =>
+                this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.COLOUR_SCHEMES}`))
+              }
+            >
+              { SettingsView.renderSetting(
+                'paint-brush',
+                'Colour scheme',
+                (<span className="colour-scheme__current">
+                  { this.chosenSchemeName() }
+                  <i className="fa fa-fw fa-chevron-right" />
+                </span>),
+              ) }
+            </div>
+          }
         </div>
 
         <div className="list-group setting-colour-0">
