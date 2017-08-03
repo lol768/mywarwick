@@ -63,6 +63,17 @@ class SettingsView extends HideableView {
         total: PropTypes.number.isRequired,
       }).isRequired,
     }).isRequired,
+    colourSchemes: PropTypes.shape({
+      fetching: PropTypes.bool.isRequired,
+      failed: PropTypes.bool.isRequired,
+      fetched: PropTypes.bool.isRequired,
+      chosen: PropTypes.number.isRequired,
+      schemes: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        url: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+      })).isRequired,
+    }).isRequired,
     activityFilter: PropTypes.shape({
       selected: PropTypes.number.isRequired,
       total: PropTypes.number.isRequired,
@@ -75,20 +86,27 @@ class SettingsView extends HideableView {
     isOnline: PropTypes.bool.isRequired,
   };
 
-  static renderSetting(icon, title, rightView) {
+  static renderSetting(icon, title, rightView, disabled = false) {
     return (
       <div className="media">
         <div className="media-left">
-          <i className={ `fa fa-fw fa-${icon}` } />
+          <i className={`fa fa-fw fa-${icon}`} />
         </div>
-        <div className="media-body">
-          { title }
+        <div className={`media-body ${disabled ? 'media-body-disabled' : ''}`}>
+          {title}
         </div>
         <div className="media-right">
-          { rightView }
+          {rightView}
         </div>
       </div>
     );
+  }
+
+  static shouldShowColourSchemes() {
+    /* eslint-disable no-undef */
+    const native = window.MyWarwickNative;
+    /* eslint-enable no-undef */
+    return !native || ('setBackgroundToDisplay' in native);
   }
 
   static renderSingleCount(number) {
@@ -226,6 +244,40 @@ class SettingsView extends HideableView {
     });
   }
 
+  chosenSchemeName() {
+    const colourSchemes = this.props.colourSchemes;
+    const fetching = colourSchemes.fetching;
+    const failed = colourSchemes.failed;
+    const fetched = colourSchemes.fetched;
+
+    if (fetching) {
+      return (
+        <div>
+          <i className="fa fa-spinner fa-pulse" />
+          <i className="fa fa-fw fa-chevron-right" />
+        </div>
+      );
+    } else if ((failed && fetched) || !fetched) {
+      return (
+        <div>
+          <i className="fa fa-exclamation-circle text-danger" />
+          <i className="fa fa-fw fa-chevron-right" />
+        </div>
+      );
+    }
+
+    const condition = e => e.id === colourSchemes.chosen;
+    const chosenSchemeName = _.find(colourSchemes.schemes, condition).name;
+    return (
+      <div>
+        <span className="colour-scheme__current">
+          {chosenSchemeName}
+        </span>
+        <i className="fa fa-fw fa-chevron-right" />
+      </div>
+    );
+  }
+
   render() {
     return (
       <div>
@@ -242,16 +294,33 @@ class SettingsView extends HideableView {
             className="list-group-item"
             role="button"
             tabIndex={0}
-            onClick={ () =>
+            onClick={() =>
               this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}`))
             }
           >
-            { SettingsView.renderSetting(
+            {SettingsView.renderSetting(
               'check-square-o',
               'Tile preferences',
               <i className="fa fa-fw fa-chevron-right" />,
-            ) }
+            )}
           </div>
+          {SettingsView.shouldShowColourSchemes() &&
+          <div
+            className="list-group-item"
+            role="button"
+            tabIndex={0}
+            onClick={this.props.isOnline ? () =>
+              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.COLOUR_SCHEMES}`)) : null
+            }
+          >
+            {SettingsView.renderSetting(
+              'paint-brush',
+              'Colour scheme',
+              this.chosenSchemeName(),
+              !this.props.isOnline,
+            )}
+          </div>
+          }
         </div>
 
         <div className="list-group setting-colour-0">
@@ -512,6 +581,13 @@ const select = (state) => {
         selected: (state.newsOptIn.selected.Location || []).length,
         total: (state.newsOptIn.options.Location || []).length,
       },
+    },
+    colourSchemes: {
+      fetching: state.colourSchemes.fetching,
+      failed: state.colourSchemes.failed,
+      fetched: state.colourSchemes.fetched,
+      chosen: state.colourSchemes.chosen,
+      schemes: state.colourSchemes.schemes,
     },
     activityFilter: {
       selected: activityFilterTotal - _.reduce(

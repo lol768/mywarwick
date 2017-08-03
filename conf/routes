@@ -112,6 +112,8 @@ POST          /api/emailNotificationPreferences              @controllers.api.Em
 GET           /api/smsNotificationPreferences                @controllers.api.SmsNotificationsPrefController.get
 POST          /api/smsNotificationPreferences                @controllers.api.SmsNotificationsPrefController.update
 
+GET           /api/colour-schemes                            @controllers.api.ColourSchemesController.get
+POST          /api/colour-schemes                            @controllers.api.ColourSchemesController.persist
 
 POST          /api/errors/js                                 @controllers.api.ErrorsController.js
 

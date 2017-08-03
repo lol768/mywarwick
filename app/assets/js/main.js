@@ -26,6 +26,7 @@ import * as user from './state/user';
 import * as news from './state/news';
 import * as newsCategories from './state/news-categories';
 import * as newsOptIn from './state/news-optin';
+import * as colourSchemes from './state/colour-schemes';
 import * as ui from './state/ui';
 import * as device from './state/device';
 import * as analytics from './analytics';
@@ -163,6 +164,8 @@ export function launch(userData) {
 
   persisted('tiles.data', tiles.fetchedTiles);
   persisted('tileContent', tiles.loadedAllTileContent);
+  persisted('tileContent', tiles.loadedAllTileContent);
+  persisted('colourSchemes', colourSchemes.receive);
 
   persisted(
     'newsCategories',
@@ -191,8 +194,8 @@ export function launch(userData) {
 
   const loadDataFromServer = _.once(() => {
     store.dispatch(tiles.fetchTiles());
-
     if (hasAuthoritativeAuthenticatedUser(store.getState())) {
+      store.dispatch(colourSchemes.fetch());
       store.dispatch(notifications.fetch());
     }
   });
