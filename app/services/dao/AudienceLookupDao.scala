@@ -4,13 +4,13 @@ import javax.inject.{Inject, Named}
 
 import org.apache.http.client.methods.HttpGet
 import play.api.Configuration
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws._
+import services.dao.TabulaResponseParsers._
 import system.Logging
 import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplicationsManager}
-import warwick.sso.{UniversityID, UserLookupService, Usercode}
-import LookupModule._
-import play.api.libs.functional.syntax._
+import warwick.sso.{UniversityID, User, UserLookupService, Usercode}
 
 import scala.concurrent.Future
 
@@ -19,17 +19,16 @@ case class LookupModule(
   name: String,
   departmentName: String
 )
-object LookupModule {
-  implicit val reads: Reads[LookupModule] = (
-    (__ \ "code").read[String] and
-      (__ \ "name").read[String] and
-      (__ \ "department").read[String]
-  )(LookupModule.apply _)
-}
 
 case class LookupSeminarGroup(
   id: String,
   name: String
+)
+
+case class LookupRelationshipType(
+  id: String,
+  agentRole: String,
+  studentRole: String
 )
 
 trait AudienceLookupDao {
@@ -42,10 +41,11 @@ trait AudienceLookupDao {
   def resolveResearchPostgraduates(departmentCode: String): Future[Seq[Usercode]]
   def resolveModule(moduleCode: String): Future[Seq[Usercode]]
   def resolveSeminarGroup(groupId: String): Future[Seq[Usercode]]
-  def resolveTutees(tutorId: UniversityID): Future[Seq[Usercode]]
+  def resolveRelationship(agentId: UniversityID, relationshipType: String): Future[Seq[Usercode]]
 
   def findModules(query: String): Future[Seq[LookupModule]]
   def findSeminarGroups(query: String): Future[Seq[LookupSeminarGroup]]
+  def findRelationships(agentId: UniversityID): Future[Map[LookupRelationshipType, Seq[User]]]
 
 }
 
@@ -59,11 +59,19 @@ class TabulaAudienceLookupDao @Inject()(
 
   import system.ThreadPools.externalData
 
-  private val tabulaModuleQuery = configuration.getString("mywarwick.tabula.moduleQuery")
-    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.moduleQuery in application.conf"))
-
   private val tabulaUsercode = configuration.getString("mywarwick.tabula.user")
     .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.user in application.conf"))
+
+  private val tabulaModuleQueryUrl = configuration.getString("mywarwick.tabula.moduleQuery")
+    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.moduleQuery in application.conf"))
+
+  private val tabulaMemberBaseUrl = configuration.getString("mywarwick.tabula.member.base")
+    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.member.base in application.conf"))
+
+  private val tabulaMemberRelationshipsSuffix = configuration.getString("mywarwick.tabula.member.relationshipsSuffix")
+    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.member.relationshipsSuffix in application.conf"))
+
+  private def tabulaMemberRelationshipsUrl(member: UniversityID) = s"$tabulaMemberBaseUrl/${member.string}$tabulaMemberRelationshipsSuffix"
 
   override def resolveDepartment(departmentCode: String): Future[Seq[Usercode]] = ???
 
@@ -81,10 +89,10 @@ class TabulaAudienceLookupDao @Inject()(
 
   override def resolveSeminarGroup(groupId: String): Future[Seq[Usercode]] = ???
 
-  override def resolveTutees(tutorId: UniversityID): Future[Seq[Usercode]] = ???
+  def resolveRelationship(agentId: UniversityID, relationshipType: String): Future[Seq[Usercode]] = ???
 
   override def findModules(query: String): Future[Seq[LookupModule]] = {
-    getAsJson(tabulaModuleQuery, Seq("query" -> query))
+    getAsJson(tabulaModuleQueryUrl, Seq("query" -> query))
       .map(_.validate[Seq[LookupModule]].fold(
         invalid => {
           logger.error(s"Could not parse JSON result from Tabula: $invalid")
@@ -96,9 +104,29 @@ class TabulaAudienceLookupDao @Inject()(
 
   override def findSeminarGroups(query: String): Future[Seq[LookupSeminarGroup]] = ???
 
+  override def findRelationships(agentId: UniversityID): Future[Map[LookupRelationshipType, Seq[User]]] = {
+    getAuthenticatedAsJson(tabulaMemberRelationshipsUrl(agentId))
+      .map(_.validate[TabulaResponseParsers.MemberRelationship.MemberRelationshipsResponse](TabulaResponseParsers.MemberRelationship.reads).fold(
+        invalid => {
+          logger.error(s"Could not parse JSON result from Tabula: $invalid")
+          Map.empty
+        },
+        response => {
+          val relationships = response.relationships.groupBy(_.relationshipType).mapValues(_.head.students)
+          val allUsercodes = relationships.values.flatMap(users => users.map(u => Usercode(u.userId))).toSeq
+          val allUsers = userLookupService.getUsers(allUsercodes).toOption
+          relationships.mapValues(users => users.flatMap(u => allUsers.flatMap(_.get(Usercode(u.userId)))))
+        }
+      ))
+  }
+
 
   private def getAsJson(url: String, params: Seq[(String, String)]): Future[JsValue] = {
     ws.url(url).withQueryString(params:_*).get().map(response => response.json)
+  }
+
+  private def getAuthenticatedAsJson(url: String, params: Seq[(String, String)] = Nil): Future[JsValue] = {
+    setupRequest(url).withQueryString(params:_*).get().map(response => response.json)
   }
 
   private def setupRequest(url: String): WSRequest = {
@@ -109,5 +137,29 @@ class TabulaAudienceLookupDao @Inject()(
     ws
       .url(url)
       .withHeaders(trustedHeaders: _*)
+  }
+}
+
+object TabulaResponseParsers {
+  implicit val lookupModuleReads: Reads[LookupModule] = (
+    (__ \ "code").read[String] and
+      (__ \ "name").read[String] and
+      (__ \ "department").read[String]
+    )(LookupModule.apply _)
+
+  case class TabulaUserData(userId: String, universityId: String)
+  private implicit val tabulaUserDataReads = Json.reads[TabulaUserData]
+
+  object MemberRelationship {
+    case class MemberRelationship(relationshipType: LookupRelationshipType, students: Seq[TabulaUserData])
+    case class MemberRelationshipsResponse(
+      relationships: Seq[MemberRelationship]
+    )
+    private implicit val lookupRelationshipTypeReads = Json.reads[LookupRelationshipType]
+    private implicit val memberRelationshipReads = (
+      (__ \ "relationshipType").read[LookupRelationshipType] and
+        (__ \ "students").read[Seq[TabulaUserData]]
+    )(MemberRelationship.apply _)
+    val reads: Reads[MemberRelationshipsResponse] = (__ \ "relationships").read[Seq[MemberRelationship]].map(MemberRelationshipsResponse.apply)
   }
 }
