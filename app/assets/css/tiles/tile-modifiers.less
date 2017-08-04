@@ -31,6 +31,7 @@ body.in-tiles {
 
 @tile-header-height: 30px;
 @tile-header-zoomed-padding: 8px;
+@tile-header-zoomed-height: 36px;
 
 .tile--zoomed {
   overflow: visible;
@@ -41,8 +42,18 @@ body.in-tiles {
     margin-left: auto;
     left: 0;
     right: 0;
-    height: @tile-header-height;
     z-index: 10;
+    height: @tile-header-zoomed-height;
+    padding-top: 1px;
+  }
+
+  .tile__icon {
+    font-size: 20px;
+  }
+
+  .tile__title {
+    font-size: 24px;
+    padding-top: 2px;
   }
 
   .tile__wrap {
