@@ -303,7 +303,7 @@ class SettingsView extends HideableView {
               {SettingsView.renderSetting(
                 'check-square-o',
                 'Tile preferences',
-                <i className="fa fa-fw fa-chevron-right"/>,
+                <i className="fa fa-fw fa-chevron-right" />,
               )}
             </div>
             {SettingsView.shouldShowColourSchemes() &&
@@ -469,16 +469,16 @@ class SettingsView extends HideableView {
             >
               <div className="media">
                 <div className="media-left feedback">
-                <span className="fa-stack">
-                  <i className="fa fa-fw fa-comment-o fa-stack-2x"/>
-                  <strong className="fa-fw fa-stack-1x">!</strong>
-                </span>
+                  <span className="fa-stack">
+                    <i className="fa fa-fw fa-comment-o fa-stack-2x" />
+                    <strong className="fa-fw fa-stack-1x">!</strong>
+                  </span>
                 </div>
                 <div className="media-body">
                   Send feedback
                 </div>
                 <div className="media-right">
-                  <i className="fa fa-fw fa-chevron-right"/>
+                  <i className="fa fa-fw fa-chevron-right" />
                 </div>
               </div>
             </div>
@@ -492,7 +492,7 @@ class SettingsView extends HideableView {
               {SettingsView.renderSetting(
                 'arrow-circle-o-right',
                 'Take a tour',
-                <i className="fa fa-fw fa-chevron-right"/>,
+                <i className="fa fa-fw fa-chevron-right" />,
               )}
             </div>
             }
@@ -510,13 +510,13 @@ class SettingsView extends HideableView {
             >
               <div className="media">
                 <div className="media-left signout">
-                  <i className="fa fa-fw fa-sign-out"/>
+                  <i className="fa fa-fw fa-sign-out" />
                 </div>
                 <div className="media-body">
                   Sign out
                 </div>
                 <div className="media-right">
-                  <i className="fa fa-fw fa-chevron-right"/>
+                  <i className="fa fa-fw fa-chevron-right" />
                 </div>
               </div>
             </div>
