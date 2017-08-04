@@ -37,6 +37,8 @@ trait PublisherDao {
 
   def updatePermissionScope(publisherId: String, isAllDepartments: Boolean, departmentCodes: Seq[String])(implicit c: Connection): Unit
 
+  def updatePublisherPermissions(publisherId: String, permissions: Seq[PublisherPermission])(implicit c: Connection): Unit
+
   def saveProvider(publisherId: String, providerId: String, data: ProviderSave)(implicit c: Connection): String
 
   def updateProvider(publisherId: String, providerId: String, data: ProviderSave)(implicit c: Connection): Unit
@@ -131,6 +133,13 @@ class PublisherDaoImpl extends PublisherDao {
         SQL"INSERT INTO PUBLISHER_DEPARTMENT VALUES ($publisherId, $deptCode)".executeUpdate()
       )
     }
+  }
+
+  override def updatePublisherPermissions(publisherId: String, permissions: Seq[PublisherPermission])(implicit c: Connection): Unit = {
+    SQL"DELETE FROM PUBLISHER_PERMISSION WHERE publisher_id = $publisherId".execute()
+    permissions.foreach(permission =>
+      SQL"INSERT INTO PUBLISHER_PERMISSION VALUES ($publisherId, ${permission.usercode.string}, ${permission.role.toString})".executeUpdate()
+    )
   }
 
   override def saveProvider(publisherId: String, providerId: String, data: ProviderSave)(implicit c: Connection): String = {

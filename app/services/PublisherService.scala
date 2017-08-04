@@ -57,6 +57,8 @@ trait PublisherService {
 
   def updatePermissionScope(publisherId: String, isAllDepartments: Boolean, departmentCodes: Seq[String]): Unit
 
+  def updatePublisherPermissions(publisherId: String, permissions: Seq[PublisherPermission]): Unit
+
   def saveProvider(publisherId: String, providerId: String, data: ProviderSave): String
 
   def updateProvider(publisherId: String, providerId: String, data: ProviderSave): Unit
@@ -129,6 +131,9 @@ class PublisherServiceImpl @Inject()(
 
   override def updatePermissionScope(publisherId: String, isAllDepartments: Boolean, departmentCodes: Seq[String]): Unit =
     db.withConnection(implicit c => dao.updatePermissionScope(publisherId, isAllDepartments, departmentCodes))
+
+  override def updatePublisherPermissions(publisherId: String, permissions: Seq[PublisherPermission]): Unit =
+    db.withConnection(implicit c => dao.updatePublisherPermissions(publisherId, permissions))
 
   override def saveProvider(publisherId: String, providerId: String, data: ProviderSave): String =
     db.withConnection(implicit c => dao.saveProvider(publisherId, providerId, data))
