@@ -31,7 +31,8 @@ body.in-tiles {
 
 @tile-header-height: 30px;
 @tile-header-zoomed-padding: 8px;
-@tile-header-zoomed-height: 36px;
+@tile-header-zoomed-height: 40px;
+@tile-header-zoomed-padding-top: 3px;
 
 .tile--zoomed {
   overflow: visible;
@@ -44,7 +45,7 @@ body.in-tiles {
     right: 0;
     z-index: 10;
     height: @tile-header-zoomed-height;
-    padding-top: 1px;
+    padding-top: 3px;
   }
 
   .tile__icon {
@@ -64,7 +65,7 @@ body.in-tiles {
   .tile__body {
     position: unset;
     overflow-y: visible;
-    padding-top: (@tile-header-zoomed-padding + @tile-header-height);
+    padding-top: (@tile-header-zoomed-height + @tile-header-zoomed-padding-top);
   }
 }
 
