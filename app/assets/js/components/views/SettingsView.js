@@ -2,6 +2,7 @@
 
 import React from 'react';
 import * as PropTypes from 'prop-types';
+import ScrollRestore from '../ui/ScrollRestore';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
@@ -280,98 +281,99 @@ class SettingsView extends HideableView {
 
   render() {
     return (
-      <div>
-        <div className="list-group fixed">
-          <div className="list-group-item">
-            <div className="list-group-item-heading">
-              <h3>Settings</h3>
+      <ScrollRestore url={`/${Routes.SETTINGS}`}>
+        <div>
+          <div className="list-group fixed">
+            <div className="list-group-item">
+              <div className="list-group-item-heading">
+                <h3>Settings</h3>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="list-group setting-colour-0">
-          <div
-            className="list-group-item"
-            role="button"
-            tabIndex={0}
-            onClick={() =>
-              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}`))
+          <div className="list-group setting-colour-0">
+            <div
+              className="list-group-item"
+              role="button"
+              tabIndex={0}
+              onClick={() =>
+                this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}`))
+              }
+            >
+              {SettingsView.renderSetting(
+                'check-square-o',
+                'Tile preferences',
+                <i className="fa fa-fw fa-chevron-right"/>,
+              )}
+            </div>
+            {SettingsView.shouldShowColourSchemes() &&
+            <div
+              className="list-group-item"
+              role="button"
+              tabIndex={0}
+              onClick={this.props.isOnline ? () =>
+                this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.COLOUR_SCHEMES}`)) : null
+              }
+            >
+              {SettingsView.renderSetting(
+                'paint-brush',
+                'Colour scheme',
+                this.chosenSchemeName(),
+                !this.props.isOnline,
+              )}
+            </div>
             }
-          >
-            {SettingsView.renderSetting(
-              'check-square-o',
-              'Tile preferences',
-              <i className="fa fa-fw fa-chevron-right" />,
-            )}
           </div>
-          {SettingsView.shouldShowColourSchemes() &&
-          <div
-            className="list-group-item"
-            role="button"
-            tabIndex={0}
-            onClick={this.props.isOnline ? () =>
-              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.COLOUR_SCHEMES}`)) : null
-            }
-          >
-            {SettingsView.renderSetting(
-              'paint-brush',
-              'Colour scheme',
-              this.chosenSchemeName(),
-              !this.props.isOnline,
-            )}
-          </div>
-          }
-        </div>
 
-        <div className="list-group setting-colour-0">
-          <div
-            className="list-group-item"
-            role="button"
-            tabIndex={0}
-            onClick={ () =>
-              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`))
-            }
-          >
-            { SettingsView.renderSetting(
-              'bell-slash-o',
-              'Muted alerts',
-              SettingsView.renderSingleCount(this.props.mutes),
-            ) }
+          <div className="list-group setting-colour-0">
+            <div
+              className="list-group-item"
+              role="button"
+              tabIndex={0}
+              onClick={() =>
+                this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`))
+              }
+            >
+              {SettingsView.renderSetting(
+                'bell-slash-o',
+                'Muted alerts',
+                SettingsView.renderSingleCount(this.props.mutes),
+              )}
+            </div>
+            <SwitchListGroupItem
+              id="copyNotificationsEmail"
+              value=""
+              icon="envelope"
+              description="Copy my alerts to email"
+              role="button"
+              tabIndex={0}
+              onClick={this.onNotificationEmailCopyChange}
+              checked={this.state.emailNotificationsOptIn.wantsEmails}
+              failure={this.state.emailNotificationsOptIn.failed && !this.props.isOnline}
+              loading={!this.state.emailNotificationsOptIn.fetchedOnce &&
+              this.props.emailNotificationsOptIn.fetching}
+              disabled={!this.props.isOnline}
+            />
+            <div
+              className="list-group-item"
+              role="button"
+              tabIndex={0}
+              onClick={() =>
+                this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.SMS}`))
+              }
+            >
+              {SettingsView.renderSetting(
+                'mobile',
+                'Copy my alerts to SMS',
+                SettingsView.renderFetchedBool({
+                  ...this.props.smsNotifications,
+                }),
+              )}
+            </div>
           </div>
-          <SwitchListGroupItem
-            id="copyNotificationsEmail"
-            value=""
-            icon="envelope"
-            description="Copy my alerts to email"
-            role="button"
-            tabIndex={0}
-            onClick={ this.onNotificationEmailCopyChange }
-            checked={ this.state.emailNotificationsOptIn.wantsEmails }
-            failure={ this.state.emailNotificationsOptIn.failed && !this.props.isOnline}
-            loading={ !this.state.emailNotificationsOptIn.fetchedOnce &&
-              this.props.emailNotificationsOptIn.fetching }
-            disabled={ !this.props.isOnline }
-          />
-          <div
-            className="list-group-item"
-            role="button"
-            tabIndex={0}
-            onClick={ () =>
-              this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.SMS}`))
-            }
-          >
-            { SettingsView.renderSetting(
-              'mobile',
-              'Copy my alerts to SMS',
-              SettingsView.renderFetchedBool({
-                ...this.props.smsNotifications,
-              }),
-            ) }
-          </div>
-        </div>
 
-        <div className="list-group setting-colour-1">
-          {/* <div
+          <div className="list-group setting-colour-1">
+            {/* <div
             className="list-group-item"
             role="button"
             tabIndex={0}
@@ -389,139 +391,138 @@ class SettingsView extends HideableView {
               }),
             ) }
           </div>*/}
-          <div
-            className="list-group-item"
-            role="button"
-            tabIndex={0}
-            onClick={ this.props.newsOptIn.fetched && !this.props.newsOptIn.failed ? () =>
-              this.props.dispatch(
-                push(
-                  `/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}/` +
-                  `${Routes.SettingsRoutes.OptInTypes.LOCATION}`,
-                ),
-              ) : null
-            }
-          >
-            { SettingsView.renderSetting(
-              'map-signs',
-              'Location preferences',
-              SettingsView.renderFetchedCount({
-                fetching: this.props.newsOptIn.fetching,
-                failed: this.props.newsOptIn.failed,
-                fetched: this.props.newsOptIn.fetched,
-                selected: this.props.newsOptIn.location.selected,
-                total: this.props.newsOptIn.location.total,
-                isOnline: this.props.isOnline,
-              }),
-            ) }
-          </div>
-        </div>
-
-        <div className="list-group setting-colour-2">
-          <div
-            className="list-group-item"
-            role="button"
-            tabIndex={0}
-            onClick={ () =>
-              this.props.dispatch(
-                push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.ACTIVITY_FILTER}`),
-              )
-            }
-          >
-            { SettingsView.renderSetting(
-              'dashboard',
-              'Activity filter',
-              SettingsView.renderFractionCount(
-                this.props.activityFilter.selected,
-                this.props.activityFilter.total,
-              ),
-            ) }
-          </div>
-          <div
-            className="list-group-item"
-            role="button"
-            tabIndex={0}
-            onClick={ () =>
-              this.props.dispatch(
-                push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NOTIFICATION_FILTER}`),
-              )
-            }
-          >
-            { SettingsView.renderSetting(
-              'bell-o',
-              'Alerts filter',
-              SettingsView.renderFractionCount(
-                this.props.notificationFilter.selected,
-                this.props.notificationFilter.total,
-              ),
-            ) }
-          </div>
-        </div>
-
-        <div className="list-group setting-colour-3">
-          <div
-            className="list-group-item"
-            role="button"
-            tabIndex={0}
-            onClick={ loadDeviceDetails }
-          >
-            <div className="media">
-              <div className="media-left feedback">
-                <span className="fa-stack">
-                  <i className="fa fa-fw fa-comment-o fa-stack-2x" />
-                  <strong className="fa-fw fa-stack-1x">!</strong>
-                </span>
-              </div>
-              <div className="media-body">
-                Send feedback
-              </div>
-              <div className="media-right">
-                <i className="fa fa-fw fa-chevron-right" />
-              </div>
-            </div>
-          </div>
-          { SettingsView.canLaunchTour() &&
             <div
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={ SettingsView.launchTour }
+              onClick={this.props.newsOptIn.fetched && !this.props.newsOptIn.failed ? () =>
+                this.props.dispatch(
+                  push(
+                    `/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}/` +
+                    `${Routes.SettingsRoutes.OptInTypes.LOCATION}`,
+                  ),
+                ) : null
+              }
             >
-              { SettingsView.renderSetting(
+              {SettingsView.renderSetting(
+                'map-signs',
+                'Location preferences',
+                SettingsView.renderFetchedCount({
+                  fetching: this.props.newsOptIn.fetching,
+                  failed: this.props.newsOptIn.failed,
+                  fetched: this.props.newsOptIn.fetched,
+                  selected: this.props.newsOptIn.location.selected,
+                  total: this.props.newsOptIn.location.total,
+                  isOnline: this.props.isOnline,
+                }),
+              )}
+            </div>
+          </div>
+
+          <div className="list-group setting-colour-2">
+            <div
+              className="list-group-item"
+              role="button"
+              tabIndex={0}
+              onClick={() =>
+                this.props.dispatch(
+                  push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.ACTIVITY_FILTER}`),
+                )
+              }
+            >
+              {SettingsView.renderSetting(
+                'dashboard',
+                'Activity filter',
+                SettingsView.renderFractionCount(
+                  this.props.activityFilter.selected,
+                  this.props.activityFilter.total,
+                ),
+              )}
+            </div>
+            <div
+              className="list-group-item"
+              role="button"
+              tabIndex={0}
+              onClick={() =>
+                this.props.dispatch(
+                  push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NOTIFICATION_FILTER}`),
+                )
+              }
+            >
+              {SettingsView.renderSetting(
+                'bell-o',
+                'Alerts filter',
+                SettingsView.renderFractionCount(
+                  this.props.notificationFilter.selected,
+                  this.props.notificationFilter.total,
+                ),
+              )}
+            </div>
+          </div>
+
+          <div className="list-group setting-colour-3">
+            <div
+              className="list-group-item"
+              role="button"
+              tabIndex={0}
+              onClick={loadDeviceDetails}
+            >
+              <div className="media">
+                <div className="media-left feedback">
+                <span className="fa-stack">
+                  <i className="fa fa-fw fa-comment-o fa-stack-2x"/>
+                  <strong className="fa-fw fa-stack-1x">!</strong>
+                </span>
+                </div>
+                <div className="media-body">
+                  Send feedback
+                </div>
+                <div className="media-right">
+                  <i className="fa fa-fw fa-chevron-right"/>
+                </div>
+              </div>
+            </div>
+            {SettingsView.canLaunchTour() &&
+            <div
+              className="list-group-item"
+              role="button"
+              tabIndex={0}
+              onClick={SettingsView.launchTour}
+            >
+              {SettingsView.renderSetting(
                 'arrow-circle-o-right',
                 'Take a tour',
-                <i className="fa fa-fw fa-chevron-right" />,
-              ) }
+                <i className="fa fa-fw fa-chevron-right"/>,
+              )}
             </div>
-          }
-          <div className="list-group-item">
-            { SettingsView.renderSetting('info-circle', this.getVersionString(), null) }
-          </div>
-        </div>
-
-        <div className="list-group setting-colour-3">
-          <div
-            className="list-group-item"
-            role="button"
-            tabIndex={0}
-            onClick={ signOut }
-          >
-            <div className="media">
-              <div className="media-left signout">
-                <i className="fa fa-fw fa-sign-out" />
-              </div>
-              <div className="media-body">
-                Sign out
-              </div>
-              <div className="media-right">
-                <i className="fa fa-fw fa-chevron-right" />
-              </div>
+            }
+            <div className="list-group-item">
+              {SettingsView.renderSetting('info-circle', this.getVersionString(), null)}
             </div>
           </div>
+
+          <div className="list-group setting-colour-3">
+            <div
+              className="list-group-item"
+              role="button"
+              tabIndex={0}
+              onClick={signOut}
+            >
+              <div className="media">
+                <div className="media-left signout">
+                  <i className="fa fa-fw fa-sign-out"/>
+                </div>
+                <div className="media-body">
+                  Sign out
+                </div>
+                <div className="media-right">
+                  <i className="fa fa-fw fa-chevron-right"/>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-
-
-      </div>
+      </ScrollRestore>
     );
   }
 }
