@@ -4,6 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import FileUpload from './publish/components/FileUpload';
+import { fetchWithCredentials } from './serverpipe';
 import './publish/news';
 import './publish/groupPicker';
 import _ from 'lodash-es';
@@ -24,7 +25,7 @@ if (fileUploadContainer) {
   const imageId = fileUploadContainer.attributes['data-image-id'].value;
 
   ReactDOM.render(
-    <FileUpload inputName={ inputName.value } imageId={ imageId } />,
+    <FileUpload inputName={inputName.value} imageId={imageId} />,
     fileUploadContainer,
   );
 }
@@ -188,6 +189,31 @@ $(() => {
       // click elsewhere on body, dismiss all open popover
       $('.popover-active').popover('hide').removeClass('popover-active');
     }
+  });
+
+  $('.activity-item__send-progress').each(function watchSendStatus() {
+    const $activity = $(this).parents('.activity-item');
+    const activityId = $activity.data('activity-id');
+
+    const interval = setInterval(() => {
+      fetchWithCredentials(`alerts/${activityId}/status`)
+        .then(response => response.text())
+        .then(text => JSON.parse(text))
+        .then((response) => {
+          if (response.sendingNow) {
+            $activity.find('.activity-item__sent-count').text(response.sentCount);
+          } else {
+            clearInterval(interval);
+            $activity.find('.activity-item__send-progress').remove();
+
+            if ($('.activity-item__send-progress').length === 0) {
+              $('#sending-empty').removeClass('hidden');
+            }
+
+            $activity.prependTo('#sent-activities');
+          }
+        });
+    }, 2000);
   });
 
   $('.fa-picker-preview').each((i, input) => {

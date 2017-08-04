@@ -3,9 +3,15 @@
 @import models.publishing.Ability.EditNotifications
 @import models.publishing.Ability.DeleteNotifications
 @import system.RequestContext
-@(publisher: Publisher, item: ActivityRender, user: Role)(implicit context: RequestContext)
+@import services.dao.DepartmentInfo
+@(
+    publisher: Publisher,
+    item: ActivityRenderWithAudience,
+    user: Role,
+    allDepartments: Seq[DepartmentInfo]
+)(implicit context: RequestContext)
 
-<div class="activity-item row">
+<div class="activity-item row" data-activity-id="@item.activity.id">
   <div class="media">
     <div class="col-xs-10">
       <div class="media-left">
@@ -17,6 +23,39 @@
         <div class="activity-item__title">@item.activity.title</div>
         @item.activity.text.map { text =>
           <div class="activity-item__text">@text</div>
+        }
+        <div class="activity-item__audience">
+          @item.audienceSize match {
+            case AudienceSize.Public => {
+              <span>To: public</span>
+            }
+            case AudienceSize.Finite(c) => {
+              <span>
+              To: @c
+                @if(c == 1) { recipient } else { recipients }
+                @if(item.audienceComponents.nonEmpty) {
+                  (@tags.audienceComponents(item.audienceComponents, allDepartments))
+              }
+              </span>
+            }
+            case _ => {}
+          }
+        </div>
+        @if(item.isSendingNow) {
+        <div class="activity-item__audience activity-item__send-progress">
+          <i class="fa fa-spin fa-refresh"></i>
+          Sent to
+          <span class="activity-item__sent-count">
+            @("%,d".format(item.sentCount))
+          </span>
+          @item.audienceSize match {
+            case AudienceSize.Finite(size) => {
+              of @("%,d".format(size))
+            }
+            case _ => {}
+          }
+          recipients
+        </div>
         }
         <div class="activity-item__date">@models.DateFormats.emailDateTime(item.activity.publishedAt)</div>
         @item.activity.url.map { url =>

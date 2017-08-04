@@ -1,7 +1,7 @@
 package services.dao
 
 import helpers.{BaseSpec, Fixtures, OneStartAppPerSuite}
-import models.{ActivityTag, TagValue}
+import models.{ActivityTag, AudienceSize, TagValue}
 
 class ActivityTagDaoTest extends BaseSpec with OneStartAppPerSuite {
 
@@ -14,7 +14,7 @@ class ActivityTagDaoTest extends BaseSpec with OneStartAppPerSuite {
   "ActivityTagDao" should {
 
     "tag an activity then find it by the tag" in transaction { implicit c =>
-      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
       dao.save(activityId, ActivityTag("name", None, TagValue("value", Some("Display value"))))
 
       val activities = dao.getActivitiesWithTags(Map("name" -> "value"), "tabula")
@@ -23,7 +23,7 @@ class ActivityTagDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "return only activities with all tags" in transaction { implicit c =>
-      val activityId = activityDao.save(activitySave, audienceId, Seq.empty)
+      val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
       dao.save(activityId, ActivityTag("a", None, TagValue("a", None)))
       dao.save(activityId, ActivityTag("b", None, TagValue("b", None)))
 

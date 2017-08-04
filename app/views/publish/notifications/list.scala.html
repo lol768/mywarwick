@@ -2,11 +2,14 @@
 @import system.RequestContext
 @import models.publishing.Ability.CreateNotifications
 @import models.publishing.Publisher
+@import services.dao.DepartmentInfo
 @(
     publisher: Publisher,
-    futureNotifications: Seq[models.ActivityRender],
-    pastNotifications: Seq[models.ActivityRender],
-    user: Role
+    futureNotifications: Seq[models.ActivityRenderWithAudience],
+    sendingNotifications: Seq[models.ActivityRenderWithAudience],
+    pastNotifications: Seq[models.ActivityRenderWithAudience],
+    user: Role,
+    allDepartments: Seq[DepartmentInfo]
 )(implicit context: RequestContext)
 
 @common.admin("Alerts") {
@@ -22,13 +25,28 @@
   @if(futureNotifications.isEmpty) {
     <p>No pending alerts.</p>
   } else {
-    @futureNotifications.map(n => views.html.publish.notifications.notificationItem(publisher, n, user))
+    @futureNotifications.map(n => views.html.publish.notifications.notificationItem(publisher, n, user, allDepartments))
+  }
+
+  <h3>Sending</h3>
+  @if(sendingNotifications.isEmpty) {
+    <p>
+      No alerts are currently being sent.
+    </p>
+  } else {
+    <p id="sending-empty" class="hidden">
+      No alerts are currently being sent.
+    </p>
+
+    @sendingNotifications.map(n => views.html.publish.notifications.notificationItem(publisher, n, user, allDepartments))
   }
 
   <h3>Sent</h3>
   @if(pastNotifications.isEmpty) {
     <p>No sent alerts.</p>
   } else {
-    @pastNotifications.map(n => views.html.publish.notifications.notificationItem(publisher, n, user))
+    <div id="sent-activities">
+      @pastNotifications.map(n => views.html.publish.notifications.notificationItem(publisher, n, user, allDepartments))
+    </div>
   }
 }

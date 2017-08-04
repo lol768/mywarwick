@@ -44,7 +44,7 @@ function buildJsonBody(contentArr) {
 function notificationsPusher() {
   if (!notificationProviders.length) return;
   const providerName = getRandom(notificationProviders);
-  const url = `${pushUrl}/api/streams/${providerName}/notifications`;
+  const url = `${pushUrl}/api/streams/${providerName}/alerts`;
   const contentArr = CONFIG.notificationProviders[providerName];
 
   fetch(url, {
