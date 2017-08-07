@@ -1,15 +1,11 @@
 package services
 
-import akka.actor.ActorSystem
-import helpers.WithActorSystem
-import org.mockito.Mockito
-import org.scalatest.mockito.MockitoSugar
-import helpers.BaseSpec
-import services.messaging.MessagingService
-import org.mockito.Mockito._
-import org.mockito.Mockito.{atLeast => atLeastTimes}
+import helpers.{BaseSpec, WithActorSystem}
+import org.mockito.Mockito.{atLeast => atLeastTimes, _}
 import org.scalatest.concurrent.Eventually
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Span}
+import services.messaging.MessagingService
 
 import scala.concurrent.duration._
 
@@ -22,8 +18,8 @@ class HealthCheckServiceTest extends BaseSpec with MockitoSugar with WithActorSy
   "HealthCheckService" should {
     "continue after an exception" in {
       val messaging = mock[MessagingService]
-      when(messaging.getQueueStatus()).thenReturn(Nil)
-      when(messaging.getOldestUnsentMessageCreatedAt()).thenThrow(new RuntimeException("DB ERROR"))
+      when(messaging.getQueueStatus).thenReturn(Nil)
+      when(messaging.getOldestUnsentMessageCreatedAt).thenThrow(new RuntimeException("DB ERROR"))
 
       val activityService = mock[ActivityService]
       when(activityService.countNotificationsByPublishersInLast48Hours).thenReturn(Nil)
@@ -34,7 +30,7 @@ class HealthCheckServiceTest extends BaseSpec with MockitoSugar with WithActorSy
 
       eventually {
         // if it crashed, it will only ever run 1 time.
-        verify(messaging, atLeastTimes(2)).getQueueStatus()
+        verify(messaging, atLeastTimes(2)).getQueueStatus
       }
     }
   }

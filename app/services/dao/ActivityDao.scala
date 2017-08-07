@@ -13,11 +13,12 @@ import models.publishing.PublisherActivityCount
 import org.joda.time.DateTime
 import system.DatabaseDialect
 import warwick.anorm.converters.ColumnConversions._
-import java.lang.{Integer => JInt}
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
   def getPastActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender]
+
+  def getSendingActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender]
 
   def getFutureActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender]
 
@@ -27,9 +28,9 @@ trait ActivityDao {
 
   def getActivityRenderById(id: String)(implicit c: Connection): Option[ActivityRender]
 
-  def save(activity: ActivitySave, audienceId: String, replaces: Seq[String])(implicit c: Connection): String
+  def save(activity: ActivitySave, audienceId: String, audienceSize: AudienceSize, replaces: Seq[String])(implicit c: Connection): String
 
-  def update(id: String, activity: ActivitySave, audienceId: String)(implicit c: Connection): Unit
+  def update(id: String, activity: ActivitySave, audienceId: String, audienceSize: AudienceSize)(implicit c: Connection): Unit
 
   def delete(activityId: String)(implicit c: Connection): Unit
 
@@ -51,13 +52,21 @@ trait ActivityDao {
   def getProvider(id: String)(implicit c: Connection): Option[ActivityProvider]
 
   def countNotificationsSinceDateGroupedByPublisher(activityType: String, since: DateTime)(implicit c: Connection): Seq[PublisherActivityCount]
+
+  def updateAudienceCount(activityId: String, audienceSize: AudienceSize)(implicit c: Connection): Int
+
+  def getAudienceSizes(ids: Seq[String])(implicit c: Connection): Map[String, AudienceSize]
+
+  def getSentCounts(ids: Seq[String])(implicit c: Connection): Map[String, Int]
+
+  def setSentCount(id: String, count: Int)(implicit c: Connection): Unit
 }
 
 class ActivityDaoImpl @Inject()(
   dialect: DatabaseDialect
 ) extends ActivityDao {
 
-  override def save(activity: ActivitySave, audienceId: String, replaces: Seq[String])(implicit c: Connection): String = {
+  override def save(activity: ActivitySave, audienceId: String, audienceSize: AudienceSize, replaces: Seq[String])(implicit c: Connection): String = {
     import activity._
     val id = UUID.randomUUID().toString
     val now = DateTime.now
@@ -65,8 +74,8 @@ class ActivityDaoImpl @Inject()(
     val sendEmailObj = sendEmail.map[JInt] { if (_) 1 else 0 }.orNull
 
     SQL"""
-      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by, send_email)
-      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $publishedAtOrNow, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string}, $sendEmailObj)
+      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by, send_email, audience_size)
+      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $publishedAtOrNow, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string}, $sendEmailObj, ${audienceSize.toOption})
     """
       .execute()
 
@@ -75,10 +84,10 @@ class ActivityDaoImpl @Inject()(
     id
   }
 
-  override def update(id: String, activity: ActivitySave, audienceId: String)(implicit c: Connection): Unit = {
+  override def update(id: String, activity: ActivitySave, audienceId: String, audienceSize: AudienceSize)(implicit c: Connection): Unit = {
     import activity._
     val publishedAtOrNow = publishedAt.getOrElse(DateTime.now)
-    SQL"UPDATE ACTIVITY SET TYPE = ${`type`}, TITLE = $title, TEXT = $text, URL = $url, PUBLISHED_AT = $publishedAtOrNow, AUDIENCE_ID = $audienceId WHERE ID = $id"
+    SQL"UPDATE ACTIVITY SET TYPE = ${`type`}, TITLE = $title, TEXT = $text, URL = $url, PUBLISHED_AT = $publishedAtOrNow, AUDIENCE_ID = $audienceId, AUDIENCE_SIZE = ${audienceSize.toOption} WHERE ID = $id"
       .execute()
   }
 
@@ -113,13 +122,34 @@ class ActivityDaoImpl @Inject()(
             --+ INDEX(ACTIVITY, ACTIVITY_PUBLISHER_TIME_INDEX)
             ID FROM ACTIVITY
           WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
-            AND ACTIVITY.PUBLISHED_AT <= SYSDATE
+            AND ACTIVITY.PUBLISHED_AT <= {now}
+            AND ACTIVITY.SENT_COUNT = ACTIVITY.AUDIENCE_SIZE
           ORDER BY ACTIVITY.PUBLISHED_AT DESC"""
         )}
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC
       """)
-      .on('publisherId -> publisherId)
+      .on('publisherId -> publisherId, 'now -> DateTime.now)
+      .as(activityRenderParser.*)
+  }
+
+  override def getSendingActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
+    SQL(s"""
+      $selectActivityRender
+      WHERE ACTIVITY.ID IN (
+        ${dialect.limitOffset(limit) (
+      s"""SELECT
+            --+ INDEX(ACTIVITY, ACTIVITY_PUBLISHER_TIME_INDEX)
+            ID FROM ACTIVITY
+          WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
+            AND ACTIVITY.PUBLISHED_AT <= {now}
+            AND ACTIVITY.SENT_COUNT < ACTIVITY.AUDIENCE_SIZE
+          ORDER BY ACTIVITY.PUBLISHED_AT DESC"""
+    )}
+      )
+      ORDER BY ACTIVITY.PUBLISHED_AT DESC
+      """)
+      .on('publisherId -> publisherId, 'now -> DateTime.now)
       .as(activityRenderParser.*)
   }
 
@@ -132,13 +162,13 @@ class ActivityDaoImpl @Inject()(
             --+ INDEX(ACTIVITY, ACTIVITY_PUBLISHER_TIME_INDEX)
             ID FROM ACTIVITY
           WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
-            AND ACTIVITY.PUBLISHED_AT > SYSDATE
+            AND ACTIVITY.PUBLISHED_AT > {now}
           ORDER BY ACTIVITY.PUBLISHED_AT DESC"""
         )}
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC
       """)
-      .on('publisherId -> publisherId)
+      .on('publisherId -> publisherId, 'now -> DateTime.now)
       .as(activityRenderParser.*)
   }
 
@@ -368,6 +398,36 @@ class ActivityDaoImpl @Inject()(
       FROM PUBLISHER
       """
       .as(publisherActivityCountParser.*)
+  }
+
+  override def updateAudienceCount(activityId: String, audienceSize: AudienceSize)(implicit c: Connection): Int = {
+    SQL"""
+      UPDATE ACTIVITY SET audience_size=${audienceSize.toOption}
+      WHERE id=$activityId
+    """.executeUpdate()
+  }
+
+  override def getAudienceSizes(ids: Seq[String])(implicit c: Connection): Map[String, AudienceSize] = {
+    ids.grouped(1000).flatMap { group =>
+      SQL"SELECT ID, AUDIENCE_SIZE FROM ACTIVITY WHERE ID IN ($group)"
+        .as((get[String]("ID") ~ get[Option[Int]]("AUDIENCE_SIZE") map {
+          case id ~ audienceSize => (id, AudienceSize.fromOption(audienceSize))
+        }).*)
+    }.toMap
+  }
+
+  override def getSentCounts(ids: Seq[String])(implicit c: Connection): Map[String, Int] = {
+    ids.grouped(1000).flatMap { group =>
+      SQL"SELECT ID, SENT_COUNT FROM ACTIVITY WHERE ID IN ($group)"
+        .as((get[String]("ID") ~ get[Int]("SENT_COUNT") map {
+          case id ~ sentCount => (id, sentCount)
+        }).*)
+    }.toMap
+  }
+
+  override def setSentCount(id: String, count: Int)(implicit c: Connection): Unit = {
+    SQL"UPDATE ACTIVITY SET SENT_COUNT = $count WHERE ID = $id"
+      .execute()
   }
 
   private lazy val activityIconParser: RowParser[ActivityIcon] =

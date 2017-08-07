@@ -201,6 +201,7 @@ function generateServiceWorker(watch) {
       navigateFallback: '/',
       navigateFallbackWhitelist: [
         /^\/notifications/,
+        /^\/alerts/,
         /^\/activities/,
         /^\/search/,
         /^\/news\/?$/,
@@ -251,6 +252,7 @@ function generateAppcache() {
           cache: [
             '/',
             '/activity',
+            '/alerts',
             '/notifications',
             '/news',
             '/search',

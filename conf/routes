@@ -3,121 +3,148 @@
 # ~~~~
 
 # Home page
-GET         /                                                     @controllers.HomeController.index
-GET         /notifications                                        @controllers.HomeController.index
-GET         /activity                                             @controllers.HomeController.index
-GET         /news                                                 @controllers.HomeController.index
-GET         /search                                               @controllers.HomeController.index
-GET         /tiles                                                @controllers.HomeController.redirectToIndex
-GET         /tiles/:id                                            @controllers.HomeController.indexIgnoreParam(id: String)
-GET         /edit                                                 @controllers.HomeController.index
-GET         /edit/add                                             @controllers.HomeController.index
-GET         /settings                                             @controllers.HomeController.settings
-GET         /settings/*setting                                    @controllers.HomeController.indexIgnoreParam(setting: String)
-GET         /post_tour                                            @controllers.HomeController.index
+GET           /                                              @controllers.HomeController.index
+GET           /notifications                                 @controllers.HomeController.index
+GET           /alerts                                        @controllers.HomeController.index
+GET           /activity                                      @controllers.HomeController.index
+GET           /news                                          @controllers.HomeController.index
+GET           /search                                        @controllers.HomeController.index
+GET           /tiles                                         @controllers.HomeController.redirectToIndex
+GET           /tiles/:id                                     @controllers.HomeController.indexIgnoreParam(id: String)
+GET           /edit                                          @controllers.HomeController.index
+GET           /edit/add                                      @controllers.HomeController.index
+GET           /settings                                      @controllers.HomeController.settings
+GET           /settings/*setting                             @controllers.HomeController.indexIgnoreParam(setting: String)
+GET           /post_tour                                     @controllers.HomeController.index
 
 # NEWSTART-253
-POST        /                                                     @controllers.HomeController.index
+POST          /                                              @controllers.HomeController.index
 
-->          /sso                                                  sso.Routes
+->            /sso                                           sso.Routes
 
-GET         /admin                                                @controllers.admin.AdminController.index
-GET         /admin/sysadmin                                       @controllers.admin.AdminController.sysadmin
-GET         /admin/cluster                                        @controllers.admin.ClusterStateController.html
-GET         /admin/masquerade                                     @controllers.admin.MasqueradeController.masquerade
+GET           /admin                                         @controllers.admin.AdminController.index
+GET           /admin/sysadmin                                @controllers.admin.AdminController.sysadmin
+GET           /admin/cluster                                 @controllers.admin.ClusterStateController.html
+GET           /admin/masquerade                              @controllers.admin.MasqueradeController.masquerade
 
-GET         /publish/:publisher/webgroups                         @controllers.publish.WebGroupsController.results(publisher: String, query: String)
+GET           /admin/publishers                                     @controllers.admin.publishers.PublishersController.index
+GET           /admin/publishers/new                                 @controllers.admin.publishers.PublishersController.createForm
+POST          /admin/publishers                                     @controllers.admin.publishers.PublishersController.create
+GET           /admin/publishers/:publisher                          @controllers.admin.publishers.PublishersController.updateForm(publisher: String)
+POST          /admin/publishers/:publisher                          @controllers.admin.publishers.PublishersController.update(publisher: String)
+GET           /admin/publishers/:publisher/departments              @controllers.admin.publishers.PublisherDepartmentsController.form(publisher: String)
+POST          /admin/publishers/:publisher/departments              @controllers.admin.publishers.PublisherDepartmentsController.update(publisher: String)
+GET           /admin/publishers/:publisher/permissions              @controllers.admin.publishers.PublisherPermissionsController.form(publisher: String)
+POST          /admin/publishers/:publisher/permissions              @controllers.admin.publishers.PublisherPermissionsController.update(publisher: String)
+GET           /admin/publishers/:publisher/providers/new            @controllers.admin.publishers.ProvidersController.createForm(publisher: String)
+POST          /admin/publishers/:publisher/providers                @controllers.admin.publishers.ProvidersController.create(publisher: String)
+GET           /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.updateForm(publisher: String, provider: String)
+POST          /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.update(publisher: String, provider: String)
 
-GET         /publish                                              @controllers.publish.PublishersController.index
-GET         /publish/:publisher                                   @controllers.publish.PublishersController.show(publisher: String)
-GET         /publish/:publisher/news                              @controllers.publish.NewsController.list(publisher: String)
-GET         /publish/:publisher/news/new                          @controllers.publish.NewsController.createForm(publisher: String)
-POST        /publish/:publisher/news/validate                     @controllers.publish.NewsController.create(publisher: String, submitted: Boolean = false)
-POST        /publish/:publisher/news/audience                     @controllers.publish.NewsController.audienceInfo(publisher: String)
-POST        /publish/:publisher/news                              @controllers.publish.NewsController.create(publisher: String, submitted: Boolean = true)
-GET         /publish/:publisher/news/:id/edit                     @controllers.publish.NewsController.updateForm(publisher: String, id: String)
-POST        /publish/:publisher/news/:id/validate                 @controllers.publish.NewsController.update(publisher: String, id: String, submitted: Boolean = false)
-POST        /publish/:publisher/news/:id                          @controllers.publish.NewsController.update(publisher: String, id: String, submitted: Boolean = true)
-POST        /publish/:publisher/news/:id/delete                   @controllers.publish.NewsController.delete(publisher: String, id: String)
+GET           /publish/:publisher/webgroups                  @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 
-GET         /publish/:publisher/notifications                     @controllers.publish.NotificationsController.list(publisher: String)
-GET         /publish/:publisher/notifications/new                 @controllers.publish.NotificationsController.createForm(publisher: String)
-POST        /publish/:publisher/notifications/validate            @controllers.publish.NotificationsController.create(publisher: String, submitted: Boolean = false)
-POST        /publish/:publisher/notifications/audience            @controllers.publish.NotificationsController.audienceInfo(publisher: String)
-POST        /publish/:publisher/notifications                     @controllers.publish.NotificationsController.create(publisher: String, submitted: Boolean = true)
-GET         /publish/:publisher/notifications/:id/edit            @controllers.publish.NotificationsController.updateForm(publisher: String, id: String)
-POST        /publish/:publisher/notifications/:id/validate        @controllers.publish.NotificationsController.update(publisher: String, id: String, submitted: Boolean = false)
-POST        /publish/:publisher/notifications/:id                 @controllers.publish.NotificationsController.update(publisher: String, id: String, submitted: Boolean = true)
-POST        /publish/:publisher/notifications/:id/delete          @controllers.publish.NotificationsController.delete(publisher: String, id: String)
+GET           /publish                                       @controllers.publish.PublishersController.index
+GET           /publish/:publisher                            @controllers.publish.PublishersController.show(publisher: String)
+GET           /publish/:publisher/news                       @controllers.publish.NewsController.list(publisher: String)
+GET           /publish/:publisher/news/new                   @controllers.publish.NewsController.createForm(publisher: String)
+POST          /publish/:publisher/news/validate              @controllers.publish.NewsController.create(publisher: String, submitted: Boolean = false)
+POST          /publish/:publisher/news/audience              @controllers.publish.NewsController.audienceInfo(publisher: String)
+POST          /publish/:publisher/news                       @controllers.publish.NewsController.create(publisher: String, submitted: Boolean = true)
+GET           /publish/:publisher/news/:id/edit              @controllers.publish.NewsController.updateForm(publisher: String, id: String)
+POST          /publish/:publisher/news/:id/validate          @controllers.publish.NewsController.update(publisher: String, id: String, submitted: Boolean = false)
+POST          /publish/:publisher/news/:id                   @controllers.publish.NewsController.update(publisher: String, id: String, submitted: Boolean = true)
+POST          /publish/:publisher/news/:id/delete            @controllers.publish.NewsController.delete(publisher: String, id: String)
 
-GET         /websockets/page/                                     @controllers.WebSocketController.socket
+GET           /publish/:publisher/alerts                     @controllers.publish.NotificationsController.list(publisher: String)
+GET           /publish/:publisher/alerts/new                 @controllers.publish.NotificationsController.createForm(publisher: String)
+POST          /publish/:publisher/alerts/validate            @controllers.publish.NotificationsController.create(publisher: String, submitted: Boolean = false)
+POST          /publish/:publisher/alerts/audience            @controllers.publish.NotificationsController.audienceInfo(publisher: String)
+POST          /publish/:publisher/alerts                     @controllers.publish.NotificationsController.create(publisher: String, submitted: Boolean = true)
+GET           /publish/:publisher/alerts/:id/edit            @controllers.publish.NotificationsController.updateForm(publisher: String, id: String)
+POST          /publish/:publisher/alerts/:id/validate        @controllers.publish.NotificationsController.update(publisher: String, id: String, submitted: Boolean = false)
+POST          /publish/:publisher/alerts/:id                 @controllers.publish.NotificationsController.update(publisher: String, id: String, submitted: Boolean = true)
+POST          /publish/:publisher/alerts/:id/delete          @controllers.publish.NotificationsController.delete(publisher: String, id: String)
+GET           /publish/:publisher/alerts/:id/status          @controllers.publish.NotificationsController.status(publisher: String, id: String)
 
-GET         /assets/manifest.json                                 @controllers.AppManifestController.getAppManifest
+GET           /websockets/page/                              @controllers.WebSocketController.socket
+
+GET           /assets/manifest.json                          @controllers.AppManifestController.getAppManifest
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                                         @controllers.Assets.versioned(path="/public", file: Asset)
+GET           /assets/*file                                  @controllers.Assets.versioned(path="/public", file: Asset)
 
-GET         /service-worker.js                                    @controllers.Assets.at(path="/public", file="service-worker.js")
+GET           /service-worker.js                             @controllers.Assets.at(path="/public", file="service-worker.js")
 
-GET         /api/news/feed                                        @controllers.api.ReadNewsController.feed(offset: Int ?= 0)
-GET         /api/news/feed.atom                                   @controllers.api.ReadNewsController.atomFeed
-GET         /api/news/feed.rss                                    @controllers.api.ReadNewsController.rssFeed
-GET         /api/news/categories                                  @controllers.api.NewsCategoriesController.categories
-POST        /api/news/categories                                  @controllers.api.NewsCategoriesController.update
-POST        /api/news/images                                      @controllers.api.NewsImagesController.create
-GET         /api/news/images/:id                                  @controllers.api.NewsImagesController.show(id: String)
-POST        /api/news/analytics                                   @controllers.api.AnalyticsController.newsItemReport
-GET         /api/news/optin                                       @controllers.api.UserNewsOptInController.list
-POST        /api/news/optin                                       @controllers.api.UserNewsOptInController.update
-GET         /api/id7/notifications/unreads                        @controllers.api.NotificationsSnapshotController.unreads
+GET           /api/news/feed                                 @controllers.api.ReadNewsController.feed(offset: Int ?= 0)
+GET           /api/news/feed.atom                            @controllers.api.ReadNewsController.atomFeed
+GET           /api/news/feed.rss                             @controllers.api.ReadNewsController.rssFeed
+GET           /api/news/categories                           @controllers.api.NewsCategoriesController.categories
+POST          /api/news/categories                           @controllers.api.NewsCategoriesController.update
+POST          /api/news/images                               @controllers.api.NewsImagesController.create
+GET           /api/news/images/:id                           @controllers.api.NewsImagesController.show(id: String)
+POST          /api/news/analytics                            @controllers.api.AnalyticsController.newsItemReport
+GET           /api/news/optin                                @controllers.api.UserNewsOptInController.list
+POST          /api/news/optin                                @controllers.api.UserNewsOptInController.update
+GET           /api/id7/notifications/unreads                 @controllers.api.NotificationsSnapshotController.unreads
+GET           /api/id7/alerts/unreads                        @controllers.api.NotificationsSnapshotController.unreads
 
-GET         /news/:id/redirect                                    @controllers.api.ReadNewsController.redirect(id: String)
+GET           /news/:id/redirect                             @controllers.api.ReadNewsController.redirect(id: String)
 
-GET         /service/metrics                                      @controllers.MetricsController.metrics
-GET         /service/gtg                                          @controllers.ServiceCheckController.gtg
-GET         /service/healthcheck                                  @controllers.ServiceCheckController.healthcheck
-GET         /service/cluster/state                                @controllers.admin.ClusterStateController.get
-GET         /service/revision                                     @controllers.VersionController.revision
+GET           /service/metrics                               @controllers.MetricsController.metrics
+GET           /service/gtg                                   @controllers.ServiceCheckController.gtg
+GET           /service/healthcheck                           @controllers.ServiceCheckController.healthcheck
+GET           /service/cluster/state                         @controllers.admin.ClusterStateController.get
+GET           /service/revision                              @controllers.VersionController.revision
 
-POST        /api/streams/read                                     @controllers.api.UserActivitiesController.markAsRead
+POST          /api/streams/read                              @controllers.api.UserActivitiesController.markAsRead
 
-GET         /api/streams/notifications                            @controllers.api.UserActivitiesController.notifications(since: Option[String], before: Option[String], limit: Int ?= 100)
-GET         /api/streams/activities                               @controllers.api.UserActivitiesController.activities(since: Option[String], before: Option[String], limit: Int ?= 100)
+GET           /api/streams/notifications                     @controllers.api.UserActivitiesController.notifications(since: Option[String], before: Option[String], limit: Int ?= 100)
+GET           /api/streams/alerts                            @controllers.api.UserActivitiesController.notifications(since: Option[String], before: Option[String], limit: Int ?= 100)
+GET           /api/streams/activities                        @controllers.api.UserActivitiesController.activities(since: Option[String], before: Option[String], limit: Int ?= 100)
 
-GET         /api/streams/notifications/filter                     @controllers.api.UserStreamFilterController.notificationFilter
-GET         /api/streams/activities/filter                        @controllers.api.UserStreamFilterController.activityFilter
-POST        /api/streams/notifications/filter                     @controllers.api.UserStreamFilterController.updateNotificationFilter
-POST        /api/streams/activities/filter                        @controllers.api.UserStreamFilterController.updateActivityFilter
+GET           /api/streams/notifications/filter              @controllers.api.UserStreamFilterController.notificationFilter
+GET           /api/streams/alerts/filter                     @controllers.api.UserStreamFilterController.notificationFilter
+GET           /api/streams/activities/filter                 @controllers.api.UserStreamFilterController.activityFilter
+POST          /api/streams/notifications/filter              @controllers.api.UserStreamFilterController.updateNotificationFilter
+POST          /api/streams/alerts/filter                     @controllers.api.UserStreamFilterController.updateNotificationFilter
+POST          /api/streams/activities/filter                 @controllers.api.UserStreamFilterController.updateActivityFilter
 
-GET         /api/streams/mute                                     @controllers.api.UserActivitiesController.listMutes
-PUT         /api/streams/mute                                     @controllers.api.UserActivitiesController.saveMute
-DELETE      /api/streams/mute                                     @controllers.api.UserActivitiesController.removeMute(id: String)
+GET           /api/streams/mute                              @controllers.api.UserActivitiesController.listMutes
+PUT           /api/streams/mute                              @controllers.api.UserActivitiesController.saveMute
+DELETE        /api/streams/mute                              @controllers.api.UserActivitiesController.removeMute(id: String)
 
-POST        /api/streams/:providerId/notifications                @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
-POST        /api/streams/:providerId/activities                   @controllers.api.IncomingActivitiesController.postActivity(providerId: String)
+POST          /api/streams/:providerId/notifications         @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
+POST          /api/streams/:providerId/alerts                @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
+POST          /api/streams/:providerId/activities            @controllers.api.IncomingActivitiesController.postActivity(providerId: String)
 
-GET         /api/tiles                                            @controllers.api.TilesController.getLayout
-GET         /api/tiles/content                                    @controllers.api.TilesController.content
-GET         /api/tiles/content/:id                                @controllers.api.TilesController.contentById(id: String)
-PUT         /api/tiles                                            @controllers.api.TilesController.saveLayout
+GET           /api/tiles                                     @controllers.api.TilesController.getLayout
+GET           /api/tiles/content                             @controllers.api.TilesController.content
+GET           /api/tiles/content/:id                         @controllers.api.TilesController.contentById(id: String)
+PUT           /api/tiles                                     @controllers.api.TilesController.saveLayout
 
-GET         /api/emailNotificationPreferences                     @controllers.api.EmailNotificationsPrefController.get
-POST        /api/emailNotificationPreferences                     @controllers.api.EmailNotificationsPrefController.update
+GET           /api/emailNotificationPreferences              @controllers.api.EmailNotificationsPrefController.get
+POST          /api/emailNotificationPreferences              @controllers.api.EmailNotificationsPrefController.update
+GET           /api/smsNotificationPreferences                @controllers.api.SmsNotificationsPrefController.get
+POST          /api/smsNotificationPreferences                @controllers.api.SmsNotificationsPrefController.update
 
+GET           /api/colour-schemes                            @controllers.api.ColourSchemesController.get
+POST          /api/colour-schemes                            @controllers.api.ColourSchemesController.persist
 
-POST        /api/errors/js                                        @controllers.api.ErrorsController.js
+POST          /api/errors/js                                 @controllers.api.ErrorsController.js
 
-GET         /user/info                                            @controllers.UserInfoController.info
-GET         /logout                                               @controllers.UserInfoController.logout
+GET           /user/info                                     @controllers.UserInfoController.info
+GET           /logout                                        @controllers.UserInfoController.logout
 
-POST        /api/push/apns/subscribe                              @controllers.api.APNSPushNotificationsController.subscribe
-POST        /api/push/web/subscribe                               @controllers.api.WebPushNotificationsController.subscribe
-POST        /api/push/fcm/subscribe                               @controllers.api.FCMPushNotificationsController.subscribe
-POST        /api/push/unsubscribe                                 @controllers.api.PushNotificationsController.unsubscribe
+POST          /api/push/apns/subscribe                       @controllers.api.APNSPushNotificationsController.subscribe
+POST          /api/push/web/subscribe                        @controllers.api.WebPushNotificationsController.subscribe
+POST          /api/push/fcm/subscribe                        @controllers.api.FCMPushNotificationsController.subscribe
+POST          /api/push/unsubscribe                          @controllers.api.PushNotificationsController.unsubscribe
 
 # Handle trailing slashes in URLs
-GET         /*path/                                               @controllers.HomeController.redirectToPath(path: String)
+GET           /*path/                                        @controllers.HomeController.redirectToPath(path: String)
 
-GET         /service/search/*path                                 @controllers.SearchController.proxy(path: String)
-POST        /service/search/*path                                 @controllers.SearchController.proxy(path: String)
+GET           /service/search/*path                          @controllers.SearchController.proxy(path: String)
+POST          /service/search/*path                          @controllers.SearchController.proxy(path: String)
 
-GET         /service/map/:lat/:lon/:width/:height                 @controllers.MapController.mapThumbnail(lat: String, lon: String, width: Int, height: Int)
+GET           /service/map/:lat/:lon/:width/:height          @controllers.MapController.mapThumbnail(lat: String, lon: String, width: Int, height: Int)
+
+POST        /service/flexipicker                                  @controllers.FlexiPickerController.queryJson

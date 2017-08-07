@@ -1,0 +1,62 @@
+@import models.publishing.{PermissionScope, Publisher}
+@import system.RequestContext
+@import services.dao.DepartmentInfo
+@(
+    publisher: Publisher,
+    isAllDepartments: Boolean,
+    currentDepartmentCodes: Seq[String],
+    allDepartments: Seq[DepartmentInfo]
+)(implicit messages: Messages, context: RequestContext)
+
+@implicitFieldConstructor = @{
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
+}
+
+@common.admin("Administration", "Publishers", publisher.name, "Departments") {
+
+  @b3.form(controllers.admin.publishers.routes.PublisherDepartmentsController.update(publisher.id), 'class -> "edit-publisher-departments") {
+
+    @context.csrfHelper.formField
+
+    @b3.free() {
+      <div class="checkbox">
+        <label>
+          <input name="isAllDepartments" type="checkbox" value="true" @if(isAllDepartments) { checked }> All departments
+        </label>
+      </div>
+    }
+
+    @b3.free('_label -> "Departments") {
+      <div class="departments">
+        @for(deptCode <- currentDepartmentCodes.sorted) {
+          <p class="form-control-static">
+            @allDepartments.find(_.code == deptCode) match {
+              case Some(dept) => { @dept.name (@dept.code) }
+              case _ => { @deptCode }
+            }
+            <button class="btn btn-danger btn-xs" type="button">Remove</button>
+            <input type="hidden" name="departments[]" value="@deptCode" />
+          </p>
+        }
+      </div>
+    }
+
+    @b3.free('_label -> "Add department") {
+      <div class="add-department">
+        <div class="input-group">
+          <select class="form-control">
+            @for(dept <- allDepartments) {
+              <option value="@dept.code">@dept.name</option>
+            }
+          </select>
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button">Add</button>
+          </span>
+        </div>
+      </div>
+    }
+
+    @tags.submitOrCancel("Update", controllers.admin.publishers.routes.PublishersController.index())
+  }
+
+}

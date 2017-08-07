@@ -1,8 +1,5 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
-import $ from 'jquery';
-import log from 'loglevel';
 import AccountPhoto from './AccountPhoto';
 
 export default class UtilityBar extends React.PureComponent {
@@ -17,26 +14,6 @@ export default class UtilityBar extends React.PureComponent {
     }),
   };
 
-  componentDidMount() {
-    this.attachAccountPopover();
-  }
-
-  componentDidUpdate() {
-    this.attachAccountPopover();
-  }
-
-  attachAccountPopover() {
-    const $element = $(ReactDOM.findDOMNode(this.refs.accountLink));
-
-    if ($element.data('id7.account-popover') === undefined) {
-      try {
-        $element.accountPopover();
-      } catch (e) {
-        log.warn('accountPopover plugin failed', e);
-      }
-    }
-  }
-
   renderSignInLink() {
     return (
       <a href={this.props.user.links.login} key="signInLink" className="sign-in-link">
@@ -45,23 +22,11 @@ export default class UtilityBar extends React.PureComponent {
     );
   }
 
-  renderAccountLink() {
-    const ssoLinks = this.props.user.links;
+  renderAccountPhoto() {
     const user = this.props.user.data || {};
 
     return (
-      <a
-        key="accountLink"
-        ref="accountLink"
-        className="account-link"
-        href="//warwick.ac.uk/myaccount"
-        data-toggle="id7:account-popover"
-        data-loginlink={ssoLinks.login}
-        data-logoutlink={ssoLinks.logout}
-      >
-        <AccountPhoto user={ user } className="img-circle" />
-        <span className="caret" />
-      </a>
+      <AccountPhoto user={ user } className="img-circle" />
     );
   }
 
@@ -72,7 +37,7 @@ export default class UtilityBar extends React.PureComponent {
     return (
       <ul>
         {!user.empty ?
-          <li>{ userData.authenticated ? this.renderAccountLink() : this.renderSignInLink() }</li>
+          <li>{ userData.authenticated ? this.renderAccountPhoto() : this.renderSignInLink() }</li>
           : null}
       </ul>
     );

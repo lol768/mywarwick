@@ -8,8 +8,8 @@ import com.google.inject.ImplementedBy
 import models._
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
-import services.{ActivityService, EmailNotificationsPrefService}
 import services.dao.MessagingDao
+import services.{ActivityService, EmailNotificationsPrefService, SmsNotificationsPrefService}
 import system.Logging
 import warwick.sso.{UserLookupService, Usercode}
 
@@ -35,9 +35,11 @@ trait MessagingService {
 
   def processNow(message: MessageSend.Light): Future[ProcessingResult]
 
-  def getQueueStatus(): Seq[QueueStatus]
+  def getQueueStatus: Seq[QueueStatus]
 
-  def getOldestUnsentMessageCreatedAt(): Option[DateTime]
+  def getOldestUnsentMessageCreatedAt: Option[DateTime]
+
+  def getSmsSentLast24Hours: Int
 }
 
 class MessagingServiceImpl @Inject()(
@@ -45,8 +47,10 @@ class MessagingServiceImpl @Inject()(
   activitiesProvider: Provider[ActivityService],
   users: UserLookupService,
   emailNotificationsPrefService: EmailNotificationsPrefService,
+  smsNotificationsPrefService: SmsNotificationsPrefService,
   @Named("email") emailer: OutputService,
   @Named("mobile") mobile: OutputService,
+  @Named("sms") sms: OutputService,
   messagingDao: MessagingDao
 ) extends MessagingService with Logging {
 
@@ -82,6 +86,8 @@ class MessagingServiceImpl @Inject()(
       )
       if (mutedUsercodes.nonEmpty) {
         logger.info(s"Muted sending activity ${activity.id} to: ${mutedUsercodes.map(_.string).mkString(",")}")
+
+        mutedUsercodes.foreach(activities.markSent(activity.id, _))
       }
       recipients.diff(mutedUsercodes)
     }.getOrElse(recipients)
@@ -115,17 +121,20 @@ class MessagingServiceImpl @Inject()(
         activities.getProvider(activity.providerId).exists(_.sendEmail)
       )
 
-  def sendSmsFor(user: Usercode, activity: Activity): Boolean = false
+  def sendSmsFor(user: Usercode, activity: Activity): Boolean =
+    smsNotificationsPrefService.get(user) && smsNotificationsPrefService.getNumber(user).nonEmpty
 
   def sendMobileFor(user: Usercode, activity: Activity): Boolean = true
 
   override def processNow(message: MessageSend.Light): Future[ProcessingResult] = {
     activities.getActivityById(message.activity).map { activity =>
       users.getUsers(Seq(message.user)).get.get(message.user).map { user =>
+        activities.markSent(activity.id, message.user)
+
         val heavyMessage = message.fill(user, activity)
         heavyMessage.output match {
           case Output.Email => emailer.send(heavyMessage)
-          case Output.SMS => Future.successful(ProcessingResult(success = false, "SMS not yet supported"))
+          case Output.SMS => sms.send(heavyMessage)
           case Output.Mobile => mobile.send(heavyMessage)
         }
       }.getOrElse {
@@ -136,11 +145,14 @@ class MessagingServiceImpl @Inject()(
     }
   }
 
-  override def getQueueStatus(): Seq[QueueStatus] =
+  override def getQueueStatus: Seq[QueueStatus] =
     db.withConnection(implicit c => messagingDao.getQueueStatus())
 
-  override def getOldestUnsentMessageCreatedAt() =
+  override def getOldestUnsentMessageCreatedAt: Option[DateTime] =
     db.withConnection(implicit c => messagingDao.getOldestUnsentMessageCreatedAt())
+
+  override def getSmsSentLast24Hours: Int =
+    db.withConnection(implicit c => messagingDao.getSmsSentLast24Hours())
 
 }
 

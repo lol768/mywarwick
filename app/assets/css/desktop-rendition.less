@@ -1,4 +1,4 @@
-html.theme-transparent.not-app .bg-stand-in {
+html.not-app .bg-stand-in {
   width: 100vw;
   height: 100vh;
   z-index: -1;
@@ -58,10 +58,6 @@ html.theme-transparent.not-app .bg-stand-in {
     }
   }
 
-  main#main:not(.in-root) {
-    height: ~"calc(100vh -" (@start-masthead-height) ~")";
-  }
-
   body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
     margin-right: 0;
     margin-left: 0;
@@ -81,7 +77,7 @@ html.theme-transparent.not-app .bg-stand-in {
     background: #f9f9f9;
   }
 
-  html.theme-transparent.not-app .bg-stand-in {
+  html.not-app .bg-stand-in {
     top: 0;
     height: 100vh;
   }
@@ -124,7 +120,7 @@ html.theme-transparent.not-app .bg-stand-in {
       z-index: 300;
     }
 
-    html&.theme-transparent .bg-stand-in {
+    html& .bg-stand-in {
       background-attachment: initial;
     }
 
@@ -152,7 +148,7 @@ html.theme-transparent.not-app .bg-stand-in {
     background: #8c6e96;
   }
 
-  html.theme-transparent .in-settings .bg-stand-in {
+  html .in-settings .bg-stand-in {
     background-image: none;
   }
 
@@ -228,7 +224,7 @@ html.theme-transparent.not-app .bg-stand-in {
         width: @desktop-rendition-vertical-border-width;
       }
 
-      html&.theme-transparent .bg-stand-in {
+      html& .bg-stand-in {
         width: @desktop-rendition-width;
       }
 

@@ -8,7 +8,7 @@ import play.api.data.{Form, Mapping}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
-import services.{AudienceService, NewsCategoryService, PublisherService, SecurityService}
+import services._
 import system.ImplicitRequestContext
 import warwick.sso.{AuthenticatedRequest, Usercode}
 
@@ -123,27 +123,22 @@ trait PublishableWithAudience {
 trait ProviderOptions {
   val publisherService: PublisherService
 
-  def providerOptions(implicit publisherRequest: PublisherRequest[_]) =
+  def providerOptions(implicit publisherRequest: PublisherRequest[_]): Seq[(String, String)] =
     publisherService.getProviders(publisherRequest.publisher.id)
-      .map(provider => provider.id -> provider.name)
+      .map(provider => provider.id -> provider.name.getOrElse(provider.id))
 
 }
 
 trait DepartmentOptions {
   self: Publishing =>
 
-  val departmentInfoDao: DepartmentInfoDao
+  val departmentInfoService: DepartmentInfoService
 
   val publisherService: PublisherService
 
-  private val audienceDepartmentTypes = Set("ACADEMIC", "SERVICE")
+  lazy val allDepartments: Seq[DepartmentInfo] = departmentInfoService.allDepartments
 
-  lazy val allDepartments: Seq[DepartmentInfo] = departmentInfoDao.allDepartments
-
-  lazy val allPublishableDepartments =
-    allDepartments
-      .filter(dept => audienceDepartmentTypes.contains(dept.`type`))
-      .sortBy(_.name)
+  lazy val allPublishableDepartments = departmentInfoService.allPublishableDepartments
 
   def departmentOptions(implicit publisherRequest: PublisherRequest[_]) =
     departmentsWithPublishPermission.map(dept => dept.code -> dept.name)

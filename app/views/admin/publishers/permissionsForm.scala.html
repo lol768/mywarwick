@@ -1,0 +1,68 @@
+@import models.publishing.{PermissionScope, Publisher}
+@import system.RequestContext
+@import services.dao.DepartmentInfo
+@import controllers.admin.publishers.PublisherPermissionData
+@import warwick.sso.User
+@import warwick.sso.Usercode
+@(
+    publisher: Publisher,
+    permissionsForm: Form[Seq[PublisherPermissionData]],
+    users: Map[Usercode, User]
+)(implicit messages: Messages, context: RequestContext)
+
+@implicitFieldConstructor = @{
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
+}
+
+@common.admin("Administration", "Publishers", publisher.name, "Permissions") {
+
+  @b3.form(controllers.admin.publishers.routes.PublisherPermissionsController.update(publisher.id), 'class -> "edit-publisher-permissions") {
+
+    @context.csrfHelper.formField
+
+    @b3.free('_label -> "Permissions") {
+      <div class="permissions">
+        @for((data, index) <- permissionsForm.value.getOrElse(Nil).zipWithIndex) {
+          <p class="form-control-static">
+            @users.get(Usercode(data.usercode)).map(u => s"${u.name.full.getOrElse("[Unknown]")} (${data.usercode})").getOrElse(s"[Unknown] ${data.usercode}")
+            :
+            @data.role match {
+              case "NewsManager" => { News Manager }
+              case "NotificationsManager" => { Notifications Manager }
+              case "Viewer" => { Viewer }
+              case "APINotificationsManager" => { API Notifications Manager }
+              case _ => { Unknown role }
+            }
+            <button class="btn btn-danger btn-xs" type="button">Remove</button>
+            <input type="hidden" name="permissions[@index].usercode" value="@data.usercode" />
+            <input type="hidden" name="permissions[@index].role" value="@data.role" />
+          </p>
+        }
+      </div>
+    }
+
+    @b3.free('_label -> "Add permission") {
+      <div class="add-permission">
+        <div class="row">
+          <div class="col-xs-5">
+            <input name="usercode" class="form-control flexi-picker" data-include-groups="false" data-include-emails="false" placeholder="Search for user" />
+          </div>
+          <div class="col-xs-5">
+            <select name="role" class="form-control">
+              <option value="NewsManager">News Manager</option>
+              <option value="NotificationsManager">Notifications Manager</option>
+              <option value="Viewer">Viewer</option>
+              <option value="APINotificationsManager">API Notifications Manager</option>
+            </select>
+          </div>
+          <div class="col-xs-2">
+            <button class="btn btn-default" type="button">Add</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @tags.submitOrCancel("Update", controllers.admin.publishers.routes.PublishersController.index())
+  }
+
+}

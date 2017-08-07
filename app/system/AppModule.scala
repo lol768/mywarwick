@@ -6,7 +6,7 @@ import com.google.inject.{AbstractModule, Provides, TypeLiteral}
 import org.quartz.Scheduler
 import play.api.libs.concurrent.AkkaGuiceSupport
 import services.healthcheck._
-import services.messaging.{EmailOutputService, MobileOutputService, OutputService}
+import services.messaging.{EmailOutputService, MobileOutputService, OutputService, SmsOutputService}
 import uk.ac.warwick.sso.client.trusted.TrustedApplicationsManager
 
 class AppModule extends AbstractModule with AkkaGuiceSupport {
@@ -18,6 +18,10 @@ class AppModule extends AbstractModule with AkkaGuiceSupport {
     bind(classOf[OutputService])
       .annotatedWith(Names.named("mobile"))
       .to(classOf[MobileOutputService])
+
+    bind(classOf[OutputService])
+      .annotatedWith(Names.named("sms"))
+      .to(classOf[SmsOutputService])
 
     // Start this up straight away so we always manage the cluster.
     bind(classOf[ClusterLifecycle]).asEagerSingleton()
@@ -36,6 +40,7 @@ class AppModule extends AbstractModule with AkkaGuiceSupport {
     multibinder.addBinding().to(classOf[FailedMessageSendHealthCheck])
     multibinder.addBinding().to(classOf[MessageQueueOldestItemHealthCheck])
     multibinder.addBinding().to(classOf[PublisherAlertFrequencyHealthCheck])
+    multibinder.addBinding().to(classOf[SmsSentLast24HoursHealthCheck])
   }
 
   @Provides

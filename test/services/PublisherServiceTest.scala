@@ -28,7 +28,7 @@ class PublisherServiceTest extends BaseSpec with MockitoSugar {
 
       new Scope {
         when(publisherDao.getPublishersForUser(Matchers.eq(Usercode("cusfal")))(Matchers.any())).thenReturn(Seq(globalPublisher))
-        when(publisherDao.getPublisherDepartments(Matchers.eq(globalPublisher.id))(Matchers.any())).thenReturn(Seq(service.AllDepartmentsWildcard))
+        when(publisherDao.getPublisherDepartments(Matchers.eq(globalPublisher.id))(Matchers.any())).thenReturn(Seq(PublisherService.AllDepartmentsWildcard))
         when(publisherDao.all(Matchers.any())).thenReturn(Seq(globalPublisher, normalPublisher))
 
         private val result = service.getPublishersForUser(Usercode("cusfal"))
@@ -54,7 +54,7 @@ class PublisherServiceTest extends BaseSpec with MockitoSugar {
         // Doesn't have any permission on the publisher
         when(publisherDao.getPublisherPermissions(Matchers.eq(normalPublisher.id), Matchers.eq(Usercode("cusfal")))(Matchers.any())).thenReturn(Seq())
         when(publisherDao.getPublishersForUser(Matchers.eq(Usercode("cusfal")))(Matchers.any())).thenReturn(Seq(globalPublisher))
-        when(publisherDao.getPublisherDepartments(Matchers.eq(globalPublisher.id))(Matchers.any())).thenReturn(Seq(service.AllDepartmentsWildcard))
+        when(publisherDao.getPublisherDepartments(Matchers.eq(globalPublisher.id))(Matchers.any())).thenReturn(Seq(PublisherService.AllDepartmentsWildcard))
 
         private val result = service.getRoleForUser(normalPublisher.id, Usercode("cusfal"))
         result.roles must have length 1
@@ -65,7 +65,7 @@ class PublisherServiceTest extends BaseSpec with MockitoSugar {
         // Has existing permission on the publisher
         when(publisherDao.getPublisherPermissions(Matchers.eq(normalPublisher.id), Matchers.eq(Usercode("cusfal")))(Matchers.any())).thenReturn(Seq(newsManagerPermission))
         when(publisherDao.getPublishersForUser(Matchers.eq(Usercode("cusfal")))(Matchers.any())).thenReturn(Seq(globalPublisher))
-        when(publisherDao.getPublisherDepartments(Matchers.eq(globalPublisher.id))(Matchers.any())).thenReturn(Seq(service.AllDepartmentsWildcard))
+        when(publisherDao.getPublisherDepartments(Matchers.eq(globalPublisher.id))(Matchers.any())).thenReturn(Seq(PublisherService.AllDepartmentsWildcard))
 
         private val result = service.getRoleForUser(normalPublisher.id, Usercode("cusfal"))
         result.roles must have length 2

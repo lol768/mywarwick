@@ -38,7 +38,7 @@ protected abstract class FuncTestBase
   // constants you can use e.g. "go to homepage"
   lazy val homepage = PathPage("/")
   lazy val search = PathPage("/search")
-  lazy val notifications = PathPage("/notifications")
+  lazy val notifications = PathPage("/alerts")
   lazy val activity = PathPage("/activity")
 
   lazy val standardSize = Dimension(1024, 768)

@@ -30,9 +30,7 @@ describe('UtilityBar', () => {
     const bar = <UtilityBar {...props} />;
     const result = shallowRender(bar);
     expect(result).to.have.property('type', 'ul');
-    const link = result.props.children.props.children;
-    expect(link).to.have.property('type', 'a');
-    const [ img ] = link.props.children;
+    const img = result.props.children.props.children;
     expect(shallowRender(img)).to.have.deep.property('props.alt', 'Ron Swanson');
   })
 

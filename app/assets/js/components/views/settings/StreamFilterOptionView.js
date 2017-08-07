@@ -130,7 +130,7 @@ function selectActivity(state) {
 
 function selectNotification(state) {
   return {
-    filterType: 'Notifications',
+    filterType: 'Alerts',
     filter: state.notifications.filter,
     filterOptions: state.notifications.filterOptions,
     isOnline: state.device.isOnline,

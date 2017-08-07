@@ -36,9 +36,11 @@ trait ActivityService {
 
   def setLastReadDate(user: User, dateTime: DateTime): Boolean
 
-  def getFutureActivitiesByPublisherId(publisherId: String, limit: Int = 50): Seq[ActivityRender]
+  def getFutureActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int = 50): Seq[ActivityRenderWithAudience]
 
-  def getPastActivitiesByPublisherId(publisherId: String, limit: Int = 50): Seq[ActivityRender]
+  def getSendingActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int = 50): Seq[ActivityRenderWithAudience]
+
+  def getPastActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int = 50): Seq[ActivityRenderWithAudience]
 
   def getActivityIcon(providerId: String): Option[ActivityIcon]
 
@@ -60,6 +62,12 @@ trait ActivityService {
   def getProvider(id: String): Option[ActivityProvider]
 
   def countNotificationsByPublishersInLast48Hours: Seq[PublisherActivityCount]
+
+  def updateAudienceCount(activityId: String, audienceId: String, recipients: Seq[Usercode]): Unit
+
+  def markSent(id: String, usercode: Usercode): Unit
+
+  def getActivityWithAudience(id: String): Option[ActivityRenderWithAudience]
 }
 
 class ActivityServiceImpl @Inject()(
@@ -67,6 +75,7 @@ class ActivityServiceImpl @Inject()(
   dao: ActivityDao,
   activityTypeService: ActivityTypeService,
   tagDao: ActivityTagDao,
+  audienceService: AudienceService,
   audienceDao: AudienceDao,
   recipientDao: ActivityRecipientDao,
   muteDao: ActivityMuteDao,
@@ -95,8 +104,12 @@ class ActivityServiceImpl @Inject()(
               // Don't expect this, but for completeness
               audienceDao.saveAudience(audience)
           }
+          val audienceSize = audience match {
+            case Audience.Public => AudienceSize.Public
+            case _ => AudienceSize.Finite(audienceService.resolve(audience).toOption.map(_.size).getOrElse(0))
+          }
 
-          dao.update(activityId, activity, audienceId)
+          dao.update(activityId, activity, audienceId, audienceSize)
 
           // Might be more efficient to store job with replace=true
           // instead of deleting separately.
@@ -134,7 +147,11 @@ class ActivityServiceImpl @Inject()(
         val replaceIds = tagDao.getActivitiesWithTags(activity.replace, activity.providerId)
 
         val audienceId = audienceDao.saveAudience(audience)
-        val activityId = dao.save(activity, audienceId, replaceIds)
+        val audienceSize = audience match {
+          case Audience.Public => AudienceSize.Public
+          case _ => AudienceSize.Finite(audienceService.resolve(audience).toOption.map(_.size).getOrElse(0))
+        }
+        val activityId = dao.save(activity, audienceId, audienceSize, replaceIds)
 
         activity.tags.foreach(tag => tagDao.save(activityId, tag))
 
@@ -192,11 +209,26 @@ class ActivityServiceImpl @Inject()(
   override def setLastReadDate(user: User, dateTime: DateTime): Boolean =
     db.withConnection(implicit c => dao.saveLastReadDate(user.usercode.string, dateTime))
 
-  override def getFutureActivitiesByPublisherId(publisherId: String, limit: Int): Seq[ActivityRender] =
-    db.withConnection(implicit c => dao.getFutureActivitiesByPublisherId(publisherId, limit))
+  override def getFutureActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int): Seq[ActivityRenderWithAudience] =
+    mixinAudience(db.withConnection(implicit c => dao.getFutureActivitiesByPublisherId(publisherId, limit)))
 
-  override def getPastActivitiesByPublisherId(publisherId: String, limit: Int): Seq[ActivityRender] =
-    db.withConnection(implicit c => dao.getPastActivitiesByPublisherId(publisherId, limit))
+  override def getSendingActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int): Seq[ActivityRenderWithAudience] =
+    mixinAudience(db.withConnection(implicit c => dao.getSendingActivitiesByPublisherId(publisherId, limit)))
+
+  override def getPastActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int): Seq[ActivityRenderWithAudience] =
+    mixinAudience(db.withConnection(implicit c => dao.getPastActivitiesByPublisherId(publisherId, limit)))
+
+  override def getActivityWithAudience(id: String): Option[ActivityRenderWithAudience] =
+    mixinAudience(db.withConnection(implicit c => dao.getActivityRenderById(id).toSeq)).headOption
+
+  private def mixinAudience(activities: Seq[ActivityRender]): Seq[ActivityRenderWithAudience] = {
+    db.withConnection { implicit c =>
+      val audiences = activities.map(a => a.activity.id -> a.activity.audienceId.map(audienceDao.getAudience).getOrElse(Audience())).toMap
+      val audienceSizes = dao.getAudienceSizes(activities.map(_.activity.id))
+      val sentCounts = dao.getSentCounts(activities.map(_.activity.id))
+      activities.map(a => ActivityRenderWithAudience.applyWithAudience(a, audienceSizes(a.activity.id), audiences(a.activity.id), sentCounts(a.activity.id)))
+    }
+  }
 
   override def getActivityIcon(providerId: String): Option[ActivityIcon] =
     db.withConnection(implicit c => dao.getActivityIcon(providerId))
@@ -276,6 +308,18 @@ class ActivityServiceImpl @Inject()(
         DateTime.now.minusHours(48)
       )
     )
+
+  override def updateAudienceCount(activityId: String, audienceId: String, recipients: Seq[Usercode]): Unit =
+    db.withTransaction { implicit c =>
+      val audienceSize = audienceDao.getAudience(audienceId) match {
+        case Audience.Public => AudienceSize.Public
+        case _ => AudienceSize.Finite(recipients.size)
+      }
+      dao.updateAudienceCount(activityId, audienceSize)
+    }
+
+  override def markSent(id: String, usercode: Usercode): Unit =
+    db.withTransaction(implicit c => recipientDao.markSent(id, usercode.string))
 }
 
 sealed trait ActivityError {

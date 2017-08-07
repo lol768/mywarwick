@@ -2,6 +2,7 @@ package services.dao
 
 import java.sql.Connection
 
+import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject}
 import models.Activity
@@ -32,14 +33,17 @@ class ActivityRecipientDaoImpl @Inject()() extends ActivityRecipientDao {
          VALUES ($activityId, $usercode, $now, $published, $shouldNotify)""".execute()
   }
 
-  override def markSent(activityId: String, usercode: String)(implicit c: Connection): Unit =
-    SQL("UPDATE ACTIVITY_RECIPIENT SET SENT_AT = {sentAt} WHERE ACTIVITY_ID = {activityId} AND USERCODE = {usercode}")
-      .on(
-        'activityId -> activityId,
-        'usercode -> usercode,
-        'sentAt -> DateTime.now()
-      )
+  override def markSent(activityId: String, usercode: String)(implicit c: Connection): Unit = {
+    if (getSentTime(activityId, usercode).isEmpty) {
+      SQL"UPDATE ACTIVITY SET SENT_COUNT = SENT_COUNT + 1 WHERE ID = $activityId"
+        .execute()
+    }
+
+    val now = DateTime.now
+
+    SQL"UPDATE ACTIVITY_RECIPIENT SET SENT_AT = $now WHERE ACTIVITY_ID = $activityId AND USERCODE = $usercode"
       .execute()
+  }
 
   override def setRecipients(activity: Activity, recipients: Set[Usercode])(implicit c: Connection): Unit = {
     SQL"DELETE FROM ACTIVITY_RECIPIENT WHERE ACTIVITY_ID = ${activity.id}".execute()
@@ -48,6 +52,9 @@ class ActivityRecipientDaoImpl @Inject()() extends ActivityRecipientDao {
     }
   }
 
-
+  private def getSentTime(activityId: String, usercode: String)(implicit c: Connection) = {
+    SQL"SELECT SENT_AT FROM ACTIVITY_RECIPIENT WHERE ACTIVITY_ID = $activityId AND USERCODE = $usercode"
+      .as(scalar[DateTime].singleOpt)
+  }
 
 }
