@@ -5,6 +5,7 @@ import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Provides, TypeLiteral}
 import org.quartz.Scheduler
 import play.api.libs.concurrent.AkkaGuiceSupport
+import services.dao.{AudienceLookupDao, TabulaAudienceLookupDao}
 import services.healthcheck._
 import services.messaging.{EmailOutputService, MobileOutputService, OutputService, SmsOutputService}
 import uk.ac.warwick.sso.client.trusted.TrustedApplicationsManager
@@ -22,6 +23,10 @@ class AppModule extends AbstractModule with AkkaGuiceSupport {
     bind(classOf[OutputService])
       .annotatedWith(Names.named("sms"))
       .to(classOf[SmsOutputService])
+
+    bind(classOf[AudienceLookupDao])
+      .annotatedWith(Names.named("tabula"))
+      .to(classOf[TabulaAudienceLookupDao])
 
     // Start this up straight away so we always manage the cluster.
     bind(classOf[ClusterLifecycle]).asEagerSingleton()
