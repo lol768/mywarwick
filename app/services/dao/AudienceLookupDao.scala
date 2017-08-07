@@ -11,6 +11,7 @@ import services.dao.TabulaResponseParsers._
 import system.Logging
 import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplicationsManager}
 import warwick.sso.{UniversityID, User, UserLookupService, Usercode}
+import scala.collection.JavaConverters._
 
 import scala.concurrent.Future
 
@@ -130,9 +131,8 @@ class TabulaAudienceLookupDao @Inject()(
   }
 
   private def setupRequest(url: String): WSRequest = {
-    val httpRequest = new HttpGet(url)
-    TrustedApplicationUtils.signRequest(trustedApplicationsManager.getCurrentApplication, tabulaUsercode, httpRequest)
-    val trustedHeaders = httpRequest.getAllHeaders.map(h => h.getName -> h.getValue)
+    val trustedHeaders = TrustedApplicationUtils.getRequestHeaders(trustedApplicationsManager.getCurrentApplication, tabulaUsercode, url)
+      .asScala.map(h => h.getName -> h.getValue).toSeq
 
     ws
       .url(url)
