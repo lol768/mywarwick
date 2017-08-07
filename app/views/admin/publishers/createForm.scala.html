@@ -1,0 +1,34 @@
+@import models.publishing.PublisherSave
+@import system.RequestContext
+@(
+    idForm: Form[String],
+    publisherForm: Form[PublisherSave]
+)(implicit messages: Messages, context: RequestContext)
+
+@implicitFieldConstructor = @{
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
+}
+
+@common.admin("Administration", "Publishers", "Create") {
+
+  @b3.form(controllers.admin.publishers.routes.PublishersController.create) {
+
+    @context.csrfHelper.formField
+
+    @b3.text(idForm("id"),
+      '_label -> "ID",
+      Symbol("data-autofocus") -> true,
+      'required -> true)
+
+    @b3.text(publisherForm("name"),
+      '_label -> "Name",
+      'required -> true)
+
+    @b3.text(publisherForm("maxRecipients"),
+      '_label -> "Max recipients for alerts",
+      'placeholder -> "None if blank")
+
+    @tags.submitOrCancel("Create", controllers.admin.publishers.routes.PublishersController.index())
+  }
+
+}
