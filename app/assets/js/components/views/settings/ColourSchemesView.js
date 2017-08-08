@@ -6,6 +6,8 @@ import wrapKeyboardSelect from '../../../keyboard-nav';
 import * as colourSchemes from '../../../state/colour-schemes';
 import HideableView from '../HideableView';
 
+// import fetch from 'fetch-base64';
+
 class ColourSchemesView extends HideableView {
   static propTypes = {
     fetching: PropTypes.bool.isRequired,
@@ -21,11 +23,38 @@ class ColourSchemesView extends HideableView {
     isOnline: PropTypes.bool.isRequired,
   };
 
+  // image = [];
+
+  static arrayBufferToBase64(buffer) {
+    let binary = '';
+    let bytes = [].slice.call(new Uint8Array(buffer));
+
+    bytes.forEach((b) => binary += String.fromCharCode(b));
+
+    return window.btoa(binary);
+  };
 
   constructor(props) {
     super(props);
     this.onSelect = this.onSelect.bind(this);
     this.persist = this.persist.bind(this);
+    // this.readImage = this.readImage.bind(this);
+    // this.readImage()
+    this.state = {};
+    const basePath = `https://${window.location.hostname}/assets/images/`;
+    this.props.schemes.forEach(scheme => {
+      const url = `${basePath}${scheme.url}`;
+      console.log('image url');
+      console.log(url);
+      fetch(url)
+        .then(res => res.arrayBuffer())
+        .then(ColourSchemesView.arrayBufferToBase64)
+        .then(b64string => {
+          const state = {};
+          state[scheme.url] = b64string;
+          this.setState(state);
+        });
+    });
   }
 
   onSelect(chosen) {
@@ -42,15 +71,24 @@ class ColourSchemesView extends HideableView {
     this.props.dispatch(colourSchemes.fetch());
   }
 
+  makeInlineImageStyle(scheme) {
+    const base64string = this.state[scheme.url];
+    if (!base64string) return {};
+    return {
+      'background-image': `url(data:image/png;base64,${base64string})`,
+    };
+  }
+
   makeItem(scheme) {
     return (
       <div
-        className={`list-group-item list-group-item--colour-scheme list-group-item__choice--colour-scheme list-group-item__choice--colour-scheme-${scheme.id}`}
+        className={`list-group-item list-group-item--colour-scheme list-group-item__choice--colour-scheme`}
         role="button"
-        key={ scheme.id }
-        onClick={ e => wrapKeyboardSelect(() => this.onSelect(scheme.id), e) }
-        onKeyUp={ e => wrapKeyboardSelect(() => this.onSelect(scheme.id), e) }
-        tabIndex={ 0 }
+        key={scheme.id}
+        onClick={e => wrapKeyboardSelect(() => this.onSelect(scheme.id), e)}
+        onKeyUp={e => wrapKeyboardSelect(() => this.onSelect(scheme.id), e)}
+        tabIndex={0}
+        style={this.makeInlineImageStyle(scheme)}
       >
         <div className="media media-colour-scheme-choice">
           <div className="media media-colour-scheme-block">
@@ -58,19 +96,19 @@ class ColourSchemesView extends HideableView {
               <div className="md-radio-colour-scheme-choice">
                 <input
                   type="radio"
-                  checked={ scheme.id === this.props.chosen }
+                  checked={scheme.id === this.props.chosen}
                   readOnly
-                  disabled={ !this.props.isOnline }
+                  disabled={!this.props.isOnline}
                 />
-                <label />
+                <label/>
               </div>
             </div>
             <div className="media-body media-body-colour-scheme-choice">
-              { scheme.name }
+              {scheme.name}
             </div>
           </div>
 
-          <div className="media-right" />
+          <div className="media-right"/>
         </div>
       </div>
     );
