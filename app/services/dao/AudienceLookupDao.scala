@@ -23,7 +23,9 @@ case class LookupModule(
 
 case class LookupSeminarGroup(
   id: String,
-  name: String
+  name: String,
+  groupSetName: String,
+  moduleCode: String
 )
 
 case class LookupRelationshipType(
@@ -66,6 +68,9 @@ class TabulaAudienceLookupDao @Inject()(
   private val tabulaModuleQueryUrl = configuration.getString("mywarwick.tabula.moduleQuery")
     .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.moduleQuery in application.conf"))
 
+  private val tabulaSmallGroupsQueryUrl = configuration.getString("mywarwick.tabula.groupsQuery")
+    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.groupsQuery in application.conf"))
+
   private val tabulaMemberBaseUrl = configuration.getString("mywarwick.tabula.member.base")
     .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.member.base in application.conf"))
 
@@ -103,7 +108,16 @@ class TabulaAudienceLookupDao @Inject()(
       ))
   }
 
-  override def findSeminarGroups(query: String): Future[Seq[LookupSeminarGroup]] = ???
+  override def findSeminarGroups(query: String): Future[Seq[LookupSeminarGroup]] = {
+    getAsJson(tabulaSmallGroupsQueryUrl, Seq("query" -> query))
+      .map(_.validate[Seq[LookupSeminarGroup]].fold(
+        invalid => {
+          logger.error(s"Could not parse JSON result from Tabula: $invalid")
+          Seq()
+        },
+        groups => groups
+      ))
+  }
 
   override def findRelationships(agentId: UniversityID): Future[Map[LookupRelationshipType, Seq[User]]] = {
     getAuthenticatedAsJson(tabulaMemberRelationshipsUrl(agentId))
@@ -146,6 +160,13 @@ object TabulaResponseParsers {
       (__ \ "name").read[String] and
       (__ \ "department").read[String]
     )(LookupModule.apply _)
+
+  implicit val lookupSeminarGroupReads: Reads[LookupSeminarGroup] = (
+    (__ \ "id").read[String] and
+      (__ \ "name").read[String] and
+      (__ \ "groupSet" \ "name").read[String] and
+      (__ \ "module" \ "code").read[String]
+    )(LookupSeminarGroup.apply _)
 
   case class TabulaUserData(userId: String, universityId: String)
   private implicit val tabulaUserDataReads = Json.reads[TabulaUserData]
