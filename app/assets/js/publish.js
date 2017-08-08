@@ -7,6 +7,17 @@ import FileUpload from './publish/components/FileUpload';
 import { fetchWithCredentials } from './serverpipe';
 import './publish/news';
 import './publish/groupPicker';
+import AudiencePicker from './publish/components/AudiencePicker';
+
+
+const audiencePicker = document.getElementById('audience-picker');
+
+if(audiencePicker) {
+  ReactDOM.render(
+    <AudiencePicker/>,
+    audiencePicker
+  )
+}
 
 /*
  Attempt to register service worker - we don't do notifications or offline but it's nice to keep it
