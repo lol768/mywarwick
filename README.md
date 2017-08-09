@@ -22,6 +22,12 @@ to re-use your Apache/Nginx proxy config that you have working for Tomcat.
 
 You probably also need to run the `content-providers` app to generate content for your tiles.
 
+Version control
+---------------
+
+Commit messages should be prefixed with the JIRA ticket reference. Once merged, old branches
+should be deleted.
+
 CSRF and Forms
 --------------
 

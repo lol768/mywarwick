@@ -27,6 +27,20 @@ GET           /admin/sysadmin                                @controllers.admin.
 GET           /admin/cluster                                 @controllers.admin.ClusterStateController.html
 GET           /admin/masquerade                              @controllers.admin.MasqueradeController.masquerade
 
+GET           /admin/publishers                                     @controllers.admin.publishers.PublishersController.index
+GET           /admin/publishers/new                                 @controllers.admin.publishers.PublishersController.createForm
+POST          /admin/publishers                                     @controllers.admin.publishers.PublishersController.create
+GET           /admin/publishers/:publisher                          @controllers.admin.publishers.PublishersController.updateForm(publisher: String)
+POST          /admin/publishers/:publisher                          @controllers.admin.publishers.PublishersController.update(publisher: String)
+GET           /admin/publishers/:publisher/departments              @controllers.admin.publishers.PublisherDepartmentsController.form(publisher: String)
+POST          /admin/publishers/:publisher/departments              @controllers.admin.publishers.PublisherDepartmentsController.update(publisher: String)
+GET           /admin/publishers/:publisher/permissions              @controllers.admin.publishers.PublisherPermissionsController.form(publisher: String)
+POST          /admin/publishers/:publisher/permissions              @controllers.admin.publishers.PublisherPermissionsController.update(publisher: String)
+GET           /admin/publishers/:publisher/providers/new            @controllers.admin.publishers.ProvidersController.createForm(publisher: String)
+POST          /admin/publishers/:publisher/providers                @controllers.admin.publishers.ProvidersController.create(publisher: String)
+GET           /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.updateForm(publisher: String, provider: String)
+POST          /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.update(publisher: String, provider: String)
+
 GET           /publish/:publisher/webgroups                  @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 
 GET           /publish                                       @controllers.publish.PublishersController.index
@@ -112,6 +126,8 @@ POST          /api/emailNotificationPreferences              @controllers.api.Em
 GET           /api/smsNotificationPreferences                @controllers.api.SmsNotificationsPrefController.get
 POST          /api/smsNotificationPreferences                @controllers.api.SmsNotificationsPrefController.update
 
+GET           /api/colour-schemes                            @controllers.api.ColourSchemesController.get
+POST          /api/colour-schemes                            @controllers.api.ColourSchemesController.persist
 
 POST          /api/errors/js                                 @controllers.api.ErrorsController.js
 
@@ -130,3 +146,5 @@ GET           /service/search/*path                          @controllers.Search
 POST          /service/search/*path                          @controllers.SearchController.proxy(path: String)
 
 GET           /service/map/:lat/:lon/:width/:height          @controllers.MapController.mapThumbnail(lat: String, lon: String, width: Int, height: Int)
+
+POST        /service/flexipicker                                  @controllers.FlexiPickerController.queryJson

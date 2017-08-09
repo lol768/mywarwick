@@ -1,0 +1,45 @@
+@import models.publishing.Publisher
+@import services.ProviderSave
+@import system.RequestContext
+@(
+    publisher: Publisher,
+    providerId: String,
+    providerForm: Form[ProviderSave]
+)(implicit messages: Messages, context: RequestContext)
+
+@implicitFieldConstructor = @{
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
+}
+
+@common.admin("Administration", "Publishers", publisher.name, "Providers", "Update") {
+
+  @b3.form(controllers.admin.publishers.routes.ProvidersController.update(publisher.id, providerId)) {
+
+    @context.csrfHelper.formField
+
+    @b3.static('_label -> "ID") {
+      @providerId
+    }
+
+    @b3.text(providerForm("name"),
+      '_label -> "Name")
+
+    @b3.free('_label -> "Icon") {
+      <div class="input-group">
+        <span class="input-group-addon">
+          <i class="fa fa-fw fa-@providerForm("icon").value.getOrElse("")"></i> fa-
+        </span>
+        <input class="form-control fa-picker-preview" name="icon" value="@providerForm("icon").value.getOrElse("")" />
+      </div>
+    }
+
+    @b3.color(providerForm("colour"),
+      '_label -> "Colour")
+
+    @b3.checkbox(providerForm("sendEmail"),
+      '_text -> "Send emails")
+
+    @tags.submitOrCancel("Update", controllers.admin.publishers.routes.PublishersController.index())
+  }
+
+}

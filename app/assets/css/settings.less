@@ -45,8 +45,28 @@
       }
     }
 
+    .media-colour-scheme-choice {
+      padding-left: 0;
+    }
+
     .media-body-disabled {
       color: #808080;
+    }
+
+    .media-body-colour-scheme-choice {
+      color: white;
+      font-weight: 400;
+      width: initial;
+    }
+
+    .media-colour-scheme-block {
+      padding: 4px 10px 4px 12px;
+      margin-top: 3px;
+      width: auto;
+      min-width: 7em;
+      display: inline-block;
+      background: rgba(0,0,0,0.4);
+      font-size: 1.2em;
     }
 
     .media-left {
@@ -70,6 +90,66 @@
         }
       }
     }
+  }
+
+  .list-group-item--colour-scheme {
+    padding-left: 0;
+    height: 105px;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .list-group-item__choice--colour-scheme {
+    background-size: cover;
+    background-position: 50% 35%;
+  }
+
+  .list-group-item__choice--colour-scheme:focus {
+    outline: none;
+    box-shadow: inset rgba(0,0,0,0.8) 0 0 20px;
+  }
+
+  .list-group-item__choice--colour-scheme-1 {
+    background-image: url(/assets/images/bg01.jpg);
+  }
+
+  .list-group-item__choice--colour-scheme-2 {
+    background-image: url(/assets/images/bg02.jpg);
+  }
+
+  .list-group-item__choice--colour-scheme-3 {
+    background-image: url(/assets/images/bg03.jpg);
+  }
+
+  .list-group-item__choice--colour-scheme-4 {
+    background-image: url(/assets/images/bg04.jpg);
+  }
+
+  .list-group-item__choice--colour-scheme-5 {
+    background-image: url(/assets/images/bg05.jpg);
+  }
+
+  .list-group-item__choice--colour-scheme-1-preview {
+    background-image: url(/assets/images/bg01-preview.png);
+  }
+
+  .list-group-item__choice--colour-scheme-2-preview {
+    background-image: url(/assets/images/bg02-preview.png);
+  }
+
+  .list-group-item__choice--colour-scheme-3-preview {
+    background-image: url(/assets/images/bg03-preview.png);
+  }
+
+  .list-group-item__choice--colour-scheme-4-preview {
+    background-image: url(/assets/images/bg04-preview.png);
+  }
+
+  .list-group-item__choice--colour-scheme-5-preview {
+    background-image: url(/assets/images/bg05-preview.png);
   }
 
   .hint-text {
@@ -112,6 +192,54 @@
   }
   100% {
     box-shadow: 0 0 0 @md-radio-ripple-size rgba(0, 0, 0, 0);
+  }
+}
+
+.md-radio-colour-scheme-choice {
+  margin-top: -1px;
+
+  &.md-radio-inline {
+    display: inline-block;
+  }
+
+  input[type="radio"] {
+    display: none;
+    &:checked + label:before {
+      border-color: white;
+    }
+    &:checked + label:after {
+      transform: scale(1);
+    }
+  }
+
+  label {
+    display: inline-block;
+    height: @md-radio-size;
+    position: relative;
+    padding: 0 10px;
+    margin-bottom: 0;
+    cursor: pointer;
+    vertical-align: middle;
+    &:before, &:after {
+      position: absolute;
+      content: '';
+      border-radius: 50%;
+    }
+    &:before {
+      left: 0;
+      top: 0;
+      width: @md-radio-size;
+      height: @md-radio-size;
+      border: 2px solid white;
+    }
+    &:after {
+      top: @md-radio-size / 2 - @md-radio-checked-size / 2;
+      left: @md-radio-size / 2 - @md-radio-checked-size / 2;
+      width: @md-radio-checked-size;
+      height: @md-radio-checked-size;
+      transform: scale(0);
+      background: white;
+    }
   }
 }
 
@@ -179,7 +307,6 @@ html.android {
     }
   }
 }
-
 
 .checkbox {
   @checkbox-size: 18px;
