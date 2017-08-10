@@ -107,7 +107,11 @@ class TabulaAudienceLookupDao @Inject()(
 
   override def resolveSeminarGroup(groupId: String): Future[Seq[Usercode]] = ???
 
-  def resolveRelationship(agentId: UniversityID, relationshipType: String): Future[Seq[Usercode]] = ???
+  override def resolveRelationship(agentId: UniversityID, relationshipType: String): Future[Seq[Usercode]] = {
+    findRelationships(agentId).map(
+      _.filterKeys(_.id == relationshipType).toSeq.headOption.map { case (_, usercodes) => usercodes.map(_.usercode) }.getOrElse(Seq())
+    )
+  }
 
   override def findModules(query: String): Future[Seq[LookupModule]] = {
     getAsJson(tabulaModuleQueryUrl, Seq("query" -> query))
