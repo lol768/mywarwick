@@ -7,10 +7,10 @@ import FileUpload from './publish/components/FileUpload';
 import { fetchWithCredentials } from './serverpipe';
 import './publish/news';
 import './publish/groupPicker';
+import './publish/modulePicker';
 import _ from 'lodash-es';
 import './flexi-picker';
 import AudiencePicker from './publish/components/AudiencePicker';
-
 
 const audiencePicker = document.getElementById('audience-picker');
 
@@ -176,7 +176,7 @@ function wireEventListeners() {
 }
 
 $(() => {
-  wireEventListeners();
+  // wireEventListeners();
   setupPublisherDepartmentsForm();
   setupPublisherPermissionsForm();
 

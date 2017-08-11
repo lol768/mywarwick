@@ -1,0 +1,60 @@
+package controllers.publish
+
+import com.google.inject.{Inject, Singleton}
+import controllers.BaseController
+import models.API
+import play.api.data.Form
+import play.api.data.Forms._
+import play.api.libs.json.{Json, Writes}
+import play.api.mvc.Result
+import services.dao.LookupModule
+import services.{GroupLookupService, SecurityService}
+import warwick.core.Logging
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
+
+
+case class GroupLookupQuery(query: String)
+
+
+@Singleton
+class GroupLookupController @Inject()(
+  securityService: SecurityService,
+  lookupService: GroupLookupService
+) extends BaseController {
+
+  import securityService._
+
+  implicit val lookupModuleWrites: Writes[LookupModule] = Json.writes[LookupModule]
+
+  private val form = Form[GroupLookupQuery](
+    mapping(
+      "query" -> nonEmptyText
+    )(GroupLookupQuery.apply)(GroupLookupQuery.unapply)
+  )
+
+  // TODO: option to limit module searches to within specified departments
+  def queryModule = RequiredUserAction.async { implicit request =>
+    form.bindFromRequest.fold[Future[Result]](
+      hasErrors => Future(Ok(Json.toJson(API.Error("invalid", s"Json was invalid when querying modules. ${request.body.asJson.get}")))),
+      success => {
+        val query = success.query.trim
+        lookupService.findModule(query).map { foundModules =>
+          Ok(Json.toJson(Map("modules" -> foundModules)))
+        }
+      }
+    )
+  }
+
+  // TODO: option to limit seminar group searches to within specified departments
+  def querySeminarGroup = RequiredUserAction { implicit request =>
+    ???
+  }
+
+  def queryRelationships = RequiredUserAction { implicit request =>
+    ???
+  }
+
+}

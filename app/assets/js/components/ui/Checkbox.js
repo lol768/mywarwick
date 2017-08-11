@@ -30,16 +30,15 @@ export class Checkbox extends React.PureComponent {
 
   render() {
 
-    const { value, label, type, isChecked, children, btnGroup } = this.props;
+    const { name, label, type, isChecked, children } = this.props;
 
     return (
       <div className={type}>
         <label>
           <input
             type={type}
-            name={btnGroup}
+            name={name}
             checked={isChecked}
-            value={value}
             onChange={this.toggle}
           />
           {label}

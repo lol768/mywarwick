@@ -1,31 +1,42 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
+import $ from 'jquery';
 
 export default class InputList extends React.PureComponent {
+
+  static propTypes = {
+    items: PropTypes.arrayOf(PropTypes.object)
+  };
 
   constructor(props) {
     super(props);
     this.state = {
-      items: []
+      items: props.items || []
     };
     this.addItem = this.addItem.bind(this);
+    this.removeItem = this.removeItem.bind(this);
   }
 
-  addItem(item) {
-    this.setState(({ items }) =>
-      items.concat([item])
-    )
+  addItem(newItem) {
+    if (!this.state.items.filter(item => item.value === newItem.value).length > 0)
+      this.setState(({ items }) => ({ items: items.concat([newItem]) }));
+  }
+
+  removeItem(value) {
+    this.setState(({ items }) => (
+      { items: items.filter(item => item.value !== value) })
+    );
   }
 
   render() {
 
     return (
       <div>
-        <InputList addItem={this.addItem}/>
-        <ul>
+        <InputSearch name={this.props.name} addItem={this.addItem}/>
+        <ul className="list-unstyled">
           {
             this.state.items.map(({ value, text }) => (
-              <ListItem key={value} text={text}/>
+              <ListItem key={value} value={value} text={text} removeItem={this.removeItem}/>
             ))
           }
         </ul>
@@ -33,6 +44,7 @@ export default class InputList extends React.PureComponent {
     )
   }
 }
+
 
 class InputSearch extends React.PureComponent {
 
@@ -48,25 +60,26 @@ class InputSearch extends React.PureComponent {
     this.handleTextChange = this.handleTextChange.bind(this);
   }
 
-  handleTextChange({ target: { value } }) {
-    console.log(value);
+  componentDidMount() {
+    $(this.refs.modulePicker).modulePicker({
+      addItem: this.props.addItem
+    });
   }
 
-  addItem() {
-    this.props.addItem(this.state.value);
-    setState(InputSearch.initialState);
+  handleTextChange({ target: { value } }) {
+    this.setState({ value })
   }
 
   render() {
     return (
-      <div>
-        <input
-          type="text"
-          value={this.state.value}
-          onChange={this.handleTextChange}
-        />
-        <button onClick={this.addItem}>add</button>
-      </div>
+
+      <input
+        placeholder="Search for modules"
+        name={this.props.name}
+        ref="modulePicker"
+        value={this.state.value}
+        onChange={this.handleTextChange}
+      />
     )
   }
 }
@@ -75,16 +88,31 @@ class ListItem extends React.PureComponent {
 
   static propTypes = {
     value: PropTypes.string,
-    text: PropTypes.string
+    text: PropTypes.string,
+    removeItem: PropTypes.func
   };
 
   constructor(props) {
     super(props);
+    this.removeItem = this.removeItem.bind(this);
+  }
+
+  removeItem(event) {
+   event.preventDefault();
+   this.props.removeItem(this.props.value)
   }
 
   render() {
     return (
-      <li>{this.props.text}</li>
+      <li>
+        <span>{this.props.text}</span>
+        <span>
+          <a href="#"
+             className="clear-field"
+             onClick={this.removeItem}
+             title="Clear">&nbsp;&times;</a>
+        </span>
+      </li>
     )
   }
 

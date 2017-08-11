@@ -2,6 +2,7 @@ package services.dao
 
 import javax.inject.{Inject, Named}
 
+import com.google.inject.ImplementedBy
 import org.apache.http.client.methods.HttpGet
 import play.api.Configuration
 import play.api.libs.functional.syntax._
@@ -11,8 +12,8 @@ import services.dao.TabulaResponseParsers._
 import system.Logging
 import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplicationsManager}
 import warwick.sso.{UniversityID, User, UserLookupService, Usercode}
-import scala.collection.JavaConverters._
 
+import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
 case class LookupModule(
@@ -34,6 +35,7 @@ case class LookupRelationshipType(
   studentRole: String
 )
 
+@ImplementedBy(classOf[TabulaAudienceLookupDao])
 trait AudienceLookupDao {
 
   def resolveDepartment(departmentCode: String): Future[Seq[Usercode]]

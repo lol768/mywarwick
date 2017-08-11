@@ -18,19 +18,19 @@ export default class AudiencePicker extends React.PureComponent {
     this.isChecked = this.isChecked.bind(this);
   }
 
-  handleChange({ target: { value } }, path, type) {
+  handleChange({ target: { name } }, path, type) {
     if (type === 'checkbox') {
       const existing = _.get(this.state, path, {});
-      if (_.keys(existing).includes(value)) {
-        const updated = _.pickBy(existing, (v, k) => k !== value);
+      if (_.keys(existing).includes(name)) {
+        const updated = _.pickBy(existing, (v, k) => k !== name);
         this.setState(state => _.set(_.cloneDeep(state), path, updated));
       } else {
         this.setState(state =>
-          _.set(_.cloneDeep(state), path, _.assign({}, existing, { [value]: undefined }))
+          _.set(_.cloneDeep(state), path, _.assign({}, existing, { [name]: undefined }))
         );
       }
     } else {
-      this.setState(state => _.set(_.cloneDeep(state), path, { [value]: undefined }));
+      this.setState(state => _.set(_.cloneDeep(state), path, { [name]: undefined }));
     }
   }
 
@@ -54,96 +54,98 @@ export default class AudiencePicker extends React.PureComponent {
             <label>Who is this alert for?</label>
             <RadioButton
               handleChange={this.handleChange}
-              isChecked={this.isChecked('top.everyone')}
+              isChecked={this.isChecked('audience.everyone')}
               label="Everyone"
-              value="everyone"
-              btnGroup="top"
+              name="everyone"
+              btnGroup="audience"
             />
             <RadioButton
               handleChange={this.handleChange}
-              isChecked={this.isChecked('top.groups')}
+              isChecked={this.isChecked('audience.groups')}
               label="Groups in <dept>"
-              value="groups"
-              btnGroup="top"
+              name="groups"
+              btnGroup="audience"
             >
               {Object.keys(options).map(value =>
                 <Checkbox
                   key={value}
                   handleChange={this.handleChange}
-                  isChecked={this.isChecked(`top.groups.${value}`)}
+                  isChecked={this.isChecked(`audience.groups.${value}`)}
                   label={options[value]}
-                  value={value}
-                  btnGroup="top.groups"
+                  name={value}
+                  btnGroup="audience.groups"
                 />
               )}
 
               <Checkbox
                 handleChange={this.handleChange}
-                isChecked={this.isChecked('top.groups.ug')}
+                isChecked={this.isChecked('audience.groups.ug')}
                 label='Undergraduates'
-                value='ug'
-                btnGroup="top.groups"
+                name='ug'
+                btnGroup="audience.groups"
               >
                 <RadioButton
                   handleChange={this.handleChange}
-                  isChecked={this.isChecked('top.groups.ug.all')}
+                  isChecked={this.isChecked('audience.groups.ug.all')}
                   label="All"
-                  value="all"
-                  btnGroup="top.groups.ug"
+                  name="all"
+                  btnGroup="audience.groups.ug"
                 />
                 <RadioButton
                   handleChange={this.handleChange}
-                  isChecked={this.isChecked('top.groups.ug.year')}
+                  isChecked={this.isChecked('audience.groups.ug.year')}
                   label="Choose year of study"
-                  value="year"
-                  btnGroup="top.groups.ug"
+                  name="year"
+                  btnGroup="audience.groups.ug"
                 >
                   <Checkbox
                     handleChange={this.handleChange}
-                    isChecked={this.isChecked('top.groups.ug.year.first')}
+                    isChecked={this.isChecked('audience.groups.ug.year.first')}
                     label='First year'
-                    value='first'
-                    btnGroup="top.groups.ug.year"
+                    name='first'
+                    btnGroup="audience.groups.ug.year"
                   />
                   <Checkbox
                     handleChange={this.handleChange}
-                    isChecked={this.isChecked('top.groups.ug.year.second')}
+                    isChecked={this.isChecked('audience.groups.ug.year.second')}
                     label='Second year'
-                    value='second'
-                    btnGroup="top.groups.ug.year"
+                    name='second'
+                    btnGroup="audience.groups.ug.year"
                   />
                   <Checkbox
                     handleChange={this.handleChange}
-                    isChecked={this.isChecked('top.groups.ug.year.final')}
+                    isChecked={this.isChecked('audience.groups.ug.year.final')}
                     label='Final year'
-                    value='final'
-                    btnGroup="top.groups.ug.year"
+                    name='final'
+                    btnGroup="audience.groups.ug.year"
                   />
                 </RadioButton>
               </Checkbox>
               <Checkbox
                 handleChange={this.handleChange}
-                isChecked={this.isChecked('top.groups.module')}
+                isChecked={this.isChecked('audience.groups.module')}
                 label='Students taking a particular module'
-                value='module'
-                btnGroup="top.groups"
+                name='module'
+                btnGroup="audience.groups"
               >
-                <InputList/>
+                <InputList name="modules" items={[]} />
               </Checkbox>
               <Checkbox
                 handleChange={this.handleChange}
-                isChecked={this.isChecked('top.groups.seminar')}
+                isChecked={this.isChecked('audience.groups.seminar')}
                 label='Students in a particular seminar group'
-                value='seminar'
-                btnGroup="top.groups"
-              />
+                name='seminar'
+                btnGroup="audience.groups"
+              >
+              </Checkbox>
               <Checkbox
                 handleChange={this.handleChange}
-                isChecked={this.isChecked('top.groups.studentsOfStaff')}
+                isChecked={this.isChecked('audience.groups.studentsOfStaff')}
                 label='Students of a particular member of staff'
-                value='studentsOfStaff'
-                btnGroup="top.groups"
-              />
+                name='studentsOfStaff'
+                btnGroup="audience.groups"
+              >
+              </Checkbox>
             </RadioButton>
           </div>
         </div>
