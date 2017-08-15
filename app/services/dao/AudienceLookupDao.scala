@@ -103,7 +103,9 @@ class TabulaAudienceLookupDao @Inject()(
     getAuthenticatedAsJson(tabulaDepartmentPGRUrl(departmentCode)).map(parseUsercodeSeq)
   }
 
-  override def resolveModule(moduleCode: String): Future[Seq[Usercode]] = ???
+  override def resolveModule(moduleCode: String): Future[Seq[Usercode]] = {
+    getAuthenticatedAsJson(tabulaModuleStudentsUrl(moduleCode)).map(parseUsercodeSeq)
+  }
 
   override def resolveSeminarGroup(groupId: String): Future[Seq[Usercode]] = {
     getAuthenticatedAsJson(tabulaSmallGroupsLookupUrl(groupId)).map(
@@ -201,8 +203,16 @@ trait TabulaAudienceLookupProperties {
 
   protected def tabulaDepartmentPGRUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/$departmentCode$tabulaDepartmentPGRSuffix"
 
-  private val tabulaModuleQuery = configuration.getString("mywarwick.tabula.moduleQuery")
-    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.moduleQuery in application.conf"))
+  private val tabulaModuleBaseUrl = configuration.getString("mywarwick.tabula.module.base")
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.module.base in application.conf"))
+
+  private val tabulaModuleStudentsSuffix = configuration.getString("mywarwick.tabula.module.studentsSuffix")
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.module.studentsSuffix in application.conf"))
+
+  protected def tabulaModuleStudentsUrl(moduleCode: String): String = s"$tabulaModuleBaseUrl/$moduleCode$tabulaModuleStudentsSuffix"
+
+  private val tabulaModuleQuery = configuration.getString("mywarwick.tabula.module.query")
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.module.query in application.conf"))
 
   protected def tabulaModuleQueryUrl: String = tabulaModuleQuery
 
