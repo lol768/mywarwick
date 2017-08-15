@@ -109,7 +109,7 @@ class TabulaAudienceLookupDao @Inject()(
 
   override def resolveRelationship(agentId: UniversityID, relationshipType: String): Future[Seq[Usercode]] = {
     findRelationships(agentId).map(
-      _.filterKeys(_.id == relationshipType).toSeq.headOption.map { case (_, usercodes) => usercodes.map(_.usercode) }.getOrElse(Seq())
+      _.filterKeys(_.id == relationshipType).toSeq.headOption.map { case (_, users) => users.map(_.usercode) }.getOrElse(Seq())
     )
   }
 
