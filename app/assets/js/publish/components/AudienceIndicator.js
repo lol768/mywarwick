@@ -10,7 +10,7 @@ export default function AudienceIndicator(props) {
     );
   }
 
-  const { baseAudience, categorySubset } = props;
+  const { baseAudience } = props;
 
   if (props.public) {
     return (
@@ -21,7 +21,6 @@ export default function AudienceIndicator(props) {
   }
 
   const baseNum = baseAudience !== undefined ? baseAudience.toLocaleString() : '0';
-  const catNum = categorySubset !== undefined && `${categorySubset.toLocaleString()}/${baseNum}`;
 
   return (
     <div className="alert alert-info">
@@ -34,8 +33,7 @@ export default function AudienceIndicator(props) {
         have been selected"
         />
       </div>
-      <div>{`People in this audience: ${baseNum}`}</div>
-      {categorySubset !== undefined && <div>{`Interested in these categories: ${catNum}`}</div>}
+      <div>{`This alert will be published to ${baseNum} people.`}</div>
     </div>
   );
 }

@@ -1,6 +1,4 @@
 @import models.publishing.PermissionScope
-@import models.Audience.WebGroupAudience
-@import models.Audience.LocationOptIn
 @(
     form: Form[_],
     fieldName: String,
@@ -10,29 +8,7 @@
     allowPublic: Boolean,
     audience: Audience
 )(implicit fc: b3.B3FieldConstructor, messages: Messages)
-@defining((s"$fieldName.audience", s"$fieldName.department")) { case (audienceField, departmentField) =>
   @* TODO make less of a UI nightmare *@
   @* TODO receive list of allowed audiences from controller - each user's will be different *@
 
-<div id="audience-picker"></div>
-
-
-<div class="audience-picker-extra">
-  @b3.multifieldFormGroup(
-    Seq(form(audienceField)),
-    Seq(
-      '_label -> Html(
-        "Where are they located? (opt-in "
-            + "<i class=\"fa fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"left\" "
-            + "title=\"Users can select one or more locations to receive %ss, or may choose not to specify any.\"></i>)".format(itemName)
-      ),
-      'id -> "item_audience_opt_in_location"),
-    Nil) { info =>
-
-    @for(location <- LocationOptIn.values) {
-      @tags.seqCheckbox(form, audienceField, 'id -> s"optIn-location-${location.value}", '_text -> location.description, 'value -> s"OptIn:${location.optInType}:${location.value}")
-    }
-
-  }
-</div>
-}
+<div data-department="" id="audience-picker"></div>

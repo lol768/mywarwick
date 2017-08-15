@@ -49,7 +49,7 @@ $('.split-form').each((i, form) => {
     $form.on(
       'change',
       [
-        '.audience-picker :input',
+        '#audience-picker :input',
         '#item_category_field :input',
         '#item_ignoreCategories_field :input',
         '.audience-picker-extra :input',

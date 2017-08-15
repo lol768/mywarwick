@@ -14,11 +14,12 @@ import AudiencePicker from './publish/components/AudiencePicker';
 
 const audiencePicker = document.getElementById('audience-picker');
 
-if(audiencePicker) {
+if (audiencePicker) {
+  const dept = audiencePicker.dataset.department || '';
   ReactDOM.render(
-    <AudiencePicker/>,
-    audiencePicker
-  )
+    <AudiencePicker department={dept} />,
+    audiencePicker,
+  );
 }
 
 /*
@@ -147,36 +148,7 @@ function setupPublisherPermissionsForm() {
   });
 }
 
-function wireEventListeners() {
-  $('.audience-picker').each((i, el) => {
-    const $el = $(el);
-    const $deptBoxes = $el.find('input[value*="Dept:"]');
-    const $deptSelect = $el.find('[data-select=department]');
-
-    const $publicBox = $el.find('input[value=Public]');
-    const $otherInputs = $el.add($('.audience-picker-extra')).find('input, select').not($publicBox);
-    $publicBox.on('change', () => {
-      if ($publicBox.is(':checked')) {
-        $otherInputs.attr('disabled', true);
-      } else {
-        $otherInputs.removeAttr('disabled');
-        $deptSelect.trigger('change');
-      }
-
-      $deptSelect.trigger('change');
-    }).trigger('change');
-
-    $deptSelect.on('change', (e) => {
-      const deptSelected = e.target.value && !$deptSelect.is(':disabled');
-      const $subsets = $deptBoxes.closest('.checkbox');
-      $deptBoxes.attr('disabled', !deptSelected);
-      $subsets.toggleClass('disabled', !deptSelected);
-    }).trigger('change');
-  });
-}
-
 $(() => {
-  // wireEventListeners();
   setupPublisherDepartmentsForm();
   setupPublisherPermissionsForm();
 
@@ -184,12 +156,14 @@ $(() => {
     $(this).css('background-color', $(this).data('background-color'));
   });
 
+  // Init popovers
   $(document).popover({
     selector: '.toggle-popover',
     container: '.id7-main-content-area',
     trigger: 'click',
   });
 
+  // Dismiss popover on document click
   $(document).on('click', (e) => {
     const $target = $(e.target);
     if ($target.hasClass('toggle-popover') || $target.closest('.popover').length > 0) {

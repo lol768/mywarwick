@@ -3,9 +3,10 @@ import { postJsonWithCredentials } from '../serverpipe';
 import 'bootstrap-3-typeahead';
 import log from 'loglevel';
 
-class ModulePicker {
+class SeminarGroupPicker {
   constructor(input, {
-    addItem = () => {},
+    addItem = () => {
+    },
   }) {
     const $element = $(input);
 
@@ -19,7 +20,7 @@ class ModulePicker {
     $element.typeahead({
       source: (query, callback) => {
         currentQuery = query;
-        postJsonWithCredentials('/service/grouplookup/module', { query })
+        postJsonWithCredentials('/service/grouplookup/seminargroup', { query })
           .then(response => response.json())
           .catch((e) => {
             log.error(e);
@@ -28,16 +29,18 @@ class ModulePicker {
           .then((response) => {
             // Return the items only if the user hasn't since made a different query
             if (currentQuery === query) {
-              callback(response.modules || []);
+              callback(response.seminarGroups || []);
             }
           });
       },
-      highlighter: (html, item) => (`<strong>${item.code}</strong>: ${item.name}<br><em>${item.departmentName}</em>`),
+      highlighter: (html, item) => (
+        `<strong>${item.name}</strong>: ${item.groupSetName}<br><em>${item.moduleCode}</em>`
+      ),
       delay: 120,
       matcher: () => true, // All data received from the server matches the query
       afterSelect: (item) => {
-        const text = `${item.code}: ${item.name}`;
-        this.addItem({ value: item.code, text });
+        const text = `${item.name}: ${item.groupSetName}`;
+        this.addItem({ value: item.id, text });
         $element.data('item', item);
         $element.val(''); // return to placeholder text
       },
@@ -45,10 +48,10 @@ class ModulePicker {
   }
 }
 
-export default function modulePicker(options = {}) {
+export default function seminarGroupPicker(options = {}) {
   const $this = $(this);
-  if ($this.data('module-picker')) {
-    throw new Error('ModulePicker has already been added to this element.');
+  if ($this.data('seminar-group-picker')) {
+    throw new Error('SeminarGroupPicker has already been added to this element.');
   }
-  $this.data('module-picker', new ModulePicker(this, options));
+  $this.data('seminar-group-picker', new SeminarGroupPicker(this, options));
 }

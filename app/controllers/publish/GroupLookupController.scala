@@ -7,13 +7,12 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.{Json, Writes}
 import play.api.mvc.Result
-import services.dao.LookupModule
+import services.dao.{LookupModule, LookupRelationshipType, LookupSeminarGroup}
 import services.{GroupLookupService, SecurityService}
-import warwick.core.Logging
+import warwick.sso.UniversityID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 
 case class GroupLookupQuery(query: String)
@@ -28,6 +27,8 @@ class GroupLookupController @Inject()(
   import securityService._
 
   implicit val lookupModuleWrites: Writes[LookupModule] = Json.writes[LookupModule]
+  implicit val lookupSeminarGroupWrites: Writes[LookupSeminarGroup] = Json.writes[LookupSeminarGroup]
+  implicit val lookupRelationshipTypeWrites: Writes[LookupRelationshipType] = Json.writes[LookupRelationshipType]
 
   private val form = Form[GroupLookupQuery](
     mapping(
@@ -49,12 +50,30 @@ class GroupLookupController @Inject()(
   }
 
   // TODO: option to limit seminar group searches to within specified departments
-  def querySeminarGroup = RequiredUserAction { implicit request =>
-    ???
+  def querySeminarGroup = RequiredUserAction.async { implicit request =>
+    form.bindFromRequest.fold[Future[Result]](
+      hasErrors => Future(Ok(Json.toJson(API.Error("invalid", s"Json was invalid when querying seminar groups. ${request.body.asJson.get}")))),
+      success => {
+        val query = success.query.trim
+        lookupService.findSeminarGroup(query).map { foundSeminarGroups =>
+          Ok(Json.toJson(Map("seminarGroups" -> foundSeminarGroups)))
+        }
+      }
+    )
   }
 
-  def queryRelationships = RequiredUserAction { implicit request =>
-    ???
+  def queryRelationships = RequiredUserAction.async { implicit request =>
+    form.bindFromRequest.fold[Future[Result]](
+      hasErrors => Future(Ok(Json.toJson(API.Error("invalid", s"Json was invalid when querying staff relationships. ${request.body.asJson.get}")))),
+      success => {
+        val query = success.query.trim
+        val agentId = UniversityID(query)
+        println(agentId)
+        lookupService.findRelationships(agentId).map { foundRelationships=>
+          Ok(Json.toJson(Map("relationships" -> foundRelationships.keySet)))
+        }
+      }
+    )
   }
 
 }

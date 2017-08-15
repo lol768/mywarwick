@@ -5,17 +5,23 @@ import * as PropTypes from 'prop-types';
  * Simple checkbox or radio input that displays sub-fields as children when checked
  */
 export class Checkbox extends React.PureComponent {
-
   static propTypes = {
-    label: PropTypes.string.isRequired,
-    type: PropTypes.oneOf(['checkbox', 'radio']),
+    btnGroup: PropTypes.string,
+    children: PropTypes.oneOfType([
+      PropTypes.arrayOf(PropTypes.node),
+      PropTypes.node,
+    ]),
     handleChange: PropTypes.func.isRequired,
     isChecked: PropTypes.bool,
-    btnGroup: PropTypes.string
+    label: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    type: PropTypes.oneOf(['checkbox', 'radio']),
+    value: PropTypes.string,
   };
 
   static defaultProps = {
-    type: 'checkbox'
+    type: 'checkbox',
+    value: undefined,
   };
 
   constructor(props) {
@@ -23,13 +29,12 @@ export class Checkbox extends React.PureComponent {
     this.toggle = this.toggle.bind(this);
   }
 
-  toggle(event) {
+  toggle({ target: { name } }) {
     const { handleChange, btnGroup, type } = this.props;
-    handleChange(event, btnGroup, type)
+    handleChange(name, btnGroup, type);
   }
 
   render() {
-
     const { name, label, type, isChecked, children } = this.props;
 
     return (
@@ -38,6 +43,7 @@ export class Checkbox extends React.PureComponent {
           <input
             type={type}
             name={name}
+            value={this.props.value}
             checked={isChecked}
             onChange={this.toggle}
           />
@@ -53,12 +59,7 @@ export class Checkbox extends React.PureComponent {
 }
 
 export class RadioButton extends Checkbox {
-
   static defaultProps = {
-    type: 'radio'
+    type: 'radio',
   };
-
-  constructor(props) {
-    super(props);
-  }
 }

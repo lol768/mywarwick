@@ -79,8 +79,9 @@ class NotificationsController @Inject()(
 
   def create(publisherId: String, submitted: Boolean) = PublisherAction(publisherId, CreateNotifications).async { implicit request =>
     bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted, restrictedRecipients = true,
-      formWithErrors =>
-        Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope, Audience())),
+      formWithErrors => {
+        Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope, Audience()))
+      },
       (publish, audience) => {
         val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
         val redirect = Redirect(routes.NotificationsController.list(publisherId))
