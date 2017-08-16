@@ -22,6 +22,18 @@ to re-use your Apache/Nginx proxy config that you have working for Tomcat.
 
 You probably also need to run the `content-providers` app to generate content for your tiles.
 
+Using the embedded worker
+-------------------------
+
+If you want to test any of the background worker tasks (e.g. sending emails for alerts), you'll need
+to:
+
+* Create a `conf/worker.conf` based on the `conf/worker-example.conf` file
+* Add `include "worker"` to your `conf/application.conf` file under the
+  existing `include "default"` line.
+
+The worker should then run with the usual IDE run/debug configurations.
+
 Version control
 ---------------
 

@@ -45,7 +45,7 @@ class ColourSchemesView extends HideableView {
   makeItem(scheme) {
     return (
       <div
-        className={`list-group-item list-group-item--colour-scheme list-group-item__choice--colour-scheme list-group-item__choice--colour-scheme-${scheme.id}`}
+        className={`list-group-item list-group-item--colour-scheme list-group-item__choice--colour-scheme list-group-item__choice--colour-scheme-${scheme.id}-preview`}
         role="button"
         key={ scheme.id }
         onClick={ e => wrapKeyboardSelect(() => this.onSelect(scheme.id), e) }

@@ -4,6 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
 import controllers.admin.{routes => adminRoutes}
+import controllers.admin.publishers.{routes => adminPublishersRoutes}
 import controllers.publish.{routes => publishRoutes}
 import models.publishing.Ability.{ViewNews, ViewNotifications}
 import models.publishing.Publisher
@@ -85,6 +86,7 @@ class NavigationServiceImpl @Inject()(
 
   val sysadminNavigation: Navigation = {
     NavigationDropdown("Sysadmin", adminRoutes.AdminController.sysadmin(), Seq(
+      NavigationPage("Publishers", adminPublishersRoutes.PublishersController.index()),
       NavigationPage("Masquerade", adminRoutes.MasqueradeController.masquerade()),
       NavigationPage("Cluster State", adminRoutes.ClusterStateController.html())
     ))

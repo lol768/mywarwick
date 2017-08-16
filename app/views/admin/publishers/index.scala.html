@@ -1,0 +1,87 @@
+@import system.RequestContext
+@import models.publishing.Publisher
+@import services.ProviderRender
+@import models.publishing.PublisherPermission
+@import models.publishing.PermissionScope
+@(
+    publishers: Seq[Publisher],
+    providerMap: Map[Publisher, Seq[ProviderRender]],
+    userPermissionsMap: Map[Publisher, Seq[PublisherPermission]],
+    permissionScopeMap: Map[Publisher, PermissionScope]
+)(implicit context: RequestContext)
+@common.admin("Administration", "Publishers") {
+  <p>
+    <a href="@controllers.admin.publishers.routes.PublishersController.createForm()" class="btn btn-default">Create publisher</a>
+  </p>
+
+  @for(publisher <- publishers.sortBy(_.name)) {
+    @defining(
+      providerMap(publisher).isEmpty ||
+      userPermissionsMap(publisher).isEmpty ||
+      permissionScopeMap(publisher).isInstanceOf[PermissionScope.Departments] && permissionScopeMap(publisher).asInstanceOf[PermissionScope.Departments].departments.isEmpty
+    ) { hasWarning =>
+      <div class="panel @if(hasWarning) { panel-warning } else { panel-default }">
+
+        <div class="panel-heading">
+          <div class="pull-right">
+            <a href="@controllers.admin.publishers.routes.PublishersController.updateForm(publisher.id)" class="btn btn-default btn-xs">Edit publisher</a>
+            <a href="@controllers.admin.publishers.routes.PublisherPermissionsController.form(publisher.id)" class="btn btn-default btn-xs">Edit permissions</a>
+            <a href="@controllers.admin.publishers.routes.PublisherDepartmentsController.form(publisher.id)" class="btn btn-default btn-xs">Edit departments</a>
+          </div>
+          <div class="panel-title">
+            @publisher.name (@publisher.id)
+            <a data-toggle="collapse" href="#panel-@publisher.id">
+              @providerMap(publisher).size
+              @if(providerMap(publisher).size == 1) { provider } else { providers }
+            </a>
+          </div>
+        </div>
+
+        <div id="panel-@publisher.id" class="panel-collapse collapse @if(hasWarning) { in }">
+          @if(hasWarning) {
+            <div class="panel-body">
+              @if(providerMap(publisher).isEmpty) {
+                <div class="alert alert-warning">
+                  No Providers found. Each publisher should have at least one provider.
+                  <a href="@controllers.admin.publishers.routes.ProvidersController.createForm(publisher.id)" class="btn btn-primary btn-sm">Create</a>
+                </div>
+              }
+              @if(userPermissionsMap(publisher).isEmpty) {
+                <div class="alert alert-warning">
+                  No users have permission to use this publisher. <a href="@controllers.admin.publishers.routes.PublisherPermissionsController.form(publisher.id)" class="btn btn-primary btn-sm">
+                  Add</a>
+                </div>
+              }
+              @permissionScopeMap(publisher) match {
+                case PermissionScope.Departments(depts) if depts.isEmpty => {
+                  <div class="alert alert-warning">
+                  No departments assigned to this publisher. <a href="@controllers.admin.publishers.routes.PublisherDepartmentsController.form(publisher.id)" class="btn btn-primary btn-sm">Add</a>
+                </div>
+                }
+                case _ => {}
+              }
+            </div>
+          }
+          @if(providerMap(publisher).nonEmpty) {
+            <table class="table table-hover table-striped">
+              <thead>
+                <tr>
+                  <th>Providers</th>
+                  <th><a href="@controllers.admin.publishers.routes.ProvidersController.createForm(publisher.id)" class="btn btn-default btn-xs">Create</a></th>
+                </tr>
+              </thead>
+              <tbody>
+              @for(provider <- providerMap(publisher).sortBy(_.name)) {
+                <tr>
+                  <td>@provider.name (@provider.id)</td>
+                  <td><a href="@controllers.admin.publishers.routes.ProvidersController.updateForm(publisher.id, provider.id)" class="btn btn-default btn-xs">Edit</a></td>
+                </tr>
+              }
+              </tbody>
+            </table>
+          }
+        </div>
+      </div>
+    }
+  }
+}

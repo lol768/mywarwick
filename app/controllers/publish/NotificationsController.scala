@@ -25,7 +25,7 @@ class NotificationsController @Inject()(
   val securityService: SecurityService,
   val publisherService: PublisherService,
   val messagesApi: MessagesApi,
-  val departmentInfoDao: DepartmentInfoDao,
+  val departmentInfoService: DepartmentInfoService,
   val audienceBinder: AudienceBinder,
   activityService: ActivityService,
   val newsCategoryService: NewsCategoryService,
