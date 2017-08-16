@@ -24,9 +24,7 @@ class AppModule extends AbstractModule with AkkaGuiceSupport {
       .annotatedWith(Names.named("sms"))
       .to(classOf[SmsOutputService])
 
-    bind(classOf[AudienceLookupDao])
-      .annotatedWith(Names.named("tabula"))
-      .to(classOf[TabulaAudienceLookupDao])
+    bindAudienceLookupDao()
 
     // Start this up straight away so we always manage the cluster.
     bind(classOf[ClusterLifecycle]).asEagerSingleton()
@@ -46,6 +44,12 @@ class AppModule extends AbstractModule with AkkaGuiceSupport {
     multibinder.addBinding().to(classOf[MessageQueueOldestItemHealthCheck])
     multibinder.addBinding().to(classOf[PublisherAlertFrequencyHealthCheck])
     multibinder.addBinding().to(classOf[SmsSentLast24HoursHealthCheck])
+  }
+
+  protected def bindAudienceLookupDao(): Unit = {
+    bind(classOf[AudienceLookupDao])
+      .annotatedWith(Names.named("tabula"))
+      .to(classOf[TabulaAudienceLookupDao])
   }
 
   @Provides

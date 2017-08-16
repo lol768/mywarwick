@@ -6,9 +6,10 @@ import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import helpers.BaseSpec
 import org.mockito.Matchers
-import services.dao.{AudienceDao, UserNewsOptInDao}
+import services.dao.{AudienceDao, AudienceLookupDao, UserNewsOptInDao}
 import warwick.sso._
 
+import scala.concurrent.Future
 import scala.util.Success
 
 class AudienceServiceTest extends BaseSpec with MockitoSugar {
@@ -16,12 +17,25 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
     val webgroups: GroupService = mock[GroupService]
     val audienceDao: AudienceDao = mock[AudienceDao]
     val newsOptInDao: UserNewsOptInDao = mock[UserNewsOptInDao]
-    val service = new AudienceServiceImpl(webgroups, audienceDao, newsOptInDao, new MockDatabase)
+    val audienceLookupDao: AudienceLookupDao = mock[AudienceLookupDao]
+    val service = new AudienceServiceImpl(webgroups, audienceDao, newsOptInDao, audienceLookupDao, new MockDatabase)
 
 
     def webgroupsIsEmpty(): Unit = {
       when(webgroups.getWebGroup(any())).thenReturn(Success(None)) // this webgroups is empty
       when(webgroups.getGroupsForQuery(any())).thenReturn(Success(Nil))
+    }
+
+    def audienceDaoIsEmpty(): Unit = {
+      when(audienceLookupDao.resolveDepartment(any())).thenReturn(Future.successful(Seq()))
+      when(audienceLookupDao.resolveUndergraduates(any())).thenReturn(Future.successful(Seq()))
+      when(audienceLookupDao.resolveTaughtPostgraduates(any())).thenReturn(Future.successful(Seq()))
+      when(audienceLookupDao.resolveResearchPostgraduates(any())).thenReturn(Future.successful(Seq()))
+      when(audienceLookupDao.resolveTeachingStaff(any())).thenReturn(Future.successful(Seq()))
+      when(audienceLookupDao.resolveAdminStaff(any())).thenReturn(Future.successful(Seq()))
+      when(audienceLookupDao.resolveModule(any())).thenReturn(Future.successful(Seq()))
+      when(audienceLookupDao.resolveSeminarGroup(any())).thenReturn(Future.successful(Seq()))
+      when(audienceLookupDao.resolveRelationship(any(), any())).thenReturn(Future.successful(Seq()))
     }
 
     def newGroup(name: String, users: Seq[String], `type`:String="Arbitrary") =
@@ -43,24 +57,143 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       service.resolve(Audience()).get must be (Nil)
     }
 
-    "search for research postgrads" in new Ctx {
+    "search for all research postgrads in WebGroups" in new Ctx {
       webgroupsIsEmpty()
       service.resolve(Audience(Seq(ResearchPostgrads))).get
       verify(webgroups).getWebGroup(GroupName("all-studenttype-postgraduate-research-ft"))
       verify(webgroups).getWebGroup(GroupName("all-studenttype-postgraduate-research-pt"))
       verifyNoMoreInteractions(webgroups)
+      verifyZeroInteractions(audienceLookupDao)
     }
 
-    "search for taught postgrads" in new Ctx {
+    "search for all taught postgrads in WebGroups" in new Ctx {
       webgroupsIsEmpty()
       service.resolve(Audience(Seq(TaughtPostgrads))).get
       verify(webgroups).getWebGroup(GroupName("all-studenttype-postgraduate-taught-ft"))
       verify(webgroups).getWebGroup(GroupName("all-studenttype-postgraduate-taught-pt"))
       verifyNoMoreInteractions(webgroups)
+      verifyZeroInteractions(audienceLookupDao)
     }
 
-    "search for combination of departmental subsets" in new Ctx {
+    "search for all undergrads in WebGroups" in new Ctx {
       webgroupsIsEmpty()
+      service.resolve(Audience(Seq(UndergradStudents))).get
+      verify(webgroups).getWebGroup(GroupName("all-studenttype-undergraduate-full-time"))
+      verify(webgroups).getWebGroup(GroupName("all-studenttype-undergraduate-part-time"))
+      verifyNoMoreInteractions(webgroups)
+      verifyZeroInteractions(audienceLookupDao)
+    }
+
+    "search for all teaching staff in WebGroups" in new Ctx {
+      webgroupsIsEmpty()
+      service.resolve(Audience(Seq(TeachingStaff))).get
+      verify(webgroups).getWebGroup(GroupName("all-teaching"))
+      verifyNoMoreInteractions(webgroups)
+      verifyZeroInteractions(audienceLookupDao)
+    }
+
+    "search for all admin staff in WebGroups" in new Ctx {
+      webgroupsIsEmpty()
+      service.resolve(Audience(Seq(AdminStaff))).get
+      verify(webgroups).getWebGroup(GroupName("all-teaching"))
+      verify(webgroups).getWebGroup(GroupName("all-staff"))
+      verifyNoMoreInteractions(webgroups)
+      verifyZeroInteractions(audienceLookupDao)
+    }
+
+    "search for specific group in WebGroups" in new Ctx {
+      webgroupsIsEmpty()
+      service.resolve(Audience(Seq(WebGroupAudience(GroupName("in-foo"))))).get
+      verify(webgroups).getWebGroup(GroupName("in-foo"))
+      verifyNoMoreInteractions(webgroups)
+      verifyZeroInteractions(audienceLookupDao)
+    }
+
+    "search for all users in department" in new Ctx {
+      val deptCode = "ch"
+      when(audienceLookupDao.resolveDepartment(deptCode)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
+      service.resolve(Audience(Seq(DepartmentAudience(deptCode, Seq(All))))).get
+      verify(audienceLookupDao, times(1)).resolveDepartment(deptCode)
+      verifyNoMoreInteractions(audienceLookupDao)
+      verifyZeroInteractions(webgroups)
+    }
+
+    "search for all undergrads in department" in new Ctx {
+      val deptCode = "ch"
+      when(audienceLookupDao.resolveUndergraduates(deptCode)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
+      service.resolve(Audience(Seq(DepartmentAudience(deptCode, Seq(UndergradStudents))))).get
+      verify(audienceLookupDao, times(1)).resolveUndergraduates(deptCode)
+      verifyNoMoreInteractions(audienceLookupDao)
+      verifyZeroInteractions(webgroups)
+    }
+
+    "search for all PGRs in department" in new Ctx {
+      val deptCode = "ch"
+      when(audienceLookupDao.resolveResearchPostgraduates(deptCode)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
+      service.resolve(Audience(Seq(DepartmentAudience(deptCode, Seq(ResearchPostgrads))))).get
+      verify(audienceLookupDao, times(1)).resolveResearchPostgraduates(deptCode)
+      verifyNoMoreInteractions(audienceLookupDao)
+      verifyZeroInteractions(webgroups)
+    }
+
+    "search for all PGTs in department" in new Ctx {
+      val deptCode = "ch"
+      when(audienceLookupDao.resolveTaughtPostgraduates(deptCode)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
+      service.resolve(Audience(Seq(DepartmentAudience(deptCode, Seq(TaughtPostgrads))))).get
+      verify(audienceLookupDao, times(1)).resolveTaughtPostgraduates(deptCode)
+      verifyNoMoreInteractions(audienceLookupDao)
+      verifyZeroInteractions(webgroups)
+    }
+
+    "search for all teaching staff in department" in new Ctx {
+      val deptCode = "ch"
+      when(audienceLookupDao.resolveTeachingStaff(deptCode)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
+      service.resolve(Audience(Seq(DepartmentAudience(deptCode, Seq(TeachingStaff))))).get
+      verify(audienceLookupDao, times(1)).resolveTeachingStaff(deptCode)
+      verifyNoMoreInteractions(audienceLookupDao)
+      verifyZeroInteractions(webgroups)
+    }
+
+    "search for all admin staff in department" in new Ctx {
+      val deptCode = "ch"
+      when(audienceLookupDao.resolveAdminStaff(deptCode)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
+      service.resolve(Audience(Seq(DepartmentAudience(deptCode, Seq(AdminStaff))))).get
+      verify(audienceLookupDao, times(1)).resolveAdminStaff(deptCode)
+      verifyNoMoreInteractions(audienceLookupDao)
+      verifyZeroInteractions(webgroups)
+    }
+
+    "search for a module" in new Ctx {
+      val moduleCode = "CH160"
+      when(audienceLookupDao.resolveModule(moduleCode)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
+      service.resolve(Audience(Seq(ModuleAudience(moduleCode)))).get
+      verify(audienceLookupDao, times(1)).resolveModule(moduleCode)
+      verifyNoMoreInteractions(audienceLookupDao)
+      verifyZeroInteractions(webgroups)
+    }
+
+    "search for a seminar group" in new Ctx {
+      val groupId = "1234"
+      when(audienceLookupDao.resolveSeminarGroup(groupId)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
+      service.resolve(Audience(Seq(SeminarGroupAudience(groupId)))).get
+      verify(audienceLookupDao, times(1)).resolveSeminarGroup(groupId)
+      verifyNoMoreInteractions(audienceLookupDao)
+      verifyZeroInteractions(webgroups)
+    }
+
+    "search for a relationship" in new Ctx {
+      val relationshipType = "personalTutor"
+      val agentId = UniversityID("1234")
+      when(audienceLookupDao.resolveRelationship(agentId, relationshipType)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
+      service.resolve(Audience(Seq(RelationshipAudience(relationshipType, agentId)))).get
+      verify(audienceLookupDao, times(1)).resolveRelationship(agentId, relationshipType)
+      verifyNoMoreInteractions(audienceLookupDao)
+      verifyZeroInteractions(webgroups)
+    }
+
+    "search for combination of audiences" in new Ctx {
+      webgroupsIsEmpty()
+      audienceDaoIsEmpty()
       service.resolve(Audience(Seq(
         WebGroupAudience(GroupName("in-winners")),
         WebGroupAudience(GroupName("in-losers")),
@@ -70,22 +203,12 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       ))).get
       verify(webgroups).getWebGroup(GroupName("in-winners"))
       verify(webgroups).getWebGroup(GroupName("in-losers"))
-      verify(webgroups).getGroupsForQuery("-cs102")
-      verify(webgroups).getWebGroup(GroupName("ch-studenttype-undergraduate-full-time"))
-      verify(webgroups).getWebGroup(GroupName("ch-studenttype-undergraduate-part-time"))
-      verify(webgroups).getWebGroup(GroupName("ph-studenttype-undergraduate-full-time"))
-      verify(webgroups).getWebGroup(GroupName("ph-studenttype-undergraduate-part-time"))
-      verify(webgroups).getWebGroup(GroupName("ph-teaching"))
+      verify(audienceLookupDao).resolveModule("CS102")
+      verify(audienceLookupDao).resolveUndergraduates("CH")
+      verify(audienceLookupDao).resolveUndergraduates("PH")
+      verify(audienceLookupDao).resolveTeachingStaff("PH")
       verifyNoMoreInteractions(webgroups)
-    }
-
-    "match an uppercase module group" in new Ctx {
-      val unrelatedGroup: Group = newGroup("in-cs102-eggbox", Seq("ada","bev"), `type`="Module")
-      val moduleGroup: Group = newGroup("in-cs102", Seq("cuuaaa","cuuaab"), `type`="Module")
-      when(webgroups.getGroupsForQuery("-cs102")).thenReturn(Success(Seq(unrelatedGroup, moduleGroup)))
-
-      val users: Seq[Usercode] = service.resolve(Audience(Seq( ModuleAudience("CS102") ))).get
-      users.map(_.string) must be (Seq("cuuaaa","cuuaab"))
+      verifyNoMoreInteractions(audienceLookupDao)
     }
 
     "deduplicate usercodes" in new Ctx {
