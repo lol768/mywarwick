@@ -103,9 +103,18 @@ class TabulaAudienceLookupDao @Inject()(
     getAuthenticatedAsJson(tabulaDepartmentPGRUrl(departmentCode)).map(parseUsercodeSeq)
   }
 
-  override def resolveModule(moduleCode: String): Future[Seq[Usercode]] = ???
+  override def resolveModule(moduleCode: String): Future[Seq[Usercode]] = {
+    getAuthenticatedAsJson(tabulaModuleStudentsUrl(moduleCode)).map(parseUsercodeSeq)
+  }
 
-  override def resolveSeminarGroup(groupId: String): Future[Seq[Usercode]] = ???
+  override def resolveSeminarGroup(groupId: String): Future[Seq[Usercode]] = {
+    getAuthenticatedAsJson(tabulaSmallGroupsLookupUrl(groupId)).map(
+      TabulaResponseParsers.validateAPIResponse(_, TabulaResponseParsers.smallGroupReads).fold(
+        handleValidationError(_, Seq()),
+        users => users.map(u => Usercode(u.userId))
+      )
+    )
+  }
 
   override def resolveRelationship(agentId: UniversityID, relationshipType: String): Future[Seq[Usercode]] = {
     findRelationships(agentId).map(
@@ -166,53 +175,66 @@ trait TabulaAudienceLookupProperties {
   def configuration: Configuration
 
   private val tabulaDepartmentBaseUrl = configuration.getString("mywarwick.tabula.department.base")
-    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.department.base in application.conf"))
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.base in application.conf"))
 
   private val tabulaDepartmentAllSuffix = configuration.getString("mywarwick.tabula.department.allSuffix")
-    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.department.allSuffix in application.conf"))
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.allSuffix in application.conf"))
 
   protected def tabulaDepartmentAllUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/$departmentCode$tabulaDepartmentAllSuffix"
 
   private val tabulaDepartmentTeachingStaffSuffix = configuration.getString("mywarwick.tabula.department.teachingStaffSuffix")
-    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.department.teachingStaffSuffix in application.conf"))
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.teachingStaffSuffix in application.conf"))
 
   protected def tabulaDepartmentTeachingStaffUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/$departmentCode$tabulaDepartmentTeachingStaffSuffix"
 
   private val tabulaDepartmentAdminStaffSuffix = configuration.getString("mywarwick.tabula.department.adminStaffSuffix")
-    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.department.adminStaffSuffix in application.conf"))
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.adminStaffSuffix in application.conf"))
 
   protected def tabulaDepartmentAdminStaffUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/$departmentCode$tabulaDepartmentAdminStaffSuffix"
 
   private val tabulaDepartmentUndergraduatesSuffix = configuration.getString("mywarwick.tabula.department.undergraduatesSuffix")
-    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.department.undergraduatesSuffix in application.conf"))
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.undergraduatesSuffix in application.conf"))
 
   protected def tabulaDepartmentUndergraduatesUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/$departmentCode$tabulaDepartmentUndergraduatesSuffix"
 
   private val tabulaDepartmentPGTSuffix = configuration.getString("mywarwick.tabula.department.pgtSuffix")
-    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.department.pgtSuffix in application.conf"))
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.pgtSuffix in application.conf"))
 
   protected def tabulaDepartmentPGTUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/$departmentCode$tabulaDepartmentPGTSuffix"
 
   private val tabulaDepartmentPGRSuffix = configuration.getString("mywarwick.tabula.department.pgrSuffix")
-    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.department.pgrSuffix in application.conf"))
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.pgrSuffix in application.conf"))
 
   protected def tabulaDepartmentPGRUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/$departmentCode$tabulaDepartmentPGRSuffix"
 
-  private val tabulaModuleQuery = configuration.getString("mywarwick.tabula.moduleQuery")
-    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.moduleQuery in application.conf"))
+  private val tabulaModuleBaseUrl = configuration.getString("mywarwick.tabula.module.base")
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.module.base in application.conf"))
+
+  private val tabulaModuleStudentsSuffix = configuration.getString("mywarwick.tabula.module.studentsSuffix")
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.module.studentsSuffix in application.conf"))
+
+  protected def tabulaModuleStudentsUrl(moduleCode: String): String = s"$tabulaModuleBaseUrl/$moduleCode$tabulaModuleStudentsSuffix"
+
+  private val tabulaModuleQuery = configuration.getString("mywarwick.tabula.module.query")
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.module.query in application.conf"))
 
   protected def tabulaModuleQueryUrl: String = tabulaModuleQuery
 
-  private val tabulaSmallGroupsQuery = configuration.getString("mywarwick.tabula.groupsQuery")
-    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.groupsQuery in application.conf"))
+  private val tabulaSmallGroupsLookup = configuration.getString("mywarwick.tabula.groups.lookup")
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.groups.lookup in application.conf"))
+
+  protected def tabulaSmallGroupsLookupUrl(groupId: String): String = s"$tabulaSmallGroupsLookup/$groupId"
+
+  private val tabulaSmallGroupsQuery = configuration.getString("mywarwick.tabula.groups.query")
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.groups.query in application.conf"))
 
   protected def tabulaSmallGroupsQueryUrl: String = tabulaSmallGroupsQuery
 
   private val tabulaMemberBaseUrl = configuration.getString("mywarwick.tabula.member.base")
-    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.member.base in application.conf"))
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.member.base in application.conf"))
 
   private val tabulaMemberRelationshipsSuffix = configuration.getString("mywarwick.tabula.member.relationshipsSuffix")
-    .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.member.relationshipsSuffix in application.conf"))
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.member.relationshipsSuffix in application.conf"))
 
   protected def tabulaMemberRelationshipsUrl(member: UniversityID) = s"$tabulaMemberBaseUrl/${member.string}$tabulaMemberRelationshipsSuffix"
 
@@ -251,6 +273,9 @@ object TabulaResponseParsers {
       (__ \ "relationships").read[Seq[MemberRelationship]](Reads.seq(memberRelationshipReads))
         .map(MemberRelationshipsResponse.apply)
   }
+
+  val smallGroupReads: Reads[Seq[TabulaUserData]] =
+    (__ \ "group" \ "students").read[Seq[TabulaUserData]](Reads.seq(tabulaUserDataReads))
 
   private case class ErrorMessage(message: String)
   private val errorMessageReads = Json.reads[ErrorMessage]
