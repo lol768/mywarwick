@@ -96,7 +96,7 @@ class ID7Layout extends React.PureComponent {
     /* HACK: default to theme-transparent-1 if user has transparent in their store */
     $('html')
       .removeClass(`theme-${oldTheme}`)
-      .addClass(newTheme === 'transparent' ? 'transparent-1' : `theme-${newTheme}`);
+      .addClass(newTheme === 'transparent' ? 'theme-transparent-1' : `theme-${newTheme}`);
   }
 
   isEditing() {

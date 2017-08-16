@@ -59,7 +59,7 @@ class NewsController @Inject()(
   val publisherService: PublisherService,
   val messagesApi: MessagesApi,
   news: NewsService,
-  val departmentInfoDao: DepartmentInfoDao,
+  val departmentInfoService: DepartmentInfoService,
   val audienceBinder: AudienceBinder,
   val newsCategoryService: NewsCategoryService,
   userNewsCategoryService: UserNewsCategoryService,
