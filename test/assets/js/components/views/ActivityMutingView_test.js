@@ -65,7 +65,7 @@ describe('ActivityMutingView', () => {
     };
     const wrapper = enzyme.shallow(<ActivityMutingView {...props} />);
     wrapper.setState({ duration: '1hour' });
-    wrapper.instance().saveMuting();
+    wrapper.instance().saveMuting({ type: 'click', currentTarget: { blur: () => {} } });
     expect(props.onMutingSave.calledOnce).to.equal(true);
     expect(props.onMutingSave.calledWith({
       activityType: 'activityType',

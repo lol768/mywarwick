@@ -6,6 +6,7 @@ import * as PropTypes from 'prop-types';
 import { Routes } from '../../AppRoot';
 import HideableView from '../HideableView';
 import * as tiles from '../../../state/tiles';
+import wrapKeyboardSelect from '../../../keyboard-nav';
 
 class TilePreferencesView extends HideableView {
   static propTypes = {
@@ -19,8 +20,21 @@ class TilePreferencesView extends HideableView {
     })),
   };
 
+  constructor(props) {
+    super(props);
+    this.onTile = this.onTile.bind(this);
+  }
+
   componentDidShow() {
     this.props.dispatch(tiles.fetchTileContent());
+  }
+
+  onTile(e) {
+    wrapKeyboardSelect(() => {
+      this.props.dispatch(
+        push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}/${e.currentTarget.dataset.tileid}`),
+      );
+    }, e);
   }
 
   render() {
@@ -41,11 +55,9 @@ class TilePreferencesView extends HideableView {
               className={ `list-group-item setting-colour-${tile.colour}` }
               role="button"
               tabIndex={0}
-              onClick={ () =>
-                this.props.dispatch(
-                  push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}/${tile.id}`),
-                )
-              }
+              data-tileid={ tile.id }
+              onClick={ this.onTile }
+              onKeyUp={ this.onTile }
             >
               <div className="media">
                 <div className="media-left">

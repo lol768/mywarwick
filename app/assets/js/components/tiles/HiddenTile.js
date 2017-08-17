@@ -1,9 +1,27 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
+import wrapKeyboardSelect from '../../keyboard-nav';
 
 export default class HiddenTile extends React.PureComponent {
+  static propTypes = {
+    icon: PropTypes.string,
+    title: PropTypes.string,
+    onShow: PropTypes.func,
+    colour: PropTypes.number,
+  };
+
+  constructor() {
+    super();
+
+    this.onShow = this.onShow.bind(this);
+  }
+
+  onShow(e) {
+    wrapKeyboardSelect(() => this.props.onShow(this.props), e);
+  }
+
   render() {
-    const { icon, title, onShow, colour } = this.props;
+    const { icon, title, colour } = this.props;
 
     return (
       <div className="tile__container">
@@ -11,7 +29,8 @@ export default class HiddenTile extends React.PureComponent {
           <div
             className="tile__edit-control top-left"
             title={ `Show ${title}` }
-            onClick={ onShow }
+            onClick={ this.onShow }
+            onKeyUp={ this.onShow }
             role="button"
             tabIndex={0}
           >
@@ -29,10 +48,3 @@ export default class HiddenTile extends React.PureComponent {
     );
   }
 }
-
-HiddenTile.propTypes = {
-  icon: PropTypes.string,
-  title: PropTypes.string,
-  onShow: PropTypes.func,
-  colour: PropTypes.number,
-};

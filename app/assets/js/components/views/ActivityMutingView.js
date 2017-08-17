@@ -4,6 +4,7 @@ import * as _ from 'lodash-es';
 import { activityMuteDurations } from '../../state/notifications';
 import CheckboxListGroupItem from '../ui/CheckboxListGroupItem';
 import RadioListGroupItem from '../ui/RadioListGroupItem';
+import wrapKeyboardSelect from '../../keyboard-nav';
 
 const TagKeyPrefix = 'tag-';
 const PublishNotificationType = 'mywarwick-user-publish-notification';
@@ -45,6 +46,11 @@ export default class ActivityMutingView extends React.PureComponent {
     this.handleDurationChange = this.handleDurationChange.bind(this);
     this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
     this.saveMuting = this.saveMuting.bind(this);
+    this.onMutingDismiss = this.onMutingDismiss.bind(this);
+  }
+
+  onMutingDismiss(e) {
+    wrapKeyboardSelect(this.props.onMutingDismiss, e);
   }
 
   handleDurationChange(value) {
@@ -64,18 +70,20 @@ export default class ActivityMutingView extends React.PureComponent {
     });
   }
 
-  saveMuting() {
-    const nameValues = {
-      activityType: (this.state.formValues.activityType) ? this.props.activityType : null,
-      providerId: (this.state.formValues.providerId) ? this.props.provider : null,
-      duration: this.state.duration,
-    };
-    _.forEach(this.props.tags, (tag) => {
-      if (this.state.formValues[ActivityMutingView.toTagKey(tag)]) {
-        nameValues[`tags[${tag.name}]`] = tag.value;
-      }
-    });
-    this.props.onMutingSave(nameValues);
+  saveMuting(e) {
+    wrapKeyboardSelect(() => {
+      const nameValues = {
+        activityType: (this.state.formValues.activityType) ? this.props.activityType : null,
+        providerId: (this.state.formValues.providerId) ? this.props.provider : null,
+        duration: this.state.duration,
+      };
+      _.forEach(this.props.tags, (tag) => {
+        if (this.state.formValues[ActivityMutingView.toTagKey(tag)]) {
+          nameValues[`tags[${tag.name}]`] = tag.value;
+        }
+      });
+      this.props.onMutingSave(nameValues);
+    }, e);
   }
 
   renderCheckboxes() {
@@ -166,7 +174,8 @@ export default class ActivityMutingView extends React.PureComponent {
                   type="button"
                   className="btn btn-default"
                   data-dismiss="modal"
-                  onClick={ this.props.onMutingDismiss }
+                  onClick={ this.onMutingDismiss }
+                  onKeyUp={ this.onMutingDismiss }
                 >
                   Cancel
                 </button>
@@ -174,6 +183,7 @@ export default class ActivityMutingView extends React.PureComponent {
                   type="button"
                   className="btn btn-primary"
                   onClick={ this.saveMuting }
+                  onKeyUp={ this.saveMuting }
                   disabled={ !this.state.duration || !someChecked }
                 >
                   Save changes

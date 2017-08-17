@@ -15,6 +15,7 @@ import isEmbedded from '../../embedHelper';
 import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
 import { Routes } from '../AppRoot';
+import wrapKeyboardSelect from '../../keyboard-nav';
 
 class ID7Layout extends React.PureComponent {
   static propTypes = {
@@ -75,20 +76,22 @@ class ID7Layout extends React.PureComponent {
     }
   }
 
-  onBackClick() {
-    this.props.dispatch(goBack());
+  onBackClick(e) {
+    wrapKeyboardSelect(() => this.props.dispatch(goBack()), e);
   }
 
-  onEdit() {
-    if (this.isEditing()) {
-      this.props.dispatch(goBack());
-    } else {
-      this.props.dispatch(push(`/${Routes.EDIT}`));
-    }
+  onEdit(e) {
+    wrapKeyboardSelect(() => {
+      if (this.isEditing()) {
+        this.props.dispatch(goBack());
+      } else {
+        this.props.dispatch(push(`/${Routes.EDIT}`));
+      }
+    }, e);
   }
 
-  onSettings() {
-    this.props.dispatch(push(`/${Routes.SETTINGS}`));
+  onSettings(e) {
+    wrapKeyboardSelect(() => this.props.dispatch(push(`/${Routes.SETTINGS}`)), e);
   }
 
   /** Set the theme on the html element, so that we can style everything. */

@@ -38,6 +38,7 @@ export default class MastheadMobile extends React.PureComponent {
         <div
           className="settings-btn"
           onClick={this.props.onSettings}
+          onKeyUp={this.props.onSettings}
           role="button"
           tabIndex={0}
         >
@@ -48,6 +49,7 @@ export default class MastheadMobile extends React.PureComponent {
         <div
           className="edit-btn pulse"
           onClick={this.props.onEdit}
+          onKeyUp={this.props.onEdit}
           role="button"
           tabIndex={0}
         >
@@ -68,6 +70,7 @@ export default class MastheadMobile extends React.PureComponent {
           <div
             className="back-btn"
             onClick={this.props.onBackClick}
+            onKeyUp={this.props.onBackClick}
             role="button"
             tabIndex={0}
           >

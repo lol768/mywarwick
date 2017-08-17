@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import ListGroupItem from '../../ui/ListGroupItem';
 import NetworkAwareControl from '../../ui/NetworkAwareControl';
 import Switch from '../../ui/Switch';
+import wrapKeyboardSelect from '../../../keyboard-nav';
 
 class SmsNotificationsView extends HideableView {
   static propTypes = {
@@ -50,17 +51,19 @@ class SmsNotificationsView extends HideableView {
     });
   }
 
-  onSwitchChange() {
-    if (!this.state.enabled && !this.state.smsNumber) {
-      this.setState({
-        editing: true,
-        fromEmpty: true,
-      });
-    } else {
-      this.setState({
-        enabled: !this.state.enabled,
-      }, () => smsNotifications.persist(this.state.enabled, this.state.smsNumber));
-    }
+  onSwitchChange(e) {
+    wrapKeyboardSelect(() => {
+      if (!this.state.enabled && !this.state.smsNumber) {
+        this.setState({
+          editing: true,
+          fromEmpty: true,
+        });
+      } else {
+        this.setState({
+          enabled: !this.state.enabled,
+        }, () => smsNotifications.persist(this.state.enabled, this.state.smsNumber));
+      }
+    }, e);
   }
 
   onEdit() {
@@ -69,24 +72,28 @@ class SmsNotificationsView extends HideableView {
     });
   }
 
-  onEditCancel() {
-    this.setState({
-      editing: false,
-      fromEmpty: false,
-      submitError: undefined,
-    });
+  onEditCancel(e) {
+    wrapKeyboardSelect(() =>
+      this.setState({
+        editing: false,
+        fromEmpty: false,
+        submitError: undefined,
+      }),
+    e);
   }
 
-  onEditSubmit() {
-    this.setState({
-      submitting: true,
-    }, () => {
-      smsNotifications.persist(
-        this.state.fromEmpty || this.state.enabled,
-        this.phoneNumberInput.value,
-      )
-        .then(response => response.json()).then(this.handleJson);
-    });
+  onEditSubmit(e) {
+    wrapKeyboardSelect(() =>
+      this.setState({
+        submitting: true,
+      }, () => {
+        smsNotifications.persist(
+          this.state.fromEmpty || this.state.enabled,
+          this.phoneNumberInput.value,
+        )
+          .then(response => response.json()).then(this.handleJson);
+      }),
+    e);
   }
 
   handleJson(json) {
@@ -163,6 +170,7 @@ class SmsNotificationsView extends HideableView {
                   className="btn btn-default"
                   data-dismiss="modal"
                   onClick={ this.onEditCancel }
+                  onKeyUp={ this.onEditCancel }
                 >
                   Cancel
                 </button>
@@ -170,6 +178,7 @@ class SmsNotificationsView extends HideableView {
                   type="button"
                   className="btn btn-primary"
                   onClick={ this.onEditSubmit }
+                  onKeyUp={ this.onEditSubmit }
                   disabled={ this.state.submitting }
                 >
                   Save
@@ -190,6 +199,7 @@ class SmsNotificationsView extends HideableView {
             <div
               className="pull-right"
               onClick={ this.onSwitchChange }
+              onKeyUp={ this.onSwitchChange }
               role="button"
               aria-disabled={ !this.props.isOnline }
               tabIndex={ this.props.isOnline ? 0 : -1 }

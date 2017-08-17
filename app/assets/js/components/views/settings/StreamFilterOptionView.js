@@ -4,6 +4,7 @@ import _ from 'lodash-es';
 import { connect } from 'react-redux';
 import * as notifications from '../../../state/notifications';
 import Switch from '../../ui/Switch';
+import wrapKeyboardSelect from '../../../keyboard-nav';
 
 class StreamFilterOptionView extends React.PureComponent {
   static propTypes = {
@@ -53,13 +54,15 @@ class StreamFilterOptionView extends React.PureComponent {
   }
 
   onClick(event) {
-    if (!this.props.isOnline) return;
-    const value = event.currentTarget.dataset.value;
-    const name = event.currentTarget.dataset.name;
-    const newOption = _.cloneDeep(this.state[name]);
-    newOption[value] = !newOption[value];
+    wrapKeyboardSelect(() => {
+      if (!this.props.isOnline) return;
+      const value = event.currentTarget.dataset.value;
+      const name = event.currentTarget.dataset.name;
+      const newOption = _.cloneDeep(this.state[name]);
+      newOption[value] = !newOption[value];
 
-    this.setState({ [name]: newOption }, () => this.props.saveFilter(this.state));
+      this.setState({ [name]: newOption }, () => this.props.saveFilter(this.state));
+    }, event);
   }
 
   render() {
@@ -90,6 +93,7 @@ class StreamFilterOptionView extends React.PureComponent {
                 role="button"
                 tabIndex={0}
                 onClick={ this.onClick }
+                onKeyUp={ this.onClick }
               >
                 <div className="media">
                   <div className="media-left">

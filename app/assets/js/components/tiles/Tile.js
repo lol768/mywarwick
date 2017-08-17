@@ -7,6 +7,7 @@ import classNames from 'classnames';
 import { localMoment } from '../../dateFormats';
 import TileWrap from './TileWrap';
 import { TILE_SIZES } from '../tiles/TileContent';
+import wrapKeyboardSelect from '../../keyboard-nav';
 
 export default class Tile extends React.PureComponent {
   constructor(props) {
@@ -56,30 +57,34 @@ export default class Tile extends React.PureComponent {
   }
 
   onClickExpand(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.props.onZoomIn(e);
+    wrapKeyboardSelect(() => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.props.onZoomIn(e);
+    }, e);
   }
 
   onClick(e) {
-    if (e.target === this.refs.icon || e.target === this.refs.zoom) {
-      // Do not apply default click action to icon
-      return;
-    }
-
-    const { content, editingAny } = this.props;
-    e.stopPropagation();
-    if (editingAny) {
-      e.preventDefault();
-    } else if (content && content.href) {
-      if (window.navigator.userAgent.indexOf('MyWarwick/') >= 0) {
-        window.location = content.href;
-      } else {
-        window.open(content.href);
+    wrapKeyboardSelect(() => {
+      if (e.target === this.refs.icon || e.target === this.refs.zoom) {
+        // Do not apply default click action to icon
+        return;
       }
-    } else if (this.getContentInstance().constructor.expandsOnClick()) {
-      this.props.onZoomIn(e);
-    }
+
+      const { content, editingAny } = this.props;
+      e.stopPropagation();
+      if (editingAny) {
+        e.preventDefault();
+      } else if (content && content.href) {
+        if (window.navigator.userAgent.indexOf('MyWarwick/') >= 0) {
+          window.location = content.href;
+        } else {
+          window.open(content.href);
+        }
+      } else if (this.getContentInstance().constructor.expandsOnClick()) {
+        this.props.onZoomIn(e);
+      }
+    }, e);
   }
 
   componentDidMount() {
@@ -105,7 +110,7 @@ export default class Tile extends React.PureComponent {
 
     const zoomIcon = () => {
       if (this.shouldDisplayExpandIcon()) {
-        return <i ref="zoom" className="fa fa-expand" role="button" tabIndex={0} onClick={this.onClickExpand} />;
+        return <i ref="zoom" className="fa fa-expand" role="button" tabIndex={0} onClick={this.onClickExpand} onKeyUp={this.onClickExpand} />;
       }
       return null;
     };
@@ -114,9 +119,13 @@ export default class Tile extends React.PureComponent {
 
     const clickProps = (content && content.href) ? {
       onClick: this.onClick,
+      onKeyUp: this.onClick,
       role: 'button',
       tabIndex: 0,
-    } : { onClick: this.onClick };
+    } : {
+      onClick: this.onClick,
+      onKeyUp: this.onClick,
+    };
 
     return (
       <div className={`tile__container tile--${type}__container`}>
@@ -136,6 +145,7 @@ export default class Tile extends React.PureComponent {
             <div
               className="tile__edit-control top-left"
               onClick={ this.props.onHide }
+              onKeyUp={ this.props.onHide }
               role="button"
               tabIndex={0}
               title={ `Hide ${title}` }
@@ -147,6 +157,7 @@ export default class Tile extends React.PureComponent {
           <div
             className="tile__edit-control bottom-right"
             onClick={ this.props.onResize }
+            onKeyUp={ this.props.onResize }
             role="button"
             tabIndex={0}
             title={`Make tile ${_.last(supportedTileSizes) === size ? 'smaller' : 'bigger'}`}
