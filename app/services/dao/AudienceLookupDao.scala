@@ -2,6 +2,7 @@ package services.dao
 
 import javax.inject.{Inject, Named}
 
+import com.google.inject.ImplementedBy
 import play.api.Configuration
 import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
@@ -33,6 +34,7 @@ case class LookupRelationshipType(
   studentRole: String
 )
 
+@ImplementedBy(classOf[TabulaAudienceLookupDao])
 trait AudienceLookupDao {
 
   def resolveDepartment(departmentCode: String): Future[Seq[Usercode]]
