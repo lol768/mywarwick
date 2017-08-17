@@ -1,12 +1,14 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
+import _ from 'lodash-es';
 
-export default class InputList extends React.PureComponent {
+export class InputList extends React.PureComponent {
   static propTypes = {
     name: PropTypes.string,
     picker: PropTypes.func,
     items: PropTypes.arrayOf(PropTypes.object),
     handleChange: PropTypes.func,
+    placeholderText: PropTypes.string,
   };
 
   static defaultProps = {
@@ -22,29 +24,32 @@ export default class InputList extends React.PureComponent {
   addItem(newItem) {
     const { items, handleChange, name } = this.props;
     if (!items.filter(item => item.value === newItem.value).length > 0) {
-      handleChange({ items: items.concat([newItem]) }, null, name);
+      handleChange({ items: [...items, newItem] }, name);
     }
   }
 
   removeItem(value) {
     const { items, handleChange, name } = this.props;
-    handleChange({ items: items.filter(item => item.value !== value) }, null, name);
+    handleChange({ items: items.filter(item => item.value !== value) }, name);
   }
 
   render() {
+    const { picker, name, items, placeholderText } = this.props;
+
     return (
       <div>
         <InputSearch
-          name={this.props.name}
-          initPicker={this.props.picker}
+          name={name}
+          initPicker={picker}
           addItem={this.addItem}
+          placeholderText={placeholderText}
         />
         <ul className="list-unstyled">
           {
-            this.props.items.map(({ value, text }) => (
+            items.map(({ value, text }) => (
               <ListItem
                 key={value}
-                name={this.props.name}
+                name={name}
                 value={value}
                 text={text}
                 removeItem={this.removeItem}
@@ -88,6 +93,7 @@ class InputSearch extends React.PureComponent {
   render() {
     return (
       <input
+        className="input-search"
         placeholder={this.props.placeholderText}
         ref={picker => (this.picker = picker)}
         value={this.state.value}
@@ -130,6 +136,117 @@ class ListItem extends React.PureComponent {
           >&nbsp;&times;</a>
         </span>
       </li>
+    );
+  }
+}
+
+class ListItemWithOptions extends ListItem {
+  static propTypes = {
+    toggleOption: PropTypes.func,
+    options: PropTypes.arrayOf(PropTypes.object),
+  };
+
+  constructor(props) {
+    super(props);
+    this.toggleOption = this.toggleOption.bind(this);
+  }
+
+  toggleOption({ target: { value } }) {
+    const oldOption = this.props.options.find(opt => opt[value])[value];
+    const updatedOption = { [value]: { ...oldOption, selected: !oldOption.selected } };
+    const newOptions =
+      [...this.props.options.filter(opt => opt[value] === undefined), updatedOption];
+    this.props.toggleOption(this.props.value, newOptions);
+  }
+
+  render() {
+    const optBtn = option =>
+      _.map(option, (val, key) => (
+        <div className="checkbox--list-item-option" key={key}>
+          <label>
+            <input
+              type="checkbox"
+              name={this.props.value}
+              value={key}
+              checked={val.selected}
+              onChange={this.toggleOption}
+            />
+            {`${val.students.length} ${val.studentRole}(s)`}
+          </label>
+        </div>
+      ))[0];
+
+    return (
+      <li>
+        <input name={this.props.name} value={this.props.value} readOnly hidden />
+        <span>{this.props.text}</span>&nbsp;
+        {this.props.options.map(optBtn)}
+        <span>
+          <a
+            role="button"
+            className="clear-field"
+            onClick={this.removeItem}
+            title="Clear"
+            tabIndex={0}
+          >&nbsp;&times;</a>
+        </span>
+      </li>
+    );
+  }
+}
+
+
+export class InputOptionsList extends InputList {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+    this.toggleOption = this.toggleOption.bind(this);
+  }
+
+  addItem(newItem) {
+    const { items, handleChange, name } = this.props;
+    if (newItem.options.length === 0) {
+      this.setState({ error: 'That staff member has no students to add' });
+    } else if (!items.filter(item => item.value === newItem.value).length > 0) {
+      handleChange({ items: [...items, newItem] }, name);
+      this.setState({ error: null });
+    } else {
+      this.setState({ error: 'That staff member has already been added' });
+    }
+  }
+
+  toggleOption(value, options) {
+    const { items, handleChange, name } = this.props;
+    const updatedItem = { ...items.find(i => i.value === value), options };
+    handleChange({ items: [...items.filter(i => i.value !== value), updatedItem] }, name);
+  }
+
+  render() {
+    const { picker, name, items, placeholderText } = this.props;
+    return (
+      <div>
+        <InputSearch
+          name={name}
+          initPicker={picker}
+          addItem={this.addItem}
+          placeholderText={placeholderText}
+        />
+        {this.state.error ? <div className="error-msg">{this.state.error}</div> : null}
+        <ul className="list-unstyled">
+          {items.map(({ value, text, options }) => (
+            <ListItemWithOptions
+              key={value}
+              name={name}
+              value={value}
+              text={text}
+              options={options}
+              removeItem={this.removeItem}
+              toggleOption={this.toggleOption}
+            />
+          ))
+          }
+        </ul>
+      </div>
     );
   }
 }

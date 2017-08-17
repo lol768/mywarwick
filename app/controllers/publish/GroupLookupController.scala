@@ -9,7 +9,7 @@ import play.api.libs.json.{Json, Writes}
 import play.api.mvc.Result
 import services.dao.{LookupModule, LookupRelationshipType, LookupSeminarGroup}
 import services.{GroupLookupService, SecurityService}
-import warwick.sso.UniversityID
+import warwick.sso._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -68,9 +68,18 @@ class GroupLookupController @Inject()(
       success => {
         val query = success.query.trim
         val agentId = UniversityID(query)
-        println(agentId)
-        lookupService.findRelationships(agentId).map { foundRelationships=>
-          Ok(Json.toJson(Map("relationships" -> foundRelationships.keySet)))
+        lookupService.findRelationships(agentId).map { foundRelationships =>
+          Ok(Json.obj(
+            "relationships" -> foundRelationships.map {
+              case (r, u) => Json.obj(
+                r.id -> Json.obj(
+                  "agentRole" -> r.agentRole,
+                  "studentRole" -> r.studentRole,
+                  "students" -> u.map(_.name.full)
+                )
+              )
+            }
+          ))
         }
       }
     )

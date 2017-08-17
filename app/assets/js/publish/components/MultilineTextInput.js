@@ -21,7 +21,7 @@ export default class MultilineTextInput extends React.PureComponent {
   }
 
   handleTextChange(event) {
-    this.props.handleChange(event.target.value, null, this.props.name);
+    this.props.handleChange(event.target.value, this.props.name);
   }
 
   render() {

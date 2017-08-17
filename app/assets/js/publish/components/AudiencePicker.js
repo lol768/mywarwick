@@ -1,7 +1,7 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import { Checkbox, RadioButton } from '../../components/ui/Checkbox';
-import InputList from './InputList';
+import { InputList, InputOptionsList } from './InputList';
 import MultilineTextInput from './MultilineTextInput';
 import _ from 'lodash-es';
 import update from 'immutability-helper';
@@ -39,7 +39,7 @@ export default class AudiencePicker extends React.PureComponent {
     this.isChecked = this.isChecked.bind(this);
   }
 
-  handleChange(value, path, type) {
+  handleChange(value, type, path) {
     switch (type) {
       /* eslint-disable no-case-declarations */
       case 'checkbox':
@@ -68,6 +68,10 @@ export default class AudiencePicker extends React.PureComponent {
       case 'listOfUsercodes':
         this.setState(state =>
           update(state, { audience: { groups: { listOfUsercodes: { $set: value } } } }));
+        break;
+      case 'staffRelationships':
+        this.setState(state =>
+          update(state, { audience: { groups: { staffRelationships: { $set: value.items } } } }));
         break;
       default:
     }
@@ -190,7 +194,7 @@ export default class AudiencePicker extends React.PureComponent {
                 name="staffRelationships"
                 btnGroup="audience.groups"
               >
-                <InputList
+                <InputOptionsList
                   name="staffRelationships"
                   handleChange={this.handleChange}
                   picker={relationshipPicker}
@@ -235,7 +239,7 @@ export default class AudiencePicker extends React.PureComponent {
               {Object.keys(LOCATIONS).map(key =>
                 (<Checkbox
                   key={key}
-                  handleChange={(value, path, type) => this.handleChange(key, path, type)}
+                  handleChange={(value, path, type) => this.handleChange(key, type, path)}
                   name="locations"
                   btnGroup="locations.yesLocation"
                   label={LOCATIONS[key]}

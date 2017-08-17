@@ -22,29 +22,50 @@ class RelationshipPicker {
     $element.typeahead({
       source: (query, callback) => {
         currentQuery = query;
-        postJsonWithCredentials('/service/grouplookup/relationships', { query })
-          .then(response => response.json())
+        postJsonWithCredentials('/service/flexipicker', {
+          includeUsers: true,
+          universityId: true,
+          query,
+        }).then(response => response.json())
           .catch((e) => {
             log.error(e);
             return [];
           })
           .then((response) => {
             // Return the items only if the user hasn't since made a different query
-            if (currentQuery === query) {
-              callback(response.relationships || []);
+            if (currentQuery === query && currentQuery !== '') {
+              const staff = response.data.results.filter(o => o.isStaff);
+              callback(staff || []);
             }
           });
       },
-      highlighter: (html, item) => (
-        `<strong>${item.name}</strong>: ${item.groupSetName}<br><em>${item.moduleCode}</em>`
-      ),
-      delay: 300,
+      highlighter: (html, item) => (`<strong>${item.name}</strong><br><em>${item.department}</em>`),
+      delay: 120,
       matcher: () => true, // All data received from the server matches the query
       afterSelect: (item) => {
-        const text = `${item.name}: ${item.groupSetName}`;
-        this.addItem({ value: item.id, text });
-        $element.data('item', item);
-        $element.val(''); // return to placeholder text
+        postJsonWithCredentials('/service/grouplookup/relationships', { query: item.value })
+          .then(response => response.json())
+          .catch((e) => {
+            log.error(e);
+            return [];
+          })
+          .then((response) => {
+            const relationships = response.relationships;
+            const text = `${item.name} (${item.department})`;
+            this.addItem({
+              value: item.value,
+              text,
+              // options: relationships.map(obj => ({ ...obj, selected: false }))
+              options: relationships.map((obj) => {
+                const keys = Object.keys(obj);
+                return keys.map(key => ({
+                  [key]: { ...obj[key], selected: false },
+                }));
+              }).reduce((a, b) => a.concat(b), []),
+            });
+            $element.data('item', item);
+            $element.val(''); // return to placeholder text
+          });
       },
     });
   }

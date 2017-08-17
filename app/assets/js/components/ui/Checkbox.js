@@ -31,7 +31,7 @@ export class Checkbox extends React.PureComponent {
 
   toggle({ target: { name } }) {
     const { handleChange, btnGroup, type } = this.props;
-    handleChange(name, btnGroup, type);
+    handleChange(name, type, btnGroup);
   }
 
   render() {
