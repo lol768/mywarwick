@@ -17,7 +17,7 @@
 
 <div class="split-form__sections">
   <section>
-    @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true, audience = audience)
+    @views.html.publish.news.tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true, audience = audience)
     @tags.categoryPicker(form, "categories", categories, "news item")
   </section>
 
