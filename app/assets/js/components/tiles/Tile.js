@@ -57,6 +57,7 @@ export default class Tile extends React.PureComponent {
 
   onClickExpand(e) {
     e.preventDefault();
+    e.stopPropagation();
     this.props.onZoomIn(e);
   }
 
@@ -76,7 +77,7 @@ export default class Tile extends React.PureComponent {
       } else {
         window.open(content.href);
       }
-    } else if (this.getContentInstance().expandsOnClick()) {
+    } else if (this.getContentInstance().constructor.expandsOnClick()) {
       this.props.onZoomIn(e);
     }
   }
