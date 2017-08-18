@@ -10,18 +10,18 @@ import seminarGroupPicker from '../../publish/seminarGroupPicker';
 import relationshipPicker from '../../publish/relationshipPicker';
 
 const GROUPS = {
-  teachingStaff: 'Teaching Staff',
-  administrativeStaff: 'Administrative Staff',
-  taughtPostgraduates: 'Taught Postgraduates',
-  researchPostgraduates: 'Research Postgraduates',
+  TeachingStaff: 'Teaching Staff',
+  AdminStaff: 'Administrative Staff',
+  TaughtPostgrads: 'Taught Postgraduates',
+  ResearchPostgrads: 'Research Postgraduates',
 };
 
 const LOCATIONS = {
-  centralCampus: 'Central campus residences',
-  westwood: 'Westwood residences',
-  coventry: 'Coventry',
-  kenilworth: 'Kenilworth',
-  leamington: 'Leamington Spa',
+  CentralCampusResidences: 'Central campus residences',
+  WestwoodResidences: 'Westwood residences',
+  Coventry: 'Coventry',
+  Kenilworth: 'Kenilworth',
+  LeamingtonSpa: 'Leamington Spa',
 };
 
 export default class AudiencePicker extends React.PureComponent {
@@ -115,45 +115,45 @@ export default class AudiencePicker extends React.PureComponent {
 
               <Checkbox
                 handleChange={this.handleChange}
-                isChecked={this.isChecked('audience.groups.ug')}
+                isChecked={this.isChecked('audience.groups.UndergradStudents')}
                 label="Undergraduates"
-                name="ug"
+                name="UndergradStudents"
                 btnGroup="audience.groups"
               >
                 <RadioButton
                   handleChange={this.handleChange}
-                  isChecked={this.isChecked('audience.groups.ug.all')}
+                  isChecked={this.isChecked('audience.groups.UndergradStudents.all')}
                   label="All"
                   name="all"
-                  btnGroup="audience.groups.ug"
+                  btnGroup="audience.groups.UndergradStudents"
                 />
                 <RadioButton
                   handleChange={this.handleChange}
-                  isChecked={this.isChecked('audience.groups.ug.year')}
+                  isChecked={this.isChecked('audience.groups.UndergradStudents.year')}
                   label="Choose year of study"
                   name="year"
-                  btnGroup="audience.groups.ug"
+                  btnGroup="audience.groups.UndergradStudents"
                 >
                   <Checkbox
                     handleChange={this.handleChange}
-                    isChecked={this.isChecked('audience.groups.ug.year.first')}
+                    isChecked={this.isChecked('audience.groups.UndergradStudents.year.first')}
                     label="First year"
                     name="first"
-                    btnGroup="audience.groups.ug.year"
+                    btnGroup="audience.groups.UndergradStudents.year"
                   />
                   <Checkbox
                     handleChange={this.handleChange}
-                    isChecked={this.isChecked('audience.groups.ug.year.second')}
+                    isChecked={this.isChecked('audience.groups.UndergradStudents.year.second')}
                     label="Second year"
                     name="second"
-                    btnGroup="audience.groups.ug.year"
+                    btnGroup="audience.groups.UndergradStudents.year"
                   />
                   <Checkbox
                     handleChange={this.handleChange}
-                    isChecked={this.isChecked('audience.groups.ug.year.final')}
+                    isChecked={this.isChecked('audience.groups.UndergradStudents.year.final')}
                     label="Final year"
                     name="final"
-                    btnGroup="audience.groups.ug.year"
+                    btnGroup="audience.groups.UndergradStudents.year"
                   />
                 </RadioButton>
               </Checkbox>
@@ -239,7 +239,7 @@ export default class AudiencePicker extends React.PureComponent {
               {Object.keys(LOCATIONS).map(key =>
                 (<Checkbox
                   key={key}
-                  handleChange={(value, path, type) => this.handleChange(key, type, path)}
+                  handleChange={(name, type, path) => this.handleChange(key, type, path)}
                   name="locations"
                   btnGroup="locations.yesLocation"
                   label={LOCATIONS[key]}
