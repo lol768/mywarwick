@@ -73,6 +73,7 @@ const initialState = {
     {
       id: 1,
       url: 'bg01.jpg',
+      name: 'Scarman',
     },
   ],
 };

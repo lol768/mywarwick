@@ -7,6 +7,7 @@ import * as notifications from '../../../state/notifications';
 import ScrollRestore from '../../ui/ScrollRestore';
 import { Routes } from '../../AppRoot';
 import EmptyState from '../../ui/EmptyState';
+import wrapKeyboardSelect from '../../../keyboard-nav';
 
 class ActivityMutesView extends React.PureComponent {
   static propTypes = {
@@ -39,8 +40,8 @@ class ActivityMutesView extends React.PureComponent {
     this.onDelete = this.onDelete.bind(this);
   }
 
-  onDelete(mute) {
-    this.props.dispatch(notifications.deleteActivityMute(mute));
+  onDelete(e, mute) {
+    wrapKeyboardSelect(() => this.props.dispatch(notifications.deleteActivityMute(mute)), e);
   }
 
   render() {
@@ -100,7 +101,8 @@ class ActivityMutesView extends React.PureComponent {
                         type="button"
                         className="btn btn-danger"
                         data-dismiss="modal"
-                        onClick={ () => this.onDelete(mute) }
+                        onClick={ e => this.onDelete(e, mute) }
+                        onKeyUp={ e => this.onDelete(e, mute) }
                         disabled={ !this.props.isOnline }
                       >
                         <i className="fa fa-times" />

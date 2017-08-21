@@ -2,6 +2,7 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 import classNames from 'classnames';
 import NetworkAwareControl from './NetworkAwareControl';
+import wrapKeyboardSelect from '../../keyboard-nav';
 
 export default class ListGroupItem extends React.PureComponent {
   static propTypes = {
@@ -26,10 +27,12 @@ export default class ListGroupItem extends React.PureComponent {
     this.isClickable = this.isClickable.bind(this);
   }
 
-  onClick() {
-    if (this.isClickable()) {
-      this.props.onClick();
-    }
+  onClick(e) {
+    wrapKeyboardSelect(() => {
+      if (this.isClickable()) {
+        this.props.onClick();
+      }
+    }, e);
   }
 
   isClickable() {
@@ -44,6 +47,7 @@ export default class ListGroupItem extends React.PureComponent {
         aria-disabled={ !this.isClickable() }
         tabIndex={ this.isClickable() ? 0 : -1 }
         onClick={ this.onClick }
+        onKeyUp={ this.onClick }
       >
         <div className="media">
           { this.props.icon &&

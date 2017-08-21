@@ -9,6 +9,7 @@ import * as TILE_TYPES from '../tiles';
 import Tile from '../tiles/Tile';
 import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
+import wrapKeyboardSelect from '../../keyboard-nav';
 
 class TileView extends Component {
   componentDidMount() {
@@ -99,8 +100,8 @@ class TileView extends Component {
     tileProps.onZoomOut = () => this.onTileDismiss();
 
     // Editing
-    tileProps.onHide = () => view.onHideTile(tileProps);
-    tileProps.onResize = () => view.onResizeTile(tileProps);
+    tileProps.onHide = e => wrapKeyboardSelect(() => view.onHideTile(tileProps), e);
+    tileProps.onResize = e => wrapKeyboardSelect(() => view.onResizeTile(tileProps), e);
 
     // subset of config needed by TileContent subclasses
     const contentProps = {

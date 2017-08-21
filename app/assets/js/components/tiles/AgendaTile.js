@@ -181,7 +181,12 @@ export default class AgendaTile extends TileContent {
             { AgendaTile.renderSingleEvent(event2) }
             { items.length > 2 &&
             <div className="text-right">
-              <a href="#event-expanded" onClick={ this.props.onClickExpand }>
+              <a
+                role="button"
+                tabIndex={0}
+                onClick={ this.props.onClickExpand }
+                onKeyUp={ this.props.onClickExpand }
+              >
                 +{ items.length - 2 } more
               </a>
             </div> }
@@ -208,7 +213,12 @@ export default class AgendaTile extends TileContent {
         { AgendaTile.renderSingleEvent(event) }
         { items.length > 1 &&
         <div className="text-right">
-          <a href="#event-expanded" onClick={ this.props.onClickExpand }>
+          <a
+            role="button"
+            tabIndex={0}
+            onClick={ this.props.onClickExpand }
+            onKeyUp={ this.props.onClickExpand }
+          >
             +{ items.length - 1 } more
           </a>
         </div> }
@@ -231,7 +241,7 @@ export default class AgendaTile extends TileContent {
 
 export class LargeBody extends React.PureComponent {
   static propTypes = {
-    children: PropTypes.element.isRequired,
+    children: PropTypes.arrayOf(PropTypes.shape(AgendaTileItemPropTypes)).isRequired,
   };
 
   render() {
@@ -392,13 +402,12 @@ export class AgendaTileItem extends React.PureComponent {
   }
 }
 
-AgendaTileItem.propTypes = {
+const AgendaTileItemPropTypes = {
   id: PropTypes.string,
   start: PropTypes.string,
   end: PropTypes.string,
   isAllDay: PropTypes.bool,
   title: PropTypes.string,
-  children: PropTypes.element.isRequired,
   organiser: PropTypes.shape({
     name: PropTypes.string,
   }),
@@ -420,3 +429,5 @@ AgendaTileItem.propTypes = {
     universityId: PropTypes.string,
   })),
 };
+
+AgendaTileItem.propTypes = AgendaTileItemPropTypes;
