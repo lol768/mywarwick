@@ -27,7 +27,6 @@ class ID7Layout extends React.PureComponent {
       }).isRequired,
     }).isRequired,
     native: PropTypes.bool,
-    showBetaWarning: PropTypes.bool,
     path: PropTypes.string.isRequired,
     zoomedTile: PropTypes.string,
     notificationsCount: PropTypes.number,
@@ -118,19 +117,6 @@ class ID7Layout extends React.PureComponent {
     return null;
   }
 
-  renderBetaWarning() {
-    if (!this.props.native && this.props.showBetaWarning && !this.state.betaWarningDismissed) {
-      return (
-        <div className="top-page-notice">
-          My&nbsp;Warwick is currently being piloted and is not yet available for general use.
-          Please visit our <a href="http://warwick.ac.uk/webteam/mywarwick/">My&nbsp;Warwick support pages</a> for more information.
-          {' '}<a role="button" tabIndex={0} className="dismiss" onClick={ this.dismissBetaWarning }>Hide</a>
-        </div>
-      );
-    }
-    return null;
-  }
-
   renderMasqueradeNotice() {
     const user = this.props.user.data;
     const $body = $('body');
@@ -158,7 +144,6 @@ class ID7Layout extends React.PureComponent {
         <div className="fixed-header at-top">
           <div>
             <header className="id7-page-header" ref="header">
-              { this.renderBetaWarning() }
               { this.renderMasqueradeNotice() }
 
               <MastheadMobile
@@ -206,7 +191,6 @@ const select = state => ({
   colourTheme: state.ui.colourTheme,
   zoomedTile: state.ui.zoomedTile,
   native: state.ui.native,
-  showBetaWarning: state.ui.showBetaWarning,
 });
 
 export default connect(select)(ID7Layout);

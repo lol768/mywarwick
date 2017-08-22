@@ -20,13 +20,10 @@ function isNative() {
   return ('navigator' in window) && navigator.userAgent.indexOf('MyWarwick/') > -1;
 }
 
-const showBetaWarning = () => $('#app-container').attr('data-show-beta-warning') === 'true';
-
 const initialState = {
   layoutWidth: 2, // 2 columns by default
   colourTheme: 'transparent',
   native: false,
-  showBetaWarning: false,
 };
 
 export function reducer(state = initialState, action) {
@@ -38,11 +35,6 @@ export function reducer(state = initialState, action) {
       return { ...state, navRequest: action.navRequest };
     case 'ui.theme':
       return { ...state, colourTheme: action.theme };
-    case 'ui.showBetaWarning':
-      if (action.showBetaWarning !== state.showBetaWarning) {
-        return { ...state, showBetaWarning: action.showBetaWarning };
-      }
-      return state;
     default:
       return state;
   }
@@ -58,20 +50,12 @@ export function updateColourTheme(theme) {
 export function updateUIContext() {
   return (dispatch, getState) => {
     const state = getState();
-    const betaWarn = showBetaWarning();
     const native = isNative();
 
     if (native !== state.ui.native) {
       dispatch({
         type: 'ui.native',
         native,
-      });
-    }
-
-    if (betaWarn !== state.ui.showBetaWarning) {
-      dispatch({
-        type: 'ui.showBetaWarning',
-        showBetaWarning: betaWarn,
       });
     }
   };
