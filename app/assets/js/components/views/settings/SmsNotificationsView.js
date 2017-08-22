@@ -8,6 +8,7 @@ import ListGroupItem from '../../ui/ListGroupItem';
 import NetworkAwareControl from '../../ui/NetworkAwareControl';
 import Switch from '../../ui/Switch';
 import wrapKeyboardSelect from '../../../keyboard-nav';
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 class SmsNotificationsView extends HideableView {
   static propTypes = {
@@ -229,8 +230,17 @@ class SmsNotificationsView extends HideableView {
             onClick={ this.onEdit }
           />
         </div>
-
-        { this.state.editing && this.renderEdit() }
+        <ReactCSSTransitionGroup
+          transitionName="grow-shrink-modal"
+          transitionAppear
+          transitionAppearTimeout={200}
+          transitionEnter
+          transitionEnterTimeout={200}
+          transitionLeave
+          transitionLeaveTimeout={200}
+        >
+          { this.state.editing && this.renderEdit() }
+        </ReactCSSTransitionGroup>
       </div>
     );
   }

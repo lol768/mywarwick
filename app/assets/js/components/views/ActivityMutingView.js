@@ -157,19 +157,19 @@ export default class ActivityMutingView extends React.PureComponent {
 
     return (
       <div className="activity-muting">
-        <div className="activity-muting__backdrop fade in" />
+        <div className="modal-backdrop in" />
         <div
-          className="activity-muting__modal fade in"
+          className="modal"
           id={`muting-${this.props.id}`}
           tabIndex="-1"
           role="dialog"
         >
-          <div className="activity-muting__modal_dialog" role="document">
-            <div className="activity-muting__modal_content">
-              <div className="activity-muting__modal_body">
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-body">
                 { this.renderForm() }
               </div>
-              <div className="activity-muting__modal_footer">
+              <div className="modal-footer">
                 <button
                   type="button"
                   className="btn btn-default"
