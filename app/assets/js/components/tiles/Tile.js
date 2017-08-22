@@ -8,12 +8,15 @@ import { localMoment } from '../../dateFormats';
 import TileWrap from './TileWrap';
 import { TILE_SIZES } from '../tiles/TileContent';
 import wrapKeyboardSelect from '../../keyboard-nav';
+import $ from 'jquery';
+import HideableView from '../views/HideableView';
 
-export default class Tile extends React.PureComponent {
+export default class Tile extends HideableView {
   constructor(props) {
     super(props);
     this.state = {
       hasMounted: false,
+      zooming: false,
     };
 
     this.onClick = this.onClick.bind(this);
@@ -60,7 +63,7 @@ export default class Tile extends React.PureComponent {
     wrapKeyboardSelect(() => {
       e.preventDefault();
       e.stopPropagation();
-      this.props.onZoomIn(e);
+      this.setState({ zooming: true });
     }, e);
   }
 
@@ -82,17 +85,33 @@ export default class Tile extends React.PureComponent {
           window.open(content.href);
         }
       } else if (this.getContentInstance().constructor.expandsOnClick()) {
-        this.props.onZoomIn(e);
+        this.props.onZoomIn();
       }
     }, e);
   }
 
-  componentDidMount() {
+  componentDidHide() {
+    $(document.body).removeClass('tile-zooming');
+    this.setState({ zooming: false });
+  }
+
+  componentDidShow() {
     // Trigger an immediate re-render after the initial mount so we can access the content instance
 
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
       hasMounted: true,
     });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (!prevState.zooming && this.state.zooming) {
+      const $articleElement = $(this.articleElement);
+      $articleElement.on('transitionend.mywarwick', () => {
+        $articleElement.off('transitionend.mywarwick');
+        this.props.onZoomIn();
+      });
+      $(document.body).addClass('tile-zooming');
+    }
   }
 
   getContentInstance() {
@@ -127,6 +146,15 @@ export default class Tile extends React.PureComponent {
       onKeyUp: this.onClick,
     };
 
+    const style = {};
+    if (this.state.zooming && this.articleElement) {
+      const thisOffset = $(this.articleElement).offset();
+      const meContainerOffset = $(this.articleElement).closest('.me-view-container').offset();
+      const scrollTop = $(document.body).prop('scrollTop');
+      style.top = (meContainerOffset.top - thisOffset.top) + scrollTop;
+      style.left = meContainerOffset.left - thisOffset.left;
+    }
+
     return (
       <div className={`tile__container tile--${type}__container`}>
         <article
@@ -136,10 +164,12 @@ export default class Tile extends React.PureComponent {
               'tile', `tile--${type}`, `tile--${size}`, `colour-${colour}`,
               {
                 'tile--editing': editing,
-                'tile--zoomed': zoomed,
+                'tile--zoomed': zoomed || this.state.zooming,
               }, tileSizeClasses,
             )
           }
+          ref={ (article) => { this.articleElement = article; }}
+          style={ style }
         >
           { this.getContentInstance() && this.getContentInstance().constructor.isRemovable() &&
             <div

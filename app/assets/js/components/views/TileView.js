@@ -1,5 +1,6 @@
 /* global document */
-import React, { Component, PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import log from 'loglevel';
 import _ from 'lodash-es';
 import $ from 'jquery';
@@ -11,7 +12,7 @@ import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
 import wrapKeyboardSelect from '../../keyboard-nav';
 
-class TileView extends Component {
+class TileView extends React.PureComponent {
   componentDidMount() {
     if (this.props.tile && this.props.zoomed) {
       $(document.body).addClass(`colour-${this.props.tile.colour}`);

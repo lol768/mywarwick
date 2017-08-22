@@ -49,4 +49,37 @@
 .me-view-container {
   width: 100%;
   overflow: hidden;
+
+  :not(.me-view--editing) {
+    .tile {
+      top: 0;
+      left: 0;
+      width: 100%;
+      transition: all .2s;
+      .tile__body {
+        transition: opacity .2s;
+      }
+    }
+  }
+}
+
+.tile-zooming .me-view-container {
+  .tile:not(.tile--zoomed) {
+    opacity: 0;
+  }
+  .tile--zoomed {
+    width: 100vw;
+    .tile__header {
+      left: auto;
+      right: auto;
+      top: auto !important;
+      margin-right: 0 !important;
+      .tile__icon--right {
+        display: none;
+      }
+    }
+    .tile__body {
+      opacity: 0;
+    }
+  }
 }
