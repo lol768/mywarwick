@@ -1,16 +1,15 @@
 package controllers.publish
 
+import helpers.BaseSpec
 import models.Audience
+import models.publishing.Publisher
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import helpers.BaseSpec
-import models.publishing.Publisher
 import play.api.data.FormError
-import play.api.test.FakeRequest
 import services.AudienceService
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
-import warwick.sso.AuthenticatedRequest
+import warwick.sso.{AuthenticatedRequest, UniversityID}
 
 import scala.util.Try
 
@@ -211,6 +210,27 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       val audienceBinder = new AudienceBinder(null, mockAudienceService)
       val result = audienceBinder.bindAudience(audienceData, restrictedRecipients = true)(new PublisherRequest(publisher, null, new AuthenticatedRequest(null, null))).futureValue
       result mustBe Left(Seq(FormError("audience", "error.audience.tooMany", Seq(1))))
+    }
+
+    "unbind module audience" in {
+      val audience = Audience(Seq(Audience.ModuleAudience("CH160")))
+      val audienceBinder: AudienceBinder = new AudienceBinder(null, null)
+      val result = audienceBinder.unbindAudience(audience).audience
+      result mustBe Seq("Module:CH160")
+    }
+
+    "unbind seminar audience" in {
+      val audience = Audience(Seq(Audience.SeminarGroupAudience("group-id")))
+      val audienceBinder: AudienceBinder = new AudienceBinder(null, null)
+      val result = audienceBinder.unbindAudience(audience).audience
+      result mustBe Seq("SeminarGroup:group-id")
+    }
+
+    "unbind relationship" in {
+      val audience = Audience(Seq(Audience.RelationshipAudience("personalTutor", UniversityID("1234"))))
+      val audienceBinder: AudienceBinder = new AudienceBinder(null, null)
+      val result = audienceBinder.unbindAudience(audience).audience
+      result mustBe Seq("Relationship:personalTutor:1234")
     }
 
   }

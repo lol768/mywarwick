@@ -180,32 +180,32 @@ trait TabulaAudienceLookupProperties {
   private val tabulaDepartmentAllSuffix = configuration.getString("mywarwick.tabula.department.allSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.allSuffix in application.conf"))
 
-  protected def tabulaDepartmentAllUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/$departmentCode$tabulaDepartmentAllSuffix"
+  protected def tabulaDepartmentAllUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/${departmentCode.toLowerCase}$tabulaDepartmentAllSuffix"
 
   private val tabulaDepartmentTeachingStaffSuffix = configuration.getString("mywarwick.tabula.department.teachingStaffSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.teachingStaffSuffix in application.conf"))
 
-  protected def tabulaDepartmentTeachingStaffUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/$departmentCode$tabulaDepartmentTeachingStaffSuffix"
+  protected def tabulaDepartmentTeachingStaffUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/${departmentCode.toLowerCase}$tabulaDepartmentTeachingStaffSuffix"
 
   private val tabulaDepartmentAdminStaffSuffix = configuration.getString("mywarwick.tabula.department.adminStaffSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.adminStaffSuffix in application.conf"))
 
-  protected def tabulaDepartmentAdminStaffUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/$departmentCode$tabulaDepartmentAdminStaffSuffix"
+  protected def tabulaDepartmentAdminStaffUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/${departmentCode.toLowerCase}$tabulaDepartmentAdminStaffSuffix"
 
   private val tabulaDepartmentUndergraduatesSuffix = configuration.getString("mywarwick.tabula.department.undergraduatesSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.undergraduatesSuffix in application.conf"))
 
-  protected def tabulaDepartmentUndergraduatesUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/$departmentCode$tabulaDepartmentUndergraduatesSuffix"
+  protected def tabulaDepartmentUndergraduatesUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/${departmentCode.toLowerCase}$tabulaDepartmentUndergraduatesSuffix"
 
   private val tabulaDepartmentPGTSuffix = configuration.getString("mywarwick.tabula.department.pgtSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.pgtSuffix in application.conf"))
 
-  protected def tabulaDepartmentPGTUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/$departmentCode$tabulaDepartmentPGTSuffix"
+  protected def tabulaDepartmentPGTUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/${departmentCode.toLowerCase}$tabulaDepartmentPGTSuffix"
 
   private val tabulaDepartmentPGRSuffix = configuration.getString("mywarwick.tabula.department.pgrSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.pgrSuffix in application.conf"))
 
-  protected def tabulaDepartmentPGRUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/$departmentCode$tabulaDepartmentPGRSuffix"
+  protected def tabulaDepartmentPGRUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/${departmentCode.toLowerCase}$tabulaDepartmentPGRSuffix"
 
   private val tabulaModuleBaseUrl = configuration.getString("mywarwick.tabula.module.base")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.module.base in application.conf"))
@@ -213,7 +213,7 @@ trait TabulaAudienceLookupProperties {
   private val tabulaModuleStudentsSuffix = configuration.getString("mywarwick.tabula.module.studentsSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.module.studentsSuffix in application.conf"))
 
-  protected def tabulaModuleStudentsUrl(moduleCode: String): String = s"$tabulaModuleBaseUrl/$moduleCode$tabulaModuleStudentsSuffix"
+  protected def tabulaModuleStudentsUrl(moduleCode: String): String = s"$tabulaModuleBaseUrl/${moduleCode.toLowerCase}$tabulaModuleStudentsSuffix"
 
   private val tabulaModuleQuery = configuration.getString("mywarwick.tabula.module.query")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.module.query in application.conf"))
