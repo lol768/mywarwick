@@ -21,6 +21,7 @@ class ID7Layout extends React.PureComponent {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     colourTheme: PropTypes.string.isRequired,
+    schemeColour: PropTypes.string.isRequired,
     user: PropTypes.shape({
       data: PropTypes.shape({
         authenticated: PropTypes.bool.isRequired,
@@ -32,6 +33,19 @@ class ID7Layout extends React.PureComponent {
     notificationsCount: PropTypes.number,
     children: PropTypes.node,
   };
+
+  /** Set the theme on the html element, so that we can style everything. */
+  static setColourTheme(newProps, oldProps = { colourTheme: '', schemeColour: '' }) {
+    /* HACK: default to theme-transparent-1 if user has transparent in their store */
+    $('html')
+      .removeClass(`theme-${oldProps.colourTheme}`)
+      .addClass(newProps.colourTheme === 'transparent' ?
+        'theme-transparent-1' :
+        `theme-${newProps.colourTheme}`,
+      )
+      .find('meta[name="theme-color"]')
+      .attr('content', newProps.schemeColour);
+  }
 
   constructor(props) {
     super(props);
@@ -45,7 +59,7 @@ class ID7Layout extends React.PureComponent {
 
   componentWillMount() {
     this.props.dispatch(ui.updateUIContext());
-    this.setBodyTheme(this.props.colourTheme);
+    ID7Layout.setColourTheme(this.props);
   }
 
   componentDidMount() {
@@ -71,7 +85,7 @@ class ID7Layout extends React.PureComponent {
 
   componentDidUpdate(prevProps) {
     if (prevProps.colourTheme !== this.props.colourTheme) {
-      this.setBodyTheme(this.props.colourTheme, prevProps.colourTheme);
+      ID7Layout.setColourTheme(this.props, prevProps);
     }
   }
 
@@ -91,14 +105,6 @@ class ID7Layout extends React.PureComponent {
 
   onSettings(e) {
     wrapKeyboardSelect(() => this.props.dispatch(push(`/${Routes.SETTINGS}`)), e);
-  }
-
-  /** Set the theme on the html element, so that we can style everything. */
-  setBodyTheme(newTheme, oldTheme = '') {
-    /* HACK: default to theme-transparent-1 if user has transparent in their store */
-    $('html')
-      .removeClass(`theme-${oldTheme}`)
-      .addClass(newTheme === 'transparent' ? 'theme-transparent-1' : `theme-${newTheme}`);
   }
 
   isEditing() {
@@ -189,6 +195,7 @@ const select = state => ({
     getNumItemsSince(state.notifications.stream, _.get(state, ['notificationsLastRead', 'date'])),
   user: state.user,
   colourTheme: state.ui.colourTheme,
+  schemeColour: state.ui.schemeColour,
   zoomedTile: state.ui.zoomedTile,
   native: state.ui.native,
 });

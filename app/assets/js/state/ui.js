@@ -23,6 +23,7 @@ function isNative() {
 const initialState = {
   layoutWidth: 2, // 2 columns by default
   colourTheme: 'transparent',
+  schemeColour: '#8C6E96',
   native: false,
 };
 
@@ -34,16 +35,16 @@ export function reducer(state = initialState, action) {
     case 'ui.navRequest':
       return { ...state, navRequest: action.navRequest };
     case 'ui.theme':
-      return { ...state, colourTheme: action.theme };
+      return { ...state, colourTheme: action.theme, schemeColour: action.colour };
     default:
       return state;
   }
 }
 
-export function updateColourTheme(theme) {
+export function updateColourTheme(payload) {
   return {
     type: 'ui.theme',
-    theme,
+    ...payload,
   };
 }
 

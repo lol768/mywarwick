@@ -55,8 +55,19 @@
   .id7-left-border, .id7-right-border, .id7-utility-masthead { background-color: gold; }
 }
 
-.transparent-theme-maker(@gradBg, @gradTh, @imageUrl, @n) {
+.transparent-theme-maker(@baseColour, @gradBg, @gradTh, @imageUrl, @n) {
   .theme-transparent-@{n} {
+
+    html.not-app& {
+      background: @baseColour;
+      #app-container:after, header.id7-page-header:before {
+        background-color: @baseColour;
+      }
+    }
+
+    .start-masthead {
+      background-color: @baseColour;
+    }
 
     .bg-stand-in {
       background: @behind-tiles-colour;
@@ -107,6 +118,7 @@
 }
 
 .transparent-theme-maker(
+  #8C6E96,
   linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
   linear-gradient(to right, rgba(70, 59, 120, 0.8) 0%, rgba(37, 91, 165, 0.8) 100%),
   '/assets/images/bg01.jpg',
@@ -114,6 +126,7 @@
 );
 
 .transparent-theme-maker(
+  #AC554E,
   linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
   linear-gradient(to right, rgba(167, 101, 92, 0.8) 0%, rgba(181, 167, 164, 0.8) 100%),
   '/assets/images/bg02.jpg',
@@ -121,6 +134,7 @@
 );
 
 .transparent-theme-maker(
+  #338888,
   linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
   linear-gradient(to right, rgba(98, 167, 158, 0.8) 0%, rgba(165, 179, 170, 0.8) 100%),
   '/assets/images/bg03.jpg',
@@ -128,6 +142,7 @@
 );
 
 .transparent-theme-maker(
+  #2F6B88,
   linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
   linear-gradient(to right, rgba(57, 121, 126, 0.8) 0%, rgba(13, 93, 108, 0.8) 100%),
   '/assets/images/bg04.jpg',
@@ -135,6 +150,7 @@
 );
 
 .transparent-theme-maker(
+  #A35138,
   linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
   linear-gradient(to right, rgba(179, 158, 30, 0.8) 0%, rgba(189, 143, 77, 0.8) 100%),
   '/assets/images/bg05.jpg',
