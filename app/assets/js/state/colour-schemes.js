@@ -24,14 +24,6 @@ export function updateUi() {
   return (dispatch, getState) => {
     const chosen = getState().colourSchemes.chosen;
     dispatch(theme.updateColourTheme(`transparent-${chosen}`));
-
-    /* eslint-disable no-undef */
-    const native = window.MyWarwickNative;
-    /* eslint-enable no-undef */
-
-    const isNativeAvailable = (native && 'setBackgroundToDisplay' in native);
-    const call = isNativeAvailable ? native.setBackgroundToDisplay : null;
-    if (call) call(chosen);
   };
 }
 
