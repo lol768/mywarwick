@@ -4,11 +4,11 @@ import helpers.OneStartAppPerSuite
 import models.Audience
 import models.Audience._
 import helpers.BaseSpec
-import warwick.sso.{GroupName, Usercode}
+import warwick.sso.{GroupName, UniversityID, Usercode}
 
 class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
 
-  val audienceDao = get[AudienceDaoImpl]
+  private val audienceDao = get[AudienceDaoImpl]
 
   "AudienceDao" should {
 
@@ -34,6 +34,20 @@ class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
       val saved = audienceDao.audienceToComponents(audience)
 
       saved mustBe Seq(AudienceComponentSave("Module", Some("music"), None))
+    }
+
+    "save Seminar Group Component" in {
+      val audience = Audience(Seq(SeminarGroupAudience("group-id")))
+      val saved = audienceDao.audienceToComponents(audience)
+
+      saved mustBe Seq(AudienceComponentSave("SeminarGroup", Some("group-id"), None))
+    }
+
+    "save Relationship Component" in {
+      val audience = Audience(Seq(RelationshipAudience("personalTutor", UniversityID("1234"))))
+      val saved = audienceDao.audienceToComponents(audience)
+
+      saved mustBe Seq(AudienceComponentSave("Relationship", Some("personalTutor|1234"), None))
     }
 
     "save WebGroup Component" in {
@@ -77,7 +91,8 @@ class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
         AudienceComponentSave("UndergradStudents", None, Some("ch")),
         AudienceComponentSave("Module", Some("music"), None),
         AudienceComponentSave("WebGroup", Some("in-elab"), None),
-        AudienceComponentSave("Module", Some("history"), None)
+        AudienceComponentSave("Module", Some("history"), None),
+        AudienceComponentSave("Relationship", Some("personalTutor|1234"), None)
       )
 
       val audience = audienceDao.audienceFromComponents(components)
@@ -87,7 +102,8 @@ class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
         DepartmentAudience("ch", Seq(Staff, UndergradStudents)),
         ModuleAudience("music"),
         WebGroupAudience(GroupName("in-elab")),
-        ModuleAudience("history")
+        ModuleAudience("history"),
+        RelationshipAudience("personalTutor", UniversityID("1234"))
       )
     }
 

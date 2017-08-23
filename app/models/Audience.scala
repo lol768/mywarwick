@@ -1,12 +1,12 @@
 package models
 
 import enumeratum.EnumEntry
-import warwick.sso.{GroupName, Usercode}
+import warwick.sso.{GroupName, UniversityID, Usercode}
 
 import scala.util.matching.Regex
 
 case class Audience(components: Seq[Audience.Component] = Nil) {
-  val public = components.contains(Audience.PublicAudience)
+  val public: Boolean = components.contains(Audience.PublicAudience)
 
   if (public && components.length > 1) {
     throw new IllegalArgumentException("Public audience can't have any other components")
@@ -37,13 +37,17 @@ object Audience {
 
   case class UsercodeAudience(usercode: Usercode) extends Component
 
-  case class WebGroupAudience(groupName: GroupName) extends Component
+  case class WebGroupAudience(groupName: GroupName) extends Component  // No longer available in Audience Picker UI
+
   case class ModuleAudience(moduleCode: String) extends Component
+  case class SeminarGroupAudience(groupId: String) extends Component
+  case class RelationshipAudience(relationshipType: String, agentId: UniversityID) extends Component
   case class DepartmentAudience(deptCode: String, subset: Seq[DepartmentSubset]) extends Component
 
   case object All extends DepartmentSubset
-  case object Staff extends DepartmentSubset
+  case object Staff extends DepartmentSubset // No longer available in Audience Picker UI
   case object TeachingStaff extends DepartmentSubset
+  case object AdminStaff extends DepartmentSubset
   case object UndergradStudents extends DepartmentSubset
   case object TaughtPostgrads extends DepartmentSubset
   case object ResearchPostgrads extends DepartmentSubset
@@ -67,6 +71,8 @@ object Audience {
   }
 
   val moduleCodeRegex: Regex = "^Module:(.+)".r
+  val seminarGroupRegex: Regex = "^SeminarGroup:(.+)".r
+  val relationshipRegex: Regex = "^Relationship:(.+):(.+)".r
   val webGroupRegex: Regex = "^WebGroup:(.+)".r
   val optInRegex: Regex = "^OptIn:(.+):(.+)".r
 
@@ -74,11 +80,14 @@ object Audience {
     def unapply(paramValue: String): Option[Component] = paramValue match {
       case "Staff" => Some(Staff)
       case "TeachingStaff" => Some(TeachingStaff)
+      case "AdminStaff" => Some(AdminStaff)
       case "UndergradStudents" => Some(UndergradStudents)
       case "TaughtPostgrads" => Some(TaughtPostgrads)
       case "ResearchPostgrads" => Some(ResearchPostgrads)
       case webGroupRegex(webGroup) => Some(WebGroupAudience(GroupName(webGroup)))
       case moduleCodeRegex(code) => Some(ModuleAudience(code))
+      case seminarGroupRegex(groupId) => Some(SeminarGroupAudience(groupId))
+      case relationshipRegex(relationshipType, agentId) => Some(RelationshipAudience(relationshipType, UniversityID(agentId)))
       case optInRegex(optInType, optInValue) if optInType == LocationOptIn.optInType => LocationOptIn.fromValue(optInValue)
       case _ => None
     }
