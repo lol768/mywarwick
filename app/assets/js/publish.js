@@ -10,16 +10,20 @@ import './publish/groupPicker';
 import './publish/modulePicker';
 import _ from 'lodash-es';
 import './flexi-picker';
-import AudiencePicker from './publish/components/AudiencePicker';
+import AudiencePickerNew from './publish/components/AudiencePickerNew';
 
-const audiencePicker = document.getElementById('audience-picker');
-
-if (audiencePicker) {
-  const dept = audiencePicker.dataset.department || '';
-  ReactDOM.render(
-    <AudiencePicker department={dept} />,
-    audiencePicker,
-  );
+function setupAudiencePicker() {
+  const audiencePicker = $('#audience-picker');
+  if (audiencePicker) {
+    const props = {
+      departments: audiencePicker.data('departments') || [],
+      isGod: audiencePicker.data('is-god') || false,
+    };
+    ReactDOM.render(
+      <AudiencePickerNew {...props} />,
+      audiencePicker.get(0),
+    );
+  }
 }
 
 /*
@@ -149,6 +153,7 @@ function setupPublisherPermissionsForm() {
 }
 
 $(() => {
+  setupAudiencePicker();
   setupPublisherDepartmentsForm();
   setupPublisherPermissionsForm();
 

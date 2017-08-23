@@ -1,0 +1,17 @@
+@import models.publishing.PermissionScope
+@import play.api.libs.json.Json
+
+@(
+    form: Form[_],
+    fieldName: String,
+    departmentOptions: Seq[(String, String)] = Seq(("balls", "deep")),
+    itemName: String,
+    permissionScope: PermissionScope,
+    allowPublic: Boolean,
+    audience: Audience
+)(implicit fc: b3.B3FieldConstructor, messages: Messages)
+@* TODO make less of a UI nightmare *@
+@* TODO receive list of allowed audiences from controller - each user's will be different *@
+
+<div data-is-god="true" data-departments='@Json.toJson(departmentOptions.map { case (code, name) => Seq(code, name)})'
+id="audience-picker" class="form-group"></div>

@@ -6,7 +6,6 @@ import * as PropTypes from 'prop-types';
  */
 export class Checkbox extends React.PureComponent {
   static propTypes = {
-    btnGroup: PropTypes.string,
     children: PropTypes.oneOfType([
       PropTypes.arrayOf(PropTypes.node),
       PropTypes.node,
@@ -30,20 +29,21 @@ export class Checkbox extends React.PureComponent {
   }
 
   toggle({ target: { name } }) {
-    const { handleChange, btnGroup, type } = this.props;
-    handleChange(name, type, btnGroup);
+    const { value, type, handleChange } = this.props;
+    handleChange(value, type, name);
   }
 
   render() {
-    const { name, label, type, isChecked, children } = this.props;
+    const { name, label, type, isChecked, children, value } = this.props;
 
     return (
       <div className={type}>
-        <label>
+        <label className="control-label">
           <input
+            className="form-check"
             type={type}
             name={name}
-            value={this.props.value}
+            value={value}
             checked={isChecked}
             onChange={this.toggle}
           />

@@ -55,7 +55,6 @@ class RelationshipPicker {
             this.addItem({
               value: item.value,
               text,
-              // options: relationships.map(obj => ({ ...obj, selected: false }))
               options: relationships.map((obj) => {
                 const keys = Object.keys(obj);
                 return keys.map(key => ({

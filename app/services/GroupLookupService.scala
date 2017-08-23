@@ -1,6 +1,7 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject}
+import com.google.inject.name.Named
 import services.dao.{AudienceLookupDao, LookupModule, LookupRelationshipType, LookupSeminarGroup}
 import warwick.sso.{UniversityID, User}
 
@@ -16,7 +17,7 @@ trait GroupLookupService {
 }
 
 class GroupLookupServiceImpl @Inject()(
-  audienceLookupDao: AudienceLookupDao
+  @Named("tabula") audienceLookupDao: AudienceLookupDao
 ) extends GroupLookupService {
 
   def findModule(query: String): Future[Seq[LookupModule]] =

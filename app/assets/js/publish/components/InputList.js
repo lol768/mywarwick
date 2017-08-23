@@ -22,15 +22,15 @@ export class InputList extends React.PureComponent {
   }
 
   addItem(newItem) {
-    const { items, handleChange, name } = this.props;
+    const { items, handleChange, type } = this.props;
     if (!items.filter(item => item.value === newItem.value).length > 0) {
-      handleChange({ items: [...items, newItem] }, name);
+      handleChange({ items: [...items, newItem] }, type);
     }
   }
 
   removeItem(value) {
-    const { items, handleChange, name } = this.props;
-    handleChange({ items: items.filter(item => item.value !== value) }, name);
+    const { items, handleChange, type } = this.props;
+    handleChange({ items: items.filter(item => item.value !== value) }, type);
   }
 
   render() {
@@ -93,7 +93,7 @@ class InputSearch extends React.PureComponent {
   render() {
     return (
       <input
-        className="input-search"
+        className="form-control input-search"
         placeholder={this.props.placeholderText}
         ref={picker => (this.picker = picker)}
         value={this.state.value}
@@ -109,6 +109,11 @@ class ListItem extends React.PureComponent {
     text: PropTypes.string,
     removeItem: PropTypes.func,
     name: PropTypes.string,
+    className: PropTypes.string,
+  };
+
+  static defaultProps = {
+    className: 'list-item',
   };
 
   constructor(props) {
@@ -123,17 +128,17 @@ class ListItem extends React.PureComponent {
 
   render() {
     return (
-      <li>
+      <li className={this.props.className}>
         <input name={this.props.name} value={this.props.value} readOnly hidden />
         <span>{this.props.text}</span>
         <span>
           <a
             role="button"
-            className="clear-field"
+            className="btn btn-xs btn-danger list-item__remove"
             onClick={this.removeItem}
             title="Clear"
             tabIndex={0}
-          >&nbsp;&times;</a>
+          >&nbsp;Remove</a>
         </span>
       </li>
     );
@@ -163,8 +168,9 @@ class ListItemWithOptions extends ListItem {
     const optBtn = option =>
       _.map(option, (val, key) => (
         <div className="checkbox--list-item-option" key={key}>
-          <label>
+          <label className="control-label">
             <input
+              className="form-check"
               type="checkbox"
               name={this.props.value}
               value={key}
@@ -181,14 +187,14 @@ class ListItemWithOptions extends ListItem {
         <input name={this.props.name} value={this.props.value} readOnly hidden />
         <span>{this.props.text}</span>&nbsp;
         {this.props.options.map(optBtn)}
-        <span>
+        <span className="pull-right">
           <a
             role="button"
-            className="clear-field"
+            className="btn btn-xs btn-danger list-item__remove"
             onClick={this.removeItem}
             title="Clear"
             tabIndex={0}
-          >&nbsp;&times;</a>
+          >&nbsp;Remove</a>
         </span>
       </li>
     );
@@ -204,11 +210,11 @@ export class InputOptionsList extends InputList {
   }
 
   addItem(newItem) {
-    const { items, handleChange, name } = this.props;
+    const { items, handleChange, type } = this.props;
     if (newItem.options.length === 0) {
       this.setState({ error: 'That staff member has no students to add' });
     } else if (!items.filter(item => item.value === newItem.value).length > 0) {
-      handleChange({ items: [...items, newItem] }, name);
+      handleChange({ items: [...items, newItem] }, type);
       this.setState({ error: null });
     } else {
       this.setState({ error: 'That staff member has already been added' });
@@ -216,9 +222,9 @@ export class InputOptionsList extends InputList {
   }
 
   toggleOption(value, options) {
-    const { items, handleChange, name } = this.props;
+    const { items, handleChange, type } = this.props;
     const updatedItem = { ...items.find(i => i.value === value), options };
-    handleChange({ items: [...items.filter(i => i.value !== value), updatedItem] }, name);
+    handleChange({ items: [...items.filter(i => i.value !== value), updatedItem] }, type);
   }
 
   render() {

@@ -32,7 +32,7 @@ class ModulePicker {
             }
           });
       },
-      highlighter: (html, item) => (`<strong>${item.code}</strong>: ${item.name}<br><em>${item.departmentName}</em>`),
+      highlighter: (html, item) => (`<strong>${item.code.toUpperCase()}</strong>: ${item.name}<br><em>${item.departmentName}</em>`),
       delay: 120,
       matcher: () => true, // All data received from the server matches the query
       afterSelect: (item) => {

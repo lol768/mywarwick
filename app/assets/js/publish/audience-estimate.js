@@ -46,11 +46,10 @@ $('.split-form').each((i, form) => {
       container,
     );
 
-    // TODO: re-enable audience indicator
     $form.on(
       'change',
       [
-        // '#audience-picker :input',
+        '#audience-picker :input',
         '#item_category_field :input',
         '#item_ignoreCategories_field :input',
         '.audience-picker-extra :input',

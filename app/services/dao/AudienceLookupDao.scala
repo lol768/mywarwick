@@ -34,7 +34,6 @@ case class LookupRelationshipType(
   studentRole: String
 )
 
-@ImplementedBy(classOf[TabulaAudienceLookupDao])
 trait AudienceLookupDao {
 
   def resolveDepartment(departmentCode: String): Future[Seq[Usercode]]

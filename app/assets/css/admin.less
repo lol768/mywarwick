@@ -60,19 +60,23 @@ dd.error {
   }
 }
 
-.radio > .checkbox, .checkbox > .radio {
-  margin-left: 1.4em
-}
-
 #audience-picker {
-  a.clear-field {
-    color: #666;
-    padding: 0 8px;
-    text-decoration: none;
-    font-size: 1.2em;
+
+  .radio > .checkbox,
+  .checkbox > .radio,
+  .radio .radio,
+  .radio select {
+    margin-left: 1.4em
   }
+
   input.input-search {
     min-width: 50%;
+  }
+  .list-item {
+    border-bottom: 4px;
+  }
+  .list-item__remove {
+    margin-left: 6px;
   }
   .error-msg {
     margin: 0 8px;

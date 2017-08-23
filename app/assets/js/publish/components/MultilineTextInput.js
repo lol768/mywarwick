@@ -27,6 +27,7 @@ export default class MultilineTextInput extends React.PureComponent {
   render() {
     return (
       <textarea
+        className="form-control"
         onChange={this.handleTextChange}
         name={this.props.name}
         placeholder={this.props.placeholder}
