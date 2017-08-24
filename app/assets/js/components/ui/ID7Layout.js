@@ -34,11 +34,15 @@ class ID7Layout extends React.PureComponent {
   };
 
   /** Set the theme on the html element, so that we can style everything. */
-  static setBodyTheme(newTheme, oldTheme = '') {
-    /* HACK: default to theme-transparent-1 if user has transparent in their store */
+  static setBodyTheme(newTheme, oldTheme) {
     $('html')
-      .removeClass(`theme-${oldTheme}`)
-      .addClass(newTheme === 'transparent' ? 'theme-transparent-1' : `theme-${newTheme}`);
+      .removeClass((i, className) => {
+        if (_.startsWith(className, 'theme-') || className === oldTheme) {
+          return className;
+        }
+        return '';
+      })
+      .addClass(`theme-${newTheme}`);
   }
 
   constructor(props) {
