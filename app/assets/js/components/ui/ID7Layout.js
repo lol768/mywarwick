@@ -34,12 +34,13 @@ class ID7Layout extends React.PureComponent {
   };
 
   /** Set the theme on the html element, so that we can style everything. */
-  static setBodyTheme(newTheme, oldTheme = '') {
+  static setBodyTheme(newTheme, oldTheme) {
     $('html')
       .removeClass((i, className) => {
-        if (_.startsWith(className, 'theme-')) {
+        if (_.startsWith(className, 'theme-') || className === oldTheme) {
           return className;
         }
+        return '';
       })
       .addClass(`theme-${newTheme}`);
   }
