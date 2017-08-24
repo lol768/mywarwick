@@ -24,14 +24,6 @@ export function updateUi() {
   return (dispatch, getState) => {
     const chosen = getState().colourSchemes.chosen;
     dispatch(theme.updateColourTheme(`transparent-${chosen}`));
-
-    /* eslint-disable no-undef */
-    const native = window.MyWarwickNative;
-    /* eslint-enable no-undef */
-
-    const isNativeAvailable = (native && 'setBackgroundToDisplay' in native);
-    const call = isNativeAvailable ? native.setBackgroundToDisplay : null;
-    if (call) call(chosen);
   };
 }
 
@@ -96,18 +88,13 @@ export function reducer(state = initialState, action) {
           fetched: true,
         };
       }
-      return action.payload.data ? {
+      return {
         ...state,
         fetching: false,
         failed: false,
         fetched: true,
         chosen: action.payload.data.chosen,
         schemes: action.payload.data.schemes,
-      } : {
-        ...state,
-        fetching: false,
-        failed: false,
-        fetched: true,
       };
     case COLOUR_SCHEME_SAVE_CHOICE:
       return {
