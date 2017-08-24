@@ -22,7 +22,7 @@ function isNative() {
 
 const initialState = {
   layoutWidth: 2, // 2 columns by default
-  colourTheme: 'transparent',
+  colourTheme: 'transparent-1',
   native: false,
 };
 
