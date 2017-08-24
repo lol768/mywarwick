@@ -88,18 +88,13 @@ export function reducer(state = initialState, action) {
           fetched: true,
         };
       }
-      return action.payload.data ? {
+      return {
         ...state,
         fetching: false,
         failed: false,
         fetched: true,
         chosen: action.payload.data.chosen,
         schemes: action.payload.data.schemes,
-      } : {
-        ...state,
-        fetching: false,
-        failed: false,
-        fetched: true,
       };
     case COLOUR_SCHEME_SAVE_CHOICE:
       return {

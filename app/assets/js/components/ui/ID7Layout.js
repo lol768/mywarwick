@@ -33,6 +33,14 @@ class ID7Layout extends React.PureComponent {
     children: PropTypes.node,
   };
 
+  /** Set the theme on the html element, so that we can style everything. */
+  static setBodyTheme(newTheme, oldTheme = '') {
+    /* HACK: default to theme-transparent-1 if user has transparent in their store */
+    $('html')
+      .removeClass(`theme-${oldTheme}`)
+      .addClass(newTheme === 'transparent' ? 'theme-transparent-1' : `theme-${newTheme}`);
+  }
+
   constructor(props) {
     super(props);
     this.onBackClick = this.onBackClick.bind(this);
@@ -45,7 +53,7 @@ class ID7Layout extends React.PureComponent {
 
   componentWillMount() {
     this.props.dispatch(ui.updateUIContext());
-    this.setBodyTheme(this.props.colourTheme);
+    ID7Layout.setBodyTheme(this.props.colourTheme);
   }
 
   componentDidMount() {
@@ -71,7 +79,7 @@ class ID7Layout extends React.PureComponent {
 
   componentDidUpdate(prevProps) {
     if (prevProps.colourTheme !== this.props.colourTheme) {
-      this.setBodyTheme(this.props.colourTheme, prevProps.colourTheme);
+      ID7Layout.setBodyTheme(this.props.colourTheme, prevProps.colourTheme);
     }
   }
 
@@ -91,14 +99,6 @@ class ID7Layout extends React.PureComponent {
 
   onSettings(e) {
     wrapKeyboardSelect(() => this.props.dispatch(push(`/${Routes.SETTINGS}`)), e);
-  }
-
-  /** Set the theme on the html element, so that we can style everything. */
-  setBodyTheme(newTheme, oldTheme = '') {
-    /* HACK: default to theme-transparent-1 if user has transparent in their store */
-    $('html')
-      .removeClass(`theme-${oldTheme}`)
-      .addClass(newTheme === 'transparent' ? 'theme-transparent-1' : `theme-${newTheme}`);
   }
 
   isEditing() {

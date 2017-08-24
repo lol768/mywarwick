@@ -165,7 +165,13 @@ export function launch(userData) {
   persisted('tiles.data', tiles.fetchedTiles);
   persisted('tileContent', tiles.loadedAllTileContent);
   persisted('tileContent', tiles.loadedAllTileContent);
-  persisted('colourSchemes', colourSchemes.receive);
+  persisted(
+    'colourSchemes',
+    colourSchemes.receive,
+    ({ chosen, schemes }) => ({ chosen, schemes }),
+    ({ chosen, schemes }) => ({ data: { chosen, schemes } }),
+  );
+  persisted('ui.colourTheme', ui.updateColourTheme);
 
   persisted(
     'newsCategories',
