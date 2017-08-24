@@ -17,8 +17,7 @@
   @for(publisher <- publishers.sortBy(_.name)) {
     @defining(
       providerMap(publisher).isEmpty ||
-      userPermissionsMap(publisher).isEmpty ||
-      permissionScopeMap(publisher).isInstanceOf[PermissionScope.Departments] && permissionScopeMap(publisher).asInstanceOf[PermissionScope.Departments].departments.isEmpty
+      userPermissionsMap(publisher).isEmpty
     ) { hasWarning =>
       <div class="panel @if(hasWarning) { panel-warning } else { panel-default }">
 
@@ -38,7 +37,10 @@
         </div>
 
         <div id="panel-@publisher.id" class="panel-collapse collapse @if(hasWarning) { in }">
-          @if(hasWarning) {
+          @if(
+            hasWarning  ||
+              permissionScopeMap(publisher).isInstanceOf[PermissionScope.Departments] && permissionScopeMap(publisher).asInstanceOf[PermissionScope.Departments].departments.isEmpty
+          ) {
             <div class="panel-body">
               @if(providerMap(publisher).isEmpty) {
                 <div class="alert alert-warning">
