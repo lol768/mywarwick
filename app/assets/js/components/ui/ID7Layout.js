@@ -21,6 +21,7 @@ class ID7Layout extends React.PureComponent {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     colourTheme: PropTypes.string.isRequired,
+    colourSchemesLoaded: PropTypes.bool.isRequired,
     user: PropTypes.shape({
       data: PropTypes.shape({
         authenticated: PropTypes.bool.isRequired,
@@ -34,15 +35,14 @@ class ID7Layout extends React.PureComponent {
   };
 
   /** Set the theme on the html element, so that we can style everything. */
-  static setBodyTheme(newTheme, oldTheme) {
-    $('html')
-      .removeClass((i, className) => {
-        if (_.startsWith(className, 'theme-') || className === oldTheme) {
-          return className;
-        }
-        return '';
-      })
-      .addClass(`theme-${newTheme}`);
+  static setBodyTheme(newProps) {
+    if (newProps.colourSchemesLoaded) {
+      $('html')
+        .removeClass((i, className) =>
+          _.filter(className.split(' '), singleClass => _.startsWith(singleClass, 'theme-')).join(' '),
+        )
+        .addClass(`theme-${newProps.colourTheme}`);
+    }
   }
 
   constructor(props) {
@@ -57,7 +57,7 @@ class ID7Layout extends React.PureComponent {
 
   componentWillMount() {
     this.props.dispatch(ui.updateUIContext());
-    ID7Layout.setBodyTheme(this.props.colourTheme);
+    ID7Layout.setBodyTheme(this.props);
   }
 
   componentDidMount() {
@@ -82,8 +82,11 @@ class ID7Layout extends React.PureComponent {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.colourTheme !== this.props.colourTheme) {
-      ID7Layout.setBodyTheme(this.props.colourTheme, prevProps.colourTheme);
+    if (
+      prevProps.colourTheme !== this.props.colourTheme ||
+        prevProps.colourSchemesLoaded !== this.props.colourSchemesLoaded
+    ) {
+      ID7Layout.setBodyTheme(this.props);
     }
   }
 
@@ -193,6 +196,7 @@ const select = state => ({
     getNumItemsSince(state.notifications.stream, _.get(state, ['notificationsLastRead', 'date'])),
   user: state.user,
   colourTheme: state.ui.colourTheme,
+  colourSchemesLoaded: state.colourSchemes.loaded,
   zoomedTile: state.ui.zoomedTile,
   native: state.ui.native,
 });
