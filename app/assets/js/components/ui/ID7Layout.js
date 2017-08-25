@@ -22,6 +22,7 @@ class ID7Layout extends React.PureComponent {
     dispatch: PropTypes.func.isRequired,
     colourTheme: PropTypes.string.isRequired,
     schemeColour: PropTypes.string.isRequired,
+    colourSchemesLoaded: PropTypes.bool.isRequired,
     user: PropTypes.shape({
       data: PropTypes.shape({
         authenticated: PropTypes.bool.isRequired,
@@ -35,16 +36,16 @@ class ID7Layout extends React.PureComponent {
   };
 
   /** Set the theme on the html element, so that we can style everything. */
-  static setColourTheme(newProps, oldProps = { colourTheme: '', schemeColour: '' }) {
-    /* HACK: default to theme-transparent-1 if user has transparent in their store */
-    $('html')
-      .removeClass(`theme-${oldProps.colourTheme}`)
-      .addClass(newProps.colourTheme === 'transparent' ?
-        'theme-transparent-1' :
-        `theme-${newProps.colourTheme}`,
-      )
-      .find('meta[name="theme-color"]')
-      .attr('content', newProps.schemeColour);
+  static setBodyTheme(newProps) {
+    if (newProps.colourSchemesLoaded) {
+      $('html')
+        .removeClass((i, className) =>
+          _.filter(className.split(' '), singleClass => _.startsWith(singleClass, 'theme-')).join(' '),
+        )
+        .addClass(`theme-${newProps.colourTheme}`)
+        .find('meta[name="theme-color"]')
+        .attr('content', newProps.schemeColour);
+    }
   }
 
   constructor(props) {
@@ -84,8 +85,11 @@ class ID7Layout extends React.PureComponent {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.colourTheme !== this.props.colourTheme) {
-      ID7Layout.setColourTheme(this.props, prevProps);
+    if (
+      prevProps.colourTheme !== this.props.colourTheme ||
+        prevProps.colourSchemesLoaded !== this.props.colourSchemesLoaded
+    ) {
+      ID7Layout.setBodyTheme(this.props);
     }
   }
 
@@ -196,6 +200,7 @@ const select = state => ({
   user: state.user,
   colourTheme: state.ui.colourTheme,
   schemeColour: state.ui.schemeColour,
+  colourSchemesLoaded: state.colourSchemes.loaded,
   zoomedTile: state.ui.zoomedTile,
   native: state.ui.native,
 });

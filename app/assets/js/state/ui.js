@@ -5,6 +5,7 @@ import $ from 'jquery';
 import { goBack, replace } from 'react-router-redux';
 import _ from 'lodash-es';
 import { Routes } from '../components/AppRoot';
+import { createSelector } from 'reselect';
 
 /* eslint-disable */
 let mq;
@@ -22,7 +23,7 @@ function isNative() {
 
 const initialState = {
   layoutWidth: 2, // 2 columns by default
-  colourTheme: 'transparent',
+  colourTheme: 'transparent-1',
   schemeColour: '#8C6E96',
   native: false,
 };
@@ -60,6 +61,17 @@ export function updateUIContext() {
       });
     }
   };
+}
+
+export function subscribeToStore(store) {
+  const themeSelector = createSelector(
+    state => state.colourSchemes.chosen,
+    chosen => store.dispatch(updateColourTheme(`transparent-${chosen}`)),
+  );
+  store.subscribe(() => {
+    const state = store.getState();
+    themeSelector(state);
+  });
 }
 
 const scrollRestoreLookup = {};

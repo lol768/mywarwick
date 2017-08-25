@@ -7,10 +7,12 @@ import { fetchWithCredentials, postJsonWithCredentials } from '../serverpipe';
 const COLOUR_SCHEME_PREFERENCE_REQUEST = 'COLOUR_SCHEME_PREFERENCE_REQUEST';
 const COLOUR_SCHEME_PREFERENCE_RECEIVE = 'COLOUR_SCHEME_PREFERENCE_RECEIVE';
 const COLOUR_SCHEME_SAVE_CHOICE = 'COLOUR_SCHEME_SAVE_CHOICE';
+const COLOUR_SCHEME_LOADED = 'COLOUR_SCHEME_LOADED';
 
 const start = createAction(COLOUR_SCHEME_PREFERENCE_REQUEST);
 export const receive = createAction(COLOUR_SCHEME_PREFERENCE_RECEIVE);
 const save = createAction(COLOUR_SCHEME_SAVE_CHOICE);
+export const loaded = createAction(COLOUR_SCHEME_LOADED);
 
 const doPostToServer = (colourScheme) => {
   postJsonWithCredentials('/api/colour-schemes', { colourScheme });
@@ -64,6 +66,7 @@ const initialState = {
   fetching: false,
   failed: false,
   fetched: false,
+  loaded: false,
   chosen: 1,
   schemes: [
     {
@@ -105,6 +108,11 @@ export function reducer(state = initialState, action) {
       return {
         ...state,
         chosen: action.payload,
+      };
+    case COLOUR_SCHEME_LOADED:
+      return {
+        ...state,
+        loaded: true,
       };
     default:
       return state;
