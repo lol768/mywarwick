@@ -173,7 +173,12 @@ export function launch(userData) {
     ({ chosen, schemes }) => ({ chosen, schemes }),
     ({ chosen, schemes }) => ({ data: { chosen, schemes } }),
   ).then(() => store.dispatch(colourSchemes.loaded()));
-  persisted('ui.colourTheme', ui.updateColourTheme);
+  persisted(
+    'ui',
+    ui.updateColourTheme,
+    ({ colourTheme, schemeColour }) => ({ colourTheme, schemeColour }),
+    ({ colourTheme, schemeColour }) => ({ colourTheme, schemeColour }),
+  );
 
   persisted(
     'newsCategories',

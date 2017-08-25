@@ -36,7 +36,7 @@ class ID7Layout extends React.PureComponent {
   };
 
   /** Set the theme on the html element, so that we can style everything. */
-  static setBodyTheme(newProps) {
+  static setColourTheme(newProps) {
     if (newProps.colourSchemesLoaded) {
       $('html')
         .removeClass((i, className) =>
@@ -89,7 +89,7 @@ class ID7Layout extends React.PureComponent {
       prevProps.colourTheme !== this.props.colourTheme ||
         prevProps.colourSchemesLoaded !== this.props.colourSchemesLoaded
     ) {
-      ID7Layout.setBodyTheme(this.props);
+      ID7Layout.setColourTheme(this.props);
     }
   }
 

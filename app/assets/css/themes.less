@@ -69,7 +69,7 @@
       background-color: @baseColour;
     }
 
-    .bg-stand-in {
+    .bg-stand-in, body {
       background: @behind-tiles-colour;
     }
 
@@ -99,11 +99,11 @@
     }
 
     .in-settings.in-tiles {
-
-      html& .bg-stand-in {
+      &, html& .bg-stand-in {
         background: @behind-tiles-colour;
       }
     }
+
     .colour-0, .colour-1, .colour-2, .colour-3 {
       background-color: @transparent;
       .tile--zoomed .tile__header {
@@ -158,14 +158,16 @@
 );
 
 .behind-tiles(@rules) {
+  html {
+    background: transparent;
+  }
+  .not-app body {
+    @rules();
+  }
   .id7-fixed-width-container,
   .id7-main-content-area {
     @rules();
   }
-  body {
-    @rules();
-  }
-
 }
 
 // Mixin to generate classes for tiles

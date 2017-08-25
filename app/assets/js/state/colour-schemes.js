@@ -27,8 +27,8 @@ export function updateUi() {
     const chosenId = getState().colourSchemes.chosen;
     const chosenScheme = _.find(getState().colourSchemes.schemes, scheme => scheme.id === chosenId);
     dispatch(theme.updateColourTheme({
-      theme: `transparent-${chosenId}`,
-      colour: chosenScheme.schemeColour,
+      colourTheme: `transparent-${chosenId}`,
+      schemeColour: chosenScheme.schemeColour,
     }));
   };
 }
