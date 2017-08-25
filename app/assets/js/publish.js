@@ -10,7 +10,7 @@ import './publish/groupPicker';
 import './publish/modulePicker';
 import _ from 'lodash-es';
 import './flexi-picker';
-import AudiencePickerNew from './publish/components/AudiencePickerNew';
+import AudiencePicker from './publish/components/AudiencePicker';
 
 function setupAudiencePicker() {
   const audiencePicker = $('#audience-picker');
@@ -20,7 +20,7 @@ function setupAudiencePicker() {
       isGod: audiencePicker.data('is-god') || false,
     };
     ReactDOM.render(
-      <AudiencePickerNew {...props} />,
+      <AudiencePicker {...props} />,
       audiencePicker.get(0),
     );
   }

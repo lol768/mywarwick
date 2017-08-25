@@ -52,6 +52,7 @@ class AudienceServiceImpl @Inject()(
       case SeminarGroupAudience(groupId) => audienceLookupDao.resolveSeminarGroup(groupId)
       case RelationshipAudience(relationshipType, agentId) => audienceLookupDao.resolveRelationship(agentId, relationshipType)
       case UsercodeAudience(usercode) => Future.successful(Seq(usercode))
+      case UsercodesAudience(usercodes) => Future.successful(usercodes)
       case optIn: OptIn => Future.successful(Nil) // Handled below
     }).map(_.flatten.toSet)
 

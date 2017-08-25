@@ -113,6 +113,7 @@ class AudienceDaoImpl extends AudienceDao {
       case RelationshipAudience(relationshipType, agentId) => Seq(AudienceComponentSave.fromCompoundValue("Relationship", Seq(relationshipType, agentId.string), None))
       case WebGroupAudience(group) => Seq(AudienceComponentSave("WebGroup", Some(group.string), None))
       case UsercodeAudience(usercode) => Seq(AudienceComponentSave("Usercode", Some(usercode.string), None))
+      case UsercodesAudience(usercodes) => usercodes.flatMap(usercode => Seq(AudienceComponentSave("Usercode", Some(usercode.string), None)))
       case optIn: OptIn => Seq(AudienceComponentSave(s"OptIn:${optIn.optInType}", Some(optIn.optInValue), None))
     }
 

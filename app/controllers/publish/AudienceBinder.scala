@@ -114,6 +114,7 @@ class AudienceBinder @Inject() (
         case ModuleAudience(moduleCode) => Seq(s"Module:$moduleCode")
         case SeminarGroupAudience(groupId) => Seq(s"SeminarGroup:$groupId")
         case RelationshipAudience(relationshipType, agentId) => Seq(s"Relationship:$relationshipType:${agentId.string}")
+        case UsercodeAudience(usercode) => Seq(usercode.string)
         case component: Component => Seq(component.entryName)
         case _ => Seq.empty
       }

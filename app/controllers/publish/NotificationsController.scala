@@ -13,13 +13,11 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{ActionFilter, Result}
 import services._
-import services.dao.DepartmentInfoDao
 import system.Validation
 import views.html.errors
 import views.html.publish.{notifications => views}
 
 import scala.concurrent.Future
-
 
 class NotificationsController @Inject()(
   val securityService: SecurityService,
@@ -79,9 +77,8 @@ class NotificationsController @Inject()(
 
   def create(publisherId: String, submitted: Boolean) = PublisherAction(publisherId, CreateNotifications).async { implicit request =>
     bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted, restrictedRecipients = true,
-      formWithErrors => {
-        Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope, Audience()))
-      },
+      formWithErrors =>
+        Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope, Audience())),
       (publish, audience) => {
         val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
         val redirect = Redirect(routes.NotificationsController.list(publisherId))

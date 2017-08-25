@@ -36,8 +36,8 @@ class ModulePicker {
       delay: 120,
       matcher: () => true, // All data received from the server matches the query
       afterSelect: (item) => {
-        const text = `${item.code}: ${item.name}`;
-        this.addItem({ value: item.code, text });
+        const text = `${item.code.toUpperCase()}: ${item.name}`;
+        this.addItem({ value: item.code.toUpperCase(), text });
         $element.data('item', item);
         $element.val(''); // return to placeholder text
       },

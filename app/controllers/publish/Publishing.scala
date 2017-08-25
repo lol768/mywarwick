@@ -92,9 +92,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
   def sharedAudienceInfo(
     audienceService: AudienceService,
     processUsercodes: Seq[Usercode] => JsObject
-  )(implicit request: PublisherRequest[_]): Future[Result] = {
-    println
-    println(request.body)
+  )(implicit request: PublisherRequest[_]): Future[Result] =
     audienceForm.bindFromRequest.fold(
       formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
       audienceData => {
@@ -115,7 +113,6 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
         }
       }
     )
-  }
 }
 
 trait PublishableWithAudience {

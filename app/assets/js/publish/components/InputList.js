@@ -1,10 +1,13 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
+import $ from 'jquery';
 
 export class InputList extends React.PureComponent {
   static propTypes = {
     name: PropTypes.string,
+    type: PropTypes.string.isRequired,
+    formPath: PropTypes.string,
     picker: PropTypes.func,
     items: PropTypes.arrayOf(PropTypes.object),
     handleChange: PropTypes.func,
@@ -34,12 +37,11 @@ export class InputList extends React.PureComponent {
   }
 
   render() {
-    const { picker, name, items, placeholderText } = this.props;
+    const { picker, name, items, placeholderText, type } = this.props;
 
     return (
       <div>
         <InputSearch
-          name={name}
           initPicker={picker}
           addItem={this.addItem}
           placeholderText={placeholderText}
@@ -50,6 +52,7 @@ export class InputList extends React.PureComponent {
               <ListItem
                 key={value}
                 name={name}
+                type={type}
                 value={value}
                 text={text}
                 removeItem={this.removeItem}
@@ -105,10 +108,11 @@ class InputSearch extends React.PureComponent {
 
 class ListItem extends React.PureComponent {
   static propTypes = {
-    value: PropTypes.string,
+    value: PropTypes.string.isRequired,
     text: PropTypes.string,
     removeItem: PropTypes.func,
     name: PropTypes.string,
+    type: PropTypes.string.isRequired,
     className: PropTypes.string,
   };
 
@@ -123,20 +127,28 @@ class ListItem extends React.PureComponent {
 
   removeItem(event) {
     event.preventDefault();
+    $(this.hiddenInput).trigger('change');
     this.props.removeItem(this.props.value);
   }
 
   render() {
+    const { className, name, text, type, value } = this.props;
     return (
-      <li className={this.props.className}>
-        <input name={this.props.name} value={this.props.value} readOnly hidden />
-        <span>{this.props.text}</span>
-        <span>
+      <li className={className}>
+        <input
+          ref={input => (this.hiddenInput = input)}
+          name={name}
+          value={`${type}:${value}`}
+          readOnly
+          hidden
+        />
+        <span>{text}</span>
+        <span className="pull-right">
           <a
             role="button"
             className="btn btn-xs btn-danger list-item__remove"
             onClick={this.removeItem}
-            title="Clear"
+            title="Remove"
             tabIndex={0}
           >&nbsp;Remove</a>
         </span>
@@ -156,7 +168,7 @@ class ListItemWithOptions extends ListItem {
     this.toggleOption = this.toggleOption.bind(this);
   }
 
-  toggleOption({ target: { value } }) {
+  toggleOption(value) {
     const oldOption = this.props.options.find(opt => opt[value])[value];
     const updatedOption = { [value]: { ...oldOption, selected: !oldOption.selected } };
     const newOptions =
@@ -165,17 +177,20 @@ class ListItemWithOptions extends ListItem {
   }
 
   render() {
+    const { name, value, type, text, options, className } = this.props;
+
     const optBtn = option =>
       _.map(option, (val, key) => (
         <div className="checkbox--list-item-option" key={key}>
           <label className="control-label">
             <input
+              ref={input => (this.hiddenInput = input)}
               className="form-check"
               type="checkbox"
-              name={this.props.value}
-              value={key}
+              name={name}
+              value={`${type}:${key}:${value}`}
               checked={val.selected}
-              onChange={this.toggleOption}
+              onChange={() => this.toggleOption(key)}
             />
             {`${val.students.length} ${val.studentRole}(s)`}
           </label>
@@ -183,10 +198,9 @@ class ListItemWithOptions extends ListItem {
       ))[0];
 
     return (
-      <li>
-        <input name={this.props.name} value={this.props.value} readOnly hidden />
-        <span>{this.props.text}</span>&nbsp;
-        {this.props.options.map(optBtn)}
+      <li className={className}>
+        <span>{text}</span>
+        {options.map(optBtn)}
         <span className="pull-right">
           <a
             role="button"
@@ -228,7 +242,7 @@ export class InputOptionsList extends InputList {
   }
 
   render() {
-    const { picker, name, items, placeholderText } = this.props;
+    const { picker, name, items, placeholderText, type } = this.props;
     return (
       <div>
         <InputSearch
@@ -243,6 +257,7 @@ export class InputOptionsList extends InputList {
             <ListItemWithOptions
               key={value}
               name={name}
+              type={type}
               value={value}
               text={text}
               options={options}

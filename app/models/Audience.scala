@@ -30,6 +30,7 @@ object Audience {
 
   // Pieces of audience
   sealed trait Component extends EnumEntry
+
   // Pieces of department
   sealed trait DepartmentSubset extends Component
 
@@ -37,19 +38,29 @@ object Audience {
 
   case class UsercodeAudience(usercode: Usercode) extends Component
 
-  case class WebGroupAudience(groupName: GroupName) extends Component  // No longer available in Audience Picker UI
+  case class UsercodesAudience(usercodes: Seq[Usercode]) extends Component
+
+  case class WebGroupAudience(groupName: GroupName) extends Component // No longer available in Audience Picker UI
 
   case class ModuleAudience(moduleCode: String) extends Component
+
   case class SeminarGroupAudience(groupId: String) extends Component
+
   case class RelationshipAudience(relationshipType: String, agentId: UniversityID) extends Component
+
   case class DepartmentAudience(deptCode: String, subset: Seq[DepartmentSubset]) extends Component
 
   case object All extends DepartmentSubset
+
   case object Staff extends DepartmentSubset // No longer available in Audience Picker UI
   case object TeachingStaff extends DepartmentSubset
+
   case object AdminStaff extends DepartmentSubset
+
   case object UndergradStudents extends DepartmentSubset
+
   case object TaughtPostgrads extends DepartmentSubset
+
   case object ResearchPostgrads extends DepartmentSubset
 
   sealed abstract class OptIn(val optInType: String, val optInValue: String, val description: String) extends Component
@@ -60,9 +71,13 @@ object Audience {
     val optInType = "Location"
 
     case object CentralCampusResidences extends LocationOptIn("CentralCampusResidences", "Central campus residences")
+
     case object WestwoodResidences extends LocationOptIn("WestwoodResidences", "Westwood residences")
+
     case object Coventry extends LocationOptIn("Coventry", "Coventry")
+
     case object Kenilworth extends LocationOptIn("Kenilworth", "Kenilworth")
+
     case object LeamingtonSpa extends LocationOptIn("LeamingtonSpa", "Leamington Spa")
 
     def values = Seq(CentralCampusResidences, WestwoodResidences, Coventry, Kenilworth, LeamingtonSpa)
@@ -75,6 +90,7 @@ object Audience {
   val relationshipRegex: Regex = "^Relationship:(.+):(.+)".r
   val webGroupRegex: Regex = "^WebGroup:(.+)".r
   val optInRegex: Regex = "^OptIn:(.+):(.+)".r
+  val usercodesRegex: Regex = "(?i)^([a-z]{5,6}|u\\d{7})".r
 
   object ComponentParameter {
     def unapply(paramValue: String): Option[Component] = paramValue match {
@@ -89,7 +105,16 @@ object Audience {
       case seminarGroupRegex(groupId) => Some(SeminarGroupAudience(groupId))
       case relationshipRegex(relationshipType, agentId) => Some(RelationshipAudience(relationshipType, UniversityID(agentId)))
       case optInRegex(optInType, optInValue) if optInType == LocationOptIn.optInType => LocationOptIn.fromValue(optInValue)
-      case _ => None
+      case string => {
+        val validUsercodes: Seq[Usercode] = string.split(",").map(_.trim).flatMap {
+          case usercodesRegex(usercode) => Some(Usercode(usercode))
+          case _ => None
+        }
+        if (validUsercodes.nonEmpty)
+          Some(UsercodesAudience(validUsercodes))
+        else
+          None
+      }
     }
   }
 
@@ -100,4 +125,5 @@ object Audience {
       case _ => None
     }
   }
+
 }

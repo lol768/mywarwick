@@ -47,8 +47,13 @@ export default class AudiencePicker extends React.PureComponent {
 
   handleChange(value, type, path) {
     const updateObj = obj => (
-      { audience: { [this.isChecked('audience.university') ? 'university' : 'department']: { groups: obj } } }
-      );
+      {
+        audience: {
+          [this.isChecked('audience.universityWide') ?
+            'universityWide' : 'department']: { groups: obj },
+        },
+      }
+    );
 
     switch (type) {
       /* eslint-disable no-case-declarations */
@@ -67,11 +72,11 @@ export default class AudiencePicker extends React.PureComponent {
       case 'radio':
         this.setState(state => _.set(_.cloneDeep(state), path, { [value]: undefined }));
         break;
-      case 'modules':
+      case 'Module':
         this.setState(state =>
           update(state, updateObj({ modules: { $set: value.items } })));
         break;
-      case 'seminarGroups':
+      case 'SeminarGroup':
         this.setState(state =>
           update(state, updateObj({ seminarGroups: { $set: value.items } })));
         break;
@@ -79,7 +84,7 @@ export default class AudiencePicker extends React.PureComponent {
         this.setState(state =>
           update(state, updateObj({ listOfUsercodes: { $set: value } })));
         break;
-      case 'staffRelationships':
+      case 'Relationship':
         this.setState(state =>
           update(state, updateObj({ staffRelationships: { $set: value.items } })));
         break;
@@ -91,167 +96,152 @@ export default class AudiencePicker extends React.PureComponent {
     return _.has(this.state, path);
   }
 
-  selectDepartment({ target: { options, selectedIndex } }) {
-    this.setState({ department: options[selectedIndex].text });
+  selectDepartment(value) {
+    this.setState({ department: value });
   }
 
   render() {
     const groupsInput = () => {
-      const isWholeUni = this.isChecked('audience.university');
+      const isPublic = this.isChecked('audience.universityWide');
       const deptSelect = this.props.departments.length > 1 ?
         (<select
           defaultValue=""
-          name="department"
+          name="audience.department"
           className="form-control"
-          onClick={this.selectDepartment}
+          onClick={({ target: { options, selectedIndex } }) =>
+            this.selectDepartment(options[selectedIndex].text)}
         >
-          <option disabled hidden value=""/>
+          <option disabled hidden value="">Select a department</option>
           {this.props.departments.map(dept => (
             <option key={dept[0]} value={dept[0]}>{dept[1]}</option>
           ))}
         </select>)
-        : <input name="department" value={this.props.departments[0][0]} hidden readOnly/>;
+        : <input name="audience.audience[]" value={this.props.departments[0][0]} hidden readOnly />;
 
-      const pathPrefix = text => `audience.${isWholeUni ? 'university' : 'department'}${text}`;
+      const prefixPath = text => `audience.${isPublic ? 'universityWide' : 'department'}${text}`;
+      const prefixDeptSubset = text => `${isPublic ? '' : 'Dept:'}${text}`;
+
+      const groups = (
+        <div>
+          {Object.keys(GROUPS).map(key =>
+            (<Checkbox
+              key={key}
+              handleChange={this.handleChange}
+              isChecked={this.isChecked(prefixPath(`.groups.${prefixDeptSubset(key)}`))}
+              label={GROUPS[key]}
+              name="audience.audience[]"
+              value={prefixDeptSubset(key)}
+              formPath={prefixPath('.groups')}
+            />),
+          )}
+          <Checkbox
+            handleChange={this.handleChange}
+            isChecked={this.isChecked(prefixPath(`.groups.${prefixDeptSubset('UndergradStudents')}`))}
+            label="Undergraduates"
+            name="audience.audience[]"
+            value={prefixDeptSubset('UndergradStudents')}
+            formPath={prefixPath('.groups')}
+          />
+          <Checkbox
+            handleChange={this.handleChange}
+            isChecked={this.isChecked(prefixPath('.groups.modules'))}
+            label="Students taking a particular module"
+            value="modules"
+            formPath={prefixPath('.groups')}
+          >
+            <InputList
+              formPath={prefixPath('.groups.modules')}
+              type="Module"
+              name="audience.audience[]"
+              handleChange={this.handleChange}
+              picker={modulePicker}
+              items={_.get(this.state, prefixPath('.groups.modules'), [])}
+              placeholderText="Start typing to find a module"
+            />
+          </Checkbox>
+          <Checkbox
+            handleChange={this.handleChange}
+            isChecked={this.isChecked(prefixPath('.groups.seminarGroups'))}
+            label="Students in a particular seminar group"
+            value="seminarGroups"
+            formPath={prefixPath('.groups')}
+          >
+            <InputList
+              formPath={prefixPath('.groups.seminarGroups')}
+              type="SeminarGroup"
+              handleChange={this.handleChange}
+              name="audience.audience[]"
+              picker={seminarGroupPicker}
+              items={_.get(this.state, prefixPath('.groups.seminarGroups'), [])}
+              placeholderText="Start typing to find a seminar group"
+            />
+          </Checkbox>
+          <Checkbox
+            handleChange={this.handleChange}
+            isChecked={this.isChecked(prefixPath('.groups.staffRelationships'))}
+            label="Students of a member of staff"
+            value="staffRelationships"
+            formPath={prefixPath('.groups')}
+          >
+            <InputOptionsList
+              formPath={prefixPath('.groups.staffRelationships')}
+              type="Relationship"
+              name="audience.audience[]"
+              handleChange={this.handleChange}
+              picker={relationshipPicker}
+              items={_.get(this.state, prefixPath('.groups.staffRelationships'), [])}
+              placeholderText="Start typing the name or usercode of the staff member"
+            />
+          </Checkbox>
+          <Checkbox
+            handleChange={this.handleChange}
+            isChecked={this.isChecked(prefixPath('.groups.listOfUsercodes'))}
+            label="A list of people I'll type or paste in"
+            value="listOfUsercodes"
+            formPath={prefixPath('.groups')}
+          >
+            <div>
+              <MultilineTextInput
+                formPath={prefixPath('.groups.listOfUsercodes')}
+                type="listOfUsercodes"
+                name="audience.audience[]"
+                handleChange={this.handleChange}
+                placeholder="Type in usercodes separated by commas (e.g. user1, user2)"
+              />
+            </div>
+          </Checkbox>
+        </div>
+      );
 
       return (
-        <div>
-          {isWholeUni ? null : deptSelect}
-          <RadioButton
-            handleChange={this.handleChange}
-            isChecked={this.isChecked(pathPrefix('.everyone'))}
-            label={`Everyone in ${isWholeUni ?
-              'the whole university' : this.state.department || '...'}`}
-            name="everyone"
-            btnGroup={pathPrefix('')}
-          />
-          <RadioButton
-            handleChange={this.handleChange}
-            isChecked={this.isChecked(pathPrefix('.groups'))}
-            label={isWholeUni ? 'These groups:' : `Groups in ${this.state.department || '...'}`}
-            name="groups"
-            btnGroup={pathPrefix('')}
-          >
-            {Object.keys(GROUPS).map(key =>
-              (<Checkbox
-                key={key}
-                handleChange={this.handleChange}
-                isChecked={this.isChecked(pathPrefix(`.groups.${key}`))}
-                label={GROUPS[key]}
-                name={key}
-                btnGroup={pathPrefix('.groups')}
-              />),
-            )}
-
-            <Checkbox
-              handleChange={this.handleChange}
-              isChecked={this.isChecked(pathPrefix('.groups.UndergradStudents'))}
-              label="Undergraduates"
-              name="UndergradStudents"
-              btnGroup={pathPrefix('.groups')}
-            >
+        <div> {
+          isPublic ?
+            groups
+            :
+            <div>
+              {deptSelect}
               <RadioButton
                 handleChange={this.handleChange}
-                isChecked={this.isChecked(pathPrefix('.groups.UndergradStudents.all'))}
-                label="All"
-                name="all"
-                btnGroup={pathPrefix('.groups.UndergradStudents')}
+                isChecked={this.isChecked(prefixPath('.Dept:All'))}
+                label={`Everyone in ${this.state.department || '...'}`}
+                value="Dept:All"
+                name="audience.audience[]"
+                formPath={prefixPath('')}
               />
               <RadioButton
                 handleChange={this.handleChange}
-                isChecked={this.isChecked(pathPrefix('.groups.UndergradStudents.year'))}
-                label="Choose year of study"
-                name="year"
-                btnGroup={pathPrefix('.groups.UndergradStudents')}
+                isChecked={this.isChecked(prefixPath('.groups'))}
+                label={isPublic ? 'These groups:' : `Groups in ${this.state.department || '...'}`}
+                value="groups"
+                formPath={prefixPath('')}
               >
-                <Checkbox
-                  handleChange={this.handleChange}
-                  isChecked={this.isChecked(pathPrefix('.groups.UndergradStudents.year.first'))}
-                  label="First year"
-                  name="first"
-                  btnGroup={pathPrefix('.groups.UndergradStudents.year')}
-                />
-                <Checkbox
-                  handleChange={this.handleChange}
-                  isChecked={this.isChecked(pathPrefix('.groups.UndergradStudents.year.second'))}
-                  label="Second year"
-                  name="second"
-                  btnGroup={pathPrefix('.groups.UndergradStudents.year')}
-                />
-                <Checkbox
-                  handleChange={this.handleChange}
-                  isChecked={this.isChecked(pathPrefix('.groups.UndergradStudents.year.final'))}
-                  label="Final year"
-                  name="final"
-                  btnGroup={pathPrefix('.groups.UndergradStudents.year')}
-                />
+                {groups}
               </RadioButton>
-            </Checkbox>
-            <Checkbox
-              handleChange={this.handleChange}
-              isChecked={this.isChecked(pathPrefix('.groups.modules'))}
-              label="Students taking a particular module"
-              name="modules"
-              btnGroup={pathPrefix('.groups')}
-            >
-              <InputList
-                name="modules"
-                handleChange={this.handleChange}
-                picker={modulePicker}
-                items={_.get(this.state, pathPrefix('.groups.modules'), [])}
-                placeholderText="Start typing to find a module"
-              />
-            </Checkbox>
-            <Checkbox
-              handleChange={this.handleChange}
-              isChecked={this.isChecked(pathPrefix('.groups.seminarGroups'))}
-              label="Students in a particular seminar group"
-              name="seminarGroups"
-              btnGroup={pathPrefix('.groups')}
-            >
-              <InputList
-                name="seminarGroups"
-                handleChange={this.handleChange}
-                picker={seminarGroupPicker}
-                items={_.get(this.state, pathPrefix('.groups.seminarGroups'), [])}
-                placeholderText="Start typing to find a seminar group"
-              />
-            </Checkbox>
-            <Checkbox
-              handleChange={this.handleChange}
-              isChecked={this.isChecked(pathPrefix('.groups.staffRelationships'))}
-              label="Students of a member of staff"
-              name="staffRelationships"
-              btnGroup={pathPrefix('.groups')}
-            >
-              <InputOptionsList
-                name="staffRelationships"
-                handleChange={this.handleChange}
-                picker={relationshipPicker}
-                items={_.get(this.state, pathPrefix('.groups.staffRelationships'), [])}
-                placeholderText="Start typing the name or usercode of the staff member"
-              />
-            </Checkbox>
-            <Checkbox
-              handleChange={this.handleChange}
-              isChecked={this.isChecked(pathPrefix('.groups.listOfUsercodes'))}
-              label="A list of people I'll type or paste in"
-              name="listOfUsercodes"
-              btnGroup={pathPrefix('.groups')}
-            >
-              <div>
-                <MultilineTextInput
-                  name="listOfUsercodes"
-                  handleChange={this.handleChange}
-                  placeholder="Type in usercodes separated by commas (e.g. user1, user2)"
-                />
-              </div>
-            </Checkbox>
-          </RadioButton>
-        </div>);
+            </div>
+        } </div>
+      );
     };
 
-    console.log(this.state);
     return (
       <div>
         <div className="list-group">
@@ -261,10 +251,10 @@ export default class AudiencePicker extends React.PureComponent {
             <div>
               <RadioButton
                 handleChange={this.handleChange}
-                isChecked={this.isChecked('audience.university')}
+                isChecked={this.isChecked('audience.universityWide')}
                 label="People across the whole university"
-                name="university"
-                btnGroup="audience"
+                value="universityWide"
+                formPath="audience"
               >
                 {groupsInput()}
               </RadioButton>
@@ -272,9 +262,10 @@ export default class AudiencePicker extends React.PureComponent {
               <RadioButton
                 handleChange={this.handleChange}
                 isChecked={this.isChecked('audience.department')}
+                onDeselect={() => this.selectDepartment(undefined, undefined)}
                 label="People within a particular department"
-                name="department"
-                btnGroup="audience"
+                value="department"
+                formPath="audience"
               >
                 {groupsInput()}
               </RadioButton>
@@ -285,30 +276,37 @@ export default class AudiencePicker extends React.PureComponent {
 
         <div className="list-group">
           <label className="control-label">
-            Is this alert specific to where people live ?
+            Is this alert specific to where people live ?&nbsp;
+            <i
+              className="fa fa-info-circle"
+              data-toggle="tooltip"
+              data-placement="left"
+              title="Users can select one or more locations to receive
+             alerts, or may choose not to specify any."
+            />
           </label>
           <RadioButton
             handleChange={this.handleChange}
-            isChecked={this.isChecked('locations.noLocation')}
+            isChecked={!this.isChecked('locations.yesLocation')}
             label="No"
-            name="noLocation"
-            btnGroup="locations"
+            value="noLocation"
+            formPath="locations"
           />
           <RadioButton
             handleChange={this.handleChange}
             isChecked={this.isChecked('locations.yesLocation')}
             label="Yes"
-            name="yesLocation"
-            btnGroup="locations"
+            value="yesLocation"
+            formPath="locations"
           >
             {Object.keys(LOCATIONS).map(key =>
               (<Checkbox
                 key={key}
                 handleChange={(name, type, path) => this.handleChange(key, type, path)}
-                name="locations"
-                btnGroup="locations.yesLocation"
+                formPath="locations.yesLocation"
                 label={LOCATIONS[key]}
-                value={key}
+                name="audience.audience[]"
+                value={`OptIn:Location:${key}`}
                 isChecked={this.isChecked(`locations.yesLocation.${key}`)}
               />),
             )}

@@ -13,7 +13,8 @@ export class Checkbox extends React.PureComponent {
     handleChange: PropTypes.func.isRequired,
     isChecked: PropTypes.bool,
     label: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
+    formPath: PropTypes.string.isRequired,
+    name: PropTypes.string,
     type: PropTypes.oneOf(['checkbox', 'radio']),
     value: PropTypes.string,
   };
@@ -28,9 +29,9 @@ export class Checkbox extends React.PureComponent {
     this.toggle = this.toggle.bind(this);
   }
 
-  toggle({ target: { name } }) {
-    const { value, type, handleChange } = this.props;
-    handleChange(value, type, name);
+  toggle() {
+    const { value, type, formPath, handleChange } = this.props;
+    handleChange(value, type, formPath);
   }
 
   render() {
@@ -59,7 +60,15 @@ export class Checkbox extends React.PureComponent {
 }
 
 export class RadioButton extends Checkbox {
+  static propTypes = {
+    onDeselect: PropTypes.func,
+  };
+
   static defaultProps = {
     type: 'radio',
   };
+
+  componentWillUpdate(nextProps) {
+    if (this.props.onDeselect !== undefined && !nextProps.isChecked) { this.props.onDeselect(); }
+  }
 }

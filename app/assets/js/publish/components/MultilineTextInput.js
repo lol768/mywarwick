@@ -8,7 +8,8 @@ export default class MultilineTextInput extends React.PureComponent {
   };
 
   static propTypes = {
-    name: PropTypes.string.isRequired,
+    name: PropTypes.string,
+    formPath: PropTypes.string,
     handleChange: PropTypes.func.isRequired,
     placeholder: PropTypes.string,
     rows: PropTypes.number,
@@ -17,11 +18,13 @@ export default class MultilineTextInput extends React.PureComponent {
 
   constructor(props) {
     super(props);
+    // this.state = { value: '' };
     this.handleTextChange = this.handleTextChange.bind(this);
   }
 
-  handleTextChange(event) {
-    this.props.handleChange(event.target.value, this.props.name);
+  handleTextChange({ target: { value } }) {
+    // this.setState({ value });
+    this.props.handleChange(value, this.props.formPath);
   }
 
   render() {
@@ -30,6 +33,7 @@ export default class MultilineTextInput extends React.PureComponent {
         className="form-control"
         onChange={this.handleTextChange}
         name={this.props.name}
+        // value={this.state.value}
         placeholder={this.props.placeholder}
         rows={this.props.rows}
         cols={this.props.cols}
