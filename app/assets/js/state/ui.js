@@ -5,6 +5,7 @@ import $ from 'jquery';
 import { goBack, replace } from 'react-router-redux';
 import _ from 'lodash-es';
 import { Routes } from '../components/AppRoot';
+import { createSelector } from 'reselect';
 
 /* eslint-disable */
 let mq;
@@ -59,6 +60,17 @@ export function updateUIContext() {
       });
     }
   };
+}
+
+export function subscribeToStore(store) {
+  const themeSelector = createSelector(
+    state => state.colourSchemes.chosen,
+    chosen => store.dispatch(updateColourTheme(`transparent-${chosen}`)),
+  );
+  store.subscribe(() => {
+    const state = store.getState();
+    themeSelector(state);
+  });
 }
 
 const scrollRestoreLookup = {};

@@ -156,6 +156,8 @@ export function launch(userData) {
 
   const persisted = persistedLib({ store, localforage });
 
+  ui.subscribeToStore(store);
+
   persisted('notificationsLastRead.date', notificationMetadata.loadedNotificationsLastRead,
     freezeDate, thawDate);
 
@@ -170,7 +172,7 @@ export function launch(userData) {
     colourSchemes.receive,
     ({ chosen, schemes }) => ({ chosen, schemes }),
     ({ chosen, schemes }) => ({ data: { chosen, schemes } }),
-  );
+  ).then(() => store.dispatch(colourSchemes.loaded()));
   persisted('ui.colourTheme', ui.updateColourTheme);
 
   persisted(
