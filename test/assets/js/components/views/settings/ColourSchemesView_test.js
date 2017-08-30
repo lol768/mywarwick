@@ -47,6 +47,9 @@ describe('ColourSchemesViews', () => {
     result.find('.list-group-item--colour-scheme').last().simulate('click', {
       type: 'click',
       currentTarget: {
+        dataset: {
+          schemeid: '1'
+        },
         blur: () => {
         }
       }
@@ -62,6 +65,13 @@ describe('ColourSchemesViews', () => {
     result.find('.list-group-item--colour-scheme').last().simulate('click', {
       type: 'keyup',
       keyCode: 13,
+      currentTarget: {
+        dataset: {
+          schemeid: '1'
+        },
+        blur: () => {
+        }
+      },
       preventDefault: () => {
       }
     });

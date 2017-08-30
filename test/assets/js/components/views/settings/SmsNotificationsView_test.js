@@ -27,7 +27,7 @@ describe('SmsNotificationsView', () => {
     };
 
     const component = enzyme.shallow(<SmsNotificationsView.WrappedComponent {...props}  />);
-    component.instance().onSwitchChange();
+    component.instance().onSwitchChange({ type: 'click', currentTarget: { blur: () => {} } });
     expect(component.state('editing')).to.equal(true);
     expect(component.state('fromEmpty')).to.equal(true);
     expect(component.find('[id="Settings:SMSNumber-input"]')).to.have.length(1);
@@ -41,7 +41,7 @@ describe('SmsNotificationsView', () => {
     };
 
     const component = enzyme.shallow(<SmsNotificationsView.WrappedComponent {...props}  />);
-    component.instance().onSwitchChange();
+    component.instance().onSwitchChange({ type: 'click', currentTarget: { blur: () => {} } });
     expect(stub.calledWith(true, "1234")).to.equal(true);
   });
 
@@ -54,9 +54,9 @@ describe('SmsNotificationsView', () => {
 
     stub.returns(Promise.resolve({ json: () => ({ success: true }) }));
     const component = enzyme.shallow(<SmsNotificationsView.WrappedComponent {...props}  />);
-    component.instance().onSwitchChange();
+    component.instance().onSwitchChange({ type: 'click', currentTarget: { blur: () => {} } });
     component.instance().phoneNumberInput = { value: '1234' };
-    component.instance().onEditSubmit();
+    component.instance().onEditSubmit({ type: 'click', currentTarget: { blur: () => {} } });
     expect(stub.calledWith(true, "1234")).to.equal(true);
   });
 
@@ -74,7 +74,7 @@ describe('SmsNotificationsView', () => {
     expect(component.state('fromEmpty')).to.equal(false);
     expect(component.find('[id="Settings:SMSNumber-input"]')).to.have.length(1);
     component.instance().phoneNumberInput = { value: '2345' };
-    component.instance().onEditSubmit();
+    component.instance().onEditSubmit({ type: 'click', currentTarget: { blur: () => {} } });
     expect(stub.calledWith(false, "2345")).to.equal(true);
   });
 

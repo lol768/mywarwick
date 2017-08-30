@@ -7,7 +7,7 @@ describe('store', () => {
   });
 
   it('handles a basic action', () => {
-    store.dispatch({type:'ui.theme',theme:'xyz'});
+    store.dispatch({type:'ui.theme',colourTheme:'xyz'});
     store.getState().ui.colourTheme.should.equal('xyz');
   });
 

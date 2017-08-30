@@ -287,7 +287,6 @@ describe('AgendaTileItem', () => {
       name: 'Heronbank',
       href: 'https://campus.warwick.ac.uk/?slid=29129',
     },
-    onClickLink: sinon.spy()
   };
 
   it('renders correctly without a href', () => {

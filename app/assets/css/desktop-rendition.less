@@ -113,7 +113,6 @@ html.not-app .bg-stand-in {
     #app-container:after, header.id7-page-header:before {
       content: "";
       position: fixed;
-      background-color: #8c6e96;
       margin-left: auto;
       left: 0;
       right: 0;
@@ -143,9 +142,6 @@ html.not-app .bg-stand-in {
       border-left: 1px solid #fff;
       border-right: 1px solid #fff;
     }
-  }
-  html.not-app {
-    background: #8c6e96;
   }
 
   html .in-settings .bg-stand-in {
@@ -233,10 +229,10 @@ html.not-app .bg-stand-in {
       }
 
       .id7-main-content-header {
-        padding-top: @desktop-rendition-vertical-border;
+        padding-top: @desktop-rendition-vertical-border + 1;
       }
 
-      .me-view-container, .tile--zoomed {
+      .me-view-container, .me-view-container .tile--zoomed.tile {
         // Account for body's border
         width: @desktop-rendition-width - 2;
         margin-left: 1px;

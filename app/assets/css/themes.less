@@ -55,10 +55,21 @@
   .id7-left-border, .id7-right-border, .id7-utility-masthead { background-color: gold; }
 }
 
-.transparent-theme-maker(@gradBg, @gradTh, @imageUrl, @n) {
+.transparent-theme-maker(@baseColour, @gradBg, @gradTh, @imageUrl, @n) {
   .theme-transparent-@{n} {
 
-    .bg-stand-in {
+    html.not-app& {
+      background: @baseColour;
+      #app-container:after, header.id7-page-header:before {
+        background-color: @baseColour;
+      }
+    }
+
+    .start-masthead {
+      background-color: @baseColour;
+    }
+
+    .bg-stand-in, body {
       background: @behind-tiles-colour;
     }
 
@@ -88,11 +99,11 @@
     }
 
     .in-settings.in-tiles {
-
-      html& .bg-stand-in {
+      &, html& .bg-stand-in {
         background: @behind-tiles-colour;
       }
     }
+
     .colour-0, .colour-1, .colour-2, .colour-3 {
       background-color: @transparent;
       .tile--zoomed .tile__header {
@@ -107,49 +118,56 @@
 }
 
 .transparent-theme-maker(
+  #8C6E96,
   linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
-  linear-gradient(to right, rgba(70, 59, 120, 0.8) 0%, rgba(37, 91, 165, 0.8) 100%),
+  linear-gradient(to right, rgba(82, 71, 144, 0.8) 0%, rgba(59, 98, 172, 0.8) 50%, rgba(55, 85, 158, 0.8) 100%),
   '/assets/images/bg01.jpg',
   1
 );
 
 .transparent-theme-maker(
-  linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
-  linear-gradient(to right, rgba(167, 101, 92, 0.8) 0%, rgba(181, 167, 164, 0.8) 100%),
+  #AC554E,
+  linear-gradient(to bottom, #e66b63, #f6b075 72.9%, #f7ae77 72.9%, #e48060 85.1%, #e57e5f 85.1%, #d46049 93.8%, #d55e4a 93.8%),
+  linear-gradient(to right, rgba(130, 45, 60, 0.8) 0%, rgba(186, 116, 86, 0.8) 50%, rgba(179, 131, 98, 0.8) 100%),
   '/assets/images/bg02.jpg',
   2
 );
 
 .transparent-theme-maker(
-  linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
-  linear-gradient(to right, rgba(98, 167, 158, 0.8) 0%, rgba(165, 179, 170, 0.8) 100%),
+  #338888,
+  linear-gradient(to bottom, #95e1df 0%, #b7e4cf 34.3%, #b5e5cd 34.3%, #abce6a 63.3%, #accc6b 63.3%, #53a72d 76.4%, #51a92f 76.4%, #3ba21b),
+  linear-gradient(to right, rgba(75, 161, 155, 0.8) 0%, rgba(155, 176, 165, 0.8) 50%, rgba(170, 179, 170, 0.8) 100%),
   '/assets/images/bg03.jpg',
   3
 );
 
 .transparent-theme-maker(
-  linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
-  linear-gradient(to right, rgba(57, 121, 126, 0.8) 0%, rgba(13, 93, 108, 0.8) 100%),
+  #2F6B88,
+  linear-gradient(to bottom, #01567f 0%, #035d82 1.3%, #025b83 1.3%, #026086 2.8%, #016285 2.8%, #047794 6.3%, #037993 6.3%, #1f8d9e 27.1%, #1f8f9d 27.1%, #a6ccc1 48.5%, #aed2c6 50.9%, #aecfc6 50.9%, #024b6b 86.3%, #034d6a 86.3%, #005572),
+  linear-gradient(to right, rgba(5, 80, 100, 0.8) 0%, rgba(6, 86, 104, 0.8) 50%, rgba(5, 99, 114, 0.8) 100%),
   '/assets/images/bg04.jpg',
   4
 );
 
 .transparent-theme-maker(
-  linear-gradient(to bottom, #0473de, #eca9de 45.7%, #eea7e0 45.7%, #f49aa2 70.9%, #f697a2 70.9%, #6d4674),
-  linear-gradient(to right, rgba(179, 158, 30, 0.8) 0%, rgba(189, 143, 77, 0.8) 100%),
+  #A35138,
+  linear-gradient(to bottom, #eef1ac, #fce178 12.9%, #fede77 12.9%, #ed8854 59.9%, #ef5a08 83.1%, #f15808 83.1%, #e85704 89.8%, #e75905 89.8%, #e7650f 92.4%, #e56710 92.4%, #f08d38 96.7%, #ed8f38 96.7%, #f7a655),
+  linear-gradient(to right, rgba(180, 152, 31, 0.8) 0%, rgba(189, 164, 105, 0.8) 50%, rgba(191, 137, 61, 0.8) 100%),
   '/assets/images/bg05.jpg',
   5
 );
 
 .behind-tiles(@rules) {
+  html {
+    background: transparent;
+  }
+  .not-app body {
+    @rules();
+  }
   .id7-fixed-width-container,
   .id7-main-content-area {
     @rules();
   }
-  body {
-    @rules();
-  }
-
 }
 
 // Mixin to generate classes for tiles

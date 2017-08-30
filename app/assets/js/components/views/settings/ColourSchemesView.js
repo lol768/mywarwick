@@ -28,9 +28,11 @@ class ColourSchemesView extends HideableView {
     this.persist = this.persist.bind(this);
   }
 
-  onSelect(chosen) {
-    if (!this.props.isOnline) return;
-    this.persist(chosen);
+  onSelect(e) {
+    wrapKeyboardSelect(() => {
+      if (!this.props.isOnline) return;
+      this.persist(parseInt(e.currentTarget.dataset.schemeid, 10));
+    }, e);
   }
 
   persist(chosen) {
@@ -45,11 +47,12 @@ class ColourSchemesView extends HideableView {
   makeItem(scheme) {
     return (
       <div
-        className={`list-group-item list-group-item--colour-scheme list-group-item__choice--colour-scheme list-group-item__choice--colour-scheme-${scheme.id}`}
+        className={`list-group-item list-group-item--colour-scheme list-group-item__choice--colour-scheme list-group-item__choice--colour-scheme-${scheme.id}-preview`}
         role="button"
         key={ scheme.id }
-        onClick={ e => wrapKeyboardSelect(() => this.onSelect(scheme.id), e) }
-        onKeyUp={ e => wrapKeyboardSelect(() => this.onSelect(scheme.id), e) }
+        data-schemeid={ scheme.id }
+        onClick={ this.onSelect }
+        onKeyUp={ this.onSelect }
         tabIndex={ 0 }
       >
         <div className="media media-colour-scheme-choice">

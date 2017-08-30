@@ -68,12 +68,17 @@ body.in-tiles {
     overflow-y: visible;
     padding-top: (@tile-header-zoomed-height + @tile-header-zoomed-padding-top);
   }
+
+  min-height: ~"calc(100vh - @{start-masthead-and-tab-bar-height})";
 }
 
-html.android.app .tile--zoomed .tile__header {
-  top: 0;
-}
+html.android.app .tile--zoomed {
+  min-height: 100vh;
+  .tile__header {
+    top: 0;
+  }
 
-html body.in-tiles .update-popup {
-  display: none;
+  html body.in-tiles .update-popup {
+    display: none;
+  }
 }

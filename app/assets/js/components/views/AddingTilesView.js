@@ -28,6 +28,8 @@ class AddingTilesView extends React.PureComponent {
 
   constructor(props) {
     super(props);
+
+    this.onShowTile = this.onShowTile.bind(this);
     this.state = {};
   }
 
@@ -56,7 +58,7 @@ class AddingTilesView extends React.PureComponent {
 
     const hiddenTileComponents = hiddenTiles.map(tile =>
       (<div key={ tile.id }>
-        <HiddenTile {...tile} onShow={ () => this.onShowTile(tile) } />
+        <HiddenTile {...tile} onShow={ this.onShowTile } />
       </div>),
     );
 

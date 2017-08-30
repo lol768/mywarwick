@@ -66,33 +66,33 @@ export class TileOptionView extends React.PureComponent {
     this.saveConfig(newPreferences);
   }
 
-  makeRadioItem(possibleChoice, radioName) {
-    const currentPreference = this.state.currentPreferences[radioName];
+  makeRadioItem(possibleChoice, groupName) {
+    const currentPreference = this.state.currentPreferences[groupName];
     const { tile, tileOptions } = this.props;
 
     let checked = null;
     if (currentPreference !== undefined && currentPreference.length > 0) {
       checked = currentPreference === possibleChoice.value;
     } else {
-      checked = tileOptions[radioName].default === possibleChoice.value;
+      checked = tileOptions[groupName].default === possibleChoice.value;
     }
 
     return (
       <RadioListGroupItem
-        key={ `${radioName}:${possibleChoice.value}` }
-        icon={ (tile.id === 'weather') ? 'sun-o' : tile.icon }
+        key={ `${groupName}:${possibleChoice.value}` }
+        icon={tileOptions[groupName].icon || tile.icon}
         description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         onClick={ this.onRadioClick }
         checked={ checked }
-        name={ radioName }
+        name={ groupName }
         value={ possibleChoice.value }
         disabled={ !this.props.isOnline }
       />
     );
   }
 
-  makeCheckboxItem(possibleChoice, cbName) {
-    const currentPreference = this.state.currentPreferences[cbName];
+  makeCheckboxItem(possibleChoice, groupName) {
+    const currentPreference = this.state.currentPreferences[groupName];
     const { tile, tileOptions } = this.props;
 
     let checked = null;
@@ -104,22 +104,22 @@ export class TileOptionView extends React.PureComponent {
       } else if (currentPreference[possibleChoice.value] !== undefined) {
         checked = currentPreference[possibleChoice.value];
       } else {
-        checked = tileOptions[cbName].default.indexOf(possibleChoice.value) !== -1;
+        checked = tileOptions[groupName].default.indexOf(possibleChoice.value) !== -1;
       }
     } else {
-      checked = tileOptions[cbName].default.indexOf(possibleChoice.value) !== -1;
+      checked = tileOptions[groupName].default.indexOf(possibleChoice.value) !== -1;
     }
 
     return (
       <SwitchListGroupItem
-        key={ `${cbName}:${possibleChoice.value}` }
-        id={ `${cbName}:${possibleChoice.value}` }
+        key={ `${groupName}:${possibleChoice.value}` }
+        id={ `${groupName}:${possibleChoice.value}` }
         value={ possibleChoice.value }
-        icon={ (tile.id === 'weather') ? 'sun-o' : tile.icon }
+        icon={tileOptions[groupName].icon || tile.icon}
         description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         onClick={ this.onCheckboxClick }
         checked={ checked }
-        name={ cbName }
+        name={ groupName }
         disabled={ !this.props.isOnline }
       />
     );

@@ -7,10 +7,12 @@ import { fetchWithCredentials, postJsonWithCredentials } from '../serverpipe';
 const COLOUR_SCHEME_PREFERENCE_REQUEST = 'COLOUR_SCHEME_PREFERENCE_REQUEST';
 const COLOUR_SCHEME_PREFERENCE_RECEIVE = 'COLOUR_SCHEME_PREFERENCE_RECEIVE';
 const COLOUR_SCHEME_SAVE_CHOICE = 'COLOUR_SCHEME_SAVE_CHOICE';
+const COLOUR_SCHEME_LOADED = 'COLOUR_SCHEME_LOADED';
 
 const start = createAction(COLOUR_SCHEME_PREFERENCE_REQUEST);
 export const receive = createAction(COLOUR_SCHEME_PREFERENCE_RECEIVE);
 const save = createAction(COLOUR_SCHEME_SAVE_CHOICE);
+export const loaded = createAction(COLOUR_SCHEME_LOADED);
 
 const doPostToServer = (colourScheme) => {
   postJsonWithCredentials('/api/colour-schemes', { colourScheme });
@@ -22,16 +24,12 @@ const postToServer = _.debounce(getState =>
 
 export function updateUi() {
   return (dispatch, getState) => {
-    const chosen = getState().colourSchemes.chosen;
-    dispatch(theme.updateColourTheme(`transparent-${chosen}`));
-
-    /* eslint-disable no-undef */
-    const native = window.MyWarwickNative;
-    /* eslint-enable no-undef */
-
-    const isNativeAvailable = (native && 'setBackgroundToDisplay' in native);
-    const call = isNativeAvailable ? native.setBackgroundToDisplay : null;
-    if (call) call(chosen);
+    const chosenId = getState().colourSchemes.chosen;
+    const chosenScheme = _.find(getState().colourSchemes.schemes, scheme => scheme.id === chosenId);
+    dispatch(theme.updateColourTheme({
+      colourTheme: `transparent-${chosenId}`,
+      schemeColour: chosenScheme.schemeColour,
+    }));
   };
 }
 
@@ -68,11 +66,14 @@ const initialState = {
   fetching: false,
   failed: false,
   fetched: false,
+  loaded: false,
   chosen: 1,
   schemes: [
     {
       id: 1,
       url: 'bg01.jpg',
+      name: 'Scarman',
+      schemeColour: '#8C6E96',
     },
   ],
 };
@@ -95,23 +96,23 @@ export function reducer(state = initialState, action) {
           fetched: true,
         };
       }
-      return action.payload.data ? {
+      return {
         ...state,
         fetching: false,
         failed: false,
         fetched: true,
         chosen: action.payload.data.chosen,
         schemes: action.payload.data.schemes,
-      } : {
-        ...state,
-        fetching: false,
-        failed: false,
-        fetched: true,
       };
     case COLOUR_SCHEME_SAVE_CHOICE:
       return {
         ...state,
         chosen: action.payload,
+      };
+    case COLOUR_SCHEME_LOADED:
+      return {
+        ...state,
+        loaded: true,
       };
     default:
       return state;

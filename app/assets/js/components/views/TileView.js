@@ -1,5 +1,6 @@
 /* global document */
-import React, { Component, PropTypes } from 'react';
+import React from 'react';
+import * as PropTypes from 'prop-types';
 import log from 'loglevel';
 import _ from 'lodash-es';
 import $ from 'jquery';
@@ -9,8 +10,9 @@ import * as TILE_TYPES from '../tiles';
 import Tile from '../tiles/Tile';
 import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
+import wrapKeyboardSelect from '../../keyboard-nav';
 
-class TileView extends Component {
+class TileView extends React.PureComponent {
   componentDidMount() {
     if (this.props.tile && this.props.zoomed) {
       $(document.body).addClass(`colour-${this.props.tile.colour}`);
@@ -99,8 +101,8 @@ class TileView extends Component {
     tileProps.onZoomOut = () => this.onTileDismiss();
 
     // Editing
-    tileProps.onHide = () => view.onHideTile(tileProps);
-    tileProps.onResize = () => view.onResizeTile(tileProps);
+    tileProps.onHide = e => wrapKeyboardSelect(() => view.onHideTile(tileProps), e);
+    tileProps.onResize = e => wrapKeyboardSelect(() => view.onResizeTile(tileProps), e);
 
     // subset of config needed by TileContent subclasses
     const contentProps = {

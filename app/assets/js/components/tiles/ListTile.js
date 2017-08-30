@@ -33,7 +33,7 @@ export default class ListTile extends TileContent {
       content.items : _.take(content.items, this.getNumberOfItemsToDisplay());
     return (<ul className="list-unstyled tile-list-group">
       {itemsToDisplay.map(item =>
-        <ListTileItem key={item.id} onClickLink={this.onClickLink} {...item} />,
+        <ListTileItem key={item.id} {...item} />,
       )}
     </ul>);
   }
@@ -41,7 +41,7 @@ export default class ListTile extends TileContent {
 
 export const ListTileItem = props => (
   <li className="tile-list-item--with-separator">
-    <a href={props.href} target="_blank" onClick={ props.onClickLink }>
+    <a href={props.href} target="_blank">
       { props.title && <span className="list-group-item__title">{props.title}</span> }
       { props.date && <span className="list-group-item__date">{formatDateTime(props.date)}</span> }
       <span className="list-group-item__text">{props.text}</span>
@@ -54,5 +54,4 @@ ListTileItem.propTypes = {
   href: PropTypes.string,
   text: PropTypes.string,
   title: PropTypes.string,
-  onClickLink: PropTypes.func,
 };

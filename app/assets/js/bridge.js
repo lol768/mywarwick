@@ -50,6 +50,15 @@ export default function init(opts) {
           stream.getNumItemsSince(strm, lastReadDate),
         ),
       ),
+      createSelector(
+        state => state.colourSchemes.chosen,
+        state => state.colourSchemes.loaded,
+        (chosen, loaded) => {
+          if (loaded && native.setBackgroundToDisplay) {
+            native.setBackgroundToDisplay(chosen);
+          }
+        },
+      ),
     ];
 
     function update() {

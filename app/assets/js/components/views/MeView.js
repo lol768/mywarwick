@@ -14,6 +14,7 @@ import * as TILE_TYPES from '../tiles';
 import ScrollRestore from '../ui/ScrollRestore';
 import GridSizingHelper from '../../GridSizingHelper';
 import { Routes } from '../AppRoot';
+import wrapKeyboardSelect from '../../keyboard-nav';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -113,8 +114,8 @@ class MeView extends React.PureComponent {
     this.props.dispatch(goBack());
   }
 
-  onAdd() {
-    this.props.dispatch(push(`/${Routes.EDIT}/${Routes.ADD}`));
+  onAdd(e) {
+    wrapKeyboardSelect(() => this.props.dispatch(push(`/${Routes.EDIT}/${Routes.ADD}`)), e);
   }
 
   getTileSize(id) {
@@ -213,6 +214,7 @@ class MeView extends React.PureComponent {
                   key="add-tile-button"
                   className="add-tile-button"
                   onClick={this.onAdd}
+                  onKeyUp={this.onAdd}
                   role="button"
                   tabIndex={0}
                 >
