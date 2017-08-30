@@ -52,8 +52,9 @@ export default function init(opts) {
       ),
       createSelector(
         state => state.colourSchemes.chosen,
-        (chosen) => {
-          if (native.setBackgroundToDisplay) {
+        state => state.colourSchemes.loaded,
+        (chosen, loaded) => {
+          if (loaded && native.setBackgroundToDisplay) {
             native.setBackgroundToDisplay(chosen);
           }
         },

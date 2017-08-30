@@ -21,6 +21,7 @@ class ID7Layout extends React.PureComponent {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     colourTheme: PropTypes.string.isRequired,
+    schemeColour: PropTypes.string.isRequired,
     colourSchemesLoaded: PropTypes.bool.isRequired,
     user: PropTypes.shape({
       data: PropTypes.shape({
@@ -35,13 +36,15 @@ class ID7Layout extends React.PureComponent {
   };
 
   /** Set the theme on the html element, so that we can style everything. */
-  static setBodyTheme(newProps) {
+  static setColourTheme(newProps) {
     if (newProps.colourSchemesLoaded) {
       $('html')
         .removeClass((i, className) =>
           _.filter(className.split(' '), singleClass => _.startsWith(singleClass, 'theme-')).join(' '),
         )
-        .addClass(`theme-${newProps.colourTheme}`);
+        .addClass(`theme-${newProps.colourTheme}`)
+        .find('meta[name="theme-color"]')
+        .attr('content', newProps.schemeColour);
     }
   }
 
@@ -57,7 +60,7 @@ class ID7Layout extends React.PureComponent {
 
   componentWillMount() {
     this.props.dispatch(ui.updateUIContext());
-    ID7Layout.setBodyTheme(this.props);
+    ID7Layout.setColourTheme(this.props);
   }
 
   componentDidMount() {
@@ -86,7 +89,7 @@ class ID7Layout extends React.PureComponent {
       prevProps.colourTheme !== this.props.colourTheme ||
         prevProps.colourSchemesLoaded !== this.props.colourSchemesLoaded
     ) {
-      ID7Layout.setBodyTheme(this.props);
+      ID7Layout.setColourTheme(this.props);
     }
   }
 
@@ -196,6 +199,7 @@ const select = state => ({
     getNumItemsSince(state.notifications.stream, _.get(state, ['notificationsLastRead', 'date'])),
   user: state.user,
   colourTheme: state.ui.colourTheme,
+  schemeColour: state.ui.schemeColour,
   colourSchemesLoaded: state.colourSchemes.loaded,
   zoomedTile: state.ui.zoomedTile,
   native: state.ui.native,

@@ -24,6 +24,7 @@ function isNative() {
 const initialState = {
   layoutWidth: 2, // 2 columns by default
   colourTheme: 'transparent-1',
+  schemeColour: '#8C6E96',
   native: false,
 };
 
@@ -35,16 +36,16 @@ export function reducer(state = initialState, action) {
     case 'ui.navRequest':
       return { ...state, navRequest: action.navRequest };
     case 'ui.theme':
-      return { ...state, colourTheme: action.theme };
+      return { ...state, colourTheme: action.colourTheme, schemeColour: action.schemeColour };
     default:
       return state;
   }
 }
 
-export function updateColourTheme(theme) {
+export function updateColourTheme(payload) {
   return {
     type: 'ui.theme',
-    theme,
+    ...payload,
   };
 }
 
@@ -65,7 +66,16 @@ export function updateUIContext() {
 export function subscribeToStore(store) {
   const themeSelector = createSelector(
     state => state.colourSchemes.chosen,
-    chosen => store.dispatch(updateColourTheme(`transparent-${chosen}`)),
+    (chosenId) => {
+      const chosenScheme = _.find(
+        store.getState().colourSchemes.schemes,
+        scheme => scheme.id === chosenId,
+      );
+      store.dispatch(updateColourTheme({
+        colourTheme: `transparent-${chosenId}`,
+        schemeColour: chosenScheme.schemeColour,
+      }));
+    },
   );
   store.subscribe(() => {
     const state = store.getState();

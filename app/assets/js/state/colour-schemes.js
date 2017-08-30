@@ -24,8 +24,12 @@ const postToServer = _.debounce(getState =>
 
 export function updateUi() {
   return (dispatch, getState) => {
-    const chosen = getState().colourSchemes.chosen;
-    dispatch(theme.updateColourTheme(`transparent-${chosen}`));
+    const chosenId = getState().colourSchemes.chosen;
+    const chosenScheme = _.find(getState().colourSchemes.schemes, scheme => scheme.id === chosenId);
+    dispatch(theme.updateColourTheme({
+      colourTheme: `transparent-${chosenId}`,
+      schemeColour: chosenScheme.schemeColour,
+    }));
   };
 }
 
@@ -69,6 +73,7 @@ const initialState = {
       id: 1,
       url: 'bg01.jpg',
       name: 'Scarman',
+      schemeColour: '#8C6E96',
     },
   ],
 };
