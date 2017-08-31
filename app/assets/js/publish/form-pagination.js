@@ -92,7 +92,7 @@ $(SPLIT_FORM).each((i, form) => {
 
       $audiencePicker.prepend(
         errorsAsJson.audience.map(err =>
-          $('<div>').addClass('alert alert-danger').attr('id', '_error_').html(err),
+          $('<div>').addClass('help-block').attr('id', '_error_').html(err),
         ),
       );
     }

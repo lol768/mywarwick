@@ -45,6 +45,11 @@ export default class AudiencePicker extends React.PureComponent {
     this.selectDepartment = this.selectDepartment.bind(this);
   }
 
+  componentDidMount() {
+    // lame way to update department from code => name
+    if (this.props.formData && this.props.formData.department) { this.deptSelect.click(); }
+  }
+
   handleChange(value, type, path) {
     const updateObj = obj => (
       {
@@ -105,7 +110,8 @@ export default class AudiencePicker extends React.PureComponent {
       const isPublic = this.isChecked('audience.universityWide');
       const deptSelect = this.props.departments.length > 1 ?
         (<select
-          defaultValue=""
+          ref={select => (this.deptSelect = select)}
+          defaultValue={this.state.department || ''}
           name="audience.department"
           className="form-control"
           onClick={({ target: { options, selectedIndex } }) =>
@@ -206,6 +212,7 @@ export default class AudiencePicker extends React.PureComponent {
                 type="listOfUsercodes"
                 name="audience.audience[]"
                 handleChange={this.handleChange}
+                items={_.get(this.state, prefixPath('.groups.listOfUsercodes'), [])}
                 placeholder="Type in usercodes separated by commas (e.g. user1, user2)"
               />
             </div>

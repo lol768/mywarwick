@@ -105,7 +105,7 @@ object Audience {
       case seminarGroupRegex(groupId) => Some(SeminarGroupAudience(groupId))
       case relationshipRegex(relationshipType, agentId) => Some(RelationshipAudience(relationshipType, UniversityID(agentId)))
       case optInRegex(optInType, optInValue) if optInType == LocationOptIn.optInType => LocationOptIn.fromValue(optInValue)
-      case string => {
+      case string if string.nonEmpty => {
         val validUsercodes: Seq[Usercode] = string.split(",").map(_.trim).flatMap {
           case usercodesRegex(usercode) => Some(Usercode(usercode))
           case _ => None
@@ -115,6 +115,7 @@ object Audience {
         else
           None
       }
+      case _ => None
     }
   }
 

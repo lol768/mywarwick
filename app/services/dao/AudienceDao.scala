@@ -20,8 +20,9 @@ object AudienceComponentSave {
       AudienceComponentSave(name, Some(valueList.mkString("|")), deptCode)
     }
   }
+
   def toCompoundValue2(compoundValue: String): (String, String) =
-    Seq(compoundValue.split('|'):_*) match {
+    Seq(compoundValue.split('|'): _*) match {
       case (value1 :: value2 :: Nil) => (value1, value2)
       case _ => throw new IllegalArgumentException(s"Expected 2 values but was ${compoundValue.split('|').length}")
     }
@@ -93,7 +94,10 @@ class AudienceDaoImpl extends AudienceDao {
           case AudienceComponentSave("WebGroup", Some(group), _) => WebGroupAudience(GroupName(group))
         }
         case ("Usercode", components) => components.flatMap(_.value).map(Usercode).map(UsercodeAudience.apply)
-        case (_, components) => components.map(_.name).flatMap(ComponentParameter.unapply)
+        case (_, components) => components.map(c =>
+          if (c.value.isDefined) s"${c.name}:${c.value.get}"
+          else c.name
+        ).flatMap(ComponentParameter.unapply)
       }
       case (Some(deptCode), components) =>
         val subsets = components.map(_.name).map {

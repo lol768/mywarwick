@@ -2,7 +2,6 @@ package services.dao
 
 import javax.inject.{Inject, Named}
 
-import com.google.inject.ImplementedBy
 import play.api.Configuration
 import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
@@ -37,17 +36,29 @@ case class LookupRelationshipType(
 trait AudienceLookupDao {
 
   def resolveDepartment(departmentCode: String): Future[Seq[Usercode]]
+
   def resolveTeachingStaff(departmentCode: String): Future[Seq[Usercode]]
+
   def resolveAdminStaff(departmentCode: String): Future[Seq[Usercode]]
+
   def resolveUndergraduates(departmentCode: String): Future[Seq[Usercode]]
+
   def resolveTaughtPostgraduates(departmentCode: String): Future[Seq[Usercode]]
+
   def resolveResearchPostgraduates(departmentCode: String): Future[Seq[Usercode]]
+
   def resolveModule(moduleCode: String): Future[Seq[Usercode]]
+
   def resolveSeminarGroup(groupId: String): Future[Seq[Usercode]]
+
   def resolveRelationship(agentId: UniversityID, relationshipType: String): Future[Seq[Usercode]]
 
+  def getSeminarGroupById(groupId: String): Future[Option[LookupSeminarGroup]]
+
   def findModules(query: String): Future[Seq[LookupModule]]
+
   def findSeminarGroups(query: String): Future[Seq[LookupSeminarGroup]]
+
   def findRelationships(agentId: UniversityID): Future[Map[LookupRelationshipType, Seq[User]]]
 
 }
@@ -123,6 +134,16 @@ class TabulaAudienceLookupDao @Inject()(
     )
   }
 
+  // TODO: Tabula API to provide 'groupById' endpoint that includes groupSetName value
+  override def getSeminarGroupById(groupId: String): Future[Option[LookupSeminarGroup]] = {
+    getAuthenticatedAsJson(tabulaSmallGroupsLookupUrl(groupId)).map(
+      TabulaResponseParsers.validateAPIResponse(_, TabulaResponseParsers.seminarGroupReads(groupId)).fold(
+        handleValidationError(_, None),
+        group => Some(group)
+      )
+    )
+  }
+
   override def findModules(query: String): Future[Seq[LookupModule]] = {
     getAsJson(tabulaModuleQueryUrl, Seq("query" -> query))
       .map(_.validate[Seq[LookupModule]](Reads.seq(TabulaResponseParsers.lookupModuleReads)).fold(
@@ -154,11 +175,11 @@ class TabulaAudienceLookupDao @Inject()(
 
 
   private def getAsJson(url: String, params: Seq[(String, String)]): Future[JsValue] = {
-    ws.url(url).withQueryString(params:_*).get().map(response => response.json)
+    ws.url(url).withQueryString(params: _*).get().map(response => response.json)
   }
 
   private def getAuthenticatedAsJson(url: String, params: Seq[(String, String)] = Nil): Future[JsValue] = {
-    setupRequest(url).withQueryString(params:_*).get().map(response => response.json)
+    setupRequest(url).withQueryString(params: _*).get().map(response => response.json)
   }
 
   private def setupRequest(url: String): WSRequest = {
@@ -248,28 +269,40 @@ object TabulaResponseParsers {
     (__ \ "code").read[String] and
       (__ \ "name").read[String] and
       (__ \ "department").read[String]
-    )(LookupModule.apply _)
+    ) (LookupModule.apply _)
 
   val lookupSeminarGroupReads: Reads[LookupSeminarGroup] = (
     (__ \ "id").read[String] and
       (__ \ "name").read[String] and
       (__ \ "groupSet" \ "name").read[String] and
       (__ \ "module" \ "code").read[String]
-    )(LookupSeminarGroup.apply _)
+    ) (LookupSeminarGroup.apply _)
+
+  // TODO: Tabula API to provide 'groupById' endpoint that includes groupSetName value, to be read into a LookupSeminarGroup
+  def seminarGroupReads(id: String): Reads[LookupSeminarGroup] = (
+    Reads.pure(id) and
+      (__ \ "group" \"name").read[String] and
+      Reads.pure("") and
+      Reads.pure("")
+    ) (LookupSeminarGroup.apply _)
 
   case class TabulaUserData(userId: String, universityId: String)
+
   private val tabulaUserDataReads = Json.reads[TabulaUserData]
 
   object MemberRelationship {
+
     case class MemberRelationship(relationshipType: LookupRelationshipType, students: Seq[TabulaUserData])
+
     case class MemberRelationshipsResponse(
       relationships: Seq[MemberRelationship]
     )
+
     private val lookupRelationshipTypeReads = Json.reads[LookupRelationshipType]
     private val memberRelationshipReads = (
       (__ \ "relationshipType").read[LookupRelationshipType](lookupRelationshipTypeReads) and
         (__ \ "students").read[Seq[TabulaUserData]](Reads.seq(tabulaUserDataReads))
-    )(MemberRelationship.apply _)
+      ) (MemberRelationship.apply _)
     val reads: Reads[MemberRelationshipsResponse] =
       (__ \ "relationships").read[Seq[MemberRelationship]](Reads.seq(memberRelationshipReads))
         .map(MemberRelationshipsResponse.apply)
@@ -279,6 +312,7 @@ object TabulaResponseParsers {
     (__ \ "group" \ "students").read[Seq[TabulaUserData]](Reads.seq(tabulaUserDataReads))
 
   private case class ErrorMessage(message: String)
+
   private val errorMessageReads = Json.reads[ErrorMessage]
 
   def validateAPIResponse[A](jsValue: JsValue, parser: Reads[A]): JsResult[A] = {

@@ -1,5 +1,5 @@
 @import models.publishing.PermissionScope
-@import play.api.libs.json.Json
+@import play.api.libs.json.{Json, JsValue}
 
 @(
     form: Form[_],
@@ -8,12 +8,14 @@
     itemName: String,
     permissionScope: PermissionScope,
     allowPublic: Boolean,
-    audience: Audience
+    audience: Audience,
+    audienceJson: JsValue = Json.obj()
 )(implicit fc: b3.B3FieldConstructor, messages: Messages)
 @* TODO receive list of allowed audiences from controller - each user's will be different *@
 
 <div
 data-is-god="@(permissionScope == PermissionScope.AllDepartments)"
+data-form-data='@Json.toJson(audienceJson)'
 data-errors='@form.errorsAsJson'
 data-departments='@Json.toJson(departmentOptions.map { case (code, name) => Seq(code, name) })'
 id="audience-picker" class="form-group col-md-12">

@@ -52,7 +52,6 @@ $('.split-form').each((i, form) => {
         '#audience-picker :input',
         '#item_category_field :input',
         '#item_ignoreCategories_field :input',
-        '.audience-picker-extra :input',
       ].join(', '),
       // Defer so any changes to other fields made as a result of this change
       // propagate before requesting the audience size estimate.  Debounce
@@ -60,6 +59,9 @@ $('.split-form').each((i, form) => {
       () => _.defer(_.debounce(updateAudienceEstimate, 500)),
     );
   }
+
+  // On update form, wait for React to load state, then calculate estimate
+  setTimeout(updateAudienceEstimate, 500);
 
   $('[data-toggle="tooltip"]').tooltip();
 });

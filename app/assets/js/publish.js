@@ -18,6 +18,7 @@ function setupAudiencePicker() {
     const props = {
       departments: audiencePicker.data('departments') || [],
       isGod: audiencePicker.data('is-god') || false,
+      formData: audiencePicker.data('form-data') || {},
     };
     ReactDOM.render(
       <AudiencePicker {...props} />,
