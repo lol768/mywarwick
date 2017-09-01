@@ -26,14 +26,14 @@ export class InputList extends React.PureComponent {
 
   addItem(newItem) {
     const { items, handleChange, type } = this.props;
-    if (!items.filter(item => item.value === newItem.value).length > 0) {
+    if (!_.filter(items, item => item.value === newItem.value).length > 0) {
       handleChange({ items: [...items, newItem] }, type);
     }
   }
 
   removeItem(value) {
     const { items, handleChange, type } = this.props;
-    handleChange({ items: items.filter(item => item.value !== value) }, type);
+    handleChange({ items: _.filter(items, item => item.value !== value) }, type);
   }
 
   render() {
@@ -169,10 +169,10 @@ class ListItemWithOptions extends ListItem {
   }
 
   toggleOption(value) {
-    const oldOption = this.props.options.find(opt => opt[value])[value];
+    const oldOption = _.find(this.props.options, opt => opt[value])[value];
     const updatedOption = { [value]: { ...oldOption, selected: !oldOption.selected } };
     const newOptions =
-      [...this.props.options.filter(opt => opt[value] === undefined), updatedOption];
+      [..._.filter(this.props.options, opt => opt[value] === undefined), updatedOption];
     this.props.toggleOption(this.props.value, newOptions);
   }
 
@@ -227,7 +227,7 @@ export class InputOptionsList extends InputList {
     const { items, handleChange, type } = this.props;
     if (newItem.options.length === 0) {
       this.setState({ error: 'That staff member has no students to add' });
-    } else if (!items.filter(item => item.value === newItem.value).length > 0) {
+    } else if (!_.filter(items, item => item.value === newItem.value).length > 0) {
       handleChange({ items: [...items, newItem] }, type);
       this.setState({ error: null });
     } else {
@@ -237,8 +237,8 @@ export class InputOptionsList extends InputList {
 
   toggleOption(value, options) {
     const { items, handleChange, type } = this.props;
-    const updatedItem = { ...items.find(i => i.value === value), options };
-    handleChange({ items: [...items.filter(i => i.value !== value), updatedItem] }, type);
+    const updatedItem = { ..._.find(items, i => i.value === value), options };
+    handleChange({ items: [..._.filter(items, i => i.value !== value), updatedItem] }, type);
   }
 
   render() {

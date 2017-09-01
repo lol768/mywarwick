@@ -9,7 +9,7 @@ import org.scalatest.mockito.MockitoSugar
 import play.api.data.FormError
 import services.AudienceService
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
-import warwick.sso.{AuthenticatedRequest, UniversityID}
+import warwick.sso.{AuthenticatedRequest, UniversityID, Usercode}
 
 import scala.util.Try
 

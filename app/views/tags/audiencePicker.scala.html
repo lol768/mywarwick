@@ -15,9 +15,9 @@
 
 <div
 data-is-god="@(permissionScope == PermissionScope.AllDepartments)"
-data-form-data='@Json.toJson(audienceJson)'
+data-form-data='@audienceJson'
 data-errors='@form.errorsAsJson'
-data-departments='@Json.toJson(departmentOptions.map { case (code, name) => Seq(code, name) })'
+data-departments='@Json.obj(departmentOptions.map { case (code, name) => code -> Json.toJsFieldJsValueWrapper(name) }:_*)'
 id="audience-picker" class="form-group col-md-12">
 </div>
 

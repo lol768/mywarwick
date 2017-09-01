@@ -7,13 +7,14 @@ import models.Audience
 import models.Audience.{LocationOptIn, _}
 import play.api.db.Database
 import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.Request
 import services.dao._
-import system.Logging
+import system.{AuditLogContext, Logging}
 import warwick.sso._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
@@ -22,6 +23,8 @@ trait AudienceService {
   def getAudience(audienceId: String): Audience
 
   def audienceToJson(audience: Audience): JsValue
+
+  def validateUsercodes(usercodes: Seq[Usercode]): Seq[Usercode]
 }
 
 class AudienceServiceImpl @Inject()(
@@ -230,4 +233,10 @@ class AudienceServiceImpl @Inject()(
       )
     ) ++ locationsJson
   }
+
+  override def validateUsercodes(usercodes: Seq[Usercode]): Seq[Usercode] =
+    userLookupService.getUsers(usercodes) match {
+      case Success(users) => users.keys.toSeq
+      case Failure(_) => Seq.empty[Usercode]
+    }
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
+import _ from 'lodash-es';
 
 export default class MultilineTextInput extends React.PureComponent {
   static defaultProps = {
@@ -24,19 +25,20 @@ export default class MultilineTextInput extends React.PureComponent {
   }
 
   handleTextChange({ target: { value } }) {
-    const items = value.split(',').filter(val => val.length > 4);
+    const items = _.filter(value.split(','), val => val.length > 4);
     this.props.handleChange(items, this.props.type);
   }
 
   render() {
     return (
       <div>
-        {this.props.items.map((val, i) =>
-          <input key={i} readOnly hidden name={this.props.name} value={val} />,
-        )}
+        {/* {this.props.items.map((val, i) =>*/}
+        {/* <input key={i} readOnly hidden name={this.props.name} value={val} />,*/}
+        {/* )}*/}
         <textarea
           className="form-control"
           onChange={this.handleTextChange}
+          name={this.props.name}
           placeholder={this.props.placeholder}
           rows={this.props.rows}
           cols={this.props.cols}

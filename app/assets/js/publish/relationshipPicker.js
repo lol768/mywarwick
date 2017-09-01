@@ -2,6 +2,7 @@ import $ from 'jquery';
 import { postJsonWithCredentials } from '../serverpipe';
 import 'bootstrap-3-typeahead';
 import log from 'loglevel';
+import _ from 'lodash-es';
 
 // TODO: implement this wrapper properly. Format response data appropriately
 
@@ -34,7 +35,7 @@ class RelationshipPicker {
           .then((response) => {
             // Return the items only if the user hasn't since made a different query
             if (currentQuery === query && currentQuery !== '') {
-              const staff = response.data.results.filter(o => o.isStaff);
+              const staff = _.filter(response.data.results, o => o.isStaff);
               callback(staff || []);
             }
           });
