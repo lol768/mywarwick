@@ -41,7 +41,7 @@ export function receiveUserInfo(response) {
 }
 
 const feedbackFormLocation =
-  'http://warwick.ac.uk/my/feedback';
+  'https://warwick.ac.uk/my/feedback';
 
 export function showFeedbackForm(deviceDetails) {
   const state = store.getState();
