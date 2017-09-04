@@ -242,6 +242,13 @@ html.not-app .bg-stand-in {
         width: @desktop-rendition-width - 2;
         margin-left: 1px;
       }
+
+      .tile--map.tile--zoomed iframe {
+        width: ~"calc(100% - 2px)";
+        left: 1px;
+        // 44px nav bar, 44px tab bar, 2 x 60px border
+        height: ~"calc(100vh - @{start-masthead-and-tab-bar-height} - @{desktop-rendition-vertical-border} - @{desktop-rendition-vertical-border})";
+      }
     }
   }
 }
