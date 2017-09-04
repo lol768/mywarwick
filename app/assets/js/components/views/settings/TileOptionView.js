@@ -24,14 +24,37 @@ export class TileOptionView extends React.PureComponent {
     super(props);
 
     const currentPreferences = {};
-    _.keys(props.tileOptions).forEach(key => (currentPreferences[key] = undefined));
+    _.keys(props.tileOptions).forEach((key) => {
+      const tileOption = props.tileOptions[key];
 
-    this.state = {
-      currentPreferences: {
-        ...currentPreferences,
-        ...props.tile.preferences,
-      },
-    };
+      // Populate the options
+      if (tileOption.type === 'array') {
+        currentPreferences[key] = {};
+        tileOption.options.forEach(option => (currentPreferences[key][option.value] = false));
+      } else {
+        currentPreferences[key] = '';
+      }
+
+      // Load the defaults
+      if (tileOption.type === 'array') {
+        tileOption.default.forEach(value => (currentPreferences[key][value] = true));
+      } else {
+        currentPreferences[key] = tileOption.default;
+      }
+
+      // Overwrite with user preference if defined
+      if (props.tile.preferences !== null && props.tile.preferences[key] !== undefined) {
+        if (tileOption.type === 'array') {
+          _.keys(props.tile.preferences[key]).forEach((option) => {
+            currentPreferences[key][option] = props.tile.preferences[key][option];
+          });
+        } else {
+          currentPreferences[key] = props.tile.preferences[key];
+        }
+      }
+    });
+
+    this.state = { currentPreferences };
 
     this.saveConfig = this.saveConfig.bind(this);
     this.saveTilePreferences = _.debounce(this.saveTilePreferences.bind(this), 1000);
@@ -41,16 +64,7 @@ export class TileOptionView extends React.PureComponent {
 
   onCheckboxClick(value, name) {
     const currentPref = _.clone(this.state.currentPreferences);
-
-    if (currentPref[name] === undefined) {
-      currentPref[name] = { [value]: true };
-    } else {
-      if (_.isArray(currentPref[name])) {
-        currentPref[name] = _.keyBy(currentPref[name]);
-        _.keys(currentPref[name]).forEach(key => (currentPref[name][key] = true));
-      }
-      currentPref[name][value] = !currentPref[name][value];
-    }
+    currentPref[name][value] = !currentPref[name][value];
 
     this.saveConfig(currentPref);
   }
@@ -69,13 +83,7 @@ export class TileOptionView extends React.PureComponent {
   makeRadioItem(possibleChoice, groupName) {
     const currentPreference = this.state.currentPreferences[groupName];
     const { tile, tileOptions } = this.props;
-
-    let checked = null;
-    if (currentPreference !== undefined && currentPreference.length > 0) {
-      checked = currentPreference === possibleChoice.value;
-    } else {
-      checked = tileOptions[groupName].default === possibleChoice.value;
-    }
+    const checked = currentPreference === possibleChoice.value;
 
     return (
       <RadioListGroupItem
@@ -95,20 +103,7 @@ export class TileOptionView extends React.PureComponent {
     const currentPreference = this.state.currentPreferences[groupName];
     const { tile, tileOptions } = this.props;
 
-    let checked = null;
-    if (currentPreference !== undefined) {
-      if (_.isArray(currentPreference)) {
-        // NEWSTART-681 We can't use the defaults if it's an array
-        // Eventually all of these will go away
-        checked = currentPreference.indexOf(possibleChoice.value) !== -1;
-      } else if (currentPreference[possibleChoice.value] !== undefined) {
-        checked = currentPreference[possibleChoice.value];
-      } else {
-        checked = tileOptions[groupName].default.indexOf(possibleChoice.value) !== -1;
-      }
-    } else {
-      checked = tileOptions[groupName].default.indexOf(possibleChoice.value) !== -1;
-    }
+    const checked = currentPreference[possibleChoice.value];
 
     return (
       <SwitchListGroupItem
