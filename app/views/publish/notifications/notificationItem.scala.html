@@ -59,7 +59,9 @@
         }
         <div class="activity-item__date">@models.DateFormats.emailDateTime(item.activity.publishedAt)</div>
         @item.activity.url.map { url =>
-          <a href="@url">Link to @url</a>
+          <div class="activity-item__visible-link">
+            Link to  <a href="@url">@url</a>
+          </div>
         }
       </div>
     </div>

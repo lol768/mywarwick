@@ -34,27 +34,32 @@ html.not-app .bg-stand-in {
       padding: 2rem;
       font-size: 18px;
       color: #fff;
+
+      h1 {
+        color: white;
+        font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 50px;
+        text-align: center;
+        letter-spacing: -0.2px;
+        text-transform: uppercase;
+        border-bottom: 0;
+        padding-bottom: 0;
+        margin-bottom: 11px;
+
+        .light {
+          opacity: 0.6;
+        }
+      }
+      a {
+        color: white;
+        text-decoration-color: white;
+      }
+      .buttons a {
+        text-decoration: none;
+      }
     }
     .app-dl {
       width: 160px;
-    }
-  }
-
-  .marketing .inner-content {
-    h1 {
-      color: white;
-      font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      font-size: 50px;
-      text-align: center;
-      letter-spacing: -0.2px;
-      text-transform: uppercase;
-      border-bottom: 0;
-      padding-bottom: 0;
-      margin-bottom: 11px;
-
-      .light {
-        opacity: 0.6;
-      }
     }
   }
 
@@ -236,6 +241,18 @@ html.not-app .bg-stand-in {
         // Account for body's border
         width: @desktop-rendition-width - 2;
         margin-left: 1px;
+      }
+
+      .tile--map.tile--zoomed iframe {
+        width: ~"calc(100% - 2px)";
+        left: 1px;
+        // 44px nav bar, 44px tab bar, 2 x 60px border
+        height: ~"calc(100vh - @{start-masthead-and-tab-bar-height} - @{desktop-rendition-vertical-border} - @{desktop-rendition-vertical-border})";
+      }
+
+      .permission-request, .permission-warning {
+        top: 0;
+        bottom: auto;
       }
     }
   }

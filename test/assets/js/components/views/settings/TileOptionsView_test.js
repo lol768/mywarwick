@@ -97,21 +97,6 @@ describe('Radio button', () => {
     expect(checked.prop('value')).to.equal('value1');
   });
 
-  it('selected if no preference (blank) with default', () => {
-    const thisProps = _.cloneDeep(props);
-    thisProps.tileOptions.radioOption.default = 'value1';
-    thisProps.tile.preferences = {
-      radioOption: '',
-    };
-
-    const result = enzyme.shallow(<TileOptionView {...thisProps} />);
-    const radios = result.find(RadioListGroupItem);
-    checkRadios(radios);
-    const checked = radios.findWhere((input) => input.props().checked);
-    expect(checked).to.have.length(1);
-    expect(checked.prop('value')).to.equal('value1');
-  });
-
   it('selected if preference no default', () => {
     const thisProps = _.cloneDeep(props);
     thisProps.tile.preferences = {
@@ -258,41 +243,6 @@ describe('Checkboxes', () => {
     checkCheckboxes(checkboxes);
     const checked = checkboxes.findWhere((input) => input.props().checked);
     expect(checked).to.have.length(2);
-  });
-
-  it('selected if preference (legacy) and no default', () => {
-    const thisProps = _.cloneDeep(props);
-    thisProps.tileOptions.checkboxOption.default = [];
-    thisProps.tile.preferences = {
-      checkboxOption: [
-        'value1',
-      ],
-    };
-
-    const result = enzyme.shallow(<TileOptionView {...thisProps} />);
-    const checkboxes = result.find(SwitchListGroupItem);
-    checkCheckboxes(checkboxes);
-    const checked = checkboxes.findWhere((input) => input.props().checked);
-    expect(checked).to.have.length(1);
-    expect(checked.prop('value')).to.equal('value1');
-  });
-
-  it('selected if preference (legacy) with default', () => {
-    const thisProps = _.cloneDeep(props);
-    thisProps.tile.preferences = {
-      checkboxOption: [
-        'value1',
-      ],
-    };
-
-    const result = enzyme.shallow(<TileOptionView {...thisProps} />);
-    const checkboxes = result.find(SwitchListGroupItem);
-    checkCheckboxes(checkboxes);
-    const checked = checkboxes.findWhere((input) => input.props().checked);
-    // Even though value2 defaults to true
-    // we can't use the defaults with the legacy (array) structure
-    expect(checked).to.have.length(1);
-    expect(checked.prop('value')).to.equal('value1');
   });
 
 });
