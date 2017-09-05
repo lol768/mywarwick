@@ -83,13 +83,27 @@ class SmsNotificationsView extends HideableView {
     e);
   }
 
+  isWantsSms() {
+    if (this.state.fromEmpty) {
+      // We're here with the intention of enabling SMS notifications
+      return true;
+    }
+
+    if (this.phoneNumberInput.value.trim().length === 0) {
+      // The phone number field is empty
+      return false;
+    }
+
+    return this.state.enabled;
+  }
+
   onEditSubmit(e) {
     wrapKeyboardSelect(() =>
       this.setState({
         submitting: true,
       }, () => {
         smsNotifications.persist(
-          this.state.fromEmpty || this.state.enabled,
+          this.isWantsSms(),
           this.phoneNumberInput.value,
         )
           .then(response => response.json()).then(this.handleJson);
@@ -104,7 +118,7 @@ class SmsNotificationsView extends HideableView {
         submitting: false,
         submitError: undefined,
         fromEmpty: false,
-        enabled: this.state.fromEmpty || this.state.enabled,
+        enabled: this.isWantsSms(),
         smsNumber: this.phoneNumberInput.value,
       });
     } else if (json.errors.length > 0) {
