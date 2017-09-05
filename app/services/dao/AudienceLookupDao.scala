@@ -1,5 +1,6 @@
 package services.dao
 
+import java.io.IOException
 import javax.inject.{Inject, Named}
 
 import play.api.Configuration
@@ -7,7 +8,7 @@ import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws._
-import system.Logging
+import system.{Logging, TrustedAppsError}
 import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplicationsManager}
 import warwick.sso.{UniversityID, User, UserLookupService, Usercode}
 
@@ -157,7 +158,16 @@ class TabulaAudienceLookupDao @Inject()(
   }
 
   private def getAuthenticatedAsJson(url: String, params: Seq[(String, String)] = Nil): Future[JsValue] = {
-    setupRequest(url).withQueryString(params:_*).get().map(response => response.json)
+    setupRequest(url).withQueryString(params:_*).get()
+      .map(response => {
+        TrustedAppsError.fromWSResponse(response).foreach { e =>
+          throw e
+        }
+        if (response.status >= 400) {
+          throw new IOException(s"Response code ${response.status} from audience lookup ${url}")
+        }
+        response.json
+      })
   }
 
   private def setupRequest(url: String): WSRequest = {
