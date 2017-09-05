@@ -11,12 +11,12 @@ import play.api.Configuration
 
 import scala.collection.JavaConversions
 
-@ImplementedBy(classOf[esServiceImpl])
+@ImplementedBy(classOf[ESServiceImpl])
 trait ESService {
   def index(index: String, docType: String, jsonString: String)
 }
 
-class esServiceImpl @Inject()(
+class ESServiceImpl @Inject()(
   config: Configuration
 ) extends ESService {
   private val esNodes = JavaConversions.asScalaBuffer(
