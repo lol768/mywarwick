@@ -16,16 +16,26 @@ export default class RadioListGroupItem extends React.PureComponent {
 
   constructor(props) {
     super(props);
+
+    this.state = {
+      animated: false,
+    };
+
     this.onClick = this.onClick.bind(this);
   }
 
   onClick() {
+    // Only allow the ripple animation to happen after the user has clicked the radio button
+    this.setState({
+      animated: true,
+    });
+
     this.props.onClick(this.props.value, this.props.name);
   }
 
   renderRadio() {
     return (
-      <div className="md-radio">
+      <div className={ 'md-radio' + (this.state.animated ? ' md-radio--animated' : '') }>
         <input
           type="radio"
           checked={ this.props.checked }
