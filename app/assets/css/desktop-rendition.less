@@ -24,6 +24,7 @@ html.not-app .bg-stand-in {
   .marketing {
     user-select: text;
     position: fixed;
+    top: 0;
     align-items: center;
     justify-content: center;
     height: 100vh;
@@ -54,8 +55,14 @@ html.not-app .bg-stand-in {
         color: white;
         text-decoration-color: white;
       }
+      .buttons {
+        text-align: center;
+        margin-top: 1rem;
+      }
       .buttons a {
         text-decoration: none;
+        display: inline-block;
+        margin: 1rem;
       }
     }
     .app-dl {
@@ -169,10 +176,9 @@ html.not-app .bg-stand-in {
   }
 }
 
-.desktop-rendition(@min-width) {
+.desktop-rendition(@min-width, @desktop-rendition-vertical-border) {
   @desktop-rendition-width: @min-width / 2;
   @desktop-rendition-width-from-center: ~"calc(50vw -" (@desktop-rendition-width) ~")";
-  @desktop-rendition-vertical-border: 60px;
   @desktop-rendition-vertical-border-width: @desktop-rendition-width + 4;
   @desktop-rendition-vertical-border-right: @desktop-rendition-width + 2;
 
@@ -183,7 +189,7 @@ html.not-app .bg-stand-in {
     }
   }
 
-  @media screen and (min-width: @min-width) {
+  @media (min-width: @min-width) {
 
     .not-app {
 
@@ -258,5 +264,14 @@ html.not-app .bg-stand-in {
   }
 }
 
-.desktop-rendition(@screen-md-min);
-.desktop-rendition(@screen-lg-min);
+@media screen {
+  .desktop-rendition(@screen-md-min, 10px);
+  .desktop-rendition(@screen-lg-min, 10px);
+}
+
+@media screen and (min-height: 700px) {
+  .desktop-rendition(@screen-md-min, 60px);
+  .desktop-rendition(@screen-lg-min, 60px);
+}
+
+
