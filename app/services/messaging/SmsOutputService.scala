@@ -24,16 +24,6 @@ import scala.util.Try
 object SmsOutputService {
   val connectTimeout: FiniteDuration = 5.seconds
   val socketTimeout: FiniteDuration = 5.seconds
-
-  private val messageSuffix: String = "\nTo opt-out visit my.warwick.ac.uk/settings"
-  private val maxMessageLength = 160 - messageSuffix.length
-  def formatForSms(message: String): String = {
-    if (message.length > maxMessageLength) {
-      message.substring(0, maxMessageLength - 3) + "..." + messageSuffix
-    } else {
-      message + messageSuffix
-    }
-  }
 }
 
 @Named("sms")
@@ -57,6 +47,17 @@ class SmsOutputService @Inject()(
   val usernameOption: Option[String] = configuration.getString("sms.username")
   val passwordOption: Option[String] = configuration.getString("sms.password")
 
+  private val rootDomain: String = configuration.getString("mywarwick.rootDomain").getOrElse("my.warwick.ac.uk")
+  private val messageSuffix: String = s"\nTo opt-out visit $rootDomain/settings"
+  private val maxMessageLength = 160 - messageSuffix.length
+  def formatForSms(message: String): String = {
+    if (message.length > maxMessageLength) {
+      message.substring(0, maxMessageLength - 3) + "..." + messageSuffix
+    } else {
+      message + messageSuffix
+    }
+  }
+
   override def send(message: MessageSend.Heavy): Future[ProcessingResult] = {
     val usercode = message.user.usercode
 
@@ -79,7 +80,7 @@ class SmsOutputService @Inject()(
           new BasicNameValuePair("username", username),
           new BasicNameValuePair("password", password),
           new BasicNameValuePair("number", PhoneNumberUtil.getInstance.format(smsNumberOption.get, PhoneNumberFormat.INTERNATIONAL)),
-          new BasicNameValuePair("message", SmsOutputService.formatForSms(message.activity.title))
+          new BasicNameValuePair("message", formatForSms(message.activity.title))
         ).asJava))
 
         var response: CloseableHttpResponse = null
