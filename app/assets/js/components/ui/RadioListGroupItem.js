@@ -35,7 +35,7 @@ export default class RadioListGroupItem extends React.PureComponent {
 
   renderRadio() {
     return (
-      <div className={ 'md-radio' + (this.state.animated ? ' md-radio--animated' : '') }>
+      <div className={ `md-radio ${this.state.animated ? 'md-radio--animated' : ''}` }>
         <input
           type="radio"
           checked={ this.props.checked }
