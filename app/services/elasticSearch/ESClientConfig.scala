@@ -1,18 +1,21 @@
 package services.elasticSearch
 
+import java.net.InetAddress
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
-import com.sksamuel.elastic4s.{ElasticsearchClientUri, TcpClient}
+import org.elasticsearch.common.settings.Settings
+import org.elasticsearch.common.transport.InetSocketTransportAddress
+import org.elasticsearch.transport.client.PreBuiltTransportClient
 import play.api.Configuration
 
 import scala.collection.JavaConversions
 
 @ImplementedBy(classOf[ESClientConfigImpl])
 trait ESClientConfig {
-  def getUriString(): String
+  def nodes: Seq[ESNode]
 
-  def getElastic4sTcpClient(): TcpClient
+  def newTransportClient: PreBuiltTransportClient
 }
 
 @Singleton
@@ -20,18 +23,24 @@ class ESClientConfigImpl @Inject()(
   config: Configuration
 ) extends ESClientConfig {
 
-  override def getUriString(): String = {
-    "elasticsearch://" +
-      JavaConversions.asScalaBuffer(
-        config
-          .getConfigList("es.nodes")
-          .getOrElse(throw new IllegalStateException("ElasticSearch nodes not configured - check es.nodes"))
-      ).toList.map(e => {
-        val host = e.getString("host") getOrElse (throw new IllegalStateException("ElasticSearch host is missing - check es.nodes"))
-        val port = e.getInt("port").getOrElse(throw new IllegalStateException("ElasticSearch port number is missing - check es.nodes"))
-        s"""$host:$port"""
-      })
-  }
+  override def nodes: List[ESNode] = JavaConversions.asScalaBuffer(
+    config
+      .getConfigList("es.nodes")
+      .getOrElse(throw new IllegalStateException("ElasticSearch nodes not configured - check es.nodes"))
+  ).toList.map(e => {
+    ESNode(
+      e.getString("endpoint") getOrElse (throw new IllegalStateException("ElasticSearch endpoint is missing - check es.nodes")),
+      e.getInt("port").getOrElse(throw new IllegalStateException("ElasticSearch port number is missing - check es.nodes"))
+    )
+  })
 
-  override def getElastic4sTcpClient(): TcpClient = TcpClient.transport(getUriString())
+  override def newTransportClient: PreBuiltTransportClient = {
+    val client = new PreBuiltTransportClient(Settings.EMPTY)
+    this.nodes.foreach(node => {
+      client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(node.node), node.port))
+    })
+    client
+  }
 }
+
+case class ESNode(node: String, port: Int)
