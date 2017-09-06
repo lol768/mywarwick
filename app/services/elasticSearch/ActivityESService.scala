@@ -5,6 +5,8 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import models.Activity
 import models.publishing.Publisher
+import org.elasticsearch.action.ActionListener
+import org.elasticsearch.action.index.{IndexRequest, IndexResponse}
 import org.joda.time.DateTime
 import services.{AudienceService, PublisherService}
 import warwick.sso.Usercode
@@ -52,7 +54,7 @@ class ActivityESServiceImpl @Inject()(
     import org.elasticsearch.common.xcontent.XContentFactory._
     val builder = jsonBuilder().startObject()
     builder
-      .field("id", "kimchy")
+      .field("activity_id", id)
       .field("provide_id", providerId)
       .field("type", activityType)
       .field("title", title)
@@ -69,7 +71,19 @@ class ActivityESServiceImpl @Inject()(
       builder.endObject()
     })
     builder.endArray()
+    builder.endObject()
 
+    val indexRequest = new IndexRequest(indexNameToday(), activityType, id).source(builder)
+
+    client.indexAsync(indexRequest, new ActionListener[IndexResponse] {
+      override def onFailure(e: Exception) = {
+
+      }
+
+      override def onResponse(response: IndexResponse) = {
+
+      }
+    })
   }
 
 }
