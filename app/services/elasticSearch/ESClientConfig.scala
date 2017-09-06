@@ -4,9 +4,8 @@ import java.net.InetAddress
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
-import org.elasticsearch.common.settings.Settings
-import org.elasticsearch.common.transport.InetSocketTransportAddress
-import org.elasticsearch.transport.client.PreBuiltTransportClient
+import org.apache.http.HttpHost
+import org.elasticsearch.client.{RestClient, RestHighLevelClient}
 import play.api.Configuration
 
 import scala.collection.JavaConversions
@@ -15,7 +14,7 @@ import scala.collection.JavaConversions
 trait ESClientConfig {
   def nodes: Seq[ESNode]
 
-  def newTransportClient: PreBuiltTransportClient
+  def newClient: RestHighLevelClient
 }
 
 @Singleton
@@ -29,17 +28,16 @@ class ESClientConfigImpl @Inject()(
       .getOrElse(throw new IllegalStateException("ElasticSearch nodes not configured - check es.nodes"))
   ).toList.map(e => {
     ESNode(
-      e.getString("endpoint") getOrElse (throw new IllegalStateException("ElasticSearch endpoint is missing - check es.nodes")),
+      e.getString("host") getOrElse (throw new IllegalStateException("ElasticSearch host is missing - check es.nodes")),
       e.getInt("port").getOrElse(throw new IllegalStateException("ElasticSearch port number is missing - check es.nodes"))
     )
   })
 
-  override def newTransportClient: PreBuiltTransportClient = {
-    val client = new PreBuiltTransportClient(Settings.EMPTY)
-    this.nodes.foreach(node => {
-      client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(node.node), node.port))
-    })
-    client
+  override def newClient: RestHighLevelClient = {
+    val allHttpHosts = this.nodes.map(node => new HttpHost(node.node, node.port, "http"))
+    val javaArray = new Array[HttpHost](allHttpHosts.size)
+    allHttpHosts.foreach(host => javaArray(allHttpHosts.indexOf(host)) = host)
+    new RestHighLevelClient(RestClient.builder(javaArray: _*))
   }
 }
 
