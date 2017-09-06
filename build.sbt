@@ -66,7 +66,7 @@ val appDeps = Seq(
   "com.vladsch.flexmark" % "flexmark" % "0.18.5",
   "com.vladsch.flexmark" % "flexmark-ext-autolink" % "0.18.5",
   "com.googlecode.libphonenumber" % "libphonenumber" % "8.6.0",
-  "org.elasticsearch.client" % "transport" % "5.5.2"
+  "org.elasticsearch.client" % "elasticsearch-rest-high-level-client" % "6.0.0-beta2"
 )
 
 val testDeps = Seq(
@@ -104,6 +104,8 @@ unmanagedResourceDirectories in Assets += baseDirectory.value / "target" / "gulp
 resolvers += ("Local Maven Repository" at "file:///" + Path.userHome.absolutePath + "/.m2/repository")
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+
+resolvers += "elastic-lucene-snapshots" at "http://s3.amazonaws.com/download.elasticsearch.org/lucenesnapshots/a128fcb"
 
 // Run Gulp when Play runs
 //playRunHooks <+= baseDirectory.map(base => Gulp(base))
