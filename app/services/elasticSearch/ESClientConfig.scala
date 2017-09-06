@@ -29,7 +29,7 @@ class ESClientConfigImpl @Inject()(
       ).toList.map(e => {
         val host = e.getString("host") getOrElse (throw new IllegalStateException("ElasticSearch host is missing - check es.nodes"))
         val port = e.getInt("port").getOrElse(throw new IllegalStateException("ElasticSearch port number is missing - check es.nodes"))
-        s"${host}:${port}"
+        s"""$host:$port"""
       })
   }
 
