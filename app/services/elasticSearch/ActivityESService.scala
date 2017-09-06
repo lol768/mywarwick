@@ -21,7 +21,7 @@ class ActivityESServiceImpl @Inject()(
   publisherService: PublisherService
 ) extends ActivityESService {
 
-  private val client = eSClientConfig.newTransportClient
+  private val client = eSClientConfig.newClient
 
   def indexNameToday(): String = {
     s"""activity_${DateTime.now().toString("yyyy_mm_dd")}"""
@@ -39,6 +39,7 @@ class ActivityESServiceImpl @Inject()(
     val shouldNotify = activity.shouldNotify
     val audiences: Seq[String] = activity.audienceId match {
       case Some(id: String) => audienceService.resolve(audienceService.getAudience(id)).getOrElse(Seq(Usercode("-"))).map(_.toString())
+      case _ => Seq("-")
     }
     val publisher: String = activity.publisherId match {
       case Some(id: String) => publisherService.find(id) match {

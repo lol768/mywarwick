@@ -5,6 +5,7 @@ import com.google.inject.Inject
 import models.ActivityRender
 import org.quartz._
 import services._
+import services.elasticSearch.ActivityESService
 import services.messaging.MessagingService
 import system.Logging
 import warwick.sso.Usercode
@@ -58,6 +59,7 @@ class PublishActivityJob @Inject()(
   activityService: ActivityService,
   messaging: MessagingService,
   pubSub: PubSub,
+  activityESService: ActivityESService,
   override val scheduler: SchedulerService
 ) extends PublishingJob {
 
@@ -85,6 +87,7 @@ class PublishActivityJob @Inject()(
 
     if (activity.shouldNotify) {
       messaging.send(recipients, activity)
+      activityESService.index(activity)
     }
   }
 }
