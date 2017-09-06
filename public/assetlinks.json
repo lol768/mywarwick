@@ -1,0 +1,11 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "uk.ac.warwick.my.app",
+      "sha256_cert_fingerprints":
+      ["4B:D6:B4:7A:9F:EA:15:9E:43:6E:E0:88:35:95:AC:5D:58:D2:5D:93:F5:32:54:05:68:B1:A6:B6:00:51:82:11"]
+    }
+  }
+]
