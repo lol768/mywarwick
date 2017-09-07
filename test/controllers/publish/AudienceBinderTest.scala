@@ -174,7 +174,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
     }
 
     "raise error message when binding with invalid non-department audience" in {
-      val unrecognisedAudience = "TeachingApple"
+      val unrecognisedAudience = "TeachingApple" // if audience component contains no ":" then we userLookup to see if it's real
       val audience = Seq(
         unrecognisedAudience,
         "ResearchPostgrads"
@@ -185,9 +185,12 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         None
       )
 
-      val audienceBinder = new AudienceBinder(null, null)
+      val mockAudienceService = mock[AudienceService]
+      when(mockAudienceService.validateUsercodes(Seq(Usercode(unrecognisedAudience)))).thenReturn(Seq.empty[Usercode])
 
-      audienceBinder.bindAudience(audienceData)(null).futureValue mustBe Left(Seq(FormError("audience", "error.audience.invalid", Seq(unrecognisedAudience))))
+      val audienceBinder = new AudienceBinder(null, mockAudienceService)
+
+      audienceBinder.bindAudience(audienceData)(null).futureValue mustBe Left(Seq(FormError("audience", "error.audience.usercodes.invalid", Seq(unrecognisedAudience))))
     }
 
 

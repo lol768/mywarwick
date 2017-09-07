@@ -151,7 +151,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
     when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
     when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.Departments(Seq("IN")))
 
-    /* TODO reimplement tests to work with new audience-picker
+    /* TODO reimplement these tests to work with new audience-picker
     "create a news item" in {
       val audience = Audience(Seq(Audience.DepartmentAudience("IN", Seq(Audience.Staff))))
       when(
@@ -175,7 +175,8 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
         "item.text" -> "Something happened",
         "item.publishDate" -> "2016-01-01T00:00.000",
         "categories[]" -> "abc",
-        "audience.audience[]" -> "Public"
+        "audience.audience[]" -> "Dept:TeachingStaff",
+        "audience.department" -> "EN"
       )
 
       when(publisherService.find("xyz")).thenReturn(Some(publisher))

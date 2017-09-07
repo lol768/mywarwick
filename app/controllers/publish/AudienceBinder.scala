@@ -53,8 +53,6 @@ class AudienceBinder @Inject()(
 
       val globalComponents = nonDeptComponents.flatMap {
         case UsercodesAudience(usercodes) => {
-          println
-          println(usercodes)
           val invalidUsercodes = usercodes.diff(audienceService.validateUsercodes(usercodes))
           if (invalidUsercodes.isEmpty)
             Some(UsercodesAudience(usercodes))
