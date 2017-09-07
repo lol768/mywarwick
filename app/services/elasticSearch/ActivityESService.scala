@@ -10,6 +10,7 @@ import org.elasticsearch.action.ActionListener
 import org.elasticsearch.action.index.{IndexRequest, IndexResponse}
 import org.joda.time.DateTime
 import services.{AudienceService, PublisherService}
+import warwick.sso.Usercode
 
 @ImplementedBy(classOf[ActivityESServiceImpl])
 trait ActivityESService {
@@ -43,26 +44,30 @@ class ActivityESServiceImpl @Inject()(
     val replacedBy = activity.replacedBy.getOrElse("-")
     val publishedAt = activity.publishedAt.toDate
 
-    //    val audienceComponents: Seq[AudienceComponent] = activity.audienceId match {
-    //      case Some(id: String) => audienceService.getAudience(id).components.map {
-    //        case e: UsercodeAudience => AudienceComponent("usercode")
-    //        case e: WebGroupAudience => AudienceComponent("webgroup", e.groupName.string)
-    //        case e: ModuleAudience => AudienceComponent("module", e.moduleCode)
-    //        case e: DepartmentAudience => AudienceComponent("department", e.deptCode, e.subset.map(_.entryName.toString))
-    //        case _ => AudienceComponent()
-    //      }
-    //      case _ => Seq(AudienceComponent())
-    //    }
-
-    val audienceComponents = activity.audienceId match {
-      case Some(id: String) => audienceService.getAudience(id).components.map(_.toString)
-      case _ => Seq("-")
+    val audienceComponents: Seq[String] = activity.audienceId match {
+      case Some(id: String) => audienceService.getAudience(id).components.flatMap {
+        case e: UsercodeAudience => Seq("usercode")
+        case e: WebGroupAudience => Seq(s"""WebGroupAudience:${e.groupName.string}""")
+        case e: ModuleAudience => Seq(s"""ModuleAudience:${e.moduleCode}""")
+        case e: DepartmentAudience => e.subset.map(subset => {
+          s"""DepartmentAudience:${e.deptCode}:${subset.entryName}"""
+        })
+        case _ => Nil
+      }
+      case _ => Nil
     }
 
-    val usersInAudience: Seq[String] = activity.audienceId match {
+    //    val audienceComponents = activity.audienceId match {
+    //      case Some(id: String) => audienceService.getAudience(id).components.map(component => {
+    //
+    //      })
+    //      case _ => Seq("-")
+    //    }
+
+    val resolvedUsers: Seq[String] = activity.audienceId match {
       case Some(id: String) => audienceService.resolve(audienceService.getAudience(id))
-        .getOrElse(Seq("-"))
-        .map(_.toString.replace("Usercode(", "").replace(")", ""))
+        .getOrElse(Seq(Usercode("-")))
+        .map(_.string)
       case _ => Seq("-")
     }
 
@@ -88,7 +93,7 @@ class ActivityESServiceImpl @Inject()(
       .field("publisher", publisher)
 
     builder.startArray("resolved_users")
-    usersInAudience.foreach(builder.value)
+    resolvedUsers.foreach(builder.value)
     builder.endArray()
 
     builder.startArray("audience_components")
