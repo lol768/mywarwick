@@ -26,7 +26,7 @@ class ActivityESServiceImpl @Inject()(
   private val client = eSClientConfig.newClient
 
   def indexNameToday(isNotification: Boolean): String = {
-    val today = DateTime.now().toString("yyyy_0:MM")
+    val today = DateTime.now().toString("yyyy_MM")
     isNotification match {
       case true => s"""alert_$today"""
       case false => s"""activity_$today"""
@@ -43,15 +43,20 @@ class ActivityESServiceImpl @Inject()(
     val replacedBy = activity.replacedBy.getOrElse("-")
     val publishedAt = activity.publishedAt.toDate
 
-    val audienceComponents: Seq[AudienceComponent] = activity.audienceId match {
-      case Some(id: String) => audienceService.getAudience(id).components.map {
-        case e: UsercodeAudience => AudienceComponent("usercode")
-        case e: WebGroupAudience => AudienceComponent("webgroup", e.groupName.string)
-        case e: ModuleAudience => AudienceComponent("module", e.moduleCode)
-        case e: DepartmentAudience => AudienceComponent("department", e.deptCode, e.subset.map(_.entryName.toString))
-        case _ => AudienceComponent()
-      }
-      case _ => Seq(AudienceComponent())
+    //    val audienceComponents: Seq[AudienceComponent] = activity.audienceId match {
+    //      case Some(id: String) => audienceService.getAudience(id).components.map {
+    //        case e: UsercodeAudience => AudienceComponent("usercode")
+    //        case e: WebGroupAudience => AudienceComponent("webgroup", e.groupName.string)
+    //        case e: ModuleAudience => AudienceComponent("module", e.moduleCode)
+    //        case e: DepartmentAudience => AudienceComponent("department", e.deptCode, e.subset.map(_.entryName.toString))
+    //        case _ => AudienceComponent()
+    //      }
+    //      case _ => Seq(AudienceComponent())
+    //    }
+
+    val audienceComponents = activity.audienceId match {
+      case Some(id: String) => audienceService.getAudience(id).components.map(_.toString)
+      case _ => Seq("-")
     }
 
     val usersInAudience: Seq[String] = activity.audienceId match {
@@ -82,22 +87,12 @@ class ActivityESServiceImpl @Inject()(
       .field("published_at", publishedAt)
       .field("publisher", publisher)
 
-    builder.startArray("audience_users")
+    builder.startArray("resolved_users")
     usersInAudience.foreach(builder.value)
     builder.endArray()
 
     builder.startArray("audience_components")
-    audienceComponents.foreach(component => {
-      builder.startObject()
-      builder.field("type", component.kind)
-      builder.field("name", component.name)
-      if (component.departmentSubSet != Nil) {
-        builder.startArray("department_subset")
-        component.departmentSubSet.foreach(builder.value)
-        builder.endArray()
-      }
-      builder.endObject()
-    })
+    audienceComponents.foreach(builder.value)
     builder.endArray()
 
     //    builder.startArray("audience_components")
@@ -122,4 +117,4 @@ class ActivityESServiceImpl @Inject()(
   }
 }
 
-sealed case class AudienceComponent(kind: String = "-", name: String = "-", departmentSubSet: Seq[String] = Nil)
+//sealed case class AudienceComponent(kind: String = "-", name: String = "-", departmentSubSet: Seq[String] = Nil)
