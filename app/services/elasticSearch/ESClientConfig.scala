@@ -29,16 +29,17 @@ class ESClientConfigImpl @Inject()(
   ).toList.map(e => {
     ESNode(
       e.getString("host") getOrElse (throw new IllegalStateException("ElasticSearch host is missing - check es.nodes")),
-      e.getInt("port").getOrElse(throw new IllegalStateException("ElasticSearch port number is missing - check es.nodes"))
+      e.getInt("port").getOrElse(throw new IllegalStateException("ElasticSearch port number is missing - check es.nodes")),
+      e.getString("protocol").getOrElse(throw new IllegalStateException("ElasticSearch protocol is missing - check es.nodes"))
     )
   })
 
   override def newClient: RestHighLevelClient = {
-    val allHttpHosts = this.nodes.map(node => new HttpHost(node.node, node.port, "http"))
+    val allHttpHosts = this.nodes.map(node => new HttpHost(node.node, node.port, node.protocol))
     val javaArray = new Array[HttpHost](allHttpHosts.size)
     allHttpHosts.foreach(host => javaArray(allHttpHosts.indexOf(host)) = host)
     new RestHighLevelClient(RestClient.builder(javaArray: _*))
   }
 }
 
-case class ESNode(node: String, port: Int)
+case class ESNode(node: String, port: Int, protocol: String)
