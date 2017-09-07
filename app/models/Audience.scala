@@ -90,7 +90,7 @@ object Audience {
   val relationshipRegex: Regex = "^Relationship:(.+):(.+)".r
   val webGroupRegex: Regex = "^WebGroup:(.+)".r
   val optInRegex: Regex = "^OptIn:(.+):(.+)".r
-  val usercodeRegex: Regex = "(?i)^([a-z]{5,6}|u\\d{7})".r
+  val noColonRegex: Regex = "^[^:]+$".r
 
   object ComponentParameter {
     def unapply(paramValue: String): Option[Component] = paramValue match {
@@ -107,7 +107,7 @@ object Audience {
       case optInRegex(optInType, optInValue) if optInType == LocationOptIn.optInType => LocationOptIn.fromValue(optInValue)
       case string if string.nonEmpty => {
         val validUsercodes: Seq[Usercode] = string.split(",").map(_.trim).flatMap {
-          case usercodeRegex(usercode) => Some(Usercode(usercode))
+          case noColonRegex(usercode) => Some(Usercode(usercode))
           case _ => None
         }
         if (validUsercodes.nonEmpty)

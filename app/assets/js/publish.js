@@ -14,7 +14,7 @@ import AudiencePicker from './publish/components/AudiencePicker';
 
 function setupAudiencePicker() {
   const audiencePicker = $('#audience-picker');
-  if (audiencePicker) {
+  if (audiencePicker.length) {
     const props = {
       departments: audiencePicker.data('departments') || [],
       isGod: audiencePicker.data('is-god') || false,

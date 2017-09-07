@@ -9,7 +9,7 @@ import modulePicker from '../../publish/modulePicker';
 import seminarGroupPicker from '../../publish/seminarGroupPicker';
 import relationshipPicker from '../../publish/relationshipPicker';
 
-const ELLIPSIS = String.fromCharCode(8230);
+const ELLIPSIS = '…';
 
 const GROUPS = {
   TeachingStaff: 'Teaching Staff',
@@ -29,7 +29,6 @@ const LOCATIONS = {
 export default class AudiencePicker extends React.PureComponent {
   static propTypes = {
     formData: PropTypes.object,
-    formErrors: PropTypes.object,
     isGod: PropTypes.bool,
     departments: PropTypes.object,
   };
@@ -38,15 +37,16 @@ export default class AudiencePicker extends React.PureComponent {
     super(props);
 
     if (!_.isEmpty(props.formData)) {
-      const deptName = props.departments[props.formData.department] || '';
+      const deptCode = props.formData.department;
       this.state = {
         ...props.formData,
-        department: deptName, // formData contains only department code, we need readable name
+        department: this.buildDeptObj(
+          { [deptCode]: _.find(props.departments, (val, key) => key === deptCode) },
+        ),
       };
     } else {
-      const deptCodes = Object.keys(props.departments);
       this.state = {
-        department: deptCodes.length > 1 ? ELLIPSIS : props.departments[deptCodes[0]],
+        department: _.size(props.departments) > 1 ? ELLIPSIS : this.buildDeptObj(props.departments),
       };
     }
 
@@ -68,8 +68,7 @@ export default class AudiencePicker extends React.PureComponent {
     );
 
     switch (type) {
-      /* eslint-disable no-case-declarations */
-      case 'checkbox':
+      case 'checkbox': {
         const existing = _.get(this.state, path, {});
         if (_.keys(existing).includes(value)) {
           const updated = _.pickBy(existing, (v, k) => k !== value);
@@ -79,8 +78,8 @@ export default class AudiencePicker extends React.PureComponent {
             _.set(_.cloneDeep(state), path, _.assign({}, existing, { [value]: undefined })),
           );
         }
-        /* eslint-enable no-case-declarations */
         break;
+      }
       case 'radio':
         this.setState(state => _.set(_.cloneDeep(state), path, { [value]: undefined }));
         break;
@@ -108,8 +107,13 @@ export default class AudiencePicker extends React.PureComponent {
     return _.has(this.state, path);
   }
 
+  buildDeptObj(dept) {
+    const key = _.first(_.keys(dept));
+    return { code: key, name: dept[key] };
+  }
+
   selectDepartment(value) {
-    this.setState({ department: value });
+    this.setState({ department: { code: value, name: this.props.departments[value] } });
   }
 
   locationInput() {
@@ -154,15 +158,16 @@ export default class AudiencePicker extends React.PureComponent {
       </div>
     );
   }
+
   groupsInput() {
     const isPublic = this.isChecked('audience.universityWide');
     const deptSelect = Object.keys(this.props.departments).length > 1 ?
       (<select
-        defaultValue={this.state.department === ELLIPSIS ? '' : this.state.department}
+        defaultValue={this.state.department === ELLIPSIS ? '' : this.state.department.code}
         name="audience.department"
         className="form-control"
         onClick={({ target: { options, selectedIndex } }) =>
-          this.selectDepartment(options[selectedIndex].text)}
+          this.selectDepartment(options[selectedIndex].value)}
       >
         <option disabled hidden value="">Select a department</option>
         {_.map(this.props.departments, (name, code) => (
@@ -170,7 +175,7 @@ export default class AudiencePicker extends React.PureComponent {
         ))}
       </select>)
       : (<input
-        name="audience.audience[]"
+        name="audience.department"
         value={Object.keys(this.props.departments)[0]}
         hidden
         readOnly
@@ -282,7 +287,7 @@ export default class AudiencePicker extends React.PureComponent {
             <RadioButton
               handleChange={this.handleChange}
               isChecked={this.isChecked(prefixPath('.Dept:All'))}
-              label={`Everyone in ${this.state.department || ELLIPSIS}`}
+              label={`Everyone in ${_.get(this.state, 'department.name', ELLIPSIS)}`}
               value="Dept:All"
               name="audience.audience[]"
               formPath={prefixPath('')}
@@ -290,7 +295,8 @@ export default class AudiencePicker extends React.PureComponent {
             <RadioButton
               handleChange={this.handleChange}
               isChecked={this.isChecked(prefixPath('.groups'))}
-              label={isPublic ? 'These groups:' : `Groups in ${this.state.department || ELLIPSIS}`}
+              label={isPublic ?
+                'These groups:' : `Groups in ${_.get(this.state, 'department.name', ELLIPSIS)}`}
               value="groups"
               formPath={prefixPath('')}
             >
