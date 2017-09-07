@@ -9,12 +9,13 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
 import services._
-import system.ImplicitRequestContext
+import system.{ImplicitRequestContext, Logging}
 import warwick.sso.{AuthenticatedRequest, Usercode}
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
-trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOptions with PublishingActionRefiner {
+trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOptions with PublishingActionRefiner with Logging {
   self: ImplicitRequestContext with Controller =>
 
   implicit val executionContext = system.ThreadPools.web
@@ -104,11 +105,12 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
                 "public" -> true
               ))))
             } else {
-              audienceService.resolve(audience)
-                .toOption
-                .map(processUsercodes)
-                .map(usercodes => Ok(Json.toJson(API.Success[JsObject](data = usercodes))))
-                .getOrElse(InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience"))))))
+              audienceService.resolve(audience).map(processUsercodes) match {
+                case Success(usercodes) => Ok(Json.toJson(API.Success[JsObject](data = usercodes)))
+                case Failure(err) =>
+                  logger.error("Failed to resolve audience", err)
+                  InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience")))))
+              }
             }
         }
       }
