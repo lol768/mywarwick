@@ -5,9 +5,10 @@ import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
 import models.Audience.{DepartmentAudience, ModuleAudience, UsercodeAudience, WebGroupAudience}
-import models.{Activity}
+import models.Activity
 import models.publishing.Publisher
 import org.elasticsearch.action.ActionListener
+import org.elasticsearch.action.get.{GetRequest, GetResponse}
 import org.elasticsearch.action.index.{IndexRequest, IndexResponse}
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.common.xcontent.XContentBuilder
@@ -15,13 +16,17 @@ import org.joda.time.DateTime
 import services.{AudienceService, PublisherService}
 import warwick.sso.Usercode
 
+import scala.concurrent.{Future, Promise}
+import scala.util.{Failure, Success}
+
 @ImplementedBy(classOf[ActivityESServiceImpl])
-trait ActivityESService{
+trait ActivityESService {
   def index(activity: Activity)
 
-  def getDocumentByActivityId(activityId: String): ActivityDocument
+  // get as in elasticsearch get api
+  def getDocumentByActivityId(activityId: String, isNotification: Boolean = true): Future[ActivityDocument]
 
-  def deleteDocumentByActivityId(activityId: String)
+  def deleteDocumentByActivityId(activityId: String, isNotification: Boolean = true)
 
   def search(): Seq[ActivityDocument]
 
@@ -42,9 +47,11 @@ class ActivityESServiceImpl @Inject()(
       audienceService,
       publisherService
     )
-    val docBuilder = ActivityESServiceIndexHelper.makeIndexDocBuilder(activityDocument)
-    val indexName = ActivityESServiceIndexHelper.indexNameToday(activity.shouldNotify)
-    val request = ActivityESServiceIndexHelper.makeIndexRequest(indexName, "activity", activity.id, docBuilder)
+    val helper = ActivityESServiceIndexHelper
+
+    val docBuilder = helper.makeIndexDocBuilder(activityDocument)
+    val indexName = helper.indexNameToday(activity.shouldNotify)
+    val request = helper.makeIndexRequest(indexName, helper.documentType, activity.id, docBuilder)
 
     client.indexAsync(request, new ActionListener[IndexResponse] {
       override def onFailure(e: Exception) = {
@@ -59,22 +66,49 @@ class ActivityESServiceImpl @Inject()(
     })
   }
 
-  override def getDocumentByActivityId(activityId: String): ActivityDocument = {
-    ???
+  override def getDocumentByActivityId(activityId: String, isNotification: Boolean): Future[ActivityDocument] = {
+    val helper = ActivityESServiceGetHelper
+    val request = new GetRequest(
+      helper.indexNameForAllTime(),
+      helper.documentType,
+      "1" // we only have 1 version per document
+    )
+    val getResponsePromise: Promise[GetResponse] = Promise[GetResponse]
+    val futureResponse: Future[GetResponse] = getResponsePromise.future
+    client.getAsync(request, new ActionListener[GetResponse] {
+      @Override
+      override def onResponse(getResponse: GetResponse): Unit = {
+        getResponsePromise.success(getResponse)
+      }
+
+      @Override
+      override def onFailure(e: Exception): Unit = {
+        // TODO log the exception
+        getResponsePromise.failure(e)
+      }
+    })
+
+    futureResponse.map(res => {
+      ActivityDocument() // and add some data
+    }).recover(error => {
+      ActivityDocument() // empty document
+    })
+    // but if it's a failed future, how do i return a Future[empty document]?
   }
 
-  override def deleteDocumentByActivityId(activityId: String): Unit = ???
+  override def deleteDocumentByActivityId(activityId: String, isNotification: Boolean): Unit = ???
 
   override def search(): Seq[ActivityDocument] = ???
 }
 
 trait ActivityESServiceHelper {
 
+  val documentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
   val nameForAlert = "alert"
   val nameForActivity = "activity"
-  val separator  = "_"
+  val separator = "_"
 
-  def indexNameToday(isNotification: Boolean): String = {
+  def indexNameToday(isNotification: Boolean = true): String = {
     val today = DateTime.now().toString("yyyy_MM")
     isNotification match {
       case true => s"""$nameForAlert$separator$today"""
@@ -82,13 +116,22 @@ trait ActivityESServiceHelper {
     }
   }
 
-  def indexNameForAllTime(isNotification: Boolean): String = {
+  def indexNameForAllTime(isNotification: Boolean = true): String = {
     isNotification match {
       case true => s"""$nameForAlert*"""
       case false => s"""$nameForActivity*"""
     }
   }
 }
+
+object ActivityESServiceGetHelper extends ActivityESServiceHelper {
+
+}
+
+object ActivityESServiceDeleteHelper extends ActivityESServiceHelper {
+
+}
+
 
 object ActivityESServiceIndexHelper extends ActivityESServiceHelper {
 
@@ -125,16 +168,16 @@ object ActivityESServiceIndexHelper extends ActivityESServiceHelper {
 }
 
 case class ActivityDocument(
-  provider_id: String,
-  activity_type: String,
-  title: String,
-  url: String,
-  text: String,
-  replaced_by: String,
-  published_at: Date,
-  publisher: String,
-  audienceComponents: Seq[String],
-  resolvedUsers: Seq[String]
+  provider_id: String = "-",
+  activity_type: String = "-",
+  title: String = "-",
+  url: String = "-",
+  text: String = "-",
+  replaced_by: String = "-",
+  published_at: Date = new Date(0),
+  publisher: String = "-",
+  audienceComponents: Seq[String] = Seq("-"),
+  resolvedUsers: Seq[String] = Seq("-")
 )
 
 object ActivityDocument {
