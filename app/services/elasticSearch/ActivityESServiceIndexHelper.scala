@@ -22,7 +22,7 @@ import services.{AudienceService, PublisherService}
 import warwick.core.Logging
 import warwick.sso.Usercode
 
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success}
 
@@ -94,6 +94,7 @@ class ActivityESServiceImpl @Inject()(
         getResponsePromise.failure(e)
       }
     })
+    import ExecutionContext.Implicits.global
     futureResponse
       .map(ActivityDocument.fromESGetResponse)
       .recover {
@@ -161,7 +162,7 @@ class ActivityESServiceImpl @Inject()(
 
       }
     })
-
+    ???
   }
 }
 
@@ -264,7 +265,7 @@ case class ActivityESSearchQuery(
   publish_at: Option[ActivityESSearchQuery.DateRange] = Option.empty,
   publisher: Option[String] = Option.empty,
   audienceComponents: Option[Seq[String]] = Option.empty,
-  resolvedUsers: Option[Seq[String]] = Option.empty,
+  resolvedUsers: Option[Seq[String]] = Option.empty
 )
 
 object ActivityESSearchQuery {
@@ -315,10 +316,10 @@ object ActivityDocument {
       res.getField(helper.ESFieldName.url).getValue.toString,
       res.getField(helper.ESFieldName.text).getValue.toString,
       res.getField(helper.ESFieldName.replaced_by).getValue.toString,
-      res.getField(helper.ESFieldName.published_at).getValue,
+      DateTime.parse(res.getField(helper.ESFieldName.published_at).getValue.toString).toDate,
       res.getField(helper.ESFieldName.publisher).getValue.toString,
       audience_components,
-      resolved_users,
+      resolved_users
     )
   }
 
