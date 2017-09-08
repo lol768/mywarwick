@@ -14,6 +14,7 @@ import org.scalatest.mockito.MockitoSugar
 import play.api.db.Database
 import services._
 import services.dao._
+import services.elasticSearch.ActivityESService
 import services.messaging.MessagingService
 import warwick.sso.{UserLookupService, Usercode}
 
@@ -94,8 +95,9 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
     val activityMuteDao = get[ActivityMuteDao]
     val messaging = mock[MessagingService]
     val activityService = new ActivityServiceImpl(db, activityDao, activityTypeService, tagDao, audienceService, audienceDao, recipientDao, activityMuteDao, scheduler)
+    val activityESService = mock[ActivityESService]
 
-    val publishNotificationJob = new PublishActivityJob(audienceService, activityService, messaging, pubSub, scheduler)
+    val publishNotificationJob = new PublishActivityJob(audienceService, activityService, messaging, pubSub, activityESService, scheduler)
 
     "save audience for notification" in {
 
