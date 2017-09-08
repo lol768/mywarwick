@@ -7,8 +7,7 @@ import com.google.inject.ImplementedBy
 import org.apache.http.HttpHost
 import org.elasticsearch.client.{RestClient, RestHighLevelClient}
 import play.api.Configuration
-
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 
 @ImplementedBy(classOf[ESClientConfigImpl])
 trait ESClientConfig {
@@ -22,17 +21,18 @@ class ESClientConfigImpl @Inject()(
   config: Configuration
 ) extends ESClientConfig {
 
-  override def nodes: List[ESNode] = JavaConversions.asScalaBuffer(
-    config
-      .getConfigList("es.nodes")
-      .getOrElse(throw new IllegalStateException("ElasticSearch nodes not configured - check es.nodes"))
-  ).toList.map(e => {
-    ESNode(
-      e.getString("host") getOrElse (throw new IllegalStateException("ElasticSearch host is missing - check es.nodes")),
-      e.getInt("port").getOrElse(throw new IllegalStateException("ElasticSearch port number is missing - check es.nodes")),
-      e.getString("protocol").getOrElse(throw new IllegalStateException("ElasticSearch protocol is missing - check es.nodes"))
-    )
-  })
+  override def nodes: List[ESNode] = config
+    .getConfigList("es.nodes")
+    .getOrElse(throw new IllegalStateException("ElasticSearch nodes not configured - check es.nodes"))
+    .asScala
+    .toList
+    .map(e => {
+      ESNode(
+        e.getString("host") getOrElse (throw new IllegalStateException("ElasticSearch host is missing - check es.nodes")),
+        e.getInt("port").getOrElse(throw new IllegalStateException("ElasticSearch port number is missing - check es.nodes")),
+        e.getString("protocol").getOrElse(throw new IllegalStateException("ElasticSearch protocol is missing - check es.nodes"))
+      )
+    })
 
   override def newClient: RestHighLevelClient = {
     val allHttpHosts = this.nodes.map(node => new HttpHost(node.node, node.port, node.protocol))

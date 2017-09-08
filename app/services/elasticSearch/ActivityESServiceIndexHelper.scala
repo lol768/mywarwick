@@ -1,5 +1,6 @@
 package services.elasticSearch
 
+import java.util
 import java.util.Date
 import javax.inject.{Inject, Singleton}
 
@@ -10,14 +11,19 @@ import models.publishing.Publisher
 import org.elasticsearch.action.ActionListener
 import org.elasticsearch.action.get.{GetRequest, GetResponse}
 import org.elasticsearch.action.index.{IndexRequest, IndexResponse}
+import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.common.xcontent.XContentBuilder
+import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
+import org.elasticsearch.search.{SearchHit, SearchHits}
+import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.joda.time.DateTime
 import services.{AudienceService, PublisherService}
+import warwick.core.Logging
 import warwick.sso.Usercode
 
-import scala.collection.JavaConversions
 import scala.concurrent.{Future, Promise}
+import scala.collection.JavaConverters._
 import scala.util.{Failure, Success}
 
 @ImplementedBy(classOf[ActivityESServiceImpl])
@@ -29,7 +35,8 @@ trait ActivityESService {
 
   def deleteDocumentByActivityId(activityId: String, isNotification: Boolean = true)
 
-  def search(): Seq[ActivityDocument]
+  // match all
+  def search(activityESSearchQuery: ActivityESSearchQuery): Seq[ActivityDocument]
 
 }
 
@@ -38,7 +45,7 @@ class ActivityESServiceImpl @Inject()(
   eSClientConfig: ESClientConfig,
   audienceService: AudienceService,
   publisherService: PublisherService
-) extends ActivityESService {
+) extends ActivityESService with Logging {
 
   private val client: RestHighLevelClient = eSClientConfig.newClient
 
@@ -84,16 +91,78 @@ class ActivityESServiceImpl @Inject()(
 
       @Override
       override def onFailure(e: Exception): Unit = {
-        // TODO log the exception
         getResponsePromise.failure(e)
       }
     })
-    futureResponse.map(ActivityDocument.fromESGetResponse)
+    futureResponse
+      .map(ActivityDocument.fromESGetResponse)
+      .recover {
+        case exception =>
+          logger.error("Exceptions thrown after sending a elasticsearch GetRequest", exception)
+          ActivityDocument()
+      }
   }
 
   override def deleteDocumentByActivityId(activityId: String, isNotification: Boolean): Unit = ???
 
-  override def search(): Seq[ActivityDocument] = ???
+  override def search(input: ActivityESSearchQuery): Seq[ActivityDocument] = {
+    val helper = ActivityESServiceSearchHelper
+    val searchSourceBuilder = new SearchSourceBuilder()
+    val searchRequest = new SearchRequest(ActivityESServiceSearchHelper.indexNameForAllTime())
+    val boolQueryBuilder = new BoolQueryBuilder()
+
+    input.provider_id match {
+      case Some(provider_id) => boolQueryBuilder.should(QueryBuilders.termQuery(helper.ESFieldName.provider_id, provider_id))
+      case _ =>
+    }
+
+    input.activity_type match {
+      case Some(activity_type) => boolQueryBuilder.should(QueryBuilders.termQuery(helper.ESFieldName.activity_type, activity_type))
+      case _ =>
+    }
+
+
+    input.publish_at match {
+      case Some(dateRange) =>
+      case _ =>
+    }
+
+    input.publisher match {
+      case Some(publisher) => boolQueryBuilder.should(QueryBuilders.termQuery(helper.ESFieldName.publisher, publisher))
+      case _ =>
+    }
+
+    input.text match {
+      case Some(text) =>
+      case _ =>
+    }
+
+    input.title match {
+      case Some(title) => boolQueryBuilder.should(QueryBuilders.termQuery(helper.ESFieldName.title, title))
+      case _ =>
+    }
+
+    input.url match {
+      case Some(url) => boolQueryBuilder.should(QueryBuilders.termQuery(helper.ESFieldName.url, url))
+      case _ =>
+    }
+
+    searchSourceBuilder.query(boolQueryBuilder)
+    searchRequest.types(ActivityESServiceSearchHelper.documentType)
+    searchRequest.source(searchSourceBuilder)
+
+    client.searchAsync(searchRequest, new ActionListener[SearchResponse] {
+      override def onResponse(response: SearchResponse) = {
+        val hits = response.getHits.asScala.toList
+
+      }
+
+      override def onFailure(e: Exception) = {
+
+      }
+    })
+
+  }
 }
 
 trait ActivityESServiceHelper {
@@ -132,14 +201,11 @@ trait ActivityESServiceHelper {
   }
 }
 
-object ActivityESServiceGetHelper extends ActivityESServiceHelper {
+object ActivityESServiceGetHelper extends ActivityESServiceHelper
 
-}
+object ActivityESServiceDeleteHelper extends ActivityESServiceHelper
 
-object ActivityESServiceDeleteHelper extends ActivityESServiceHelper {
-
-}
-
+object ActivityESServiceSearchHelper extends ActivityESServiceHelper
 
 object ActivityESServiceIndexHelper extends ActivityESServiceHelper {
 
@@ -188,6 +254,25 @@ case class ActivityDocument(
   resolvedUsers: Seq[String] = Seq("-")
 )
 
+case class ActivityESSearchQuery(
+  provider_id: Option[String] = Option.empty,
+  activity_type: Option[String] = Option.empty,
+  title: Option[String] = Option.empty,
+  url: Option[String] = Option.empty,
+  text: Option[String] = Option.empty,
+  replaced_by: Option[String] = Option.empty,
+  publish_at: Option[ActivityESSearchQuery.DateRange] = Option.empty,
+  publisher: Option[String] = Option.empty,
+  audienceComponents: Option[Seq[String]] = Option.empty,
+  resolvedUsers: Option[Seq[String]] = Option.empty,
+)
+
+object ActivityESSearchQuery {
+
+  case class DateRange(from: Date, to: Date)
+
+}
+
 object ActivityDocument {
   def fromActivityModel(
     activity: Activity,
@@ -210,14 +295,17 @@ object ActivityDocument {
 
   def fromESGetResponse(res: GetResponse): ActivityDocument = {
     val helper = ActivityESServiceGetHelper
-    val audience_components = JavaConversions
-      .asScalaBuffer(res.getField(helper.ESFieldName.audience_components).getValues)
+    val audience_components = res
+      .getField(helper.ESFieldName.audience_components)
+      .getValues
+      .asScala
       .toList
       .map(_.toString)
 
-    val resolved_users = JavaConversions
-      .asScalaBuffer(res.getField(helper.ESFieldName.resolved_users).getValues)
-      .toList
+    val resolved_users = res
+      .getField(helper.ESFieldName.resolved_users)
+      .getValues
+      .asScala
       .map(_.toString)
 
     ActivityDocument(
