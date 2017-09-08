@@ -16,8 +16,15 @@ import services.{AudienceService, PublisherService}
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[ActivityESServiceImpl])
-trait ActivityESService {
+trait ActivityESService{
   def index(activity: Activity)
+
+  def getDocumentByActivityId(activityId: String): ActivityDocument
+
+  def deleteDocumentByActivityId(activityId: String)
+
+  def search(): Seq[ActivityDocument]
+
 }
 
 @Singleton
@@ -35,9 +42,9 @@ class ActivityESServiceImpl @Inject()(
       audienceService,
       publisherService
     )
-    val docBuilder = ActivityESService.makeIndexDocBuilder(activityDocument)
-    val indexName = ActivityESService.indexNameToday(activity.shouldNotify)
-    val request = ActivityESService.makeIndexRequest(indexName, "activity", activity.id, docBuilder)
+    val docBuilder = ActivityESServiceIndexHelper.makeIndexDocBuilder(activityDocument)
+    val indexName = ActivityESServiceIndexHelper.indexNameToday(activity.shouldNotify)
+    val request = ActivityESServiceIndexHelper.makeIndexRequest(indexName, "activity", activity.id, docBuilder)
 
     client.indexAsync(request, new ActionListener[IndexResponse] {
       override def onFailure(e: Exception) = {
@@ -51,16 +58,39 @@ class ActivityESServiceImpl @Inject()(
       }
     })
   }
+
+  override def getDocumentByActivityId(activityId: String): ActivityDocument = {
+    ???
+  }
+
+  override def deleteDocumentByActivityId(activityId: String): Unit = ???
+
+  override def search(): Seq[ActivityDocument] = ???
 }
 
-object ActivityESService {
+trait ActivityESServiceHelper {
+
+  val nameForAlert = "alert"
+  val nameForActivity = "activity"
+  val separator  = "_"
+
   def indexNameToday(isNotification: Boolean): String = {
     val today = DateTime.now().toString("yyyy_MM")
     isNotification match {
-      case true => s"""alert_$today"""
-      case false => s"""activity_$today"""
+      case true => s"""$nameForAlert$separator$today"""
+      case false => s"""$nameForActivity$separator$today"""
     }
   }
+
+  def indexNameForAllTime(isNotification: Boolean): String = {
+    isNotification match {
+      case true => s"""$nameForAlert*"""
+      case false => s"""$nameForActivity*"""
+    }
+  }
+}
+
+object ActivityESServiceIndexHelper extends ActivityESServiceHelper {
 
   def makeIndexRequest(indexName: String, docType: String, docId: String, docSource: XContentBuilder): IndexRequest = {
     new IndexRequest(indexName, docType, docId).source(docSource)
