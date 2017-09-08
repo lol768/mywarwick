@@ -16,6 +16,7 @@ import org.joda.time.DateTime
 import services.{AudienceService, PublisherService}
 import warwick.sso.Usercode
 
+import scala.collection.JavaConversions
 import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success}
 
@@ -71,7 +72,7 @@ class ActivityESServiceImpl @Inject()(
     val request = new GetRequest(
       helper.indexNameForAllTime(),
       helper.documentType,
-      "1" // we only have 1 version per document
+      activityId
     )
     val getResponsePromise: Promise[GetResponse] = Promise[GetResponse]
     val futureResponse: Future[GetResponse] = getResponsePromise.future
@@ -87,13 +88,7 @@ class ActivityESServiceImpl @Inject()(
         getResponsePromise.failure(e)
       }
     })
-
-    futureResponse.map(res => {
-      ActivityDocument(
-        res.getField("")
-      )
-    })
-    // but if it's a failed future, how do i return a Future[empty document]?
+    futureResponse.map(ActivityDocument.fromESGetResponse)
   }
 
   override def deleteDocumentByActivityId(activityId: String, isNotification: Boolean): Unit = ???
@@ -210,6 +205,32 @@ object ActivityDocument {
       serialisePublisher(activity.publisherId, publisherService),
       serialiseAudienceComponents(activity.audienceId, audienceService),
       serialiseResolvedUsers(activity.audienceId, audienceService)
+    )
+  }
+
+  def fromESGetResponse(res: GetResponse): ActivityDocument = {
+    val helper = ActivityESServiceGetHelper
+    val audience_components = JavaConversions
+      .asScalaBuffer(res.getField(helper.ESFieldName.audience_components).getValues)
+      .toList
+      .map(_.toString)
+
+    val resolved_users = JavaConversions
+      .asScalaBuffer(res.getField(helper.ESFieldName.resolved_users).getValues)
+      .toList
+      .map(_.toString)
+
+    ActivityDocument(
+      res.getField(helper.ESFieldName.provider_id).getValue.toString,
+      res.getField(helper.ESFieldName.activity_type).getValue.toString,
+      res.getField(helper.ESFieldName.title).getValue.toString,
+      res.getField(helper.ESFieldName.url).getValue.toString,
+      res.getField(helper.ESFieldName.text).getValue.toString,
+      res.getField(helper.ESFieldName.replaced_by).getValue.toString,
+      res.getField(helper.ESFieldName.published_at).getValue,
+      res.getField(helper.ESFieldName.publisher).getValue.toString,
+      audience_components,
+      resolved_users,
     )
   }
 
