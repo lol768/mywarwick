@@ -76,7 +76,6 @@ class ActivityESServiceImpl @Inject()(
     val builder = jsonBuilder().startObject()
 
     builder
-      .field("activity_id", id)
       .field("provider_id", providerId)
       .field("activity_type", activityType)
       .field("title", title)
