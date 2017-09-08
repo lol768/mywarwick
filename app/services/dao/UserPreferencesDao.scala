@@ -49,6 +49,10 @@ trait UserPreferencesDao {
 
   def getVerificationCode(usercode: Usercode)(implicit c: Connection): Option[String]
 
+  def setUserSmsVerificationNumber(usercode: Usercode, phoneNumber: String)(implicit c: Connection): Boolean
+
+  def getVerificationNumber(usercode: Usercode)(implicit c: Connection): Option[String]
+
 }
 
 @Singleton
@@ -137,7 +141,7 @@ class UserPreferencesDaoImpl extends UserPreferencesDao {
       save(usercode)
     }
 
-    SQL"""UPDATE USER_PREFERENCE SET SMS_NUMBER = $phoneNumber, SMS_VERIFICATION = null WHERE USERCODE = ${usercode.string}""".execute()
+    SQL"""UPDATE USER_PREFERENCE SET SMS_NUMBER = $phoneNumber, SMS_VERIFICATION = null, SMS_NUMBER_TO_VERIFY = null WHERE USERCODE = ${usercode.string}""".execute()
   }
 
   override def getColourSchemePreference(usercode: Usercode)(implicit c: Connection): Int = {
@@ -166,6 +170,20 @@ class UserPreferencesDaoImpl extends UserPreferencesDao {
   override def getVerificationCode(usercode: Usercode)(implicit c: Connection): Option[String] = {
     SQL"SELECT SMS_VERIFICATION FROM USER_PREFERENCE WHERE USERCODE = ${usercode.string}"
       .as(get[Option[String]]("sms_verification").singleOpt)
+      .flatten
+  }
+
+  override def setUserSmsVerificationNumber(usercode: Usercode, phoneNumber: String)(implicit c: Connection): Boolean = {
+    if (!exists(usercode)) {
+      save(usercode)
+    }
+
+    SQL"""UPDATE USER_PREFERENCE SET SMS_NUMBER_TO_VERIFY = $phoneNumber WHERE USERCODE = ${usercode.string}""".execute()
+  }
+
+  override def getVerificationNumber(usercode: Usercode)(implicit c: Connection): Option[String] = {
+    SQL"SELECT SMS_NUMBER_TO_VERIFY FROM USER_PREFERENCE WHERE USERCODE = ${usercode.string}"
+      .as(get[Option[String]]("sms_number_to_verify").singleOpt)
       .flatten
   }
 }

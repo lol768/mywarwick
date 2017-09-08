@@ -2,7 +2,6 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import actors.MessageProcessing.ProcessingResult
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber
@@ -25,6 +24,8 @@ object SmsNotificationsPrefService {
     RandomStringUtils.random(VERIFICATION_CODE_LENGTH, VERIFICATION_CHARS).toUpperCase
 }
 
+case class SmsVerification(code: String, phoneNumber: PhoneNumber)
+
 @ImplementedBy(classOf[SmsNotificationsPrefServiceImpl])
 trait SmsNotificationsPrefService {
 
@@ -36,9 +37,9 @@ trait SmsNotificationsPrefService {
 
   def setNumber(usercode: Usercode, phoneNumber: Option[PhoneNumber]): Unit
 
-  def requireVerification(usercode: Usercode, phoneNumber: PhoneNumber): Boolean
+  def requireVerification(usercode: Usercode, phoneNumber: PhoneNumber): Option[SmsVerification]
 
-  def getVerificationCode(usercode: Usercode): Option[String]
+  def getVerification(usercode: Usercode): Option[SmsVerification]
 
 }
 
@@ -72,23 +73,40 @@ class SmsNotificationsPrefServiceImpl @Inject()(
       phoneNumber.map(PhoneNumberUtil.getInstance.format(_, PhoneNumberFormat.INTERNATIONAL)).orNull
     ))
 
-  override def requireVerification(usercode: Usercode, phoneNumber: PhoneNumber): Boolean = {
+  override def requireVerification(usercode: Usercode, phoneNumber: PhoneNumber): Option[SmsVerification] = {
     val code = SmsNotificationsPrefService.generateVerificationCode
-    db.withConnection(implicit c => dao.setUserSmsVerificationCode(usercode, code))
+    db.withConnection { implicit c =>
+      dao.setUserSmsVerificationCode(usercode, code)
+      dao.setUserSmsVerificationNumber(usercode, PhoneNumberUtil.getInstance.format(phoneNumber, PhoneNumberFormat.INTERNATIONAL))
+    }
 
     sendSms(phoneNumber, s"Your My Warwick SMS verification code is $code").map(json => {
       val result = json.value("success").as[JsBoolean].value
       if (!result) {
         logger.error(s"Failed sending SMS message sent to $usercode: ${json.toString}")
+        None
+      } else {
+        Some(SmsVerification(code, phoneNumber))
       }
-      result
     }).recover {
       case e =>
         logger.error(s"Unable to send SMS verification to $phoneNumber", e)
-        false
+        None
     }.get
   }
 
-  override def getVerificationCode(usercode: Usercode): Option[String] =
-    db.withConnection(implicit c => dao.getVerificationCode(usercode))
+  override def getVerification(usercode: Usercode): Option[SmsVerification] = {
+    val (codeOption, numberOption) = db.withConnection(implicit c =>
+      (dao.getVerificationCode(usercode), dao.getVerificationNumber(usercode))
+    )
+    codeOption.flatMap(code => numberOption.flatMap(number =>
+      Try(PhoneNumberUtil.getInstance.parse(number, "GB")).recoverWith {
+        case e =>
+          logger.error(s"Unable to parse phone number $number", e)
+          Failure(e)
+      }.toOption.map(phoneNumber =>
+        SmsVerification(code, phoneNumber)
+      )
+    ))
+  }
 }

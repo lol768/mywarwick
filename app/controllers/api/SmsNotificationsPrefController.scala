@@ -63,8 +63,8 @@ class SmsNotificationsPrefController @Inject()(
   }
 
   private def requireVerification(user: User, data: SmsNotificationsRequest)(implicit request: AuthenticatedRequest[AnyContent]): Result = {
-    val verifySent = notificationPrefService.requireVerification(user.usercode, data.smsNumber.get)
-    if (verifySent) {
+    val verification = notificationPrefService.requireVerification(user.usercode, data.smsNumber.get)
+    if (verification.nonEmpty) {
       Ok(Json.toJson(API.Success("verificationRequired", "verificationRequired")))
     } else {
       InternalServerError(Json.toJson(API.Failure[JsObject]("internal server error", Seq(API.Error("sms-failure", "Unable to send SMS verification code")))))
@@ -88,16 +88,21 @@ class SmsNotificationsPrefController @Inject()(
               BadRequest(Json.toJson(API.Failure[JsObject]("error", Seq(API.Error("invalid-body", "Phone number must be set")))))
             } else {
               val existingNumber = notificationPrefService.getNumber(user.usercode)
-              val existingVerification = notificationPrefService.getVerificationCode(user.usercode)
+              val existingVerification = notificationPrefService.getVerification(user.usercode)
 
               if (data.resendVerification) {
                 requireVerification(user, data)
               } else if (data.smsNumber.nonEmpty && existingVerification.nonEmpty) {
                 // Check verification
                 if (data.verificationCode.isEmpty || !StringUtils.hasText(data.verificationCode.get)) {
+                  // Check code exists
                   BadRequest(Json.toJson(API.Failure[JsObject]("verificationRequired", Seq(API.Error("invalid-body-verification", "Verification code required")))))
-                } else if (existingVerification.get != data.verificationCode.get) {
+                } else if (existingVerification.get.code != data.verificationCode.get) {
+                  // Check code matches
                   BadRequest(Json.toJson(API.Failure[JsObject]("verificationRequired", Seq(API.Error("invalid-body-verification", "Verification code is incorrect")))))
+                } else if (!existingVerification.get.phoneNumber.exactlySameAs(data.smsNumber.get)) {
+                  // Check number matches
+                  BadRequest(Json.toJson(API.Failure[JsObject]("verificationRequired", Seq(API.Error("invalid-body-verification", "Verification code sent for different phone number. Click re-send to regenerate code.")))))
                 } else {
                   doUpdate(user, data)
                 }

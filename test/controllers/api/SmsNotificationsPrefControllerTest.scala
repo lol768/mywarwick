@@ -1,19 +1,17 @@
 package controllers.api
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber
 import helpers.WithActorSystem
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.PlaySpec
-import play.api.libs.json.{JsBoolean, JsNull, JsString, Json}
-import play.api.test.FakeRequest
-import services.{MockNavigationService, SecurityService, SecurityServiceImpl, SmsNotificationsPrefService}
-import play.api.test.Helpers._
-import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
 import play.api.cache.CacheApi
+import play.api.libs.json.{JsNull, JsString, Json}
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import services._
 import warwick.sso._
 
 class SmsNotificationsPrefControllerTest extends PlaySpec with MockitoSugar with WithActorSystem {
@@ -94,8 +92,8 @@ class SmsNotificationsPrefControllerTest extends PlaySpec with MockitoSugar with
       )
       private val parsedPhoneNumber = PhoneNumberUtil.getInstance.parse("+44 7773 12 55 77", "GB")
       when(smsNotificationsPrefService.getNumber(ron.usercode)).thenReturn(None)
-      when(smsNotificationsPrefService.getVerificationCode(ron.usercode)).thenReturn(None)
-      when(smsNotificationsPrefService.requireVerification(ron.usercode, parsedPhoneNumber)).thenReturn(true)
+      when(smsNotificationsPrefService.getVerification(ron.usercode)).thenReturn(None)
+      when(smsNotificationsPrefService.requireVerification(ron.usercode, parsedPhoneNumber)).thenReturn(Some(SmsVerification("123456", parsedPhoneNumber)))
 
       private val result = call(controller.update, FakeRequest("POST", "/").withBody(body))
       status(result) mustBe OK
@@ -112,8 +110,8 @@ class SmsNotificationsPrefControllerTest extends PlaySpec with MockitoSugar with
       private val parsedPhoneNumber = PhoneNumberUtil.getInstance.parse("+44 7773 12 55 77", "GB")
       private val parsedCurrentPhoneNumber = PhoneNumberUtil.getInstance.parse("+44 7773 12 55 78", "GB")
       when(smsNotificationsPrefService.getNumber(ron.usercode)).thenReturn(Some(parsedCurrentPhoneNumber))
-      when(smsNotificationsPrefService.getVerificationCode(ron.usercode)).thenReturn(None)
-      when(smsNotificationsPrefService.requireVerification(ron.usercode, parsedPhoneNumber)).thenReturn(true)
+      when(smsNotificationsPrefService.getVerification(ron.usercode)).thenReturn(None)
+      when(smsNotificationsPrefService.requireVerification(ron.usercode, parsedPhoneNumber)).thenReturn(Some(SmsVerification("123456", parsedPhoneNumber)))
 
       private val result = call(controller.update, FakeRequest("POST", "/").withBody(body))
       status(result) mustBe OK
@@ -129,7 +127,7 @@ class SmsNotificationsPrefControllerTest extends PlaySpec with MockitoSugar with
       )
       private val parsedPhoneNumber = PhoneNumberUtil.getInstance.parse("+44 7773 12 55 77", "GB")
       when(smsNotificationsPrefService.getNumber(ron.usercode)).thenReturn(None)
-      when(smsNotificationsPrefService.getVerificationCode(ron.usercode)).thenReturn(Some("123456"))
+      when(smsNotificationsPrefService.getVerification(ron.usercode)).thenReturn(Some(SmsVerification("123456", parsedPhoneNumber)))
 
       private val result = call(controller.update, FakeRequest("POST", "/").withBody(body))
       status(result) mustBe BAD_REQUEST
@@ -146,8 +144,27 @@ class SmsNotificationsPrefControllerTest extends PlaySpec with MockitoSugar with
         "verificationCode" -> "nope"
       )
       private val parsedPhoneNumber = PhoneNumberUtil.getInstance.parse("+44 7773 12 55 77", "GB")
+      private val parsedVerifyPhoneNumber = PhoneNumberUtil.getInstance.parse("+44 7773 12 55 78", "GB")
       when(smsNotificationsPrefService.getNumber(ron.usercode)).thenReturn(None)
-      when(smsNotificationsPrefService.getVerificationCode(ron.usercode)).thenReturn(Some("123456"))
+      when(smsNotificationsPrefService.getVerification(ron.usercode)).thenReturn(Some(SmsVerification("123456", parsedVerifyPhoneNumber)))
+
+      private val result = call(controller.update, FakeRequest("POST", "/").withBody(body))
+      status(result) mustBe BAD_REQUEST
+      (contentAsJson(result) \ "status").get mustBe JsString("verificationRequired")
+      verify(smsNotificationsPrefService, times(0)).set(ron.usercode, wantsSMS = true)
+      verify(smsNotificationsPrefService, times(0)).setNumber(ron.usercode, Some(parsedPhoneNumber))
+      verify(smsNotificationsPrefService, times(0)).requireVerification(ron.usercode, parsedPhoneNumber)
+    }
+
+    "valid phone number verification code sent wrong number" in new Fixture {
+      private val body = Json.obj(
+        "wantsSms" -> true,
+        "smsNumber" -> "+44 7773 12 55 77",
+        "verificationCode" -> "nope"
+      )
+      private val parsedPhoneNumber = PhoneNumberUtil.getInstance.parse("+44 7773 12 55 77", "GB")
+      when(smsNotificationsPrefService.getNumber(ron.usercode)).thenReturn(None)
+      when(smsNotificationsPrefService.getVerification(ron.usercode)).thenReturn(Some(SmsVerification("123456", parsedPhoneNumber)))
 
       private val result = call(controller.update, FakeRequest("POST", "/").withBody(body))
       status(result) mustBe BAD_REQUEST
@@ -165,7 +182,7 @@ class SmsNotificationsPrefControllerTest extends PlaySpec with MockitoSugar with
       )
       private val parsedPhoneNumber = PhoneNumberUtil.getInstance.parse("+44 7773 12 55 77", "GB")
       when(smsNotificationsPrefService.getNumber(ron.usercode)).thenReturn(None)
-      when(smsNotificationsPrefService.getVerificationCode(ron.usercode)).thenReturn(Some("123456"))
+      when(smsNotificationsPrefService.getVerification(ron.usercode)).thenReturn(Some(SmsVerification("123456", parsedPhoneNumber)))
 
       private val result = call(controller.update, FakeRequest("POST", "/").withBody(body))
       status(result) mustBe OK
