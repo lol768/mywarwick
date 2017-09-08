@@ -57,13 +57,6 @@ class ActivityESServiceImpl @Inject()(
       case _ => Nil
     }
 
-    //    val audienceComponents = activity.audienceId match {
-    //      case Some(id: String) => audienceService.getAudience(id).components.map(component => {
-    //
-    //      })
-    //      case _ => Seq("-")
-    //    }
-
     val resolvedUsers: Seq[String] = activity.audienceId match {
       case Some(id: String) => audienceService.resolve(audienceService.getAudience(id))
         .getOrElse(Seq(Usercode("-")))
@@ -81,10 +74,11 @@ class ActivityESServiceImpl @Inject()(
 
     import org.elasticsearch.common.xcontent.XContentFactory._
     val builder = jsonBuilder().startObject()
+
     builder
       .field("activity_id", id)
       .field("provider_id", providerId)
-      .field("type", activityType)
+      .field("activity_type", activityType)
       .field("title", title)
       .field("url", url)
       .field("test", text)
@@ -100,13 +94,9 @@ class ActivityESServiceImpl @Inject()(
     audienceComponents.foreach(builder.value)
     builder.endArray()
 
-    //    builder.startArray("audience_components")
-    //    audienceComponents.foreach(builder.value)
-    //    builder.endArray()
-
     builder.endObject()
 
-    val indexRequest = new IndexRequest(indexNameToday(activity.shouldNotify), activityType, id).source(builder)
+    val indexRequest = new IndexRequest(indexNameToday(activity.shouldNotify), "activity", id).source(builder)
 
     client.indexAsync(indexRequest, new ActionListener[IndexResponse] {
       override def onFailure(e: Exception) = {
