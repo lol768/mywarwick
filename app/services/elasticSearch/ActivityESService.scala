@@ -5,13 +5,12 @@ import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
 import models.Audience.{DepartmentAudience, ModuleAudience, UsercodeAudience, WebGroupAudience}
-import models.{Activity, Audience}
+import models.{Activity}
 import models.publishing.Publisher
 import org.elasticsearch.action.ActionListener
 import org.elasticsearch.action.index.{IndexRequest, IndexResponse}
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.common.xcontent.XContentBuilder
-import org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder
 import org.joda.time.DateTime
 import services.{AudienceService, PublisherService}
 import warwick.sso.Usercode
@@ -54,20 +53,6 @@ class ActivityESServiceImpl @Inject()(
   }
 }
 
-sealed case class ActivityDocument(
-  provider_id: String,
-  activity_type: String,
-  title: String,
-  url: String,
-  text: String,
-  replaced_by: String,
-  published_at: Date,
-  publisher: String,
-  audienceComponents: Seq[String],
-  resolvedUsers: Seq[String]
-)
-
-
 object ActivityESService {
   def indexNameToday(isNotification: Boolean): String = {
     val today = DateTime.now().toString("yyyy_MM")
@@ -82,6 +67,7 @@ object ActivityESService {
   }
 
   def makeIndexDocBuilder(activityDocument: ActivityDocument): XContentBuilder = {
+    import org.elasticsearch.common.xcontent.XContentFactory._
     val builder: XContentBuilder = jsonBuilder().startObject()
 
     builder
@@ -108,22 +94,41 @@ object ActivityESService {
 
 }
 
+case class ActivityDocument(
+  provider_id: String,
+  activity_type: String,
+  title: String,
+  url: String,
+  text: String,
+  replaced_by: String,
+  published_at: Date,
+  publisher: String,
+  audienceComponents: Seq[String],
+  resolvedUsers: Seq[String]
+)
+
 object ActivityDocument {
   def fromActivityModel(
     activity: Activity,
     audienceService: AudienceService,
     publisherService: PublisherService
   ): ActivityDocument = {
-    val id = activity.id
-    val providerId = activity.providerId
-    val activityType = activity.`type`
-    val title = activity.title
-    val text = activity.text.getOrElse("-")
-    val url = activity.url.getOrElse("-")
-    val replacedBy = activity.replacedBy.getOrElse("-")
-    val publishedAt: Date = activity.publishedAt.toDate
+    ActivityDocument(
+      activity.providerId,
+      activity.`type`,
+      activity.title,
+      activity.url.getOrElse("-"),
+      activity.text.getOrElse("-"),
+      activity.replacedBy.getOrElse("-"),
+      activity.publishedAt.toDate,
+      serialisePublisher(activity.publisherId, publisherService),
+      serialiseAudienceComponents(activity.audienceId, audienceService),
+      serialiseResolvedUsers(activity.audienceId, audienceService)
+    )
+  }
 
-    val audienceComponents: Seq[String] = activity.audienceId match {
+  def serialiseAudienceComponents(audienceId: Option[String], audienceService: AudienceService): Seq[String] = {
+    audienceId match {
       case Some(id: String) => audienceService.getAudience(id).components.flatMap {
         case e: UsercodeAudience => Seq("usercode")
         case e: WebGroupAudience => Seq(s"""WebGroupAudience:${e.groupName.string}""")
@@ -135,33 +140,24 @@ object ActivityDocument {
       }
       case _ => Nil
     }
+  }
 
-    val resolvedUsers: Seq[String] = activity.audienceId match {
+  def serialiseResolvedUsers(audienceId: Option[String], audienceService: AudienceService): Seq[String] = {
+    audienceId match {
       case Some(id: String) => audienceService.resolve(audienceService.getAudience(id))
         .getOrElse(Seq(Usercode("-")))
         .map(_.string)
       case _ => Seq("-")
     }
+  }
 
-    val publisher: String = activity.publisherId match {
+  def serialisePublisher(publisherId: Option[String], publisherService: PublisherService): String = {
+    publisherId match {
       case Some(id: String) => publisherService.find(id) match {
         case Some(e: Publisher) => e.id
         case _ => "-"
       }
       case _ => "-"
     }
-
-    ActivityDocument(
-      providerId,
-      activityType,
-      title,
-      url,
-      text,
-      replacedBy,
-      publishedAt,
-      publisher,
-      audienceComponents,
-      resolvedUsers
-    )
   }
 }
