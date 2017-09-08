@@ -106,6 +106,7 @@ class ActivityESServiceImpl @Inject()(
 
   override def deleteDocumentByActivityId(activityId: String, isNotification: Boolean): Unit = ???
 
+  //TODO extract into small functions so that we can have unit tests
   override def search(input: ActivityESSearchQuery): Seq[ActivityDocument] = {
     val helper = ActivityESServiceSearchHelper
     val searchSourceBuilder = new SearchSourceBuilder()
@@ -123,6 +124,7 @@ class ActivityESServiceImpl @Inject()(
     }
 
 
+    //TODO figure out the range query
     input.publish_at match {
       case Some(dateRange) =>
       case _ =>
@@ -133,6 +135,8 @@ class ActivityESServiceImpl @Inject()(
       case _ =>
     }
 
+    //TODO figure out fuzzy text match
+    //TODO check if text is analysed or not
     input.text match {
       case Some(text) =>
       case _ =>
@@ -148,6 +152,18 @@ class ActivityESServiceImpl @Inject()(
       case _ =>
     }
 
+    //TODO figure out query for array
+    input.audienceComponents match {
+      case Some(components) =>
+      case _ =>
+    }
+
+    //TODO figure out query for array
+    input.resolvedUsers match {
+      case Some(resolvedUsers) =>
+      case _=>
+    }
+
     searchSourceBuilder.query(boolQueryBuilder)
     searchRequest.types(ActivityESServiceSearchHelper.documentType)
     searchRequest.source(searchSourceBuilder)
@@ -155,7 +171,7 @@ class ActivityESServiceImpl @Inject()(
     client.searchAsync(searchRequest, new ActionListener[SearchResponse] {
       override def onResponse(response: SearchResponse) = {
         val hits = response.getHits.asScala.toList
-
+        //TODO map hits to a list of ActivityDocument
       }
 
       override def onFailure(e: Exception) = {
@@ -166,6 +182,7 @@ class ActivityESServiceImpl @Inject()(
   }
 }
 
+//TODO unit tests for all the following helper functions
 trait ActivityESServiceHelper {
 
   val documentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
@@ -274,6 +291,7 @@ object ActivityESSearchQuery {
 
 }
 
+//TODO unit tests for all the following helper functions
 object ActivityDocument {
   def fromActivityModel(
     activity: Activity,
@@ -316,7 +334,7 @@ object ActivityDocument {
       res.getField(helper.ESFieldName.url).getValue.toString,
       res.getField(helper.ESFieldName.text).getValue.toString,
       res.getField(helper.ESFieldName.replaced_by).getValue.toString,
-      DateTime.parse(res.getField(helper.ESFieldName.published_at).getValue.toString).toDate,
+      DateTime.parse(res.getField(helper.ESFieldName.published_at).getValue.toString).toDate, //TODO not sure if this is right
       res.getField(helper.ESFieldName.publisher).getValue.toString,
       audience_components,
       resolved_users
