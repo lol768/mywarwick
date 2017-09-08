@@ -89,9 +89,9 @@ class ActivityESServiceImpl @Inject()(
     })
 
     futureResponse.map(res => {
-      ActivityDocument() // and add some data
-    }).recover(error => {
-      ActivityDocument() // empty document
+      ActivityDocument(
+        res.getField("")
+      )
     })
     // but if it's a failed future, how do i return a Future[empty document]?
   }
@@ -107,6 +107,19 @@ trait ActivityESServiceHelper {
   val nameForAlert = "alert"
   val nameForActivity = "activity"
   val separator = "_"
+
+  object ESFieldName {
+    val provider_id = "provider_id"
+    val activity_type = "activity_type"
+    val title = "title"
+    val url = "url"
+    val text = "text"
+    val replaced_by = "replaced_by"
+    val published_at = "published_at"
+    val publisher = "publisher"
+    val resolved_users = "resolved_users"
+    val audience_components = "audience_components"
+  }
 
   def indexNameToday(isNotification: Boolean = true): String = {
     val today = DateTime.now().toString("yyyy_MM")
@@ -144,20 +157,20 @@ object ActivityESServiceIndexHelper extends ActivityESServiceHelper {
     val builder: XContentBuilder = jsonBuilder().startObject()
 
     builder
-      .field("provider_id", activityDocument.provider_id)
-      .field("activity_type", activityDocument.activity_type)
-      .field("title", activityDocument.title)
-      .field("url", activityDocument.url)
-      .field("text", activityDocument.text)
-      .field("replaced_by", activityDocument.replaced_by)
-      .field("published_at", activityDocument.published_at)
-      .field("publisher", activityDocument.publisher)
+      .field(ESFieldName.provider_id, activityDocument.provider_id)
+      .field(ESFieldName.activity_type, activityDocument.activity_type)
+      .field(ESFieldName.title, activityDocument.title)
+      .field(ESFieldName.url, activityDocument.url)
+      .field(ESFieldName.text, activityDocument.text)
+      .field(ESFieldName.replaced_by, activityDocument.replaced_by)
+      .field(ESFieldName.published_at, activityDocument.published_at)
+      .field(ESFieldName.publisher, activityDocument.publisher)
 
-    builder.startArray("resolved_users")
+    builder.startArray(ESFieldName.resolved_users)
     activityDocument.resolvedUsers.foreach(builder.value)
     builder.endArray()
 
-    builder.startArray("audience_components")
+    builder.startArray(ESFieldName.audience_components)
     activityDocument.audienceComponents.foreach(builder.value)
     builder.endArray()
 
