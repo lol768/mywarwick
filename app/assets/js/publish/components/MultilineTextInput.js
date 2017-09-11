@@ -26,7 +26,7 @@ export default class MultilineTextInput extends React.PureComponent {
   }
 
   handleTextChange({ target: { value } }) {
-    const items = _.filter(value.split(','), val => val.length > 4);
+    const items = _.filter(value.split('\n'), val => val.length > 4);
     this.props.handleChange(items, this.props.type);
   }
 
@@ -39,7 +39,7 @@ export default class MultilineTextInput extends React.PureComponent {
         placeholder={this.props.placeholder}
         rows={this.props.rows}
         cols={this.props.cols}
-        defaultValue={this.props.items.join(', ')}
+        defaultValue={this.props.items.join('\n')}
       />
     );
   }

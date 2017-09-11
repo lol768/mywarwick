@@ -258,7 +258,7 @@ export default class AudiencePicker extends React.PureComponent {
               name="audience.audience[]"
               handleChange={this.handleChange}
               items={_.get(this.state, prefixPath('.groups.listOfUsercodes'), [])}
-              placeholder="Type in usercodes separated by commas (e.g. user1, user2)"
+              placeholder="Type in usercodes, one per line"
             />
           </div>
         </Checkbox>

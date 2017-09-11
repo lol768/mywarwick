@@ -119,7 +119,7 @@ object Audience {
       case relationshipRegex(relationshipType, agentId) => Some(RelationshipAudience(relationshipType, UniversityID(agentId)))
       case optInRegex(optInType, optInValue) if optInType == LocationOptIn.optInType => LocationOptIn.fromValue(optInValue)
       case string if string.nonEmpty => {
-        val validUsercodes: Seq[Usercode] = string.split(",").map(_.trim).flatMap { usercode =>
+        val validUsercodes: Seq[Usercode] = string.split("\n").map(_.trim).flatMap { usercode =>
           if(!usercode.contains(":")) Some(Usercode(usercode))
           else None
         }
