@@ -1,7 +1,7 @@
 @import services.dao.DepartmentInfo
 @(components: Seq[Audience.Component], allDepartments: Seq[DepartmentInfo])@components.flatMap(component => component match {
   case Audience.PublicAudience => Seq("Public")
-  case usercode: Audience.UsercodeAudience => Seq(s"Usercode: ${usercode.usercode}")
+  case usercodesAudience: Audience.UsercodesAudience => usercodesAudience.usercodes.map(u => s"Usercode: ${u.string}").seq
   case group: Audience.WebGroupAudience => Seq(s"WebGroup: ${group.groupName.string}")
   case module: Audience.ModuleAudience => Seq(s"Module: ${module.moduleCode.toUpperCase}")
   case dept: Audience.DepartmentAudience => dept.subset.map {

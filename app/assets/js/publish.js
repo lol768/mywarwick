@@ -13,12 +13,15 @@ import './flexi-picker';
 import AudiencePicker from './publish/components/AudiencePicker';
 
 function setupAudiencePicker() {
-  const audiencePicker = $('#audience-picker');
+  const audiencePicker = $('.audience-picker');
+
   if (audiencePicker.length) {
     const props = {
       departments: audiencePicker.data('departments') || [],
       isGod: audiencePicker.data('is-god') || false,
       formData: audiencePicker.data('form-data') || {},
+      locationOpts: audiencePicker.data('location-opts') || {},
+      deptSubsetOpts: audiencePicker.data('dept-subset-opts') || {},
     };
     ReactDOM.render(
       <AudiencePicker {...props} />,

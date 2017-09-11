@@ -69,6 +69,6 @@ export class RadioButton extends Checkbox {
   };
 
   componentWillUpdate(nextProps) {
-    if (this.props.onDeselect !== undefined && !nextProps.isChecked) { this.props.onDeselect(); }
+    if (!nextProps.isChecked && this.props.onDeselect !== undefined) { this.props.onDeselect(); }
   }
 }

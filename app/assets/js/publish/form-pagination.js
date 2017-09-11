@@ -83,16 +83,16 @@ $(SPLIT_FORM).each((i, form) => {
     $currentSection.find('*[id*=_error_]').remove();
     $currentSection.find('.has-error').removeClass('has-error');
 
-    const errorsAsJson = $(html).find('#audience-picker').data('errors');
+    const errorsAsJson = $(html).find('.audience-picker').data('errors');
 
     if (errorsAsJson.audience !== undefined) {
-      const $audiencePicker = $('#audience-picker');
+      const $audiencePicker = $('.audience-picker');
       $audiencePicker
         .addClass('has-error');
 
       $audiencePicker.prepend(
-        errorsAsJson.audience.map(err =>
-          $('<div>').addClass('help-block').attr('id', '_error_').html(err),
+        errorsAsJson.audience.map((err, index) =>
+          $('<div>').addClass('help-block').attr('id', `audience_error_${index}`).html(err),
         ),
       );
     }

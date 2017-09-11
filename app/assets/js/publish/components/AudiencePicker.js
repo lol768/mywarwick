@@ -11,26 +11,21 @@ import relationshipPicker from '../../publish/relationshipPicker';
 
 const ELLIPSIS = '…';
 
-const GROUPS = {
-  TeachingStaff: 'Teaching Staff',
-  AdminStaff: 'Administrative Staff',
-  TaughtPostgrads: 'Taught Postgraduates',
-  ResearchPostgrads: 'Research Postgraduates',
-};
-
-const LOCATIONS = {
-  CentralCampusResidences: 'Central campus residences',
-  WestwoodResidences: 'Westwood residences',
-  Coventry: 'Coventry',
-  Kenilworth: 'Kenilworth',
-  LeamingtonSpa: 'Leamington Spa',
-};
-
 export default class AudiencePicker extends React.PureComponent {
   static propTypes = {
     formData: PropTypes.object,
     isGod: PropTypes.bool,
     departments: PropTypes.object,
+    deptSubsetOpts: PropTypes.object,
+    locationOpts: PropTypes.object,
+  };
+
+  static defaultProps = {
+    formData: {},
+    isGod: false,
+    departments: {},
+    deptSubsetOpts: {},
+    locationOpts: {},
   };
 
   constructor(props) {
@@ -53,6 +48,7 @@ export default class AudiencePicker extends React.PureComponent {
     this.handleChange = this.handleChange.bind(this);
     this.isChecked = this.isChecked.bind(this);
     this.selectDepartment = this.selectDepartment.bind(this);
+    this.clearDepartment = this.clearDepartment.bind(this);
     this.groupsInput = this.groupsInput.bind(this);
     this.locationInput = this.locationInput.bind(this);
   }
@@ -143,12 +139,12 @@ export default class AudiencePicker extends React.PureComponent {
           value="yesLocation"
           formPath="locations"
         >
-          {Object.keys(LOCATIONS).map(key =>
+          {Object.keys(this.props.locationOpts).map(key =>
             (<Checkbox
               key={key}
               handleChange={(name, type, path) => this.handleChange(key, type, path)}
               formPath="locations.yesLocation"
-              label={LOCATIONS[key]}
+              label={this.props.locationOpts[key]}
               name="audience.audience[]"
               value={`OptIn:Location:${key}`}
               isChecked={this.isChecked(`locations.yesLocation.${key}`)}
@@ -186,25 +182,17 @@ export default class AudiencePicker extends React.PureComponent {
 
     const groups = (
       <div>
-        {Object.keys(GROUPS).map(key =>
+        {_.map(this.props.deptSubsetOpts, (val, key) =>
           (<Checkbox
             key={key}
             handleChange={this.handleChange}
             isChecked={this.isChecked(prefixPath(`.groups.${prefixDeptSubset(key)}`))}
-            label={GROUPS[key]}
+            label={val}
             name="audience.audience[]"
             value={prefixDeptSubset(key)}
             formPath={prefixPath('.groups')}
           />),
         )}
-        <Checkbox
-          handleChange={this.handleChange}
-          isChecked={this.isChecked(prefixPath(`.groups.${prefixDeptSubset('UndergradStudents')}`))}
-          label="Undergraduates"
-          name="audience.audience[]"
-          value={prefixDeptSubset('UndergradStudents')}
-          formPath={prefixPath('.groups')}
-        />
         <Checkbox
           handleChange={this.handleChange}
           isChecked={this.isChecked(prefixPath('.groups.modules'))}
@@ -307,6 +295,10 @@ export default class AudiencePicker extends React.PureComponent {
     );
   }
 
+  clearDepartment() {
+    this.setState({ department: ELLIPSIS });
+  }
+
   render() {
     return (
       <div>
@@ -328,7 +320,7 @@ export default class AudiencePicker extends React.PureComponent {
               <RadioButton
                 handleChange={this.handleChange}
                 isChecked={this.isChecked('audience.department')}
-                onDeselect={() => this.selectDepartment(undefined, undefined)}
+                onDeselect={this.clearDepartment}
                 label="People within a particular department"
                 value="department"
                 formPath="audience"

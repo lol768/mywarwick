@@ -93,7 +93,7 @@ class AudienceDaoImpl extends AudienceDao {
         case ("WebGroup", components) => components.collect {
           case AudienceComponentSave("WebGroup", Some(group), _) => WebGroupAudience(GroupName(group))
         }
-        case ("Usercode", components) => components.flatMap(_.value).map(Usercode).map(UsercodeAudience.apply)
+        case ("Usercode", components) => Seq(UsercodesAudience(components.flatMap(_.value).map(Usercode)))
         case (_, components) => components.map(c =>
           if (c.value.isDefined) s"${c.name}:${c.value.get}"
           else c.name
@@ -116,7 +116,6 @@ class AudienceDaoImpl extends AudienceDao {
       case SeminarGroupAudience(groupId) => Seq(AudienceComponentSave("SeminarGroup", Some(groupId), None))
       case RelationshipAudience(relationshipType, agentId) => Seq(AudienceComponentSave.fromCompoundValue("Relationship", Seq(relationshipType, agentId.string), None))
       case WebGroupAudience(group) => Seq(AudienceComponentSave("WebGroup", Some(group.string), None))
-      case UsercodeAudience(usercode) => Seq(AudienceComponentSave("Usercode", Some(usercode.string), None))
       case UsercodesAudience(usercodes) => usercodes.flatMap(usercode => Seq(AudienceComponentSave("Usercode", Some(usercode.string), None)))
       case optIn: OptIn => Seq(AudienceComponentSave(s"OptIn:${optIn.optInType}", Some(optIn.optInValue), None))
     }

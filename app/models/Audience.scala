@@ -17,7 +17,10 @@ object Audience {
   val Public = Audience(Seq(PublicAudience))
 
   def usercodes(usercodes: Seq[Usercode]): Audience = {
-    Audience(usercodes.map(UsercodeAudience))
+    Audience(usercodes match {
+      case _::_ => Seq(UsercodesAudience(usercodes))
+      case _ => Nil
+    })
   }
 
   def usercode(usercode: Usercode): Audience = {
@@ -32,11 +35,11 @@ object Audience {
   sealed trait Component extends EnumEntry
 
   // Pieces of department
-  sealed trait DepartmentSubset extends Component
+  sealed trait DepartmentSubset extends Component {
+    val displayName: String = toString
+  }
 
   case object PublicAudience extends Component
-
-  case class UsercodeAudience(usercode: Usercode) extends Component
 
   case class UsercodesAudience(usercodes: Seq[Usercode]) extends Component
 
@@ -53,15 +56,26 @@ object Audience {
   case object All extends DepartmentSubset
 
   case object Staff extends DepartmentSubset // No longer available in Audience Picker UI
-  case object TeachingStaff extends DepartmentSubset
 
-  case object AdminStaff extends DepartmentSubset
+  case object TeachingStaff extends DepartmentSubset {
+    override val displayName = "Teaching Staff"
+  }
 
-  case object UndergradStudents extends DepartmentSubset
+  case object AdminStaff extends DepartmentSubset {
+    override val displayName = "Administrative Staff"
+  }
 
-  case object TaughtPostgrads extends DepartmentSubset
+  case object UndergradStudents extends DepartmentSubset {
+    override val displayName = "Undergraduates"
+  }
 
-  case object ResearchPostgrads extends DepartmentSubset
+  case object TaughtPostgrads extends DepartmentSubset {
+    override val displayName = "Taught Postgraduates"
+  }
+
+  case object ResearchPostgrads extends DepartmentSubset {
+    override val displayName = "Research Postgraduates"
+  }
 
   sealed abstract class OptIn(val optInType: String, val optInValue: String, val description: String) extends Component
 

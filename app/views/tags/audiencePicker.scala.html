@@ -1,5 +1,6 @@
 @import models.publishing.PermissionScope
 @import play.api.libs.json.{Json, JsValue}
+@import models.Audience._
 
 @(
     form: Form[_],
@@ -13,12 +14,16 @@
 )(implicit fc: b3.B3FieldConstructor, messages: Messages)
 @* TODO receive list of allowed audiences from controller - each user's will be different *@
 
-<div
-data-is-god="@(permissionScope == PermissionScope.AllDepartments)"
-data-form-data='@audienceJson'
-data-errors='@form.errorsAsJson'
-data-departments='@Json.obj(departmentOptions.map { case (code, name) => code -> Json.toJsFieldJsValueWrapper(name) }:_*)'
-id="audience-picker" class="form-group col-md-12">
-</div>
+@defining(Seq(TeachingStaff, AdminStaff, UndergradStudents, TaughtPostgrads, ResearchPostgrads)) { deptSubsets =>
+  <div
+  data-is-god="@(permissionScope == PermissionScope.AllDepartments)"
+  data-form-data='@audienceJson'
+  data-errors='@form.errorsAsJson'
+  data-location-opts='@Json.obj(LocationOptIn.values.map(loc => loc.value -> Json.toJsFieldJsValueWrapper(loc.description)): _*)'
+  data-dept-subset-opts='@Json.obj(deptSubsets.map(ds => ds.toString -> Json.toJsFieldJsValueWrapper(ds.displayName)):_*)'
+  data-departments='@Json.obj(departmentOptions.map { case (code, name) => code -> Json.toJsFieldJsValueWrapper(name) }: _*)'
+  class="audience-picker" class="form-group col-md-12">
+  </div>
+}
 
 

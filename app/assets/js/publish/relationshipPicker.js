@@ -4,8 +4,6 @@ import 'bootstrap-3-typeahead';
 import log from 'loglevel';
 import _ from 'lodash-es';
 
-// TODO: implement this wrapper properly. Format response data appropriately
-
 class RelationshipPicker {
   constructor(input, {
     addItem = () => {

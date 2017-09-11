@@ -120,7 +120,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
       status(result) mustBe FORBIDDEN
     }
 
-    /* TODO reimplement tests to work with new audience-picker
+    /*
     "display news form" in {
       when(publisherService.find("xyz")).thenReturn(Some(publisher))
       when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)

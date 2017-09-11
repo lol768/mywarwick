@@ -36,7 +36,6 @@ class GroupLookupController @Inject()(
     )(GroupLookupQuery.apply)(GroupLookupQuery.unapply)
   )
 
-  // TODO: option to limit module searches to within specified departments
   def queryModule = RequiredUserAction.async { implicit request =>
     form.bindFromRequest.fold[Future[Result]](
       hasErrors => Future(Ok(Json.toJson(API.Error("invalid", s"Json was invalid when querying modules. ${request.body.asJson.get}")))),
@@ -49,7 +48,6 @@ class GroupLookupController @Inject()(
     )
   }
 
-  // TODO: option to limit seminar group searches to within specified departments
   def querySeminarGroup = RequiredUserAction.async { implicit request =>
     form.bindFromRequest.fold[Future[Result]](
       hasErrors => Future(Ok(Json.toJson(API.Error("invalid", s"Json was invalid when querying seminar groups. ${request.body.asJson.get}")))),

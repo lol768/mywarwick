@@ -125,7 +125,6 @@ class TabulaAudienceLookupDao @Inject()(
     )
   }
 
-  // TODO: Tabula API to provide 'groupById' endpoint that includes groupSetName value
   override def getSeminarGroupById(groupId: String): Future[Option[LookupSeminarGroup]] = {
     getAuthenticatedAsJson(tabulaSmallGroupsLookupUrl(groupId)).map(
       TabulaResponseParsers.validateAPIResponse(_, TabulaResponseParsers.seminarGroupReads(groupId)).fold(
@@ -278,7 +277,6 @@ object TabulaResponseParsers {
       (__ \ "module" \ "code").read[String]
     ) (LookupSeminarGroup.apply _)
 
-  // TODO: Tabula API to provide 'groupById' endpoint that includes groupSetName value, to be read into a LookupSeminarGroup
   def seminarGroupReads(id: String): Reads[LookupSeminarGroup] = (
     Reads.pure(id) and
       (__ \ "group" \"name").read[String] and

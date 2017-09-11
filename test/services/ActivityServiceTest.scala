@@ -261,8 +261,5 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
         }) must be (true)
       }
     }
-
-    // TODO test when there are activities to replace
-
   }
 }
