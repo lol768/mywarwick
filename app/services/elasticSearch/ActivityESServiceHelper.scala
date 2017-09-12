@@ -1,6 +1,7 @@
 package services.elasticSearch
 
 import org.elasticsearch.action.index.IndexRequest
+import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.joda.time.DateTime
 
@@ -37,21 +38,8 @@ trait ActivityESServiceHelper {
       case false => s"""$nameForActivity*"""
     }
   }
-}
 
-object ActivityESServiceGetHelper extends ActivityESServiceHelper
-
-object ActivityESServiceDeleteHelper extends ActivityESServiceHelper
-
-object ActivityESServiceSearchHelper extends ActivityESServiceHelper
-
-object ActivityESServiceIndexHelper extends ActivityESServiceHelper {
-
-  def makeIndexRequest(indexName: String, docType: String, docId: String, docSource: XContentBuilder): IndexRequest = {
-    new IndexRequest(indexName, docType, docId).source(docSource)
-  }
-
-  def makeIndexDocBuilder(activityDocument: ActivityDocument): XContentBuilder = {
+  def elasticSearchContentBuilderFromActivityDocument(activityDocument: ActivityDocument): XContentBuilder = {
     import org.elasticsearch.common.xcontent.XContentFactory._
     val builder: XContentBuilder = jsonBuilder().startObject()
 
@@ -76,5 +64,26 @@ object ActivityESServiceIndexHelper extends ActivityESServiceHelper {
     builder.endObject()
     builder
   }
+}
+
+object ActivityESServiceGetHelper extends ActivityESServiceHelper
+
+object ActivityESServiceUpdateHelper extends ActivityESServiceHelper {
+  def makeUpdateRequest(indexName: String, docType: String, docId: String, docSource: XContentBuilder): UpdateRequest = {
+    new UpdateRequest(indexName, docType, docId).doc(docSource)
+  }
 
 }
+
+object ActivityESServiceDeleteHelper extends ActivityESServiceHelper
+
+object ActivityESServiceSearchHelper extends ActivityESServiceHelper
+
+object ActivityESServiceIndexHelper extends ActivityESServiceHelper {
+
+  def makeIndexRequest(indexName: String, docType: String, docId: String, docSource: XContentBuilder): IndexRequest = {
+    new IndexRequest(indexName, docType, docId).source(docSource)
+  }
+}
+
+object ActivityESServiceHelper extends ActivityESServiceHelper
