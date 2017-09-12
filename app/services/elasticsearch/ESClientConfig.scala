@@ -1,13 +1,11 @@
 package services.elasticsearch
 
-import java.net.InetAddress
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
 import org.apache.http.HttpHost
 import org.elasticsearch.client.{RestClient, RestHighLevelClient}
 import play.api.Configuration
-import scala.collection.JavaConverters._
 
 @ImplementedBy(classOf[ESClientConfigImpl])
 trait ESClientConfig {
@@ -21,11 +19,9 @@ class ESClientConfigImpl @Inject()(
   config: Configuration
 ) extends ESClientConfig {
 
-  override def nodes: List[ESNode] = config
-    .getConfigList("es.nodes")
+  override def nodes: Seq[ESNode] = config
+    .getConfigSeq("es.nodes")
     .getOrElse(throw new IllegalStateException("ElasticSearch nodes not configured - check es.nodes"))
-    .asScala
-    .toList
     .map(e => {
       ESNode(
         e.getString("host") getOrElse (throw new IllegalStateException("ElasticSearch host is missing - check es.nodes")),

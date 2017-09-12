@@ -23,7 +23,6 @@ trait ActivityESService {
 
   def update(activity: Activity)
 
-
   // get as in elasticsearch get api
   def getDocumentByActivityId(activityId: String, isNotification: Boolean = true): Future[ActivityDocument]
 
