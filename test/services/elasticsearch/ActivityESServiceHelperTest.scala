@@ -52,9 +52,10 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
         Seq("user1", "user2")
       )
 
-      val result = ActivityESServiceHelper.elasticSearchContentBuilderFromActivityDocument(activityDoc)
+      val helper = ActivityESServiceHelper
+      val result = helper.elasticSearchContentBuilderFromActivityDocument(activityDoc)
 
-      result.string() must be("""[{"provider_id":"test1","activity_type":"test2","title":"test3","url":"test4","text":"test5","replaced_by":"test6","published_at":"1970-01-01T00:00:00.000Z","publisher":"test1","resolved_users":["user1","user2"],"audience_components":["component1","component2"]}]""")
+      result.string() must be("""{"provider_id":"test1","activity_type":"test2","title":"test3","url":"test4","text":"test5","replaced_by":"test6","published_at":"1970-01-01T00:00:00.000Z","publisher":"test1","resolved_users":["user1","user2"],"audience_components":["component1","component2"]}""")
 
     }
 
