@@ -107,11 +107,11 @@ class ActivityESServiceImpl @Inject()(
   //TODO extract into small functions so that we can have unit tests
   override def search(input: ActivityESSearchQuery): Future[Seq[ActivityDocument]] = {
     val helper = ActivityESServiceSearchHelper
-    val searchSourceBuilder = new SearchSourceBuilder()
+
     val searchRequest = new SearchRequest(ActivityESServiceSearchHelper.indexNameForAllTime())
     val boolQueryBuilder: BoolQueryBuilder = helper.makeBoolQueryBuilder(input)
+    val searchSourceBuilder: SearchSourceBuilder = helper.makeSearchSourceBuilder(boolQueryBuilder)
 
-    searchSourceBuilder.query(boolQueryBuilder)
     searchRequest.types(ActivityESServiceSearchHelper.documentType)
     searchRequest.source(searchSourceBuilder)
 

@@ -3,7 +3,8 @@ package services.elasticsearch
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.common.xcontent.XContentBuilder
-import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
+import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
+import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.joda.time.DateTime
 
 trait ActivityESServiceHelper {
@@ -79,6 +80,11 @@ object ActivityESServiceUpdateHelper extends ActivityESServiceHelper {
 object ActivityESServiceDeleteHelper extends ActivityESServiceHelper
 
 object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
+
+  def makeSearchSourceBuilder(queryBuilder: QueryBuilder): SearchSourceBuilder = {
+    val searchSourceBuilder = new SearchSourceBuilder()
+    searchSourceBuilder.query(queryBuilder)
+  }
 
   def makeBoolQueryBuilder(activityESSearchQuery: ActivityESSearchQuery): BoolQueryBuilder = {
     val boolQueryBuilder: BoolQueryBuilder = new BoolQueryBuilder()
