@@ -122,10 +122,8 @@ class ActivityESServiceImpl @Inject()(
       case _ =>
     }
 
-
-    //TODO figure out the range query
     input.publish_at match {
-      case Some(dateRange) =>
+      case Some(dateRange) => boolQueryBuilder.must(QueryBuilders.rangeQuery(helper.ESFieldName.published_at).gte(dateRange.from.toString()).lte(dateRange.to.toString()))
       case _ =>
     }
 
