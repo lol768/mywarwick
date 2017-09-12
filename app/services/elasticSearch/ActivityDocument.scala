@@ -97,13 +97,14 @@ object ActivityDocument {
   }
 
   def serialiseAudienceComponents(audienceId: Option[String], audienceService: AudienceService): Seq[String] = {
+    def simpleClassName(o: Object) = o.getClass.getSimpleName.replace("$", "")
     audienceId match {
       case Some(id: String) => audienceService.getAudience(id).components.flatMap {
-        case e: UsercodeAudience => Seq("usercode")
-        case e: WebGroupAudience => Seq(s"""WebGroupAudience:${e.groupName.string}""")
-        case e: ModuleAudience => Seq(s"""ModuleAudience:${e.moduleCode}""")
+        case e: UsercodeAudience => Seq(s"""${simpleClassName(e)}""")
+        case e: WebGroupAudience => Seq(s"""${simpleClassName(e)}:${e.groupName.string}""")
+        case e: ModuleAudience => Seq(s"""${simpleClassName(e)}:${e.moduleCode}""")
         case e: DepartmentAudience => e.subset.map(subset => {
-          s"""DepartmentAudience:${e.deptCode}:${subset.entryName}"""
+          s"""${simpleClassName(e)}:${e.deptCode}:${subset.entryName}"""
         })
         case _ => Nil
       }
