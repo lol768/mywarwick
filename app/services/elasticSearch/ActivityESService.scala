@@ -8,6 +8,7 @@ import org.elasticsearch.action.ActionListener
 import org.elasticsearch.action.get.{GetRequest, GetResponse}
 import org.elasticsearch.action.index.{IndexRequest, IndexResponse}
 import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
+import org.elasticsearch.action.update.UpdateResponse
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
 import org.elasticsearch.search.builder.SearchSourceBuilder
@@ -42,8 +43,30 @@ class ActivityESServiceImpl @Inject()(
 
   private val client: RestHighLevelClient = eSClientConfig.newClient
 
-  //TODO implement me https://www.elastic.co/guide/en/elasticsearch/client/java-rest/master/java-rest-high-document-update.html
-  override def update(activity: Activity): Unit = ???
+  override def update(activity: Activity): Unit = {
+    val activityDocument = ActivityDocument.fromActivityModel(
+      activity,
+      audienceService,
+      publisherService
+    )
+    val helper = ActivityESServiceUpdateHelper
+
+    val request = helper.makeUpdateRequest(
+      helper.indexNameToday(activity.shouldNotify),
+      helper.documentType,
+      activity.id,
+      helper.elasticSearchContentBuilderFromActivityDocument(activityDocument)
+    )
+    client.updateAsync(request, new ActionListener[UpdateResponse] {
+      override def onFailure(e: Exception): Unit = {
+        logger.error("Exception thrown when sending UpdateRequest to ES", e)
+      }
+
+      override def onResponse(response: UpdateResponse): Unit = {
+        logger.debug("UpdateRequest sent to ES with response: " + response.toString)
+      }
+    })
+  }
 
   override def index(activity: Activity): Unit = {
     val activityDocument = ActivityDocument.fromActivityModel(
@@ -53,13 +76,13 @@ class ActivityESServiceImpl @Inject()(
     )
     val helper = ActivityESServiceIndexHelper
 
-    val docBuilder = helper.makeIndexDocBuilder(activityDocument)
+    val docBuilder = helper.elasticSearchContentBuilderFromActivityDocument(activityDocument)
     val indexName = helper.indexNameToday(activity.shouldNotify)
     val request = helper.makeIndexRequest(indexName, helper.documentType, activity.id, docBuilder)
 
     client.indexAsync(request, new ActionListener[IndexResponse] {
       override def onFailure(e: Exception) = {
-        logger.error("Exception raised when sending indexRequest to ES", e)
+        logger.error("Exception thrown when sending indexRequest to ES", e)
       }
 
       override def onResponse(response: IndexResponse) = {
@@ -68,6 +91,7 @@ class ActivityESServiceImpl @Inject()(
     })
   }
 
+  // rough start of the implementation, might be entirely incorrect
   override def getDocumentByActivityId(activityId: String, isNotification: Boolean = true): Future[ActivityDocument] = {
     val helper = ActivityESServiceGetHelper
     val request = new GetRequest(
