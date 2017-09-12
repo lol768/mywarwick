@@ -22,7 +22,7 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 trait ActivityESService {
   def index(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None)
 
-  def update(activity: Activity)
+  def update(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None)
 
   // get as in elasticsearch get api
   def getDocumentByActivityId(activityId: String, isNotification: Boolean = true): Future[ActivityDocument]
@@ -67,30 +67,7 @@ class ActivityESServiceImpl @Inject()(
     })
   }
 
-  override def update(activity: Activity): Unit = {
-    val activityDocument = ActivityDocument.fromActivityModel(
-      activity,
-      audienceService,
-      publisherService
-    )
-    val helper = ActivityESServiceUpdateHelper
-
-    val request = helper.makeUpdateRequest(
-      helper.indexNameToday(activity.shouldNotify),
-      helper.documentType,
-      activity.id,
-      helper.elasticSearchContentBuilderFromActivityDocument(activityDocument)
-    )
-    client.updateAsync(request, new ActionListener[UpdateResponse] {
-      override def onFailure(e: Exception): Unit = {
-        logger.error("Exception thrown when sending UpdateRequest to ES", e)
-      }
-
-      override def onResponse(response: UpdateResponse): Unit = {
-        logger.debug("UpdateRequest sent to ES with response: " + response.toString)
-      }
-    })
-  }
+  override def update(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None) = index(activity, resolvedUsers)
 
   // rough start of the implementation, might be entirely incorrect
   override def getDocumentByActivityId(activityId: String, isNotification: Boolean = true): Future[ActivityDocument] = {
