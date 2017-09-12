@@ -105,67 +105,11 @@ class ActivityESServiceImpl @Inject()(
   override def deleteDocumentByActivityId(activityId: String, isNotification: Boolean): Unit = ???
 
   //TODO extract into small functions so that we can have unit tests
-  //TODO move some logics to helper object
-  //rough start of the search function, could be entirely incorrect
   override def search(input: ActivityESSearchQuery): Future[Seq[ActivityDocument]] = {
     val helper = ActivityESServiceSearchHelper
     val searchSourceBuilder = new SearchSourceBuilder()
     val searchRequest = new SearchRequest(ActivityESServiceSearchHelper.indexNameForAllTime())
-    val boolQueryBuilder = new BoolQueryBuilder()
-
-    input.provider_id match {
-      case Some(provider_id) => boolQueryBuilder.must(QueryBuilders.termQuery(helper.ESFieldName.provider_id, provider_id))
-      case _ =>
-    }
-
-    input.activity_type match {
-      case Some(activity_type) => boolQueryBuilder.must(QueryBuilders.termQuery(helper.ESFieldName.activity_type, activity_type))
-      case _ =>
-    }
-
-    input.publish_at match {
-      case Some(dateRange) => boolQueryBuilder.must(QueryBuilders.rangeQuery(helper.ESFieldName.published_at).gte(dateRange.from.toString()).lte(dateRange.to.toString()))
-      case _ =>
-    }
-
-    input.publisher match {
-      case Some(publisher) => boolQueryBuilder.must(QueryBuilders.termQuery(helper.ESFieldName.publisher, publisher))
-      case _ =>
-    }
-
-    //TODO check if fuzzy query works on this field
-    input.text match {
-      case Some(text) => boolQueryBuilder.must(QueryBuilders.fuzzyQuery(helper.ESFieldName.text, text))
-      case _ =>
-    }
-
-    input.title match {
-      case Some(title) => boolQueryBuilder.must(QueryBuilders.termQuery(helper.ESFieldName.title, title))
-      case _ =>
-    }
-
-    input.url match {
-      case Some(url) => boolQueryBuilder.must(QueryBuilders.termQuery(helper.ESFieldName.url, url))
-      case _ =>
-    }
-
-    input.audienceComponents match {
-      case Some(components) => {
-        val componentListJava = new Array[String](components.size)
-        components.foreach(e => componentListJava(components.indexOf(e)) = e)
-        boolQueryBuilder.must(QueryBuilders.termsQuery(helper.ESFieldName.audience_components, componentListJava: _*))
-      }
-      case _ =>
-    }
-
-    input.resolvedUsers match {
-      case Some(resolvedUsers) => {
-        val resolvedUserListJava = new Array[String](resolvedUsers.size)
-        resolvedUsers.foreach(e => resolvedUserListJava(resolvedUsers.indexOf(e)) = e)
-        boolQueryBuilder.must(QueryBuilders.termsQuery(helper.ESFieldName.audience_components, resolvedUserListJava: _*))
-      }
-      case _ =>
-    }
+    val boolQueryBuilder: BoolQueryBuilder = helper.makeBoolQueryBuilder(input)
 
     searchSourceBuilder.query(boolQueryBuilder)
     searchRequest.types(ActivityESServiceSearchHelper.documentType)
