@@ -1,32 +1,27 @@
 package services.elasticSearch
 
-import java.util
-import java.util.Date
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
-import models.Audience.{DepartmentAudience, ModuleAudience, UsercodeAudience, WebGroupAudience}
 import models.Activity
-import models.publishing.Publisher
 import org.elasticsearch.action.ActionListener
 import org.elasticsearch.action.get.{GetRequest, GetResponse}
 import org.elasticsearch.action.index.{IndexRequest, IndexResponse}
 import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
 import org.elasticsearch.client.RestHighLevelClient
-import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
 import org.elasticsearch.search.builder.SearchSourceBuilder
-import org.joda.time.DateTime
 import services.{AudienceService, PublisherService}
 import warwick.core.Logging
-import warwick.sso.Usercode
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.collection.JavaConverters._
 
 @ImplementedBy(classOf[ActivityESServiceImpl])
 trait ActivityESService {
   def index(activity: Activity)
+
+  def update(activity: Activity)
+
 
   // get as in elasticsearch get api
   def getDocumentByActivityId(activityId: String, isNotification: Boolean = true): Future[ActivityDocument]
@@ -34,7 +29,7 @@ trait ActivityESService {
   def deleteDocumentByActivityId(activityId: String, isNotification: Boolean = true)
 
   // match all
-  def search(activityESSearchQuery: ActivityESSearchQuery): Seq[ActivityDocument]
+  def search(activityESSearchQuery: ActivityESSearchQuery): Future[Seq[ActivityDocument]]
 
 }
 
@@ -46,6 +41,9 @@ class ActivityESServiceImpl @Inject()(
 ) extends ActivityESService with Logging {
 
   private val client: RestHighLevelClient = eSClientConfig.newClient
+
+  //TODO implement me https://www.elastic.co/guide/en/elasticsearch/client/java-rest/master/java-rest-high-document-update.html
+  override def update(activity: Activity): Unit = ???
 
   override def index(activity: Activity): Unit = {
     val activityDocument = ActivityDocument.fromActivityModel(
@@ -100,9 +98,12 @@ class ActivityESServiceImpl @Inject()(
       }
   }
 
+  //TODO implement me https://www.elastic.co/guide/en/elasticsearch/client/java-rest/master/java-rest-high-document-delete.html
   override def deleteDocumentByActivityId(activityId: String, isNotification: Boolean): Unit = ???
 
   //TODO extract into small functions so that we can have unit tests
+  //TODO move some logics to helper object
+  //rough start of the search function, could be entirely incorrect
   override def search(input: ActivityESSearchQuery): Future[Seq[ActivityDocument]] = {
     val helper = ActivityESServiceSearchHelper
     val searchSourceBuilder = new SearchSourceBuilder()
@@ -183,218 +184,5 @@ class ActivityESServiceImpl @Inject()(
           logger.error("Exceptions thrown after sending a elasticsearch SearchRequest", exception)
           Seq()
       }
-  }
-}
-
-//TODO unit tests for all the following helper functions
-trait ActivityESServiceHelper {
-
-  val documentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
-  val nameForAlert = "alert"
-  val nameForActivity = "activity"
-  val separator = "_"
-
-  object ESFieldName {
-    val provider_id = "provider_id"
-    val activity_type = "activity_type"
-    val title = "title"
-    val url = "url"
-    val text = "text"
-    val replaced_by = "replaced_by"
-    val published_at = "published_at"
-    val publisher = "publisher"
-    val resolved_users = "resolved_users"
-    val audience_components = "audience_components"
-  }
-
-  def indexNameToday(isNotification: Boolean = true): String = {
-    val today = DateTime.now().toString("yyyy_MM")
-    isNotification match {
-      case true => s"""$nameForAlert$separator$today"""
-      case false => s"""$nameForActivity$separator$today"""
-    }
-  }
-
-  def indexNameForAllTime(isNotification: Boolean = true): String = {
-    isNotification match {
-      case true => s"""$nameForAlert*"""
-      case false => s"""$nameForActivity*"""
-    }
-  }
-}
-
-object ActivityESServiceGetHelper extends ActivityESServiceHelper
-
-object ActivityESServiceDeleteHelper extends ActivityESServiceHelper
-
-object ActivityESServiceSearchHelper extends ActivityESServiceHelper
-
-object ActivityESServiceIndexHelper extends ActivityESServiceHelper {
-
-  def makeIndexRequest(indexName: String, docType: String, docId: String, docSource: XContentBuilder): IndexRequest = {
-    new IndexRequest(indexName, docType, docId).source(docSource)
-  }
-
-  def makeIndexDocBuilder(activityDocument: ActivityDocument): XContentBuilder = {
-    import org.elasticsearch.common.xcontent.XContentFactory._
-    val builder: XContentBuilder = jsonBuilder().startObject()
-
-    builder
-      .field(ESFieldName.provider_id, activityDocument.provider_id)
-      .field(ESFieldName.activity_type, activityDocument.activity_type)
-      .field(ESFieldName.title, activityDocument.title)
-      .field(ESFieldName.url, activityDocument.url)
-      .field(ESFieldName.text, activityDocument.text)
-      .field(ESFieldName.replaced_by, activityDocument.replaced_by)
-      .field(ESFieldName.published_at, activityDocument.published_at)
-      .field(ESFieldName.publisher, activityDocument.publisher)
-
-    builder.startArray(ESFieldName.resolved_users)
-    activityDocument.resolvedUsers.foreach(builder.value)
-    builder.endArray()
-
-    builder.startArray(ESFieldName.audience_components)
-    activityDocument.audienceComponents.foreach(builder.value)
-    builder.endArray()
-
-    builder.endObject()
-    builder
-  }
-
-}
-
-case class ActivityDocument(
-  provider_id: String = "-",
-  activity_type: String = "-",
-  title: String = "-",
-  url: String = "-",
-  text: String = "-",
-  replaced_by: String = "-",
-  published_at: Date = new Date(0),
-  publisher: String = "-",
-  audienceComponents: Seq[String] = Seq("-"),
-  resolvedUsers: Seq[String] = Seq("-")
-)
-
-case class ActivityESSearchQuery(
-  provider_id: Option[String] = Option.empty,
-  activity_type: Option[String] = Option.empty,
-  title: Option[String] = Option.empty,
-  url: Option[String] = Option.empty,
-  text: Option[String] = Option.empty,
-  replaced_by: Option[String] = Option.empty,
-  publish_at: Option[ActivityESSearchQuery.DateRange] = Option.empty,
-  publisher: Option[String] = Option.empty,
-  audienceComponents: Option[Seq[String]] = Option.empty,
-  resolvedUsers: Option[Seq[String]] = Option.empty
-)
-
-object ActivityESSearchQuery {
-
-  case class DateRange(from: Date, to: Date)
-
-}
-
-//TODO unit tests for all the following helper functions
-object ActivityDocument {
-  def fromActivityModel(
-    activity: Activity,
-    audienceService: AudienceService,
-    publisherService: PublisherService
-  ): ActivityDocument = {
-    ActivityDocument(
-      activity.providerId,
-      activity.`type`,
-      activity.title,
-      activity.url.getOrElse("-"),
-      activity.text.getOrElse("-"),
-      activity.replacedBy.getOrElse("-"),
-      activity.publishedAt.toDate,
-      serialisePublisher(activity.publisherId, publisherService),
-      serialiseAudienceComponents(activity.audienceId, audienceService),
-      serialiseResolvedUsers(activity.audienceId, audienceService)
-    )
-  }
-
-  def fromESGetResponse(res: GetResponse): ActivityDocument = {
-    val helper = ActivityESServiceGetHelper
-    val audience_components = res
-      .getField(helper.ESFieldName.audience_components)
-      .getValues
-      .asScala
-      .toList
-      .map(_.toString)
-
-    val resolved_users = res
-      .getField(helper.ESFieldName.resolved_users)
-      .getValues
-      .asScala
-      .map(_.toString)
-
-    ActivityDocument(
-      res.getField(helper.ESFieldName.provider_id).getValue.toString,
-      res.getField(helper.ESFieldName.activity_type).getValue.toString,
-      res.getField(helper.ESFieldName.title).getValue.toString,
-      res.getField(helper.ESFieldName.url).getValue.toString,
-      res.getField(helper.ESFieldName.text).getValue.toString,
-      res.getField(helper.ESFieldName.replaced_by).getValue.toString,
-      DateTime.parse(res.getField(helper.ESFieldName.published_at).getValue.toString).toDate, //TODO not sure if this is right
-      res.getField(helper.ESFieldName.publisher).getValue.toString,
-      audience_components,
-      resolved_users
-    )
-  }
-
-  def fromESSearchResponse(res: SearchResponse): Seq[ActivityDocument] = {
-    res.getHits.asScala.toList.map(searchHit => {
-      val hitMap = searchHit.getSourceAsMap.asScala.toMap
-      val field = ActivityESServiceSearchHelper.ESFieldName
-      ActivityDocument(
-        hitMap.getOrElse(field.provider_id, "-").toString,
-        hitMap.getOrElse(field.activity_type, "-").toString,
-        hitMap.getOrElse(field.title, "-").toString,
-        hitMap.getOrElse(field.url, "-").toString,
-        hitMap.getOrElse(field.text, "-").toString,
-        hitMap.getOrElse(field.replaced_by, "-").toString,
-        new DateTime(hitMap.getOrElse(field.published_at, new Date(0))).toDate, // TODO not sure if this is right
-        hitMap.getOrElse(field.publisher, "-").toString,
-        hitMap.getOrElse(field.audience_components, new util.ArrayList()).asInstanceOf[util.ArrayList].asScala.toList.map(_.toString),
-        hitMap.getOrElse(field.resolved_users, new util.ArrayList()).asInstanceOf[util.ArrayList].asScala.toList.map(_.toString)
-      )
-    })
-  }
-
-  def serialiseAudienceComponents(audienceId: Option[String], audienceService: AudienceService): Seq[String] = {
-    audienceId match {
-      case Some(id: String) => audienceService.getAudience(id).components.flatMap {
-        case e: UsercodeAudience => Seq("usercode")
-        case e: WebGroupAudience => Seq(s"""WebGroupAudience:${e.groupName.string}""")
-        case e: ModuleAudience => Seq(s"""ModuleAudience:${e.moduleCode}""")
-        case e: DepartmentAudience => e.subset.map(subset => {
-          s"""DepartmentAudience:${e.deptCode}:${subset.entryName}"""
-        })
-        case _ => Nil
-      }
-      case _ => Nil
-    }
-  }
-
-  def serialiseResolvedUsers(audienceId: Option[String], audienceService: AudienceService): Seq[String] = {
-    audienceId match {
-      case Some(id: String) => audienceService.resolve(audienceService.getAudience(id))
-        .getOrElse(Seq(Usercode("-")))
-        .map(_.string)
-      case _ => Seq("-")
-    }
-  }
-
-  def serialisePublisher(publisherId: Option[String], publisherService: PublisherService): String = {
-    publisherId match {
-      case Some(id: String) => publisherService.find(id) match {
-        case Some(e: Publisher) => e.id
-        case _ => "-"
-      }
-      case _ => "-"
-    }
   }
 }
