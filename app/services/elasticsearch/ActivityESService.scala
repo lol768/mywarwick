@@ -132,10 +132,9 @@ class ActivityESServiceImpl @Inject()(
       case _ =>
     }
 
-    //TODO figure out fuzzy text match
-    //TODO check if text is analysed or not
+    //TODO check if fuzzy query works on this field
     input.text match {
-      case Some(text) =>
+      case Some(text) => boolQueryBuilder.must(QueryBuilders.fuzzyQuery(helper.ESFieldName.text, text))
       case _ =>
     }
 
