@@ -88,6 +88,6 @@ class PublishActivityJob @Inject()(
     if (activity.shouldNotify) {
       messaging.send(recipients, activity)
     }
-    activityESService.index(activity)
+    activityESService.index(activity, Some(recipients.toSeq))
   }
 }

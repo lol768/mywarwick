@@ -14,12 +14,13 @@ import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import services.{AudienceService, PublisherService}
 import warwick.core.Logging
+import warwick.sso.Usercode
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
 @ImplementedBy(classOf[ActivityESServiceImpl])
 trait ActivityESService {
-  def index(activity: Activity)
+  def index(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None)
 
   def update(activity: Activity)
 
@@ -42,6 +43,30 @@ class ActivityESServiceImpl @Inject()(
 
   private val client: RestHighLevelClient = eSClientConfig.newClient
 
+  override def index(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None): Unit = {
+    val activityDocument = ActivityDocument.fromActivityModel(
+      activity,
+      audienceService,
+      publisherService,
+      resolvedUsers
+    )
+    val helper = ActivityESServiceIndexHelper
+
+    val docBuilder = helper.elasticSearchContentBuilderFromActivityDocument(activityDocument)
+    val indexName = helper.indexNameToday(activity.shouldNotify)
+    val request = helper.makeIndexRequest(indexName, helper.documentType, activity.id, docBuilder)
+
+    client.indexAsync(request, new ActionListener[IndexResponse] {
+      override def onFailure(e: Exception) = {
+        logger.error("Exception thrown when sending indexRequest to ES", e)
+      }
+
+      override def onResponse(response: IndexResponse) = {
+        logger.debug("IndexRequest sent to ES with response: " + response.toString)
+      }
+    })
+  }
+
   override def update(activity: Activity): Unit = {
     val activityDocument = ActivityDocument.fromActivityModel(
       activity,
@@ -63,29 +88,6 @@ class ActivityESServiceImpl @Inject()(
 
       override def onResponse(response: UpdateResponse): Unit = {
         logger.debug("UpdateRequest sent to ES with response: " + response.toString)
-      }
-    })
-  }
-
-  override def index(activity: Activity): Unit = {
-    val activityDocument = ActivityDocument.fromActivityModel(
-      activity,
-      audienceService,
-      publisherService
-    )
-    val helper = ActivityESServiceIndexHelper
-
-    val docBuilder = helper.elasticSearchContentBuilderFromActivityDocument(activityDocument)
-    val indexName = helper.indexNameToday(activity.shouldNotify)
-    val request = helper.makeIndexRequest(indexName, helper.documentType, activity.id, docBuilder)
-
-    client.indexAsync(request, new ActionListener[IndexResponse] {
-      override def onFailure(e: Exception) = {
-        logger.error("Exception thrown when sending indexRequest to ES", e)
-      }
-
-      override def onResponse(response: IndexResponse) = {
-        logger.debug("IndexRequest sent to ES with response: " + response.toString)
       }
     })
   }

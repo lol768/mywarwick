@@ -30,7 +30,8 @@ object ActivityDocument {
   def fromActivityModel(
     activity: Activity,
     audienceService: AudienceService,
-    publisherService: PublisherService
+    publisherService: PublisherService,
+    resolvedUsers: Option[Seq[Usercode]] = None
   ): ActivityDocument = {
     ActivityDocument(
       activity.providerId,
@@ -42,7 +43,10 @@ object ActivityDocument {
       activity.publishedAt.toDate,
       serialisePublisher(activity.publisherId, publisherService),
       serialiseAudienceComponents(activity.audienceId, audienceService),
-      serialiseResolvedUsers(activity.audienceId, audienceService)
+      resolvedUsers match {
+        case e: Some[Seq[Usercode]] => e.getOrElse(Seq(Usercode("-"))).map(_.string)
+        case _ => serialiseResolvedUsers(activity.audienceId, audienceService)
+      }
     )
   }
 
@@ -96,6 +100,7 @@ object ActivityDocument {
 
   def serialiseAudienceComponents(audienceId: Option[String], audienceService: AudienceService): Seq[String] = {
     def simpleClassName(o: Object) = o.getClass.getSimpleName.replace("$", "")
+
     audienceId match {
       case Some(id: String) => audienceService.getAudience(id).components.flatMap {
         case e: UsercodeAudience => Seq(s"""${simpleClassName(e)}""")
