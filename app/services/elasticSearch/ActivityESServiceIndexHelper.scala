@@ -15,7 +15,6 @@ import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
-import org.elasticsearch.search.{SearchHit, SearchHits}
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.joda.time.DateTime
 import services.{AudienceService, PublisherService}
@@ -24,7 +23,6 @@ import warwick.sso.Usercode
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.collection.JavaConverters._
-import scala.util.{Failure, Success}
 
 @ImplementedBy(classOf[ActivityESServiceImpl])
 trait ActivityESService {
@@ -63,21 +61,19 @@ class ActivityESServiceImpl @Inject()(
 
     client.indexAsync(request, new ActionListener[IndexResponse] {
       override def onFailure(e: Exception) = {
-        println("error sending activity to es")
-        println(e)
+        logger.error("Exception raised when sending indexRequest to ES", e)
       }
 
       override def onResponse(response: IndexResponse) = {
-        println("response from es")
-        println(response.toString)
+        logger.debug("IndexRequest sent to ES with response: " + response.toString)
       }
     })
   }
 
-  override def getDocumentByActivityId(activityId: String, isNotification: Boolean): Future[ActivityDocument] = {
+  override def getDocumentByActivityId(activityId: String, isNotification: Boolean = true): Future[ActivityDocument] = {
     val helper = ActivityESServiceGetHelper
     val request = new GetRequest(
-      helper.indexNameForAllTime(),
+      helper.indexNameForAllTime(isNotification),
       helper.documentType,
       activityId
     )
@@ -107,19 +103,19 @@ class ActivityESServiceImpl @Inject()(
   override def deleteDocumentByActivityId(activityId: String, isNotification: Boolean): Unit = ???
 
   //TODO extract into small functions so that we can have unit tests
-  override def search(input: ActivityESSearchQuery): Seq[ActivityDocument] = {
+  override def search(input: ActivityESSearchQuery): Future[Seq[ActivityDocument]] = {
     val helper = ActivityESServiceSearchHelper
     val searchSourceBuilder = new SearchSourceBuilder()
     val searchRequest = new SearchRequest(ActivityESServiceSearchHelper.indexNameForAllTime())
     val boolQueryBuilder = new BoolQueryBuilder()
 
     input.provider_id match {
-      case Some(provider_id) => boolQueryBuilder.should(QueryBuilders.termQuery(helper.ESFieldName.provider_id, provider_id))
+      case Some(provider_id) => boolQueryBuilder.must(QueryBuilders.termQuery(helper.ESFieldName.provider_id, provider_id))
       case _ =>
     }
 
     input.activity_type match {
-      case Some(activity_type) => boolQueryBuilder.should(QueryBuilders.termQuery(helper.ESFieldName.activity_type, activity_type))
+      case Some(activity_type) => boolQueryBuilder.must(QueryBuilders.termQuery(helper.ESFieldName.activity_type, activity_type))
       case _ =>
     }
 
@@ -131,7 +127,7 @@ class ActivityESServiceImpl @Inject()(
     }
 
     input.publisher match {
-      case Some(publisher) => boolQueryBuilder.should(QueryBuilders.termQuery(helper.ESFieldName.publisher, publisher))
+      case Some(publisher) => boolQueryBuilder.must(QueryBuilders.termQuery(helper.ESFieldName.publisher, publisher))
       case _ =>
     }
 
@@ -143,12 +139,12 @@ class ActivityESServiceImpl @Inject()(
     }
 
     input.title match {
-      case Some(title) => boolQueryBuilder.should(QueryBuilders.termQuery(helper.ESFieldName.title, title))
+      case Some(title) => boolQueryBuilder.must(QueryBuilders.termQuery(helper.ESFieldName.title, title))
       case _ =>
     }
 
     input.url match {
-      case Some(url) => boolQueryBuilder.should(QueryBuilders.termQuery(helper.ESFieldName.url, url))
+      case Some(url) => boolQueryBuilder.must(QueryBuilders.termQuery(helper.ESFieldName.url, url))
       case _ =>
     }
 
@@ -161,24 +157,32 @@ class ActivityESServiceImpl @Inject()(
     //TODO figure out query for array
     input.resolvedUsers match {
       case Some(resolvedUsers) =>
-      case _=>
+      case _ =>
     }
 
     searchSourceBuilder.query(boolQueryBuilder)
     searchRequest.types(ActivityESServiceSearchHelper.documentType)
     searchRequest.source(searchSourceBuilder)
 
+    val searchResponsePromise: Promise[SearchResponse] = Promise[SearchResponse]
+    val futureResponse: Future[SearchResponse] = searchResponsePromise.future
     client.searchAsync(searchRequest, new ActionListener[SearchResponse] {
-      override def onResponse(response: SearchResponse) = {
-        val hits = response.getHits.asScala.toList
-        //TODO map hits to a list of ActivityDocument
+      override def onFailure(e: Exception) = {
+        searchResponsePromise.failure(e)
       }
 
-      override def onFailure(e: Exception) = {
-
+      override def onResponse(response: SearchResponse) = {
+        searchResponsePromise.success(response)
       }
     })
-    ???
+    import ExecutionContext.Implicits.global
+    futureResponse
+      .map(ActivityDocument.fromESSearchResponse)
+      .recover {
+        case exception =>
+          logger.error("Exceptions thrown after sending a elasticsearch SearchRequest", exception)
+          Seq()
+      }
   }
 }
 
@@ -339,6 +343,25 @@ object ActivityDocument {
       audience_components,
       resolved_users
     )
+  }
+
+  def fromESSearchResponse(res: SearchResponse): Seq[ActivityDocument] = {
+    res.getHits.asScala.toList.map(searchHit => {
+      val hitMap = searchHit.getSourceAsMap.asScala.toMap
+      val field = ActivityESServiceSearchHelper.ESFieldName
+      ActivityDocument(
+        hitMap.getOrElse(field.provider_id, "-").toString,
+        hitMap.getOrElse(field.activity_type, "-").toString,
+        hitMap.getOrElse(field.title, "-").toString,
+        hitMap.getOrElse(field.url, "-").toString,
+        hitMap.getOrElse(field.text, "-").toString,
+        hitMap.getOrElse(field.replaced_by, "-").toString,
+        new DateTime(hitMap.getOrElse(field.published_at, new Date(0))).toDate, // TODO not sure if this is right
+        hitMap.getOrElse(field.publisher, "-").toString,
+        hitMap.getOrElse(field.audience_components, new util.ArrayList()).asInstanceOf[util.ArrayList].asScala.toList.map(_.toString),
+        hitMap.getOrElse(field.resolved_users, new util.ArrayList()).asInstanceOf[util.ArrayList].asScala.toList.map(_.toString)
+      )
+    })
   }
 
   def serialiseAudienceComponents(audienceId: Option[String], audienceService: AudienceService): Seq[String] = {
