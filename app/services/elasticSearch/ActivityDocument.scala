@@ -26,8 +26,6 @@ case class ActivityDocument(
   resolvedUsers: Seq[String] = Seq("-")
 )
 
-
-//TODO unit tests for all the following helper functions
 object ActivityDocument {
   def fromActivityModel(
     activity: Activity,

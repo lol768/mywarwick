@@ -4,7 +4,6 @@ import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.joda.time.DateTime
 
-//TODO unit tests for all the following helper functions
 trait ActivityESServiceHelper {
 
   val documentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
