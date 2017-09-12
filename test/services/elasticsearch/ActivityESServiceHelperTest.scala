@@ -5,6 +5,8 @@ import java.util.Date
 import helpers.BaseSpec
 import org.joda.time.DateTime
 import org.scalatest.mockito.MockitoSugar
+import uk.ac.warwick.util.core.jodatime.DateTimeUtils
+import uk.ac.warwick.util.core.jodatime.DateTimeUtils.Callback
 
 
 class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
@@ -17,20 +19,23 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     "produce correct monthly index name for alerts and activity" in new Scope {
 
-      ActivityESServiceGetHelper.indexNameToday() must be ("alert_" +DateTime.now().toString("yyyy_MM"))
+      DateTimeUtils.useMockDateTime(DateTime.parse("2016-06-30T01:20"), new Callback {
+        override def doSomething() = {
 
-      ActivityESServiceGetHelper.indexNameToday(true) must be ("alert_" +DateTime.now().toString("yyyy_MM"))
+          ActivityESServiceGetHelper.indexNameToday(true, DateTime.now().toString("yyyy_MM")) must be("alert_2016_06")
 
-      ActivityESServiceGetHelper.indexNameToday(false) must be
-      "activity_" +DateTime.now().toString("yyyy_MM")
+          ActivityESServiceGetHelper.indexNameToday(false, DateTime.now().toString("yyyy_MM")) must be("activity_2016_06")
+        }
+      })
+
 
     }
 
     "produce correct all time index name for alerts and activity" in new Scope {
 
-      ActivityESServiceGetHelper.indexNameForAllTime() must be ("alert*")
+      ActivityESServiceGetHelper.indexNameForAllTime() must be("alert*")
 
-      ActivityESServiceGetHelper.indexNameForAllTime(false) must be ("activity*")
+      ActivityESServiceGetHelper.indexNameForAllTime(false) must be("activity*")
 
     }
   }
