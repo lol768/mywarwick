@@ -1,6 +1,6 @@
 package services.elasticsearch
 
-import java.util.Date
+import org.joda.time.DateTime
 
 case class ActivityESSearchQuery(
   provider_id: Option[String] = None,
@@ -17,6 +17,6 @@ case class ActivityESSearchQuery(
 
 object ActivityESSearchQuery {
 
-  case class DateRange(from: Date, to: Date)
+  case class DateRange(from: DateTime, to: DateTime)
 
 }

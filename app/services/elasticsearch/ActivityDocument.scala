@@ -1,7 +1,6 @@
 package services.elasticsearch
 
 import java.util
-import java.util.Date
 
 import models.Activity
 import models.Audience.{DepartmentAudience, ModuleAudience, UsercodeAudience, WebGroupAudience}
@@ -20,7 +19,7 @@ case class ActivityDocument(
   url: String = "-",
   text: String = "-",
   replaced_by: String = "-",
-  published_at: Date = new Date(0),
+  published_at: DateTime = new DateTime(0),
   publisher: String = "-",
   audienceComponents: Seq[String] = Seq("-"),
   resolvedUsers: Seq[String] = Seq("-")
@@ -40,7 +39,7 @@ object ActivityDocument {
       activity.url.getOrElse("-"),
       activity.text.getOrElse("-"),
       activity.replacedBy.getOrElse("-"),
-      activity.publishedAt.toDate,
+      activity.publishedAt,
       serialisePublisher(activity.publisherId, publisherService),
       serialiseAudienceComponents(activity.audienceId, audienceService),
       resolvedUsers match {
@@ -72,7 +71,7 @@ object ActivityDocument {
       res.getField(helper.ESFieldName.url).getValue.toString,
       res.getField(helper.ESFieldName.text).getValue.toString,
       res.getField(helper.ESFieldName.replaced_by).getValue.toString,
-      DateTime.parse(res.getField(helper.ESFieldName.published_at).getValue.toString).toDate, //TODO test if this is right
+      DateTime.parse(res.getField(helper.ESFieldName.published_at).getValue.toString), //TODO test if this is right
       res.getField(helper.ESFieldName.publisher).getValue.toString,
       audience_components,
       resolved_users
@@ -90,7 +89,7 @@ object ActivityDocument {
         hitMap.getOrElse(field.url, "-").toString,
         hitMap.getOrElse(field.text, "-").toString,
         hitMap.getOrElse(field.replaced_by, "-").toString,
-        new DateTime(hitMap.getOrElse(field.published_at, new Date(0))).toDate, // TODO test if this is right
+        DateTime.parse(hitMap.getOrElse(field.published_at.toString, 0).toString), // TODO test if this is right
         hitMap.getOrElse(field.publisher, "-").toString,
         hitMap.getOrElse(field.audience_components, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
         hitMap.getOrElse(field.resolved_users, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString)

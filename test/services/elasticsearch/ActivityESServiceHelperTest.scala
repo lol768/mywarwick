@@ -46,7 +46,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
         "test4",
         "test5",
         "test6",
-        new Date(0),
+        new DateTime(0),
         "test1",
         Seq("component1", "component2"),
         Seq("user1", "user2")

@@ -50,7 +50,7 @@ trait ActivityESServiceHelper {
       .field(ESFieldName.url, activityDocument.url)
       .field(ESFieldName.text, activityDocument.text)
       .field(ESFieldName.replaced_by, activityDocument.replaced_by)
-      .field(ESFieldName.published_at, activityDocument.published_at)
+      .field(ESFieldName.published_at, activityDocument.published_at.toDate)
       .field(ESFieldName.publisher, activityDocument.publisher)
 
     builder.startArray(ESFieldName.resolved_users)
