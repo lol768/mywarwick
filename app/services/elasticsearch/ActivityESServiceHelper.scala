@@ -27,15 +27,15 @@ trait ActivityESServiceHelper {
 
   def indexNameToday(isNotification: Boolean = true, today: String = DateTime.now().toString("yyyy_MM")): String = {
     isNotification match {
-      case true => s"""$nameForAlert$separator$today"""
-      case false => s"""$nameForActivity$separator$today"""
+      case true => s"$nameForAlert$separator$today"
+      case false => s"$nameForActivity$separator$today"
     }
   }
 
   def indexNameForAllTime(isNotification: Boolean = true): String = {
     isNotification match {
-      case true => s"""$nameForAlert*"""
-      case false => s"""$nameForActivity*"""
+      case true => s"$nameForAlert*"
+      case false => s"$nameForActivity*"
     }
   }
 

@@ -103,11 +103,11 @@ object ActivityDocument {
 
     audienceId match {
       case Some(id: String) => audienceService.getAudience(id).components.flatMap {
-        case e: UsercodeAudience => Seq(s"""${simpleClassName(e)}""")
-        case e: WebGroupAudience => Seq(s"""${simpleClassName(e)}:${e.groupName.string}""")
-        case e: ModuleAudience => Seq(s"""${simpleClassName(e)}:${e.moduleCode}""")
+        case e: UsercodeAudience => Seq(s"${simpleClassName(e)}")
+        case e: WebGroupAudience => Seq(s"${simpleClassName(e)}:${e.groupName.string}")
+        case e: ModuleAudience => Seq(s"${simpleClassName(e)}:${e.moduleCode}")
         case e: DepartmentAudience => e.subset.map(subset => {
-          s"""${simpleClassName(e)}:${e.deptCode}:${subset.entryName}"""
+          s"${simpleClassName(e)}:${e.deptCode}:${subset.entryName}"
         })
         case _ => Nil
       }
