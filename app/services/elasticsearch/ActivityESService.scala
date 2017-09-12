@@ -15,6 +15,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder
 import services.{AudienceService, PublisherService}
 import warwick.core.Logging
 import warwick.sso.Usercode
+import collection.JavaConverters._
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
@@ -148,15 +149,21 @@ class ActivityESServiceImpl @Inject()(
       case _ =>
     }
 
-    //TODO figure out query for array
     input.audienceComponents match {
-      case Some(components) =>
+      case Some(components) => {
+        val componentListJava = new Array[String](components.size)
+        components.foreach(e => componentListJava(components.indexOf(e)) = e)
+        boolQueryBuilder.must(QueryBuilders.termsQuery(helper.ESFieldName.audience_components, componentListJava: _*))
+      }
       case _ =>
     }
 
-    //TODO figure out query for array
     input.resolvedUsers match {
-      case Some(resolvedUsers) =>
+      case Some(resolvedUsers) => {
+        val resolvedUserListJava = new Array[String](resolvedUsers.size)
+        resolvedUsers.foreach(e => resolvedUserListJava(resolvedUsers.indexOf(e)) = e)
+        boolQueryBuilder.must(QueryBuilders.termsQuery(helper.ESFieldName.audience_components, resolvedUserListJava: _*))
+      }
       case _ =>
     }
 
