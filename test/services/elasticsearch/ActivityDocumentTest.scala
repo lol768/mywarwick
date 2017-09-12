@@ -1,4 +1,4 @@
-package services.elasticSearch
+package services.elasticsearch
 
 import helpers.BaseSpec
 import models.Audience

@@ -1,4 +1,4 @@
-package services.elasticSearch
+package services.elasticsearch
 
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.update.UpdateRequest

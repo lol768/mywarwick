@@ -1,4 +1,4 @@
-package services.elasticSearch
+package services.elasticsearch
 
 import java.net.InetAddress
 import javax.inject.{Inject, Singleton}

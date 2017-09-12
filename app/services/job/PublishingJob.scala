@@ -5,7 +5,7 @@ import com.google.inject.Inject
 import models.ActivityRender
 import org.quartz._
 import services._
-import services.elasticSearch.ActivityESService
+import services.elasticsearch.ActivityESService
 import services.messaging.MessagingService
 import system.Logging
 import warwick.sso.Usercode

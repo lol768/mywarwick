@@ -14,7 +14,7 @@ import org.scalatest.mockito.MockitoSugar
 import play.api.db.Database
 import services._
 import services.dao._
-import services.elasticSearch.ActivityESService
+import services.elasticsearch.ActivityESService
 import services.messaging.MessagingService
 import warwick.sso.{UserLookupService, Usercode}
 
