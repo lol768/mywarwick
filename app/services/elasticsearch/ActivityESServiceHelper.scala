@@ -28,6 +28,8 @@ trait ActivityESServiceHelper {
     val audience_components = "audience_components"
   }
 
+  def hyphenToUnderscore(in: String) = in.replace("-", "_")
+
   def indexNameToday(isNotification: Boolean = true, today: String = DateTime.now().toString("yyyy_MM")): String = {
     isNotification match {
       case true => s"$nameForAlert$separator$today"
@@ -47,22 +49,22 @@ trait ActivityESServiceHelper {
     val builder: XContentBuilder = jsonBuilder().startObject()
 
     builder
-      .field(ESFieldName.activity_id, activityDocument.activity_id)
-      .field(ESFieldName.provider_id, activityDocument.provider_id)
-      .field(ESFieldName.activity_type, activityDocument.activity_type)
-      .field(ESFieldName.title, activityDocument.title)
-      .field(ESFieldName.url, activityDocument.url)
-      .field(ESFieldName.text, activityDocument.text)
-      .field(ESFieldName.replaced_by, activityDocument.replaced_by)
+      .field(ESFieldName.activity_id, hyphenToUnderscore(activityDocument.activity_id))
+      .field(ESFieldName.provider_id, hyphenToUnderscore(activityDocument.provider_id))
+      .field(ESFieldName.activity_type, hyphenToUnderscore(activityDocument.activity_type))
+      .field(ESFieldName.title, hyphenToUnderscore(activityDocument.title))
+      .field(ESFieldName.url, hyphenToUnderscore(activityDocument.url))
+      .field(ESFieldName.text, hyphenToUnderscore(activityDocument.text))
+      .field(ESFieldName.replaced_by, hyphenToUnderscore(activityDocument.replaced_by))
       .field(ESFieldName.published_at, activityDocument.published_at.toDate)
-      .field(ESFieldName.publisher, activityDocument.publisher)
+      .field(ESFieldName.publisher, hyphenToUnderscore(activityDocument.publisher))
 
     builder.startArray(ESFieldName.resolved_users)
-    activityDocument.resolvedUsers.foreach(builder.value)
+    activityDocument.resolvedUsers.foreach(e => builder.value(hyphenToUnderscore(e)))
     builder.endArray()
 
     builder.startArray(ESFieldName.audience_components)
-    activityDocument.audienceComponents.foreach(builder.value)
+    activityDocument.audienceComponents.foreach(e => builder.value(hyphenToUnderscore(e)))
     builder.endArray()
 
     builder.endObject()
@@ -87,10 +89,11 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
   }
 
   def makeBoolQueryBuilder(activityESSearchQuery: ActivityESSearchQuery): BoolQueryBuilder = {
+
     val boolQueryBuilder: BoolQueryBuilder = new BoolQueryBuilder()
 
     activityESSearchQuery.activity_id match {
-      case Some(activity_id) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.activity_id, activity_id))
+      case Some(activity_id) => boolQueryBuilder.must(QueryBuilders.matchQuery(ESFieldName.activity_id, activity_id))
       case _ =>
     }
 
@@ -121,7 +124,7 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
     }
 
     activityESSearchQuery.title match {
-      case Some(title) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.title, title))
+      case Some(title) => boolQueryBuilder.must(QueryBuilders.matchQuery(ESFieldName.title, title))
       case _ =>
     }
 
@@ -131,20 +134,18 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
     }
 
     activityESSearchQuery.audienceComponents match {
-      case Some(components) => {
-        val componentListJava = new Array[String](components.size)
-        components.foreach(e => componentListJava(components.indexOf(e)) = e)
-        boolQueryBuilder.must(QueryBuilders.termsQuery(ESFieldName.audience_components, componentListJava: _*))
-      }
+      case Some(components) =>
+        components.foreach(component => {
+          boolQueryBuilder.should(QueryBuilders.termQuery(ESFieldName.audience_components, component))
+        })
       case _ =>
     }
 
     activityESSearchQuery.resolvedUsers match {
-      case Some(resolvedUsers) => {
-        val resolvedUserListJava = new Array[String](resolvedUsers.size)
-        resolvedUsers.foreach(e => resolvedUserListJava(resolvedUsers.indexOf(e)) = e)
-        boolQueryBuilder.must(QueryBuilders.termsQuery(ESFieldName.audience_components, resolvedUserListJava: _*))
-      }
+      case Some(resolvedUsers) =>
+        resolvedUsers.foreach(resolvedUser => {
+          boolQueryBuilder.should(QueryBuilders.termQuery(ESFieldName.resolved_users, resolvedUser))
+        })
       case _ =>
     }
 
