@@ -15,6 +15,7 @@ trait ActivityESServiceHelper {
   val separator = "_"
 
   object ESFieldName {
+    val activity_id = "activity_id"
     val provider_id = "provider_id"
     val activity_type = "activity_type"
     val title = "title"
@@ -46,6 +47,7 @@ trait ActivityESServiceHelper {
     val builder: XContentBuilder = jsonBuilder().startObject()
 
     builder
+      .field(ESFieldName.activity_id, activityDocument.activity_id)
       .field(ESFieldName.provider_id, activityDocument.provider_id)
       .field(ESFieldName.activity_type, activityDocument.activity_type)
       .field(ESFieldName.title, activityDocument.title)

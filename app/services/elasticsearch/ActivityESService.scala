@@ -26,7 +26,7 @@ trait ActivityESService {
   def update(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None)
 
   // get as in elasticsearch get api
-  def getDocumentByActivityId(activityId: String, isNotification: Boolean = true): Future[ActivityDocument]
+  def getDocumentByActivityId(activityId: String, index: String, isNotification: Boolean = true): Future[ActivityDocument]
 
   def deleteDocumentByActivityId(activityId: String, isNotification: Boolean = true)
 
@@ -70,11 +70,12 @@ class ActivityESServiceImpl @Inject()(
 
   override def update(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None) = index(activity, resolvedUsers)
 
-  // rough start of the implementation, might be entirely incorrect
-  override def getDocumentByActivityId(activityId: String, isNotification: Boolean = true): Future[ActivityDocument] = {
+  // get document by id does not support index name wild cast like alert*
+  // https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-index.html
+  override def getDocumentByActivityId(activityId: String, index: String, isNotification: Boolean = true): Future[ActivityDocument] = {
     val helper = ActivityESServiceGetHelper
     val request = new GetRequest(
-      helper.indexNameForAllTime(isNotification),
+      index,
       helper.documentType,
       activityId
     )

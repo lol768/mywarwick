@@ -13,6 +13,7 @@ import warwick.sso.Usercode
 import scala.collection.JavaConverters._
 
 case class ActivityDocument(
+  activity_id: String = "-",
   provider_id: String = "-",
   activity_type: String = "-",
   title: String = "-",
@@ -33,6 +34,7 @@ object ActivityDocument {
     resolvedUsers: Option[Seq[Usercode]] = None
   ): ActivityDocument = {
     ActivityDocument(
+      activity.id,
       activity.providerId,
       activity.`type`,
       activity.title,
@@ -65,6 +67,7 @@ object ActivityDocument {
       .map(_.toString)
 
     ActivityDocument(
+      res.getField(helper.ESFieldName.activity_id).getValue.toString,
       res.getField(helper.ESFieldName.provider_id).getValue.toString,
       res.getField(helper.ESFieldName.activity_type).getValue.toString,
       res.getField(helper.ESFieldName.title).getValue.toString,
@@ -83,6 +86,7 @@ object ActivityDocument {
       val hitMap = searchHit.getSourceAsMap.asScala.toMap
       val field = ActivityESServiceSearchHelper.ESFieldName
       ActivityDocument(
+        hitMap.getOrElse(field.activity_id, "-").toString,
         hitMap.getOrElse(field.provider_id, "-").toString,
         hitMap.getOrElse(field.activity_type, "-").toString,
         hitMap.getOrElse(field.title, "-").toString,
