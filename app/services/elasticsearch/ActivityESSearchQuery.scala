@@ -3,6 +3,7 @@ package services.elasticsearch
 import org.joda.time.DateTime
 
 case class ActivityESSearchQuery(
+  activity_id: Option[String] = None,
   provider_id: Option[String] = None,
   activity_type: Option[String] = None,
   title: Option[String] = None,

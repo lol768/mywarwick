@@ -90,6 +90,12 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 
   def makeBoolQueryBuilder(activityESSearchQuery: ActivityESSearchQuery): BoolQueryBuilder = {
     val boolQueryBuilder: BoolQueryBuilder = new BoolQueryBuilder()
+
+    activityESSearchQuery.activity_id match {
+      case Some(activity_id) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.activity_id, activity_id))
+      case _ =>
+    }
+
     activityESSearchQuery.provider_id match {
       case Some(provider_id) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.provider_id, provider_id))
       case _ =>
