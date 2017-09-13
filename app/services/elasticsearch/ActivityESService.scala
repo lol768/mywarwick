@@ -25,9 +25,6 @@ trait ActivityESService {
 
   def update(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None)
 
-  // get as in elasticsearch get api
-  def getDocumentByActivityId(activityId: String, index: String, isNotification: Boolean = true): Future[ActivityDocument]
-
   def deleteDocumentByActivityId(activityId: String, isNotification: Boolean = true)
 
   // match all
@@ -69,38 +66,6 @@ class ActivityESServiceImpl @Inject()(
   }
 
   override def update(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None) = index(activity, resolvedUsers)
-
-  // get document by id does not support index name wild cast like alert*
-  // https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-index.html
-  override def getDocumentByActivityId(activityId: String, index: String, isNotification: Boolean = true): Future[ActivityDocument] = {
-    val helper = ActivityESServiceGetHelper
-    val request = new GetRequest(
-      index,
-      helper.documentType,
-      activityId
-    )
-    val getResponsePromise: Promise[GetResponse] = Promise[GetResponse]
-    val futureResponse: Future[GetResponse] = getResponsePromise.future
-    client.getAsync(request, new ActionListener[GetResponse] {
-      @Override
-      override def onResponse(getResponse: GetResponse): Unit = {
-        getResponsePromise.success(getResponse)
-      }
-
-      @Override
-      override def onFailure(e: Exception): Unit = {
-        getResponsePromise.failure(e)
-      }
-    })
-    import ExecutionContext.Implicits.global
-    futureResponse
-      .map(ActivityDocument.fromESGetResponse)
-      .recover {
-        case exception =>
-          logger.error("Exceptions thrown after sending a elasticsearch GetRequest", exception)
-          ActivityDocument()
-      }
-  }
 
   //TODO implement me https://www.elastic.co/guide/en/elasticsearch/client/java-rest/master/java-rest-high-document-delete.html
   override def deleteDocumentByActivityId(activityId: String, isNotification: Boolean): Unit = ???

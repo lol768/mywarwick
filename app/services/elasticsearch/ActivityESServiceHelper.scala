@@ -70,8 +70,6 @@ trait ActivityESServiceHelper {
   }
 }
 
-object ActivityESServiceGetHelper extends ActivityESServiceHelper
-
 object ActivityESServiceUpdateHelper extends ActivityESServiceHelper {
   def makeUpdateRequest(indexName: String, docType: String, docId: String, docSource: XContentBuilder): UpdateRequest = {
     new UpdateRequest(indexName, docType, docId).doc(docSource)

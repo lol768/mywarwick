@@ -51,36 +51,6 @@ object ActivityDocument {
     )
   }
 
-  def fromESGetResponse(res: GetResponse): ActivityDocument = {
-    val helper = ActivityESServiceGetHelper
-    val audience_components = res
-      .getField(helper.ESFieldName.audience_components)
-      .getValues
-      .asScala
-      .toList
-      .map(_.toString)
-
-    val resolved_users = res
-      .getField(helper.ESFieldName.resolved_users)
-      .getValues
-      .asScala
-      .map(_.toString)
-
-    ActivityDocument(
-      res.getField(helper.ESFieldName.activity_id).getValue.toString,
-      res.getField(helper.ESFieldName.provider_id).getValue.toString,
-      res.getField(helper.ESFieldName.activity_type).getValue.toString,
-      res.getField(helper.ESFieldName.title).getValue.toString,
-      res.getField(helper.ESFieldName.url).getValue.toString,
-      res.getField(helper.ESFieldName.text).getValue.toString,
-      res.getField(helper.ESFieldName.replaced_by).getValue.toString,
-      DateTime.parse(res.getField(helper.ESFieldName.published_at).getValue.toString), //TODO test if this is right
-      res.getField(helper.ESFieldName.publisher).getValue.toString,
-      audience_components,
-      resolved_users
-    )
-  }
-
   def fromESSearchResponse(res: SearchResponse): Seq[ActivityDocument] = {
     res.getHits.asScala.toList.map(searchHit => {
       val hitMap = searchHit.getSourceAsMap.asScala.toMap
