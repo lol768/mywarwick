@@ -65,9 +65,65 @@ class StreamFilterOptionView extends React.PureComponent {
     }, event);
   }
 
-  render() {
-    const { filterOptions } = this.props;
+  renderProvider() {
+    const providers = this.props.filterOptions.provider;
 
+    if (providers.length === 0) {
+      const plural = (this.props.filterType === 'Alerts') ? 'alerts' : 'activities';
+      return (
+        <div className="empty-state">
+          You haven&apos;t recorded any { plural } yet. When you do, you&apos;ll be able to use this
+          screen to choose which types of { this.props.filterType.toLowerCase() } you&apos;d like to
+          see on your { this.props.filterType } tab.
+        </div>
+      );
+    }
+
+    return (
+      <div className="list-group">
+        <div className="list-group-item list-group-item--header">
+          Provider
+        </div>
+        { _.map(
+          _.sortBy(providers, o => (o.displayName ? o.displayName : o.name)),
+          option =>
+            (<div
+              key={ `provider:${option.id}` }
+              className="list-group-item"
+              data-name="provider"
+              data-value={option.id}
+              role="button"
+              tabIndex={0}
+              onClick={ this.onClick }
+              onKeyUp={ this.onClick }
+            >
+              <div className="media">
+                <div className="media-left">
+                  <i
+                    className={ `fa fa-fw fa-${option.icon ? option.icon : 'cog'}` }
+                    style={{ color: (option.colour ? option.colour : 'black') }}
+                  />
+                </div>
+                <div
+                  className={`media-body${this.props.isOnline ? '' : ' media-body-disabled'}`}
+                >
+                  { option.displayName ? option.displayName : option.name }
+                </div>
+                <div className="media-right">
+                  <Switch
+                    id={ `${this.props.filterType}:provider:${option.id}` }
+                    checked={ this.state.provider[option.id] }
+                    disabled={ !this.props.isOnline }
+                  />
+                </div>
+              </div>
+            </div>),
+        ) }
+      </div>
+    );
+  }
+
+  render() {
     return (
       <div>
         <div className="list-group fixed setting-colour-2">
@@ -78,46 +134,7 @@ class StreamFilterOptionView extends React.PureComponent {
           </div>
         </div>
 
-        <div className="list-group">
-          <div className="list-group-item list-group-item--header">
-              Provider
-          </div>
-          { _.map(
-            _.sortBy(filterOptions.provider, o => (o.displayName ? o.displayName : o.name)),
-            option =>
-              (<div
-                key={ `provider:${option.id}` }
-                className="list-group-item"
-                data-name="provider"
-                data-value={option.id}
-                role="button"
-                tabIndex={0}
-                onClick={ this.onClick }
-                onKeyUp={ this.onClick }
-              >
-                <div className="media">
-                  <div className="media-left">
-                    <i
-                      className={ `fa fa-fw fa-${option.icon ? option.icon : 'cog'}` }
-                      style={{ color: (option.colour ? option.colour : 'black') }}
-                    />
-                  </div>
-                  <div
-                    className={`media-body${this.props.isOnline ? '' : ' media-body-disabled'}`}
-                  >
-                    { option.displayName ? option.displayName : option.name }
-                  </div>
-                  <div className="media-right">
-                    <Switch
-                      id={ `${this.props.filterType}:provider:${option.id}` }
-                      checked={ this.state.provider[option.id] }
-                      disabled={ !this.props.isOnline }
-                    />
-                  </div>
-                </div>
-              </div>),
-          ) }
-        </div>
+        { this.renderProvider() }
       </div>
     );
   }
