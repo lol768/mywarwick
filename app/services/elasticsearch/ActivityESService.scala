@@ -20,6 +20,8 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 trait ActivityESService {
   def index(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None)
 
+  def index(activities: Seq[Activity])
+
   def update(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None)
 
   def deleteDocumentByActivityId(activityId: String, isNotification: Boolean = true)
@@ -58,6 +60,13 @@ class ActivityESServiceImpl @Inject()(
       override def onResponse(response: IndexResponse) = {
         logger.debug("IndexRequest sent to ES with response: " + response.toString)
       }
+    })
+  }
+
+
+  override def index(activities: Seq[Activity]): Unit = {
+    activities.foreach(activity => {
+      this.index(activity)
     })
   }
 
