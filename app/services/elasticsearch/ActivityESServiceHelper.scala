@@ -117,9 +117,8 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
       case _ =>
     }
 
-    //TODO check if fuzzy query works on this field
     activityESSearchQuery.text match {
-      case Some(text) => boolQueryBuilder.must(QueryBuilders.fuzzyQuery(ESFieldName.text, text))
+      case Some(text) => boolQueryBuilder.must(QueryBuilders.matchQuery(ESFieldName.text, text))
       case _ =>
     }
 
