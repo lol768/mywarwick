@@ -5,6 +5,8 @@ import java.util.Date
 import helpers.BaseSpec
 import org.joda.time.DateTime
 import org.scalatest.mockito.MockitoSugar
+import play.api.libs.json.Json
+import services.elasticsearch.ActivityESSearchQuery.DateRange
 import uk.ac.warwick.util.core.jodatime.DateTimeUtils
 import uk.ac.warwick.util.core.jodatime.DateTimeUtils.Callback
 
@@ -66,5 +68,416 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
     }
 
   }
+
+  "ActivityESServiceSearchHelper" should {
+
+    "build an empty query if the supplied ActivityESSearchQuery is empty" in new Scope {
+
+      val query = ActivityESSearchQuery()
+
+      val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
+
+      val expect = Json.parse(
+        """
+          {
+            "bool" : {
+              "adjust_pure_negative" : true,
+              "boost" : 1.0
+            }
+          }
+        """)
+      Json.parse(result.toString()) must be(expect)
+    }
+
+
+    "should have correct must term query for activity id" in new Scope {
+
+      var query = ActivityESSearchQuery(Some("sdflsdkfj-sdflksdjf_1231"))
+      val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
+
+      val expect = Json.parse(
+        """
+          {
+            "bool": {
+              "must": [
+                {
+                  "term": {
+                    "activity_id": {
+                      "value": "sdflsdkfj_sdflksdjf_1231",
+                      "boost": 1
+                    }
+                  }
+                }
+              ],
+              "adjust_pure_negative": true,
+              "boost": 1
+            }
+          }
+        """
+      )
+
+      Json.parse(result.toString) must be(expect)
+
+    }
+
+    "should have correct must query for provider id" in new Scope {
+
+      var query = ActivityESSearchQuery(None, Some("super-provider_id-id"))
+      val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
+
+      val expect = Json.parse(
+        """
+          {
+            "bool": {
+              "must": [
+                {
+                  "term": {
+                    "provider_id": {
+                      "value": "super_provider_id_id",
+                      "boost": 1
+                    }
+                  }
+                }
+              ],
+              "adjust_pure_negative": true,
+              "boost": 1
+            }
+          }
+        """
+      )
+      Json.parse(result.toString()) must be(expect)
+    }
+
+    "should have correct must term query for activity type" in new Scope {
+
+      var query = ActivityESSearchQuery(None, None, Some("cool-activity-type"))
+      val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
+
+      val expect = Json.parse(
+        """
+          {
+            "bool": {
+              "must": [
+                {
+                  "term": {
+                    "activity_type": {
+                      "value": "cool_activity_type",
+                      "boost": 1
+                    }
+                  }
+                }
+              ],
+              "adjust_pure_negative": true,
+              "boost": 1
+            }
+          }
+        """
+      )
+      Json.parse(result.toString()) must be(expect)
+    }
+
+    "should have correct must term query for publisher" in new Scope {
+
+      var query = ActivityESSearchQuery(
+        publisher = Some("cool-publisher")
+      )
+      val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
+
+      val expect = Json.parse(
+        """
+          {
+            "bool": {
+              "must": [
+                {
+                  "term": {
+                    "publisher": {
+                      "value": "cool_publisher",
+                      "boost": 1
+                    }
+                  }
+                }
+              ],
+              "adjust_pure_negative": true,
+              "boost": 1
+            }
+          }
+        """
+      )
+      Json.parse(result.toString()) must be(expect)
+    }
+
+
+    "should have correct must match query for text" in new Scope {
+
+      var query = ActivityESSearchQuery(text = Some("this and that"))
+      val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
+
+      val expect = Json.parse(
+        """
+          {
+            "bool": {
+              "must": [
+                {
+                  "match": {
+                    "text": {
+                      "query": "this and that",
+                      "operator": "OR",
+                      "prefix_length": 0,
+                      "max_expansions": 50,
+                      "fuzzy_transpositions": true,
+                      "lenient": false,
+                      "zero_terms_query": "NONE",
+                      "boost": 1
+                    }
+                  }
+                }
+              ],
+              "adjust_pure_negative": true,
+              "boost": 1
+            }
+          }
+        """
+      )
+      Json.parse(result.toString()) must be(expect)
+    }
+
+
+    "should have correct must match query for title" in new Scope {
+
+      var query = ActivityESSearchQuery(title = Some("wonderful title"))
+      val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
+
+      val expect = Json.parse(
+        """
+          {
+            "bool": {
+              "must": [
+                {
+                  "match": {
+                    "title": {
+                      "query": "wonderful title",
+                      "operator": "OR",
+                      "prefix_length": 0,
+                      "max_expansions": 50,
+                      "fuzzy_transpositions": true,
+                      "lenient": false,
+                      "zero_terms_query": "NONE",
+                      "boost": 1
+                    }
+                  }
+                }
+              ],
+              "adjust_pure_negative": true,
+              "boost": 1
+            }
+          }
+        """
+      )
+      Json.parse(result.toString()) must be(expect)
+    }
+
+
+    "should have correct must query for published_at time range" in new Scope {
+
+      var range = DateRange(DateTime.parse("2017-09-13T12:33:28.855Z"), DateTime.parse("2017-09-13T12:35:28.855Z"))
+
+      var query = ActivityESSearchQuery(
+        publish_at = Some(range)
+      )
+      val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
+
+      val expect = Json.parse(
+        s"""
+        {
+          "bool": {
+            "must": [
+              {
+                "range": {
+                  "published_at": {
+                    "from": "${range.from}",
+                    "to": "${range.to}",
+                    "include_lower": true,
+                    "include_upper": true,
+                    "boost": 1
+                  }
+                }
+              }
+            ],
+            "adjust_pure_negative": true,
+            "boost": 1
+          }
+        }
+      """
+      )
+      Json.parse(result.toString()) must be(expect)
+    }
+
+    "should have correct must term query for url" in new Scope {
+
+      var query = ActivityESSearchQuery(
+        url = Some("https://fake.fake.com")
+      )
+      val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
+
+      val expect = Json.parse(
+        """
+          {
+            "bool": {
+              "must": [
+                {
+                  "term": {
+                    "url": {
+                      "value": "https://fake.fake.com",
+                      "boost": 1
+                    }
+                  }
+                }
+              ],
+              "adjust_pure_negative": true,
+              "boost": 1
+            }
+          }
+        """
+      )
+      Json.parse(result.toString()) must be(expect)
+    }
+
+    "should have multiple should match queries for each element in audience components" in new Scope {
+
+
+      val query = ActivityESSearchQuery(
+        audienceComponents = Some(Seq("com1", "com2", "com3", "wat"))
+      )
+
+      val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
+
+      val expect =Json.parse(
+        """
+           {
+             "bool": {
+               "should": [
+                 {
+                   "match": {
+                     "audience_components": {
+                       "query": "com1",
+                       "operator": "OR",
+                       "prefix_length": 0,
+                       "max_expansions": 50,
+                       "fuzzy_transpositions": true,
+                       "lenient": false,
+                       "zero_terms_query": "NONE",
+                       "boost": 1
+                     }
+                   }
+                 },
+                 {
+                   "match": {
+                     "audience_components": {
+                       "query": "com2",
+                       "operator": "OR",
+                       "prefix_length": 0,
+                       "max_expansions": 50,
+                       "fuzzy_transpositions": true,
+                       "lenient": false,
+                       "zero_terms_query": "NONE",
+                       "boost": 1
+                     }
+                   }
+                 },
+                 {
+                   "match": {
+                     "audience_components": {
+                       "query": "com3",
+                       "operator": "OR",
+                       "prefix_length": 0,
+                       "max_expansions": 50,
+                       "fuzzy_transpositions": true,
+                       "lenient": false,
+                       "zero_terms_query": "NONE",
+                       "boost": 1
+                     }
+                   }
+                 },
+                 {
+                   "match": {
+                     "audience_components": {
+                       "query": "wat",
+                       "operator": "OR",
+                       "prefix_length": 0,
+                       "max_expansions": 50,
+                       "fuzzy_transpositions": true,
+                       "lenient": false,
+                       "zero_terms_query": "NONE",
+                       "boost": 1
+                     }
+                   }
+                 }
+               ],
+               "adjust_pure_negative": true,
+               "boost": 1
+             }
+           }
+        """)
+      Json.parse(result.toString()) must be(expect)
+
+    }
+
+    "should have multiple should term quieres for each usercode in resolved users" in new Scope {
+
+      val query = ActivityESSearchQuery(
+        resolvedUsers = Some(Seq("user1", "user2", "user3", "cat"))
+      )
+
+      val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
+
+      val expect = Json.parse(
+        """
+           {
+             "bool": {
+               "should": [
+                 {
+                   "term": {
+                     "resolved_users": {
+                       "value": "user1",
+                       "boost": 1
+                     }
+                   }
+                 },
+                 {
+                   "term": {
+                     "resolved_users": {
+                       "value": "user2",
+                       "boost": 1
+                     }
+                   }
+                 },
+                 {
+                   "term": {
+                     "resolved_users": {
+                       "value": "user3",
+                       "boost": 1
+                     }
+                   }
+                 },
+                 {
+                   "term": {
+                     "resolved_users": {
+                       "value": "cat",
+                       "boost": 1
+                     }
+                   }
+                 }
+               ],
+               "adjust_pure_negative": true,
+               "boost": 1
+             }
+           }
+        """
+      )
+      Json.parse(result.toString()) must be(expect)
+    }
+
+  }
+
 
 }
