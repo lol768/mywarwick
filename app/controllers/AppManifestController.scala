@@ -44,6 +44,10 @@ class AppManifestController @Inject()(
           Json.obj(
             "platform" -> "play",
             "id" -> "uk.ac.warwick.my.app"
+          ),
+          Json.obj(
+            "platform" -> "itunes",
+            "url" -> "https://itunes.apple.com/gb/app/my-warwick/id1162088811?mt=8"
           )
         )
       ))
