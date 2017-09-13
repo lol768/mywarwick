@@ -5,17 +5,14 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import models.Activity
 import org.elasticsearch.action.ActionListener
-import org.elasticsearch.action.get.{GetRequest, GetResponse}
-import org.elasticsearch.action.index.{IndexRequest, IndexResponse}
+import org.elasticsearch.action.index.{IndexResponse}
 import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
-import org.elasticsearch.action.update.UpdateResponse
 import org.elasticsearch.client.RestHighLevelClient
-import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
+import org.elasticsearch.index.query.{BoolQueryBuilder}
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import services.{AudienceService, PublisherService}
 import warwick.core.Logging
 import warwick.sso.Usercode
-import collection.JavaConverters._
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
@@ -27,7 +24,6 @@ trait ActivityESService {
 
   def deleteDocumentByActivityId(activityId: String, isNotification: Boolean = true)
 
-  // match all
   def search(activityESSearchQuery: ActivityESSearchQuery): Future[Seq[ActivityDocument]]
 
 }
@@ -70,7 +66,6 @@ class ActivityESServiceImpl @Inject()(
   //TODO implement me https://www.elastic.co/guide/en/elasticsearch/client/java-rest/master/java-rest-high-document-delete.html
   override def deleteDocumentByActivityId(activityId: String, isNotification: Boolean): Unit = ???
 
-  //TODO extract into small functions so that we can have unit tests
   override def search(input: ActivityESSearchQuery): Future[Seq[ActivityDocument]] = {
     val helper = ActivityESServiceSearchHelper
 
