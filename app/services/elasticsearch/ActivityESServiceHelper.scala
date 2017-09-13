@@ -93,17 +93,17 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
     val boolQueryBuilder: BoolQueryBuilder = new BoolQueryBuilder()
 
     activityESSearchQuery.activity_id match {
-      case Some(activity_id) => boolQueryBuilder.must(QueryBuilders.matchQuery(ESFieldName.activity_id, activity_id))
+      case Some(activity_id) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.activity_id, hyphenToUnderscore(activity_id)))
       case _ =>
     }
 
     activityESSearchQuery.provider_id match {
-      case Some(provider_id) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.provider_id, provider_id))
+      case Some(provider_id) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.provider_id, hyphenToUnderscore(provider_id)))
       case _ =>
     }
 
     activityESSearchQuery.activity_type match {
-      case Some(activity_type) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.activity_type, activity_type))
+      case Some(activity_type) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.activity_type, hyphenToUnderscore(activity_type)))
       case _ =>
     }
 
@@ -113,7 +113,7 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
     }
 
     activityESSearchQuery.publisher match {
-      case Some(publisher) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.publisher, publisher))
+      case Some(publisher) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.publisher, hyphenToUnderscore(publisher)))
       case _ =>
     }
 
@@ -135,7 +135,7 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
     activityESSearchQuery.audienceComponents match {
       case Some(components) =>
         components.foreach(component => {
-          boolQueryBuilder.should(QueryBuilders.termQuery(ESFieldName.audience_components, component))
+          boolQueryBuilder.should(QueryBuilders.matchQuery(ESFieldName.audience_components, component))
         })
       case _ =>
     }
@@ -147,7 +147,6 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
         })
       case _ =>
     }
-
     boolQueryBuilder
   }
 
