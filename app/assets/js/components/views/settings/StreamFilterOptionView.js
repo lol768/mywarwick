@@ -67,14 +67,14 @@ class StreamFilterOptionView extends React.PureComponent {
 
   renderProvider() {
     const providers = this.props.filterOptions.provider;
+    const plural = (this.props.filterType === 'Alerts') ? 'Alerts' : 'Activities';
 
     if (providers.length === 0) {
-      const plural = (this.props.filterType === 'Alerts') ? 'alerts' : 'activities';
       return (
         <div className="empty-state">
-          You haven&apos;t recorded any { plural } yet. When you do, you&apos;ll be able to use this
-          screen to choose which types of { this.props.filterType.toLowerCase() } you&apos;d like to
-          see on your { this.props.filterType } tab.
+          You haven&apos;t recorded any { plural.toLowerCase() } yet. When you do, you&apos;ll be
+          able to use this screen to choose which types of { this.props.filterType.toLowerCase() }
+          you&apos;d like to see on your { this.props.filterType } tab.
         </div>
       );
     }
@@ -82,7 +82,7 @@ class StreamFilterOptionView extends React.PureComponent {
     return (
       <div>
         <p className="hint-text container-fluid">
-          Provider
+          On my { plural } tab, show { plural.toLowerCase() } that come from
         </p>
         <div className="list-group">
           { _.map(
