@@ -22,9 +22,9 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
       DateTimeUtils.useMockDateTime(DateTime.parse("2016-06-30T01:20"), new Callback {
         override def doSomething() = {
 
-          ActivityESServiceGetHelper.indexNameToday(true, DateTime.now().toString("yyyy_MM")) must be("alert_2016_06")
+          ActivityESServiceHelper.indexNameToday(true, DateTime.now().toString("yyyy_MM")) must be("alert_2016_06")
 
-          ActivityESServiceGetHelper.indexNameToday(false, DateTime.now().toString("yyyy_MM")) must be("activity_2016_06")
+          ActivityESServiceHelper.indexNameToday(false, DateTime.now().toString("yyyy_MM")) must be("activity_2016_06")
         }
       })
 
@@ -33,9 +33,9 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     "produce correct all time index name for alerts and activity" in new Scope {
 
-      ActivityESServiceGetHelper.indexNameForAllTime() must be("alert*")
+      ActivityESServiceHelper.indexNameForAllTime() must be("alert*")
 
-      ActivityESServiceGetHelper.indexNameForAllTime(false) must be("activity*")
+      ActivityESServiceHelper.indexNameForAllTime(false) must be("activity*")
 
     }
   }
