@@ -1,25 +1,15 @@
 package services.messaging
 
 import actors.MessageProcessing.ProcessingResult
-import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import models.MessageSend
-import org.apache.http.client.config.RequestConfig
-import org.apache.http.client.entity.UrlEncodedFormEntity
-import org.apache.http.client.methods.{CloseableHttpResponse, HttpPost}
-import org.apache.http.impl.client.{CloseableHttpClient, HttpClientBuilder}
-import org.apache.http.message.BasicNameValuePair
-import org.apache.http.util.EntityUtils
 import play.api.Configuration
-import play.api.libs.json.{JsBoolean, JsObject, Json}
+import play.api.libs.json.JsBoolean
 import services.SmsNotificationsPrefService
 
-import scala.collection.JavaConverters._
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.util.Try
 
 object SmsOutputService {
   val connectTimeout: FiniteDuration = 5.seconds
@@ -28,24 +18,11 @@ object SmsOutputService {
 
 @Named("sms")
 class SmsOutputService @Inject()(
-  configuration: Configuration,
+  val configuration: Configuration,
   smsNotificationsPrefService: SmsNotificationsPrefService
-) extends OutputService {
+) extends OutputService with SmsSendingService {
 
   import system.ThreadPools.sms
-
-  val requestConfig: RequestConfig = RequestConfig.custom()
-    .setConnectTimeout(SmsOutputService.connectTimeout.toMillis.toInt)
-    .setSocketTimeout(SmsOutputService.socketTimeout.toMillis.toInt)
-    .build()
-
-  val client: CloseableHttpClient = HttpClientBuilder.create()
-    .setDefaultRequestConfig(requestConfig)
-    .build()
-
-  val baseUrlOption: Option[String] = configuration.getString("sms.baseUrl")
-  val usernameOption: Option[String] = configuration.getString("sms.username")
-  val passwordOption: Option[String] = configuration.getString("sms.password")
 
   private val rootDomain: String = configuration.getString("mywarwick.rootDomain").getOrElse("my.warwick.ac.uk")
   private val messageSuffix: String = s"\nTo opt-out visit $rootDomain/settings"
@@ -69,39 +46,17 @@ class SmsOutputService @Inject()(
     } else if (smsNumberOption.isEmpty) {
       Future.successful(ProcessingResult(success = false, s"No phone number defined for $usercode"))
     } else {
-
-      val baseUrl = baseUrlOption.getOrElse(throw new IllegalArgumentException("sms.baseUrl not defined"))
-      val username = usernameOption.getOrElse(throw new IllegalArgumentException("sms.username not defined"))
-      val password = passwordOption.getOrElse(throw new IllegalArgumentException("sms.password not defined"))
-
       Future {
-        val request = new HttpPost(baseUrl)
-        request.setEntity(new UrlEncodedFormEntity(Seq(
-          new BasicNameValuePair("username", username),
-          new BasicNameValuePair("password", password),
-          new BasicNameValuePair("number", PhoneNumberUtil.getInstance.format(smsNumberOption.get, PhoneNumberFormat.INTERNATIONAL)),
-          new BasicNameValuePair("message", formatForSms(message.activity.title))
-        ).asJava))
-
-        var response: CloseableHttpResponse = null
-
-        val processingResult = Try {
-          response = client.execute(request)
-          val entity = response.getEntity
-          val json = Json.parse(EntityUtils.toString(entity)).as[JsObject]
+        sendSms(smsNumberOption.get, formatForSms(message.activity.title)).map(json => {
           val result = json.value("success").as[JsBoolean].value
           if (result) {
             ProcessingResult(success = true, s"SMS message sent to $usercode")
           } else {
             ProcessingResult(success = false, s"Failed sending SMS message sent to $usercode: ${json.toString}")
           }
-        }.recover {
+        }).recover {
           case e => ProcessingResult(success = false, s"Failed sending SMS message sent to $usercode: ${e.getMessage}")
-        }
-
-        if (response != null) response.close()
-
-        processingResult.get
+        }.get
       }
     }
   }
