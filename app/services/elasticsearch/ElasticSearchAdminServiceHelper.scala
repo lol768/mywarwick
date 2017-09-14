@@ -51,33 +51,30 @@ trait ElasticSearchAdminServiceHelper extends Logging {
     suppliedResponseListener: Option[(Promise[Response]) => ResponseListener] = None
   ): Future[Response] = {
 
-    val param: util.Map[String, String] = suppliedParam match {
-      case Some(p: util.Map[String, String]) => p
-      case _ => emptyParam
-    }
-
-
-    val responseListener = suppliedResponseListener match {
-      case Some(f) => f
-      case _ => this.responseListener
-    }
-
     val responsePromise: Promise[Response] = Promise[Response]
+
+    val param = suppliedParam.getOrElse(emptyParam)
+
+    implicit def getResponseListener(p: Option[(Promise[Response]) => ResponseListener]) = p match {
+      case Some(f) => f(responsePromise)
+      case _ => this.responseListener(responsePromise)
+    }
+
     entity match {
-      case Some(e: NStringEntity) =>
+      case Some(nStringEntity: NStringEntity) =>
         lowLevelClient.performRequestAsync(
           method,
           path,
           param,
-          e,
-          responseListener(responsePromise)
+          nStringEntity,
+          suppliedResponseListener
         )
       case _ =>
         lowLevelClient.performRequestAsync(
           method,
           path,
           param,
-          responseListener(responsePromise)
+          suppliedResponseListener
         )
     }
     responsePromise.future
