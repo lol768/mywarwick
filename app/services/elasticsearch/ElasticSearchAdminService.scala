@@ -33,7 +33,12 @@ class ElasticSearchAdminServiceImpl @Inject()(
   eSClientConfig: ESClientConfig
 ) extends ElasticSearchAdminService with ElasticSearchAdminServiceHelper {
 
-  override lazy val lowLevelClient: RestClient = eSClientConfig.newClient.getLowLevelClient
+  lazy val lowLevelClient: RestClient = eSClientConfig.newClient.getLowLevelClient
+
+  implicit def getClient(client: Option[RestClient]): RestClient = client match {
+    case Some(c: RestClient) => c
+    case _ => this.lowLevelClient
+  }
 
   override def putTemplate(
     template: JsValue,
@@ -43,7 +48,6 @@ class ElasticSearchAdminServiceImpl @Inject()(
     performRequestAsync(
       method = Method.get,
       path = s"$templateRootPath/$name",
-      param = emptyParam,
       entity = Some(httpEntityFromJsValue(template)),
       lowLevelClient = suppliedLowLevelClient
     )

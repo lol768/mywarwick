@@ -13,8 +13,6 @@ import scala.concurrent.{Future, Promise}
 
 trait ElasticSearchAdminServiceHelper extends Logging {
 
-  val lowLevelClient: RestClient
-
   val templateRootPath = "_template"
 
   object Method {
@@ -61,21 +59,21 @@ trait ElasticSearchAdminServiceHelper extends Logging {
   def performRequestAsync(
     method: String,
     path: String,
-    param: util.Map[String, String] = emptyParam,
+    lowLevelClient: RestClient,
+    suppliedParam: Option[util.Map[String, String]] = None,
     entity: Option[NStringEntity] = None,
-    responseListener: (Promise[Response], (Option[Any], Promise[Response]) => Unit) => ResponseListener = responseListener,
-    lowLevelClient: Option[RestClient] = None
+    responseListener: (Promise[Response], (Option[Any], Promise[Response]) => Unit) => ResponseListener = responseListener
   ): Future[Response] = {
 
-    val client: RestClient = lowLevelClient match {
-      case Some(c: RestClient) => c
-      case _ => this.lowLevelClient
+    val param: util.Map[String, String] = suppliedParam match {
+      case Some(p: util.Map[String, String]) => p
+      case _ => emptyParam
     }
 
     val responsePromise: Promise[Response] = Promise[Response]
     entity match {
       case Some(e: NStringEntity) =>
-        client.performRequestAsync(
+        lowLevelClient.performRequestAsync(
           method,
           path,
           param,
@@ -83,7 +81,7 @@ trait ElasticSearchAdminServiceHelper extends Logging {
           responseListener(responsePromise)
         )
       case _ =>
-        client.performRequestAsync(
+        lowLevelClient.performRequestAsync(
           method,
           path,
           param,
