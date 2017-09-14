@@ -48,7 +48,7 @@ trait ElasticSearchAdminServiceHelper extends Logging {
     lowLevelClient: RestClient,
     suppliedParam: Option[util.Map[String, String]] = None,
     entity: Option[NStringEntity] = None,
-    suppliedResponseListener: Option[(Promise[Response]) => ResponseListener] = None,
+    suppliedResponseListener: Option[(Promise[Response]) => ResponseListener] = None
   ): Future[Response] = {
 
     val param: util.Map[String, String] = suppliedParam match {
