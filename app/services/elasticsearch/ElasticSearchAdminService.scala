@@ -1,17 +1,12 @@
 package services.elasticsearch
 
-import java.util
-import java.util.Collections
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
-import org.apache.http.nio.entity.NStringEntity
-import org.elasticsearch.client.{Response, ResponseListener, RestClient}
-import play.api.libs.json.{JsValue, Json}
-import warwick.core.Logging
-import org.apache.http.entity.ContentType
+import org.elasticsearch.client.{Response, RestClient}
+import play.api.libs.json.{JsValue}
 
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{Future}
 
 @ImplementedBy(classOf[ElasticSearchAdminServiceImpl])
 trait ElasticSearchAdminService {

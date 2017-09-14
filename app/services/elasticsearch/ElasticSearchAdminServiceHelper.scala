@@ -6,6 +6,7 @@ import java.util.Collections
 import org.apache.http.entity.ContentType
 import org.apache.http.nio.entity.NStringEntity
 import org.elasticsearch.client.{Response, ResponseListener, RestClient}
+import org.jdom.IllegalDataException
 import play.api.libs.json.{JsValue, Json}
 import warwick.core.Logging
 
@@ -23,35 +24,20 @@ trait ElasticSearchAdminServiceHelper extends Logging {
     val head = "HEAD"
   }
 
-  val emptyParam: util.Map[String, String] = Collections.emptyMap()[String, String]
+  val emptyParam: util.Map[String, String] = Collections.emptyMap()
 
   def httpEntityFromJsValue(json: JsValue) = new NStringEntity(Json.stringify(json), ContentType.APPLICATION_JSON)
 
-  def responseHandler(
-    res: Option[Any],
-    responsePromise: Promise[Response]
-  ): Unit = {
-    res match {
-      case Some(e: Exception) =>
-        responsePromise.failure(e)
-        logger.error("Exception thrown after sending request to elasticsearch", e)
-      case Some(r: Response) =>
-        responsePromise.success(r)
-        logger.debug(s"Response received from elasticsearch: ${r.toString}")
-    }
-  }
-
-  def responseListener(
-    responsePromise: Promise[Response],
-    callbackHandler: (Option[Any], Promise[Response]) => Unit = this.responseHandler
-  ): ResponseListener = {
+  val responseListener: (Promise[Response]) => ResponseListener = (responsePromise) => {
     new ResponseListener() {
       def onFailure(exception: Exception): Unit = {
-        callbackHandler(Some(exception), responsePromise)
+        responsePromise.failure(exception)
+        logger.error("Exception thrown after sending request to elasticsearch", exception)
       }
 
       override def onSuccess(response: Response): Unit = {
-        callbackHandler(Some(response), responsePromise)
+        responsePromise.success(response)
+        logger.debug(s"Response received from elasticsearch: ${response.toString}")
       }
     }
   }
@@ -62,12 +48,18 @@ trait ElasticSearchAdminServiceHelper extends Logging {
     lowLevelClient: RestClient,
     suppliedParam: Option[util.Map[String, String]] = None,
     entity: Option[NStringEntity] = None,
-    responseListener: (Promise[Response], (Option[Any], Promise[Response]) => Unit) => ResponseListener = responseListener
+    suppliedResponseListener: Option[(Promise[Response]) => ResponseListener] = None,
   ): Future[Response] = {
 
     val param: util.Map[String, String] = suppliedParam match {
       case Some(p: util.Map[String, String]) => p
       case _ => emptyParam
+    }
+
+
+    val responseListener = suppliedResponseListener match {
+      case Some(f) => f
+      case _ => this.responseListener
     }
 
     val responsePromise: Promise[Response] = Promise[Response]
