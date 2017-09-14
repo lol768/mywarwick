@@ -120,7 +120,7 @@ describe('SmsNotificationsView', () => {
     expect(component.state('editing')).to.equal(true);
     expect(component.state('submitting')).to.equal(false);
     expect(component.state('smsNumber')).to.equal('1234');
-    expect(component.state('submitError')).to.equal('Empty');
+    expect(component.state('submitErrors').phoneNumber).to.equal('Empty');
     expect(component.find('.has-error')).to.have.length(1);
 
     component.setState({
@@ -134,7 +134,7 @@ describe('SmsNotificationsView', () => {
     expect(component.state('editing')).to.equal(false);
     expect(component.state('submitting')).to.equal(false);
     expect(component.state('smsNumber')).to.equal('2345');
-    expect(component.state('submitError')).to.equal(undefined);
+    expect(component.state('submitErrors')).to.equal(undefined);
     expect(component.find('.has-error')).to.have.length(0);
   });
 

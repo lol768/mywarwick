@@ -9,6 +9,7 @@ import NetworkAwareControl from '../../ui/NetworkAwareControl';
 import Switch from '../../ui/Switch';
 import wrapKeyboardSelect from '../../../keyboard-nav';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
+import _ from 'lodash-es';
 
 class SmsNotificationsView extends HideableView {
   static propTypes = {
@@ -28,6 +29,8 @@ class SmsNotificationsView extends HideableView {
     this.onEdit = this.onEdit.bind(this);
     this.onEditCancel = this.onEditCancel.bind(this);
     this.onEditSubmit = this.onEditSubmit.bind(this);
+    this.onEditSubmitResend = this.onEditSubmitResend.bind(this);
+    this.onEditSubmitCommon = this.onEditSubmitCommon.bind(this);
     this.handleJson = this.handleJson.bind(this);
 
     this.state = {
@@ -35,8 +38,9 @@ class SmsNotificationsView extends HideableView {
       smsNumber: props.smsNumber,
       editing: false,
       submitting: false,
-      submitError: undefined,
+      submitErrors: undefined,
       fromEmpty: false,
+      verificationRequired: false,
     };
   }
 
@@ -70,6 +74,7 @@ class SmsNotificationsView extends HideableView {
   onEdit() {
     this.setState({
       editing: true,
+      verificationRequired: false,
     });
   }
 
@@ -78,44 +83,83 @@ class SmsNotificationsView extends HideableView {
       this.setState({
         editing: false,
         fromEmpty: false,
-        submitError: undefined,
+        submitErrors: undefined,
       }),
     e);
   }
 
+  isWantsSms() {
+    if (this.state.fromEmpty) {
+      // We're here with the intention of enabling SMS notifications
+      return true;
+    }
+
+    if (this.phoneNumberInput.value.trim().length === 0) {
+      // The phone number field is empty
+      return false;
+    }
+
+    return this.state.enabled;
+  }
+
+  onEditSubmitCommon(resend) {
+    this.setState({
+      submitting: true,
+    }, () => {
+      smsNotifications.persist(
+        this.isWantsSms(),
+        this.phoneNumberInput.value,
+        (this.verificationCodeInput) ? this.verificationCodeInput.value : '',
+        resend,
+      )
+        .then(response => response.json()).then(this.handleJson);
+    });
+  }
+
   onEditSubmit(e) {
-    wrapKeyboardSelect(() =>
-      this.setState({
-        submitting: true,
-      }, () => {
-        smsNotifications.persist(
-          this.state.fromEmpty || this.state.enabled,
-          this.phoneNumberInput.value,
-        )
-          .then(response => response.json()).then(this.handleJson);
-      }),
-    e);
+    wrapKeyboardSelect(() => this.onEditSubmitCommon(false), e);
+  }
+
+  onEditSubmitResend(e) {
+    wrapKeyboardSelect(() => this.onEditSubmitCommon(true), e);
   }
 
   handleJson(json) {
     if (json.success) {
-      this.setState({
-        editing: false,
-        submitting: false,
-        submitError: undefined,
-        fromEmpty: false,
-        enabled: this.state.fromEmpty || this.state.enabled,
-        smsNumber: this.phoneNumberInput.value,
-      });
+      if (json.status === 'verificationRequired') {
+        this.setState({
+          submitting: false,
+          submitErrors: undefined,
+          verificationRequired: true,
+        });
+      } else {
+        this.setState({
+          editing: false,
+          submitting: false,
+          submitErrors: undefined,
+          fromEmpty: false,
+          enabled: this.isWantsSms(),
+          smsNumber: this.phoneNumberInput.value,
+        });
+      }
     } else if (json.errors.length > 0) {
+      const [verificationErrors, phoneErrors] = _.partition(json.errors, e => e.id === 'invalid-body-verification');
+      const submitErrors = {};
+      if (verificationErrors.length > 0) {
+        submitErrors.verificationCode = verificationErrors[0].message || verificationErrors[0].id;
+      }
+      if (phoneErrors.length > 0) {
+        submitErrors.phoneNumber = phoneErrors[0].message || phoneErrors[0].id;
+      }
       this.setState({
         submitting: false,
-        submitError: json.errors[0].message || json.errors[0].id,
+        submitErrors,
+        verificationRequired: json.status === 'verificationRequired',
       });
     } else {
       this.setState({
         submitting: false,
-        submitError: 'An unknown error occurred',
+        submitErrors: { phoneNumber: 'An unknown error occurred' },
       });
     }
   }
@@ -145,7 +189,7 @@ class SmsNotificationsView extends HideableView {
                 <form className="form" id="Settings:SMSNumber-form">
                   <div className={ classNames({
                     'form-group': true,
-                    'has-error': this.state.submitError,
+                    'has-error': this.state.submitErrors && this.state.submitErrors.phoneNumber,
                   }) }
                   >
                     <label htmlFor="Settings:SMSNumber-input">
@@ -159,10 +203,45 @@ class SmsNotificationsView extends HideableView {
                       defaultValue={ this.state.smsNumber || '' }
                       ref={ (i) => { this.phoneNumberInput = i; } }
                     />
-                    { this.state.submitError &&
-                      <span className="help-block">{ this.state.submitError }</span>
+                    { this.state.submitErrors && this.state.submitErrors.phoneNumber &&
+                      <span className="help-block">{ this.state.submitErrors.phoneNumber }</span>
                     }
                   </div>
+                  <p className="hint-text">
+                    We&apos;ll use the number you provide only to send My Warwick alerts to, and we
+                    won&apos;t share the number with any other application or with any third party.
+                    You can turn off SMS alerting at any time.
+                  </p>
+                  { this.state.verificationRequired &&
+                    <div>
+                      <div className={ classNames({
+                        'form-group': true,
+                        'has-error': this.state.submitErrors && this.state.submitErrors.verificationCode,
+                      }) }
+                      >
+                        <label htmlFor="Settings:SMSNumber-verificationCode">
+                          We&apos;ve sent you a code to verify your phone number. Enter it below.
+                        </label>
+                        <input
+                          type="tel"
+                          id="Settings:SMSNumber-verificationCode"
+                          className="form-control"
+                          placeholder="Verification code"
+                          ref={ (i) => { this.verificationCodeInput = i; } }
+                        />
+                        { this.state.submitErrors && this.state.submitErrors.verificationCode &&
+                          <span className="help-block">{ this.state.submitErrors.verificationCode }</span>
+                        }
+                      </div>
+                      <button
+                        type="button"
+                        onClick={ this.onEditSubmitResend }
+                        className="btn btn-default"
+                      >
+                        Re-send verification code
+                      </button>
+                    </div>
+                  }
                 </form>
               </div>
               <div className="modal-footer">
