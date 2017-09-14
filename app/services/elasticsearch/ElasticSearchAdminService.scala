@@ -10,25 +10,20 @@ import org.elasticsearch.client.{Response, ResponseListener, RestClient}
 import play.api.libs.json.{JsValue, Json}
 import warwick.core.Logging
 import org.apache.http.entity.ContentType
-import play.api.http.HttpEntity
 
 import scala.concurrent.{Future, Promise}
 
 @ImplementedBy(classOf[ElasticSearchAdminServiceImpl])
 trait ElasticSearchAdminService {
 
-  val lowLevelClient: RestClient
-
-  val templateRootPath = "_template"
-
   // template
-  def putTemplate(template: JsValue, name: String, lowLevelClient: RestClient = lowLevelClient): Future[Response]
+  def putTemplate(template: JsValue, name: String, lowLevelClient: Option[RestClient] = None): Future[Response]
 
-  def deleteTemplate(name: String, lowLevelClient: RestClient = lowLevelClient): Future[Response]
+  def deleteTemplate(name: String, lowLevelClient: Option[RestClient] = None): Future[Response]
 
-  def getTemplate(name: String, lowLevelClient: RestClient = lowLevelClient): Future[Response]
+  def getTemplate(name: String, lowLevelClient: Option[RestClient] = None): Future[Response]
 
-  def hasTemplate(name: String, lowLevelClient: RestClient = lowLevelClient): Future[Response]
+  def hasTemplate(name: String, lowLevelClient: Option[RestClient] = None): Future[Response]
 
   // remove index
 
@@ -39,22 +34,110 @@ trait ElasticSearchAdminService {
 @Singleton
 class ElasticSearchAdminServiceImpl @Inject()(
   eSClientConfig: ESClientConfig
-) extends ElasticSearchAdminService with Logging {
+) extends ElasticSearchAdminService with ElasticSearchAdminServiceHelper {
+
+  lazy val lowLevelClient: RestClient = eSClientConfig.newClient.getLowLevelClient
+
+  def performRequestAsync(
+    method: String,
+    path: String,
+    param: util.Map[String, String] = Collections.emptyMap()[String, String],
+    entity: Option[NStringEntity] = None,
+    responseListener: (Promise[Response], (Option[Any], Promise[Response]) => Unit) => ResponseListener = super.responseListener,
+    lowLevelClient: Option[RestClient] = None
+  ): Future[Response] = {
+
+    val client: RestClient = lowLevelClient match {
+      case Some(c: RestClient) => c
+      case _ => this.lowLevelClient
+    }
+
+    val responsePromise: Promise[Response] = Promise[Response]
+    entity match {
+      case Some(e: NStringEntity) =>
+        client.performRequestAsync(
+          method,
+          path,
+          param,
+          e,
+          responseListener(responsePromise)
+        )
+      case _ =>
+        client.performRequestAsync(
+          method,
+          path,
+          param,
+          responseListener(responsePromise)
+        )
+    }
+    responsePromise.future
+  }
+
+  override def putTemplate(
+    template: JsValue,
+    name: String,
+    lowLevelClient: Option[RestClient] = None
+  ): Future[Response] = {
+    performRequestAsync(
+      method = Method.get,
+      path = s"$templateRootPath/$name",
+      param = emptyParam,
+      entity = Some(httpEntityFromJsValue(template)),
+      lowLevelClient = lowLevelClient
+    )
+  }
+
+  override def deleteTemplate(
+    name: String,
+    lowLevelClient: Option[RestClient] = None
+  ): Future[Response] = {
+    performRequestAsync(
+      method = Method.delete,
+      path = s"$templateRootPath/$name",
+      lowLevelClient = lowLevelClient
+    )
+  }
+
+  override def getTemplate(
+    name: String,
+    lowLevelClient: Option[RestClient] = None
+  ): Future[Response] = {
+    performRequestAsync(
+      method = Method.get,
+      path = s"$templateRootPath/$name",
+      lowLevelClient = lowLevelClient
+    )
+  }
+
+  override def hasTemplate(
+    name: String,
+    lowLevelClient: Option[RestClient] = None
+  ): Future[Response] = {
+    performRequestAsync(
+      method = Method.head,
+      path = s"$templateRootPath/$name",
+      lowLevelClient = lowLevelClient
+    )
+  }
+}
+
+trait ElasticSearchAdminServiceHelper extends Logging {
+
+  val templateRootPath = "_template"
 
   object Method {
     val put = "PUT"
     val delete = "DELETE"
     val post = "POST"
     val get = "GET"
+    val head = "HEAD"
   }
-
-  override lazy val lowLevelClient: RestClient = eSClientConfig.newClient.getLowLevelClient
 
   val emptyParam: util.Map[String, String] = Collections.emptyMap()[String, String]
 
   def httpEntityFromJsValue(json: JsValue) = new NStringEntity(Json.stringify(json), ContentType.APPLICATION_JSON)
 
-  def defaultResponseHandler(
+  def responseHandler(
     res: Option[Any],
     responsePromise: Promise[Response]
   ): Unit = {
@@ -68,9 +151,9 @@ class ElasticSearchAdminServiceImpl @Inject()(
     }
   }
 
-  def defaultResponseListener(
+  def responseListener(
     responsePromise: Promise[Response],
-    callbackHandler: (Option[Any], Promise[Response]) => Unit = defaultResponseHandler
+    callbackHandler: (Option[Any], Promise[Response]) => Unit = this.responseHandler
   ): ResponseListener = {
     new ResponseListener() {
       def onFailure(exception: Exception): Unit = {
@@ -83,58 +166,6 @@ class ElasticSearchAdminServiceImpl @Inject()(
     }
   }
 
-  def performRequestAsync(
-    method: String,
-    path: String,
-    param: util.Map[String, String] = Collections.emptyMap()[String, String],
-    entity: Option[NStringEntity] = None,
-    responseListener: (Promise[Response], (Option[Any], Promise[Response]) => Unit) => ResponseListener = defaultResponseListener,
-    lowLevelClient: RestClient = this.lowLevelClient
-  ): Future[Response] = {
-
-    val responsePromise: Promise[Response] = Promise[Response]
-    entity match {
-      case Some(e: NStringEntity) =>
-        lowLevelClient.performRequestAsync(
-          method,
-          path,
-          param,
-          e,
-          responseListener(responsePromise)
-        )
-      case _ =>
-        lowLevelClient.performRequestAsync(
-          method,
-          path,
-          param,
-          responseListener(responsePromise)
-        )
-    }
-    responsePromise.future
-  }
-
-  override def putTemplate(
-    template: JsValue,
-    name: String,
-    lowLevelClient: RestClient
-  ): Future[Response] = {
-    performRequestAsync(
-      Method.get,
-      s"$templateRootPath/$name",
-      emptyParam,
-      Some(httpEntityFromJsValue(template))
-    )
-  }
-
-  override def deleteTemplate(name: String, lowLevelClient: RestClient): Future[Response] = {
-    performRequestAsync(
-      Method.delete,
-      s"$templateRootPath/$name",
-      emptyParam
-    )
-  }
-
-  override def getTemplate(name: String, lowLevelClient: RestClient): Future[Response] = ???
-
-  override def hasTemplate(name: String, lowLevelClient: RestClient): Future[Response] = ???
 }
+
+object ElasticSearchAdminServiceHelper extends ElasticSearchAdminServiceHelper
