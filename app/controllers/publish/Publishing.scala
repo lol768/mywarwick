@@ -44,7 +44,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
       case PermissionScope.AllDepartments =>
         true
       case PermissionScope.Departments(deptCodes: Seq[String]) =>
-        data.audience.forall(a => a.startsWith("Dept:") || deptCodes.exists(dc => a.startsWith(s"WebGroup:${dc.toLowerCase}-"))) && data.department.forall(deptCodes.contains)
+        data.department.forall(deptCodes.contains)
     }
   }
 
@@ -93,7 +93,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
   def sharedAudienceInfo(
     audienceService: AudienceService,
     processUsercodes: Seq[Usercode] => JsObject
-  )(implicit request: PublisherRequest[_]): Future[Result] = {
+  )(implicit request: PublisherRequest[_]): Future[Result] =
     audienceForm.bindFromRequest.fold(
       formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
       audienceData => {
@@ -115,7 +115,6 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
         }
       }
     )
-  }
 }
 
 trait PublishableWithAudience {

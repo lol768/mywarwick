@@ -4,6 +4,7 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import controllers.BaseController
+import models.Audience.UsercodesAudience
 import models.{Audience, _}
 import models.publishing.Ability.CreateAPINotifications
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -40,7 +41,10 @@ class IncomingActivitiesController @Inject()(
             request.body.validate[IncomingActivityData].map { data =>
               val activity = ActivitySave.fromApi(user.usercode, publisherId, providerId, shouldNotify, data)
 
-              val usercodes = data.recipients.users.getOrElse(Seq.empty).map(Usercode).map(Audience.UsercodeAudience)
+              val usercodes = data.recipients.users.getOrElse(Seq.empty).map(Usercode) match {
+                case usercodes: Seq[Usercode] if usercodes.nonEmpty => Seq(UsercodesAudience(usercodes))
+                case Nil => Seq.empty[Audience.Component]
+              }
               val webgroups = data.recipients.groups.getOrElse(Seq.empty).map(GroupName).map(Audience.WebGroupAudience)
 
               val audience = Audience(usercodes ++ webgroups)

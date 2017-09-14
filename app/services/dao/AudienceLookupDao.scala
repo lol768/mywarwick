@@ -46,6 +46,8 @@ trait AudienceLookupDao {
   def resolveSeminarGroup(groupId: String): Future[Seq[Usercode]]
   def resolveRelationship(agentId: UniversityID, relationshipType: String): Future[Seq[Usercode]]
 
+  def getSeminarGroupById(groupId: String): Future[Option[LookupSeminarGroup]]
+
   def findModules(query: String): Future[Seq[LookupModule]]
   def findSeminarGroups(query: String): Future[Seq[LookupSeminarGroup]]
   def findRelationships(agentId: UniversityID): Future[Map[LookupRelationshipType, Seq[User]]]
@@ -120,6 +122,15 @@ class TabulaAudienceLookupDao @Inject()(
   override def resolveRelationship(agentId: UniversityID, relationshipType: String): Future[Seq[Usercode]] = {
     findRelationships(agentId).map(
       _.filterKeys(_.id == relationshipType).toSeq.headOption.map { case (_, users) => users.map(_.usercode) }.getOrElse(Seq())
+    )
+  }
+
+  override def getSeminarGroupById(groupId: String): Future[Option[LookupSeminarGroup]] = {
+    getAuthenticatedAsJson(tabulaSmallGroupsLookupUrl(groupId)).map(
+      TabulaResponseParsers.validateAPIResponse(_, TabulaResponseParsers.seminarGroupReads(groupId)).fold(
+        handleValidationError(_, None),
+        group => Some(group)
+      )
     )
   }
 
@@ -264,7 +275,14 @@ object TabulaResponseParsers {
       (__ \ "name").read[String] and
       (__ \ "groupSet" \ "name").read[String] and
       (__ \ "module" \ "code").read[String]
-    )(LookupSeminarGroup.apply _)
+    ) (LookupSeminarGroup.apply _)
+
+  def seminarGroupReads(id: String): Reads[LookupSeminarGroup] = (
+    Reads.pure(id) and
+      (__ \ "group" \"name").read[String] and
+      Reads.pure("") and
+      Reads.pure("")
+    ) (LookupSeminarGroup.apply _)
 
   case class TabulaUserData(userId: String, universityId: String)
   private val tabulaUserDataReads = Json.reads[TabulaUserData]

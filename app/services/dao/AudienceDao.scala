@@ -20,8 +20,9 @@ object AudienceComponentSave {
       AudienceComponentSave(name, Some(valueList.mkString("|")), deptCode)
     }
   }
+
   def toCompoundValue2(compoundValue: String): (String, String) =
-    Seq(compoundValue.split('|'):_*) match {
+    Seq(compoundValue.split('|'): _*) match {
       case (value1 :: value2 :: Nil) => (value1, value2)
       case _ => throw new IllegalArgumentException(s"Expected 2 values but was ${compoundValue.split('|').length}")
     }
@@ -92,8 +93,11 @@ class AudienceDaoImpl extends AudienceDao {
         case ("WebGroup", components) => components.collect {
           case AudienceComponentSave("WebGroup", Some(group), _) => WebGroupAudience(GroupName(group))
         }
-        case ("Usercode", components) => components.flatMap(_.value).map(Usercode).map(UsercodeAudience.apply)
-        case (_, components) => components.map(_.name).flatMap(ComponentParameter.unapply)
+        case ("Usercode", components) => Seq(UsercodesAudience(components.flatMap(_.value).map(Usercode)))
+        case (_, components) => components.map(c =>
+          if (c.value.isDefined) s"${c.name}:${c.value.get}"
+          else c.name
+        ).flatMap(ComponentParameter.unapply)
       }
       case (Some(deptCode), components) =>
         val subsets = components.map(_.name).map {
@@ -112,7 +116,7 @@ class AudienceDaoImpl extends AudienceDao {
       case SeminarGroupAudience(groupId) => Seq(AudienceComponentSave("SeminarGroup", Some(groupId), None))
       case RelationshipAudience(relationshipType, agentId) => Seq(AudienceComponentSave.fromCompoundValue("Relationship", Seq(relationshipType, agentId.string), None))
       case WebGroupAudience(group) => Seq(AudienceComponentSave("WebGroup", Some(group.string), None))
-      case UsercodeAudience(usercode) => Seq(AudienceComponentSave("Usercode", Some(usercode.string), None))
+      case UsercodesAudience(usercodes) => usercodes.flatMap(usercode => Seq(AudienceComponentSave("Usercode", Some(usercode.string), None)))
       case optIn: OptIn => Seq(AudienceComponentSave(s"OptIn:${optIn.optInType}", Some(optIn.optInValue), None))
     }
 

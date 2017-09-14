@@ -17,7 +17,10 @@ object Audience {
   val Public = Audience(Seq(PublicAudience))
 
   def usercodes(usercodes: Seq[Usercode]): Audience = {
-    Audience(usercodes.map(UsercodeAudience))
+    Audience(usercodes match {
+      case _::_ => Seq(UsercodesAudience(usercodes))
+      case _ => Nil
+    })
   }
 
   def usercode(usercode: Usercode): Audience = {
@@ -30,27 +33,49 @@ object Audience {
 
   // Pieces of audience
   sealed trait Component extends EnumEntry
+
   // Pieces of department
-  sealed trait DepartmentSubset extends Component
+  sealed trait DepartmentSubset extends Component {
+    val displayName: String = toString
+  }
 
   case object PublicAudience extends Component
 
-  case class UsercodeAudience(usercode: Usercode) extends Component
+  case class UsercodesAudience(usercodes: Seq[Usercode]) extends Component
 
-  case class WebGroupAudience(groupName: GroupName) extends Component  // No longer available in Audience Picker UI
+  case class WebGroupAudience(groupName: GroupName) extends Component // No longer available in Audience Picker UI
 
   case class ModuleAudience(moduleCode: String) extends Component
+
   case class SeminarGroupAudience(groupId: String) extends Component
+
   case class RelationshipAudience(relationshipType: String, agentId: UniversityID) extends Component
+
   case class DepartmentAudience(deptCode: String, subset: Seq[DepartmentSubset]) extends Component
 
   case object All extends DepartmentSubset
+
   case object Staff extends DepartmentSubset // No longer available in Audience Picker UI
-  case object TeachingStaff extends DepartmentSubset
-  case object AdminStaff extends DepartmentSubset
-  case object UndergradStudents extends DepartmentSubset
-  case object TaughtPostgrads extends DepartmentSubset
-  case object ResearchPostgrads extends DepartmentSubset
+
+  case object TeachingStaff extends DepartmentSubset {
+    override val displayName = "Teaching Staff"
+  }
+
+  case object AdminStaff extends DepartmentSubset {
+    override val displayName = "Administrative Staff"
+  }
+
+  case object UndergradStudents extends DepartmentSubset {
+    override val displayName = "Undergraduates"
+  }
+
+  case object TaughtPostgrads extends DepartmentSubset {
+    override val displayName = "Taught Postgraduates"
+  }
+
+  case object ResearchPostgrads extends DepartmentSubset {
+    override val displayName = "Research Postgraduates"
+  }
 
   sealed abstract class OptIn(val optInType: String, val optInValue: String, val description: String) extends Component
 
@@ -60,9 +85,13 @@ object Audience {
     val optInType = "Location"
 
     case object CentralCampusResidences extends LocationOptIn("CentralCampusResidences", "Central campus residences")
+
     case object WestwoodResidences extends LocationOptIn("WestwoodResidences", "Westwood residences")
+
     case object Coventry extends LocationOptIn("Coventry", "Coventry")
+
     case object Kenilworth extends LocationOptIn("Kenilworth", "Kenilworth")
+
     case object LeamingtonSpa extends LocationOptIn("LeamingtonSpa", "Leamington Spa")
 
     def values = Seq(CentralCampusResidences, WestwoodResidences, Coventry, Kenilworth, LeamingtonSpa)
@@ -89,6 +118,16 @@ object Audience {
       case seminarGroupRegex(groupId) => Some(SeminarGroupAudience(groupId))
       case relationshipRegex(relationshipType, agentId) => Some(RelationshipAudience(relationshipType, UniversityID(agentId)))
       case optInRegex(optInType, optInValue) if optInType == LocationOptIn.optInType => LocationOptIn.fromValue(optInValue)
+      case string if string.nonEmpty => {
+        val validUsercodes: Seq[Usercode] = string.split("\n").map(_.trim).flatMap { usercode =>
+          if(!usercode.contains(":")) Some(Usercode(usercode))
+          else None
+        }
+        if (validUsercodes.nonEmpty)
+          Some(UsercodesAudience(validUsercodes))
+        else
+          None
+      }
       case _ => None
     }
   }
@@ -100,4 +139,5 @@ object Audience {
       case _ => None
     }
   }
+
 }

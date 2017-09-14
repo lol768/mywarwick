@@ -1,6 +1,7 @@
 @import models.publishing.PermissionScope
-@import models.Audience.WebGroupAudience
-@import models.Audience.LocationOptIn
+@import play.api.libs.json.{Json, JsValue}
+@import models.Audience._
+
 @(
     form: Form[_],
     fieldName: String,
@@ -8,88 +9,21 @@
     itemName: String,
     permissionScope: PermissionScope,
     allowPublic: Boolean,
-    audience: Audience
+    audience: Audience,
+    audienceJson: JsValue = Json.obj()
 )(implicit fc: b3.B3FieldConstructor, messages: Messages)
-@defining((s"$fieldName.audience", s"$fieldName.department")) { case (audienceField, departmentField) =>
+@* TODO receive list of allowed audiences from controller - each user's will be different *@
 
-    @* TODO make less of a UI nightmare *@
-    @* TODO receive list of allowed audiences from controller - each user's will be different *@
-    @b3.multifieldFormGroup(
-      Seq(form(fieldName), form(audienceField), form(departmentField)),
-      Seq('_label -> s"Who is this $itemName for?", 'id -> "item_audience"),
-      Nil) { info =>
-
-      <div class="audience-picker">
-
-        @for((msg, i) <- info.errorsAndInfos.zipWithIndex) { <span class="help-block" id="item_audience_error_@i">@msg</span> }
-
-        @if(permissionScope == PermissionScope.AllDepartments) {
-          @if(allowPublic) {
-            @tags.seqCheckbox(form, audienceField, 'id -> "public", '_text -> "Everyone (public)", 'value -> "Public")
-          }
-
-          @tags.seqCheckbox(form, audienceField, 'id -> "staff", '_text -> "All staff", 'value -> "Staff")
-          @tags.seqCheckbox(form, audienceField, 'id -> "teaching", '_text -> "Teaching staff", 'value -> "TeachingStaff")
-          @tags.seqCheckbox(form, audienceField, 'id -> "ug", '_text -> "Undergraduates", 'value -> "UndergradStudents")
-          @tags.seqCheckbox(form, audienceField, 'id -> "pgt", '_text -> "PG Taught", 'value -> "TaughtPostgrads")
-          @tags.seqCheckbox(form, audienceField, 'id -> "pgr", '_text -> "PG Research", 'value -> "ResearchPostgrads")
-        }
-
-        @defining(audience.components.filter(_.isInstanceOf[WebGroupAudience]).map(_.asInstanceOf[WebGroupAudience])) { webGroupComponents =>
-          @if(webGroupComponents.nonEmpty) {
-             @webGroupComponents.map { component =>
-               @tags.seqCheckbox(form, audienceField, '_text -> "Members of a WebGroup", 'value -> s"WebGroup:${component.groupName.string}")
-               <input type="text" class="form-control group-picker" autocomplete="no" value="@component.groupName.string">
-             }
-          } else {
-            @tags.seqCheckbox(form, audienceField, '_text -> "Members of a WebGroup", 'value -> "WebGroup:")
-            <input type="text" class="form-control group-picker" autocomplete="no">
-          }
-        }
-
-        <hr>
-
-        @if(departmentOptions.size == 1) {
-          @b3.static(){ @departmentOptions.head._2 }(b3.clear.fieldConstructorSpecific)
-          @b3.hidden(departmentField, departmentOptions.head._1)
-        } else {
-          @b3.select(form(departmentField), departmentOptions,
-            '_text -> "Department",
-            '_default -> "",
-            Symbol("data-select") -> "department"
-          )(b3.clear.fieldConstructorSpecific, messages)
-        }
-
-        <div class="row">
-          <div class="col-xs-11 col-xs-offset-1">
-            @tags.seqCheckbox(form, audienceField, 'id -> "dept-all", '_text -> "Everyone", 'value -> "Dept:All")
-            @tags.seqCheckbox(form, audienceField, 'id -> "dept-staff", '_text -> "All staff", 'value -> "Dept:Staff")
-            @tags.seqCheckbox(form, audienceField, 'id -> "dept-teaching", '_text -> "Teaching staff", 'value -> "Dept:TeachingStaff")
-            @tags.seqCheckbox(form, audienceField, 'id -> "dept-ug", '_text -> "Undergraduates", 'value -> "Dept:UndergradStudents")
-            @tags.seqCheckbox(form, audienceField, 'id -> "dept-pgt", '_text -> "PG Taught", 'value -> "Dept:TaughtPostgrads")
-            @tags.seqCheckbox(form, audienceField, 'id -> "dept-pgr", '_text -> "PG Research", 'value -> "Dept:ResearchPostgrads")
-          </div>
-        </div>
-
-      </div>
-    }
-
-  <div class="audience-picker-extra">
-    @b3.multifieldFormGroup(
-      Seq(form(audienceField)),
-      Seq(
-        '_label -> Html(
-            "Where are they located? (opt-in "
-             + "<i class=\"fa fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"left\" "
-             + "title=\"Users can select one or more locations to receive %ss, or may choose not to specify any.\"></i>)".format(itemName)
-            ),
-        'id -> "item_audience_opt_in_location"),
-      Nil) { info =>
-
-        @for(location <- LocationOptIn.values) {
-          @tags.seqCheckbox(form, audienceField, 'id -> s"optIn-location-${location.value}", '_text -> location.description, 'value -> s"OptIn:${location.optInType}:${location.value}")
-        }
-
-    }
+@defining(Seq(TeachingStaff, AdminStaff, UndergradStudents, TaughtPostgrads, ResearchPostgrads)) { deptSubsets =>
+  <div
+  data-is-god="@(permissionScope == PermissionScope.AllDepartments)"
+  data-form-data='@audienceJson'
+  data-errors='@form.errorsAsJson'
+  data-location-opts='@Json.obj(LocationOptIn.values.map(loc => loc.value -> Json.toJsFieldJsValueWrapper(loc.description)): _*)'
+  data-dept-subset-opts='@Json.obj(deptSubsets.map(ds => ds.toString -> Json.toJsFieldJsValueWrapper(ds.displayName)):_*)'
+  data-departments='@Json.obj(departmentOptions.map { case (code, name) => code -> Json.toJsFieldJsValueWrapper(name) }: _*)'
+  class="audience-picker" class="form-group col-md-12">
   </div>
 }
+
+

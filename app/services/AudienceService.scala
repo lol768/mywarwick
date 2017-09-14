@@ -4,20 +4,27 @@ import javax.inject.{Inject, Named}
 
 import com.google.inject.ImplementedBy
 import models.Audience
-import models.Audience._
+import models.Audience.{LocationOptIn, _}
 import play.api.db.Database
-import services.dao.{AudienceDao, AudienceLookupDao, UserNewsOptInDao}
-import system.Logging
-import warwick.sso.{GroupName, GroupService, Usercode}
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.Request
+import services.dao._
+import system.{AuditLogContext, Logging}
+import warwick.sso._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
   def resolve(audience: Audience): Try[Seq[Usercode]]
+
   def getAudience(audienceId: String): Audience
+
+  def audienceToJson(audience: Audience): JsValue
+
+  def validateUsercodes(usercodes: Seq[Usercode]): Seq[Usercode]
 }
 
 class AudienceServiceImpl @Inject()(
@@ -25,7 +32,8 @@ class AudienceServiceImpl @Inject()(
   dao: AudienceDao,
   optInDao: UserNewsOptInDao,
   @Named("tabula") audienceLookupDao: AudienceLookupDao,
-  db: Database
+  db: Database,
+  userLookupService: UserLookupService
 ) extends AudienceService with Logging {
 
   import system.ThreadPools.externalData
@@ -51,7 +59,7 @@ class AudienceServiceImpl @Inject()(
       case ModuleAudience(code) => audienceLookupDao.resolveModule(code)
       case SeminarGroupAudience(groupId) => audienceLookupDao.resolveSeminarGroup(groupId)
       case RelationshipAudience(relationshipType, agentId) => audienceLookupDao.resolveRelationship(agentId, relationshipType)
-      case UsercodeAudience(usercode) => Future.successful(Seq(usercode))
+      case UsercodesAudience(usercodes) => Future.successful(usercodes)
       case optIn: OptIn => Future.successful(Nil) // Handled below
     }).map(_.flatten.toSet)
 
@@ -116,4 +124,117 @@ class AudienceServiceImpl @Inject()(
 
   override def getAudience(audienceId: String): Audience =
     db.withConnection(implicit c => dao.getAudience(audienceId))
+
+
+  override def audienceToJson(audience: Audience): JsValue = {
+
+    def resolveStaffRelationship(agentId: UniversityID, checkedRelationships: Seq[String]): Future[JsValue] = {
+      audienceLookupDao.findRelationships(agentId).map { rel =>
+        Json.obj(
+          "value" -> agentId.string,
+          "text" -> userLookupService.getUsers(Seq(agentId)).get.get(agentId).map {
+            case u: User =>
+              s"${u.name.full.getOrElse("")} ${if (u.department.isDefined) s"(${u.department.get.name.get})"}"
+            case _ => ""
+          },
+          "options" -> rel.map {
+            case (r: LookupRelationshipType, users: Seq[User]) => Json.obj(
+              r.id -> Json.obj(
+                "agentRole" -> r.agentRole,
+                "studentRole" -> r.studentRole,
+                "students" -> users.map(_.name.full),
+                "selected" -> checkedRelationships.contains(r.id)
+              )
+            )
+          }
+        )
+      }
+    }
+
+    var department: String = ""
+    var departmentSubsets: Seq[String] = Seq.empty[String]
+    var listOfUsercodes: Seq[String] = Seq.empty[String]
+    var modules: Seq[JsValue] = Seq.empty[JsValue]
+    var seminarGroups: Seq[JsValue] = Seq.empty[JsValue]
+    var locations: Seq[String] = Seq.empty[String]
+    var staffRelationships: Map[UniversityID, Seq[String]] = Map[UniversityID, Seq[String]]()
+
+    audience.components.foreach {
+      case ds: DepartmentSubset => departmentSubsets :+= ds.toString
+      case DepartmentAudience(code, subsets) => {
+        department = code
+        departmentSubsets ++= subsets.map(set => s"Dept:${set.toString}")
+      }
+      case ModuleAudience(code) =>
+        modules ++= Await.result(audienceLookupDao.findModules(code.trim), 5.seconds).map { m =>
+           Json.obj(
+            "value" -> m.code.toUpperCase,
+            "text" -> s"${m.code.toUpperCase}: ${m.name}"
+          )
+        }
+      case SeminarGroupAudience(groupId) =>
+        seminarGroups ++= Await.result(audienceLookupDao.getSeminarGroupById(groupId.trim), 5.seconds).map { group =>
+            Json.obj(
+              "value" -> groupId,
+              "text" -> s"${group.name}"//: ${group.groupSetName}"
+            )
+        }
+      case RelationshipAudience(relationshipType, agentId) =>
+        staffRelationships += agentId -> (staffRelationships.getOrElse(agentId, Seq.empty[String]) :+ relationshipType)
+      case UsercodesAudience(usercodes) => listOfUsercodes ++= usercodes.map(_.string)
+      case optIn: OptIn if optIn.optInType == LocationOptIn.optInType => locations :+= optIn.optInValue
+      case _ => Nil
+    }
+
+    val audienceType =
+      if (department.isEmpty)
+        "universityWide"
+      else "department"
+
+    val locationsJson =
+      if (locations.nonEmpty) Json.obj("locations" -> Json.obj("yesLocation" ->
+        Json.obj(locations.map(l => l -> Json.toJsFieldJsValueWrapper("undefined")):_*)))
+      else Json.obj()
+
+    val staffRelationshipJson =
+      if (staffRelationships.nonEmpty)
+        Json.obj("staffRelationships" ->
+          staffRelationships.map { case (k, v) =>
+            Await.result(resolveStaffRelationship(k, v), 5.second)
+          }.toSeq
+        )
+      else Json.obj()
+
+    val seminarGroupsJson =
+      if (seminarGroups.nonEmpty)
+        Json.obj("seminarGroups" -> seminarGroups)
+      else Json.obj()
+
+    val modulesJson =
+      if (modules.nonEmpty)
+        Json.obj("modules" -> modules)
+      else Json.obj()
+
+    val listOfUsercodesJson =
+      if (listOfUsercodes.nonEmpty)
+        Json.obj("listOfUsercodes" -> listOfUsercodes)
+      else Json.obj()
+
+    Json.obj(
+      "department" -> department,
+      "audience" -> Json.obj(
+        audienceType -> Json.obj(
+          "groups" -> (Json.obj(
+            departmentSubsets.map(_ -> Json.toJsFieldJsValueWrapper("undefined")): _*
+          ) ++ staffRelationshipJson ++ seminarGroupsJson ++ modulesJson ++ listOfUsercodesJson)
+        )
+      )
+    ) ++ locationsJson
+  }
+
+  override def validateUsercodes(usercodes: Seq[Usercode]): Seq[Usercode] =
+    userLookupService.getUsers(usercodes) match {
+      case Success(users) => users.keys.toSeq
+      case Failure(_) => Seq.empty[Usercode]
+    }
 }

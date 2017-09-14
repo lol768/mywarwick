@@ -18,7 +18,8 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
     val audienceDao: AudienceDao = mock[AudienceDao]
     val newsOptInDao: UserNewsOptInDao = mock[UserNewsOptInDao]
     val audienceLookupDao: AudienceLookupDao = mock[AudienceLookupDao]
-    val service = new AudienceServiceImpl(webgroups, audienceDao, newsOptInDao, audienceLookupDao, new MockDatabase)
+    val userLookup: UserLookupService = mock[UserLookupService]
+    val service = new AudienceServiceImpl(webgroups, audienceDao, newsOptInDao, audienceLookupDao, new MockDatabase, userLookup)
 
 
     def webgroupsIsEmpty(): Unit = {
@@ -228,9 +229,7 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       ))
 
       val users: Seq[Usercode] = service.resolve(Audience(Seq(
-        UsercodeAudience(Usercode("cusfal")),
-        UsercodeAudience(Usercode("cusebr")),
-        UsercodeAudience(Usercode("cusaab")),
+        UsercodesAudience(Seq(Usercode("cusfal"), Usercode("cusebr"), Usercode("cusaab"))),
         LocationOptIn.CentralCampusResidences
       ))).get
 

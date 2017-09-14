@@ -16,7 +16,7 @@ import scala.concurrent.Future
   * For converting bits of a raw request Form into an actual Audience.
   */
 @Singleton
-class AudienceBinder @Inject() (
+class AudienceBinder @Inject()(
   departments: DepartmentInfoDao,
   audienceService: AudienceService
 ) {
@@ -41,7 +41,7 @@ class AudienceBinder @Inject() (
       val groupedComponents = data.audience.groupBy(_.startsWith("Dept:"))
 
       // Bits of audience not related to a department.
-      val globalComponents = groupedComponents.getOrElse(false, Nil).flatMap {
+      val nonDeptComponents = groupedComponents.getOrElse(false, Nil).flatMap {
         case Audience.ComponentParameter(component) => Some(component)
 
         // Don't error for a blank audience such as "WebGroup:"
@@ -49,6 +49,19 @@ class AudienceBinder @Inject() (
         case unrecognised =>
           errors :+= FormError("audience", "error.audience.invalid", Seq(unrecognised))
           None
+      }
+
+      val globalComponents = nonDeptComponents.flatMap {
+        case UsercodesAudience(usercodes) => {
+          val invalidUsercodes = usercodes.diff(audienceService.validateUsercodes(usercodes))
+          if (invalidUsercodes.isEmpty)
+            Some(UsercodesAudience(usercodes))
+          else {
+            errors :+= FormError("audience", "error.audience.usercodes.invalid", Seq(invalidUsercodes.map(_.string).mkString(", ")))
+            None
+          }
+        }
+        case component: Audience.Component => Some(component)
       }
 
       val deptComponentValues = groupedComponents.getOrElse(true, Nil)
@@ -114,6 +127,7 @@ class AudienceBinder @Inject() (
         case ModuleAudience(moduleCode) => Seq(s"Module:$moduleCode")
         case SeminarGroupAudience(groupId) => Seq(s"SeminarGroup:$groupId")
         case RelationshipAudience(relationshipType, agentId) => Seq(s"Relationship:$relationshipType:${agentId.string}")
+        case UsercodesAudience(usercodes) => usercodes.map(_.string)
         case component: Component => Seq(component.entryName)
         case _ => Seq.empty
       }

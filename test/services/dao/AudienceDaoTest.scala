@@ -80,8 +80,7 @@ class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
       val audience = audienceDao.audienceFromComponents(components)
 
       audience mustBe Audience(Seq(
-        Audience.UsercodeAudience(Usercode("a")),
-        Audience.UsercodeAudience(Usercode("b"))
+        Audience.UsercodesAudience(Seq(Usercode("a"), Usercode("b")))
       ))
     }
 
