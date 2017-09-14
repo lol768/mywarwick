@@ -24,16 +24,15 @@ export default class HiddenTile extends React.PureComponent {
     const { icon, title, colour } = this.props;
 
     return (
-      <div className="tile__container">
+      <div
+        className="tile__container"
+        onClick={ this.onShow }
+        onKeyUp={ this.onShow }
+        role="button"
+        tabIndex={0}
+      >
         <article className={`tile tile--hidden tile--editing tile--small colour-${colour}`}>
-          <div
-            className="tile__edit-control top-left"
-            title={ `Show ${title}` }
-            onClick={ this.onShow }
-            onKeyUp={ this.onShow }
-            role="button"
-            tabIndex={0}
-          >
+          <div className="tile__edit-control top-left" title={ `Show ${title}` }>
             <i className="fa fa-plus" />
           </div>
 
