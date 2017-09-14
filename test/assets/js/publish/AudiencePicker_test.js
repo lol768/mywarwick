@@ -6,6 +6,9 @@ import _ from 'lodash-es';
 
 describe('AudiencePicker', () => {
 
+  const deptSubsetOpts = {'TeachingStaff':'Teaching Staff','AdminStaff':'Administrative Staff','UndergradStudents':'Undergraduates','TaughtPostgrads':'Taught Postgraduates','ResearchPostgrads':'Research Postgraduates'};
+  const locationOpts = {'CentralCampusResidences':'Central campus residences','WestwoodResidences':'Westwood residences','Coventry':'Coventry','Kenilworth':'Kenilworth','LeamingtonSpa':'Leamington Spa'};
+
   it('shows single \'hidden\' input if single department', () => {
     const props = {
       isGod: false,
@@ -112,6 +115,8 @@ describe('AudiencePicker', () => {
         FU: 'Fun Department',
         MU: 'Agriculture Department',
       },
+      deptSubsetOpts,
+      locationOpts,
     };
 
     const html = enzyme.render(<form><AudiencePicker {...props} /></form>);
@@ -122,7 +127,7 @@ describe('AudiencePicker', () => {
       , []);
 
     const expectedAudienceValues = [
-      'cusjau, u1234567',
+      'cusjau\r\nu1234567',
       'Relationship:supervisor:1234567',
       'SeminarGroup:12d779c3-aafd-4883-9c1d-cacfdba37974',
       'Module:CS118',
@@ -140,6 +145,8 @@ describe('AudiencePicker', () => {
       departments: {
         MU: 'Agriculture Department',
       },
+      deptSubsetOpts,
+      locationOpts,
     };
 
     const mounted = enzyme.mount(<AudiencePicker {...props} />);
