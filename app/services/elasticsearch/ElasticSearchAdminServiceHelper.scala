@@ -9,7 +9,7 @@ import org.elasticsearch.client.{Response, ResponseListener, RestClient}
 import org.jdom.IllegalDataException
 import play.api.libs.json.{JsValue, Json}
 import warwick.core.Logging
-
+import collection.JavaConverters._
 import scala.concurrent.{Future, Promise}
 
 trait ElasticSearchAdminServiceHelper extends Logging {
@@ -46,14 +46,14 @@ trait ElasticSearchAdminServiceHelper extends Logging {
     method: String,
     path: String,
     lowLevelClient: RestClient,
-    suppliedParam: Option[util.Map[String, String]] = None,
+    suppliedParam: Option[Map[String, String]] = None,
     entity: Option[NStringEntity] = None,
     suppliedResponseListener: Option[(Promise[Response]) => ResponseListener] = None
   ): Future[Response] = {
 
     val responsePromise: Promise[Response] = Promise[Response]
 
-    val param = suppliedParam.getOrElse(emptyParam)
+    val param = suppliedParam.getOrElse(Map()).asJava
 
     val responseListener = suppliedResponseListener.getOrElse(this.responseListener)(responsePromise)
 
