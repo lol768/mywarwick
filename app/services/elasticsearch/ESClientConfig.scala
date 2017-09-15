@@ -31,10 +31,8 @@ class ESClientConfigImpl @Inject()(
     })
 
   override def newClient: RestHighLevelClient = {
-    val allHttpHosts = this.nodes.map(node => new HttpHost(node.node, node.port, node.protocol))
-    val javaArray = new Array[HttpHost](allHttpHosts.size)
-    allHttpHosts.foreach(host => javaArray(allHttpHosts.indexOf(host)) = host)
-    new RestHighLevelClient(RestClient.builder(javaArray: _*))
+    val allHttpHosts: Seq[HttpHost] = this.nodes.map(node => new HttpHost(node.node, node.port, node.protocol))
+    new RestHighLevelClient(RestClient.builder(allHttpHosts.toArray: _*))
   }
 }
 
