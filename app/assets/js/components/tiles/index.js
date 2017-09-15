@@ -9,3 +9,4 @@ export { default as traffic } from './traffic/TrafficTile';
 export { default as map } from './MapTile';
 export { default as workarea } from './WorkareaTile';
 export { default as account } from './AccountTile';
+export { default as mail } from './MailTile';

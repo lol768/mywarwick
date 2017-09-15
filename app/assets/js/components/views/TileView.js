@@ -110,6 +110,7 @@ class TileView extends React.PureComponent {
       zoomed,
       size,
       user,
+      preferences: tile.preferences,
     };
 
     const tileElement = (
