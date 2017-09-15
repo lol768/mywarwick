@@ -14,7 +14,7 @@ import scala.concurrent.{Future, Promise}
 
 trait ElasticSearchAdminServiceHelper extends Logging {
 
-  val templateRootPath = "_template"
+  val templateRootPath = "/_template"
 
   object Method {
     val put = "PUT"
