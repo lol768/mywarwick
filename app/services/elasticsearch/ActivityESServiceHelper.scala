@@ -92,51 +92,34 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 
     val rootBoolQuery: BoolQueryBuilder = new BoolQueryBuilder()
 
-    for (activity_id <- activityESSearchQuery.activity_id) {
-      rootBoolQuery.must(QueryBuilders.termQuery(ESFieldName.activity_id, hyphenToUnderscore(activity_id)))
-    }
+    import QueryBuilders._
+    import ESFieldName._
 
-    for (provider_id <- activityESSearchQuery.provider_id) {
-      rootBoolQuery.must(QueryBuilders.termQuery(ESFieldName.provider_id, hyphenToUnderscore(provider_id)))
-    }
+    for (v <- activityESSearchQuery.activity_id) rootBoolQuery.must(termQuery(activity_id, hyphenToUnderscore(v)))
 
-    for (activity_type <- activityESSearchQuery.activity_type) {
-      rootBoolQuery.must(QueryBuilders.termQuery(ESFieldName.activity_type, hyphenToUnderscore(activity_type)))
-    }
+    for (v <- activityESSearchQuery.provider_id) rootBoolQuery.must(termQuery(provider_id, hyphenToUnderscore(v)))
 
-    for (dateRange <- activityESSearchQuery.publish_at) {
-      rootBoolQuery.must(QueryBuilders.rangeQuery(ESFieldName.published_at).gte(dateRange.from.toString()).lte(dateRange.to.toString()))
-    }
+    for (v <- activityESSearchQuery.activity_type) rootBoolQuery.must(termQuery(activity_type, hyphenToUnderscore(v)))
 
-    for (publisher <- activityESSearchQuery.publisher) {
-      rootBoolQuery.must(QueryBuilders.termQuery(ESFieldName.publisher, hyphenToUnderscore(publisher)))
-    }
+    for (v <- activityESSearchQuery.publish_at) rootBoolQuery.must(rangeQuery(published_at).gte(v.from.toString()).lte(v.to.toString()))
 
-    for (text <- activityESSearchQuery.text) {
-      rootBoolQuery.must(QueryBuilders.matchQuery(ESFieldName.text, text))
-    }
+    for (v <- activityESSearchQuery.publisher) rootBoolQuery.must(termQuery(publisher, hyphenToUnderscore(v)))
 
-    for (title <- activityESSearchQuery.title) {
-      rootBoolQuery.must(QueryBuilders.matchQuery(ESFieldName.title, title))
-    }
+    for (v <- activityESSearchQuery.text) rootBoolQuery.must(matchQuery(text, v))
 
-    for (url <- activityESSearchQuery.url) {
-      rootBoolQuery.must(QueryBuilders.termQuery(ESFieldName.url, url))
-    }
+    for (v <- activityESSearchQuery.title) rootBoolQuery.must(matchQuery(title, v))
 
-    for (audienceComponents <- activityESSearchQuery.audienceComponents) {
+    for (v <- activityESSearchQuery.url) rootBoolQuery.must(termQuery(url, v))
+
+    for (v <- activityESSearchQuery.audienceComponents) {
       val componentBoolQueryBuilder: BoolQueryBuilder = new BoolQueryBuilder()
-      audienceComponents.foreach(component => {
-        componentBoolQueryBuilder.should(QueryBuilders.matchQuery(ESFieldName.audience_components, component))
-      })
+      v.foreach(component => componentBoolQueryBuilder.should(matchQuery(audience_components, component)))
       rootBoolQuery.must(componentBoolQueryBuilder)
     }
 
-    for (resolvedUsers <- activityESSearchQuery.resolvedUsers) {
+    for (v <- activityESSearchQuery.resolvedUsers) {
       val resolvedUsersBoolQueryBuilder: BoolQueryBuilder = new BoolQueryBuilder()
-      resolvedUsers.foreach(resolvedUser => {
-        resolvedUsersBoolQueryBuilder.should(QueryBuilders.termQuery(ESFieldName.resolved_users, resolvedUser))
-      })
+      v.foreach(resolvedUser => resolvedUsersBoolQueryBuilder.should(termQuery(resolved_users, resolvedUser)))
       rootBoolQuery.must(resolvedUsersBoolQueryBuilder)
     }
 
