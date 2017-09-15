@@ -103,7 +103,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
                 {
                   "term": {
                     "activity_id": {
-                      "value": "sdflsdkfj_sdflksdjf_1231",
+                      "value": "sdflsdkfj-sdflksdjf_1231",
                       "boost": 1
                     }
                   }
@@ -133,7 +133,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
                 {
                   "term": {
                     "provider_id": {
-                      "value": "super_provider_id_id",
+                      "value": "super-provider_id-id",
                       "boost": 1
                     }
                   }
@@ -161,7 +161,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
                 {
                   "term": {
                     "activity_type": {
-                      "value": "cool_activity_type",
+                      "value": "cool-activity-type",
                       "boost": 1
                     }
                   }
@@ -191,7 +191,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
                 {
                   "term": {
                     "publisher": {
-                      "value": "cool_publisher",
+                      "value": "cool-publisher",
                       "boost": 1
                     }
                   }
