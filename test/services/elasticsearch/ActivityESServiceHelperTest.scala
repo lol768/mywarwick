@@ -355,61 +355,69 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
         """
            {
              "bool": {
-               "should": [
+               "must": [
                  {
-                   "match": {
-                     "audience_components": {
-                       "query": "com1",
-                       "operator": "OR",
-                       "prefix_length": 0,
-                       "max_expansions": 50,
-                       "fuzzy_transpositions": true,
-                       "lenient": false,
-                       "zero_terms_query": "NONE",
-                       "boost": 1
-                     }
-                   }
-                 },
-                 {
-                   "match": {
-                     "audience_components": {
-                       "query": "com2",
-                       "operator": "OR",
-                       "prefix_length": 0,
-                       "max_expansions": 50,
-                       "fuzzy_transpositions": true,
-                       "lenient": false,
-                       "zero_terms_query": "NONE",
-                       "boost": 1
-                     }
-                   }
-                 },
-                 {
-                   "match": {
-                     "audience_components": {
-                       "query": "com3",
-                       "operator": "OR",
-                       "prefix_length": 0,
-                       "max_expansions": 50,
-                       "fuzzy_transpositions": true,
-                       "lenient": false,
-                       "zero_terms_query": "NONE",
-                       "boost": 1
-                     }
-                   }
-                 },
-                 {
-                   "match": {
-                     "audience_components": {
-                       "query": "wat",
-                       "operator": "OR",
-                       "prefix_length": 0,
-                       "max_expansions": 50,
-                       "fuzzy_transpositions": true,
-                       "lenient": false,
-                       "zero_terms_query": "NONE",
-                       "boost": 1
-                     }
+                   "bool": {
+                     "should": [
+                       {
+                         "match": {
+                           "audience_components": {
+                             "query": "com1",
+                             "operator": "OR",
+                             "prefix_length": 0,
+                             "max_expansions": 50,
+                             "fuzzy_transpositions": true,
+                             "lenient": false,
+                             "zero_terms_query": "NONE",
+                             "boost": 1
+                           }
+                         }
+                       },
+                       {
+                         "match": {
+                           "audience_components": {
+                             "query": "com2",
+                             "operator": "OR",
+                             "prefix_length": 0,
+                             "max_expansions": 50,
+                             "fuzzy_transpositions": true,
+                             "lenient": false,
+                             "zero_terms_query": "NONE",
+                             "boost": 1
+                           }
+                         }
+                       },
+                       {
+                         "match": {
+                           "audience_components": {
+                             "query": "com3",
+                             "operator": "OR",
+                             "prefix_length": 0,
+                             "max_expansions": 50,
+                             "fuzzy_transpositions": true,
+                             "lenient": false,
+                             "zero_terms_query": "NONE",
+                             "boost": 1
+                           }
+                         }
+                       },
+                       {
+                         "match": {
+                           "audience_components": {
+                             "query": "wat",
+                             "operator": "OR",
+                             "prefix_length": 0,
+                             "max_expansions": 50,
+                             "fuzzy_transpositions": true,
+                             "lenient": false,
+                             "zero_terms_query": "NONE",
+                             "boost": 1
+                           }
+                         }
+                       }
+                     ],
+                     "adjust_pure_negative": true,
+                     "boost": 1
                    }
                  }
                ],
@@ -425,6 +433,8 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
     "should have multiple should term quieres for each usercode in resolved users" in new Scope {
 
       val query = ActivityESSearchQuery(
+        activity_id = Some("123456"),
+        publisher = Some("its"),
         resolvedUsers = Some(Seq("user1", "user2", "user3", "cat"))
       )
 
@@ -432,46 +442,70 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
       val expect = Json.parse(
         """
-           {
-             "bool": {
-               "should": [
-                 {
-                   "term": {
-                     "resolved_users": {
-                       "value": "user1",
-                       "boost": 1
-                     }
-                   }
-                 },
-                 {
-                   "term": {
-                     "resolved_users": {
-                       "value": "user2",
-                       "boost": 1
-                     }
-                   }
-                 },
-                 {
-                   "term": {
-                     "resolved_users": {
-                       "value": "user3",
-                       "boost": 1
-                     }
-                   }
-                 },
-                 {
-                   "term": {
-                     "resolved_users": {
-                       "value": "cat",
-                       "boost": 1
-                     }
-                   }
-                 }
-               ],
-               "adjust_pure_negative": true,
-               "boost": 1
-             }
-           }
+          {
+            "bool": {
+              "must": [
+                {
+                  "term": {
+                    "activity_id": {
+                      "value": "123456",
+                      "boost": 1
+                    }
+                  }
+                },
+                {
+                  "term": {
+                    "publisher": {
+                      "value": "its",
+                      "boost": 1
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "should": [
+                      {
+                        "term": {
+                          "resolved_users": {
+                            "value": "user1",
+                            "boost": 1
+                          }
+                        }
+                      },
+                      {
+                        "term": {
+                          "resolved_users": {
+                            "value": "user2",
+                            "boost": 1
+                          }
+                        }
+                      },
+                      {
+                        "term": {
+                          "resolved_users": {
+                            "value": "user3",
+                            "boost": 1
+                          }
+                        }
+                      },
+                      {
+                        "term": {
+                          "resolved_users": {
+                            "value": "cat",
+                            "boost": 1
+                          }
+                        }
+                      }
+                    ],
+                    "adjust_pure_negative": true,
+                    "boost": 1
+                  }
+                }
+              ],
+              "adjust_pure_negative": true,
+              "boost": 1
+            }
+          }
         """
       )
       Json.parse(result.toString()) must be(expect)
