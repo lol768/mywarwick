@@ -55,10 +55,7 @@ trait ElasticSearchAdminServiceHelper extends Logging {
 
     val param = suppliedParam.getOrElse(emptyParam)
 
-    implicit def getResponseListener(p: Option[(Promise[Response]) => ResponseListener]) = p match {
-      case Some(f) => f(responsePromise)
-      case _ => this.responseListener(responsePromise)
-    }
+    val responseListener = suppliedResponseListener.getOrElse(this.responseListener)(responsePromise)
 
     entity match {
       case Some(nStringEntity: NStringEntity) =>
@@ -67,14 +64,14 @@ trait ElasticSearchAdminServiceHelper extends Logging {
           path,
           param,
           nStringEntity,
-          suppliedResponseListener
+          responseListener
         )
       case _ =>
         lowLevelClient.performRequestAsync(
           method,
           path,
           param,
-          suppliedResponseListener
+          responseListener
         )
     }
     responsePromise.future
