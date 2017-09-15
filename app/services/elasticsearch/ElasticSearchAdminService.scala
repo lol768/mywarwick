@@ -11,13 +11,15 @@ import scala.concurrent.{Future}
 @ImplementedBy(classOf[ElasticSearchAdminServiceImpl])
 trait ElasticSearchAdminService {
 
-  def putTemplate(template: JsValue, name: String, suppliedLowLevelClient: Option[RestClient] = None): Future[Response]
+  def putTemplate(template: JsValue, name: String): Future[Response]
 
-  def deleteTemplate(name: String, suppliedLowLevelClient: Option[RestClient] = None): Future[Response]
+  def deleteTemplate(name: String): Future[Response]
 
-  def getTemplate(name: String, suppliedLowLevelClient: Option[RestClient] = None): Future[Response]
+  def getTemplate(name: String): Future[Response]
 
-  def hasTemplate(name: String, suppliedLowLevelClient: Option[RestClient] = None): Future[Response]
+  def getTemplates(): Future[Response]
+
+  def hasTemplate(name: String): Future[Response]
 
   //TODO other options that we need
 
@@ -28,7 +30,7 @@ class ElasticSearchAdminServiceImpl @Inject()(
   eSClientConfig: ESClientConfig
 ) extends ElasticSearchAdminService with ElasticSearchAdminServiceHelper {
 
-  lazy val lowLevelClient: RestClient = eSClientConfig.newClient.getLowLevelClient
+  val lowLevelClient: RestClient = eSClientConfig.newClient.getLowLevelClient
 
   implicit def getClient(client: Option[RestClient]): RestClient = client match {
     case Some(c: RestClient) => c
@@ -37,47 +39,47 @@ class ElasticSearchAdminServiceImpl @Inject()(
 
   override def putTemplate(
     template: JsValue,
-    name: String,
-    suppliedLowLevelClient: Option[RestClient] = None
+    name: String
   ): Future[Response] = {
     performRequestAsync(
       method = Method.get,
       path = s"$templateRootPath/$name",
       entity = Some(httpEntityFromJsValue(template)),
-      lowLevelClient = suppliedLowLevelClient
+      lowLevelClient = lowLevelClient
     )
   }
 
   override def deleteTemplate(
-    name: String,
-    suppliedLowLevelClient: Option[RestClient] = None
+    name: String
   ): Future[Response] = {
     performRequestAsync(
       method = Method.delete,
       path = s"$templateRootPath/$name",
-      lowLevelClient = suppliedLowLevelClient
+      lowLevelClient = lowLevelClient
     )
   }
 
   override def getTemplate(
-    name: String,
-    suppliedLowLevelClient: Option[RestClient] = None
+    name: String
   ): Future[Response] = {
     performRequestAsync(
       method = Method.get,
       path = s"$templateRootPath/$name",
-      lowLevelClient = suppliedLowLevelClient
+      lowLevelClient = lowLevelClient
     )
   }
 
+  override def getTemplates(): Future[Response] = {
+    getTemplate("")
+  }
+
   override def hasTemplate(
-    name: String,
-    suppliedLowLevelClient: Option[RestClient] = None
+    name: String
   ): Future[Response] = {
     performRequestAsync(
       method = Method.head,
       path = s"$templateRootPath/$name",
-      lowLevelClient = suppliedLowLevelClient
+      lowLevelClient = lowLevelClient
     )
   }
 }
