@@ -134,17 +134,21 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 
     activityESSearchQuery.audienceComponents match {
       case Some(components) =>
+        val componentBoolQueryBuilder: BoolQueryBuilder = new BoolQueryBuilder()
         components.foreach(component => {
-          boolQueryBuilder.should(QueryBuilders.matchQuery(ESFieldName.audience_components, component))
+          componentBoolQueryBuilder.should(QueryBuilders.matchQuery(ESFieldName.audience_components, component))
         })
+        boolQueryBuilder.must(componentBoolQueryBuilder)
       case _ =>
     }
 
     activityESSearchQuery.resolvedUsers match {
       case Some(resolvedUsers) =>
+        val resolvedUsersBoolQueryBuilder: BoolQueryBuilder = new BoolQueryBuilder()
         resolvedUsers.foreach(resolvedUser => {
-          boolQueryBuilder.should(QueryBuilders.termQuery(ESFieldName.resolved_users, resolvedUser))
+          resolvedUsersBoolQueryBuilder.should(QueryBuilders.termQuery(ESFieldName.resolved_users, resolvedUser))
         })
+        boolQueryBuilder.must(resolvedUsersBoolQueryBuilder)
       case _ =>
     }
     boolQueryBuilder
