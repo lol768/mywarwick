@@ -13,17 +13,17 @@ import warwick.sso.Usercode
 import scala.collection.JavaConverters._
 
 case class ActivityDocument(
-  activity_id: String = "-",
-  provider_id: String = "-",
-  activity_type: String = "-",
-  title: String = "-",
-  url: String = "-",
-  text: String = "-",
-  replaced_by: String = "-",
-  published_at: DateTime = new DateTime(0),
-  publisher: String = "-",
-  audienceComponents: Seq[String] = Seq("-"),
-  resolvedUsers: Seq[String] = Seq("-")
+  activity_id: String = null,
+  provider_id: String = null,
+  activity_type: String = null,
+  title: String = null,
+  url: String = null,
+  text: String = null,
+  replaced_by: String = null,
+  published_at: DateTime = null,
+  publisher: String = null,
+  audienceComponents: Seq[String] = null,
+  resolvedUsers: Seq[String] = null
 )
 
 object ActivityDocument {
@@ -33,21 +33,22 @@ object ActivityDocument {
     publisherService: PublisherService,
     resolvedUsers: Option[Seq[Usercode]] = None
   ): ActivityDocument = {
+
     ActivityDocument(
       activity.id,
       activity.providerId,
       activity.`type`,
       activity.title,
-      activity.url.getOrElse("-"),
-      activity.text.getOrElse("-"),
-      activity.replacedBy.getOrElse("-"),
+      activity.url.orNull,
+      activity.text.orNull,
+      activity.replacedBy.orNull,
       activity.publishedAt,
       serialisePublisher(activity.publisherId, publisherService),
       serialiseAudienceComponents(activity.audienceId, audienceService),
-      resolvedUsers match {
-        case e: Some[Seq[Usercode]] => e.getOrElse(Seq(Usercode("-"))).map(_.string)
+      resolvedUsers.map({
+        case result: Seq[Usercode] => result.map(_.string)
         case _ => serialiseResolvedUsers(activity.audienceId, audienceService)
-      }
+      }).orNull
     )
   }
 

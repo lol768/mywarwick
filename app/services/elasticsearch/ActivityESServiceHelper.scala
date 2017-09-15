@@ -28,8 +28,6 @@ trait ActivityESServiceHelper {
     val audience_components = "audience_components"
   }
 
-  def hyphenToUnderscore(in: String) = in.replace("-", "_")
-
   def indexNameToday(isNotification: Boolean = true, today: String = DateTime.now().toString("yyyy_MM")): String = {
     isNotification match {
       case true => s"$nameForAlert$separator$today"
@@ -49,22 +47,22 @@ trait ActivityESServiceHelper {
     val builder: XContentBuilder = jsonBuilder().startObject()
 
     builder
-      .field(ESFieldName.activity_id, hyphenToUnderscore(activityDocument.activity_id))
-      .field(ESFieldName.provider_id, hyphenToUnderscore(activityDocument.provider_id))
-      .field(ESFieldName.activity_type, hyphenToUnderscore(activityDocument.activity_type))
-      .field(ESFieldName.title, hyphenToUnderscore(activityDocument.title))
-      .field(ESFieldName.url, hyphenToUnderscore(activityDocument.url))
-      .field(ESFieldName.text, hyphenToUnderscore(activityDocument.text))
-      .field(ESFieldName.replaced_by, hyphenToUnderscore(activityDocument.replaced_by))
+      .field(ESFieldName.activity_id, activityDocument.activity_id)
+      .field(ESFieldName.provider_id, activityDocument.provider_id)
+      .field(ESFieldName.activity_type, activityDocument.activity_type)
+      .field(ESFieldName.title, activityDocument.title)
+      .field(ESFieldName.url, activityDocument.url)
+      .field(ESFieldName.text, activityDocument.text)
+      .field(ESFieldName.replaced_by, activityDocument.replaced_by)
       .field(ESFieldName.published_at, activityDocument.published_at.toDate)
-      .field(ESFieldName.publisher, hyphenToUnderscore(activityDocument.publisher))
+      .field(ESFieldName.publisher, activityDocument.publisher)
 
     builder.startArray(ESFieldName.resolved_users)
-    activityDocument.resolvedUsers.foreach(e => builder.value(hyphenToUnderscore(e)))
+    activityDocument.resolvedUsers.foreach(builder.value)
     builder.endArray()
 
     builder.startArray(ESFieldName.audience_components)
-    activityDocument.audienceComponents.foreach(e => builder.value(hyphenToUnderscore(e)))
+    activityDocument.audienceComponents.foreach(builder.value)
     builder.endArray()
 
     builder.endObject()
@@ -95,15 +93,15 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
     import QueryBuilders._
     import ESFieldName._
 
-    for (v <- activityESSearchQuery.activity_id) rootBoolQuery.must(termQuery(activity_id, hyphenToUnderscore(v)))
+    for (v <- activityESSearchQuery.activity_id) rootBoolQuery.must(termQuery(activity_id, v))
 
-    for (v <- activityESSearchQuery.provider_id) rootBoolQuery.must(termQuery(provider_id, hyphenToUnderscore(v)))
+    for (v <- activityESSearchQuery.provider_id) rootBoolQuery.must(termQuery(provider_id, v))
 
-    for (v <- activityESSearchQuery.activity_type) rootBoolQuery.must(termQuery(activity_type, hyphenToUnderscore(v)))
+    for (v <- activityESSearchQuery.activity_type) rootBoolQuery.must(termQuery(activity_type, v))
 
     for (v <- activityESSearchQuery.publish_at) rootBoolQuery.must(rangeQuery(published_at).gte(v.from.toString()).lte(v.to.toString()))
 
-    for (v <- activityESSearchQuery.publisher) rootBoolQuery.must(termQuery(publisher, hyphenToUnderscore(v)))
+    for (v <- activityESSearchQuery.publisher) rootBoolQuery.must(termQuery(publisher, v))
 
     for (v <- activityESSearchQuery.text) rootBoolQuery.must(matchQuery(text, v))
 
