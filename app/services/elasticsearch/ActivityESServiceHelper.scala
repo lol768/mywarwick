@@ -90,68 +90,57 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 
   def makeBoolQueryBuilder(activityESSearchQuery: ActivityESSearchQuery): BoolQueryBuilder = {
 
-    val boolQueryBuilder: BoolQueryBuilder = new BoolQueryBuilder()
+    val rootBoolQuery: BoolQueryBuilder = new BoolQueryBuilder()
 
-    activityESSearchQuery.activity_id match {
-      case Some(activity_id) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.activity_id, hyphenToUnderscore(activity_id)))
-      case _ =>
+    for (activity_id <- activityESSearchQuery.activity_id) {
+      rootBoolQuery.must(QueryBuilders.termQuery(ESFieldName.activity_id, hyphenToUnderscore(activity_id)))
     }
 
-    activityESSearchQuery.provider_id match {
-      case Some(provider_id) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.provider_id, hyphenToUnderscore(provider_id)))
-      case _ =>
+    for (provider_id <- activityESSearchQuery.provider_id) {
+      rootBoolQuery.must(QueryBuilders.termQuery(ESFieldName.provider_id, hyphenToUnderscore(provider_id)))
     }
 
-    activityESSearchQuery.activity_type match {
-      case Some(activity_type) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.activity_type, hyphenToUnderscore(activity_type)))
-      case _ =>
+    for (activity_type <- activityESSearchQuery.activity_type) {
+      rootBoolQuery.must(QueryBuilders.termQuery(ESFieldName.activity_type, hyphenToUnderscore(activity_type)))
     }
 
-    activityESSearchQuery.publish_at match {
-      case Some(dateRange) => boolQueryBuilder.must(QueryBuilders.rangeQuery(ESFieldName.published_at).gte(dateRange.from.toString()).lte(dateRange.to.toString()))
-      case _ =>
+    for (dateRange <- activityESSearchQuery.publish_at) {
+      rootBoolQuery.must(QueryBuilders.rangeQuery(ESFieldName.published_at).gte(dateRange.from.toString()).lte(dateRange.to.toString()))
     }
 
-    activityESSearchQuery.publisher match {
-      case Some(publisher) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.publisher, hyphenToUnderscore(publisher)))
-      case _ =>
+    for (publisher <- activityESSearchQuery.publisher) {
+      rootBoolQuery.must(QueryBuilders.termQuery(ESFieldName.publisher, hyphenToUnderscore(publisher)))
     }
 
-    activityESSearchQuery.text match {
-      case Some(text) => boolQueryBuilder.must(QueryBuilders.matchQuery(ESFieldName.text, text))
-      case _ =>
+    for (text <- activityESSearchQuery.text) {
+      rootBoolQuery.must(QueryBuilders.matchQuery(ESFieldName.text, text))
     }
 
-    activityESSearchQuery.title match {
-      case Some(title) => boolQueryBuilder.must(QueryBuilders.matchQuery(ESFieldName.title, title))
-      case _ =>
+    for (title <- activityESSearchQuery.title) {
+      rootBoolQuery.must(QueryBuilders.matchQuery(ESFieldName.title, title))
     }
 
-    activityESSearchQuery.url match {
-      case Some(url) => boolQueryBuilder.must(QueryBuilders.termQuery(ESFieldName.url, url))
-      case _ =>
+    for (url <- activityESSearchQuery.url) {
+      rootBoolQuery.must(QueryBuilders.termQuery(ESFieldName.url, url))
     }
 
-    activityESSearchQuery.audienceComponents match {
-      case Some(components) =>
-        val componentBoolQueryBuilder: BoolQueryBuilder = new BoolQueryBuilder()
-        components.foreach(component => {
-          componentBoolQueryBuilder.should(QueryBuilders.matchQuery(ESFieldName.audience_components, component))
-        })
-        boolQueryBuilder.must(componentBoolQueryBuilder)
-      case _ =>
+    for (audienceComponents <- activityESSearchQuery.audienceComponents) {
+      val componentBoolQueryBuilder: BoolQueryBuilder = new BoolQueryBuilder()
+      audienceComponents.foreach(component => {
+        componentBoolQueryBuilder.should(QueryBuilders.matchQuery(ESFieldName.audience_components, component))
+      })
+      rootBoolQuery.must(componentBoolQueryBuilder)
     }
 
-    activityESSearchQuery.resolvedUsers match {
-      case Some(resolvedUsers) =>
-        val resolvedUsersBoolQueryBuilder: BoolQueryBuilder = new BoolQueryBuilder()
-        resolvedUsers.foreach(resolvedUser => {
-          resolvedUsersBoolQueryBuilder.should(QueryBuilders.termQuery(ESFieldName.resolved_users, resolvedUser))
-        })
-        boolQueryBuilder.must(resolvedUsersBoolQueryBuilder)
-      case _ =>
+    for (resolvedUsers <- activityESSearchQuery.resolvedUsers) {
+      val resolvedUsersBoolQueryBuilder: BoolQueryBuilder = new BoolQueryBuilder()
+      resolvedUsers.foreach(resolvedUser => {
+        resolvedUsersBoolQueryBuilder.should(QueryBuilders.termQuery(ESFieldName.resolved_users, resolvedUser))
+      })
+      rootBoolQuery.must(resolvedUsersBoolQueryBuilder)
     }
-    boolQueryBuilder
+
+    rootBoolQuery
   }
 
 }
