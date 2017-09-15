@@ -91,10 +91,10 @@ object ActivityDocument {
 
   def serialiseResolvedUsers(audienceId: Option[String], audienceService: AudienceService): Seq[String] = {
     audienceId match {
-      case Some(id: String) => audienceService.resolve(audienceService.getAudience(id))
-        .getOrElse(Seq(Usercode("-")))
-        .map(_.string)
-      case _ => Seq("-")
+      case Some(id: String) => audienceService
+        .resolve(audienceService.getAudience(id))
+        .map(e => e.map(_.string)).recover({ case _ => Seq() }).getOrElse(Seq())
+      case _ => Seq()
     }
   }
 
@@ -102,9 +102,9 @@ object ActivityDocument {
     publisherId match {
       case Some(id: String) => publisherService.find(id) match {
         case Some(e: Publisher) => e.id
-        case _ => "-"
+        case _ => null
       }
-      case _ => "-"
+      case _ => null
     }
   }
 }
