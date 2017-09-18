@@ -34,8 +34,15 @@ trait ActivityESService {
 class ActivityESServiceImpl @Inject()(
   eSClientConfig: ESClientConfig,
   audienceService: AudienceService,
-  publisherService: PublisherService
+  publisherService: PublisherService,
+  elasticSearchAdminService: ElasticSearchAdminService
 ) extends ActivityESService with Logging {
+
+
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.activityEsTemplates, "activity_template_default")
+  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.alertEsTemplates, "alert_template_default")
 
   private val client: RestHighLevelClient = eSClientConfig.newClient
 
