@@ -79,7 +79,7 @@ trait ActivityESServiceHelper {
     builder
   }
 
-  sealed def getEsTemplate(name: String) = Json.parse({
+  def getEsTemplate(name: String) = Json.parse({
     s"""
       {
         "template": "${name}",
@@ -137,6 +137,7 @@ trait ActivityESServiceHelper {
       }
     """
   })
+
   val activityEsTemplates: JsValue = getEsTemplate(indexNameForActivity)
   val alertEsTemplates: JsValue = getEsTemplate(indexNameForAlert)
 }
