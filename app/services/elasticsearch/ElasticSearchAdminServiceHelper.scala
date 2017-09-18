@@ -28,34 +28,16 @@ trait ElasticSearchAdminServiceHelper extends Logging {
 
   def httpEntityFromJsValue(json: JsValue) = new NStringEntity(Json.stringify(json), ContentType.APPLICATION_JSON)
 
-  val responseListener: (Promise[Response]) => ResponseListener = (responsePromise) => {
-    new ResponseListener() {
-      def onFailure(exception: Exception): Unit = {
-        responsePromise.failure(exception)
-        logger.error("Exception thrown after sending request to elasticsearch", exception)
-      }
-
-      override def onSuccess(response: Response): Unit = {
-        responsePromise.success(response)
-        logger.debug(s"Response received from elasticsearch: ${response.toString}")
-      }
-    }
-  }
-
   def performRequestAsync(
     method: String,
     path: String,
     lowLevelClient: RestClient,
     suppliedParam: Option[Map[String, String]] = None,
-    entity: Option[NStringEntity] = None,
-    suppliedResponseListener: Option[(Promise[Response]) => ResponseListener] = None
+    entity: Option[NStringEntity] = None
   ): Future[Response] = {
-
-    val responsePromise: Promise[Response] = Promise[Response]
+    val listener = new FutureResponseListener
 
     val param = suppliedParam.getOrElse(Map()).asJava
-
-    val responseListener = suppliedResponseListener.getOrElse(this.responseListener)(responsePromise)
 
     entity match {
       case Some(nStringEntity: NStringEntity) =>
@@ -64,16 +46,17 @@ trait ElasticSearchAdminServiceHelper extends Logging {
           path,
           param,
           nStringEntity,
-          responseListener
+          listener
         )
       case _ =>
         lowLevelClient.performRequestAsync(
           method,
           path,
           param,
-          responseListener
+          listener
         )
     }
-    responsePromise.future
+
+    listener.future
   }
 }

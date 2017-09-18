@@ -5,7 +5,7 @@ import com.google.inject.Inject
 import models.ActivityRender
 import org.quartz._
 import services._
-import services.elasticsearch.ActivityESService
+import services.elasticsearch.{ActivityESService, IndexActivityRequest}
 import services.messaging.MessagingService
 import system.Logging
 import warwick.sso.Usercode
@@ -88,6 +88,6 @@ class PublishActivityJob @Inject()(
     if (activity.shouldNotify) {
       messaging.send(recipients, activity)
     }
-    activityESService.index(activity, Some(recipients.toSeq))
+    activityESService.index(IndexActivityRequest(activity, Some(recipients.toSeq)))
   }
 }

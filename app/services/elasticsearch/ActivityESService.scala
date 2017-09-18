@@ -5,10 +5,11 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import models.Activity
 import org.elasticsearch.action.ActionListener
-import org.elasticsearch.action.index.{IndexResponse}
+import org.elasticsearch.action.bulk.{BulkRequest, BulkRequestBuilder, BulkResponse}
+import org.elasticsearch.action.index.{IndexRequest, IndexResponse}
 import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
 import org.elasticsearch.client.RestHighLevelClient
-import org.elasticsearch.index.query.{BoolQueryBuilder}
+import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import services.{AudienceService, PublisherService}
 import warwick.core.Logging
@@ -18,17 +19,17 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 
 @ImplementedBy(classOf[ActivityESServiceImpl])
 trait ActivityESService {
-  def index(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None)
+  def index(req: IndexActivityRequest) : Future[Unit]
 
-  def index(activities: Seq[Activity])
-
-  def update(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None)
+  def index(requests: Seq[IndexActivityRequest]): Future[Unit]
 
   def deleteDocumentByActivityId(activityId: String, isNotification: Boolean = true)
 
   def search(activityESSearchQuery: ActivityESSearchQuery): Future[Seq[ActivityDocument]]
 
 }
+
+case class IndexActivityRequest(activity: Activity, resolvedUsers: Option[Seq[Usercode]])
 
 @Singleton
 class ActivityESServiceImpl @Inject()(
@@ -38,46 +39,38 @@ class ActivityESServiceImpl @Inject()(
   elasticSearchAdminService: ElasticSearchAdminService
 ) extends ActivityESService with Logging {
 
-
-  import scala.concurrent.ExecutionContext.Implicits.global
+  import system.ThreadPools.elastic
 
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.activityEsTemplates, "activity_template_default")
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.alertEsTemplates, "alert_template_default")
 
-  private val client: RestHighLevelClient = eSClientConfig.newClient
+  private val client: RestHighLevelClient = eSClientConfig.highLevelClient
 
-  override def index(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None): Unit = {
-    val activityDocument = ActivityDocument.fromActivityModel(
-      activity,
-      audienceService,
-      publisherService,
-      resolvedUsers
-    )
-    val helper = ActivityESServiceIndexHelper
+  override def index(req: IndexActivityRequest) = index(Seq(req))
 
-    val docBuilder = helper.elasticSearchContentBuilderFromActivityDocument(activityDocument)
-    val indexName = helper.indexNameToday(activity.shouldNotify)
-    val request = helper.makeIndexRequest(indexName, helper.documentType, activity.id, docBuilder)
+  def index(reqs: Seq[IndexActivityRequest]): Future[Unit] = {
+    val bulkRequest = new BulkRequest()
+    reqs.foreach { req =>
+      val activity = req.activity
+      val resolvedUsers = req.resolvedUsers
+      val activityDocument = ActivityDocument.fromActivityModel(
+        activity,
+        audienceService,
+        publisherService,
+        resolvedUsers
+      )
+      val helper = ActivityESServiceIndexHelper
 
-    client.indexAsync(request, new ActionListener[IndexResponse] {
-      override def onFailure(e: Exception) = {
-        logger.error("Exception thrown when sending indexRequest to ES", e)
-      }
+      val docBuilder = helper.elasticSearchContentBuilderFromActivityDocument(activityDocument)
+      val indexName = helper.indexNameToday(activity.shouldNotify)
+      val indexRequest = helper.makeIndexRequest(indexName, helper.documentType, activity.id, docBuilder)
+      bulkRequest.add(indexRequest)
+    }
 
-      override def onResponse(response: IndexResponse) = {
-        logger.debug("IndexRequest sent to ES with response: " + response.toString)
-      }
-    })
+    val listener = new FutureActionListener[BulkResponse]
+    client.bulkAsync(bulkRequest, listener)
+    listener.future.map(_ => {})
   }
-
-
-  override def index(activities: Seq[Activity]): Unit = {
-    activities.foreach(activity => {
-      this.index(activity)
-    })
-  }
-
-  override def update(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None) = index(activity, resolvedUsers)
 
   //TODO implement me https://www.elastic.co/guide/en/elasticsearch/client/java-rest/master/java-rest-high-document-delete.html
   override def deleteDocumentByActivityId(activityId: String, isNotification: Boolean): Unit = ???
@@ -103,7 +96,7 @@ class ActivityESServiceImpl @Inject()(
         searchResponsePromise.success(response)
       }
     })
-    import ExecutionContext.Implicits.global
+    import system.ThreadPools.elastic
     futureResponse
       .map(ActivityDocument.fromESSearchResponse)
       .recover {
