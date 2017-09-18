@@ -39,6 +39,8 @@ trait ActivityDao {
 
   def getActivitiesByIds(ids: Seq[String])(implicit c: Connection): Seq[Activity]
 
+  def getAllActivities()(implicit c: Connection): Seq[Activity]
+
   def getLastReadDate(usercode: String)(implicit c: Connection): Option[DateTime]
 
   def countNotificationsSinceDate(usercode: String, date: DateTime)(implicit c: Connection): Int
@@ -71,7 +73,9 @@ class ActivityDaoImpl @Inject()(
     val id = UUID.randomUUID().toString
     val now = DateTime.now
     val publishedAtOrNow = publishedAt.getOrElse(now)
-    val sendEmailObj = sendEmail.map[JInt] { if (_) 1 else 0 }.orNull
+    val sendEmailObj = sendEmail.map[JInt] {
+      if (_) 1 else 0
+    }.orNull
 
     SQL"""
       INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by, send_email, audience_size)
@@ -113,11 +117,15 @@ class ActivityDaoImpl @Inject()(
         .as(activityParser.*)
     }.toSeq
 
+  override def getAllActivities()(implicit c: Connection): Seq[Activity] = SQL("SELECT * FROM ACTIVITY").as(activityParser.*)
+
   override def getPastActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
-    SQL(s"""
+    SQL(
+      s"""
       $selectActivityRender
       WHERE ACTIVITY.ID IN (
-        ${dialect.limitOffset(limit) (
+        ${
+        dialect.limitOffset(limit)(
           s"""SELECT
             --+ INDEX(ACTIVITY, ACTIVITY_PUBLISHER_TIME_INDEX)
             ID FROM ACTIVITY
@@ -125,7 +133,8 @@ class ActivityDaoImpl @Inject()(
             AND ACTIVITY.PUBLISHED_AT <= {now}
             AND ACTIVITY.SENT_COUNT = ACTIVITY.AUDIENCE_SIZE
           ORDER BY ACTIVITY.PUBLISHED_AT DESC"""
-        )}
+        )
+      }
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC
       """)
@@ -134,18 +143,21 @@ class ActivityDaoImpl @Inject()(
   }
 
   override def getSendingActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
-    SQL(s"""
+    SQL(
+      s"""
       $selectActivityRender
       WHERE ACTIVITY.ID IN (
-        ${dialect.limitOffset(limit) (
-      s"""SELECT
+        ${
+        dialect.limitOffset(limit)(
+          s"""SELECT
             --+ INDEX(ACTIVITY, ACTIVITY_PUBLISHER_TIME_INDEX)
             ID FROM ACTIVITY
           WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
             AND ACTIVITY.PUBLISHED_AT <= {now}
             AND ACTIVITY.SENT_COUNT < ACTIVITY.AUDIENCE_SIZE
           ORDER BY ACTIVITY.PUBLISHED_AT DESC"""
-    )}
+        )
+      }
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC
       """)
@@ -154,17 +166,20 @@ class ActivityDaoImpl @Inject()(
   }
 
   override def getFutureActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
-    SQL(s"""
+    SQL(
+      s"""
       $selectActivityRender
       WHERE ACTIVITY.ID IN (
-        ${dialect.limitOffset(limit)(
+        ${
+        dialect.limitOffset(limit)(
           s"""SELECT
             --+ INDEX(ACTIVITY, ACTIVITY_PUBLISHER_TIME_INDEX)
             ID FROM ACTIVITY
           WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
             AND ACTIVITY.PUBLISHED_AT > {now}
           ORDER BY ACTIVITY.PUBLISHED_AT DESC"""
-        )}
+        )
+      }
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC
       """)
@@ -230,16 +245,18 @@ class ActivityDaoImpl @Inject()(
       * It's important that the inner query here (which gets the final 100 or whatever IDs
       * we'll be returning) is fast, which is why:
       *  - It only uses columns that are in the ACTIVITY_RECIPIENT_READ_INDEX,
-      *      so it can read the index and not need to read the table at all;
+      * so it can read the index and not need to read the table at all;
       *  - It doesn't join on any other tables.
       *
       * If you're about to make a change that might break these two rules, it requires
       * some discussion before you go ahead.
       */
-    val query = s"""
+    val query =
+      s"""
       $selectActivityRender
       WHERE ACTIVITY.ID IN (
-        ${dialect.limitOffset(limit)(
+        ${
+        dialect.limitOffset(limit)(
           s"""SELECT ACTIVITY_ID
           FROM ACTIVITY_RECIPIENT
           WHERE USERCODE = {usercode}
@@ -247,7 +264,8 @@ class ActivityDaoImpl @Inject()(
             AND SHOULD_NOTIFY = {notifications}
             $conditions
           ORDER BY PUBLISHED_AT $publishedAtOrder, ACTIVITY_ID ASC"""
-        )}
+        )
+      }
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC, ACTIVITY.ID ASC
       """
