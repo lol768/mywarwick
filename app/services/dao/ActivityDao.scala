@@ -117,8 +117,6 @@ class ActivityDaoImpl @Inject()(
         .as(activityParser.*)
     }.toSeq
 
-  override def getAllActivities()(implicit c: Connection): Seq[Activity] = SQL("SELECT * FROM ACTIVITY").as(activityParser.*)
-
   override def getPastActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
     SQL(
       s"""

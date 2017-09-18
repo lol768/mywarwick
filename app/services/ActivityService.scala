@@ -20,8 +20,6 @@ trait ActivityService {
 
   def getActivitiesForUser(user: User, before: Option[String], since: Option[String], limit: Int): Seq[ActivityRender]
 
-  def getAllActivities(): Seq[Activity]
-
   def getNotificationsForUser(user: User, before: Option[String], since: Option[String], limit: Int): Seq[ActivityRender]
 
   def countUnreadNotificationsForUsercode(usercode: Usercode): Int
@@ -206,9 +204,6 @@ class ActivityServiceImpl @Inject()(
 
   override def getActivitiesForUser(user: User, before: Option[String], since: Option[String], limit: Int): Seq[ActivityRender] =
     db.withConnection(implicit c => dao.getActivitiesForUser(user.usercode.string, notifications = false, before, since, limit))
-
-  override def getAllActivities(): Seq[Activity] =
-    db.withConnection(implicit c => dao.getAllActivities())
 
   override def getLastReadDate(user: User): Option[DateTime] =
     db.withConnection(implicit c => dao.getLastReadDate(user.usercode.string))
