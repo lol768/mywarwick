@@ -45,10 +45,10 @@ object ActivityDocument {
       activity.publishedAt,
       serialisePublisher(activity.publisherId, publisherService),
       serialiseAudienceComponents(activity.audienceId, audienceService),
-      resolvedUsers.map({
-        case result: Seq[Usercode] => result.map(_.string)
+      resolvedUsers match {
+        case e: Some[Seq[Usercode]] => e.map(_.map(_.string)).orNull
         case _ => serialiseResolvedUsers(activity.audienceId, audienceService)
-      }).orNull
+      }
     )
   }
 
