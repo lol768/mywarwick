@@ -33,7 +33,7 @@ class ElasticSearchAdminServiceImpl @Inject()(
   eSClientConfig: ESClientConfig
 ) extends ElasticSearchAdminService with ElasticSearchAdminServiceHelper {
 
-  val lowLevelClient: RestClient = eSClientConfig.newClient.getLowLevelClient
+  val lowLevelClient: RestClient = eSClientConfig.lowLevelClient
 
   implicit def getClient(client: Option[RestClient]): RestClient = client match {
     case Some(c: RestClient) => c
