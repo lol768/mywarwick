@@ -45,7 +45,7 @@ class ElasticSearchAdminServiceImpl @Inject()(
     name: String
   ): Future[Response] = {
     performRequestAsync(
-      method = Method.get,
+      method = Method.put,
       path = s"$templateRootPath/$name",
       entity = Some(httpEntityFromJsValue(template)),
       lowLevelClient = lowLevelClient
