@@ -17,10 +17,13 @@ trait ElasticSearchAdminService {
 
   def getTemplate(name: String): Future[Response]
 
-  def getTemplates(): Future[Response]
+  def getAllTemplates(): Future[Response]
 
   def hasTemplate(name: String): Future[Response]
 
+  def getIndex(name: String): Future[Response]
+
+  def getAllIndices(): Future[Response]
   //TODO other options that we need
 
 }
@@ -69,7 +72,7 @@ class ElasticSearchAdminServiceImpl @Inject()(
     )
   }
 
-  override def getTemplates(): Future[Response] = {
+  override def getAllTemplates(): Future[Response] = {
     getTemplate("")
   }
 
@@ -81,5 +84,17 @@ class ElasticSearchAdminServiceImpl @Inject()(
       path = s"$templateRootPath/$name",
       lowLevelClient = lowLevelClient
     )
+  }
+
+  override def getIndex(name: String) = {
+    performRequestAsync(
+      Method.get,
+      path = s"/$name",
+      lowLevelClient = lowLevelClient
+    )
+  }
+
+  override def getAllIndices() = {
+    getIndex("*")
   }
 }
