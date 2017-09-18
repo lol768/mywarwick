@@ -6,12 +6,13 @@ import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.joda.time.DateTime
+import play.api.libs.json.{JsValue, Json}
 
 trait ActivityESServiceHelper {
 
   val documentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
-  val nameForAlert = "alert"
-  val nameForActivity = "activity"
+  val indexNameForAlert = "alert"
+  val indexNameForActivity = "activity"
   val separator = "_"
 
   object ESFieldName {
@@ -30,15 +31,15 @@ trait ActivityESServiceHelper {
 
   def indexNameToday(isNotification: Boolean = true, today: String = DateTime.now().toString("yyyy_MM")): String = {
     isNotification match {
-      case true => s"$nameForAlert$separator$today"
-      case false => s"$nameForActivity$separator$today"
+      case true => s"$indexNameForAlert$separator$today"
+      case false => s"$indexNameForActivity$separator$today"
     }
   }
 
   def indexNameForAllTime(isNotification: Boolean = true): String = {
     isNotification match {
-      case true => s"$nameForAlert*"
-      case false => s"$nameForActivity*"
+      case true => s"$indexNameForAlert*"
+      case false => s"$indexNameForActivity*"
     }
   }
 
@@ -68,6 +69,121 @@ trait ActivityESServiceHelper {
     builder.endObject()
     builder
   }
+
+  val activityEsTemplates: JsValue = Json.parse(
+    s"""
+      {
+        "template": "${indexNameForActivity}*",
+        "mappings": {
+          "activity": {
+            "properties": {
+              "activity_id": {
+                "type": "keyword"
+              },
+              "activity_type": {
+                "type": "keyword"
+              },
+              "audience_components": {
+                "type": "keyword"
+              },
+              "provider_id": {
+                "type": "keyword"
+              },
+              "published_at": {
+                "type": "date"
+              },
+              "publisher": {
+                "type": "keyword"
+              },
+              "replaced_by": {
+                "type": "keyword"
+              },
+              "resolved_users": {
+                "type": "keyword"
+              },
+              "text": {
+                "type": "text"
+              },
+              "title": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "url": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    """)
+  val alertEsTemplates: JsValue = Json.parse(
+    s"""
+      {
+        "template": "${indexNameForAlert}*",
+        "mappings": {
+          "activity": {
+            "properties": {
+              "activity_id": {
+                "type": "keyword"
+              },
+              "activity_type": {
+                "type": "keyword"
+              },
+              "audience_components": {
+                "type": "keyword"
+              },
+              "provider_id": {
+                "type": "keyword"
+              },
+              "published_at": {
+                "type": "date"
+              },
+              "publisher": {
+                "type": "keyword"
+              },
+              "replaced_by": {
+                "type": "keyword"
+              },
+              "resolved_users": {
+                "type": "keyword"
+              },
+              "text": {
+                "type": "text"
+              },
+              "title": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "url": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    """)
 }
 
 object ActivityESServiceUpdateHelper extends ActivityESServiceHelper {
