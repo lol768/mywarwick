@@ -39,8 +39,6 @@ trait ActivityDao {
 
   def getActivitiesByIds(ids: Seq[String])(implicit c: Connection): Seq[Activity]
 
-  def getAllActivities()(implicit c: Connection): Seq[Activity]
-
   def getLastReadDate(usercode: String)(implicit c: Connection): Option[DateTime]
 
   def countNotificationsSinceDate(usercode: String, date: DateTime)(implicit c: Connection): Int
