@@ -59,21 +59,30 @@ trait ActivityESServiceHelper {
       .field(ESFieldName.publisher, activityDocument.publisher)
 
     builder.startArray(ESFieldName.resolved_users)
-    activityDocument.resolvedUsers.foreach(builder.value)
+    if (activityDocument.resolvedUsers != null) {
+      activityDocument.resolvedUsers.foreach(builder.value)
+    } else {
+      builder.value(Nil)
+    }
     builder.endArray()
 
+
     builder.startArray(ESFieldName.audience_components)
-    activityDocument.audienceComponents.foreach(builder.value)
+    if (activityDocument.audienceComponents != null) {
+      activityDocument.audienceComponents.foreach(builder.value)
+    } else {
+      builder.value(Nil)
+    }
     builder.endArray()
 
     builder.endObject()
     builder
   }
 
-  val activityEsTemplates: JsValue = Json.parse(
+  sealed def getEsTemplate(name: String) = Json.parse({
     s"""
       {
-        "template": "${indexNameForActivity}*",
+        "template": "${name}",
         "mappings": {
           "activity": {
             "properties": {
@@ -126,64 +135,10 @@ trait ActivityESServiceHelper {
           }
         }
       }
-    """)
-  val alertEsTemplates: JsValue = Json.parse(
-    s"""
-      {
-        "template": "${indexNameForAlert}*",
-        "mappings": {
-          "activity": {
-            "properties": {
-              "activity_id": {
-                "type": "keyword"
-              },
-              "activity_type": {
-                "type": "keyword"
-              },
-              "audience_components": {
-                "type": "keyword"
-              },
-              "provider_id": {
-                "type": "keyword"
-              },
-              "published_at": {
-                "type": "date"
-              },
-              "publisher": {
-                "type": "keyword"
-              },
-              "replaced_by": {
-                "type": "keyword"
-              },
-              "resolved_users": {
-                "type": "keyword"
-              },
-              "text": {
-                "type": "text"
-              },
-              "title": {
-                "type": "text",
-                "fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
-                }
-              },
-              "url": {
-                "type": "text",
-                "fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    """)
+    """
+  })
+  val activityEsTemplates: JsValue = getEsTemplate(indexNameForActivity)
+  val alertEsTemplates: JsValue = getEsTemplate(indexNameForAlert)
 }
 
 object ActivityESServiceUpdateHelper extends ActivityESServiceHelper {
