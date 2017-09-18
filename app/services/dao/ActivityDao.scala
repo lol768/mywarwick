@@ -37,6 +37,8 @@ trait ActivityDao {
   def getActivityById(id: String)(implicit c: Connection): Option[Activity] =
     getActivitiesByIds(Seq(id)).headOption
 
+  def getActivitiesForDateTimeRange(from: DateTime, to: DateTime)(implicit c: Connection): Seq[Activity]
+
   def getActivitiesByIds(ids: Seq[String])(implicit c: Connection): Seq[Activity]
 
   def getLastReadDate(usercode: String)(implicit c: Connection): Option[DateTime]
@@ -98,6 +100,19 @@ class ActivityDaoImpl @Inject()(
     SQL"DELETE FROM ACTIVITY_TAG WHERE ACTIVITY_ID = $activityId".execute()
     SQL"DELETE FROM ACTIVITY_RECIPIENT WHERE ACTIVITY_ID = $activityId".execute()
     SQL"DELETE FROM ACTIVITY WHERE ID = $activityId".execute()
+  }
+
+  override def getActivitiesForDateTimeRange(from: DateTime, to: DateTime)(implicit c: Connection): Seq[Activity] = {
+    SQL(
+      """
+         SELECT * from ACTIVITY
+         WHERE PUBLISHED_AT >= TO_DATE ({from}, 'YYYY-MM-DD"T"HH24:MI:SS')
+         AND PUBLISHED_AT <= TO_DATE({to}, 'YYYY-MM-DD"T"HH24:MI:SS');
+      """
+    ).on(
+      'from -> from.toString("""YYYY-MM-DD"T"HH24:MI:SS"""),
+      'to -> to.toString("""YYYY-MM-DD"T"HH24:MI:SS""")
+    ).as(activityParser.*)
   }
 
   def updateReplacedActivity(replacedById: String, replaces: Seq[String])(implicit c: Connection) =

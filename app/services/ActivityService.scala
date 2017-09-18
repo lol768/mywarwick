@@ -68,6 +68,8 @@ trait ActivityService {
   def markSent(id: String, usercode: Usercode): Unit
 
   def getActivityWithAudience(id: String): Option[ActivityRenderWithAudience]
+
+  def getActivitiesForDateTimeRange(from: DateTime, to: DateTime): Seq[Activity]
 }
 
 class ActivityServiceImpl @Inject()(
@@ -87,7 +89,6 @@ class ActivityServiceImpl @Inject()(
 
   override def getActivityRenderById(id: String): Option[ActivityRender] =
     db.withConnection(implicit c => dao.getActivityRenderById(id))
-
 
 
   override def update(activityId: String, activity: ActivitySave, audience: Audience): Either[Seq[ActivityError], String] = {
@@ -322,6 +323,12 @@ class ActivityServiceImpl @Inject()(
 
   override def markSent(id: String, usercode: Usercode): Unit =
     db.withTransaction(implicit c => recipientDao.markSent(id, usercode.string))
+
+  override def getActivitiesForDateTimeRange(from: DateTime, to: DateTime): Seq[Activity] = {
+    db.withConnection(implicit c => {
+      dao.getActivitiesForDateTimeRange(from, to)
+    })
+  }
 }
 
 sealed trait ActivityError {
