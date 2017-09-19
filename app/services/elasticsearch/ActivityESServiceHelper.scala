@@ -1,5 +1,6 @@
 package services.elasticsearch
 
+import models.Activity
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.common.xcontent.XContentBuilder
@@ -40,6 +41,13 @@ trait ActivityESServiceHelper {
     isNotification match {
       case true => s"$indexNameForAlert$separator${dateTime.toString("yyyy_MM")}"
       case false => s"$indexNameForActivity$separator${dateTime.toString("yyyy_MM")}"
+    }
+  }
+
+  def indexNameForActivity(activity: Activity): String = {
+    activity.publishedAt match {
+      case e:DateTime => indexNameForDateTime(e, activity.shouldNotify)
+      case _ => indexNameToday(activity.shouldNotify)
     }
   }
 
