@@ -1,6 +1,6 @@
 package services.elasticsearch
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Interval}
 
 case class ActivityESSearchQuery(
   activity_id: Option[String] = None,
@@ -10,14 +10,8 @@ case class ActivityESSearchQuery(
   url: Option[String] = None,
   text: Option[String] = None,
   replaced_by: Option[String] = None,
-  publish_at: Option[ActivityESSearchQuery.DateRange] = None,
+  publish_at: Option[Interval] = None,
   publisher: Option[String] = None,
   audienceComponents: Option[Seq[String]] = None,
   resolvedUsers: Option[Seq[String]] = None
 )
-
-object ActivityESSearchQuery {
-
-  case class DateRange(from: DateTime, to: DateTime)
-
-}

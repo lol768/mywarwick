@@ -3,10 +3,10 @@ package services.elasticsearch
 import java.util.Date
 
 import helpers.BaseSpec
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Interval}
+import org.scalatest.concurrent.PatienceConfiguration.Interval
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
-import services.elasticsearch.ActivityESSearchQuery.DateRange
 import uk.ac.warwick.util.core.jodatime.DateTimeUtils
 import uk.ac.warwick.util.core.jodatime.DateTimeUtils.Callback
 
@@ -279,7 +279,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     "should have correct must query for published_at time range" in new Scope {
 
-      var range = DateRange(DateTime.parse("2017-09-13T12:33:28.855Z"), DateTime.parse("2017-09-13T12:35:28.855Z"))
+      var range = new Interval(DateTime.parse("2017-09-13T12:33:28.855Z"), DateTime.parse("2017-09-13T12:35:28.855Z"))
 
       var query = ActivityESSearchQuery(
         publish_at = Some(range)
@@ -294,8 +294,8 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
               {
                 "range": {
                   "published_at": {
-                    "from": "${range.from}",
-                    "to": "${range.to}",
+                    "from": "${range.getStart}",
+                    "to": "${range.getEnd}",
                     "include_lower": true,
                     "include_upper": true,
                     "boost": 1

@@ -186,7 +186,7 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 
     for (v <- activityESSearchQuery.activity_type) rootBoolQuery.must(termQuery(activity_type, v))
 
-    for (v <- activityESSearchQuery.publish_at) rootBoolQuery.must(rangeQuery(published_at).gte(v.from.toString()).lte(v.to.toString()))
+    for (v <- activityESSearchQuery.publish_at) rootBoolQuery.must(rangeQuery(published_at).gte(v.getStart.toString()).lte(v.getEnd.toString()))
 
     for (v <- activityESSearchQuery.publisher) rootBoolQuery.must(termQuery(publisher, v))
 
