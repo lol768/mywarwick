@@ -43,7 +43,7 @@ POST          /admin/publishers/:publisher/providers/:provider      @controllers
 
 
 GET           /admin/elasticsearch/activity                  @controllers.admin.elasticsearch.ActivityToESController.index
-POST          /admin/elasticsearch/reindexall                @controllers.admin.elasticsearch.ActivityToESController.reindexAllActivities
+POST          /admin/elasticsearch/reindex                   @controllers.admin.elasticsearch.ActivityToESController.reindexActivitiesInDateTimeRange
 
 GET           /publish/:publisher/webgroups                  @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 

@@ -1,15 +1,45 @@
 @import system.RequestContext
-@()(implicit context: RequestContext)
+@import controllers.admin.elasticsearch.ActivityToESControllerFormData
+@(formData: Form[ActivityToESControllerFormData])(implicit context: RequestContext)
 @common.admin("Administration") {
   <header>
     @context.csrfHelper.metaElementToken
     @context.csrfHelper.metaElementHeader
   </header>
-  <p>
-    click the button will reindex all activities to elasticsearch.
-  </p>
-  <form method="post" action="/admin/elasticsearch/reindexall">
+
+  <form class="form" method="post" action="/admin/elasticsearch/reindex">
+    <p>
+      Choose desired time range for activities that need to be indexed by ElasticSearch
+    </p>
+
     @context.csrfHelper.formField
-    <input type="submit" />
+    <div class="form-group">
+      <p>From</p>
+      <div class="datetimepicker">
+        <input type="hidden" name="fromDate" />
+        <div class="input-group">
+          <input type="text" autocomplete="off" id="fromDate" class="form-control" />
+          <span class="input-group-addon">
+            <span class="fa fa-calendar"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <p>To</p>
+      <div class="datetimepicker">
+        <input type="hidden" name="toDate" />
+        <div class="input-group">
+          <input type="text" autocomplete="off" id="toDate" class="form-control" />
+          <span class="input-group-addon">
+            <span class="fa fa-calendar"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <input class="btn btn-primary" type="submit" />
+    </div>
   </form>
+
 }
