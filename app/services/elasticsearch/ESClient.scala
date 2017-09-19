@@ -27,8 +27,7 @@ class ESClientConfigImpl @Inject()(
 
   override def nodes: Seq[ESNode] = {
     config
-      .getConfigSeq("es.nodes")
-      .map(_.map(_.toString))
+      .getStringSeq("es.nodes")
       .map(ESNode.fromConfigs)
       .getOrElse(throw new IllegalStateException("ElasticSearch nodes not configured - check es.nodes"))
   }
