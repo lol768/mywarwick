@@ -1,10 +1,7 @@
 package services.elasticsearch
 
-import java.util.Date
-
 import helpers.BaseSpec
 import org.joda.time.{DateTime, Interval}
-import org.scalatest.concurrent.PatienceConfiguration.Interval
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
 import uk.ac.warwick.util.core.jodatime.DateTimeUtils
