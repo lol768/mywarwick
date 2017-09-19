@@ -36,6 +36,13 @@ trait ActivityESServiceHelper {
     }
   }
 
+  def indexNameForDateTime(dateTime: DateTime, isNotification: Boolean = true) = {
+    isNotification match {
+      case true => s"$indexNameForAlert$separator${dateTime.toString("yyyy_MM")}"
+      case false => s"$indexNameForActivity$separator${dateTime.toString("yyyy_MM")}"
+    }
+  }
+
   def indexNameForAllTime(isNotification: Boolean = true): String = {
     isNotification match {
       case true => s"$indexNameForAlert*"
@@ -82,7 +89,7 @@ trait ActivityESServiceHelper {
   def getEsTemplate(name: String) = Json.parse({
     s"""
       {
-        "template": "${name}",
+        "template": "${name}*",
         "mappings": {
           "activity": {
             "properties": {

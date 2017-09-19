@@ -29,7 +29,7 @@ trait ActivityESService {
 
 }
 
-case class IndexActivityRequest(activity: Activity, resolvedUsers: Option[Seq[Usercode]])
+case class IndexActivityRequest(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None)
 
 @Singleton
 class ActivityESServiceImpl @Inject()(
@@ -62,7 +62,7 @@ class ActivityESServiceImpl @Inject()(
       val helper = ActivityESServiceIndexHelper
 
       val docBuilder = helper.elasticSearchContentBuilderFromActivityDocument(activityDocument)
-      val indexName = helper.indexNameToday(activity.shouldNotify)
+      val indexName = helper.indexNameForDateTime(activity.publishedAt, activity.shouldNotify)
       val indexRequest = helper.makeIndexRequest(indexName, helper.documentType, activity.id, docBuilder)
       bulkRequest.add(indexRequest)
     }
