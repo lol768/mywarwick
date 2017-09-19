@@ -39,17 +39,18 @@ object Audience {
     val displayName: String = toString
   }
 
-  case object PublicAudience extends Component
-
-  case class UsercodesAudience(usercodes: Seq[Usercode]) extends Component
-
   case class WebGroupAudience(groupName: GroupName) extends Component // No longer available in Audience Picker UI
 
-  case class ModuleAudience(moduleCode: String) extends Component
+  case object PublicAudience extends Component
 
-  case class SeminarGroupAudience(groupId: String) extends Component
+  case class UsercodesAudience(usercodes: Seq[Usercode]) extends DepartmentSubset
 
-  case class RelationshipAudience(relationshipType: String, agentId: UniversityID) extends Component
+
+  case class ModuleAudience(moduleCode: String) extends DepartmentSubset
+
+  case class SeminarGroupAudience(groupId: String) extends DepartmentSubset
+
+  case class RelationshipAudience(relationshipType: String, agentId: UniversityID) extends DepartmentSubset
 
   case class DepartmentAudience(deptCode: String, subset: Seq[DepartmentSubset]) extends Component
 

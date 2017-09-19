@@ -49,17 +49,17 @@ class AudienceServiceImpl @Inject()(
     }
     val audienceUsers: Future[Set[Usercode]] = Future.sequence(audienceComponents.map {
       case PublicAudience => Future.successful(Seq(Usercode("*")))
-      // A subset not in a department i.e. ALL undergraduates in the University
-      // Use WebGroups for these
-      case ds: DepartmentSubset => Future.fromTry(resolveUniversityGroup(ds))
       case WebGroupAudience(name) => Future.fromTry(webgroupUsers(name))
-      case DepartmentAudience(code, subsets) => Future.sequence(subsets.map(subset =>
-        resolveDepartmentGroup(code, subset)
-      )).map(_.flatten.toSeq)
       case ModuleAudience(code) => audienceLookupDao.resolveModule(code)
       case SeminarGroupAudience(groupId) => audienceLookupDao.resolveSeminarGroup(groupId)
       case RelationshipAudience(relationshipType, agentId) => audienceLookupDao.resolveRelationship(agentId, relationshipType)
       case UsercodesAudience(usercodes) => Future.successful(usercodes)
+      // A subset not in a department i.e. ALL undergraduates in the University
+      // Use WebGroups for these
+      case ds: DepartmentSubset => Future.fromTry(resolveUniversityGroup(ds))
+      case DepartmentAudience(code, subsets) => Future.sequence(subsets.map(subset =>
+        resolveDepartmentGroup(code, subset)
+      )).map(_.flatten.toSeq)
       case optIn: OptIn => Future.successful(Nil) // Handled below
     }).map(_.flatten.toSet)
 
@@ -100,6 +100,7 @@ class AudienceServiceImpl @Inject()(
         webgroupUsers(GroupName("all-staff")).flatMap(allStaff =>
           webgroupUsers(GroupName(s"all-teaching")).map(teachingStaff => allStaff.diff(teachingStaff))
         )
+      case _ => Try(Nil)
     }
 
 
@@ -115,6 +116,10 @@ class AudienceServiceImpl @Inject()(
       case TaughtPostgrads => audienceLookupDao.resolveTaughtPostgraduates(departmentCode)
       case TeachingStaff => audienceLookupDao.resolveTeachingStaff(departmentCode)
       case AdminStaff => audienceLookupDao.resolveAdminStaff(departmentCode)
+      case ModuleAudience(code) => audienceLookupDao.resolveModule(code)
+      case SeminarGroupAudience(groupId) => audienceLookupDao.resolveSeminarGroup(groupId)
+      case RelationshipAudience(relationshipType, agentId) => audienceLookupDao.resolveRelationship(agentId, relationshipType)
+      case UsercodesAudience(usercodes) => Future.successful(usercodes)
     }
 
   private def webgroupUsers(groupName: GroupName): Try[Seq[Usercode]] =
@@ -159,29 +164,42 @@ class AudienceServiceImpl @Inject()(
     var locations: Seq[String] = Seq.empty[String]
     var staffRelationships: Map[UniversityID, Seq[String]] = Map[UniversityID, Seq[String]]()
 
-    audience.components.foreach {
-      case ds: DepartmentSubset => departmentSubsets :+= ds.toString
-      case DepartmentAudience(code, subsets) => {
-        department = code
-        departmentSubsets ++= subsets.map(set => s"Dept:${set.toString}")
-      }
-      case ModuleAudience(code) =>
-        modules ++= Await.result(audienceLookupDao.findModules(code.trim), 5.seconds).map { m =>
-           Json.obj(
-            "value" -> m.code.toUpperCase,
-            "text" -> s"${m.code.toUpperCase}: ${m.name}"
-          )
-        }
-      case SeminarGroupAudience(groupId) =>
-        seminarGroups ++= Await.result(audienceLookupDao.getSeminarGroupById(groupId.trim), 5.seconds).map { group =>
+    def matchDeptSubset(subset: DepartmentSubset): Unit =
+      subset match {
+        case ModuleAudience(code) =>
+          modules ++= Await.result(audienceLookupDao.findModules(code.trim), 5.seconds).map { m =>
+            Json.obj(
+              "value" -> m.code.toUpperCase,
+              "text" -> s"${m.code.toUpperCase}: ${m.name}"
+            )
+          }
+        case SeminarGroupAudience(groupId) =>
+          seminarGroups ++= Await.result(audienceLookupDao.getSeminarGroupById(groupId.trim), 5.seconds).map { group =>
             Json.obj(
               "value" -> groupId,
-              "text" -> s"${group.name}"//: ${group.groupSetName}"
+              "text" -> s"${group.name}" //: ${group.groupSetName}"
             )
+          }
+        case RelationshipAudience(relationshipType, agentId) =>
+          staffRelationships += agentId -> (staffRelationships.getOrElse(agentId, Seq.empty[String]) :+ relationshipType)
+        case UsercodesAudience(usercodes) => listOfUsercodes ++= usercodes.map(_.string)
+        case _ => Nil
+      }
+
+    audience.components.foreach {
+      case ds: DepartmentSubset => ds match {
+        case All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | UndergradStudents | AdminStaff =>
+          departmentSubsets :+= ds.toString
+        case subset => matchDeptSubset(subset)
+      }
+      case DepartmentAudience(code, subsets) => {
+        department = code
+        subsets.foreach {
+          case subset@(All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | UndergradStudents | AdminStaff) =>
+            departmentSubsets :+= s"Dept:${subset.entryName}"
+          case subset => matchDeptSubset(subset)
         }
-      case RelationshipAudience(relationshipType, agentId) =>
-        staffRelationships += agentId -> (staffRelationships.getOrElse(agentId, Seq.empty[String]) :+ relationshipType)
-      case UsercodesAudience(usercodes) => listOfUsercodes ++= usercodes.map(_.string)
+      }
       case optIn: OptIn if optIn.optInType == LocationOptIn.optInType => locations :+= optIn.optInValue
       case _ => Nil
     }
@@ -193,7 +211,7 @@ class AudienceServiceImpl @Inject()(
 
     val locationsJson =
       if (locations.nonEmpty) Json.obj("locations" -> Json.obj("yesLocation" ->
-        Json.obj(locations.map(l => l -> Json.toJsFieldJsValueWrapper("undefined")):_*)))
+        Json.obj(locations.map(l => l -> Json.toJsFieldJsValueWrapper("undefined")): _*)))
       else Json.obj()
 
     val staffRelationshipJson =
@@ -220,13 +238,19 @@ class AudienceServiceImpl @Inject()(
         Json.obj("listOfUsercodes" -> listOfUsercodes)
       else Json.obj()
 
+    val deptSubsets: (String, Json.JsValueWrapper) =
+      if (departmentSubsets.contains("Dept:All"))
+        "Dept:All" -> Json.toJsFieldJsValueWrapper("undefined")
+      else
+        "groups" -> (Json.obj(
+          departmentSubsets.map(_ -> Json.toJsFieldJsValueWrapper("undefined")): _*
+        ) ++ staffRelationshipJson ++ seminarGroupsJson ++ modulesJson ++ listOfUsercodesJson)
+
     Json.obj(
       "department" -> department,
       "audience" -> Json.obj(
         audienceType -> Json.obj(
-          "groups" -> (Json.obj(
-            departmentSubsets.map(_ -> Json.toJsFieldJsValueWrapper("undefined")): _*
-          ) ++ staffRelationshipJson ++ seminarGroupsJson ++ modulesJson ++ listOfUsercodesJson)
+          deptSubsets
         )
       )
     ) ++ locationsJson

@@ -79,10 +79,12 @@ export default class AudiencePicker extends React.PureComponent {
       case 'radio':
         this.setState(state => _.set(_.cloneDeep(state), path, { [value]: undefined }));
         break;
+      case 'Dept:Module':
       case 'Module':
         this.setState(state =>
           update(state, updateObj({ modules: { $set: value.items } })));
         break;
+      case 'Dept:SeminarGroup':
       case 'SeminarGroup':
         this.setState(state =>
           update(state, updateObj({ seminarGroups: { $set: value.items } })));
@@ -91,6 +93,7 @@ export default class AudiencePicker extends React.PureComponent {
         this.setState(state =>
           update(state, updateObj({ listOfUsercodes: { $set: value } })));
         break;
+      case 'Dept:Relationship':
       case 'Relationship':
         this.setState(state =>
           update(state, updateObj({ staffRelationships: { $set: value.items } })));
@@ -202,7 +205,7 @@ export default class AudiencePicker extends React.PureComponent {
         >
           <InputList
             formPath={prefixPath('.groups.modules')}
-            type="Module"
+            type={prefixDeptSubset('Module')}
             name="audience.audience[]"
             handleChange={this.handleChange}
             picker={modulePicker}
@@ -219,7 +222,7 @@ export default class AudiencePicker extends React.PureComponent {
         >
           <InputList
             formPath={prefixPath('.groups.seminarGroups')}
-            type="SeminarGroup"
+            type={prefixDeptSubset('SeminarGroup')}
             handleChange={this.handleChange}
             name="audience.audience[]"
             picker={seminarGroupPicker}
@@ -236,7 +239,7 @@ export default class AudiencePicker extends React.PureComponent {
         >
           <InputOptionsList
             formPath={prefixPath('.groups.staffRelationships')}
-            type="Relationship"
+            type={prefixDeptSubset('Relationship')}
             name="audience.audience[]"
             handleChange={this.handleChange}
             picker={relationshipPicker}
@@ -259,6 +262,7 @@ export default class AudiencePicker extends React.PureComponent {
               handleChange={this.handleChange}
               items={_.get(this.state, prefixPath('.groups.listOfUsercodes'), [])}
               placeholder="Type in usercodes, one per line"
+              valuePrefix={prefixDeptSubset('')}
             />
           </div>
         </Checkbox>
