@@ -1,5 +1,6 @@
 package controllers.admin.elasticsearch
 
+import java.util.Date
 import javax.inject.Inject
 
 import controllers.BaseController
@@ -24,18 +25,28 @@ class ActivityToESController @Inject()(
 
   import Roles._
   import security._
+  import play.api.data._
+  import play.api.data.Forms._
+
+  val formData = Form(
+    mapping(
+      "fromDate" -> text,
+      "toDate" -> text
+    )(ActivityToESControllerFormData.apply)(ActivityToESControllerFormData.unapply))
 
   def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    Ok(views.html.admin.elasticsearch.index())
+
+
+    Ok(views.html.admin.elasticsearch.index(formData))
   }
 
-  def reindexAllActivities = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    //TODO bind start and end dates
+  def reindexActivitiesInDateTimeRange = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
+    val data = formData.bindFromRequest.get
+
+    val fromDate: DateTime = new DateTime(data.fromDate)
+    val toDate: DateTime = new DateTime(data.toDate)
+
     import services.job.ReindexActivityJobHelper._
-
-    val fromDate: DateTime = DateTime.parse("2010-11-01T01:00+02:00")
-    val toDate: DateTime = DateTime.parse("2017-12-01T01:00+02:00")
-
     val jobDetail = JobBuilder
       .newJob()
       .ofType(jobType)
@@ -45,8 +56,8 @@ class ActivityToESController @Inject()(
       .build()
     scheduler.triggerJobNow(jobDetail)
 
-    Ok(views.html.admin.elasticsearch.index())
+    Ok(views.html.admin.elasticsearch.index(formData))
   }
 }
 
-case class formData(fromDate: DateTime, toDate: DateTime)
+case class ActivityToESControllerFormData(fromDate: String, toDate: String)
