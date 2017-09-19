@@ -1,0 +1,15 @@
+@import system.RequestContext
+@()(implicit context: RequestContext)
+@common.admin("Administration") {
+  <header>
+    @context.csrfHelper.metaElementToken
+    @context.csrfHelper.metaElementHeader
+  </header>
+  <p>
+    click the button will reindex all activities to elasticsearch.
+  </p>
+  <form method="post" action="/admin/elasticsearch/reindexall">
+    @context.csrfHelper.formField
+    <input type="submit" />
+  </form>
+}
