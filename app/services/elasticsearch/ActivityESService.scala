@@ -11,6 +11,7 @@ import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
+import org.joda.time.DateTime
 import services.{AudienceService, PublisherService}
 import warwick.core.Logging
 import warwick.sso.Usercode
@@ -19,7 +20,7 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 
 @ImplementedBy(classOf[ActivityESServiceImpl])
 trait ActivityESService {
-  def index(req: IndexActivityRequest) : Future[Unit]
+  def index(req: IndexActivityRequest): Future[Unit]
 
   def index(requests: Seq[IndexActivityRequest]): Future[Unit]
 
@@ -62,8 +63,11 @@ class ActivityESServiceImpl @Inject()(
       val helper = ActivityESServiceIndexHelper
 
       val docBuilder = helper.elasticSearchContentBuilderFromActivityDocument(activityDocument)
-      val indexName = helper.indexNameForDateTime(activity.publishedAt, activity.shouldNotify)
+
+      val indexName = helper.indexNameForActivity(activity)
+
       val indexRequest = helper.makeIndexRequest(indexName, helper.documentType, activity.id, docBuilder)
+
       bulkRequest.add(indexRequest)
     }
 
