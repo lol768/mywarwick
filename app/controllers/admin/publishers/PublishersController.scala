@@ -4,11 +4,12 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import controllers.BaseController
-import models.publishing.{PermissionScope, Publisher, PublisherSave}
+import models.publishing.{Publisher, PublisherSave}
 import play.api.data.Forms._
 import play.api.data._
+import play.api.data.validation.Constraints
 import play.api.i18n.{I18nSupport, MessagesApi}
-import services.{DepartmentInfoService, PublisherService, SecurityService}
+import services.{PublisherService, SecurityService}
 import system.Roles
 
 @Singleton
@@ -24,7 +25,9 @@ class PublishersController @Inject() (
   def allPublishers: Seq[Publisher] = publisherService.all
 
   def createPublisherIdForm = Form(mapping(
-    "id" -> nonEmptyText.verifying("ID already exists", id => !allPublishers.exists(_.id == id))
+    "id" -> nonEmptyText
+      .verifying(Constraints.pattern("[a-z-]+".r))
+      .verifying("ID already exists", id => !allPublishers.exists(_.id == id))
   )(s => s)(s => Option(s)))
 
   def publisherForm = Form(mapping(
