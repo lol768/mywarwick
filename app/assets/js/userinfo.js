@@ -7,6 +7,7 @@ import * as user from './state/user';
 import * as analytics from './analytics';
 import { fetchUserInfo, handleRedirects } from './userinfo-base';
 import { hasAuthoritativeAuthenticatedUser } from './state';
+import SettingsView from './components/views/SettingsView';
 
 export { fetchUserInfo } from './userinfo-base';
 
@@ -46,13 +47,26 @@ const feedbackFormLocation =
 export function showFeedbackForm(deviceDetails) {
   const state = store.getState();
   let userDetails = {};
-  if (state !== undefined && hasAuthoritativeAuthenticatedUser(state)) {
-    userDetails = {
-      usercode: state.user.data.usercode,
-      name: state.user.data.name,
+  let webVersion = {};
+  if (state !== undefined) {
+    if (hasAuthoritativeAuthenticatedUser(state)) {
+      userDetails = {
+        usercode: state.user.data.usercode,
+        name: state.user.data.name,
+      };
+    }
+    webVersion = {
+      version: state.app.assets.revision,
     };
   }
-  window.location = `${feedbackFormLocation}?${$.param(Object.assign(deviceDetails, userDetails))}`;
+  const nativeAppVersion = SettingsView.getNativeAppVersion();
+  const buildVersion = (nativeAppVersion) ? { build: nativeAppVersion } : {};
+  window.location = `${feedbackFormLocation}?${$.param(Object.assign(
+    deviceDetails,
+    userDetails,
+    buildVersion,
+    webVersion,
+  ))}`;
 }
 
 export function loadDeviceDetails() {
