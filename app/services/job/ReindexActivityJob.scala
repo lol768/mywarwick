@@ -14,7 +14,7 @@ import services.elasticsearch.{ActivityESService, IndexActivityRequest}
 class ReindexActivityJob @Inject()(
   activityESService: ActivityESService,
   activityService: ActivityService
-) extends JobReindexActivityJobHelper {
+) extends Job {
 
   def execute(context: JobExecutionContext) = {
     import ReindexActivityJobHelper._
@@ -35,7 +35,6 @@ object ReindexActivityJobHelper {
   val jobDateKeyForFromDate = "fromDate"
   val jobDateKeyForToDate = "toDate"
   val dateTimeFormat: DateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss")
-
 
   def getDateTimeRangeFromContext(context: JobExecutionContext): Map[String, DateTime] = {
     val data: JobDataMap = context.getJobDetail.getJobDataMap
