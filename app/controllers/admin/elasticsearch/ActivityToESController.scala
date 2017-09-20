@@ -30,8 +30,6 @@ class ActivityToESController @Inject()(
     )(ActivityToESControllerFormData.apply)(ActivityToESControllerFormData.unapply))
 
   def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-
-
     Ok(views.html.admin.elasticsearch.index(formData))
   }
 

@@ -1,6 +1,7 @@
 @import system.RequestContext
 @import controllers.admin.elasticsearch.ActivityToESControllerFormData
-@(formData: Form[ActivityToESControllerFormData])(implicit context: RequestContext)
+@import org.joda.time.DateTime
+@(formData: Form[ActivityToESControllerFormData], defaultTo: DateTime = DateTime.now(), defaultFrom: DateTime = DateTime.now().minusDays(7))(implicit context: RequestContext)
 @common.admin("Administration") {
   <header>
     @context.csrfHelper.metaElementToken
@@ -16,9 +17,9 @@
     <div class="form-group">
       <p>From</p>
       <div class="datetimepicker">
-        <input type="hidden" name="fromDate" />
+        <input type="hidden" name="fromDate" value="@defaultFrom.toString()" />
         <div class="input-group">
-          <input type="text" autocomplete="off" id="fromDate" class="form-control" />
+          <input type="text" autocomplete="off" id="fromDate" class="form-control" value="@defaultFrom.toString()" />
           <span class="input-group-addon">
             <span class="fa fa-calendar"></span>
           </span>
@@ -28,10 +29,10 @@
     <div class="form-group">
       <p>To</p>
       <div class="datetimepicker">
-        <input type="hidden" name="toDate" />
+        <input type="hidden" name="toDate" value="@defaultTo.toString()" />
         <div class="input-group">
-          <input type="text" autocomplete="off" id="toDate" class="form-control" />
-          <span class="input-group-addon">
+          <input type="text" autocomplete="off" id="toDate" class="form-control" value="@defaultTo.toString()" />
+          <span class=" input-group-addon">
             <span class="fa fa-calendar"></span>
           </span>
         </div>
