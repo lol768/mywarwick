@@ -15,7 +15,7 @@ import org.joda.time.DateTime
 import services.{AudienceService, PublisherService}
 import warwick.core.Logging
 import warwick.sso.Usercode
-
+import system.ThreadPools.elastic
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
 @ImplementedBy(classOf[ActivityESServiceImpl])
@@ -39,8 +39,6 @@ class ActivityESServiceImpl @Inject()(
   publisherService: PublisherService,
   elasticSearchAdminService: ElasticSearchAdminService
 ) extends ActivityESService with Logging {
-
-  import system.ThreadPools.elastic
 
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.activityEsTemplates, "activity_template_default")
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.alertEsTemplates, "alert_template_default")
@@ -100,7 +98,6 @@ class ActivityESServiceImpl @Inject()(
         searchResponsePromise.success(response)
       }
     })
-    import system.ThreadPools.elastic
     futureResponse
       .map(ActivityDocument.fromESSearchResponse)
       .recover {
