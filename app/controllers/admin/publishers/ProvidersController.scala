@@ -7,6 +7,7 @@ import controllers.BaseController
 import models.publishing.Publisher
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.data.validation.Constraints
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Result
 import services.{ProviderRender, ProviderSave, PublisherService, SecurityService}
@@ -25,7 +26,9 @@ class ProvidersController @Inject() (
   def allProviders(publisherId: String): Seq[ProviderRender] = publisherService.getProviders(publisherId)
 
   def createProviderIdForm(publisherId: String) = Form(mapping(
-    "id" -> nonEmptyText.verifying("ID already exists", id => !allProviders(publisherId).exists(_.id == id))
+    "id" -> nonEmptyText
+      .verifying(Constraints.pattern("[a-z-]+".r))
+      .verifying("ID already exists", id => !allProviders(publisherId).exists(_.id == id))
   )(s => s)(s => Option(s)))
 
   def providerForm = Form(mapping(
