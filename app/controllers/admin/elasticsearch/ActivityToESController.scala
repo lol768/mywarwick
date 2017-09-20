@@ -26,31 +26,58 @@ class ActivityToESController @Inject()(
 
   val formData = Form(
     mapping(
-      "fromDate" -> text,
-      "toDate" -> text
-    )(ActivityToESControllerFormData.apply)(ActivityToESControllerFormData.unapply))
+      "fromDate" -> default(jodaDate("yyyy-MM-dd'T'HH:mm:ss"), defaultFormData.fromDate),
+      "toDate" -> default(jodaDate("yyyy-MM-dd'T'HH:mm:ss"), defaultFormData.toDate)
+    )(ActivityToESControllerFormData.apply)(ActivityToESControllerFormData.unapply) verifying(
+      """"From" date must be before "To" date""",
+      fields => fields match {
+        case data => ActivityToESControllerFormData.validate(data.fromDate, data.toDate).isDefined
+      })
+  )
+
+  def defaultFormData = {
+    val defaultTo = DateTime.now()
+    val defaultFrom = defaultTo.minusDays(7)
+    ActivityToESControllerFormData(defaultFrom, defaultTo)
+  }
 
   def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    Ok(views.html.admin.elasticsearch.index(formData))
+    Ok(views.html.admin.elasticsearch.index(formData, defaultFormData))
   }
 
   def reindexActivitiesInDateTimeRange = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    val data = formData.bindFromRequest.get
 
-    val fromDate: DateTime = new DateTime(data.fromDate)
-    val toDate: DateTime = new DateTime(data.toDate)
+    formData.bindFromRequest.fold(
+      formError => {
+        Redirect(controllers.admin.elasticsearch.routes.ActivityToESController.index()).flashing("error" -> formError.errors.map(_.message).mkString(", "))
+      },
+      data => {
+        // do something with the data
+        val fromDate: DateTime = data.fromDate
+        val toDate: DateTime = data.toDate
 
-    import services.job.ReindexActivityJobHelper._
-    val jobDetail = JobBuilder
-      .newJob()
-      .ofType(jobType)
-      .withIdentity(jobId)
-      .usingJobData(jobDateKeyForFromDate, fromDate.toString(dateTimeFormat))
-      .usingJobData(jobDateKeyForToDate, toDate.toString(dateTimeFormat))
-      .build()
-    scheduler.triggerJobNow(jobDetail)
-    Redirect(controllers.admin.elasticsearch.routes.ActivityToESController.index()).flashing("success" -> "The task is now added to scheduler queue.")
+        import services.job.ReindexActivityJobHelper._
+        val jobDetail = JobBuilder
+          .newJob()
+          .ofType(jobType)
+          .withIdentity(jobId)
+          .usingJobData(jobDateKeyForFromDate, fromDate.toString(dateTimeFormat))
+          .usingJobData(jobDateKeyForToDate, toDate.toString(dateTimeFormat))
+          .build()
+        scheduler.triggerJobNow(jobDetail)
+        Redirect(controllers.admin.elasticsearch.routes.ActivityToESController.index()).flashing("success" -> "The task is now added to scheduler queue.")
+      }
+    )
   }
 }
 
-case class ActivityToESControllerFormData(fromDate: String, toDate: String)
+case class ActivityToESControllerFormData(fromDate: DateTime, toDate: DateTime)
+
+object ActivityToESControllerFormData {
+  def validate(fromDate: DateTime, toDate: DateTime) = {
+    toDate.isAfter(fromDate) match {
+      case true => Some(ActivityToESControllerFormData(fromDate, toDate))
+      case _ => None
+    }
+  }
+}

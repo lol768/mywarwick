@@ -1,14 +1,14 @@
 @import system.RequestContext
 @import controllers.admin.elasticsearch.ActivityToESControllerFormData
 @import org.joda.time.DateTime
-@(formData: Form[ActivityToESControllerFormData], defaultTo: DateTime = DateTime.now(), defaultFrom: DateTime = DateTime.now().minusDays(7))(implicit context: RequestContext)
+@(formData: Form[ActivityToESControllerFormData], defaultForm: ActivityToESControllerFormData)(implicit context: RequestContext)
 @common.admin("Administration") {
   <header>
     @context.csrfHelper.metaElementToken
     @context.csrfHelper.metaElementHeader
   </header>
 
-  <form class="form" method="post" action="/admin/elasticsearch/reindex">
+  <form class="form" method="post" action="/admin/elasticsearch/reindex" >
     <p>
       Choose desired time range for activities that need to be indexed by ElasticSearch
     </p>
@@ -17,9 +17,9 @@
     <div class="form-group">
       <p>From</p>
       <div class="datetimepicker">
-        <input type="hidden" name="fromDate" value="@defaultFrom.toString()" />
+        <input type="hidden" name="fromDate" value="@formData.value.getOrElse(defaultForm).fromDate.toString()" />
         <div class="input-group">
-          <input type="text" autocomplete="off" id="fromDate" class="form-control" value="@defaultFrom.toString()" />
+          <input type="text" autocomplete="off" id="fromDate" class="form-control" value="@formData.value.getOrElse(defaultForm).fromDate.toString()" />
           <span class="input-group-addon">
             <span class="fa fa-calendar"></span>
           </span>
@@ -29,10 +29,10 @@
     <div class="form-group">
       <p>To</p>
       <div class="datetimepicker">
-        <input type="hidden" name="toDate" value="@defaultTo.toString()" />
+        <input type="hidden" name="toDate" value="@formData.value.getOrElse(defaultForm).toDate.toString()" />
         <div class="input-group">
-          <input type="text" autocomplete="off" id="toDate" class="form-control" value="@defaultTo.toString()" />
-          <span class=" input-group-addon">
+          <input type="text" autocomplete="off" id="toDate" class="form-control" value="@formData.value.getOrElse(defaultForm).toDate.toString()" />
+          <span class="input-group-addon">
             <span class="fa fa-calendar"></span>
           </span>
         </div>
