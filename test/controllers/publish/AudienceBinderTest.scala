@@ -156,6 +156,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
     "raise error message when binding with invalid department audience" in {
 
       val departmentCode = "AH"
+      // this value does not match any defined dept subset types so we attempt to validate it as a Usercode
       val unrecognisedAudience = "Dept:TeachingApple"
       val audience = Seq(
         unrecognisedAudience,
@@ -168,9 +169,14 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       )
       val departmentInfoDao = mock[DepartmentInfoDao]
       when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
-      val audienceBinder = new AudienceBinder(departmentInfoDao, null)
 
-      audienceBinder.bindAudience(audienceData)(null).futureValue mustBe Left(Seq(FormError("audience", "error.audience.invalid", Seq(unrecognisedAudience))))
+      val audienceService = mock[AudienceService]
+      when(audienceService.validateUsercodes(Seq(Usercode("TeachingApple")))).thenReturn(Seq.empty[Usercode])
+
+      val audienceBinder = new AudienceBinder(departmentInfoDao, audienceService)
+
+      audienceBinder.bindAudience(audienceData)(null).futureValue mustBe
+        Left(Seq(FormError("audience", Seq("error.audience.usercodes.invalid"), Seq("TeachingApple"))))
     }
 
     "raise error message when binding with invalid non-department audience" in {

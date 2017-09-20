@@ -18,6 +18,7 @@ export default class MultilineTextInput extends React.PureComponent {
     cols: PropTypes.number,
     items: PropTypes.arrayOf(PropTypes.string),
     type: PropTypes.string,
+    valuePrefix: PropTypes.string,
   };
 
   constructor(props) {
@@ -31,16 +32,25 @@ export default class MultilineTextInput extends React.PureComponent {
   }
 
   render() {
+    const itemString = this.props.items.join('\r\n');
+
     return (
-      <textarea
-        className="form-control"
-        onChange={this.handleTextChange}
-        name={this.props.items.length ? this.props.name : ''} // don't appear as submittable form field if no value
-        placeholder={this.props.placeholder}
-        rows={this.props.rows}
-        cols={this.props.cols}
-        defaultValue={this.props.items.join('\n')}
-      />
+      <div>
+        <textarea
+          name={this.props.items.length ? this.props.name : ''} // don't appear as submittable form field if no value
+          hidden
+          readOnly
+          value={`${this.props.valuePrefix}${itemString}`}
+        />
+        <textarea
+          className="form-control"
+          onChange={this.handleTextChange}
+          placeholder={this.props.placeholder}
+          rows={this.props.rows}
+          cols={this.props.cols}
+          defaultValue={itemString}
+        />
+      </div>
     );
   }
 }

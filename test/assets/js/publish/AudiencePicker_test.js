@@ -74,7 +74,7 @@ describe('AudiencePicker', () => {
     expect(radioButtons.children().at(1).prop('label')).to.eql('People within a particular department');
   });
 
-  it('populates update from from props.formData and serialises form values correctly', () => {
+  it('populates update from props.formData and serialises form values correctly', () => {
     const formData = {
       department: 'FU',
       audience: {
@@ -127,10 +127,10 @@ describe('AudiencePicker', () => {
       , []);
 
     const expectedAudienceValues = [
-      'cusjau\r\nu1234567',
-      'Relationship:supervisor:1234567',
-      'SeminarGroup:12d779c3-aafd-4883-9c1d-cacfdba37974',
-      'Module:CS118',
+      'Dept:cusjau\r\nu1234567',
+      'Dept:Relationship:supervisor:1234567',
+      'Dept:SeminarGroup:12d779c3-aafd-4883-9c1d-cacfdba37974',
+      'Dept:Module:CS118',
       'Dept:TaughtPostgrads',
       'Dept:TeachingStaff'];
 

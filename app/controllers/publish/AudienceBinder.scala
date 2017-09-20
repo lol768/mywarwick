@@ -51,16 +51,18 @@ class AudienceBinder @Inject()(
           None
       }
 
-      val globalComponents = nonDeptComponents.flatMap {
-        case UsercodesAudience(usercodes) => {
-          val invalidUsercodes = usercodes.diff(audienceService.validateUsercodes(usercodes))
-          if (invalidUsercodes.isEmpty)
-            Some(UsercodesAudience(usercodes))
-          else {
-            errors :+= FormError("audience", "error.audience.usercodes.invalid", Seq(invalidUsercodes.map(_.string).mkString(", ")))
-            None
-          }
+      def validateUsercodesAudience(component: UsercodesAudience): Option[UsercodesAudience] = {
+        val invalidUsercodes = component.usercodes.diff(audienceService.validateUsercodes(component.usercodes))
+        if (invalidUsercodes.isEmpty)
+          Some(UsercodesAudience(component.usercodes))
+        else {
+          errors :+= FormError("audience", "error.audience.usercodes.invalid", Seq(invalidUsercodes.map(_.string).mkString(", ")))
+          None
         }
+      }
+
+      val globalComponents = nonDeptComponents.flatMap {
+        case ua: UsercodesAudience => validateUsercodesAudience(ua)
         case component: Audience.Component => Some(component)
       }
 
@@ -71,6 +73,10 @@ class AudienceBinder @Inject()(
           case unrecognised =>
             errors :+= FormError("audience", "error.audience.invalid", Seq(s"Dept:$unrecognised"))
             None
+        }
+        .flatMap {
+          case ua: UsercodesAudience => validateUsercodesAudience(ua)
+          case ds: DepartmentSubset => Some(ds)
         }
 
       val departmentParam = data.department.filter(StringUtils.hasText).map(_.trim)
