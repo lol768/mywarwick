@@ -24,6 +24,11 @@ class ActivityToESController @Inject()(
   import play.api.data._
   import play.api.data.Forms._
 
+  object FormField {
+    val from = "fromDate"
+    val to = "toDate"
+  }
+
   val formData = Form(
     mapping(
       "fromDate" -> default(jodaDate("yyyy-MM-dd'T'HH:mm:ss"), defaultFormData.fromDate),
@@ -42,14 +47,21 @@ class ActivityToESController @Inject()(
   }
 
   def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    Ok(views.html.admin.elasticsearch.index(formData, defaultFormData))
+    val fromDate = DateTime.parse(request.flash.data.getOrElse(FormField.from, defaultFormData.fromDate.toString()))
+    val toDate = DateTime.parse(request.flash.data.getOrElse(FormField.to, defaultFormData.toDate.toString()))
+    Ok(views.html.admin.elasticsearch.index(formData, ActivityToESControllerFormData(fromDate, toDate)))
   }
 
   def reindexActivitiesInDateTimeRange = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
 
     formData.bindFromRequest.fold(
       formError => {
-        Redirect(controllers.admin.elasticsearch.routes.ActivityToESController.index()).flashing("error" -> formError.errors.map(_.message).mkString(", "))
+        Redirect(controllers.admin.elasticsearch.routes.ActivityToESController.index())
+          .flashing(
+            "error" -> formError.errors.map(_.message).mkString(", "),
+            "fromDate" -> formError.data.getOrElse(FormField.from, defaultFormData.fromDate).toString,
+            "toDate" -> formError.data.getOrElse(FormField.to, defaultFormData.toDate).toString
+          )
       },
       data => {
         // do something with the data

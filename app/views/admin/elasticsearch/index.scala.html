@@ -17,9 +17,9 @@
     <div class="form-group">
       <p>From</p>
       <div class="datetimepicker">
-        <input type="hidden" name="fromDate" value="@formData.value.getOrElse(defaultForm).fromDate.toString()" />
+        <input type="hidden" name="fromDate" value="@formData.value.getOrElse(defaultForm).fromDate.toString("yyyy-MM-dd'T'HH:mm:ss")" />
         <div class="input-group">
-          <input type="text" autocomplete="off" id="fromDate" class="form-control" value="@formData.value.getOrElse(defaultForm).fromDate.toString()" />
+          <input type="text" autocomplete="off" id="fromDate" class="form-control" value="@formData.value.getOrElse(defaultForm).fromDate.toString("yyyy-MM-dd'T'HH:mm:ss")" />
           <span class="input-group-addon">
             <span class="fa fa-calendar"></span>
           </span>
@@ -29,9 +29,9 @@
     <div class="form-group">
       <p>To</p>
       <div class="datetimepicker">
-        <input type="hidden" name="toDate" value="@formData.value.getOrElse(defaultForm).toDate.toString()" />
+        <input type="hidden" name="toDate" value="@formData.value.getOrElse(defaultForm).toDate.toString("yyyy-MM-dd'T'HH:mm:ss")" />
         <div class="input-group">
-          <input type="text" autocomplete="off" id="toDate" class="form-control" value="@formData.value.getOrElse(defaultForm).toDate.toString()" />
+          <input type="text" autocomplete="off" id="toDate" class="form-control" value="@formData.value.getOrElse(defaultForm).toDate.toString("yyyy-MM-dd'T'HH:mm:ss")" />
           <span class="input-group-addon">
             <span class="fa fa-calendar"></span>
           </span>
