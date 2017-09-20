@@ -106,12 +106,12 @@ class ActivityDaoImpl @Inject()(
     SQL(
       """
          SELECT * from ACTIVITY
-         WHERE PUBLISHED_AT >= TO_DATE({from}, 'YYYY-MM-DD"T"HH24:MI:SS')
-         AND PUBLISHED_AT <= TO_DATE({to}, 'YYYY-MM-DD"T"HH24:MI:SS')
+         WHERE PUBLISHED_AT >= {from}
+         AND PUBLISHED_AT <= {to}
       """
     ).on(
-      'from -> from.toString("yyyy-MM-dd'T'HH:mm:ss"),
-      'to -> to.toString("yyyy-MM-dd'T'HH:mm:ss")
+      'from -> from,
+      'to -> to
     ).as(activityParser.*)
   }
 
