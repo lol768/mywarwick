@@ -29,7 +29,7 @@
   <form action="/sso/masquerade" method="post">
     @context.csrfHelper.formField
     <div class="input-group" style="max-width: 300px">
-      <input type="text" class="form-control" name="usercode" placeholder="Type a usercode" autofocus autocomplete="off">
+      <input type="text" class="form-control flexi-picker" data-include-groups="false" data-include-emails="false" name="usercode" placeholder="Type a usercode" autofocus autocomplete="off">
       <span class="input-group-btn">
         <button class="btn btn-default" type="submit">
           <i class="fa fa-fw fa-user-secret"></i>
