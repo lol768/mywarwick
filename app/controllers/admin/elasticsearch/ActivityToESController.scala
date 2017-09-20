@@ -5,6 +5,7 @@ import javax.inject.{Inject, Singleton}
 import controllers.BaseController
 import org.joda.time.DateTime
 import org.quartz.{JobBuilder, JobKey}
+import play.mvc.Http.Flash
 import services.elasticsearch.ActivityESService
 import services.job.ReindexActivityJob
 import services.{ActivityService, SchedulerService, SecurityService}
@@ -48,8 +49,7 @@ class ActivityToESController @Inject()(
       .usingJobData(jobDateKeyForToDate, toDate.toString(dateTimeFormat))
       .build()
     scheduler.triggerJobNow(jobDetail)
-
-    Ok(views.html.admin.elasticsearch.index(formData))
+    Redirect(controllers.admin.elasticsearch.routes.ActivityToESController.index()).flashing("success" -> "The task is now added to sceduler.")
   }
 }
 

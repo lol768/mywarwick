@@ -16,7 +16,7 @@ class ReindexActivityJob @Inject()(
   activityService: ActivityService
 ) extends JobReindexActivityJobHelper {
 
-  override def execute(context: JobExecutionContext) = {
+  def execute(context: JobExecutionContext) = {
     import ReindexActivityJobHelper._
 
     val dateTimeRange = getDateTimeRangeFromContext(context)
