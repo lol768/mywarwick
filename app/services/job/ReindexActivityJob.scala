@@ -14,9 +14,11 @@ import services.elasticsearch.{ActivityESService, IndexActivityRequest}
 class ReindexActivityJob @Inject()(
   activityESService: ActivityESService,
   activityService: ActivityService
-) extends Job with ReindexActivityJobHelper {
+) extends JobReindexActivityJobHelper {
 
   override def execute(context: JobExecutionContext) = {
+    import ReindexActivityJobHelper._
+
     val dateTimeRange = getDateTimeRangeFromContext(context)
     val activities = activityService.getActivitiesForDateTimeRange(
       dateTimeRange.get(jobDateKeyForFromDate).orNull,
@@ -26,7 +28,7 @@ class ReindexActivityJob @Inject()(
   }
 }
 
-trait ReindexActivityJobHelper {
+object ReindexActivityJobHelper {
 
   val jobType: Class[ReindexActivityJob] = classOf[ReindexActivityJob]
   val jobId = new JobKey(UUID.randomUUID().toString, "ReindexActivityJob")
@@ -45,5 +47,3 @@ trait ReindexActivityJobHelper {
     )
   }
 }
-
-object ReindexActivityJobHelper extends ReindexActivityJobHelper
