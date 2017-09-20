@@ -1,21 +1,16 @@
 package controllers.admin.elasticsearch
 
-import java.util.Date
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import controllers.BaseController
-import models.Activity
 import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormatter
 import org.quartz.{JobBuilder, JobKey}
-import services.elasticsearch.{ActivityESService, IndexActivityRequest}
+import services.elasticsearch.ActivityESService
 import services.job.ReindexActivityJob
 import services.{ActivityService, SchedulerService, SecurityService}
 import system.Roles
 
-import scala.collection.immutable.Queue
-
-@Inject
+@Singleton
 class ActivityToESController @Inject()(
   security: SecurityService,
   activityService: ActivityService,
