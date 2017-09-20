@@ -80,7 +80,7 @@ class ActivityESServiceImpl @Inject()(
   override def search(input: ActivityESSearchQuery): Future[Seq[ActivityDocument]] = {
     val helper = ActivityESServiceSearchHelper
 
-    val searchRequest = new SearchRequest(ActivityESServiceSearchHelper.indexNameForAllTime())
+    val searchRequest = new SearchRequest(ActivityESServiceSearchHelper.indexNameForActivitySearchQuery(input))
     val boolQueryBuilder: BoolQueryBuilder = helper.makeBoolQueryBuilder(input)
     val searchSourceBuilder: SearchSourceBuilder = helper.makeSearchSourceBuilder(boolQueryBuilder)
 

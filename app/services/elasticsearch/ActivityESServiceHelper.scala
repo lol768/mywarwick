@@ -6,7 +6,7 @@ import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
 import org.elasticsearch.search.builder.SearchSourceBuilder
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Interval}
 import play.api.libs.json.{JsValue, Json}
 
 trait ActivityESServiceHelper {
@@ -46,7 +46,7 @@ trait ActivityESServiceHelper {
 
   def indexNameForActivity(activity: Activity): String = {
     activity.publishedAt match {
-      case e:DateTime => indexNameForDateTime(e, activity.shouldNotify)
+      case e: DateTime => indexNameForDateTime(e, activity.shouldNotify)
       case _ => indexNameToday(activity.shouldNotify)
     }
   }
@@ -167,6 +167,56 @@ object ActivityESServiceUpdateHelper extends ActivityESServiceHelper {
 object ActivityESServiceDeleteHelper extends ActivityESServiceHelper
 
 object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
+
+  def indexNameForActivitySearchQuery(query: ActivityESSearchQuery): String = {
+    val indexForInterval: Option[String] = query.publish_at.map {
+      case e: Interval => partialIndexNameForInterval(e)
+      case _ => "*"
+    }
+
+    val indexForActivityType: Option[String] = query.isAlert.map {
+      case i: Boolean => partialIndexNameForActivityType(i)
+      case _ => "*"
+    }
+
+    (for {
+      nameForType <- indexForActivityType
+      nameForInterval <- indexForInterval
+    } yield {
+      s"${nameForInterval}_${nameForInterval}"
+    }).getOrElse("*")
+  }
+
+  def partialIndexNameForActivityType(isAlert: Boolean): String = {
+    isAlert match {
+      case true => "alert"
+      case false => "activity"
+    }
+  }
+
+  def partialIndexNameForInterval(interval: Interval): String = {
+    val start = interval.getStart
+    val end = interval.getEnd
+
+    val startYear = interval.getStart.getYear
+    val endYear = interval.getEnd.getYear
+
+    if (startYear == endYear) {
+      val sameYear = startYear
+      val startMonth = start.getMonthOfYear
+      val endMonth = end.getMonthOfYear
+
+      if (startMonth == endMonth) {
+        val sameMonth = startMonth
+        s"${sameYear}_${sameMonth}"
+      } else {
+        s"${sameYear}*"
+      }
+    } else {
+      "*"
+    }
+
+  }
 
   def makeSearchSourceBuilder(queryBuilder: QueryBuilder): SearchSourceBuilder = {
     val searchSourceBuilder = new SearchSourceBuilder()

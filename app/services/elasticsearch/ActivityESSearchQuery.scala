@@ -13,5 +13,6 @@ case class ActivityESSearchQuery(
   publish_at: Option[Interval] = None,
   publisher: Option[String] = None,
   audienceComponents: Option[Seq[String]] = None,
-  resolvedUsers: Option[Seq[String]] = None
+  resolvedUsers: Option[Seq[String]] = None,
+  isAlert: Option[Boolean] = None,
 )
