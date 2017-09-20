@@ -87,18 +87,10 @@ class ActivityESServiceImpl @Inject()(
     searchRequest.types(ActivityESServiceSearchHelper.documentType)
     searchRequest.source(searchSourceBuilder)
 
-    val searchResponsePromise: Promise[SearchResponse] = Promise[SearchResponse]
-    val futureResponse: Future[SearchResponse] = searchResponsePromise.future
-    client.searchAsync(searchRequest, new ActionListener[SearchResponse] {
-      override def onFailure(e: Exception) = {
-        searchResponsePromise.failure(e)
-      }
+    val listener = new FutureActionListener[SearchResponse]
+    client.searchAsync(searchRequest, listener)
 
-      override def onResponse(response: SearchResponse) = {
-        searchResponsePromise.success(response)
-      }
-    })
-    futureResponse
+    listener.future
       .map(ActivityDocument.fromESSearchResponse)
       .recover {
         case exception =>
