@@ -8,10 +8,6 @@
 }
 
 @common.admin("Administration") {
-  <header>
-    @context.csrfHelper.metaElementToken
-    @context.csrfHelper.metaElementHeader
-  </header>
 
   @if(formData.hasGlobalErrors) {
     @for(error <- formData.globalErrors) {
