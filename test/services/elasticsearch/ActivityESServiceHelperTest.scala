@@ -67,6 +67,71 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
   }
 
   "ActivityESServiceSearchHelper" should {
+    import ActivityESServiceSearchHelper._
+
+    "give index names according to activity type" in new Scope {
+
+      ActivityESServiceSearchHelper.partialIndexNameForActivityType(true) must be("alert")
+      ActivityESServiceSearchHelper.partialIndexNameForActivityType(false) must be("activity")
+
+    }
+
+    "give correct index name based on datetime interval" in new Scope {
+
+      val `20170701`: DateTime = new DateTime().withYear(2017).withMonthOfYear(7).withDayOfMonth(1)
+      val `20170801`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(1)
+
+      val sameYearDifferentMonthInterval = new Interval(`20170701`, `20170801`)
+
+      partialIndexNameForInterval(sameYearDifferentMonthInterval) must be("2017*")
+
+      val `20150801`: DateTime = new DateTime().withYear(2015).withMonthOfYear(8).withDayOfMonth(1)
+      val `20160801`: DateTime = new DateTime().withYear(2016).withMonthOfYear(8).withDayOfMonth(1)
+
+      val differentYear = new Interval(`20150801`, `20160801`)
+
+      partialIndexNameForInterval(differentYear) must be("*")
+
+      val `20170810`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(10)
+      val `20170829`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(29)
+
+      val sameYearSameMonth = new Interval(`20170810`, `20170829`)
+      partialIndexNameForInterval(sameYearSameMonth) must be("2017_08")
+
+    }
+
+    "generate correct index for query with no interval or type" in new Scope {
+      val query1 = ActivityESSearchQuery()
+      indexNameForActivitySearchQuery(query1) must be("*")
+    }
+
+    "generate correct index for query with type but no interval" in new Scope {
+      val query2 = ActivityESSearchQuery(isAlert = Some(true))
+      indexNameForActivitySearchQuery(query2) must be("alert_*")
+    }
+
+    "generate correct index for query with type and interval" in new Scope {
+
+      val `20170810`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(10)
+      val `20170829`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(29)
+
+      val query3 = ActivityESSearchQuery(
+        isAlert = Some(true),
+        publish_at = Some(new Interval(`20170810`, `20170829`))
+      )
+      indexNameForActivitySearchQuery(query3) must be("alert_2017_08")
+    }
+
+    "generate correct index for a with interval but no type" in new Scope {
+
+      val `20170810`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(10)
+      val `20170829`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(29)
+
+      val query4 = ActivityESSearchQuery(
+        publish_at = Some(new Interval(`20170810`, `20170829`))
+      )
+      indexNameForActivitySearchQuery(query4) must be("*_2017_08")
+    }
 
     "build an empty query if the supplied ActivityESSearchQuery is empty" in new Scope {
 
@@ -348,7 +413,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
       val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
 
-      val expect =Json.parse(
+      val expect = Json.parse(
         """
            {
              "bool": {

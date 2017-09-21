@@ -169,22 +169,20 @@ object ActivityESServiceDeleteHelper extends ActivityESServiceHelper
 object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 
   def indexNameForActivitySearchQuery(query: ActivityESSearchQuery): String = {
-    val indexForInterval: Option[String] = query.publish_at.map {
-      case e: Interval => partialIndexNameForInterval(e)
+    val indexForInterval = query.publish_at match {
+      case i: Some[Interval] => i.map(partialIndexNameForInterval).getOrElse("*")
       case _ => "*"
     }
 
-    val indexForActivityType: Option[String] = query.isAlert.map {
-      case i: Boolean => partialIndexNameForActivityType(i)
+    val indexForActivityType = query.isAlert match {
+      case i: Some[Boolean] => i.map(partialIndexNameForActivityType).getOrElse("*")
       case _ => "*"
     }
 
-    (for {
-      nameForType <- indexForActivityType
-      nameForInterval <- indexForInterval
-    } yield {
-      s"${nameForInterval}_${nameForInterval}"
-    }).getOrElse("*")
+    (indexForActivityType, indexForInterval) match {
+      case ("*", "*") => "*"
+      case _ => s"${indexForActivityType}_${indexForInterval}"
+    }
   }
 
   def partialIndexNameForActivityType(isAlert: Boolean): String = {
@@ -203,8 +201,8 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 
     if (startYear == endYear) {
       val sameYear = startYear
-      val startMonth = start.getMonthOfYear
-      val endMonth = end.getMonthOfYear
+      val startMonth = start.toString("MM")
+      val endMonth = end.toString("MM")
 
       if (startMonth == endMonth) {
         val sameMonth = startMonth
