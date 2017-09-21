@@ -9,14 +9,10 @@ import uk.ac.warwick.util.core.jodatime.DateTimeUtils.Callback
 
 
 class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
-
-  class Scope {
-
-  }
-
+  
   "ActivityESServiceHelper" should {
 
-    "produce correct monthly index name for alerts and activity" in new Scope {
+    "produce correct monthly index name for alerts and activity" in {
 
       DateTimeUtils.useMockDateTime(DateTime.parse("2016-06-30T01:20"), new Callback {
         override def doSomething() = {
@@ -30,7 +26,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     }
 
-    "produce correct all time index name for alerts and activity" in new Scope {
+    "produce correct all time index name for alerts and activity" in {
 
       ActivityESServiceHelper.indexNameForAllTime() must be("alert*")
 
@@ -41,7 +37,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
   "ActivityESServiceHelper" should {
 
-    "make elasticsearch document builder from activity document correctly" in new Scope {
+    "make elasticsearch document builder from activity document correctly" in {
 
       val activityDoc = ActivityDocument(
         "test0",
@@ -69,14 +65,14 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
   "ActivityESServiceSearchHelper" should {
     import ActivityESServiceSearchHelper._
 
-    "give index names according to activity type" in new Scope {
+    "give index names according to activity type" in {
 
       ActivityESServiceSearchHelper.partialIndexNameForActivityType(true) must be("alert")
       ActivityESServiceSearchHelper.partialIndexNameForActivityType(false) must be("activity")
 
     }
 
-    "give correct index name based on datetime interval" in new Scope {
+    "give correct index name based on datetime interval" in {
 
       val `20170701`: DateTime = new DateTime().withYear(2017).withMonthOfYear(7).withDayOfMonth(1)
       val `20170801`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(1)
@@ -100,17 +96,17 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     }
 
-    "generate correct index for query with no interval or type" in new Scope {
+    "generate correct index for query with no interval or type" in {
       val query1 = ActivityESSearchQuery()
       indexNameForActivitySearchQuery(query1) must be("*")
     }
 
-    "generate correct index for query with type but no interval" in new Scope {
+    "generate correct index for query with type but no interval" in {
       val query2 = ActivityESSearchQuery(isAlert = Some(true))
       indexNameForActivitySearchQuery(query2) must be("alert_*")
     }
 
-    "generate correct index for query with type and interval" in new Scope {
+    "generate correct index for query with type and interval" in {
 
       val `20170810`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(10)
       val `20170829`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(29)
@@ -122,7 +118,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
       indexNameForActivitySearchQuery(query3) must be("alert_2017_08")
     }
 
-    "generate correct index for a with interval but no type" in new Scope {
+    "generate correct index for a with interval but no type" in {
 
       val `20170810`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(10)
       val `20170829`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(29)
@@ -133,7 +129,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
       indexNameForActivitySearchQuery(query4) must be("*_2017_08")
     }
 
-    "build an empty query if the supplied ActivityESSearchQuery is empty" in new Scope {
+    "build an empty query if the supplied ActivityESSearchQuery is empty" in {
 
       val query = ActivityESSearchQuery()
 
@@ -152,7 +148,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
     }
 
 
-    "should have correct must term query for activity id" in new Scope {
+    "should have correct must term query for activity id" in {
 
       var query = ActivityESSearchQuery(Some("sdflsdkfj-sdflksdjf_1231"))
       val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
@@ -182,7 +178,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     }
 
-    "should have correct must query for provider id" in new Scope {
+    "should have correct must query for provider id" in {
 
       var query = ActivityESSearchQuery(None, Some("super-provider_id-id"))
       val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
@@ -210,7 +206,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
       Json.parse(result.toString()) must be(expect)
     }
 
-    "should have correct must term query for activity type" in new Scope {
+    "should have correct must term query for activity type" in {
 
       var query = ActivityESSearchQuery(None, None, Some("cool-activity-type"))
       val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
@@ -238,7 +234,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
       Json.parse(result.toString()) must be(expect)
     }
 
-    "should have correct must term query for publisher" in new Scope {
+    "should have correct must term query for publisher" in {
 
       var query = ActivityESSearchQuery(
         publisher = Some("cool-publisher")
@@ -269,7 +265,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
     }
 
 
-    "should have correct must match query for text" in new Scope {
+    "should have correct must match query for text" in {
 
       var query = ActivityESSearchQuery(text = Some("this and that"))
       val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
@@ -304,7 +300,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
     }
 
 
-    "should have correct must match query for title" in new Scope {
+    "should have correct must match query for title" in {
 
       var query = ActivityESSearchQuery(title = Some("wonderful title"))
       val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
@@ -339,7 +335,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
     }
 
 
-    "should have correct must query for published_at time range" in new Scope {
+    "should have correct must query for published_at time range" in {
 
       var range = new Interval(DateTime.parse("2017-09-13T12:33:28.855Z"), DateTime.parse("2017-09-13T12:35:28.855Z"))
 
@@ -374,7 +370,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
       Json.parse(result.toString()) must be(expect)
     }
 
-    "should have correct must term query for url" in new Scope {
+    "should have correct must term query for url" in {
 
       var query = ActivityESSearchQuery(
         url = Some("https://fake.fake.com")
@@ -404,7 +400,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
       Json.parse(result.toString()) must be(expect)
     }
 
-    "should have multiple should match queries for each element in audience components" in new Scope {
+    "should have multiple should match queries for each element in audience components" in {
 
 
       val query = ActivityESSearchQuery(
@@ -492,7 +488,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     }
 
-    "should have multiple should term quieres for each usercode in resolved users" in new Scope {
+    "should have multiple should term quieres for each usercode in resolved users" in {
 
       val query = ActivityESSearchQuery(
         activity_id = Some("123456"),

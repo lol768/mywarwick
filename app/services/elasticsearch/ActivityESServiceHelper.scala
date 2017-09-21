@@ -181,14 +181,14 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 
     (indexForActivityType, indexForInterval) match {
       case ("*", "*") => "*"
-      case _ => s"${indexForActivityType}_${indexForInterval}"
+      case _ => s"$indexForActivityType$separator$indexForInterval"
     }
   }
 
   def partialIndexNameForActivityType(isAlert: Boolean): String = {
     isAlert match {
-      case true => "alert"
-      case false => "activity"
+      case true => indexNameForAlert
+      case false => indexNameForActivity
     }
   }
 
