@@ -4,25 +4,25 @@ import javax.inject.{Inject, Singleton}
 
 import controllers.BaseController
 import org.joda.time.DateTime
-import org.quartz.{JobBuilder, JobKey}
-import play.mvc.Http.Flash
+import org.quartz.JobBuilder
+import play.api.i18n.{I18nSupport, MessagesApi}
 import services.elasticsearch.ActivityESService
-import services.job.ReindexActivityJob
 import services.{ActivityService, SchedulerService, SecurityService}
 import system.Roles
+import play.api.data._
+import play.api.data.Forms._
 
 @Singleton
 class ActivityToESController @Inject()(
   security: SecurityService,
   activityService: ActivityService,
   activityESService: ActivityESService,
-  scheduler: SchedulerService
-) extends BaseController {
+  scheduler: SchedulerService,
+  val messagesApi: MessagesApi
+) extends BaseController with I18nSupport {
 
   import Roles._
   import security._
-  import play.api.data._
-  import play.api.data.Forms._
 
   object FormField {
     val from = "fromDate"
@@ -31,8 +31,8 @@ class ActivityToESController @Inject()(
 
   val formData = Form(
     mapping(
-      "fromDate" -> default(jodaDate("yyyy-MM-dd'T'HH:mm:ss"), defaultFormData.fromDate),
-      "toDate" -> default(jodaDate("yyyy-MM-dd'T'HH:mm:ss"), defaultFormData.toDate)
+      "fromDate" -> jodaDate("yyyy-MM-dd'T'HH:mm:ss"),
+      "toDate" -> jodaDate("yyyy-MM-dd'T'HH:mm:ss")
     )(ActivityToESControllerFormData.apply)(ActivityToESControllerFormData.unapply) verifying(
       """"From" date must be before "To" date""",
       fields => fields match {
@@ -40,28 +40,18 @@ class ActivityToESController @Inject()(
       })
   )
 
-  def defaultFormData = {
+  def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     val defaultTo = DateTime.now()
     val defaultFrom = defaultTo.minusDays(7)
     ActivityToESControllerFormData(defaultFrom, defaultTo)
-  }
-
-  def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    val fromDate = DateTime.parse(request.flash.data.getOrElse(FormField.from, defaultFormData.fromDate.toString()))
-    val toDate = DateTime.parse(request.flash.data.getOrElse(FormField.to, defaultFormData.toDate.toString()))
-    Ok(views.html.admin.elasticsearch.index(formData, ActivityToESControllerFormData(fromDate, toDate)))
+    Ok(views.html.admin.elasticsearch.index(formData.fill(ActivityToESControllerFormData(defaultFrom, defaultTo))))
   }
 
   def reindexActivitiesInDateTimeRange = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
 
     formData.bindFromRequest.fold(
       formError => {
-        Redirect(controllers.admin.elasticsearch.routes.ActivityToESController.index())
-          .flashing(
-            "error" -> formError.errors.map(_.message).mkString(", "),
-            "fromDate" -> formError.data.getOrElse(FormField.from, defaultFormData.fromDate).toString,
-            "toDate" -> formError.data.getOrElse(FormField.to, defaultFormData.toDate).toString
-          )
+        Ok(views.html.admin.elasticsearch.index(formError))
       },
       data => {
         // do something with the data
