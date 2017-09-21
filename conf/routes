@@ -41,6 +41,10 @@ POST          /admin/publishers/:publisher/providers                @controllers
 GET           /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.updateForm(publisher: String, provider: String)
 POST          /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.update(publisher: String, provider: String)
 
+
+GET           /admin/elasticsearch/activity                  @controllers.admin.elasticsearch.ActivityToESController.index
+POST          /admin/elasticsearch/reindex                   @controllers.admin.elasticsearch.ActivityToESController.reindexActivitiesInDateTimeRange
+
 GET           /publish/:publisher/webgroups                  @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 
 GET           /publish                                       @controllers.publish.PublishersController.index
