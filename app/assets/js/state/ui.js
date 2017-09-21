@@ -5,6 +5,7 @@ import $ from 'jquery';
 import { goBack, replace } from 'react-router-redux';
 import _ from 'lodash-es';
 import { Routes } from '../components/AppRoot';
+import { createSelector } from 'reselect';
 
 /* eslint-disable */
 let mq;
@@ -20,13 +21,11 @@ function isNative() {
   return ('navigator' in window) && navigator.userAgent.indexOf('MyWarwick/') > -1;
 }
 
-const showBetaWarning = () => $('#app-container').attr('data-show-beta-warning') === 'true';
-
 const initialState = {
   layoutWidth: 2, // 2 columns by default
-  colourTheme: 'transparent',
+  colourTheme: 'transparent-1',
+  schemeColour: '#8C6E96',
   native: false,
-  showBetaWarning: false,
 };
 
 export function reducer(state = initialState, action) {
@@ -37,28 +36,22 @@ export function reducer(state = initialState, action) {
     case 'ui.navRequest':
       return { ...state, navRequest: action.navRequest };
     case 'ui.theme':
-      return { ...state, colourTheme: action.theme };
-    case 'ui.showBetaWarning':
-      if (action.showBetaWarning !== state.showBetaWarning) {
-        return { ...state, showBetaWarning: action.showBetaWarning };
-      }
-      return state;
+      return { ...state, colourTheme: action.colourTheme, schemeColour: action.schemeColour };
     default:
       return state;
   }
 }
 
-export function updateColourTheme(theme) {
+export function updateColourTheme(payload) {
   return {
     type: 'ui.theme',
-    theme,
+    ...payload,
   };
 }
 
 export function updateUIContext() {
   return (dispatch, getState) => {
     const state = getState();
-    const betaWarn = showBetaWarning();
     const native = isNative();
 
     if (native !== state.ui.native) {
@@ -67,14 +60,27 @@ export function updateUIContext() {
         native,
       });
     }
-
-    if (betaWarn !== state.ui.showBetaWarning) {
-      dispatch({
-        type: 'ui.showBetaWarning',
-        showBetaWarning: betaWarn,
-      });
-    }
   };
+}
+
+export function subscribeToStore(store) {
+  const themeSelector = createSelector(
+    state => state.colourSchemes.chosen,
+    (chosenId) => {
+      const chosenScheme = _.find(
+        store.getState().colourSchemes.schemes,
+        scheme => scheme.id === chosenId,
+      );
+      store.dispatch(updateColourTheme({
+        colourTheme: `transparent-${chosenId}`,
+        schemeColour: chosenScheme.schemeColour,
+      }));
+    },
+  );
+  store.subscribe(() => {
+    const state = store.getState();
+    themeSelector(state);
+  });
 }
 
 const scrollRestoreLookup = {};

@@ -7,12 +7,16 @@ import classNames from 'classnames';
 import { localMoment } from '../../dateFormats';
 import TileWrap from './TileWrap';
 import { TILE_SIZES } from '../tiles/TileContent';
+import wrapKeyboardSelect from '../../keyboard-nav';
+import $ from 'jquery';
+import HideableView from '../views/HideableView';
 
-export default class Tile extends React.PureComponent {
+export default class Tile extends HideableView {
   constructor(props) {
     super(props);
     this.state = {
       hasMounted: false,
+      zooming: false,
     };
 
     this.onClick = this.onClick.bind(this);
@@ -56,37 +60,60 @@ export default class Tile extends React.PureComponent {
   }
 
   onClickExpand(e) {
-    e.preventDefault();
-    this.props.onZoomIn(e);
+    wrapKeyboardSelect(() => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.setState({ zooming: true });
+    }, e);
   }
 
   onClick(e) {
-    if (e.target === this.refs.icon || e.target === this.refs.zoom) {
-      // Do not apply default click action to icon
-      return;
-    }
-
-    const { content, editingAny } = this.props;
-    e.stopPropagation();
-    if (editingAny) {
-      e.preventDefault();
-    } else if (content && content.href) {
-      if (window.navigator.userAgent.indexOf('MyWarwick/') >= 0) {
-        window.location = content.href;
-      } else {
-        window.open(content.href);
+    wrapKeyboardSelect(() => {
+      if (e.target === this.refs.icon || e.target === this.refs.zoom) {
+        // Do not apply default click action to icon
+        return;
       }
-    } else if (this.getContentInstance().expandsOnClick()) {
-      this.props.onZoomIn(e);
-    }
+
+      const { content, editingAny } = this.props;
+      e.stopPropagation();
+      if (editingAny) {
+        e.preventDefault();
+      } else if (content && this.getContentInstance().constructor.overridesOnClick()) {
+        this.getContentInstance().onClick();
+      } else if (content && content.href) {
+        if (window.navigator.userAgent.indexOf('MyWarwick/') >= 0) {
+          window.location = content.href;
+        } else {
+          window.open(content.href);
+        }
+      } else if (this.getContentInstance().constructor.expandsOnClick()) {
+        this.props.onZoomIn();
+      }
+    }, e);
   }
 
-  componentDidMount() {
+  componentDidHide() {
+    $(document.body).removeClass('tile-zooming');
+    this.setState({ zooming: false });
+  }
+
+  componentDidShow() {
     // Trigger an immediate re-render after the initial mount so we can access the content instance
 
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
       hasMounted: true,
     });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (!prevState.zooming && this.state.zooming) {
+      const $articleElement = $(this.articleElement);
+      $articleElement.on('transitionend.mywarwick', () => {
+        $articleElement.off('transitionend.mywarwick');
+        this.props.onZoomIn();
+      });
+      $(document.body).addClass('tile-zooming');
+    }
   }
 
   getContentInstance() {
@@ -104,7 +131,7 @@ export default class Tile extends React.PureComponent {
 
     const zoomIcon = () => {
       if (this.shouldDisplayExpandIcon()) {
-        return <i ref="zoom" className="fa fa-expand" role="button" tabIndex={0} onClick={this.onClickExpand} />;
+        return <i ref="zoom" className="fa fa-expand" role="button" tabIndex={0} onClick={this.onClickExpand} onKeyUp={this.onClickExpand} />;
       }
       return null;
     };
@@ -113,9 +140,22 @@ export default class Tile extends React.PureComponent {
 
     const clickProps = (content && content.href) ? {
       onClick: this.onClick,
+      onKeyUp: this.onClick,
       role: 'button',
       tabIndex: 0,
-    } : { onClick: this.onClick };
+    } : {
+      onClick: this.onClick,
+      onKeyUp: this.onClick,
+    };
+
+    const style = {};
+    if (this.state.zooming && this.articleElement) {
+      const thisOffset = $(this.articleElement).offset();
+      const meContainerOffset = $(this.articleElement).closest('.me-view-container').offset();
+      const scrollTop = $(document.body).prop('scrollTop');
+      style.top = (meContainerOffset.top - thisOffset.top) + scrollTop;
+      style.left = meContainerOffset.left - thisOffset.left;
+    }
 
     return (
       <div className={`tile__container tile--${type}__container`}>
@@ -126,15 +166,18 @@ export default class Tile extends React.PureComponent {
               'tile', `tile--${type}`, `tile--${size}`, `colour-${colour}`,
               {
                 'tile--editing': editing,
-                'tile--zoomed': zoomed,
+                'tile--zoomed': zoomed || this.state.zooming,
               }, tileSizeClasses,
             )
           }
+          ref={ (article) => { this.articleElement = article; }}
+          style={ style }
         >
           { this.getContentInstance() && this.getContentInstance().constructor.isRemovable() &&
             <div
               className="tile__edit-control top-left"
               onClick={ this.props.onHide }
+              onKeyUp={ this.props.onHide }
               role="button"
               tabIndex={0}
               title={ `Hide ${title}` }
@@ -146,6 +189,7 @@ export default class Tile extends React.PureComponent {
           <div
             className="tile__edit-control bottom-right"
             onClick={ this.props.onResize }
+            onKeyUp={ this.props.onResize }
             role="button"
             tabIndex={0}
             title={`Make tile ${_.last(supportedTileSizes) === size ? 'smaller' : 'bigger'}`}

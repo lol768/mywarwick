@@ -74,6 +74,9 @@ GET           /assets/*file                                  @controllers.Assets
 
 GET           /service-worker.js                             @controllers.Assets.at(path="/public", file="service-worker.js")
 
+# Android App Links
+GET           /.well-known/assetlinks.json                   @controllers.Assets.at(path="/public", file="assetlinks.json")
+
 GET           /api/news/feed                                 @controllers.api.ReadNewsController.feed(offset: Int ?= 0)
 GET           /api/news/feed.atom                            @controllers.api.ReadNewsController.atomFeed
 GET           /api/news/feed.rss                             @controllers.api.ReadNewsController.rssFeed

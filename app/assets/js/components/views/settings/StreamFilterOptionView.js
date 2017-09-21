@@ -4,6 +4,7 @@ import _ from 'lodash-es';
 import { connect } from 'react-redux';
 import * as notifications from '../../../state/notifications';
 import Switch from '../../ui/Switch';
+import wrapKeyboardSelect from '../../../keyboard-nav';
 
 class StreamFilterOptionView extends React.PureComponent {
   static propTypes = {
@@ -53,34 +54,39 @@ class StreamFilterOptionView extends React.PureComponent {
   }
 
   onClick(event) {
-    if (!this.props.isOnline) return;
-    const value = event.currentTarget.dataset.value;
-    const name = event.currentTarget.dataset.name;
-    const newOption = _.cloneDeep(this.state[name]);
-    newOption[value] = !newOption[value];
+    wrapKeyboardSelect(() => {
+      if (!this.props.isOnline) return;
+      const value = event.currentTarget.dataset.value;
+      const name = event.currentTarget.dataset.name;
+      const newOption = _.cloneDeep(this.state[name]);
+      newOption[value] = !newOption[value];
 
-    this.setState({ [name]: newOption }, () => this.props.saveFilter(this.state));
+      this.setState({ [name]: newOption }, () => this.props.saveFilter(this.state));
+    }, event);
   }
 
-  render() {
-    const { filterOptions } = this.props;
+  renderProvider() {
+    const providers = this.props.filterOptions.provider;
+    const plural = (this.props.filterType === 'Alerts') ? 'Alerts' : 'Activities';
+
+    if (providers.length === 0) {
+      return (
+        <div className="empty-state">
+          You haven&apos;t recorded any { plural.toLowerCase() } yet. When you do, you&apos;ll be
+          able to use this screen to choose which types of { this.props.filterType.toLowerCase() }
+          you&apos;d like to see on your { this.props.filterType } tab.
+        </div>
+      );
+    }
 
     return (
       <div>
-        <div className="list-group fixed setting-colour-2">
-          <div className="list-group-item">
-            <div className="list-group-item-heading">
-              <h3>{ `${this.props.filterType} filter` }</h3>
-            </div>
-          </div>
-        </div>
-
+        <p className="hint-text container-fluid">
+          On my { plural } tab, show { plural.toLowerCase() } that come from
+        </p>
         <div className="list-group">
-          <div className="list-group-item list-group-item--header">
-              Provider
-          </div>
           { _.map(
-            _.sortBy(filterOptions.provider, o => (o.displayName ? o.displayName : o.name)),
+            _.sortBy(providers, o => (o.displayName ? o.displayName : o.name)),
             option =>
               (<div
                 key={ `provider:${option.id}` }
@@ -90,6 +96,7 @@ class StreamFilterOptionView extends React.PureComponent {
                 role="button"
                 tabIndex={0}
                 onClick={ this.onClick }
+                onKeyUp={ this.onClick }
               >
                 <div className="media">
                   <div className="media-left">
@@ -114,6 +121,22 @@ class StreamFilterOptionView extends React.PureComponent {
               </div>),
           ) }
         </div>
+      </div>
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        <div className="list-group fixed setting-colour-2">
+          <div className="list-group-item">
+            <div className="list-group-item-heading">
+              <h3>{ `${this.props.filterType} filter` }</h3>
+            </div>
+          </div>
+        </div>
+
+        { this.renderProvider() }
       </div>
     );
   }

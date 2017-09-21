@@ -17,7 +17,7 @@ import ScrollRestore from '../ui/ScrollRestore';
 import { Routes } from '../AppRoot';
 import HideableView from './HideableView';
 import ActivityMutingView from './ActivityMutingView';
-
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 const SOME_MORE = 20;
 
@@ -211,9 +211,17 @@ class NotificationsView extends HideableView {
 
     return (
       <div>
-        {
-          this.renderMuting()
-        }
+        <ReactCSSTransitionGroup
+          transitionName="grow-shrink-modal"
+          transitionAppear
+          transitionAppearTimeout={200}
+          transitionEnter
+          transitionEnterTimeout={200}
+          transitionLeave
+          transitionLeaveTimeout={200}
+        >
+          { this.renderMuting() }
+        </ReactCSSTransitionGroup>
         { browserPushDisabled ?
           <div className="permission-warning">
             You have blocked My Warwick from showing system notifications. You&apos;ll need to open

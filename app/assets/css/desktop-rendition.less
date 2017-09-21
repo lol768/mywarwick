@@ -24,6 +24,7 @@ html.not-app .bg-stand-in {
   .marketing {
     user-select: text;
     position: fixed;
+    top: 0;
     align-items: center;
     justify-content: center;
     height: 100vh;
@@ -34,27 +35,38 @@ html.not-app .bg-stand-in {
       padding: 2rem;
       font-size: 18px;
       color: #fff;
+
+      h1 {
+        color: white;
+        font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 50px;
+        text-align: center;
+        letter-spacing: -0.2px;
+        text-transform: uppercase;
+        border-bottom: 0;
+        padding-bottom: 0;
+        margin-bottom: 11px;
+
+        .light {
+          opacity: 0.6;
+        }
+      }
+      a {
+        color: white;
+        text-decoration-color: white;
+      }
+      .buttons {
+        text-align: center;
+        margin-top: 1rem;
+      }
+      .buttons a {
+        text-decoration: none;
+        display: inline-block;
+        margin: 1rem;
+      }
     }
     .app-dl {
       width: 160px;
-    }
-  }
-
-  .marketing .inner-content {
-    h1 {
-      color: white;
-      font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      font-size: 50px;
-      text-align: center;
-      letter-spacing: -0.2px;
-      text-transform: uppercase;
-      border-bottom: 0;
-      padding-bottom: 0;
-      margin-bottom: 11px;
-
-      .light {
-        opacity: 0.6;
-      }
     }
   }
 
@@ -113,7 +125,6 @@ html.not-app .bg-stand-in {
     #app-container:after, header.id7-page-header:before {
       content: "";
       position: fixed;
-      background-color: #8c6e96;
       margin-left: auto;
       left: 0;
       right: 0;
@@ -144,9 +155,6 @@ html.not-app .bg-stand-in {
       border-right: 1px solid #fff;
     }
   }
-  html.not-app {
-    background: #8c6e96;
-  }
 
   html .in-settings .bg-stand-in {
     background-image: none;
@@ -168,10 +176,9 @@ html.not-app .bg-stand-in {
   }
 }
 
-.desktop-rendition(@min-width) {
+.desktop-rendition(@min-width, @desktop-rendition-vertical-border) {
   @desktop-rendition-width: @min-width / 2;
   @desktop-rendition-width-from-center: ~"calc(50vw -" (@desktop-rendition-width) ~")";
-  @desktop-rendition-vertical-border: 60px;
   @desktop-rendition-vertical-border-width: @desktop-rendition-width + 4;
   @desktop-rendition-vertical-border-right: @desktop-rendition-width + 2;
 
@@ -182,7 +189,7 @@ html.not-app .bg-stand-in {
     }
   }
 
-  @media screen and (min-width: @min-width) {
+  @media (min-width: @min-width) {
 
     .not-app {
 
@@ -233,17 +240,38 @@ html.not-app .bg-stand-in {
       }
 
       .id7-main-content-header {
-        padding-top: @desktop-rendition-vertical-border;
+        padding-top: @desktop-rendition-vertical-border + 1;
       }
 
-      .me-view-container, .tile--zoomed {
+      .me-view-container, .me-view-container .tile--zoomed.tile {
         // Account for body's border
         width: @desktop-rendition-width - 2;
         margin-left: 1px;
+      }
+
+      .tile--map.tile--zoomed iframe {
+        width: ~"calc(100% - 2px)";
+        left: 1px;
+        // 44px nav bar, 44px tab bar, 2 x 60px border
+        height: ~"calc(100vh - @{start-masthead-and-tab-bar-height} - @{desktop-rendition-vertical-border} - @{desktop-rendition-vertical-border})";
+      }
+
+      .permission-request, .permission-warning {
+        top: 0;
+        bottom: auto;
       }
     }
   }
 }
 
-.desktop-rendition(@screen-md-min);
-.desktop-rendition(@screen-lg-min);
+@media screen {
+  .desktop-rendition(@screen-md-min, 10px);
+  .desktop-rendition(@screen-lg-min, 10px);
+}
+
+@media screen and (min-height: 700px) {
+  .desktop-rendition(@screen-md-min, 60px);
+  .desktop-rendition(@screen-lg-min, 60px);
+}
+
+

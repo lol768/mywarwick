@@ -53,13 +53,15 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
   val geeseBackground: Config = ConfigFactory.parseMap(mapAsJavaMap(Map(
     "id" -> 1,
     "name" -> "Geese invasion",
-    "url" -> "geese_westwood.jpg"
+    "url" -> "geese_westwood.jpg",
+    "schemeColour" -> "#ffffff"
   )))
 
   val foxBackground: Config = ConfigFactory.parseMap(mapAsJavaMap(Map(
     "id" -> 2,
     "name" -> "Fox den",
-    "url" -> "fox_den.jpg"
+    "url" -> "fox_den.jpg",
+    "schemeColour" -> "#000000"
   )))
 
   val configList = new java.util.ArrayList[Configuration]
@@ -82,8 +84,10 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
       (json \ "data" \ "schemes").as[Seq[JsValue]].length mustBe 2
       (json \ "data" \ "schemes" \ 0 \ "name").as[String] mustBe "Geese invasion"
       (json \ "data" \ "schemes" \ 0 \ "url").as[String] mustBe "geese_westwood.jpg"
+      (json \ "data" \ "schemes" \ 0 \ "schemeColour").as[String] mustBe "#ffffff"
       (json \ "data" \ "schemes" \ 1 \ "name").as[String] mustBe "Fox den"
       (json \ "data" \ "schemes" \ 1 \ "url").as[String] mustBe "fox_den.jpg"
+      (json \ "data" \ "schemes" \ 1 \ "schemeColour").as[String] mustBe "#000000"
     }
 
     "correctly retrieve an anonymous user's colour scheme, the default" in {
@@ -99,8 +103,10 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
       (json \ "data" \ "schemes").as[Seq[JsValue]].length mustBe 2
       (json \ "data" \ "schemes" \ 0 \ "name").as[String] mustBe "Geese invasion"
       (json \ "data" \ "schemes" \ 0 \ "url").as[String] mustBe "geese_westwood.jpg"
+      (json \ "data" \ "schemes" \ 0 \ "schemeColour").as[String] mustBe "#ffffff"
       (json \ "data" \ "schemes" \ 1 \ "name").as[String] mustBe "Fox den"
       (json \ "data" \ "schemes" \ 1 \ "url").as[String] mustBe "fox_den.jpg"
+      (json \ "data" \ "schemes" \ 1 \ "schemeColour").as[String] mustBe "#000000"
     }
   }
 

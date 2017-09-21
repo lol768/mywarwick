@@ -24,7 +24,8 @@ class ColourSchemesController @Inject()(
   sealed case class Background(
     id: Int,
     url: String,
-    name: String
+    name: String,
+    schemeColour: String
   )
 
   implicit private val BackgroundWriter = Json.writes[Background]
@@ -35,7 +36,8 @@ class ColourSchemesController @Inject()(
     Background(
       e.getInt("id").getOrElse(throw new IllegalStateException("id is not set for this background")),
       e.getString("url").getOrElse(throw new IllegalStateException("url is not set for this background")),
-      e.getString("name").getOrElse(throw new IllegalStateException("name is not set for this background"))
+      e.getString("name").getOrElse(throw new IllegalStateException("name is not set for this background")),
+      e.getString("schemeColour").getOrElse(throw new IllegalStateException("schemeColour is not set for this background"))
     )
   })
 

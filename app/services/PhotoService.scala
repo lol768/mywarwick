@@ -21,15 +21,15 @@ class PhotoServiceImpl @Inject()(
   ws: WSAPI
 ) extends PhotoService with Logging {
 
-  val photosHost = configuration.getString("mywarwick.photos.host")
+  private val photosHost = configuration.getString("mywarwick.photos.host")
     .getOrElse(throw new IllegalStateException("Missing Photos host - set mywarwick.photos.host"))
 
-  val photosKey = configuration.getString("mywarwick.photos.apiKey")
+  private val photosKey = configuration.getString("mywarwick.photos.apiKey")
     .getOrElse(throw new IllegalStateException("Missing Photos API Key - set mywarwick.photos.apiKey"))
 
   def photoUrl(universityId: Option[UniversityID]): Future[String] = {
     universityId.map { universityId =>
-      ws.url(s"$photosHost/start/photo/${hash(universityId)}/${universityId.string}.json?s=60")
+      ws.url(s"$photosHost/start/photo/${hash(universityId)}/${universityId.string}.json?s=240")
         .get()
         .map {
           case res if res.status == 200 => res

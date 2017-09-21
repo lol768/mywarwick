@@ -15,6 +15,7 @@ import * as emailNotificationsOptIn from '../../state/email-notifications-opt-in
 import * as smsNotifications from '../../state/sms-notifications';
 import { loadDeviceDetails, signOut } from '../../userinfo';
 import SwitchListGroupItem from '../ui/SwitchListGroupItem';
+import wrapKeyboardSelect from '../../keyboard-nav';
 
 
 class SettingsView extends HideableView {
@@ -27,6 +28,13 @@ class SettingsView extends HideableView {
       },
     };
     this.onNotificationEmailCopyChange = this.onNotificationEmailCopyChange.bind(this);
+    this.onTilePreferences = this.onTilePreferences.bind(this);
+    this.onColourScheme = this.onColourScheme.bind(this);
+    this.onNotificationMutes = this.onNotificationMutes.bind(this);
+    this.onSMS = this.onSMS.bind(this);
+    this.onLocationPreferences = this.onLocationPreferences.bind(this);
+    this.onActivityFilter = this.onActivityFilter.bind(this);
+    this.onNotificationFilter = this.onNotificationFilter.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -197,11 +205,13 @@ class SettingsView extends HideableView {
     return 'MyWarwickNative' in window && 'launchTour' in window.MyWarwickNative;
   }
 
-  static launchTour() {
-    if (SettingsView.canLaunchTour()) {
-      return window.MyWarwickNative.launchTour();
-    }
-    return null;
+  static launchTour(e) {
+    wrapKeyboardSelect(() => {
+      if (SettingsView.canLaunchTour()) {
+        return window.MyWarwickNative.launchTour();
+      }
+      return null;
+    }, e);
   }
 
   getVersionString() {
@@ -279,6 +289,69 @@ class SettingsView extends HideableView {
     );
   }
 
+  onTilePreferences(e) {
+    wrapKeyboardSelect(() => {
+      this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}`));
+    }, e);
+  }
+
+  onColourScheme(e) {
+    wrapKeyboardSelect(() => {
+      if (this.props.isOnline) {
+        this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.COLOUR_SCHEMES}`));
+      }
+    }, e);
+  }
+
+  onNotificationMutes(e) {
+    wrapKeyboardSelect(() => {
+      this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`));
+    }, e);
+  }
+
+  onSMS(e) {
+    wrapKeyboardSelect(() => {
+      this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.SMS}`));
+    }, e);
+  }
+
+  onLocationPreferences(e) {
+    wrapKeyboardSelect(() => {
+      if (this.props.newsOptIn.fetched && !this.props.newsOptIn.failed) {
+        this.props.dispatch(
+          push(
+            `/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}/` +
+            `${Routes.SettingsRoutes.OptInTypes.LOCATION}`,
+          ),
+        );
+      }
+    }, e);
+  }
+
+  onActivityFilter(e) {
+    wrapKeyboardSelect(() => {
+      this.props.dispatch(
+        push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.ACTIVITY_FILTER}`),
+      );
+    }, e);
+  }
+
+  onNotificationFilter(e) {
+    wrapKeyboardSelect(() => {
+      this.props.dispatch(
+        push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NOTIFICATION_FILTER}`),
+      );
+    }, e);
+  }
+
+  static onSendFeedback(e) {
+    wrapKeyboardSelect(loadDeviceDetails, e);
+  }
+
+  static onSignOut(e) {
+    wrapKeyboardSelect(signOut, e);
+  }
+
   render() {
     return (
       <ScrollRestore url={`/${Routes.SETTINGS}`}>
@@ -296,9 +369,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={() =>
-                this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TILES}`))
-              }
+              onClick={ this.onTilePreferences }
+              onKeyUp={ this.onTilePreferences }
             >
               {SettingsView.renderSetting(
                 'check-square-o',
@@ -311,9 +383,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={this.props.isOnline ? () =>
-                this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.COLOUR_SCHEMES}`)) : null
-              }
+              onClick={ this.onColourScheme }
+              onKeyUp={ this.onColourScheme }
             >
               {SettingsView.renderSetting(
                 'paint-brush',
@@ -330,9 +401,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={() =>
-                this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.MUTES}`))
-              }
+              onClick={ this.onNotificationMutes }
+              onKeyUp={ this.onNotificationMutes }
             >
               {SettingsView.renderSetting(
                 'bell-slash-o',
@@ -358,9 +428,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={() =>
-                this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.SMS}`))
-              }
+              onClick={ this.onSMS }
+              onKeyUp={ this.onSMS }
             >
               {SettingsView.renderSetting(
                 'mobile',
@@ -395,14 +464,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={this.props.newsOptIn.fetched && !this.props.newsOptIn.failed ? () =>
-                this.props.dispatch(
-                  push(
-                    `/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}/` +
-                    `${Routes.SettingsRoutes.OptInTypes.LOCATION}`,
-                  ),
-                ) : null
-              }
+              onClick={ this.onLocationPreferences }
+              onKeyUp={ this.onLocationPreferences }
             >
               {SettingsView.renderSetting(
                 'map-signs',
@@ -424,11 +487,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={() =>
-                this.props.dispatch(
-                  push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.ACTIVITY_FILTER}`),
-                )
-              }
+              onClick={ this.onActivityFilter }
+              onKeyUp={ this.onActivityFilter }
             >
               {SettingsView.renderSetting(
                 'dashboard',
@@ -443,11 +503,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={() =>
-                this.props.dispatch(
-                  push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NOTIFICATION_FILTER}`),
-                )
-              }
+              onClick={ this.onNotificationFilter }
+              onKeyUp={ this.onNotificationFilter }
             >
               {SettingsView.renderSetting(
                 'bell-o',
@@ -465,7 +522,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={loadDeviceDetails}
+              onClick={ SettingsView.onSendFeedback }
+              onKeyUp={ SettingsView.onSendFeedback }
             >
               <div className="media">
                 <div className="media-left feedback">
@@ -488,6 +546,7 @@ class SettingsView extends HideableView {
               role="button"
               tabIndex={0}
               onClick={SettingsView.launchTour}
+              onKeyUp={SettingsView.launchTour}
             >
               {SettingsView.renderSetting(
                 'arrow-circle-o-right',
@@ -506,7 +565,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={signOut}
+              onClick={SettingsView.onSignOut}
+              onKeyUp={SettingsView.onSignOut}
             >
               <div className="media">
                 <div className="media-left signout">

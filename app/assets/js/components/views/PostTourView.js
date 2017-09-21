@@ -3,6 +3,7 @@ import { replace } from 'react-router-redux';
 import { connect } from 'react-redux';
 import HideableView from './HideableView';
 import OptInSettingsView from './settings/OptInSettingsView';
+import wrapKeyboardSelect from '../../keyboard-nav';
 
 class PostTourView extends HideableView {
   constructor(props) {
@@ -10,8 +11,8 @@ class PostTourView extends HideableView {
     this.onFinish = this.onFinish.bind(this);
   }
 
-  onFinish() {
-    this.props.dispatch(replace('/'));
+  onFinish(e) {
+    wrapKeyboardSelect(() => this.props.dispatch(replace('/')), e);
   }
 
   render() {
@@ -20,7 +21,13 @@ class PostTourView extends HideableView {
         <OptInSettingsView />
 
         <div className="container">
-          <a href="#finish-tour" className="btn btn-default btn-lg btn-block" onClick={ this.onFinish }>
+          <a
+            className="btn btn-default btn-lg btn-block"
+            onClick={ this.onFinish }
+            onKeyUp={ this.onFinish }
+            role="button"
+            tabIndex={0}
+          >
             Finish
           </a>
         </div>

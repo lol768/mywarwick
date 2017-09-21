@@ -4,6 +4,7 @@ import * as PropTypes from 'prop-types';
 import Hyperlink from './Hyperlink';
 import * as dateFormats from '../../dateFormats';
 import AppIcon from './AppIcon';
+import wrapKeyboardSelect from '../../keyboard-nav';
 
 class ActivityItem extends React.PureComponent {
   static propTypes = {
@@ -28,8 +29,8 @@ class ActivityItem extends React.PureComponent {
     this.onMuting = this.onMuting.bind(this);
   }
 
-  onMuting() {
-    this.props.onMuting(this.props);
+  onMuting(e) {
+    wrapKeyboardSelect(() => this.props.onMuting(this.props), e);
   }
 
   render() {
@@ -43,7 +44,7 @@ class ActivityItem extends React.PureComponent {
     return (
       <div className={ classNames }>
         { (this.props.muteable) ?
-          <div className="muting" onClick={ this.onMuting } role="button" tabIndex={0}>
+          <div className="muting" onClick={ this.onMuting } onKeyUp={ this.onMuting } role="button" tabIndex={0}>
             <i className="fa fa-chevron-down" />
           </div> : null
         }

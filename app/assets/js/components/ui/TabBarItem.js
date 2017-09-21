@@ -1,6 +1,7 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import classNames from 'classnames';
+import wrapKeyboardSelect from '../../keyboard-nav';
 
 const formatBadgeCount = n => (n > 99 ? '99+' : n);
 
@@ -22,12 +23,10 @@ export default class TabBarItem extends React.PureComponent {
     this.listItem = null;
   }
 
-  onClick() {
-    if (this.listItem) {
-      // Remove focus
-      this.listItem.blur();
-    }
-    if (!this.props.isDisabled) this.props.onSelectItem(this.props.path);
+  onClick(e) {
+    wrapKeyboardSelect(() => {
+      if (!this.props.isDisabled) this.props.onSelectItem(this.props.path);
+    }, e);
   }
 
   render() {
@@ -41,6 +40,7 @@ export default class TabBarItem extends React.PureComponent {
         role="button"
         tabIndex={0}
         onClick={ this.onClick }
+        onKeyUp={ this.onClick }
         ref={(li) => { this.listItem = li; }}
       >
         <i

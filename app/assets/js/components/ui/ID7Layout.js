@@ -15,23 +15,46 @@ import isEmbedded from '../../embedHelper';
 import { getNumItemsSince } from '../../stream';
 import * as ui from '../../state/ui';
 import { Routes } from '../AppRoot';
+import wrapKeyboardSelect from '../../keyboard-nav';
 
 class ID7Layout extends React.PureComponent {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     colourTheme: PropTypes.string.isRequired,
+    schemeColour: PropTypes.string.isRequired,
+    colourSchemesLoaded: PropTypes.bool.isRequired,
     user: PropTypes.shape({
       data: PropTypes.shape({
         authenticated: PropTypes.bool.isRequired,
       }).isRequired,
     }).isRequired,
     native: PropTypes.bool,
-    showBetaWarning: PropTypes.bool,
     path: PropTypes.string.isRequired,
     zoomedTile: PropTypes.string,
     notificationsCount: PropTypes.number,
     children: PropTypes.node,
   };
+
+  /** Set the theme on the html element, so that we can style everything. */
+  static setColourTheme(newProps) {
+    if (newProps.colourSchemesLoaded) {
+      $('html')
+        .removeClass((i, className) =>
+          _.filter(className.split(' '), singleClass => _.startsWith(singleClass, 'theme-')).join(' '),
+        )
+        .addClass(`theme-${newProps.colourTheme}`)
+        .find('meta[name="theme-color"]')
+        .attr('content', newProps.schemeColour);
+
+      if (isEmbedded()) {
+        const data = {
+          type: 'message.id7.account-popover.colourThemeChange',
+          colourTheme: newProps.colourTheme,
+        };
+        window.parent.postMessage(JSON.stringify(data), '*');
+      }
+    }
+  }
 
   constructor(props) {
     super(props);
@@ -45,13 +68,16 @@ class ID7Layout extends React.PureComponent {
 
   componentWillMount() {
     this.props.dispatch(ui.updateUIContext());
-    this.setBodyTheme(this.props.colourTheme);
+    ID7Layout.setColourTheme(this.props);
   }
 
   componentDidMount() {
     if (isEmbedded()) {
-      const type = 'message.id7.account-popover.layoutDidMount';
-      window.parent.postMessage(JSON.stringify({ type }), '*');
+      const data = {
+        type: 'message.id7.account-popover.layoutDidMount',
+        colourTheme: this.props.colourTheme,
+      };
+      window.parent.postMessage(JSON.stringify(data), '*');
     }
   }
 
@@ -70,33 +96,30 @@ class ID7Layout extends React.PureComponent {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.colourTheme !== this.props.colourTheme) {
-      this.setBodyTheme(this.props.colourTheme, prevProps.colourTheme);
+    if (
+      prevProps.colourTheme !== this.props.colourTheme ||
+        prevProps.colourSchemesLoaded !== this.props.colourSchemesLoaded
+    ) {
+      ID7Layout.setColourTheme(this.props);
     }
   }
 
-  onBackClick() {
-    this.props.dispatch(goBack());
+  onBackClick(e) {
+    wrapKeyboardSelect(() => this.props.dispatch(goBack()), e);
   }
 
-  onEdit() {
-    if (this.isEditing()) {
-      this.props.dispatch(goBack());
-    } else {
-      this.props.dispatch(push(`/${Routes.EDIT}`));
-    }
+  onEdit(e) {
+    wrapKeyboardSelect(() => {
+      if (this.isEditing()) {
+        this.props.dispatch(goBack());
+      } else {
+        this.props.dispatch(push(`/${Routes.EDIT}`));
+      }
+    }, e);
   }
 
-  onSettings() {
-    this.props.dispatch(push(`/${Routes.SETTINGS}`));
-  }
-
-  /** Set the theme on the html element, so that we can style everything. */
-  setBodyTheme(newTheme, oldTheme = '') {
-    /* HACK: default to theme-transparent-1 if user has transparent in their store */
-    $('html')
-      .removeClass(`theme-${oldTheme}`)
-      .addClass(newTheme === 'transparent' ? 'theme-transparent-1' : `theme-${newTheme}`);
+  onSettings(e) {
+    wrapKeyboardSelect(() => this.props.dispatch(push(`/${Routes.SETTINGS}`)), e);
   }
 
   isEditing() {
@@ -112,19 +135,6 @@ class ID7Layout extends React.PureComponent {
       return <PermissionRequest isDisabled={ !this.props.user.data.authenticated } />;
     }
 
-    return null;
-  }
-
-  renderBetaWarning() {
-    if (!this.props.native && this.props.showBetaWarning && !this.state.betaWarningDismissed) {
-      return (
-        <div className="top-page-notice">
-          My&nbsp;Warwick is currently being piloted and is not yet available for general use.
-          Please visit our <a href="http://warwick.ac.uk/webteam/mywarwick/">My&nbsp;Warwick support pages</a> for more information.
-          {' '}<a role="button" tabIndex={0} className="dismiss" onClick={ this.dismissBetaWarning }>Hide</a>
-        </div>
-      );
-    }
     return null;
   }
 
@@ -155,7 +165,6 @@ class ID7Layout extends React.PureComponent {
         <div className="fixed-header at-top">
           <div>
             <header className="id7-page-header" ref="header">
-              { this.renderBetaWarning() }
               { this.renderMasqueradeNotice() }
 
               <MastheadMobile
@@ -201,9 +210,10 @@ const select = state => ({
     getNumItemsSince(state.notifications.stream, _.get(state, ['notificationsLastRead', 'date'])),
   user: state.user,
   colourTheme: state.ui.colourTheme,
+  schemeColour: state.ui.schemeColour,
+  colourSchemesLoaded: state.colourSchemes.loaded,
   zoomedTile: state.ui.zoomedTile,
   native: state.ui.native,
-  showBetaWarning: state.ui.showBetaWarning,
 });
 
 export default connect(select)(ID7Layout);

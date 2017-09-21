@@ -18,6 +18,7 @@ export default class TileContent extends React.PureComponent {
     content: PropTypes.object,
     size: PropTypes.oneOf(_.values(TILE_SIZES)).isRequired,
     zoomed: PropTypes.bool,
+    preferences: PropTypes.object,
   };
 
   static supportedTileSizes() {
@@ -33,6 +34,10 @@ export default class TileContent extends React.PureComponent {
   }
 
   static expandsOnClick() {
+    return false;
+  }
+
+  static overridesOnClick() {
     return false;
   }
 
