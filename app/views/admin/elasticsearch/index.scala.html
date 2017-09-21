@@ -1,46 +1,34 @@
 @import system.RequestContext
 @import controllers.admin.elasticsearch.ActivityToESControllerFormData
-@import org.joda.time.DateTime
-@(formData: Form[ActivityToESControllerFormData], defaultForm: ActivityToESControllerFormData)(implicit context: RequestContext)
+@import controllers.admin.elasticsearch._
+
+@(formData: Form[ActivityToESControllerFormData])(implicit messages: Messages, context: RequestContext)
+@implicitFieldConstructor = @{
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
+}
+
 @common.admin("Administration") {
   <header>
     @context.csrfHelper.metaElementToken
     @context.csrfHelper.metaElementHeader
   </header>
 
-  <form class="form" method="post" action="/admin/elasticsearch/reindex" >
-    <p>
-      Choose desired time range for activities that need to be indexed by ElasticSearch
-    </p>
+  @if(formData.hasGlobalErrors) {
+    @for(error <- formData.globalErrors) {
+      <div class="alert alert-danger">@error.message</div>
+    }
+  }
+
+  @b3.form(routes.ActivityToESController.reindexActivitiesInDateTimeRange) {
 
     @context.csrfHelper.formField
-    <div class="form-group">
-      <p>From</p>
-      <div class="datetimepicker">
-        <input type="hidden" name="fromDate" value="@formData.value.getOrElse(defaultForm).fromDate.toString("yyyy-MM-dd'T'HH:mm:ss")" />
-        <div class="input-group">
-          <input type="text" autocomplete="off" id="fromDate" class="form-control" value="@formData.value.getOrElse(defaultForm).fromDate.toString("yyyy-MM-dd'T'HH:mm:ss")" />
-          <span class="input-group-addon">
-            <span class="fa fa-calendar"></span>
-          </span>
-        </div>
-      </div>
-    </div>
-    <div class="form-group">
-      <p>To</p>
-      <div class="datetimepicker">
-        <input type="hidden" name="toDate" value="@formData.value.getOrElse(defaultForm).toDate.toString("yyyy-MM-dd'T'HH:mm:ss")" />
-        <div class="input-group">
-          <input type="text" autocomplete="off" id="toDate" class="form-control" value="@formData.value.getOrElse(defaultForm).toDate.toString("yyyy-MM-dd'T'HH:mm:ss")" />
-          <span class="input-group-addon">
-            <span class="fa fa-calendar"></span>
-          </span>
-        </div>
-      </div>
-    </div>
-    <div class="form-group">
-      <input class="btn btn-primary" type="submit" />
-    </div>
-  </form>
 
+    <p>Choose desired date/time range for activities that need to be indexed by ElasticSearch</p>
+
+    @tags.datetimePicker(formData("fromDate"), '_label -> "From")
+
+    @tags.datetimePicker(formData("toDate"), '_label -> "To")
+
+    @tags.submitOrCancel("Create", routes.ActivityToESController.index)
+  }
 }
