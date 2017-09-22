@@ -20,15 +20,7 @@ class ReindexActivityJob @Inject()(
 
   def execute(context: JobExecutionContext) = {
     import ReindexActivityJobHelper._
-
-    val dateTimeRange = getDateTimeRangeFromContext(context)
-
-    val bigInterval: Interval = new Interval(
-      dateTimeRange.get(jobDateKeyForFromDate).orNull,
-      dateTimeRange.get(jobDateKeyForToDate).orNull
-    )
-
-    toSmallerIntervals(bigInterval, Period.hours(6))
+    toSmallerIntervals(getDateTimeRangeFromContext(context), Period.hours(6))
       .foreach(shorterInterval => activityService
         .getActivitiesForDateTimeRange(shorterInterval)
         .grouped(1000)
@@ -45,14 +37,11 @@ object ReindexActivityJobHelper {
   val jobDateKeyForToDate = "toDate"
   val dateTimeFormat: DateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss")
 
-  def getDateTimeRangeFromContext(context: JobExecutionContext): Map[String, DateTime] = {
+  def getDateTimeRangeFromContext(context: JobExecutionContext): Interval = {
     val data: JobDataMap = context.getJobDetail.getJobDataMap
     val fromDate: DateTime = DateTime.parse(data.getString(jobDateKeyForFromDate), dateTimeFormat)
     val toDate: DateTime = DateTime.parse(data.getString(jobDateKeyForToDate), dateTimeFormat)
-    Map(
-      jobDateKeyForFromDate -> fromDate,
-      jobDateKeyForToDate -> toDate
-    )
+    new Interval(fromDate, toDate)
   }
 
   def toSmallerIntervals(bigInterval: Interval, smallIntervalSize: Period): Seq[Interval] = {
