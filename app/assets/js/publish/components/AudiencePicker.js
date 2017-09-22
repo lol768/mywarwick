@@ -165,8 +165,9 @@ export default class AudiencePicker extends React.PureComponent {
         defaultValue={this.state.department === ELLIPSIS ? '' : this.state.department.code}
         name="audience.department"
         className="form-control"
-        onClick={({ target: { options, selectedIndex } }) =>
-          this.selectDepartment(options[selectedIndex].value)}
+        onClick={({ currentTarget: { options, selectedIndex } }) =>
+          this.selectDepartment(options[selectedIndex].value)
+        }
       >
         <option disabled hidden value="">Select a department</option>
         {_.map(this.props.departments, (name, code) => (
