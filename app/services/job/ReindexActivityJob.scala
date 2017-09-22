@@ -22,11 +22,20 @@ class ReindexActivityJob @Inject()(
     import ReindexActivityJobHelper._
 
     val dateTimeRange = getDateTimeRangeFromContext(context)
-    val activities = activityService.getActivitiesForDateTimeRange(
+
+    val bigInterval: Interval = new Interval(
       dateTimeRange.get(jobDateKeyForFromDate).orNull,
       dateTimeRange.get(jobDateKeyForToDate).orNull
     )
-    activities.grouped(1000).foreach(group => activityESService.index(group.map(IndexActivityRequest(_))))
+
+    val period = Period.days(1)
+
+    subRange(bigInterval, period)
+      .foreach(shorterInterval => activityService
+        .getActivitiesForDateTimeRange(shorterInterval)
+        .grouped(1000)
+        .foreach(group => activityESService.index(group.map(IndexActivityRequest(_))))
+      )
   }
 }
 
@@ -48,17 +57,15 @@ object ReindexActivityJobHelper {
     )
   }
 
-  def subRanges(bigInterval: Interval, period: Period): Seq[Interval] = {
+  def subRange(bigInterval: Interval, period: Period): Seq[Interval] = {
     val size: Int = BigDecimal(bigInterval.toDuration.getStandardSeconds.toDouble / period.toStandardDuration.getStandardSeconds.toDouble).setScale(0, BigDecimal.RoundingMode.UP).toInt
-    Range(1, size).map(i => {
+    Range(0, size).map(i => {
       val start = bigInterval.getStartMillis + i * period.toStandardDuration.getMillis
-      val end = start + period.toStandardDuration.getMillis
-
-      if ((i + 1) == size) {
-        new Interval(start, bigInterval.getEndMillis)
-      } else {
-        new Interval(start, end)
+      val end = (i + 1) == size match {
+        case true => bigInterval.getEndMillis
+        case false => start + period.toStandardDuration.getMillis
       }
+      new Interval(start, end)
     })
   }
 

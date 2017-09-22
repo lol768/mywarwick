@@ -4,7 +4,7 @@ import com.google.inject.{ImplementedBy, Inject}
 import models.news.NotificationData
 import models.publishing.PublisherActivityCount
 import models.{Audience, _}
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Interval}
 import org.quartz._
 import play.api.db.{Database, NamedDatabase}
 import services.ActivityError._
@@ -70,6 +70,8 @@ trait ActivityService {
   def getActivityWithAudience(id: String): Option[ActivityRenderWithAudience]
 
   def getActivitiesForDateTimeRange(from: DateTime, to: DateTime): Seq[Activity]
+
+  def getActivitiesForDateTimeRange(interval: Interval): Seq[Activity]
 }
 
 class ActivityServiceImpl @Inject()(
@@ -328,6 +330,10 @@ class ActivityServiceImpl @Inject()(
     db.withConnection(implicit c => {
       dao.getActivitiesForDateTimeRange(from, to)
     })
+  }
+
+  override def getActivitiesForDateTimeRange(interval: Interval): Seq[Activity] = {
+    this.getActivitiesForDateTimeRange(interval.getStart, interval.getEnd)
   }
 }
 
