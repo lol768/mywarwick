@@ -3,11 +3,13 @@ package services.job
 import java.util.UUID
 import javax.inject.Inject
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Interval, Period}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import org.quartz._
 import services.ActivityService
 import services.elasticsearch.{ActivityESService, IndexActivityRequest}
+
+import scala.math.BigDecimal
 
 @DisallowConcurrentExecution
 @PersistJobDataAfterExecution
@@ -45,4 +47,19 @@ object ReindexActivityJobHelper {
       jobDateKeyForToDate -> toDate
     )
   }
+
+  def subRanges(bigInterval: Interval, period: Period): Seq[Interval] = {
+    val size: Int = BigDecimal(bigInterval.toDuration.getStandardSeconds.toDouble / period.toStandardDuration.getStandardSeconds.toDouble).setScale(0, BigDecimal.RoundingMode.UP).toInt
+    Range(1, size).map(i => {
+      val start = bigInterval.getStartMillis + i * period.toStandardDuration.getMillis
+      val end = start + period.toStandardDuration.getMillis
+
+      if ((i + 1) == size) {
+        new Interval(start, bigInterval.getEndMillis)
+      } else {
+        new Interval(start, end)
+      }
+    })
+  }
+
 }
