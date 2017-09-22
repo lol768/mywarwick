@@ -28,9 +28,7 @@ class ReindexActivityJob @Inject()(
       dateTimeRange.get(jobDateKeyForToDate).orNull
     )
 
-    val period = Period.days(1)
-
-    subRange(bigInterval, period)
+    toSmallerIntervals(bigInterval, Period.hours(6))
       .foreach(shorterInterval => activityService
         .getActivitiesForDateTimeRange(shorterInterval)
         .grouped(1000)
@@ -57,13 +55,13 @@ object ReindexActivityJobHelper {
     )
   }
 
-  def subRange(bigInterval: Interval, period: Period): Seq[Interval] = {
-    val size: Int = BigDecimal(bigInterval.toDuration.getStandardSeconds.toDouble / period.toStandardDuration.getStandardSeconds.toDouble).setScale(0, BigDecimal.RoundingMode.UP).toInt
+  def toSmallerIntervals(bigInterval: Interval, smallIntervalSize: Period): Seq[Interval] = {
+    val size: Int = BigDecimal(bigInterval.toDuration.getStandardSeconds.toDouble / smallIntervalSize.toStandardDuration.getStandardSeconds.toDouble).setScale(0, BigDecimal.RoundingMode.UP).toInt
     Range(0, size).map(i => {
-      val start = bigInterval.getStartMillis + i * period.toStandardDuration.getMillis
+      val start = bigInterval.getStartMillis + i * smallIntervalSize.toStandardDuration.getMillis
       val end = (i + 1) == size match {
         case true => bigInterval.getEndMillis
-        case false => start + period.toStandardDuration.getMillis
+        case false => start + smallIntervalSize.toStandardDuration.getMillis
       }
       new Interval(start, end)
     })
