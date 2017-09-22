@@ -21,10 +21,9 @@ class ReindexActivityJob @Inject()(
   def execute(context: JobExecutionContext) = {
     import ReindexActivityJobHelper._
     toSmallerIntervals(getDateTimeRangeFromContext(context), Period.hours(6))
-      .foreach(shorterInterval => activityService
-        .getActivitiesForDateTimeRange(shorterInterval)
-        .grouped(1000)
-        .foreach(group => activityESService.index(group.map(IndexActivityRequest(_))))
+      .foreach(activityService.getActivitiesForDateTimeRange(_)
+        .grouped(1000).map(_.map(IndexActivityRequest(_, None)))
+        .foreach(activityESService.index)
       )
   }
 }
