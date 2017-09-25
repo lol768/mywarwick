@@ -8,16 +8,18 @@ class ReindexActivityJobHelperTest extends BaseSpec with MockitoSugar {
 
   import ReindexActivityJobHelper._
 
-  "ReindexActivityJobHelper" should {
-    "slice big interval into seq of smaller consecutive intervals" in {
+  class Scope {
+    var start: DateTime = null
+    var end: DateTime = null
 
-      var start: DateTime = null
-      var end: DateTime = null
+    def bigInterval = new Interval(start, end)
+  }
+
+  "ReindexActivityJobHelper" should {
+    "slice big interval into seq of smaller consecutive intervals of every 30 days" in new Scope {
 
       start = new DateTime().withYear(2017).withMonthOfYear(1).withDayOfMonth(1).withHourOfDay(1).withMinuteOfHour(1).withSecondOfMinute(1).withMillisOfSecond(1)
       end = new DateTime().withYear(2017).withMonthOfYear(6).withDayOfMonth(15).withHourOfDay(1).withMinuteOfHour(1).withSecondOfMinute(1).withMillisOfSecond(1)
-
-      def bigInterval = new Interval(start, end)
 
       val resultPer30Days = toSmallerIntervals(bigInterval, Period.days(30))
 
@@ -31,6 +33,10 @@ class ReindexActivityJobHelperTest extends BaseSpec with MockitoSugar {
           new Interval(new DateTime("2017-05-31T02:01:01.001+01:00"), new DateTime("2017-06-15T01:01:01.001+01:00"))
         )
       )
+    }
+
+
+    "slice big interval into seq of smaller consecutive intervals of every 3 hours" in new Scope {
 
       start = new DateTime().withYear(2017).withMonthOfYear(6).withDayOfMonth(13).withHourOfDay(1).withMinuteOfHour(1).withSecondOfMinute(1).withMillisOfSecond(1)
       end = new DateTime().withYear(2017).withMonthOfYear(6).withDayOfMonth(15).withHourOfDay(1).withMinuteOfHour(1).withSecondOfMinute(1).withMillisOfSecond(1)
@@ -58,6 +64,9 @@ class ReindexActivityJobHelperTest extends BaseSpec with MockitoSugar {
           new Interval(new DateTime("2017-06-14T22:01:01.001+01:00"), new DateTime("2017-06-15T01:01:01.001+01:00"))
         )
       )
+    }
+
+    "slice big interval into seq of smaller consecutive intervals of every 100 days" in new Scope {
 
       start = new DateTime().withYear(2016).withMonthOfYear(6).withDayOfMonth(13).withHourOfDay(1).withMinuteOfHour(1).withSecondOfMinute(1).withMillisOfSecond(1)
       end = new DateTime().withYear(2017).withMonthOfYear(6).withDayOfMonth(15).withHourOfDay(1).withMinuteOfHour(1).withSecondOfMinute(1).withMillisOfSecond(1)
@@ -73,5 +82,6 @@ class ReindexActivityJobHelperTest extends BaseSpec with MockitoSugar {
       )
 
     }
+
   }
 }
