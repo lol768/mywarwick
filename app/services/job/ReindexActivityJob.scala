@@ -47,9 +47,10 @@ object ReindexActivityJobHelper {
     val size: Int = BigDecimal(bigInterval.toDuration.getStandardSeconds.toDouble / smallIntervalSize.toStandardDuration.getStandardSeconds.toDouble).setScale(0, BigDecimal.RoundingMode.UP).toInt
     Range(0, size).map(i => {
       val start = bigInterval.getStartMillis + i * smallIntervalSize.toStandardDuration.getMillis
-      val end = (i + 1) == size match {
-        case true => bigInterval.getEndMillis
-        case false => start + smallIntervalSize.toStandardDuration.getMillis
+      val end = if ((i + 1) == size) {
+        bigInterval.getEndMillis
+      } else {
+        start + smallIntervalSize.toStandardDuration.getMillis
       }
       new Interval(start, end)
     })
