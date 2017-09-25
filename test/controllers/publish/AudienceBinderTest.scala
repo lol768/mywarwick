@@ -2,8 +2,10 @@ package controllers.publish
 
 import helpers.BaseSpec
 import models.Audience
+import models.Audience.UsercodesAudience
 import models.publishing.Publisher
 import org.mockito.Mockito._
+import org.mockito.{AdditionalAnswers, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.data.FormError
@@ -16,6 +18,29 @@ import scala.util.Try
 class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
   "AudienceBinder" should {
+
+    "ignore duplicate usercode input" in {
+      val departmentCode = "AH"
+      val audience = Seq("cusjau\r\ncusjau\r\ncusjau")
+
+      val publisherRequest: PublisherRequest[_] = new PublisherRequest(Publisher("xyz", "Publisher", None), null, new AuthenticatedRequest(null, null))
+
+      val audienceData = AudienceData(
+        audience,
+        Some(departmentCode) //Arden house
+      )
+
+      val usercodes = audience.map(Usercode)
+      val audienceService = mock[AudienceService]
+      when(audienceService.validateUsercodes(Matchers.any[Seq[Usercode]]())).thenAnswer(AdditionalAnswers.returnsFirstArg())
+
+      val departmentInfoDao = mock[DepartmentInfoDao]
+      when(departmentInfoDao.allDepartments).thenReturn(Seq[DepartmentInfo](DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
+
+      val audienceBinder: AudienceBinder = new AudienceBinder(departmentInfoDao, audienceService)
+
+      audienceBinder.bindAudience(audienceData)(publisherRequest).futureValue mustBe Right(Audience(Seq(UsercodesAudience(Seq(Usercode("cusjau"))))))
+    }
 
     "return Seq of Public when unbinding public Audience" in {
       val audience = Audience(Seq(Audience.PublicAudience))
