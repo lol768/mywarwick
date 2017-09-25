@@ -32,14 +32,14 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
       val usercodes = audience.map(Usercode)
       val audienceService = mock[AudienceService]
-      when(audienceService.validateUsercodes(Matchers.any[Seq[Usercode]]())).thenAnswer(AdditionalAnswers.returnsFirstArg())
+      when(audienceService.validateUsercodes(Matchers.any[Set[Usercode]]())).thenAnswer(AdditionalAnswers.returnsFirstArg())
 
       val departmentInfoDao = mock[DepartmentInfoDao]
       when(departmentInfoDao.allDepartments).thenReturn(Seq[DepartmentInfo](DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
 
       val audienceBinder: AudienceBinder = new AudienceBinder(departmentInfoDao, audienceService)
 
-      audienceBinder.bindAudience(audienceData)(publisherRequest).futureValue mustBe Right(Audience(Seq(UsercodesAudience(Seq(Usercode("cusjau"))))))
+      audienceBinder.bindAudience(audienceData)(publisherRequest).futureValue mustBe Right(Audience(Seq(UsercodesAudience(Set(Usercode("cusjau"))))))
     }
 
     "return Seq of Public when unbinding public Audience" in {
@@ -196,7 +196,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
 
       val audienceService = mock[AudienceService]
-      when(audienceService.validateUsercodes(Seq(Usercode("TeachingApple")))).thenReturn(Seq.empty[Usercode])
+      when(audienceService.validateUsercodes(Set(Usercode("TeachingApple")))).thenReturn(Set.empty[Usercode])
 
       val audienceBinder = new AudienceBinder(departmentInfoDao, audienceService)
 
@@ -217,7 +217,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       )
 
       val mockAudienceService = mock[AudienceService]
-      when(mockAudienceService.validateUsercodes(Seq(Usercode(unrecognisedAudience)))).thenReturn(Seq.empty[Usercode])
+      when(mockAudienceService.validateUsercodes(Set(Usercode(unrecognisedAudience)))).thenReturn(Set.empty[Usercode])
 
       val audienceBinder = new AudienceBinder(null, mockAudienceService)
 

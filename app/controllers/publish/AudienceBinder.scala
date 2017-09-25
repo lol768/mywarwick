@@ -52,10 +52,9 @@ class AudienceBinder @Inject()(
       }
 
       def validateUsercodesAudience(component: UsercodesAudience): Option[UsercodesAudience] = {
-        val distinctUsercodes = component.usercodes.distinct
-        val invalidUsercodes = distinctUsercodes.diff(audienceService.validateUsercodes(distinctUsercodes))
+        val invalidUsercodes = component.usercodes.diff(audienceService.validateUsercodes(component.usercodes))
         if (invalidUsercodes.isEmpty)
-          Some(UsercodesAudience(distinctUsercodes))
+          Some(UsercodesAudience(component.usercodes))
          else {
           errors :+= FormError("audience", "error.audience.usercodes.invalid", Seq(invalidUsercodes.map(_.string).mkString(", ")))
           None

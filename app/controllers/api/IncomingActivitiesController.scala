@@ -42,7 +42,7 @@ class IncomingActivitiesController @Inject()(
               val activity = ActivitySave.fromApi(user.usercode, publisherId, providerId, shouldNotify, data)
 
               val usercodes = data.recipients.users.getOrElse(Seq.empty).map(Usercode) match {
-                case usercodes: Seq[Usercode] if usercodes.nonEmpty => Seq(UsercodesAudience(usercodes))
+                case usercodes: Seq[Usercode] if usercodes.nonEmpty => Seq(UsercodesAudience(usercodes.toSet))
                 case Nil => Seq.empty[Audience.Component]
               }
               val webgroups = data.recipients.groups.getOrElse(Seq.empty).map(GroupName).map(Audience.WebGroupAudience)
