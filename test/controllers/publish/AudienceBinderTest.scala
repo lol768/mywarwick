@@ -2,31 +2,49 @@ package controllers.publish
 
 import helpers.BaseSpec
 import models.Audience
+import models.publishing.PermissionScope.{AllDepartments, Departments}
 import models.publishing.Publisher
+import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.data.FormError
-import services.AudienceService
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
+import services.{AudienceService, PublisherService}
 import warwick.sso.{AuthenticatedRequest, UniversityID, Usercode}
 
 import scala.util.Try
 
 class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
+  def mockPublisherService(deptPermissions: String*): PublisherService = {
+    val publisherService = mock[PublisherService]
+    when(publisherService.getPermissionScope(any[String]()))
+      .thenReturn(
+        if (deptPermissions.contains("**")) AllDepartments
+        else Departments(deptPermissions)
+      )
+    publisherService
+  }
+
+  val defaultMockPublisherService: PublisherService = mockPublisherService("**")
+  val publisher = Publisher("xyz", "Publisher", Some(1))
+  implicit val defaultPublisherRequest: PublisherRequest[_] = new PublisherRequest(publisher, null, new AuthenticatedRequest(null, null))
+
   "AudienceBinder" should {
 
     "return Seq of Public when unbinding public Audience" in {
       val audience = Audience(Seq(Audience.PublicAudience))
-      val audienceBinder: AudienceBinder = new AudienceBinder(null, null)
+      val audienceBinder: AudienceBinder = new AudienceBinder(null, null, defaultMockPublisherService)
       val result = audienceBinder.unbindAudience(audience).audience
       result mustBe Seq("Public")
     }
 
     "bind string Public to only Audience.Public" in {
-      val audienceBinder: AudienceBinder = new AudienceBinder(null, null)
-      audienceBinder.bindAudience(AudienceData(Seq("Public"), null))(null).futureValue mustBe Right(Audience.Public)
+      when(defaultMockPublisherService.getPermissionScope(any[String]())).thenReturn(AllDepartments)
+
+      val audienceBinder: AudienceBinder = new AudienceBinder(null, null, defaultMockPublisherService)
+      audienceBinder.bindAudience(AudienceData(Seq("Public"), null))(defaultPublisherRequest).futureValue mustBe Right(Audience.Public)
     }
 
     "bind single department single audience" in {
@@ -42,8 +60,8 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       )
       val departmentInfoDao = mock[DepartmentInfoDao]
       when(departmentInfoDao.allDepartments).thenReturn(Seq[DepartmentInfo](DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
-      val audienceBinder = new AudienceBinder(departmentInfoDao, null)
-      audienceBinder.bindAudience(audienceData)(null).futureValue mustBe Right(Audience(Seq(Audience.DepartmentAudience(departmentCode, Seq(Audience.TeachingStaff)))))
+      val audienceBinder = new AudienceBinder(departmentInfoDao, null, defaultMockPublisherService)
+      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.DepartmentAudience(departmentCode, Seq(Audience.TeachingStaff)))))
 
     }
 
@@ -60,9 +78,9 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       )
       val departmentInfoDao = mock[DepartmentInfoDao]
       when(departmentInfoDao.allDepartments).thenReturn(Seq[DepartmentInfo](DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
-      val audienceBinder = new AudienceBinder(departmentInfoDao, null)
+      val audienceBinder = new AudienceBinder(departmentInfoDao, null, defaultMockPublisherService)
 
-      audienceBinder.bindAudience(audienceData)(null).futureValue mustBe Right(Audience(Seq(Audience.DepartmentAudience(departmentCode, Seq(Audience.TeachingStaff, Audience.TaughtPostgrads)))))
+      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.DepartmentAudience(departmentCode, Seq(Audience.TeachingStaff, Audience.TaughtPostgrads)))))
 
     }
 
@@ -76,8 +94,8 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         None
       )
 
-      val audienceBinder = new AudienceBinder(null, null)
-      audienceBinder.bindAudience(audienceData)(null).futureValue mustBe Right(Audience(Seq(Audience.TaughtPostgrads)))
+      val audienceBinder = new AudienceBinder(null, null, defaultMockPublisherService)
+      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.TaughtPostgrads)))
     }
 
     "bind multiple non-department audiences" in {
@@ -91,8 +109,8 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         None
       )
 
-      val audienceBinder = new AudienceBinder(null, null)
-      audienceBinder.bindAudience(audienceData)(null).futureValue mustBe Right(Audience(Seq(Audience.TeachingStaff, Audience.TaughtPostgrads)))
+      val audienceBinder = new AudienceBinder(null, null, defaultMockPublisherService)
+      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.TeachingStaff, Audience.TaughtPostgrads)))
     }
 
     "bind multiple department and non-department audiences" in {
@@ -110,9 +128,9 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       )
       val departmentInfoDao = mock[DepartmentInfoDao]
       when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
-      val audienceBinder = new AudienceBinder(departmentInfoDao, null)
+      val audienceBinder = new AudienceBinder(departmentInfoDao, null, defaultMockPublisherService)
 
-      audienceBinder.bindAudience(audienceData)(null).futureValue mustBe Right(Audience(Seq(Audience.TeachingStaff, Audience.UndergradStudents, Audience.DepartmentAudience(departmentCode, Seq(Audience.TeachingStaff, Audience.ResearchPostgrads)))))
+      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.TeachingStaff, Audience.UndergradStudents, Audience.DepartmentAudience(departmentCode, Seq(Audience.TeachingStaff, Audience.ResearchPostgrads)))))
 
     }
 
@@ -129,9 +147,9 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
       val departmentInfoDao = mock[DepartmentInfoDao]
       when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
-      val audienceBinder = new AudienceBinder(departmentInfoDao, null)
+      val audienceBinder = new AudienceBinder(departmentInfoDao, null, defaultMockPublisherService)
 
-      audienceBinder.bindAudience(audienceData)(null).futureValue mustBe Right(Audience(Seq(Audience.Staff)))
+      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.Staff)))
     }
 
     "raise error message when binding with invalid department code" in {
@@ -148,9 +166,9 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       )
       val departmentInfoDao = mock[DepartmentInfoDao]
       when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("BB", "BB", "BB", "BB", "BB")))
-      val audienceBinder = new AudienceBinder(departmentInfoDao, null)
+      val audienceBinder = new AudienceBinder(departmentInfoDao, null, defaultMockPublisherService)
 
-      audienceBinder.bindAudience(audienceData)(null).futureValue mustBe Left(Seq(FormError("department", "error.department.invalid")))
+      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Left(Seq(FormError("department", "error.department.invalid")))
     }
 
     "raise error message when binding with invalid department audience" in {
@@ -173,9 +191,9 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       val audienceService = mock[AudienceService]
       when(audienceService.validateUsercodes(Seq(Usercode("TeachingApple")))).thenReturn(Seq.empty[Usercode])
 
-      val audienceBinder = new AudienceBinder(departmentInfoDao, audienceService)
+      val audienceBinder = new AudienceBinder(departmentInfoDao, audienceService, defaultMockPublisherService)
 
-      audienceBinder.bindAudience(audienceData)(null).futureValue mustBe
+      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe
         Left(Seq(FormError("audience", Seq("error.audience.usercodes.invalid"), Seq("TeachingApple"))))
     }
 
@@ -194,9 +212,9 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       val mockAudienceService = mock[AudienceService]
       when(mockAudienceService.validateUsercodes(Seq(Usercode(unrecognisedAudience)))).thenReturn(Seq.empty[Usercode])
 
-      val audienceBinder = new AudienceBinder(null, mockAudienceService)
+      val audienceBinder = new AudienceBinder(null, mockAudienceService, defaultMockPublisherService)
 
-      audienceBinder.bindAudience(audienceData)(null).futureValue mustBe Left(Seq(FormError("audience", "error.audience.usercodes.invalid", Seq(unrecognisedAudience))))
+      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Left(Seq(FormError("audience", "error.audience.usercodes.invalid", Seq(unrecognisedAudience))))
     }
 
 
@@ -206,8 +224,8 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         audience,
         None
       )
-      val audienceBinder = new AudienceBinder(null, null)
-      audienceBinder.bindAudience(audienceData)(null).futureValue mustBe Left(Seq(FormError("audience", "error.audience.invalid", Seq("")), FormError("audience", "error.audience.empty")))
+      val audienceBinder = new AudienceBinder(null, null, defaultMockPublisherService)
+      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Left(Seq(FormError("audience", "error.audience.invalid", Seq("")), FormError("audience", "error.audience.empty")))
     }
 
     "raise error message if more than restricted recipients" in {
@@ -216,28 +234,28 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
       val mockAudienceService = mock[AudienceService]
       when(mockAudienceService.resolve(Audience(Seq(Audience.ComponentParameter.unapply("TaughtPostgrads").get)))).thenReturn(Try(Seq(null, null)))
-      val audienceBinder = new AudienceBinder(null, mockAudienceService)
+      val audienceBinder = new AudienceBinder(null, mockAudienceService, defaultMockPublisherService)
       val result = audienceBinder.bindAudience(audienceData, restrictedRecipients = true)(new PublisherRequest(publisher, null, new AuthenticatedRequest(null, null))).futureValue
       result mustBe Left(Seq(FormError("audience", "error.audience.tooMany", Seq(1))))
     }
 
     "unbind module audience" in {
       val audience = Audience(Seq(Audience.ModuleAudience("CH160")))
-      val audienceBinder: AudienceBinder = new AudienceBinder(null, null)
+      val audienceBinder: AudienceBinder = new AudienceBinder(null, null, defaultMockPublisherService)
       val result = audienceBinder.unbindAudience(audience).audience
       result mustBe Seq("Module:CH160")
     }
 
     "unbind seminar audience" in {
       val audience = Audience(Seq(Audience.SeminarGroupAudience("group-id")))
-      val audienceBinder: AudienceBinder = new AudienceBinder(null, null)
+      val audienceBinder: AudienceBinder = new AudienceBinder(null, null, defaultMockPublisherService)
       val result = audienceBinder.unbindAudience(audience).audience
       result mustBe Seq("SeminarGroup:group-id")
     }
 
     "unbind relationship" in {
       val audience = Audience(Seq(Audience.RelationshipAudience("personalTutor", UniversityID("1234"))))
-      val audienceBinder: AudienceBinder = new AudienceBinder(null, null)
+      val audienceBinder: AudienceBinder = new AudienceBinder(null, null, defaultMockPublisherService)
       val result = audienceBinder.unbindAudience(audience).audience
       result mustBe Seq("Relationship:personalTutor:1234")
     }
