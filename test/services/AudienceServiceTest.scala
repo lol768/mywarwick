@@ -229,7 +229,7 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       ))
 
       val users: Seq[Usercode] = service.resolve(Audience(Seq(
-        UsercodesAudience(Seq(Usercode("cusfal"), Usercode("cusebr"), Usercode("cusaab"))),
+        UsercodesAudience(Set(Usercode("cusfal"), Usercode("cusebr"), Usercode("cusaab"))),
         LocationOptIn.CentralCampusResidences
       ))).get
 
