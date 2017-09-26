@@ -93,7 +93,7 @@ object ActivityDocument {
     audienceId match {
       case Some(id: String) => audienceService
         .resolve(audienceService.getAudience(id))
-        .map(e => e.map(_.string)).recover({ case _ => Seq() }).getOrElse(Seq())
+        .map(e => e.toSeq.map(_.string)).recover({ case _ => Seq() }).getOrElse(Seq())
       case _ => Seq()
     }
   }

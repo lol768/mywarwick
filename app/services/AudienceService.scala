@@ -14,7 +14,7 @@ import scala.util.Try
 
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
-  def resolve(audience: Audience): Try[Seq[Usercode]]
+  def resolve(audience: Audience): Try[Set[Usercode]]
   def getAudience(audienceId: String): Audience
 }
 
@@ -27,7 +27,7 @@ class AudienceServiceImpl @Inject()(
 
   // TODO Try.get wrapped with another Try is a weak sauce solution.
   // Should use magic combinators that nobody can understand.
-  override def resolve(audience: Audience): Try[Seq[Usercode]] = Try {
+  override def resolve(audience: Audience): Try[Set[Usercode]] = Try {
     val (optInComponents, audienceComponents) = audience.components.partition {
       case _: OptIn => true
       case _ => false
@@ -55,9 +55,9 @@ class AudienceServiceImpl @Inject()(
 
       val optInUsers = optInUsersByType.tail.foldLeft(optInUsersByType.head) { case (result, usercodes) => result.intersect(usercodes) }
 
-      audienceUsers.intersect(optInUsers).toSeq
+      audienceUsers.intersect(optInUsers)
     } else {
-      audienceUsers.toSeq
+      audienceUsers
     }
   }
 

@@ -56,7 +56,7 @@ class NotificationsController @Inject()(
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
     sharedAudienceInfo(audienceService, usercodesInAudience =>
       Json.obj(
-        "baseAudience" -> usercodesInAudience.length
+        "baseAudience" -> usercodesInAudience.size
       )
     )
   }

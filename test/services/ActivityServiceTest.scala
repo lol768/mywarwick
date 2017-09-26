@@ -60,7 +60,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
 
       when(audienceDao.saveAudience(Matchers.eq(recipients))(any())).thenReturn("audience-id")
       when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(AudienceSize.Finite(1)), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
-      when(audienceService.resolve(recipients)).thenReturn(Try(Seq(Usercode("cusebr"))))
+      when(audienceService.resolve(recipients)).thenReturn(Try(Set(Usercode("cusebr"))))
 
       service.save(submissionDue, recipients) must be(Right("activity-id"))
 
@@ -72,7 +72,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       when(activityTypeService.isValidActivityType(Matchers.any())).thenReturn(false)
       when(audienceDao.saveAudience(Matchers.any())(any())).thenReturn("audience-id")
       when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(AudienceSize.Finite(1)), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
-      when(audienceService.resolve(recipients)).thenReturn(Try(Seq(Usercode("custard"))))
+      when(audienceService.resolve(recipients)).thenReturn(Try(Set(Usercode("custard"))))
 
       private val activity = submissionDue
       private val result = service.save(activity, recipients)
@@ -85,7 +85,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       when(activityTypeService.isValidActivityTagName(Matchers.any())).thenReturn(false)
       when(audienceDao.saveAudience(Matchers.any())(any())).thenReturn("audience-id")
       when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(AudienceSize.Finite(1)), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
-      when(audienceService.resolve(recipients)).thenReturn(Try(Seq(Usercode("custard"))))
+      when(audienceService.resolve(recipients)).thenReturn(Try(Set(Usercode("custard"))))
 
       private val activity = submissionDue
       private val result = service.save(activity, recipients)
@@ -146,7 +146,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
 
       private val audience = Audience.usercode(Usercode("custard"))
       when(audienceDao.saveAudience(Matchers.eq(audience))(any())).thenReturn("audience")
-      when(audienceService.resolve(audience)).thenReturn(Try(Seq(Usercode("custard"))))
+      when(audienceService.resolve(audience)).thenReturn(Try(Set(Usercode("custard"))))
 
       private val result = service.update("activity", submissionDue, audience)
 
