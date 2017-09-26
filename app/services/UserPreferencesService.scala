@@ -13,7 +13,7 @@ trait UserPreferencesService {
 
   def save(usercode: Usercode): Unit
 
-  def countInitialisedUsers(usercodes: Seq[Usercode]): Int
+  def countInitialisedUsers(usercodes: Set[Usercode]): Int
 
   def getNotificationFilter(usercode: Usercode): JsObject
 
@@ -39,7 +39,7 @@ class UserPreferencesServiceImpl @Inject()(
 
   override def save(usercode: Usercode): Unit = db.withConnection(implicit c => dao.save(usercode))
 
-  override def countInitialisedUsers(usercodes: Seq[Usercode]): Int =
+  override def countInitialisedUsers(usercodes: Set[Usercode]): Int =
     db.withConnection(implicit c => dao.countInitialisedUsers(usercodes))
 
   override def getNotificationFilter(usercode: Usercode): JsObject =

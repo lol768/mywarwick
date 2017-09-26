@@ -12,7 +12,7 @@ trait UserNewsCategoryService {
 
   def setSubscribedCategories(usercode: Usercode, categoryIds: Seq[String]): Unit
 
-  def getRecipientsOfNewsInCategories(categoryIds: Seq[String]): Seq[Usercode]
+  def getRecipientsOfNewsInCategories(categoryIds: Seq[String]): Set[Usercode]
 
 }
 

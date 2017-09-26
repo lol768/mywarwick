@@ -40,7 +40,7 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
   "AudienceService" should {
 
     "return an empty list for an empty audience" in new Ctx {
-      service.resolve(Audience()).get must be (Nil)
+      service.resolve(Audience()).get must be (Set.empty)
     }
 
     "search for research postgrads" in new Ctx {
@@ -84,17 +84,17 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       val moduleGroup: Group = newGroup("in-cs102", Seq("cuuaaa","cuuaab"), `type`="Module")
       when(webgroups.getGroupsForQuery("-cs102")).thenReturn(Success(Seq(unrelatedGroup, moduleGroup)))
 
-      val users: Seq[Usercode] = service.resolve(Audience(Seq( ModuleAudience("CS102") ))).get
-      users.map(_.string) must be (Seq("cuuaaa","cuuaab"))
+      val users: Set[Usercode] = service.resolve(Audience(Seq( ModuleAudience("CS102") ))).get
+      users.map(_.string) must be (Set("cuuaaa","cuuaab"))
     }
 
     "deduplicate usercodes" in new Ctx {
       webgroupsAllContainBarry()
-      val users: Seq[Usercode] = service.resolve(Audience(Seq(
+      val users: Set[Usercode] = service.resolve(Audience(Seq(
         ResearchPostgrads, TaughtPostgrads, UndergradStudents
       ))).get
 
-      users must be (Seq(Usercode("cuddz")))
+      users must be (Set(Usercode("cuddz")))
     }
 
     "combine opt-in components" in new Ctx {
@@ -104,7 +104,7 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
         Usercode("cuscao")
       ))
 
-      val users: Seq[Usercode] = service.resolve(Audience(Seq(
+      val users: Set[Usercode] = service.resolve(Audience(Seq(
         UsercodeAudience(Usercode("cusfal")),
         UsercodeAudience(Usercode("cusebr")),
         UsercodeAudience(Usercode("cusaab")),
@@ -112,7 +112,7 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       ))).get
 
       users must have size 2
-      users must be (Seq(Usercode("cusfal"), Usercode("cusebr")))
+      users must be (Set(Usercode("cusfal"), Usercode("cusebr")))
     }
 
   }

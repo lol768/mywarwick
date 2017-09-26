@@ -63,7 +63,7 @@ trait ActivityService {
 
   def countNotificationsByPublishersInLast48Hours: Seq[PublisherActivityCount]
 
-  def updateAudienceCount(activityId: String, audienceId: String, recipients: Seq[Usercode]): Unit
+  def updateAudienceCount(activityId: String, audienceId: String, recipients: Set[Usercode]): Unit
 
   def markSent(id: String, usercode: Usercode): Unit
 
@@ -314,7 +314,7 @@ class ActivityServiceImpl @Inject()(
       )
     )
 
-  override def updateAudienceCount(activityId: String, audienceId: String, recipients: Seq[Usercode]): Unit =
+  override def updateAudienceCount(activityId: String, audienceId: String, recipients: Set[Usercode]): Unit =
     db.withTransaction { implicit c =>
       val audienceSize = audienceDao.getAudience(audienceId) match {
         case Audience.Public => AudienceSize.Public
