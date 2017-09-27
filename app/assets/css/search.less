@@ -5,3 +5,39 @@
 @import 'warwick-search-frontend/app/assets/css/search-form';
 @import 'warwick-search-frontend/app/assets/css/search-results';
 @import 'warwick-search-frontend/app/assets/css/chrome';
+
+.search-form:extend(.search-form all) {
+  input {
+    font: -apple-system-body;
+    font-family: 'Roboto', 'Droid Sans', 'Segoe WP', Helvetica, sans-serif;
+    line-height: 1.6;
+  }
+
+  p {
+    font: -apple-system-footnote;
+    font-family: 'Roboto', 'Droid Sans', 'Segoe WP', Helvetica, sans-serif;
+    line-height: 1.6;
+  }
+}
+
+.suggested-links .search-result .metadata {
+  font: -apple-system-caption1;
+  font-family: 'Roboto', 'Droid Sans', 'Segoe WP', Helvetica, sans-serif;
+}
+
+.search-result:extend(.search-result all) {
+  .hsep:extend(.hsep all) {
+    h4 {
+      font: -apple-system-body;
+      font-family: 'Roboto', 'Droid Sans', 'Segoe WP', Helvetica, sans-serif;
+    }
+  }
+
+  .summary:extend(.summary all) {
+    span {
+      font: -apple-system-body;
+      font-family: 'Roboto', 'Droid Sans', 'Segoe WP', Helvetica, sans-serif;
+    }
+  }
+}
+
