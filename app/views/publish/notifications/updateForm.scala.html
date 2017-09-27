@@ -2,6 +2,7 @@
 @import models.publishing.{PermissionScope, Publisher}
 @import system.RequestContext
 @import views.html._
+@import play.api.libs.json.JsValue
 
 @(
     publisher: Publisher,
@@ -10,7 +11,8 @@
     departmentOptions: Seq[(String, String)],
     providerOptions: Seq[(String, String)],
     permissionScope: PermissionScope,
-    audience: Audience
+    audience: Audience,
+    audienceJson: JsValue
 )(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
@@ -19,7 +21,7 @@
 
 @common.admin("Update alert") {
   @b3.form(action = controllers.publish.routes.NotificationsController.update(publisher.id, activity.id, submitted = true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.publish.routes.NotificationsController.audienceInfo(publisher.id)) {
-    @publish.notifications.contentForm(form, publisher, departmentOptions, providerOptions, permissionScope, audience, "Update")
+    @publish.notifications.contentForm(form, publisher, departmentOptions, providerOptions, permissionScope, audience, "Update", audienceJson)
   }
 }
 

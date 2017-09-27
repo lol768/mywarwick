@@ -14,7 +14,7 @@ trait UserNewsCategoryDao {
 
   def setSubscribedCategories(usercode: Usercode, categoryIds: Seq[String])(implicit c: Connection): Unit
 
-  def getRecipientsOfNewsInCategories(categoryIds: Seq[String])(implicit c: Connection): Seq[Usercode]
+  def getRecipientsOfNewsInCategories(categoryIds: Seq[String])(implicit c: Connection): Set[Usercode]
 
 }
 
@@ -43,9 +43,9 @@ class UserNewsCategoryDaoImpl @Inject()(
     }
   }
 
-  override def getRecipientsOfNewsInCategories(categoryIds: Seq[String])(implicit c: Connection): List[Usercode] = {
+  override def getRecipientsOfNewsInCategories(categoryIds: Seq[String])(implicit c: Connection): Set[Usercode] = {
     if (categoryIds.isEmpty) {
-      List()
+      Set.empty
     } else {
       userPreferencesDao.allInitialisedUsers().diff(
         SQL"""
@@ -54,7 +54,7 @@ class UserNewsCategoryDaoImpl @Inject()(
         GROUP BY USERCODE HAVING COUNT(*) = ${categoryIds.size}
       """.as(str("usercode").*)
           .map(Usercode)
-      ).toList
+      ).toSet
     }
   }
 

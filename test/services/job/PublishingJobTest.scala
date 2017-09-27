@@ -48,8 +48,7 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
 
     "save audience for news item" in db.withConnection { implicit c =>
       val audienceId = audienceDao.saveAudience(Audience(Seq(
-        Audience.UsercodeAudience(Usercode("dave")),
-        Audience.UsercodeAudience(Usercode("james"))
+        Audience.UsercodesAudience(Set(Usercode("dave"), Usercode("james")))
       )))
       val newsItemId = newsDao.save(Fixtures.news.save(), audienceId, AudienceSize.Finite(2))
 
@@ -103,8 +102,7 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
 
       db.withConnection { implicit c =>
         val audienceId = audienceDao.saveAudience(Audience(Seq(
-          Audience.UsercodeAudience(Usercode("dave")),
-          Audience.UsercodeAudience(Usercode("james"))
+          Audience.UsercodesAudience(Set(Usercode("dave"), Usercode("james")))
         )))
         when(jobDataMap.getString("audienceId")).thenReturn(audienceId)
 

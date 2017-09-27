@@ -4,7 +4,7 @@ import com.google.inject.{ImplementedBy, Inject}
 import models.news.NotificationData
 import models.publishing.PublisherActivityCount
 import models.{Audience, _}
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Interval}
 import org.quartz._
 import play.api.db.{Database, NamedDatabase}
 import services.ActivityError._
@@ -63,13 +63,15 @@ trait ActivityService {
 
   def countNotificationsByPublishersInLast48Hours: Seq[PublisherActivityCount]
 
-  def updateAudienceCount(activityId: String, audienceId: String, recipients: Seq[Usercode]): Unit
+  def updateAudienceCount(activityId: String, audienceId: String, recipients: Set[Usercode]): Unit
 
   def markSent(id: String, usercode: Usercode): Unit
 
   def getActivityWithAudience(id: String): Option[ActivityRenderWithAudience]
 
   def getActivitiesForDateTimeRange(from: DateTime, to: DateTime): Seq[Activity]
+
+  def getActivitiesForDateTimeRange(interval: Interval): Seq[Activity]
 }
 
 class ActivityServiceImpl @Inject()(
@@ -312,7 +314,7 @@ class ActivityServiceImpl @Inject()(
       )
     )
 
-  override def updateAudienceCount(activityId: String, audienceId: String, recipients: Seq[Usercode]): Unit =
+  override def updateAudienceCount(activityId: String, audienceId: String, recipients: Set[Usercode]): Unit =
     db.withTransaction { implicit c =>
       val audienceSize = audienceDao.getAudience(audienceId) match {
         case Audience.Public => AudienceSize.Public
@@ -328,6 +330,10 @@ class ActivityServiceImpl @Inject()(
     db.withConnection(implicit c => {
       dao.getActivitiesForDateTimeRange(from, to)
     })
+  }
+
+  override def getActivitiesForDateTimeRange(interval: Interval): Seq[Activity] = {
+    this.getActivitiesForDateTimeRange(interval.getStart, interval.getEnd)
   }
 }
 

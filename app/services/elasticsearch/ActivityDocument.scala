@@ -3,13 +3,13 @@ package services.elasticsearch
 import java.util
 
 import models.Activity
-import models.Audience.{DepartmentAudience, ModuleAudience, UsercodeAudience, WebGroupAudience}
+import models.Audience.{DepartmentAudience, ModuleAudience, UsercodesAudience, WebGroupAudience}
 import models.publishing.Publisher
-import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.joda.time.DateTime
 import services.{AudienceService, PublisherService}
 import warwick.sso.Usercode
+
 import scala.collection.JavaConverters._
 
 case class ActivityDocument(
@@ -77,7 +77,7 @@ object ActivityDocument {
 
     audienceId match {
       case Some(id: String) => audienceService.getAudience(id).components.flatMap {
-        case e: UsercodeAudience => Seq(s"${simpleClassName(e)}")
+        case e: UsercodesAudience => Seq(s"${simpleClassName(e)}")
         case e: WebGroupAudience => Seq(s"${simpleClassName(e)}:${e.groupName.string}")
         case e: ModuleAudience => Seq(s"${simpleClassName(e)}:${e.moduleCode}")
         case e: DepartmentAudience => e.subset.map(subset => {
@@ -93,7 +93,7 @@ object ActivityDocument {
     audienceId match {
       case Some(id: String) => audienceService
         .resolve(audienceService.getAudience(id))
-        .map(e => e.map(_.string)).recover({ case _ => Seq() }).getOrElse(Seq())
+        .map(e => e.toSeq.map(_.string)).recover({ case _ => Seq() }).getOrElse(Seq())
       case _ => Seq()
     }
   }

@@ -30,7 +30,9 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
 
   val mockSSOClient = new MockSSOClient(new LoginContext {
     override def loginUrl(target: Option[String]) = ""
+
     override def actualUserHasRole(role: RoleName) = false
+
     override def userHasRole(role: RoleName) = false
 
     override val user: Option[User] = Some(Users.create(custard))
@@ -118,6 +120,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
       status(result) mustBe FORBIDDEN
     }
 
+
     "display news form" in {
       when(publisherService.find("xyz")).thenReturn(Some(publisher))
       when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
@@ -127,7 +130,12 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
 
       status(result) mustBe OK
       contentAsString(result) must include("IT Services")
-      contentAsString(result) must include("Everyone (public)")
+      contentAsString(result) must include("Link URL")
+      contentAsString(result) must include("Title")
+      contentAsString(result) must include("Text")
+      // data attribute with publisher's department options
+      contentAsString(result) must include("data-departments='{&quot;IN&quot;:&quot;IT Services&quot;}'")
+      contentAsString(result) must include("class=\"audience-picker\"")
     }
 
   }
@@ -169,7 +177,8 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
         "item.text" -> "Something happened",
         "item.publishDate" -> "2016-01-01T00:00.000",
         "categories[]" -> "abc",
-        "audience.audience[]" -> "Public"
+        "audience.audience[]" -> "Dept:TeachingStaff",
+        "audience.department" -> "EN"
       )
 
       when(publisherService.find("xyz")).thenReturn(Some(publisher))
@@ -253,9 +262,9 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
           Matchers.eq(false)
         )(Matchers.any())
       ).thenReturn(Future.successful(Right(audience)))
-      when(audienceService.resolve(audience)).thenReturn(Success(Seq("a", "b", "c").map(Usercode)))
-      when(userPreferencesService.countInitialisedUsers(Seq("a", "b", "c").map(Usercode))).thenReturn(2)
-      when(userNewsCategoryService.getRecipientsOfNewsInCategories(Seq("abc"))).thenReturn(Seq("a", "e").map(Usercode))
+      when(audienceService.resolve(audience)).thenReturn(Success(Set("a", "b", "c").map(Usercode)))
+      when(userPreferencesService.countInitialisedUsers(Set("a", "b", "c").map(Usercode))).thenReturn(2)
+      when(userNewsCategoryService.getRecipientsOfNewsInCategories(Seq("abc"))).thenReturn(Set("a", "e").map(Usercode))
 
       val result = call(newsController.audienceInfo("xyz"), FakeRequest("POST", "/").withFormUrlEncodedBody(validData: _*))
 
@@ -274,7 +283,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
           Matchers.eq(false)
         )(Matchers.any())
       ).thenReturn(Future.successful(Right(Audience.Public)))
-      when(audienceService.resolve(Audience.Public)).thenReturn(Success(Seq(Usercode("*"))))
+      when(audienceService.resolve(Audience.Public)).thenReturn(Success(Set(Usercode("*"))))
       when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.AllDepartments)
 
       val data = Seq(

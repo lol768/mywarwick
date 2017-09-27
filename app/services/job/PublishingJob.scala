@@ -72,7 +72,7 @@ class PublishActivityJob @Inject()(
 
     audienceService.resolve(audience).foreach { recipients =>
       activityService.getActivityRenderById(activityId).foreach { activityRender =>
-        saveRecipients(activityRender, recipients.toSet)
+        saveRecipients(activityRender, recipients)
         activityService.updateAudienceCount(activityId, audienceId, recipients)
       }
     }
