@@ -59,7 +59,7 @@ class AudienceBinder @Inject()(
         val invalidUsercodes = component.usercodes.diff(audienceService.validateUsercodes(component.usercodes))
         if (invalidUsercodes.isEmpty)
           Some(UsercodesAudience(component.usercodes))
-        else {
+         else {
           errors :+= FormError("audience", "error.audience.usercodes.invalid", Seq(invalidUsercodes.map(_.string).mkString(", ")))
           None
         }

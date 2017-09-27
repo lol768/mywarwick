@@ -88,7 +88,7 @@ class AudienceDaoImpl extends AudienceDao {
             case (relationshipType, universityIdString) => RelationshipAudience(relationshipType, UniversityID(universityIdString))
           }
       }
-      case ("Usercode", components) => Seq(UsercodesAudience(components.flatMap(_.value).map(Usercode)))
+      case ("Usercode", components) => Seq(UsercodesAudience(components.flatMap(_.value).map(Usercode).toSet))
       case (_, components) => components.map(c =>
         if (c.value.isDefined) s"${c.name}:${c.value.get}"
         else c.name
@@ -137,7 +137,6 @@ class AudienceDaoImpl extends AudienceDao {
       case ModuleAudience(code) => Seq(AudienceComponentSave("Module", Some(code), deptCode))
       case SeminarGroupAudience(groupId) => Seq(AudienceComponentSave("SeminarGroup", Some(groupId), deptCode))
       case RelationshipAudience(relationshipType, agentId) => Seq(AudienceComponentSave.fromCompoundValue("Relationship", Seq(relationshipType, agentId.string), deptCode))
-      case UsercodesAudience(usercodes) => usercodes.flatMap(usercode => Seq(AudienceComponentSave("Usercode", Some(usercode.string), deptCode)))
+      case UsercodesAudience(usercodes) => usercodes.map(usercode => AudienceComponentSave("Usercode", Some(usercode.string), deptCode)).toSeq
     }
-
 }

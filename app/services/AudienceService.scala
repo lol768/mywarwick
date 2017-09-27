@@ -23,7 +23,7 @@ trait AudienceService {
 
   def audienceToJson(audience: Audience): JsValue
 
-  def validateUsercodes(usercodes: Seq[Usercode]): Seq[Usercode]
+  def validateUsercodes(usercodes: Set[Usercode]): Set[Usercode]
 }
 
 class AudienceServiceImpl @Inject()(
@@ -118,7 +118,7 @@ class AudienceServiceImpl @Inject()(
       case ModuleAudience(code) => audienceLookupDao.resolveModule(code)
       case SeminarGroupAudience(groupId) => audienceLookupDao.resolveSeminarGroup(groupId)
       case RelationshipAudience(relationshipType, agentId) => audienceLookupDao.resolveRelationship(agentId, relationshipType)
-      case UsercodesAudience(usercodes) => Future.successful(usercodes)
+      case UsercodesAudience(usercodes) => Future.successful(usercodes.toSeq)
     }
 
   private def webgroupUsers(groupName: GroupName): Try[Seq[Usercode]] =
@@ -255,9 +255,9 @@ class AudienceServiceImpl @Inject()(
     ) ++ locationsJson
   }
 
-  override def validateUsercodes(usercodes: Seq[Usercode]): Seq[Usercode] =
-    userLookupService.getUsers(usercodes) match {
-      case Success(users) => users.keys.toSeq
-      case Failure(_) => Seq.empty[Usercode]
+  override def validateUsercodes(usercodes: Set[Usercode]): Set[Usercode] =
+    userLookupService.getUsers(usercodes.toSeq) match {
+      case Success(users) => users.keys.toSet
+      case Failure(_) => Set.empty[Usercode]
     }
 }
