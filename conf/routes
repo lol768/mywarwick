@@ -154,4 +154,8 @@ POST          /service/search/*path                          @controllers.Search
 
 GET           /service/map/:lat/:lon/:width/:height          @controllers.MapController.mapThumbnail(lat: String, lon: String, width: Int, height: Int)
 
-POST        /service/flexipicker                                  @controllers.FlexiPickerController.queryJson
+POST          /service/flexipicker                           @controllers.FlexiPickerController.queryJson
+POST          /service/grouplookup/module                    @controllers.publish.GroupLookupController.queryModule
+POST          /service/grouplookup/seminargroup              @controllers.publish.GroupLookupController.querySeminarGroup
+POST          /service/grouplookup/relationships             @controllers.publish.GroupLookupController.queryRelationships
+

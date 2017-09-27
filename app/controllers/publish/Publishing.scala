@@ -1,20 +1,21 @@
 package controllers.publish
 
 import controllers.admin.addFormErrors
-import models.{API, Audience}
 import models.publishing._
+import models.{API, Audience}
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
-import services.dao.{DepartmentInfo, DepartmentInfoDao}
 import services._
-import system.ImplicitRequestContext
+import services.dao.DepartmentInfo
+import system.{ImplicitRequestContext, Logging}
 import warwick.sso.{AuthenticatedRequest, Usercode}
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
-trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOptions with PublishingActionRefiner {
+trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOptions with PublishingActionRefiner with Logging {
   self: ImplicitRequestContext with Controller =>
 
   implicit val executionContext = system.ThreadPools.web
@@ -43,7 +44,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
       case PermissionScope.AllDepartments =>
         true
       case PermissionScope.Departments(deptCodes: Seq[String]) =>
-        data.audience.forall(a => a.startsWith("Dept:") || deptCodes.exists(dc => a.startsWith(s"WebGroup:${dc.toLowerCase}-"))) && data.department.forall(deptCodes.contains)
+        data.department.forall(deptCodes.contains)
     }
   }
 
@@ -92,7 +93,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
   def sharedAudienceInfo(
     audienceService: AudienceService,
     processUsercodes: Set[Usercode] => JsObject
-  )(implicit request: PublisherRequest[_]): Future[Result] = {
+  )(implicit request: PublisherRequest[_]): Future[Result] =
     audienceForm.bindFromRequest.fold(
       formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
       audienceData => {
@@ -104,16 +105,16 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
                 "public" -> true
               ))))
             } else {
-              audienceService.resolve(audience)
-                .toOption
-                .map(processUsercodes)
-                .map(usercodes => Ok(Json.toJson(API.Success[JsObject](data = usercodes))))
-                .getOrElse(InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience"))))))
+              audienceService.resolve(audience).map(processUsercodes) match {
+                case Success(usercodes) => Ok(Json.toJson(API.Success[JsObject](data = usercodes)))
+                case Failure(err) =>
+                  logger.error("Failed to resolve audience", err)
+                  InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience")))))
+              }
             }
         }
       }
     )
-  }
 }
 
 trait PublishableWithAudience {

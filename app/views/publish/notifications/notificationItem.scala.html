@@ -34,8 +34,11 @@
               To: @c
                 @if(c == 1) { recipient } else { recipients }
                 @if(item.audienceComponents.nonEmpty) {
-                  (@tags.audienceComponents(item.audienceComponents, allDepartments))
-              }
+                  <i class="audience-details fa collapsed" data-toggle="collapse" data-target="#@item.activity.id"></i>
+                  <div id="@item.activity.id" class="collapse">
+                    @tags.audienceComponents(item.audienceComponents, allDepartments)
+                  </div>
+                }
               </span>
             }
             case _ => {}

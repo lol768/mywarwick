@@ -1,0 +1,9 @@
+@(
+    strings: Seq[String]
+)
+
+@if(strings.length > 1) {
+  @(s"${strings.dropRight(1).mkString("", ", ", " and ")}${strings.last}")
+} else {
+  @(strings.mkString(""))
+}
