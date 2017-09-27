@@ -88,7 +88,8 @@ class NavigationServiceImpl @Inject()(
     NavigationDropdown("Sysadmin", adminRoutes.AdminController.sysadmin(), Seq(
       NavigationPage("Publishers", adminPublishersRoutes.PublishersController.index()),
       NavigationPage("Masquerade", adminRoutes.MasqueradeController.masquerade()),
-      NavigationPage("Cluster State", adminRoutes.ClusterStateController.html())
+      NavigationPage("Cluster State", adminRoutes.ClusterStateController.html()),
+      NavigationPage("ElasticSearch", controllers.admin.elasticsearch.routes.ActivityToESController.index())
     ))
   }
 }

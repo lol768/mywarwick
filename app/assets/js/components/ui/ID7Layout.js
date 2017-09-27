@@ -45,6 +45,14 @@ class ID7Layout extends React.PureComponent {
         .addClass(`theme-${newProps.colourTheme}`)
         .find('meta[name="theme-color"]')
         .attr('content', newProps.schemeColour);
+
+      if (isEmbedded()) {
+        const data = {
+          type: 'message.id7.account-popover.colourThemeChange',
+          colourTheme: newProps.colourTheme,
+        };
+        window.parent.postMessage(JSON.stringify(data), '*');
+      }
     }
   }
 
@@ -65,8 +73,11 @@ class ID7Layout extends React.PureComponent {
 
   componentDidMount() {
     if (isEmbedded()) {
-      const type = 'message.id7.account-popover.layoutDidMount';
-      window.parent.postMessage(JSON.stringify({ type }), '*');
+      const data = {
+        type: 'message.id7.account-popover.layoutDidMount',
+        colourTheme: this.props.colourTheme,
+      };
+      window.parent.postMessage(JSON.stringify(data), '*');
     }
   }
 

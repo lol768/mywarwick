@@ -61,6 +61,8 @@ class TileContentServiceImpl @Inject()(
   // TODO inject a client properly
   val client = HttpClientBuilder.create()
     .setDefaultRequestConfig(requestConfig)
+    .setMaxConnTotal(250)
+    .setMaxConnPerRoute(100)
     .build()
 
   val preferenceCacheDuration = config

@@ -4,7 +4,7 @@ import com.google.inject.{ImplementedBy, Inject}
 import models.news.NotificationData
 import models.publishing.PublisherActivityCount
 import models.{Audience, _}
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Interval}
 import org.quartz._
 import play.api.db.{Database, NamedDatabase}
 import services.ActivityError._
@@ -68,6 +68,10 @@ trait ActivityService {
   def markSent(id: String, usercode: Usercode): Unit
 
   def getActivityWithAudience(id: String): Option[ActivityRenderWithAudience]
+
+  def getActivitiesForDateTimeRange(from: DateTime, to: DateTime): Seq[Activity]
+
+  def getActivitiesForDateTimeRange(interval: Interval): Seq[Activity]
 }
 
 class ActivityServiceImpl @Inject()(
@@ -87,6 +91,7 @@ class ActivityServiceImpl @Inject()(
 
   override def getActivityRenderById(id: String): Option[ActivityRender] =
     db.withConnection(implicit c => dao.getActivityRenderById(id))
+
 
   override def update(activityId: String, activity: ActivitySave, audience: Audience): Either[Seq[ActivityError], String] = {
     getActivityById(activityId).map { existingActivity =>
@@ -320,6 +325,16 @@ class ActivityServiceImpl @Inject()(
 
   override def markSent(id: String, usercode: Usercode): Unit =
     db.withTransaction(implicit c => recipientDao.markSent(id, usercode.string))
+
+  override def getActivitiesForDateTimeRange(from: DateTime, to: DateTime): Seq[Activity] = {
+    db.withConnection(implicit c => {
+      dao.getActivitiesForDateTimeRange(from, to)
+    })
+  }
+
+  override def getActivitiesForDateTimeRange(interval: Interval): Seq[Activity] = {
+    this.getActivitiesForDateTimeRange(interval.getStart, interval.getEnd)
+  }
 }
 
 sealed trait ActivityError {
