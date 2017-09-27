@@ -53,9 +53,10 @@ export default function init(opts) {
       createSelector(
         state => state.colourSchemes.chosen,
         state => state.colourSchemes.loaded,
-        (chosen, loaded) => {
+        state => state.colourSchemes.isHighContrast,
+        (chosen, loaded, isHighContrast) => {
           if (loaded && native.setBackgroundToDisplay) {
-            native.setBackgroundToDisplay(chosen);
+            native.setBackgroundToDisplay(chosen, isHighContrast);
           }
         },
       ),
