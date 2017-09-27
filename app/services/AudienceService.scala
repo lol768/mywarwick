@@ -17,8 +17,7 @@ import scala.util.{Failure, Success, Try}
 
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
-  def resolve(audience: Audience): Try[Seq[Usercode]]
-
+  def resolve(audience: Audience): Try[Set[Usercode]]
   def getAudience(audienceId: String): Audience
 
   def audienceToJson(audience: Audience): JsValue
@@ -37,11 +36,11 @@ class AudienceServiceImpl @Inject()(
 
   import system.ThreadPools.externalData
 
-  override def resolve(audience: Audience): Try[Seq[Usercode]] = {
+  override def resolve(audience: Audience): Try[Set[Usercode]] = {
     Await.ready(resolveFuture(audience), 30.seconds).value.get
   }
 
-  private def resolveFuture(audience: Audience): Future[Seq[Usercode]] = {
+  private def resolveFuture(audience: Audience): Future[Set[Usercode]] = {
     val (optInComponents, audienceComponents) = audience.components.partition {
       case _: OptIn => true
       case _ => false
@@ -71,9 +70,9 @@ class AudienceServiceImpl @Inject()(
 
       val optInUsers = optInUsersByType.tail.foldLeft(optInUsersByType.head) { case (result, usercodes) => result.intersect(usercodes) }
 
-      audienceUsers.map(_.intersect(optInUsers).toSeq)
+      audienceUsers.map(_.intersect(optInUsers))
     } else {
-      audienceUsers.map(_.toSeq)
+      audienceUsers
     }
   }
 

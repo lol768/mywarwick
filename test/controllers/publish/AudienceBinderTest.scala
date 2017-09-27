@@ -233,7 +233,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       val publisher = Publisher("xyz", "Publisher", Some(1))
 
       val mockAudienceService = mock[AudienceService]
-      when(mockAudienceService.resolve(Audience(Seq(Audience.ComponentParameter.unapply("TaughtPostgrads").get)))).thenReturn(Try(Seq(null, null)))
+      when(mockAudienceService.resolve(Audience(Seq(Audience.ComponentParameter.unapply("TaughtPostgrads").get)))).thenReturn(Try(Set.apply[Usercode](Usercode("a"), Usercode("b"))))
       val audienceBinder = new AudienceBinder(null, mockAudienceService, defaultMockPublisherService)
       val result = audienceBinder.bindAudience(audienceData, restrictedRecipients = true)(new PublisherRequest(publisher, null, new AuthenticatedRequest(null, null))).futureValue
       result mustBe Left(Seq(FormError("audience", "error.audience.tooMany", Seq(1))))

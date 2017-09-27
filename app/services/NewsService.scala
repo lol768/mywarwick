@@ -48,7 +48,7 @@ trait NewsService {
 
   def getNewsItem(id: String): Option[NewsItemRender]
 
-  def setRecipients(newsItemId: String, recipients: Seq[Usercode]): Unit
+  def setRecipients(newsItemId: String, recipients: Set[Usercode]): Unit
 
   def delete(newsItemId: String): Unit
 
@@ -179,7 +179,7 @@ class AnormNewsService @Inject()(
     Future {
       // Delete the recipients now and re-create them in the future
       if (existingAudience.nonEmpty) {
-        db.withTransaction(implicit c => dao.setRecipients(id, Seq.empty))
+        db.withTransaction(implicit c => dao.setRecipients(id, Set.empty))
       }
 
       schedulePublishNewsItem(id, audienceId, item.publishDate)
@@ -202,7 +202,7 @@ class AnormNewsService @Inject()(
     * @param newsItemId
     * @param recipients
     */
-  override def setRecipients(newsItemId: String, recipients: Seq[Usercode]): Unit =
+  override def setRecipients(newsItemId: String, recipients: Set[Usercode]): Unit =
     db.withTransaction(implicit c => dao.setRecipients(newsItemId, recipients))
 
   override def updateAudienceCount(id: String): Unit =

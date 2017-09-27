@@ -2,8 +2,8 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import actors.WebSocketActor
-import akka.actor.ActorSystem
+import actors.{PubSubActor, WebSocketActor}
+import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.Materializer
 import play.api.libs.json.JsValue
 import play.api.libs.streams.ActorFlow
@@ -25,11 +25,14 @@ class WebSocketController @Inject()(implicit
 
   import security._
 
-  def socket = WebSocket.acceptOrResult[JsValue, JsValue] { request =>
+  // This actor lives as long as the controller
+  private val pubSubActor = system.actorOf(PubSubActor.props())
+
+  def socket: WebSocket = WebSocket.acceptOrResult[JsValue, JsValue] { request =>
     SecureWebsocket(request) { loginContext: LoginContext =>
       val who = loginContext.user.map(_.usercode).getOrElse("nobody")
       logger.info(s"WebSocket opening for $who")
-      val flow = ActorFlow.actorRef(out => WebSocketActor.props(loginContext, metrics.websocketTracker())(out))
+      val flow = ActorFlow.actorRef(out => WebSocketActor.props(loginContext, metrics.websocketTracker(), pubSubActor, out))
       Future.successful(Right(flow))
     }
   }

@@ -103,16 +103,16 @@ class NewsController @Inject()(
       formData.filterNot(_.ignoreCategories)
         .map { data =>
           val initialisedUsers = userPreferencesService.countInitialisedUsers(usercodesInAudience)
-          val newsRecipients = userNewsCategoryService.getRecipientsOfNewsInCategories(data.categoryIds).intersect(usercodesInAudience).length
+          val newsRecipients = userNewsCategoryService.getRecipientsOfNewsInCategories(data.categoryIds).intersect(usercodesInAudience).size
 
           Json.obj(
-            "baseAudience" -> usercodesInAudience.length,
-            "categorySubset" -> (usercodesInAudience.length - initialisedUsers + newsRecipients)
+            "baseAudience" -> usercodesInAudience.size,
+            "categorySubset" -> (usercodesInAudience.size - initialisedUsers + newsRecipients)
           )
         }
         .getOrElse(
           Json.obj(
-            "baseAudience" -> usercodesInAudience.length
+            "baseAudience" -> usercodesInAudience.size
           )
         )
     )

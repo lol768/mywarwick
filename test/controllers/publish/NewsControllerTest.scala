@@ -262,9 +262,9 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
           Matchers.eq(false)
         )(Matchers.any())
       ).thenReturn(Future.successful(Right(audience)))
-      when(audienceService.resolve(audience)).thenReturn(Success(Seq("a", "b", "c").map(Usercode)))
-      when(userPreferencesService.countInitialisedUsers(Seq("a", "b", "c").map(Usercode))).thenReturn(2)
-      when(userNewsCategoryService.getRecipientsOfNewsInCategories(Seq("abc"))).thenReturn(Seq("a", "e").map(Usercode))
+      when(audienceService.resolve(audience)).thenReturn(Success(Set("a", "b", "c").map(Usercode)))
+      when(userPreferencesService.countInitialisedUsers(Set("a", "b", "c").map(Usercode))).thenReturn(2)
+      when(userNewsCategoryService.getRecipientsOfNewsInCategories(Seq("abc"))).thenReturn(Set("a", "e").map(Usercode))
 
       val result = call(newsController.audienceInfo("xyz"), FakeRequest("POST", "/").withFormUrlEncodedBody(validData: _*))
 
@@ -283,7 +283,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
           Matchers.eq(false)
         )(Matchers.any())
       ).thenReturn(Future.successful(Right(Audience.Public)))
-      when(audienceService.resolve(Audience.Public)).thenReturn(Success(Seq(Usercode("*"))))
+      when(audienceService.resolve(Audience.Public)).thenReturn(Success(Set(Usercode("*"))))
       when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.AllDepartments)
 
       val data = Seq(
