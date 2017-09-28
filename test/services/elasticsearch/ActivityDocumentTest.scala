@@ -19,12 +19,12 @@ class ActivityDocumentTest extends BaseSpec with MockitoSugar {
 
 
   "ActivityDocument" should {
-    "serialise audience component correctly for UsercodeAudience" in new Scope {
+    "serialise audience component correctly for UsercodesAudience" in new Scope {
 
-      val audience = Audience.usercode(Usercode("usercode123"))
+      val audience = Audience.usercodes(Seq(Usercode("usercode123"), Usercode("usercode456")))
       when(audienceService.getAudience((Matchers.any()))).thenReturn(audience)
       val result = ActivityDocument.serialiseAudienceComponents(Some("1"), audienceService)
-      result must be(Seq("UsercodeAudience")
+      result must be(Seq("UsercodesAudience")
       )
     }
 

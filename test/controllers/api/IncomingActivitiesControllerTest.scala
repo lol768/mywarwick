@@ -175,7 +175,7 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
     "fail for too many recipients" in {
       when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
       when(publisherService.find(tabulaPublisherId)).thenReturn(Some(tabulaPublisher.copy(maxRecipients = Some(1))))
-      when(audienceService.resolve(Audience(Seq(Audience.UsercodeAudience(Usercode("cusfal")), Audience.UsercodeAudience(Usercode("cusebr")))))).thenReturn(Try(Set(Usercode("cusfal"), Usercode("cusebr"))))
+      when(audienceService.resolve(Audience(Seq(Audience.UsercodesAudience(Set(Usercode("cusfal"), Usercode("cusebr"))))))).thenReturn(Try(Set(Usercode("cusfal"), Usercode("cusebr"))))
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(Json.obj(
         "type" -> "due",
         "title" -> "Coursework due soon",

@@ -30,7 +30,9 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
 
   val mockSSOClient = new MockSSOClient(new LoginContext {
     override def loginUrl(target: Option[String]) = ""
+
     override def actualUserHasRole(role: RoleName) = false
+
     override def userHasRole(role: RoleName) = false
 
     override val user: Option[User] = Some(Users.create(custard))
@@ -118,6 +120,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
       status(result) mustBe FORBIDDEN
     }
 
+
     "display news form" in {
       when(publisherService.find("xyz")).thenReturn(Some(publisher))
       when(publisherService.getRoleForUser("xyz", custard)).thenReturn(NewsManager)
@@ -127,7 +130,12 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
 
       status(result) mustBe OK
       contentAsString(result) must include("IT Services")
-      contentAsString(result) must include("Everyone (public)")
+      contentAsString(result) must include("Link URL")
+      contentAsString(result) must include("Title")
+      contentAsString(result) must include("Text")
+      // data attribute with publisher's department options
+      contentAsString(result) must include("data-departments='{&quot;IN&quot;:&quot;IT Services&quot;}'")
+      contentAsString(result) must include("class=\"audience-picker\"")
     }
 
   }
@@ -169,7 +177,8 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
         "item.text" -> "Something happened",
         "item.publishDate" -> "2016-01-01T00:00.000",
         "categories[]" -> "abc",
-        "audience.audience[]" -> "Public"
+        "audience.audience[]" -> "Dept:TeachingStaff",
+        "audience.department" -> "EN"
       )
 
       when(publisherService.find("xyz")).thenReturn(Some(publisher))

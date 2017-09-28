@@ -1,23 +1,28 @@
 @import services.dao.DepartmentInfo
-@(components: Seq[Audience.Component], allDepartments: Seq[DepartmentInfo])@components.flatMap(component => component match {
-  case Audience.PublicAudience => Seq("Public")
-  case usercode: Audience.UsercodeAudience => Seq(s"Usercode: ${usercode.usercode}")
-  case group: Audience.WebGroupAudience => Seq(s"WebGroup: ${group.groupName.string}")
-  case module: Audience.ModuleAudience => Seq(s"Module: ${module.moduleCode.toUpperCase}")
-  case dept: Audience.DepartmentAudience => dept.subset.map {
-    case Audience.All => s"All members in ${allDepartments.find(_.code == dept.deptCode).map(_.shortName).getOrElse(dept.deptCode)}"
-    case Audience.Staff => s"All staff in ${allDepartments.find(_.code == dept.deptCode).map(_.shortName).getOrElse(dept.deptCode)}"
-    case Audience.TeachingStaff => s"All teaching staff in ${allDepartments.find(_.code == dept.deptCode).map(_.shortName).getOrElse(dept.deptCode)}"
-    case Audience.UndergradStudents => s"All undergraduate students in ${allDepartments.find(_.code == dept.deptCode).map(_.shortName).getOrElse(dept.deptCode)}"
-    case Audience.TaughtPostgrads => s"All taught postgraduates in ${allDepartments.find(_.code == dept.deptCode).map(_.shortName).getOrElse(dept.deptCode)}"
-    case Audience.ResearchPostgrads => s"All research postgraduates in ${allDepartments.find(_.code == dept.deptCode).map(_.shortName).getOrElse(dept.deptCode)}"
-    case unknownSubset => unknownSubset.toString
-  }
-  case Audience.All => Seq(s"All university members")
-  case Audience.Staff => Seq(s"All staff")
-  case Audience.TeachingStaff => Seq(s"All teaching staff")
-  case Audience.UndergradStudents => Seq(s"All undergraduate students")
-  case Audience.TaughtPostgrads => Seq(s"All taught postgraduates")
-  case Audience.ResearchPostgrads => Seq(s"All research postgraduates")
-  case unknown => Seq(unknown.toString)
-}).mkString(", ")
+@import models.Audience
+@(
+    components: Seq[Audience.Component],
+    allDepartments: Seq[DepartmentInfo]
+)
+
+@defining(Map("supervisor" -> "Supervisees", "personalTutor" -> "Personal tutees")) { relationships: Map[String, String] =>
+  @components.flatMap(component => component match {
+    case Audience.PublicAudience => Seq("Public")
+    case Audience.UsercodesAudience(usercodes) => Seq(s"Usercodes: ${usercodes.map(_.string).mkString(", ")}")
+    case Audience.WebGroupAudience(groupName) => Seq(s"WebGroup: ${groupName.string}")
+    case Audience.ModuleAudience(moduleCode) => Seq(s"Module: ${moduleCode.toUpperCase}")
+    case Audience.RelationshipAudience(rel, agentId) => Seq(s"${relationships.getOrElse(rel, rel)} of ${agentId.string}")
+    case Audience.SeminarGroupAudience(groupId) => Seq(s"Seminar group: $groupId")
+    case loc: Audience.LocationOptIn => Seq(s"Location: ${loc.description}")
+    case dept: Audience.DepartmentAudience =>
+      Seq(s"${tags.mkList(dept.subset.map(_.displayName))} in ${allDepartments.find(_.code == dept.deptCode).map(_.shortName).getOrElse(dept.deptCode)}")
+    case Audience.All => Seq(s"All university members")
+    case Audience.Staff => Seq(s"All staff")
+    case Audience.TeachingStaff => Seq(s"All teaching staff")
+    case Audience.UndergradStudents => Seq(s"All undergraduate students")
+    case Audience.TaughtPostgrads => Seq(s"All taught postgraduates")
+    case Audience.ResearchPostgrads => Seq(s"All research postgraduates")
+    case unknown => Seq(unknown.toString)
+  }).mkString(", ")
+}
+
