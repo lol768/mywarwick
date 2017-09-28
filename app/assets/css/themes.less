@@ -113,10 +113,13 @@
 
   .colour-0, .colour-1, .colour-2, .colour-3 {
     background-color: @transparent;
-    .tile--zoomed .tile__header {
-      background: @gradTh;
+    & when (@highContrastFallback = null) {
+      .tile--zoomed .tile__header {
+        background: @gradTh;
+      }
     }
   }
+
   .tile--map__container .map-tile-image {
     -webkit-filter: saturate(0%) brightness(90%) contrast(50%) opacity(25%); // Android WebView seems to need this
     filter: saturate(0%) brightness(90%) contrast(50%) opacity(25%);
