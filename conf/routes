@@ -41,6 +41,10 @@ POST          /admin/publishers/:publisher/providers                @controllers
 GET           /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.updateForm(publisher: String, provider: String)
 POST          /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.update(publisher: String, provider: String)
 
+
+GET           /admin/elasticsearch/activity                  @controllers.admin.elasticsearch.ActivityToESController.index
+POST          /admin/elasticsearch/reindex                   @controllers.admin.elasticsearch.ActivityToESController.reindexActivitiesInDateTimeRange
+
 GET           /publish/:publisher/webgroups                  @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 
 GET           /publish                                       @controllers.publish.PublishersController.index
@@ -150,4 +154,8 @@ POST          /service/search/*path                          @controllers.Search
 
 GET           /service/map/:lat/:lon/:width/:height          @controllers.MapController.mapThumbnail(lat: String, lon: String, width: Int, height: Int)
 
-POST        /service/flexipicker                                  @controllers.FlexiPickerController.queryJson
+POST          /service/flexipicker                           @controllers.FlexiPickerController.queryJson
+POST          /service/grouplookup/module                    @controllers.publish.GroupLookupController.queryModule
+POST          /service/grouplookup/seminargroup              @controllers.publish.GroupLookupController.querySeminarGroup
+POST          /service/grouplookup/relationships             @controllers.publish.GroupLookupController.queryRelationships
+

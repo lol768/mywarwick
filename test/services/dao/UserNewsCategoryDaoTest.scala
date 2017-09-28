@@ -80,11 +80,11 @@ class UserNewsCategoryDaoTest extends BaseSpec with OneStartAppPerSuite {
       SQL"INSERT INTO USER_NEWS_CATEGORY (USERCODE, NEWS_CATEGORY_ID, SELECTED) VALUES ('cusac', 'category-c', 0)".execute()
 
       dao.getRecipientsOfNewsInCategories(Seq("category-a")).map(_.string) mustBe empty
-      dao.getRecipientsOfNewsInCategories(Seq("category-b")).map(_.string) mustBe Seq("cusac")
-      dao.getRecipientsOfNewsInCategories(Seq("category-c")).map(_.string) mustBe Seq("cusab")
+      dao.getRecipientsOfNewsInCategories(Seq("category-b")).map(_.string) mustBe Set("cusac")
+      dao.getRecipientsOfNewsInCategories(Seq("category-c")).map(_.string) mustBe Set("cusab")
 
-      dao.getRecipientsOfNewsInCategories(Seq("category-a", "category-b")).map(_.string) mustBe Seq("cusac")
-      dao.getRecipientsOfNewsInCategories(Seq("category-a", "category-c")).map(_.string) mustBe Seq("cusab")
+      dao.getRecipientsOfNewsInCategories(Seq("category-a", "category-b")).map(_.string) mustBe Set("cusac")
+      dao.getRecipientsOfNewsInCategories(Seq("category-a", "category-c")).map(_.string) mustBe Set("cusab")
       dao.getRecipientsOfNewsInCategories(Seq("category-a", "category-b", "category-c")).map(_.string) must contain only("cusac", "cusab")
 
       dao.getRecipientsOfNewsInCategories(Nil).map(_.string) must be(empty)

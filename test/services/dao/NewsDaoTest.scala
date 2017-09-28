@@ -23,7 +23,7 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
   val jim = Usercode("cusjim")
   val public = Usercode("*")
 
-  def save(item: NewsItemSave, recipients: Seq[Usercode])(implicit c: Connection): String = {
+  def save(item: NewsItemSave, recipients: Set[Usercode])(implicit c: Connection): String = {
     val id = newsDao.save(item, "audienceId", AudienceSize.Finite(recipients.size))
     newsDao.setRecipients(id, recipients)
     id
@@ -69,9 +69,9 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "return only published news for user" in transaction { implicit c =>
-      save(londonsBurning, Seq(public))
-      save(brumPanic, Seq(ana, eli))
-      save(futureNews, Seq(ana, bob, eli, jim))
+      save(londonsBurning, Set(public))
+      save(brumPanic, Set(ana, eli))
+      save(futureNews, Set(ana, bob, eli, jim))
 
       val publicNews = newsDao.latestNews(None)
       publicNews.map(_.title) must be(Seq(londonsBurning.title))
@@ -84,15 +84,15 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "limit results to requested amount" in transaction { implicit c =>
-      save(londonsBurning, Seq(ana))
-      save(brumPanic, Seq(ana))
+      save(londonsBurning, Set(ana))
+      save(brumPanic, Set(ana))
       newsDao.latestNews(Some(ana), limit = 2) must have length 2
       newsDao.latestNews(Some(ana), limit = 1) must have length 1
     }
 
     "offset results by requested number" in transaction { implicit c =>
-      save(londonsBurning, Seq(ana))
-      save(brumPanic, Seq(ana))
+      save(londonsBurning, Set(ana))
+      save(brumPanic, Set(ana))
       newsDao.latestNews(Some(ana), offset = 1) must have length 1
       newsDao.latestNews(Some(ana), limit = 1, offset = 1).head must have('title (brumPanic.title))
       newsDao.latestNews(Some(ana), limit = 1).head must have('title (londonsBurning.title))
@@ -101,7 +101,7 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
     "return only news for subscribed categories" in transaction { implicit c =>
       val someCategory = newsCategoryDao.all().head
 
-      val id = save(londonsBurning.copy(ignoreCategories = false), Seq(public))
+      val id = save(londonsBurning.copy(ignoreCategories = false), Set(public))
       newsCategoryDao.saveNewsCategories(id, Seq(someCategory.id))
 
       userNewsCategoryDao.setSubscribedCategories(jim, Seq(someCategory.id))
@@ -118,7 +118,7 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
     "return news with IGNORE_CATEGORIES set regardless of chosen categories" in transaction { implicit c =>
       val someCategory :: anotherCategory :: _ = newsCategoryDao.all()
 
-      val id = save(londonsBurning.copy(ignoreCategories = true), Seq(public))
+      val id = save(londonsBurning.copy(ignoreCategories = true), Set(public))
       newsCategoryDao.saveNewsCategories(id, Seq(someCategory.id))
 
       userNewsCategoryDao.setSubscribedCategories(jim, Seq(anotherCategory.id))
@@ -134,7 +134,7 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
 
     "return all public news for anonymous user" in transaction { implicit c =>
       // Anonymous user should see all news as they cannot choose categories
-      save(londonsBurning.copy(ignoreCategories = false), Seq(public))
+      save(londonsBurning.copy(ignoreCategories = false), Set(public))
 
       val anonNews = newsDao.latestNews(None)
 
@@ -149,14 +149,14 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "return a single news item" in transaction { implicit c =>
-      val id = save(londonsBurning, Seq(public))
+      val id = save(londonsBurning, Set(public))
 
       newsDao.getNewsByIds(Seq(id)) must have length 1
     }
 
     "return multiple news items" in transaction { implicit c =>
-      val id1 = save(londonsBurning, Seq(public))
-      val id2 = save(brumPanic, Seq(ana, eli))
+      val id1 = save(londonsBurning, Set(public))
+      val id2 = save(brumPanic, Set(ana, eli))
 
       newsDao.getNewsByIds(Seq(id1, id2)) must have length 2
     }
@@ -170,7 +170,7 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "return a news item that exists" in transaction { implicit c =>
-      val id = save(londonsBurning, Seq(public))
+      val id = save(londonsBurning, Set(public))
 
       newsDao.getNewsById(id) mustNot be(empty)
     }

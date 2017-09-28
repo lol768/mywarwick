@@ -13,13 +13,11 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{ActionFilter, Result}
 import services._
-import services.dao.DepartmentInfoDao
 import system.Validation
 import views.html.errors
 import views.html.publish.{notifications => views}
 
 import scala.concurrent.Future
-
 
 class NotificationsController @Inject()(
   val securityService: SecurityService,
@@ -56,7 +54,7 @@ class NotificationsController @Inject()(
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
     sharedAudienceInfo(audienceService, usercodesInAudience =>
       Json.obj(
-        "baseAudience" -> usercodesInAudience.length
+        "baseAudience" -> usercodesInAudience.size
       )
     )
   }
@@ -99,6 +97,7 @@ class NotificationsController @Inject()(
   def updateForm(publisherId: String, id: String) = EditAction(id, publisherId, EditNotifications).async { implicit request =>
     val activity = activityService.getActivityById(id).get
     val audience = audienceService.getAudience(activity.audienceId.get)
+    val audienceJson = audienceService.audienceToJson(audience)
 
     val notificationData = NotificationData(
       text = activity.title,
@@ -113,17 +112,18 @@ class NotificationsController @Inject()(
     val form = publishNotificationForm.fill(PublishNotificationData(notificationData, audienceData))
 
     Future.successful(
-      Ok(views.updateForm(request.publisher, activity, form, departmentOptions, providerOptions, permissionScope, audience))
+      Ok(views.updateForm(request.publisher, activity, form, departmentOptions, providerOptions, permissionScope, audience, audienceJson))
     )
   }
 
   def update(publisherId: String, id: String, submitted: Boolean) = EditAction(id, publisherId, EditNotifications).async { implicit request =>
     val activity = activityService.getActivityById(id).get
     val audience = audienceService.getAudience(activity.id)
+    val audienceJson = audienceService.audienceToJson(audience)
 
     bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted, restrictedRecipients = true,
       formWithErrors =>
-        Ok(views.updateForm(request.publisher, activity, formWithErrors, departmentOptions, providerOptions, permissionScope, audience)),
+        Ok(views.updateForm(request.publisher, activity, formWithErrors, departmentOptions, providerOptions, permissionScope, audience, audienceJson)),
       (publish, audience) => {
         val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
