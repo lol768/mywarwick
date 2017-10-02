@@ -66,7 +66,7 @@ export default class AccountTile extends TileContent {
       if (date.isAfter(moment().add(1000, 'years'))) {
         return null;
       }
-      return <li>{ `Expected end date ${dateFormats.formatDateMoment(date)}` }</li>;
+      return <li>{ `Expected end date: ${dateFormats.formatDateMoment(date)}` }</li>;
     }
     return null;
   }
@@ -83,18 +83,33 @@ export default class AccountTile extends TileContent {
     );
   }
 
+  static getSCD(member) {
+    if (member.studentCourseDetails) {
+      const scd = _.find(member.studentCourseDetails, c => c.mostSignificant);
+      if (scd === undefined) {
+        return _.last(member.studentCourseDetails);
+      }
+      return scd;
+    }
+    return null;
+  }
+
   isEmpty() {
     return false;
   }
 
   getSmallBody() {
     const member = this.props.content;
+    const scd = AccountTile.getSCD(member);
+
     return (
       <div>
         <div>{ member.fullName }</div>
         <div>{ member.email }</div>
         <div>{ `${member.userId}, ${member.universityId}` }</div>
-        <div>{ `${member.userType}, ${member.homeDepartment.name}` }</div>
+        <div>{member.userType}, {
+          scd ? `Course: ${scd.course.name}` : member.homeDepartment.name
+        }</div>
         { AccountTile.getLink() }
       </div>
     );
@@ -103,6 +118,8 @@ export default class AccountTile extends TileContent {
   getWideBody() {
     const member = this.props.content;
     const user = this.props.user;
+    const scd = AccountTile.getSCD(member);
+
     return (
       <div className="media">
         { AccountTile.getMediaLeft(user) }
@@ -110,7 +127,9 @@ export default class AccountTile extends TileContent {
           <div>{ member.fullName }</div>
           <div>{ member.email }</div>
           <div>{ `${member.userId}, ${member.universityId}` }</div>
-          <div>{ `${member.userType}, ${member.homeDepartment.name}` }</div>
+          <div>{member.userType}, {
+            scd ? `Course: ${scd.course.name}` : member.homeDepartment.name
+          }</div>
           { AccountTile.getLink() }
         </div>
       </div>
@@ -120,13 +139,7 @@ export default class AccountTile extends TileContent {
   getLargeBody() {
     const member = this.props.content;
     const user = this.props.user;
-    let scd;
-    if (member.studentCourseDetails) {
-      scd = _.find(member.studentCourseDetails, c => c.mostSignificant);
-      if (scd === undefined) {
-        scd = _.last(member.studentCourseDetails);
-      }
-    }
+    const scd = AccountTile.getSCD(member);
 
     return (
       <div className="media">
@@ -137,14 +150,16 @@ export default class AccountTile extends TileContent {
             <li>{ member.email }</li>
             <li>{ `${member.userId}, ${member.universityId}` }</li>
             { (member.jobTitle) ? <li>{ member.jobTitle }</li> : null }
-            <li>{ `${member.userType}, ${member.homeDepartment.name}` }</li>
+            <li>{member.userType}, {
+              scd ? `Course: ${scd.course.name}` : member.homeDepartment.name
+            }</li>
             { AccountTile.realInactivationDate(member.inactivationDate) }
             { member.phoneNumber && <li><i className="fa fa-phone" /> { member.phoneNumber }</li> }
-            { (scd) && <li>Course: { scd.course.name }</li> }
             { (scd) &&
               <li>Route: { scd.currentRoute.code.toUpperCase() } { scd.currentRoute.name }</li>
             }
             { (scd) && <li>Year of study: { scd.levelCode }</li> }
+            { (scd) && <li>Home department: { member.homeDepartment.name }</li> }
             <li>&nbsp;</li>
           </ul>
           { AccountTile.getLink() }
