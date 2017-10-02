@@ -15,6 +15,7 @@ html.app .modal-dialog {
 html.not-app .modal-dialog {
   height: ~"calc(100vh - @{start-tab-bar-height} - 1em)";
 }
+
 html.ios.not-app .modal-dialog {
   height: ~"calc(100vh - @{ios-tab-bar-height} - 6em)";
 }
@@ -102,14 +103,19 @@ html:not(.ios) {
     color: rgba(0, 0, 0, 0.3) !important;
   }
 
-
 }
 
 html.ios {
+
+  div .modal-content {
+    font: -apple-system-body;
+  }
+
   // make modals resemble native iOS modals on iOS
   .modal-header h4.modal-title {
     font-weight: 500;
     text-align: center;
+
   }
 
   .modal-body {
@@ -118,6 +124,7 @@ html.ios {
   }
 
   .modal-footer {
+
     border-top: 1px solid #e5e5e5;
   }
 

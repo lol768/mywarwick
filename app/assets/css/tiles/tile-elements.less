@@ -1,3 +1,39 @@
+html.ios {
+
+  div.tile__wrap {
+    font: -apple-system-body;
+  }
+
+  .tile__text {
+    display: block;
+    font-size: 0.813em;
+    line-height: 1;
+  }
+
+  .tile__icon {
+    cursor: pointer;
+    display: block;
+    font-size: 1em;
+    i {
+      padding: @tile-padding;
+    }
+  }
+
+  .tile__title {
+    font-size: 1em;
+    line-height: 29px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin: 0 30px;
+  }
+
+  .tile__text {
+    display: block;
+    font-size: 0.813em;
+    line-height: 1;
+  }
+}
+
 .tile__wrap {
   overflow: hidden;
   position: absolute;
@@ -16,6 +52,7 @@
 
 .tile__title {
   font-size: 16px;
+  font-weight: normal;
   line-height: 29px;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -61,7 +98,6 @@
 
 .tile__callout {
   font-size: 2em;
-  line-height: 1;
 }
 
 .tile__item {
@@ -70,8 +106,9 @@
 
 .tile__text {
   display: block;
+  font-size: 13px;
+  line-height: 1;
 }
-
 
 .tile-list-group .list-group-item--header {
   background-color: rgba(255, 255, 255, .2) !important;
