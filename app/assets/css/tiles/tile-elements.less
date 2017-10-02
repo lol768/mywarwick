@@ -1,5 +1,37 @@
-div.tile__wrap {
-  font: -apple-system-body;
+html.ios {
+
+  div.tile__wrap {
+    font: -apple-system-body;
+  }
+
+  .tile__text {
+    display: block;
+    font-size: 0.813em;
+    line-height: 1;
+  }
+
+  .tile__icon {
+    cursor: pointer;
+    display: block;
+    font-size: 1em;
+    i {
+      padding: @tile-padding;
+    }
+  }
+
+  .tile__title {
+    font-size: 1em;
+    line-height: 29px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin: 0 30px;
+  }
+
+  .tile__text {
+    display: block;
+    font-size: 0.813em;
+    line-height: 1;
+  }
 }
 
 .tile__wrap {
@@ -19,7 +51,7 @@ div.tile__wrap {
 }
 
 .tile__title {
-  font-size: 1em;
+  font-size: 16px;
   font-weight: normal;
   line-height: 29px;
   text-overflow: ellipsis;
@@ -30,7 +62,7 @@ div.tile__wrap {
 .tile__icon {
   cursor: pointer;
   display: block;
-  font-size: 1em;
+  font-size: 16px;
   i {
     padding: @tile-padding;
   }
@@ -66,8 +98,6 @@ div.tile__wrap {
 
 .tile__callout {
   font-size: 2em;
-  font-weight: 400;
-  line-height: 1;
 }
 
 .tile__item {
@@ -76,7 +106,7 @@ div.tile__wrap {
 
 .tile__text {
   display: block;
-  font-size: 0.813em;
+  font-size: 13px;
   line-height: 1;
 }
 
