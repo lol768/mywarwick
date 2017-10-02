@@ -4,6 +4,7 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 import log from 'loglevel';
 import TileContent from './TileContent';
+import _ from 'lodash-es';
 
 function isPositionOnCampus({ latitude, longitude }) {
   return latitude >= 52.373 && latitude <= 52.392
@@ -14,6 +15,8 @@ function isAccuratePosition({ accuracy }) {
   return accuracy <= 50;
 }
 
+const defaultMapUrl = 'https://campus.warwick.ac.uk/?lite=1&autoLocate=true';
+
 export default class MapTile extends TileContent {
   static propTypes = {
     imageSize: PropTypes.shape({
@@ -21,6 +24,7 @@ export default class MapTile extends TileContent {
       height: PropTypes.number.isRequired,
     }).isRequired,
     refreshInterval: PropTypes.number.isRequired,
+    params: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
@@ -105,12 +109,15 @@ export default class MapTile extends TileContent {
   }
 
   getZoomedBody() {
+    const queryParams = this.props.params.queryParams || {};
+    const extraParams = _.map(queryParams, (value, key) => `&${key}=${value}`).join('');
+    const iframeUrl = defaultMapUrl + extraParams;
     return (
       <div>
         <div className="tile-loading">
           <i className="fa fa-spinner fa-pulse" />
         </div>
-        <iframe src="https://campus.warwick.ac.uk/?lite=1&autoLocate=true" frameBorder="0" title="Interactive Campus Map" />
+        <iframe src={iframeUrl} frameBorder="0" title="Interactive Campus Map" />
       </div>
     );
   }

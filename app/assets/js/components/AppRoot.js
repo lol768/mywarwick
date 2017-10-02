@@ -210,7 +210,7 @@ class AppRoot extends React.Component {
   }
 
   expandedTile() {
-    return new RegExp(`^/${Routes.TILES}/(.+)`).exec(this.state.location.pathname);
+    return new RegExp(`^/${Routes.TILES}/([^\\?/]+)[\\?/]*.*`).exec(this.state.location.pathname);
   }
 
   tileOption() {
@@ -246,12 +246,21 @@ class AppRoot extends React.Component {
         </Visible> : null
     ));
 
-    if ((tilePath || []).length === 2) {
+    if ((tilePath || []).length >= 2) {
+      const queryParams = (this.state.location.search.length > 0) ?
+        _.fromPairs(
+          _.compact(
+            _.map(
+              this.state.location.search.substr(1).split('&'),
+              term => term.split('='),
+            ),
+          ),
+        ) : {};
       views.push(
         <Visible key={ tilePath[1] } visible>
           <TileView
             id={ tilePath[1] }
-            params={{ id: tilePath[1] }}
+            params={{ id: tilePath[1], queryParams }}
             {...this.props}
           />
         </Visible>,
