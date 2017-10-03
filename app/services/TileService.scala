@@ -82,7 +82,8 @@ class TileServiceImpl @Inject()(
   private def getGroups(user: User): Set[String] = {
     val isStaff = if (user.isStaffOrPGR) Set("staff") else Set()
     val isStudent = if (user.isStudent) Set("student") else Set()
-    isStaff ++ isStudent ++ user.department.flatMap(_.shortName).toSet
+    val isOther = if (!user.isStaffOrPGR && !user.isStudent) Set("other") else Set()
+    isStaff ++ isStudent ++ isOther ++ user.department.flatMap(_.shortName).toSet
   }
 
 }
