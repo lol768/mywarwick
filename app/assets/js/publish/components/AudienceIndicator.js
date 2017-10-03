@@ -1,5 +1,6 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
+import Hyperlink from '../../components/ui/Hyperlink';
 
 export default function AudienceIndicator(props) {
   if (props.fetching) {
@@ -24,6 +25,10 @@ export default function AudienceIndicator(props) {
 
   return (
     <div className="alert alert-info">
+      <div>
+        <p>When sending alerts, please remember that alerts should be specific or personal to the recipient, and something they need to be aware of or take action on immediately, and concise - a sentence or two at most. <Hyperlink href="https://warwick.ac.uk/mw-support/faqs/usingalerts">More info...</Hyperlink></p>
+      </div>
+
       <div className="pull-right">
         <i
           className="fa fa-info-circle"
