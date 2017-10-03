@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import wrapKeyboardSelect from '../../../keyboard-nav';
 import * as colourSchemes from '../../../state/colour-schemes';
 import HideableView from '../HideableView';
-import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
+// import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 
 class ColourSchemesView extends HideableView {
   static propTypes = {
@@ -98,7 +98,7 @@ class ColourSchemesView extends HideableView {
           </div>
         </div>
 
-        <div className="list-group">
+        {/* <div className="list-group">
           <SwitchListGroupItem
             id="colourSchemeHighContrast"
             value=""
@@ -108,7 +108,7 @@ class ColourSchemesView extends HideableView {
             onClick={ this.onHighContrastToggle }
             disabled={ !this.props.isOnline }
           />
-        </div>
+        </div>*/}
 
         <div className="list-group">
           {_.map(this.props.schemes, scheme => this.makeItem(scheme))}
