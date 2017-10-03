@@ -9,25 +9,29 @@ const COLOUR_SCHEME_PREFERENCE_RECEIVE = 'COLOUR_SCHEME_PREFERENCE_RECEIVE';
 const COLOUR_SCHEME_SAVE_CHOICE = 'COLOUR_SCHEME_SAVE_CHOICE';
 const COLOUR_SCHEME_LOADED = 'COLOUR_SCHEME_LOADED';
 
+const COLOUR_SCHEME_TOGGLE_HIGH_CONTRAST = 'COLOUR_SCHEME_TOGGLE_HIGHCONTRAST';
+
 const start = createAction(COLOUR_SCHEME_PREFERENCE_REQUEST);
 export const receive = createAction(COLOUR_SCHEME_PREFERENCE_RECEIVE);
 const save = createAction(COLOUR_SCHEME_SAVE_CHOICE);
 export const loaded = createAction(COLOUR_SCHEME_LOADED);
+const toggleContrast = createAction(COLOUR_SCHEME_TOGGLE_HIGH_CONTRAST);
 
-const doPostToServer = (colourScheme) => {
-  postJsonWithCredentials('/api/colour-schemes', { colourScheme });
+const doPostToServer = ({ chosen: colourScheme, isHighContrast }) => {
+  postJsonWithCredentials('/api/colour-schemes', { colourScheme, isHighContrast });
 };
 
 const postToServer = _.debounce(getState =>
-  doPostToServer(getState().colourSchemes.chosen), 500,
+  doPostToServer(getState().colourSchemes), 500,
 );
 
 export function updateUi() {
   return (dispatch, getState) => {
     const chosenId = getState().colourSchemes.chosen;
+    const isHighContrast = getState().colourSchemes.isHighContrast;
     const chosenScheme = _.find(getState().colourSchemes.schemes, scheme => scheme.id === chosenId);
     dispatch(theme.updateColourTheme({
-      colourTheme: `transparent-${chosenId}`,
+      colourTheme: `transparent-${chosenId}${isHighContrast ? '--high-contrast' : ''}`,
       schemeColour: chosenScheme.schemeColour,
     }));
   };
@@ -38,6 +42,17 @@ export function changeColourScheme(chosen) {
     const currentPref = getState().colourSchemes.chosen;
     if (chosen && (currentPref !== chosen)) {
       dispatch(save(chosen));
+      dispatch(updateUi());
+      postToServer(getState);
+    }
+  };
+}
+
+export function toggleHighContrast(value) {
+  return (dispatch, getState) => {
+    const currentPref = getState().colourSchemes.isHighContrast;
+    if (currentPref !== value) {
+      dispatch(toggleContrast(value));
       dispatch(updateUi());
       postToServer(getState);
     }
@@ -68,6 +83,7 @@ const initialState = {
   fetched: false,
   loaded: false,
   chosen: 1,
+  isHighContrast: false,
   schemes: [
     {
       id: 1,
@@ -103,6 +119,7 @@ export function reducer(state = initialState, action) {
         fetched: true,
         chosen: action.payload.data.chosen,
         schemes: action.payload.data.schemes,
+        isHighContrast: action.payload.data.isHighContrast,
       };
     case COLOUR_SCHEME_SAVE_CHOICE:
       return {
@@ -113,6 +130,11 @@ export function reducer(state = initialState, action) {
       return {
         ...state,
         loaded: true,
+      };
+    case COLOUR_SCHEME_TOGGLE_HIGH_CONTRAST:
+      return {
+        ...state,
+        isHighContrast: !state.isHighContrast,
       };
     default:
       return state;

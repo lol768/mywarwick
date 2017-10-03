@@ -11,6 +11,8 @@ import services.{SecurityService, UserPreferencesService}
 
 import scala.collection.JavaConverters._
 
+case class ColourScheme(schemeId: Int, highContrast: Boolean)
+
 @Singleton
 class ColourSchemesController @Inject()(
   security: SecurityService,
@@ -19,7 +21,6 @@ class ColourSchemesController @Inject()(
 ) extends BaseController {
 
   import security._
-
 
   sealed case class Background(
     id: Int,
@@ -50,7 +51,8 @@ class ColourSchemesController @Inject()(
     )
 
     val data = JsObject(Map(
-      "chosen" -> JsNumber(BigDecimal(chosenColourScheme.getOrElse(1))),
+      "chosen" -> JsNumber(BigDecimal(chosenColourScheme.map(_.schemeId).getOrElse(1))),
+      "isHighContrast" -> JsBoolean(chosenColourScheme.exists(_.highContrast)),
       "schemes" -> JsArray(backgrounds.map(e => {
         Json.toJson(e)
       }))
@@ -62,15 +64,17 @@ class ColourSchemesController @Inject()(
   def persist = RequiredUserAction { request =>
     val user = request.context.user.get
     request.body.asJson.collect { case o: JsObject => o }.map { jsObject =>
+      val highContrast = (jsObject \ "isHighContrast").getOrElse(JsBoolean(false)).as[Boolean]
       // generally be forgiving here and default to 1
-      val intendedValue = jsObject.value.getOrElse("colourScheme", 1)
-      val chosenScheme = intendedValue match {
+      val intendedSchemeId = jsObject.value.getOrElse("colourScheme", 1)
+      val chosenSchemeId = intendedSchemeId match {
         case a: JsNumber => if (backgroundsMap.contains(a.value.intValue())) a.value.intValue() else 1
         case _ => 1
       }
+      val newScheme = ColourScheme(chosenSchemeId, highContrast)
 
-      userPreferencesService.setChosenColourScheme(user.usercode, chosenScheme)
-      Ok(Json.toJson(API.Success("ok", Json.toJson(backgroundsMap(chosenScheme)))))
+      userPreferencesService.setChosenColourScheme(user.usercode, newScheme)
+      Ok(Json.toJson(API.Success("ok", Json.toJson(backgroundsMap(newScheme.schemeId)))))
     }.getOrElse(BadRequest(Json.toJson(API.Failure[JsObject]("bad request", Seq(API.Error("invalid-body", "Body must be JSON-formatted"))))))
 
   }
