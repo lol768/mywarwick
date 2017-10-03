@@ -98,7 +98,7 @@ class ColourSchemesView extends HideableView {
           </div>
         </div>
 
-        <div className="list-group">
+        {/*<div className="list-group">
           <SwitchListGroupItem
             id="colourSchemeHighContrast"
             value=""
@@ -108,7 +108,7 @@ class ColourSchemesView extends HideableView {
             onClick={ this.onHighContrastToggle }
             disabled={ !this.props.isOnline }
           />
-        </div>
+        </div>*/}
 
         <div className="list-group">
           {_.map(this.props.schemes, scheme => this.makeItem(scheme))}
