@@ -32,7 +32,7 @@ export default class ListTile extends TileContent {
     const itemsToDisplay = this.props.zoomed ?
       content.items : _.take(content.items, this.getNumberOfItemsToDisplay());
     return (<ul className="list-unstyled tile-list-group">
-      {itemsToDisplay.map(item =>
+      {_.compact(itemsToDisplay).map(item =>
         <ListTileItem key={item.id} {...item} />,
       )}
     </ul>);
