@@ -5,6 +5,7 @@ import java.sql.Connection
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Singleton}
+import controllers.api.ColourScheme
 import org.joda.time.DateTime
 import play.api.libs.json.{JsObject, Json}
 import warwick.anorm.converters.ColumnConversions._
@@ -33,9 +34,9 @@ trait UserPreferencesDao {
 
   def setUserEmailsPreference(usercode: Usercode, wantsEmail: Boolean)(implicit c: Connection): Unit
 
-  def getColourSchemePreference(usercode: Usercode)(implicit c: Connection): Int
+  def getColourSchemePreference(usercode: Usercode)(implicit c: Connection): ColourScheme
 
-  def setColourSchemePreference(usercode: Usercode, schemeId: Int)(implicit c: Connection): Boolean
+  def setColourSchemePreference(usercode: Usercode, chosenScheme: ColourScheme)(implicit c: Connection): Boolean
 
   def getUserSmsPreference(usercode: Usercode)(implicit c: Connection): Boolean
 
@@ -144,19 +145,21 @@ class UserPreferencesDaoImpl extends UserPreferencesDao {
     SQL"""UPDATE USER_PREFERENCE SET SMS_NUMBER = $phoneNumber, SMS_VERIFICATION = null, SMS_NUMBER_TO_VERIFY = null WHERE USERCODE = ${usercode.string}""".execute()
   }
 
-  override def getColourSchemePreference(usercode: Usercode)(implicit c: Connection): Int = {
-    val result =
-      SQL"SELECT CHOSEN_COLOUR_SCHEME FROM USER_PREFERENCE WHERE USERCODE = ${usercode.string}".as(scalar[Int].singleOpt)
-
-    result.get
+  override def getColourSchemePreference(usercode: Usercode)(implicit c: Connection): ColourScheme = {
+    SQL"SELECT CHOSEN_COLOUR_SCHEME, COLOUR_SCHEME_HIGH_CONTRAST FROM USER_PREFERENCE WHERE USERCODE = ${usercode.string}"
+      .as((int("chosen_colour_scheme") ~
+        bool("colour_scheme_high_contrast") map {
+        case schemeId ~ highContrast => ColourScheme(schemeId, highContrast)
+      }).single)
   }
 
-  override def setColourSchemePreference(usercode: Usercode, schemeId: Int)(implicit c: Connection): Boolean = {
+  override def setColourSchemePreference(usercode: Usercode, chosenScheme: ColourScheme)(implicit c: Connection): Boolean = {
     if (!exists(usercode)) {
       save(usercode)
     }
 
-    SQL"""UPDATE USER_PREFERENCE SET CHOSEN_COLOUR_SCHEME = $schemeId WHERE USERCODE = ${usercode.string}""".execute()
+    SQL"""UPDATE USER_PREFERENCE SET CHOSEN_COLOUR_SCHEME = ${chosenScheme.schemeId},
+          COLOUR_SCHEME_HIGH_CONTRAST=${chosenScheme.highContrast} WHERE USERCODE = ${usercode.string}""".execute()
   }
 
   override def setUserSmsVerificationCode(usercode: Usercode, code: String)(implicit c: Connection): Boolean = {

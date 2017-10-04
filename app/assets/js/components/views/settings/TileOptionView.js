@@ -145,7 +145,7 @@ export class TileOptionView extends React.PureComponent {
               { tileOption.description }
             </p>
             <div key={ key } className={ `list-group setting-colour-${this.props.tile.colour}` }>
-              { _.map(_.sortBy(tileOption.options, o => (o.name ? o.name : o.value)), (option) => {
+              { _.map(tileOption.options, (option) => {
                 switch (tileOption.type.toLowerCase()) {
                   case 'array':
                     return this.makeCheckboxItem(option, key);

@@ -191,6 +191,21 @@ class SmsNotificationsPrefControllerTest extends PlaySpec with MockitoSugar with
       verify(smsNotificationsPrefService, times(0)).requireVerification(ron.usercode, parsedPhoneNumber)
     }
 
+    "too-short phone number is rejected" in new Fixture {
+      private val body = Json.obj(
+        "wantsSms" -> true,
+        "smsNumber" -> "0123456789"
+      )
+
+      when(smsNotificationsPrefService.getNumber(ron.usercode)).thenReturn(None)
+      when(smsNotificationsPrefService.getVerification(ron.usercode)).thenReturn(None)
+
+      private val result = call(controller.update, FakeRequest("POST", "/").withBody(body))
+      status(result) mustBe BAD_REQUEST
+      (contentAsJson(result) \ "status").get mustBe JsString("error")
+      (contentAsJson(result) \ "errors" \ 0 \ "id").get mustBe JsString("invalid-body-number")
+    }
+
   }
 
 }

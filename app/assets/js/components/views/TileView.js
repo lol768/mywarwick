@@ -111,6 +111,7 @@ class TileView extends React.PureComponent {
       size,
       user,
       preferences: tile.preferences,
+      params: this.props.params,
     };
 
     const tileElement = (
