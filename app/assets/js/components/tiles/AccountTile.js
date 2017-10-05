@@ -75,7 +75,7 @@ export default class AccountTile extends TileContent {
     return (
       <div className="media-left">
         { user.photo && user.photo.url &&
-          <Hyperlink href="//photos.warwick.ac.uk">
+          <Hyperlink href="//photos.warwick.ac.uk/yourphoto">
             <AccountPhoto user={ user } className="media-object media-object-img-fix" />
           </Hyperlink>
         }
