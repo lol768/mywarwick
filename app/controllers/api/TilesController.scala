@@ -49,12 +49,11 @@ class TilesController @Inject()(
     }
   }
 
-  def saveLayout = RequiredUserAction { request =>
+  def saveLayout = RequiredUserAction { implicit request =>
     request.context.user.map { user =>
       request.body.asJson.map { body =>
         body.validate[SaveTilesRequest] match {
           case JsSuccess(tileLayout, _) =>
-            implicit val auditLogContext: AuditLogContext = implicitAuditLogContext(request)
             tileService.saveTilePreferencesForUser(user, tileLayout.tiles)
             tileService.saveTileLayoutForUser(user, tileLayout.layout)
             Ok(Json.toJson(API.Success("ok", "saved")))
