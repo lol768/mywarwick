@@ -14,16 +14,27 @@
   }
 
   &__title {
+    html.ios & {
+      font: -apple-system-subheadline;
+      font-weight: bold;
+    }
     font-weight: bold;
   }
 
   &__text {
+    html.ios & {
+      font: -apple-system-subheadline;
+      font-weight: normal;
+    }
     font-weight: normal;
   }
 
   &__date, &__audience, &__visible-link {
     .small;
     .text-muted;
+    html.ios & {
+      font: -apple-system-subheadline;
+    }
   }
 
   &--with-url {
