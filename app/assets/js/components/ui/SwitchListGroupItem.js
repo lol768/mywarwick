@@ -10,6 +10,7 @@ export default class SwitchListGroupItem extends React.PureComponent {
     name: PropTypes.string,
     value: PropTypes.string.isRequired,
     checked: PropTypes.bool.isRequired,
+    settingColour: PropTypes.string,
   };
 
   static defaultProps = {
