@@ -53,8 +53,8 @@ class TilesController @Inject()(
       request.body.asJson.map { body =>
         body.validate[SaveTilesRequest] match {
           case JsSuccess(tileLayout, _) =>
-            tileService.saveTilePreferencesForUser(user, tileLayout.tiles)
-            tileService.saveTileLayoutForUser(user, tileLayout.layout)
+            tileService.saveTilePreferencesForUser(user, tileLayout.tiles)(request)
+            tileService.saveTileLayoutForUser(user, tileLayout.layout)(request)
             Ok(Json.toJson(API.Success("ok", "saved")))
           case error: JsError =>
             BadRequest(Json.toJson(API.Failure[JsObject]("error", API.Error.fromJsError(error))))
