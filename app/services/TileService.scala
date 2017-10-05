@@ -3,10 +3,8 @@ package services
 import com.google.inject.{ImplementedBy, Inject}
 import models._
 import play.api.db.{Database, NamedDatabase}
-import play.api.libs.json.JsObject
-import play.api.mvc.Request
 import services.dao.{TileDao, TileLayoutDao}
-import system.Logging
+import system.{AuditLogContext, Logging}
 import warwick.sso.User
 
 @ImplementedBy(classOf[TileServiceImpl])
@@ -18,9 +16,9 @@ trait TileService {
 
   def getTileLayoutForUser(user: Option[User]): Seq[TileLayout]
 
-  def saveTilePreferencesForUser(user: User, tileLayout: Seq[UserTileSetting])(implicit request: Request[_]): Unit
+  def saveTilePreferencesForUser(user: User, tileLayout: Seq[UserTileSetting])(implicit context: AuditLogContext): Unit
 
-  def saveTileLayoutForUser(user: User, tileLayout: Seq[TileLayout])(implicit request: Request[_]): Unit
+  def saveTileLayoutForUser(user: User, tileLayout: Seq[TileLayout])(implicit context: AuditLogContext): Unit
 
 }
 
@@ -49,7 +47,7 @@ class TileServiceImpl @Inject()(
       }
   }
 
-  override def saveTileLayoutForUser(user: User, tileLayout: Seq[TileLayout])(implicit request: Request[_]): Unit = {
+  override def saveTileLayoutForUser(user: User, tileLayout: Seq[TileLayout])(implicit context: AuditLogContext): Unit = {
     db.withConnection(implicit c => tileLayoutDao.saveTileLayoutForUser(user.usercode.string, tileLayout))
     auditLog('UpdateTileLayout, 'tile_layout -> tileLayout.map(layout =>
       layout.tile -> Map(
@@ -80,7 +78,7 @@ class TileServiceImpl @Inject()(
         }
     }
 
-  override def saveTilePreferencesForUser(user: User, tileLayout: Seq[UserTileSetting])(implicit request: Request[_]): Unit = db.withConnection {
+  override def saveTilePreferencesForUser(user: User, tileLayout: Seq[UserTileSetting])(implicit context: AuditLogContext): Unit = db.withConnection {
     implicit c =>
       val defaultTileIds = tileDao.getDefaultTilesForGroups(getGroups(user)).map(_.tile.id)
       val previousTiles = getTilesForUser(Some(user))

@@ -8,6 +8,7 @@ import models._
 import play.api.libs.json.{JsError, JsObject, JsSuccess, Json}
 import play.api.mvc.Result
 import services.{SecurityService, TileContentService, TileService}
+import system.AuditLogContext
 import warwick.sso.User
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -53,8 +54,9 @@ class TilesController @Inject()(
       request.body.asJson.map { body =>
         body.validate[SaveTilesRequest] match {
           case JsSuccess(tileLayout, _) =>
-            tileService.saveTilePreferencesForUser(user, tileLayout.tiles)(request)
-            tileService.saveTileLayoutForUser(user, tileLayout.layout)(request)
+            implicit val auditLogContext: AuditLogContext = implicitAuditLogContext(request)
+            tileService.saveTilePreferencesForUser(user, tileLayout.tiles)
+            tileService.saveTileLayoutForUser(user, tileLayout.layout)
             Ok(Json.toJson(API.Success("ok", "saved")))
           case error: JsError =>
             BadRequest(Json.toJson(API.Failure[JsObject]("error", API.Error.fromJsError(error))))
