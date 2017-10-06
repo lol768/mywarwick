@@ -48,7 +48,7 @@ class TilesController @Inject()(
     }
   }
 
-  def saveLayout = RequiredUserAction { request =>
+  def saveLayout = RequiredUserAction { implicit request =>
     request.context.user.map { user =>
       request.body.asJson.map { body =>
         body.validate[SaveTilesRequest] match {
