@@ -94,7 +94,7 @@ class MeView extends React.PureComponent {
     $('.me-view-container .me-view').addClass('with-transitions');
 
     this.props.dispatch(tiles.hideTile(tile));
-    this.props.dispatch(tiles.persistTiles());
+    // Persistence done by layout change
   }
 
   onResizeTile(tileProps) {

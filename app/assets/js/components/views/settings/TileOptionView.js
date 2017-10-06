@@ -95,6 +95,7 @@ export class TileOptionView extends React.PureComponent {
         name={ groupName }
         value={ possibleChoice.value }
         disabled={ !this.props.isOnline }
+        settingColour={ possibleChoice.colour || this.props.tile.colour }
       />
     );
   }
@@ -116,6 +117,7 @@ export class TileOptionView extends React.PureComponent {
         checked={ checked }
         name={ groupName }
         disabled={ !this.props.isOnline }
+        settingColour={ possibleChoice.colour || this.props.tile.colour }
       />
     );
   }
@@ -144,7 +146,7 @@ export class TileOptionView extends React.PureComponent {
             <p className="hint-text container-fluid">
               { tileOption.description }
             </p>
-            <div key={ key } className={ `list-group setting-colour-${this.props.tile.colour}` }>
+            <div key={ key } className="list-group">
               { _.map(tileOption.options, (option) => {
                 switch (tileOption.type.toLowerCase()) {
                   case 'array':

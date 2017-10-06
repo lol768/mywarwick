@@ -1,4 +1,15 @@
 html {
+
+  &.ios body {
+    h1, h2, h3 {
+      font: -apple-system-headline;
+    }
+
+    h3, h4, h5 {
+      font: -apple-system-subheadline;
+    }
+  }
+
   body {
     font-family: -apple-system, 'Roboto', 'Droid Sans', 'Segoe WP', Helvetica, sans-serif !important;
 
@@ -20,18 +31,6 @@ html {
   &.app.android body {
     margin-top: 0;
     margin-bottom: 0;
-  }
-
-  h1, h2, h3 {
-    font: -apple-system-headline;
-  }
-
-  h3, h4, h5 {
-    font: -apple-system-subheadline;
-  }
-
-  p {
-    font: -apple-system-body;
   }
 
   .tile__body {

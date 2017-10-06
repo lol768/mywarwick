@@ -1,10 +1,12 @@
 package system
 
 import play.api.Logger
+import play.api.libs.json._
 import play.api.mvc.Request
 import uk.ac.warwick.util.logging.AuditLogger
 import uk.ac.warwick.util.logging.AuditLogger.{Field, RequestInformation}
 import warwick.sso.AuthenticatedRequest
+
 import scala.collection.JavaConverters._
 
 /**
@@ -42,6 +44,12 @@ trait Logging {
       case smap: scala.collection.Map[_, _] => mapAsJavaMapConverter(smap.mapValues(handle)).asJava
       case sseq: scala.Seq[_] => seqAsJavaListConverter(sseq.map(handle)).asJava
       case scol: scala.Iterable[_] => asJavaCollectionConverter(scol.map(handle)).asJavaCollection
+      case JsNull => null
+      case jsBoolean: JsBoolean => Boolean.box(jsBoolean.value)
+      case jsNumber: JsNumber => jsNumber.value
+      case jsString: JsString => jsString.value
+      case jsArray: JsArray => handle(jsArray.value.map(handle))
+      case jsObj: JsObject => handle(jsObj.value.mapValues(handle))
       case other: AnyRef => other
       case _ => null
     }) match {
