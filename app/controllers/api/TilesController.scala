@@ -8,7 +8,6 @@ import models._
 import play.api.libs.json.{JsError, JsObject, JsSuccess, Json}
 import play.api.mvc.Result
 import services.{SecurityService, TileContentService, TileService}
-import system.AuditLogContext
 import warwick.sso.User
 
 import scala.concurrent.ExecutionContext.Implicits.global
