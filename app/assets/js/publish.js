@@ -11,6 +11,8 @@ import './publish/modulePicker';
 import _ from 'lodash-es';
 import './flexi-picker';
 import AudiencePicker from './publish/components/AudiencePicker';
+import store from './publish/publishStore';
+
 
 function setupAudiencePicker() {
   const audiencePicker = $('.audience-picker');
@@ -22,6 +24,7 @@ function setupAudiencePicker() {
       formData: audiencePicker.data('form-data') || {},
       locationOpts: audiencePicker.data('location-opts') || {},
       deptSubsetOpts: audiencePicker.data('dept-subset-opts') || {},
+      store,
     };
     ReactDOM.render(
       <AudiencePicker {...props} />,

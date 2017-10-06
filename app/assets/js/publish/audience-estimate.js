@@ -1,11 +1,21 @@
 import $ from 'jquery';
-import _ from 'lodash-es';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import log from 'loglevel';
 import AudienceIndicator from './components/AudienceIndicator';
-import promiseSubmit from './utils';
+import store from './publishStore';
 
+
+const $audienceIndicator = $('.split-form').find('.audience-indicator');
+const container = $audienceIndicator[0];
+
+setTimeout(() => {
+  ReactDOM.render(
+    <AudienceIndicator store={store} />,
+    container,
+  );
+}, 200);
+
+/*
 $('.split-form').each((i, form) => {
   const $form = $(form);
 
@@ -15,7 +25,7 @@ $('.split-form').each((i, form) => {
   function updateAudienceEstimate() {
     const timeout = setTimeout(() => {
       ReactDOM.render(
-        <AudienceIndicator fetching />,
+        <AudienceIndicator {...{store, fetching: true}} />,
         container,
       );
     }, 200);
@@ -26,14 +36,14 @@ $('.split-form').each((i, form) => {
     })
       .then((response) => {
         ReactDOM.render(
-          <AudienceIndicator {...response.data} />,
+          <AudienceIndicator {...{...response.data, store}} />,
           container,
         );
       })
       .catch((e) => {
         log.error('Audience estimate returned error', e);
         ReactDOM.render(
-          <AudienceIndicator error />,
+          <AudienceIndicator {...{store, error: true}} />,
           container,
         );
       })
@@ -42,7 +52,7 @@ $('.split-form').each((i, form) => {
 
   if (container !== undefined) {
     ReactDOM.render(
-      <AudienceIndicator empty />,
+      <AudienceIndicator {...{store, empty: true}} />,
       container,
     );
 
@@ -65,3 +75,4 @@ $('.split-form').each((i, form) => {
 
   $('[data-toggle="tooltip"]').tooltip();
 });
+*/

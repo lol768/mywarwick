@@ -18,6 +18,7 @@ export default class AudiencePicker extends React.PureComponent {
     departments: PropTypes.object,
     deptSubsetOpts: PropTypes.object,
     locationOpts: PropTypes.object,
+    store: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
@@ -51,6 +52,13 @@ export default class AudiencePicker extends React.PureComponent {
     this.clearDepartment = this.clearDepartment.bind(this);
     this.groupsInput = this.groupsInput.bind(this);
     this.locationInput = this.locationInput.bind(this);
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    this.props.store.dispatch({
+      type: 'AUDIENCE_UPDATE',
+      components: nextState,
+    });
   }
 
   handleChange(value, type, path) {
