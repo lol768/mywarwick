@@ -36,7 +36,7 @@ class AddingTilesView extends React.PureComponent {
   onShowTile(tile) {
     this.props.dispatch(tiles.showTile(tile));
     this.props.dispatch(tiles.fetchTileContent(tile.id));
-    this.props.dispatch(tiles.persistTiles());
+    // Persistence done by layout change
   }
 
   getGridLayoutWidth() {
