@@ -13,6 +13,7 @@ export default class ListGroupItem extends React.PureComponent {
     failure: PropTypes.bool,
     disabled: PropTypes.bool,
     uiControl: PropTypes.any,
+    settingColour: PropTypes.string,
   };
 
   static defaultProps = {
@@ -42,7 +43,9 @@ export default class ListGroupItem extends React.PureComponent {
   render() {
     return (
       <div
-        className="list-group-item"
+        className={`list-group-item ${
+          ('settingColour' in this.props) ? `setting-colour-${this.props.settingColour}` : ''
+        }`}
         role="button"
         aria-disabled={ !this.isClickable() }
         tabIndex={ this.isClickable() ? 0 : -1 }
