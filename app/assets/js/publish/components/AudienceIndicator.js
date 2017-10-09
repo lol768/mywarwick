@@ -6,14 +6,8 @@ import $ from 'jquery';
 import _ from 'lodash-es';
 import Hyperlink from '../../components/ui/Hyperlink';
 
-class AudienceIndicator extends React.PureComponent {
+export class AudienceIndicator extends React.PureComponent {
   static propTypes = {
-    fetching: PropTypes.bool,
-    error: PropTypes.bool,
-    empty: PropTypes.bool,
-    public: PropTypes.bool,
-    baseAudience: PropTypes.number,
-    categorySubset: PropTypes.number,
     audienceComponents: PropTypes.object,
     store: PropTypes.object.isRequired,
     promiseSubmit: PropTypes.func.isRequired,
@@ -84,7 +78,9 @@ class AudienceIndicator extends React.PureComponent {
               case 'seminarGroups':
                 return _.map(v, seminar => (<div key={k}>{seminar.text}</div>));
               case 'listOfUsercodes':
-                if (v !== undefined) { return <div key={k}>{`${v.length} usercodes`}</div>; }
+                if (v !== undefined) {
+                  return <div key={k}>{`${v.length} usercodes`}</div>;
+                }
                 return null; // lint made me do it
               case 'staffRelationships':
                 return _.flatMap(v, rel => rel.options.map(opt => _.map(opt, val => (
@@ -94,7 +90,9 @@ class AudienceIndicator extends React.PureComponent {
                 ))));
               default: {
                 const group = _.startCase(_.replace(k, 'Dept:', ''));
-                return (<div key={k}>{`All ${group} in ${_.startsWith(k, 'Dept:') ? dept.name : 'the University'}`}</div>);
+                return (isUniWide || !_.isEmpty(dept.name)) ?
+                  (<div key={k}>{`All ${group} in ${_.startsWith(k, 'Dept:') ? dept.name : 'the University'}`}</div>)
+                  : null;
               }
             }
           })
@@ -120,7 +118,11 @@ class AudienceIndicator extends React.PureComponent {
     return (
       <div className="alert alert-info">
         <div>
-          <p>When sending alerts, please remember that alerts should be specific or personal to the recipient, and something they need to be aware of or take action on immediately, and concise - a sentence or two at most. <Hyperlink href="https://warwick.ac.uk/mw-support/faqs/usingalerts">More info...</Hyperlink></p>
+          <p>When sending alerts, please remember that alerts should be specific or personal to the
+            recipient, and something they need to be aware of or take action on immediately, and
+            concise - a sentence or two at most. <Hyperlink
+              href="https://warwick.ac.uk/mw-support/faqs/usingalerts"
+            >More info...</Hyperlink></p>
         </div>
 
         <div className="pull-right">

@@ -1,42 +1,28 @@
-import AudienceIndicator from 'publish/components/AudienceIndicator';
+import { AudienceIndicator } from 'publish/components/AudienceIndicator';
 import * as React from 'react';
 import * as enzyme from 'enzyme';
-
-const mockStore = state => ({
-  getState() {
-    return state;
-  },
-  dispatch() {
-  },
-  subscribe() {
-  },
-});
-
-const shallowWithStore = (component, store) => enzyme.shallow(component, { context: { ...store } });
 
 describe('AudienceIndicator', () => {
 
   it('handles \'everyone in department\' case', () => {
-    const audienceState = {
-      audience: {
+    const props = {
+      audienceComponents: {
         department: { name: 'School of Bodybuilding' },
         audience: {
           department: { 'Dept:All': undefined }
         }
-      }
+      },
     };
 
-    const store = mockStore(audienceState);
-    const render = shallowWithStore(<AudienceIndicator store={store} promiseSubmit={() => {
-    }}/>, store);
+    const render = enzyme.shallow(<AudienceIndicator {...props} />);
 
     expect(render.html()).to.contain('Everyone in School of Bodybuilding');
   });
 
 
   it('renders readable ', () => {
-    const audienceState = {
-      audience: {
+    const props = {
+      audienceComponents: {
         department: { name: 'Anatomy and Physiology' },
         audience: {
           department: {
@@ -63,12 +49,10 @@ describe('AudienceIndicator', () => {
             }
           }
         }
-      }
+      },
     };
 
-    const store = mockStore(audienceState);
-    const render = shallowWithStore(<AudienceIndicator store={store} promiseSubmit={() => {
-    }}/>, store);
+    const render = enzyme.shallow(<AudienceIndicator {...props} />);
     const html = render.html();
 
     [
@@ -83,23 +67,21 @@ describe('AudienceIndicator', () => {
   });
 
   it('displays nothing for no audience', () => {
-    const audienceState = {
-      audience: {
+    const props = {
+      audienceComponents: {
         department: undefined
-      }
+      },
     };
 
-    const store = mockStore(audienceState);
-    const render = enzyme.render(<AudienceIndicator store={store} promiseSubmit={() => {
-    }}/>);
+    const render = enzyme.render(<AudienceIndicator {...props} />);
 
     expect(render.find('.audience-component-list').first().text()).to.equal('');
 
   });
 
   it('handles \'everyone in university\' case', () => {
-    const audienceState = {
-      audience: {
+    const props = {
+      audienceComponents: {
         audience: {
           universityWide: {
             groups: {
@@ -108,14 +90,35 @@ describe('AudienceIndicator', () => {
             }
           }
         }
-      }
+      },
     };
 
-    const store = mockStore(audienceState);
-    const render = shallowWithStore(<AudienceIndicator store={store} promiseSubmit={() => {
-    }}/>, store);
+    const render = enzyme.shallow(<AudienceIndicator {...props}/>);
 
     expect(render.html()).to.contain('All Teaching Staff in the University');
     expect(render.html()).to.contain('All Undergrad Students in the University');
   });
+
+
+  it('don\'t render \'undefined\' as department name', () => {
+    const props = {
+      audienceComponents: {
+        department: {},
+        audience: {
+          department: {
+            groups: {
+              TeachingStaff: undefined,
+              UndergradStudents: undefined
+            }
+          }
+        }
+      },
+    };
+
+    const render = enzyme.shallow(<AudienceIndicator {...props}/>);
+
+    expect(render.html()).to.not.contain('All Teaching Staff');
+    expect(render.html()).to.not.contain('All Undergrad Students');
+  });
+
 });
