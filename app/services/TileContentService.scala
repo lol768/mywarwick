@@ -18,6 +18,7 @@ import play.api.Configuration
 import play.api.cache._
 import play.api.libs.json.{JsObject, _}
 import play.api.libs.ws.WSClient
+import system.CacheMethods._
 import system.{Logging, ThreadPools}
 import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils}
 import warwick.sso.User
@@ -25,8 +26,6 @@ import warwick.sso.User
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Try
-
-import system.CacheMethods._
 
 object TileContentService {
 
@@ -61,6 +60,8 @@ class TileContentServiceImpl @Inject()(
   // TODO inject a client properly
   val client = HttpClientBuilder.create()
     .setDefaultRequestConfig(requestConfig)
+    .setMaxConnTotal(250)
+    .setMaxConnPerRoute(100)
     .build()
 
   val preferenceCacheDuration = config

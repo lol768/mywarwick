@@ -47,7 +47,7 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
   })
 
   val prefsMock: UserPreferencesService = mock[UserPreferencesService]
-  when(prefsMock.getChosenColourScheme(fox.usercode)).thenReturn(2)
+  when(prefsMock.getChosenColourScheme(fox.usercode)).thenReturn(ColourScheme(2, false))
 
   val confMock: Configuration = mock[Configuration]
   val geeseBackground: Config = ConfigFactory.parseMap(mapAsJavaMap(Map(
@@ -117,7 +117,7 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
 
       val result = call(controller.persist, FakeRequest("POST", "/").withHeaders("Content-Type" -> "application/json").withJsonBody(Json.obj("colourScheme" -> JsNumber(1))))
       status(result) mustBe OK
-      verify(prefsMock, atLeastOnce()).setChosenColourScheme(fox.usercode, 1)
+      verify(prefsMock, atLeastOnce()).setChosenColourScheme(fox.usercode, ColourScheme(1, highContrast = false))
 
       checkResultAgainstDefault(result)
     }
@@ -128,7 +128,7 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
 
       val result = call(controller.persist, FakeRequest("POST", "/").withHeaders("Content-Type" -> "application/json").withJsonBody(Json.obj("colourScheme" -> JsNumber(-1))))
       status(result) mustBe OK
-      verify(prefsMock, atLeastOnce()).setChosenColourScheme(fox.usercode, 1)
+      verify(prefsMock, atLeastOnce()).setChosenColourScheme(fox.usercode, ColourScheme(1, highContrast = false))
 
       checkResultAgainstDefault(result)
     }
@@ -139,7 +139,7 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
 
       val result = call(controller.persist, FakeRequest("POST", "/").withHeaders("Content-Type" -> "application/json").withJsonBody(Json.obj("colourScheme" -> JsString("foo"))))
       status(result) mustBe OK
-      verify(prefsMock, atLeastOnce()).setChosenColourScheme(fox.usercode, 1)
+      verify(prefsMock, atLeastOnce()).setChosenColourScheme(fox.usercode, ColourScheme(1, highContrast = false))
 
       checkResultAgainstDefault(result)
     }

@@ -55,69 +55,87 @@
   .id7-left-border, .id7-right-border, .id7-utility-masthead { background-color: gold; }
 }
 
-.transparent-theme-maker(@baseColour, @gradBg, @gradTh, @imageUrl, @n) {
-  .theme-transparent-@{n} {
+.transparent-theme-maker-helper(@baseColour, @gradBg, @gradTh, @imageUrl, @highContrastFallback) {
 
-    html.not-app& {
-      background: @baseColour;
-      #app-container:after, header.id7-page-header:before {
-        background-color: @baseColour;
+  html.not-app& {
+    background: @baseColour;
+    #app-container:after, header.id7-page-header:before {
+      background-color: @baseColour;
+    }
+  }
+
+  .start-masthead {
+    background-color: @baseColour;
+  }
+
+  .bg-stand-in, body {
+    background: @behind-tiles-colour;
+  }
+
+  @transparent: rgba(0, 0, 0, 0.25);
+  .id7-fixed-width-container,
+  .id7-main-content-area {
+    background: transparent;
+  }
+
+  .in-root, .in-edit, .in-tiles {
+
+    & when (iscolor(@highContrastFallback)) {
+      html& .bg-stand-in {
+        background-color: @highContrastFallback;
       }
     }
 
-    .start-masthead {
-      background-color: @baseColour;
-    }
-
-    .bg-stand-in, body {
-      background: @behind-tiles-colour;
-    }
-
-    @transparent: rgba(0, 0, 0, 0.25);
-    .id7-fixed-width-container,
-    .id7-main-content-area {
-      background: transparent;
-    }
-
-    .in-root, .in-edit, .in-tiles {
-
+    & when (@highContrastFallback = null) {
       html& .bg-stand-in {
         background-image: url(@imageUrl), @gradBg;
       }
-
-      &.in-add h3 {
-        margin: 0;
-        padding: 20px 0 20px 14px;
-        background: @transparent;
-        color: #fff;
-      }
-
-      html& {
-        // Native apps render the background image internally
-        background: transparent;
-      }
     }
 
-    .in-settings.in-tiles {
-      &, html& .bg-stand-in {
-        background: @behind-tiles-colour;
-      }
+    &.in-add h3 {
+      margin: 0;
+      padding: 20px 0 20px 14px;
+      background: @transparent;
+      color: #fff;
     }
 
-    .colour-0, .colour-1, .colour-2, .colour-3 {
-      background-color: @transparent;
+    html& {
+      // Native apps render the background image internally
+      background: transparent;
+    }
+  }
+
+  .in-settings.in-tiles {
+    &, html& .bg-stand-in {
+      background: @behind-tiles-colour;
+    }
+  }
+
+  .colour-0, .colour-1, .colour-2, .colour-3 {
+    background-color: @transparent;
+    & when (@highContrastFallback = null) {
       .tile--zoomed .tile__header {
         background: @gradTh;
       }
     }
-    .tile--map__container .map-tile-image {
-      -webkit-filter: saturate(0%) brightness(90%) contrast(50%) opacity(25%); // Android WebView seems to need this
-      filter: saturate(0%) brightness(90%) contrast(50%) opacity(25%);
-    }
+  }
 
-    .add-tile-container .add-tile-button {
-      background-color: @baseColour;
-    }
+  .tile--map__container .map-tile-image {
+    -webkit-filter: saturate(0%) brightness(90%) contrast(50%) opacity(25%); // Android WebView seems to need this
+    filter: saturate(0%) brightness(90%) contrast(50%) opacity(25%);
+  }
+
+  .add-tile-container .add-tile-button {
+    background-color: @baseColour;
+  }
+}
+
+.transparent-theme-maker(@baseColour, @gradBg, @gradTh, @imageUrl, @n) {
+  .theme-transparent-@{n} {
+    .transparent-theme-maker-helper(@baseColour, @gradBg, @gradTh, @imageUrl, null)
+  }
+  .theme-transparent-@{n}--high-contrast {
+    .transparent-theme-maker-helper(@baseColour, @gradBg, @gradTh, @imageUrl, multiply(@baseColour, darken(white, 20%)))
   }
 }
 

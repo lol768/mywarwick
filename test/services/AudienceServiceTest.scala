@@ -1,11 +1,11 @@
 package services
 
+import helpers.BaseSpec
 import models.Audience
+import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import helpers.BaseSpec
-import org.mockito.Matchers
 import services.dao.{AudienceDao, AudienceLookupDao, UserNewsOptInDao}
 import warwick.sso._
 
@@ -55,7 +55,7 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
   "AudienceService" should {
 
     "return an empty list for an empty audience" in new Ctx {
-      service.resolve(Audience()).get must be (Nil)
+      service.resolve(Audience()).get must be (Set.empty)
     }
 
     "search for all research postgrads in WebGroups" in new Ctx {
@@ -214,11 +214,11 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
 
     "deduplicate usercodes" in new Ctx {
       webgroupsAllContainBarry()
-      val users: Seq[Usercode] = service.resolve(Audience(Seq(
+      val users: Set[Usercode] = service.resolve(Audience(Seq(
         ResearchPostgrads, TaughtPostgrads, UndergradStudents
       ))).get
 
-      users must be (Seq(Usercode("cuddz")))
+      users must be (Set(Usercode("cuddz")))
     }
 
     "combine opt-in components" in new Ctx {
@@ -228,13 +228,13 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
         Usercode("cuscao")
       ))
 
-      val users: Seq[Usercode] = service.resolve(Audience(Seq(
-        UsercodesAudience(Seq(Usercode("cusfal"), Usercode("cusebr"), Usercode("cusaab"))),
+      val users: Set[Usercode] = service.resolve(Audience(Seq(
+        UsercodesAudience(Set(Usercode("cusfal"), Usercode("cusebr"), Usercode("cusaab"))),
         LocationOptIn.CentralCampusResidences
       ))).get
 
       users must have size 2
-      users must be (Seq(Usercode("cusfal"), Usercode("cusebr")))
+      users must be (Set(Usercode("cusfal"), Usercode("cusebr")))
     }
 
   }

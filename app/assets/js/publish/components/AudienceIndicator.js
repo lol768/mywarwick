@@ -5,6 +5,7 @@ import promiseSubmit from '../utils';
 import log from 'loglevel';
 import $ from 'jquery';
 import _ from 'lodash-es';
+import Hyperlink from '../../components/ui/Hyperlink';
 
 class AudienceIndicator extends React.PureComponent {
   static propTypes = {
@@ -118,7 +119,11 @@ class AudienceIndicator extends React.PureComponent {
 
     return (
       <div className="alert alert-info">
-        <div className="pull-right">
+        <div>
+        <p>When sending alerts, please remember that alerts should be specific or personal to the recipient, and something they need to be aware of or take action on immediately, and concise - a sentence or two at most. <Hyperlink href="https://warwick.ac.uk/mw-support/faqs/usingalerts">More info...</Hyperlink></p>
+      </div>
+
+      <div className="pull-right">
           <i
             className="fa fa-info-circle"
             data-toggle="tooltip"

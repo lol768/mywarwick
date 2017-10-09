@@ -14,6 +14,7 @@ import org.scalatest.mockito.MockitoSugar
 import play.api.db.Database
 import services._
 import services.dao._
+import services.elasticsearch.ActivityESService
 import services.messaging.MessagingService
 import warwick.sso.{UserLookupService, Usercode}
 
@@ -47,7 +48,7 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
 
     "save audience for news item" in db.withConnection { implicit c =>
       val audienceId = audienceDao.saveAudience(Audience(Seq(
-        Audience.UsercodesAudience(Seq(Usercode("dave"), Usercode("james")))
+        Audience.UsercodesAudience(Set(Usercode("dave"), Usercode("james")))
       )))
       val newsItemId = newsDao.save(Fixtures.news.save(), audienceId, AudienceSize.Finite(2))
 
@@ -93,14 +94,15 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
     val activityMuteDao = get[ActivityMuteDao]
     val messaging = mock[MessagingService]
     val activityService = new ActivityServiceImpl(db, activityDao, activityTypeService, tagDao, audienceService, audienceDao, recipientDao, activityMuteDao, scheduler)
+    val activityESService = mock[ActivityESService]
 
-    val publishNotificationJob = new PublishActivityJob(audienceService, activityService, messaging, pubSub, scheduler)
+    val publishNotificationJob = new PublishActivityJob(audienceService, activityService, messaging, pubSub, activityESService, scheduler)
 
     "save audience for notification" in {
 
       db.withConnection { implicit c =>
         val audienceId = audienceDao.saveAudience(Audience(Seq(
-          Audience.UsercodesAudience(Seq(Usercode("dave"), Usercode("james")))
+          Audience.UsercodesAudience(Set(Usercode("dave"), Usercode("james")))
         )))
         when(jobDataMap.getString("audienceId")).thenReturn(audienceId)
 

@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import wrapKeyboardSelect from '../../../keyboard-nav';
 import * as colourSchemes from '../../../state/colour-schemes';
 import HideableView from '../HideableView';
+// import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 
 class ColourSchemesView extends HideableView {
   static propTypes = {
@@ -19,16 +20,18 @@ class ColourSchemesView extends HideableView {
       name: PropTypes.string.isRequired,
     })).isRequired,
     isOnline: PropTypes.bool.isRequired,
+    isHighContrast: PropTypes.bool.isRequired,
   };
 
 
   constructor(props) {
     super(props);
-    this.onSelect = this.onSelect.bind(this);
+    this.onColourSchemeSelect = this.onColourSchemeSelect.bind(this);
     this.persist = this.persist.bind(this);
+    this.onHighContrastToggle = this.onHighContrastToggle.bind(this);
   }
 
-  onSelect(e) {
+  onColourSchemeSelect(e) {
     wrapKeyboardSelect(() => {
       if (!this.props.isOnline) return;
       this.persist(parseInt(e.currentTarget.dataset.schemeid, 10));
@@ -37,6 +40,11 @@ class ColourSchemesView extends HideableView {
 
   persist(chosen) {
     this.props.dispatch(colourSchemes.changeColourScheme(chosen));
+  }
+
+  onHighContrastToggle() {
+    if (!this.props.isOnline) return;
+    this.props.dispatch(colourSchemes.toggleHighContrast(!this.props.isHighContrast));
   }
 
   componentDidShow() {
@@ -51,8 +59,8 @@ class ColourSchemesView extends HideableView {
         role="button"
         key={ scheme.id }
         data-schemeid={ scheme.id }
-        onClick={ this.onSelect }
-        onKeyUp={ this.onSelect }
+        onClick={ this.onColourSchemeSelect }
+        onKeyUp={ this.onColourSchemeSelect }
         tabIndex={ 0 }
       >
         <div className="media media-colour-scheme-choice">
@@ -90,6 +98,18 @@ class ColourSchemesView extends HideableView {
           </div>
         </div>
 
+        {/* <div className="list-group">
+          <SwitchListGroupItem
+            id="colourSchemeHighContrast"
+            value=""
+            checked={ this.props.isHighContrast }
+            icon="adjust"
+            description="High contrast"
+            onClick={ this.onHighContrastToggle }
+            disabled={ !this.props.isOnline }
+          />
+        </div>*/}
+
         <div className="list-group">
           {_.map(this.props.schemes, scheme => this.makeItem(scheme))}
         </div>
@@ -105,6 +125,7 @@ function select(store) {
     fetched: store.colourSchemes.fetched,
     chosen: store.colourSchemes.chosen,
     schemes: store.colourSchemes.schemes,
+    isHighContrast: store.colourSchemes.isHighContrast,
     isOnline: store.device.isOnline,
   };
 }

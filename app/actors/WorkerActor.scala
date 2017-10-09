@@ -6,7 +6,7 @@ import actors.MessageProcessing.WorkAvailable
 import akka.actor._
 import play.api.Configuration
 import services.messaging.MessagingService
-import warwick.sso.{User, UserLookupService}
+import warwick.sso.{UserLookupService}
 import scala.concurrent.duration._
 
 import scala.util.{Failure, Success, Try}

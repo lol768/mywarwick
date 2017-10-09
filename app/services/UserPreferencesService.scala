@@ -1,6 +1,7 @@
 package services
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import controllers.api.ColourScheme
 import play.api.db.{Database, NamedDatabase}
 import play.api.libs.json.JsObject
 import services.dao.UserPreferencesDao
@@ -13,7 +14,7 @@ trait UserPreferencesService {
 
   def save(usercode: Usercode): Unit
 
-  def countInitialisedUsers(usercodes: Seq[Usercode]): Int
+  def countInitialisedUsers(usercodes: Set[Usercode]): Int
 
   def getNotificationFilter(usercode: Usercode): JsObject
 
@@ -23,9 +24,9 @@ trait UserPreferencesService {
 
   def setActivityFilter(usercode: Usercode, filter: JsObject): Unit
 
-  def getChosenColourScheme(usercode: Usercode): Int
+  def getChosenColourScheme(usercode: Usercode): ColourScheme
 
-  def setChosenColourScheme(usercode: Usercode, chosenScheme: Int): Unit
+  def setChosenColourScheme(usercode: Usercode, chosenScheme: ColourScheme): Unit
 
 }
 
@@ -39,7 +40,7 @@ class UserPreferencesServiceImpl @Inject()(
 
   override def save(usercode: Usercode): Unit = db.withConnection(implicit c => dao.save(usercode))
 
-  override def countInitialisedUsers(usercodes: Seq[Usercode]): Int =
+  override def countInitialisedUsers(usercodes: Set[Usercode]): Int =
     db.withConnection(implicit c => dao.countInitialisedUsers(usercodes))
 
   override def getNotificationFilter(usercode: Usercode): JsObject =
@@ -54,9 +55,9 @@ class UserPreferencesServiceImpl @Inject()(
   override def setActivityFilter(usercode: Usercode, filter: JsObject): Unit =
     db.withConnection(implicit c => dao.setActivityFilter(usercode, filter))
 
-  override def getChosenColourScheme(usercode: Usercode): Int =
+  override def getChosenColourScheme(usercode: Usercode): ColourScheme =
     db.withConnection(implicit c => dao.getColourSchemePreference(usercode))
 
-  override def setChosenColourScheme(usercode: Usercode, chosenScheme: Int): Unit =
+  override def setChosenColourScheme(usercode: Usercode, chosenScheme: ColourScheme): Unit =
     db.withConnection(implicit c => dao.setColourSchemePreference(usercode, chosenScheme))
 }

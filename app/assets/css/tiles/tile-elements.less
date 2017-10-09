@@ -5,6 +5,9 @@
   left: 0;
   right: 0;
   bottom: 0;
+  html.ios & {
+    font: -apple-system-body;
+  }
 }
 
 .tile__header {
@@ -20,6 +23,10 @@
   text-overflow: ellipsis;
   overflow: hidden;
   margin: 0 30px;
+  html.ios & {
+    font-size: 1em;
+    font-weight: normal;
+  }
 }
 
 .tile__icon {
@@ -70,6 +77,10 @@
 
 .tile__text {
   display: block;
+  html.ios & {
+    font-size: 1em;
+    line-height: 1;
+  }
 }
 
 

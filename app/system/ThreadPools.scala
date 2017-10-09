@@ -19,6 +19,8 @@ object ThreadPools {
 
   implicit val externalData = shared
 
+  implicit val elastic = shared
+
   // For Controllers to do basic processing on received futures.
   implicit val web = shared
 }

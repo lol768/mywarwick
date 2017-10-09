@@ -18,7 +18,7 @@ object Audience {
 
   def usercodes(usercodes: Seq[Usercode]): Audience = {
     Audience(usercodes match {
-      case _::_ => Seq(UsercodesAudience(usercodes))
+      case _::_ => Seq(UsercodesAudience(usercodes.toSet))
       case _ => Nil
     })
   }
@@ -43,7 +43,7 @@ object Audience {
 
   case object PublicAudience extends Component
 
-  case class UsercodesAudience(usercodes: Seq[Usercode]) extends DepartmentSubset
+  case class UsercodesAudience(usercodes: Set[Usercode]) extends DepartmentSubset
 
 
   case class ModuleAudience(moduleCode: String) extends DepartmentSubset
@@ -120,10 +120,10 @@ object Audience {
       case relationshipRegex(relationshipType, agentId) => Some(RelationshipAudience(relationshipType, UniversityID(agentId)))
       case optInRegex(optInType, optInValue) if optInType == LocationOptIn.optInType => LocationOptIn.fromValue(optInValue)
       case string if string.nonEmpty => {
-        val validUsercodes: Seq[Usercode] = string.split("\n").map(_.trim).flatMap { usercode =>
+        val validUsercodes: Set[Usercode] = string.split("\n").map(_.trim).flatMap { usercode =>
           if(!usercode.contains(":")) Some(Usercode(usercode))
           else None
-        }
+        }.toSet
         if (validUsercodes.nonEmpty)
           Some(UsercodesAudience(validUsercodes))
         else

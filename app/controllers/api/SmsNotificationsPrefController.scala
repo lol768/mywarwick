@@ -9,13 +9,13 @@ import com.google.inject.Inject
 import controllers.BaseController
 import models.API
 import play.api.data.validation.ValidationError
-import play.api.libs.json._
-import services.{SecurityService, SmsNotificationsPrefService}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads.filter
+import play.api.libs.json._
 import play.api.mvc.{AnyContent, Result}
-import warwick.sso.{AuthenticatedRequest, User}
+import services.{SecurityService, SmsNotificationsPrefService}
 import uk.ac.warwick.util.core.StringUtils
+import warwick.sso.{AuthenticatedRequest, User}
 
 import scala.util.Try
 
@@ -34,11 +34,11 @@ object SmsNotificationsRequest {
           filter(ValidationError("Invalid phone number")) { s =>
             s.isEmpty || Try(PhoneNumberUtil.getInstance.parse(s, "GB")).isSuccess
           }).map(o => o.flatMap(s =>
-            Option(s).filter(_.nonEmpty).map(PhoneNumberUtil.getInstance.parse(_, "GB"))
+          Option(s).filter(_.nonEmpty).map(PhoneNumberUtil.getInstance.parse(_, "GB"))
         )) and
         (__ \ "verificationCode").readNullable[String] and
         (__ \ "resendVerification").readNullable[Boolean].map(_.getOrElse(false))
-    )(SmsNotificationsRequest.apply _)
+      ) (SmsNotificationsRequest.apply _)
 }
 
 @Singleton
@@ -46,6 +46,8 @@ class SmsNotificationsPrefController @Inject()(
   security: SecurityService,
   notificationPrefService: SmsNotificationsPrefService
 ) extends BaseController {
+
+  private val phoneUtil = PhoneNumberUtil.getInstance
 
   import security._
 
@@ -55,7 +57,7 @@ class SmsNotificationsPrefController @Inject()(
     val data = JsObject(Map(
       "wantsSms" -> JsBoolean(notificationPrefService.get(user.usercode)),
       "smsNumber" -> JsString(notificationPrefService.getNumber(user.usercode).map(
-        PhoneNumberUtil.getInstance.format(_, PhoneNumberFormat.INTERNATIONAL)
+        phoneUtil.format(_, PhoneNumberFormat.INTERNATIONAL)
       ).orNull)
     ))
 
@@ -107,7 +109,12 @@ class SmsNotificationsPrefController @Inject()(
                   doUpdate(user, data)
                 }
               } else if (data.smsNumber.nonEmpty && (existingNumber.isEmpty || !existingNumber.get.exactlySameAs(data.smsNumber.get))) {
-                requireVerification(user, data)
+                if (data.smsNumber.exists(phoneUtil.isValidNumber)) {
+                  requireVerification(user, data)
+                } else {
+                  // Phone number is invalid
+                  BadRequest(Json.toJson(API.Failure[JsObject]("error", Seq(API.Error("invalid-body-number", "This isn't a valid phone number")))))
+                }
               } else {
                 // Phone number hasn't changed or is empty
                 doUpdate(user, data)

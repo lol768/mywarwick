@@ -5,6 +5,7 @@ import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Provides, TypeLiteral}
 import org.quartz.Scheduler
 import play.api.libs.concurrent.AkkaGuiceSupport
+import services.elasticsearch.{ActivityESService, ActivityESServiceImpl}
 import services.dao.{AudienceLookupDao, TabulaAudienceLookupDao}
 import services.healthcheck._
 import services.messaging.{EmailOutputService, MobileOutputService, OutputService, SmsOutputService}
@@ -31,6 +32,9 @@ class AppModule extends AbstractModule with AkkaGuiceSupport {
 
     // Enables Scheduler for injection. Scheduler.start() happens separately, in SchedulerConfigModule
     bind(classOf[Scheduler]).toProvider(classOf[SchedulerProvider])
+
+    // eagerly bind ActivityESService to ensure activity's template is set at first
+    bind(classOf[ActivityESService]).to(classOf[ActivityESServiceImpl]).asEagerSingleton()
 
     bindHealthChecks()
   }

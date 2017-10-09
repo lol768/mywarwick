@@ -1,14 +1,14 @@
 package controllers.publish
 
 import controllers.admin.addFormErrors
-import models.{API, Audience}
 import models.publishing._
+import models.{API, Audience}
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
-import services.dao.{DepartmentInfo, DepartmentInfoDao}
 import services._
+import services.dao.DepartmentInfo
 import system.{ImplicitRequestContext, Logging}
 import warwick.sso.{AuthenticatedRequest, Usercode}
 
@@ -92,7 +92,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
 
   def sharedAudienceInfo(
     audienceService: AudienceService,
-    processUsercodes: Seq[Usercode] => JsObject
+    processUsercodes: Set[Usercode] => JsObject
   )(implicit request: PublisherRequest[_]): Future[Result] =
     audienceForm.bindFromRequest.fold(
       formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),

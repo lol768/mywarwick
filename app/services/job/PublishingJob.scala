@@ -5,6 +5,7 @@ import com.google.inject.Inject
 import models.ActivityRender
 import org.quartz._
 import services._
+import services.elasticsearch.{ActivityESService, IndexActivityRequest}
 import services.messaging.MessagingService
 import system.Logging
 import warwick.sso.Usercode
@@ -58,6 +59,7 @@ class PublishActivityJob @Inject()(
   activityService: ActivityService,
   messaging: MessagingService,
   pubSub: PubSub,
+  activityESService: ActivityESService,
   override val scheduler: SchedulerService
 ) extends PublishingJob {
 
@@ -70,7 +72,7 @@ class PublishActivityJob @Inject()(
 
     audienceService.resolve(audience).foreach { recipients =>
       activityService.getActivityRenderById(activityId).foreach { activityRender =>
-        saveRecipients(activityRender, recipients.toSet)
+        saveRecipients(activityRender, recipients)
         activityService.updateAudienceCount(activityId, audienceId, recipients)
       }
     }
@@ -86,5 +88,6 @@ class PublishActivityJob @Inject()(
     if (activity.shouldNotify) {
       messaging.send(recipients, activity)
     }
+    activityESService.index(IndexActivityRequest(activity, Some(recipients.toSeq)))
   }
 }
