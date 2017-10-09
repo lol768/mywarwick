@@ -4,6 +4,10 @@ import * as React from 'react';
 import * as enzyme from 'enzyme';
 import _ from 'lodash-es';
 
+const store = {
+  dispatch: () => {},
+};
+
 describe('AudiencePicker', () => {
 
   const deptSubsetOpts = {'TeachingStaff':'Teaching Staff','AdminStaff':'Administrative Staff','UndergradStudents':'Undergraduates','TaughtPostgrads':'Taught Postgraduates','ResearchPostgrads':'Research Postgraduates'};
@@ -15,6 +19,7 @@ describe('AudiencePicker', () => {
       departments: {
         FU: 'Fun Department',
       },
+      store,
     };
 
     const shallow = enzyme.shallow(<AudiencePicker {...props} />);
@@ -39,6 +44,7 @@ describe('AudiencePicker', () => {
         MU: 'Agriculture Department',
         PU: 'Sewage Department',
       },
+      store,
     };
 
     const shallow = enzyme.shallow(<AudiencePicker {...props} />);
@@ -64,6 +70,7 @@ describe('AudiencePicker', () => {
         MU: 'Agriculture Department',
         PU: 'Sewage Department',
       },
+      store,
     };
     const shallow = enzyme.shallow(<AudiencePicker {...props}/>);
 
@@ -117,6 +124,7 @@ describe('AudiencePicker', () => {
       },
       deptSubsetOpts,
       locationOpts,
+      store,
     };
 
     const html = enzyme.render(<form><AudiencePicker {...props} /></form>);
@@ -147,6 +155,7 @@ describe('AudiencePicker', () => {
       },
       deptSubsetOpts,
       locationOpts,
+      store,
     };
 
     const mounted = enzyme.mount(<AudiencePicker {...props} />);
@@ -166,6 +175,7 @@ describe('AudiencePicker', () => {
       departments: {
         MU: 'Agriculture Department',
       },
+      store,
     };
 
     const stateOne = {
@@ -195,6 +205,7 @@ describe('AudiencePicker', () => {
       departments: {
         MU: 'Agriculture Department',
       },
+      store,
     };
 
     const newState = {

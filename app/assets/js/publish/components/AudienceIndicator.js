@@ -1,7 +1,6 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import promiseSubmit from '../utils';
 import log from 'loglevel';
 import $ from 'jquery';
 import _ from 'lodash-es';
@@ -17,6 +16,7 @@ class AudienceIndicator extends React.PureComponent {
     categorySubset: PropTypes.number,
     audienceComponents: PropTypes.object,
     store: PropTypes.object.isRequired,
+    promiseSubmit: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -48,7 +48,7 @@ class AudienceIndicator extends React.PureComponent {
     this.setState({ fetching: true });
     const $form = $($('.split-form').get(0));
 
-    promiseSubmit($form, {
+    this.props.promiseSubmit($form, {
       url: $form.attr('data-audience-action'),
       dataType: 'json',
     })
@@ -72,7 +72,7 @@ class AudienceIndicator extends React.PureComponent {
       const audience = this.props.audienceComponents.audience[isUniWide ? 'universityWide' : 'department'];
 
       if (audience !== undefined) {
-        if ('Dept:All' in audience) {
+        if ('Dept:All' in audience && dept.name !== undefined) {
           return <div>{`Everyone in ${dept.name}`}</div>;
         }
 

@@ -11,8 +11,22 @@ import './publish/modulePicker';
 import _ from 'lodash-es';
 import './flexi-picker';
 import AudiencePicker from './publish/components/AudiencePicker';
+import AudienceIndicator from './publish/components/AudienceIndicator';
 import store from './publish/publishStore';
+import promiseSubmit from './publish/utils';
 
+function setupAudienceIndicator() {
+  const audienceIndicator = $('.audience-indicator');
+
+  if (audienceIndicator.length) {
+    setTimeout(() => {
+      ReactDOM.render(
+        <AudienceIndicator store={store} promiseSubmit={promiseSubmit} />,
+        audienceIndicator.get(0),
+      );
+    }, 200);
+  }
+}
 
 function setupAudiencePicker() {
   const audiencePicker = $('.audience-picker');
@@ -160,6 +174,7 @@ function setupPublisherPermissionsForm() {
 }
 
 $(() => {
+  setupAudienceIndicator();
   setupAudiencePicker();
   setupPublisherDepartmentsForm();
   setupPublisherPermissionsForm();
