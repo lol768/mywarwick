@@ -1,5 +1,3 @@
-/* eslint-env browser */
-
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
@@ -92,27 +90,17 @@ class ColourSchemesView extends HideableView {
   // Check whether the high contrast option is supported by the current app version.
   // Check is based on version number for now - see NEWSTART-1150 for how we'd like to
   // do this in future.
-  static isHighContrastSupported() {
-    if (!('MyWarwickNative' in window)) {
-      // Supported on the web
-      return true;
+  isHighContrastSupported() {
+    const { nativePlatform, nativeAppVersion } = this.props;
+
+    switch (nativePlatform) {
+      case 'android':
+        return parseInt(nativeAppVersion, 10) >= 32;
+      case 'ios':
+        return parseInt(nativeAppVersion, 10) >= 3;
+      default:
+        return true;
     }
-
-    if (!('getAppVersion' in window.MyWarwickNative)) {
-      // Unreasonably old native app version - not supported
-      return false;
-    }
-
-    const appVersion = parseInt(window.MyWarwickNative.getAppVersion(), 10);
-
-    const { userAgent } = window.navigator;
-    const isAndroid = userAgent.indexOf('Android') >= 0;
-
-    if (isAndroid) {
-      return appVersion >= 32;
-    }
-
-    return appVersion >= 3;
   }
 
   render() {
@@ -127,7 +115,7 @@ class ColourSchemesView extends HideableView {
         </div>
 
         <div className="list-group">
-          { ColourSchemesView.isHighContrastSupported() && <SwitchListGroupItem
+          { this.isHighContrastSupported() && <SwitchListGroupItem
             id="colourSchemeHighContrast"
             value=""
             checked={ this.props.isHighContrast }
@@ -146,15 +134,19 @@ class ColourSchemesView extends HideableView {
   }
 }
 
-function select(store) {
+function select(state) {
+  const cs = state.colourSchemes;
+
   return {
-    fetching: store.colourSchemes.fetching,
-    failed: store.colourSchemes.failed,
-    fetched: store.colourSchemes.fetched,
-    chosen: store.colourSchemes.chosen,
-    schemes: store.colourSchemes.schemes,
-    isHighContrast: store.colourSchemes.isHighContrast,
-    isOnline: store.device.isOnline,
+    fetching: cs.fetching,
+    failed: cs.failed,
+    fetched: cs.fetched,
+    chosen: cs.chosen,
+    schemes: cs.schemes,
+    isHighContrast: cs.isHighContrast,
+    isOnline: state.device.isOnline,
+    nativePlatform: state.app.native.platform,
+    nativeAppVersion: state.app.native.version,
   };
 }
 
