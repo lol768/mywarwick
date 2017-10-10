@@ -257,25 +257,39 @@ describe('AgendaTile', () => {
       , now);
     html.props.children.length.should.equal(1);
   });
-
-
 });
 
 describe('LargeBody', () => {
-  it('Groups by date', () => {
-    const items = [ ITEMS.firstEvent, ITEMS.secondEvent ];
-    const keys = items.map( n => n.id );
-    const wrapper = shallow(<LargeBody>{ items }</LargeBody>);
-    wrapper.props().children.map(n => n.key).should.deep.equal(keys);
+  it('Groups by date', () =>
+    atMoment(() => {
+      const items = [ITEMS.firstEvent, ITEMS.secondEvent];
+      const keys = items.map(n => n.id);
+      const wrapper = shallow(<LargeBody>{items}</LargeBody>);
+      wrapper.props().children.map(n => n.key).should.deep.equal(keys);
 
-    // could use enzyme.render() and check the actual HTML,
-    // but instead just checking the function we'd use -
-    // GroupedList should have its own tests.
-    wrapper.name().should.equal('GroupedList');
-    const grouper = wrapper.props().groupBy;
-    const unixTime = now.getTime() / 1000;
-    grouper.titleForGroup(unixTime).should.equal('Thu 19th May');
-  });
+      // could use enzyme.render() and check the actual HTML,
+      // but instead just checking the function we'd use -
+      // GroupedList should have its own tests.
+      wrapper.name().should.equal('GroupedList');
+      const grouper = wrapper.props().groupBy;
+      const unixTime = now.getTime() / 1000;
+      grouper.titleForGroup(unixTime).should.equal('Thu 19th May');
+    }, new Date(2016, 5, 1))
+  );
+
+  it('includes year in group titles for non-current years', () =>
+    atMoment(() => {
+      const items = [ITEMS.firstEvent, ITEMS.secondEvent];
+      const wrapper = shallow(<LargeBody>{items}</LargeBody>);
+
+      // could use enzyme.render() and check the actual HTML,
+      // but instead just checking the function we'd use -
+      // GroupedList should have its own tests.
+      const grouper = wrapper.props().groupBy;
+      const unixTime = now.getTime() / 1000;
+      grouper.titleForGroup(unixTime).should.equal('Thu 19th May 2016');
+    }, new Date(2015, 5, 1))
+  );
 });
 
 describe('AgendaTileItem', () => {
