@@ -42,8 +42,15 @@ const groupItemsForAgendaTile = {
     switch (parseInt(group, 10)) {
       case 0: return 'Today';
       case 1: return 'Tomorrow';
-      default:
-        return moment.unix(group).tz('Europe/London').format('ddd Do MMMM');
+      default: {
+        const date = moment.unix(group).tz('Europe/London');
+
+        if (date.isSame(moment(), 'year')) {
+          return date.format('ddd Do MMMM');
+        }
+
+        return date.format('ddd Do MMMM YYYY');
+      }
     }
   },
 };
