@@ -25,7 +25,7 @@ const propsTestData = {
   isOnline: true,
 };
 
-describe('ColourSchemesViews', () => {
+describe('ColourSchemesView', () => {
   it('includes all of the colour schemes passed to it', () => {
     const result = shallow(<ColourSchemesView.WrappedComponent {...propsTestData} />);
     expect(result.find('.media-body-colour-scheme-choice')).to.have.length(2);
@@ -40,7 +40,7 @@ describe('ColourSchemesViews', () => {
     expect(radios.first().props().checked).to.equal(true);
   });
 
-  it('fire the correct event after it is clicked', () => {
+  it('fires the correct event after it is clicked', () => {
     const result = shallow(<ColourSchemesView.WrappedComponent {...propsTestData} />);
     const instance = result.instance();
     const click = sinon.spy(instance, 'persist');
@@ -58,7 +58,7 @@ describe('ColourSchemesViews', () => {
 
   });
 
-  it('fire the correct event after enter pressed', () => {
+  it('fires the correct event after enter pressed', () => {
     const result = shallow(<ColourSchemesView.WrappedComponent {...propsTestData} />);
     const instance = result.instance();
     const click = sinon.spy(instance, 'persist');
@@ -76,5 +76,13 @@ describe('ColourSchemesViews', () => {
       }
     });
     click.should.have.been.called;
+  });
+
+  it('renders the high contrast option iff supported', () => {
+    const unsupportedResult = shallow(<ColourSchemesView.WrappedComponent {...propsTestData} nativePlatform="ios" nativeAppVersion="2" />);
+    expect(unsupportedResult.find('#colourSchemeHighContrast')).to.have.length(0);
+
+    const supportedResult = shallow(<ColourSchemesView.WrappedComponent {...propsTestData} nativePlatform="ios" nativeAppVersion="3" />);
+    expect(supportedResult.find('#colourSchemeHighContrast')).to.have.length(1);
   });
 });
