@@ -1,3 +1,5 @@
+/* eslint-env browser */
+
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
@@ -5,7 +7,7 @@ import { connect } from 'react-redux';
 import wrapKeyboardSelect from '../../../keyboard-nav';
 import * as colourSchemes from '../../../state/colour-schemes';
 import HideableView from '../HideableView';
-// import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
+import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 
 class ColourSchemesView extends HideableView {
   static propTypes = {
@@ -87,6 +89,32 @@ class ColourSchemesView extends HideableView {
     );
   }
 
+  // Check whether the high contrast option is supported by the current app version.
+  // Check is based on version number for now - see NEWSTART-1150 for how we'd like to
+  // do this in future.
+  static isHighContrastSupported() {
+    if (!('MyWarwickNative' in window)) {
+      // Supported on the web
+      return true;
+    }
+
+    if (!('getAppVersion' in window.MyWarwickNative)) {
+      // Unreasonably old native app version - not supported
+      return false;
+    }
+
+    const appVersion = parseInt(window.MyWarwickNative.getAppVersion(), 10);
+
+    const { userAgent } = window.navigator;
+    const isAndroid = userAgent.indexOf('Android') >= 0;
+
+    if (isAndroid) {
+      return appVersion >= 32;
+    }
+
+    return appVersion >= 3;
+  }
+
   render() {
     return (
       <div>
@@ -98,8 +126,8 @@ class ColourSchemesView extends HideableView {
           </div>
         </div>
 
-        {/* <div className="list-group">
-          <SwitchListGroupItem
+        <div className="list-group">
+          { ColourSchemesView.isHighContrastSupported() && <SwitchListGroupItem
             id="colourSchemeHighContrast"
             value=""
             checked={ this.props.isHighContrast }
@@ -107,8 +135,8 @@ class ColourSchemesView extends HideableView {
             description="High contrast"
             onClick={ this.onHighContrastToggle }
             disabled={ !this.props.isOnline }
-          />
-        </div>*/}
+          /> }
+        </div>
 
         <div className="list-group">
           {_.map(this.props.schemes, scheme => this.makeItem(scheme))}
