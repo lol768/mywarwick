@@ -23,7 +23,8 @@ case class ActivityDocument(
   published_at: DateTime = null,
   publisher: String = null,
   audienceComponents: Seq[String] = null,
-  resolvedUsers: Seq[String] = null
+  resolvedUsers: Seq[String] = null,
+  api: Boolean = false
 )
 
 object ActivityDocument {
@@ -48,7 +49,8 @@ object ActivityDocument {
       resolvedUsers match {
         case e: Some[Seq[Usercode]] => e.map(_.map(_.string)).orNull
         case _ => serialiseResolvedUsers(activity.audienceId, audienceService)
-      }
+      },
+      activity.api
     )
   }
 
@@ -67,7 +69,8 @@ object ActivityDocument {
         DateTime.parse(hitMap.getOrElse(field.published_at.toString, 0).toString), // TODO test if this is right
         hitMap.getOrElse(field.publisher, "-").toString,
         hitMap.getOrElse(field.audience_components, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
-        hitMap.getOrElse(field.resolved_users, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString)
+        hitMap.getOrElse(field.resolved_users, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
+        Boolean.unbox(hitMap.getOrElse(field.api, Boolean.box(false)))
       )
     })
   }
