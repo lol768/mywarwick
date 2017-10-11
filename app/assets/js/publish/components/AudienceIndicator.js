@@ -21,7 +21,7 @@ export class AudienceIndicator extends React.PureComponent {
       public: false,
     };
     this.fetchAudienceEstimate = this.fetchAudienceEstimate.bind(this);
-    this.onAudienceChange = this.onAudienceChange.bind(this);
+    this.onAudienceChange = _.debounce(this.onAudienceChange.bind(this), 500);
     this.readableAudienceComponents = this.readableAudienceComponents.bind(this);
   }
 
@@ -35,7 +35,7 @@ export class AudienceIndicator extends React.PureComponent {
   }
 
   onAudienceChange() {
-    _.defer(_.debounce(this.fetchAudienceEstimate, 500));
+    this.fetchAudienceEstimate();
   }
 
   fetchAudienceEstimate() {
@@ -47,13 +47,13 @@ export class AudienceIndicator extends React.PureComponent {
       dataType: 'json',
     })
       .then(({ data: { baseAudience } }) =>
-        setTimeout(() => this.setState({ baseAudience, fetching: false }), 200),
+        this.setState({ baseAudience, fetching: false }),
       )
       .catch((e) => {
         this.setState({ baseAudience: 0 });
         log.error('Audience estimate returned error', e);
       })
-      .then(() => setTimeout(() => this.setState({ fetching: false }), 200),
+      .then(() => this.setState({ fetching: false }),
       );
   }
 
@@ -71,27 +71,27 @@ export class AudienceIndicator extends React.PureComponent {
         }
 
         return (<div> {
-          _.map(audience.groups, (v, k) => {
-            switch (k) {
+          _.map(audience.groups, (components, audienceType) => {
+            switch (audienceType) {
               case 'modules':
-                return _.map(v, module => (<div key={k}>{module.text || module.value}</div>));
+                return _.map(components, module => (<div key={audienceType}>{module.text || module.value}</div>));
               case 'seminarGroups':
-                return _.map(v, seminar => (<div key={k}>{seminar.text}</div>));
+                return _.map(components, seminar => (<div key={audienceType}>{seminar.text}</div>));
               case 'listOfUsercodes':
-                if (v !== undefined) {
-                  return <div key={k}>{`${v.length} usercodes`}</div>;
+                if (components !== undefined) {
+                  return <div key={audienceType}>{`${components.length} usercodes`}</div>;
                 }
                 return null; // lint made me do it
               case 'staffRelationships':
-                return _.flatMap(v, rel => rel.options.map(opt => _.map(opt, val => (
+                return _.flatMap(components, rel => rel.options.map(opt => _.map(opt, val => (
                   <div
-                    key={k}
+                    key={audienceType}
                   >{val.selected ? `${_.startCase(val.studentRole)}s of ${rel.text}` : ''}</div>
                 ))));
               default: {
-                const group = _.startCase(_.replace(k, 'Dept:', ''));
+                const group = _.startCase(_.replace(audienceType, 'Dept:', ''));
                 return (isUniWide || !_.isEmpty(dept.name)) ?
-                  (<div key={k}>{`All ${group} in ${_.startsWith(k, 'Dept:') ? dept.name : 'the University'}`}</div>)
+                  (<div key={audienceType}>{`All ${group} in ${_.startsWith(audienceType, 'Dept:') ? dept.name : 'the University'}`}</div>)
                   : null;
               }
             }
