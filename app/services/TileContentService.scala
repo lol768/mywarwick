@@ -139,7 +139,7 @@ class TileContentServiceImpl @Inject()(
       }
 
   private def error(kind: Symbol, message: String): API.Failure[JsObject] = {
-    API.Failure("error", Seq(API.Error(kind.toString(), message)))
+    API.Failure("error", Seq(API.Error(kind.name, message)))
   }
 
   // For test overriding - if we cared that this was lame we could pull all TA ops
