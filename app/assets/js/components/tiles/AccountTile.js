@@ -10,6 +10,7 @@ import * as dateFormats from '../../dateFormats';
 export default class AccountTile extends TileContent {
   static propTypes = {
     content: PropTypes.shape({
+      accountMsg: PropTypes.string,
       fullName: PropTypes.string.isRequired,
       email: PropTypes.string.isRequired,
       userId: PropTypes.string.isRequired,
@@ -104,6 +105,7 @@ export default class AccountTile extends TileContent {
 
     return (
       <div>
+        { member.accountMsg ? <div>{ member.accountMsg }</div> : null }
         <div>{ member.fullName }</div>
         <div>{ member.email }</div>
         <div>{ `${member.userId}, ${member.universityId}` }</div>

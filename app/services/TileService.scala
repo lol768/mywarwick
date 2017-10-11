@@ -105,10 +105,14 @@ class TileServiceImpl @Inject()(
 
   // TODO - add undergrad / postgrad groups - review isStaff (should it include PGRs?)
   private def getGroups(user: User): Set[String] = {
-    val isStaff = if (user.isStaffOrPGR) Set("staff") else Set()
-    val isStudent = if (user.isStudent) Set("student") else Set()
-    val isOther = if (!user.isStaffOrPGR && !user.isStudent) Set("other") else Set()
-    isStaff ++ isStudent ++ isOther ++ user.department.flatMap(_.shortName).toSet
+    // TODO - update sso-client-play User to include proper check
+    if (user.rawProperties.getOrElse("usersource", "") == "WBSLdap")
+      Set("wbs")
+    else {
+      val isStaff = if (user.isStaffOrPGR) Set("staff") else Set()
+      val isStudent = if (user.isStudent) Set("student") else Set()
+      val isOther = if (!user.isStaffOrPGR && !user.isStudent) Set("other") else Set()
+      isStaff ++ isStudent ++ isOther ++ user.department.flatMap(_.shortName).toSet
+    }
   }
-
 }
