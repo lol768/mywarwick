@@ -29,6 +29,7 @@ case class Activity(
   publishedAt: DateTime,
   createdAt: DateTime,
   shouldNotify: Boolean,
+  api: Boolean,
   audienceId: Option[String] = None,
   publisherId: Option[String] = None,
   sendEmail: Option[Boolean] = None
@@ -153,7 +154,8 @@ case class ActivitySave(
   tags: Seq[ActivityTag] = Seq.empty,
   replace: Map[String, String] = Map.empty,
   publishedAt: Option[DateTime] = None,
-  sendEmail: Option[Boolean] = None
+  sendEmail: Option[Boolean] = None,
+  api: Boolean = false
 )
 
 object ActivitySave {
@@ -171,7 +173,8 @@ object ActivitySave {
       tags = tags.getOrElse(Seq.empty),
       replace = replace.getOrElse(Map.empty),
       publishedAt = generated_at,
-      sendEmail = send_email
+      sendEmail = send_email,
+      api = true
     )
   }
 }
