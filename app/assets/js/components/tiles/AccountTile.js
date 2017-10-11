@@ -163,10 +163,10 @@ export default class AccountTile extends TileContent {
             { (scd) && <li>Year of study: { scd.levelCode }</li> }
             { (scd) && <li>Home department: { member.homeDepartment.name }</li> }
             <li>&nbsp;</li>
-            { member.usersource === "WBSLdap" ? // user has signed in with WBS credentials
-              <li><a role="button" className="text--dotted-underline" onClick={ signOut }>
+            { member.usersource === 'WBSLdap' ? ( // user has signed in with WBS credentials
+              <li><a role="button" tabIndex={0} className="text--dotted-underline" onClick={ signOut }>
                 Please sign in with your ITS account
-              </a></li>
+              </a></li>)
               : null }
           </ul>
           { AccountTile.getLink() }
