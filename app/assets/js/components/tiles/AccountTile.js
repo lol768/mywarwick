@@ -23,7 +23,7 @@ export default class AccountTile extends TileContent {
       jobTitle: PropTypes.string,
       inactivationDate: PropTypes.string,
       phoneNumber: PropTypes.string,
-      usersource: PropTypes.string,
+      userSource: PropTypes.string,
       studentCourseDetails: PropTypes.arrayOf(PropTypes.shape({
         course: PropTypes.shape({
           name: PropTypes.string.isRequired,
@@ -163,11 +163,13 @@ export default class AccountTile extends TileContent {
             { (scd) && <li>Year of study: { scd.levelCode }</li> }
             { (scd) && <li>Home department: { member.homeDepartment.name }</li> }
             <li>&nbsp;</li>
-            { member.usersource === 'WBSLdap' ? ( // user has signed in with WBS credentials
-              <li><a role="button" tabIndex={0} className="text--dotted-underline" onClick={ signOut }>
-                Please sign in with your ITS account
-              </a></li>)
-              : null }
+            { member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
+            <li>You’ve signed in with your WBS credentials, but My Warwick won’t work with them.
+              &nbsp;Please&nbsp;
+              <a role="button" tabIndex={0} className="text--dotted-underline" onClick={signOut}>
+                sign in with your ITS credentials instead.
+              </a>
+            </li> }
           </ul>
           { AccountTile.getLink() }
         </div>

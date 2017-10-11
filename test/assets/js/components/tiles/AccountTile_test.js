@@ -14,14 +14,14 @@ describe('AccountTile', () => {
         universityId: '1234567',
         homeDepartment: {},
         userType: 'student',
-        usersource: 'WBSLdap',
+        userSource: 'WBSLdap',
       },
       user: {},
     };
 
   const shallow = enzyme.shallow(<AccountTile {...props} />);
 
-  expect(shallow.html()).to.contain('Please sign in with your ITS account');
+  expect(shallow.html()).to.contain('sign in with your ITS credentials instead.');
   });
 
 });
