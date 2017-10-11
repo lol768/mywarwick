@@ -123,7 +123,7 @@ export class AudienceIndicator extends React.PureComponent {
             recipient, and something they need to be aware of or take action on immediately, and
             concise - a sentence or two at most. <Hyperlink
               href="https://warwick.ac.uk/mw-support/faqs/usingalerts"
-            >More info...</Hyperlink></p>
+            >More info…</Hyperlink></p>
         </div>
 
         <div className="pull-right">
