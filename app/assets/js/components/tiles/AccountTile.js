@@ -6,11 +6,11 @@ import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 import Hyperlink from '../ui/Hyperlink';
 import AccountPhoto from '../ui/AccountPhoto';
 import * as dateFormats from '../../dateFormats';
+import { signOut } from '../../userinfo';
 
 export default class AccountTile extends TileContent {
   static propTypes = {
     content: PropTypes.shape({
-      accountMsg: PropTypes.string,
       fullName: PropTypes.string.isRequired,
       email: PropTypes.string.isRequired,
       userId: PropTypes.string.isRequired,
@@ -23,6 +23,7 @@ export default class AccountTile extends TileContent {
       jobTitle: PropTypes.string,
       inactivationDate: PropTypes.string,
       phoneNumber: PropTypes.string,
+      usersource: PropTypes.string,
       studentCourseDetails: PropTypes.arrayOf(PropTypes.shape({
         course: PropTypes.shape({
           name: PropTypes.string.isRequired,
@@ -105,7 +106,6 @@ export default class AccountTile extends TileContent {
 
     return (
       <div>
-        { member.accountMsg ? <div>{ member.accountMsg }</div> : null }
         <div>{ member.fullName }</div>
         <div>{ member.email }</div>
         <div>{ `${member.userId}, ${member.universityId}` }</div>
@@ -163,6 +163,11 @@ export default class AccountTile extends TileContent {
             { (scd) && <li>Year of study: { scd.levelCode }</li> }
             { (scd) && <li>Home department: { member.homeDepartment.name }</li> }
             <li>&nbsp;</li>
+            { member.usersource === "WBSLdap" ? // user has signed in with WBS credentials
+              <li><a role="button" className="text--dotted-underline" onClick={ signOut }>
+                Please sign in with your ITS account
+              </a></li>
+              : null }
           </ul>
           { AccountTile.getLink() }
         </div>
