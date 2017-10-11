@@ -74,7 +74,8 @@ export class AudienceIndicator extends React.PureComponent {
           _.map(audience.groups, (components, audienceType) => {
             switch (audienceType) {
               case 'modules':
-                return _.map(components, module => (<div key={audienceType}>{module.text || module.value}</div>));
+                return _.map(components, module =>
+                  (<div key={audienceType}>{module.text || module.value}</div>));
               case 'seminarGroups':
                 return _.map(components, seminar => (<div key={audienceType}>{seminar.text}</div>));
               case 'listOfUsercodes':
