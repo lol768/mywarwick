@@ -9,7 +9,6 @@ import Hyperlink from '../../components/ui/Hyperlink';
 export class AudienceIndicator extends React.PureComponent {
   static propTypes = {
     audienceComponents: PropTypes.object,
-    store: PropTypes.object.isRequired,
     promiseSubmit: PropTypes.func.isRequired,
   };
 

@@ -18,6 +18,9 @@ export default class AudiencePicker extends React.PureComponent {
     departments: PropTypes.object,
     deptSubsetOpts: PropTypes.object,
     locationOpts: PropTypes.object,
+  };
+
+  static contextTypes = {
     store: PropTypes.object.isRequired,
   };
 
@@ -55,7 +58,7 @@ export default class AudiencePicker extends React.PureComponent {
   }
 
   componentWillUpdate(nextProps, nextState) {
-    this.props.store.dispatch({
+    this.context.store.dispatch({
       type: 'AUDIENCE_UPDATE',
       components: nextState,
     });

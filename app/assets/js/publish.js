@@ -14,6 +14,7 @@ import AudiencePicker from './publish/components/AudiencePicker';
 import AudienceIndicator from './publish/components/AudienceIndicator';
 import store from './publish/publishStore';
 import promiseSubmit from './publish/utils';
+import { Provider } from 'react-redux';
 
 function setupAudienceIndicator() {
   const audienceIndicator = $('.audience-indicator');
@@ -21,7 +22,9 @@ function setupAudienceIndicator() {
   if (audienceIndicator.length) {
     setTimeout(() => {
       ReactDOM.render(
-        <AudienceIndicator store={store} promiseSubmit={promiseSubmit} />,
+        <Provider store={store} >
+          <AudienceIndicator promiseSubmit={promiseSubmit} />
+        </Provider>,
         audienceIndicator.get(0),
       );
     }, 200);
@@ -41,7 +44,9 @@ function setupAudiencePicker() {
       store,
     };
     ReactDOM.render(
-      <AudiencePicker {...props} />,
+      <Provider store={store}>
+        <AudiencePicker {...props} />
+      </Provider>,
       audiencePicker.get(0),
     );
   }
