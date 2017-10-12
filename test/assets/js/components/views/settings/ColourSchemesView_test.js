@@ -78,11 +78,14 @@ describe('ColourSchemesView', () => {
     click.should.have.been.called;
   });
 
-  it('renders the high contrast option iff supported', () => {
+  it('renders the high contrast option if supported', () => {
     const unsupportedResult = shallow(<ColourSchemesView.WrappedComponent {...propsTestData} nativePlatform="ios" nativeAppVersion="2" />);
     expect(unsupportedResult.find('#colourSchemeHighContrast')).to.have.length(0);
 
     const supportedResult = shallow(<ColourSchemesView.WrappedComponent {...propsTestData} nativePlatform="ios" nativeAppVersion="3" />);
     expect(supportedResult.find('#colourSchemeHighContrast')).to.have.length(1);
+
+    const oldAppRender = shallow(<ColourSchemesView.WrappedComponent {...propsTestData} isNative={true} />);
+    expect(oldAppRender.find('#colourSchemeHighContrast')).to.have.length(0);
   });
 });

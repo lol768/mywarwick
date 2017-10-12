@@ -91,13 +91,15 @@ class ColourSchemesView extends HideableView {
   // Check is based on version number for now - see NEWSTART-1150 for how we'd like to
   // do this in future.
   isHighContrastSupported() {
-    const { nativePlatform, nativeAppVersion } = this.props;
+    const { isNative, nativePlatform, nativeAppVersion = 1 } = this.props;
 
     switch (nativePlatform) {
       case 'android':
         return parseInt(nativeAppVersion, 10) >= 32;
       case 'ios':
         return parseInt(nativeAppVersion, 10) >= 3;
+      case isNative && undefined:
+        return false;
       default:
         return true;
     }
@@ -114,8 +116,8 @@ class ColourSchemesView extends HideableView {
           </div>
         </div>
 
-        <div className="list-group">
-          { this.isHighContrastSupported() && <SwitchListGroupItem
+        { this.isHighContrastSupported() && <div className="list-group">
+          <SwitchListGroupItem
             id="colourSchemeHighContrast"
             value=""
             checked={ this.props.isHighContrast }
@@ -123,8 +125,8 @@ class ColourSchemesView extends HideableView {
             description="High contrast"
             onClick={ this.onHighContrastToggle }
             disabled={ !this.props.isOnline }
-          /> }
-        </div>
+          />
+        </div> }
 
         <div className="list-group">
           {_.map(this.props.schemes, scheme => this.makeItem(scheme))}
@@ -145,6 +147,7 @@ function select(state) {
     schemes: cs.schemes,
     isHighContrast: cs.isHighContrast,
     isOnline: state.device.isOnline,
+    isNative: state.ui.native,
     nativePlatform: state.app.native.platform,
     nativeAppVersion: state.app.native.version,
   };
