@@ -30,21 +30,23 @@ class TileServiceImpl @Inject()(
 
   override def getTileLayoutForUser(user: Option[User]): Seq[TileLayout] = db.withConnection {
     implicit c =>
-      val userTileLayout = user.map { u =>
-        tileLayoutDao.getTileLayoutForUser(u.usercode.string)
-      }.getOrElse(Seq.empty)
+      val userTileLayout = user
+        .map { u => tileLayoutDao.getTileLayoutForUser(u.usercode.string) }
+        .getOrElse(Nil)
 
-      if (userTileLayout.isEmpty) {
-        user match {
-          case Some(u) => getGroups(u).flatMap(group =>
-            tileLayoutDao.getDefaultTileLayoutForGroup(group)
-          ).toSeq
-          case None => tileLayoutDao.getDefaultTileLayoutForGroup("anonymous")
-        }
+      val userTiles = userTileLayout.map(_.tile).toSet
+
+      // use the default for any tiles that aren't mentioned in the
+      // user's layout. Usually a new tile we're introducing.
+      val defaults = {
+        val groups = user.map(getGroups).getOrElse(Seq("anonymous")).toSeq
+        val defaultLayouts = groups.flatMap(group =>
+          tileLayoutDao.getDefaultTileLayoutForGroup(group)
+        )
+        defaultLayouts.filterNot(tl => userTiles.contains(tl.tile))
       }
-      else {
-        userTileLayout
-      }
+
+      userTileLayout ++ defaults
   }
 
   override def saveTileLayoutForUser(user: User, tileLayout: Seq[TileLayout])(implicit context: AuditLogContext): Unit = {
