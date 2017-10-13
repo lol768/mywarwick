@@ -28,7 +28,6 @@ class ID7Layout extends React.PureComponent {
         authenticated: PropTypes.bool.isRequired,
       }).isRequired,
     }).isRequired,
-    native: PropTypes.bool,
     path: PropTypes.string.isRequired,
     zoomedTile: PropTypes.string,
     notificationsCount: PropTypes.number,
@@ -213,7 +212,6 @@ const select = state => ({
   schemeColour: state.ui.schemeColour,
   colourSchemesLoaded: state.colourSchemes.loaded,
   zoomedTile: state.ui.zoomedTile,
-  native: state.ui.native,
 });
 
 export default connect(select)(ID7Layout);
