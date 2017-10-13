@@ -18,7 +18,7 @@ try {
 /* eslint-enable */
 
 function isNative() {
-  return ('MyWarwickNative' in window);
+  return ('navigator' in window) && navigator.userAgent.indexOf('MyWarwick/') > -1;
 }
 
 const initialState = {

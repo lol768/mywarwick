@@ -91,17 +91,19 @@ class ColourSchemesView extends HideableView {
   // Check is based on version number for now - see NEWSTART-1150 for how we'd like to
   // do this in future.
   isHighContrastSupported() {
-    const { isNative, nativePlatform, nativeAppVersion = 1 } = this.props;
+    const { isNative, nativePlatform, nativeAppVersion } = this.props;
+
+    if (!isNative) {
+      return true;
+    }
 
     switch (nativePlatform) {
       case 'android':
         return parseInt(nativeAppVersion, 10) >= 32;
       case 'ios':
         return parseInt(nativeAppVersion, 10) >= 3;
-      case isNative && undefined:
-        return false;
       default:
-        return true;
+        return false;
     }
   }
 
