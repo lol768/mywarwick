@@ -130,6 +130,73 @@ export class TileOptionView extends React.PureComponent {
     this.setState({ currentPreferences }, this.saveTilePreferences);
   }
 
+  groupOptions(options) {
+    const canGroup = options.length === options.filter(e => e.group).length;
+    if (canGroup){
+      return _.groupBy(options, 'group');
+    } else {
+      return false;
+    }
+  }
+
+  makeList(tileOption, key) {
+    const options = tileOption.options;
+    const type = tileOption.type.toLowerCase();
+    const groupedOptions = this.groupOptions(options);
+
+    if (groupedOptions) {
+      return this.makeGroupedList(groupedOptions, type, key);
+    } else {
+      return this.makeUngroupedList(options, type, key);
+    }
+  }
+
+  makeGroupedList(groupedOptions, type, key) {
+    //TODO make grouped options
+    const groups = _.keys(groupedOptions);
+    return (
+      <div>
+        { _.map(groups, group => {
+          return (
+            <div>
+              <h1>{ group }</h1>
+              { this.makeUngroupedList(groupedOptions[group]) }
+            </div>
+          )
+        }) }
+      </div>
+    );
+
+    // return (
+    //   <div>
+    //     {_.mapKeys(groupedOptions, (options, group) => {
+    //       console.log("group is: " + group);
+    //       return (
+    //         <div>
+    //           <h1>{ group }</h1>
+    //           {/*{ this.makeUngroupedList(options, type, key) }*/}
+    //         </div>
+    //       );
+    //     })}
+    //   </div>
+    // );
+  }
+
+  makeUngroupedList(options, type, key) {
+    return _.map(options, (option) => {
+      switch (type) {
+        case 'array':
+          return this.makeCheckboxItem(option, key);
+        case 'string':
+          return this.makeRadioItem(option, key);
+        default:
+          return (
+            <div />
+          );
+      }
+    });
+  }
+
   render() {
     return (
       <div>
@@ -147,18 +214,7 @@ export class TileOptionView extends React.PureComponent {
               { tileOption.description }
             </p>
             <div key={ key } className="list-group">
-              { _.map(tileOption.options, (option) => {
-                switch (tileOption.type.toLowerCase()) {
-                  case 'array':
-                    return this.makeCheckboxItem(option, key);
-                  case 'string':
-                    return this.makeRadioItem(option, key);
-                  default:
-                    return (
-                      <div />
-                    );
-                }
-              }) }
+              { this.makeList(tileOption, key) }
             </div>
           </div>),
         ) }
