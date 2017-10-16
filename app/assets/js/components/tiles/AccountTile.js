@@ -164,9 +164,9 @@ export default class AccountTile extends TileContent {
             { (scd) && <li>Home department: { member.homeDepartment.name }</li> }
             <li>&nbsp;</li>
             { member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
-            <li>You’ve signed in with your WBS credentials, but My Warwick won’t work with them.
-              &nbsp;Please&nbsp;
-              <a role="button" tabIndex={0} className="text--dotted-underline" onClick={signOut}>
+            <li>
+              You’re signed in with your WBS account. To access all the features of My Warwick,
+              please <a role="button" tabIndex={0} className="text--dotted-underline" onClick={signOut}>
                 sign in with your ITS credentials instead.
               </a>
             </li> }
