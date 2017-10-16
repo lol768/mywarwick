@@ -84,11 +84,11 @@ class TileContentServiceImpl @Inject()(
                 case 200 => (tile.id, res.json)
                 case 404 => (tile.id, Json.obj())
                 case _ =>
-                  logger.error(s"Error requesting preferences for a tile, res: $res")
+                  logger.error(s"Error requesting preferences for tile ${tile.id}, res: $res")
                   (tile.id, Json.obj())
               }
             ).recover { case e =>
-              logger.error(s"Error requesting preferences for a tile: $e")
+              logger.error("Error requesting preferences for tile ${tile.id}", e)
               (tile.id, Json.obj())
             }
         }
