@@ -28,6 +28,7 @@ trait ActivityESServiceHelper {
     val publisher = "publisher"
     val resolved_users = "resolved_users"
     val audience_components = "audience_components"
+    val api = "api"
   }
 
   def indexNameToday(isNotification: Boolean = true, today: String = DateTime.now().toString("yyyy_MM")): String = {
@@ -89,6 +90,8 @@ trait ActivityESServiceHelper {
       builder.value(Nil)
     }
     builder.endArray()
+
+    builder.field(ESFieldName.api, activityDocument.api)
 
     builder.endObject()
     builder

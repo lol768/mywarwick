@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import wrapKeyboardSelect from '../../../keyboard-nav';
 import * as colourSchemes from '../../../state/colour-schemes';
 import HideableView from '../HideableView';
-// import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
+import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 
 class ColourSchemesView extends HideableView {
   static propTypes = {
@@ -87,6 +87,26 @@ class ColourSchemesView extends HideableView {
     );
   }
 
+  // Check whether the high contrast option is supported by the current app version.
+  // Check is based on version number for now - see NEWSTART-1150 for how we'd like to
+  // do this in future.
+  isHighContrastSupported() {
+    const { isNative, nativePlatform, nativeAppVersion } = this.props;
+
+    if (!isNative) {
+      return true;
+    }
+
+    switch (nativePlatform) {
+      case 'android':
+        return parseInt(nativeAppVersion, 10) >= 32;
+      case 'ios':
+        return parseInt(nativeAppVersion, 10) >= 3;
+      default:
+        return false;
+    }
+  }
+
   render() {
     return (
       <div>
@@ -98,7 +118,7 @@ class ColourSchemesView extends HideableView {
           </div>
         </div>
 
-        {/* <div className="list-group">
+        { this.isHighContrastSupported() && <div className="list-group">
           <SwitchListGroupItem
             id="colourSchemeHighContrast"
             value=""
@@ -108,7 +128,7 @@ class ColourSchemesView extends HideableView {
             onClick={ this.onHighContrastToggle }
             disabled={ !this.props.isOnline }
           />
-        </div>*/}
+        </div> }
 
         <div className="list-group">
           {_.map(this.props.schemes, scheme => this.makeItem(scheme))}
@@ -118,15 +138,20 @@ class ColourSchemesView extends HideableView {
   }
 }
 
-function select(store) {
+function select(state) {
+  const cs = state.colourSchemes;
+
   return {
-    fetching: store.colourSchemes.fetching,
-    failed: store.colourSchemes.failed,
-    fetched: store.colourSchemes.fetched,
-    chosen: store.colourSchemes.chosen,
-    schemes: store.colourSchemes.schemes,
-    isHighContrast: store.colourSchemes.isHighContrast,
-    isOnline: store.device.isOnline,
+    fetching: cs.fetching,
+    failed: cs.failed,
+    fetched: cs.fetched,
+    chosen: cs.chosen,
+    schemes: cs.schemes,
+    isHighContrast: cs.isHighContrast,
+    isOnline: state.device.isOnline,
+    isNative: state.ui.native,
+    nativePlatform: state.app.native.platform,
+    nativeAppVersion: state.app.native.version,
   };
 }
 

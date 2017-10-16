@@ -193,14 +193,6 @@ class SettingsView extends HideableView {
     }
   }
 
-  static getNativeAppVersion() {
-    if ('MyWarwickNative' in window && 'getAppVersion' in window.MyWarwickNative) {
-      return window.MyWarwickNative.getAppVersion();
-    }
-
-    return null;
-  }
-
   static canLaunchTour() {
     return 'MyWarwickNative' in window && 'launchTour' in window.MyWarwickNative;
   }
@@ -215,9 +207,8 @@ class SettingsView extends HideableView {
   }
 
   getVersionString() {
-    const { assetsRevision } = this.props;
+    const { assetsRevision, appVersion } = this.props;
     const userAgent = window.navigator.userAgent;
-    const appVersion = SettingsView.getNativeAppVersion();
 
     const versions = [];
 
@@ -667,6 +658,7 @@ const select = (state) => {
       total: notificationFilterTotal,
     },
     assetsRevision: state.app.assets.revision,
+    appVersion: state.app.native.version,
     isOnline: state.device.isOnline,
   };
 };

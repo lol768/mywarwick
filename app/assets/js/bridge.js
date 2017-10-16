@@ -14,6 +14,7 @@ import { postJsonWithCredentials } from './serverpipe';
 import { hasAuthoritativeAuthenticatedUser } from './state';
 import { Routes } from './components/AppRoot';
 import { navRequest } from './state/ui';
+import { loadNative } from './state/app';
 import { showFeedbackForm } from './userinfo';
 
 /**
@@ -74,6 +75,17 @@ export default function init(opts) {
 
     store.subscribe(update);
     update();
+
+    const userAgent = window.navigator.userAgent;
+    const appPlatform = userAgent.indexOf('Android') >= 0 ? 'android' : 'ios';
+
+    if (native.getAppVersion && native.getAppBuild) {
+      store.dispatch(loadNative({
+        platform: appPlatform,
+        version: native.getAppVersion(),
+        build: native.getAppBuild(),
+      }));
+    }
 
     if ('applicationCache' in window) {
       window.applicationCache.addEventListener('cached', setAppCached);

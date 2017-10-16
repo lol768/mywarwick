@@ -2,6 +2,13 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 
 export default class MasqueradeNotice extends React.PureComponent {
+  static propTypes = {
+    masqueradingAs: PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      usercode: PropTypes.string.isRequired,
+    }).isRequired,
+  };
+
   render() {
     return (
       <div className="top-page-notice masquerade">
@@ -12,9 +19,3 @@ export default class MasqueradeNotice extends React.PureComponent {
   }
 }
 
-MasqueradeNotice.propTypes = {
-  masqueradingAs: {
-    name: PropTypes.string.isRequired,
-    usercode: PropTypes.string.isRequired,
-  }.isRequired,
-};

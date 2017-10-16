@@ -35,7 +35,8 @@ class ActivityMuteDaoTest extends BaseSpec with OneStartAppPerSuite {
         createdAt = null,
         shouldNotify = true,
         audienceId = null,
-        publisherId = null
+        publisherId = null,
+        api = false
       )
 
       val mute = ActivityMuteSave(
@@ -91,7 +92,8 @@ class ActivityMuteDaoTest extends BaseSpec with OneStartAppPerSuite {
         createdAt = null,
         shouldNotify = true,
         audienceId = null,
-        publisherId = null
+        publisherId = null,
+        api = false
       )
 
       val mutes = dao.mutesForActivity(activity)
@@ -120,7 +122,8 @@ class ActivityMuteDaoTest extends BaseSpec with OneStartAppPerSuite {
         createdAt = null,
         shouldNotify = true,
         audienceId = null,
-        publisherId = null
+        publisherId = null,
+        api = false
       )
       dao.mutesForActivity(activity) must have length 1
 
@@ -159,7 +162,8 @@ class ActivityMuteDaoTest extends BaseSpec with OneStartAppPerSuite {
         createdAt = null,
         shouldNotify = true,
         audienceId = null,
-        publisherId = null
+        publisherId = null,
+        api = false
       )
       dao.mutesForActivity(activity) must have length 2
       dao.mutesForActivity(activity, Set(Usercode("cusfal"))) must have length 1
@@ -181,7 +185,8 @@ class ActivityMuteDaoTest extends BaseSpec with OneStartAppPerSuite {
       createdAt = null,
       shouldNotify = true,
       audienceId = null,
-      publisherId = null
+      publisherId = null,
+      api = false
     )
 
     val mute = ActivityMuteSave(
