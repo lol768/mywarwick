@@ -152,7 +152,6 @@ export class TileOptionView extends React.PureComponent {
   }
 
   makeGroupedList(groupedOptions, type, key) {
-    //TODO make grouped options
     const groups = _.keys(groupedOptions);
     return (
       <div>
@@ -160,26 +159,12 @@ export class TileOptionView extends React.PureComponent {
           return (
             <div>
               <h1>{ group }</h1>
-              { this.makeUngroupedList(groupedOptions[group]) }
+              { this.makeUngroupedList(groupedOptions[group], type, key) }
             </div>
           )
         }) }
       </div>
     );
-
-    // return (
-    //   <div>
-    //     {_.mapKeys(groupedOptions, (options, group) => {
-    //       console.log("group is: " + group);
-    //       return (
-    //         <div>
-    //           <h1>{ group }</h1>
-    //           {/*{ this.makeUngroupedList(options, type, key) }*/}
-    //         </div>
-    //       );
-    //     })}
-    //   </div>
-    // );
   }
 
   makeUngroupedList(options, type, key) {
