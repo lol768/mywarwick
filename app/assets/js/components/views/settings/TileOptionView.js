@@ -80,19 +80,19 @@ export class TileOptionView extends React.PureComponent {
     this.saveConfig(newPreferences);
   }
 
-  makeRadioItem(possibleChoice, groupName) {
-    const currentPreference = this.state.currentPreferences[groupName];
+  makeRadioItem(possibleChoice, sectionName) {
+    const currentPreference = this.state.currentPreferences[sectionName];
     const { tile, tileOptions } = this.props;
     const checked = currentPreference === possibleChoice.value;
 
     return (
       <RadioListGroupItem
-        key={ `${groupName}:${possibleChoice.value}` }
-        icon={tileOptions[groupName].icon || tile.icon}
+        key={ `${sectionName}:${possibleChoice.value}` }
+        icon={tileOptions[sectionName].icon || tile.icon}
         description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         onClick={ this.onRadioClick }
         checked={ checked }
-        name={ groupName }
+        name={ sectionName }
         value={ possibleChoice.value }
         disabled={ !this.props.isOnline }
         settingColour={ possibleChoice.colour || this.props.tile.colour }
@@ -100,22 +100,22 @@ export class TileOptionView extends React.PureComponent {
     );
   }
 
-  makeCheckboxItem(possibleChoice, groupName) {
-    const currentPreference = this.state.currentPreferences[groupName];
+  makeCheckboxItem(possibleChoice, sectionName) {
+    const currentPreference = this.state.currentPreferences[sectionName];
     const { tile, tileOptions } = this.props;
 
     const checked = currentPreference[possibleChoice.value];
 
     return (
       <SwitchListGroupItem
-        key={ `${groupName}:${possibleChoice.value}` }
-        id={ `${groupName}:${possibleChoice.value}` }
+        key={ `${sectionName}:${possibleChoice.value}` }
+        id={ `${sectionName}:${possibleChoice.value}` }
         value={ possibleChoice.value }
-        icon={tileOptions[groupName].icon || tile.icon}
+        icon={tileOptions[sectionName].icon || tile.icon}
         description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         onClick={ this.onCheckboxClick }
         checked={ checked }
-        name={ groupName }
+        name={ sectionName }
         disabled={ !this.props.isOnline }
         settingColour={ possibleChoice.colour || this.props.tile.colour }
       />
