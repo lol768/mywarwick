@@ -155,8 +155,10 @@ export class TileOptionView extends React.PureComponent {
     return (
       <div>
         {_.map(groups, group => (
-          <div>
-            <div className={'grouped-option-title'}>{_.upperCase(groupedOptions[group].groupName)}</div>
+          <div className={ 'grouped-options' } id={`grouped-options-${group}`}>
+            <div className={'grouped-option-title'} id={`grouped-option-title-${group}`}>
+              {_.upperCase(groupedOptions[group].groupName)}
+            </div>
             { this.makeUngroupedList(_.filter(groupedOptions[group], (v, k) => k !== 'groupName'), type, key) }
           </div>))}
       </div>
