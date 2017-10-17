@@ -130,40 +130,40 @@ export class TileOptionView extends React.PureComponent {
     this.setState({ currentPreferences }, this.saveTilePreferences);
   }
 
-  groupOptions(options) {
+  groupedOptions(options) {
     const canGroup = options.length === options.filter(e => e.group).length;
-    if (canGroup){
-      return _.groupBy(options, 'group');
-    } else {
-      return false;
-    }
+    return canGroup ? _.groupBy(options, 'group') : canGroup;
   }
 
   makeList(tileOption, key) {
     const options = tileOption.options;
     const type = tileOption.type.toLowerCase();
-    const groupedOptions = this.groupOptions(options);
+    const groupedOptions = this.groupedOptions(options);
     if (groupedOptions) {
       const groupNames = _.mapValues(_.groupBy(tileOption.groups, 'id'), v => v[0]);
-      _.forEach(groupedOptions, (v, k) => v.groupName = groupNames[k].name);
-      return this.makeGroupedList(groupedOptions, type, key);
-    } else {
-      return this.makeUngroupedList(options, type, key);
+      // _.forEach(groupedOptions, (v, k) => v.groupName = groupNames[k].name);
+      // const x = _.mapValues(groupedOptions, (v, k) => ({
+      //     ...v,
+      //     groupName: groupNames[k].name,
+      //   }));
+      return this.makeGroupedList(
+        _.mapValues(groupedOptions, (v, k) => ({
+          ...v,
+          groupName: groupNames[k].name,
+        })), type, key);
     }
+    return this.makeUngroupedList(options, type, key);
   }
 
   makeGroupedList(groupedOptions, type, key) {
     const groups = _.keys(groupedOptions);
     return (
       <div>
-        { _.map(groups, group => {
-          return (
-            <div>
-              <h1>{ groupedOptions[group].groupName }</h1>
-              { this.makeUngroupedList(groupedOptions[group], type, key) }
-            </div>
-          )
-        }) }
+        {_.map(groups, group => (
+          <div>
+            <h5 className={'grouped-option-title'}>{groupedOptions[group].groupName}</h5>
+            { this.makeUngroupedList(_.filter(groupedOptions[group], (v,k) => k !== "groupName"), type, key) }
+          </div>))}
       </div>
     );
   }
