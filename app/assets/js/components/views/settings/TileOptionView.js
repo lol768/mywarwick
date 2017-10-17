@@ -143,8 +143,9 @@ export class TileOptionView extends React.PureComponent {
     const options = tileOption.options;
     const type = tileOption.type.toLowerCase();
     const groupedOptions = this.groupOptions(options);
-
     if (groupedOptions) {
+      const groupNames = _.mapValues(_.groupBy(tileOption.groups, 'id'), v => v[0]);
+      _.forEach(groupedOptions, (v, k) => v.groupName = groupNames[k].name);
       return this.makeGroupedList(groupedOptions, type, key);
     } else {
       return this.makeUngroupedList(options, type, key);
@@ -158,7 +159,7 @@ export class TileOptionView extends React.PureComponent {
         { _.map(groups, group => {
           return (
             <div>
-              <h1>{ group }</h1>
+              <h1>{ groupedOptions[group].groupName }</h1>
               { this.makeUngroupedList(groupedOptions[group], type, key) }
             </div>
           )
