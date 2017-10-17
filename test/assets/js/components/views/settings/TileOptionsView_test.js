@@ -63,11 +63,11 @@ const propsWithGroup = {
       description: 'Description',
       groups: [
         {
-          id: 'group1',
+          id: 'radioGroup1',
           name: 'group1name',
         },
         {
-          id: 'group2',
+          id: 'radioGroup2',
           name: 'group2name'
         }
       ],
@@ -75,37 +75,59 @@ const propsWithGroup = {
         {
           name: 'Option 1',
           value: 'value1',
-          group: 'group1',
+          group: 'radioGroup1',
         },
         {
           name: 'Option 2',
           value: 'value2',
-          group: 'group1',
+          group: 'radioGroup1',
         },
         {
           name: 'Option 3',
           value: 'value3',
-          group: 'group2',
+          group: 'radioGroup2',
         },
         {
           name: 'Option 4',
           value: 'value4',
-          group: 'group2',
+          group: 'radioGroup2',
         },
       ],
       type: 'string',
     },
     checkboxOption: {
-      default: ['value1', 'value2'],
+      default: ['value1', 'value2', 'value3', 'value4'],
       description: 'Description',
+      groups: [
+        {
+          id: 'checkboxGroup1',
+          name: 'group1name',
+        },
+        {
+          id: 'checkboxGroup2',
+          name: 'group2name'
+        }
+      ],
       options: [
         {
           name: 'Option 1',
           value: 'value1',
+          group: 'checkboxGroup1',
         },
         {
           name: 'Option 2',
           value: 'value2',
+          group: 'checkboxGroup1',
+        },
+        {
+          name: 'Option 3',
+          value: 'value3',
+          group: 'checkboxGroup2',
+        },
+        {
+          name: 'Option 4',
+          value: 'value4',
+          group: 'checkboxGroup2',
         },
       ],
       type: 'array',
@@ -119,25 +141,33 @@ describe('Radio button', () => {
     expect(radios.findWhere(r => r.prop('name') === 'radioOption')).to.have.length(2);
     expect(radios.findWhere(r => r.prop('value') === 'value1')).to.have.length(1);
     expect(radios.findWhere(r => r.prop('value') === 'value1')).to.have.length(1);
+
   };
 
-  const checkRadioWithGroups = (radios) => {
-    expect(radios.findWhere(r => r.prop('name') === 'radioOption')).to.have.length(4);
-    expect(radios.findWhere(r => r.prop('value') === 'value1')).to.have.length(1);
-    expect(radios.findWhere(r => r.prop('value') === 'value1')).to.have.length(1);
-  };
+  it('should render ungrouped options if no group', () => {
+    const thisProps = _.cloneDeep(props);
+    thisProps.tileOptions.radioOption.default = '';
+    thisProps.tile.preferences = {};
+    const result = enzyme.shallow(<TileOptionView {...thisProps}  />);
+    const radios = result.find(RadioListGroupItem);
+    checkRadios(radios);
+    expect(result.find('div.grouped-option-title')).to.have.length(0);
+    expect(result.find('div.grouped-options')).to.have.length(0);
+  });
 
-  it('test', () => {
+  it('should render group information if available', () => {
     const thisProps = _.cloneDeep(propsWithGroup);
     thisProps.tileOptions.radioOption.default = '';
     thisProps.tile.preferences = {};
-
     const result = enzyme.shallow(<TileOptionView {...thisProps}  />);
     const radios = result.find(RadioListGroupItem);
-    checkRadioWithGroups(radios);
-    radios.find('[checked="true"]').forEach((input) =>
-      expect(input.props().checked).to.equal(false)
-    )
+    expect(radios.findWhere(r => r.prop('name') === 'radioOption')).to.have.length(4);
+    expect(result.find('div.grouped-option-title')).to.have.length(4);
+    expect(result.find('div.grouped-options')).to.have.length(4);
+    expect(result.find('#grouped-options-radioGroup1')).to.have.length(1);
+    expect(result.find('#grouped-options-radioGroup2')).to.have.length(1);
+    expect(result.find('#grouped-option-title-radioGroup1')).to.have.length(1);
+    expect(result.find('#grouped-option-title-radioGroup2')).to.have.length(1);
   });
 
   it('unselected if no preference (undefined) and no default', () => {
@@ -219,6 +249,33 @@ describe('Checkboxes', () => {
     expect(checkboxes.findWhere(r => r.prop('value') === 'value1')).to.have.length(1);
     expect(checkboxes.findWhere(r => r.prop('value') === 'value1')).to.have.length(1);
   };
+
+  it('should render as ungrouped options information if not supplied', () => {
+    const thisProps = _.cloneDeep(props);
+    thisProps.tileOptions.checkboxOption.default = [];
+    thisProps.tile.preferences = [];
+
+    const result = enzyme.shallow(<TileOptionView {...thisProps} />);
+    const checkboxes = result.find(SwitchListGroupItem);
+    checkCheckboxes(checkboxes);
+    expect(result.find('div.grouped-option-title')).to.have.length(0);
+    expect(result.find('div.grouped-options')).to.have.length(0);
+  });
+
+  it('should render group information if available', () => {
+    const thisProps = _.cloneDeep(propsWithGroup);
+    thisProps.tileOptions.checkboxOption.default = [];
+    thisProps.tile.preferences = [];
+    const result = enzyme.shallow(<TileOptionView {...thisProps}  />);
+    const checkboxes = result.find(SwitchListGroupItem);
+    expect(checkboxes.findWhere(r => r.prop('name') === 'checkboxOption')).to.have.length(4);
+    expect(result.find('div.grouped-option-title')).to.have.length(4);
+    expect(result.find('div.grouped-options')).to.have.length(4);
+    expect(result.find('#grouped-options-checkboxGroup1')).to.have.length(1);
+    expect(result.find('#grouped-options-checkboxGroup2')).to.have.length(1);
+    expect(result.find('#grouped-option-title-checkboxGroup1')).to.have.length(1);
+    expect(result.find('#grouped-option-title-checkboxGroup2')).to.have.length(1);
+  });
 
   it('unselected if no preference (undefined) and no default', () => {
     const thisProps = _.cloneDeep(props);
