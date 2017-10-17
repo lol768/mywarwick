@@ -48,6 +48,71 @@ const props = {
   },
 };
 
+const propsWithGroup = {
+  isOnline: true,
+  dispatch: () => {},
+  tile: {
+    id: 'foo',
+    title: 'Title',
+    colour: 0,
+    icon: 'cog',
+  },
+  tileOptions: {
+    radioOption: {
+      default: 'value1',
+      description: 'Description',
+      groups: [
+        {
+          id: 'group1',
+          name: 'group1name',
+        },
+        {
+          id: 'group2',
+          name: 'group2name'
+        }
+      ],
+      options: [
+        {
+          name: 'Option 1',
+          value: 'value1',
+          group: 'group1',
+        },
+        {
+          name: 'Option 2',
+          value: 'value2',
+          group: 'group1',
+        },
+        {
+          name: 'Option 3',
+          value: 'value3',
+          group: 'group2',
+        },
+        {
+          name: 'Option 4',
+          value: 'value4',
+          group: 'group2',
+        },
+      ],
+      type: 'string',
+    },
+    checkboxOption: {
+      default: ['value1', 'value2'],
+      description: 'Description',
+      options: [
+        {
+          name: 'Option 1',
+          value: 'value1',
+        },
+        {
+          name: 'Option 2',
+          value: 'value2',
+        },
+      ],
+      type: 'array',
+    }
+  },
+};
+
 describe('Radio button', () => {
 
   const checkRadios = (radios) => {
@@ -55,6 +120,25 @@ describe('Radio button', () => {
     expect(radios.findWhere(r => r.prop('value') === 'value1')).to.have.length(1);
     expect(radios.findWhere(r => r.prop('value') === 'value1')).to.have.length(1);
   };
+
+  const checkRadioWithGroups = (radios) => {
+    expect(radios.findWhere(r => r.prop('name') === 'radioOption')).to.have.length(4);
+    expect(radios.findWhere(r => r.prop('value') === 'value1')).to.have.length(1);
+    expect(radios.findWhere(r => r.prop('value') === 'value1')).to.have.length(1);
+  };
+
+  it('test', () => {
+    const thisProps = _.cloneDeep(propsWithGroup);
+    thisProps.tileOptions.radioOption.default = '';
+    thisProps.tile.preferences = {};
+
+    const result = enzyme.shallow(<TileOptionView {...thisProps}  />);
+    const radios = result.find(RadioListGroupItem);
+    checkRadioWithGroups(radios);
+    radios.find('[checked="true"]').forEach((input) =>
+      expect(input.props().checked).to.equal(false)
+    )
+  });
 
   it('unselected if no preference (undefined) and no default', () => {
     const thisProps = _.cloneDeep(props);
