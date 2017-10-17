@@ -80,6 +80,10 @@ export class TileOptionView extends React.PureComponent {
     this.saveConfig(newPreferences);
   }
 
+  getGroupName(sectionName, groupId) {
+    return _.keyBy(this.props.tileOptions[sectionName].groups, 'id')[groupId].name;
+  }
+
   makeRadioItem(possibleChoice, sectionName) {
     const currentPreference = this.state.currentPreferences[sectionName];
     const { tile, tileOptions } = this.props;
@@ -135,43 +139,36 @@ export class TileOptionView extends React.PureComponent {
     return canGroup ? _.groupBy(options, 'group') : canGroup;
   }
 
-  makeList(tileOption, key) {
+  makeList(tileOption, section) {
     const options = tileOption.options;
     const type = tileOption.type.toLowerCase();
     const groupedOptions = this.groupedOptions(options);
-    if (groupedOptions) {
-      const groupNames = _.mapValues(_.groupBy(tileOption.groups, 'id'), v => v[0]);
-      return this.makeGroupedList(
-        _.mapValues(groupedOptions, (v, k) => ({
-          ...v,
-          groupName: groupNames[k].name,
-        })), type, key);
-    }
-    return this.makeUngroupedList(options, type, key);
+    if (groupedOptions) return this.makeGroupedList(groupedOptions, type, section);
+    return this.makeUngroupedList(options, type, section);
   }
 
-  makeGroupedList(groupedOptions, type, key) {
+  makeGroupedList(groupedOptions, type, section) {
     const groups = _.keys(groupedOptions);
     return (
       <div>
         {_.map(groups, group => (
           <div className={ 'grouped-options' } id={`grouped-options-${group}`}>
             <div className={'grouped-option-title'} id={`grouped-option-title-${group}`}>
-              {_.upperCase(groupedOptions[group].groupName)}
+              {_.upperCase(this.getGroupName(section, group))}
             </div>
-            { this.makeUngroupedList(_.filter(groupedOptions[group], (v, k) => k !== 'groupName'), type, key) }
+            { this.makeUngroupedList(groupedOptions[group], type, section) }
           </div>))}
       </div>
     );
   }
 
-  makeUngroupedList(options, type, key) {
+  makeUngroupedList(options, type, section) {
     return _.map(options, (option) => {
       switch (type) {
         case 'array':
-          return this.makeCheckboxItem(option, key);
+          return this.makeCheckboxItem(option, section);
         case 'string':
-          return this.makeRadioItem(option, key);
+          return this.makeRadioItem(option, section);
         default:
           return (
             <div />
@@ -191,13 +188,13 @@ export class TileOptionView extends React.PureComponent {
           </div>
         </div>
 
-        { _.flatMap(this.props.tileOptions, (tileOption, key) =>
-          (<div key={ key }>
+        { _.flatMap(this.props.tileOptions, (tileOption, section) =>
+          (<div key={ section }>
             <p className="hint-text container-fluid">
               { tileOption.description }
             </p>
-            <div key={ key } className="list-group">
-              { this.makeList(tileOption, key) }
+            <div key={ section } className="list-group">
+              { this.makeList(tileOption, section) }
             </div>
           </div>),
         ) }
