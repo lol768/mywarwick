@@ -56,12 +56,16 @@ export class TileOptionView extends React.PureComponent {
 
     this.state = {
       currentPreferences,
-      groupNames: _.mapValues(this.props.tileOptions, v => _.keyBy(v.groups, 'id')),
+      groupNames: this.makeGroupNames(this.props),
     };
     this.saveConfig = this.saveConfig.bind(this);
     this.saveTilePreferences = _.debounce(this.saveTilePreferences.bind(this), 1000);
     this.onCheckboxClick = this.onCheckboxClick.bind(this);
     this.onRadioClick = this.onRadioClick.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({ groupNames: this.makeGroupNames(nextProps) });
   }
 
   onCheckboxClick(value, name) {
@@ -78,8 +82,11 @@ export class TileOptionView extends React.PureComponent {
       ...currentPref,
       [name]: value,
     };
-
     this.saveConfig(newPreferences);
+  }
+
+  makeGroupNames(props) {
+    return _.mapValues(props.tileOptions, v => _.keyBy(v.groups, 'id'));
   }
 
   makeRadioItem(possibleChoice, sectionName) {
