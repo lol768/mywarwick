@@ -56,7 +56,7 @@ export class TileOptionView extends React.PureComponent {
 
     this.state = {
       currentPreferences,
-      groupNames: _.mapValues(this.props.tileOptions, (v) => _.keyBy(v.groups, 'id')),
+      groupNames: _.mapValues(this.props.tileOptions, v => _.keyBy(v.groups, 'id')),
     };
     this.saveConfig = this.saveConfig.bind(this);
     this.saveTilePreferences = _.debounce(this.saveTilePreferences.bind(this), 1000);
