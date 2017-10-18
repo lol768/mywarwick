@@ -54,12 +54,18 @@ export class TileOptionView extends React.PureComponent {
       }
     });
 
-    this.state = { currentPreferences };
-
+    this.state = {
+      currentPreferences,
+      groupNames: this.makeGroupNames(this.props),
+    };
     this.saveConfig = this.saveConfig.bind(this);
     this.saveTilePreferences = _.debounce(this.saveTilePreferences.bind(this), 1000);
     this.onCheckboxClick = this.onCheckboxClick.bind(this);
     this.onRadioClick = this.onRadioClick.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({ groupNames: this.makeGroupNames(nextProps) });
   }
 
   onCheckboxClick(value, name) {
@@ -76,23 +82,26 @@ export class TileOptionView extends React.PureComponent {
       ...currentPref,
       [name]: value,
     };
-
     this.saveConfig(newPreferences);
   }
 
-  makeRadioItem(possibleChoice, groupName) {
-    const currentPreference = this.state.currentPreferences[groupName];
+  makeGroupNames(props) {
+    return _.mapValues(props.tileOptions, v => _.keyBy(v.groups, 'id'));
+  }
+
+  makeRadioItem(possibleChoice, sectionName) {
+    const currentPreference = this.state.currentPreferences[sectionName];
     const { tile, tileOptions } = this.props;
     const checked = currentPreference === possibleChoice.value;
 
     return (
       <RadioListGroupItem
-        key={ `${groupName}:${possibleChoice.value}` }
-        icon={tileOptions[groupName].icon || tile.icon}
+        key={ `${sectionName}:${possibleChoice.value}` }
+        icon={tileOptions[sectionName].icon || tile.icon}
         description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         onClick={ this.onRadioClick }
         checked={ checked }
-        name={ groupName }
+        name={ sectionName }
         value={ possibleChoice.value }
         disabled={ !this.props.isOnline }
         settingColour={ possibleChoice.colour || this.props.tile.colour }
@@ -100,22 +109,22 @@ export class TileOptionView extends React.PureComponent {
     );
   }
 
-  makeCheckboxItem(possibleChoice, groupName) {
-    const currentPreference = this.state.currentPreferences[groupName];
+  makeCheckboxItem(possibleChoice, sectionName) {
+    const currentPreference = this.state.currentPreferences[sectionName];
     const { tile, tileOptions } = this.props;
 
     const checked = currentPreference[possibleChoice.value];
 
     return (
       <SwitchListGroupItem
-        key={ `${groupName}:${possibleChoice.value}` }
-        id={ `${groupName}:${possibleChoice.value}` }
+        key={ `${sectionName}:${possibleChoice.value}` }
+        id={ `${sectionName}:${possibleChoice.value}` }
         value={ possibleChoice.value }
-        icon={tileOptions[groupName].icon || tile.icon}
+        icon={tileOptions[sectionName].icon || tile.icon}
         description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
         onClick={ this.onCheckboxClick }
         checked={ checked }
-        name={ groupName }
+        name={ sectionName }
         disabled={ !this.props.isOnline }
         settingColour={ possibleChoice.colour || this.props.tile.colour }
       />
@@ -130,6 +139,49 @@ export class TileOptionView extends React.PureComponent {
     this.setState({ currentPreferences }, this.saveTilePreferences);
   }
 
+  groupedOptions(options) {
+    const canGroup = options.length === options.filter(e => e.group).length;
+    return canGroup ? _.groupBy(options, 'group') : canGroup;
+  }
+
+  makeList(tileOption, section) {
+    const options = tileOption.options;
+    const type = tileOption.type.toLowerCase();
+    const groupedOptions = this.groupedOptions(options);
+    if (groupedOptions) return this.makeGroupedList(groupedOptions, type, section);
+    return this.makeUngroupedList(options, type, section);
+  }
+
+  makeGroupedList(groupedOptions, type, section) {
+    const groups = _.keys(groupedOptions);
+    return (
+      <div>
+        {_.map(groups, group => (
+          <div className={ 'grouped-options' } id={`grouped-options-${group}`}>
+            <div className={'grouped-option-title'} id={`grouped-option-title-${group}`}>
+              {_.upperCase(this.state.groupNames[section][group].name)}
+            </div>
+            { this.makeUngroupedList(groupedOptions[group], type, section) }
+          </div>))}
+      </div>
+    );
+  }
+
+  makeUngroupedList(options, type, section) {
+    return _.map(options, (option) => {
+      switch (type) {
+        case 'array':
+          return this.makeCheckboxItem(option, section);
+        case 'string':
+          return this.makeRadioItem(option, section);
+        default:
+          return (
+            <div />
+          );
+      }
+    });
+  }
+
   render() {
     return (
       <div>
@@ -141,24 +193,13 @@ export class TileOptionView extends React.PureComponent {
           </div>
         </div>
 
-        { _.flatMap(this.props.tileOptions, (tileOption, key) =>
-          (<div key={ key }>
+        { _.flatMap(this.props.tileOptions, (tileOption, section) =>
+          (<div key={ section }>
             <p className="hint-text container-fluid">
               { tileOption.description }
             </p>
-            <div key={ key } className="list-group">
-              { _.map(tileOption.options, (option) => {
-                switch (tileOption.type.toLowerCase()) {
-                  case 'array':
-                    return this.makeCheckboxItem(option, key);
-                  case 'string':
-                    return this.makeRadioItem(option, key);
-                  default:
-                    return (
-                      <div />
-                    );
-                }
-              }) }
+            <div key={ section } className="list-group">
+              { this.makeList(tileOption, section) }
             </div>
           </div>),
         ) }
