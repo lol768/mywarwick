@@ -145,14 +145,6 @@ export default class AgendaTile extends TileContent {
     return location.name;
   }
 
-  static hasLocation(event) {
-    if (_.isArray(event.location) && event.location.length === 0) {
-      return false;
-    }
-
-    return !!event.location;
-  }
-
   static renderSingleEvent(event) {
     if (!event) {
       return null;
@@ -169,7 +161,7 @@ export default class AgendaTile extends TileContent {
             <i className="fa fa-fw fa-calendar-check-o" />
             { event.title }
           </li>
-          { AgendaTile.hasLocation(event) &&
+          { !_.isEmpty(event.location) &&
           <li className="text-overflow-block">
             <i className="fa fa-fw fa-map-marker" />
             { AgendaTile.getLocationString(event.location) }
@@ -351,7 +343,7 @@ export class AgendaTileItem extends React.PureComponent {
   renderLocation() {
     const { location } = this.props;
 
-    if (!AgendaTile.hasLocation(this.props)) {
+    if (_.isEmpty(this.props.location)) {
       return null;
     }
 
