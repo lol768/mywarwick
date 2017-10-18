@@ -1,4 +1,4 @@
-import AudiencePicker from 'publish/components/AudiencePicker';
+import { AudiencePicker } from 'publish/components/AudiencePicker';
 import { RadioButton, Checkbox } from '../../../../app/assets/js/components/ui/Checkbox';
 import * as React from 'react';
 import * as enzyme from 'enzyme';
@@ -157,7 +157,7 @@ describe('AudiencePicker', () => {
       },
       deptSubsetOpts,
       locationOpts,
-      
+      audienceDidUpdate: () => {},
     };
 
     const mounted = enzyme.mount(<AudiencePicker {...props} />,  { context });
@@ -177,7 +177,7 @@ describe('AudiencePicker', () => {
       departments: {
         MU: 'Agriculture Department',
       },
-      
+      audienceDidUpdate: () => {},
     };
 
     const stateOne = {
@@ -207,7 +207,7 @@ describe('AudiencePicker', () => {
       departments: {
         MU: 'Agriculture Department',
       },
-      
+      audienceDidUpdate: () => {},
     };
 
     const newState = {

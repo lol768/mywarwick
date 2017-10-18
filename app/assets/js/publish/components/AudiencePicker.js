@@ -1,5 +1,6 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { Checkbox, RadioButton } from '../../components/ui/Checkbox';
 import { InputList, InputOptionsList } from './InputList';
 import MultilineTextInput from './MultilineTextInput';
@@ -11,17 +12,14 @@ import relationshipPicker from '../../publish/relationshipPicker';
 
 const ELLIPSIS = '…';
 
-export default class AudiencePicker extends React.PureComponent {
+export class AudiencePicker extends React.PureComponent {
   static propTypes = {
     formData: PropTypes.object,
     isGod: PropTypes.bool,
     departments: PropTypes.object,
     deptSubsetOpts: PropTypes.object,
     locationOpts: PropTypes.object,
-  };
-
-  static contextTypes = {
-    store: PropTypes.object.isRequired,
+    audienceDidUpdate: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
@@ -58,10 +56,7 @@ export default class AudiencePicker extends React.PureComponent {
   }
 
   componentWillUpdate(nextProps, nextState) {
-    this.context.store.dispatch({
-      type: 'AUDIENCE_UPDATE',
-      components: nextState,
-    });
+    this.props.audienceDidUpdate(nextState);
   }
 
   handleChange(value, type, path) {
@@ -352,3 +347,15 @@ export default class AudiencePicker extends React.PureComponent {
     );
   }
 }
+
+
+function mapDispatchToProps(dispatch) {
+  return ({
+    audienceDidUpdate: components => dispatch({
+      type: 'AUDIENCE_UPDATE',
+      components,
+    }),
+  });
+}
+
+export default connect(_, mapDispatchToProps)(AudiencePicker);
