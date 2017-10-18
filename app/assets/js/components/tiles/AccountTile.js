@@ -6,6 +6,7 @@ import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 import Hyperlink from '../ui/Hyperlink';
 import AccountPhoto from '../ui/AccountPhoto';
 import * as dateFormats from '../../dateFormats';
+import { signOut } from '../../userinfo';
 
 export default class AccountTile extends TileContent {
   static propTypes = {
@@ -22,6 +23,7 @@ export default class AccountTile extends TileContent {
       jobTitle: PropTypes.string,
       inactivationDate: PropTypes.string,
       phoneNumber: PropTypes.string,
+      userSource: PropTypes.string,
       studentCourseDetails: PropTypes.arrayOf(PropTypes.shape({
         course: PropTypes.shape({
           name: PropTypes.string.isRequired,
@@ -161,6 +163,13 @@ export default class AccountTile extends TileContent {
             { (scd) && <li>Year of study: { scd.levelCode }</li> }
             { (scd) && <li>Home department: { member.homeDepartment.name }</li> }
             <li>&nbsp;</li>
+            { member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
+            <li>
+              You’re signed in with your WBS account. To access all the features of My Warwick,
+              please <a role="button" tabIndex={0} className="text--dotted-underline" onClick={signOut}>
+                sign in with your ITS credentials instead.
+              </a>
+            </li> }
           </ul>
           { AccountTile.getLink() }
         </div>
