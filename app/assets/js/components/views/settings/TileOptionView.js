@@ -54,8 +54,10 @@ export class TileOptionView extends React.PureComponent {
       }
     });
 
-    this.state = { currentPreferences };
-
+    this.state = {
+      currentPreferences,
+      groupNames: _.mapValues(this.props.tileOptions, (v) => _.keyBy(v.groups, 'id')),
+    };
     this.saveConfig = this.saveConfig.bind(this);
     this.saveTilePreferences = _.debounce(this.saveTilePreferences.bind(this), 1000);
     this.onCheckboxClick = this.onCheckboxClick.bind(this);
@@ -78,10 +80,6 @@ export class TileOptionView extends React.PureComponent {
     };
 
     this.saveConfig(newPreferences);
-  }
-
-  getGroupName(sectionName, groupId) {
-    return _.keyBy(this.props.tileOptions[sectionName].groups, 'id')[groupId].name;
   }
 
   makeRadioItem(possibleChoice, sectionName) {
@@ -154,7 +152,7 @@ export class TileOptionView extends React.PureComponent {
         {_.map(groups, group => (
           <div className={ 'grouped-options' } id={`grouped-options-${group}`}>
             <div className={'grouped-option-title'} id={`grouped-option-title-${group}`}>
-              {_.upperCase(this.getGroupName(section, group))}
+              {_.upperCase(this.state.groupNames[section][group].name)}
             </div>
             { this.makeUngroupedList(groupedOptions[group], type, section) }
           </div>))}
