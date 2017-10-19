@@ -170,8 +170,8 @@ export function launch(userData) {
   persisted(
     'colourSchemes',
     colourSchemes.receive,
-    ({ chosen, schemes }) => ({ chosen, schemes }),
-    ({ chosen, schemes }) => ({ data: { chosen, schemes } }),
+    ({ chosen, schemes, isHighContrast }) => ({ chosen, schemes, isHighContrast }),
+    ({ chosen, schemes, isHighContrast }) => ({ data: { chosen, schemes, isHighContrast } }),
   ).then(() => store.dispatch(colourSchemes.loaded()));
   persisted(
     'ui',
