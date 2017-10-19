@@ -15,6 +15,7 @@ import ScrollRestore from '../ui/ScrollRestore';
 import GridSizingHelper from '../../GridSizingHelper';
 import { Routes } from '../AppRoot';
 import wrapKeyboardSelect from '../../keyboard-nav';
+import { pluralise } from '../../helpers';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -210,17 +211,23 @@ class MeView extends React.PureComponent {
               transitionEnterTimeout={500}
               transitionLeaveTimeout={300}
             >{ editing && hiddenTiles.length > 0 ?
-                <div
-                  key="add-tile-button"
-                  className="add-tile-button"
-                  onClick={this.onAdd}
-                  onKeyUp={this.onAdd}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <i className="fa fa-plus" />
+              <div
+                key="add-tile-button"
+                className="add-tile-button"
+                onClick={this.onAdd}
+                onKeyUp={this.onAdd}
+                role="button"
+                tabIndex={0}
+              >
+                <i className="fa fa-plus"/>
+                <div className="add-tile-button__text">
+                  <div className="num-hidden-tiles">{hiddenTiles.length}</div>
+                  <div>
+                    hidden<br/>{pluralise('tile', hiddenTiles.length)}
+                  </div>
                 </div>
-              : null }
+              </div>
+              : null}
             </ReactCSSTransitionGroup>
           </div>
         </div>
