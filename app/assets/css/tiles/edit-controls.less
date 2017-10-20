@@ -1,5 +1,5 @@
 .center-aligned-icon(@base-size, @font-size) {
-  @offset: @base-size / 2 - @font-size / 2;
+  @offset: (@base-size - @font-size) / 2;
   i {
     position: absolute;
     top: @offset;
@@ -10,6 +10,13 @@
     height: @font-size;
     width: @font-size;
     text-align: center;
+  }
+}
+
+.left-aligned-icon(@base-size, @font-size) {
+  .center-aligned-icon(@base-size, @font-size);
+  i {
+    left: (@base-size - @font-size) / 4;
   }
 }
 
@@ -113,15 +120,31 @@
     bottom: 60px;
     right: 25px;
     z-index: 200;
-    width: @base-size;
+    width: @base-size * 2;
     height: @base-size;
     background-color: #8c6e96;
     border-radius: @base-size / 2;
     position: absolute;
     box-shadow: rgba(0, 0, 0, 0.16) 0 3px 10px, rgba(0, 0, 0, 0.23) 0 3px 10px;
-    .center-aligned-icon(@base-size, @font-size);
+    .left-aligned-icon(@base-size, @font-size);
     .app.android & {
       bottom: 24px;
+    }
+    .add-tile-button__text {
+      width: @base-size * 2;
+      height: @base-size;
+      padding: @base-size / 4 0;
+      padding-left: @base-size * .55;
+      color: #f0f0f0;
+      line-height: 1;
+      font-size: @font-size / 2;
+      .num-hidden-tiles {
+        font-size: @font-size * 1.1;
+      }
+      div {
+        margin-left: 2px;
+        display: inline-block;
+      }
     }
   }
 }

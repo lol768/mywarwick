@@ -5,6 +5,7 @@ import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import Hyperlink from '../ui/Hyperlink';
 import TextTile from './TextTile';
 import { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
+import { pluralise } from '../../helpers';
 
 export default class LibraryTile extends TextTile {
   static supportedTileSizes() {
@@ -30,7 +31,7 @@ export default class LibraryTile extends TextTile {
     return (
       <span>
         <span className="tile__callout">
-          {`${length} ${this._pluralise(type, length)}`}
+          {`${length} ${pluralise(type, length)}`}
         </span>
       </span>
     );
@@ -40,7 +41,7 @@ export default class LibraryTile extends TextTile {
     const groupedItems = _.groupby(items, 'type');
     let text = '';
     _.forEach(groupedItems, (value, key) => {
-      text += `${value.length} ${this._pluralise(key, value.length)} `;
+      text += `${value.length} ${pluralise(key, value.length)} `;
     });
 
     const chunks = text.split(/\s+/);
@@ -135,7 +136,4 @@ export default class LibraryTile extends TextTile {
       </ReactCSSTransitionGroup>
     );
   }
-
-  _pluralise = (unit, len) => `${unit}${len === 1 ? '' : 's'}`;
 }
-
