@@ -236,7 +236,6 @@ export default class AccountTile extends TileContent {
   getLargeBody() {
     const member = this.props.content;
     const user = this.props.user;
-    const scd = AccountTile.getSCD(member);
 
     return (
       <div className="media">
