@@ -157,7 +157,7 @@ export default class AccountTile extends TileContent {
 
   static makeEndDate(member) {
     return AccountTile.makeLineItem(
-      member.inactivationDate,
+      AccountTile.realInactivationDate(member.inactivationDate),
       'fa-birthday-cake',
     );
   }
@@ -168,7 +168,7 @@ export default class AccountTile extends TileContent {
       return AccountTile.makeLineItem(
         `Route: ${scd.currentRoute.code.toUpperCase()} ${scd.currentRoute.name}`,
         'fa-map-o',
-      )
+      );
     }
     return null;
   }
@@ -212,7 +212,6 @@ export default class AccountTile extends TileContent {
         {AccountTile.makeEmail(member)}
         {AccountTile.makeUserid(member)}
         {AccountTile.makeUserType(member)}
-        {/*{AccountTile.getLink()}*/}
       </div>
     );
   }
