@@ -68,7 +68,7 @@ export default class AccountTile extends TileContent {
       if (date.isAfter(moment().add(1000, 'years'))) {
         return null;
       }
-      return <li>{ `Expected end date: ${dateFormats.formatDateMoment(date)}` }</li>;
+      return <li>{`Expected end date: ${dateFormats.formatDateMoment(date)}`}</li>;
     }
     return null;
   }
@@ -76,10 +76,10 @@ export default class AccountTile extends TileContent {
   static getMediaLeft(user) {
     return (
       <div className="media-left">
-        { user.photo && user.photo.url &&
-          <Hyperlink href="//photos.warwick.ac.uk/yourphoto">
-            <AccountPhoto user={ user } className="media-object media-object-img-fix" />
-          </Hyperlink>
+        {user.photo && user.photo.url &&
+        <Hyperlink href="//photos.warwick.ac.uk/yourphoto">
+          <AccountPhoto user={user} className="media-object media-object-img-fix"/>
+        </Hyperlink>
         }
       </div>
     );
@@ -100,19 +100,76 @@ export default class AccountTile extends TileContent {
     return false;
   }
 
+  static makeFullName(member) {
+    return AccountTile.makeLineItem(
+      member.fullName,
+      'fa-user-o'
+    );
+  }
+
+  static makeEmail(member) {
+    return AccountTile.makeLineItem(
+      member.email,
+      'fa-envelope-o'
+    );
+  }
+
+  static makeUserid(member) {
+    return AccountTile.makeLineItem(
+      `${member.userId}, ${member.universityId}`,
+      'fa-id-card-o'
+    );
+  }
+
+  static makeUserType(member) {
+    const scd = AccountTile.getSCD(member);
+    if (scd) {
+      return AccountTile.makeLineItem(
+        `${member.userType}, Course: ${scd.course.name}`,
+        'fa-university'
+      );
+    }
+    return AccountTile.makeLineItem(
+      `${member.userType}, ${ member.homeDepartment.name }`,
+      'fa-address-book-o'
+    );
+  }
+
+  static makeJobTitle(member) {
+    if (member.jobTitle) {
+      return AccountTile.makeLineItem(member.jobTitle, 'fa-id-badge');
+    }
+    return null;
+  }
+
+  static makePhone(member) {
+    if (member.phoneNumber) {
+      return AccountTile.makeLineItem(
+        member.phoneNumber,
+        'fa-phone'
+      );
+    }
+    return null;
+  }
+
+  static makeLineItem(content, icon) {
+    return (
+      <div className="text-overflow-block">
+        <i className={`fa ${icon}`}/>
+        {content}
+      </div>
+    );
+  }
+
   getSmallBody() {
     const member = this.props.content;
-    const scd = AccountTile.getSCD(member);
-
     return (
-      <div>
-        <div>{ member.fullName }</div>
-        <div>{ member.email }</div>
-        <div>{ `${member.userId}, ${member.universityId}` }</div>
-        <div>{member.userType}, {
-          scd ? `Course: ${scd.course.name}` : member.homeDepartment.name
-        }</div>
-        { AccountTile.getLink() }
+      <div className="account--tile">
+        {AccountTile.makeFullName(member)}
+        {AccountTile.makeEmail(member)}
+        {AccountTile.makeUserid(member)}
+        {AccountTile.makeUserType(member)}
+        {AccountTile.getLink()}
       </div>
     );
   }
@@ -120,19 +177,16 @@ export default class AccountTile extends TileContent {
   getWideBody() {
     const member = this.props.content;
     const user = this.props.user;
-    const scd = AccountTile.getSCD(member);
 
     return (
       <div className="media">
-        { AccountTile.getMediaLeft(user) }
-        <div className="media-body">
-          <div>{ member.fullName }</div>
-          <div>{ member.email }</div>
-          <div>{ `${member.userId}, ${member.universityId}` }</div>
-          <div>{member.userType}, {
-            scd ? `Course: ${scd.course.name}` : member.homeDepartment.name
-          }</div>
-          { AccountTile.getLink() }
+        {AccountTile.getMediaLeft(user)}
+        <div className="media-body account--tile">
+          {AccountTile.makeFullName(member)}
+          {AccountTile.makeEmail(member)}
+          {AccountTile.makeUserid(member)}
+          {AccountTile.makeUserType(member)}
+          {AccountTile.getLink()}
         </div>
       </div>
     );
@@ -145,33 +199,32 @@ export default class AccountTile extends TileContent {
 
     return (
       <div className="media">
-        { AccountTile.getMediaLeft(user) }
-        <div className="media-body">
+        {AccountTile.getMediaLeft(user)}
+        <div className="media-body account--tile">
           <ul className="list-unstyled">
-            <li>{ member.fullName }</li>
-            <li>{ member.email }</li>
-            <li>{ `${member.userId}, ${member.universityId}` }</li>
-            { (member.jobTitle) ? <li>{ member.jobTitle }</li> : null }
-            <li>{member.userType}, {
-              scd ? `Course: ${scd.course.name}` : member.homeDepartment.name
-            }</li>
-            { AccountTile.realInactivationDate(member.inactivationDate) }
-            { member.phoneNumber && <li><i className="fa fa-phone" /> { member.phoneNumber }</li> }
-            { (scd) &&
-              <li>Route: { scd.currentRoute.code.toUpperCase() } { scd.currentRoute.name }</li>
+            <li>{AccountTile.makeFullName(member)}</li>
+            <li>{AccountTile.makeEmail(member)}</li>
+            <li>{AccountTile.makeUserid(member)}</li>
+            <li>{AccountTile.makeJobTitle(member)}</li>
+            <li>{AccountTile.makeUserType(member)}</li>
+            {AccountTile.realInactivationDate(member.inactivationDate)}
+            <li>{AccountTile.makePhone(member)}</li>
+            {(scd) &&
+            <li>Route: {scd.currentRoute.code.toUpperCase()} {scd.currentRoute.name}</li>
             }
-            { (scd) && <li>Year of study: { scd.levelCode }</li> }
-            { (scd) && <li>Home department: { member.homeDepartment.name }</li> }
+            {(scd) && <li>Year of study: {scd.levelCode}</li>}
+            {(scd) && <li>Home department: {member.homeDepartment.name}</li>}
             <li>&nbsp;</li>
-            { member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
+            {member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
             <li>
               You’re signed in with your WBS account. To access all the features of My Warwick,
-              please <a role="button" tabIndex={0} className="text--dotted-underline" onClick={signOut}>
-                sign in with your ITS credentials instead.
-              </a>
-            </li> }
+              please <a role="button" tabIndex={0} className="text--dotted-underline"
+                        onClick={signOut}>
+              sign in with your ITS credentials instead.
+            </a>
+            </li>}
           </ul>
-          { AccountTile.getLink() }
+          {AccountTile.getLink()}
         </div>
       </div>
     );
