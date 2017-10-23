@@ -18,15 +18,21 @@
   }
 }
 
-.account--tile {
+.tile--account {
+
+  .media-left img {
+    max-height: 60px;
+    max-width: 60px;
+  }
+
   .fa {
     opacity: 0.5;
     margin-right: 4px;
-    width: 16px;
   }
-}
 
-.tile--account .media-left img {
-  max-height: 60px;
-  max-width: 60px;
+  .tile__body {
+    .tile--small&, .tile--wide& {
+      line-height: 1.6 !important;
+    }
+  }
 }
