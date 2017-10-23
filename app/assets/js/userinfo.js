@@ -59,7 +59,10 @@ export function showFeedbackForm(deviceDetails) {
       version: state.app.assets.revision,
     };
   }
-  const nativeAppVersion = SettingsView.getNativeAppVersion();
+  const nativeAppVersion =
+    ('MyWarwickNative' in window && 'getAppVersion' in window.MyWarwickNative) ?
+      window.MyWarwickNative.getAppVersion() : null;
+
   const buildVersion = (nativeAppVersion) ? { build: nativeAppVersion } : {};
   window.location = `${feedbackFormLocation}?${$.param(Object.assign(
     deviceDetails,
