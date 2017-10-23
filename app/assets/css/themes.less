@@ -115,7 +115,10 @@
     background-color: @transparent;
       .tile--zoomed .tile__header {
         & when (iscolor(@highContrastFallback)) {
-          background: fade(multiply(@highContrastFallback, @transparent), 80%);
+            background: fade(multiply(@baseColour, @transparent), 80%);
+          html.not-app& {
+            background: fade(multiply(@highContrastFallback, @transparent), 80%);
+          }
         }
         & when (@highContrastFallback = null) {
           background: @gradTh;
