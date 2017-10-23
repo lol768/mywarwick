@@ -68,7 +68,7 @@ export default class AccountTile extends TileContent {
       if (date.isAfter(moment().add(1000, 'years'))) {
         return null;
       }
-      return <li>{`Expected end date: ${dateFormats.formatDateMoment(date)}`}</li>;
+      return `Expected end date: ${dateFormats.formatDateMoment(date)}`;
     }
     return null;
   }
@@ -156,10 +156,13 @@ export default class AccountTile extends TileContent {
   }
 
   static makeEndDate(member) {
-    return AccountTile.makeLineItem(
-      AccountTile.realInactivationDate(member.inactivationDate),
-      'fa-birthday-cake',
-    );
+    if (member.inactivationDate) {
+      return AccountTile.makeLineItem(
+        AccountTile.realInactivationDate(member.inactivationDate),
+        'fa-birthday-cake',
+      );
+    }
+    return null;
   }
 
   static makeRoute(member) {
