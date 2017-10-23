@@ -84,6 +84,34 @@ describe('AgendaTile', () => {
     findChild(html, [0, 0, 3, 1]).should.equal('John Smith');
   });
 
+  it('renders an event with multiple locations when small', () => {
+    const content = {
+      items: [
+        {
+          ...ITEMS.firstEvent,
+          location: [
+            {
+              name: 'Location',
+            },
+            {
+              name: 'Location',
+            },
+            {
+              name: 'Location',
+            },
+          ]
+        }
+      ],
+    };
+
+    const html = renderAtMoment(<AgendaTile size="small" content={ content }/>, now);
+
+    findChild(html, [0, 0, 0, 1]).should.equal('Today 13:00–14:00');
+    findChild(html, [0, 0, 1, 1]).should.equal('First Event');
+    findChild(html, [0, 0, 2, 1]).should.equal('Location, Location, Location');
+    findChild(html, [0, 0, 3, 1]).should.equal('John Smith');
+  });
+
   it('renders an event with the start time only when start = end time', () => {
     const content = {
       items: [ ITEMS.secondEvent ]
@@ -339,5 +367,28 @@ describe('AgendaTileItem', () => {
     const link = locationInner.find(Hyperlink);
     link.childAt(0).text().should.equal('Heronbank');
     link.props().href.should.equal('https://campus.warwick.ac.uk/?slid=29129');
-  })
+  });
+
+  it('renders multiple locations', () => {
+    const props2 = {
+      ...props,
+      location: [
+        {
+          name: 'Location',
+        },
+        {
+          name: 'Location',
+        },
+        {
+          name: 'Location',
+        },
+      ],
+    };
+
+    const html = shallow(<AgendaTileItem zoomed={ true } { ...props2 } />);
+
+    const locationInner = html.find('.tile-list-item__location');
+    locationInner.hasClass('text--light').should.equal(true);
+    locationInner.contains('Location, Location, Location').should.equal(true);
+  });
 });
