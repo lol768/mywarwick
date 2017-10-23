@@ -7,7 +7,6 @@ import * as user from './state/user';
 import * as analytics from './analytics';
 import { fetchUserInfo, handleRedirects } from './userinfo-base';
 import { hasAuthoritativeAuthenticatedUser } from './state';
-import SettingsView from './components/views/SettingsView';
 
 export { fetchUserInfo } from './userinfo-base';
 
@@ -59,9 +58,7 @@ export function showFeedbackForm(deviceDetails) {
       version: state.app.assets.revision,
     };
   }
-  const nativeAppVersion =
-    ('MyWarwickNative' in window && 'getAppVersion' in window.MyWarwickNative) ?
-      window.MyWarwickNative.getAppVersion() : null;
+  const nativeAppVersion = state.app.native.version;
 
   const buildVersion = (nativeAppVersion) ? { build: nativeAppVersion } : {};
   window.location = `${feedbackFormLocation}?${$.param(Object.assign(
