@@ -113,9 +113,12 @@
 
   .colour-0, .colour-1, .colour-2, .colour-3 {
     background-color: @transparent;
-    & when (@highContrastFallback = null) {
       .tile--zoomed .tile__header {
-        background: @gradTh;
+        & when (iscolor(@highContrastFallback)) {
+          background: fade(multiply(@highContrastFallback, @transparent), 80%);
+        }
+        & when (@highContrastFallback = null) {
+          background: @gradTh;
       }
     }
   }
