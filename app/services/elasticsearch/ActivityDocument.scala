@@ -24,7 +24,9 @@ case class ActivityDocument(
   publisher: String = null,
   audienceComponents: Seq[String] = null,
   resolvedUsers: Seq[String] = null,
-  api: Boolean = false
+  api: Boolean = false,
+  created_at: DateTime = null,
+  created_by: String = null
 )
 
 object ActivityDocument {
@@ -50,7 +52,9 @@ object ActivityDocument {
         case e: Some[Seq[Usercode]] => e.map(_.map(_.string)).orNull
         case _ => serialiseResolvedUsers(activity.audienceId, audienceService)
       },
-      activity.api
+      activity.api,
+      activity.createdAt,
+      activity.createdBy.string
     )
   }
 
@@ -66,11 +70,13 @@ object ActivityDocument {
         hitMap.getOrElse(field.url, "-").toString,
         hitMap.getOrElse(field.text, "-").toString,
         hitMap.getOrElse(field.replaced_by, "-").toString,
-        DateTime.parse(hitMap.getOrElse(field.published_at.toString, 0).toString), // TODO test if this is right
+        hitMap.get(field.published_at).map(_.toString).map(DateTime.parse).orNull,
         hitMap.getOrElse(field.publisher, "-").toString,
         hitMap.getOrElse(field.audience_components, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
         hitMap.getOrElse(field.resolved_users, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
-        Boolean.unbox(hitMap.getOrElse(field.api, Boolean.box(false)))
+        Boolean.unbox(hitMap.getOrElse(field.api, Boolean.box(false))),
+        hitMap.get(field.created_at).map(_.toString).map(DateTime.parse).orNull,
+        hitMap.getOrElse(field.created_at, "-").toString
       )
     })
   }
