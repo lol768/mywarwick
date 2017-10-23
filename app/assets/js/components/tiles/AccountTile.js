@@ -155,10 +155,50 @@ export default class AccountTile extends TileContent {
     return null;
   }
 
+  static makeEndDate(member) {
+    return AccountTile.makeLineItem(
+      member.inactivationDate,
+      'fa-birthday-cake',
+    );
+  }
+
+  static makeRoute(member) {
+    const scd = AccountTile.getSCD(member);
+    if (scd) {
+      return AccountTile.makeLineItem(
+        `Route: ${scd.currentRoute.code.toUpperCase()} ${scd.currentRoute.name}`,
+        'fa-map-o',
+      )
+    }
+    return null;
+  }
+
+  static makeYearOfStudy(member) {
+    const scd = AccountTile.getSCD(member);
+    if (scd) {
+      return AccountTile.makeLineItem(
+        `Year of study: ${scd.levelCode}`,
+        'fa-calendar-o',
+      );
+    }
+    return null;
+  }
+
+  static makeHomeDepartment(member) {
+    const scd = AccountTile.getSCD(member);
+    if (scd) {
+      return AccountTile.makeLineItem(
+        `Home department: ${member.homeDepartment.name}`,
+        'fa-home',
+      );
+    }
+    return null;
+  }
+
   static makeLineItem(content, icon) {
     return (
       <div className="text-overflow-block">
-        <i className={`fa ${icon}`} />
+        <i className={`fa fa-fw ${icon}`} />
         { content }
       </div>
     );
@@ -167,12 +207,12 @@ export default class AccountTile extends TileContent {
   getSmallBody() {
     const member = this.props.content;
     return (
-      <div className="account--tile">
+      <div>
         {AccountTile.makeFullName(member)}
         {AccountTile.makeEmail(member)}
         {AccountTile.makeUserid(member)}
         {AccountTile.makeUserType(member)}
-        {AccountTile.getLink()}
+        {/*{AccountTile.getLink()}*/}
       </div>
     );
   }
@@ -209,13 +249,11 @@ export default class AccountTile extends TileContent {
             <li>{AccountTile.makeUserid(member)}</li>
             <li>{AccountTile.makeJobTitle(member)}</li>
             <li>{AccountTile.makeUserType(member)}</li>
-            {AccountTile.realInactivationDate(member.inactivationDate)}
+            <li>{AccountTile.makeEndDate(member)}</li>
             <li>{AccountTile.makePhone(member)}</li>
-            {(scd) &&
-            <li>Route: {scd.currentRoute.code.toUpperCase()} {scd.currentRoute.name}</li>
-            }
-            {(scd) && <li>Year of study: {scd.levelCode}</li>}
-            {(scd) && <li>Home department: {member.homeDepartment.name}</li>}
+            <li>{AccountTile.makeRoute(member)}</li>
+            <li>{AccountTile.makeYearOfStudy(member)}</li>
+            <li>{AccountTile.makeHomeDepartment(member)}</li>
             <li>&nbsp;</li>
             {member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
             <li>
