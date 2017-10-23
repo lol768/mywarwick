@@ -88,7 +88,6 @@ object ActivityDocument {
           s"${simpleClassName(e)}:${e.deptCode}:${subset.entryName}"
         })
         case e: Audience.Component => Seq(simpleClassName(e))
-        case _ => Nil
       }
       case _ => Nil
     }
