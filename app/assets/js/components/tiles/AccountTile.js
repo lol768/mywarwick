@@ -78,7 +78,7 @@ export default class AccountTile extends TileContent {
       <div className="media-left">
         {user.photo && user.photo.url &&
         <Hyperlink href="//photos.warwick.ac.uk/yourphoto">
-          <AccountPhoto user={user} className="media-object media-object-img-fix"/>
+          <AccountPhoto user={user} className="media-object media-object-img-fix" />
         </Hyperlink>
         }
       </div>
@@ -103,21 +103,21 @@ export default class AccountTile extends TileContent {
   static makeFullName(member) {
     return AccountTile.makeLineItem(
       member.fullName,
-      'fa-user-o'
+      'fa-user-o',
     );
   }
 
   static makeEmail(member) {
     return AccountTile.makeLineItem(
       member.email,
-      'fa-envelope-o'
+      'fa-envelope-o',
     );
   }
 
   static makeUserid(member) {
     return AccountTile.makeLineItem(
       `${member.userId}, ${member.universityId}`,
-      'fa-id-card-o'
+      'fa-id-card-o',
     );
   }
 
@@ -126,18 +126,21 @@ export default class AccountTile extends TileContent {
     if (scd) {
       return AccountTile.makeLineItem(
         `${member.userType}, Course: ${scd.course.name}`,
-        'fa-university'
+        'fa-university',
       );
     }
     return AccountTile.makeLineItem(
-      `${member.userType}, ${ member.homeDepartment.name }`,
-      'fa-address-book-o'
+      `${member.userType}, ${member.homeDepartment.name}`,
+      'fa-address-book-o',
     );
   }
 
   static makeJobTitle(member) {
     if (member.jobTitle) {
-      return AccountTile.makeLineItem(member.jobTitle, 'fa-id-badge');
+      return AccountTile.makeLineItem(
+        member.jobTitle,
+        'fa-id-badge',
+      );
     }
     return null;
   }
@@ -146,7 +149,7 @@ export default class AccountTile extends TileContent {
     if (member.phoneNumber) {
       return AccountTile.makeLineItem(
         member.phoneNumber,
-        'fa-phone'
+        'fa-phone',
       );
     }
     return null;
@@ -155,8 +158,8 @@ export default class AccountTile extends TileContent {
   static makeLineItem(content, icon) {
     return (
       <div className="text-overflow-block">
-        <i className={`fa ${icon}`}/>
-        {content}
+        <i className={`fa ${icon}`} />
+        { content }
       </div>
     );
   }
@@ -177,7 +180,6 @@ export default class AccountTile extends TileContent {
   getWideBody() {
     const member = this.props.content;
     const user = this.props.user;
-
     return (
       <div className="media">
         {AccountTile.getMediaLeft(user)}
@@ -218,10 +220,15 @@ export default class AccountTile extends TileContent {
             {member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
             <li>
               You’re signed in with your WBS account. To access all the features of My Warwick,
-              please <a role="button" tabIndex={0} className="text--dotted-underline"
-                        onClick={signOut}>
-              sign in with your ITS credentials instead.
-            </a>
+              please
+              <a
+                role="button"
+                tabIndex={0}
+                className="text--dotted-underline"
+                onClick={signOut}
+              >
+                sign in with your ITS credentials instead.
+              </a>
             </li>}
           </ul>
           {AccountTile.getLink()}
