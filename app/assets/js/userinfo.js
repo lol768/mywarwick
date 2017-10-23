@@ -58,7 +58,7 @@ export function showFeedbackForm(deviceDetails) {
       version: state.app.assets.revision,
     };
   }
-  const nativeAppVersion = state.app.native.version;
+  const nativeAppVersion = state !== undefined ? state.app.native.version : null;
 
   const buildVersion = (nativeAppVersion) ? { build: nativeAppVersion } : {};
   window.location = `${feedbackFormLocation}?${$.param(Object.assign(
