@@ -41,6 +41,7 @@ object Fixtures {
       replacedBy = None,
       publishedAt = activity.publishedAt.getOrElse(DateTime.now),
       createdAt = DateTime.now,
+      createdBy = activity.changedBy,
       shouldNotify = activity.shouldNotify,
       api = false
     )
