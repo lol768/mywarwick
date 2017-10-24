@@ -156,9 +156,10 @@ export default class AccountTile extends TileContent {
   }
 
   static makeEndDate(member) {
-    if (member.inactivationDate) {
+    const date = AccountTile.realInactivationDate(member.inactivationDate);
+    if (date) {
       return AccountTile.makeLineItem(
-        AccountTile.realInactivationDate(member.inactivationDate),
+        date,
         'fa-birthday-cake',
       );
     }
@@ -200,22 +201,22 @@ export default class AccountTile extends TileContent {
 
   static makeLineItem(content, icon) {
     return (
-      <div className="text-overflow-block">
+      <li className="text-overflow-block">
         <i className={`fa fa-fw ${icon}`} />
         { content }
-      </div>
+      </li>
     );
   }
 
   getSmallBody() {
     const member = this.props.content;
     return (
-      <div>
+      <ul className="list-unstyled">
         {AccountTile.makeFullName(member)}
         {AccountTile.makeEmail(member)}
         {AccountTile.makeUserid(member)}
         {AccountTile.makeUserType(member)}
-      </div>
+      </ul>
     );
   }
 
@@ -225,12 +226,14 @@ export default class AccountTile extends TileContent {
     return (
       <div className="media">
         {AccountTile.getMediaLeft(user)}
-        <div className="media-body account--tile">
-          {AccountTile.makeFullName(member)}
-          {AccountTile.makeEmail(member)}
-          {AccountTile.makeUserid(member)}
-          {AccountTile.makeUserType(member)}
-          {AccountTile.getLink()}
+        <div className="media-body">
+          <ul className="list-unstyled">
+            {AccountTile.makeFullName(member)}
+            {AccountTile.makeEmail(member)}
+            {AccountTile.makeUserid(member)}
+            {AccountTile.makeUserType(member)}
+            {AccountTile.getLink()}
+          </ul>
         </div>
       </div>
     );
@@ -243,18 +246,18 @@ export default class AccountTile extends TileContent {
     return (
       <div className="media">
         {AccountTile.getMediaLeft(user)}
-        <div className="media-body account--tile">
+        <div className="media-body">
           <ul className="list-unstyled">
-            <li>{AccountTile.makeFullName(member)}</li>
-            <li>{AccountTile.makeEmail(member)}</li>
-            <li>{AccountTile.makeUserid(member)}</li>
-            <li>{AccountTile.makeJobTitle(member)}</li>
-            <li>{AccountTile.makeUserType(member)}</li>
-            <li>{AccountTile.makeEndDate(member)}</li>
-            <li>{AccountTile.makePhone(member)}</li>
-            <li>{AccountTile.makeRoute(member)}</li>
-            <li>{AccountTile.makeYearOfStudy(member)}</li>
-            <li>{AccountTile.makeHomeDepartment(member)}</li>
+            {AccountTile.makeFullName(member)}
+            {AccountTile.makeEmail(member)}
+            {AccountTile.makeUserid(member)}
+            {AccountTile.makeJobTitle(member)}
+            {AccountTile.makeUserType(member)}
+            {AccountTile.makeEndDate(member)}
+            {AccountTile.makePhone(member)}
+            {AccountTile.makeRoute(member)}
+            {AccountTile.makeYearOfStudy(member)}
+            {AccountTile.makeHomeDepartment(member)}
             <li>&nbsp;</li>
             {member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
             <li>
