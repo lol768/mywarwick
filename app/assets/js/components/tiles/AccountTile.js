@@ -216,6 +216,7 @@ export default class AccountTile extends TileContent {
         {AccountTile.makeEmail(member)}
         {AccountTile.makeUserid(member)}
         {AccountTile.makeUserType(member)}
+        {AccountTile.getLink()}
       </ul>
     );
   }
