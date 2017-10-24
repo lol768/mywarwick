@@ -1,8 +1,14 @@
-import AudiencePicker from 'publish/components/AudiencePicker';
+import { AudiencePicker } from 'publish/components/AudiencePicker';
 import { RadioButton, Checkbox } from '../../../../app/assets/js/components/ui/Checkbox';
 import * as React from 'react';
 import * as enzyme from 'enzyme';
 import _ from 'lodash-es';
+
+const context = {
+  store: {
+    dispatch: () => {},
+  },
+};
 
 describe('AudiencePicker', () => {
 
@@ -15,6 +21,7 @@ describe('AudiencePicker', () => {
       departments: {
         FU: 'Fun Department',
       },
+      
     };
 
     const shallow = enzyme.shallow(<AudiencePicker {...props} />);
@@ -39,6 +46,7 @@ describe('AudiencePicker', () => {
         MU: 'Agriculture Department',
         PU: 'Sewage Department',
       },
+      
     };
 
     const shallow = enzyme.shallow(<AudiencePicker {...props} />);
@@ -64,6 +72,7 @@ describe('AudiencePicker', () => {
         MU: 'Agriculture Department',
         PU: 'Sewage Department',
       },
+      
     };
     const shallow = enzyme.shallow(<AudiencePicker {...props}/>);
 
@@ -117,6 +126,7 @@ describe('AudiencePicker', () => {
       },
       deptSubsetOpts,
       locationOpts,
+      
     };
 
     const html = enzyme.render(<form><AudiencePicker {...props} /></form>);
@@ -147,9 +157,10 @@ describe('AudiencePicker', () => {
       },
       deptSubsetOpts,
       locationOpts,
+      audienceDidUpdate: () => {},
     };
 
-    const mounted = enzyme.mount(<AudiencePicker {...props} />);
+    const mounted = enzyme.mount(<AudiencePicker {...props} />,  { context });
     const btnOne = mounted.find(RadioButton).at(1);
     expect(btnOne.children()).to.have.length(1);
 
@@ -166,6 +177,7 @@ describe('AudiencePicker', () => {
       departments: {
         MU: 'Agriculture Department',
       },
+      audienceDidUpdate: () => {},
     };
 
     const stateOne = {
@@ -178,7 +190,7 @@ describe('AudiencePicker', () => {
       audience: { department: { groups: { modules: undefined } } }
     };
 
-    const shallow = enzyme.shallow(<AudiencePicker {...props} />);
+    const shallow = enzyme.shallow(<AudiencePicker {...props} />,  { context });
 
     shallow.setState(stateOne);
     expect(shallow.find(Checkbox).find({ value: 'modules' }).first().prop('isChecked')).to.eql(false);
@@ -195,6 +207,7 @@ describe('AudiencePicker', () => {
       departments: {
         MU: 'Agriculture Department',
       },
+      audienceDidUpdate: () => {},
     };
 
     const newState = {
@@ -203,7 +216,7 @@ describe('AudiencePicker', () => {
       },
     };
 
-    const shallow = enzyme.shallow(<AudiencePicker {...props} />);
+    const shallow = enzyme.shallow(<AudiencePicker {...props} />,  { context });
 
     expect(shallow.find('.list-group').at(1).find(RadioButton).first().prop('isChecked')).to.eql(true);
     expect(shallow.find('.list-group').at(1).find(RadioButton).at(1).prop('isChecked')).to.eql(false);
