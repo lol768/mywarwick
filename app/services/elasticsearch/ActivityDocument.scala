@@ -2,9 +2,9 @@ package services.elasticsearch
 
 import java.util
 
-import models.Activity
-import models.Audience.{DepartmentAudience, ModuleAudience, UsercodesAudience, WebGroupAudience}
+import models.Audience._
 import models.publishing.Publisher
+import models.{Activity, Audience}
 import org.elasticsearch.action.search.SearchResponse
 import org.joda.time.DateTime
 import services.{AudienceService, PublisherService}
@@ -90,13 +90,14 @@ object ActivityDocument {
 
     audienceId match {
       case Some(id: String) => audienceService.getAudience(id).components.flatMap {
-        case e: UsercodesAudience => Seq(s"${simpleClassName(e)}")
         case e: WebGroupAudience => Seq(s"${simpleClassName(e)}:${e.groupName.string}")
         case e: ModuleAudience => Seq(s"${simpleClassName(e)}:${e.moduleCode}")
+        case e: SeminarGroupAudience => Seq(s"${simpleClassName(e)}:${e.groupId}")
+        case e: RelationshipAudience => Seq(s"${simpleClassName(e)}:${e.relationshipType}:${e.agentId.string}")
         case e: DepartmentAudience => e.subset.map(subset => {
           s"${simpleClassName(e)}:${e.deptCode}:${subset.entryName}"
         })
-        case _ => Nil
+        case e: Audience.Component => Seq(simpleClassName(e))
       }
       case _ => Nil
     }
