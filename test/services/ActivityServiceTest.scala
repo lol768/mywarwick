@@ -12,7 +12,7 @@ import org.scalatest.mockito.MockitoSugar
 import services.ActivityError.{InvalidTagValue, _}
 import services.dao._
 import services.job.PublishActivityJob
-import warwick.sso.Usercode
+import warwick.sso.{UserLookupService, Usercode}
 
 import scala.util.Try
 
@@ -26,6 +26,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
     val audienceService: AudienceService = mock[AudienceService]
     val audienceDao: AudienceDao = mock[AudienceDao]
     val activityMuteDao: ActivityMuteDao = mock[ActivityMuteDao]
+    val userLookupService: UserLookupService = mock[UserLookupService]
     val scheduler = new MockSchedulerService()
 
     val service = new ActivityServiceImpl(
@@ -37,7 +38,8 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       audienceDao,
       activityRecipientDao,
       activityMuteDao,
-      scheduler
+      scheduler,
+      userLookupService
     )
 
     when(activityTypeService.isValidActivityType(Matchers.any())).thenReturn(true)
