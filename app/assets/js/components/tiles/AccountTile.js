@@ -48,13 +48,15 @@ export default class AccountTile extends TileContent {
     return true;
   }
 
-  static getLink() {
+  static getLink(member) {
     return (
-      <div className="bottom-right">
+      <div>
+        {member.fullName}&nbsp;
         <Hyperlink href="//warwick.ac.uk/myaccount" className="text--dotted-underline">
-          Account settings
+          (Settings)
         </Hyperlink>
       </div>
+
     );
   }
 
@@ -102,7 +104,7 @@ export default class AccountTile extends TileContent {
 
   static makeFullName(member) {
     return AccountTile.makeLineItem(
-      member.fullName,
+      AccountTile.getLink(member),
       'fa-user-o',
     );
   }
@@ -201,8 +203,8 @@ export default class AccountTile extends TileContent {
 
   static makeLineItem(content, icon) {
     return (
-      <li className="text-overflow-block">
-        <i className={`fa fa-fw ${icon}`} />
+      <li>
+        <i className={`fa fa-li fa-fw ${icon}`} />
         { content }
       </li>
     );
@@ -211,12 +213,11 @@ export default class AccountTile extends TileContent {
   getSmallBody() {
     const member = this.props.content;
     return (
-      <ul className="list-unstyled">
+      <ul className="list-unstyled fa-ul">
         {AccountTile.makeFullName(member)}
         {AccountTile.makeEmail(member)}
         {AccountTile.makeUserid(member)}
         {AccountTile.makeUserType(member)}
-        {AccountTile.getLink()}
       </ul>
     );
   }
@@ -228,12 +229,11 @@ export default class AccountTile extends TileContent {
       <div className="media">
         {AccountTile.getMediaLeft(user)}
         <div className="media-body">
-          <ul className="list-unstyled">
+          <ul className="list-unstyled fa-ul">
             {AccountTile.makeFullName(member)}
             {AccountTile.makeEmail(member)}
             {AccountTile.makeUserid(member)}
             {AccountTile.makeUserType(member)}
-            {AccountTile.getLink()}
           </ul>
         </div>
       </div>
@@ -248,7 +248,7 @@ export default class AccountTile extends TileContent {
       <div className="media">
         {AccountTile.getMediaLeft(user)}
         <div className="media-body">
-          <ul className="list-unstyled">
+          <ul className="list-unstyled fa-ul">
             {AccountTile.makeFullName(member)}
             {AccountTile.makeEmail(member)}
             {AccountTile.makeUserid(member)}
@@ -274,7 +274,6 @@ export default class AccountTile extends TileContent {
               </a>
             </li>}
           </ul>
-          {AccountTile.getLink()}
         </div>
       </div>
     );
