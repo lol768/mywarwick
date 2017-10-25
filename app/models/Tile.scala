@@ -10,7 +10,7 @@ case class Tile(
   fetchUrl: Option[String],
   title: String,
   icon: Option[String],
-  timeout: Option[Int]
+  timeout: Int
 )
 
 object Tile {

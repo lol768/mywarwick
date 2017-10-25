@@ -29,19 +29,15 @@ import scala.util.Try
 
 object TileContentService {
 
-  val defaultConnectTimeout: FiniteDuration = 5.seconds
   val defaultSocketTimeout: FiniteDuration = 5.seconds
 
-  val defaultRequestConfig: RequestConfig = RequestConfig.custom()
-    .setConnectTimeout(defaultConnectTimeout.toMillis.toInt)
-    .setSocketTimeout(defaultSocketTimeout.toMillis.toInt)
-    .build()
+  val defaultRequestConfig: RequestConfig = RequestConfig
+    .custom()
+    .setSocketTimeout(defaultSocketTimeout.toMillis.toInt).build()
 
-  def getRequestConfigForTile(tileInstance: TileInstance): Option[RequestConfig] = {
-    tileInstance.tile.timeout.map {
-      case timeout: Int => RequestConfig.custom().setConnectTimeout(timeout).build()
-      case _ => defaultRequestConfig
-    }
+
+  def getRequestConfigForTile(tileInstance: TileInstance): RequestConfig = {
+    RequestConfig.custom().setConnectTimeout(tileInstance.tile.timeout).build()
   }
 
 }
@@ -67,6 +63,7 @@ class TileContentServiceImpl @Inject()(
 
   // TODO inject a client properly
   val client: CloseableHttpClient = HttpClientBuilder.create()
+    .setDefaultRequestConfig(defaultRequestConfig)
     .setMaxConnTotal(250)
     .setMaxConnPerRoute(100)
     .build()
@@ -95,9 +92,9 @@ class TileContentServiceImpl @Inject()(
                   (tile.id, Json.obj())
               }
             ).recover { case e =>
-              logger.error("Error requesting preferences for tile ${tile.id}", e)
-              (tile.id, Json.obj())
-            }
+            logger.error("Error requesting preferences for tile ${tile.id}", e)
+            (tile.id, Json.obj())
+          }
         }
       }.getOrElse(Future.successful((tile.id, Json.obj())))
     })
@@ -116,7 +113,7 @@ class TileContentServiceImpl @Inject()(
         val serviceName = tileInstance.tile.title.toLowerCase
 
         val result = Try {
-          request.setConfig(getRequestConfigForTile(tileInstance).getOrElse(throw new IllegalStateException("Error set request config")))
+          request.setConfig(getRequestConfigForTile(tileInstance))
           response = client.execute(request)
           val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
           val apiResponse = Json.parse(body).as[API.Response[JsObject]]
@@ -154,7 +151,7 @@ class TileContentServiceImpl @Inject()(
   // For test overriding - if we cared that this was lame we could pull all TA ops
   // out into a service, no object functions
   def signRequest(trustedApp: CurrentApplication, usercode: String, request: HttpUriRequest) =
-  TrustedApplicationUtils.signRequest(trustedApp, usercode, request)
+    TrustedApplicationUtils.signRequest(trustedApp, usercode, request)
 
   private def jsonPost(url: String, postData: Option[JsObject]) = {
     val request = new HttpPost(url)
