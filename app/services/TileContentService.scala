@@ -29,8 +29,8 @@ import scala.util.Try
 
 object TileContentService {
 
-  val connectTimeout = 5.seconds
-  val socketTimeout = 5.seconds
+  val connectTimeout = 15.seconds
+  val socketTimeout = 15.seconds
 
 }
 
