@@ -1,0 +1,5 @@
+# --- !Ups
+ALTER TABLE TILE ADD column_8 INT NULL;
+
+# --- !Downs
+ALTER TABLE TILE DROP COLUMN TIMEOUT;
