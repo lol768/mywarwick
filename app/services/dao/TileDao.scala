@@ -83,11 +83,12 @@ class TileDaoImpl @Inject()() extends TileDao {
       get[Option[String]]("FETCH_URL") ~
       get[String]("TITLE") ~
       get[Option[String]]("ICON") ~
+      get[Option[Int]]("TIMEOUT") ~
       get[Boolean]("REMOVED") ~
       get[Option[String]]("PREFERENCES") map {
-      case tileId ~ tileType ~ colour ~ fetchUrl ~ title ~ icon ~ removed ~ preferences =>
+      case tileId ~ tileType ~ colour ~ fetchUrl ~ title ~ icon ~ timeout ~ removed ~ preferences =>
         TileInstance(
-          Tile(tileId, tileType, colour, fetchUrl, title, icon),
+          Tile(tileId, tileType, colour, fetchUrl, title, icon, timeout),
           preferences.map(Json.parse(_).as[JsObject]),
           removed
         )
