@@ -53,7 +53,7 @@ export default class AccountTile extends TileContent {
       <div>
         {member.fullName}&nbsp;
         <Hyperlink href="//warwick.ac.uk/myaccount" className="text--dotted-underline">
-          (Settings)
+          <small>(Settings)</small>
         </Hyperlink>
       </div>
 
@@ -162,7 +162,7 @@ export default class AccountTile extends TileContent {
     if (date) {
       return AccountTile.makeLineItem(
         date,
-        'fa-birthday-cake',
+        'fa-graduation-cap',
       );
     }
     return null;
