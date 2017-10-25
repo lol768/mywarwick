@@ -29,8 +29,20 @@ import scala.util.Try
 
 object TileContentService {
 
-  val defaultConnectTimeout = 5.seconds
-  val defaultSocketTimeout = 5.seconds
+  val defaultConnectTimeout: FiniteDuration = 5.seconds
+  val defaultSocketTimeout: FiniteDuration = 5.seconds
+
+  val defaultRequestConfig: RequestConfig = RequestConfig.custom()
+    .setConnectTimeout(defaultConnectTimeout.toMillis.toInt)
+    .setSocketTimeout(defaultSocketTimeout.toMillis.toInt)
+    .build()
+
+  def getRequestConfigForTile(tileInstance: TileInstance): Option[RequestConfig] = {
+    tileInstance.tile.timeout.map {
+      case timeout: Int => RequestConfig.custom().setConnectTimeout(timeout).build()
+      case _ => defaultRequestConfig
+    }
+  }
 
 }
 
@@ -52,11 +64,6 @@ class TileContentServiceImpl @Inject()(
 ) extends TileContentService with Logging {
 
   import TileContentService._
-
-  val defaultRequestConfig: RequestConfig = RequestConfig.custom()
-    .setConnectTimeout(defaultConnectTimeout.toMillis.toInt)
-    .setSocketTimeout(defaultSocketTimeout.toMillis.toInt)
-    .build()
 
   // TODO inject a client properly
   val client: CloseableHttpClient = HttpClientBuilder.create()
@@ -94,13 +101,6 @@ class TileContentServiceImpl @Inject()(
         }
       }.getOrElse(Future.successful((tile.id, Json.obj())))
     })
-  }
-
-  def getRequestConfigForTile(tileInstance: TileInstance): Option[RequestConfig] = {
-    tileInstance.tile.timeout.map {
-      case timeout: Int => RequestConfig.custom().setConnectTimeout(timeout).build()
-      case _ => defaultRequestConfig
-    }
   }
 
   // TODO cache
