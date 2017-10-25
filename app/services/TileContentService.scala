@@ -33,8 +33,8 @@ object TileContentService {
 
   val defaultRequestConfig: RequestConfig = RequestConfig
     .custom()
-    .setSocketTimeout(defaultSocketTimeout.toMillis.toInt).build()
-
+    .setSocketTimeout(defaultSocketTimeout.toMillis.toInt)
+    .build()
 
   def getRequestConfigForTile(tileInstance: TileInstance): RequestConfig = {
     RequestConfig.custom().setConnectTimeout(tileInstance.tile.timeout).build()

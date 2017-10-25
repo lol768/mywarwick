@@ -43,7 +43,7 @@ class TileContentServiceTest extends BaseSpec with ScalaFutures with MockitoSuga
       fetchUrl = url,
       title = "Printer Credit",
       icon = Some("print"),
-      timeout = Some(1000)
+      timeout = 1000
     ),
     preferences = None,
     removed = false
