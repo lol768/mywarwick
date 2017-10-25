@@ -52,8 +52,7 @@ class TileContentServiceImpl @Inject()(
   trustedApp: CurrentApplication,
   ws: WSClient,
   cache: CacheApi,
-  config: Configuration,
-  tileService: TileService
+  config: Configuration
 ) extends TileContentService with Logging {
 
   import TileContentService._

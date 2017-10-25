@@ -53,11 +53,10 @@ class TileContentServiceTest extends BaseSpec with ScalaFutures with MockitoSuga
     val trusted = mock[CurrentApplication]
     val ws = web.client
     val cache = new MockCacheApi
-    val tileService = mock[TileService]
     val config = Configuration {
       "mywarwick.cache.tile-preferences.seconds" -> 1
     }
-    val service = new TileContentServiceImpl(trusted, ws, cache, config, tileService) {
+    val service = new TileContentServiceImpl(trusted, ws, cache, config) {
       // do nothing - no testing of TrustedApps here
       override def signRequest(trustedApp: CurrentApplication, usercode: String, request: HttpUriRequest): Unit = {}
     }
