@@ -29,15 +29,12 @@ import scala.util.Try
 
 object TileContentService {
 
-  val defaultSocketTimeout: FiniteDuration = 5.seconds
-
-  val defaultRequestConfig: RequestConfig = RequestConfig
-    .custom()
-    .setSocketTimeout(defaultSocketTimeout.toMillis.toInt)
-    .build()
-
   def getRequestConfigForTile(tileInstance: TileInstance): RequestConfig = {
-    RequestConfig.custom().setConnectTimeout(tileInstance.tile.timeout).build()
+    RequestConfig
+      .custom()
+      .setConnectTimeout(tileInstance.tile.timeout)
+      .setSocketTimeout(tileInstance.tile.timeout)
+      .build()
   }
 
 }
@@ -62,8 +59,8 @@ class TileContentServiceImpl @Inject()(
   import TileContentService._
 
   // TODO inject a client properly
-  val client: CloseableHttpClient = HttpClientBuilder.create()
-    .setDefaultRequestConfig(defaultRequestConfig)
+  val client: CloseableHttpClient = HttpClientBuilder
+    .create()
     .setMaxConnTotal(250)
     .setMaxConnPerRoute(100)
     .build()
