@@ -87,10 +87,12 @@ class TileContentServiceImpl @Inject()(
                   logger.error(s"Error requesting preferences for tile ${tile.id}, res: $res")
                   (tile.id, Json.obj())
               }
-            ).recover { case e =>
-            logger.error("Error requesting preferences for tile ${tile.id}", e)
-            (tile.id, Json.obj())
-          }
+            )
+            .recover {
+              case e =>
+                logger.error("Error requesting preferences for tile ${tile.id}", e)
+                (tile.id, Json.obj())
+            }
         }
       }.getOrElse(Future.successful((tile.id, Json.obj())))
     })
@@ -135,10 +137,9 @@ class TileContentServiceImpl @Inject()(
 
         result.get
       }
+    }.getOrElse {
+      Future.failed(new IllegalArgumentException(s"Tile type ${tileInstance.tile.id} does not have a fetch URL"))
     }
-      .getOrElse {
-        Future.failed(new IllegalArgumentException(s"Tile type ${tileInstance.tile.id} does not have a fetch URL"))
-      }
 
   private def error(kind: Symbol, message: String): API.Failure[JsObject] = {
     API.Failure("error", Seq(API.Error(kind.name, message)))
