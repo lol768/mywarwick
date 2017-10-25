@@ -53,21 +53,18 @@ class TileContentServiceImpl @Inject()(
 
   import TileContentService._
 
-  val requestConfig = RequestConfig.custom()
+  val defaultRequestConfig: RequestConfig = RequestConfig.custom()
     .setConnectTimeout(defaultConnectTimeout.toMillis.toInt)
     .setSocketTimeout(defaultSocketTimeout.toMillis.toInt)
     .build()
 
   // TODO inject a client properly
-  var clients: Map[String, CloseableHttpClient] = Map (
-    "default" -> HttpClientBuilder.create()
-      .setDefaultRequestConfig(requestConfig)
-      .setMaxConnTotal(250)
-      .setMaxConnPerRoute(100)
-      .build()
-  )
+  val client: CloseableHttpClient = HttpClientBuilder.create()
+    .setMaxConnTotal(250)
+    .setMaxConnPerRoute(100)
+    .build()
 
-  val preferenceCacheDuration = config
+  val preferenceCacheDuration: FiniteDuration = config
     .getInt("mywarwick.cache.tile-preferences.seconds").map(_.seconds)
     .getOrElse(throw new IllegalStateException("Missing default"))
 
@@ -99,26 +96,11 @@ class TileContentServiceImpl @Inject()(
     })
   }
 
-  def getHttpClientForTile(tileInstance: TileInstance): CloseableHttpClient = {
-    val tileId = tileInstance.tile.id
-    val client = clients.get(tileId) match {
-      case e: Some[CloseableHttpClient] => e
-      case _ =>
-        tileInstance.tile.timeout match {
-          case timeout: Some[Int] =>
-            clients = clients + (tileId ->  HttpClientBuilder.create()
-              .setDefaultRequestConfig(RequestConfig.custom()
-                .setConnectTimeout(timeout.get)
-                .setSocketTimeout(defaultSocketTimeout.toMillis.toInt)
-                .build())
-              .setMaxConnTotal(250)
-              .setMaxConnPerRoute(100)
-              .build())
-            clients.get(tileId)
-          case _ => clients.get("default")
-        }
+  def getRequestConfigForTile(tileInstance: TileInstance): Option[RequestConfig] = {
+    tileInstance.tile.timeout.map {
+      case timeout: Int => RequestConfig.custom().setConnectTimeout(timeout).build()
+      case _ => defaultRequestConfig
     }
-    client.getOrElse(throw new IllegalStateException("Error getting HttpClient for tile: " + tileId))
   }
 
   // TODO cache
@@ -126,6 +108,7 @@ class TileContentServiceImpl @Inject()(
     tileInstance.tile.fetchUrl.map { fetchUrl =>
       Future {
         val request = jsonPost(fetchUrl, tileInstance.preferences)
+
         user.foreach(user => signRequest(trustedApp, user.usercode.string, request))
 
         var response: CloseableHttpResponse = null
@@ -133,8 +116,8 @@ class TileContentServiceImpl @Inject()(
         val serviceName = tileInstance.tile.title.toLowerCase
 
         val result = Try {
-
-          response = getHttpClientForTile(tileInstance).execute(request)
+          request.setConfig(getRequestConfigForTile(tileInstance).getOrElse(throw new IllegalStateException("Error set request config")))
+          response = client.execute(request)
           val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
           val apiResponse = Json.parse(body).as[API.Response[JsObject]]
 
