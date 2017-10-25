@@ -13,7 +13,7 @@ import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods._
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.{ContentType, StringEntity}
-import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.impl.client.{CloseableHttpClient, HttpClientBuilder}
 import play.api.Configuration
 import play.api.cache._
 import play.api.libs.json.{JsObject, _}
@@ -29,8 +29,8 @@ import scala.util.Try
 
 object TileContentService {
 
-  val connectTimeout = 15.seconds
-  val socketTimeout = 15.seconds
+  val defaultConnectTimeout = 5.seconds
+  val defaultSocketTimeout = 5.seconds
 
 }
 
@@ -47,22 +47,25 @@ class TileContentServiceImpl @Inject()(
   trustedApp: CurrentApplication,
   ws: WSClient,
   cache: CacheApi,
-  config: Configuration
+  config: Configuration,
+  tileService: TileService
 ) extends TileContentService with Logging {
 
   import TileContentService._
 
   val requestConfig = RequestConfig.custom()
-    .setConnectTimeout(connectTimeout.toMillis.toInt)
-    .setSocketTimeout(socketTimeout.toMillis.toInt)
+    .setConnectTimeout(defaultConnectTimeout.toMillis.toInt)
+    .setSocketTimeout(defaultSocketTimeout.toMillis.toInt)
     .build()
 
   // TODO inject a client properly
-  val client = HttpClientBuilder.create()
-    .setDefaultRequestConfig(requestConfig)
-    .setMaxConnTotal(250)
-    .setMaxConnPerRoute(100)
-    .build()
+  var clients: Map[String, CloseableHttpClient] = Map (
+    "default" -> HttpClientBuilder.create()
+      .setDefaultRequestConfig(requestConfig)
+      .setMaxConnTotal(250)
+      .setMaxConnPerRoute(100)
+      .build()
+  )
 
   val preferenceCacheDuration = config
     .getInt("mywarwick.cache.tile-preferences.seconds").map(_.seconds)
@@ -107,8 +110,30 @@ class TileContentServiceImpl @Inject()(
 
         val serviceName = tileInstance.tile.title.toLowerCase
 
+        val tileId = tileInstance.tile.id
+
         val result = Try {
-          response = client.execute(request)
+          val client = clients.get(tileId) match {
+            case e: Some[CloseableHttpClient] => e
+            case _ =>
+              tileInstance.tile.timeout match {
+                case timeout: Some[Int] =>
+                  clients = clients + (tileId ->  HttpClientBuilder.create()
+                    .setDefaultRequestConfig(RequestConfig.custom()
+                      .setConnectTimeout(timeout.get)
+                      .setSocketTimeout(defaultSocketTimeout.toMillis.toInt)
+                      .build())
+                    .setMaxConnTotal(250)
+                    .setMaxConnPerRoute(100)
+                    .build())
+                  clients.get(tileId)
+                case _ => clients.get("default")
+              }
+          }
+
+          response = client
+            .getOrElse(throw new IllegalStateException("Error setting up HttpClient"))
+            .execute(request)
           val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
           val apiResponse = Json.parse(body).as[API.Response[JsObject]]
 
