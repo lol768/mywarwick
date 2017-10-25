@@ -99,6 +99,28 @@ class TileContentServiceImpl @Inject()(
     })
   }
 
+  def getHttpClientForTile(tileInstance: TileInstance): CloseableHttpClient = {
+    val tileId = tileInstance.tile.id
+    val client = clients.get(tileId) match {
+      case e: Some[CloseableHttpClient] => e
+      case _ =>
+        tileInstance.tile.timeout match {
+          case timeout: Some[Int] =>
+            clients = clients + (tileId ->  HttpClientBuilder.create()
+              .setDefaultRequestConfig(RequestConfig.custom()
+                .setConnectTimeout(timeout.get)
+                .setSocketTimeout(defaultSocketTimeout.toMillis.toInt)
+                .build())
+              .setMaxConnTotal(250)
+              .setMaxConnPerRoute(100)
+              .build())
+            clients.get(tileId)
+          case _ => clients.get("default")
+        }
+    }
+    client.getOrElse(throw new IllegalStateException("Error getting HttpClient for tile: " + tileId))
+  }
+
   // TODO cache
   override def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]] =
     tileInstance.tile.fetchUrl.map { fetchUrl =>
@@ -110,30 +132,9 @@ class TileContentServiceImpl @Inject()(
 
         val serviceName = tileInstance.tile.title.toLowerCase
 
-        val tileId = tileInstance.tile.id
-
         val result = Try {
-          val client = clients.get(tileId) match {
-            case e: Some[CloseableHttpClient] => e
-            case _ =>
-              tileInstance.tile.timeout match {
-                case timeout: Some[Int] =>
-                  clients = clients + (tileId ->  HttpClientBuilder.create()
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                      .setConnectTimeout(timeout.get)
-                      .setSocketTimeout(defaultSocketTimeout.toMillis.toInt)
-                      .build())
-                    .setMaxConnTotal(250)
-                    .setMaxConnPerRoute(100)
-                    .build())
-                  clients.get(tileId)
-                case _ => clients.get("default")
-              }
-          }
 
-          response = client
-            .getOrElse(throw new IllegalStateException("Error setting up HttpClient"))
-            .execute(request)
+          response = getHttpClientForTile(tileInstance).execute(request)
           val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
           val apiResponse = Json.parse(body).as[API.Response[JsObject]]
 
