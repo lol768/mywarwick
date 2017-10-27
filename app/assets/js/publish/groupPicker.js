@@ -1,5 +1,9 @@
 /* eslint-env browser */
 
+/*
+ * Not being used since Webgroup selection was removed from publishing UI
+ */
+
 import $ from 'jquery';
 import 'bootstrap-3-typeahead';
 import fetch from 'isomorphic-fetch';

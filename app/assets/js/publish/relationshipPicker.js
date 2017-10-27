@@ -39,7 +39,7 @@ class RelationshipPicker {
           });
       },
       highlighter: (html, item) => (`<strong>${item.name}</strong><br><em>${item.department}</em>`),
-      delay: 120,
+      delay: 600,
       matcher: () => true, // All data received from the server matches the query
       afterSelect: (item) => {
         postJsonWithCredentials('/service/grouplookup/relationships', { query: item.value })
