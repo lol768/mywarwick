@@ -1,6 +1,6 @@
 import CourseworkTile from 'components/tiles/CourseworkTile';
 import { shallow } from 'enzyme';
-import { ListTileItem } from '../../../../../app/assets/js/components/tiles/ListTile';
+import { ListTileItem } from 'components/tiles/ListTile';
 
 describe('CourseworkTile', () => {
 
