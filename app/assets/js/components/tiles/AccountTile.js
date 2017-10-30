@@ -167,7 +167,8 @@ export default class AccountTile extends TileContent {
             <li>
               You’re signed in with your WBS account. To access all the features of My Warwick,
               please
-             &nbsp; <a
+              &nbsp;
+              <a
                 role="button"
                 tabIndex={0}
                 className="text--dotted-underline"
