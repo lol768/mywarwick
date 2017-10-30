@@ -10,7 +10,7 @@ import { push } from 'react-router-redux';
 import { createSelector } from 'reselect';
 import * as stream from './stream';
 import { displayUpdateProgress } from './state/update';
-import { postJsonWithCredentials } from './serverpipe';
+import { fetchWithCredentials, postJsonWithCredentials } from './serverpipe';
 import { hasAuthoritativeAuthenticatedUser } from './state';
 import { Routes } from './components/AppRoot';
 import { navRequest } from './state/ui';
@@ -180,6 +180,12 @@ export default function init(opts) {
 
       unregisterForPush(deviceToken) {
         postJsonWithCredentials('/api/push/unsubscribe', { deviceToken });
+      },
+
+      registerForTimetable() {
+        fetchWithCredentials('/api/timetable/register', { method: 'post' })
+          .then(response => response.json())
+          .then(response => MyWarwickNative.setTimetableToken(response.token));
       },
     };
 
