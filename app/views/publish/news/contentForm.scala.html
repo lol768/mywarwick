@@ -2,10 +2,11 @@
 @import system.RequestContext
 @import org.joda.time.LocalDateTime
 @import models.publishing.Publisher
+@import services.dao.DepartmentInfo
 @(
     form: Form[_],
     publisher: Publisher,
-    departmentOptions: Seq[(String, String)],
+    departmentOptions: Seq[DepartmentInfo],
     categories: Seq[NewsCategory],
     permissionScope: PermissionScope,
     audience: Audience,
