@@ -13,7 +13,7 @@ import warwick.sso._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
