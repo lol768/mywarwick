@@ -56,7 +56,7 @@ export default class AccountTile extends TileContent {
             href="//warwick.ac.uk/myaccount"
             className="small text--dotted-underline"
           >
-            Account Settings
+            Account settings
           </Hyperlink>
           <span className="text-right-spacing">&nbsp;&nbsp;&nbsp;</span>
         </div>
