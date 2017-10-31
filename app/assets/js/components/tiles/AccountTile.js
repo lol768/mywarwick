@@ -51,14 +51,14 @@ export default class AccountTile extends TileContent {
   static getLink() {
     return (
       <li>
-        <span>
+        <div className='text-right'>
           <Hyperlink
             href="//warwick.ac.uk/myaccount"
-            className="text--dotted-underline settings-link"
+            className="text--dotted-underline"
           >
             <small>Account Settings</small>
           </Hyperlink>
-        </span>
+        </div>
       </li>
     );
   }
