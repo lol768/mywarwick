@@ -3,26 +3,27 @@
   padding-top: 5px;
 }
 
-.tile--agenda, .tile--account {
-  .tile__body {
-    .tile--small&, .tile--wide&, .tile--large& {
-      & ul {
-        line-height: 0.8 !important;
-        margin-bottom: 8px;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        .settings-link {
-          right: 10px;
-          position: absolute;
-        }
+.tile__body {
+  .tile--small.tile--agenda &,
+  .tile--wide.tile--agenda &,
+  .tile--small.tile--account &,
+  .tile--wide.tile--account &,
+  .tile--large.tile--account & {
+    & ul {
+      line-height: 0.8 !important;
+      margin-bottom: 8px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      .settings-link {
+        right: 10px;
+        position: absolute;
       }
     }
+  }
+  .fa {
+    opacity: 0.5;
+    margin-right: 4px;
 
-    .fa {
-      opacity: 0.5;
-      margin-right: 4px;
-
-    }
   }
 }
 
