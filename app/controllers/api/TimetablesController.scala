@@ -37,11 +37,15 @@ class TimetablesController @Inject()(
   def get: Action[AnyContent] = Action.async { request =>
     request.headers.get("X-Timetable-Token")
       .flatMap(timetableTokenService.validate)
-      .map { usercode =>
-        val user = userLookupService.getUser(usercode).toOption
-        val Seq(tileInstance) = tileService.getTilesByIds(user, Seq("timetable"))
-        tileContentService.getTileContent(Some(usercode), tileInstance)
-          .map(r => Ok(Json.toJson(r)))
+      .flatMap(usercode => userLookupService.getUser(usercode).recover {
+        case e =>
+          logger.error(s"Failed to look up user '${usercode.string}'", e)
+          throw e
+      }.toOption)
+      .map { user =>
+        val Seq(tileInstance) = tileService.getTilesByIds(Some(user), Seq("timetable"))
+        tileContentService.getTileContent(Some(user.usercode), tileInstance)
+          .map(res => Ok(Json.toJson(res)))
       }.getOrElse {
       Future.successful(Unauthorized(Json.obj(
         "success" -> false,
