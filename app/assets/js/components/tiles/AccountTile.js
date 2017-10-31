@@ -48,15 +48,16 @@ export default class AccountTile extends TileContent {
     return true;
   }
 
-  static getLink(member) {
+  static getLink() {
     return (
-      <div>
-        {member.fullName}&nbsp;
-        <Hyperlink href="//warwick.ac.uk/myaccount" className="text--dotted-underline">
-          <small>(Settings)</small>
-        </Hyperlink>
-      </div>
-
+      <li>
+        <span>
+          <Hyperlink href="//warwick.ac.uk/myaccount"
+                     className="text--dotted-underline settings-link">
+            <small>Account Settings</small>
+          </Hyperlink>
+        </span>
+      </li>
     );
   }
 
@@ -104,7 +105,7 @@ export default class AccountTile extends TileContent {
 
   static makeFullName(member) {
     return AccountTile.makeLineItem(
-      AccountTile.getLink(member),
+      member.fullName,
       'fa-user-o',
     );
   }
@@ -204,8 +205,8 @@ export default class AccountTile extends TileContent {
   static makeLineItem(content, icon) {
     return (
       <li>
-        <i className={`fa fa-li fa-fw ${icon}`} />
-        { content }
+        <i className={`fa fa-li fa-fw ${icon}`}/>
+        {content}
       </li>
     );
   }
@@ -218,6 +219,7 @@ export default class AccountTile extends TileContent {
         {AccountTile.makeEmail(member)}
         {AccountTile.makeUserid(member)}
         {AccountTile.makeUserType(member)}
+        {AccountTile.getLink()}
       </ul>
     );
   }
@@ -234,6 +236,7 @@ export default class AccountTile extends TileContent {
             {AccountTile.makeEmail(member)}
             {AccountTile.makeUserid(member)}
             {AccountTile.makeUserType(member)}
+            {AccountTile.getLink()}
           </ul>
         </div>
       </div>
@@ -259,6 +262,7 @@ export default class AccountTile extends TileContent {
             {AccountTile.makeRoute(member)}
             {AccountTile.makeYearOfStudy(member)}
             {AccountTile.makeHomeDepartment(member)}
+            {AccountTile.getLink()}
             <li>&nbsp;</li>
             {member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
             <li>
