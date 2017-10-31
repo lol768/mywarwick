@@ -50,7 +50,7 @@ export default class AccountTile extends TileContent {
 
   static getLink() {
     return (
-      <li>
+      <li className='text-overflow-block'>
         <div className='text-right'>
           <Hyperlink
             href="//warwick.ac.uk/myaccount"
@@ -206,7 +206,7 @@ export default class AccountTile extends TileContent {
 
   static makeLineItem(content, icon) {
     return (
-      <li>
+      <li className='text-overflow-block'>
         <i className={`fa fa-fw ${icon}`} />
         {content}
       </li>
