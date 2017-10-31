@@ -1,7 +1,6 @@
 package services.dao
 
 import java.sql.Connection
-import java.util.UUID
 import javax.inject.Singleton
 
 import anorm.SqlParser._
@@ -13,8 +12,6 @@ import warwick.sso.Usercode
 
 case class TimetableToken(string: String)
 
-case class TimetableTokenLookup(id: String, usercode: Usercode)
-
 @ImplementedBy(classOf[TimetableTokenDaoImpl])
 trait TimetableTokenDao {
   def create(usercode: Usercode, token: String)(implicit c: Connection): TimetableToken
@@ -25,9 +22,7 @@ trait TimetableTokenDao {
 @Singleton
 class TimetableTokenDaoImpl extends TimetableTokenDao {
   override def create(usercode: Usercode, token: String)(implicit c: Connection): TimetableToken = {
-    val id = UUID.randomUUID().toString
-
-    SQL"INSERT INTO TIMETABLE_TOKEN (ID, USERCODE, TOKEN) VALUES ($id, ${usercode.string}, $token)"
+    SQL"INSERT INTO TIMETABLE_TOKEN (USERCODE, TOKEN) VALUES (${usercode.string}, $token)"
       .execute()
 
     TimetableToken(token)
@@ -36,22 +31,15 @@ class TimetableTokenDaoImpl extends TimetableTokenDao {
   override def validate(token: String)(implicit c: Connection): Option[Usercode] = {
     val now = DateTime.now()
 
-    val result = SQL"SELECT ID, USERCODE FROM TIMETABLE_TOKEN WHERE TOKEN = $token"
+    val result: Option[Usercode] = SQL"SELECT USERCODE FROM TIMETABLE_TOKEN WHERE TOKEN = $token"
       .executeQuery()
-      .as(parser.singleOpt)
+      .as(get[String]("USERCODE").map(Usercode).singleOpt)
 
-    result.foreach {
-      case TimetableTokenLookup(id, _) =>
-        SQL"UPDATE TIMETABLE_TOKEN SET LAST_USED_AT = $now WHERE ID = $id"
-          .execute()
+    result.foreach { _ =>
+      SQL"UPDATE TIMETABLE_TOKEN SET LAST_USED_AT = $now WHERE TOKEN = $token"
+        .execute()
     }
 
-    result.map(_.usercode)
+    result
   }
-
-  val parser: RowParser[TimetableTokenLookup] =
-    get[String]("ID") ~
-      get[String]("USERCODE") map {
-      case id ~ usercode => TimetableTokenLookup(id, Usercode(usercode))
-    }
 }
