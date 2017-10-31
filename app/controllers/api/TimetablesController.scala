@@ -38,6 +38,9 @@ class TimetablesController @Inject()(
     request.headers.get("X-Timetable-Token")
       .flatMap(timetableTokenService.validate)
       .flatMap(usercode => userLookupService.getUser(usercode).recover {
+        case e: NoSuchElementException =>
+          logger.warn(s"User '${usercode.string}' not found", e)
+          throw e
         case e =>
           logger.error(s"Failed to look up user '${usercode.string}'", e)
           throw e
