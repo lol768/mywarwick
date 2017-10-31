@@ -50,11 +50,11 @@ class TimetablesController @Inject()(
         tileContentService.getTileContent(Some(user.usercode), tileInstance)
           .map(res => Ok(Json.toJson(res)))
       }.getOrElse {
-      Future.successful(Unauthorized(Json.obj(
-        "success" -> false,
-        "status" -> "unauthorized"
-      )))
-    }
+        Future.successful(Unauthorized(Json.obj(
+          "success" -> false,
+          "status" -> "unauthorized"
+        )))
+      }
   }
 
 }
