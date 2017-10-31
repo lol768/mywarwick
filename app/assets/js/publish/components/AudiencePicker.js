@@ -57,7 +57,7 @@ export class AudiencePicker extends React.PureComponent {
     this.clearDepartment = this.clearDepartment.bind(this);
     this.groupsInput = this.groupsInput.bind(this);
     this.locationInput = this.locationInput.bind(this);
-    this.isTeachingDepartment = this.isTeachingDepartment.bind(this)
+    this.isTeachingDepartment = this.isTeachingDepartment.bind(this);
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -127,7 +127,7 @@ export class AudiencePicker extends React.PureComponent {
   }
 
   isTeachingDepartment() {
-    return this.state.department.faculty !== 'X'
+    return this.state.department.faculty !== 'X';
   }
 
   locationInput() {
