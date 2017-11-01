@@ -42,7 +42,6 @@ export class AudiencePicker extends React.PureComponent {
         ...props.formData,
         department: this.buildDeptObj(
           { [deptCode]: props.departments[deptCode] },
-          // { [deptCode]: _.find(props.departments, (val, key) => key === deptCode) },
         ),
       };
     } else {
