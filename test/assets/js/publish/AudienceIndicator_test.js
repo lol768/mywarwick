@@ -47,15 +47,26 @@ describe('AudienceIndicator', () => {
                   text: 'Tutorial Group 2B: Or maybe 2A'
                 }
               ],
-              staffRelationships: [{
-                text: 'Dirk Diggler (Anatomy and Physiology)',
-                options: [{
-                  supervisor: {
-                    studentRole: 'supervisee',
-                    selected: true
-                  }
-                }]
-              }],
+              staffRelationships: [
+                {
+                  text: 'Dirk Diggler (Anatomy and Physiology)',
+                  options: [{
+                    supervisor: {
+                      studentRole: 'supervisee',
+                      selected: true
+                    }
+                  }]
+                },
+                {
+                  text: 'Dirk Diggler (Anatomy and Physiology)',
+                  options: [{
+                    personalTutor: {
+                      studentRole: 'personal tutee',
+                      selected: true
+                    }
+                  }]
+                }
+              ],
               listOfUsercodes: ['cusjau', 'u1234567']
             }
           }
@@ -68,6 +79,7 @@ describe('AudienceIndicator', () => {
 
     [
       'Supervisees of Dirk Diggler (Anatomy and Physiology)',
+      'Personal Tutees of Dirk Diggler (Anatomy and Physiology)',
       'Tutorial Group 2: CH160 Tutorials',
       'Tutorial Group 2B: Or maybe 2A',
       'CS118: Programming for Computer Scientists',

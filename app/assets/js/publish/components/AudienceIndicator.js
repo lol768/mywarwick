@@ -85,9 +85,7 @@ export class AudienceIndicator extends React.PureComponent {
                 return null; // lint made me do it
               case 'staffRelationships':
                 return _.flatMap(components, rel => rel.options.map(opt => _.map(opt, val => (
-                  <div
-                    key={audienceType}
-                  >{val.selected ? `${_.startCase(val.studentRole)}s of ${rel.text}` : ''}</div>
+                  <div>{val.selected ? `${_.startCase(val.studentRole)}s of ${rel.text}` : ''}</div>
                 ))));
               default: {
                 const group = _.startCase(_.replace(audienceType, 'Dept:', ''));
