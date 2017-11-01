@@ -1,6 +1,6 @@
 package services
 
-import helpers.BaseSpec
+import helpers.{BaseSpec, Fixtures}
 import models.Audience
 import org.mockito.Matchers
 import org.mockito.Matchers._
@@ -10,7 +10,7 @@ import services.dao.{AudienceDao, AudienceLookupDao, UserNewsOptInDao}
 import warwick.sso._
 
 import scala.concurrent.Future
-import scala.util.Success
+import scala.util.{Success, Try}
 
 class AudienceServiceTest extends BaseSpec with MockitoSugar {
   trait Ctx {
@@ -237,5 +237,19 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       users must be (Set(Usercode("cusfal"), Usercode("cusebr")))
     }
 
+    "validate both usercodes and university ids" in new Ctx {
+      val codes = Seq(Usercode("cusebh"), Usercode("cusjau"))
+      val ids = Seq(Usercode("0123456"), Usercode("1234567"))
+      val codesAndIds: Seq[Usercode] = codes ++ ids
+
+      when(userLookup.getUsers(any[Seq[Usercode]]))
+        .thenReturn(Try(codes.map(c => c -> Fixtures.user.makeFoundUser(c.string)).toMap))
+      when(userLookup.getUsers(any[Seq[UniversityID]], anyBoolean()))
+        .thenReturn(Try(codes.map(c => UniversityID(c.string) -> Fixtures.user.makeFoundUser(c.string)).toMap))
+
+      service.validateUsercodes(codesAndIds.toSet)
+      verify(userLookup, times(1)).getUsers(ids.map(u => UniversityID(u.string)))
+      verify(userLookup, times(1)).getUsers(codesAndIds)
+    }
   }
 }
