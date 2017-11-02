@@ -25,14 +25,17 @@
 }
 
 .tile--account {
+  @media-left-image-max-width: 60px;
+  @setting-link-width: 2em;
+
   html.ios & {
     ul {
-      width: @media-body-width-ios;
+      width: ~"calc(100vw - @{media-left-image-max-width} - @{setting-link-width})";
     }
   }
 
   .media-left img {
     max-height: 60px;
-    max-width: 60px;
+    max-width: @media-left-image-max-width;
   }
 }
