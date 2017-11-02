@@ -58,7 +58,6 @@ export default class AccountTile extends TileContent {
           >
             Account settings
           </Hyperlink>
-          <span className="text-right-spacing">_</span>
         </div>
       </li>
     );
