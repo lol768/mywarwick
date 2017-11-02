@@ -25,14 +25,10 @@
 }
 
 .tile--account {
-  span {
-    font: -apple-system-footnote !important;
-    line-height: 0.8 !important;
-    color: transparent;
-  }
-
-  .text-right-spacing {
-    font-size: 0.00001em;
+  html.ios & {
+    ul {
+      width: @media-body-width-ios;
+    }
   }
 
   .media-left img {
