@@ -263,7 +263,7 @@ export default class AccountTile extends TileContent {
             {member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
             <li>
               You’re signed in with your WBS account. To access all the features of My Warwick,
-              please
+              please&nbsp;
               <a
                 role="button"
                 tabIndex={0}
