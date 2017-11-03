@@ -73,10 +73,11 @@ export class AudienceIndicator extends React.PureComponent {
           _.map(audience.groups, (components, audienceType) => {
             switch (audienceType) {
               case 'modules':
-                return _.map(components, module =>
-                  (<div key={audienceType}>{module.text || module.value}</div>));
+                return _.map(components, ({ text, value }) =>
+                  (<div key={`${audienceType}:${value}`}>{text || value}</div>));
               case 'seminarGroups':
-                return _.map(components, seminar => (<div key={audienceType}>{seminar.text}</div>));
+                return _.map(components, ({ text }) =>
+                  (<div key={`${audienceType}:${text}`}>{text}</div>));
               case 'listOfUsercodes':
                 if (components !== undefined) {
                   return <div key={audienceType}>{`${components.length} usercodes`}</div>;
@@ -84,9 +85,7 @@ export class AudienceIndicator extends React.PureComponent {
                 return null; // lint made me do it
               case 'staffRelationships':
                 return _.flatMap(components, rel => rel.options.map(opt => _.map(opt, val => (
-                  <div
-                    key={audienceType}
-                  >{val.selected ? `${_.startCase(val.studentRole)}s of ${rel.text}` : ''}</div>
+                  <div>{val.selected ? `${_.startCase(val.studentRole)}s of ${rel.text}` : ''}</div>
                 ))));
               default: {
                 const group = _.startCase(_.replace(audienceType, 'Dept:', ''));
