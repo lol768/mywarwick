@@ -3,12 +3,13 @@
 @import org.joda.time.LocalDateTime
 @import system.RequestContext
 @import models.publishing.Publisher
+@import services.dao.DepartmentInfo
 @import play.api.libs.json.{Json, JsValue}
 
 @(
     form: PublishNotificationForm,
     publisher: Publisher,
-    departmentOptions: Seq[(String, String)],
+    departmentOptions: Seq[DepartmentInfo],
     providerOptions: Seq[(String, String)],
     permissionScope: PermissionScope,
     audience: Audience,
