@@ -13,6 +13,7 @@ import models.publishing.PublisherActivityCount
 import org.joda.time.DateTime
 import system.DatabaseDialect
 import warwick.anorm.converters.ColumnConversions._
+import warwick.sso.Usercode
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
@@ -351,13 +352,14 @@ class ActivityDaoImpl @Inject()(
       get[Option[String]]("REPLACED_BY_ID") ~
       get[DateTime]("PUBLISHED_AT") ~
       get[DateTime]("CREATED_AT") ~
+      get[String]("CREATED_BY") ~
       get[Boolean]("SHOULD_NOTIFY") ~
       get[Boolean]("API") ~
       get[Option[String]]("AUDIENCE_ID") ~
       get[Option[String]]("PUBLISHER_ID") ~
       get[Option[Boolean]]("SEND_EMAIL") map {
-      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ publishedAt ~ createdAt ~ shouldNotify ~ api ~ audienceId ~ publisherId ~ sendEmail =>
-        Activity(id, providerId, activityType, title, text, url, replacedById, publishedAt, createdAt, shouldNotify, api, audienceId, publisherId, sendEmail)
+      case id ~ providerId ~ activityType ~ title ~ text ~ url ~ replacedById ~ publishedAt ~ createdAt ~ createdBy ~ shouldNotify ~ api ~ audienceId ~ publisherId ~ sendEmail =>
+        Activity(id, providerId, activityType, title, text, url, replacedById, publishedAt, createdAt, Usercode(createdBy), shouldNotify, api, audienceId, publisherId, sendEmail)
     }
 
   private lazy val tagParser: RowParser[Option[ActivityTag]] =

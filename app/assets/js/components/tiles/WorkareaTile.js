@@ -1,6 +1,7 @@
 import React from 'react';
 import TextTile from './TextTile';
 import { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
+import { pluralise } from '../../helpers';
 
 export default class WorkareaTile extends TextTile {
   static supportedTileSizes() {
@@ -25,7 +26,7 @@ export default class WorkareaTile extends TextTile {
         <span className="tile__callout">
           {workarea.availableSeats}/{workarea.totalSeats}
         </span>
-        &nbsp;{workarea.totalSeats === 1 ? 'seat ' : 'seats '}available
+        &nbsp;{pluralise('seat', workarea.totalSeats)} available
       </span>
     );
   }

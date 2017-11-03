@@ -36,7 +36,7 @@ class SeminarGroupPicker {
       highlighter: (html, item) => (
         `<strong>${item.name}</strong>: ${item.groupSetName}<br><em>${item.moduleCode.toUpperCase()}</em>`
       ),
-      delay: 120,
+      delay: 600,
       matcher: () => true, // All data received from the server matches the query
       afterSelect: (item) => {
         const text = `${item.name}: ${item.groupSetName}`;

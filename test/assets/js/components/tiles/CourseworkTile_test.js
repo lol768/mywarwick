@@ -1,4 +1,6 @@
 import CourseworkTile from 'components/tiles/CourseworkTile';
+import { shallow } from 'enzyme';
+import { ListTileItem } from 'components/tiles/ListTile';
 
 describe('CourseworkTile', () => {
 
@@ -36,5 +38,12 @@ describe('CourseworkTile', () => {
     findChild(html, [1, 1]).type.displayName.should.equal('Hyperlink');
     findChild(html, [1, 1]).props.children.should.equal('Parachuting (SP747)');
     findChild(html, [1, 3]).should.equal('Thu 12 May, 00:00');
-  })
+  });
+
+  it('renders large tile as List Tile list', () => {
+    const render = shallow(<CourseworkTile {...props} size="large" />);
+    expect(render.find(ListTileItem)).to.have.length(3);
+    expect(render.find(ListTileItem).get(1).props.text).to.eql('Tactical Espionage Action (SN4k3)');
+    expect(render.find(ListTileItem).get(1).props.title).to.eql('Tactical Espionage Action');
+  });
 });

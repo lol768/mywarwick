@@ -60,7 +60,11 @@
           recipients
         </div>
         }
-        <div class="activity-item__date">@models.DateFormats.emailDateTime(item.activity.publishedAt)</div>
+        <div class="activity-item__date">
+          @models.DateFormats.emailDateTime(item.activity.publishedAt)
+          by
+          @item.createdBy.name.full.getOrElse("[Unknown]") (@item.createdBy.usercode.string)
+        </div>
         @item.activity.url.map { url =>
           <div class="activity-item__visible-link">
             Link to  <a href="@url">@url</a>

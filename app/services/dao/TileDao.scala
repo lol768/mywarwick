@@ -50,7 +50,7 @@ class TileDaoImpl @Inject()() extends TileDao {
 
     val userTiles = SQL(
       s"""
-         |SELECT ID, TILE_TYPE, TITLE, ICON, COLOUR, FETCH_URL, REMOVED, PREFERENCES
+         |SELECT ID, TILE_TYPE, TITLE, ICON, COLOUR, TIMEOUT, FETCH_URL, REMOVED, PREFERENCES
          |FROM USER_TILE JOIN TILE ON ID = TILE_ID
          |WHERE USERCODE = {usercode} $idRestriction
       """.stripMargin)
@@ -67,7 +67,7 @@ class TileDaoImpl @Inject()() extends TileDao {
     val idRestriction = if (ids.isEmpty) "" else "AND ID IN ({ids})"
     SQL(
       s"""
-         |SELECT ID, TILE_TYPE, TITLE, ICON, COLOUR, FETCH_URL, 0 AS REMOVED, NULL AS PREFERENCES
+         |SELECT ID, TILE_TYPE, TITLE, ICON, COLOUR, TIMEOUT, FETCH_URL, 0 AS REMOVED, NULL AS PREFERENCES
          |FROM TILE
          |WHERE EXISTS (SELECT * FROM TILE_GROUP WHERE TILE_ID = ID and "GROUP" in ({groups})) $idRestriction
     """.stripMargin).on(
@@ -83,11 +83,12 @@ class TileDaoImpl @Inject()() extends TileDao {
       get[Option[String]]("FETCH_URL") ~
       get[String]("TITLE") ~
       get[Option[String]]("ICON") ~
+      get[Int]("TIMEOUT") ~
       get[Boolean]("REMOVED") ~
       get[Option[String]]("PREFERENCES") map {
-      case tileId ~ tileType ~ colour ~ fetchUrl ~ title ~ icon ~ removed ~ preferences =>
+      case tileId ~ tileType ~ colour ~ fetchUrl ~ title ~ icon ~ timeout ~ removed ~ preferences =>
         TileInstance(
-          Tile(tileId, tileType, colour, fetchUrl, title, icon),
+          Tile(tileId, tileType, colour, fetchUrl, title, icon, timeout),
           preferences.map(Json.parse(_).as[JsObject]),
           removed
         )

@@ -10,7 +10,7 @@ import play.api.db.{Database, NamedDatabase}
 import services.ActivityError._
 import services.dao._
 import services.job.PublishActivityJob
-import warwick.sso.{User, Usercode}
+import warwick.sso.{User, UserLookupService, Usercode}
 
 @ImplementedBy(classOf[ActivityServiceImpl])
 trait ActivityService {
@@ -83,7 +83,8 @@ class ActivityServiceImpl @Inject()(
   audienceDao: AudienceDao,
   recipientDao: ActivityRecipientDao,
   muteDao: ActivityMuteDao,
-  scheduler: SchedulerService
+  scheduler: SchedulerService,
+  userLookupService: UserLookupService
 ) extends ActivityService {
 
   override def getActivityById(id: String): Option[Activity] =
@@ -231,7 +232,8 @@ class ActivityServiceImpl @Inject()(
       val audiences = activities.map(a => a.activity.id -> a.activity.audienceId.map(audienceDao.getAudience).getOrElse(Audience())).toMap
       val audienceSizes = dao.getAudienceSizes(activities.map(_.activity.id))
       val sentCounts = dao.getSentCounts(activities.map(_.activity.id))
-      activities.map(a => ActivityRenderWithAudience.applyWithAudience(a, audienceSizes(a.activity.id), audiences(a.activity.id), sentCounts(a.activity.id)))
+      val users = userLookupService.getUsers(activities.map(_.activity.createdBy)).getOrElse(Map.empty)
+      activities.map(a => ActivityRenderWithAudience.applyWithAudience(a, audienceSizes(a.activity.id), users(a.activity.createdBy), audiences(a.activity.id), sentCounts(a.activity.id)))
     }
   }
 

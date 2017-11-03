@@ -2,9 +2,9 @@ package services.elasticsearch
 
 import java.util
 
-import models.Activity
-import models.Audience.{DepartmentAudience, ModuleAudience, UsercodesAudience, WebGroupAudience}
+import models.Audience._
 import models.publishing.Publisher
+import models.{Activity, Audience}
 import org.elasticsearch.action.search.SearchResponse
 import org.joda.time.DateTime
 import services.{AudienceService, PublisherService}
@@ -24,7 +24,9 @@ case class ActivityDocument(
   publisher: String = null,
   audienceComponents: Seq[String] = null,
   resolvedUsers: Seq[String] = null,
-  api: Boolean = false
+  api: Boolean = false,
+  created_at: DateTime = null,
+  created_by: String = null
 )
 
 object ActivityDocument {
@@ -50,29 +52,37 @@ object ActivityDocument {
         case e: Some[Seq[Usercode]] => e.map(_.map(_.string)).orNull
         case _ => serialiseResolvedUsers(activity.audienceId, audienceService)
       },
-      activity.api
+      activity.api,
+      activity.createdAt,
+      activity.createdBy.string
     )
   }
 
   def fromESSearchResponse(res: SearchResponse): Seq[ActivityDocument] = {
-    res.getHits.asScala.toList.map(searchHit => {
-      val hitMap = searchHit.getSourceAsMap.asScala.toMap
-      val field = ActivityESServiceSearchHelper.ESFieldName
-      ActivityDocument(
-        hitMap.getOrElse(field.activity_id, "-").toString,
-        hitMap.getOrElse(field.provider_id, "-").toString,
-        hitMap.getOrElse(field.activity_type, "-").toString,
-        hitMap.getOrElse(field.title, "-").toString,
-        hitMap.getOrElse(field.url, "-").toString,
-        hitMap.getOrElse(field.text, "-").toString,
-        hitMap.getOrElse(field.replaced_by, "-").toString,
-        DateTime.parse(hitMap.getOrElse(field.published_at.toString, 0).toString), // TODO test if this is right
-        hitMap.getOrElse(field.publisher, "-").toString,
-        hitMap.getOrElse(field.audience_components, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
-        hitMap.getOrElse(field.resolved_users, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
-        Boolean.unbox(hitMap.getOrElse(field.api, Boolean.box(false)))
-      )
-    })
+    res.getHits.asScala.toList.map(searchHit =>
+      fromMap(searchHit.getSourceAsMap.asScala.toMap)
+    )
+  }
+
+  def fromMap(map: Map[String, AnyRef]) = {
+    val field = ActivityESServiceSearchHelper.ESFieldName
+
+    ActivityDocument(
+      map.getOrElse(field.activity_id, "-").toString,
+      map.getOrElse(field.provider_id, "-").toString,
+      map.getOrElse(field.activity_type, "-").toString,
+      map.getOrElse(field.title, "-").toString,
+      map.getOrElse(field.url, "-").toString,
+      map.getOrElse(field.text, "-").toString,
+      map.getOrElse(field.replaced_by, "-").toString,
+      map.get(field.published_at).map(_.toString).map(DateTime.parse).orNull,
+      map.getOrElse(field.publisher, "-").toString,
+      map.getOrElse(field.audience_components, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
+      map.getOrElse(field.resolved_users, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
+      Boolean.unbox(map.getOrElse(field.api, Boolean.box(false))),
+      map.get(field.created_at).map(_.toString).map(DateTime.parse).orNull,
+      map.getOrElse(field.created_by, "-").toString
+    )
   }
 
   def serialiseAudienceComponents(audienceId: Option[String], audienceService: AudienceService): Seq[String] = {
@@ -80,13 +90,14 @@ object ActivityDocument {
 
     audienceId match {
       case Some(id: String) => audienceService.getAudience(id).components.flatMap {
-        case e: UsercodesAudience => Seq(s"${simpleClassName(e)}")
         case e: WebGroupAudience => Seq(s"${simpleClassName(e)}:${e.groupName.string}")
         case e: ModuleAudience => Seq(s"${simpleClassName(e)}:${e.moduleCode}")
+        case e: SeminarGroupAudience => Seq(s"${simpleClassName(e)}:${e.groupId}")
+        case e: RelationshipAudience => Seq(s"${simpleClassName(e)}:${e.relationshipType}:${e.agentId.string}")
         case e: DepartmentAudience => e.subset.map(subset => {
           s"${simpleClassName(e)}:${e.deptCode}:${subset.entryName}"
         })
-        case _ => Nil
+        case e: Audience.Component => Seq(simpleClassName(e))
       }
       case _ => Nil
     }

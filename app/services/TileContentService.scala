@@ -13,7 +13,7 @@ import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods._
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.{ContentType, StringEntity}
-import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.impl.client.{CloseableHttpClient, HttpClientBuilder}
 import play.api.Configuration
 import play.api.cache._
 import play.api.libs.json.{JsObject, _}
@@ -29,8 +29,13 @@ import scala.util.Try
 
 object TileContentService {
 
-  val connectTimeout = 5.seconds
-  val socketTimeout = 5.seconds
+  def getRequestConfigForTile(tileInstance: TileInstance): RequestConfig = {
+    RequestConfig
+      .custom()
+      .setConnectTimeout(tileInstance.tile.timeout)
+      .setSocketTimeout(tileInstance.tile.timeout)
+      .build()
+  }
 
 }
 
@@ -52,19 +57,14 @@ class TileContentServiceImpl @Inject()(
 
   import TileContentService._
 
-  val requestConfig = RequestConfig.custom()
-    .setConnectTimeout(connectTimeout.toMillis.toInt)
-    .setSocketTimeout(socketTimeout.toMillis.toInt)
-    .build()
-
   // TODO inject a client properly
-  val client = HttpClientBuilder.create()
-    .setDefaultRequestConfig(requestConfig)
+  val client: CloseableHttpClient = HttpClientBuilder
+    .create()
     .setMaxConnTotal(250)
     .setMaxConnPerRoute(100)
     .build()
 
-  val preferenceCacheDuration = config
+  val preferenceCacheDuration: FiniteDuration = config
     .getInt("mywarwick.cache.tile-preferences.seconds").map(_.seconds)
     .getOrElse(throw new IllegalStateException("Missing default"))
 
@@ -87,9 +87,11 @@ class TileContentServiceImpl @Inject()(
                   logger.error(s"Error requesting preferences for tile ${tile.id}, res: $res")
                   (tile.id, Json.obj())
               }
-            ).recover { case e =>
-              logger.error("Error requesting preferences for tile ${tile.id}", e)
-              (tile.id, Json.obj())
+            )
+            .recover {
+              case e =>
+                logger.error("Error requesting preferences for tile ${tile.id}", e)
+                (tile.id, Json.obj())
             }
         }
       }.getOrElse(Future.successful((tile.id, Json.obj())))
@@ -101,6 +103,7 @@ class TileContentServiceImpl @Inject()(
     tileInstance.tile.fetchUrl.map { fetchUrl =>
       Future {
         val request = jsonPost(fetchUrl, tileInstance.preferences)
+
         user.foreach(user => signRequest(trustedApp, user.usercode.string, request))
 
         var response: CloseableHttpResponse = null
@@ -108,6 +111,7 @@ class TileContentServiceImpl @Inject()(
         val serviceName = tileInstance.tile.title.toLowerCase
 
         val result = Try {
+          request.setConfig(getRequestConfigForTile(tileInstance))
           response = client.execute(request)
           val body = CharStreams.toString(new InputStreamReader(response.getEntity.getContent, Charsets.UTF_8))
           val apiResponse = Json.parse(body).as[API.Response[JsObject]]
@@ -133,10 +137,9 @@ class TileContentServiceImpl @Inject()(
 
         result.get
       }
+    }.getOrElse {
+      Future.failed(new IllegalArgumentException(s"Tile type ${tileInstance.tile.id} does not have a fetch URL"))
     }
-      .getOrElse {
-        Future.failed(new IllegalArgumentException(s"Tile type ${tileInstance.tile.id} does not have a fetch URL"))
-      }
 
   private def error(kind: Symbol, message: String): API.Failure[JsObject] = {
     API.Failure("error", Seq(API.Error(kind.name, message)))
@@ -145,7 +148,7 @@ class TileContentServiceImpl @Inject()(
   // For test overriding - if we cared that this was lame we could pull all TA ops
   // out into a service, no object functions
   def signRequest(trustedApp: CurrentApplication, usercode: String, request: HttpUriRequest) =
-  TrustedApplicationUtils.signRequest(trustedApp, usercode, request)
+    TrustedApplicationUtils.signRequest(trustedApp, usercode, request)
 
   private def jsonPost(url: String, postData: Option[JsObject]) = {
     val request = new HttpPost(url)

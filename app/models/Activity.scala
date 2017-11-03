@@ -5,13 +5,13 @@ import org.joda.time.DateTime
 import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import warwick.sso.Usercode
+import warwick.sso.{User, Usercode}
 import play.api.libs.json.Reads.filter
 import uk.ac.warwick.util.core.StringUtils
 
 case class ActivityIcon(name: String, colour: Option[String])
 object ActivityIcon {
-  implicit val writes = Json.writes[ActivityIcon]
+  implicit val writes: Writes[ActivityIcon] = Json.writes[ActivityIcon]
 }
 
 case class Activity(
@@ -28,6 +28,7 @@ case class Activity(
   replacedBy: Option[String],
   publishedAt: DateTime,
   createdAt: DateTime,
+  createdBy: Usercode,
   shouldNotify: Boolean,
   api: Boolean,
   audienceId: Option[String] = None,
@@ -36,7 +37,25 @@ case class Activity(
 )
 
 object Activity {
-  implicit val writes = Json.writes[Activity]
+  implicit val writes: Writes[Activity] = new Writes[Activity] {
+    override def writes(o: Activity): JsValue = Json.obj(
+      "id" -> o.id,
+      "providerId" -> o.providerId,
+      "type" -> o.`type`,
+      "title" -> o.title,
+      "text" -> o.text,
+      "url" -> o.url,
+      "replacedBy" -> o.replacedBy,
+      "publishedAt" -> o.publishedAt,
+      "createdAt" -> o.createdAt,
+      // omitted createdBy
+      "shouldNotify" -> o.shouldNotify,
+      "api" -> o.api,
+      "audienceId" -> o.audienceId,
+      "publisherId" -> o.publisherId,
+      "sendEmail" -> o.sendEmail
+    )
+  }
 }
 
 object ActivityRender {
@@ -84,13 +103,14 @@ case class ActivityRender(
 ) extends ActivityRenderFields
 
 object ActivityRenderWithAudience {
-  def applyWithAudience(activityRender: ActivityRender, audienceSize: AudienceSize, audience: Audience, sentCount: Int) =
+  def applyWithAudience(activityRender: ActivityRender, audienceSize: AudienceSize, createdBy: User, audience: Audience, sentCount: Int) =
     ActivityRenderWithAudience(
       activity = activityRender.activity,
       icon = activityRender.icon,
       tags = activityRender.tags,
       provider = activityRender.provider,
       `type` = activityRender.`type`,
+      createdBy = createdBy,
       audienceSize = audienceSize,
       audienceComponents = audience.components,
       sentCount = sentCount
@@ -103,6 +123,7 @@ case class ActivityRenderWithAudience(
   tags: Seq[ActivityTag],
   provider: ActivityProvider,
   `type`: ActivityType,
+  createdBy: User,
   audienceSize: AudienceSize,
   audienceComponents: Seq[Audience.Component],
   sentCount: Int

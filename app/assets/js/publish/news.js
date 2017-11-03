@@ -2,7 +2,6 @@ import $ from 'jquery';
 import log from 'loglevel';
 import './datetimepicker';
 import './form-pagination';
-import './audience-estimate';
 
 const NEWS_ITEM = '.news-item';
 

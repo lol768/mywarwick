@@ -48,4 +48,9 @@ export default class CourseworkTile extends ListTile {
       </div>
     );
   }
+
+  getLargeBody() {
+    // fall back to List Tile's listification of things
+    return super.getSmallBody();
+  }
 }
