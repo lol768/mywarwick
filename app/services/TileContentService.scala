@@ -21,7 +21,7 @@ import play.api.libs.ws.WSClient
 import system.CacheMethods._
 import system.{Logging, ThreadPools}
 import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils}
-import warwick.sso.User
+import warwick.sso.Usercode
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -41,11 +41,9 @@ object TileContentService {
 
 @ImplementedBy(classOf[TileContentServiceImpl])
 trait TileContentService {
-
   def getTilesOptions(tiles: Seq[Tile]): Future[JsValue]
 
-  def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]]
-
+  def getTileContent(user: Option[Usercode], tileInstance: TileInstance): Future[API.Response[JsObject]]
 }
 
 class TileContentServiceImpl @Inject()(
@@ -99,12 +97,12 @@ class TileContentServiceImpl @Inject()(
   }
 
   // TODO cache
-  override def getTileContent(user: Option[User], tileInstance: TileInstance): Future[API.Response[JsObject]] =
+  override def getTileContent(usercode: Option[Usercode], tileInstance: TileInstance): Future[API.Response[JsObject]] =
     tileInstance.tile.fetchUrl.map { fetchUrl =>
       Future {
         val request = jsonPost(fetchUrl, tileInstance.preferences)
 
-        user.foreach(user => signRequest(trustedApp, user.usercode.string, request))
+        usercode.foreach(usercode => signRequest(trustedApp, usercode.string, request))
 
         var response: CloseableHttpResponse = null
 
@@ -117,13 +115,13 @@ class TileContentServiceImpl @Inject()(
           val apiResponse = Json.parse(body).as[API.Response[JsObject]]
 
           if (!apiResponse.success) {
-            logger.warn(s"Content provider returned failure: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}, response=$body")
+            logger.warn(s"Content provider returned failure: user=${usercode.map(_.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}, response=$body")
           }
 
           apiResponse
         }.recover {
           case e =>
-            logger.warn(s"Error fetching tile content: user=${user.map(_.usercode.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}", e)
+            logger.warn(s"Error fetching tile content: user=${usercode.map(_.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}", e)
             throw e
         }.recover {
           case _: JsonProcessingException | _: JsResultException => error('parse, s"The $serviceName service returned an unexpected response.")

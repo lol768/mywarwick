@@ -65,12 +65,12 @@ class TileContentServiceTest extends BaseSpec with ScalaFutures with MockitoSuga
     "fetch a Tile's URL" in {
       ExternalServers.runServer(handler) { port =>
         val ut = userPrinterTile(Some(s"http://localhost:${port}/content/printcredits"))
-        service.getTileContent(Some(user), ut).futureValue must be(response)
+        service.getTileContent(Some(user.usercode), ut).futureValue must be(response)
       }
     }
 
      "return a failed Future if the tile does not have a fetch URL" in {
-      val content = service.getTileContent(Some(user), userPrinterTile(None))
+      val content = service.getTileContent(Some(user.usercode), userPrinterTile(None))
 
       content.failed.futureValue mustBe an[IllegalArgumentException]
     }
