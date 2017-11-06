@@ -16,6 +16,7 @@ import GridSizingHelper from '../../GridSizingHelper';
 import { Routes } from '../AppRoot';
 import wrapKeyboardSelect from '../../keyboard-nav';
 import { pluralise } from '../../helpers';
+import { isiPhoneX } from '../../helpers';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -213,7 +214,7 @@ class MeView extends React.PureComponent {
             >{ editing && hiddenTiles.length > 0 ?
               <div
                 key="add-tile-button"
-                className="add-tile-button"
+                className={`add-tile-button ${isiPhoneX()? 'isiPhoneX' : null}`}
                 onClick={this.onAdd}
                 onKeyUp={this.onAdd}
                 role="button"
