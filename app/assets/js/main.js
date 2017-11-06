@@ -31,6 +31,7 @@ import * as ui from './state/ui';
 import * as device from './state/device';
 import * as analytics from './analytics';
 import * as stream from './stream';
+import * as timetableAlarms from './state/timetable-alarms';
 import store, { browserHistory } from './store';
 import AppRoot from './components/AppRoot';
 import bridge from './bridge';
@@ -202,6 +203,8 @@ export function launch(userData) {
     .then(() => store.dispatch(app.promoteNextRevision()));
 
   const persistedUserLinks = persisted('user.links', user.receiveSSOLinks);
+
+  persisted('timetableAlarms', timetableAlarms.update);
 
   /** Initial requests for data */
 

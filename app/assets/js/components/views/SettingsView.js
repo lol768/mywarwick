@@ -112,17 +112,19 @@ class SettingsView extends HideableView {
   }
 
   static shouldShowColourSchemes() {
-    /* eslint-disable no-undef */
-    const native = window.MyWarwickNative;
-    /* eslint-enable no-undef */
+    const native = window.MyWarwickNative; // eslint-disable-line no-undef
     return !native || ('setBackgroundToDisplay' in native);
+  }
+
+  static shouldShowTimetableAlarms() {
+    return ('MyWarwickNative' in window) && ('setTimetableNotificationsEnabled' in window.MyWarwickNative); // eslint-disable-line no-undef, max-len
   }
 
   static renderSingleCount(number) {
     return (
       <div>
-        <span className={ classNames({ 'badge progress-bar-danger': number > 0 }) }>
-          { number }
+        <span className={classNames({ 'badge progress-bar-danger': number > 0 })}>
+          {number}
         </span>
         <i className="fa fa-fw fa-chevron-right" />
       </div>
@@ -133,7 +135,7 @@ class SettingsView extends HideableView {
     const fraction = (number === total) ? 'All' : `${number}/${total}`;
     return (
       <div>
-        { fraction }
+        {fraction}
         <i className="fa fa-fw fa-chevron-right" />
       </div>
     );
@@ -178,7 +180,7 @@ class SettingsView extends HideableView {
     }
     return (
       <div>
-        { (enabled) ? 'Enabled' : 'Disabled' }
+        {(enabled) ? 'Enabled' : 'Disabled'}
         <i className="fa fa-fw fa-chevron-right" />
       </div>
     );
@@ -335,6 +337,14 @@ class SettingsView extends HideableView {
     }, e);
   }
 
+  onTimetableAlarms = (e) => {
+    wrapKeyboardSelect(() => {
+      this.props.dispatch(
+        push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TIMETABLE_ALARMS}`),
+      );
+    }, e);
+  };
+
   static onSendFeedback(e) {
     wrapKeyboardSelect(loadDeviceDetails, e);
   }
@@ -360,8 +370,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={ this.onTilePreferences }
-              onKeyUp={ this.onTilePreferences }
+              onClick={this.onTilePreferences}
+              onKeyUp={this.onTilePreferences}
             >
               {SettingsView.renderSetting(
                 'check-square-o',
@@ -374,8 +384,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={ this.onColourScheme }
-              onKeyUp={ this.onColourScheme }
+              onClick={this.onColourScheme}
+              onKeyUp={this.onColourScheme}
             >
               {SettingsView.renderSetting(
                 'paint-brush',
@@ -392,8 +402,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={ this.onNotificationMutes }
-              onKeyUp={ this.onNotificationMutes }
+              onClick={this.onNotificationMutes}
+              onKeyUp={this.onNotificationMutes}
             >
               {SettingsView.renderSetting(
                 'bell-slash-o',
@@ -419,8 +429,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={ this.onSMS }
-              onKeyUp={ this.onSMS }
+              onClick={this.onSMS}
+              onKeyUp={this.onSMS}
             >
               {SettingsView.renderSetting(
                 'mobile',
@@ -455,8 +465,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={ this.onLocationPreferences }
-              onKeyUp={ this.onLocationPreferences }
+              onClick={this.onLocationPreferences}
+              onKeyUp={this.onLocationPreferences}
             >
               {SettingsView.renderSetting(
                 'map-signs',
@@ -473,13 +483,36 @@ class SettingsView extends HideableView {
             </div>
           </div>
 
+          {SettingsView.shouldShowTimetableAlarms() &&
           <div className="list-group setting-colour-2">
             <div
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={ this.onActivityFilter }
-              onKeyUp={ this.onActivityFilter }
+              onClick={this.onTimetableAlarms}
+              onKeyUp={this.onTimetableAlarms}
+            >
+              {SettingsView.renderSetting(
+                'bell',
+                'Timetable alarms',
+                <div>
+                  {this.props.timetableAlarms.enabled ?
+                    `${this.props.timetableAlarms.minutesBeforeEvent} minutes before` :
+                    'Off'}
+                  <i className="fa fa-fw fa-chevron-right" />
+                </div>,
+              )}
+            </div>
+          </div>
+          }
+
+          <div className="list-group setting-colour-2">
+            <div
+              className="list-group-item"
+              role="button"
+              tabIndex={0}
+              onClick={this.onActivityFilter}
+              onKeyUp={this.onActivityFilter}
             >
               {SettingsView.renderSetting(
                 'dashboard',
@@ -494,8 +527,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={ this.onNotificationFilter }
-              onKeyUp={ this.onNotificationFilter }
+              onClick={this.onNotificationFilter}
+              onKeyUp={this.onNotificationFilter}
             >
               {SettingsView.renderSetting(
                 'bell-o',
@@ -513,8 +546,8 @@ class SettingsView extends HideableView {
               className="list-group-item"
               role="button"
               tabIndex={0}
-              onClick={ SettingsView.onSendFeedback }
-              onKeyUp={ SettingsView.onSendFeedback }
+              onClick={SettingsView.onSendFeedback}
+              onKeyUp={SettingsView.onSendFeedback}
             >
               <div className="media">
                 <div className="media-left feedback">
@@ -660,6 +693,7 @@ const select = (state) => {
     assetsRevision: state.app.assets.revision,
     appVersion: state.app.native.version,
     isOnline: state.device.isOnline,
+    timetableAlarms: state.timetableAlarms,
   };
 };
 
