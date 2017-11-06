@@ -23,6 +23,7 @@ import TilePreferencesView from './views/settings/TilePreferencesView';
 import ColourSchemesView from './views/settings/ColourSchemesView';
 import TileOptionView from './views/settings/TileOptionView';
 import PostTourView from './views/PostTourView';
+import TimetableAlarmsView from './views/settings/TimetableAlarmsView';
 import {
   ActivityStreamFilterOptionView,
   NotificationStreamFilterOptionView,
@@ -50,6 +51,7 @@ export const Routes = {
     ACTIVITY_FILTER: 'activityfilter',
     NOTIFICATION_FILTER: 'notificationfilter',
     SMS: 'sms',
+    TIMETABLE_ALARMS: 'timetable_alarms',
   },
   POST_TOUR: 'post_tour',
 };
@@ -137,6 +139,10 @@ RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NOTIFICATION_FILTER}`] =
 RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.SMS}`] = {
   rendered: false,
   view: SmsNotificationsView,
+};
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TIMETABLE_ALARMS}`] = {
+  rendered: false,
+  view: TimetableAlarmsView,
 };
 
 class AppRoot extends React.Component {
