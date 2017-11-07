@@ -19,14 +19,16 @@ describe('AudiencePicker', () => {
     const props = {
       isGod: false,
       departments: {
-        FU: 'Fun Department',
+        FU: {
+          name: 'Fun Department'
+        },
       },
       
     };
 
     const shallow = enzyme.shallow(<AudiencePicker {...props} />);
 
-    expect(shallow.state('department').name).to.eql(props.departments.FU);
+    expect(shallow.state('department').name).to.eql(props.departments.FU.name);
 
     const deptInput = shallow.find('input[name="audience.department"]').first();
     expect(deptInput.type()).to.eql('input');
@@ -42,9 +44,9 @@ describe('AudiencePicker', () => {
     const props = {
       isGod: false,
       departments: {
-        FU: 'Fun Department',
-        MU: 'Agriculture Department',
-        PU: 'Sewage Department',
+        FU: { name: 'Fun Department' },
+        MU: { name: 'Agriculture Department' },
+        PU: { name: 'Sewage Department' },
       },
       
     };
@@ -68,9 +70,9 @@ describe('AudiencePicker', () => {
     const props = {
       isGod: true,
       departments: {
-        FU: 'Fun Department',
-        MU: 'Agriculture Department',
-        PU: 'Sewage Department',
+        FU: { name: 'Fun Department' },
+        MU: { name: 'Agriculture Department' },
+        PU: { name: 'Sewage Department' },
       },
       
     };
@@ -121,8 +123,8 @@ describe('AudiencePicker', () => {
       isGod: false,
       formData,
       departments: {
-        FU: 'Fun Department',
-        MU: 'Agriculture Department',
+        FU: { name: 'Fun Department' },
+        MU: { name: 'Agriculture Department' },
       },
       deptSubsetOpts,
       locationOpts,
@@ -153,7 +155,7 @@ describe('AudiencePicker', () => {
     const props = {
       isGod: false,
       departments: {
-        MU: 'Agriculture Department',
+        MU: { name: 'Agriculture Department' },
       },
       deptSubsetOpts,
       locationOpts,
@@ -175,7 +177,7 @@ describe('AudiencePicker', () => {
     const props = {
       isGod: false,
       departments: {
-        MU: 'Agriculture Department',
+        MU: { name: 'Agriculture Department' },
       },
       audienceDidUpdate: () => {},
     };
@@ -205,7 +207,7 @@ describe('AudiencePicker', () => {
     const props = {
       isGod: false,
       departments: {
-        MU: 'Agriculture Department',
+        MU: { name: 'Agriculture Department' },
       },
       audienceDidUpdate: () => {},
     };
@@ -226,4 +228,20 @@ describe('AudiencePicker', () => {
     expect(shallow.find('.list-group').at(1).find(RadioButton).at(1).prop('isChecked')).to.eql(true);
   });
 
+  it('only displays \'groups\' ui for teaching departments', () => {
+    const props = {
+      isGod: false,
+      departments: {
+        MU: { name: 'Agriculture Department', faculty: 'X' }, // faculty:X indicates non-teaching dept
+      },
+      audienceDidUpdate: () => {},
+    };
+
+    const shallow = enzyme.shallow(<AudiencePicker {...props} />,  { context });
+
+    expect(shallow.find('.list-group').first().find(RadioButton).length).to.eql(1);
+    shallow.setState({ department: { code: 'FU', name: 'Fun Department', faculty: 'Arts' } });
+    expect(shallow.find('.list-group').first().find(RadioButton).length).to.eql(2);
+    expect(shallow.find('.list-group').first().find(RadioButton).at(1).props().label).to.contain('Groups in Fun Department');
+  })
 });

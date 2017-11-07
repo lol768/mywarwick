@@ -3,12 +3,13 @@
 @import views.html._
 @import models.publishing.PermissionScope
 @import models.publishing.Publisher
+@import services.dao.DepartmentInfo
 
 @(
     publisher: Publisher,
     id: String,
     form: Form[PublishNewsItemData],
-    departmentOptions: Seq[(String, String)],
+    departmentOptions: Seq[DepartmentInfo],
     categories: Seq[NewsCategory],
     permissionScope: PermissionScope,
     audience: Audience

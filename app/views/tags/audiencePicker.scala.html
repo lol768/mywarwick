@@ -1,11 +1,12 @@
 @import models.publishing.PermissionScope
 @import play.api.libs.json.{Json, JsValue}
 @import models.Audience._
+@import services.dao.DepartmentInfo
 
 @(
     form: Form[_],
     fieldName: String,
-    departmentOptions: Seq[(String, String)],
+    departmentOptions: Seq[DepartmentInfo],
     itemName: String,
     permissionScope: PermissionScope,
     allowPublic: Boolean,
@@ -21,7 +22,13 @@
   data-errors='@form.errorsAsJson'
   data-location-opts='@Json.obj(LocationOptIn.values.map(loc => loc.value -> Json.toJsFieldJsValueWrapper(loc.description)): _*)'
   data-dept-subset-opts='@Json.obj(deptSubsets.map(ds => ds.toString -> Json.toJsFieldJsValueWrapper(ds.displayName)):_*)'
-  data-departments='@Json.obj(departmentOptions.map { case (code, name) => code -> Json.toJsFieldJsValueWrapper(name) }: _*)'
+  data-departments='@Json.obj(
+    departmentOptions.map(d =>
+      d.code -> Json.toJsFieldJsValueWrapper(Json.obj(
+        "name" -> d.name,
+        "faculty" -> d.faculty
+      ))
+    ):_*)'
   class="audience-picker" class="form-group col-md-12">
   </div>
 }

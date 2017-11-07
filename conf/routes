@@ -159,3 +159,5 @@ POST          /service/grouplookup/module                    @controllers.publis
 POST          /service/grouplookup/seminargroup              @controllers.publish.GroupLookupController.querySeminarGroup
 POST          /service/grouplookup/relationships             @controllers.publish.GroupLookupController.queryRelationships
 
+POST          /api/timetable/register                        @controllers.api.TimetablesController.register
+GET           /api/timetable                                 @controllers.api.TimetablesController.get
