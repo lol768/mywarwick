@@ -15,8 +15,7 @@ import ScrollRestore from '../ui/ScrollRestore';
 import GridSizingHelper from '../../GridSizingHelper';
 import { Routes } from '../AppRoot';
 import wrapKeyboardSelect from '../../keyboard-nav';
-import { pluralise } from '../../helpers';
-import { isiPhoneX } from '../../helpers';
+import { pluralise, isiPhoneX } from '../../helpers';
 
 const rowHeight = 125;
 const margin = [4, 4];
