@@ -50,7 +50,7 @@ export default class AccountTile extends TileContent {
 
   static getLink() {
     return (
-      <li className="text-overflow-block">
+      <li>
         <div className="text-right">
           <Hyperlink
             href="//warwick.ac.uk/myaccount"
@@ -80,7 +80,7 @@ export default class AccountTile extends TileContent {
 
   static getMediaLeft(user) {
     return (
-      <div className="media-left">
+      <div className="flex-photo">
         {user.photo && user.photo.url &&
         <Hyperlink href="//photos.warwick.ac.uk/yourphoto">
           <AccountPhoto user={user} className="media-object media-object-img-fix" />
@@ -206,7 +206,7 @@ export default class AccountTile extends TileContent {
 
   static makeLineItem(content, icon) {
     return (
-      <li className="text-overflow-block">
+      <li>
         <i className={`fa fa-fw ${icon}`} />
         {content}
       </li>
@@ -250,9 +250,9 @@ export default class AccountTile extends TileContent {
     const user = this.props.user;
 
     return (
-      <div className="media">
+      <div className="flex-container">
         {AccountTile.getMediaLeft(user)}
-        <div className="media-body">
+        <div className="flex-content">
           <ul className="list-unstyled">
             {AccountTile.makeFullName(member)}
             {AccountTile.makeEmail(member)}
