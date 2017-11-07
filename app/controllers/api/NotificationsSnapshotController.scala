@@ -19,13 +19,12 @@ class NotificationsSnapshotController @Inject()(
 
   val WARWICK_SSO_COOKIE_NAME: String = "WarwickSSO"
 
-  def invalidOrigin(headerOption: Option[String]): Boolean = {
-    headerOption.fold(true)(headerToCheck => {
-      !(
-        (headerToCheck.startsWith("https://") && headerToCheck.endsWith(".warwick.ac.uk")) ||
-        headerToCheck.equals("http://www2.warwick.ac.uk") // special case for sitebuilder
-        )
-    })
+  def isValidOrigin(headerOption: Option[String]): Boolean = {
+    headerOption.exists(origin =>
+      (origin.startsWith("https://") && origin.endsWith(".warwick.ac.uk"))
+        || origin.endsWith("://warwick.ac.uk")
+        || origin.endsWith("://www2.warwick.ac.uk")
+    )
   }
 
   /**
@@ -37,7 +36,7 @@ class NotificationsSnapshotController @Inject()(
     val originHeader = request.headers.get(ORIGIN)
     val cookie = request.cookies.get(WARWICK_SSO_COOKIE_NAME)
 
-    if (invalidOrigin(originHeader))
+    if (!isValidOrigin(originHeader))
       Forbidden("Not permitted: CORS origin not allowed.")
     else
       cookie.map(_.value).map(lookup.getUserByToken).filter(_.isFoundUser).map { user =>
