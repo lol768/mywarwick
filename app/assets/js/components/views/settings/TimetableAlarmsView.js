@@ -44,8 +44,8 @@ class TimetableAlarmsView extends HideableView {
 
         <div className="hint-text container-fluid">
           <p>
-            Turning Timetable alarms on will show a notification and play a sound shortly before
-            every event in your teaching timetable.
+            Turning Timetable alarms on will show a notification and play a sound on this device
+            shortly before every event in your teaching timetable.
           </p>
         </div>
 
