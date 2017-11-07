@@ -55,6 +55,18 @@
   .id7-left-border, .id7-right-border, .id7-utility-masthead { background-color: gold; }
 }
 
+.set-hint-text-colour(@bgColour) when (lightness(@bgColour) > 40) {
+  .hint-text {
+    color: #ffffff;
+  }
+}
+
+.set-hint-text-colour(@bgColour) when (lightness(@bgColour) < 41) {
+  .hint-text {
+    color: #000000;
+  }
+}
+
 .transparent-theme-maker-helper(@baseColour, @gradBg, @gradTh, @imageUrl, @highContrastFallback) {
 
   html.not-app& {
@@ -92,11 +104,20 @@
       }
     }
 
-    &.in-add h3 {
-      margin: 0;
-      padding: 20px 0 20px 14px;
-      background: @transparent;
-      color: #fff;
+    &.in-add {
+      h3 {
+        margin: 0;
+        padding: 20px 0 20px 14px;
+        background: @transparent;
+        color: #fff;
+      }
+
+      .hint-text {
+        text-align: center;
+      }
+
+      .set-hint-text-colour(@baseColour);
+
     }
 
     html& {
