@@ -11,9 +11,7 @@ export function pluralise(unit, count, plural) {
 }
 
 export function isiPhoneX() {
-  /* eslint-disable */
-  const theWindow = window;
-  /* eslint-enable */
+  const theWindow = window; /* eslint-disable-line no-undef */
   const height = theWindow.screen.height;
   const width = theWindow.screen.width;
   return (height === 812 && width === 375);
