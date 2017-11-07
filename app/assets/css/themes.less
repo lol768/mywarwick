@@ -55,14 +55,14 @@
   .id7-left-border, .id7-right-border, .id7-utility-masthead { background-color: gold; }
 }
 
-.set-hint-text-colour(@bgColour) when (lightness(@bgColour) > 40) {
-  .hint-text {
+.set-empty-state-text-colour(@bgColour) when (lightness(@bgColour) > 40) {
+  .empty-state {
     color: #ffffff;
   }
 }
 
-.set-hint-text-colour(@bgColour) when (lightness(@bgColour) < 41) {
-  .hint-text {
+.set-empty-state-text-colour(@bgColour) when (lightness(@bgColour) < 41) {
+  .empty-state {
     color: #000000;
   }
 }
@@ -111,12 +111,10 @@
         background: @transparent;
         color: #fff;
       }
-
-      .hint-text {
+      .set-empty-state-text-colour(@baseColour);
+      .empty-state {
         text-align: center;
       }
-
-      .set-hint-text-colour(@baseColour);
 
     }
 
