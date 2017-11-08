@@ -24,7 +24,7 @@ class WebPushOutputService @Inject()(
   import system.ThreadPools.mobile
 
   val apiKey = configuration.getString("mywarwick.fcm.apiKey")
-    .getOrElse(throw new IllegalStateException("Missing GCM API key - set mywarwick.fcm.apiKey"))
+    .getOrElse(throw new IllegalStateException("Missing FCM API key - set mywarwick.fcm.apiKey"))
 
   val pushService = new PushService
   pushService.setGcmApiKey(apiKey)
