@@ -213,7 +213,7 @@ class MeView extends React.PureComponent {
             >{ editing && hiddenTiles.length > 0 ?
               <div
                 key="add-tile-button"
-                className={"add-tile-button"}
+                className="add-tile-button"
                 onClick={this.onAdd}
                 onKeyUp={this.onAdd}
                 role="button"
