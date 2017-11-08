@@ -15,7 +15,7 @@ import ScrollRestore from '../ui/ScrollRestore';
 import GridSizingHelper from '../../GridSizingHelper';
 import { Routes } from '../AppRoot';
 import wrapKeyboardSelect from '../../keyboard-nav';
-import { pluralise, isiPhoneX } from '../../helpers';
+import { pluralise } from '../../helpers';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -213,7 +213,7 @@ class MeView extends React.PureComponent {
             >{ editing && hiddenTiles.length > 0 ?
               <div
                 key="add-tile-button"
-                className={`add-tile-button ${isiPhoneX()? 'is-iphone-x' : null}`}
+                className={"add-tile-button"}
                 onClick={this.onAdd}
                 onKeyUp={this.onAdd}
                 role="button"

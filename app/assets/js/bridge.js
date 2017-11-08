@@ -16,6 +16,7 @@ import { Routes } from './components/AppRoot';
 import { navRequest } from './state/ui';
 import { loadNative } from './state/app';
 import { showFeedbackForm } from './userinfo';
+import { isiPhoneX } from './helpers';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -122,6 +123,9 @@ export default function init(opts) {
   if (/iPad|iPhone|iPod/.test(userAgent)) {
     $html.addClass('ios');
   }
+
+  if (isiPhoneX()) $html.addClass('is-iphone-x');
+
 
   if (navigator.standalone) {
     $html.addClass('standalone');
