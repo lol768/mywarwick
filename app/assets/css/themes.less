@@ -55,18 +55,6 @@
   .id7-left-border, .id7-right-border, .id7-utility-masthead { background-color: gold; }
 }
 
-.set-empty-state-text-colour(@bgColour) when (lightness(@bgColour) > 40) {
-  .empty-state {
-    color: #ffffff;
-  }
-}
-
-.set-empty-state-text-colour(@bgColour) when (lightness(@bgColour) < 41) {
-  .empty-state {
-    color: #000000;
-  }
-}
-
 .transparent-theme-maker-helper(@baseColour, @gradBg, @gradTh, @imageUrl, @highContrastFallback) {
 
   html.not-app& {
@@ -111,9 +99,10 @@
         background: @transparent;
         color: #fff;
       }
-      .set-empty-state-text-colour(@baseColour);
       .empty-state {
+        color: contrast(@baseColour);
         text-align: center;
+        line-height: 50vh;
       }
 
     }
