@@ -92,11 +92,19 @@
       }
     }
 
-    &.in-add h3 {
-      margin: 0;
-      padding: 20px 0 20px 14px;
-      background: @transparent;
-      color: #fff;
+    &.in-add {
+      h3 {
+        margin: 0;
+        padding: 20px 0 20px 14px;
+        background: @transparent;
+        color: #fff;
+      }
+      .empty-state {
+        color: contrast(@baseColour);
+        text-align: center;
+        margin-top: ~"calc(50vh - @{start-masthead-and-tab-bar-height} - 10vh)";
+      }
+
     }
 
     html& {
