@@ -100,9 +100,11 @@
         color: #fff;
       }
       .empty-state {
-        color: contrast(@baseColour);
-        text-align: center;
-        line-height: 50vh;
+        .lead {
+          color: contrast(@baseColour);
+          text-align: center;
+          margin-top: ~"calc(50vh - @{start-masthead-and-tab-bar-height} - 10vh)";
+        }
       }
 
     }

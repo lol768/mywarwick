@@ -79,7 +79,7 @@ class AddingTilesView extends React.PureComponent {
           >
             { hiddenTileComponents }
           </ReactGridLayoutBase>
-          : <EmptyState>There are no more tiles available to add</EmptyState>
+          : <EmptyState lead="There are no more tiles available to add" />
         }
       </div>
     );
