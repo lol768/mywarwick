@@ -5,6 +5,7 @@ import anorm.SqlParser._
 import helpers.{BaseSpec, Fixtures, OneStartAppPerSuite}
 import models.{ActivitySave, AudienceSize}
 import org.joda.time.DateTime
+import org.scalatest.Matchers._
 import warwick.anorm.converters.ColumnConversions._
 
 class ActivityRecipientDaoTest extends BaseSpec with OneStartAppPerSuite {
