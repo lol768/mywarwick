@@ -230,9 +230,9 @@ export default class AccountTile extends TileContent {
     const member = this.props.content;
     const user = this.props.user;
     return (
-      <div className="media">
+      <div className="flex-container">
         {AccountTile.getMediaLeft(user)}
-        <div className="media-body">
+        <div className="flex-content">
           <ul className="list-unstyled">
             {AccountTile.makeFullName(member)}
             {AccountTile.makeEmail(member)}
