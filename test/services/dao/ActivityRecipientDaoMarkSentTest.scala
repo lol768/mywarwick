@@ -1,6 +1,5 @@
 package services.dao
 
-import akka.actor.ActorSystem
 import anorm._
 import anorm.SqlParser._
 import helpers.{BaseSpec, Fixtures, OneStartAppPerSuite}
@@ -8,7 +7,8 @@ import models.{ActivitySave, AudienceSize}
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 
 /**
   * Testing concurrency of markSent. This is in its own test suite because it
@@ -18,8 +18,6 @@ class ActivityRecipientDaoMarkSentTest extends BaseSpec with OneStartAppPerSuite
 
   val activityDao: ActivityDao = get[ActivityDao]
   val activityRecipientDao: ActivityRecipientDao = get[ActivityRecipientDao]
-
-  val akka = get[ActorSystem]
   
   val activitySave: ActivitySave = Fixtures.activitySave.submissionDue
   val audienceId = "audience"
@@ -27,30 +25,31 @@ class ActivityRecipientDaoMarkSentTest extends BaseSpec with OneStartAppPerSuite
   "ActivityRecipientDao" should {
 
     "mark activity as sent concurrency" in {
-      implicit val executor = akka.dispatcher
+      import scala.concurrent.ExecutionContext.Implicits.global
 
       val COUNT = 10
       val usercodes: Seq[String] = (1 to COUNT).map(i => s"user$i")
       usercodes must have length COUNT
 
-      var activityId: String = null // yes
-
-      transaction(rollback=false) { implicit c =>
-        activityId = activityDao.save(activitySave, audienceId, AudienceSize.Finite(COUNT), Nil)
+      // create the activity recipients
+      val activityId = transaction(rollback=false) { implicit c =>
+        val id = activityDao.save(activitySave, audienceId, AudienceSize.Finite(COUNT), Nil)
         usercodes.foreach { usercode =>
-          activityRecipientDao.create(activityId, usercode, None, shouldNotify = false)
+          activityRecipientDao.create(id, usercode, None, shouldNotify = false)
+        }
+        id
+      }
+
+      val markedSent = for {
+        usercode <- usercodes
+        _ <- 1 to 5
+      } yield Future {
+        transaction(rollback=false) { implicit c =>
+          activityRecipientDao.markSent(activityId, usercode)
         }
       }
 
-      val marked: Future[Unit] = Future.sequence(usercodes.flatMap { usercode =>
-        for (i <- 1 to 5) yield Future {
-          transaction(rollback=false) { implicit c =>
-            activityRecipientDao.markSent(activityId, usercode)
-          }
-        }
-      }).map(_ => Unit)
-
-      marked.futureValue
+      Await.result(Future.sequence(markedSent), 5.seconds)
 
       transaction { implicit c =>
         val count = SQL"SELECT SENT_COUNT FROM ACTIVITY WHERE ID = $activityId"

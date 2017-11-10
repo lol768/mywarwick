@@ -2,23 +2,25 @@ package helpers
 
 import java.sql.Connection
 
+import akka.stream.Materializer
 import org.scalatest.{Suite, TestSuite}
 import org.scalatestplus.play.OneAppPerSuite
+import play.api.Application
 import play.api.db.Database
 
 import scala.reflect.ClassTag
 
 trait OneStartAppPerSuite extends TestSuite with OneAppPerSuite {
 
-  implicit override lazy val app = TestApplications.full()
-  implicit lazy val mat = app.materializer
+  implicit override lazy val app: Application = TestApplications.full()
+  implicit lazy val mat: Materializer = app.materializer
 
   def get[T : ClassTag]: T = app.injector.instanceOf[T]
 
-  def transaction(block: Connection => Unit): Unit =
+  def transaction[T](block: Connection => T): T =
     transaction(rollback = true)(block)
 
-  def transaction(rollback: Boolean)(block: Connection => Unit): Unit = {
+  def transaction[T](rollback: Boolean)(block: Connection => T): T = {
     val database = app.injector.instanceOf[Database]
     val connection = database.getConnection(autocommit = false)
 
