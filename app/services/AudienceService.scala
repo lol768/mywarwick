@@ -80,10 +80,16 @@ class AudienceServiceImpl @Inject()(
     component match {
       case All => webgroupUsers(GroupName("all-all"))
       case Staff => webgroupUsers(GroupName("all-staff"))
-      case UndergradStudents => for {
-        ft <- webgroupUsers(GroupName("all-studenttype-undergraduate-full-time"))
-        pt <- webgroupUsers(GroupName("all-studenttype-undergraduate-part-time"))
-      } yield ft ++ pt
+      case ug: UndergradStudents => ug match {
+        case UndergradStudents.All => for {
+          ft <- webgroupUsers(GroupName("all-studenttype-undergraduate-full-time"))
+          pt <- webgroupUsers(GroupName("all-studenttype-undergraduate-part-time"))
+        } yield ft ++ pt
+        case UndergradStudents.First => ???
+        case UndergradStudents.Second => ???
+        case UndergradStudents.Final => ???
+        case _ => ???
+      }
       case ResearchPostgrads => for {
         ft <- webgroupUsers(GroupName("all-studenttype-postgraduate-research-ft"))
         pt <- webgroupUsers(GroupName("all-studenttype-postgraduate-research-pt"))
@@ -109,7 +115,15 @@ class AudienceServiceImpl @Inject()(
         audienceLookupDao.resolveAdminStaff(departmentCode),
         audienceLookupDao.resolveTeachingStaff(departmentCode)
       )).map(_.flatten.toSeq)
-      case UndergradStudents => audienceLookupDao.resolveUndergraduates(departmentCode)
+      case ug: UndergradStudents => {
+        import UndergradStudents._
+        ug match {
+          case All => audienceLookupDao.resolveUndergraduates(departmentCode, All)
+          case First => audienceLookupDao.resolveUndergraduates(departmentCode, First)
+          case Second => audienceLookupDao.resolveUndergraduates(departmentCode, Second)
+          case Final => audienceLookupDao.resolveUndergraduates(departmentCode, Final)
+        }
+      }
       case ResearchPostgrads => audienceLookupDao.resolveResearchPostgraduates(departmentCode)
       case TaughtPostgrads => audienceLookupDao.resolveTaughtPostgraduates(departmentCode)
       case TeachingStaff => audienceLookupDao.resolveTeachingStaff(departmentCode)
@@ -186,14 +200,16 @@ class AudienceServiceImpl @Inject()(
 
     audience.components.foreach {
       case ds: DepartmentSubset => ds match {
-        case All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | UndergradStudents | AdminStaff =>
+        case All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | UndergradStudents.All | UndergradStudents.First
+             | UndergradStudents.Second | UndergradStudents.Final | AdminStaff =>
           departmentSubsets :+= ds.toString
         case subset => matchDeptSubset(subset)
       }
       case DepartmentAudience(code, subsets) => {
         department = code
         subsets.foreach {
-          case subset@(All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | UndergradStudents | AdminStaff) =>
+          case subset@(All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | UndergradStudents.All | UndergradStudents.First
+                       | UndergradStudents.Second | UndergradStudents.Final | AdminStaff) =>
             departmentSubsets :+= s"Dept:${subset.entryName}"
           case subset => matchDeptSubset(subset)
         }

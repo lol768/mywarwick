@@ -66,8 +66,15 @@ object Audience {
     override val displayName = "Administrative Staff"
   }
 
-  case object UndergradStudents extends DepartmentSubset {
-    override val displayName = "Undergraduates"
+  sealed abstract class UndergradStudents(val value: String) extends DepartmentSubset
+
+  object UndergradStudents {
+    case object All extends UndergradStudents("All")
+    case object First extends UndergradStudents("First")
+    case object Second extends UndergradStudents("Second")
+    case object Final extends UndergradStudents("Final")
+    def values = Seq(All, First, Second, Final)
+    def fromValue(value: String): Option[UndergradStudents] = values.find(_.value == value)
   }
 
   case object TaughtPostgrads extends DepartmentSubset {
@@ -101,6 +108,7 @@ object Audience {
   }
 
   val moduleCodeRegex: Regex = "^Module:(.+)".r
+  val undergradRegex: Regex = "^UndergradStudents:(.+)".r
   val seminarGroupRegex: Regex = "^SeminarGroup:(.+)".r
   val relationshipRegex: Regex = "^Relationship:(.+):(.+)".r
   val webGroupRegex: Regex = "^WebGroup:(.+)".r
@@ -111,9 +119,9 @@ object Audience {
       case "Staff" => Some(Staff)
       case "TeachingStaff" => Some(TeachingStaff)
       case "AdminStaff" => Some(AdminStaff)
-      case "UndergradStudents" => Some(UndergradStudents)
       case "TaughtPostgrads" => Some(TaughtPostgrads)
       case "ResearchPostgrads" => Some(ResearchPostgrads)
+      case undergradRegex(group) => UndergradStudents.fromValue(group)
       case webGroupRegex(webGroup) => Some(WebGroupAudience(GroupName(webGroup)))
       case moduleCodeRegex(code) => Some(ModuleAudience(code))
       case seminarGroupRegex(groupId) => Some(SeminarGroupAudience(groupId))

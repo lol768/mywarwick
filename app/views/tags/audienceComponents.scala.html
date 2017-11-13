@@ -1,5 +1,6 @@
 @import services.dao.DepartmentInfo
 @import models.Audience
+@import Audience._
 @(
     components: Seq[Audience.Component],
     allDepartments: Seq[DepartmentInfo]
@@ -7,21 +8,24 @@
 
 @defining(Map("supervisor" -> "Supervisees", "personalTutor" -> "Personal tutees")) { relationships: Map[String, String] =>
   @components.flatMap(component => component match {
-    case Audience.PublicAudience => Seq("Public")
-    case Audience.UsercodesAudience(usercodes) => Seq(s"Usercodes: ${usercodes.map(_.string).mkString(", ")}")
-    case Audience.WebGroupAudience(groupName) => Seq(s"WebGroup: ${groupName.string}")
-    case Audience.ModuleAudience(moduleCode) => Seq(s"Module: ${moduleCode.toUpperCase}")
-    case Audience.RelationshipAudience(rel, agentId) => Seq(s"${relationships.getOrElse(rel, rel)} of ${agentId.string}")
-    case Audience.SeminarGroupAudience(groupId) => Seq(s"Seminar group: $groupId")
-    case loc: Audience.LocationOptIn => Seq(s"Location: ${loc.description}")
-    case dept: Audience.DepartmentAudience =>
+    case PublicAudience => Seq("Public")
+    case UsercodesAudience(usercodes) => Seq(s"Usercodes: ${usercodes.map(_.string).mkString(", ")}")
+    case WebGroupAudience(groupName) => Seq(s"WebGroup: ${groupName.string}")
+    case ModuleAudience(moduleCode) => Seq(s"Module: ${moduleCode.toUpperCase}")
+    case RelationshipAudience(rel, agentId) => Seq(s"${relationships.getOrElse(rel, rel)} of ${agentId.string}")
+    case SeminarGroupAudience(groupId) => Seq(s"Seminar group: $groupId")
+    case loc: LocationOptIn => Seq(s"Location: ${loc.description}")
+    case dept: DepartmentAudience =>
       Seq(s"${tags.mkList(dept.subset.map(_.displayName))} in ${allDepartments.find(_.code == dept.deptCode).map(_.shortName).getOrElse(dept.deptCode)}")
-    case Audience.All => Seq(s"All university members")
-    case Audience.Staff => Seq(s"All staff")
-    case Audience.TeachingStaff => Seq(s"All teaching staff")
-    case Audience.UndergradStudents => Seq(s"All undergraduate students")
-    case Audience.TaughtPostgrads => Seq(s"All taught postgraduates")
-    case Audience.ResearchPostgrads => Seq(s"All research postgraduates")
+    case All => Seq(s"All university members")
+    case Staff => Seq(s"All staff")
+    case TeachingStaff => Seq(s"All teaching staff")
+    case ug: UndergradStudents => ug.value match {
+      case UndergradStudents.All.value => Seq(s"All undergraduate students")
+      case level: String => Seq(s"$level year undergraduate students")
+    }
+    case TaughtPostgrads => Seq(s"All taught postgraduates")
+    case ResearchPostgrads => Seq(s"All research postgraduates")
     case unknown => Seq(unknown.toString)
   }).mkString(", ")
 }
