@@ -89,7 +89,8 @@ class NavigationServiceImpl @Inject()(
       NavigationPage("Publishers", adminPublishersRoutes.PublishersController.index()),
       NavigationPage("Masquerade", adminRoutes.MasqueradeController.masquerade()),
       NavigationPage("Cluster State", adminRoutes.ClusterStateController.html()),
-      NavigationPage("ElasticSearch", controllers.admin.elasticsearch.routes.ActivityToESController.index())
+      NavigationPage("ElasticSearch", controllers.admin.elasticsearch.routes.ActivityToESController.index()),
+      NavigationPage("Preferences Report", controllers.admin.reporting.routes.PreferencesReportingController.index())
     ))
   }
 }
