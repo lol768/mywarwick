@@ -43,7 +43,6 @@ object Activity {
       "providerId" -> o.providerId,
       "type" -> o.`type`,
       "title" -> o.title,
-      "text" -> o.text,
       "url" -> o.url,
       "replacedBy" -> o.replacedBy,
       "publishedAt" -> o.publishedAt,
@@ -54,7 +53,7 @@ object Activity {
       "audienceId" -> o.audienceId,
       "publisherId" -> o.publisherId,
       "sendEmail" -> o.sendEmail
-    )
+    ) ++ o.text.map(text => Json.obj("text" -> text)).getOrElse(Json.obj())
   }
 }
 
