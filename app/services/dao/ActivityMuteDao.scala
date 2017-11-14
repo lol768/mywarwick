@@ -30,6 +30,11 @@ trait ActivityMuteDao {
   def mutesForProvider(provider: ActivityProvider)(implicit c: Connection): Seq[ActivityMute]
 
   def mutesForProviders(providers: Seq[ActivityProvider])(implicit c: Connection): Map[ActivityProvider, Seq[ActivityMute]]
+
+  def mutesCountForProvider(provider: ActivityProvider)(implicit c: Connection): Int
+
+  def mutesCountForProviders(providers: Seq[ActivityProvider])(implicit c: Connection): Int
+
 }
 
 class ActivityMuteDaoImpl extends ActivityMuteDao {
@@ -150,6 +155,16 @@ class ActivityMuteDaoImpl extends ActivityMuteDao {
   }
 
   override def mutesForProviders(providers: Seq[ActivityProvider])(implicit c: Connection) = {
-    val p = providers.flatMap { provider => Map(provider -> this.mutesForProvider(provider)) }.toMap
+    providers.flatMap(provider => Map(provider -> this.mutesForProvider(provider))).toMap
+  }
+
+  override def mutesCountForProvider(provider: ActivityProvider)(implicit c: Connection) = {
+    SQL(s"select count(*) from ACTIVITY_MUTE where PROVIDER_ID = {PROVIDER_ID}")
+      .on("PROVIDER_ID" -> provider.id)
+      .as(scalar[Int].single)
+  }
+
+  override def mutesCountForProviders(providers: Seq[ActivityProvider])(implicit c: Connection) = {
+    providers.map(provider => this.mutesCountForProvider(provider)).sum
   }
 }
