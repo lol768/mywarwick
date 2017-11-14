@@ -27,6 +27,9 @@ trait ActivityMuteDao {
 
   def deleteExpiredBefore(expiredBefore: DateTime)(implicit c: Connection): Int
 
+  def mutesForProvider(provider: ActivityProvider)(implicit c: Connection): Seq[ActivityMute]
+
+  def mutesForProviders(providers: Seq[ActivityProvider])(implicit c: Connection): Map[ActivityProvider, Seq[ActivityMute]]
 }
 
 class ActivityMuteDaoImpl extends ActivityMuteDao {
@@ -140,4 +143,13 @@ class ActivityMuteDaoImpl extends ActivityMuteDao {
       .executeUpdate()
   }
 
+  override def mutesForProvider(provider: ActivityProvider)(implicit c: Connection) = {
+    SQL(s"select * from ACTIVITY_MUTE where PROVIDER_ID = {PROVIDER_ID}")
+      .on("PROVIDER_ID" -> provider.id)
+      .as(activityMuteParser.*)
+  }
+
+  override def mutesForProviders(providers: Seq[ActivityProvider])(implicit c: Connection) = {
+    val p = providers.flatMap { provider => Map(provider -> this.mutesForProvider(provider)) }.toMap
+  }
 }
