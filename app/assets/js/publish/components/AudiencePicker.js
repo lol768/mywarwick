@@ -211,6 +211,56 @@ export class AudiencePicker extends React.PureComponent {
             formPath={prefixPath('.groups')}
           />),
         )}
+
+        <Checkbox
+          handleChange={this.handleChange}
+          isChecked={this.isChecked(prefixPath('.groups.undergraduates'))}
+          label="Undergraduates"
+          value="undergraduates"
+          formPath={prefixPath('.groups')}
+        >
+          <RadioButton
+            handleChange={this.handleChange}
+            isChecked={this.isChecked(prefixPath(`.groups.undergraduates.${prefixDeptSubset("UndergradStudents:All")}`))}
+            label="All"
+            name="audience.audience[]"
+            value={prefixDeptSubset("UndergradStudents:All")}
+            formPath={prefixPath('.groups.undergraduates')}
+          />
+          <RadioButton
+            handleChange={this.handleChange}
+            isChecked={this.isChecked(prefixPath('.groups.undergraduates.year'))}
+            label="Choose year of study"
+            value="year"
+            formPath={prefixPath('.groups.undergraduates')}
+          >
+            <Checkbox
+              handleChange={this.handleChange}
+              isChecked={this.isChecked(prefixPath(`.groups.undergraduates.year.${prefixDeptSubset("UndergradStudents:First")}`))}
+              label="First year"
+              name="audience.audience[]"
+              value={prefixDeptSubset("UndergradStudents:First")}
+              formPath={prefixPath('.groups.undergraduates.year')}
+            />
+            <Checkbox
+              handleChange={this.handleChange}
+              isChecked={this.isChecked(prefixPath(`.groups.undergraduates.year.${prefixDeptSubset("UndergradStudents:Second")}`))}
+              label="Second year"
+              name="audience.audience[]"
+              value={prefixDeptSubset("UndergradStudents:Second")}
+              formPath={prefixPath('.groups.undergraduates.year')}
+            />
+            <Checkbox
+              handleChange={this.handleChange}
+              isChecked={this.isChecked(prefixPath(`.groups.undergraduates.year.${prefixDeptSubset("UndergradStudents:Final")}`))}
+              label="Final year"
+              name="audience.audience[]"
+              value={prefixDeptSubset("UndergradStudents:Final")}
+              formPath={prefixPath('.groups.undergraduates.year')}
+            />
+          </RadioButton>
+        </Checkbox>
+
         <Checkbox
           handleChange={this.handleChange}
           isChecked={this.isChecked(prefixPath('.groups.modules'))}

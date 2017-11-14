@@ -5,6 +5,7 @@ import log from 'loglevel';
 import $ from 'jquery';
 import _ from 'lodash-es';
 import Hyperlink from '../../components/ui/Hyperlink';
+import { mkString } from '../../helpers';
 
 export class AudienceIndicator extends React.PureComponent {
   static propTypes = {
@@ -61,6 +62,7 @@ export class AudienceIndicator extends React.PureComponent {
     const dept = audienceComponents.department;
 
     if (audienceComponents.audience) {
+
       const isUniWide = audienceComponents.audience.universityWide !== undefined;
       const audience = this.props.audienceComponents.audience[isUniWide ? 'universityWide' : 'department'];
 
@@ -87,6 +89,18 @@ export class AudienceIndicator extends React.PureComponent {
                 return _.flatMap(components, rel => rel.options.map(opt => _.map(opt, val => (
                   <div>{val.selected ? `${_.startCase(val.studentRole)}s of ${rel.text}` : ''}</div>
                 ))));
+              case 'undergraduates':
+                if (components !== undefined) {
+                  if (_.has(components, 'year')) {
+                    const years = _.map(components.year, (k, year) => _.last(_.split(year, ':')).toLowerCase());
+                    return years.length ?
+                      <div>
+                        {`All ${mkString(years)} year Undergraduates in ${_.startsWith(years[0], 'Dept:') ? dept.name : 'the University'}`}
+                      </div> : null;
+                  }
+                  return `All Undergraduates in ${_.startsWith(_.first(_.keys(components)), 'Dept:') ? dept.name : 'the University'}`
+                }
+                return null;
               default: {
                 const group = _.startCase(_.replace(audienceType, 'Dept:', ''));
                 return (isUniWide || !_.isEmpty(dept.name)) ?

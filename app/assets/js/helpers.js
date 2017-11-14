@@ -11,6 +11,10 @@ export function pluralise(unit, count, plural) {
   return count === 1 ? unit : (plural || `${unit}s`);
 }
 
+export function mkString(list) {
+  return list.join(', ').replace(/,\s(\w+)$/, " and $1")
+}
+
 export function isiPhoneX() {
   const theWindow = window;
   const height = theWindow.screen.height;
