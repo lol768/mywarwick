@@ -2,7 +2,6 @@ package services.dao
 
 import java.sql.Connection
 import java.util.UUID
-import javax.inject.Inject
 
 import anorm.SqlParser._
 import anorm._
@@ -10,7 +9,6 @@ import com.google.inject.ImplementedBy
 import models._
 import org.joda.time.DateTime
 import play.api.libs.json.{JsArray, Json}
-import services.ProviderRender
 import warwick.anorm.converters.ColumnConversions._
 import warwick.sso.Usercode
 
@@ -31,18 +29,10 @@ trait ActivityMuteDao {
 
   def mutesForProvider(provider: ActivityProvider)(implicit c: Connection): Seq[ActivityMute]
 
-  def mutesForProviders(providers: Seq[ActivityProvider])(implicit c: Connection): Map[ActivityProvider, Seq[ActivityMute]]
-
   def mutesCountForProvider(provider: ActivityProvider)(implicit c: Connection): Int
-
-  def mutesCountForProviders(providers: Seq[ActivityProvider])(implicit c: Connection): Int
-
-  def allMutesGroupedByProviders()(implicit c: Connection): Map[ActivityProvider, List[ActivityMute]]
 }
 
-class ActivityMuteDaoImpl @Inject()(
-  publisherDao: PublisherDao
-) extends ActivityMuteDao {
+class ActivityMuteDaoImpl extends ActivityMuteDao {
 
   override def save(mute: ActivityMuteSave)(implicit c: Connection): String = {
     import mute._
@@ -159,21 +149,9 @@ class ActivityMuteDaoImpl @Inject()(
       .as(activityMuteParser.*)
   }
 
-  override def mutesForProviders(providers: Seq[ActivityProvider])(implicit c: Connection): Map[ActivityProvider, List[ActivityMute]] = {
-    providers.flatMap(provider => Map(provider -> this.mutesForProvider(provider))).toMap
-  }
-
   override def mutesCountForProvider(provider: ActivityProvider)(implicit c: Connection) = {
     SQL(s"select count(*) from ACTIVITY_MUTE where PROVIDER_ID = {PROVIDER_ID}")
       .on("PROVIDER_ID" -> provider.id)
       .as(scalar[Int].single)
-  }
-
-  override def mutesCountForProviders(providers: Seq[ActivityProvider])(implicit c: Connection) = {
-    providers.map(provider => this.mutesCountForProvider(provider)).sum
-  }
-
-  override def allMutesGroupedByProviders()(implicit c: Connection) = {
-    this.mutesForProviders(publisherDao.getAllProviders().map(ProviderRender.toActivityProvider))
   }
 }
