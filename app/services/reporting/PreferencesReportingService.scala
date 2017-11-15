@@ -3,8 +3,7 @@ package services.reporting
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
-import models.{ActivityMute, ActivityProvider, ActivityType}
-import org.joda.time.Interval
+import models.{ActivityMute, ActivityProvider}
 import play.api.db.{Database, NamedDatabase}
 import services.ProviderRender
 import services.dao.{ActivityMuteDao, PublisherDao, UserPreferencesDao}
