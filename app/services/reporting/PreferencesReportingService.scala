@@ -38,7 +38,7 @@ class PreferencesReportingServiceImpl @Inject()(
 
   override def getMutesByProviders(providers: Seq[ActivityProvider]): Map[ActivityProvider, Seq[ActivityMute]] = {
     db.withConnection(implicit c => {
-      providers.flatMap(provider => Map(provider -> activityMuteDao.mutesForProvider(provider))).toMap
+      providers.map(provider => provider -> activityMuteDao.mutesForProvider(provider)).toMap
     })
   }
 
