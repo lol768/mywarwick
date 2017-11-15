@@ -29,6 +29,8 @@ trait PublisherDao {
 
   def getProviders(publisherId: String)(implicit c: Connection): Seq[ProviderRender]
 
+  def getAllProviders()(implicit c: Connection): Seq[ProviderRender]
+
   def isPublisher(usercode: String)(implicit  c: Connection): Boolean
 
   def save(id: String, data: PublisherSave)(implicit c: Connection): String
@@ -99,6 +101,11 @@ class PublisherDaoImpl extends PublisherDao {
 
   override def getProviders(publisherId: String)(implicit c: Connection): Seq[ProviderRender] =
     SQL"SELECT * FROM provider WHERE publisher_id = $publisherId ORDER BY display_name"
+      .executeQuery()
+      .as(providerParser.*)
+
+  override def getAllProviders()(implicit c: Connection): Seq[ProviderRender] =
+    SQL"SELECT * FROM provider"
       .executeQuery()
       .as(providerParser.*)
 
