@@ -45,6 +45,9 @@ POST          /admin/publishers/:publisher/providers/:provider      @controllers
 GET           /admin/elasticsearch/activity                  @controllers.admin.elasticsearch.ActivityToESController.index
 POST          /admin/elasticsearch/reindex                   @controllers.admin.elasticsearch.ActivityToESController.reindexActivitiesInDateTimeRange
 
+GET           /admin/reports/preferences                     @controllers.admin.reporting.PreferencesReportingController.index
+GET           /admin/reports                                 @controllers.admin.reporting.HomeController.index
+
 GET           /publish/:publisher/webgroups                  @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 
 GET           /publish                                       @controllers.publish.PublishersController.index
