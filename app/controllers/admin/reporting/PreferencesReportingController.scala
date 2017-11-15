@@ -23,14 +23,18 @@ class PreferencesReportingController @Inject()(
 
   def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
 
-    val allMutes = ListMap(preferencesReportingService
+    val allActivityMutes = ListMap(preferencesReportingService
       .getAllMutesGroupedByProviders()
-      .toSeq
-      .sortBy {
-        case (key, _) => key.displayName.getOrElse(key.id)
-      }: _*)
+      .toSeq.sortBy({ case (key, _) => key.displayName.getOrElse(key.id) }): _*)
 
-    Ok(views.html.admin.reporting.preferences.index(allMutes))
+    val allTileHiddenCount = ListMap(preferencesReportingService
+      .getAllUserTileHiddenCounts()
+      .toSeq.sortBy({ case(tile, _) => tile.title }): _*)
+
+    Ok(views.html.admin.reporting.preferences.index(
+      allActivityMutes,
+      allTileHiddenCount
+    ))
   }
 
 }
