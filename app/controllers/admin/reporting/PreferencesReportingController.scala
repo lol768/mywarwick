@@ -3,6 +3,7 @@ package controllers.admin.reporting
 import javax.inject.{Inject, Singleton}
 
 import controllers.BaseController
+import models.{ActivityMute, ActivityProvider}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.SecurityService
 import services.reporting.PreferencesReportingService
@@ -20,7 +21,7 @@ class PreferencesReportingController @Inject()(
 
   def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
 
-    val allMutes = preferencesReportingService.getAllMutesGroupedByProviders()
+    val allMutes: Map[ActivityProvider, Seq[ActivityMute]] = preferencesReportingService.getAllMutesGroupedByProviders()
 
     play.api.mvc.Results.Ok(views.html.admin.reporting.preferences.index(allMutes))
   }

@@ -1,6 +1,22 @@
 @import system.RequestContext
 
-@(test: String)(implicit messages: Messages, context: RequestContext)
+@(allMutes: Map[ActivityProvider, Seq[ActivityMute]])(implicit messages: Messages, context: RequestContext)
 @common.admin("Administration", "Preferences Report") {
-
+  <div>
+    <p>Activity mutes counts by providers</p>
+    <table class="table">
+      <thead class="thead">
+        <th scope="col">Provider</th>
+        <th scope="col">Mutes</th>
+      </thead>
+      <tbody>
+      @for((key, value) <- allMutes) {
+        <tr>
+          <td>@key.id</td>
+          <td>@value.length</td>
+        </tr>
+      }
+      </tbody>
+    </table>
+  </div>
 }
