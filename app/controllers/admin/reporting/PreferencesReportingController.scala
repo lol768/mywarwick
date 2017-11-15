@@ -19,7 +19,10 @@ class PreferencesReportingController @Inject()(
   import securityService._
 
   def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    play.api.mvc.Results.Ok(views.html.admin.reporting.preferences.index("test"))
+
+    val allMutes = preferencesReportingService.getAllMutesGroupedByProviders()
+
+    play.api.mvc.Results.Ok(views.html.admin.reporting.preferences.index(allMutes))
   }
 
 }
