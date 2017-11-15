@@ -169,7 +169,7 @@ class TileDaoImpl @Inject()() extends TileDao {
     }
   }
 
-  override def getAllTiles()(implicit c: Connection): List[Tile] = SQL(s"select * from TILE").as(tileParser.*)
+  override def getAllTiles()(implicit c: Connection): Seq[Tile] = SQL(s"select * from TILE").as(tileParser.*)
 
-  override def getAllUserTiles()(implicit c: Connection): List[UserTile] = SQL(s"select * from USER_TILE").as(rawUserTileParser.*)
+  override def getAllUserTiles()(implicit c: Connection): Seq[UserTile] = SQL(s"select * from USER_TILE").as(rawUserTileParser.*)
 }
