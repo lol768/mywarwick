@@ -26,7 +26,10 @@ class PreferencesReportingController @Inject()(
     val allMutes = ListMap(preferencesReportingService
       .getAllMutesGroupedByProviders()
       .toSeq
-      .sortBy(item => item._1.displayName.getOrElse(item._1.id)): _*)
+      .sortBy {
+        case (key, _) => key.displayName.getOrElse(key.id)
+      }: _*)
+
     Ok(views.html.admin.reporting.preferences.index(allMutes))
   }
 
