@@ -3,11 +3,12 @@ package controllers.admin.reporting
 import javax.inject.{Inject, Singleton}
 
 import controllers.BaseController
-import models.{ActivityMute, ActivityProvider}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.SecurityService
 import services.reporting.PreferencesReportingService
 import system.Roles
+
+import scala.collection.immutable.ListMap
 
 @Singleton
 class PreferencesReportingController @Inject()(
@@ -21,7 +22,12 @@ class PreferencesReportingController @Inject()(
 
   def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
 
-    val allMutes: Map[ActivityProvider, Seq[ActivityMute]] = preferencesReportingService.getAllMutesGroupedByProviders()
+    val allMutes = ListMap(preferencesReportingService
+      .getAllMutesGroupedByProviders()
+      .toSeq
+      .sortWith((a, b) => {
+        a._1.displayName.getOrElse(a._1.id) < b._1.displayName.getOrElse(b._1.id)
+      }): _*)
 
     play.api.mvc.Results.Ok(views.html.admin.reporting.preferences.index(allMutes))
   }
