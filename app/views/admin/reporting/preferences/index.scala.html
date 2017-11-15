@@ -12,7 +12,7 @@
       <tbody>
       @for((key, value) <- allMutes) {
         <tr>
-          <td>@key.id</td>
+          <td>@key.displayName.getOrElse(key.id)</td>
           <td>@value.length</td>
         </tr>
       }
