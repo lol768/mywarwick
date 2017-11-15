@@ -105,7 +105,7 @@ class PublisherDaoImpl extends PublisherDao {
       .as(providerParser.*)
 
   override def getAllProviders()(implicit c: Connection): Seq[ProviderRender] =
-    SQL"SELECT * FROM provider"
+    SQL"select * from PROVIDER"
       .executeQuery()
       .as(providerParser.*)
 
