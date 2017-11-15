@@ -17,6 +17,6 @@ class HomeController @Inject()(
   import securityService._
 
   def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    play.api.mvc.Results.Ok(views.html.admin.reporting.home.index())
+    Ok(views.html.admin.reporting.home.index())
   }
 }

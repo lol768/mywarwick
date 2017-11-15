@@ -29,7 +29,7 @@ class PreferencesReportingController @Inject()(
         a._1.displayName.getOrElse(a._1.id) < b._1.displayName.getOrElse(b._1.id)
       }): _*)
 
-    play.api.mvc.Results.Ok(views.html.admin.reporting.preferences.index(allMutes))
+    Ok(views.html.admin.reporting.preferences.index(allMutes))
   }
 
 }
