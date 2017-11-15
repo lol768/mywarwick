@@ -1,7 +1,7 @@
 @import system.RequestContext
 
 @(allMutes: Map[ActivityProvider, Seq[ActivityMute]])(implicit messages: Messages, context: RequestContext)
-@common.admin("Administration", "Preferences Report") {
+@common.admin("Administration", "Reports", "Preferences Report") {
   <div>
     <p>Activity mutes counts by providers</p>
     <table class="table">
@@ -11,10 +11,14 @@
       </thead>
       <tbody>
       @for((key, value) <- allMutes) {
-        <tr>
-          <td>@key.displayName.getOrElse(key.id)</td>
-          <td>@value.length</td>
-        </tr>
+        @if(value.isEmpty) {
+          <tr class="text-muted">
+        } else {
+          <tr>
+          }
+        <td>@key.displayName.getOrElse(key.id)</td>
+        <td>@value.length</td>
+      </tr>
       }
       </tbody>
     </table>
