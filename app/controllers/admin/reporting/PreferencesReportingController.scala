@@ -3,6 +3,7 @@ package controllers.admin.reporting
 import javax.inject.{Inject, Singleton}
 
 import controllers.BaseController
+import models.{ActivityMute, ActivityProvider}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.SecurityService
 import services.reporting.PreferencesReportingService
@@ -25,10 +26,7 @@ class PreferencesReportingController @Inject()(
     val allMutes = ListMap(preferencesReportingService
       .getAllMutesGroupedByProviders()
       .toSeq
-      .sortWith((a, b) => {
-        a._1.displayName.getOrElse(a._1.id) < b._1.displayName.getOrElse(b._1.id)
-      }): _*)
-
+      .sortBy(item => item._1.displayName.getOrElse(item._1.id)): _*)
     Ok(views.html.admin.reporting.preferences.index(allMutes))
   }
 
