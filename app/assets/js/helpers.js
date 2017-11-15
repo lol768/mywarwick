@@ -12,7 +12,7 @@ export function pluralise(unit, count, plural) {
 }
 
 export function mkString(list) {
-  return list.join(', ').replace(/,\s(\w+)$/, " and $1")
+  return list.join(', ').replace(/,\s(\w+)$/, ' and $1');
 }
 
 export function isiPhoneX() {

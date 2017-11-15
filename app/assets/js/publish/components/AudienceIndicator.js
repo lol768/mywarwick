@@ -62,7 +62,6 @@ export class AudienceIndicator extends React.PureComponent {
     const dept = audienceComponents.department;
 
     if (audienceComponents.audience) {
-
       const isUniWide = audienceComponents.audience.universityWide !== undefined;
       const audience = this.props.audienceComponents.audience[isUniWide ? 'universityWide' : 'department'];
 
@@ -98,7 +97,7 @@ export class AudienceIndicator extends React.PureComponent {
                         {`All ${mkString(years)} year Undergraduates in ${_.startsWith(years[0], 'Dept:') ? dept.name : 'the University'}`}
                       </div> : null;
                   }
-                  return `All Undergraduates in ${_.startsWith(_.first(_.keys(components)), 'Dept:') ? dept.name : 'the University'}`
+                  return `All Undergraduates in ${_.startsWith(_.first(_.keys(components)), 'Dept:') ? dept.name : 'the University'}`;
                 }
                 return null;
               default: {
