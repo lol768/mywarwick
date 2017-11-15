@@ -101,7 +101,7 @@ class MeView extends HideableView {
     $('.me-view-container .me-view').addClass('with-transitions');
 
     this.props.dispatch(tiles.hideTile(tile));
-    // Persistence done by layout change
+    // Persistence done when leaving edit mode
   }
 
   onResizeTile(tileProps) {
