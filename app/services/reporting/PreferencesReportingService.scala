@@ -44,7 +44,7 @@ class PreferencesReportingServiceImpl @Inject()(
 
   override def getMutesCountByProviders(providers: Seq[ActivityProvider]) = {
     db.withConnection(implicit c => {
-      providers.map(provider => activityMuteDao.mutesCountForProvider(provider)).sum
+      activityMuteDao.mutesCountForProviders(providers)
     })
   }
 
