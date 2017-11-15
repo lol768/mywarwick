@@ -13,6 +13,7 @@ import TileView from './TileView';
 import * as TILE_TYPES from '../tiles';
 import ScrollRestore from '../ui/ScrollRestore';
 import GridSizingHelper from '../../GridSizingHelper';
+import HideableView from './HideableView';
 import { Routes } from '../AppRoot';
 import wrapKeyboardSelect from '../../keyboard-nav';
 import { pluralise } from '../../helpers';
@@ -49,7 +50,7 @@ function getSizeNameFromSize(size) {
   return TILE_SIZES.LARGE;
 }
 
-class MeView extends React.PureComponent {
+class MeView extends HideableView {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     editing: PropTypes.bool,
@@ -66,6 +67,12 @@ class MeView extends React.PureComponent {
     this.onLayoutChange = this.onLayoutChange.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
     this.onAdd = this.onAdd.bind(this);
+  }
+
+  componentWillHide() {
+    if (this.props.editing) {
+      this.props.dispatch(tiles.persistTiles());
+    }
   }
 
   onDragStart(layout, item, newItem, placeholder, e) {
@@ -85,7 +92,6 @@ class MeView extends React.PureComponent {
     } else if (!_.isEqual(layout, this.previousLayout)) {
       this.props.dispatch(tiles.tileLayoutChange(layout, this.props.layoutWidth));
       this.previousLayout = _.cloneDeep(layout);
-      this.props.dispatch(tiles.persistTiles());
     }
     return true;
   }
