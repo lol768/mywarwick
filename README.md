@@ -9,6 +9,7 @@ You will need a recent JDK, 8 ideally. You will need `node` (with `npm`) install
 To get Node dependencies run `npm install`.
 
 Get a global `gulp` command with `npm install -g gulp-cli` in case you don't already have it.
+Alternatively use `npm run gulp` wherever you see `gulp` to use the project version.
 
 Building and running
 --------------------

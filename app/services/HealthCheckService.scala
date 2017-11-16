@@ -25,7 +25,7 @@ class HealthCheckService @Inject()(
   def frequency: FiniteDuration = HealthCheckService.defaultFrequency
 
   var healthCheckLastRunAt: DateTime = _
-  var messagingQueueStatus: Seq[QueueStatus] = _
+  var messagingQueueStatus: Seq[QueueStatus] = Nil
   var oldestUnsentMessageCreatedAt: Option[DateTime] = None
   var notificationCountByPublisher: Seq[PublisherActivityCount] = Nil
   var smsSentLast24Hours: Int = 0
