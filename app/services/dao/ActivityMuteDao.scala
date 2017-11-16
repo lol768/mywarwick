@@ -27,6 +27,11 @@ trait ActivityMuteDao {
 
   def deleteExpiredBefore(expiredBefore: DateTime)(implicit c: Connection): Int
 
+  def mutesForProvider(provider: ActivityProvider)(implicit c: Connection): Seq[ActivityMute]
+
+  def mutesCountForProvider(provider: ActivityProvider)(implicit c: Connection): Int
+
+  def mutesCountForProviders(providers: Seq[ActivityProvider])(implicit c: Connection): Int
 }
 
 class ActivityMuteDaoImpl extends ActivityMuteDao {
@@ -140,4 +145,21 @@ class ActivityMuteDaoImpl extends ActivityMuteDao {
       .executeUpdate()
   }
 
+  override def mutesForProvider(provider: ActivityProvider)(implicit c: Connection) = {
+    SQL(s"select * from ACTIVITY_MUTE where PROVIDER_ID = {PROVIDER_ID}")
+      .on("PROVIDER_ID" -> provider.id)
+      .as(activityMuteParser.*)
+  }
+
+  override def mutesCountForProvider(provider: ActivityProvider)(implicit c: Connection) = {
+    SQL(s"select count(*) from ACTIVITY_MUTE where PROVIDER_ID = {PROVIDER_ID}")
+      .on("PROVIDER_ID" -> provider.id)
+      .as(scalar[Int].single)
+  }
+
+  override def mutesCountForProviders(providers: Seq[ActivityProvider])(implicit c: Connection) = {
+    SQL(s"select count(*) from ACTIVITY_MUTE where PROVIDER_ID in ({PROVIDER_IDs})")
+      .on("PROVIDER_IDs" -> providers.map(_.id))
+      .as(scalar[Int].single)
+  }
 }

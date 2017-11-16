@@ -1,12 +1,13 @@
 @import controllers.publish.NotificationsController.PublishNotificationForm
 @import models.publishing.{PermissionScope, Publisher}
+@import services.dao.DepartmentInfo
 @import system.RequestContext
 @import views.html._
 
 @(
     publisher: Publisher,
     form: PublishNotificationForm,
-    departmentOptions: Seq[(String, String)],
+    departmentOptions: Seq[DepartmentInfo],
     providerOptions: Seq[(String, String)],
     permissionScope: PermissionScope,
     audience: Audience

@@ -51,8 +51,8 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
   private val userPreferencesService = mock[UserPreferencesService]
   private val userNewsCategoryService = mock[UserNewsCategoryService]
 
-  when(departmentInfoService.allDepartments).thenReturn(Seq(DepartmentInfo("IN", "IT Services", "IT Services", "ITS", "SERVICE")))
-  when(departmentInfoService.allPublishableDepartments).thenReturn(Seq(DepartmentInfo("IN", "IT Services", "IT Services", "ITS", "SERVICE")))
+  when(departmentInfoService.allDepartments).thenReturn(Seq(DepartmentInfo("IN", "IT Services", "IT Services", "ITS", "SERVICE", "X")))
+  when(departmentInfoService.allPublishableDepartments).thenReturn(Seq(DepartmentInfo("IN", "IT Services", "IT Services", "ITS", "SERVICE", "X")))
   when(newsCategoryService.all()).thenReturn(Seq(NewsCategory("abc", "Campus")))
 
   private val mockCsrfHelper = mock[CSRFPageHelper]
@@ -134,7 +134,9 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
       contentAsString(result) must include("Title")
       contentAsString(result) must include("Text")
       // data attribute with publisher's department options
-      contentAsString(result) must include("data-departments='{&quot;IN&quot;:&quot;IT Services&quot;}'")
+      contentAsString(result) must include(
+        "data-departments='{&quot;IN&quot;:{&quot;name&quot;:&quot;IT Services&quot;,&quot;faculty&quot;:&quot;X&quot;}}'"
+      )
       contentAsString(result) must include("class=\"audience-picker\"")
     }
 

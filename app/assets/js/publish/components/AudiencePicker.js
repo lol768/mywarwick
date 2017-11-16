@@ -16,7 +16,10 @@ export class AudiencePicker extends React.PureComponent {
   static propTypes = {
     formData: PropTypes.object,
     isGod: PropTypes.bool,
-    departments: PropTypes.object,
+    departments: PropTypes.objectOf(PropTypes.shape({
+      name: PropTypes.string,
+      faculty: PropTypes.string,
+    })),
     deptSubsetOpts: PropTypes.object,
     locationOpts: PropTypes.object,
     audienceDidUpdate: PropTypes.func.isRequired,
@@ -38,7 +41,7 @@ export class AudiencePicker extends React.PureComponent {
       this.state = {
         ...props.formData,
         department: this.buildDeptObj(
-          { [deptCode]: _.find(props.departments, (val, key) => key === deptCode) },
+          { [deptCode]: props.departments[deptCode] },
         ),
       };
     } else {
@@ -53,6 +56,7 @@ export class AudiencePicker extends React.PureComponent {
     this.clearDepartment = this.clearDepartment.bind(this);
     this.groupsInput = this.groupsInput.bind(this);
     this.locationInput = this.locationInput.bind(this);
+    this.isTeachingDepartment = this.isTeachingDepartment.bind(this);
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -114,11 +118,15 @@ export class AudiencePicker extends React.PureComponent {
 
   buildDeptObj(dept) {
     const key = _.first(_.keys(dept));
-    return { code: key, name: dept[key] };
+    return { code: key, ...dept[key] };
   }
 
   selectDepartment(value) {
-    this.setState({ department: { code: value, name: this.props.departments[value] } });
+    this.setState({ department: { code: value, ...this.props.departments[value] } });
+  }
+
+  isTeachingDepartment() {
+    return this.state.department.faculty !== 'X';
   }
 
   locationInput() {
@@ -176,7 +184,7 @@ export class AudiencePicker extends React.PureComponent {
         }
       >
         <option disabled hidden value="">Select a department</option>
-        {_.map(this.props.departments, (name, code) => (
+        {_.map(this.props.departments, ({ name }, code) => (
           <option key={code} value={code}>{name}</option>
         ))}
       </select>)
@@ -291,6 +299,7 @@ export class AudiencePicker extends React.PureComponent {
               name="audience.audience[]"
               formPath={prefixPath('')}
             />
+            { this.isTeachingDepartment() &&
             <RadioButton
               handleChange={this.handleChange}
               isChecked={this.isChecked(prefixPath('.groups'))}
@@ -300,7 +309,7 @@ export class AudiencePicker extends React.PureComponent {
               formPath={prefixPath('')}
             >
               {groups}
-            </RadioButton>
+            </RadioButton> }
           </div>
       } </div>
     );

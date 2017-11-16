@@ -3,12 +3,13 @@
 @import system.RequestContext
 @import views.html._
 @import play.api.libs.json.JsValue
+@import services.dao.DepartmentInfo
 
 @(
     publisher: Publisher,
     activity: Activity,
     form: PublishNotificationForm,
-    departmentOptions: Seq[(String, String)],
+    departmentOptions: Seq[DepartmentInfo],
     providerOptions: Seq[(String, String)],
     permissionScope: PermissionScope,
     audience: Audience,

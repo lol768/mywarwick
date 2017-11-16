@@ -141,10 +141,10 @@ trait DepartmentOptions {
 
   lazy val allPublishableDepartments = departmentInfoService.allPublishableDepartments
 
-  def departmentOptions(implicit publisherRequest: PublisherRequest[_]) =
-    departmentsWithPublishPermission.map(dept => dept.code -> dept.name)
+  def departmentOptions(implicit publisherRequest: PublisherRequest[_]): Seq[DepartmentInfo] =
+    departmentsWithPublishPermission
 
-  def departmentsWithPublishPermission(implicit publisherRequest: PublisherRequest[_]) =
+  def departmentsWithPublishPermission(implicit publisherRequest: PublisherRequest[_]): Seq[DepartmentInfo] =
     permissionScope match {
       case PermissionScope.AllDepartments =>
         allPublishableDepartments

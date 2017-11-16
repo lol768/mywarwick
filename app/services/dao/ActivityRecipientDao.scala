@@ -34,15 +34,14 @@ class ActivityRecipientDaoImpl @Inject()() extends ActivityRecipientDao {
   }
 
   override def markSent(activityId: String, usercode: String)(implicit c: Connection): Unit = {
-    if (getSentTime(activityId, usercode).isEmpty) {
+    val now = DateTime.now
+    val updated = SQL"UPDATE ACTIVITY_RECIPIENT SET SENT_AT = $now WHERE SENT_AT IS NULL AND ACTIVITY_ID = $activityId AND USERCODE = $usercode"
+      .executeUpdate()
+
+    if (updated > 0) {
       SQL"UPDATE ACTIVITY SET SENT_COUNT = SENT_COUNT + 1 WHERE ID = $activityId"
         .execute()
     }
-
-    val now = DateTime.now
-
-    SQL"UPDATE ACTIVITY_RECIPIENT SET SENT_AT = $now WHERE ACTIVITY_ID = $activityId AND USERCODE = $usercode"
-      .execute()
   }
 
   override def setRecipients(activity: Activity, recipients: Set[Usercode])(implicit c: Connection): Unit = {
@@ -50,11 +49,6 @@ class ActivityRecipientDaoImpl @Inject()() extends ActivityRecipientDao {
     recipients.foreach { recipient =>
       create(activity.id, recipient.string, Some(activity.publishedAt), activity.shouldNotify)
     }
-  }
-
-  private def getSentTime(activityId: String, usercode: String)(implicit c: Connection) = {
-    SQL"SELECT SENT_AT FROM ACTIVITY_RECIPIENT WHERE ACTIVITY_ID = $activityId AND USERCODE = $usercode"
-      .as(scalar[DateTime].singleOpt)
   }
 
 }

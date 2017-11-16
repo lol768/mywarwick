@@ -59,7 +59,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         Some(departmentCode) //Arden house
       )
       val departmentInfoDao = mock[DepartmentInfoDao]
-      when(departmentInfoDao.allDepartments).thenReturn(Seq[DepartmentInfo](DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
+      when(departmentInfoDao.allDepartments).thenReturn(Seq[DepartmentInfo](DepartmentInfo("AH", "AH", "AH", "AH", "AH", "X")))
       val audienceBinder = new AudienceBinder(departmentInfoDao, null, defaultMockPublisherService)
       audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.DepartmentAudience(departmentCode, Seq(Audience.TeachingStaff)))))
 
@@ -77,7 +77,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         Some(departmentCode) //Arden house
       )
       val departmentInfoDao = mock[DepartmentInfoDao]
-      when(departmentInfoDao.allDepartments).thenReturn(Seq[DepartmentInfo](DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
+      when(departmentInfoDao.allDepartments).thenReturn(Seq[DepartmentInfo](DepartmentInfo("AH", "AH", "AH", "AH", "AH", "X")))
       val audienceBinder = new AudienceBinder(departmentInfoDao, null, defaultMockPublisherService)
 
       audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.DepartmentAudience(departmentCode, Seq(Audience.TeachingStaff, Audience.TaughtPostgrads)))))
@@ -127,7 +127,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         Some(departmentCode) //Arden house
       )
       val departmentInfoDao = mock[DepartmentInfoDao]
-      when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
+      when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH", "X")))
       val audienceBinder = new AudienceBinder(departmentInfoDao, null, defaultMockPublisherService)
 
       audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.TeachingStaff, Audience.UndergradStudents, Audience.DepartmentAudience(departmentCode, Seq(Audience.TeachingStaff, Audience.ResearchPostgrads)))))
@@ -146,7 +146,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       )
 
       val departmentInfoDao = mock[DepartmentInfoDao]
-      when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
+      when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH", "X")))
       val audienceBinder = new AudienceBinder(departmentInfoDao, null, defaultMockPublisherService)
 
       audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.Staff)))
@@ -165,7 +165,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         Some(departmentCode)
       )
       val departmentInfoDao = mock[DepartmentInfoDao]
-      when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("BB", "BB", "BB", "BB", "BB")))
+      when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("BB", "BB", "BB", "BB", "BB", "X")))
       val audienceBinder = new AudienceBinder(departmentInfoDao, null, defaultMockPublisherService)
 
       audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Left(Seq(FormError("department", "error.department.invalid")))
@@ -186,7 +186,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
         Some(departmentCode) //Arden house
       )
       val departmentInfoDao = mock[DepartmentInfoDao]
-      when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH")))
+      when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH", "X")))
 
       val audienceService = mock[AudienceService]
       when(audienceService.validateUsercodes(Set(Usercode("TeachingApple")))).thenReturn(Set.empty[Usercode])

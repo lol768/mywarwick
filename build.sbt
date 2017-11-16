@@ -38,7 +38,7 @@ val appDeps = Seq(
   evolutions,
   "com.typesafe.play" %% "anorm" % "2.5.0",
   "com.oracle" % "ojdbc7" % "12.1.0.2.0",
-  "uk.ac.warwick.sso" %% "sso-client-play" % "2.22",
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.30.3",
   "uk.ac.warwick.play-utils" %% "accesslog" % "1.7",
   "uk.ac.warwick.play-utils" %% "anorm" % "1.7",
   "uk.ac.warwick.play-utils" %% "objectstore" % "1.7",
@@ -74,7 +74,7 @@ val testDeps = Seq(
   "org.scalatest" %% "scalatest" % "3.0.1",
   "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0",
   "com.typesafe.akka" %% "akka-testkit" % "2.4.0",
-  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.18",
+  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.30.3",
   "org.eclipse.jetty" % "jetty-server" % "9.3.6.v20151106"
 ).map(_ % Test)
 

@@ -8,6 +8,7 @@ import HiddenTile from '../tiles/HiddenTile';
 import ScrollRestore from '../ui/ScrollRestore';
 import { Routes } from '../AppRoot';
 import GridSizingHelper from '../../GridSizingHelper';
+import EmptyState from '../ui/EmptyState';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -78,7 +79,7 @@ class AddingTilesView extends React.PureComponent {
           >
             { hiddenTileComponents }
           </ReactGridLayoutBase>
-          : <p>There are no more tiles available to add</p>
+          : <EmptyState lead="There are no more tiles available to add" />
         }
       </div>
     );

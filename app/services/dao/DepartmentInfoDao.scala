@@ -18,7 +18,8 @@ case class DepartmentInfo(
   name: String,
   shortName: String,
   veryShortName: String,
-  `type`: String
+  `type`: String,
+  faculty: String
 )
 
 object DepartmentInfo {

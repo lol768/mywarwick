@@ -10,12 +10,13 @@ import { push } from 'react-router-redux';
 import { createSelector } from 'reselect';
 import * as stream from './stream';
 import { displayUpdateProgress } from './state/update';
-import { postJsonWithCredentials } from './serverpipe';
+import { fetchWithCredentials, postJsonWithCredentials } from './serverpipe';
 import { hasAuthoritativeAuthenticatedUser } from './state';
 import { Routes } from './components/AppRoot';
 import { navRequest } from './state/ui';
 import { loadNative } from './state/app';
 import { showFeedbackForm } from './userinfo';
+import { isiPhoneX } from './helpers';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -123,6 +124,9 @@ export default function init(opts) {
     $html.addClass('ios');
   }
 
+  if (isiPhoneX()) $html.addClass('is-iphone-x');
+
+
   if (navigator.standalone) {
     $html.addClass('standalone');
   }
@@ -180,6 +184,12 @@ export default function init(opts) {
 
       unregisterForPush(deviceToken) {
         postJsonWithCredentials('/api/push/unsubscribe', { deviceToken });
+      },
+
+      registerForTimetable() {
+        fetchWithCredentials('/api/timetable/register', { method: 'post' })
+          .then(response => response.json())
+          .then(response => MyWarwickNative.setTimetableToken(response.token));
       },
     };
 

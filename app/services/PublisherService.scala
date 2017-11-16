@@ -3,6 +3,7 @@ package services
 import java.sql.Connection
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import models.ActivityProvider
 import models.publishing.PublishingRole.Viewer
 import models.publishing._
 import play.api.db.{Database, NamedDatabase}
@@ -16,6 +17,14 @@ case class ProviderRender(
   colour: Option[String],
   sendEmail: Boolean
 )
+
+object ProviderRender {
+  def toActivityProvider(providerRender: ProviderRender) = ActivityProvider(
+    providerRender.id,
+    providerRender.sendEmail,
+    providerRender.name
+  )
+}
 
 case class ProviderSave(
   name: Option[String],

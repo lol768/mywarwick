@@ -13,7 +13,7 @@ import warwick.sso._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
@@ -254,9 +254,12 @@ class AudienceServiceImpl @Inject()(
     ) ++ locationsJson
   }
 
-  override def validateUsercodes(usercodes: Set[Usercode]): Set[Usercode] =
-    userLookupService.getUsers(usercodes.toSeq) match {
-      case Success(users) => users.keys.toSet
-      case Failure(_) => Set.empty[Usercode]
-    }
+  override def validateUsercodes(usercodes: Set[Usercode]): Set[Usercode] = {
+    val uniIds = usercodes.filter(_.string.forall(Character.isDigit))
+    val validIds = userLookupService.getUsers(uniIds.map(id => UniversityID(id.string)).toSeq).toOption
+    val validCodes = userLookupService.getUsers(usercodes.toSeq).toOption
+
+    (validCodes.map(_.keys).getOrElse(Nil) ++ validIds.map(_.values.map(_.usercode)).getOrElse(Nil)).toSet
+  }
+
 }

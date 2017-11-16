@@ -29,22 +29,44 @@ describe('AudienceIndicator', () => {
             groups: {
               'Dept:TaughtPostgrads': undefined,
               'Dept:TeachingStaff': undefined,
-              modules: [{
-                value: 'CS118',
-                text: 'CS118: Programming for Computer Scientists'
-              }],
-              seminarGroups: [{
-                text: 'Tutorial Group 2: CH160 Tutorials'
-              }],
-              staffRelationships: [{
-                text: 'Dirk Diggler (Anatomy and Physiology)',
-                options: [{
-                  supervisor: {
-                    studentRole: 'supervisee',
-                    selected: true
-                  }
-                }]
-              }],
+              modules: [
+                {
+                  value: 'CS118',
+                  text: 'CS118: Programming for Computer Scientists'
+                },
+                {
+                  value: 'CS101',
+                  text: 'CS101: Introduction to the semi-colon'
+                }
+              ],
+              seminarGroups: [
+                {
+                  text: 'Tutorial Group 2: CH160 Tutorials'
+                },
+                {
+                  text: 'Tutorial Group 2B: Or maybe 2A'
+                }
+              ],
+              staffRelationships: [
+                {
+                  text: 'Dirk Diggler (Anatomy and Physiology)',
+                  options: [{
+                    supervisor: {
+                      studentRole: 'supervisee',
+                      selected: true
+                    }
+                  }]
+                },
+                {
+                  text: 'Dirk Diggler (Anatomy and Physiology)',
+                  options: [{
+                    personalTutor: {
+                      studentRole: 'personal tutee',
+                      selected: true
+                    }
+                  }]
+                }
+              ],
               listOfUsercodes: ['cusjau', 'u1234567']
             }
           }
@@ -57,8 +79,11 @@ describe('AudienceIndicator', () => {
 
     [
       'Supervisees of Dirk Diggler (Anatomy and Physiology)',
+      'Personal Tutees of Dirk Diggler (Anatomy and Physiology)',
       'Tutorial Group 2: CH160 Tutorials',
+      'Tutorial Group 2B: Or maybe 2A',
       'CS118: Programming for Computer Scientists',
+      'CS101: Introduction to the semi-colon',
       'All Taught Postgrads in Anatomy and Physiology',
       'All Teaching Staff in Anatomy and Physiology',
       '2 usercodes',

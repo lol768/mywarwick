@@ -56,6 +56,16 @@ class TileServiceTest extends BaseSpec with MockitoSugar with ScalaFutures {
       ))
     }
 
+    "return WBS tile set for WBS user" in new Scope {
+      val bob = Fixtures.user.makeFoundUser("bob").copy(userSource = Some("WBSLdap"))
+      val wbsLayout = Seq(TileLayout("business", 2, 0,0, 1,1))
+
+      when(tileLayoutDao.getTileLayoutForUser(isEq(bob.usercode.string))(conn)).thenReturn(Nil)
+      when(tileLayoutDao.getDefaultTileLayoutForGroup(isEq("wbs"))(conn)).thenReturn(wbsLayout)
+
+      service.getTileLayoutForUser(Some(bob)) must be (wbsLayout)
+    }
+
   }
 
 }

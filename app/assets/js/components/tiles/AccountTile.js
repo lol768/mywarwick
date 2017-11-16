@@ -48,15 +48,18 @@ export default class AccountTile extends TileContent {
     return true;
   }
 
-  static getLink(member) {
+  static getLink() {
     return (
-      <div>
-        {member.fullName}&nbsp;
-        <Hyperlink href="//warwick.ac.uk/myaccount" className="text--dotted-underline">
-          <small>(Settings)</small>
-        </Hyperlink>
-      </div>
-
+      <li>
+        <div className="text-right">
+          <Hyperlink
+            href="//warwick.ac.uk/myaccount"
+            className="small text--dotted-underline"
+          >
+            Account settings
+          </Hyperlink>
+        </div>
+      </li>
     );
   }
 
@@ -77,7 +80,7 @@ export default class AccountTile extends TileContent {
 
   static getMediaLeft(user) {
     return (
-      <div className="media-left">
+      <div className="flex-photo">
         {user.photo && user.photo.url &&
         <Hyperlink href="//photos.warwick.ac.uk/yourphoto">
           <AccountPhoto user={user} className="media-object media-object-img-fix" />
@@ -104,7 +107,7 @@ export default class AccountTile extends TileContent {
 
   static makeFullName(member) {
     return AccountTile.makeLineItem(
-      AccountTile.getLink(member),
+      member.fullName,
       'fa-user-o',
     );
   }
@@ -204,8 +207,8 @@ export default class AccountTile extends TileContent {
   static makeLineItem(content, icon) {
     return (
       <li>
-        <i className={`fa fa-li fa-fw ${icon}`} />
-        { content }
+        <i className={`fa fa-fw ${icon}`} />
+        {content}
       </li>
     );
   }
@@ -213,11 +216,12 @@ export default class AccountTile extends TileContent {
   getSmallBody() {
     const member = this.props.content;
     return (
-      <ul className="list-unstyled fa-ul">
+      <ul className="list-unstyled">
         {AccountTile.makeFullName(member)}
         {AccountTile.makeEmail(member)}
         {AccountTile.makeUserid(member)}
         {AccountTile.makeUserType(member)}
+        {AccountTile.getLink()}
       </ul>
     );
   }
@@ -226,14 +230,15 @@ export default class AccountTile extends TileContent {
     const member = this.props.content;
     const user = this.props.user;
     return (
-      <div className="media">
+      <div className="flex-container">
         {AccountTile.getMediaLeft(user)}
-        <div className="media-body">
-          <ul className="list-unstyled fa-ul">
+        <div className="flex-content">
+          <ul className="list-unstyled">
             {AccountTile.makeFullName(member)}
             {AccountTile.makeEmail(member)}
             {AccountTile.makeUserid(member)}
             {AccountTile.makeUserType(member)}
+            {AccountTile.getLink()}
           </ul>
         </div>
       </div>
@@ -245,10 +250,10 @@ export default class AccountTile extends TileContent {
     const user = this.props.user;
 
     return (
-      <div className="media">
+      <div className="flex-container">
         {AccountTile.getMediaLeft(user)}
-        <div className="media-body">
-          <ul className="list-unstyled fa-ul">
+        <div className="flex-content">
+          <ul className="list-unstyled">
             {AccountTile.makeFullName(member)}
             {AccountTile.makeEmail(member)}
             {AccountTile.makeUserid(member)}
@@ -259,6 +264,7 @@ export default class AccountTile extends TileContent {
             {AccountTile.makeRoute(member)}
             {AccountTile.makeYearOfStudy(member)}
             {AccountTile.makeHomeDepartment(member)}
+            {AccountTile.getLink()}
             <li>&nbsp;</li>
             {member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
             <li>

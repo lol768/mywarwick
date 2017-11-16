@@ -107,8 +107,7 @@ class TileServiceImpl @Inject()(
 
   // TODO - add undergrad / postgrad groups - review isStaff (should it include PGRs?)
   private def getGroups(user: User): Set[String] = {
-    // TODO - update sso-client-play User to include property
-    if (user.rawProperties.getOrElse("urn:websignon:usersource", "") == "WBSLdap")
+    if (user.userSource.contains("WBSLdap"))
       Set("wbs")
     else {
       val isStaff = if (user.isStaffOrPGR) Set("staff") else Set()
