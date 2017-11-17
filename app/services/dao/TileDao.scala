@@ -25,6 +25,10 @@ trait TileDao {
 
   def getDefaultTilesForGroups(groups: Set[String], ids: Seq[String] = Nil)(implicit c: Connection): Seq[TileInstance]
 
+  def getAllTiles()(implicit c: Connection): Seq[Tile]
+
+  def getAllUserTiles()(implicit c: Connection): Seq[UserTile]
+
 }
 
 class TileDaoImpl @Inject()() extends TileDao {
@@ -95,6 +99,48 @@ class TileDaoImpl @Inject()() extends TileDao {
     }
   }
 
+  def tileParser: RowParser[Tile] = {
+    get[String]("ID") ~
+      get[String]("TILE_TYPE") ~
+      get[Int]("COLOUR") ~
+      get[Option[String]]("FETCH_URL") ~
+      get[String]("TITLE") ~
+      get[Option[String]]("ICON") ~
+      get[Int]("TIMEOUT") map {
+      case tileId ~ tileType ~ colour ~ fetchUrl ~ title ~ icon ~ timeout => {
+        Tile(
+          tileId,
+          tileType,
+          colour,
+          fetchUrl,
+          title,
+          icon,
+          timeout
+        )
+      }
+    }
+  }
+
+  def rawUserTileParser: RowParser[UserTile] = {
+    get[String]("USERCODE") ~
+    get[String]("TILE_ID") ~
+    get[DateTime]("CREATED_AT") ~
+    get[DateTime]("UPDATED_AT") ~
+    get[Boolean]("REMOVED") ~
+    get[Option[String]]("PREFERENCES") map {
+      case userCode ~ tileId ~ createdAt ~ updatedAt ~ removed ~ preferences => {
+        UserTile(
+          userCode,
+          tileId,
+          createdAt,
+          updatedAt,
+          removed,
+          preferences
+        )
+      }
+    }
+  }
+
   override def saveTilePreferences(usercode: String, tileId: String, preferences: JsObject)(implicit c: Connection) =
     SQL("UPDATE USER_TILE SET PREFERENCES = {preferences} WHERE USERCODE = {usercode} AND TILE_ID = {tileId}")
       .on(
@@ -122,4 +168,8 @@ class TileDaoImpl @Inject()() extends TileDao {
         SQL(if (tile.removed) updateRemoved else update).on(params: _*).executeUpdate() > 0 || SQL(insert).on(params: _*).execute()
     }
   }
+
+  override def getAllTiles()(implicit c: Connection): Seq[Tile] = SQL(s"select * from TILE").as(tileParser.*)
+
+  override def getAllUserTiles()(implicit c: Connection): Seq[UserTile] = SQL(s"select * from USER_TILE").as(rawUserTileParser.*)
 }
