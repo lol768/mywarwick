@@ -9,6 +9,7 @@ import services.SecurityService
 import services.reporting.ActivityReportingService
 import system.Roles
 
+import scala.collection.immutable.ListMap
 import scala.concurrent.Future
 
 @Singleton
@@ -22,7 +23,7 @@ class ActivityReportingController @Inject()(
   import securityService._
 
   // default to report for the past 14 days
-  val defaultReportInterval = new Interval(DateTime.now().minusDays(14), DateTime.now)
+  val defaultReportInterval = new Interval(DateTime.now().minusDays(60), DateTime.now)
 
   def index = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
     import system.ThreadPools.elastic
@@ -32,9 +33,11 @@ class ActivityReportingController @Inject()(
           for {
             docs <- futureDocs
           } yield (provider, docs)
-      }).map(_.toMap)
+      }).map(_.toSeq.sortBy {
+        case (provider, _) => provider.displayName.getOrElse(provider.id)
+      })
     } yield {
-      Ok(views.html.admin.reporting.activity.index(allAlertsByProviders))
+      Ok(views.html.admin.reporting.activity.index(ListMap(allAlertsByProviders: _*)))
     }
   }
 }
