@@ -48,6 +48,7 @@ POST          /admin/elasticsearch/reindex                   @controllers.admin.
 GET           /admin/reports/preferences                     @controllers.admin.reporting.PreferencesReportingController.index
 GET           /admin/reports                                 @controllers.admin.reporting.HomeController.index
 GET           /admin/reports/activity                        @controllers.admin.reporting.ActivityReportingController.index
+POST           /admin/reports/activity/formSubmit             @controllers.admin.reporting.ActivityReportingController.formSubmit
 
 GET           /publish/:publisher/webgroups                  @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 
