@@ -68,7 +68,7 @@
     "react-test-renderer": "^15.5.4",
     "sinon": "~1.17.3",
     "sinon-chai": "~2.8.0",
-    "sw-precache": "~5.0.0",
+    "sw-precache": "5.2.0",
     "timekeeper": "0.0.5",
     "vinyl-buffer": "~1.0.0",
     "vinyl-source-stream": "~1.1.0",
