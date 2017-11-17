@@ -5,6 +5,9 @@ import javax.inject.Inject
 import com.google.inject.ImplementedBy
 import models.ActivityProvider
 import org.joda.time.Interval
+import play.api.db.{Database, NamedDatabase}
+import services.ProviderRender
+import services.dao.PublisherDao
 import services.elasticsearch.{ActivityDocument, ActivityESSearchQuery, ActivityESService}
 
 import scala.concurrent.Future
@@ -15,6 +18,8 @@ trait ActivityReportingService {
 
   def alertsByProviders(providers: Map[ActivityProvider, Interval]): Map[ActivityProvider, Future[Seq[ActivityDocument]]]
 
+  def allAlertsByProviders(interval: Interval): Map[ActivityProvider, Future[Seq[ActivityDocument]]]
+
   // activity as in non-alert activity
   def activitiesByProvider(provider: ActivityProvider, interval: Interval): Seq[ActivityDocument]
 
@@ -22,9 +27,11 @@ trait ActivityReportingService {
 }
 
 class ActivityReportingServiceImpl @Inject()(
-  activityESService: ActivityESService
+  activityESService: ActivityESService,
+  publisherDao: PublisherDao,
+  @NamedDatabase("default") db: Database
 ) extends ActivityReportingService {
-  override def alertsByProvider(provider: ActivityProvider, interval: Interval) = {
+  override def alertsByProvider(provider: ActivityProvider, interval: Interval): Future[Seq[ActivityDocument]] = {
     val query = ActivityESSearchQuery(
       provider_id = Some(provider.id),
       publish_at = Some(interval),
@@ -40,4 +47,15 @@ class ActivityReportingServiceImpl @Inject()(
   override def activitiesByProvider(provider: ActivityProvider, interval: Interval) = ???
 
   override def activitiesByProviders(providers: Map[ActivityProvider, Interval]) = ???
+
+  override def allAlertsByProviders(interval: Interval) = {
+    db.withConnection(implicit c => {
+      val providersWithInterval = publisherDao
+        .getAllProviders()
+        .map(ProviderRender.toActivityProvider)
+        .map((_, interval))
+        .toMap
+      this.alertsByProviders(providersWithInterval)
+    })
+  }
 }
