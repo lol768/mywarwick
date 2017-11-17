@@ -64,24 +64,31 @@ object ActivityDocument {
     )
   }
 
-  def fromMap(map: Map[String, AnyRef]) = {
+  def fromMap(hitMap: Map[String, AnyRef]) = {
     val field = ActivityESServiceSearchHelper.ESFieldName
+    val resultMap = hitMap.map {
+      case (k, v) =>
+        (k, v match {
+          case null => "-"
+          case _ => v
+        })
+    }
 
     ActivityDocument(
-      map.getOrElse(field.activity_id, "-").toString,
-      map.getOrElse(field.provider_id, "-").toString,
-      map.getOrElse(field.activity_type, "-").toString,
-      map.getOrElse(field.title, "-").toString,
-      map.getOrElse(field.url, "-").toString,
-      map.getOrElse(field.text, "-").toString,
-      map.getOrElse(field.replaced_by, "-").toString,
-      map.get(field.published_at).map(_.toString).map(DateTime.parse).orNull,
-      map.getOrElse(field.publisher, "-").toString,
-      map.getOrElse(field.audience_components, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
-      map.getOrElse(field.resolved_users, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
-      Boolean.unbox(map.getOrElse(field.api, Boolean.box(false))),
-      map.get(field.created_at).map(_.toString).map(DateTime.parse).orNull,
-      map.getOrElse(field.created_by, "-").toString
+      resultMap.getOrElse(field.activity_id, "-").toString,
+      resultMap.getOrElse(field.provider_id, "-").toString,
+      resultMap.getOrElse(field.activity_type, "-").toString,
+      resultMap.getOrElse(field.title, "-").toString,
+      resultMap.getOrElse(field.url, "-").toString,
+      resultMap.getOrElse(field.text, "-").toString,
+      resultMap.getOrElse(field.replaced_by, "-").toString,
+      resultMap.get(field.published_at).map(_.toString).map(DateTime.parse).orNull,
+      resultMap.getOrElse(field.publisher, "-").toString,
+      resultMap.getOrElse(field.audience_components, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
+      resultMap.getOrElse(field.resolved_users, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
+      Boolean.unbox(resultMap.getOrElse(field.api, Boolean.box(false))),
+      resultMap.get(field.created_at).map(_.toString).map(DateTime.parse).orNull,
+      resultMap.getOrElse(field.created_by, "-").toString
     )
   }
 
