@@ -1,27 +1,51 @@
 @import system.RequestContext
 @import services.elasticsearch.ActivityDocument
+@import controllers.admin.reporting.ActivityReportFormData
+@import controllers.admin.reporting._
 
-@(allAlertsByProviders: Map[ActivityProvider, Seq[ActivityDocument]])(implicit messages: Messages, context: RequestContext)
+@(allAlertsByProviders: Map[ActivityProvider, Seq[ActivityDocument]], formData: Form[ActivityReportFormData])(implicit messages: Messages, context: RequestContext)
+@implicitFieldConstructor = @{
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
+}
+
 @common.admin("Administration", "Reports", "Activity Report") {
   <div>
     <h2>Alerts count by providers</h2>
-    <table class="table">
-      <thead class="thead">
-        <th scope="col">Provider</th>
-        <th scope="col">Alerts sent</th>
-      </thead>
-      <tbody>
-      @for((provider, doc) <- allAlertsByProviders) {
-        @if(doc.isEmpty) {
-          <tr class="text-muted">
-        } else {
-          <tr>
-          }
-        <td>@provider.displayName</td>
-        <td>@doc.length</td>
-      </tr>
+
+    @b3.form(routes.ActivityReportingController.formSubmit) {
+
+      @context.csrfHelper.formField
+
+      @tags.datetimePicker(formData("fromDate"), '_label -> "From")
+
+      @tags.datetimePicker(formData("toDate"), '_label -> "To")
+
+      @b3.submit('class -> "btn btn-primary"){ Search }
+    }
+
+    @if(formData.hasGlobalErrors) {
+      @for(error <- formData.globalErrors) {
+        <div class="alert alert-danger">@error.message</div>
       }
-      </tbody>
-    </table>
+    } else {
+      <table class="table">
+        <thead class="thead">
+          <th scope="col">Provider</th>
+          <th scope="col">Alerts sent</th>
+        </thead>
+        <tbody>
+        @for((provider, doc) <- allAlertsByProviders) {
+          @if(doc.isEmpty) {
+            <tr class="text-muted">
+          } else {
+            <tr>
+            }
+          <td>@provider.displayName</td>
+          <td>@doc.length</td>
+        </tr>
+        }
+        </tbody>
+      </table>
+    }
   </div>
 }
