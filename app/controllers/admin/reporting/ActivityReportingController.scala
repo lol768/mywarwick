@@ -23,7 +23,7 @@ class ActivityReportingController @Inject()(
   import securityService._
 
   // default to report for the past 14 days
-  val defaultReportInterval = new Interval(DateTime.now().minusDays(60), DateTime.now)
+  val defaultReportInterval = new Interval(DateTime.now().minusDays(14), DateTime.now)
 
   def index = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
     import system.ThreadPools.elastic

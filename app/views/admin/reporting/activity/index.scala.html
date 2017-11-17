@@ -1,6 +1,7 @@
 @import system.RequestContext
+@import services.elasticsearch.ActivityDocument
 
-@()(implicit messages: Messages, context: RequestContext)
+@(allAlertsByProviders: Map[ActivityProvider, Seq[ActivityDocument]])(implicit messages: Messages, context: RequestContext)
 @common.admin("Administration", "Reports", "Activity Report") {
   <div>
     <h2>Alerts count by providers</h2>
@@ -10,8 +11,16 @@
         <th scope="col">Alerts sent</th>
       </thead>
       <tbody>
-        <tr class="text-muted">
-        </tr>
+      @for((provider, doc) <- allAlertsByProviders) {
+        @if(doc.isEmpty) {
+          <tr class="text-muted">
+        } else {
+          <tr>
+          }
+        <td>@provider.displayName</td>
+        <td>@doc.length</td>
+      </tr>
+      }
       </tbody>
     </table>
   </div>
