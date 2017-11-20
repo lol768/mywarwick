@@ -16,14 +16,14 @@ import scala.concurrent.Future
 trait ActivityReportingService {
   def alertsByProvider(provider: ActivityProvider, interval: Interval): Future[Seq[ActivityDocument]]
 
-  def alertsByProviders(providers: Map[ActivityProvider, Interval]): Map[ActivityProvider, Future[Seq[ActivityDocument]]]
+  def alertsByProviders(providers: Map[ActivityProvider, Interval]): Future[Map[ActivityProvider, Seq[ActivityDocument]]]
 
-  def allAlertsByProviders(interval: Interval): Map[ActivityProvider, Future[Seq[ActivityDocument]]]
+  def allAlertsByProviders(interval: Interval): Future[Map[ActivityProvider, Seq[ActivityDocument]]]
 
   // activity as in non-alert activity
   def activitiesByProvider(provider: ActivityProvider, interval: Interval): Seq[ActivityDocument]
 
-  def activitiesByProviders(providers: Map[ActivityProvider, Interval]): Map[ActivityProvider, Future[Seq[ActivityDocument]]]
+  def activitiesByProviders(providers: Map[ActivityProvider, Interval]): Future[Map[ActivityProvider, Seq[ActivityDocument]]]
 }
 
 class ActivityReportingServiceImpl @Inject()(
@@ -40,9 +40,17 @@ class ActivityReportingServiceImpl @Inject()(
     activityESService.search(query)
   }
 
-  override def alertsByProviders(providers: Map[ActivityProvider, Interval]) = providers.map {
-    case (provider, interval) => (provider, this.alertsByProvider(provider, interval))
+  override def alertsByProviders(providers: Map[ActivityProvider, Interval]) = {
+    Future.sequence(providers.map {
+      case (provider, interval) => (provider, this.alertsByProvider(provider, interval))
+    }.map {
+      case (provider, futureActivityDocuments) =>
+        for {
+          activityDocuments <- futureActivityDocuments
+        } yield (provider, activityDocuments)
+    }).map(_.toMap)
   }
+
 
   override def activitiesByProvider(provider: ActivityProvider, interval: Interval) = ???
 
