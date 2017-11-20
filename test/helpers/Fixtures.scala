@@ -27,6 +27,19 @@ object Fixtures {
         shouldNotify = true
       )
 
+    lazy val activityFromApi =
+      ActivitySave(
+        changedBy = Usercode("custard"),
+        publisherId = "elab",
+        providerId = "tabula",
+        `type` = "due",
+        title = "Coursework due",
+        text = Some("Your coursework is due in 7 days"),
+        url = Some("http://tabula.warwick.ac.uk"),
+        shouldNotify = true,
+        api = true
+      )
+
   }
 
   object activity {
