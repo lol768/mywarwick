@@ -48,7 +48,7 @@ class ActivityReportingController @Inject()(
   )(implicit request: AuthenticatedRequest[AnyContent]): Future[Result] = {
     import system.ThreadPools.web
     if (formError != null) {
-      return Future(Ok(views.html.admin.reporting.activity.index(
+      return Future.successful(Ok(views.html.admin.reporting.activity.index(
         null,
         formError
       )))
