@@ -71,7 +71,7 @@ class ActivityReportingController @Inject()(
         activityReportingService.allAlertsByProviders(interval).map { result =>
           Ok(views.html.admin.reporting.activity.index(
             result,
-            formData.fill(ActivityReportFormData(interval.getStart, interval.getEnd))
+            formData.fill(data)
           ))
         }
       }
