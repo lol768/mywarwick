@@ -66,12 +66,8 @@ object ActivityDocument {
 
   def fromMap(hitMap: Map[String, AnyRef]) = {
     val field = ActivityESServiceSearchHelper.ESFieldName
-    val map = hitMap.map {
-      case (k, v) =>
-        (k, v match {
-          case null => "-"
-          case _ => v
-        })
+    val map = hitMap.mapValues {
+      Option(_).getOrElse("-")
     }
 
     ActivityDocument(
