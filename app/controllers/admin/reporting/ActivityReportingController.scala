@@ -47,33 +47,33 @@ class ActivityReportingController @Inject()(
 
   def index = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
     val interval = ActivityReportingController.makeDefaultTimeDate()
-    activityReportingService.allAlertsByProviders(interval).map(result => {
+    activityReportingService.allAlertsByProviders(interval).map { result =>
       Ok(views.html.admin.reporting.activity.index(
         result,
         formData.fill(ActivityReportFormData(interval.getStart, interval.getEnd))
       ))
-    })
+    }
   }
 
   def formSubmit = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
     formData.bindFromRequest.fold(
       formError => {
         val interval = ActivityReportingController.makeDefaultTimeDate()
-        activityReportingService.allAlertsByProviders(interval).map(result => {
+        activityReportingService.allAlertsByProviders(interval).map { result =>
           Ok(views.html.admin.reporting.activity.index(
             result,
             formError.fill(ActivityReportFormData(interval.getStart, interval.getEnd))
           ))
-        })
+        }
       },
       data => {
         val interval = new Interval(data.fromDate, data.toDate)
-        activityReportingService.allAlertsByProviders(interval).map(result => {
+        activityReportingService.allAlertsByProviders(interval).map { result =>
           Ok(views.html.admin.reporting.activity.index(
             result,
             formData.fill(ActivityReportFormData(interval.getStart, interval.getEnd))
           ))
-        })
+        }
       }
     )
   }
