@@ -44,13 +44,13 @@ class ActivityReportingController @Inject()(
 
   def renderResultWithInterval(
     interval: Interval,
-    formError: Form[ActivityReportFormData] = null
+    formError: Option[Form[ActivityReportFormData]] = None
   )(implicit request: AuthenticatedRequest[AnyContent]): Future[Result] = {
     import system.ThreadPools.web
-    if (formError != null) {
+    if (formError.isDefined) {
       return Future.successful(Ok(views.html.admin.reporting.activity.index(
         null,
-        formError
+        formError.orNull
       )))
     }
 
@@ -77,7 +77,7 @@ class ActivityReportingController @Inject()(
 
     formData.bindFromRequest.fold(
       formError => {
-        renderResultWithInterval(ActivityReportFormData.makeDefaultTimeDate(), formError)
+        renderResultWithInterval(ActivityReportFormData.makeDefaultTimeDate(), Some(formError))
       },
       data => {
         renderResultWithInterval(new Interval(data.fromDate, data.toDate))
