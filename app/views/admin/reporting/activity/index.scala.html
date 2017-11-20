@@ -20,32 +20,32 @@
 
       @tags.datetimePicker(formData("toDate"), '_label -> "To")
 
-      @b3.submit('class -> "btn btn-primary"){ Search }
+      @b3.submit('class -> "btn btn-primary") { Search }
     }
 
     @if(formData.hasGlobalErrors) {
       @for(error <- formData.globalErrors) {
         <div class="alert alert-danger">@error.message</div>
       }
-    } else {
-      <table class="table">
-        <thead class="thead">
-          <th scope="col">Provider</th>
-          <th scope="col">Alerts sent</th>
-        </thead>
-        <tbody>
-        @for((provider, doc) <- allAlertsByProviders) {
-          @if(doc.isEmpty) {
-            <tr class="text-muted">
-          } else {
-            <tr>
-            }
-          <td>@provider.displayName</td>
-          <td>@doc.length</td>
-        </tr>
-        }
-        </tbody>
-      </table>
     }
+    <table class="table">
+      <thead class="thead">
+        <th scope="col">Provider</th>
+        <th scope="col">Alerts sent</th>
+      </thead>
+      <tbody>
+      @for((provider, doc) <- allAlertsByProviders) {
+        @if(doc.isEmpty) {
+          <tr class="text-muted">
+        } else {
+          <tr>
+          }
+        <td>@provider.displayName</td>
+        <td>@doc.length</td>
+      </tr>
+      }
+      </tbody>
+    </table>
+
   </div>
 }
