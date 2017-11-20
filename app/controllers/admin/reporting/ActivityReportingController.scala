@@ -46,7 +46,6 @@ class ActivityReportingController @Inject()(
     interval: Interval,
     formError: Form[ActivityReportFormData] = null
   )(implicit request: AuthenticatedRequest[AnyContent]): Future[Result] = {
-    import system.ThreadPools.elastic
 
     if (formError != null) {
       return Future(Ok(views.html.admin.reporting.activity.index(
@@ -56,17 +55,13 @@ class ActivityReportingController @Inject()(
     }
 
     for {
-      allAlertsByProviders <- Future.sequence(activityReportingService.allAlertsByProviders(interval).map {
-        case (provider, futureDocs) =>
-          for {
-            docs <- futureDocs
-          } yield (provider, docs)
-      }).map(_.toSeq.sortBy {
-        case (provider, _) => provider.displayName.getOrElse(provider.id)
-      })
+      allAlertsByProviders <- activityReportingService.allAlertsByProviders(interval)
     } yield {
+      val sortedResult = ListMap(allAlertsByProviders.toSeq.sortBy {
+        case (provider, _) => provider.displayName.getOrElse(provider.id)
+      }: _*)
       Ok(views.html.admin.reporting.activity.index(
-        ListMap(allAlertsByProviders: _*),
+        sortedResult,
         formData.fill(ActivityReportFormData(interval.getStart, interval.getEnd))
       ))
     }
@@ -75,7 +70,6 @@ class ActivityReportingController @Inject()(
 
   def index = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
     val defaultFormData = ActivityReportFormData.withDefaultTimeDate()
-    //    formData.fill(defaultFormData)
     renderResultWithInterval(new Interval(defaultFormData.fromDate, defaultFormData.toDate))
   }
 
