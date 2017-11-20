@@ -45,21 +45,10 @@ class ActivityReportingController @Inject()(
       })
   )
 
-  def getResultFromService(interval: Interval = ActivityReportingController.makeDefaultTimeDate()): Future[ListMap[ActivityProvider, Seq[ActivityDocument]]] = {
-    for {
-      allAlertsByProviders <- activityReportingService.allAlertsByProviders(interval)
-    } yield {
-      ListMap(allAlertsByProviders.toSeq.sortBy {
-        case (provider, _) => provider.displayName.getOrElse(provider.id)
-      }: _*)
-    }
-  }
-
-
   def index = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
     val interval = ActivityReportingController.makeDefaultTimeDate()
     for {
-      result <- this.getResultFromService(interval)
+      result <- activityReportingService.allAlertsByProviders(interval)
     } yield {
       Ok(views.html.admin.reporting.activity.index(
         result,
@@ -72,19 +61,17 @@ class ActivityReportingController @Inject()(
     formData.bindFromRequest.fold(
       formError => {
         val interval = ActivityReportingController.makeDefaultTimeDate()
-        for {
-          result <- this.getResultFromService(interval)
-        } yield {
+        activityReportingService.allAlertsByProviders(interval).map( result =>{
           Ok(views.html.admin.reporting.activity.index(
             result,
             formError.fill(ActivityReportFormData(interval.getStart, interval.getEnd))
           ))
-        }
+        })
       },
       data => {
         val interval = new Interval(data.fromDate, data.toDate)
         for {
-          result <- this.getResultFromService(interval)
+          result <- activityReportingService.allAlertsByProviders(interval)
         } yield {
           Ok(views.html.admin.reporting.activity.index(
             result,

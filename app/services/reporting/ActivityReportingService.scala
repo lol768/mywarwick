@@ -10,6 +10,7 @@ import services.ProviderRender
 import services.dao.PublisherDao
 import services.elasticsearch.{ActivityDocument, ActivityESSearchQuery, ActivityESService}
 
+import scala.collection.immutable.ListMap
 import scala.concurrent.Future
 
 @ImplementedBy(classOf[ActivityReportingServiceImpl])
@@ -40,7 +41,7 @@ class ActivityReportingServiceImpl @Inject()(
     activityESService.search(query)
   }
 
-  override def alertsByProviders(providers: Map[ActivityProvider, Interval]) = {
+  override def alertsByProviders(providers: Map[ActivityProvider, Interval]): Future[Map[ActivityProvider, Seq[ActivityDocument]]] = {
     import system.ThreadPools.elastic
     Future.sequence(providers.map {
       case (provider, interval) => (provider, this.alertsByProvider(provider, interval))
@@ -49,7 +50,11 @@ class ActivityReportingServiceImpl @Inject()(
         for {
           activityDocuments <- futureActivityDocuments
         } yield (provider, activityDocuments)
-    }).map(_.toMap)
+    }).map(result => {
+      ListMap(result.toSeq.sortBy {
+        case (provider, _) => provider.displayName.getOrElse(provider.id)
+      }: _*)
+    })
   }
 
 
@@ -57,7 +62,7 @@ class ActivityReportingServiceImpl @Inject()(
 
   override def activitiesByProviders(providers: Map[ActivityProvider, Interval]) = ???
 
-  override def allAlertsByProviders(interval: Interval) = {
+  override def allAlertsByProviders(interval: Interval): Future[Map[ActivityProvider, Seq[ActivityDocument]]] = {
     db.withConnection(implicit c => {
       val providersWithInterval = publisherDao
         .getAllProviders()
