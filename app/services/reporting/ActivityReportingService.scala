@@ -41,6 +41,7 @@ class ActivityReportingServiceImpl @Inject()(
   }
 
   override def alertsByProviders(providers: Map[ActivityProvider, Interval]) = {
+    import system.ThreadPools.elastic
     Future.sequence(providers.map {
       case (provider, interval) => (provider, this.alertsByProvider(provider, interval))
     }.map {
