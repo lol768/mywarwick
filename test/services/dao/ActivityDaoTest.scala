@@ -297,8 +297,8 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
     "api" in transaction { implicit c =>
       val activityId = activityDao.save(Fixtures.activitySave.activityFromApi.copy(publishedAt = Some(DateTime.now.minusHours(1))), audienceId, AudienceSize.Public, Nil)
       val saved = activityDao.getActivityById(activityId)
-      saved.isDefined mustBe true
-      saved.orNull.api mustBe true
+      saved must not be empty
+      saved.get.api mustBe true
     }
   }
 }
