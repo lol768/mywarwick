@@ -105,45 +105,14 @@ class ActivityESServiceImpl @Inject()(
   }
 
   override def count(input: ActivityESSearchQuery): Future[Int] = {
-
-
-    val searchHelper = ActivityESServiceSearchHelper
     val lowHelper = LowLevelClientHelper
-    val boolQueryInString = searchHelper.makeBoolQueryBuilder(input).toString
-    val boolQueryJson = Json.parse({
-      boolQueryInString
-    })
-
-    val query = JsObject(Seq(
-      "query" -> JsObject(Seq(
-        "bool" -> (boolQueryJson \ "bool").get
-      ))
-
-    ))
-
-    //    val isAlert = input.isAlert.getOrElse(false)
-    val indexName = searchHelper.indexNameForActivitySearchQuery(input)
-    val path = lowHelper.countPathForIndexName(indexName)
-
-    val futureRes: Future[Response] = lowHelper.performRequestAsync(
+    lowHelper.performRequestAsync(
       method = lowHelper.Method.get,
-      path = path,
-      entity = Some(lowHelper.httpEntityFromJsValue(query)),
+      path = lowHelper.makePathForCountApiFromActivityEsSearchQuery(input),
+      entity = Some(lowHelper.httpEntityFromJsValue(lowHelper.makeQueryForCountApiFromActivityESSearchQuery(input))),
       lowLevelClient = lowLevelClient
-    )
-
-
-    futureRes.map { res =>
-      val entity = res.getEntity
-
-      val resString = scala.io.Source.fromInputStream(entity.getContent).mkString
-
-      val resJs: JsValue = Json.parse({
-        resString
-      })
-
-      val count = (resJs \ "count").get.toString().toInt
-      count
+    ).map {
+      lowHelper.getCountFromCountApiRes
     }
   }
 }

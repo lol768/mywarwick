@@ -6,16 +6,18 @@ import java.util.Collections
 import org.apache.http.entity.ContentType
 import org.apache.http.nio.entity.NStringEntity
 import org.elasticsearch.client.{Response, RestClient}
-import play.api.libs.json.{JsValue, Json}
+import org.elasticsearch.index.query.BoolQueryBuilder
+import play.api.libs.json.{JsObject, JsValue, Json}
 import warwick.core.Logging
+
 import collection.JavaConverters._
-import scala.concurrent.{Future}
+import scala.concurrent.Future
 
 trait LowLevelClientHelper extends Logging {
 
   val templateRootPath = "/_template"
 
-  def countPathForIndexName(path: String ) = s"/$path/_count"
+  def countPathForIndexName(path: String) = s"/$path/_count"
 
   object Method {
     val put = "PUT"
@@ -23,6 +25,28 @@ trait LowLevelClientHelper extends Logging {
     val post = "POST"
     val get = "GET"
     val head = "HEAD"
+  }
+
+  def getCountFromCountApiRes(res: Response): Int = {
+    val resJs: JsValue = Json.parse({
+      scala.io.Source.fromInputStream(res.getEntity.getContent).mkString
+    })
+    (resJs \ "count").get.toString().toInt
+  }
+
+  def makeQueryForCountApiFromActivityESSearchQuery(input: ActivityESSearchQuery): JsValue = {
+    val boolQuery = Json.parse({
+      ActivityESServiceSearchHelper.makeBoolQueryBuilder(input).toString
+    })
+    JsObject(Seq(
+      "query" -> JsObject(Seq(
+        "bool" -> (boolQuery \ "bool").get
+      ))
+    ))
+  }
+
+  def makePathForCountApiFromActivityEsSearchQuery(input: ActivityESSearchQuery): String = {
+    countPathForIndexName(ActivityESServiceSearchHelper.indexNameForActivitySearchQuery(input))
   }
 
   val emptyParam: util.Map[String, String] = Collections.emptyMap()
