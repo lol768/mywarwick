@@ -70,7 +70,7 @@ class WebGroupsController @Inject()(
     }
   }
 
-  implicit val writesGroup = new Writes[Group] {
+  implicit val writesGroup: Writes[Group] = new Writes[Group] {
     override def writes(o: Group): JsValue = Json.obj(
       "name" -> o.name.string,
       "title" -> o.title
