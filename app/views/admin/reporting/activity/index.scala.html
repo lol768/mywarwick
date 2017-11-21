@@ -3,7 +3,7 @@
 @import controllers.admin.reporting.ActivityReportFormData
 @import controllers.admin.reporting._
 
-@(allAlertsByProviders: Iterable[(ActivityProvider, Seq[ActivityDocument])], formData: Form[ActivityReportFormData])(implicit messages: Messages, context: RequestContext)
+@(allAlertsCountByProviders: Iterable[(ActivityProvider, Int)], formData: Form[ActivityReportFormData])(implicit messages: Messages, context: RequestContext)
 @implicitFieldConstructor = @{
   b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
 }
@@ -34,14 +34,14 @@
         <th scope="col">Alerts sent</th>
       </thead>
       <tbody>
-      @for((provider, doc) <- allAlertsByProviders) {
-        @if(doc.isEmpty) {
+      @for((provider, count) <- allAlertsCountByProviders) {
+        @if(count == 0) {
           <tr class="text-muted">
         } else {
           <tr>
           }
         <td>@provider.displayName</td>
-        <td>@doc.length</td>
+        <td>@count</td>
       </tr>
       }
       </tbody>
