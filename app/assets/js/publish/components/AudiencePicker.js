@@ -276,7 +276,7 @@ export class AudiencePicker extends React.PureComponent {
               name="audience.audience[]"
               handleChange={this.handleChange}
               items={_.get(this.state, prefixPath('.groups.listOfUsercodes'), [])}
-              placeholder="Type in usercodes, one per line"
+              placeholder="Type in usercodes or uni ids, one per line"
               valuePrefix={prefixDeptSubset('')}
             />
           </div>

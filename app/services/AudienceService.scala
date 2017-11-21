@@ -13,7 +13,7 @@ import warwick.sso._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
@@ -22,7 +22,7 @@ trait AudienceService {
 
   def audienceToJson(audience: Audience): JsValue
 
-  def validateUsercodes(usercodes: Set[Usercode]): Set[Usercode]
+  def validateUsercodes(usercodes: Set[Usercode]): Either[Set[Usercode], Set[Usercode]]
 }
 
 class AudienceServiceImpl @Inject()(
@@ -254,12 +254,19 @@ class AudienceServiceImpl @Inject()(
     ) ++ locationsJson
   }
 
-  override def validateUsercodes(usercodes: Set[Usercode]): Set[Usercode] = {
-    val uniIds = usercodes.filter(_.string.forall(Character.isDigit))
-    val validIds = userLookupService.getUsers(uniIds.map(id => UniversityID(id.string)).toSeq).toOption
-    val validCodes = userLookupService.getUsers(usercodes.toSeq).toOption
+  override def validateUsercodes(usercodes: Set[Usercode]): Either[Set[Usercode], Set[Usercode]] = {
+    val uniIds: Set[String] = usercodes.map(_.string).filter(_.forall(Character.isDigit))
+    val validIds: Option[Map[UniversityID, User]] = userLookupService.getUsers(uniIds.map(id => UniversityID(id)).toSeq).toOption
+    val validCodes: Set[Usercode] = userLookupService.getUsers(usercodes.toSeq).toOption
+      .map(_.keys).getOrElse(Nil).toSet
 
-    (validCodes.map(_.keys).getOrElse(Nil) ++ validIds.map(_.values.map(_.usercode)).getOrElse(Nil)).toSet
+    val invalid: Set[Usercode] = usercodes.diff(validCodes).filterNot(u => validIds.map(_.keys).getOrElse(Nil).map(_.string).toSet.contains(u.string))
+
+    if (invalid.isEmpty) {
+      Left(validCodes ++ validIds.map(_.values.map(_.usercode)).getOrElse(Nil).toSet)
+    } else {
+      Right(invalid)
+    }
   }
 
 }

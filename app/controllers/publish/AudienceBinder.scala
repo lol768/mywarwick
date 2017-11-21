@@ -10,7 +10,7 @@ import play.api.data.FormError
 import services.{AudienceService, PublisherService}
 import services.dao.DepartmentInfoDao
 import uk.ac.warwick.util.core.StringUtils
-import warwick.sso.GroupName
+import warwick.sso.{GroupName, Usercode}
 
 import scala.concurrent.Future
 
@@ -56,12 +56,12 @@ class AudienceBinder @Inject()(
       }
 
       def validateUsercodesAudience(component: UsercodesAudience): Option[UsercodesAudience] = {
-        val invalidUsercodes = component.usercodes.diff(audienceService.validateUsercodes(component.usercodes))
-        if (invalidUsercodes.isEmpty)
-          Some(UsercodesAudience(component.usercodes))
-         else {
-          errors :+= FormError("audience", "error.audience.usercodes.invalid", Seq(invalidUsercodes.map(_.string).mkString(", ")))
-          None
+        audienceService.validateUsercodes(component.usercodes) match {
+          case Left(validUsercodes) => Some(UsercodesAudience(validUsercodes))
+          case Right(invalidUsercodes) => {
+            errors :+= FormError("audience", "error.audience.usercodes.invalid", Seq(invalidUsercodes.map(_.string).mkString(", ")))
+            None
+          }
         }
       }
 

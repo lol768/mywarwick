@@ -80,7 +80,7 @@ export class AudienceIndicator extends React.PureComponent {
                   (<div key={`${audienceType}:${text}`}>{text}</div>));
               case 'listOfUsercodes':
                 if (components !== undefined) {
-                  return <div key={audienceType}>{`${components.length} usercodes`}</div>;
+                  return <div key={audienceType}>{`${components.length} usercodes or university ids`}</div>;
                 }
                 return null; // lint made me do it
               case 'staffRelationships':
