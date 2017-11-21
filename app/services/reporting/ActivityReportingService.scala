@@ -9,22 +9,20 @@ import play.api.db.{Database, NamedDatabase}
 import services.ProviderRender
 import services.dao.PublisherDao
 import services.elasticsearch.{ActivityDocument, ActivityESSearchQuery, ActivityESService}
-
-import scala.collection.immutable.ListMap
 import scala.concurrent.Future
 
 @ImplementedBy(classOf[ActivityReportingServiceImpl])
 trait ActivityReportingService {
   def alertsByProvider(provider: ActivityProvider, interval: Interval): Future[Seq[ActivityDocument]]
 
-  def alertsByProviders(providers: Map[ActivityProvider, Interval]): Future[Map[ActivityProvider, Seq[ActivityDocument]]]
+  def alertsByProviders(providers: Map[ActivityProvider, Interval]): Future[Iterable[(ActivityProvider, Seq[ActivityDocument])]]
 
-  def allAlertsByProviders(interval: Interval): Future[Map[ActivityProvider, Seq[ActivityDocument]]]
+  def allAlertsByProviders(interval: Interval): Future[Iterable[(ActivityProvider, Seq[ActivityDocument])]]
 
   // activity as in non-alert activity
   def activitiesByProvider(provider: ActivityProvider, interval: Interval): Seq[ActivityDocument]
 
-  def activitiesByProviders(providers: Map[ActivityProvider, Interval]): Future[Map[ActivityProvider, Seq[ActivityDocument]]]
+  def activitiesByProviders(providers: Map[ActivityProvider, Interval]): Future[Iterable[(ActivityProvider, Seq[ActivityDocument])]]
 }
 
 class ActivityReportingServiceImpl @Inject()(
@@ -41,7 +39,7 @@ class ActivityReportingServiceImpl @Inject()(
     activityESService.search(query)
   }
 
-  override def alertsByProviders(providers: Map[ActivityProvider, Interval]): Future[Map[ActivityProvider, Seq[ActivityDocument]]] = {
+  override def alertsByProviders(providers: Map[ActivityProvider, Interval]): Future[Iterable[(ActivityProvider, Seq[ActivityDocument])]] = {
     import system.ThreadPools.elastic
     Future.sequence(providers.map {
       case (provider, interval) => (provider, this.alertsByProvider(provider, interval))
@@ -50,19 +48,18 @@ class ActivityReportingServiceImpl @Inject()(
         for {
           activityDocuments <- futureActivityDocuments
         } yield (provider, activityDocuments)
-    }).map(result => {
-      ListMap(result.toSeq.sortBy {
+    }).map { result =>
+      result.toSeq.sortBy {
         case (provider, _) => provider.displayName.getOrElse(provider.id)
-      }: _*)
-    })
+      }
+    }
   }
-
 
   override def activitiesByProvider(provider: ActivityProvider, interval: Interval) = ???
 
   override def activitiesByProviders(providers: Map[ActivityProvider, Interval]) = ???
 
-  override def allAlertsByProviders(interval: Interval): Future[Map[ActivityProvider, Seq[ActivityDocument]]] = {
+  override def allAlertsByProviders(interval: Interval): Future[Iterable[(ActivityProvider, Seq[ActivityDocument])]] = {
     db.withConnection(implicit c => {
       val providersWithInterval = publisherDao
         .getAllProviders()
