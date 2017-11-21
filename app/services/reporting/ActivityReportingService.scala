@@ -15,9 +15,15 @@ import scala.concurrent.Future
 trait ActivityReportingService {
   def alertsByProvider(provider: ActivityProvider, interval: Interval): Future[Seq[ActivityDocument]]
 
+  def alertsCountByProvider(provider: ActivityProvider, interval: Interval): Future[Int]
+
   def alertsByProviders(providers: Map[ActivityProvider, Interval]): Future[Iterable[(ActivityProvider, Seq[ActivityDocument])]]
 
+  def alertsCountByProviders(providers: Map[ActivityProvider, Interval]): Future[Iterable[(ActivityProvider, Int)]]
+
   def allAlertsByProviders(interval: Interval): Future[Iterable[(ActivityProvider, Seq[ActivityDocument])]]
+
+  def allAlertsCountByProviders(interval: Interval): Future[Iterable[(ActivityProvider, Int)]]
 
   // activity as in non-alert activity
   def activitiesByProvider(provider: ActivityProvider, interval: Interval): Seq[ActivityDocument]
@@ -39,6 +45,15 @@ class ActivityReportingServiceImpl @Inject()(
     activityESService.search(query)
   }
 
+  override def alertsCountByProvider(provider: ActivityProvider, interval: Interval) = {
+    val query = ActivityESSearchQuery(
+      provider_id = Some(provider.id),
+      publish_at = Some(interval),
+      isAlert = Some(true)
+    )
+    activityESService.count(query)
+  }
+
   override def alertsByProviders(providers: Map[ActivityProvider, Interval]): Future[Iterable[(ActivityProvider, Seq[ActivityDocument])]] = {
     import system.ThreadPools.elastic
     Future.sequence(providers.map {
@@ -55,9 +70,22 @@ class ActivityReportingServiceImpl @Inject()(
     }
   }
 
-  override def activitiesByProvider(provider: ActivityProvider, interval: Interval) = ???
+  override def alertsCountByProviders(providers: Map[ActivityProvider, Interval]) = {
+    import system.ThreadPools.elastic
+    Future.sequence(providers.map {
+      case (provider, interval) => (provider, this.alertsCountByProvider(provider, interval))
+    }.map {
+      case (provider, futureCount) =>
+        for {
+          count <- futureCount
+        } yield (provider, count)
+    }).map { result =>
+      result.toSeq.sortBy {
+        case (provider, _) => provider.displayName.getOrElse(provider.id)
+      }
+    }
+  }
 
-  override def activitiesByProviders(providers: Map[ActivityProvider, Interval]) = ???
 
   override def allAlertsByProviders(interval: Interval): Future[Iterable[(ActivityProvider, Seq[ActivityDocument])]] = {
     db.withConnection(implicit c => {
@@ -69,4 +97,19 @@ class ActivityReportingServiceImpl @Inject()(
       this.alertsByProviders(providersWithInterval)
     })
   }
+
+  override def allAlertsCountByProviders(interval: Interval) = {
+    db.withConnection(implicit c => {
+      val providersWithInterval = publisherDao
+        .getAllProviders()
+        .map(ProviderRender.toActivityProvider)
+        .map((_, interval))
+        .toMap
+      this.alertsCountByProviders(providersWithInterval)
+    })
+  }
+
+  override def activitiesByProvider(provider: ActivityProvider, interval: Interval) = ???
+
+  override def activitiesByProviders(providers: Map[ActivityProvider, Interval]) = ???
 }
