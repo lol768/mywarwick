@@ -225,6 +225,7 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 
   def makeSearchSourceBuilder(queryBuilder: QueryBuilder): SearchSourceBuilder = {
     val searchSourceBuilder = new SearchSourceBuilder()
+    searchSourceBuilder.size(10000) //TODO fixme search api is limited to 10000 results, replace with search scroll api
     searchSourceBuilder.query(queryBuilder)
   }
 
