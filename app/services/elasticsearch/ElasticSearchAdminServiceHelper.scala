@@ -5,12 +5,11 @@ import java.util.Collections
 
 import org.apache.http.entity.ContentType
 import org.apache.http.nio.entity.NStringEntity
-import org.elasticsearch.client.{Response, ResponseListener, RestClient}
-import org.jdom.IllegalDataException
+import org.elasticsearch.client.{Response, RestClient}
 import play.api.libs.json.{JsValue, Json}
 import warwick.core.Logging
 import collection.JavaConverters._
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{Future}
 
 trait ElasticSearchAdminServiceHelper extends Logging {
 

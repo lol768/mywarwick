@@ -64,24 +64,42 @@ object ActivityDocument {
     )
   }
 
-  def fromMap(map: Map[String, AnyRef]) = {
+  def fromMap(hitMap: Map[String, AnyRef]) = {
     val field = ActivityESServiceSearchHelper.ESFieldName
+    val map = hitMap.filterNot { case (_, v) => v == null }
+
+    type SList = util.ArrayList[String]
+
+    def getStringSeq(field: String) =
+      map.getOrElse(field, new SList())
+        .asInstanceOf[SList]
+        .asScala
+        .map(_.toString)
+
+    def getString(field: String) =
+      map.getOrElse(field, "-").toString
+
+    def getDate(field: String) =
+      map.get(field).map(_.toString).map(DateTime.parse).orNull
+
+    def getBoolean(field: String, default: Boolean) =
+      Boolean.unbox(map.getOrElse(field, Boolean.box(default)))
 
     ActivityDocument(
-      map.getOrElse(field.activity_id, "-").toString,
-      map.getOrElse(field.provider_id, "-").toString,
-      map.getOrElse(field.activity_type, "-").toString,
-      map.getOrElse(field.title, "-").toString,
-      map.getOrElse(field.url, "-").toString,
-      map.getOrElse(field.text, "-").toString,
-      map.getOrElse(field.replaced_by, "-").toString,
-      map.get(field.published_at).map(_.toString).map(DateTime.parse).orNull,
-      map.getOrElse(field.publisher, "-").toString,
-      map.getOrElse(field.audience_components, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
-      map.getOrElse(field.resolved_users, new util.ArrayList()).asInstanceOf[util.ArrayList[String]].asScala.toList.map(_.toString),
-      Boolean.unbox(map.getOrElse(field.api, Boolean.box(false))),
-      map.get(field.created_at).map(_.toString).map(DateTime.parse).orNull,
-      map.getOrElse(field.created_by, "-").toString
+      getString(field.activity_id),
+      getString(field.provider_id),
+      getString(field.activity_type),
+      getString(field.title),
+      getString(field.url),
+      getString(field.text),
+      getString(field.replaced_by),
+      getDate(field.published_at),
+      getString(field.publisher),
+      getStringSeq(field.audience_components),
+      getStringSeq(field.resolved_users),
+      getBoolean(field.api, default = false),
+      getDate(field.created_at),
+      getString(field.created_by)
     )
   }
 
