@@ -8,14 +8,16 @@ import org.elasticsearch.action.ActionListener
 import org.elasticsearch.action.bulk.{BulkRequest, BulkRequestBuilder, BulkResponse}
 import org.elasticsearch.action.index.{IndexRequest, IndexResponse}
 import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
-import org.elasticsearch.client.RestHighLevelClient
+import org.elasticsearch.client.{Response, RestClient, RestHighLevelClient}
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.joda.time.DateTime
+import play.api.libs.json.{JsObject, JsValue, Json}
 import services.{AudienceService, PublisherService}
 import warwick.core.Logging
 import warwick.sso.Usercode
 import system.ThreadPools.elastic
+
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
 @ImplementedBy(classOf[ActivityESServiceImpl])
@@ -27,6 +29,8 @@ trait ActivityESService {
   def deleteDocumentByActivityId(activityId: String, isNotification: Boolean = true)
 
   def search(activityESSearchQuery: ActivityESSearchQuery): Future[Seq[ActivityDocument]]
+
+  def count(activityESSearchQuery: ActivityESSearchQuery): Future[Int]
 
 }
 
@@ -44,6 +48,7 @@ class ActivityESServiceImpl @Inject()(
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.alertEsTemplates, "alert_template_default")
 
   private val client: RestHighLevelClient = eSClientConfig.highLevelClient
+  private val lowLevelClient: RestClient = eSClientConfig.lowLevelClient
 
   override def index(req: IndexActivityRequest) = index(Seq(req))
 
@@ -97,5 +102,48 @@ class ActivityESServiceImpl @Inject()(
           logger.error("Exceptions thrown after sending a elasticsearch SearchRequest", exception)
           Seq()
       }
+  }
+
+  override def count(input: ActivityESSearchQuery): Future[Int] = {
+
+
+    val searchHelper = ActivityESServiceSearchHelper
+    val lowHelper = LowLevelClientHelper
+    val boolQueryInString = searchHelper.makeBoolQueryBuilder(input).toString
+    val boolQueryJson = Json.parse({
+      boolQueryInString
+    })
+
+    val query = JsObject(Seq(
+      "query" -> JsObject(Seq(
+        "bool" -> (boolQueryJson \ "bool").get
+      ))
+
+    ))
+
+    //    val isAlert = input.isAlert.getOrElse(false)
+    val indexName = searchHelper.indexNameForActivitySearchQuery(input)
+    val path = lowHelper.countPathForIndexName(indexName)
+
+    val futureRes: Future[Response] = lowHelper.performRequestAsync(
+      method = lowHelper.Method.get,
+      path = path,
+      entity = Some(lowHelper.httpEntityFromJsValue(query)),
+      lowLevelClient = lowLevelClient
+    )
+
+
+    futureRes.map { res =>
+      val entity = res.getEntity
+
+      val resString = scala.io.Source.fromInputStream(entity.getContent).mkString
+
+      val resJs: JsValue = Json.parse({
+        resString
+      })
+
+      val count = (resJs \ "count").get.toString().toInt
+      count
+    }
   }
 }
