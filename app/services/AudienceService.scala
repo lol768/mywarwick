@@ -263,9 +263,9 @@ class AudienceServiceImpl @Inject()(
     val invalid: Set[Usercode] = usercodes.diff(validCodes).filterNot(u => validIds.map(_.keys).getOrElse(Nil).map(_.string).toSet.contains(u.string))
 
     if (invalid.isEmpty) {
-      Left(validCodes ++ validIds.map(_.values.map(_.usercode)).getOrElse(Nil).toSet)
+      Right(validCodes ++ validIds.map(_.values.map(_.usercode)).getOrElse(Nil).toSet)
     } else {
-      Right(invalid)
+      Left(invalid)
     }
   }
 
