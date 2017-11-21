@@ -3,20 +3,13 @@ package controllers.admin.reporting
 import javax.inject.{Inject, Singleton}
 
 import controllers.BaseController
-import models.ActivityProvider
 import org.joda.time.{DateTime, Interval}
 import play.api.data.Form
 import play.api.data.Forms.{jodaDate, mapping}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{AnyContent, Result}
 import services.SecurityService
-import services.elasticsearch.ActivityDocument
 import services.reporting.ActivityReportingService
-import system.Roles
-import warwick.sso.AuthenticatedRequest
-
-import scala.collection.immutable.ListMap
-import scala.concurrent.Future
+import system.{RequestContext, Roles}
 
 @Singleton
 class ActivityReportingController @Inject()(
@@ -27,75 +20,42 @@ class ActivityReportingController @Inject()(
 
   import Roles._
   import securityService._
-  import system.ThreadPools.elastic
+  import system.ThreadPools.web
 
-  object FormField {
-    val from = "fromDate"
-    val to = "toDate"
-  }
-
-  val formData = Form(
+  private val form = Form(
     mapping(
       "fromDate" -> jodaDate("yyyy-MM-dd'T'HH:mm:ss"),
       "toDate" -> jodaDate("yyyy-MM-dd'T'HH:mm:ss")
     )(ActivityReportFormData.apply)(ActivityReportFormData.unapply) verifying(
       """"From" date must be before "To" date""",
-      fields => fields match {
-        case data => ActivityReportFormData.validate(data.fromDate, data.toDate).isDefined
-      })
+      data => data.fromDate.isBefore(data.toDate)
+    )
   )
 
+  private def defaultData = ActivityReportFormData(
+    DateTime.now().minusDays(14),
+    DateTime.now()
+  )
+
+  private def defaultForm = form.fill(defaultData)
+
   def index = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
-    val interval = ActivityReportingController.makeDefaultTimeDate()
-    activityReportingService.allAlertsByProviders(interval).map { result =>
-      Ok(views.html.admin.reporting.activity.index(
-        result,
-        formData.fill(ActivityReportFormData(interval.getStart, interval.getEnd))
-      ))
-    }
+    render(defaultData, defaultForm)
   }
 
   def formSubmit = RequiredActualUserRoleAction(Sysadmin).async { implicit request =>
-    formData.bindFromRequest.fold(
-      formError => {
-        val interval = ActivityReportingController.makeDefaultTimeDate()
-        activityReportingService.allAlertsByProviders(interval).map { result =>
-          Ok(views.html.admin.reporting.activity.index(
-            result,
-            formError.fill(ActivityReportFormData(interval.getStart, interval.getEnd))
-          ))
-        }
-      },
-      data => {
-        val interval = new Interval(data.fromDate, data.toDate)
-        activityReportingService.allAlertsByProviders(interval).map { result =>
-          Ok(views.html.admin.reporting.activity.index(
-            result,
-            formData.fill(data)
-          ))
-        }
-      }
+    defaultForm.bindFromRequest.fold(
+      formError => render(defaultData, formError),
+      data => render(data, defaultForm.fill(data))
     )
   }
-}
 
-object ActivityReportingController {
-
-  def makeDefaultTimeDate() = {
-    val defaultTo = DateTime.now()
-    val defaultFrom = defaultTo.minusDays(14)
-    new Interval(defaultFrom, defaultTo)
-  }
-}
-
-case class ActivityReportFormData(fromDate: DateTime, toDate: DateTime)
-
-object ActivityReportFormData {
-  def validate(fromDate: DateTime, toDate: DateTime) = {
-    toDate.isAfter(fromDate) match {
-      case true => Some(ActivityReportFormData(fromDate, toDate))
-      case _ => None
+  private def render(data: ActivityReportFormData, form: Form[ActivityReportFormData])(implicit ctx: RequestContext) =
+    activityReportingService.allAlertsByProviders(data.interval).map { result =>
+      Ok(views.html.admin.reporting.activity.index(result, form))
     }
-  }
+}
 
+case class ActivityReportFormData(fromDate: DateTime, toDate: DateTime) {
+  def interval: Interval = new Interval(fromDate, toDate)
 }
