@@ -79,8 +79,8 @@ class ActivityDaoImpl @Inject()(
     }.orNull
 
     SQL"""
-      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by, send_email, audience_size)
-      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $publishedAtOrNow, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string}, $sendEmailObj, ${audienceSize.toOption})
+      INSERT INTO ACTIVITY (id, provider_id, type, title, text, url, published_at, created_at, should_notify, audience_id, publisher_id, created_by, send_email, audience_size, api)
+      VALUES ($id, $providerId, ${`type`}, $title, $text, $url, $publishedAtOrNow, $now, $shouldNotify, $audienceId, $publisherId, ${changedBy.string}, $sendEmailObj, ${audienceSize.toOption}, $api)
     """
       .execute()
 
@@ -92,7 +92,7 @@ class ActivityDaoImpl @Inject()(
   override def update(id: String, activity: ActivitySave, audienceId: String, audienceSize: AudienceSize)(implicit c: Connection): Unit = {
     import activity._
     val publishedAtOrNow = publishedAt.getOrElse(DateTime.now)
-    SQL"UPDATE ACTIVITY SET TYPE = ${`type`}, TITLE = $title, TEXT = $text, URL = $url, PUBLISHED_AT = $publishedAtOrNow, AUDIENCE_ID = $audienceId, AUDIENCE_SIZE = ${audienceSize.toOption} WHERE ID = $id"
+    SQL"UPDATE ACTIVITY SET TYPE = ${`type`}, TITLE = $title, TEXT = $text, URL = $url, PUBLISHED_AT = $publishedAtOrNow, AUDIENCE_ID = $audienceId, AUDIENCE_SIZE = ${audienceSize.toOption}, API = $api WHERE ID = $id"
       .execute()
   }
 
