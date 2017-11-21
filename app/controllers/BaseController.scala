@@ -1,6 +1,6 @@
 package controllers
 
-import play.api.mvc.Controller
+import play.api.mvc.InjectedController
 import system.{ImplicitRequestContext, Logging}
 
 /**
@@ -9,6 +9,6 @@ import system.{ImplicitRequestContext, Logging}
   * You'll love BaseController
   */
 abstract class BaseController
-  extends Controller
+  extends InjectedController
   with Logging
   with ImplicitRequestContext

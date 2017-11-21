@@ -10,20 +10,20 @@ import play.api.mvc._
 import system.ImplicitRequestContext
 import warwick.sso._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[SecurityServiceImpl])
 trait SecurityService {
 
-  def UserAction: ActionBuilder[AuthenticatedRequest]
+  def UserAction(parser: BodyParser[AnyContent]): ActionBuilder[AuthenticatedRequest, AnyContent]
 
-  def RequiredUserAction: ActionBuilder[AuthenticatedRequest]
+  def RequiredUserAction(parser: BodyParser[AnyContent]): ActionBuilder[AuthenticatedRequest, AnyContent]
 
-  def RequiredRoleAction(role: RoleName): ActionBuilder[AuthenticatedRequest]
+  def RequiredRoleAction(parser: BodyParser[AnyContent])(role: RoleName): ActionBuilder[AuthenticatedRequest, AnyContent]
 
-  def RequiredActualUserRoleAction(role: RoleName): ActionBuilder[AuthenticatedRequest]
+  def RequiredActualUserRoleAction(parser: BodyParser[AnyContent])(role: RoleName): ActionBuilder[AuthenticatedRequest, AnyContent]
 
-  def APIAction: ActionBuilder[AuthenticatedRequest]
+  def APIAction(parser: BodyParser[AnyContent]): ActionBuilder[AuthenticatedRequest, AnyContent]
 
   /**
     * An async result that will either do what you ask (A) or fall back to an error Result.
@@ -44,19 +44,18 @@ class SecurityServiceImpl @Inject()(
   override val ssoClient: SSOClient,
   val basicAuth: BasicAuth,
   cache: CacheApi
-) extends SecurityService with ImplicitRequestContext {
+) (implicit ec: ExecutionContext) extends SecurityService with ImplicitRequestContext {
 
-  import play.api.libs.concurrent.Execution.Implicits._
+  override def UserAction(parser: BodyParser[AnyContent]) = ssoClient.Lenient(parser)
+  override def RequiredUserAction(parser: BodyParser[AnyContent]) = ssoClient.Strict(parser)
 
-  val UserAction = ssoClient.Lenient
-  val RequiredUserAction = ssoClient.Strict
+  override def RequiredRoleAction(parser: BodyParser[AnyContent])(role: RoleName) = ssoClient.RequireRole(role, otherwise = showForbidden)(parser)
 
-  def RequiredRoleAction(role: RoleName) = ssoClient.RequireRole(role, otherwise = showForbidden)
-
-  def RequiredActualUserRoleAction(role: RoleName) = ssoClient.RequireActualUserRole(role, otherwise = showForbidden)
+  override def RequiredActualUserRoleAction(parser: BodyParser[AnyContent])(role: RoleName) = ssoClient.RequireActualUserRole(role, otherwise = showForbidden)(parser)
 
   // TODO this always returns a forbidden result if no user found. We might want API calls for anonymous users.
-  val APIAction = ssoClient.Lenient andThen BasicAuthFallback
+  def APIAction(parser: BodyParser[AnyContent]): ActionBuilder[AuthenticatedRequest, AnyContent] =
+    ssoClient.Lenient(parser) andThen new BasicAuthFallback(parser, ec)
 
   override def SecureWebsocket[A](request: play.api.mvc.RequestHeader)(block: warwick.sso.LoginContext => TryAccept[A]) =
     ssoClient.withUser(request)(block)
@@ -65,10 +64,10 @@ class SecurityServiceImpl @Inject()(
     * If a user already exists in the incoming AuthenticatedRequest, we use that.
     * otherwise we try Basic Auth.
     */
-  object BasicAuthFallback extends ActionFunction[AuthenticatedRequest, AuthenticatedRequest] {
+  class BasicAuthFallback(parser: BodyParser[AnyContent], val executionContext: ExecutionContext) extends ActionFunction[AuthenticatedRequest, AuthenticatedRequest] {
     override def invokeBlock[A](request: AuthenticatedRequest[A], block: (AuthenticatedRequest[A]) => Future[Result]): Future[Result] = {
       if (request.context.user.exists(_.isFound)) block(request)
-      else basicAuth.Check(basicAuthDenied).invokeBlock(request, block)
+      else basicAuth.Check(basicAuthDenied)(parser).invokeBlock(request, block)
     }
   }
 

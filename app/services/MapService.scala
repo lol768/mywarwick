@@ -3,7 +3,8 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import play.api.Configuration
-import play.api.libs.ws.{StreamedResponse, WSClient}
+import play.api.libs.ws.WSClient
+import play.api.libs.ws.ahc.StreamedResponse
 
 import scala.concurrent.Future
 
@@ -20,8 +21,8 @@ class MapService @Inject()(
 
   def thumbnailForLocation(lat: String, lon: String, width: Int, height: Int): Future[StreamedResponse] = {
     ws.url(url).withMethod("GET")
-      .withQueryString(query: _*)
-      .withQueryString(
+      .addQueryStringParameters(query: _*)
+      .addQueryStringParameters(
         "gps" -> s"$lat,$lon",
         "crop" -> s"${width}x$height"
       )

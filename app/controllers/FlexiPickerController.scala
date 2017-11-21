@@ -37,7 +37,7 @@ class FlexiPickerController @Inject()(
     )(FlexiPickerQuery.apply)(FlexiPickerQuery.unapply)
   )
 
-  def queryJson = RequiredUserAction { implicit request =>
+  def queryJson = RequiredUserAction(parse.anyContent) { implicit request =>
     form.bindFromRequest.fold(
       _ => Ok(Json.toJson(Map[String, String]())).withHeaders(CONTENT_TYPE -> "text/json"),
 
