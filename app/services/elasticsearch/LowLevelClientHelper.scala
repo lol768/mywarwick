@@ -11,9 +11,11 @@ import warwick.core.Logging
 import collection.JavaConverters._
 import scala.concurrent.{Future}
 
-trait ElasticSearchAdminServiceHelper extends Logging {
+trait LowLevelClientHelper extends Logging {
 
   val templateRootPath = "/_template"
+
+  def countPathForIndexName(path: String ) = s"/$path/_count"
 
   object Method {
     val put = "PUT"
@@ -59,3 +61,5 @@ trait ElasticSearchAdminServiceHelper extends Logging {
     listener.future
   }
 }
+
+object LowLevelClientHelper extends LowLevelClientHelper
