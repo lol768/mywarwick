@@ -253,7 +253,7 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       verify(userLookup, times(1)).getUsers(ids.map(u => UniversityID(u.string)))
       verify(userLookup, times(1)).getUsers(codesAndIds)
 
-      actual must be (Right(Set(invalidId)))
+      actual must be (Left(Set(invalidId)))
     }
   }
 }
