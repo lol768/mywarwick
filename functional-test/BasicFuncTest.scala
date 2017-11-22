@@ -7,7 +7,7 @@ import org.scalatestplus.play.{BrowserInfo, PortNumber}
 import play.api.test.TestBrowser
 import uk.ac.warwick.util.web.Uri
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
   * This class is currently a bit of a mishmash of things under test,
@@ -70,9 +70,9 @@ class BasicFuncTest extends RemoteFuncTestBase {
   // Just messing around with getting logs.
   private def printLogs(browser: TestBrowser): Unit = {
     val logs = browser.manage.logs
-    for (logtype <- logs.getAvailableLogTypes) {
+    for (logtype <- logs.getAvailableLogTypes.asScala) {
       println(s"-- Examining ${logtype} logs --")
-      for (entry <- logs.get(logtype).filter(Level.INFO)) {
+      for (entry <- logs.get(logtype).filter(Level.INFO).asScala) {
         println(s"[${entry.getTimestamp}] - ${entry.getLevel} - ${entry.getMessage}")
       }
     }

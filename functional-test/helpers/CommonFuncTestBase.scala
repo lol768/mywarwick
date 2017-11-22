@@ -15,8 +15,11 @@ protected abstract class CommonFuncTestBase
     with ScalaFutures
     with ScaledTimeSpans
     with IntegrationPatience
+    with OneStartAppPerSuite
     with WithWebClient {
   def baseUrl: String
+
+  override lazy val app = TestApplications.minimal()
 
   val rawConfig: Config = ConfigFactory.load("functional-test")
 

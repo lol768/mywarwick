@@ -20,6 +20,8 @@ import warwick.sso._
 
 import scala.util.Try
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with Results with WithActorSystem {
 
   val tabula = "tabula"
@@ -43,11 +45,10 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
   val audienceService: AudienceService = mock[AudienceService]
 
   val controller = new IncomingActivitiesController(
-    new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], mock[CacheApi]),
+    new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], PlayBodyParsers()),
     activityService,
     publisherService,
-    audienceService,
-    mock[MessagesApi]
+    audienceService
   ) {
     override val navigationService = new MockNavigationService()
     override val ssoClient: MockSSOClient = mockSSOClient

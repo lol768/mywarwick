@@ -16,7 +16,7 @@ import scala.concurrent.Future
 class ServiceCheckController @Inject()(
   life: ApplicationLifecycle,
   healthChecks: java.util.Set[HealthCheck[_]]
-) extends Controller {
+) extends InjectedController {
 
   private val checks = healthChecks.asScala.toList
 

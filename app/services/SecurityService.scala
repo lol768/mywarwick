@@ -2,8 +2,7 @@ package services
 
 import javax.inject.Inject
 
-import com.google.inject.ImplementedBy
-import play.api.cache.CacheApi
+import com.google.inject.{ImplementedBy, Provider}
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc._
@@ -14,16 +13,15 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[SecurityServiceImpl])
 trait SecurityService {
+  def UserAction: ActionBuilder[AuthenticatedRequest, AnyContent]
 
-  def UserAction(parser: BodyParser[AnyContent]): ActionBuilder[AuthenticatedRequest, AnyContent]
+  def RequiredUserAction: ActionBuilder[AuthenticatedRequest, AnyContent]
 
-  def RequiredUserAction(parser: BodyParser[AnyContent]): ActionBuilder[AuthenticatedRequest, AnyContent]
+  def RequiredRoleAction(role: RoleName): ActionBuilder[AuthenticatedRequest, AnyContent]
 
-  def RequiredRoleAction(parser: BodyParser[AnyContent])(role: RoleName): ActionBuilder[AuthenticatedRequest, AnyContent]
+  def RequiredActualUserRoleAction(role: RoleName): ActionBuilder[AuthenticatedRequest, AnyContent]
 
-  def RequiredActualUserRoleAction(parser: BodyParser[AnyContent])(role: RoleName): ActionBuilder[AuthenticatedRequest, AnyContent]
-
-  def APIAction(parser: BodyParser[AnyContent]): ActionBuilder[AuthenticatedRequest, AnyContent]
+  def APIAction: ActionBuilder[AuthenticatedRequest, AnyContent]
 
   /**
     * An async result that will either do what you ask (A) or fall back to an error Result.
@@ -43,19 +41,21 @@ trait SecurityService {
 class SecurityServiceImpl @Inject()(
   override val ssoClient: SSOClient,
   val basicAuth: BasicAuth,
-  cache: CacheApi
+  parse: PlayBodyParsers
 ) (implicit ec: ExecutionContext) extends SecurityService with ImplicitRequestContext {
 
-  override def UserAction(parser: BodyParser[AnyContent]) = ssoClient.Lenient(parser)
-  override def RequiredUserAction(parser: BodyParser[AnyContent]) = ssoClient.Strict(parser)
+  def defaultParser = parse.default
 
-  override def RequiredRoleAction(parser: BodyParser[AnyContent])(role: RoleName) = ssoClient.RequireRole(role, otherwise = showForbidden)(parser)
+  override def UserAction = ssoClient.Lenient(defaultParser)
+  override def RequiredUserAction = ssoClient.Strict(defaultParser)
 
-  override def RequiredActualUserRoleAction(parser: BodyParser[AnyContent])(role: RoleName) = ssoClient.RequireActualUserRole(role, otherwise = showForbidden)(parser)
+  override def RequiredRoleAction(role: RoleName) = ssoClient.RequireRole(role, otherwise = showForbidden)(defaultParser)
+
+  override def RequiredActualUserRoleAction(role: RoleName) = ssoClient.RequireActualUserRole(role, otherwise = showForbidden)(defaultParser)
 
   // TODO this always returns a forbidden result if no user found. We might want API calls for anonymous users.
-  def APIAction(parser: BodyParser[AnyContent]): ActionBuilder[AuthenticatedRequest, AnyContent] =
-    ssoClient.Lenient(parser) andThen new BasicAuthFallback(parser, ec)
+  def APIAction: ActionBuilder[AuthenticatedRequest, AnyContent] =
+    ssoClient.Lenient(defaultParser) andThen new BasicAuthFallback(defaultParser, ec)
 
   override def SecureWebsocket[A](request: play.api.mvc.RequestHeader)(block: warwick.sso.LoginContext => TryAccept[A]) =
     ssoClient.withUser(request)(block)
@@ -64,7 +64,7 @@ class SecurityServiceImpl @Inject()(
     * If a user already exists in the incoming AuthenticatedRequest, we use that.
     * otherwise we try Basic Auth.
     */
-  class BasicAuthFallback(parser: BodyParser[AnyContent], val executionContext: ExecutionContext) extends ActionFunction[AuthenticatedRequest, AuthenticatedRequest] {
+  class BasicAuthFallback[C](parser: BodyParser[C], val executionContext: ExecutionContext) extends ActionFunction[AuthenticatedRequest, AuthenticatedRequest] {
     override def invokeBlock[A](request: AuthenticatedRequest[A], block: (AuthenticatedRequest[A]) => Future[Result]): Future[Result] = {
       if (request.context.user.exists(_.isFound)) block(request)
       else basicAuth.Check(basicAuthDenied)(parser).invokeBlock(request, block)

@@ -7,7 +7,6 @@ import com.kenshoo.play.metrics.{Metrics, MetricsFilter}
 import play.api.Environment
 import play.api.http.HttpErrorHandler
 import play.api.mvc.{RequestHeader, Results}
-import services.SecurityService
 import warwick.sso.SSOClient
 
 import scala.concurrent.Future
@@ -17,7 +16,7 @@ import scala.concurrent.Future
   *
   * TODO serve JSON response when we requested a JSON API.
   */
-class ErrorHandler @Inject()(environment: Environment, metrics: Metrics, sso: SSOClient, securityService: SecurityService, csrfHelperFactory: CSRFPageHelperFactory)
+class ErrorHandler @Inject()(environment: Environment, metrics: Metrics, sso: SSOClient, csrfHelperFactory: CSRFPageHelperFactory)
   extends HttpErrorHandler with Results with Logging {
 
   lazy private val internalServerErrorMeter = metrics.defaultRegistry.meter(name(classOf[MetricsFilter], "500"))

@@ -10,7 +10,6 @@ import system.Roles
 @Singleton
 class HomeController @Inject()(
   securityService: SecurityService,
-  val messagesApi: MessagesApi
 ) extends BaseController with I18nSupport {
 
   import Roles._

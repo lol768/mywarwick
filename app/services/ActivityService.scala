@@ -353,6 +353,10 @@ object ActivityError {
     val message = "Audience cannot be public"
   }
 
+  object InvalidJSON extends ActivityError {
+    val message = s"The request was not valid JSON"
+  }
+
   case class InvalidActivityType(name: String) extends ActivityError {
     def message = s"The activity type '$name' is not valid"
   }

@@ -22,6 +22,7 @@ case class SaveMuteRequest(
 
 object SaveMuteRequest {
   import DateFormats.isoDateReads
+  import DateFormats.isoDateWrites
   implicit val format: OFormat[SaveMuteRequest] = Json.format[SaveMuteRequest]
 }
 
@@ -64,7 +65,7 @@ class UserActivitiesController @Inject()(
             val success = data.forall(activityService.setLastReadDate(u, _))
             if (success) {
               Future(mobileOutput.clearUnreadCount(u.usercode))
-                .onFailure { case e => logger.warn("clearUnreadCount failure", e) }
+                .failed.foreach { e => logger.warn("clearUnreadCount failure", e) }
               Ok(Json.toJson(API.Success[JsObject](data = Json.obj())))
             }
             else InternalServerError(Json.toJson(

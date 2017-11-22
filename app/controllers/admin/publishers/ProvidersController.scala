@@ -16,7 +16,6 @@ import system.{RequestContext, Roles}
 @Singleton
 class ProvidersController @Inject() (
   security: SecurityService,
-  val messagesApi: MessagesApi,
   val publisherService: PublisherService
 ) extends BaseController with I18nSupport with WithPublisher {
 
@@ -63,6 +62,7 @@ class ProvidersController @Inject() (
   }
 
   def updateForm(publisherId: String, providerId: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
+
     withPublisherAndProvider(publisherId, providerId, { (publisher, provider) =>
       Ok(views.html.admin.providers.updateForm(
         publisher,

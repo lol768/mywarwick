@@ -7,7 +7,7 @@ import models.Platform.Google
 import play.api.Configuration
 import play.api.db._
 import play.api.libs.json._
-import play.api.libs.ws.WSAPI
+import play.api.libs.ws.WSClient
 import services.dao.PushRegistrationDao
 import system.Logging
 import warwick.sso.Usercode
@@ -19,14 +19,14 @@ class FCMOutputService @Inject()(
   pushRegistrationDao: PushRegistrationDao,
   @NamedDatabase("default") db: Database,
   configuration: Configuration,
-  ws: WSAPI
+  ws: WSClient
 ) extends MobileOutputService with Logging {
 
   import system.ThreadPools.mobile
 
   private val ARROW_EMOJI = "↗️"
 
-  val apiKey = configuration.getString("mywarwick.fcm.apiKey")
+  val apiKey = configuration.get[Option[String]]("mywarwick.fcm.apiKey")
     .getOrElse(throw new IllegalStateException("Missing FCM API key - set mywarwick.fcm.apiKey"))
 
   def send(message: MessageSend.Heavy): Future[ProcessingResult] = {
@@ -53,7 +53,7 @@ class FCMOutputService @Inject()(
     )
 
     ws.url("https://fcm.googleapis.com/fcm/send")
-      .withHeaders(
+      .addHttpHeaders(
         "Authorization" -> s"key=$apiKey",
         "Content-Type" -> "application/json"
       )

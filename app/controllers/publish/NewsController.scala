@@ -20,7 +20,7 @@ import uk.ac.warwick.util.web.Uri
 import views.html.errors
 import warwick.sso.Usercode
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class PublishNewsItemData(item: NewsItemData, categoryIds: Seq[String], audience: AudienceData) extends PublishableWithAudience
 
@@ -57,7 +57,6 @@ case class NewsItemData(
 class NewsController @Inject()(
   val securityService: SecurityService,
   val publisherService: PublisherService,
-  val messagesApi: MessagesApi,
   news: NewsService,
   val departmentInfoService: DepartmentInfoService,
   val audienceBinder: AudienceBinder,
@@ -166,7 +165,7 @@ class NewsController @Inject()(
           val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
 
           news.update(id, newsItem, audience, data.categoryIds)
-            .onFailure { case e =>
+            .failed.foreach { e =>
               logger.error(s"Error updating news item $id", e)
               errorHandler.markInternalServerError()
             }
@@ -185,23 +184,26 @@ class NewsController @Inject()(
     Redirect(routes.NewsController.list(publisherId)).flashing("success" -> "News deleted")
   }
 
-  private def NewsBelongsToPublisher(id: String, publisherId: String) = new ActionFilter[PublisherRequest] {
-    override protected def filter[A](request: PublisherRequest[A]): Future[Option[Result]] = {
-      implicit val r = request
+  private def NewsBelongsToPublisher(id: String, publisherId: String)(implicit ec: ExecutionContext) =
+    new ActionFilter[PublisherRequest] {
+      override protected def filter[A](request: PublisherRequest[A]): Future[Option[Result]] = {
+        implicit val r: PublisherRequest[A] = request
 
-      val maybeBoolean = for {
-        item <- news.getNewsItem(id)
-      } yield item.publisherId.contains(publisherId)
+        val maybeBoolean = for {
+          item <- news.getNewsItem(id)
+        } yield item.publisherId.contains(publisherId)
 
-      Future.successful {
-        if (maybeBoolean.contains(true)) {
-          None
-        } else {
-          Some(NotFound(errors.notFound()))
+        Future.successful {
+          if (maybeBoolean.contains(true)) {
+            None
+          } else {
+            Some(NotFound(errors.notFound()))
+          }
         }
       }
+
+      override protected def executionContext = ec
     }
-  }
 
   private def withNewsItem(id: String, publisherId: String, block: (NewsItemRender) => Future[Result])(implicit request: RequestContext): Future[Result] = {
     news.getNewsItem(id)

@@ -63,7 +63,7 @@ case class NewsItemRender (
 }
 
 object NewsItemRender {
-  implicit private val dateWriter = DateFormats.isoDateWrites
+  import DateFormats.isoDateFormats
   implicit val format: OFormat[NewsItemRender] = Json.format[NewsItemRender]
 }
 

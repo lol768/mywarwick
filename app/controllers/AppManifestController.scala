@@ -14,8 +14,7 @@ class AppManifestController @Inject()(
   cached: Cached
 ) extends BaseController {
 
-  val senderId = configuration.getString("mywarwick.fcm.id")
-    .getOrElse(throw new IllegalStateException("Missing FCM Sender ID - set mywarwick.fcm.id"))
+  val senderId = configuration.get[String]("mywarwick.fcm.id")
 
   def getAppManifest = cached("manifest") {
     Action {

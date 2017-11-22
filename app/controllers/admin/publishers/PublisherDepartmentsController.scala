@@ -14,7 +14,6 @@ import system.Roles
 @Singleton
 class PublisherDepartmentsController @Inject() (
   security: SecurityService,
-  val messagesApi: MessagesApi,
   val publisherService: PublisherService,
   departmentInfoService: DepartmentInfoService
 ) extends BaseController with I18nSupport with WithPublisher {

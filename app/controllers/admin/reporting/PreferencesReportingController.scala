@@ -15,7 +15,6 @@ import scala.collection.immutable.ListMap
 class PreferencesReportingController @Inject()(
   preferencesReportingService: PreferencesReportingService,
   securityService: SecurityService,
-  val messagesApi: MessagesApi
 ) extends BaseController with I18nSupport {
 
   import Roles._

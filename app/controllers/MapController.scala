@@ -5,13 +5,13 @@ import javax.inject.{Inject, Singleton}
 import akka.stream.Materializer
 import org.joda.time.DateTime
 import play.api.http.HttpEntity
+import play.api.libs.ws.WSResponse
 import play.api.mvc.{Action, AnyContent}
 import play.api.libs.ws.ahc._
 import services.MapService
 import system.ThreadPools.externalData
 
 import scala.collection.JavaConverters._
-
 import scala.concurrent.Future
 
 @Singleton
@@ -22,17 +22,17 @@ class MapController @Inject()(
 
   private val PUBLIC_MAX_AGE_ONE_WEEK = "public, max-age: 604800"
 
-  private def isOk(resp: StreamedResponse) = resp.status == OK
+  private def isOk(resp: WSResponse) = resp.status == OK
 
-  private def isContentType(resp: StreamedResponse, prefix: String) = getContentType(resp).startsWith(prefix)
+  private def isContentType(resp: WSResponse, prefix: String) = getContentType(resp).startsWith(prefix)
 
-  private def getContentType(resp: StreamedResponse) = resp.headers.get("Content-Type").flatMap(_.headOption).getOrElse("application/octet-stream")
+  private def getContentType(resp: WSResponse) = resp.headers.get("Content-Type").flatMap(_.headOption).getOrElse("application/octet-stream")
 
   def mapThumbnail(lat: String, lon: String, width: Int, height: Int): Action[AnyContent] = Action.async { implicit request =>
     val now = DateTime.now().toString
 
     mapService.thumbnailForLocation(lat, lon, width, height).flatMap {
-      case res: StreamedResponse if isOk(res) && isContentType(res, "image") =>
+      case res if isOk(res) && isContentType(res, "image") =>
         val contentType = getContentType(res)
 
         res.headers.get("Content-Length") match {
@@ -51,7 +51,7 @@ class MapController @Inject()(
                 .withHeaders(CACHE_CONTROL -> PUBLIC_MAX_AGE_ONE_WEEK)
             )
         }
-      case res: StreamedResponse if isOk(res) && isContentType(res, "text") =>
+      case res if isOk(res) && isContentType(res, "text") =>
         res.bodyAsSource
           .runReduce(_ ++ _)
           .map(_.utf8String)

@@ -22,7 +22,6 @@ case class PublisherPermissionData(
 @Singleton
 class PublisherPermissionsController @Inject() (
   security: SecurityService,
-  val messagesApi: MessagesApi,
   val publisherService: PublisherService,
   userLookupService: UserLookupService
 ) extends BaseController with I18nSupport with WithPublisher {

@@ -13,7 +13,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{ActionFilter, Result}
 import services._
-import system.Validation
+import system.{ThreadPools, Validation}
 import views.html.errors
 import views.html.publish.{notifications => views}
 
@@ -22,7 +22,6 @@ import scala.concurrent.Future
 class NotificationsController @Inject()(
   val securityService: SecurityService,
   val publisherService: PublisherService,
-  val messagesApi: MessagesApi,
   val departmentInfoService: DepartmentInfoService,
   val audienceBinder: AudienceBinder,
   activityService: ActivityService,
@@ -153,6 +152,7 @@ class NotificationsController @Inject()(
   }
 
   private def NotificationBelongsToPublisher(id: String, publisherId: String) = new ActionFilter[PublisherRequest] {
+
     override protected def filter[A](request: PublisherRequest[A]): Future[Option[Result]] = {
       implicit val r = request
       val maybeBoolean = for {
@@ -168,6 +168,8 @@ class NotificationsController @Inject()(
         }
       }
     }
+
+    override protected def executionContext = ThreadPools.web
   }
 
   def renderCreateForm(publisher: Publisher, form: Form[PublishNotificationData], audience: Audience)(implicit request: PublisherRequest[_]) =

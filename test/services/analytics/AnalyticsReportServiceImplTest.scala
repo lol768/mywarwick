@@ -8,6 +8,8 @@ import org.mockito.Matchers._
 import org.mockito.Mockito._
 import java.util.Arrays.asList
 
+import com.typesafe.config.ConfigException
+
 import scala.collection.JavaConverters._
 
 
@@ -40,7 +42,7 @@ class AnalyticsReportServiceImplTest extends BaseSpec with MockitoSugar {
   "AnalyticsReportServiceImplTest" should {
 
     "throw exception if config for GA view ids are missing" in {
-      intercept[IllegalStateException] {
+      intercept[ConfigException.Missing] {
         val service = new AnalyticsReportServiceImpl(Configuration(), null)
       }
     }

@@ -8,15 +8,15 @@ import org.scalatestplus.play.PlaySpec
 import play.api.Configuration
 import play.api.cache.CacheApi
 import play.api.libs.json._
-import play.api.mvc.{Result, Results}
+import play.api.mvc.{PlayBodyParsers, Result, Results}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{call, _}
 import services._
 import warwick.sso._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.concurrent.Future
-
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Results with WithActorSystem {
 
@@ -49,25 +49,26 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
   val prefsMock: UserPreferencesService = mock[UserPreferencesService]
   when(prefsMock.getChosenColourScheme(fox.usercode)).thenReturn(ColourScheme(2, false))
 
-  val confMock: Configuration = mock[Configuration]
-  val geeseBackground: Config = ConfigFactory.parseMap(mapAsJavaMap(Map(
+  val geeseBackground = Map(
     "id" -> 1,
     "name" -> "Geese invasion",
     "url" -> "geese_westwood.jpg",
     "schemeColour" -> "#ffffff"
-  )))
+  )
 
-  val foxBackground: Config = ConfigFactory.parseMap(mapAsJavaMap(Map(
+  val foxBackground = Map(
     "id" -> 2,
     "name" -> "Fox den",
     "url" -> "fox_den.jpg",
     "schemeColour" -> "#000000"
-  )))
+  )
 
-  val configList = new java.util.ArrayList[Configuration]
-  configList.add(new Configuration(geeseBackground))
-  configList.add(new Configuration(foxBackground))
-  when(confMock.getConfigList("mywarwick.backgrounds")).thenReturn(Some(configList))
+  val config = Configuration(
+    "mywarwick.backgrounds" -> Seq(
+      geeseBackground,
+      foxBackground
+    )
+  )
 
   "ColourSchemesControllerTest#get" should {
     "correctly retrieve fox's chosen colour scheme" in {
@@ -148,11 +149,11 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
   private def getControllerForTest(loggedIn: Boolean): ColourSchemesController = {
     var secService: SecurityService = null
     if (loggedIn) {
-      secService = new SecurityServiceImpl(mockSSOClientLoggedIn, mock[BasicAuth], mock[CacheApi])
+      secService = new SecurityServiceImpl(mockSSOClientLoggedIn, mock[BasicAuth], PlayBodyParsers())
     } else {
-      secService = new SecurityServiceImpl(mockSSOClientLoggedOut, mock[BasicAuth], mock[CacheApi])
+      secService = new SecurityServiceImpl(mockSSOClientLoggedOut, mock[BasicAuth], PlayBodyParsers())
     }
-    new ColourSchemesController(secService, confMock, prefsMock)
+    new ColourSchemesController(secService, config, prefsMock)
 
   }
 

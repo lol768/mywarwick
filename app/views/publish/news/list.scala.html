@@ -25,7 +25,7 @@
       <p>No pending news.</p>
     } else {
       @newsPending.map { item =>
-        @publish.news.newsItemInfo(publisher.id, item, user, allDepartments)
+        @views.html.publish.news.newsItemInfo(publisher.id, item, user, allDepartments)
       }
     }
 
@@ -34,7 +34,7 @@
       <p>No published news.</p>
     } else {
       @newsPublished.map { item =>
-        @publish.news.newsItemInfo(publisher.id, item, user, allDepartments)
+        @views.html.publish.news.newsItemInfo(publisher.id, item, user, allDepartments)
       }
     }
   }

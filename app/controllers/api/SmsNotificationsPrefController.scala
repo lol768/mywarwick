@@ -31,7 +31,7 @@ object SmsNotificationsRequest {
     (
       (__ \ "wantsSms").read[Boolean] and
         (__ \ "smsNumber").readNullable[String](
-          filter(ValidationError("Invalid phone number")) { s =>
+          filter(JsonValidationError("Invalid phone number")) { s =>
             s.isEmpty || Try(PhoneNumberUtil.getInstance.parse(s, "GB")).isSuccess
           }).map(o => o.flatMap(s =>
           Option(s).filter(_.nonEmpty).map(PhoneNumberUtil.getInstance.parse(_, "GB"))
