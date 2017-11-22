@@ -27,23 +27,19 @@ trait LowLevelClientHelper extends Logging {
     val head = "HEAD"
   }
 
-  def getCountFromCountApiRes(res: Response): Int = {
-    val resJs: JsValue = Json.parse({
-      scala.io.Source.fromInputStream(res.getEntity.getContent).mkString
-    })
-    (resJs \ "count").get.toString().toInt
-  }
+  def getCountFromCountApiRes(res: Response): Int = (Json
+    .parse(scala.io.Source.fromInputStream(res.getEntity.getContent).mkString) \ "count")
+    .get
+    .toString()
+    .toInt
 
-  def makeQueryForCountApiFromActivityESSearchQuery(input: ActivityESSearchQuery): JsValue = {
-    val boolQuery = Json.parse({
-      ActivityESServiceSearchHelper.makeBoolQueryBuilder(input).toString
-    })
-    JsObject(Seq(
-      "query" -> JsObject(Seq(
-        "bool" -> (boolQuery \ "bool").get
-      ))
+
+  def makeQueryForCountApiFromActivityESSearchQuery(input: ActivityESSearchQuery): JsValue = JsObject(Seq(
+    "query" -> JsObject(Seq(
+      "bool" -> (Json.parse(ActivityESServiceSearchHelper.makeBoolQueryBuilder(input).toString) \ "bool").get
     ))
-  }
+  ))
+
 
   def makePathForCountApiFromActivityEsSearchQuery(input: ActivityESSearchQuery): String = {
     countPathForIndexName(ActivityESServiceSearchHelper.indexNameForActivitySearchQuery(input))
