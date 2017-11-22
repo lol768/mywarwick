@@ -1,5 +1,3 @@
-// @flow
-
 import _ from 'lodash-es';
 import moment from 'moment';
 
@@ -8,30 +6,12 @@ export const ID_KEY = 'id';
 
 const DESC = 'desc';
 
-type Item = {
-  id: string,
-  date: string
-}
+const sortStream = stream => _.orderBy(stream, [DATE_KEY, ID_KEY], [DESC, DESC]);
 
-type Rx = Item[];
-type Stream = Item[];
-type Filter = {
+const uniqStream = stream => _.uniqBy(stream, ID_KEY);
 
-};
-
-type FetchedActivities = {
-  stream: any,
-  olderItemsOnServer: any,
-  filter: any,
-  filterOptions: any
-}
-
-const sortStream = (stream: Stream) => _.orderBy(stream, [DATE_KEY, ID_KEY], [DESC, DESC]);
-
-const uniqStream = (stream: Stream) => _.uniqBy(stream, ID_KEY);
-
-export function makeStream(): Stream {
-  return [];
+export function makeStream() {
+  return {};
 }
 
 /*
@@ -42,7 +22,7 @@ export function makeStream(): Stream {
  * perform the merge.  If these all fail, it falls back to concatenating,
  * de-duplicating and sorting the whole thing.
  */
-export function mergeReceivedItems(stream: Stream = [], rx: Rx = []) {
+export function mergeReceivedItems(stream = [], rx = []) {
   // Preconditions: stream has no duplicates, stream is in reverse date order
 
   const uniqRx = uniqStream(rx);
@@ -83,9 +63,9 @@ export function mergeReceivedItems(stream: Stream = [], rx: Rx = []) {
  * long as it's the same for all items that belong in the same partition.
  */
 export function onStreamReceive(
-  stream: Stream = [],
-  grouper: Item => any = item => item.date,
-  rx: Rx = [],
+  stream = {},
+  grouper = item => item.date,
+  rx = [],
 ) {
   if (rx.length === 0) return stream;
   const result = _.clone(stream);
@@ -109,14 +89,14 @@ function getOrderedStreamPartitions(stream) {
  *
  * If the partition does not exist, return an empty list.
  */
-export function getStreamPartition(stream: Stream, i: number) {
+export function getStreamPartition(stream, i) {
   return getOrderedStreamPartitions(stream)[i] || [];
 }
 
 /*
  * Return the n most recent items from the stream.
  */
-export function takeFromStream(stream: Stream, n: number) {
+export function takeFromStream(stream, n) {
   return _.reduce(getOrderedStreamPartitions(stream),
     (result, part) => {
       if (result.length >= n) return result;
@@ -126,7 +106,7 @@ export function takeFromStream(stream: Stream, n: number) {
   );
 }
 
-export function getLastItemInStream(stream: Stream) {
+export function getLastItemInStream(stream) {
   return _.last(
     getOrderedStreamPartitions(stream)
       .map(part => _.last(part))
@@ -137,7 +117,7 @@ export function getLastItemInStream(stream: Stream) {
 /*
  * Return the total number of items in the stream.
  */
-export function getStreamSize(stream: Stream) {
+export function getStreamSize(stream) {
   return _.reduce(stream, (sum, part) => sum + part.length, 0);
 }
 
@@ -146,7 +126,7 @@ export function getStreamSize(stream: Stream) {
  *
  * If date is falsy, return the total number of items in the stream.
  */
-export function getNumItemsSince(stream: Stream, date: moment) {
+export function getNumItemsSince(stream, date) {
   if (!date) {
     return getStreamSize(stream);
   }
@@ -158,7 +138,7 @@ export function getNumItemsSince(stream: Stream, date: moment) {
 }
 
 /** Convert to a regular array for the persisted module */
-export function freeze({ stream, olderItemsOnServer, filter, filterOptions }: FetchedActivities) {
+export function freeze({ stream, olderItemsOnServer, filter, filterOptions }) {
   return {
     items: _.flatten(_.values(stream)),
     meta: {
@@ -169,7 +149,7 @@ export function freeze({ stream, olderItemsOnServer, filter, filterOptions }: Fe
   };
 }
 
-export function filterStream(stream: Stream, filter: Filter) {
+export function filterStream(stream, filter) {
   return _.pickBy(
     _.mapValues(stream, part =>
       _.filter(part, item =>

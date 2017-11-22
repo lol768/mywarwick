@@ -1,6 +1,6 @@
 [ignore]
+.*/node_modules/.*
 .*/target/.*
-.*/broken.json
 
 [include]
 app/assets/js
