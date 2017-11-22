@@ -91,7 +91,8 @@ class NavigationServiceImpl @Inject()(
       NavigationPage("Cluster State", adminRoutes.ClusterStateController.html()),
       NavigationPage("ElasticSearch", controllers.admin.elasticsearch.routes.ActivityToESController.index()),
       NavigationPage("Reports", controllers.admin.reporting.routes.HomeController.index(), Seq(
-        NavigationPage("Preferences Report", controllers.admin.reporting.routes.PreferencesReportingController.index())
+        NavigationPage("Preferences Report", controllers.admin.reporting.routes.PreferencesReportingController.index()),
+        NavigationPage("Activity Report", controllers.admin.reporting.routes.ActivityReportingController.index())
       ))
     ))
   }
