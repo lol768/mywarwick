@@ -6,7 +6,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.API
 import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
@@ -45,7 +45,7 @@ object SmsNotificationsRequest {
 class SmsNotificationsPrefController @Inject()(
   security: SecurityService,
   notificationPrefService: SmsNotificationsPrefService
-) extends BaseController {
+) extends MyController {
 
   private val phoneUtil = PhoneNumberUtil.getInstance
 

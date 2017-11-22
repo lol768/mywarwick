@@ -8,7 +8,7 @@ import system.{ImplicitRequestContext, Logging}
   *
   * You'll love BaseController
   */
-abstract class BaseController
+abstract class MyController
   extends InjectedController
   with Logging
   with ImplicitRequestContext

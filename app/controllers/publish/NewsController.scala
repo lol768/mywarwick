@@ -2,7 +2,7 @@ package controllers.publish
 
 import javax.inject.{Inject, Singleton}
 
-import controllers.BaseController
+import controllers.MyController
 import models._
 import models.news.{Link, NewsItemRender, NewsItemRenderWithAuditAndAudience, NewsItemSave}
 import models.publishing.Ability._
@@ -65,7 +65,7 @@ class NewsController @Inject()(
   errorHandler: ErrorHandler,
   audienceService: AudienceService,
   userPreferencesService: UserPreferencesService
-) extends BaseController with I18nSupport with Publishing {
+) extends MyController with I18nSupport with Publishing {
 
   private val newsItemMapping = mapping(
     "title" -> nonEmptyText,

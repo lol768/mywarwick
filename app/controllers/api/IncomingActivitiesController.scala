@@ -3,7 +3,7 @@ package controllers.api
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.Audience.UsercodesAudience
 import models.publishing.Ability.CreateAPINotifications
 import models.{Audience, _}
@@ -20,7 +20,7 @@ class IncomingActivitiesController @Inject()(
   activityService: ActivityService,
   publisherService: PublisherService,
   audienceService: AudienceService
-) extends BaseController with I18nSupport {
+) extends MyController with I18nSupport {
 
   import securityService._
 

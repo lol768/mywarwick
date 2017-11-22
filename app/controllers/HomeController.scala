@@ -14,7 +14,7 @@ class HomeController @Inject()(
   metrics: AppMetrics,
   configuration: Configuration,
   measurementService: AnalyticsMeasurementService
-) extends BaseController {
+) extends MyController {
 
   implicit val analyticsTrackingId: Option[AnalyticsTrackingID] = Some(measurementService.trackingID)
 

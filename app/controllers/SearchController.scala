@@ -16,7 +16,7 @@ class SearchController @Inject()(
   ws: WSClient,
   trustedApplicationsManager: TrustedApplicationsManager,
   configuration: Configuration
-) extends BaseController {
+) extends MyController {
 
   import securityService._
 

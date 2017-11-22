@@ -30,7 +30,7 @@ class UserInfoController @Inject()(
   userInitialisationService: UserInitialisationService,
   photoService: PhotoService,
   measurementService: AnalyticsMeasurementService
-) extends BaseController {
+) extends MyController {
 
   val SSC_NAME = ssoConfig.getString("shire.sscookie.name")
   val SSC_PATH = ssoConfig.getString("shire.sscookie.path")

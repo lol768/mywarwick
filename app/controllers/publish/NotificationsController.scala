@@ -2,7 +2,7 @@ package controllers.publish
 
 import javax.inject.Inject
 
-import controllers.BaseController
+import controllers.MyController
 import models.news.NotificationData
 import models.publishing.Ability._
 import models.publishing.{Ability, Publisher}
@@ -27,7 +27,7 @@ class NotificationsController @Inject()(
   activityService: ActivityService,
   val newsCategoryService: NewsCategoryService,
   audienceService: AudienceService
-) extends BaseController with I18nSupport with Publishing {
+) extends MyController with I18nSupport with Publishing {
 
   val notificationMapping = mapping(
     "text" -> nonEmptyText,

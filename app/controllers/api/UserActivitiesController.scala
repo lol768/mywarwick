@@ -3,7 +3,7 @@ package controllers.api
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.API.Error
 import models._
 import org.joda.time.DateTime
@@ -31,7 +31,7 @@ class UserActivitiesController @Inject()(
   activityService: ActivityService,
   securityService: SecurityService,
   mobileOutput: MobileOutputService
-) extends BaseController {
+) extends MyController {
 
   import DateFormats.{isoDateReads, isoDateWrites}
   import securityService._

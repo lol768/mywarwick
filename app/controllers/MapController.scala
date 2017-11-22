@@ -18,7 +18,7 @@ import scala.concurrent.Future
 class MapController @Inject()(
   implicit val mat: Materializer,
   mapService: MapService
-) extends BaseController {
+) extends MyController {
 
   private val PUBLIC_MAX_AGE_ONE_WEEK = "public, max-age: 604800"
 

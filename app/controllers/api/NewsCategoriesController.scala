@@ -3,7 +3,7 @@ package controllers.api
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import controllers.publish.CategoryOptions
 import models.API
 import play.api.data.Forms._
@@ -16,7 +16,7 @@ class NewsCategoriesController @Inject()(
   security: SecurityService,
   val newsCategoryService: NewsCategoryService,
   userNewsCategoryService: UserNewsCategoryService
-) extends BaseController with CategoryOptions {
+) extends MyController with CategoryOptions {
 
   import security._
 

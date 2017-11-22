@@ -3,7 +3,7 @@ package controllers.api
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.API
 import play.api.libs.json._
 import services.{ActivityService, SecurityService, UserPreferencesService}
@@ -13,7 +13,7 @@ class UserStreamFilterController @Inject()(
   security: SecurityService,
   userPreferencesService: UserPreferencesService,
   activityService: ActivityService
-) extends BaseController {
+) extends MyController {
 
   import security._
 

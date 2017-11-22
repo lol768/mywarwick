@@ -3,7 +3,7 @@ package controllers.api
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.API
 import play.api.Configuration
 import play.api.libs.json._
@@ -18,7 +18,7 @@ class ColourSchemesController @Inject()(
   security: SecurityService,
   configuration: Configuration,
   userPreferencesService: UserPreferencesService
-) extends BaseController {
+) extends MyController {
 
   import security._
 

@@ -5,7 +5,7 @@ import javax.imageio.ImageIO
 
 import com.google.common.io.ByteStreams
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.API
 import play.api.cache.{CacheApi, SyncCacheApi}
 import play.api.libs.Files.TemporaryFile
@@ -23,7 +23,7 @@ class NewsImagesController @Inject()(
   imageManipulator: ImageManipulator,
   publisherService: PublisherService,
   cache: SyncCacheApi
-) extends BaseController {
+) extends MyController {
 
   import EitherValidation._
   import securityService._

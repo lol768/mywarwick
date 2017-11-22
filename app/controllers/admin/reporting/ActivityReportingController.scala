@@ -2,7 +2,7 @@ package controllers.admin.reporting
 
 import javax.inject.{Inject, Singleton}
 
-import controllers.BaseController
+import controllers.MyController
 import org.joda.time.{DateTime, Interval}
 import play.api.data.Form
 import play.api.data.Forms._
@@ -17,7 +17,7 @@ import system.{RequestContext, Roles}
 class ActivityReportingController @Inject()(
   activityReportingService: ActivityReportingService,
   securityService: SecurityService,
-) extends BaseController with I18nSupport {
+) extends MyController with I18nSupport {
 
   import Roles._
   import securityService._

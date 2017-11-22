@@ -12,7 +12,7 @@ import play.api.mvc.Action
 class AppManifestController @Inject()(
   configuration: Configuration,
   cached: Cached
-) extends BaseController {
+) extends MyController {
 
   val senderId = configuration.get[String]("mywarwick.fcm.id")
 

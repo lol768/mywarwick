@@ -1,14 +1,14 @@
 package controllers.api
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import services.analytics.NewsAnalyticsService
 
 class AnalyticsController @Inject()(
   news: NewsAnalyticsService
-) extends BaseController {
+) extends MyController {
 
   def newsItemReport = Action { implicit request =>
     request.body.asJson.map { json =>
