@@ -13,7 +13,7 @@ import warwick.sso._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.util.Try
+import scala.util.{Success, Try}
 
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
@@ -85,10 +85,10 @@ class AudienceServiceImpl @Inject()(
           ft <- webgroupUsers(GroupName("all-studenttype-undergraduate-full-time"))
           pt <- webgroupUsers(GroupName("all-studenttype-undergraduate-part-time"))
         } yield ft ++ pt
-        case UndergradStudents.First => ???
-        case UndergradStudents.Second => ???
+        case UndergradStudents.First => webgroupUsers(GroupName("all-level-1"))
+        case UndergradStudents.Second => webgroupUsers(GroupName("all-level-2"))
         case UndergradStudents.Final => ???
-        case _ => ???
+        case _ => Success(Nil)
       }
       case ResearchPostgrads => for {
         ft <- webgroupUsers(GroupName("all-studenttype-postgraduate-research-ft"))
@@ -170,6 +170,7 @@ class AudienceServiceImpl @Inject()(
 
     var department: String = ""
     var departmentSubsets: Seq[String] = Seq.empty[String]
+    var undergradSubsets: Seq[String] = Seq.empty[String]
     var listOfUsercodes: Seq[String] = Seq.empty[String]
     var modules: Seq[JsValue] = Seq.empty[JsValue]
     var seminarGroups: Seq[JsValue] = Seq.empty[JsValue]
@@ -200,16 +201,18 @@ class AudienceServiceImpl @Inject()(
 
     audience.components.foreach {
       case ds: DepartmentSubset => ds match {
-        case All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | UndergradStudents.All | UndergradStudents.First
-             | UndergradStudents.Second | UndergradStudents.Final | AdminStaff =>
+        case UndergradStudents.All | UndergradStudents.First | UndergradStudents.Second | UndergradStudents.Final  =>
+          undergradSubsets :+= s"UndergradStudents:${ds.toString}"
+        case All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | AdminStaff =>
           departmentSubsets :+= ds.toString
         case subset => matchDeptSubset(subset)
       }
       case DepartmentAudience(code, subsets) => {
         department = code
         subsets.foreach {
-          case subset@(All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | UndergradStudents.All | UndergradStudents.First
-                       | UndergradStudents.Second | UndergradStudents.Final | AdminStaff) =>
+          case subset@(UndergradStudents.All | UndergradStudents.First | UndergradStudents.Second | UndergradStudents.Final)  =>
+            undergradSubsets :+= s"Dept:UndergradStudents:${subset.toString}"
+          case subset@(All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | AdminStaff) =>
             departmentSubsets :+= s"Dept:${subset.entryName}"
           case subset => matchDeptSubset(subset)
         }
@@ -252,13 +255,25 @@ class AudienceServiceImpl @Inject()(
         Json.obj("listOfUsercodes" -> listOfUsercodes)
       else Json.obj()
 
+    println(undergradSubsets)
+
+    val undergraduates =
+      if (undergradSubsets.nonEmpty)
+        if (undergradSubsets.contains("all"))
+          Json.obj("undergraduates" -> s"${if (department.isEmpty) "" else "Dept:"}UndergradStudents:All")
+        else
+          Json.obj("undergraduates" -> Json.obj("year" -> Json.obj(
+            undergradSubsets.map(_ -> Json.toJsFieldJsValueWrapper("undefined")): _*
+          )))
+      else Json.obj()
+
     val deptSubsets: (String, Json.JsValueWrapper) =
       if (departmentSubsets.contains("Dept:All"))
         "Dept:All" -> Json.toJsFieldJsValueWrapper("undefined")
       else
         "groups" -> (Json.obj(
           departmentSubsets.map(_ -> Json.toJsFieldJsValueWrapper("undefined")): _*
-        ) ++ staffRelationshipJson ++ seminarGroupsJson ++ modulesJson ++ listOfUsercodesJson)
+        ) ++ staffRelationshipJson ++ seminarGroupsJson ++ modulesJson ++ listOfUsercodesJson ++ undergraduates)
 
     Json.obj(
       "department" -> department,

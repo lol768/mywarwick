@@ -11,8 +11,17 @@ export function pluralise(unit, count, plural) {
   return count === 1 ? unit : (plural || `${unit}s`);
 }
 
+/**
+ * Returns single readable string from string array.
+ * E.g. (['Ed', 'Edd', 'Eddy']) => 'Ed, Edd and Eddy'
+ *
+ * @param {string[]} list
+ * @returns {string}
+ */
 export function mkString(list) {
-  return list.join(', ').replace(/,\s(\w+)$/, ' and $1');
+  if (!list || list.length === 0) return '';
+  else if (list.length === 1) return list[0];
+  else return `${list.slice(0, list.length - 1).join(', ')} and ${list[list.length - 1]}`;
 }
 
 export function isiPhoneX() {

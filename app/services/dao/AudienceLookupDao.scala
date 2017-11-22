@@ -96,7 +96,7 @@ class TabulaAudienceLookupDao @Inject()(
   }
 
   override def resolveUndergraduates(departmentCode: String, level: UndergradStudents): Future[Seq[Usercode]] = {
-    getAuthenticatedAsJson(tabulaDepartmentUndergraduatesUrl(departmentCode, level.value.toLowerCase)).map(parseUsercodeSeq)
+    getAuthenticatedAsJson(tabulaDepartmentUndergraduatesUrl(departmentCode, UndergradStudents.levelToNumStr(level))).map(parseUsercodeSeq)
   }
 
   override def resolveTaughtPostgraduates(departmentCode: String): Future[Seq[Usercode]] = {
@@ -214,11 +214,11 @@ trait TabulaAudienceLookupProperties {
 
   protected def tabulaDepartmentAdminStaffUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/${departmentCode.toLowerCase}$tabulaDepartmentAdminStaffSuffix"
 
-  // TODO: when Tabula API is updated, update url here to pass UG level param
   private val tabulaDepartmentUndergraduatesSuffix = configuration.getString("mywarwick.tabula.department.undergraduatesSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.undergraduatesSuffix in application.conf"))
 
-  protected def tabulaDepartmentUndergraduatesUrl(departmentCode: String, level: String) = s"$tabulaDepartmentBaseUrl/${departmentCode.toLowerCase}$tabulaDepartmentUndergraduatesSuffix"
+  protected def tabulaDepartmentUndergraduatesUrl(departmentCode: String, level: String) =
+    s"$tabulaDepartmentBaseUrl/${departmentCode.toLowerCase}$tabulaDepartmentUndergraduatesSuffix${if (level.nonEmpty) s"?level=$level" else ""}"
 
   private val tabulaDepartmentPGTSuffix = configuration.getString("mywarwick.tabula.department.pgtSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.pgtSuffix in application.conf"))

@@ -59,6 +59,10 @@ export class AudiencePicker extends React.PureComponent {
     this.isTeachingDepartment = this.isTeachingDepartment.bind(this);
   }
 
+  componentDidMount() {
+    this.props.audienceDidUpdate(this.state);
+  }
+
   componentWillUpdate(nextProps, nextState) {
     this.props.audienceDidUpdate(nextState);
   }
@@ -370,6 +374,7 @@ export class AudiencePicker extends React.PureComponent {
   }
 
   render() {
+    console.log(this.state)
     return (
       <div>
         <div className="list-group">

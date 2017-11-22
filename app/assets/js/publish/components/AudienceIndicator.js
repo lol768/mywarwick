@@ -90,14 +90,15 @@ export class AudienceIndicator extends React.PureComponent {
                 ))));
               case 'undergraduates':
                 if (components !== undefined) {
+                  const subset = dept.name !== undefined ? dept.name : 'the University';
                   if (_.has(components, 'year')) {
                     const years = _.map(components.year, (k, year) => _.last(_.split(year, ':')).toLowerCase());
                     return years.length ?
-                      <div>
-                        {`All ${mkString(years)} year Undergraduates in ${_.startsWith(years[0], 'Dept:') ? dept.name : 'the University'}`}
+                      <div key={audienceType}>
+                        {`All ${mkString(years)} year Undergraduates in ${subset}`}
                       </div> : null;
                   }
-                  return `All Undergraduates in ${_.startsWith(_.first(_.keys(components)), 'Dept:') ? dept.name : 'the University'}`;
+                  return `All Undergraduates in ${subset}`;
                 }
                 return null;
               default: {

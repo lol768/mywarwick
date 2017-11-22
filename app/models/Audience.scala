@@ -75,6 +75,12 @@ object Audience {
     case object Final extends UndergradStudents("Final")
     def values = Seq(All, First, Second, Final)
     def fromValue(value: String): Option[UndergradStudents] = values.find(_.value == value)
+    def levelToNumStr(level: UndergradStudents): String = level match {
+      case First => "1"
+      case Second => "2"
+      case Final => "F"
+      case _ => ""
+    }
   }
 
   case object TaughtPostgrads extends DepartmentSubset {
