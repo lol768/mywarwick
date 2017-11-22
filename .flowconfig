@@ -1,0 +1,14 @@
+[ignore]
+.*/node_modules/.*
+.*/target/.*
+
+[include]
+app/assets/js
+
+[libs]
+
+[lints]
+
+[options]
+
+[strict]

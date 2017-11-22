@@ -37,6 +37,7 @@
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-jsx-a11y": "~5",
     "eslint-plugin-react": "~7.1.0",
+    "flow-bin": "^0.59.0",
     "globby": "6.0.0",
     "gulp": "~3.9.1",
     "gulp-babel": "~6.1.2",
@@ -125,6 +126,7 @@
   },
   "scripts": {
     "gulp": "gulp",
+    "flow": "flow",
     "lint": "gulp lint",
     "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha -r babel-activate -r TestHelper --recursive test/assets/js",
     "bamboo": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" /usr/nodejs/5/bin/node node_modules/mocha/bin/mocha -R mocha-bamboo-reporter -r babel-activate -r TestHelper --recursive test/assets/js",
