@@ -8,7 +8,7 @@ import play.api.libs.json.{JsValue}
 
 import scala.concurrent.{Future}
 
-@ImplementedBy(classOf[LowLevelClientImpl])
+@ImplementedBy(classOf[ElasticSearchAdminServiceImpl])
 trait ElasticSearchAdminService {
 
   def putTemplate(template: JsValue, name: String): Future[Response]
@@ -29,7 +29,7 @@ trait ElasticSearchAdminService {
 }
 
 @Singleton
-class LowLevelClientImpl @Inject()(
+class ElasticSearchAdminServiceImpl @Inject()(
   eSClientConfig: ESClientConfig
 ) extends ElasticSearchAdminService with LowLevelClientHelper {
 
