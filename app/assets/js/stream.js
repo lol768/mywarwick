@@ -166,7 +166,12 @@ export function getNumItemsSince(stream: Stream, date: moment): number {
 }
 
 /** Convert to a regular array for the persisted module */
-export function freeze({ stream, olderItemsOnServer, filter, filterOptions }: FetchedActivities): any {
+export function freeze({
+  stream,
+  olderItemsOnServer,
+  filter,
+  filterOptions,
+  }: FetchedActivities): any {
   return {
     items: _.flatten(_.values(stream)),
     meta: {
