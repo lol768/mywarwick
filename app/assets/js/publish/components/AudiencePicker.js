@@ -374,7 +374,6 @@ export class AudiencePicker extends React.PureComponent {
   }
 
   render() {
-    console.log(this.state)
     return (
       <div>
         <div className="list-group">

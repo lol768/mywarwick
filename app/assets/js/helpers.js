@@ -21,7 +21,7 @@ export function pluralise(unit, count, plural) {
 export function mkString(list) {
   if (!list || list.length === 0) return '';
   else if (list.length === 1) return list[0];
-  else return `${list.slice(0, list.length - 1).join(', ')} and ${list[list.length - 1]}`;
+  return `${list.slice(0, list.length - 1).join(', ')} and ${list[list.length - 1]}`;
 }
 
 export function isiPhoneX() {
