@@ -1,14 +1,13 @@
 package services.analytics
 
-import com.google.api.services.analyticsreporting.v4.model._
-import org.scalatest.mockito.MockitoSugar
-import helpers.BaseSpec
-import play.api.Configuration
-import org.mockito.Matchers._
-import org.mockito.Mockito._
 import java.util.Arrays.asList
 
-import com.typesafe.config.ConfigException
+import com.google.api.services.analyticsreporting.v4.model._
+import helpers.BaseSpec
+import org.mockito.Matchers._
+import org.mockito.Mockito._
+import org.scalatest.mockito.MockitoSugar
+import play.api.Configuration
 
 import scala.collection.JavaConverters._
 
@@ -42,7 +41,7 @@ class AnalyticsReportServiceImplTest extends BaseSpec with MockitoSugar {
   "AnalyticsReportServiceImplTest" should {
 
     "throw exception if config for GA view ids are missing" in {
-      intercept[ConfigException.Missing] {
+      intercept[IllegalStateException] {
         val service = new AnalyticsReportServiceImpl(Configuration(), null)
       }
     }
