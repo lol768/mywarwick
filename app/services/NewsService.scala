@@ -12,7 +12,7 @@ import org.quartz.JobBuilder.newJob
 import org.quartz.SimpleScheduleBuilder.simpleSchedule
 import org.quartz.TriggerBuilder.newTrigger
 import org.quartz._
-import play.api.cache.CacheApi
+import play.api.cache.{CacheApi, SyncCacheApi}
 import play.api.db.Database
 import services.dao.{AudienceDao, NewsCategoryDao, NewsDao, NewsImageDao}
 import services.job.PublishNewsItemJob
@@ -67,7 +67,7 @@ class AnormNewsService @Inject()(
   userInitialisationService: UserInitialisationService,
   scheduler: SchedulerService,
   userLookupService: UserLookupService,
-  cache: CacheApi
+  cache: SyncCacheApi
 ) extends NewsService {
 
   override def delete(newsId: String): Unit = db.withTransaction { implicit c =>
@@ -78,7 +78,7 @@ class AnormNewsService @Inject()(
   }
 
   override def getNewsItemsMatchingAudience(webGroup: Option[GroupName], departmentCode: Option[String], departmentSubset: Option[DepartmentSubset], publisherId: Option[String], limit: Int): Seq[NewsItemRender] =
-    cache.getOrElse(s"audienceNews:$webGroup:$departmentCode:$departmentSubset:$publisherId:$limit", Duration(10, TimeUnit.MINUTES)) {
+    cache.getOrElseUpdate(s"audienceNews:$webGroup:$departmentCode:$departmentSubset:$publisherId:$limit", Duration(10, TimeUnit.MINUTES)) {
       db.withConnection(implicit c =>
         dao.getNewsByIds(dao.getNewsItemsMatchingAudience(webGroup, departmentCode, departmentSubset, publisherId, limit))
       )

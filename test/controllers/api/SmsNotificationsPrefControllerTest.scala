@@ -9,10 +9,13 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.cache.CacheApi
 import play.api.libs.json.{JsNull, JsString, Json}
+import play.api.mvc.PlayBodyParsers
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services._
 import warwick.sso._
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class SmsNotificationsPrefControllerTest extends PlaySpec with MockitoSugar with WithActorSystem {
 
@@ -26,7 +29,7 @@ class SmsNotificationsPrefControllerTest extends PlaySpec with MockitoSugar with
     override def userHasRole(role: RoleName) = false
     override def actualUserHasRole(role: RoleName) = false
   })
-  val securityService = new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], mock[CacheApi])
+  val securityService = new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], PlayBodyParsers())
 
   trait Fixture {
     protected val smsNotificationsPrefService: SmsNotificationsPrefService = mock[SmsNotificationsPrefService]

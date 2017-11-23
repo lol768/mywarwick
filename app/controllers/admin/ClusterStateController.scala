@@ -3,7 +3,7 @@ package controllers.admin
 import javax.inject.{Singleton, Inject}
 
 import akka.cluster.Member
-import controllers.BaseController
+import controllers.MyController
 import play.api.libs.json.{JsString, Json}
 import play.api.mvc.Action
 import services.{ClusterStateService, SecurityService}
@@ -25,7 +25,7 @@ import system.Roles.Sysadmin
 class ClusterStateController @Inject() (
   cluster: ClusterStateService,
   security: SecurityService
-) extends BaseController {
+) extends MyController {
 
   import security._
 

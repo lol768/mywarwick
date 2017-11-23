@@ -3,7 +3,7 @@ package controllers.api
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.{API, Audience}
 import play.api.libs.json._
 import services.{SecurityService, UserNewsOptInService}
@@ -12,7 +12,7 @@ import services.{SecurityService, UserNewsOptInService}
 class UserNewsOptInController @Inject()(
   security: SecurityService,
   userNewsOptInService: UserNewsOptInService
-) extends BaseController {
+) extends MyController {
 
   import security._
 

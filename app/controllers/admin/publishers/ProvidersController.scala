@@ -3,7 +3,7 @@ package controllers.admin.publishers
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.publishing.Publisher
 import play.api.data.Form
 import play.api.data.Forms._
@@ -16,9 +16,8 @@ import system.{RequestContext, Roles}
 @Singleton
 class ProvidersController @Inject() (
   security: SecurityService,
-  val messagesApi: MessagesApi,
   val publisherService: PublisherService
-) extends BaseController with I18nSupport with WithPublisher {
+) extends MyController with I18nSupport with WithPublisher {
 
   import Roles._
   import security._
@@ -63,6 +62,7 @@ class ProvidersController @Inject() (
   }
 
   def updateForm(publisherId: String, providerId: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
+
     withPublisherAndProvider(publisherId, providerId, { (publisher, provider) =>
       Ok(views.html.admin.providers.updateForm(
         publisher,

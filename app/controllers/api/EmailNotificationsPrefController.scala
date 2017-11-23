@@ -3,7 +3,7 @@ package controllers.api
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.API
 import play.api.libs.json._
 import services.{EmailNotificationsPrefService, SecurityService}
@@ -12,7 +12,7 @@ import services.{EmailNotificationsPrefService, SecurityService}
 class EmailNotificationsPrefController @Inject()(
   security: SecurityService,
   notificationPrefService: EmailNotificationsPrefService
-) extends BaseController {
+) extends MyController {
 
   import security._
 

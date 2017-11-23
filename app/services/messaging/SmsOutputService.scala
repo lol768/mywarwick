@@ -24,7 +24,7 @@ class SmsOutputService @Inject()(
 
   import system.ThreadPools.sms
 
-  private val rootDomain: String = configuration.getString("mywarwick.rootDomain").getOrElse("my.warwick.ac.uk")
+  private val rootDomain: String = configuration.get[Option[String]]("mywarwick.rootDomain").getOrElse("my.warwick.ac.uk")
   private val messageSuffix: String = s"\nTo opt-out visit $rootDomain/settings"
   private val maxMessageLength = 160 - messageSuffix.length
   def formatForSms(message: String): String = {

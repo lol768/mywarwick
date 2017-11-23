@@ -16,11 +16,11 @@ class SearchController @Inject()(
   ws: WSClient,
   trustedApplicationsManager: TrustedApplicationsManager,
   configuration: Configuration
-) extends BaseController {
+) extends MyController {
 
   import securityService._
 
-  private val searchRoot = configuration.getString("mywarwick.search.root")
+  private val searchRoot = configuration.get[Option[String]]("mywarwick.search.root")
     .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.search.root in application.conf"))
 
   private val ForwardedHeaders = Seq(CONTENT_TYPE, ACCEPT).map(_.toLowerCase)
@@ -37,14 +37,14 @@ class SearchController @Inject()(
     ws
       .url(url)
       .withMethod(request.method)
-      .withHeaders(headers.toSeq: _*)
-      .withHeaders(trustedHeaders: _*)
+      .addHttpHeaders(headers.toSeq: _*)
+      .addHttpHeaders(trustedHeaders: _*)
       .withBody(body)
       .execute()
       .map { response =>
         val contentType = response.header(CONTENT_TYPE).getOrElse("text/html")
 
-        val headers = response.allHeaders.collect {
+        val headers = response.headers.collect {
           case (name, value :: _) if !IgnoredReturnHeaders.contains(name.toLowerCase) => name -> value
         }
 

@@ -5,9 +5,9 @@ import javax.imageio.ImageIO
 
 import com.google.common.io.ByteStreams
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.API
-import play.api.cache.CacheApi
+import play.api.cache.{CacheApi, SyncCacheApi}
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.MultipartFormData.FilePart
@@ -22,8 +22,8 @@ class NewsImagesController @Inject()(
   newsImageService: NewsImageService,
   imageManipulator: ImageManipulator,
   publisherService: PublisherService,
-  cache: CacheApi
-) extends BaseController {
+  cache: SyncCacheApi
+) extends MyController {
 
   import EitherValidation._
   import securityService._
@@ -34,7 +34,7 @@ class NewsImagesController @Inject()(
       val cacheKey = targetWidth.map(w => s"$id@$w").getOrElse(id)
 
       cache
-        .getOrElse(cacheKey) {
+        .getOrElseUpdate(cacheKey) {
           val byteArray = newsImageService.fetchStream(id).map { stream =>
             targetWidth.map { targetWidth =>
               val formatName = newsImage.contentType.split('/').last
@@ -79,9 +79,9 @@ class NewsImagesController @Inject()(
     request.body.file("image").map { maybeValidImage =>
       Right[Result, FilePart[TemporaryFile]](maybeValidImage)
         .verifying(_.contentType.exists(_.startsWith("image/")), API.Error("invalid-content-type", "Invalid image content type"))
-        .verifying(_.ref.file.length() <= 1 * MEGABYTE, API.Error("image-content-length", "The uploaded image is too large (1MB max)"))
+        .verifying(_.ref.path.toFile.length() <= 1 * MEGABYTE, API.Error("image-content-length", "The uploaded image is too large (1MB max)"))
         .andThen { image =>
-          newsImageService.put(image.ref.file) match {
+          newsImageService.put(image.ref.path.toFile) match {
             case Success(id) =>
               Right(id)
             case Failure(e) =>

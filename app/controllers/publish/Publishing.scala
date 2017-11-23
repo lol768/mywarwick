@@ -9,14 +9,14 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
 import services._
 import services.dao.DepartmentInfo
-import system.{ImplicitRequestContext, Logging}
+import system.{ImplicitRequestContext, Logging, ThreadPools}
 import warwick.sso.{AuthenticatedRequest, Usercode}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOptions with PublishingActionRefiner with Logging {
-  self: ImplicitRequestContext with Controller =>
+  self: ImplicitRequestContext with BaseController =>
 
   implicit val executionContext = system.ThreadPools.web
 
@@ -197,6 +197,8 @@ trait PublishingActionRefiner {
         }
       }
     }
+
+    override protected def executionContext = ThreadPools.web
 
   }
 

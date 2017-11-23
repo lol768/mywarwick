@@ -1,11 +1,10 @@
 package controllers
 
-import helpers.Fixtures
+import helpers.{BaseSpec, Fixtures, MinimalAppPerSuite}
 import org.apache.commons.configuration.BaseConfiguration
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import helpers.BaseSpec
 import org.mockito.Matchers
 import play.api.http.HeaderNames
 import play.api.mvc._
@@ -21,9 +20,10 @@ import uk.ac.warwick.sso.client.cache.{UserCache, UserCacheItem}
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import warwick.sso._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class UserInfoControllerTest extends BaseSpec with MockitoSugar with Results {
+class UserInfoControllerTest extends BaseSpec with MockitoSugar with Results with MinimalAppPerSuite {
   val baseConfig = new BaseConfiguration
   val ssoConfig = new SSOConfiguration(baseConfig)
   val userCache = mock[UserCache]
@@ -68,6 +68,7 @@ class UserInfoControllerTest extends BaseSpec with MockitoSugar with Results {
       override val csrfPageHelperFactory: CSRFPageHelperFactory = mockCsrfPageHelperFactory
       override val navigationService = new MockNavigationService()
       override val ssoClient: SSOClient = mockSSOClient
+      setControllerComponents(get[ControllerComponents])
     }
   }
   val REFRESH_URL = "https://signon.example.com/login"

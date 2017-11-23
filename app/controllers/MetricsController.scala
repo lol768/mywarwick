@@ -10,7 +10,7 @@ import play.api.mvc.Action
 class MetricsController @Inject() (
   m: Metrics,
   filter: MetricsFilter // for http
-) extends BaseController {
+) extends MyController {
 
   import Json._
 

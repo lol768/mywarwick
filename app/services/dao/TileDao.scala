@@ -68,16 +68,20 @@ class TileDaoImpl @Inject()() extends TileDao {
   }
 
   override def getDefaultTilesForGroups(groups: Set[String], ids: Seq[String] = Nil)(implicit c: Connection): Seq[TileInstance] = {
-    val idRestriction = if (ids.isEmpty) "" else "AND ID IN ({ids})"
-    SQL(
-      s"""
-         |SELECT ID, TILE_TYPE, TITLE, ICON, COLOUR, TIMEOUT, FETCH_URL, 0 AS REMOVED, NULL AS PREFERENCES
-         |FROM TILE
-         |WHERE EXISTS (SELECT * FROM TILE_GROUP WHERE TILE_ID = ID and "GROUP" in ({groups})) $idRestriction
-    """.stripMargin).on(
-      'ids -> ids,
-      'groups -> groups
-    ).as(userTileParser.*)
+    if (groups.isEmpty) {
+      Nil
+    } else {
+      val idRestriction = if (ids.isEmpty) "" else "AND ID IN ({ids})"
+      SQL(
+        s"""
+           |SELECT ID, TILE_TYPE, TITLE, ICON, COLOUR, TIMEOUT, FETCH_URL, 0 AS REMOVED, NULL AS PREFERENCES
+           |FROM TILE
+           |WHERE EXISTS (SELECT * FROM TILE_GROUP WHERE TILE_ID = ID and "GROUP" in ({groups})) $idRestriction
+      """.stripMargin).on(
+        'ids -> ids,
+        'groups -> groups
+      ).as(userTileParser.*)
+    }
   }
 
   def userTileParser: RowParser[TileInstance] = {

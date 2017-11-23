@@ -3,7 +3,7 @@ package controllers.admin.publishers
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.publishing.{PublisherPermission, PublishingRole}
 import play.api.data.Forms._
 import play.api.data._
@@ -22,10 +22,9 @@ case class PublisherPermissionData(
 @Singleton
 class PublisherPermissionsController @Inject() (
   security: SecurityService,
-  val messagesApi: MessagesApi,
   val publisherService: PublisherService,
   userLookupService: UserLookupService
-) extends BaseController with I18nSupport with WithPublisher {
+) extends MyController with I18nSupport with WithPublisher {
 
   import Roles._
   import security._

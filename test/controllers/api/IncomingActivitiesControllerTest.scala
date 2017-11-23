@@ -1,13 +1,12 @@
 package controllers.api
 
-import helpers.WithActorSystem
+import helpers.{BaseSpec, MinimalAppPerSuite, WithActorSystem}
 import models.Audience
 import models.publishing.PublishingRole.{APINotificationsManager, NotificationsManager}
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import helpers.BaseSpec
 import models.publishing.Publisher
 import play.api.cache.CacheApi
 import play.api.i18n.MessagesApi
@@ -19,8 +18,9 @@ import services._
 import warwick.sso._
 
 import scala.util.Try
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with Results with WithActorSystem {
+class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with Results with MinimalAppPerSuite {
 
   val tabula = "tabula"
   val tabulaPublisherId = "tabulaPublisherId"
@@ -43,14 +43,15 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
   val audienceService: AudienceService = mock[AudienceService]
 
   val controller = new IncomingActivitiesController(
-    new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], mock[CacheApi]),
+    new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], PlayBodyParsers()),
     activityService,
     publisherService,
-    audienceService,
-    mock[MessagesApi]
+    audienceService
   ) {
     override val navigationService = new MockNavigationService()
     override val ssoClient: MockSSOClient = mockSSOClient
+
+    setControllerComponents(get[ControllerComponents])
   }
 
   val body: JsObject = Json.obj(

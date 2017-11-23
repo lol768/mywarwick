@@ -2,7 +2,7 @@ package controllers.publish
 
 import javax.inject.Inject
 
-import controllers.BaseController
+import controllers.MyController
 import models.publishing.PermissionScope.{AllDepartments, Departments}
 import play.api.libs.json._
 import services.{PublisherService, SecurityService}
@@ -14,7 +14,7 @@ class WebGroupsController @Inject()(
   groupService: GroupService,
   val publisherService: PublisherService,
   val securityService: SecurityService
-) extends BaseController with PublishingActionRefiner {
+) extends MyController with PublishingActionRefiner {
 
   val excludedGroupSuffixes = Seq(
     "-all",
@@ -70,7 +70,7 @@ class WebGroupsController @Inject()(
     }
   }
 
-  implicit val writesGroup = new Writes[Group] {
+  implicit val writesGroup: Writes[Group] = new Writes[Group] {
     override def writes(o: Group): JsValue = Json.obj(
       "name" -> o.name.string,
       "title" -> o.title

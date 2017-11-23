@@ -1,7 +1,6 @@
 @import system.RequestContext
 @import services.elasticsearch.ActivityDocument
 @import controllers.admin.reporting.ActivityReportFormData
-@import controllers.admin.reporting._
 
 @(allAlertsByProviders: Iterable[(ActivityProvider, Seq[ActivityDocument])], formData: Form[ActivityReportFormData])(implicit messages: Messages, context: RequestContext)
 @implicitFieldConstructor = @{
@@ -12,7 +11,7 @@
   <div>
     <h2>Alerts count by providers</h2>
 
-    @b3.form(routes.ActivityReportingController.formSubmit) {
+    @b3.form(controllers.admin.reporting.routes.ActivityReportingController.formSubmit) {
 
       @context.csrfHelper.formField
 

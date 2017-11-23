@@ -3,14 +3,14 @@ package controllers.admin
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import services.SecurityService
 import system.Roles
 
 @Singleton
 class AdminController @Inject() (
   security: SecurityService
-) extends BaseController {
+) extends MyController {
 
   import Roles._
   import security._

@@ -5,7 +5,7 @@ import javax.inject.Singleton
 import com.google.inject.Inject
 import com.sun.syndication.feed.synd._
 import com.sun.syndication.io.WireFeedOutput
-import controllers.BaseController
+import controllers.MyController
 import models.Audience.DepartmentSubset
 import models.news.NewsItemRender
 import models.{API, PageViewHit}
@@ -23,7 +23,7 @@ class ReadNewsController @Inject()(
   news: NewsService,
   security: SecurityService,
   measurementService: AnalyticsMeasurementService
-) extends BaseController {
+) extends MyController {
 
   private val output = new WireFeedOutput()
 
