@@ -20,8 +20,8 @@ class EmailOutputService @Inject() (
 
   import system.ThreadPools.email
 
-  val from = config.get[Option[String]]("mywarwick.mail.notifications.from")
-    .orElse(config.get[Option[String]]("mywarwick.mail.from"))
+  // defaults to mywarwick.mail.from
+  val from = config.getOptional[String]("mywarwick.mail.notifications.from")
     .getOrElse(throw new IllegalStateException("No From address - set mywarwick.mail[.notifications].from"))
 
   override def send(message: MessageSend.Heavy): Future[ProcessingResult] = Future {
@@ -38,7 +38,7 @@ class EmailOutputService @Inject() (
   def build(address: String, user: User, activity: Activity): Email = {
     val fullAddress = user.name.full.map(full => s"${full} <${address}>").getOrElse(address)
     val date = DateFormats.emailDateTime(activity.publishedAt)
-    val rootUrl = config.get[Option[String]]("mywarwick.rootUrl")
+    val rootUrl = config.getOptional[String]("mywarwick.rootUrl")
     require(rootUrl.nonEmpty, "Valid mywarwick.rootUrl not present")
 
     val optOutRoute = s"${controllers.routes.HomeController.settings().url}"

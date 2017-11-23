@@ -59,7 +59,7 @@ class WsDepartmentInfoDao @Inject()(
     cache.clear()
   }
 
-  private lazy val url: String = config.get[Option[String]]("mywarwick.departments.list.url")
+  private lazy val url: String = config.getOptional[String]("mywarwick.departments.list.url")
     .getOrElse(throw new IllegalArgumentException("mywarwick.departments.list.url missing"))
 
   private lazy val request: WSRequest = ws.url(url).withRequestTimeout(5.seconds)

@@ -17,7 +17,7 @@ class MapService @Inject()(
   val conf = configuration.get[Configuration]("webservice.map.thumbnail")
 
   val url: String = conf.get[String]("urlPath")
-  val query: Seq[(String, String)] = conf.get[Option[Seq[String]]]("urlParams").getOrElse(Nil)
+  val query: Seq[(String, String)] = conf.getOptional[Seq[String]]("urlParams").getOrElse(Nil)
     .map(_.split("=", 2))
     .map { case Array(key, value) => (key, value) }
 

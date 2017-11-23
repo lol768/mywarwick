@@ -28,9 +28,9 @@ trait SmsSendingService {
     .setDefaultRequestConfig(requestConfig)
     .build()
 
-  private val baseUrlOption: Option[String] = configuration.get[Option[String]]("sms.baseUrl")
-  private val usernameOption: Option[String] = configuration.get[Option[String]]("sms.username")
-  private val passwordOption: Option[String] = configuration.get[Option[String]]("sms.password")
+  private val baseUrlOption: Option[String] = configuration.getOptional[String]("sms.baseUrl")
+  private val usernameOption: Option[String] = configuration.getOptional[String]("sms.username")
+  private val passwordOption: Option[String] = configuration.getOptional[String]("sms.password")
 
   def sendSms(phoneNumber: PhoneNumber, message: String): Try[JsObject] = {
     val baseUrl = baseUrlOption.getOrElse(throw new IllegalArgumentException("sms.baseUrl not defined"))

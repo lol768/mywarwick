@@ -26,7 +26,7 @@ class FCMOutputService @Inject()(
 
   private val ARROW_EMOJI = "↗️"
 
-  val apiKey = configuration.get[Option[String]]("mywarwick.fcm.apiKey")
+  val apiKey = configuration.getOptional[String]("mywarwick.fcm.apiKey")
     .getOrElse(throw new IllegalStateException("Missing FCM API key - set mywarwick.fcm.apiKey"))
 
   def send(message: MessageSend.Heavy): Future[ProcessingResult] = {

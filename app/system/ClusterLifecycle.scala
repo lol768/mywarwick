@@ -22,7 +22,7 @@ class ClusterLifecycle @Inject() (
   akka: ActorSystem
 ) extends Logging {
 
-  if (config.get[Option[String]]("akka.actor.provider").contains("akka.cluster.ClusterActorRefProvider")) {
+  if (config.getOptional[String]("akka.actor.provider").contains("akka.cluster.ClusterActorRefProvider")) {
 
     val cluster = Cluster(akka)
     val shutdownWait: FiniteDuration = 30.seconds
