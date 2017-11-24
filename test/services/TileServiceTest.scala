@@ -71,7 +71,7 @@ class TileServiceTest extends BaseSpec with MockitoSugar with ScalaFutures {
       val accountTile = Seq(TileLayout("account", 2, 0,0, 1,1))
 
       when(tileLayoutDao.getTileLayoutForUser(isEq(tim.usercode.string))(conn)).thenReturn(Nil)
-      when(tileLayoutDao.getDefaultTileLayoutForGroup(isEq("wbs"))(conn)).thenReturn(accountTile)
+      when(tileLayoutDao.getDefaultTileLayoutForGroup(isEq("no-uni-id"))(conn)).thenReturn(accountTile)
 
       service.getTileLayoutForUser(Some(tim)) must be (accountTile)
     }
