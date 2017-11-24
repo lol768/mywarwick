@@ -266,20 +266,22 @@ export default class AccountTile extends TileContent {
             {AccountTile.makeHomeDepartment(member)}
             {AccountTile.getLink()}
             <li>&nbsp;</li>
-            {member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
-            <li>
-              You’re signed in with your WBS account. To access all the features of My Warwick,
-              please&nbsp;
-              <a
-                role="button"
-                tabIndex={0}
-                className="text--dotted-underline"
-                onClick={signOut}
-              >
-                sign in with your ITS credentials instead.
-              </a>
-            </li>}
           </ul>
+
+          {member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
+          <div className="wbs-message">
+            You’re signed in with your WBS account. To access all the features of My Warwick,
+            please&nbsp;
+            <a
+              role="button"
+              tabIndex={0}
+              className="text--dotted-underline"
+              onClick={signOut}
+            >
+              sign in with your ITS credentials instead.
+            </a>
+          </div>}
+
         </div>
       </div>
     );
