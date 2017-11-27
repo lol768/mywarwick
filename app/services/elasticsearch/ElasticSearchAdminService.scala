@@ -31,7 +31,7 @@ trait ElasticSearchAdminService {
 @Singleton
 class ElasticSearchAdminServiceImpl @Inject()(
   eSClientConfig: ESClientConfig
-) extends ElasticSearchAdminService with ElasticSearchAdminServiceHelper {
+) extends ElasticSearchAdminService with LowLevelClientHelper {
 
   val lowLevelClient: RestClient = eSClientConfig.lowLevelClient
 

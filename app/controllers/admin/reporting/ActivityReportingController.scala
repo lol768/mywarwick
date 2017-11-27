@@ -52,7 +52,7 @@ class ActivityReportingController @Inject()(
   }
 
   private def render(data: ActivityReportFormData, form: Form[ActivityReportFormData])(implicit req: Request[_]) =
-    activityReportingService.allAlertsByProviders(data.interval).map { result =>
+    activityReportingService.allAlertsCountByProviders(data.interval).map { result =>
       Ok(views.html.admin.reporting.activity.index(result, form))
     }
 }
