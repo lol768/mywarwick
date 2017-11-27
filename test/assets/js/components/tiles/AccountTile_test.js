@@ -24,4 +24,18 @@ describe('AccountTile', () => {
   expect(shallow.html()).to.contain('sign in with your ITS credentials instead.');
   });
 
+  it('should not render undefined for users with no universityId', () => {
+    const member = {
+      fullName: 'Ext User',
+      email: 'ext-user@warwick.ac.uk',
+      userId: 'cu_extuser',
+      homeDepartment: {},
+      userType: 'Staff',
+      userSource: 'WarwickExtUsers'
+    };
+
+    const userId = AccountTile.makeUserid(member);
+
+    expect(userId).to.not.contain('undefined');
+  });
 });

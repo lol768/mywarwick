@@ -14,7 +14,7 @@ export default class AccountTile extends TileContent {
       fullName: PropTypes.string.isRequired,
       email: PropTypes.string.isRequired,
       userId: PropTypes.string.isRequired,
-      universityId: PropTypes.string.isRequired,
+      universityId: PropTypes.string,
       homeDepartment: PropTypes.shape({
         code: PropTypes.string.isRequired,
         name: PropTypes.string.isRequired,
@@ -120,8 +120,9 @@ export default class AccountTile extends TileContent {
   }
 
   static makeUserid(member) {
+    const uniId = member.universityId ? `, ${member.universityId}` : '';
     return AccountTile.makeLineItem(
-      `${member.userId}, ${member.universityId}`,
+      `${member.userId}${uniId}`,
       'fa-id-card-o',
     );
   }
