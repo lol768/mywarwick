@@ -82,6 +82,8 @@ class ActivityESServiceImpl @Inject()(
   //TODO implement me https://www.elastic.co/guide/en/elasticsearch/client/java-rest/master/java-rest-high-document-delete.html
   override def deleteDocumentByActivityId(activityId: String, isNotification: Boolean): Unit = ???
 
+  // TODO we are not using the search function at all at the moent, but if one day we do, this should be reimplemented with search_after to get over the 10k limit
+  // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-search-after.html
   override def search(input: ActivityESSearchQuery): Future[Seq[ActivityDocument]] = {
     val helper = ActivityESServiceSearchHelper
 
