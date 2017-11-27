@@ -68,7 +68,12 @@ class ActivityESServiceImpl @Inject()(
     val bulkRequest = new BulkRequest().add(writeReqs : _*)
     val listener = new FutureActionListener[BulkResponse]
     client.bulkAsync(bulkRequest, listener)
-    listener.future.map(_ => {})
+    listener.future.map { response =>
+      if (response.hasFailures) {
+        logger.error(response.buildFailureMessage)
+      }
+      () // Unit
+    }
   }
 
   override def count(input: ActivityESSearchQuery): Future[Int] = {
