@@ -1,6 +1,6 @@
 package controllers.admin.publishers
 
-import controllers.BaseController
+import controllers.MyController
 import models.publishing.Publisher
 import play.api.mvc.Result
 import services.PublisherService
@@ -8,7 +8,7 @@ import system.RequestContext
 
 trait WithPublisher {
 
-  self: BaseController =>
+  self: MyController =>
 
   def publisherService: PublisherService
 

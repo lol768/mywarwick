@@ -17,8 +17,8 @@ import scala.concurrent.duration._
   * Handles shutting down the ActorSystem at the end of the suite.
   */
 trait WithActorSystem extends TestSuiteMixin { this: TestSuite =>
-  implicit val akka: ActorSystem = TestActors.plainActorSystem()
-  implicit val mat: Materializer = ActorMaterializer()
+  implicit lazy val akka: ActorSystem = TestActors.plainActorSystem()
+  implicit lazy val mat: Materializer = ActorMaterializer()
 
   abstract override def run(testName: Option[String], args: Args): Status =
     try super.run(testName, args)

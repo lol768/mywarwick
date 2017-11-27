@@ -21,6 +21,6 @@
 
 @common.admin("Update news") {
   @b3.form(action = controllers.publish.routes.NewsController.update(publisher.id, id, submitted = true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.publish.routes.NewsController.audienceInfo(publisher.id)) {
-    @publish.news.contentForm(form, publisher, departmentOptions, categories, permissionScope, audience, "Update")
+    @views.html.publish.news.contentForm(form, publisher, departmentOptions, categories, permissionScope, audience, "Update")
   }
 }

@@ -2,7 +2,7 @@ package controllers.api
 
 import java.io.{File, FileInputStream}
 
-import helpers.WithActorSystem
+import helpers.{MinimalAppPerSuite, OneStartAppPerSuite, TestApplications, WithActorSystem}
 import org.apache.commons.io.FileUtils
 import org.joda.time.DateTime
 import org.mockito.Matchers
@@ -10,21 +10,24 @@ import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.cache.CacheApi
-import play.api.libs.Files.TemporaryFile
+import play.api.cache.{AsyncCacheApi, CacheApi}
+import play.api.libs.Files.{TemporaryFile, TemporaryFileCreator}
 import play.api.mvc.MultipartFormData.FilePart
-import play.api.mvc.{MultipartFormData, Request, Results}
+import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services._
 import services.dao.NewsImage
+import system.NullCacheApi
 import warwick.sso._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
+import scala.concurrent.ExecutionContext.Implicits.global
 
+class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results with MinimalAppPerSuite {
 
-class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results with WithActorSystem {
+  val temporaryFileCreator = app.injector.instanceOf[TemporaryFileCreator]
 
   val ron = Users.create(usercode = Usercode("ron"))
 
@@ -39,21 +42,23 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
     override def actualUserHasRole(role: RoleName) = true
   })
 
-  val securityService = new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], mock[CacheApi])
+  val securityService = new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], PlayBodyParsers())
 
   private val service = mock[NewsImageService]
   private val imageManipulator = mock[NoopImageManipulator]
   private val publisherService = mock[PublisherService]
-  val cache = new MockCacheApi
+  val cache: AsyncCacheApi = new NullCacheApi
   val controller = new NewsImagesController(
     securityService,
     service,
     imageManipulator,
     publisherService,
-    cache
+    cache.sync
   ) {
     override val navigationService = new MockNavigationService()
     override val ssoClient = mockSSOClient
+
+    setControllerComponents(get[ControllerComponents])
   }
 
   val frog = new File("test/resources/frog.jpg")
@@ -136,7 +141,7 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
     }
 
     "fail with not-an-image" in {
-      val part = FilePart("image", "image.pdf", Some("application/pdf"), TemporaryFile("start", "pdf"))
+      val part = FilePart("image", "image.pdf", Some("application/pdf"), temporaryFileCreator.create("start", "pdf"))
       when(request.body).thenReturn(MultipartFormData(Map.empty, Seq(part), Seq.empty))
 
       val result = Future.successful(controller.createInternal(request))
@@ -150,7 +155,7 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
     }
 
     "fail if service fails" in {
-      val part = FilePart("image", "frog.jpg", Some("image/jpeg"), TemporaryFile(tempFile))
+      val part = FilePart("image", "frog.jpg", Some("image/jpeg"), temporaryFileCreator.create(tempFile.toPath))
       when(request.body).thenReturn(MultipartFormData(Map.empty, Seq(part), Seq.empty))
 
       when(service.put(any())).thenReturn(Failure(new Exception("Something went wrong")))
@@ -166,7 +171,7 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
     }
 
     "put an image" in {
-      val part = FilePart("image", "frog.jpg", Some("image/jpeg"), TemporaryFile(tempFile))
+      val part = FilePart("image", "frog.jpg", Some("image/jpeg"), temporaryFileCreator.create(tempFile.toPath))
       when(request.body).thenReturn(MultipartFormData(Map.empty, Seq(part), Seq.empty))
 
       when(service.put(any())).thenReturn(Success("image-id"))

@@ -6,7 +6,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import models.Hit
 import org.apache.commons.codec.digest.DigestUtils
 import play.api.Configuration
-import play.api.libs.ws.WSAPI
+import play.api.libs.ws.WSClient
 import play.api.mvc.RequestHeader
 import system.RequestContext
 import warwick.sso.Usercode
@@ -38,14 +38,14 @@ trait AnalyticsTracker {
 
 @Singleton
 class AnalyticsMeasurementServiceImpl @Inject()(
-  ws: WSAPI,
+  ws: WSClient,
   configuration: Configuration
 ) extends AnalyticsMeasurementService {
 
-  val trackingID = configuration.getString("mywarwick.analytics.tracking-id").map(AnalyticsTrackingID)
+  val trackingID = configuration.getOptional[String]("mywarwick.analytics.tracking-id").map(AnalyticsTrackingID)
     .getOrElse(throw new IllegalStateException("Analytics tracking ID missing - check mywarwick.analytics.tracking-id"))
 
-  val identifierSalt = configuration.getString("mywarwick.analytics.identifier.salt")
+  val identifierSalt = configuration.getOptional[String]("mywarwick.analytics.identifier.salt")
     .getOrElse(throw new IllegalStateException("Analytics identifier salt missing - check mywarwick.analytics.identifier.salt"))
 
   override def getUserIdentifier(usercode: Usercode) =

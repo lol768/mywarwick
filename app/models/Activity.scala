@@ -37,6 +37,8 @@ case class Activity(
 )
 
 object Activity {
+  import DateFormats.isoDateWrites
+
   implicit val writes: Writes[Activity] = new Writes[Activity] {
     override def writes(o: Activity): JsValue = Json.obj(
       "id" -> o.id,
@@ -206,8 +208,8 @@ case class ActivityRecipients(
 
 object ActivityRecipients {
   implicit val readsActivityRecipients: Reads[ActivityRecipients] = (
-      (__ \ "users").readNullable[Seq[String]](filter(ValidationError("All usercodes must be non-empty"))(_.forall(StringUtils.hasText))) and
-      (__ \ "groups").readNullable[Seq[String]](filter(ValidationError("All group names must be non-empty"))(_.forall(StringUtils.hasText)))
+      (__ \ "users").readNullable[Seq[String]](filter(JsonValidationError("All usercodes must be non-empty"))(_.forall(StringUtils.hasText))) and
+      (__ \ "groups").readNullable[Seq[String]](filter(JsonValidationError("All group names must be non-empty"))(_.forall(StringUtils.hasText)))
     )(ActivityRecipients.apply _)
 }
 

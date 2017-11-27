@@ -1,10 +1,10 @@
 // Warwick parent plugin
 resolvers += "nexus" at "https://mvn.elab.warwick.ac.uk/nexus/content/groups/public"
 credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
-addSbtPlugin("uk.ac.warwick" % "play-warwick" % "0.5")
+addSbtPlugin("uk.ac.warwick" % "play-warwick" % "0.6")
 
 // The Play plugin
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.12")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.6")
 
 // .tgz generator
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.0.3")

@@ -2,7 +2,6 @@
 @import models.publishing.{PermissionScope, Publisher}
 @import services.dao.DepartmentInfo
 @import system.RequestContext
-@import views.html._
 
 @(
     publisher: Publisher,
@@ -19,6 +18,6 @@
 
 @common.admin("Create alert") {
   @b3.form(action = controllers.publish.routes.NotificationsController.create(publisher.id, submitted = true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.publish.routes.NotificationsController.audienceInfo(publisher.id)) {
-    @publish.notifications.contentForm(form, publisher, departmentOptions, providerOptions, permissionScope, audience, "Create")
+    @views.html.publish.notifications.contentForm(form, publisher, departmentOptions, providerOptions, permissionScope, audience, "Create")
   }
 }

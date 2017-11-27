@@ -4,12 +4,12 @@ import org.databrary.PlayLogbackAccessModule
 import play.api.db.evolutions.{ClassLoaderEvolutionsReader, EvolutionsReader}
 import play.api.inject._
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.routing.SimpleRouter
+import play.api.routing.{Router, SimpleRouter}
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import services.messaging.MobileOutputService
 import services.{CookieSSOClient, NullMobileOutputService, SchedulerService}
-import system.{DatabaseDialect, H2DatabaseDialect}
+import system.{DatabaseDialect, H2DatabaseDialect, NullCacheModule}
 import warwick.accesslog.LogbackAccessModule
 import warwick.sso._
 
@@ -33,17 +33,12 @@ object TestApplications {
   def minimal() =
     GuiceApplicationBuilder(loadConfiguration = e => config("minimal.conf", e))
       .in(Environment.simple())
-      .router(SimpleRouter(PartialFunction.empty))
+      .router(Router.empty)
       .disable[PlayLogbackAccessModule]
       .disable[LogbackAccessModule]
       .build()
 
-  /**
-    * As full an Application as can be created while still talking to
-    * mock external services only, and an in-memory database. Used for
-    * DAO tests and integration tests.
-    */
-  def full(user: Option[User] = None) =
+  def fullBuilder(user: Option[User]) =
     GuiceApplicationBuilder(loadConfiguration = testConfig)
       .in(Environment.simple())
       .configure(inMemoryDatabase("default", Map("MODE" -> "Oracle")))
@@ -59,7 +54,24 @@ object TestApplications {
         // Allows putting test versions of migrations under test/resources/evolutions/default
         bind[EvolutionsReader].toInstance(new ClassLoaderEvolutionsReader())
       )
-      .build()
+
+  /**
+    * As full an Application as can be created while still talking to
+    * mock external services only, and an in-memory database. Used for
+    * DAO tests and integration tests.
+    */
+  def full(user: Option[User] = None) =
+    fullBuilder(user).build()
+
+  /**
+    * The full application, but with no routes - this typically means none of the
+    * controllers are created or injected, and any services only referenced by
+    * controllers will not be immediately created either.
+    */
+  def fullNoRoutes(user: Option[User] = None) =
+    fullBuilder(user)
+        .router(Router.empty)
+        .build()
 
   def functional() =
     GuiceApplicationBuilder(loadConfiguration = functionalConfig)

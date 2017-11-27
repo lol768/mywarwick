@@ -3,7 +3,7 @@ package controllers.api
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import play.api.libs.json.JsObject
 import play.api.mvc.Action
 import services.PushRegistrationService
@@ -11,7 +11,7 @@ import services.PushRegistrationService
 @Singleton
 class PushNotificationsController @Inject()(
   pushRegistrationService: PushRegistrationService
-) extends BaseController {
+) extends MyController {
 
   def unsubscribe = Action { implicit request =>
     val deviceToken = request.body.asJson.flatMap(_.asInstanceOf[JsObject].value.get("deviceToken")).map(_.as[String])

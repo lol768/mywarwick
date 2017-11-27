@@ -22,7 +22,7 @@ class FlexiPickerController @Inject()(
   securityService: SecurityService,
   userLookupService: UserLookupService,
   groupService: GroupService
-) extends BaseController {
+) extends MyController {
 
   import securityService._
 

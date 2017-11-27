@@ -2,7 +2,7 @@ package controllers.api
 
 import javax.inject.{Inject, Singleton}
 
-import controllers.BaseController
+import controllers.MyController
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import services.{SecurityService, TileContentService, TileService, TimetableTokenService}
@@ -18,7 +18,7 @@ class TimetablesController @Inject()(
   tileContentService: TileContentService,
   tileService: TileService,
   userLookupService: UserLookupService
-) extends BaseController {
+) extends MyController {
 
   import securityService._
 

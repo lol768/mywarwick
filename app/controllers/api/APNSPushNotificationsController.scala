@@ -3,7 +3,7 @@ package controllers.api
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.Platform.Apple
 import play.api.libs.json.JsObject
 import services.{PushRegistrationService, SecurityService}
@@ -12,7 +12,7 @@ import services.{PushRegistrationService, SecurityService}
 class APNSPushNotificationsController @Inject()(
   securityService: SecurityService,
   pushRegistrationService: PushRegistrationService
-) extends BaseController {
+) extends MyController {
 
   import securityService._
 

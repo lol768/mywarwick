@@ -2,6 +2,9 @@ package helpers
 
 import helpers.embedded.EmbeddedServerConfig
 import org.scalatestplus.play.WsScalaTestClient
+import play.api.libs.ws.WSClient
+import play.api.test.WsTestClient
+import play.libs.ws.WSClient
 
 /**
   * Starts a server but doesn't drive any browsers - use the
@@ -16,10 +19,7 @@ import org.scalatestplus.play.WsScalaTestClient
 abstract class ApiFuncTestBase
   extends CommonFuncTestBase
     with EmbeddedServerConfig
-    with WsScalaTestClient
-    with WithActorSystem { // needed for WithWebClient
+    with WsScalaTestClient {
 
-  // for WsScalaTestClient
-  implicit def ws = web.client
 
 }

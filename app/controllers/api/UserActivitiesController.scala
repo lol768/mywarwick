@@ -3,7 +3,7 @@ package controllers.api
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.API.Error
 import models._
 import org.joda.time.DateTime
@@ -22,6 +22,7 @@ case class SaveMuteRequest(
 
 object SaveMuteRequest {
   import DateFormats.isoDateReads
+  import DateFormats.isoDateWrites
   implicit val format: OFormat[SaveMuteRequest] = Json.format[SaveMuteRequest]
 }
 
@@ -30,7 +31,7 @@ class UserActivitiesController @Inject()(
   activityService: ActivityService,
   securityService: SecurityService,
   mobileOutput: MobileOutputService
-) extends BaseController {
+) extends MyController {
 
   import DateFormats.{isoDateReads, isoDateWrites}
   import securityService._
@@ -64,7 +65,7 @@ class UserActivitiesController @Inject()(
             val success = data.forall(activityService.setLastReadDate(u, _))
             if (success) {
               Future(mobileOutput.clearUnreadCount(u.usercode))
-                .onFailure { case e => logger.warn("clearUnreadCount failure", e) }
+                .failed.foreach { e => logger.warn("clearUnreadCount failure", e) }
               Ok(Json.toJson(API.Success[JsObject](data = Json.obj())))
             }
             else InternalServerError(Json.toJson(

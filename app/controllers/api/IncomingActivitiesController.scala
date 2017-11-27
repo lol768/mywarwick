@@ -3,11 +3,11 @@ package controllers.api
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.Audience.UsercodesAudience
-import models.{Audience, _}
 import models.publishing.Ability.CreateAPINotifications
-import play.api.i18n.{I18nSupport, MessagesApi}
+import models.{Audience, _}
+import play.api.i18n.I18nSupport
 import play.api.libs.json._
 import play.api.mvc.Result
 import services.ActivityError.InvalidProviderId
@@ -19,9 +19,8 @@ class IncomingActivitiesController @Inject()(
   securityService: SecurityService,
   activityService: ActivityService,
   publisherService: PublisherService,
-  audienceService: AudienceService,
-  val messagesApi: MessagesApi
-) extends BaseController with I18nSupport {
+  audienceService: AudienceService
+) extends MyController with I18nSupport {
 
   import securityService._
 

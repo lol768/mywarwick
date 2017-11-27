@@ -12,17 +12,16 @@ import scala.concurrent.ExecutionContext
   */
 abstract class RemoteFuncTestBase
   extends FuncTestBase
-    with RemoteServerConfig
-    with WithActorSystem {
+    with RemoteServerConfig {
 
-  implicit val ec: ExecutionContext = akka.dispatcher
+  implicit val ec: ExecutionContext = app.actorSystem.dispatcher
 
   private def getUserInfo: UserInfoResponse = {
     // Check /user/info to see if we're authenticated already.
     val cookies = webDriver.manage().getCookies().asScala
     val cookiesAsString = cookies.map(_.toString).mkString("; ")
-    web.url(s"${config.url}/user/info")
-      .withHeaders("Cookie" -> cookiesAsString)
+    client.url(s"${config.url}/user/info")
+      .addHttpHeaders("Cookie" -> cookiesAsString)
       .get()
       .map { response => new UserInfoResponse(response.json) }
       .futureValue
