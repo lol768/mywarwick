@@ -1,7 +1,5 @@
 package system
 
-import java.util.concurrent.Executors
-
 import scala.concurrent.ExecutionContext
 
 /**
