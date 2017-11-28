@@ -25,17 +25,19 @@ object TestApplications {
   def config(file: String, environment: Environment) =
     Configuration.load(environment, Map("config.resource" -> file))
 
+  def minimalBuilder = GuiceApplicationBuilder(loadConfiguration = e => config("minimal.conf", e))
+    .in(Environment.simple())
+    .disable[PlayLogbackAccessModule]
+    .disable[LogbackAccessModule]
+
   /**
     * As minimal an Application as can be created. Use for any tests
     * where you just can't do without an Application, like something that
     * requires WSAPI which is a pain to build by hand.
     */
   def minimal() =
-    GuiceApplicationBuilder(loadConfiguration = e => config("minimal.conf", e))
-      .in(Environment.simple())
+    minimalBuilder
       .router(Router.empty)
-      .disable[PlayLogbackAccessModule]
-      .disable[LogbackAccessModule]
       .build()
 
   def fullBuilder(user: Option[User]) =

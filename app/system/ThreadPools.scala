@@ -1,5 +1,7 @@
 package system
 
+import java.util.concurrent.Executors
+
 import scala.concurrent.ExecutionContext
 
 /**
@@ -20,6 +22,8 @@ object ThreadPools {
   implicit val externalData = shared
 
   implicit val elastic = shared
+
+  implicit val publishing = shared
 
   // For Controllers to do basic processing on received futures.
   implicit val web = shared
