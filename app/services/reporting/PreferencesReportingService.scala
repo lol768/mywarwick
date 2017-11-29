@@ -3,10 +3,10 @@ package services.reporting
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
-import models.{ActivityMute, ActivityProvider}
+import models.{ActivityMute, ActivityProvider, Tile, UserTile}
 import play.api.db.{Database, NamedDatabase}
 import services.ProviderRender
-import services.dao.{ActivityMuteDao, PublisherDao, UserPreferencesDao}
+import services.dao.{ActivityMuteDao, PublisherDao, TileDao, UserPreferencesDao}
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[PreferencesReportingServiceImpl])
@@ -22,6 +22,9 @@ trait PreferencesReportingService {
 
   def getAllMutesGroupedByProviders(): Map[ActivityProvider, Seq[ActivityMute]]
 
+  def getAllUserTileSettings(): Map[Tile, Seq[UserTile]]
+
+  def getAllUserTileHiddenCounts(): Map[Tile, Int]
 }
 
 
@@ -30,7 +33,8 @@ class PreferencesReportingServiceImpl @Inject()(
   @NamedDatabase("default") db: Database,
   userPreferencesDao: UserPreferencesDao,
   publisherDao: PublisherDao,
-  activityMuteDao: ActivityMuteDao
+  activityMuteDao: ActivityMuteDao,
+  tileDao: TileDao
 ) extends PreferencesReportingService {
   override def userWantsEmails(usercode: Usercode) = ???
 
@@ -51,6 +55,22 @@ class PreferencesReportingServiceImpl @Inject()(
   override def getAllMutesGroupedByProviders() = {
     db.withConnection(implicit c => {
       this.getMutesByProviders(publisherDao.getAllProviders().map(ProviderRender.toActivityProvider))
+    })
+  }
+
+  override def getAllUserTileSettings() = {
+    db.withConnection(implicit c => {
+      val allTiles = tileDao.getAllTiles()
+      val allUserTiles = tileDao.getAllUserTiles()
+      allTiles.map(tile => (tile, allUserTiles.filter(_.tileId == tile.id))).toMap
+    })
+  }
+
+  override def getAllUserTileHiddenCounts() = {
+    db.withConnection(implicit c => {
+      this.getAllUserTileSettings.seq.map {
+        case (tile, userTiles) => (tile, userTiles.count(_.removed))
+      }
     })
   }
 }

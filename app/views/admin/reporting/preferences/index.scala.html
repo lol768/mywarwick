@@ -1,23 +1,46 @@
 @import system.RequestContext
-
-@(allMutes: Map[ActivityProvider, Seq[ActivityMute]])(implicit messages: Messages, context: RequestContext)
+@(
+    allActivityMutes: Map[ActivityProvider, Seq[ActivityMute]],
+    allTileHiddenCount: Map[Tile, Int]
+)(implicit messages: Messages, context: RequestContext)
 @common.admin("Administration", "Reports", "Preferences Report") {
   <div>
-    <p>Activity mutes count by providers</p>
+    <h2>Activity mutes count by providers</h2>
     <table class="table">
       <thead class="thead">
         <th scope="col">Provider</th>
         <th scope="col">Mutes</th>
       </thead>
       <tbody>
-      @for((key, value) <- allMutes) {
-        @if(value.isEmpty) {
+      @for((provider, mutes) <- allActivityMutes) {
+        @if(mutes.isEmpty) {
           <tr class="text-muted">
         } else {
           <tr>
           }
-        <td>@key.displayName.getOrElse(key.id)</td>
-        <td>@value.length</td>
+        <td>@provider.displayName.getOrElse(provider.id)</td>
+        <td>@mutes.length</td>
+      </tr>
+      }
+      </tbody>
+    </table>
+  </div>
+  <div>
+    <h2>Hidden tile counts by user tile settings</h2>
+    <table class="table">
+      <thead class="thead">
+        <th scope="col">Tile</th>
+        <th scope="col">Hidden</th>
+      </thead>
+      <tbody>
+      @for((tile, count) <- allTileHiddenCount) {
+        @if(count == 0) {
+          <tr class="text-muted">
+        } else {
+          <tr>
+          }
+        <td>@tile.title</td>
+        <td>@count</td>
       </tr>
       }
       </tbody>

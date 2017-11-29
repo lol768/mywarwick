@@ -30,9 +30,7 @@ class UserInfoController @Inject()(
   userInitialisationService: UserInitialisationService,
   photoService: PhotoService,
   measurementService: AnalyticsMeasurementService
-) extends BaseController {
-
-  import ssoClient.Lenient
+) extends MyController {
 
   val SSC_NAME = ssoConfig.getString("shire.sscookie.name")
   val SSC_PATH = ssoConfig.getString("shire.sscookie.path")
@@ -47,7 +45,7 @@ class UserInfoController @Inject()(
     * the SSC to hang around forever, so instead we check that our local cached copy
     * of the user's session is missing (meaning it probably expired away).
     */
-  def info = Lenient.disallowRedirect.async { implicit request =>
+  def info = ssoClient.Lenient(parse.default).disallowRedirect.async { implicit request =>
     val ltc = request.cookies.get(GLOBAL_LOGIN_COOKIE_NAME).filter(hasValue)
     val ssc = request.cookies.get(SSC_NAME).filter(hasValue)
 

@@ -16,6 +16,7 @@ import services._
 import services.dao._
 import services.elasticsearch.ActivityESService
 import services.messaging.MessagingService
+import system.NullCacheApi
 import warwick.sso.{UserLookupService, Usercode}
 
 class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSuite {
@@ -30,7 +31,7 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
   private val jobDetail = mock[JobDetail]
   private val jobDataMap = mock[JobDataMap]
 
-  val cache = new MockCacheApi
+  val cache = new NullCacheApi
 
   when(context.getJobDetail).thenReturn(jobDetail)
   when(jobDetail.getJobDataMap).thenReturn(jobDataMap)
@@ -42,7 +43,7 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
     val newsImageDao = mock[NewsImageDao]
     val userInitialisationService = mock[UserInitialisationService]
     val userLookupService = mock[UserLookupService]
-    val newsService = new AnormNewsService(db, newsDao, audienceService, newsCategoryDao, newsImageDao, audienceDao, userInitialisationService, scheduler, userLookupService, cache)
+    val newsService = new AnormNewsService(db, newsDao, audienceService, newsCategoryDao, newsImageDao, audienceDao, userInitialisationService, scheduler, userLookupService, cache.sync)
 
     val publishNewsItemJob = new PublishNewsItemJob(audienceService, newsService, scheduler)
 

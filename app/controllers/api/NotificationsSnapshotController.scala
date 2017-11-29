@@ -2,7 +2,7 @@ package controllers.api
 
 import javax.inject.{Inject, Singleton}
 
-import controllers.BaseController
+import controllers.MyController
 import play.api.db.{Database, NamedDatabase}
 import play.api.libs.json.Json
 import play.api.mvc.Action
@@ -15,7 +15,7 @@ class NotificationsSnapshotController @Inject()(
   @NamedDatabase("default") db: Database,
   lookup: UserLookupInterface,
   activityService: ActivityService
-) extends BaseController {
+) extends MyController {
 
   val WARWICK_SSO_COOKIE_NAME: String = "WarwickSSO"
 

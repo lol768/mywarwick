@@ -3,7 +3,7 @@ package helpers.embedded
 import helpers.TestApplications
 import org.junit.AfterClass
 import org.scalatest.TestSuite
-import org.scalatestplus.play.OneServerPerSuite
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.db.Database
 
 /**
@@ -12,7 +12,7 @@ import play.api.db.Database
   * fixtures.
   */
 trait FunctionalAppPerSuite
-  extends OneServerPerSuite
+  extends GuiceOneServerPerSuite
   with SqlScriptRunner { self: TestSuite =>
 
   def origin = s"localhost:$port"

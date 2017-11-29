@@ -18,7 +18,6 @@ import play.api.Configuration
 import play.api.cache._
 import play.api.libs.json.{JsObject, _}
 import play.api.libs.ws.WSClient
-import system.CacheMethods._
 import system.{Logging, ThreadPools}
 import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils}
 import warwick.sso.Usercode
@@ -49,7 +48,7 @@ trait TileContentService {
 class TileContentServiceImpl @Inject()(
   trustedApp: CurrentApplication,
   ws: WSClient,
-  cache: CacheApi,
+  cache: AsyncCacheApi,
   config: Configuration
 ) extends TileContentService with Logging {
 
@@ -63,8 +62,7 @@ class TileContentServiceImpl @Inject()(
     .build()
 
   val preferenceCacheDuration: FiniteDuration = config
-    .getInt("mywarwick.cache.tile-preferences.seconds").map(_.seconds)
-    .getOrElse(throw new IllegalStateException("Missing default"))
+    .get[Int]("mywarwick.cache.tile-preferences.seconds").seconds
 
   import ThreadPools.tileData
 
@@ -75,7 +73,7 @@ class TileContentServiceImpl @Inject()(
   def getCachedTilesOptions(tiles: Seq[Tile]): Future[Seq[(String, JsValue)]] = {
     Future.sequence(tiles.map { tile =>
       tile.fetchUrl.map { url =>
-        cache.getOrElseFuture(s"tile-preferences-${tile.id}", preferenceCacheDuration) {
+        cache.getOrElseUpdate(s"tile-preferences-${tile.id}", preferenceCacheDuration) {
           ws.url(s"$url/preferences.json").get()
             .map(res =>
               res.status match {

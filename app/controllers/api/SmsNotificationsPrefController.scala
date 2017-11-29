@@ -6,7 +6,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.API
 import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
@@ -31,7 +31,7 @@ object SmsNotificationsRequest {
     (
       (__ \ "wantsSms").read[Boolean] and
         (__ \ "smsNumber").readNullable[String](
-          filter(ValidationError("Invalid phone number")) { s =>
+          filter(JsonValidationError("Invalid phone number")) { s =>
             s.isEmpty || Try(PhoneNumberUtil.getInstance.parse(s, "GB")).isSuccess
           }).map(o => o.flatMap(s =>
           Option(s).filter(_.nonEmpty).map(PhoneNumberUtil.getInstance.parse(_, "GB"))
@@ -45,7 +45,7 @@ object SmsNotificationsRequest {
 class SmsNotificationsPrefController @Inject()(
   security: SecurityService,
   notificationPrefService: SmsNotificationsPrefService
-) extends BaseController {
+) extends MyController {
 
   private val phoneUtil = PhoneNumberUtil.getInstance
 

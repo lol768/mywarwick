@@ -1,28 +1,40 @@
 package system
 
-import com.google.inject.{AbstractModule, Singleton}
-import play.api.cache.CacheApi
+import akka.Done
+import com.google.inject.{AbstractModule, Provides, Singleton}
+import play.api.cache.{AsyncCacheApi, CacheApi, DefaultSyncCacheApi, SyncCacheApi}
 
+import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 import scala.reflect.ClassTag
 
 @Singleton
-class NullCacheApi extends CacheApi {
+class NullCacheApi extends AsyncCacheApi {
 
-  override def set(key: String, value: Any, expiration: Duration) = ()
+  private val done = Future.successful(Done)
 
-  override def get[T: ClassTag](key: String) = None
+  def set(key: String, value: Any, expiration: Duration = Duration.Inf): Future[Done] =
+    done
 
-  override def getOrElse[A: ClassTag](key: String, expiration: Duration)(orElse: => A) = orElse
+  def remove(key: String): Future[Done] =
+    done
 
-  override def remove(key: String) = ()
+  def getOrElseUpdate[A: ClassTag](key: String, expiration: Duration = Duration.Inf)(orElse: => Future[A]): Future[A] =
+    orElse
 
+  def get[T: ClassTag](key: String): Future[Option[T]] =
+    Future.successful(None)
+
+  def removeAll(): Future[Done] =
+    done
 }
 
 class NullCacheModule extends AbstractModule {
 
   override def configure() = {
-    bind(classOf[CacheApi]).to(classOf[NullCacheApi])
+    val cache = new NullCacheApi()
+    bind(classOf[AsyncCacheApi]).toInstance(cache)
+    bind(classOf[SyncCacheApi]).toInstance(cache.sync)
   }
 
 }

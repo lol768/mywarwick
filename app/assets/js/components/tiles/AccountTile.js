@@ -14,7 +14,7 @@ export default class AccountTile extends TileContent {
       fullName: PropTypes.string.isRequired,
       email: PropTypes.string.isRequired,
       userId: PropTypes.string.isRequired,
-      universityId: PropTypes.string.isRequired,
+      universityId: PropTypes.string,
       homeDepartment: PropTypes.shape({
         code: PropTypes.string.isRequired,
         name: PropTypes.string.isRequired,
@@ -120,8 +120,9 @@ export default class AccountTile extends TileContent {
   }
 
   static makeUserid(member) {
+    const uniId = member.universityId ? `, ${member.universityId}` : '';
     return AccountTile.makeLineItem(
-      `${member.userId}, ${member.universityId}`,
+      `${member.userId}${uniId}`,
       'fa-id-card-o',
     );
   }
@@ -266,20 +267,22 @@ export default class AccountTile extends TileContent {
             {AccountTile.makeHomeDepartment(member)}
             {AccountTile.getLink()}
             <li>&nbsp;</li>
-            {member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
-            <li>
-              You’re signed in with your WBS account. To access all the features of My Warwick,
-              please&nbsp;
-              <a
-                role="button"
-                tabIndex={0}
-                className="text--dotted-underline"
-                onClick={signOut}
-              >
-                sign in with your ITS credentials instead.
-              </a>
-            </li>}
           </ul>
+
+          {member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
+          <div className="wbs-message">
+            You’re signed in with your WBS account. To access all the features of My Warwick,
+            please&nbsp;
+            <a
+              role="button"
+              tabIndex={0}
+              className="text--dotted-underline"
+              onClick={signOut}
+            >
+              sign in with your ITS credentials instead.
+            </a>
+          </div>}
+
         </div>
       </div>
     );

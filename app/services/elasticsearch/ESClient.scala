@@ -25,12 +25,9 @@ class ESClientConfigImpl @Inject()(
   val lowLevel: RestClientBuilder = RestClient.builder(allHttpHosts.toArray: _*).setMaxRetryTimeoutMillis(60000)
   val highLevel: RestHighLevelClient = new RestHighLevelClient(lowLevel)
 
-  override def nodes: Seq[ESNode] = {
-    config
-      .getStringSeq("es.nodes")
-      .map(ESNode.fromConfigs)
-      .getOrElse(throw new IllegalStateException("ElasticSearch nodes not configured - check es.nodes"))
-  }
+  override def nodes: Seq[ESNode] =
+    ESNode.fromConfigs(config
+      .get[Seq[String]]("es.nodes"))
 
   override def highLevelClient: RestHighLevelClient = highLevel
 

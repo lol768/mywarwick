@@ -41,22 +41,28 @@ class CookieSSOClient @Inject() (
     val req = new PlayHttpRequestHeader(request)
     new LinkGeneratorImpl(configuration, req)
   }
+   
+  def Lenient[C](parser: BodyParser[C]) = ???
+  def Strict[C](parser: BodyParser[C]) = ???
 
-  lazy val Strict = Lenient andThen requireCondition(_.context.user.isDefined, otherwise = redirectToSSO)
+   lazy val Strict = ??? // Lenient andThen requireCondition(_.context.user.isDefined, otherwise = redirectToSSO)
 
-  lazy val Lenient = FindUser
 
-  override def RequireRole(role: RoleName, otherwise: AuthRequest[_] => Result) = Strict andThen requireCondition(_.context.userHasRole(role), otherwise)
-  override def RequireActualUserRole(role: RoleName, otherwise: AuthRequest[_] => Result) = Strict andThen requireCondition(_.context.actualUserHasRole(role), otherwise)
+  def RequireRole[C](role: RoleName, otherwise: AuthRequest[_] => Result)(parser: BodyParser[C]): ActionBuilder[AuthRequest, C] = ???
 
-  object FindUser extends SSOActionBuilder {
+  def RequireActualUserRole[C](role: RoleName, otherwise: AuthRequest[_] => Result)(parser: BodyParser[C]): ActionBuilder[AuthRequest, C] = ???
+
+//  override def RequireRole[C](role: RoleName, otherwise: AuthRequest[C] => Result) = ??? // Strict andThen requireCondition(_.context.userHasRole(role), otherwise)
+//  override def RequireActualUserRole[C](role: RoleName, otherwise: AuthRequest[C] => Result) = ??? //Strict andThen requireCondition(_.context.actualUserHasRole(role), otherwise)
+
+  /*object FindUser extends SSOActionBuilder {
     def disallowRedirect = this
 
     override def invokeBlock[A](request: Request[A], block: (AuthenticatedRequest[A]) => Future[Result]): Future[Result] = {
       val ctx = getLoginContext(request)
       block(new AuthenticatedRequest(ctx, request))
     }
-  }
+  }*/
 
   override def withUser[A](request: RequestHeader)(block: (LoginContext) => TryAcceptResult[A]) : TryAcceptResult[A] = {
     val ctx = getLoginContext(request)
@@ -82,6 +88,7 @@ class CookieSSOClient @Inject() (
 
   private def requireCondition(block: AuthRequest[_] => Boolean, otherwise: AuthRequest[_] => Result) =
     new ActionFilter[AuthRequest] {
+      override def executionContext = ???
       override protected def filter[A](request: AuthRequest[A]) =
         Future.successful {
           block(request) match {

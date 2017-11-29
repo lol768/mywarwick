@@ -109,6 +109,8 @@ class TileServiceImpl @Inject()(
   private def getGroups(user: User): Set[String] = {
     if (user.userSource.contains("WBSLdap"))
       Set("wbs")
+    else if (user.universityId.isEmpty)
+      Set("no-uni-id")
     else {
       val isStaff = if (user.isStaffOrPGR) Set("staff") else Set()
       val isStudent = if (user.isStudent) Set("student") else Set()

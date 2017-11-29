@@ -15,8 +15,9 @@ class PushRegistrationDaoTest extends BaseSpec with MockitoSugar with OneStartAp
 
   private val deviceStringMaxLength = 10
 
-  val config = mock[Configuration]
-  when(config.getInt(any[String])) thenReturn(Some(deviceStringMaxLength))
+  val config = Configuration(
+    "mywarwick.pushregistration.deviceStringMaxLength" -> deviceStringMaxLength
+  )
   val dao = new PushRegistrationDaoImpl(config)
 
   "PushNotificationDao" should {

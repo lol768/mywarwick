@@ -2,7 +2,7 @@ package controllers.admin.elasticsearch
 
 import javax.inject.{Inject, Singleton}
 
-import controllers.BaseController
+import controllers.MyController
 import org.joda.time.DateTime
 import org.quartz.JobBuilder
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -11,15 +11,15 @@ import services.{ActivityService, SchedulerService, SecurityService}
 import system.Roles
 import play.api.data._
 import play.api.data.Forms._
+import play.api.data.JodaForms._
 
 @Singleton
 class ActivityToESController @Inject()(
   security: SecurityService,
   activityService: ActivityService,
   activityESService: ActivityESService,
-  scheduler: SchedulerService,
-  val messagesApi: MessagesApi
-) extends BaseController with I18nSupport {
+  scheduler: SchedulerService
+) extends MyController with I18nSupport {
 
   import Roles._
   import security._

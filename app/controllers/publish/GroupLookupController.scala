@@ -1,7 +1,7 @@
 package controllers.publish
 
 import com.google.inject.{Inject, Singleton}
-import controllers.BaseController
+import controllers.MyController
 import models.API
 import play.api.data.Form
 import play.api.data.Forms._
@@ -22,7 +22,7 @@ case class GroupLookupQuery(query: String)
 class GroupLookupController @Inject()(
   securityService: SecurityService,
   lookupService: GroupLookupService
-) extends BaseController {
+) extends MyController {
 
   import securityService._
 

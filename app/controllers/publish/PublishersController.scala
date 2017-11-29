@@ -1,7 +1,7 @@
 package controllers.publish
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.publishing.{Publisher, PublisherPermission}
 import services.{PublisherService, SecurityService}
 import warwick.sso.{User, UserLookupService}
@@ -10,7 +10,7 @@ class PublishersController @Inject()(
   securityService: SecurityService,
   publisherService: PublisherService,
   userLookup: UserLookupService
-) extends BaseController {
+) extends MyController {
 
   import securityService._
 

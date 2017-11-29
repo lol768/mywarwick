@@ -1,7 +1,7 @@
 @(
   actionLabel: String,
   cancelRoute: Call
-)(implicit fc: b3.B3FieldConstructor)
+)(implicit fc: b3.B3FieldConstructor, messages: MessagesProvider)
 
 @b3.free() {
   <button type="submit" class="btn btn-primary">@actionLabel</button>

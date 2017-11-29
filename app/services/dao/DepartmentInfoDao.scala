@@ -5,7 +5,7 @@ import javax.inject.Inject
 import com.google.inject.ImplementedBy
 import play.api.Mode.Dev
 import play.api.libs.json._
-import play.api.libs.ws.{WSAPI, WSRequest}
+import play.api.libs.ws.{WSClient, WSRequest}
 import play.api.{Configuration, Environment}
 import system.Logging
 import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
@@ -32,7 +32,7 @@ trait DepartmentInfoDao {
 }
 
 class WsDepartmentInfoDao @Inject()(
-  ws: WSAPI,
+  ws: WSClient,
   config: Configuration,
   environment: Environment
 ) extends DepartmentInfoDao with Logging {
@@ -59,7 +59,7 @@ class WsDepartmentInfoDao @Inject()(
     cache.clear()
   }
 
-  private lazy val url: String = config.getString("mywarwick.departments.list.url")
+  private lazy val url: String = config.getOptional[String]("mywarwick.departments.list.url")
     .getOrElse(throw new IllegalArgumentException("mywarwick.departments.list.url missing"))
 
   private lazy val request: WSRequest = ws.url(url).withRequestTimeout(5.seconds)

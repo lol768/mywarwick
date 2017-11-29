@@ -4,7 +4,7 @@ import java.security.MessageDigest
 
 import com.google.inject.{ImplementedBy, Inject}
 import play.api.Configuration
-import play.api.libs.ws.WSAPI
+import play.api.libs.ws.WSClient
 import system.Logging
 import system.ThreadPools.externalData
 import warwick.sso.UniversityID
@@ -18,13 +18,13 @@ trait PhotoService {
 
 class PhotoServiceImpl @Inject()(
   configuration: Configuration,
-  ws: WSAPI
+  ws: WSClient
 ) extends PhotoService with Logging {
 
-  private val photosHost = configuration.getString("mywarwick.photos.host")
+  private val photosHost = configuration.getOptional[String]("mywarwick.photos.host")
     .getOrElse(throw new IllegalStateException("Missing Photos host - set mywarwick.photos.host"))
 
-  private val photosKey = configuration.getString("mywarwick.photos.apiKey")
+  private val photosKey = configuration.getOptional[String]("mywarwick.photos.apiKey")
     .getOrElse(throw new IllegalStateException("Missing Photos API Key - set mywarwick.photos.apiKey"))
 
   def photoUrl(universityId: Option[UniversityID]): Future[String] = {

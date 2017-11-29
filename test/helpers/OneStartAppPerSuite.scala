@@ -4,15 +4,15 @@ import java.sql.Connection
 
 import akka.stream.Materializer
 import org.scalatest.{Suite, TestSuite}
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.db.Database
 
 import scala.reflect.ClassTag
 
-trait OneStartAppPerSuite extends TestSuite with OneAppPerSuite {
+trait OneStartAppPerSuite extends TestSuite with GuiceOneAppPerSuite {
 
-  implicit override lazy val app: Application = TestApplications.full()
+  implicit override lazy val app: Application = TestApplications.fullNoRoutes()
   implicit lazy val mat: Materializer = app.materializer
 
   def get[T : ClassTag]: T = app.injector.instanceOf[T]
