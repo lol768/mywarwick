@@ -143,13 +143,45 @@ $(SPLIT_FORM).each((i, form) => {
     pushSection(currentPage - 1);
   });
 
+  const template = '<div id="alert-create-confirmation" class="popover" role="tooltip"><div class="popover-arrow"></div><div class="popover-title"></div><div class="popover-content"></div></div>';
+
+  const confirmPopover = {
+    content: `<div class="btn-toolbar">
+                <button type="button" class="btn btn-primary confirm-alert">Yes</button>
+                <button type="button" class="btn btn-danger close-popover">No</button>
+              </div>`,
+    container: 'body',
+    trigger: 'manual',
+    html: true,
+    placement: 'top',
+    selector: 'form.split-form :submit:last-of-type',
+    template,
+  };
+
+  const $createBtn = $form.find(':submit').last();
+  const confirm = () => {
+    $createBtn.button('loading');
+    $form.off().submit();
+  };
+
+  $createBtn.popover(confirmPopover);
+  $('body').on('click', 'button.confirm-alert', null, (event) => {
+    $(event.target).attr('disabled', true);
+    confirm();
+  })
+    .on('click', 'button.close-popover', null, () => $createBtn.popover('hide'));
+
   $form.on('submit', () => {
     validate()
       .then((html) => {
         updateFormGroupErrors(html);
 
         if (!hasErrors()) {
-          $form.off().submit();
+          const baseAudience = $form.data('base-audience');
+          if (baseAudience > 100) {
+            const msg = `Are you sure you want to send this alert to ${baseAudience} people?`;
+            $createBtn.attr('data-original-title', msg).popover('show');
+          } else { confirm(); }
         }
       })
       .catch(e => log.error(e));

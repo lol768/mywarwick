@@ -33,6 +33,10 @@ export class AudienceIndicator extends React.PureComponent {
     this.onAudienceChange();
   }
 
+  componentWillUpdate(nextProps, nextState) {
+    $('.split-form').first().data('base-audience', nextState.baseAudience);
+  }
+
   onAudienceChange() {
     this.fetchAudienceEstimate();
   }
