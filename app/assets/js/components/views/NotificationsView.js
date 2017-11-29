@@ -18,6 +18,7 @@ import { Routes } from '../AppRoot';
 import HideableView from './HideableView';
 import ActivityMutingView from './ActivityMutingView';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
+import isEmbedded from '../../embedHelper';
 
 const SOME_MORE = 20;
 
@@ -222,7 +223,7 @@ class NotificationsView extends HideableView {
         >
           { this.renderMuting() }
         </ReactCSSTransitionGroup>
-        { browserPushDisabled ?
+        { !isEmbedded() && browserPushDisabled ?
           <div className="permission-warning">
             You have blocked My Warwick from showing system notifications. You&apos;ll need to open
             your browser preferences to change that.
