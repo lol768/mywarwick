@@ -51,9 +51,14 @@ class NotificationsController @Inject()(
   }
 
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
-    sharedAudienceInfo(audienceService, usercodesInAudience =>
+    sharedAudienceInfoGrouped(audienceService, grouppedUsercodes =>
       Json.obj(
-        "baseAudience" -> usercodesInAudience.size
+        "baseAudience" -> grouppedUsercodes.flatMap {
+          case (_, usercodes) => usercodes
+        }.size,
+        "groupedAudience" -> Json.toJson(grouppedUsercodes.map {
+          case (component, usercodes) => (component.entryName, usercodes.size)
+        }.toMap)
       )
     )
   }
