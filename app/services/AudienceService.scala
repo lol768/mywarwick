@@ -18,7 +18,10 @@ import scala.util.{Failure, Success, Try}
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
   def resolve(audience: Audience): Try[Set[Usercode]]
+
   def getAudience(audienceId: String): Audience
+
+  def resolveUsersForComponentsGrouped(audienceComponents: Seq[Audience.Component]): Future[Seq[(Audience.Component, Seq[Usercode])]]
 
   def audienceToJson(audience: Audience): JsValue
 
@@ -40,7 +43,7 @@ class AudienceServiceImpl @Inject()(
     Await.ready(resolveFuture(audience), 30.seconds).value.get
   }
 
-  def resolveUsersForComponent(audienceComponent: Audience.Component): Future[Set[Usercode]] = {
+  private def resolveUsersForComponent(audienceComponent: Audience.Component): Future[Set[Usercode]] = {
     (audienceComponent match {
       case PublicAudience => Future.successful(Seq(Usercode("*")))
       case WebGroupAudience(name) => Future.fromTry(webgroupUsers(name))
@@ -58,8 +61,18 @@ class AudienceServiceImpl @Inject()(
     }).map(_.toSet)
   }
 
+  private def resolveUsersForComponentWithGroup(audienceComponent: Audience.Component): Future[(Audience.Component, Set[Usercode])] = {
+    for {
+      usercodes <- this.resolveUsersForComponent(audienceComponent)
+    } yield (audienceComponent, usercodes)
+  }
+
   def resolveUsersForComponents(audienceComponents: Seq[Audience.Component]): Future[Set[Usercode]] = {
     Future.sequence(audienceComponents.map(this.resolveUsersForComponent)).map(_.flatten.toSet)
+  }
+
+  override def resolveUsersForComponentsGrouped(audienceComponents: Seq[Audience.Component]): Future[Seq[(Audience.Component, Set[Usercode])]] = {
+    Future.sequence(audienceComponents.map(this.resolveUsersForComponentWithGroup))
   }
 
   def resolveFuture(audience: Audience): Future[Set[Usercode]] = {
