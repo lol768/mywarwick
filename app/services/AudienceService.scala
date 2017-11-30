@@ -21,7 +21,7 @@ trait AudienceService {
 
   def getAudience(audienceId: String): Audience
 
-  def resolveUsersForComponentsGrouped(audienceComponents: Seq[Audience.Component]): Future[Seq[(Audience.Component, Seq[Usercode])]]
+  def resolveUsersForComponentsGrouped(audienceComponents: Seq[Audience.Component]): Try[Seq[(Audience.Component, Set[Usercode])]]
 
   def audienceToJson(audience: Audience): JsValue
 
@@ -71,8 +71,8 @@ class AudienceServiceImpl @Inject()(
     Future.sequence(audienceComponents.map(this.resolveUsersForComponent)).map(_.flatten.toSet)
   }
 
-  override def resolveUsersForComponentsGrouped(audienceComponents: Seq[Audience.Component]): Future[Seq[(Audience.Component, Set[Usercode])]] = {
-    Future.sequence(audienceComponents.map(this.resolveUsersForComponentWithGroup))
+  override def resolveUsersForComponentsGrouped(audienceComponents: Seq[Audience.Component]): Try[Seq[(Audience.Component, Set[Usercode])]] = {
+    Await.ready(Future.sequence(audienceComponents.map(this.resolveUsersForComponentWithGroup)), 30.seconds).value.get
   }
 
   def resolveFuture(audience: Audience): Future[Set[Usercode]] = {
