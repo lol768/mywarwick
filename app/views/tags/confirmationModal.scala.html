@@ -1,0 +1,23 @@
+@(id: String, title: String, body: String, confirmRoute: Call
+)(implicit messages: Messages)
+<div id="@id" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h5 class="modal-title">@title</h5>
+      </div>
+      <div class="modal-body">
+      @body
+      </div>
+      <div class="modal-footer">
+        @if(confirmRoute != null) {
+          <a href="@confirmRoute" tabIndex={0} role="button" class="btn btn-primary confirm">Yes</a>
+        } else {
+          <a tabIndex={0} role="button" class="btn btn-primary confirm">Yes</a>
+        }
+        <button type="button" class="btn btn-default cancel" data-dismiss="modal">No</button>
+      </div>
+    </div>
+  </div>
+</div>
