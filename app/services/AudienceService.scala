@@ -260,12 +260,23 @@ class AudienceServiceImpl @Inject()(
     val validCodes: Set[Usercode] = userLookupService.getUsers(usercodes.toSeq).toOption
       .map(_.keys).getOrElse(Nil).toSet
 
-    val invalid: Set[Usercode] = usercodes.diff(validCodes).filterNot(u => validIds.map(_.keys).getOrElse(Nil).map(_.string).toSet.contains(u.string))
+    val maybeinvalidStrings: Set[String] = validIds.map(_.keys).getOrElse(Nil).map(_.string).toSet
+    val maybeInvalid: Set[Usercode] = usercodes.diff(validCodes).filterNot(u => maybeinvalidStrings.contains(u.string))
 
-    if (invalid.isEmpty) {
-      Right(validCodes ++ validIds.map(_.values.map(_.usercode)).getOrElse(Nil).toSet)
+    // NEWSTART-1235 hey, you! want to prepend a 'u' to a perfectly good university id? no problem buddy, let's handle that for you
+    val maybeInvalidToIds: Seq[UniversityID] = maybeInvalid.collect {
+      case uc if uc.string.startsWith("u") => UniversityID(uc.string.drop(1))
+    }.toSeq
+    val foundFromMaybeInvalid: Option[Map[UniversityID, User]] = userLookupService.getUsers(maybeInvalidToIds).toOption
+    val usercodesFromIds: Set[Usercode] = foundFromMaybeInvalid.map(_.values.map(_.usercode)).getOrElse(Nil).toSet
+
+    val actuallyInvalidString: Set[String] = foundFromMaybeInvalid.map(_.keys).getOrElse(Nil).map(u => s"u${u.string}").toSet
+    val actuallyInvalid: Set[Usercode] = maybeInvalid.filterNot(u => actuallyInvalidString.contains(u.string))
+
+    if (actuallyInvalid.isEmpty) {
+      Right(usercodesFromIds ++ validCodes ++ validIds.map(_.values.map(_.usercode)).getOrElse(Nil).toSet)
     } else {
-      Left(invalid)
+      Left(actuallyInvalid)
     }
   }
 
