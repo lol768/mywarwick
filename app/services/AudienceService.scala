@@ -40,18 +40,14 @@ class AudienceServiceImpl @Inject()(
     Await.ready(resolveFuture(audience), 30.seconds).value.get
   }
 
-  private def resolveFuture(audience: Audience): Future[Set[Usercode]] = {
-    val (optInComponents, audienceComponents) = audience.components.partition {
-      case _: OptIn => true
-      case _ => false
-    }
-    val audienceUsers: Future[Set[Usercode]] = Future.sequence(audienceComponents.map {
+  def resolveUsersForComponent(audienceComponent: Audience.Component): Future[Set[Usercode]] = {
+    (audienceComponent match {
       case PublicAudience => Future.successful(Seq(Usercode("*")))
       case WebGroupAudience(name) => Future.fromTry(webgroupUsers(name))
       case ModuleAudience(code) => audienceLookupDao.resolveModule(code)
       case SeminarGroupAudience(groupId) => audienceLookupDao.resolveSeminarGroup(groupId)
       case RelationshipAudience(relationshipType, agentId) => audienceLookupDao.resolveRelationship(agentId, relationshipType)
-      case UsercodesAudience(usercodes) => Future.successful(usercodes)
+      case UsercodesAudience(usercodes) => Future.successful(usercodes).map(_.toSeq)
       // A subset not in a department i.e. ALL undergraduates in the University
       // Use WebGroups for these
       case ds: DepartmentSubset => Future.fromTry(resolveUniversityGroup(ds))
@@ -59,7 +55,20 @@ class AudienceServiceImpl @Inject()(
         resolveDepartmentGroup(code, subset)
       )).map(_.flatten.toSeq)
       case optIn: OptIn => Future.successful(Nil) // Handled below
-    }).map(_.flatten.toSet)
+    }).map(_.toSet)
+  }
+
+  def resolveUsersForComponents(audienceComponents: Seq[Audience.Component]): Future[Set[Usercode]] = {
+    Future.sequence(audienceComponents.map(this.resolveUsersForComponent)).map(_.flatten.toSet)
+  }
+
+  def resolveFuture(audience: Audience): Future[Set[Usercode]] = {
+    val (optInComponents, audienceComponents) = audience.components.partition {
+      case _: OptIn => true
+      case _ => false
+    }
+
+    val audienceUsers = this.resolveUsersForComponents(audienceComponents)
 
     if (optInComponents.nonEmpty) {
       // AND each opt-in type with the selected audience
