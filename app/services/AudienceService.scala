@@ -44,20 +44,10 @@ class AudienceServiceImpl @Inject()(
   }
 
   private def resolveUsersForComponent(audienceComponent: Audience.Component): Future[Set[Usercode]] = {
-    (audienceComponent match {
-      case PublicAudience => Future.successful(Seq(Usercode("*")))
-      case WebGroupAudience(name) => Future.fromTry(webgroupUsers(name))
-      case ModuleAudience(code) => audienceLookupDao.resolveModule(code)
-      case SeminarGroupAudience(groupId) => audienceLookupDao.resolveSeminarGroup(groupId)
-      case RelationshipAudience(relationshipType, agentId) => audienceLookupDao.resolveRelationship(agentId, relationshipType)
-      case UsercodesAudience(usercodes) => Future.successful(usercodes).map(_.toSeq)
-      // A subset not in a department i.e. ALL undergraduates in the University
-      // Use WebGroups for these
-      case ds: DepartmentSubset => Future.fromTry(resolveUniversityGroup(ds))
-      case DepartmentAudience(code, subsets) => Future.sequence(subsets.map(subset =>
-        resolveDepartmentGroup(code, subset)
-      )).map(_.flatten)
-      case optIn: OptIn => Future.successful(Nil) // Handled below
+    (for {
+      items <- resolveUsersForComponentWithGroup(audienceComponent)
+    } yield items.flatMap {
+      case (_, usercodes) => usercodes
     }).map(_.toSet)
   }
 
