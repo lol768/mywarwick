@@ -45,8 +45,8 @@ class AudienceServiceImpl @Inject()(
 
   private def resolveUsersForComponent(audienceComponent: Audience.Component): Future[Set[Usercode]] = {
     (for {
-      items <- resolveUsersForComponentWithGroup(audienceComponent)
-    } yield items.flatMap {
+      groupedUsercodes <- resolveUsersForComponentWithGroup(audienceComponent)
+    } yield groupedUsercodes.flatMap {
       case (_, usercodes) => usercodes
     }).map(_.toSet)
   }
