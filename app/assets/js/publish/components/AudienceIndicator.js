@@ -71,8 +71,11 @@ export class AudienceIndicator extends React.PureComponent {
     const { fetching, groupedAudience } = this.state;
     const dept = audienceComponents.department;
 
-    const getCount = group => (fetching ?
-      <i className="fa fa-spin fa-refresh" /> : `${groupedAudience[group]} people`);
+    const getCount = (group) => {
+      const peopleCount = groupedAudience[group] ? groupedAudience[group] : 0;
+      return (fetching ?
+        <i className="fa fa-spin fa-refresh" /> : `${peopleCount} people`);
+    };
 
     if (audienceComponents.audience) {
       const isUniWide = audienceComponents.audience.universityWide !== undefined;
