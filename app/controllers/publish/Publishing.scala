@@ -90,33 +90,33 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
     )
   }
 
-  def sharedAudienceInfo(
-    audienceService: AudienceService,
-    processUsercodes: Set[Usercode] => JsObject
-  )(implicit request: PublisherRequest[_]): Future[Result] =
-    audienceForm.bindFromRequest.fold(
-      formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
-      audienceData => {
-        audienceBinder.bindAudience(audienceData).map {
-          case Left(errors) => BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", errors.map(e => API.Error(e.key, e.message)))))
-          case Right(audience) =>
-            if (audience.public) {
-              Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
-                "public" -> true
-              ))))
-            } else {
-              audienceService.resolve(audience).map(processUsercodes) match {
-                case Success(usercodes) => Ok(Json.toJson(API.Success[JsObject](data = usercodes)))
-                case Failure(err) =>
-                  logger.error("Failed to resolve audience", err)
-                  InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience")))))
-              }
-            }
-        }
-      }
-    )
+//  def sharedAudienceInfo(
+//    audienceService: AudienceService,
+//    processUsercodes: Set[Usercode] => JsObject
+//  )(implicit request: PublisherRequest[_]): Future[Result] =
+//    audienceForm.bindFromRequest.fold(
+//      formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
+//      audienceData => {
+//        audienceBinder.bindAudience(audienceData).map {
+//          case Left(errors) => BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", errors.map(e => API.Error(e.key, e.message)))))
+//          case Right(audience) =>
+//            if (audience.public) {
+//              Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
+//                "public" -> true
+//              ))))
+//            } else {
+//              audienceService.resolve(audience).map(processUsercodes) match {
+//                case Success(usercodes) => Ok(Json.toJson(API.Success[JsObject](data = usercodes)))
+//                case Failure(err) =>
+//                  logger.error("Failed to resolve audience", err)
+//                  InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience")))))
+//              }
+//            }
+//        }
+//      }
+//    )
 
-  def sharedAudienceInfoGrouped(
+  def sharedAudienceInfo(
     audienceService: AudienceService,
     processGroupedUsercodes: Seq[(Audience.Component, Set[Usercode])] => JsObject
   )(implicit request: PublisherRequest[_]): Future[Result] =
