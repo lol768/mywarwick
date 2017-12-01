@@ -2,7 +2,7 @@ package services
 
 import helpers.{BaseSpec, Fixtures}
 import models.Audience
-import org.mockito.{ArgumentCaptor, Matchers}
+import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
@@ -251,7 +251,7 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
         .thenReturn(Try(Seq(UniversityID(validId.string) -> Fixtures.user.makeFoundUser(validId.string)).toMap))
       when(userLookup.getUsers(Seq.empty[UniversityID])).thenReturn(Failure(new UserLookupException))
 
-      val actual = service.validateUsercodes(codesAndIds.toSet)
+      val actual = service.validateUsers(codesAndIds.toSet)
 
       actual must be (Left(Set(invalidId)))
     }
@@ -271,7 +271,7 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       when(userLookup.getUsers(Seq(bobsId), includeDisabled = false))
         .thenReturn(Try(Seq(bobsId -> Fixtures.user.makeFoundUser(bobsUsercode.string)).toMap))
 
-      val actual = service.validateUsercodes(codes.toSet)
+      val actual: Either[Set[Usercode], Set[Usercode]] = service.validateUsers(codes.toSet)
 
       actual must be (Right((validUsercode :+ bobsUsercode).toSet))
     }
