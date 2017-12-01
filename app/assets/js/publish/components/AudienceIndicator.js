@@ -16,6 +16,7 @@ export class AudienceIndicator extends React.PureComponent {
     super(props);
     this.state = {
       baseAudience: 0,
+      groupedAudience: {},
       fetching: false,
       public: false,
     };
