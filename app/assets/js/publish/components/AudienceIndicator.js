@@ -68,7 +68,15 @@ export class AudienceIndicator extends React.PureComponent {
 
   readableAudienceComponents() {
     const { audienceComponents } = this.props;
+    const { fetching, groupedAudience } = this.state;
     const dept = audienceComponents.department;
+
+    console.log("this is audienceComponents from props");
+    console.log(audienceComponents);
+    console.log("this is groupedAudience");
+    console.log(groupedAudience);
+
+    const getCount = (group) => (fetching ? <i className="fa fa-spin fa-refresh" /> : groupedAudience[group]);
 
     if (audienceComponents.audience) {
       const isUniWide = audienceComponents.audience.universityWide !== undefined;
@@ -81,10 +89,18 @@ export class AudienceIndicator extends React.PureComponent {
 
         return (<div> {
           _.map(audience.groups, (components, audienceType) => {
+
+            console.log("components is: " + components);
+            console.log("audienceType is: " +audienceType);
+
             switch (audienceType) {
               case 'modules':
-                return _.map(components, ({ text, value }) =>
-                  (<div key={`${audienceType}:${value}`}>{text || value}</div>));
+                return _.map(components, ({ text, value }) =>{
+                  console.log("module!!!");
+                  console.log("text: " + text);
+                  console.log("value: " + value);
+                  return (<div key={`${audienceType}:${value}`}>{text || value}: {getCount(`ModuleAudience(${audienceType})`)}</div>);
+                });
               case 'seminarGroups':
                 return _.map(components, ({ text }) =>
                   (<div key={`${audienceType}:${text}`}>{text}</div>));
@@ -98,9 +114,10 @@ export class AudienceIndicator extends React.PureComponent {
                   <div>{val.selected ? `${_.startCase(val.studentRole)}s of ${rel.text}` : ''}</div>
                 ))));
               default: {
-                const group = _.startCase(_.replace(audienceType, 'Dept:', ''));
+                const group = _.replace(audienceType, 'Dept:', '');
+                const groupDisplayName = _.startCase(group);
                 return (isUniWide || !_.isEmpty(dept.name)) ?
-                  (<div key={audienceType}>{`All ${group} in ${_.startsWith(audienceType, 'Dept:') ? dept.name : 'the University'}`}</div>)
+                  (<div key={audienceType}>{`All ${groupDisplayName} in ${_.startsWith(audienceType, 'Dept:') ? dept.name : 'the University'}`}: {getCount(group)}</div>)
                   : null;
               }
             }
@@ -152,8 +169,6 @@ export class AudienceIndicator extends React.PureComponent {
         <div>{fetching ? <i className="fa fa-spin fa-refresh" /> : `(${baseNum} people)`}</div>
         <div>Test!!</div>
         <div>{fetching ? <i className="fa fa-spin fa-refresh" /> : <ul>{groupedCount.map(item => <li>{item}</li>)}</ul>}</div>
-        { console.log(groupedCount) }
-        { console.log(groupedAudience) }
       </div>
     );
   }
