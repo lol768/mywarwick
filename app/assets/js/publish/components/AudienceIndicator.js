@@ -71,12 +71,8 @@ export class AudienceIndicator extends React.PureComponent {
     const { fetching, groupedAudience } = this.state;
     const dept = audienceComponents.department;
 
-    console.log("this is audienceComponents from props");
-    console.log(audienceComponents);
-    console.log("this is groupedAudience");
-    console.log(groupedAudience);
-
-    const getCount = (group) => (fetching ? <i className="fa fa-spin fa-refresh" /> : groupedAudience[group]);
+    const getCount = (group) => (fetching ?
+      <i className="fa fa-spin fa-refresh"/> : `${groupedAudience[group]} people`);
 
     if (audienceComponents.audience) {
       const isUniWide = audienceComponents.audience.universityWide !== undefined;
@@ -89,35 +85,32 @@ export class AudienceIndicator extends React.PureComponent {
 
         return (<div> {
           _.map(audience.groups, (components, audienceType) => {
-
-            console.log("components is: " + components);
-            console.log("audienceType is: " +audienceType);
-
             switch (audienceType) {
               case 'modules':
-                return _.map(components, ({ text, value }) =>{
-                  console.log("module!!!");
-                  console.log("text: " + text);
-                  console.log("value: " + value);
-                  return (<div key={`${audienceType}:${value}`}>{text || value}: {getCount(`ModuleAudience(${audienceType})`)}</div>);
-                });
+                return _.map(components, ({ text, value }) =>
+                  (<div
+                    key={`${audienceType}:${value}`}>{text || value}: {getCount(`ModuleAudience(${value})`)}</div>));
               case 'seminarGroups':
-                return _.map(components, ({ text }) =>
-                  (<div key={`${audienceType}:${text}`}>{text}</div>));
+                return _.map(components, ({ text, value }) =>
+                  (<div
+                    key={`${audienceType}:${text}`}>{text}: {getCount(`SeminarGroupAudience(${value})`)}</div>));
               case 'listOfUsercodes':
-                if (components !== undefined) {
-                  return <div key={audienceType}>{`${components.length} usercodes or university IDs`}</div>;
-                }
-                return null; // lint made me do it
+                return (components !== undefined) ?
+                  (<div
+                    key={audienceType}>{`${components.length} usercodes or university IDs: ${components.length} people`}</div>) :
+                  <div/>;
               case 'staffRelationships':
-                return _.flatMap(components, rel => rel.options.map(opt => _.map(opt, val => (
-                  <div>{val.selected ? `${_.startCase(val.studentRole)}s of ${rel.text}` : ''}</div>
-                ))));
+                return _.flatMap(components, rel => rel.options.map(opt => _.map(opt, val => (val.selected) ?
+                  (
+                    <div>{`${_.startCase(val.studentRole)}s of ${rel.text}`}: {getCount(`RelationshipAudience(personalTutor,UniversityID(${rel.value}))`)}</div>) :
+                  <div/>
+                )));
               default: {
                 const group = _.replace(audienceType, 'Dept:', '');
                 const groupDisplayName = _.startCase(group);
                 return (isUniWide || !_.isEmpty(dept.name)) ?
-                  (<div key={audienceType}>{`All ${groupDisplayName} in ${_.startsWith(audienceType, 'Dept:') ? dept.name : 'the University'}`}: {getCount(group)}</div>)
+                  (<div
+                    key={audienceType}>{`All ${groupDisplayName} in ${_.startsWith(audienceType, 'Dept:') ? dept.name : 'the University'}`}: {getCount(group)}</div>)
                   : null;
               }
             }
@@ -140,9 +133,9 @@ export class AudienceIndicator extends React.PureComponent {
     }
 
     const baseNum = baseAudience !== undefined ? baseAudience.toLocaleString() : '0';
-    const groupedCount = _.map(_.keys(groupedAudience), (key) => {
-      return `${key}: ${groupedAudience[key]}`;
-    });
+    // const groupedCount = _.map(_.keys(groupedAudience), (key) => {
+    //   return `${key}: ${groupedAudience[key]}`;
+    // });
 
 
     return (
@@ -166,9 +159,10 @@ export class AudienceIndicator extends React.PureComponent {
         </div>
         <div>This alert will be published to:</div>
         <div className="audience-component-list">{this.readableAudienceComponents()}</div>
-        <div>{fetching ? <i className="fa fa-spin fa-refresh" /> : `(${baseNum} people)`}</div>
-        <div>Test!!</div>
-        <div>{fetching ? <i className="fa fa-spin fa-refresh" /> : <ul>{groupedCount.map(item => <li>{item}</li>)}</ul>}</div>
+        <div>{fetching ?
+          <i className="fa fa-spin fa-refresh"/> : `(${baseNum} people in total)`}</div>
+        {/*<div>Test!!</div>*/}
+        {/*<div>{fetching ? <i className="fa fa-spin fa-refresh" /> : <ul>{groupedCount.map(item => <li>{item}</li>)}</ul>}</div>*/}
       </div>
     );
   }
