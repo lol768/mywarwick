@@ -43,20 +43,16 @@ class AudienceServiceImpl @Inject()(
     Await.ready(resolveFuture(audience), 30.seconds).value.get
   }
 
-  private def resolveUsersForComponent(audienceComponent: Audience.Component): Future[Set[Usercode]] = {
-    (for {
-      groupedUsercodes <- resolveUsersForComponentWithGroup(audienceComponent)
-    } yield groupedUsercodes.flatMap {
+  private def resolveUsersForComponent(audienceComponent: Audience.Component): Future[Set[Usercode]] = resolveUsersForComponentWithGroup(audienceComponent).map(
+    _.flatMap {
       case (_, usercodes) => usercodes
-    }).map(_.toSet)
-  }
+    }
+  ).map(_.toSet)
+
 
   private def resolveUsersForComponentWithGroup(audienceComponent: Audience.Component): Future[Seq[(Audience.Component, Set[Usercode])]] = {
-
     def makeResult(futureUsercodes: Future[Iterable[Usercode]], group: Audience.Component = audienceComponent): Future[Seq[(Audience.Component, Set[Usercode])]] = {
-      for {
-        usercodes <- futureUsercodes
-      } yield {
+      futureUsercodes.map { usercodes =>
         Seq(
           (group, usercodes.toSet),
         )
