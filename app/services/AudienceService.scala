@@ -56,15 +56,36 @@ class AudienceServiceImpl @Inject()(
       case ds: DepartmentSubset => Future.fromTry(resolveUniversityGroup(ds))
       case DepartmentAudience(code, subsets) => Future.sequence(subsets.map(subset =>
         resolveDepartmentGroup(code, subset)
-      )).map(_.flatten.toSeq)
+      )).map(_.flatten)
       case optIn: OptIn => Future.successful(Nil) // Handled below
     }).map(_.toSet)
   }
 
-  private def resolveUsersForComponentWithGroup(audienceComponent: Audience.Component): Future[(Audience.Component, Set[Usercode])] = {
-    for {
-      usercodes <- this.resolveUsersForComponent(audienceComponent)
-    } yield (audienceComponent, usercodes)
+  private def resolveUsersForComponentWithGroup(audienceComponent: Audience.Component): Future[Seq[(Audience.Component, Set[Usercode])]] = {
+
+    def makeResult(futureUsercodes: Future[Iterable[Usercode]], group: Audience.Component = audienceComponent): Future[Seq[(Audience.Component, Set[Usercode])]] = {
+      for {
+        usercodes <- futureUsercodes
+      } yield {
+        Seq(
+          (group, usercodes.toSet),
+        )
+      }
+    }
+
+    audienceComponent match {
+      case PublicAudience => makeResult(Future.successful(Seq(Usercode("*"))))
+      case WebGroupAudience(name) => makeResult(Future.fromTry(webgroupUsers(name)))
+      case ModuleAudience(code) => makeResult(audienceLookupDao.resolveModule(code))
+      case SeminarGroupAudience(groupId) => makeResult(audienceLookupDao.resolveSeminarGroup(groupId))
+      case RelationshipAudience(relationshipType, agentId) => makeResult(audienceLookupDao.resolveRelationship(agentId, relationshipType))
+      case UsercodesAudience(usercodes) => makeResult(Future.successful(usercodes))
+      case ds: DepartmentSubset => makeResult(Future.fromTry(resolveUniversityGroup(ds)))
+      case DepartmentAudience(code, subsets) => Future.sequence(subsets.map(subset =>
+        makeResult(resolveDepartmentGroup(code, subset), subset)
+      )).map(_.flatten)
+      case optIn: OptIn => makeResult(Future.successful(Nil))
+    }
   }
 
   def resolveUsersForComponents(audienceComponents: Seq[Audience.Component]): Future[Set[Usercode]] = {
@@ -72,7 +93,8 @@ class AudienceServiceImpl @Inject()(
   }
 
   override def resolveUsersForComponentsGrouped(audienceComponents: Seq[Audience.Component]): Try[Seq[(Audience.Component, Set[Usercode])]] = {
-    Await.ready(Future.sequence(audienceComponents.map(this.resolveUsersForComponentWithGroup)), 30.seconds).value.get
+    val p = Future.sequence(audienceComponents.map(this.resolveUsersForComponentWithGroup)).map(_.flatten)
+    Await.ready(p, 30.seconds).value.get
   }
 
   def resolveFuture(audience: Audience): Future[Set[Usercode]] = {
