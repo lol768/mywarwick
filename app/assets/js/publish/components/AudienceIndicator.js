@@ -106,12 +106,11 @@ export class AudienceIndicator extends React.PureComponent {
               case 'staffRelationships':
                 return _.flatMap(components, rel =>
                   rel.options.map(opt =>
-                    _.map(opt, (val) => {
-                      const selected = val.selected;
-                      return (selected) ?
+                    _.map(opt, val =>
+                      (val.selected ?
                         (<div>{`${_.startCase(val.studentRole)}s of ${rel.text}`}: {getCount(`RelationshipAudience(personalTutor,UniversityID(${rel.value}))`)}</div>) :
-                        (<div />);
-                    })));
+                        (<div />)
+                      ))));
               default: {
                 const group = _.replace(audienceType, 'Dept:', '');
                 const groupDisplayName = _.startCase(group);
