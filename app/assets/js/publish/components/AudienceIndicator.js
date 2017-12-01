@@ -45,11 +45,21 @@ export class AudienceIndicator extends React.PureComponent {
       url: $form.attr('data-audience-action'),
       dataType: 'json',
     })
-      .then(({ data: { baseAudience } }) =>
-        this.setState({ baseAudience, fetching: false }),
-      )
-      .catch((e) => {
-        this.setState({ baseAudience: 0 });
+
+      .then(result => {
+        const baseAudience = result.data.baseAudience;
+        const groupedAudience = result.data.groupedAudience;
+        this.setState({
+          baseAudience,
+          groupedAudience,
+          fetching: false,
+        });
+      })
+      .catch(e => {
+        this.setState({
+          baseAudience: 0,
+          groupedAudience: {},
+        });
         log.error('Audience estimate returned error', e);
       })
       .then(() => this.setState({ fetching: false }),
@@ -102,7 +112,7 @@ export class AudienceIndicator extends React.PureComponent {
   }
 
   render() {
-    const { baseAudience, fetching } = this.state;
+    const { baseAudience, groupedAudience, fetching } = this.state;
 
     if (this.state.public) {
       return (
@@ -113,6 +123,10 @@ export class AudienceIndicator extends React.PureComponent {
     }
 
     const baseNum = baseAudience !== undefined ? baseAudience.toLocaleString() : '0';
+    const groupedCount = _.map(_.keys(groupedAudience), (key) => {
+      return `${key}: ${groupedAudience[key]}`;
+    });
+
 
     return (
       <div className="alert alert-info">
@@ -136,6 +150,10 @@ export class AudienceIndicator extends React.PureComponent {
         <div>This alert will be published to:</div>
         <div className="audience-component-list">{this.readableAudienceComponents()}</div>
         <div>{fetching ? <i className="fa fa-spin fa-refresh" /> : `(${baseNum} people)`}</div>
+        <div>Test!!</div>
+        <div>{fetching ? <i className="fa fa-spin fa-refresh" /> : <ul>{groupedCount.map(item => <li>{item}</li>)}</ul>}</div>
+        { console.log(groupedCount) }
+        { console.log(groupedAudience) }
       </div>
     );
   }
