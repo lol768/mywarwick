@@ -100,7 +100,7 @@ export class AudienceIndicator extends React.PureComponent {
                   (<div
                     key={audienceType}
                   >
-                    {`${components.length} usercodes or university IDs: ${components.length} people`}
+                    {`Usercodes or university IDs: ${components.length} people`}
                   </div>) :
                   <div />;
               case 'staffRelationships':
