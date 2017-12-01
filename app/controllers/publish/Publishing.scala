@@ -106,8 +106,8 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
               ))))
             } else {
               audienceService.resolveUsersForComponentsGrouped(audience.components).map(processGroupedUsercodes) match {
-                case Success(componentWithUsercodes) =>
-                  Ok(Json.toJson(API.Success[JsObject](data = componentWithUsercodes)))
+                case Success(jsonData) =>
+                  Ok(Json.toJson(API.Success[JsObject](data = jsonData)))
                 case Failure(err) =>
                   logger.error("Failed to resolve audience", err)
                   InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience")))))
