@@ -143,13 +143,33 @@ $(SPLIT_FORM).each((i, form) => {
     pushSection(currentPage - 1);
   });
 
+  const $confirmationModal = $('#confirmCreateModal');
+  const $createConfirmBtn = $confirmationModal.find('.confirm');
+  const $createBtn = $form.find(':submit').last();
+
+  const confirm = () => {
+    $createBtn.button('loading');
+    $form.off().submit();
+  };
+
+  $createConfirmBtn.one('click', (event) => {
+    event.preventDefault();
+    $(event.target).attr('disabled', true);
+    confirm();
+  });
+
   $form.on('submit', () => {
     validate()
       .then((html) => {
         updateFormGroupErrors(html);
 
         if (!hasErrors()) {
-          $form.off().submit();
+          const baseAudience = $form.data('base-audience');
+          if (baseAudience > 100) {
+            const msg = `Are you sure you want to send this alert to ${baseAudience} people?`;
+            $confirmationModal.find('.modal-body').text(msg);
+            $confirmationModal.modal('show');
+          } else { confirm(); }
         }
       })
       .catch(e => log.error(e));
