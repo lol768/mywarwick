@@ -92,7 +92,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
 
   def sharedAudienceInfo(
     audienceService: AudienceService,
-    processGroupedUsercodes: Seq[(Audience.Component, Set[Usercode])] => JsObject
+    processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => JsObject
   )(implicit request: PublisherRequest[_]): Future[Result] =
     audienceForm.bindFromRequest.fold(
       formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
@@ -105,7 +105,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
                 "public" -> true
               ))))
             } else {
-              audienceService.resolveUsersForComponentsGrouped(audience.components).map(processGroupedUsercodes) match {
+              audienceService.resolveUsersForComponentsGrouped(audience.components).map(_.toMap).map(processGroupedUsercodes) match {
                 case Success(jsonData) =>
                   Ok(Json.toJson(API.Success[JsObject](data = jsonData)))
                 case Failure(err) =>

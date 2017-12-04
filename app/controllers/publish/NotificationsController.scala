@@ -58,7 +58,7 @@ class NotificationsController @Inject()(
         }.size,
         "groupedAudience" -> Json.toJson(groupedUsercodes.map {
           case (component, usercodes) => (component.entryName, usercodes.size)
-        }.toMap)
+        })
       )
     )
   }

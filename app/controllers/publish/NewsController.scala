@@ -113,7 +113,7 @@ class NewsController @Inject()(
               "categorySubset" -> (allAudienceUsercodes.size - initialisedUsers + newsRecipients),
               "groupedAudience" -> Json.toJson(groupedUsercodes.map {
                 case (component, usercodes) => (component.entryName, usercodes.size)
-              }.toMap)
+              })
             )
           }
           .getOrElse(
