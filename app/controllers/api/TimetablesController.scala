@@ -45,10 +45,11 @@ class TimetablesController @Inject()(
           logger.error(s"Failed to look up user '${usercode.string}'", e)
           throw e
       }.toOption)
-      .map { user =>
-        val Seq(tileInstance) = tileService.getTilesByIds(Some(user), Seq("timetable"))
-        tileContentService.getTileContent(Some(user.usercode), tileInstance)
-          .map(res => Ok(Json.toJson(res)))
+      .flatMap { user =>
+        tileService.getTilesByIds(Some(user), Seq("timetable")).headOption.map(tileInstance =>
+          tileContentService.getTileContent(Some(user.usercode), tileInstance)
+            .map(res => Ok(Json.toJson(res)))
+        )
       }.getOrElse {
         Future.successful(Unauthorized(Json.obj(
           "success" -> false,
