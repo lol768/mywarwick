@@ -110,7 +110,7 @@ class NewsController @Inject()(
 
             Json.obj(
               "baseAudience" -> allAudienceUsercodes.size,
-              "categorySubset" -> (groupedUsercodes.size - initialisedUsers + newsRecipients),
+              "categorySubset" -> (allAudienceUsercodes.size - initialisedUsers + newsRecipients),
               "groupedAudience" -> Json.toJson(groupedUsercodes.map {
                 case (component, usercodes) => (component.entryName, usercodes.size)
               }.toMap)
