@@ -1,15 +1,11 @@
 package controllers.api
 
-import collection.JavaConverters._
 import javax.inject.Singleton
 
 import controllers.MyController
 import net.logstash.logback.argument.StructuredArguments
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.JsValue
-import play.api.mvc.Action
-
-import scala.util.Try
 
 @Singleton
 class ErrorsController extends MyController {
