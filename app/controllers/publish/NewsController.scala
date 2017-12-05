@@ -173,12 +173,10 @@ class NewsController @Inject()(
 
           news.update(id, newsItem, audience, data.categoryIds)
             .failed.foreach { e =>
-            logger.error(s"Error updating news item $id", e)
-            errorHandler.markInternalServerError()
-          }
-
+              logger.error(s"Error updating news item $id", e)
+              errorHandler.markInternalServerError()
+            }
           auditLog('UpdateNewsItem, 'id -> id)
-
           Redirect(controllers.publish.routes.NewsController.list(publisherId)).flashing("success" -> "News updated")
         }
       )
