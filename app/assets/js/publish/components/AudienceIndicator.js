@@ -74,7 +74,7 @@ export class AudienceIndicator extends React.PureComponent {
     const getCount = (group) => {
       const peopleCount = groupedAudience[group] ? groupedAudience[group] : 0;
       return (fetching ?
-        <i className="fa fa-spin fa-refresh" /> : `${peopleCount} people`);
+        <i className="fa fa-spin fa-fw fa-refresh" /> : `${peopleCount} people`);
     };
 
     if (audienceComponents.audience) {
@@ -167,7 +167,7 @@ export class AudienceIndicator extends React.PureComponent {
         <div>This alert will be published to:</div>
         <div className="audience-component-list">{this.readableAudienceComponents()}</div>
         <div>{fetching ?
-          <i className="fa fa-spin fa-refresh" /> : `(${baseNum} people in total)`}</div>
+          <i className="fa fa-spin fa-fw fa-refresh" /> : `(${baseNum} people in total)`}</div>
       </div>
     );
   }
