@@ -1,6 +1,6 @@
 package helpers
 
-import org.joda.time.DateTime
+import java.time.ZonedDateTime
 import warwick.sso._
 
 /** Access via Fixtures.user */
@@ -14,7 +14,7 @@ private[helpers] object UserFixtures {
       Seq(Usercode("a")),
       "Arbitrary",
       Department(None, Some("Information Technology Services"), Some(department)),
-      DateTime.now(),
+      ZonedDateTime.now(),
       restricted = false
     )
 
