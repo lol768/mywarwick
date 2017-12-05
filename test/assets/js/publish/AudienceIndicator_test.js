@@ -75,18 +75,23 @@ describe('AudienceIndicator', () => {
     };
 
     const render = enzyme.shallow(<AudienceIndicator {...props} />);
+    render.setState({
+      groupedAudience: {
+        TaughtPostgrads: 12,
+      }
+    });
     const html = render.html();
 
     [
-      'Supervisees of Dirk Diggler (Anatomy and Physiology)',
-      'Personal Tutees of Dirk Diggler (Anatomy and Physiology)',
-      'Tutorial Group 2: CH160 Tutorials',
-      'Tutorial Group 2B: Or maybe 2A',
-      'CS118: Programming for Computer Scientists',
-      'CS101: Introduction to the semi-colon',
-      'All Taught Postgrads in Anatomy and Physiology',
-      'All Teaching Staff in Anatomy and Physiology',
-      '2 usercodes',
+      'Supervisees of Dirk Diggler (Anatomy and Physiology): 0 people',
+      'Personal Tutees of Dirk Diggler (Anatomy and Physiology): 0 people',
+      'Tutorial Group 2: CH160 Tutorials: 0 people',
+      'Tutorial Group 2B: Or maybe 2A: 0 people',
+      'CS118: Programming for Computer Scientists: 0 people',
+      'CS101: Introduction to the semi-colon: 0 people',
+      'All Taught Postgrads in Anatomy and Physiology: 12 people',
+      'All Teaching Staff in Anatomy and Physiology: 0 people',
+      'Usercodes or university IDs: 2 people',
     ].forEach(readableComponent => expect(html).to.contain(readableComponent))
 
   });
