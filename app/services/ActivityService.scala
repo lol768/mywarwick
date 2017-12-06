@@ -353,6 +353,10 @@ object ActivityError {
     val message = "Audience cannot be public"
   }
 
+  case class InvalidUsercodeAudience(invalidUsercodes: Seq[Usercode]) extends ActivityError {
+    def message = s"The request contains one or more invalid usercode: $invalidUsercodes"
+  }
+
   object InvalidJSON extends ActivityError {
     val message = s"The request was not valid JSON"
   }
