@@ -141,4 +141,7 @@ object Audience {
     }
   }
 
+  def isValidUsercode(usercode: Usercode): Boolean = """^([a-zA-Z0-9\_\-]+)\Z""".r.findAllMatchIn(usercode.string).nonEmpty
+  def areValidUsercodes(usercodes: Seq[Usercode]): Boolean = usercodes.forall(isValidUsercode)
+
 }
