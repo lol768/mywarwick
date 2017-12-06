@@ -22,7 +22,7 @@ object API {
 
   case class Error(id: String, message: String)
 
-  case class Success[A: Reads : Writes](status: String = "ok", data: A) extends Response[A](true, status) {
+  case class Success[A: Reads : Writes](status: String = "ok", data: A, errors: Seq[Error] = Seq.empty) extends Response[A](true, status) {
     def either = Right(this)
   }
 
@@ -48,12 +48,12 @@ object API {
     implicit def reads[A: Reads : Writes]: Reads[Response[A]] = new Reads[Response[A]] {
       override def reads(json: JsValue): JsResult[Response[A]] = {
         val status = (json \ "status").validate[String]
+        val errors = (json \ "errors").validate[Seq[Error]]
         (json \ "success").validate[Boolean].flatMap { success =>
           if (success) {
             val data = (json \ "data").validate[A]
-            (status and data) (Success.apply[A] _)
+            (status and data and errors) (Success.apply[A] _)
           } else {
-            val errors = (json \ "errors").validate[Seq[Error]]
             (status and errors) (Failure.apply[A] _)
           }
         }
@@ -62,10 +62,11 @@ object API {
 
     implicit def writes[A: Reads : Writes]: Writes[Response[A]] = new Writes[Response[A]] {
       override def writes(response: Response[A]): JsValue = response match {
-        case Success(status, data) => Json.obj(
+        case Success(status, data, errors) => Json.obj(
           "success" -> true,
           "status" -> status,
-          "data" -> data
+          "data" -> data,
+          "errors" -> errors
         )
         case Failure(status, errors) => Json.obj(
           "success" -> false,
