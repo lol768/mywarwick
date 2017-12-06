@@ -47,7 +47,7 @@ class IncomingActivitiesController @Inject()(
               if (usercodesAudiences.forall(_.allUsercodesAreLikelyInvalid)) {
                 BadRequest(Json.toJson(API.Failure[JsObject](
                   "bad_request",
-                  Seq(API.Error("invalid-usercode", s"All usercode from this request are likely invalid")),
+                  Seq(API.Error("invalid-usercode", s"All usercodes from this request seem to be invalid")),
                 )))
               } else {
                 val validUsercodeAudiences = usercodesAudiences.map { usercodesAudience => UsercodesAudience(usercodesAudience.getLikelyValidUsercodes) }
@@ -88,11 +88,11 @@ class IncomingActivitiesController @Inject()(
       errors.map(error => API.Error(error.getClass.getSimpleName, error.message))
     )))
 
-  private def created(activityId: String, errors: Seq[ActivityError] = Seq.empty[ActivityError]): Result =
+  private def created(activityId: String, warnings: Seq[ActivityError] = Seq.empty[ActivityError]): Result =
     Created(Json.toJson(API.Success(
       "ok",
       Json.obj("id" -> activityId),
-      errors.map(error => API.Error(error.getClass.getSimpleName, error.message)),
+      warnings.map(warning => API.Error(warning.getClass.getSimpleName, warning.message)),
     )))
 
   private def validationError(error: JsError): Result =
