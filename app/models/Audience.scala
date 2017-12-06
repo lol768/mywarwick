@@ -148,8 +148,12 @@ object Audience {
 
 
   object helper {
-    def isLikelyValidUsercode(usercode: Usercode): Boolean = """^([a-zA-Z0-9\_\-]+)\Z""".r.findAllMatchIn(usercode.string).nonEmpty
+    val validUsercodePattern: Regex = """^([a-zA-Z0-9\_\-]+)\Z""".r
+
+    def isLikelyValidUsercode(usercode: Usercode): Boolean = validUsercodePattern.findAllMatchIn(usercode.string).nonEmpty
+
     def maybeInvalidUsercode(usercode: Usercode): Boolean = !isLikelyValidUsercode(usercode)
+
     def areValidUsercodes(usercodes: Seq[Usercode]): Boolean = usercodes.forall(isLikelyValidUsercode)
 
     def getLikelyValidUsercodes(usercodesAudiences: UsercodesAudience): Set[Usercode] = {
