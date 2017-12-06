@@ -66,7 +66,7 @@ object API {
           "success" -> true,
           "status" -> status,
           "data" -> data,
-          "errors" -> errors
+          "warnings" -> errors
         )
         case Failure(status, errors) => Json.obj(
           "success" -> false,

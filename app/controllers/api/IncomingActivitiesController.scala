@@ -40,7 +40,7 @@ class IncomingActivitiesController @Inject()(
             request.body.validate[IncomingActivityData].map { data =>
               val activity = ActivitySave.fromApi(user.usercode, publisherId, providerId, shouldNotify, data)
 
-              val usercodesAudiences:Seq[UsercodesAudience] = data.recipients.users.getOrElse(Seq.empty).map(Usercode) match {
+              val usercodesAudiences: Seq[UsercodesAudience] = data.recipients.users.getOrElse(Seq.empty).map(Usercode) match {
                 case usercodes: Seq[Usercode] if usercodes.nonEmpty => Seq(UsercodesAudience(usercodes.toSet))
                 case Nil => Seq.empty[UsercodesAudience]
               }
