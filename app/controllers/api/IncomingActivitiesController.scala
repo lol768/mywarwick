@@ -10,7 +10,7 @@ import models.{Audience, _}
 import play.api.i18n.I18nSupport
 import play.api.libs.json._
 import play.api.mvc.Result
-import services.ActivityError.InvalidProviderId
+import services.ActivityError.{InvalidProviderId, InvalidUsercodeAudience}
 import services._
 import warwick.sso.{AuthenticatedRequest, GroupName, User, Usercode}
 
@@ -49,9 +49,12 @@ class IncomingActivitiesController @Inject()(
                 BadRequest(Json.toJson(API.Failure[JsObject]("bad_request", Seq(API.Error("invalid-usercode", s"All usercode from this request are likely invalid")))))
               }
 
-              val error: JsError = ??? // optional error message for created
-              val validUsercodeAudiences = usercodesAudiences.map{usercodesAudience =>
-                UsercodesAudience(usercodesAudience.getLikelyValidUsercodes)
+              val validUsercodeAudiences = usercodesAudiences.map { usercodesAudience => UsercodesAudience(usercodesAudience.getLikelyValidUsercodes) }
+
+              val errors: Seq[ActivityError] = validUsercodeAudiences.flatten(_.usercodes).size != usercodesAudiences.flatMap(_.usercodes).size match {
+                case true =>
+                  Seq(InvalidUsercodeAudience(usercodesAudiences.flatMap(_.getLikelyInvalidUsercodes)))
+                case _ => Seq.empty
               }
 
               val webGroupAudiences: Seq[Audience.WebGroupAudience] = data.recipients.groups.getOrElse(Seq.empty).map(GroupName).map(Audience.WebGroupAudience)
@@ -66,7 +69,7 @@ class IncomingActivitiesController @Inject()(
                 case _ =>
                   activityService.save(activity, audience).fold(badRequest, id => {
                     auditLog('CreateActivity, 'id -> id, 'provider -> activity.providerId)
-                    created(id)
+                    created(id, errors)
                   })
               }
 
@@ -84,10 +87,12 @@ class IncomingActivitiesController @Inject()(
       errors.map(error => API.Error(error.getClass.getSimpleName, error.message))
     )))
 
-  private def created(activityId: String): Result =
-    Created(Json.toJson(API.Success("ok", Json.obj(
-      "id" -> activityId
-    ))))
+  private def created(activityId: String, errors: Seq[ActivityError] = Seq.empty[ActivityError]): Result =
+    Created(Json.toJson(API.Success(
+      "ok",
+      Json.obj("id" -> activityId),
+      errors.map(error => API.Error(error.getClass.getSimpleName, error.message)),
+    )))
 
   private def validationError(error: JsError): Result =
     BadRequest(Json.toJson(API.Failure[JsObject]("bad_request", API.Error.fromJsError(error))))
