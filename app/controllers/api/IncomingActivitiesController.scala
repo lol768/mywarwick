@@ -41,7 +41,12 @@ class IncomingActivitiesController @Inject()(
               val activity = ActivitySave.fromApi(user.usercode, publisherId, providerId, shouldNotify, data)
 
               val usercodes = data.recipients.users.getOrElse(Seq.empty).map(Usercode) match {
-                case usercodes: Seq[Usercode] if usercodes.nonEmpty => Seq(UsercodesAudience(usercodes.toSet))
+                case usercodes: Seq[Usercode] if usercodes.nonEmpty =>
+                  val validUsercodes = usercodes.filter(Audience.isValidUsercode)
+                  if (validUsercodes.size != usercodes.size) {
+                    logger.warn(s"There are invalid usercodes in this request (${usercodes.filterNot(Audience.isValidUsercode)}), we have removed them and carried on with valid ones.")
+                  }
+                  Seq(UsercodesAudience(validUsercodes.toSet))
                 case Nil => Seq.empty[Audience.Component]
               }
               val webgroups = data.recipients.groups.getOrElse(Seq.empty).map(GroupName).map(Audience.WebGroupAudience)
@@ -86,5 +91,4 @@ class IncomingActivitiesController @Inject()(
     Forbidden(Json.toJson(API.Failure[JsObject]("forbidden",
       Seq(API.Error("no-permission", s"User '${user.usercode.string}' does not have permission to post to the stream for provider '$providerId'"))
     )))
-
 }
