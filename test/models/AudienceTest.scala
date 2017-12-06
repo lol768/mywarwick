@@ -25,6 +25,24 @@ class AudienceTest extends BaseSpec {
       Audience.isValidUsercode(valideUsercode) mustBe true
     }
 
+    "be able to tell usercodes are invalid" in {
+      val invalid = Seq(
+        Usercode("*jd0"),
+        Usercode("abcsdf,skkdsf,ds233"),
+        Usercode("u1444444"),
+      )
+      Audience.areValidUsercodes(invalid) mustBe false
+    }
+
+    "be able to tell usercodes are valid" in {
+      val valid = Seq(
+        Usercode("ksd_123"),
+        Usercode("abcsdf"),
+        Usercode("u1444444"),
+      )
+      Audience.areValidUsercodes(valid) mustBe true
+    }
+
   }
 
 }
