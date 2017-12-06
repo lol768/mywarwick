@@ -43,7 +43,12 @@ object Audience {
 
   case object PublicAudience extends Component
 
-  case class UsercodesAudience(usercodes: Set[Usercode]) extends DepartmentSubset
+  case class UsercodesAudience(usercodes: Set[Usercode]) extends DepartmentSubset {
+    def size: Int = usercodes.size
+    def getLikelyInvalidUsercodes: Set[Usercode] = Audience.helper.getLikelyInvalidUsercodes(this)
+    def allUsercodesAreLikelyInvalid: Boolean = getLikelyInvalidUsercodes.size == size
+    def getLikelyValidUsercodes: Set[Usercode] = Audience.helper.getLikelyValidUsercodes(this)
+  }
 
 
   case class ModuleAudience(moduleCode: String) extends DepartmentSubset
@@ -141,7 +146,18 @@ object Audience {
     }
   }
 
-  def isValidUsercode(usercode: Usercode): Boolean = """^([a-zA-Z0-9\_\-]+)\Z""".r.findAllMatchIn(usercode.string).nonEmpty
-  def areValidUsercodes(usercodes: Seq[Usercode]): Boolean = usercodes.forall(isValidUsercode)
 
+  object helper {
+    def isLikelyValidUsercode(usercode: Usercode): Boolean = """^([a-zA-Z0-9\_\-]+)\Z""".r.findAllMatchIn(usercode.string).nonEmpty
+    def maybeInvalidUsercode(usercode: Usercode): Boolean = !isLikelyValidUsercode(usercode)
+    def areValidUsercodes(usercodes: Seq[Usercode]): Boolean = usercodes.forall(isLikelyValidUsercode)
+
+    def getLikelyValidUsercodes(usercodesAudiences: UsercodesAudience): Set[Usercode] = {
+      usercodesAudiences.usercodes.filterNot(isLikelyValidUsercode)
+    }
+
+    def getLikelyInvalidUsercodes(usercodesAudiences: UsercodesAudience): Set[Usercode] = {
+      usercodesAudiences.usercodes.filter(maybeInvalidUsercode)
+    }
+  }
 }
