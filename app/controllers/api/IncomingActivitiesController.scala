@@ -40,18 +40,23 @@ class IncomingActivitiesController @Inject()(
             request.body.validate[IncomingActivityData].map { data =>
               val activity = ActivitySave.fromApi(user.usercode, publisherId, providerId, shouldNotify, data)
 
-              val usercodes = data.recipients.users.getOrElse(Seq.empty).map(Usercode) match {
-                case usercodes: Seq[Usercode] if usercodes.nonEmpty =>
-                  val validUsercodes = usercodes.filter(Audience.isValidUsercode)
-                  if (validUsercodes.size != usercodes.size) {
-                    logger.warn(s"There are invalid usercodes in this request (${usercodes.filterNot(Audience.isValidUsercode)}), we have removed them and carried on with valid ones.")
-                  }
-                  Seq(UsercodesAudience(validUsercodes.toSet))
-                case Nil => Seq.empty[Audience.Component]
+              val usercodesAudiences:Seq[UsercodesAudience] = data.recipients.users.getOrElse(Seq.empty).map(Usercode) match {
+                case usercodes: Seq[Usercode] if usercodes.nonEmpty => Seq(UsercodesAudience(usercodes.toSet))
+                case Nil => Seq.empty[UsercodesAudience]
               }
-              val webgroups = data.recipients.groups.getOrElse(Seq.empty).map(GroupName).map(Audience.WebGroupAudience)
+              // bad request if all usercodes are invalid
+              if (usercodesAudiences.forall(_.allUsercodesAreLikelyInvalid)) {
+                BadRequest(Json.toJson(API.Failure[JsObject]("bad_request", Seq(API.Error("invalid-usercode", s"All usercode from this request are likely invalid")))))
+              }
 
-              val audience = Audience(usercodes ++ webgroups)
+              val error: JsError = ??? // optional error message for created
+              val validUsercodeAudiences = usercodesAudiences.map{usercodesAudience =>
+                UsercodesAudience(usercodesAudience.getLikelyValidUsercodes)
+              }
+
+              val webGroupAudiences: Seq[Audience.WebGroupAudience] = data.recipients.groups.getOrElse(Seq.empty).map(GroupName).map(Audience.WebGroupAudience)
+
+              val audience: Audience = Audience(validUsercodeAudiences ++ webGroupAudiences)
 
               val publisher = publisherService.find(publisherId).get
               lazy val recipients = audienceService.resolve(audience).toOption.map(_.size).getOrElse(0)
