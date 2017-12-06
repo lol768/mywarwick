@@ -62,12 +62,22 @@ object API {
 
     implicit def writes[A: Reads : Writes]: Writes[Response[A]] = new Writes[Response[A]] {
       override def writes(response: Response[A]): JsValue = response match {
-        case Success(status, data, warnings) => Json.obj(
-          "success" -> true,
-          "status" -> status,
-          "data" -> data,
-          "warnings" -> warnings
-        )
+        case Success(status, data, warnings) => {
+          if (warnings.isEmpty) {
+            Json.obj(
+              "success" -> true,
+              "status" -> status,
+              "data" -> data,
+            )
+          } else {
+            Json.obj(
+              "success" -> true,
+              "status" -> status,
+              "data" -> data,
+              "warnings" -> warnings,
+            )
+          }
+        }
         case Failure(status, errors) => Json.obj(
           "success" -> false,
           "status" -> status,

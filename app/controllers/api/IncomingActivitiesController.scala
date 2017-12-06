@@ -52,7 +52,7 @@ class IncomingActivitiesController @Inject()(
               } else {
                 val validUsercodeAudiences = usercodesAudiences.map { usercodesAudience => UsercodesAudience(usercodesAudience.getLikelyValidUsercodes) }
 
-                val errors: Seq[ActivityError] = validUsercodeAudiences.flatten(_.usercodes).size != usercodesAudiences.flatMap(_.usercodes).size match {
+                val warnings: Seq[ActivityError] = validUsercodeAudiences.flatten(_.usercodes).size != usercodesAudiences.flatMap(_.usercodes).size match {
                   case true =>
                     Seq(InvalidUsercodeAudience(usercodesAudiences.flatMap(_.getLikelyInvalidUsercodes)))
                   case _ => Seq.empty
@@ -70,7 +70,7 @@ class IncomingActivitiesController @Inject()(
                   case _ =>
                     activityService.save(activity, audience).fold(badRequest, id => {
                       auditLog('CreateActivity, 'id -> id, 'provider -> activity.providerId)
-                      created(id, errors)
+                      created(id, warnings)
                     })
                 }
               }
