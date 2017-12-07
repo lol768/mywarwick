@@ -108,7 +108,7 @@ dependencyOverrides += "com.google.guava" % "guava" % "20.0"
 // Because jclouds is terrible
 dependencyOverrides += "com.google.code.gson" % "gson" % "2.4"
 
-// Fix a dependency waring
+// Fix a dependency warning
 dependencyOverrides += "org.json" % "json" % "20171018"
 
 // Make gulp output available as Play assets.
