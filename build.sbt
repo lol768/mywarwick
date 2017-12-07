@@ -29,6 +29,8 @@ lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala, 
 
 // Versions of things for below
 val enumeratumVersion = "1.5.12"
+val akkaVersion = "2.5.3"
+val playUtilsVersion = "1.10"
 
 val appDeps = Seq(
   jdbc,
@@ -40,15 +42,15 @@ val appDeps = Seq(
   jodaForms,
   "com.typesafe.play" %% "anorm" % "2.5.3",
   "com.oracle" % "ojdbc7" % "12.1.0.2.0",
-  "uk.ac.warwick.sso" %% "sso-client-play" % "2.37",
-  "uk.ac.warwick.play-utils" %% "accesslog" % "1.8",
-  "uk.ac.warwick.play-utils" %% "anorm" % "1.8",
-  "uk.ac.warwick.play-utils" %% "objectstore" % "1.8",
-  "uk.ac.warwick.util" % "warwickutils-cache" % "20170217",
-  "uk.ac.warwick.util" % "warwickutils-core" % "20170217",
-  "com.typesafe.akka" %% "akka-cluster" % "2.4.16",
-  "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.16",
-  "com.typesafe.akka" %% "akka-slf4j" % "2.4.16",
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.38",
+  "uk.ac.warwick.play-utils" %% "accesslog" % playUtilsVersion,
+  "uk.ac.warwick.play-utils" %% "anorm" % playUtilsVersion,
+  "uk.ac.warwick.play-utils" %% "objectstore" % playUtilsVersion,
+  "uk.ac.warwick.util" % "warwickutils-cache" % "20171206",
+  "uk.ac.warwick.util" % "warwickutils-core" % "20171206",
+  "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
+  "com.typesafe.akka" %% "akka-cluster-tools" % akkaVersion,
+  "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
   "com.kenshoo" %% "metrics-play" % "2.6.6_0.6.2",
   "com.typesafe.play" %% "play-mailer" % "6.0.1",
   "com.typesafe.play" %% "play-mailer-guice" % "6.0.1",
@@ -105,6 +107,9 @@ dependencyOverrides += "com.google.guava" % "guava" % "20.0"
 
 // Because jclouds is terrible
 dependencyOverrides += "com.google.code.gson" % "gson" % "2.4"
+
+// Fix a dependency warning
+dependencyOverrides += "org.json" % "json" % "20171018"
 
 // Make gulp output available as Play assets.
 unmanagedResourceDirectories in Assets += baseDirectory.value / "target" / "gulp"
