@@ -78,23 +78,23 @@ object API {
             "success" -> true,
             "status" -> status,
             "data" -> data,
-            "warnings" -> warnings
+            "warnings" -> warnings,
           )
         case Success(status, data) =>
           Json.obj(
             "success" -> true,
             "status" -> status,
-            "data" -> data
+            "data" -> data,
           )
         case Failure(status, errors) => Json.obj(
           "success" -> false,
           "status" -> status,
-          "errors" -> errors
+          "errors" -> errors,
         )
         case _ => Json.obj(
           "success" -> false,
           "status" -> "bad_request",
-          "errors" -> Json.arr("unknown error")
+          "errors" -> Json.arr("unknown error"),
         )
       }
     }
