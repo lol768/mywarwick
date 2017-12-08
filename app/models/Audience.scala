@@ -148,7 +148,7 @@ object Audience {
 
 
   object helper {
-    val validUsercodePattern: Regex = """^([a-zA-Z0-9\_\-]+)\Z""".r
+    val validUsercodePattern: Regex = """^([a-zA-Z0-9\_\-\@\.]+)\Z""".r
 
     def isLikelyValidUsercode(usercode: Usercode): Boolean = validUsercodePattern.findAllMatchIn(usercode.string).nonEmpty
 
