@@ -7,7 +7,7 @@ import controllers.MyController
 import models._
 import play.api.libs.json.{JsError, JsObject, JsSuccess, Json}
 import play.api.mvc.Result
-import services.{ActivityError, SecurityService, TileContentService, TileService}
+import services.{SecurityService, TileContentService, TileService}
 import warwick.sso.User
 
 import scala.concurrent.ExecutionContext.Implicits.global

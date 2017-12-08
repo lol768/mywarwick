@@ -93,8 +93,8 @@ object API {
         )
         case _ => Json.obj(
           "success" -> false,
-          "status" -> "500",
-          "errors" -> "unknown error"
+          "status" -> "bad_request",
+          "errors" -> Json.arr("unknown error")
         )
       }
     }
