@@ -44,7 +44,7 @@ class IncomingActivitiesController @Inject()(
                 case usercodes: Seq[Usercode] if usercodes.nonEmpty => Seq(UsercodesAudience(usercodes.toSet))
                 case Nil => Seq.empty[UsercodesAudience]
               }
-              if (usercodesAudiences.forall(_.allUsercodesAreLikelyInvalid)) {
+              if (usercodesAudiences.nonEmpty && usercodesAudiences.forall(_.allUsercodesAreLikelyInvalid)) {
                 BadRequest(Json.toJson(API.Failure[JsObject](
                   "bad_request",
                   Seq(API.Error("invalid-usercode", s"All usercodes from this request seem to be invalid")),
