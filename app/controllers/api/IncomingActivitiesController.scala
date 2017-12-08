@@ -70,7 +70,11 @@ class IncomingActivitiesController @Inject()(
                   case _ =>
                     activityService.save(activity, audience).fold(badRequest, id => {
                       auditLog('CreateActivity, 'id -> id, 'provider -> activity.providerId)
-                      created(id, warnings)
+                      if (warnings.isEmpty) {
+                        created(id)
+                      } else {
+                        createdWithWarnings(id, warnings)
+                      }
                     })
                 }
               }
@@ -88,12 +92,17 @@ class IncomingActivitiesController @Inject()(
       errors.map(error => API.Error(error.getClass.getSimpleName, error.message))
     )))
 
-  private def created(activityId: String, warnings: Seq[ActivityError] = Seq.empty[ActivityError]): Result =
-    Created(Json.toJson(API.Success(
-      "ok",
-      Json.obj("id" -> activityId),
-      warnings.map(warning => API.Error(warning.getClass.getSimpleName, warning.message)),
-    )))
+  private def created(activityId: String): Result = Created(Json.toJson(API.Success(
+    "ok",
+    Json.obj("id" -> activityId),
+  )))
+
+  private def createdWithWarnings(activityId: String, warnings: Seq[ActivityError]): Result = Created(Json.toJson(API.SuccessWithWarnings(
+    "ok",
+    Json.obj("id" -> activityId),
+    warnings.map(warning => API.Error(warning.getClass.getSimpleName, warning.message)),
+  )))
+
 
   private def validationError(error: JsError): Result =
     BadRequest(Json.toJson(API.Failure[JsObject]("bad_request", API.Error.fromJsError(error))))
