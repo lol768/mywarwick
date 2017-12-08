@@ -48,13 +48,14 @@ object API {
     implicit def reads[A: Reads : Writes]: Reads[Response[A]] = new Reads[Response[A]] {
       override def reads(json: JsValue): JsResult[Response[A]] = {
         val status = (json \ "status").validate[String]
-        val warnings = (json \ "warnings").validate[Seq[Error]]
         (json \ "success").validate[Boolean].flatMap { success =>
           if (success) {
             val data = (json \ "data").validate[A]
+            val warnings = (json \ "warnings").validate[Seq[Error]]
             (status and data and warnings) (Success.apply[A] _)
           } else {
-            (status and warnings) (Failure.apply[A] _)
+            val errors = (json \ "errors").validate[Seq[Error]]
+            (status and errors) (Failure.apply[A] _)
           }
         }
       }
