@@ -173,6 +173,56 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
       (json \ "errors" \ 0 \ "message").as[String] mustBe "All usercodes must be non-empty"
     }
 
+    "have warnings attached to the success response if some usercodes are invalid" in {
+      when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
+      when(publisherService.getRoleForUser(any(), any())).thenReturn(APINotificationsManager)
+      when(audienceService.resolve(any())).thenReturn(Try(Set(Usercode("u123123"), Usercode("u2938484"))))
+      when(activityService.save(any(), any())).thenReturn(Right("created-activity-id"))
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(Json.obj(
+        "type" -> "due",
+        "title" -> "Coursework due soon",
+        "url" -> "http://tabula.warwick.ac.uk",
+        "text" -> "Your submission for CS118 is due tomorrow",
+        "recipients" -> Json.obj(
+          "users" -> Json.arr(
+            "u123123",
+            "u2938484",
+            "invalid,sd",
+          )
+        )
+      )))
+
+      status(result) mustBe CREATED
+      val json = contentAsJson(result)
+
+      (json \ "warnings" \ 0 \ "message").as[String] mustBe "The request contains one or more invalid usercode: List(Usercode(invalid,sd))"
+    }
+
+
+    "bad request response if all usercodes are invalid" in {
+      when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
+      when(publisherService.getRoleForUser(any(), any())).thenReturn(APINotificationsManager)
+      when(activityService.save(any(), any())).thenReturn(Right("created-activity-id"))
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(Json.obj(
+        "type" -> "due",
+        "title" -> "Coursework due soon",
+        "url" -> "http://tabula.warwick.ac.uk",
+        "text" -> "Your submission for CS118 is due tomorrow",
+        "recipients" -> Json.obj(
+          "users" -> Json.arr(
+            "u12, 3123",
+            "u,2938484",
+            "invalid,sd",
+          )
+        )
+      )))
+
+      status(result) mustBe BAD_REQUEST
+      val json = contentAsJson(result)
+
+      (json \ "errors" \ 0 \ "message").as[String] mustBe "All usercodes from this request seem to be invalid"
+    }
+
     "fail for too many recipients" in {
       when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
       when(publisherService.find(tabulaPublisherId)).thenReturn(Some(tabulaPublisher.copy(maxRecipients = Some(1))))
