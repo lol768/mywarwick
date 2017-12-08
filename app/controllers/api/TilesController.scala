@@ -74,7 +74,7 @@ class TilesController @Inject()(
     }
 
     Future.sequence(futures).map { result =>
-      val tileResult = for ((tile, API.Success(_, content, Nil)) <- result) yield tile.tile.id -> Map("content" -> content)
+      val tileResult = for ((tile, API.Success(_, content)) <- result) yield tile.tile.id -> Map("content" -> content)
       val errorResult = for ((tile, API.Failure(_, errors)) <- result) yield tile.tile.id -> Map("errors" -> Json.toJson(errors))
 
       Ok(Json.toJson(API.Success(data = (tileResult ++ errorResult).toMap))).as(withCharset(JSON))
