@@ -22,7 +22,7 @@ object API {
 
   case class Error(id: String, message: String)
 
-  abstract class AbstractSuccess[A: Reads : Writes](status: String = "ok", data: A) extends Response[A](true, status)
+  sealed abstract class AbstractSuccess[A: Reads : Writes](status: String = "ok", data: A) extends Response[A](true, status)
 
   case class Success[A: Reads : Writes](status: String = "ok", data: A) extends AbstractSuccess[A](status, data) {
     def either = Right(this)
@@ -90,11 +90,6 @@ object API {
           "success" -> false,
           "status" -> status,
           "errors" -> errors,
-        )
-        case _ => Json.obj(
-          "success" -> false,
-          "status" -> "bad_request",
-          "errors" -> Json.arr("unknown error"),
         )
       }
     }
