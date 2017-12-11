@@ -28,7 +28,7 @@ object API {
     def either = Right(this)
   }
 
-  case class SuccessWithWarnings[A: Reads : Writes](status: String = "ok", data: A, warnings: Seq[Error]) extends AbstractSuccess[A](status, data) {
+  case class PartialSuccess[A: Reads : Writes](status: String = "ok", data: A, warnings: Seq[Error]) extends AbstractSuccess[A](status, data) {
     def either = Right(this)
   }
 
@@ -61,7 +61,7 @@ object API {
             if (warnings.isError){
               (status and data) (Success.apply[A] _)
             } else {
-              (status and data and warnings) (SuccessWithWarnings.apply[A] _)
+              (status and data and warnings) (PartialSuccess.apply[A] _)
             }
           } else {
             val errors = (json \ "errors").validate[Seq[Error]]
@@ -73,7 +73,7 @@ object API {
 
     implicit def writes[A: Reads : Writes]: Writes[Response[A]] = new Writes[Response[A]] {
       override def writes(response: Response[A]): JsValue = response match {
-        case SuccessWithWarnings(status, data, warnings) =>
+        case PartialSuccess(status, data, warnings) =>
           Json.obj(
             "success" -> true,
             "status" -> status,

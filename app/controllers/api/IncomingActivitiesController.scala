@@ -97,7 +97,7 @@ class IncomingActivitiesController @Inject()(
     Json.obj("id" -> activityId),
   )))
 
-  private def createdWithWarnings(activityId: String, warnings: Seq[ActivityError]): Result = Created(Json.toJson(API.SuccessWithWarnings(
+  private def createdWithWarnings(activityId: String, warnings: Seq[ActivityError]): Result = Created(Json.toJson(API.PartialSuccess(
     "ok",
     Json.obj("id" -> activityId),
     warnings.map(warning => API.Error(warning.getClass.getSimpleName, warning.message)),
