@@ -10,7 +10,7 @@ import models.{Audience, _}
 import play.api.i18n.I18nSupport
 import play.api.libs.json._
 import play.api.mvc.Result
-import services.ActivityError.InvalidProviderId
+import services.ActivityError.{InvalidProviderId, InvalidUsercodeAudience}
 import services._
 import warwick.sso.{AuthenticatedRequest, GroupName, User, Usercode}
 
@@ -40,26 +40,44 @@ class IncomingActivitiesController @Inject()(
             request.body.validate[IncomingActivityData].map { data =>
               val activity = ActivitySave.fromApi(user.usercode, publisherId, providerId, shouldNotify, data)
 
-              val usercodes = data.recipients.users.getOrElse(Seq.empty).map(Usercode) match {
+              val usercodesAudiences: Seq[UsercodesAudience] = data.recipients.users.getOrElse(Seq.empty).map(Usercode) match {
                 case usercodes: Seq[Usercode] if usercodes.nonEmpty => Seq(UsercodesAudience(usercodes.toSet))
-                case Nil => Seq.empty[Audience.Component]
+                case Nil => Seq.empty[UsercodesAudience]
               }
-              val webgroups = data.recipients.groups.getOrElse(Seq.empty).map(GroupName).map(Audience.WebGroupAudience)
+              if (usercodesAudiences.nonEmpty && usercodesAudiences.forall(_.allUsercodesAreLikelyInvalid)) {
+                BadRequest(Json.toJson(API.Failure[JsObject](
+                  "bad_request",
+                  Seq(API.Error("invalid-usercode", s"All usercodes from this request seem to be invalid")),
+                )))
+              } else {
+                val validUsercodeAudiences = usercodesAudiences.map { usercodesAudience => UsercodesAudience(usercodesAudience.getLikelyValidUsercodes) }
 
-              val audience = Audience(usercodes ++ webgroups)
+                val warnings: Seq[ActivityError] = validUsercodeAudiences.flatten(_.usercodes).size != usercodesAudiences.flatMap(_.usercodes).size match {
+                  case true =>
+                    Seq(InvalidUsercodeAudience(usercodesAudiences.flatMap(_.getLikelyInvalidUsercodes)))
+                  case _ => Seq.empty
+                }
 
-              val publisher = publisherService.find(publisherId).get
-              lazy val recipients = audienceService.resolve(audience).toOption.map(_.size).getOrElse(0)
-              publisher.maxRecipients match {
-                case Some(max) if shouldNotify && recipients > max =>
-                  BadRequest(Json.toJson(API.Failure[JsObject]("bad_request", Seq(API.Error("too-many-recipients", s"You can only send to $max recipients at a time")))))
-                case _ =>
-                  activityService.save(activity, audience).fold(badRequest, id => {
-                    auditLog('CreateActivity, 'id -> id, 'provider -> activity.providerId)
-                    created(id)
-                  })
+                val webGroupAudiences: Seq[Audience.WebGroupAudience] = data.recipients.groups.getOrElse(Seq.empty).map(GroupName).map(Audience.WebGroupAudience)
+
+                val audience: Audience = Audience(validUsercodeAudiences ++ webGroupAudiences)
+
+                val publisher = publisherService.find(publisherId).get
+                lazy val recipients = audienceService.resolve(audience).toOption.map(_.size).getOrElse(0)
+                publisher.maxRecipients match {
+                  case Some(max) if shouldNotify && recipients > max =>
+                    BadRequest(Json.toJson(API.Failure[JsObject]("bad_request", Seq(API.Error("too-many-recipients", s"You can only send to $max recipients at a time")))))
+                  case _ =>
+                    activityService.save(activity, audience).fold(badRequest, id => {
+                      auditLog('CreateActivity, 'id -> id, 'provider -> activity.providerId)
+                      if (warnings.isEmpty) {
+                        created(id)
+                      } else {
+                        createdWithWarnings(id, warnings)
+                      }
+                    })
+                }
               }
-
             }.recoverTotal(validationError)
           } else {
             forbidden(providerId, user)
@@ -74,10 +92,17 @@ class IncomingActivitiesController @Inject()(
       errors.map(error => API.Error(error.getClass.getSimpleName, error.message))
     )))
 
-  private def created(activityId: String): Result =
-    Created(Json.toJson(API.Success("ok", Json.obj(
-      "id" -> activityId
-    ))))
+  private def created(activityId: String): Result = Created(Json.toJson(API.Success(
+    "ok",
+    Json.obj("id" -> activityId),
+  )))
+
+  private def createdWithWarnings(activityId: String, warnings: Seq[ActivityError]): Result = Created(Json.toJson(API.PartialSuccess(
+    "ok",
+    Json.obj("id" -> activityId),
+    warnings.map(warning => API.Error(warning.getClass.getSimpleName, warning.message)),
+  )))
+
 
   private def validationError(error: JsError): Result =
     BadRequest(Json.toJson(API.Failure[JsObject]("bad_request", API.Error.fromJsError(error))))
@@ -86,5 +111,4 @@ class IncomingActivitiesController @Inject()(
     Forbidden(Json.toJson(API.Failure[JsObject]("forbidden",
       Seq(API.Error("no-permission", s"User '${user.usercode.string}' does not have permission to post to the stream for provider '$providerId'"))
     )))
-
 }
