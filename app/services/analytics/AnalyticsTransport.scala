@@ -25,9 +25,9 @@ class GoogleAnalyticsTransport @Inject()(
   private val APPLICATION_NAME = "Start"
   private val JSON_FACTORY = new JacksonFactory()
 
-  private val KEY_FILE_LOCATION = config.getString("mywarwick.analytics.key_path")
+  private val KEY_FILE_LOCATION = config.getOptional[String]("mywarwick.analytics.key_path")
     .getOrElse(throw new IllegalStateException("Missing Google Analytics key file path - set mywarwick.analytics.key_path"))
-  private val SERVICE_ACCOUNT_EMAIL = config.getString("mywarwick.analytics.account.email")
+  private val SERVICE_ACCOUNT_EMAIL = config.getOptional[String]("mywarwick.analytics.account.email")
     .getOrElse(throw new IllegalStateException("Missing Google Analytics service account id - set mywarwick.analytics.account.email"))
 
   private val analytics: AnalyticsReporting = {

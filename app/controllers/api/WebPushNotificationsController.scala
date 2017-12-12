@@ -3,7 +3,7 @@ package controllers.api
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.Platform.WebPush
 import models.messaging.Subscription
 import play.api.libs.json.Json
@@ -15,7 +15,7 @@ class WebPushNotificationsController @Inject()(
   securityService: SecurityService,
   pushRegistrationService: PushRegistrationService,
   fetchNotificationsService: FetchNotificationsService
-) extends BaseController {
+) extends MyController {
 
   import securityService._
 

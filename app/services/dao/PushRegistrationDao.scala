@@ -32,8 +32,7 @@ trait PushRegistrationDao {
 
 class PushRegistrationDaoImpl @Inject()(config: Configuration) extends PushRegistrationDao with Logging {
 
-  private lazy val deviceStringMaxLength: Int = config.getInt("mywarwick.pushregistration.deviceStringMaxLength")
-    .getOrElse(throw new IllegalArgumentException("mywarwick.pushregistration.deviceStringMaxLength missing"))
+  private lazy val deviceStringMaxLength: Int = config.get[Int]("mywarwick.pushregistration.deviceStringMaxLength")
 
   val pushRegistrationParser: RowParser[PushRegistration] =
     get[String]("USERCODE") ~

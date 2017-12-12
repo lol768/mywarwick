@@ -14,12 +14,12 @@ class HomeController @Inject()(
   metrics: AppMetrics,
   configuration: Configuration,
   measurementService: AnalyticsMeasurementService
-) extends BaseController {
+) extends MyController {
 
   implicit val analyticsTrackingId: Option[AnalyticsTrackingID] = Some(measurementService.trackingID)
 
   implicit val searchRootUrl: SearchRootUrl =
-    configuration.getString("mywarwick.search.root").map(SearchRootUrl)
+    configuration.getOptional[String]("mywarwick.search.root").map(SearchRootUrl)
       .getOrElse(throw new IllegalStateException("Search root URL not configured - check mywarwick.search.root property"))
 
   def index = Action {

@@ -3,7 +3,7 @@ package controllers.admin.publishers
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.publishing.{Publisher, PublisherSave}
 import play.api.data.Forms._
 import play.api.data._
@@ -15,9 +15,8 @@ import system.Roles
 @Singleton
 class PublishersController @Inject() (
   security: SecurityService,
-  val messagesApi: MessagesApi,
   val publisherService: PublisherService
-) extends BaseController with I18nSupport with WithPublisher {
+) extends MyController with I18nSupport with WithPublisher {
 
   import Roles._
   import security._

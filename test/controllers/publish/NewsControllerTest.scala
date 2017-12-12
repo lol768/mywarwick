@@ -1,6 +1,6 @@
 package controllers.publish
 
-import helpers.{BaseSpec, Fixtures, OneStartAppPerSuite}
+import helpers.{BaseSpec, Fixtures, MinimalAppPerSuite, OneStartAppPerSuite}
 import models.Audience.Staff
 import models.publishing.PublishingRole.NewsManager
 import models.publishing._
@@ -10,7 +10,7 @@ import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import play.api.cache.CacheApi
 import play.api.i18n.MessagesApi
-import play.api.mvc.Results
+import play.api.mvc.{ControllerComponents, PlayBodyParsers, Results}
 import play.api.test.Helpers._
 import play.api.test._
 import play.filters.csrf.CSRF
@@ -23,8 +23,9 @@ import warwick.sso._
 
 import scala.concurrent.Future
 import scala.util.Success
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class NewsControllerTest extends BaseSpec with MockitoSugar with Results with OneStartAppPerSuite {
+class NewsControllerTest extends BaseSpec with MockitoSugar with Results with MinimalAppPerSuite {
 
   val custard = Usercode("custard")
 
@@ -39,7 +40,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
     override val actualUser: Option[User] = user
   })
 
-  val securityServiceImpl = new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], mock[CacheApi])
+  val securityServiceImpl = new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], PlayBodyParsers())
 
   private val publisherService = mock[PublisherService]
   private val newsService = mock[NewsService]
@@ -66,10 +67,12 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
 
   when(mockCsrfPageHelperFactory.getInstance(Matchers.any[Option[Token]])).thenReturn(mockCsrfHelper)
 
-  val newsController = new NewsController(securityServiceImpl, publisherService, messagesApi, newsService, departmentInfoService, audienceBinder, newsCategoryService, userNewsCategoryService, mock[ErrorHandler], audienceService, userPreferencesService) {
+  val newsController = new NewsController(securityServiceImpl, publisherService, newsService, departmentInfoService, audienceBinder, newsCategoryService, userNewsCategoryService, mock[ErrorHandler], audienceService, userPreferencesService) {
     override val navigationService = new MockNavigationService()
     override val ssoClient: MockSSOClient = mockSSOClient
     override val csrfPageHelperFactory: CSRFPageHelperFactory = mockCsrfPageHelperFactory
+
+    setControllerComponents(get[ControllerComponents])
   }
 
   private val publisher = Publisher("xyz", "Test Publisher")
@@ -265,6 +268,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with On
         )(Matchers.any())
       ).thenReturn(Future.successful(Right(audience)))
       when(audienceService.resolve(audience)).thenReturn(Success(Set("a", "b", "c").map(Usercode)))
+      when(audienceService.resolveUsersForComponentsGrouped(audience.components)).thenReturn(Success(Seq((Audience.DepartmentAudience("IN", Seq(Staff)), Set("a", "b", "c").map(Usercode)))))
       when(userPreferencesService.countInitialisedUsers(Set("a", "b", "c").map(Usercode))).thenReturn(2)
       when(userNewsCategoryService.getRecipientsOfNewsInCategories(Seq("abc"))).thenReturn(Set("a", "e").map(Usercode))
 

@@ -3,7 +3,7 @@ package controllers.api
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models._
 import play.api.libs.json.{JsError, JsObject, JsSuccess, Json}
 import play.api.mvc.Result
@@ -27,7 +27,7 @@ class TilesController @Inject()(
   securityService: SecurityService,
   tileService: TileService,
   tileContentService: TileContentService
-) extends BaseController {
+) extends MyController {
 
   import securityService._
 

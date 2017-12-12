@@ -3,7 +3,7 @@ package controllers.api
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import controllers.BaseController
+import controllers.MyController
 import models.API
 import play.api.Configuration
 import play.api.libs.json._
@@ -18,7 +18,7 @@ class ColourSchemesController @Inject()(
   security: SecurityService,
   configuration: Configuration,
   userPreferencesService: UserPreferencesService
-) extends BaseController {
+) extends MyController {
 
   import security._
 
@@ -31,14 +31,13 @@ class ColourSchemesController @Inject()(
 
   implicit private val BackgroundWriter = Json.writes[Background]
 
-  val backgrounds: Seq[Background] = configuration.getConfigList("mywarwick.backgrounds")
-    .getOrElse(throw new IllegalStateException("mywarwick.backgrounds is not configured in default.conf."))
+  val backgrounds: Seq[Background] = configuration.underlying.getConfigList("mywarwick.backgrounds")
     .asScala.map(e => {
     Background(
-      e.getInt("id").getOrElse(throw new IllegalStateException("id is not set for this background")),
-      e.getString("url").getOrElse(throw new IllegalStateException("url is not set for this background")),
-      e.getString("name").getOrElse(throw new IllegalStateException("name is not set for this background")),
-      e.getString("schemeColour").getOrElse(throw new IllegalStateException("schemeColour is not set for this background"))
+      e.getInt("id"),
+      e.getString("url"),
+      e.getString("name"),
+      e.getString("schemeColour")
     )
   })
 

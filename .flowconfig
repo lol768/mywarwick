@@ -1,0 +1,14 @@
+[ignore]
+.*/target/.*
+.*/broken.json
+
+[include]
+app/assets/js
+
+[libs]
+
+[lints]
+
+[options]
+
+[strict]

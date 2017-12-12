@@ -11,6 +11,7 @@ import play.api.Configuration
 import play.api.cache._
 import play.api.libs.json.{JsObject, Json}
 import play.api.libs.ws.WSClient
+import system.NullCacheApi
 import uk.ac.warwick.sso.client.trusted.CurrentApplication
 
 import scala.concurrent.Await
@@ -51,8 +52,8 @@ class TileContentServiceTest extends BaseSpec with ScalaFutures with MockitoSuga
 
   "TileContentService" should {
     val trusted = mock[CurrentApplication]
-    val ws = web.client
-    val cache = new MockCacheApi
+    val ws = client
+    val cache = new NullCacheApi
     val config = Configuration {
       "mywarwick.cache.tile-preferences.seconds" -> 1
     }

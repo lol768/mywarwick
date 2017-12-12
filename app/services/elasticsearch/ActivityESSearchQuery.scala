@@ -1,6 +1,6 @@
 package services.elasticsearch
 
-import org.joda.time.{DateTime, Interval}
+import org.joda.time.Interval
 
 case class ActivityESSearchQuery(
   activity_id: Option[String] = None,

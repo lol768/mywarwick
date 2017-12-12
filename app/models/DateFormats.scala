@@ -52,9 +52,11 @@ object DateFormats {
       Try(dateTime().parseDateTime(json.as[String]))
         .orElse(Try(dateTimeNoMillis().parseDateTime(json.as[String]))) match {
         case Success(v) => JsSuccess(v)
-        case Failure(e) => JsError(Seq(JsPath() -> Seq(ValidationError("error.expected.date.format", "iso8601"))))
+        case Failure(e) => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.date.format", "iso8601"))))
       }
   }
+
+  implicit val isoDateFormats: Format[DateTime] = Format(isoDateReads, isoDateWrites)
 
 
   ///// JODA FORMATTERS

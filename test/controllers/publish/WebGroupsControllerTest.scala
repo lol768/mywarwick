@@ -1,6 +1,6 @@
 package controllers.publish
 
-import helpers.{BaseSpec, Fixtures}
+import helpers.{BaseSpec, Fixtures, WithActorSystem}
 import models.publishing.PermissionScope.{AllDepartments, Departments}
 import models.publishing.Publisher
 import models.publishing.PublishingRole.NewsManager
@@ -14,8 +14,9 @@ import services.{PublisherService, SecurityServiceImpl}
 import warwick.sso._
 
 import scala.util.Success
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class WebGroupsControllerTest extends BaseSpec with MockitoSugar with Results {
+class WebGroupsControllerTest extends BaseSpec with MockitoSugar with Results with WithActorSystem {
 
   private val groupService = mock[GroupService]
   private val publisherService = mock[PublisherService]
@@ -33,7 +34,7 @@ class WebGroupsControllerTest extends BaseSpec with MockitoSugar with Results {
     override val actualUser: Option[User] = user
   })
 
-  private val securityService = new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], mock[CacheApi])
+  private val securityService = new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], PlayBodyParsers())
 
   private val controller = new WebGroupsController(groupService, publisherService, securityService)
 

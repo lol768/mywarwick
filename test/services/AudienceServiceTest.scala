@@ -239,17 +239,21 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
 
     "validate both usercodes and university ids" in new Ctx {
       val codes = Seq(Usercode("cusebh"), Usercode("cusjau"))
-      val ids = Seq(Usercode("0123456"), Usercode("1234567"))
+      val validId = Usercode("0123456")
+      val invalidId = Usercode("1234567")
+      val ids = Seq(validId, invalidId)
       val codesAndIds: Seq[Usercode] = codes ++ ids
 
       when(userLookup.getUsers(any[Seq[Usercode]]))
         .thenReturn(Try(codes.map(c => c -> Fixtures.user.makeFoundUser(c.string)).toMap))
-      when(userLookup.getUsers(any[Seq[UniversityID]], anyBoolean()))
-        .thenReturn(Try(codes.map(c => UniversityID(c.string) -> Fixtures.user.makeFoundUser(c.string)).toMap))
+      when(userLookup.getUsers(ids.map(_.string).map(UniversityID), false))
+        .thenReturn(Try(Seq(UniversityID(validId.string) -> Fixtures.user.makeFoundUser(validId.string)).toMap))
 
-      service.validateUsercodes(codesAndIds.toSet)
+      val actual = service.validateUsercodes(codesAndIds.toSet)
       verify(userLookup, times(1)).getUsers(ids.map(u => UniversityID(u.string)))
       verify(userLookup, times(1)).getUsers(codesAndIds)
+
+      actual must be (Left(Set(invalidId)))
     }
   }
 }

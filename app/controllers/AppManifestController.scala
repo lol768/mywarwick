@@ -12,10 +12,9 @@ import play.api.mvc.Action
 class AppManifestController @Inject()(
   configuration: Configuration,
   cached: Cached
-) extends BaseController {
+) extends MyController {
 
-  val senderId = configuration.getString("mywarwick.fcm.id")
-    .getOrElse(throw new IllegalStateException("Missing FCM Sender ID - set mywarwick.fcm.id"))
+  val senderId = configuration.get[String]("mywarwick.fcm.id")
 
   def getAppManifest = cached("manifest") {
     Action {

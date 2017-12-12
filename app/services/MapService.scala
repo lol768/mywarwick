@@ -3,7 +3,8 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import play.api.Configuration
-import play.api.libs.ws.{StreamedResponse, WSClient}
+import play.api.libs.ws.{WSClient, WSResponse}
+import play.api.libs.ws.ahc.StreamedResponse
 
 import scala.concurrent.Future
 
@@ -13,15 +14,17 @@ class MapService @Inject()(
   configuration: Configuration
 ) {
 
-  val url: String = configuration.getString("webservice.map.thumbnail.urlPath").getOrElse(throw new IllegalStateException("Missing Map web service thumbnail URL in config (webservice.map.thumbnail.urlPath)"))
-  val query: Seq[(String, String)] = configuration.getStringSeq("webservice.map.thumbnail.urlParams").getOrElse(Seq())
+  val conf = configuration.get[Configuration]("webservice.map.thumbnail")
+
+  val url: String = conf.get[String]("urlPath")
+  val query: Seq[(String, String)] = conf.getOptional[Seq[String]]("urlParams").getOrElse(Nil)
     .map(_.split("=", 2))
     .map { case Array(key, value) => (key, value) }
 
-  def thumbnailForLocation(lat: String, lon: String, width: Int, height: Int): Future[StreamedResponse] = {
+  def thumbnailForLocation(lat: String, lon: String, width: Int, height: Int): Future[WSResponse] = {
     ws.url(url).withMethod("GET")
-      .withQueryString(query: _*)
-      .withQueryString(
+      .addQueryStringParameters(query: _*)
+      .addQueryStringParameters(
         "gps" -> s"$lat,$lon",
         "crop" -> s"${width}x$height"
       )

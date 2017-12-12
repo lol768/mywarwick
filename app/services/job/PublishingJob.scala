@@ -63,6 +63,8 @@ class PublishActivityJob @Inject()(
   override val scheduler: SchedulerService
 ) extends PublishingJob {
 
+  import system.ThreadPools.publishing
+
   override def executeJob(context: JobExecutionContext): Unit = {
     val dataMap = context.getJobDetail.getJobDataMap
     val activityId = dataMap.getString("activityId")
@@ -89,5 +91,8 @@ class PublishActivityJob @Inject()(
       messaging.send(recipients, activity)
     }
     activityESService.index(IndexActivityRequest(activity, Some(recipients.toSeq)))
+      .failed.foreach { e =>
+        logger.error("Failed to index activity to ES", e)
+      }
   }
 }

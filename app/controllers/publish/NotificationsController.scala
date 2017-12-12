@@ -2,7 +2,7 @@ package controllers.publish
 
 import javax.inject.Inject
 
-import controllers.BaseController
+import controllers.MyController
 import models.news.NotificationData
 import models.publishing.Ability._
 import models.publishing.{Ability, Publisher}
@@ -13,7 +13,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{ActionFilter, Result}
 import services._
-import system.Validation
+import system.{ThreadPools, Validation}
 import views.html.errors
 import views.html.publish.{notifications => views}
 
@@ -22,13 +22,12 @@ import scala.concurrent.Future
 class NotificationsController @Inject()(
   val securityService: SecurityService,
   val publisherService: PublisherService,
-  val messagesApi: MessagesApi,
   val departmentInfoService: DepartmentInfoService,
   val audienceBinder: AudienceBinder,
   activityService: ActivityService,
   val newsCategoryService: NewsCategoryService,
   audienceService: AudienceService
-) extends BaseController with I18nSupport with Publishing {
+) extends MyController with I18nSupport with Publishing {
 
   val notificationMapping = mapping(
     "text" -> nonEmptyText,
@@ -52,9 +51,14 @@ class NotificationsController @Inject()(
   }
 
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
-    sharedAudienceInfo(audienceService, usercodesInAudience =>
+    sharedAudienceInfo(audienceService, groupedUsercodes =>
       Json.obj(
-        "baseAudience" -> usercodesInAudience.size
+        "baseAudience" -> groupedUsercodes.flatMap {
+          case (_, usercodes) => usercodes
+        }.size,
+        "groupedAudience" -> Json.toJson(groupedUsercodes.map {
+          case (component, usercodes) => (component.entryName, usercodes.size)
+        })
       )
     )
   }
@@ -153,6 +157,7 @@ class NotificationsController @Inject()(
   }
 
   private def NotificationBelongsToPublisher(id: String, publisherId: String) = new ActionFilter[PublisherRequest] {
+
     override protected def filter[A](request: PublisherRequest[A]): Future[Option[Result]] = {
       implicit val r = request
       val maybeBoolean = for {
@@ -168,6 +173,8 @@ class NotificationsController @Inject()(
         }
       }
     }
+
+    override protected def executionContext = ThreadPools.web
   }
 
   def renderCreateForm(publisher: Publisher, form: Form[PublishNotificationData], audience: Audience)(implicit request: PublisherRequest[_]) =

@@ -13,16 +13,19 @@ import warwick.sso._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
   def resolve(audience: Audience): Try[Set[Usercode]]
+
   def getAudience(audienceId: String): Audience
+
+  def resolveUsersForComponentsGrouped(audienceComponents: Seq[Audience.Component]): Try[Seq[(Audience.Component, Set[Usercode])]]
 
   def audienceToJson(audience: Audience): JsValue
 
-  def validateUsercodes(usercodes: Set[Usercode]): Set[Usercode]
+  def validateUsercodes(usercodes: Set[Usercode]): Either[Set[Usercode], Set[Usercode]]
 }
 
 class AudienceServiceImpl @Inject()(
@@ -40,26 +43,52 @@ class AudienceServiceImpl @Inject()(
     Await.ready(resolveFuture(audience), 30.seconds).value.get
   }
 
-  private def resolveFuture(audience: Audience): Future[Set[Usercode]] = {
+  private def resolveUsersForComponent(audienceComponent: Audience.Component): Future[Set[Usercode]] = resolveUsersForComponentWithGroup(audienceComponent).map(
+    _.flatMap {
+      case (_, usercodes) => usercodes
+    }
+  ).map(_.toSet)
+
+
+  private def resolveUsersForComponentWithGroup(audienceComponent: Audience.Component): Future[Seq[(Audience.Component, Set[Usercode])]] = {
+    def makeResult(futureUsercodes: Future[Iterable[Usercode]], group: Audience.Component = audienceComponent): Future[Seq[(Audience.Component, Set[Usercode])]] = {
+      futureUsercodes.map { usercodes =>
+        Seq(
+          (group, usercodes.toSet),
+        )
+      }
+    }
+
+    audienceComponent match {
+      case PublicAudience => makeResult(Future.successful(Seq(Usercode("*"))))
+      case WebGroupAudience(name) => makeResult(Future.fromTry(webgroupUsers(name)))
+      case ModuleAudience(code) => makeResult(audienceLookupDao.resolveModule(code))
+      case SeminarGroupAudience(groupId) => makeResult(audienceLookupDao.resolveSeminarGroup(groupId))
+      case RelationshipAudience(relationshipType, agentId) => makeResult(audienceLookupDao.resolveRelationship(agentId, relationshipType))
+      case UsercodesAudience(usercodes) => makeResult(Future.successful(usercodes))
+      case ds: DepartmentSubset => makeResult(Future.fromTry(resolveUniversityGroup(ds)))
+      case DepartmentAudience(code, subsets) => Future.sequence(subsets.map(subset =>
+        makeResult(resolveDepartmentGroup(code, subset), subset)
+      )).map(_.flatten)
+      case optIn: OptIn => makeResult(Future.successful(Nil))
+    }
+  }
+
+  def resolveUsersForComponents(audienceComponents: Seq[Audience.Component]): Future[Set[Usercode]] = {
+    Future.sequence(audienceComponents.map(this.resolveUsersForComponent)).map(_.flatten.toSet)
+  }
+
+  override def resolveUsersForComponentsGrouped(audienceComponents: Seq[Audience.Component]): Try[Seq[(Audience.Component, Set[Usercode])]] = {
+    Await.ready(Future.sequence(audienceComponents.map(this.resolveUsersForComponentWithGroup)).map(_.flatten), 30.seconds).value.get
+  }
+
+  def resolveFuture(audience: Audience): Future[Set[Usercode]] = {
     val (optInComponents, audienceComponents) = audience.components.partition {
       case _: OptIn => true
       case _ => false
     }
-    val audienceUsers: Future[Set[Usercode]] = Future.sequence(audienceComponents.map {
-      case PublicAudience => Future.successful(Seq(Usercode("*")))
-      case WebGroupAudience(name) => Future.fromTry(webgroupUsers(name))
-      case ModuleAudience(code) => audienceLookupDao.resolveModule(code)
-      case SeminarGroupAudience(groupId) => audienceLookupDao.resolveSeminarGroup(groupId)
-      case RelationshipAudience(relationshipType, agentId) => audienceLookupDao.resolveRelationship(agentId, relationshipType)
-      case UsercodesAudience(usercodes) => Future.successful(usercodes)
-      // A subset not in a department i.e. ALL undergraduates in the University
-      // Use WebGroups for these
-      case ds: DepartmentSubset => Future.fromTry(resolveUniversityGroup(ds))
-      case DepartmentAudience(code, subsets) => Future.sequence(subsets.map(subset =>
-        resolveDepartmentGroup(code, subset)
-      )).map(_.flatten.toSeq)
-      case optIn: OptIn => Future.successful(Nil) // Handled below
-    }).map(_.flatten.toSet)
+
+    val audienceUsers = this.resolveUsersForComponents(audienceComponents)
 
     if (optInComponents.nonEmpty) {
       // AND each opt-in type with the selected audience
@@ -285,12 +314,19 @@ class AudienceServiceImpl @Inject()(
     ) ++ locationsJson
   }
 
-  override def validateUsercodes(usercodes: Set[Usercode]): Set[Usercode] = {
-    val uniIds = usercodes.filter(_.string.forall(Character.isDigit))
-    val validIds = userLookupService.getUsers(uniIds.map(id => UniversityID(id.string)).toSeq).toOption
-    val validCodes = userLookupService.getUsers(usercodes.toSeq).toOption
+  override def validateUsercodes(usercodes: Set[Usercode]): Either[Set[Usercode], Set[Usercode]] = {
+    val uniIds: Set[String] = usercodes.map(_.string).filter(_.forall(Character.isDigit))
+    val validIds: Option[Map[UniversityID, User]] = userLookupService.getUsers(uniIds.map(id => UniversityID(id)).toSeq).toOption
+    val validCodes: Set[Usercode] = userLookupService.getUsers(usercodes.toSeq).toOption
+      .map(_.keys).getOrElse(Nil).toSet
 
-    (validCodes.map(_.keys).getOrElse(Nil) ++ validIds.map(_.values.map(_.usercode)).getOrElse(Nil)).toSet
+    val invalid: Set[Usercode] = usercodes.diff(validCodes).filterNot(u => validIds.map(_.keys).getOrElse(Nil).map(_.string).toSet.contains(u.string))
+
+    if (invalid.isEmpty) {
+      Right(validCodes ++ validIds.map(_.values.map(_.usercode)).getOrElse(Nil).toSet)
+    } else {
+      Left(invalid)
+    }
   }
 
 }

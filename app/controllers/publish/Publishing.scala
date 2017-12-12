@@ -9,14 +9,14 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
 import services._
 import services.dao.DepartmentInfo
-import system.{ImplicitRequestContext, Logging}
+import system.{ImplicitRequestContext, Logging, ThreadPools}
 import warwick.sso.{AuthenticatedRequest, Usercode}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOptions with PublishingActionRefiner with Logging {
-  self: ImplicitRequestContext with Controller =>
+  self: ImplicitRequestContext with BaseController =>
 
   implicit val executionContext = system.ThreadPools.web
 
@@ -92,7 +92,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
 
   def sharedAudienceInfo(
     audienceService: AudienceService,
-    processUsercodes: Set[Usercode] => JsObject
+    processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => JsObject
   )(implicit request: PublisherRequest[_]): Future[Result] =
     audienceForm.bindFromRequest.fold(
       formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
@@ -105,8 +105,9 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
                 "public" -> true
               ))))
             } else {
-              audienceService.resolve(audience).map(processUsercodes) match {
-                case Success(usercodes) => Ok(Json.toJson(API.Success[JsObject](data = usercodes)))
+              audienceService.resolveUsersForComponentsGrouped(audience.components).map(_.toMap).map(processGroupedUsercodes) match {
+                case Success(jsonData) =>
+                  Ok(Json.toJson(API.Success[JsObject](data = jsonData)))
                 case Failure(err) =>
                   logger.error("Failed to resolve audience", err)
                   InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience")))))
@@ -197,6 +198,8 @@ trait PublishingActionRefiner {
         }
       }
     }
+
+    override protected def executionContext = ThreadPools.web
 
   }
 

@@ -3,15 +3,8 @@ package helpers
 import akka.stream.Materializer
 import org.scalatest.{Args, Status, TestSuite, TestSuiteMixin}
 import play.api.libs.ws.ahc.{AhcConfigBuilder, AhcWSClient}
-import play.api.libs.ws.{WSAPI, WSClient, WSRequest}
-
-
-class WebClient(mat: Materializer) extends WSAPI {
-  private val config = new AhcConfigBuilder().build()
-
-  override val client: WSClient = new AhcWSClient(config)(mat)
-  override def url(url: String): WSRequest = client.url(url)
-}
+import play.api.libs.ws.{WSClient, WSRequest}
+import play.api.test.WsTestClient
 
 /**
   * Provides a WebClient for the lifetime of the test suite, then
@@ -23,17 +16,17 @@ class WebClient(mat: Materializer) extends WSAPI {
   */
 trait WithWebClient extends TestSuiteMixin { this: TestSuite =>
 
-  def mat: Materializer
+  implicit def mat: Materializer
 
   private var webClientOpen = false
 
-  lazy val web = {
+  implicit lazy val client = {
     webClientOpen = true
-    new WebClient(mat)
+    AhcWSClient()
   }
 
   abstract override def run(testName: Option[String], args: Args): Status =
     try super.run(testName, args)
-    finally if (webClientOpen) web.client.close()
+    finally if (webClientOpen) client.close()
 
 }

@@ -1,12 +1,13 @@
 package services.analytics
 
+import java.util.Arrays.asList
+
 import com.google.api.services.analyticsreporting.v4.model._
-import org.scalatest.mockito.MockitoSugar
 import helpers.BaseSpec
-import play.api.Configuration
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import java.util.Arrays.asList
+import org.scalatest.mockito.MockitoSugar
+import play.api.Configuration
 
 import scala.collection.JavaConverters._
 

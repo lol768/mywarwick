@@ -22,7 +22,7 @@
 
 @common.admin("Update alert") {
   @b3.form(action = controllers.publish.routes.NotificationsController.update(publisher.id, activity.id, submitted = true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.publish.routes.NotificationsController.audienceInfo(publisher.id)) {
-    @publish.notifications.contentForm(form, publisher, departmentOptions, providerOptions, permissionScope, audience, "Update", audienceJson)
+    @views.html.publish.notifications.contentForm(form, publisher, departmentOptions, providerOptions, permissionScope, audience, "Update", audienceJson)
   }
 }
 

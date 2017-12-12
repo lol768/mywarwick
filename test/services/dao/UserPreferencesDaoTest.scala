@@ -2,11 +2,12 @@ package services.dao
 
 import anorm.SqlParser._
 import anorm._
-import helpers.OneStartAppPerSuite
-import helpers.BaseSpec
+import helpers.{BaseSpec, OneStartAppPerSuite, TestApplications}
 import warwick.sso.Usercode
 
 class UserPreferencesDaoTest extends BaseSpec with OneStartAppPerSuite {
+
+  override lazy val app = TestApplications.fullNoRoutes()
 
   val dao = get[UserPreferencesDao]
 
