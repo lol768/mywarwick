@@ -13,7 +13,7 @@ import warwick.sso._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 @ImplementedBy(classOf[AudienceServiceImpl])
 trait AudienceService {
@@ -25,7 +25,7 @@ trait AudienceService {
 
   def audienceToJson(audience: Audience): JsValue
 
-  def validateUsercodes(usercodes: Set[Usercode]): Either[Set[Usercode], Set[Usercode]]
+  def validateUsers(usercodes: Set[Usercode]): Either[Set[Usercode], Set[Usercode]]
 }
 
 class AudienceServiceImpl @Inject()(
@@ -283,19 +283,68 @@ class AudienceServiceImpl @Inject()(
     ) ++ locationsJson
   }
 
-  override def validateUsercodes(usercodes: Set[Usercode]): Either[Set[Usercode], Set[Usercode]] = {
+  private def validateUsercodesOLD(usercodes: Set[Usercode]): Either[Set[Usercode], Set[Usercode]] = {
     val uniIds: Set[String] = usercodes.map(_.string).filter(_.forall(Character.isDigit))
     val validIds: Option[Map[UniversityID, User]] = userLookupService.getUsers(uniIds.map(id => UniversityID(id)).toSeq).toOption
     val validCodes: Set[Usercode] = userLookupService.getUsers(usercodes.toSeq).toOption
       .map(_.keys).getOrElse(Nil).toSet
 
-    val invalid: Set[Usercode] = usercodes.diff(validCodes).filterNot(u => validIds.map(_.keys).getOrElse(Nil).map(_.string).toSet.contains(u.string))
+    val maybeinvalidStrings: Set[String] = validIds.map(_.keys).getOrElse(Nil).map(_.string).toSet
+    val maybeInvalid: Set[Usercode] = usercodes.diff(validCodes).filterNot(u => maybeinvalidStrings.contains(u.string))
 
-    if (invalid.isEmpty) {
-      Right(validCodes ++ validIds.map(_.values.map(_.usercode)).getOrElse(Nil).toSet)
+    // NEWSTART-1235 handles case where user enters university id prepended with 'u'
+    val maybeInvalidToIds: Seq[UniversityID] = maybeInvalid.collect {
+      case uc if uc.string.startsWith("u") => UniversityID(uc.string.drop(1))
+    }.toSeq
+    val foundFromMaybeInvalid: Option[Map[UniversityID, User]] = userLookupService.getUsers(maybeInvalidToIds).toOption
+    val usercodesFromIds: Set[Usercode] = foundFromMaybeInvalid.map(_.values.map(_.usercode)).getOrElse(Nil).toSet
+
+    val actuallyInvalidString: Set[String] = foundFromMaybeInvalid.map(_.keys).getOrElse(Nil).map(u => s"u${u.string}").toSet
+    val actuallyInvalid: Set[Usercode] = maybeInvalid.filterNot(u => actuallyInvalidString.contains(u.string))
+
+    if (actuallyInvalid.isEmpty) {
+      Right(usercodesFromIds ++ validCodes ++ validIds.map(_.values.map(_.usercode)).getOrElse(Nil).toSet)
     } else {
-      Left(invalid)
+      Left(actuallyInvalid)
     }
   }
 
+  override def validateUsers(inputUsercodes: Set[Usercode]): Either[Set[Usercode], Set[Usercode]] = {
+    def validateUsercodes(usercodes: Set[Usercode]): (Set[String], Set[String]) = {
+      val valid = userLookupService.getUsers(usercodes.toSeq).toOption.map(_.keys).getOrElse(Nil).map(_.string).toSet
+      val invalid = usercodes.map(_.string).diff(valid)
+      (valid, invalid)
+    }
+
+    def validateUniIds(uniIds: Set[UniversityID]): (Set[String], Set[String]) = {
+      val valid = userLookupService.getUsers(uniIds.toSeq).toOption
+      val validUniIds: Set[String] = valid.map(_.keys).getOrElse(Nil).map(_.string).toSet
+      val validUsercodes = valid.map(_.values).getOrElse(Nil).map(_.usercode.string).toSet
+      val invalid = uniIds.map(_.string).diff(validUniIds)
+      (validUsercodes, invalid)
+    }
+
+    // split codes into allDigits and not allDigits
+    val (ids, codes) = inputUsercodes.map(_.string).partition(_.forall(Character.isDigit))
+
+    // run Usercode lookup for anything that isn't all digits
+    val (validUsercodes, invalidUsercodes) = validateUsercodes(codes.map(Usercode))
+
+    // university ids mistyped as usercodes
+    val (mistypedUniIds, badCodes) = invalidUsercodes.partition(_.matches("^u\\d.+"))
+
+    // run lookup as UniversityIDs for anything that is allDigits
+    val (validCodesFromIds, invalidCodesFromIds) = validateUniIds((ids ++ mistypedUniIds.map(_.drop(1))).map(UniversityID))
+
+    val allValid: Set[String] = validUsercodes ++ validCodesFromIds
+
+    val allInvalid: Set[String] = invalidCodesFromIds ++ badCodes
+
+    if (allInvalid.isEmpty) {
+      Right(allValid.map(Usercode))
+    }
+    else {
+      Left(allInvalid.map(Usercode))
+    }
+  }
 }
