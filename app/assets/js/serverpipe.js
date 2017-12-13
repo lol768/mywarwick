@@ -1,12 +1,14 @@
 import fetch from 'isomorphic-fetch';
 import { getCsrfHeaderName, getCsrfToken } from './csrfToken';
 import QueryString from 'query-string';
+import log from 'loglevel';
 
-export function fetchWithCredentials(url, options = {}, queryString) {
+export function fetchWithCredentials(url, options = {}, queryString = {}) {
   const headers = 'headers' in options ? options.headers : {};
+  const finalQueryString = isIE11() ? appendTimeStampToQs(queryString) : queryString;
   headers[getCsrfHeaderName()] = getCsrfToken();
   return fetch(
-    queryString ? addQsToUrl(url, queryString) : url,
+    addQsToUrl(url, finalQueryString),
     {
       credentials: 'same-origin',
       headers,
@@ -29,4 +31,19 @@ export function postJsonWithCredentials(url, body, options = {}) {
 
 export function addQsToUrl(url, qs) {
   return `${url}?${QueryString.stringify(qs)}`;
+}
+
+export function isIE11() {
+  if (!!window.MSInputMethodContext && !!document.documentMode) {
+    log.debug('Running on IE11.');
+    return true;
+  }
+  return false;
+}
+
+export function appendTimeStampToQs(originalQueryString, timeStamp = new Date().valueOf()) {
+  return {
+    ...originalQueryString,
+    ts: timeStamp,
+  }
 }
