@@ -1,10 +1,10 @@
 /* eslint-env browser */
 import fetch from 'isomorphic-fetch';
 import { getCsrfHeaderName, getCsrfToken } from './csrfToken';
-import QueryString from 'qs';
 import log from 'loglevel';
+import Url from 'url';
 
-export function isIE11() {
+function isIE11() {
   if (!!window.MSInputMethodContext && !!document.documentMode) {
     log.debug('Running on IE11.');
     return true;
@@ -13,22 +13,26 @@ export function isIE11() {
 }
 
 export function addQsToUrl(url, qs) {
-  return `${url}?${QueryString.stringify(qs)}`;
+  const parsedUrl = Url.parse(url, true);
+  parsedUrl.search = null;
+  parsedUrl.query = {
+    ...parsedUrl.query,
+    ...qs,
+  };
+  return Url.format(parsedUrl);
 }
 
-export function appendTimeStampToQs(originalQueryString, timeStamp = new Date().valueOf()) {
+export function generateTimeStampQsForUrl(timeStamp = new Date().valueOf()) {
   return {
-    ...originalQueryString,
     ts: timeStamp,
   };
 }
 
-export function fetchWithCredentials(url, options = {}, queryString = {}) {
+export function fetchWithCredentials(url, options = {}) {
   const headers = 'headers' in options ? options.headers : {};
-  const finalQueryString = isIE11() ? appendTimeStampToQs(queryString) : queryString;
   headers[getCsrfHeaderName()] = getCsrfToken();
   return fetch(
-    addQsToUrl(url, finalQueryString),
+    isIE11() ? addQsToUrl(url, generateTimeStampQsForUrl()) : url,
     {
       credentials: 'same-origin',
       headers,
