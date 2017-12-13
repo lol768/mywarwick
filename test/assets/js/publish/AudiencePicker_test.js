@@ -249,7 +249,7 @@ describe('AudiencePicker', () => {
     const props = {
       isGod: false,
       departments: {
-        MU: { name: 'Turnip Department', faculty: 'Vegetable' }, // faculty:X indicates non-teaching dept
+        MU: { name: 'Turnip Department', faculty: 'Vegetable' },
       },
       formData: {
         audience: { department: { groups: { undergraduates: undefined } } }
@@ -260,6 +260,12 @@ describe('AudiencePicker', () => {
     const mounted = enzyme.mount(<AudiencePicker {...props} />,  { context });
     expect(mounted.find('.list-group').first(1).find(RadioButton).find({value: 'Dept:UndergradStudents:All'})).to.have.length(1);
     expect(mounted.find('.list-group').first(1).find(RadioButton).find({value: 'year'})).to.have.length(1);
+    expect(mounted.find('.list-group').first(1).find(RadioButton).find({value: 'Dept:UndergradStudents:First'})).to.have.length(0);
+
+    mounted.setState({ audience: { department: { groups: { undergraduates: { year: { 'Dept:UndergradStudents:First': undefined } } } } } });
+
+    expect(mounted.find('.list-group').first(1).find(RadioButton)
+      .find({ value: 'Dept:UndergradStudents:First' })).to.have.length(1);
   })
 
 });

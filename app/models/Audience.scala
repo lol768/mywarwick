@@ -78,7 +78,7 @@ object Audience {
     def levelToNumStr(level: UndergradStudents): String = level match {
       case First => "1"
       case Second => "2"
-      case Final => "F"
+      case Final => "f"
       case _ => ""
     }
   }

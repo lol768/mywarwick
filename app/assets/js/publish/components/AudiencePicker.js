@@ -216,6 +216,7 @@ export class AudiencePicker extends React.PureComponent {
           />),
         )}
 
+        {/* The UndergradStudents options are defined only here and not passed by server */}
         <Checkbox
           handleChange={this.handleChange}
           isChecked={this.isChecked(prefixPath('.groups.undergraduates'))}

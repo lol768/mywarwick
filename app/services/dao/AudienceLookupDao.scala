@@ -40,7 +40,8 @@ trait AudienceLookupDao {
   def resolveDepartment(departmentCode: String): Future[Seq[Usercode]]
   def resolveTeachingStaff(departmentCode: String): Future[Seq[Usercode]]
   def resolveAdminStaff(departmentCode: String): Future[Seq[Usercode]]
-  def resolveUndergraduates(departmentCode: String, level: UndergradStudents): Future[Seq[Usercode]]
+  def resolveUndergraduatesInDept(departmentCode: String, level: UndergradStudents): Future[Seq[Usercode]]
+  def resolveUndergraduatesUniWide(level: UndergradStudents): Future[Seq[Usercode]]
   def resolveTaughtPostgraduates(departmentCode: String): Future[Seq[Usercode]]
   def resolveResearchPostgraduates(departmentCode: String): Future[Seq[Usercode]]
   def resolveModule(moduleCode: String): Future[Seq[Usercode]]
@@ -95,8 +96,12 @@ class TabulaAudienceLookupDao @Inject()(
     getAuthenticatedAsJson(tabulaDepartmentAdminStaffUrl(departmentCode)).map(parseUsercodeSeq)
   }
 
-  override def resolveUndergraduates(departmentCode: String, level: UndergradStudents): Future[Seq[Usercode]] = {
+  override def resolveUndergraduatesInDept(departmentCode: String, level: UndergradStudents): Future[Seq[Usercode]] = {
     getAuthenticatedAsJson(tabulaDepartmentUndergraduatesUrl(departmentCode, UndergradStudents.levelToNumStr(level))).map(parseUsercodeSeq)
+  }
+
+  override def resolveUndergraduatesUniWide(level: UndergradStudents): Future[Seq[Usercode]] = {
+    getAuthenticatedAsJson(tabulaUniWideUndergraduatesUrl(UndergradStudents.levelToNumStr(level))).map(parseUsercodeSeq)
   }
 
   override def resolveTaughtPostgraduates(departmentCode: String): Future[Seq[Usercode]] = {
@@ -196,6 +201,9 @@ trait TabulaAudienceLookupProperties {
 
   def configuration: Configuration
 
+  private val tabulaAPIBaseUrl = configuration.getOptional[String]("mywarwick.tabula.apiBase")
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.apiBase in application.conf"))
+
   private val tabulaDepartmentBaseUrl = configuration.getOptional[String]("mywarwick.tabula.department.base")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.base in application.conf"))
 
@@ -214,11 +222,14 @@ trait TabulaAudienceLookupProperties {
 
   protected def tabulaDepartmentAdminStaffUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/${departmentCode.toLowerCase}$tabulaDepartmentAdminStaffSuffix"
 
-  private val tabulaDepartmentUndergraduatesSuffix = configuration.getOptional[String]("mywarwick.tabula.department.undergraduatesSuffix")
-    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.undergraduatesSuffix in application.conf"))
+  private val tabulaUndergraduatesSuffix = configuration.getOptional[String]("mywarwick.tabula.undergraduatesSuffix")
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.undergraduatesSuffix in application.conf"))
 
   protected def tabulaDepartmentUndergraduatesUrl(departmentCode: String, level: String) =
-    s"$tabulaDepartmentBaseUrl/${departmentCode.toLowerCase}$tabulaDepartmentUndergraduatesSuffix${if (level.nonEmpty) s"?level=$level" else ""}"
+    s"$tabulaDepartmentBaseUrl/${departmentCode.toLowerCase}$tabulaUndergraduatesSuffix${if (level.nonEmpty) s"?level=$level" else ""}"
+
+  protected def tabulaUniWideUndergraduatesUrl(level: String) =
+    s"$tabulaAPIBaseUrl/$tabulaUndergraduatesSuffix${if (level.nonEmpty) s"?level=$level" else ""}"
 
   private val tabulaDepartmentPGTSuffix = configuration.getOptional[String]("mywarwick.tabula.department.pgtSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.pgtSuffix in application.conf"))

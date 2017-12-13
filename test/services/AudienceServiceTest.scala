@@ -29,7 +29,8 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
 
     def audienceDaoIsEmpty(): Unit = {
       when(audienceLookupDao.resolveDepartment(any())).thenReturn(Future.successful(Seq()))
-      when(audienceLookupDao.resolveUndergraduates(any(), any())).thenReturn(Future.successful(Seq()))
+      when(audienceLookupDao.resolveUndergraduatesInDept(any(), any())).thenReturn(Future.successful(Seq()))
+      when(audienceLookupDao.resolveUndergraduatesUniWide(any())).thenReturn(Future.successful(Seq()))
       when(audienceLookupDao.resolveTaughtPostgraduates(any())).thenReturn(Future.successful(Seq()))
       when(audienceLookupDao.resolveResearchPostgraduates(any())).thenReturn(Future.successful(Seq()))
       when(audienceLookupDao.resolveTeachingStaff(any())).thenReturn(Future.successful(Seq()))
@@ -76,13 +77,23 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       verifyZeroInteractions(audienceLookupDao)
     }
 
-    "search for all undergrads in WebGroups" in new Ctx {
-      webgroupsIsEmpty()
-      service.resolve(Audience(Seq(UndergradStudents.All))).get
-      verify(webgroups).getWebGroup(GroupName("all-studenttype-undergraduate-full-time"))
-      verify(webgroups).getWebGroup(GroupName("all-studenttype-undergraduate-part-time"))
-      verifyNoMoreInteractions(webgroups)
-      verifyZeroInteractions(audienceLookupDao)
+    "search for first and second year undergrads in Tabula" in new Ctx {
+      audienceDaoIsEmpty()
+      import UndergradStudents._
+      service.resolve(Audience(Seq(First, Second))).get
+      verify(audienceLookupDao).resolveUndergraduatesUniWide(First)
+      verify(audienceLookupDao).resolveUndergraduatesUniWide(Second)
+      verifyNoMoreInteractions(audienceLookupDao)
+      verifyZeroInteractions(webgroups)
+    }
+
+    "search for dept undergrads in Tabula" in new Ctx {
+      audienceDaoIsEmpty()
+      val deptCode = "AH"
+      service.resolve(Audience(Seq(DepartmentAudience(deptCode, Seq(UndergradStudents.All))))).get
+      verify(audienceLookupDao).resolveUndergraduatesInDept(deptCode, UndergradStudents.All)
+      verifyNoMoreInteractions(audienceLookupDao)
+      verifyZeroInteractions(webgroups)
     }
 
     "search for all teaching staff in WebGroups" in new Ctx {
@@ -121,9 +132,9 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
 
     "search for all undergrads in department" in new Ctx {
       val deptCode = "ch"
-      when(audienceLookupDao.resolveUndergraduates(deptCode, UndergradStudents.All)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
+      when(audienceLookupDao.resolveUndergraduatesInDept(deptCode, UndergradStudents.All)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
       service.resolve(Audience(Seq(DepartmentAudience(deptCode, Seq(UndergradStudents.All))))).get
-      verify(audienceLookupDao, times(1)).resolveUndergraduates(deptCode, UndergradStudents.All)
+      verify(audienceLookupDao, times(1)).resolveUndergraduatesInDept(deptCode, UndergradStudents.All)
       verifyNoMoreInteractions(audienceLookupDao)
       verifyZeroInteractions(webgroups)
     }
@@ -205,8 +216,8 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       verify(webgroups).getWebGroup(GroupName("in-winners"))
       verify(webgroups).getWebGroup(GroupName("in-losers"))
       verify(audienceLookupDao).resolveModule("CS102")
-      verify(audienceLookupDao).resolveUndergraduates("CH", UndergradStudents.All)
-      verify(audienceLookupDao).resolveUndergraduates("PH", UndergradStudents.All)
+      verify(audienceLookupDao).resolveUndergraduatesInDept("CH", UndergradStudents.All)
+      verify(audienceLookupDao).resolveUndergraduatesInDept("PH", UndergradStudents.All)
       verify(audienceLookupDao).resolveTeachingStaff("PH")
       verifyNoMoreInteractions(webgroups)
       verifyNoMoreInteractions(audienceLookupDao)
@@ -215,7 +226,7 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
     "deduplicate usercodes" in new Ctx {
       webgroupsAllContainBarry()
       val users: Set[Usercode] = service.resolve(Audience(Seq(
-        ResearchPostgrads, TaughtPostgrads, UndergradStudents.All
+        ResearchPostgrads, TaughtPostgrads, AdminStaff
       ))).get
 
       users must be (Set(Usercode("cuddz")))
