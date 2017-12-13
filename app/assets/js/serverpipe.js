@@ -1,14 +1,17 @@
 import fetch from 'isomorphic-fetch';
 import { getCsrfHeaderName, getCsrfToken } from './csrfToken';
+import QueryString from 'query-string';
 
-export function fetchWithCredentials(url, options = {}) {
+export function fetchWithCredentials(url, options = {}, queryString) {
   const headers = 'headers' in options ? options.headers : {};
   headers[getCsrfHeaderName()] = getCsrfToken();
-  return fetch(url, {
-    credentials: 'same-origin',
-    headers,
-    ...options,
-  });
+  return fetch(
+    queryString ? addQsToUrl(url, queryString) : url,
+    {
+      credentials: 'same-origin',
+      headers,
+      ...options,
+    });
 }
 
 export function postJsonWithCredentials(url, body, options = {}) {
@@ -22,4 +25,8 @@ export function postJsonWithCredentials(url, body, options = {}) {
     headers,
     ...options,
   });
+}
+
+export function addQsToUrl(url, qs) {
+  return `${url}?${QueryString.stringify(qs)}`;
 }
