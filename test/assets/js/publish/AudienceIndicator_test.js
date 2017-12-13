@@ -151,4 +151,28 @@ describe('AudienceIndicator', () => {
     expect(render.html()).to.not.contain('All Undergrad Students');
   });
 
+  it('groups undergraduate subsets and combines audience count', () => {
+    const props = {
+      audienceComponents: {
+        department: { name: 'Anatomy and Physiology' },
+        audience: { department: { groups: { undergraduates: { year: {
+              'Dept:UndergradStudents:First': undefined,
+              'Dept:UndergradStudents:Second': undefined,
+              'Dept:UndergradStudents:Final': undefined,
+            } } } } }
+      },
+    };
+
+    const render = enzyme.shallow(<AudienceIndicator {...props} />);
+    render.setState({
+      groupedAudience: {
+        First: 2,
+        Second: 7,
+        Final: 11,
+      }
+    });
+
+    expect(render.html()).to.contain(`All first, second and final year Undergraduates in ${props.audienceComponents.department.name}: 20 people`)
+  })
+
 });
