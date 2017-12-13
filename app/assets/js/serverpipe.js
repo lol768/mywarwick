@@ -1,7 +1,7 @@
 /* eslint-env browser */
 import fetch from 'isomorphic-fetch';
 import { getCsrfHeaderName, getCsrfToken } from './csrfToken';
-import QueryString from 'query-string';
+import QueryString from 'qs';
 import log from 'loglevel';
 
 export function isIE11() {
