@@ -1,7 +1,27 @@
+/* eslint-env browser */
 import fetch from 'isomorphic-fetch';
 import { getCsrfHeaderName, getCsrfToken } from './csrfToken';
 import QueryString from 'query-string';
 import log from 'loglevel';
+
+export function isIE11() {
+  if (!!window.MSInputMethodContext && !!document.documentMode) {
+    log.debug('Running on IE11.');
+    return true;
+  }
+  return false;
+}
+
+export function addQsToUrl(url, qs) {
+  return `${url}?${QueryString.stringify(qs)}`;
+}
+
+export function appendTimeStampToQs(originalQueryString, timeStamp = new Date().valueOf()) {
+  return {
+    ...originalQueryString,
+    ts: timeStamp,
+  };
+}
 
 export function fetchWithCredentials(url, options = {}, queryString = {}) {
   const headers = 'headers' in options ? options.headers : {};
@@ -29,21 +49,3 @@ export function postJsonWithCredentials(url, body, options = {}) {
   });
 }
 
-export function addQsToUrl(url, qs) {
-  return `${url}?${QueryString.stringify(qs)}`;
-}
-
-export function isIE11() {
-  if (!!window.MSInputMethodContext && !!document.documentMode) {
-    log.debug('Running on IE11.');
-    return true;
-  }
-  return false;
-}
-
-export function appendTimeStampToQs(originalQueryString, timeStamp = new Date().valueOf()) {
-  return {
-    ...originalQueryString,
-    ts: timeStamp,
-  }
-}
