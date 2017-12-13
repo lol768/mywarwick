@@ -1,5 +1,4 @@
-import { addQsToUrl } from 'serverpipe';
-
+import { addQsToUrl, appendTimeStampToQs } from 'serverpipe';
 
 describe('serverpipe', () => {
 
@@ -14,5 +13,22 @@ describe('serverpipe', () => {
     const expected = `/api/test?cake=salted&ts=123`;
     assert.equal(addQsToUrl(originalUrl, qs), expected);
   });
+
+  it('append timestamp to a given querystring', () => {
+
+    const qs = {
+      name: 'who',
+    };
+
+    const timeStamp = 123;
+    const result = appendTimeStampToQs(qs, timeStamp);
+    const expected = {
+      name: 'who',
+      ts: 123,
+    };
+
+    assert.deepEqual(result, expected);
+
+  })
 
 });
