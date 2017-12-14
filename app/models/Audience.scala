@@ -161,7 +161,7 @@ object Audience {
 
     def maybeAllValidUsercodes(usercodes: Set[Usercode]): Boolean = usercodes.forall(maybeValidUsercode)
 
-    def maybeAllInvalidUsercodes(usercodes: Set[Usercode]): Boolean = !maybeAllValidUsercodes(usercodes)
+    def maybeAllInvalidUsercodes(usercodes: Set[Usercode]): Boolean = usercodes.forall(maybeInvalidUsercode)
 
     def getLikelyValidUsercodes(usercodesAudiences: UsercodesAudience): Set[Usercode] = {
       usercodesAudiences.usercodes.filter(maybeValidUsercode)
