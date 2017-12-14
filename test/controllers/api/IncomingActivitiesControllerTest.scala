@@ -223,6 +223,26 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
       (json \ "errors" \ 0 \ "message").as[String] mustBe "All usercodes from this request seem to be invalid"
     }
 
+    "happy with empty useraudiences" in {
+      when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
+      when(publisherService.getRoleForUser(any(), any())).thenReturn(APINotificationsManager)
+      when(activityService.save(any(), any())).thenReturn(Right("created-activity-id"))
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(Json.obj(
+        "type" -> "due",
+        "title" -> "Coursework due soon",
+        "url" -> "http://tabula.warwick.ac.uk",
+        "text" -> "Your submission for CS118 is due tomorrow",
+        "recipients" -> Json.obj(
+          "users" -> Json.arr(),
+          "groups" -> Json.arr(
+            "in-trigue"
+          )
+        )
+      )))
+
+      status(result) mustBe CREATED
+    }
+
     "fail for too many recipients" in {
       when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
       when(publisherService.find(tabulaPublisherId)).thenReturn(Some(tabulaPublisher.copy(maxRecipients = Some(1))))
