@@ -10,7 +10,7 @@ import org.scalatest.mockito.MockitoSugar
 import models.publishing.Publisher
 import play.api.cache.CacheApi
 import play.api.i18n.MessagesApi
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.json.{JsObject, JsString, JsUndefined, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
@@ -239,8 +239,32 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
           )
         )
       )))
+      status(result) mustBe CREATED
+      val json = contentAsJson(result)
+      (json \ "warnings").asOpt[String].isEmpty mustBe true
+    }
+
+    "happy with all valid usercodes" in {
+      when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
+      when(publisherService.getRoleForUser(any(), any())).thenReturn(APINotificationsManager)
+      when(activityService.save(any(), any())).thenReturn(Right("created-activity-id"))
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(Json.obj(
+        "type" -> "due",
+        "title" -> "Coursework due soon",
+        "url" -> "http://tabula.warwick.ac.uk",
+        "text" -> "Your submission for CS118 is due tomorrow",
+        "recipients" -> Json.obj(
+          "users" -> Json.arr(
+            "sdf",
+            "123sdf",
+            "9jd@sdf.com"
+          ),
+        )
+      )))
 
       status(result) mustBe CREATED
+      val json = contentAsJson(result)
+      (json \ "warnings").asOpt[String].isEmpty mustBe true
     }
 
     "fail for too many recipients" in {
