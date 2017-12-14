@@ -4,12 +4,14 @@ import { getCsrfHeaderName, getCsrfToken } from './csrfToken';
 import log from 'loglevel';
 import Url from 'url';
 
-function isIE11() {
-  if (!!window.MSInputMethodContext && !!document.documentMode) {
-    log.debug('Running on IE11.');
-    return true;
+function isIE() {
+  const ua = window.navigator.userAgent;
+  const msie = ua.indexOf('MSIE ');
+  const ie = (msie > 0 || !!navigator.userAgent.match(/Trident.*rv:11\./));
+  if (ie) {
+    log.debug('Running on MS IE.');
   }
-  return false;
+  return ie;
 }
 
 export function addQsToUrl(url, qs) {
@@ -32,7 +34,7 @@ export function fetchWithCredentials(url, options = {}) {
   const headers = 'headers' in options ? options.headers : {};
   headers[getCsrfHeaderName()] = getCsrfToken();
   return fetch(
-    isIE11() ? addQsToUrl(url, generateTimeStampQsForUrl()) : url,
+    isIE() ? addQsToUrl(url, generateTimeStampQsForUrl()) : url,
     {
       credentials: 'same-origin',
       headers,
