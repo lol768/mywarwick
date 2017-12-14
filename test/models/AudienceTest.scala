@@ -29,9 +29,35 @@ class AudienceTest extends BaseSpec {
       val invalid = Seq(
         Usercode("*jd0"),
         Usercode("abcsdf,skkdsf,ds233"),
-        Usercode("u1444444"),
+        Usercode("u1444444")
       )
       Audience.helper.areValidUsercodes(invalid) mustBe false
+    }
+
+    "be able to handle empty usercode audience" in {
+      val emptyUsercodes = Seq.empty[Usercode]
+      val emptyUsercodeAudiences = Audience.UsercodesAudience(emptyUsercodes.toSet)
+      Audience.helper.areValidUsercodes(emptyUsercodes) mustBe true
+      Audience.helper.getLikelyInvalidUsercodes(emptyUsercodeAudiences) mustBe Set()
+      Audience.helper.getLikelyValidUsercodes(emptyUsercodeAudiences) mustBe Set()
+    }
+
+    "be able to get invalid and valids usercodes from usercode audiences" in {
+      val usercodes = Seq(
+        Usercode("*jd0"),
+        Usercode("abcsdf,skkdsf,ds233"),
+        Usercode("u1444444")
+      )
+      val usercodesAudience = Audience.UsercodesAudience(usercodes.toSet)
+      Audience.helper.getLikelyInvalidUsercodes(usercodesAudience) mustBe Set(
+        Usercode("*jd0"),
+        Usercode("abcsdf,skkdsf,ds233")
+      )
+
+      Audience.helper.getLikelyValidUsercodes(usercodesAudience) mustBe Set(
+        Usercode("u1444444")
+      )
+
     }
 
     "be able to tell usercodes are valid" in {
