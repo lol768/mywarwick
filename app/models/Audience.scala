@@ -159,7 +159,7 @@ object Audience {
 
     def maybeInvalidUsercode(usercode: Usercode): Boolean = !maybeValidUsercode(usercode)
 
-    def maybeAllValidUsercodes(usercodes: Set[Usercode]): Boolean = usercodes.isEmpty || usercodes.forall(maybeValidUsercode)
+    def maybeAllValidUsercodes(usercodes: Set[Usercode]): Boolean = usercodes.forall(maybeValidUsercode)
 
     def maybeAllInvalidUsercodes(usercodes: Set[Usercode]): Boolean = !maybeAllValidUsercodes(usercodes)
 
