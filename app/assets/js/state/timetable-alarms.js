@@ -2,6 +2,7 @@
 import { pick } from 'lodash-es';
 
 const UPDATE = 'TIMETABLE_ALARMS_UPDATE';
+const SET_NATIVE = 'SET_NATIVE';
 
 const initialState = {
   enabled: true,
@@ -14,6 +15,16 @@ export function updateNativeWithState(state) {
     native.setTimetableNotificationsEnabled(state.enabled);
     native.setTimetableNotificationTiming(state.minutesBeforeEvent);
   }
+}
+
+export function setNative(payload) {
+  return (dispatch, getState) => {
+    dispatch({
+      type: SET_NATIVE,
+      payload,
+    });
+    updateNativeWithState(getState().timetableAlarms);
+  };
 }
 
 export function update(payload) {
