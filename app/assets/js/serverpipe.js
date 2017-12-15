@@ -24,17 +24,11 @@ export function addQsToUrl(url, qs) {
   return Url.format(parsedUrl);
 }
 
-export function generateTimeStampQsForUrl(timeStamp = new Date().valueOf()) {
-  return {
-    ts: timeStamp,
-  };
-}
-
 export function fetchWithCredentials(url, options = {}) {
   const headers = 'headers' in options ? options.headers : {};
   headers[getCsrfHeaderName()] = getCsrfToken();
   return fetch(
-    isIE() ? addQsToUrl(url, generateTimeStampQsForUrl()) : url,
+    isIE() ? addQsToUrl(url, {ts: new Date().valueOf()}) : url,
     {
       credentials: 'same-origin',
       headers,
