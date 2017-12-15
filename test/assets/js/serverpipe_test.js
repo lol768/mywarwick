@@ -1,4 +1,4 @@
-import { addQsToUrl, generateTimeStampQsForUrl } from 'serverpipe';
+import { addQsToUrl } from 'serverpipe';
 
 describe('serverpipe', () => {
 
