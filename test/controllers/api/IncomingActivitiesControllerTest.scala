@@ -10,10 +10,11 @@ import org.scalatest.mockito.MockitoSugar
 import models.publishing.Publisher
 import play.api.cache.CacheApi
 import play.api.i18n.MessagesApi
-import play.api.libs.json.{JsObject, JsString, JsUndefined, Json}
+import play.api.libs.json._
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
+import services.ActivityError.InvalidUsercodeAudience
 import services._
 import warwick.sso._
 
@@ -194,7 +195,7 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
 
       status(result) mustBe CREATED
       val json = contentAsJson(result)
-
+      (json \ "warnings").asOpt[JsArray].isDefined mustBe true
       (json \ "warnings" \ 0 \ "message").as[String] mustBe "The request contains one or more invalid usercode: List(Usercode(invalid,sd))"
     }
 
@@ -219,7 +220,7 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
 
       status(result) mustBe BAD_REQUEST
       val json = contentAsJson(result)
-
+      (json \ "warnings").asOpt[JsArray].isEmpty mustBe true
       (json \ "errors" \ 0 \ "message").as[String] mustBe "All usercodes from this request seem to be invalid"
     }
 
@@ -241,7 +242,9 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
       )))
       status(result) mustBe CREATED
       val json = contentAsJson(result)
-      (json \ "warnings").asOpt[String].isEmpty mustBe true
+      (json \ "warnings").asOpt[JsArray].isEmpty mustBe true
+
+//      (json \ "warnings").asOpt[List.type].isEmpty mustBe true
     }
 
     "happy with all valid usercodes" in {
@@ -264,7 +267,7 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
 
       status(result) mustBe CREATED
       val json = contentAsJson(result)
-      (json \ "warnings").asOpt[String].isEmpty mustBe true
+      (json \ "warnings").asOpt[JsArray].isEmpty mustBe true
     }
 
     "fail for too many recipients" in {
