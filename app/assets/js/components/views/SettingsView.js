@@ -580,7 +580,7 @@ class SettingsView extends HideableView {
             </div>
             }
             <div className="list-group-item">
-              {SettingsView.renderSetting('info-circle', this.getVersionString(), null)}
+              {SettingsView.renderSetting('info-circle', `Version: ${this.getVersionString()}`, null)}
             </div>
           </div>
 
