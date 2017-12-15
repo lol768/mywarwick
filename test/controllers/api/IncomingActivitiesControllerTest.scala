@@ -195,7 +195,7 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
 
       status(result) mustBe CREATED
       val json = contentAsJson(result)
-      (json \ "warnings").asOpt[JsArray].isDefined mustBe true
+      (json \ "warnings").isDefined mustBe true
       (json \ "warnings" \ 0 \ "message").as[String] mustBe "The request contains one or more invalid usercode: List(Usercode(invalid,sd))"
     }
 
@@ -220,7 +220,7 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
 
       status(result) mustBe BAD_REQUEST
       val json = contentAsJson(result)
-      (json \ "warnings").asOpt[JsArray].isEmpty mustBe true
+      (json \ "warnings").isEmpty mustBe true
       (json \ "errors" \ 0 \ "message").as[String] mustBe "All usercodes from this request seem to be invalid"
     }
 
@@ -242,7 +242,7 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
       )))
       status(result) mustBe CREATED
       val json = contentAsJson(result)
-      (json \ "warnings").asOpt[JsArray].isEmpty mustBe true
+      (json \ "warnings").isEmpty mustBe true
 
 //      (json \ "warnings").asOpt[List.type].isEmpty mustBe true
     }
@@ -267,7 +267,7 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
 
       status(result) mustBe CREATED
       val json = contentAsJson(result)
-      (json \ "warnings").asOpt[JsArray].isEmpty mustBe true
+      (json \ "warnings").isEmpty mustBe true
     }
 
     "fail for too many recipients" in {
