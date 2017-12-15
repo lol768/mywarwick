@@ -172,7 +172,7 @@ describe('AudienceIndicator', () => {
       }
     });
 
-    expect(render.html()).to.contain(`All first, second and final year Undergraduates in ${props.audienceComponents.department.name}: 20 people`)
+    expect(render.html()).to.contain(`All first, second, and final year Undergraduates in ${props.audienceComponents.department.name}: 20 people`)
   })
 
 });
