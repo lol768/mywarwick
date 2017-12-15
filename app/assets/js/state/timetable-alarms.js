@@ -1,6 +1,20 @@
+/* eslint-env browser */
 import { pick } from 'lodash-es';
 
 const UPDATE = 'TIMETABLE_ALARMS_UPDATE';
+
+const initialState = {
+  enabled: true,
+  minutesBeforeEvent: 15,
+};
+
+export function updateNativeWithState(state) {
+  const native = window.MyWarwickNative; // eslint-disable-line no-undef
+  if (!!native && 'setTimetableNotificationsEnabled' in native) {
+    native.setTimetableNotificationsEnabled(state.enabled);
+    native.setTimetableNotificationTiming(state.minutesBeforeEvent);
+  }
+}
 
 export function update(payload) {
   return (dispatch, getState) => {
@@ -8,22 +22,9 @@ export function update(payload) {
       type: UPDATE,
       payload,
     });
-
-    const { enabled, minutesBeforeEvent } = getState().timetableAlarms;
-
-    const native = window.MyWarwickNative; // eslint-disable-line no-undef
-
-    if (!!native && 'setTimetableNotificationsEnabled' in native) {
-      native.setTimetableNotificationsEnabled(enabled);
-      native.setTimetableNotificationTiming(minutesBeforeEvent);
-    }
+    updateNativeWithState(getState().timetableAlarms);
   };
 }
-
-const initialState = {
-  enabled: false,
-  minutesBeforeEvent: 15,
-};
 
 export function reducer(state = initialState, action) {
   if (action.type === UPDATE) {
