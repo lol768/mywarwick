@@ -10,7 +10,7 @@ const initialState = {
 };
 
 export function updateNativeWithState(state) {
-  const native = window.MyWarwickNative; // eslint-disable-line no-undef
+  const native = window.MyWarwickNative;
   if (!!native && 'setTimetableNotificationsEnabled' in native) {
     native.setTimetableNotificationsEnabled(state.enabled);
     native.setTimetableNotificationTiming(state.minutesBeforeEvent);
