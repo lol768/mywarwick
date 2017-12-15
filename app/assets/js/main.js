@@ -205,7 +205,7 @@ export function launch(userData) {
   const persistedUserLinks = persisted('user.links', user.receiveSSOLinks);
 
   persisted('timetableAlarms', timetableAlarms.update).then(() => {
-    store.dispatch(timetableAlarms.setNative)
+    store.dispatch(timetableAlarms.setNative);
   });
   /** Initial requests for data */
 
