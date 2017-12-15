@@ -19,10 +19,9 @@ export function pluralise(unit, count, plural) {
  * @returns {string}
  */
 export function mkString(list) {
-  const len = list.length;
-  if (!list || len === 0) return '';
-  else if (len === 1) return list[0];
-  return `${list.slice(0, len - 1).join(', ')}${len > 2 ? ',' : ''} and ${list[len - 1]}`;
+  if (!list || list.length === 0) return '';
+  else if (list.length === 1) return list[0];
+  return `${list.slice(0, list.length - 1).join(', ')}${list.length > 2 ? ',' : ''} and ${list[list.length - 1]}`;
 }
 
 export function isiPhoneX() {

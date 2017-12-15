@@ -9,6 +9,21 @@ describe ('Javascript helpers', () => {
     assert.equal(expected, actual);
   });
 
+  it ('#mkString - should not error on !list', () => {
+    const arrUndef = undefined;
+    const arrNull = null;
+    const arrEmpty = [];
+
+    const actualUndef = mkString(arrUndef);
+    const actualNull = mkString(arrNull);
+    const actualEmpty = mkString(arrEmpty);
+
+    const expected = '';
+    assert.equal(expected, actualUndef);
+    assert.equal(expected, actualNull);
+    assert.equal(expected, actualEmpty);
+  });
+
   it ('#mkString - should handle string array with length 1', () => {
     const arr = ['Nic'];
     const expected = 'Nic';
