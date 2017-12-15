@@ -28,7 +28,7 @@ export function fetchWithCredentials(url, options = {}) {
   const headers = 'headers' in options ? options.headers : {};
   headers[getCsrfHeaderName()] = getCsrfToken();
   return fetch(
-    isIE() ? addQsToUrl(url, {ts: new Date().valueOf()}) : url,
+    isIE() ? addQsToUrl(url, { ts: new Date().valueOf() }) : url,
     {
       credentials: 'same-origin',
       headers,
