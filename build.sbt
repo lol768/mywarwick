@@ -16,7 +16,9 @@ updateOptions := updateOptions.value.withCachedResolution(true)
 val gitRevision = SettingKey[String]("gitRevision")
 gitRevision := git.gitHeadCommit.value.getOrElse("Unset")
 
-lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala, BuildInfoPlugin)
+lazy val root = (project in file("."))
+  .enablePlugins(WarwickProject, PlayScala, PlayNettyServer, BuildInfoPlugin)
+  .disablePlugins(PlayAkkaHttpServer)
   .configs(config("fun").extend(Test))
   .settings(
     Gulp.settings,
