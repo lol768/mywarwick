@@ -18,7 +18,7 @@ object Audience {
 
   def usercodes(usercodes: Seq[Usercode]): Audience = {
     Audience(usercodes match {
-      case _::_ => Seq(UsercodesAudience(usercodes.toSet))
+      case _ :: _ => Seq(UsercodesAudience(usercodes.toSet))
       case _ => Nil
     })
   }
@@ -45,8 +45,13 @@ object Audience {
 
   case class UsercodesAudience(usercodes: Set[Usercode]) extends DepartmentSubset {
     def size: Int = usercodes.size
+
     def getLikelyInvalidUsercodes: Set[Usercode] = Audience.helper.getLikelyInvalidUsercodes(this)
-    def allUsercodesAreLikelyInvalid: Boolean = getLikelyInvalidUsercodes.size == size
+
+    def allUsercodesAreLikelyInvalid: Boolean = Audience.helper.maybeAllInvalidUsercodes(usercodes)
+
+    def allUsercodesAreLikelyValid: Boolean = Audience.helper.maybeAllValidUsercodes(usercodes)
+
     def getLikelyValidUsercodes: Set[Usercode] = Audience.helper.getLikelyValidUsercodes(this)
   }
 
@@ -126,7 +131,7 @@ object Audience {
       case optInRegex(optInType, optInValue) if optInType == LocationOptIn.optInType => LocationOptIn.fromValue(optInValue)
       case string if string.nonEmpty => {
         val validUsercodes: Set[Usercode] = string.split("\n").map(_.trim).flatMap { usercode =>
-          if(!usercode.contains(":")) Some(Usercode(usercode))
+          if (!usercode.contains(":")) Some(Usercode(usercode))
           else None
         }.toSet
         if (validUsercodes.nonEmpty)
@@ -150,18 +155,26 @@ object Audience {
   object helper {
     val validUsercodePattern: Regex = """^([a-zA-Z0-9\_\-\@\.]+)\Z""".r
 
-    def isLikelyValidUsercode(usercode: Usercode): Boolean = validUsercodePattern.findAllMatchIn(usercode.string).nonEmpty
+    def maybeValidUsercode(usercode: Usercode): Boolean = validUsercodePattern.findAllMatchIn(usercode.string).nonEmpty
 
-    def maybeInvalidUsercode(usercode: Usercode): Boolean = !isLikelyValidUsercode(usercode)
+    def maybeInvalidUsercode(usercode: Usercode): Boolean = !maybeValidUsercode(usercode)
 
-    def areValidUsercodes(usercodes: Seq[Usercode]): Boolean = usercodes.forall(isLikelyValidUsercode)
+    def maybeAllValidUsercodes(usercodes: Set[Usercode]): Boolean = usercodes.forall(maybeValidUsercode)
+
+    def maybeAllInvalidUsercodes(usercodes: Set[Usercode]): Boolean = {
+      if (usercodes.isEmpty) {
+        return false
+      }
+      usercodes.forall(maybeInvalidUsercode)
+    }
 
     def getLikelyValidUsercodes(usercodesAudiences: UsercodesAudience): Set[Usercode] = {
-      usercodesAudiences.usercodes.filterNot(isLikelyValidUsercode)
+      usercodesAudiences.usercodes.filter(maybeValidUsercode)
     }
 
     def getLikelyInvalidUsercodes(usercodesAudiences: UsercodesAudience): Set[Usercode] = {
       usercodesAudiences.usercodes.filter(maybeInvalidUsercode)
     }
   }
+
 }
