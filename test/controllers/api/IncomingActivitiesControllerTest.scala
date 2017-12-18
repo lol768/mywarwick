@@ -243,8 +243,6 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
       status(result) mustBe CREATED
       val json = contentAsJson(result)
       (json \ "warnings").isEmpty mustBe true
-
-//      (json \ "warnings").asOpt[List.type].isEmpty mustBe true
     }
 
     "happy with all valid usercodes" in {
