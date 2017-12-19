@@ -17,6 +17,22 @@ import { loadDeviceDetails, signOut } from '../../userinfo';
 import SwitchListGroupItem from '../ui/SwitchListGroupItem';
 import wrapKeyboardSelect from '../../keyboard-nav';
 
+const ListGroupItemBtn = props => (
+  <div
+    className="list-group-item"
+    role="button"
+    tabIndex={0}
+    onClick={props.handler}
+    onKeyUp={props.handler}
+  >
+    {props.children}
+  </div>
+);
+
+ListGroupItemBtn.propTypes = {
+  handler: PropTypes.func.isRequired,
+  children: PropTypes.element.isRequired,
+};
 
 class SettingsView extends HideableView {
   constructor(props) {
@@ -349,6 +365,12 @@ class SettingsView extends HideableView {
     wrapKeyboardSelect(loadDeviceDetails, e);
   }
 
+  static onWhatsNew(e) {
+    wrapKeyboardSelect(() => {
+      window.location = 'https://warwick.ac.uk/mw-support/whatsnew';
+    }, e);
+  }
+
   static onSignOut(e) {
     wrapKeyboardSelect(signOut, e);
   }
@@ -366,51 +388,33 @@ class SettingsView extends HideableView {
           </div>
 
           <div className="list-group setting-colour-0">
-            <div
-              className="list-group-item"
-              role="button"
-              tabIndex={0}
-              onClick={this.onTilePreferences}
-              onKeyUp={this.onTilePreferences}
-            >
+            <ListGroupItemBtn handler={this.onTilePreferences}>
               {SettingsView.renderSetting(
                 'check-square-o',
                 'Tile preferences',
                 <i className="fa fa-fw fa-chevron-right" />,
               )}
-            </div>
+            </ListGroupItemBtn>
             {SettingsView.shouldShowColourSchemes() &&
-            <div
-              className="list-group-item"
-              role="button"
-              tabIndex={0}
-              onClick={this.onColourScheme}
-              onKeyUp={this.onColourScheme}
-            >
+            <ListGroupItemBtn handler={this.onColourScheme}>
               {SettingsView.renderSetting(
                 'paint-brush',
                 'Colour scheme',
                 this.chosenSchemeName(),
                 !this.props.isOnline,
               )}
-            </div>
+            </ListGroupItemBtn>
             }
           </div>
 
           <div className="list-group setting-colour-0">
-            <div
-              className="list-group-item"
-              role="button"
-              tabIndex={0}
-              onClick={this.onNotificationMutes}
-              onKeyUp={this.onNotificationMutes}
-            >
+            <ListGroupItemBtn handler={this.onNotificationMutes}>
               {SettingsView.renderSetting(
                 'bell-slash-o',
                 'Muted alerts',
                 SettingsView.renderSingleCount(this.props.mutes),
               )}
-            </div>
+            </ListGroupItemBtn>
             <SwitchListGroupItem
               id="copyNotificationsEmail"
               value=""
@@ -425,13 +429,7 @@ class SettingsView extends HideableView {
               this.props.emailNotificationsOptIn.fetching}
               disabled={!this.props.isOnline}
             />
-            <div
-              className="list-group-item"
-              role="button"
-              tabIndex={0}
-              onClick={this.onSMS}
-              onKeyUp={this.onSMS}
-            >
+            <ListGroupItemBtn handler={this.onSMS}>
               {SettingsView.renderSetting(
                 'mobile',
                 'Copy my alerts to SMS',
@@ -439,15 +437,12 @@ class SettingsView extends HideableView {
                   ...this.props.smsNotifications,
                 }),
               )}
-            </div>
+            </ListGroupItemBtn>
           </div>
 
           <div className="list-group setting-colour-1">
-            {/* <div
-            className="list-group-item"
-            role="button"
-            tabIndex={0}
-            onClick={ this.props.newsCategories.fetched && !this.props.newsCategories.failed ? () =>
+            {/* <ListGroupItemBtn
+            handler={ this.props.newsCategories.fetched && !this.props.newsCategories.failed ? () =>
               this.props.dispatch(
                 push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`),
               ) : null
@@ -461,13 +456,7 @@ class SettingsView extends HideableView {
               }),
             ) }
           </div>*/}
-            <div
-              className="list-group-item"
-              role="button"
-              tabIndex={0}
-              onClick={this.onLocationPreferences}
-              onKeyUp={this.onLocationPreferences}
-            >
+            <ListGroupItemBtn handler={this.onLocationPreferences}>
               {SettingsView.renderSetting(
                 'map-signs',
                 'Location preferences',
@@ -480,18 +469,12 @@ class SettingsView extends HideableView {
                   isOnline: this.props.isOnline,
                 }),
               )}
-            </div>
+            </ListGroupItemBtn>
           </div>
 
           {SettingsView.shouldShowTimetableAlarms() &&
           <div className="list-group setting-colour-2">
-            <div
-              className="list-group-item"
-              role="button"
-              tabIndex={0}
-              onClick={this.onTimetableAlarms}
-              onKeyUp={this.onTimetableAlarms}
-            >
+            <ListGroupItemBtn handler={this.onTimetableAlarms}>
               {SettingsView.renderSetting(
                 'bell',
                 'Timetable alarms',
@@ -502,18 +485,12 @@ class SettingsView extends HideableView {
                   <i className="fa fa-fw fa-chevron-right" />
                 </div>,
               )}
-            </div>
+            </ListGroupItemBtn>
           </div>
           }
 
           <div className="list-group setting-colour-2">
-            <div
-              className="list-group-item"
-              role="button"
-              tabIndex={0}
-              onClick={this.onActivityFilter}
-              onKeyUp={this.onActivityFilter}
-            >
+            <ListGroupItemBtn handler={this.onActivityFilter}>
               {SettingsView.renderSetting(
                 'dashboard',
                 'Activity filter',
@@ -522,11 +499,8 @@ class SettingsView extends HideableView {
                   this.props.activityFilter.total,
                 ),
               )}
-            </div>
-            <div
-              className="list-group-item"
-              role="button"
-              tabIndex={0}
+            </ListGroupItemBtn>
+            <ListGroupItemBtn
               onClick={this.onNotificationFilter}
               onKeyUp={this.onNotificationFilter}
             >
@@ -538,17 +512,18 @@ class SettingsView extends HideableView {
                   this.props.notificationFilter.total,
                 ),
               )}
-            </div>
+            </ListGroupItemBtn>
           </div>
 
           <div className="list-group setting-colour-3">
-            <div
-              className="list-group-item"
-              role="button"
-              tabIndex={0}
-              onClick={SettingsView.onSendFeedback}
-              onKeyUp={SettingsView.onSendFeedback}
-            >
+            <ListGroupItemBtn handler={SettingsView.onWhatsNew}>
+              {SettingsView.renderSetting(
+                'question-circle-o',
+                'What\'s new?',
+                <i className="fa fa-fw fa-chevron-right" />,
+              )}
+            </ListGroupItemBtn>
+            <ListGroupItemBtn handler={SettingsView.onSendFeedback}>
               <div className="media">
                 <div className="media-left feedback">
                   <span className="fa-stack">
@@ -563,21 +538,15 @@ class SettingsView extends HideableView {
                   <i className="fa fa-fw fa-chevron-right" />
                 </div>
               </div>
-            </div>
+            </ListGroupItemBtn>
             {SettingsView.canLaunchTour() &&
-            <div
-              className="list-group-item"
-              role="button"
-              tabIndex={0}
-              onClick={SettingsView.launchTour}
-              onKeyUp={SettingsView.launchTour}
-            >
+            <ListGroupItemBtn handler={SettingsView.launchTour}>
               {SettingsView.renderSetting(
                 'arrow-circle-o-right',
                 'Take a tour',
                 <i className="fa fa-fw fa-chevron-right" />,
               )}
-            </div>
+            </ListGroupItemBtn>
             }
             <div className="list-group-item">
               {SettingsView.renderSetting('info-circle', `Version: ${this.getVersionString()}`, null)}
@@ -585,13 +554,7 @@ class SettingsView extends HideableView {
           </div>
 
           <div className="list-group setting-colour-3">
-            <div
-              className="list-group-item"
-              role="button"
-              tabIndex={0}
-              onClick={SettingsView.onSignOut}
-              onKeyUp={SettingsView.onSignOut}
-            >
+            <ListGroupItemBtn handler={SettingsView.onSignOut}>
               <div className="media">
                 <div className="media-left signout">
                   <i className="fa fa-fw fa-sign-out" />
@@ -603,7 +566,7 @@ class SettingsView extends HideableView {
                   <i className="fa fa-fw fa-chevron-right" />
                 </div>
               </div>
-            </div>
+            </ListGroupItemBtn>
           </div>
         </div>
       </ScrollRestore>
