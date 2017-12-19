@@ -9,7 +9,7 @@ const initialState = {
   minutesBeforeEvent: 15,
 };
 
-export function updateNativeWithState(state) {
+function updateNativeWithState(state) {
   const native = window.MyWarwickNative;
   if (!!native && 'setTimetableNotificationsEnabled' in native) {
     native.setTimetableNotificationsEnabled(state.enabled);
