@@ -17,7 +17,7 @@ import { loadDeviceDetails, signOut } from '../../userinfo';
 import SwitchListGroupItem from '../ui/SwitchListGroupItem';
 import wrapKeyboardSelect from '../../keyboard-nav';
 
-const ChevronRight = () => <i className="fa fa-fw fa-chevron-right" />;
+const FAChevronRight = () => <i className="fa fa-fw fa-chevron-right" />;
 const ListGroupItemBtn = props => (
   <div
     className="list-group-item"
@@ -143,7 +143,7 @@ class SettingsView extends HideableView {
         <span className={classNames({ 'badge progress-bar-danger': number > 0 })}>
           {number}
         </span>
-        <ChevronRight />
+        <FAChevronRight />
       </div>
     );
   }
@@ -153,7 +153,7 @@ class SettingsView extends HideableView {
     return (
       <div>
         {fraction}
-        <ChevronRight />
+        <FAChevronRight />
       </div>
     );
   }
@@ -164,14 +164,14 @@ class SettingsView extends HideableView {
       return (
         <div>
           <i className="fa fa-spinner fa-pulse" />
-          <ChevronRight />
+          <FAChevronRight />
         </div>
       );
     } else if ((failed && fetched) || !fetched) {
       return (
         <div>
           <i className="fa fa-exclamation-circle text-danger" />
-          <ChevronRight />
+          <FAChevronRight />
         </div>
       );
     }
@@ -184,21 +184,21 @@ class SettingsView extends HideableView {
       return (
         <div>
           <i className="fa fa-spinner fa-pulse" />
-          <ChevronRight />
+          <FAChevronRight />
         </div>
       );
     } else if ((failed && fetched) || !fetched) {
       return (
         <div>
           <i className="fa fa-exclamation-circle text-danger" />
-          <ChevronRight />
+          <FAChevronRight />
         </div>
       );
     }
     return (
       <div>
         {(enabled) ? 'Enabled' : 'Disabled'}
-        <ChevronRight />
+        <FAChevronRight />
       </div>
     );
   }
@@ -275,14 +275,14 @@ class SettingsView extends HideableView {
       return (
         <div>
           <i className="fa fa-spinner fa-pulse" />
-          <ChevronRight />
+          <FAChevronRight />
         </div>
       );
     } else if ((failed && fetched) || !fetched) {
       return (
         <div>
           <i className="fa fa-exclamation-circle text-danger" />
-          <ChevronRight />
+          <FAChevronRight />
         </div>
       );
     }
@@ -294,7 +294,7 @@ class SettingsView extends HideableView {
         <span className="colour-scheme__current">
           {chosenSchemeName}
         </span>
-        <ChevronRight />
+        <FAChevronRight />
       </div>
     );
   }
@@ -393,7 +393,7 @@ class SettingsView extends HideableView {
               {SettingsView.renderSetting(
                 'check-square-o',
                 'Tile preferences',
-                <ChevronRight />,
+                <FAChevronRight />,
               )}
             </ListGroupItemBtn>
             {SettingsView.shouldShowColourSchemes() &&
@@ -483,7 +483,7 @@ class SettingsView extends HideableView {
                   {this.props.timetableAlarms.enabled ?
                     `${this.props.timetableAlarms.minutesBeforeEvent} minutes before` :
                     'Off'}
-                  <ChevronRight />
+                  <FAChevronRight />
                 </div>,
               )}
             </ListGroupItemBtn>
@@ -518,7 +518,7 @@ class SettingsView extends HideableView {
               {SettingsView.renderSetting(
                 'question-circle-o',
                 'What\'s new?',
-                <ChevronRight />,
+                <FAChevronRight />,
               )}
             </ListGroupItemBtn>
             <ListGroupItemBtn handler={SettingsView.onSendFeedback}>
@@ -533,7 +533,7 @@ class SettingsView extends HideableView {
                   Send feedback
                 </div>
                 <div className="media-right">
-                  <ChevronRight />
+                  <FAChevronRight />
                 </div>
               </div>
             </ListGroupItemBtn>
@@ -542,7 +542,7 @@ class SettingsView extends HideableView {
               {SettingsView.renderSetting(
                 'arrow-circle-o-right',
                 'Take a tour',
-                <ChevronRight />,
+                <FAChevronRight />,
               )}
             </ListGroupItemBtn>
             }
@@ -561,7 +561,7 @@ class SettingsView extends HideableView {
                   Sign out
                 </div>
                 <div className="media-right">
-                  <ChevronRight />
+                  <FAChevronRight />
                 </div>
               </div>
             </ListGroupItemBtn>
