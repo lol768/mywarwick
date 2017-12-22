@@ -202,7 +202,7 @@ class NewsDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "find all news items for a department" in transaction { implicit c =>
-      val audienceId = audienceDao.saveAudience(Audience(Seq(DepartmentAudience("IN", Seq(UndergradStudents, TeachingStaff)))))
+      val audienceId = audienceDao.saveAudience(Audience(Seq(DepartmentAudience("IN", Seq(UndergradStudents.All, TeachingStaff)))))
       val newsItemId = newsDao.save(londonsBurning, audienceId, AudienceSize.Finite(1))
 
       newsDao.getNewsItemsMatchingAudience(

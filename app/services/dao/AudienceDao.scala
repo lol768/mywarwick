@@ -129,7 +129,7 @@ class AudienceDaoImpl extends AudienceDao {
     subset match {
       case All => Seq(AudienceComponentSave("All", None, deptCode))
       case Staff => Seq(AudienceComponentSave("Staff", None, deptCode))
-      case UndergradStudents => Seq(AudienceComponentSave("UndergradStudents", None, deptCode))
+      case ug: UndergradStudents => Seq(AudienceComponentSave("UndergradStudents", Some(ug.value), deptCode))
       case TaughtPostgrads => Seq(AudienceComponentSave("TaughtPostgrads", None, deptCode))
       case ResearchPostgrads => Seq(AudienceComponentSave("ResearchPostgrads", None, deptCode))
       case TeachingStaff => Seq(AudienceComponentSave("TeachingStaff", None, deptCode))

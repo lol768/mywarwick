@@ -109,10 +109,7 @@ class AudienceServiceImpl @Inject()(
     component match {
       case All => webgroupUsers(GroupName("all-all"))
       case Staff => webgroupUsers(GroupName("all-staff"))
-      case UndergradStudents => for {
-        ft <- webgroupUsers(GroupName("all-studenttype-undergraduate-full-time"))
-        pt <- webgroupUsers(GroupName("all-studenttype-undergraduate-part-time"))
-      } yield ft ++ pt
+      case ug: UndergradStudents => Await.ready(audienceLookupDao.resolveUndergraduatesUniWide(ug), 30.seconds).value.get
       case ResearchPostgrads => for {
         ft <- webgroupUsers(GroupName("all-studenttype-postgraduate-research-ft"))
         pt <- webgroupUsers(GroupName("all-studenttype-postgraduate-research-pt"))
@@ -138,7 +135,7 @@ class AudienceServiceImpl @Inject()(
         audienceLookupDao.resolveAdminStaff(departmentCode),
         audienceLookupDao.resolveTeachingStaff(departmentCode)
       )).map(_.flatten.toSeq)
-      case UndergradStudents => audienceLookupDao.resolveUndergraduates(departmentCode)
+      case ug: UndergradStudents => audienceLookupDao.resolveUndergraduatesInDept(departmentCode, ug)
       case ResearchPostgrads => audienceLookupDao.resolveResearchPostgraduates(departmentCode)
       case TaughtPostgrads => audienceLookupDao.resolveTaughtPostgraduates(departmentCode)
       case TeachingStaff => audienceLookupDao.resolveTeachingStaff(departmentCode)
@@ -185,6 +182,7 @@ class AudienceServiceImpl @Inject()(
 
     var department: String = ""
     var departmentSubsets: Seq[String] = Seq.empty[String]
+    var undergradSubsets: Seq[String] = Seq.empty[String]
     var listOfUsercodes: Seq[String] = Seq.empty[String]
     var modules: Seq[JsValue] = Seq.empty[JsValue]
     var seminarGroups: Seq[JsValue] = Seq.empty[JsValue]
@@ -215,14 +213,18 @@ class AudienceServiceImpl @Inject()(
 
     audience.components.foreach {
       case ds: DepartmentSubset => ds match {
-        case All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | UndergradStudents | AdminStaff =>
+        case UndergradStudents.All | UndergradStudents.First | UndergradStudents.Second | UndergradStudents.Final  =>
+          undergradSubsets :+= s"UndergradStudents:${ds.toString}"
+        case All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | AdminStaff =>
           departmentSubsets :+= ds.toString
         case subset => matchDeptSubset(subset)
       }
       case DepartmentAudience(code, subsets) => {
         department = code
         subsets.foreach {
-          case subset@(All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | UndergradStudents | AdminStaff) =>
+          case subset@(UndergradStudents.All | UndergradStudents.First | UndergradStudents.Second | UndergradStudents.Final)  =>
+            undergradSubsets :+= s"Dept:UndergradStudents:${subset.toString}"
+          case subset@(All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | AdminStaff) =>
             departmentSubsets :+= s"Dept:${subset.entryName}"
           case subset => matchDeptSubset(subset)
         }
@@ -265,13 +267,23 @@ class AudienceServiceImpl @Inject()(
         Json.obj("listOfUsercodes" -> listOfUsercodes)
       else Json.obj()
 
+    val undergraduates =
+      if (undergradSubsets.nonEmpty)
+        if (undergradSubsets.contains("all"))
+          Json.obj("undergraduates" -> s"${if (department.isEmpty) "" else "Dept:"}UndergradStudents:All")
+        else
+          Json.obj("undergraduates" -> Json.obj("year" -> Json.obj(
+            undergradSubsets.map(_ -> Json.toJsFieldJsValueWrapper("undefined")): _*
+          )))
+      else Json.obj()
+
     val deptSubsets: (String, Json.JsValueWrapper) =
       if (departmentSubsets.contains("Dept:All"))
         "Dept:All" -> Json.toJsFieldJsValueWrapper("undefined")
       else
         "groups" -> (Json.obj(
           departmentSubsets.map(_ -> Json.toJsFieldJsValueWrapper("undefined")): _*
-        ) ++ staffRelationshipJson ++ seminarGroupsJson ++ modulesJson ++ listOfUsercodesJson)
+        ) ++ staffRelationshipJson ++ seminarGroupsJson ++ modulesJson ++ listOfUsercodesJson ++ undergraduates)
 
     Json.obj(
       "department" -> department,

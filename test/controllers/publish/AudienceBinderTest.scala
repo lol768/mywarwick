@@ -117,7 +117,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       val departmentCode = "AH"
       val audience = Seq(
         "TeachingStaff",
-        "UndergradStudents",
+        "UndergradStudents:All",
         "Dept:TeachingStaff",
         "Dept:ResearchPostgrads"
       )
@@ -130,7 +130,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH", "X")))
       val audienceBinder = new AudienceBinder(departmentInfoDao, null, defaultMockPublisherService)
 
-      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.TeachingStaff, Audience.UndergradStudents, Audience.DepartmentAudience(departmentCode, Seq(Audience.TeachingStaff, Audience.ResearchPostgrads)))))
+      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.TeachingStaff, Audience.UndergradStudents.All, Audience.DepartmentAudience(departmentCode, Seq(Audience.TeachingStaff, Audience.ResearchPostgrads)))))
 
     }
 
@@ -260,5 +260,22 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       result mustBe Seq("Relationship:personalTutor:1234")
     }
 
+    "bind multiple UndergradStudents subsets" in {
+      val departmentCode = "AH"
+      val audience = Seq(
+        "Dept:UndergradStudents:First",
+        "Dept:UndergradStudents:Second"
+      )
+
+      val audienceData = AudienceData(
+        audience,
+        Some(departmentCode) //Arden house
+      )
+      val departmentInfoDao = mock[DepartmentInfoDao]
+      when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH", "X")))
+      val audienceBinder = new AudienceBinder(departmentInfoDao, null, defaultMockPublisherService)
+
+      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.DepartmentAudience(departmentCode, Seq(Audience.UndergradStudents.First, Audience.UndergradStudents.Second)))))
+    }
   }
 }

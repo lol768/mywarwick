@@ -5,6 +5,7 @@ import log from 'loglevel';
 import $ from 'jquery';
 import _ from 'lodash-es';
 import Hyperlink from '../../components/ui/Hyperlink';
+import { mkString } from '../../helpers';
 
 export class AudienceIndicator extends React.PureComponent {
   static propTypes = {
@@ -75,8 +76,8 @@ export class AudienceIndicator extends React.PureComponent {
     const { fetching, groupedAudience } = this.state;
     const dept = audienceComponents.department;
 
-    const getCount = (group) => {
-      const peopleCount = groupedAudience[group] ? groupedAudience[group] : 0;
+    const getCount = (groups) => {
+      const peopleCount = _.reduce(groups, (acc, group) => acc + (groupedAudience[group] || 0), 0);
       return (fetching ?
         <i className="fa fa-spin fa-fw fa-refresh" /> : `${peopleCount} people`);
     };
@@ -97,12 +98,12 @@ export class AudienceIndicator extends React.PureComponent {
                 return _.map(components, ({ text, value }) =>
                   (<div
                     key={`${audienceType}:${value}`}
-                  >{text || value}: {getCount(`ModuleAudience(${value})`)}</div>));
+                  >{text || value}: {getCount([`ModuleAudience(${value})`])}</div>));
               case 'seminarGroups':
                 return _.map(components, ({ text, value }) =>
                   (<div
                     key={`${audienceType}:${text}`}
-                  >{text}: {getCount(`SeminarGroupAudience(${value})`)}</div>));
+                  >{text}: {getCount([`SeminarGroupAudience(${value})`])}</div>));
               case 'listOfUsercodes':
                 return (components !== undefined) ?
                   (<div
@@ -116,17 +117,31 @@ export class AudienceIndicator extends React.PureComponent {
                   rel.options.map(opt =>
                     _.map(opt, val =>
                       (val.selected ?
-                        (<div>{`${_.startCase(val.studentRole)}s of ${rel.text}`}: {getCount(`RelationshipAudience(personalTutor,UniversityID(${rel.value}))`)}</div>) :
+                        (<div>{`${_.startCase(val.studentRole)}s of ${rel.text}`}: {getCount([`RelationshipAudience(personalTutor,UniversityID(${rel.value}))`])}</div>) :
                         (<div />)
                       ))));
+              case 'undergraduates':
+                if (components !== undefined) {
+                  const subset = dept.name !== undefined ? dept.name : 'the University';
+                  if (_.has(components, 'year')) {
+                    const years = _.map(components.year, (k, year) => _.last(_.split(year, ':')).toLowerCase());
+                    return years.length ?
+                      <div key={audienceType}>
+                        {`All ${mkString(years)} year Undergraduates in ${subset}`}: {getCount(_.map(years, _.capitalize))}
+                      </div> : null;
+                  }
+                  return (<div key={audienceType}>
+                    {`All Undergraduates in ${subset}`}: {getCount(['All'])}
+                  </div>);
+                }
+                return null;
               default: {
                 const group = _.replace(audienceType, 'Dept:', '');
                 const groupDisplayName = _.startCase(group);
                 return (isUniWide || !_.isEmpty(dept.name)) ?
-                  (<div
-                    key={audienceType}
-                  >{`All ${groupDisplayName} in ${_.startsWith(audienceType, 'Dept:') ? dept.name : 'the University'}`}: {getCount(group)}</div>)
-                  : null;
+                  <div key={audienceType}>
+                    {`All ${groupDisplayName} in ${_.startsWith(audienceType, 'Dept:') ? dept.name : 'the University'}`}: {getCount([group])}
+                  </div> : null;
               }
             }
           })

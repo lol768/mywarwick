@@ -20,12 +20,22 @@ class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
     }
 
     "save CH Staff and CH Student Components" in {
-      val audience = Audience(Seq(DepartmentAudience("ch", Seq(Staff, UndergradStudents))))
+      val audience = Audience(Seq(DepartmentAudience("ch", Seq(Staff, UndergradStudents.All))))
       val saved = audienceDao.audienceToComponents(audience)
 
       saved mustBe Seq(
         AudienceComponentSave("Staff", None, Some("ch")),
-        AudienceComponentSave("UndergradStudents", None, Some("ch"))
+        AudienceComponentSave("UndergradStudents", Some("All"), Some("ch"))
+      )
+    }
+
+    "save multiple UndergradStudent components" in {
+      val audience = Audience(Seq(DepartmentAudience("ch", Seq(UndergradStudents.Second, UndergradStudents.Final))))
+      val saved = audienceDao.audienceToComponents(audience)
+
+      saved mustBe Seq(
+        AudienceComponentSave("UndergradStudents", Some("Second"), Some("ch")),
+        AudienceComponentSave("UndergradStudents", Some("Final"), Some("ch"))
       )
     }
 
@@ -87,7 +97,7 @@ class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
     "group mixed Components into Audience" in {
       val components = Seq(
         AudienceComponentSave("Staff", None, Some("ch")),
-        AudienceComponentSave("UndergradStudents", None, Some("ch")),
+        AudienceComponentSave("UndergradStudents", Some("All"), Some("ch")),
         AudienceComponentSave("Module", Some("music"), None),
         AudienceComponentSave("WebGroup", Some("in-elab"), None),
         AudienceComponentSave("Module", Some("history"), None),
@@ -98,7 +108,7 @@ class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
 
       audience must not be 'public
       audience.components must contain only(
-        DepartmentAudience("ch", Seq(Staff, UndergradStudents)),
+        DepartmentAudience("ch", Seq(Staff, UndergradStudents.All)),
         ModuleAudience("music"),
         WebGroupAudience(GroupName("in-elab")),
         ModuleAudience("history"),
@@ -111,7 +121,7 @@ class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
         AudienceComponentSave("Staff", None, Some("ch")),
         AudienceComponentSave("ResearchPostgrads", None, Some("fr")),
         AudienceComponentSave("Staff", None, Some("ec")),
-        AudienceComponentSave("UndergradStudents", None, Some("ch"))
+        AudienceComponentSave("UndergradStudents", Some("All"), Some("ch"))
       )
 
       val audience = audienceDao.audienceFromComponents(components)
@@ -119,7 +129,7 @@ class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
       audience must not be 'public
       audience.components must contain only(
         DepartmentAudience("fr", Seq(ResearchPostgrads)),
-        DepartmentAudience("ch", Seq(Staff, UndergradStudents)),
+        DepartmentAudience("ch", Seq(Staff, UndergradStudents.All)),
         DepartmentAudience("ec", Seq(Staff))
       )
     }

@@ -169,7 +169,7 @@ describe('AudiencePicker', () => {
     btnOne.find('input').first().simulate('change');
 
     expect(btnOne.children()).to.have.length(2);
-    expect(btnOne.children().at(1).find(Checkbox)).to.have.length(9)
+    expect(btnOne.children().at(1).find(Checkbox)).to.have.length(10)
 
   });
 
@@ -237,11 +237,35 @@ describe('AudiencePicker', () => {
       audienceDidUpdate: () => {},
     };
 
-    const shallow = enzyme.shallow(<AudiencePicker {...props} />,  { context });
+    const mounted = enzyme.mount(<AudiencePicker {...props} />,  { context });
 
-    expect(shallow.find('.list-group').first().find(RadioButton).length).to.eql(1);
-    shallow.setState({ department: { code: 'FU', name: 'Fun Department', faculty: 'Arts' } });
-    expect(shallow.find('.list-group').first().find(RadioButton).length).to.eql(2);
-    expect(shallow.find('.list-group').first().find(RadioButton).at(1).props().label).to.contain('Groups in Fun Department');
+    expect(mounted.find('.list-group').first().find(RadioButton).length).to.eql(1);
+    mounted.setState({ department: { code: 'FU', name: 'Fun Department', faculty: 'Arts' } });
+    expect(mounted.find('.list-group').first().find(RadioButton).length).to.eql(2);
+    expect(mounted.find('.list-group').first().find(RadioButton).at(1).props().label).to.contain('Groups in Fun Department');
+  });
+
+  it('displays undergraduate group subsets', () => {
+    const props = {
+      isGod: false,
+      departments: {
+        MU: { name: 'Turnip Department', faculty: 'Vegetable' },
+      },
+      formData: {
+        audience: { department: { groups: { undergraduates: undefined } } }
+      },
+      audienceDidUpdate: () => {},
+    };
+
+    const mounted = enzyme.mount(<AudiencePicker {...props} />,  { context });
+    expect(mounted.find('.list-group').first(1).find(RadioButton).find({value: 'Dept:UndergradStudents:All'})).to.have.length(1);
+    expect(mounted.find('.list-group').first(1).find(RadioButton).find({value: 'year'})).to.have.length(1);
+    expect(mounted.find('.list-group').first(1).find(RadioButton).find({value: 'Dept:UndergradStudents:First'})).to.have.length(0);
+
+    mounted.setState({ audience: { department: { groups: { undergraduates: { year: { 'Dept:UndergradStudents:First': undefined } } } } } });
+
+    expect(mounted.find('.list-group').first(1).find(RadioButton)
+      .find({ value: 'Dept:UndergradStudents:First' })).to.have.length(1);
   })
+
 });
