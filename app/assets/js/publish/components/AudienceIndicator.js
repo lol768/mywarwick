@@ -106,12 +106,10 @@ export class AudienceIndicator extends React.PureComponent {
                   >{text}: {getCount([`SeminarGroupAudience(${value})`])}</div>));
               case 'listOfUsercodes':
                 return (components !== undefined) ?
-                  (<div
-                    key={audienceType}
-                  >
+                  (<div key={audienceType}>
                     {`Usercodes or university IDs: ${components.length} people`}
-                  </div>) :
-                  <div />;
+                  </div>)
+                  : null;
               case 'staffRelationships':
                 return _.flatMap(components, rel =>
                   rel.options.map(opt =>

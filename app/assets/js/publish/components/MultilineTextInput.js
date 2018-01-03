@@ -19,6 +19,7 @@ export default class MultilineTextInput extends React.PureComponent {
     items: PropTypes.arrayOf(PropTypes.string),
     type: PropTypes.string,
     valuePrefix: PropTypes.string,
+    className: PropTypes.string,
   };
 
   constructor(props) {
@@ -35,7 +36,7 @@ export default class MultilineTextInput extends React.PureComponent {
     const itemString = this.props.items.join('\r\n');
 
     return (
-      <div>
+      <div className={this.props.className}>
         <textarea
           name={this.props.items.length ? this.props.name : ''} // don't appear as submittable form field if no value
           hidden
