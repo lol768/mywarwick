@@ -11,8 +11,17 @@ import Tile from '../tiles/Tile';
 import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
 import wrapKeyboardSelect from '../../keyboard-nav';
+import DismissableInfoModal from '../ui/DismissableInfoModal';
 
 class TileView extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      activeModal: null,
+    };
+    this.showModal = this.showModal.bind(this);
+  }
+
   componentDidMount() {
     if (this.props.tile && this.props.zoomed) {
       $(document.body).addClass(`colour-${this.props.tile.colour}`);
@@ -43,6 +52,12 @@ class TileView extends React.PureComponent {
 
   onTileDismiss() {
     this.props.dispatch(goBack());
+  }
+
+  showModal(modal) {
+    this.setState({
+      activeModal: modal,
+    });
   }
 
   render() {
@@ -104,6 +119,7 @@ class TileView extends React.PureComponent {
     tileProps.onHide = e => wrapKeyboardSelect(() => view.onHideTile(tileProps), e);
     tileProps.onResize = e => wrapKeyboardSelect(() => view.onResizeTile(tileProps), e);
 
+    const showModal = this.props.showModal || this.showModal;
     // subset of config needed by TileContent subclasses
     const contentProps = {
       ...content,
@@ -112,6 +128,7 @@ class TileView extends React.PureComponent {
       user,
       preferences: tile.preferences,
       params: this.props.params,
+      showModal,
     };
 
     const tileElement = (
@@ -123,7 +140,10 @@ class TileView extends React.PureComponent {
     if (zoomed) {
       return (
         <ScrollRestore url={`/${Routes.TILES}/${id}`} forceTop>
-          {tileElement}
+          <div>
+            {tileElement}
+            {this.state.activeModal}
+          </div>
         </ScrollRestore>
       );
     }
@@ -162,6 +182,8 @@ TileView.propTypes = {
   editing: PropTypes.bool.isRequired,
   view: PropTypes.object,
   user: PropTypes.object.isRequired,
+  showModal: PropTypes.func,
+  activeModal: PropTypes.instanceOf(DismissableInfoModal),
 };
 
 TileView.defaultProps = {

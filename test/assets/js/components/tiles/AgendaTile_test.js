@@ -200,10 +200,10 @@ describe('AgendaTile', () => {
     };
     atMoment(() => {
       const html = shallow(<AgendaTile size="wide" content={ content } />);
-      html.find('.agenda__date').map(n => n.text()).should.deep.equal([
-        'Sat 12:00',
-        'Sat 12:00–14:00'
-      ]);
+      const expected = ['Sat 12:00', 'Sat 12:00–14:00'];
+      html.find('.agenda__date').forEach((date, i) =>
+        expect(date.children().at(1).text()).to.equal(expected[i])
+      )
     }, now);
   });
 
@@ -337,8 +337,7 @@ describe('AgendaTileItem', () => {
     html.hasClass('tile-list-item').should.equal(true);
     const titleElement = html.find('.tile-list-item__title');
     titleElement.props().title.should.equal(props.title);
-    titleElement.find(Hyperlink).children().text().should.equal(props.title);
-
+    html.find(Hyperlink).first().children().text().should.equal(props.title);
     html.find('.agenda-item__cell').first().text().should.equal('17:00 –18:00');
   });
 
@@ -362,7 +361,7 @@ describe('AgendaTileItem', () => {
     const locationInner = html.find('.tile-list-item__location');
     locationInner.hasClass('text--light').should.equal(true);
     locationInner.contains('Heronbank').should.equal(true);
-    locationInner.find('.fa-map-marker').exists().should.equal(true);
+    locationInner.html().should.include('<i class="fa fa-map-marker"></i>');
 
     const link = locationInner.find(Hyperlink);
     link.childAt(0).text().should.equal('Heronbank');
