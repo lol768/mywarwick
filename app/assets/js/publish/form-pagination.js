@@ -78,6 +78,15 @@ $(SPLIT_FORM).each((i, form) => {
   }
 
   function updateFormGroupErrors(html) {
+    function prependErrorsToElem($elem, errorsAsJson, errorType) {
+      $elem.prepend(
+        errorsAsJson.map((err, index) =>
+          $('<div>').addClass('help-block').attr('id', `${errorType}_error_${index}`)
+            .html(`<i class="fa fa-exclamation-triangle"></i> ${err}`),
+        ),
+      );
+    }
+
     // Remove all errors from the current page of the form
     const $currentSection = $form.find(`section:eq(${currentPage})`);
     $currentSection.find('*[id*=_error_]').remove();
@@ -85,16 +94,18 @@ $(SPLIT_FORM).each((i, form) => {
 
     const errorsAsJson = $(html).find('.audience-picker').data('errors');
 
-    if (errorsAsJson.audience !== undefined) {
-      const $audiencePicker = $('.audience-picker');
-      $audiencePicker
-        .addClass('has-error');
+    const $audiencePicker = $('.audience-picker');
 
-      $audiencePicker.prepend(
-        errorsAsJson.audience.map((err, index) =>
-          $('<div>').addClass('help-block').attr('id', `audience_error_${index}`).html(err),
-        ),
-      );
+    if (errorsAsJson.audience !== undefined) {
+      $audiencePicker.addClass('has-error');
+      prependErrorsToElem($audiencePicker, errorsAsJson.audience, 'audience');
+    }
+
+    const usercodeErrors = errorsAsJson['audience.usercodes'];
+    if (usercodeErrors !== undefined) {
+      const $listOfUsercodes = $audiencePicker.find('.listOfUsercodes');
+      $listOfUsercodes.addClass('has-error');
+      prependErrorsToElem($listOfUsercodes, usercodeErrors, 'audience_usercodes');
     }
 
     const $groupsWithErrors = $(html).find(`section:eq(${currentPage}) .has-error`);

@@ -194,7 +194,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       val audienceBinder = new AudienceBinder(departmentInfoDao, audienceService, defaultMockPublisherService)
 
       audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe
-        Left(Seq(FormError("audience", Seq("error.audience.usercodes.invalid"), Seq("TeachingApple"))))
+        Left(Seq(FormError("audience.usercodes", Seq("error.audience.usercodes.invalid"), Seq("TeachingApple"))))
     }
 
     "raise error message when binding with invalid non-department audience" in {
@@ -214,7 +214,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
       val audienceBinder = new AudienceBinder(null, mockAudienceService, defaultMockPublisherService)
 
-      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Left(Seq(FormError("audience", "error.audience.usercodes.invalid", Seq(unrecognisedAudience))))
+      audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Left(Seq(FormError("audience.usercodes", "error.audience.usercodes.invalid", Seq(unrecognisedAudience))))
     }
 
 
