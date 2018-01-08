@@ -268,6 +268,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with Mi
         )(Matchers.any())
       ).thenReturn(Future.successful(Right(audience)))
       when(audienceService.resolve(audience)).thenReturn(Success(Set("a", "b", "c").map(Usercode)))
+      when(audienceService.resolveUsersForComponentsGrouped(audience.components)).thenReturn(Success(Seq((Audience.DepartmentAudience("IN", Seq(Staff)), Set("a", "b", "c").map(Usercode)))))
       when(userPreferencesService.countInitialisedUsers(Set("a", "b", "c").map(Usercode))).thenReturn(2)
       when(userNewsCategoryService.getRecipientsOfNewsInCategories(Seq("abc"))).thenReturn(Set("a", "e").map(Usercode))
 

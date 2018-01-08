@@ -233,7 +233,13 @@ class ActivityServiceImpl @Inject()(
       val audienceSizes = dao.getAudienceSizes(activities.map(_.activity.id))
       val sentCounts = dao.getSentCounts(activities.map(_.activity.id))
       val users = userLookupService.getUsers(activities.map(_.activity.createdBy)).getOrElse(Map.empty)
-      activities.map(a => ActivityRenderWithAudience.applyWithAudience(a, audienceSizes(a.activity.id), users(a.activity.createdBy), audiences(a.activity.id), sentCounts(a.activity.id)))
+      activities.map(a => ActivityRenderWithAudience.applyWithAudience(
+        activityRender = a,
+        audienceSize = audienceSizes(a.activity.id),
+        createdBy = users.getOrElse(a.activity.createdBy, User.unknown(a.activity.createdBy)),
+        audience = audiences(a.activity.id),
+        sentCount = sentCounts(a.activity.id))
+      )
     }
   }
 
@@ -351,6 +357,10 @@ object ActivityError {
 
   object PublicAudience extends ActivityError {
     val message = "Audience cannot be public"
+  }
+
+  case class InvalidUsercodeAudience(invalidUsercodes: Seq[Usercode]) extends ActivityError {
+    def message = s"The request contains one or more invalid usercode: $invalidUsercodes"
   }
 
   object InvalidJSON extends ActivityError {

@@ -16,7 +16,9 @@ updateOptions := updateOptions.value.withCachedResolution(true)
 val gitRevision = SettingKey[String]("gitRevision")
 gitRevision := git.gitHeadCommit.value.getOrElse("Unset")
 
-lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala, BuildInfoPlugin)
+lazy val root = (project in file("."))
+  .enablePlugins(WarwickProject, PlayScala, PlayNettyServer, BuildInfoPlugin)
+  .disablePlugins(PlayAkkaHttpServer)
   .configs(config("fun").extend(Test))
   .settings(
     Gulp.settings,
@@ -29,6 +31,8 @@ lazy val root = (project in file(".")).enablePlugins(WarwickProject, PlayScala, 
 
 // Versions of things for below
 val enumeratumVersion = "1.5.12"
+val akkaVersion = "2.5.3"
+val playUtilsVersion = "1.10"
 
 val appDeps = Seq(
   jdbc,
@@ -40,15 +44,15 @@ val appDeps = Seq(
   jodaForms,
   "com.typesafe.play" %% "anorm" % "2.5.3",
   "com.oracle" % "ojdbc7" % "12.1.0.2.0",
-  "uk.ac.warwick.sso" %% "sso-client-play" % "2.36",
-  "uk.ac.warwick.play-utils" %% "accesslog" % "1.8",
-  "uk.ac.warwick.play-utils" %% "anorm" % "1.8",
-  "uk.ac.warwick.play-utils" %% "objectstore" % "1.8",
-  "uk.ac.warwick.util" % "warwickutils-cache" % "20170217",
-  "uk.ac.warwick.util" % "warwickutils-core" % "20170217",
-  "com.typesafe.akka" %% "akka-cluster" % "2.4.16",
-  "com.typesafe.akka" %% "akka-cluster-tools" % "2.4.16",
-  "com.typesafe.akka" %% "akka-slf4j" % "2.4.16",
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.38",
+  "uk.ac.warwick.play-utils" %% "accesslog" % playUtilsVersion,
+  "uk.ac.warwick.play-utils" %% "anorm" % playUtilsVersion,
+  "uk.ac.warwick.play-utils" %% "objectstore" % playUtilsVersion,
+  "uk.ac.warwick.util" % "warwickutils-cache" % "20171206",
+  "uk.ac.warwick.util" % "warwickutils-core" % "20171206",
+  "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
+  "com.typesafe.akka" %% "akka-cluster-tools" % akkaVersion,
+  "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
   "com.kenshoo" %% "metrics-play" % "2.6.6_0.6.2",
   "com.typesafe.play" %% "play-mailer" % "6.0.1",
   "com.typesafe.play" %% "play-mailer-guice" % "6.0.1",
@@ -78,7 +82,7 @@ val testDeps = Seq(
   "org.scalatest" %% "scalatest" % "3.0.1",
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0",
   "com.typesafe.akka" %% "akka-testkit" % "2.4.19",
-  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.36",
+  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.37",
   "org.eclipse.jetty" % "jetty-server" % "9.4.7.v20170914",
   "com.h2database" % "h2" % "1.4.196"
 ).map(_ % Test)
@@ -105,6 +109,9 @@ dependencyOverrides += "com.google.guava" % "guava" % "20.0"
 
 // Because jclouds is terrible
 dependencyOverrides += "com.google.code.gson" % "gson" % "2.4"
+
+// Fix a dependency warning
+dependencyOverrides += "org.json" % "json" % "20171018"
 
 // Make gulp output available as Play assets.
 unmanagedResourceDirectories in Assets += baseDirectory.value / "target" / "gulp"

@@ -98,23 +98,30 @@ class NewsController @Inject()(
 
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNews).async { implicit request =>
     val formData = newsAudienceForm.bindFromRequest.value
-    sharedAudienceInfo(audienceService, usercodesInAudience =>
-      formData.filterNot(_.ignoreCategories)
-        .map { data =>
-          val initialisedUsers = userPreferencesService.countInitialisedUsers(usercodesInAudience)
-          val newsRecipients = userNewsCategoryService.getRecipientsOfNewsInCategories(data.categoryIds).intersect(usercodesInAudience).size
+    sharedAudienceInfo(
+      audienceService,
+      groupedUsercodes => {
+        val allAudienceUsercodes = groupedUsercodes.flatMap { case (_, usercodes) => usercodes }.toSet
+        formData
+          .filterNot(_.ignoreCategories)
+          .map { data =>
+            val initialisedUsers = userPreferencesService.countInitialisedUsers(allAudienceUsercodes)
+            val newsRecipients = userNewsCategoryService.getRecipientsOfNewsInCategories(data.categoryIds).intersect(allAudienceUsercodes).size
 
-          Json.obj(
-            "baseAudience" -> usercodesInAudience.size,
-            "categorySubset" -> (usercodesInAudience.size - initialisedUsers + newsRecipients)
+            Json.obj(
+              "baseAudience" -> allAudienceUsercodes.size,
+              "categorySubset" -> (allAudienceUsercodes.size - initialisedUsers + newsRecipients),
+              "groupedAudience" -> Json.toJson(groupedUsercodes.map {
+                case (component, usercodes) => (component.entryName, usercodes.size)
+              })
+            )
+          }
+          .getOrElse(
+            Json.obj(
+              "baseAudience" -> allAudienceUsercodes.size
+            )
           )
-        }
-        .getOrElse(
-          Json.obj(
-            "baseAudience" -> usercodesInAudience.size
-          )
-        )
-    )
+      })
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNews) { implicit request =>
@@ -169,9 +176,7 @@ class NewsController @Inject()(
               logger.error(s"Error updating news item $id", e)
               errorHandler.markInternalServerError()
             }
-
           auditLog('UpdateNewsItem, 'id -> id)
-
           Redirect(controllers.publish.routes.NewsController.list(publisherId)).flashing("success" -> "News updated")
         }
       )

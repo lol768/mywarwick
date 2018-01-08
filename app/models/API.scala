@@ -17,12 +17,18 @@ object API {
     implicit def writes = Response.writes[A]
 
     // Maybe this is useful, if you like using Either
-    def either: Either[Failure[A], Success[A]]
+    def either: Either[Failure[A], AbstractSuccess[A]]
   }
 
   case class Error(id: String, message: String)
 
-  case class Success[A: Reads : Writes](status: String = "ok", data: A) extends Response[A](true, status) {
+  sealed abstract class AbstractSuccess[A: Reads : Writes](status: String = "ok", data: A) extends Response[A](true, status)
+
+  case class Success[A: Reads : Writes](status: String = "ok", data: A) extends AbstractSuccess[A](status, data) {
+    def either = Right(this)
+  }
+
+  case class PartialSuccess[A: Reads : Writes](status: String = "ok", data: A, warnings: Seq[Error]) extends AbstractSuccess[A](status, data) {
     def either = Right(this)
   }
 
@@ -51,7 +57,12 @@ object API {
         (json \ "success").validate[Boolean].flatMap { success =>
           if (success) {
             val data = (json \ "data").validate[A]
-            (status and data) (Success.apply[A] _)
+            val warnings = (json \ "warnings").validate[Seq[Error]]
+            if (warnings.isError){
+              (status and data) (Success.apply[A] _)
+            } else {
+              (status and data and warnings) (PartialSuccess.apply[A] _)
+            }
           } else {
             val errors = (json \ "errors").validate[Seq[Error]]
             (status and errors) (Failure.apply[A] _)
@@ -62,15 +73,23 @@ object API {
 
     implicit def writes[A: Reads : Writes]: Writes[Response[A]] = new Writes[Response[A]] {
       override def writes(response: Response[A]): JsValue = response match {
-        case Success(status, data) => Json.obj(
-          "success" -> true,
-          "status" -> status,
-          "data" -> data
-        )
+        case PartialSuccess(status, data, warnings) =>
+          Json.obj(
+            "success" -> true,
+            "status" -> status,
+            "data" -> data,
+            "warnings" -> warnings,
+          )
+        case Success(status, data) =>
+          Json.obj(
+            "success" -> true,
+            "status" -> status,
+            "data" -> data,
+          )
         case Failure(status, errors) => Json.obj(
           "success" -> false,
           "status" -> status,
-          "errors" -> errors
+          "errors" -> errors,
         )
       }
     }

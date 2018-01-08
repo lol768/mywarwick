@@ -1,9 +1,23 @@
 @(
-  actionLabel: String,
-  cancelRoute: Call
+    actionLabel: String,
+    cancelRoute: Call
 )(implicit fc: b3.B3FieldConstructor, messages: MessagesProvider)
 
 @b3.free() {
-  <button type="submit" class="btn btn-primary">@actionLabel</button>
-  <a href="@cancelRoute" class="btn btn-default">Cancel</a>
+  <button type="submit" data-loading-text="@(s"${actionLabel.dropRight(1)}ing...")" class="btn btn-primary">@actionLabel</button>
+  <a data-toggle="modal" data-target="#confirmCancelModal" class="btn btn-default">Cancel</a>
+
+  @tags.confirmationModal(
+    id = "confirmCreateModal",
+    title = "Create",
+    body = "Are you sure you want to send this alert?",
+    confirmRoute = null
+  )
+
+  @tags.confirmationModal(
+    id = "confirmCancelModal",
+    title = "Cancel",
+    body = "Are you sure you want to cancel?",
+    confirmRoute = cancelRoute
+  )
 }

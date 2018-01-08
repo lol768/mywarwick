@@ -7,10 +7,11 @@ import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import services.dao.{AudienceDao, AudienceLookupDao, UserNewsOptInDao}
+import uk.ac.warwick.userlookup.UserLookupException
 import warwick.sso._
 
 import scala.concurrent.Future
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 class AudienceServiceTest extends BaseSpec with MockitoSugar {
   trait Ctx {
@@ -29,7 +30,8 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
 
     def audienceDaoIsEmpty(): Unit = {
       when(audienceLookupDao.resolveDepartment(any())).thenReturn(Future.successful(Seq()))
-      when(audienceLookupDao.resolveUndergraduates(any())).thenReturn(Future.successful(Seq()))
+      when(audienceLookupDao.resolveUndergraduatesInDept(any(), any())).thenReturn(Future.successful(Seq()))
+      when(audienceLookupDao.resolveUndergraduatesUniWide(any())).thenReturn(Future.successful(Seq()))
       when(audienceLookupDao.resolveTaughtPostgraduates(any())).thenReturn(Future.successful(Seq()))
       when(audienceLookupDao.resolveResearchPostgraduates(any())).thenReturn(Future.successful(Seq()))
       when(audienceLookupDao.resolveTeachingStaff(any())).thenReturn(Future.successful(Seq()))
@@ -76,13 +78,23 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       verifyZeroInteractions(audienceLookupDao)
     }
 
-    "search for all undergrads in WebGroups" in new Ctx {
-      webgroupsIsEmpty()
-      service.resolve(Audience(Seq(UndergradStudents))).get
-      verify(webgroups).getWebGroup(GroupName("all-studenttype-undergraduate-full-time"))
-      verify(webgroups).getWebGroup(GroupName("all-studenttype-undergraduate-part-time"))
-      verifyNoMoreInteractions(webgroups)
-      verifyZeroInteractions(audienceLookupDao)
+    "search for first and second year undergrads in Tabula" in new Ctx {
+      audienceDaoIsEmpty()
+      import UndergradStudents._
+      service.resolve(Audience(Seq(First, Second))).get
+      verify(audienceLookupDao).resolveUndergraduatesUniWide(First)
+      verify(audienceLookupDao).resolveUndergraduatesUniWide(Second)
+      verifyNoMoreInteractions(audienceLookupDao)
+      verifyZeroInteractions(webgroups)
+    }
+
+    "search for dept undergrads in Tabula" in new Ctx {
+      audienceDaoIsEmpty()
+      val deptCode = "AH"
+      service.resolve(Audience(Seq(DepartmentAudience(deptCode, Seq(UndergradStudents.All))))).get
+      verify(audienceLookupDao).resolveUndergraduatesInDept(deptCode, UndergradStudents.All)
+      verifyNoMoreInteractions(audienceLookupDao)
+      verifyZeroInteractions(webgroups)
     }
 
     "search for all teaching staff in WebGroups" in new Ctx {
@@ -121,9 +133,9 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
 
     "search for all undergrads in department" in new Ctx {
       val deptCode = "ch"
-      when(audienceLookupDao.resolveUndergraduates(deptCode)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
-      service.resolve(Audience(Seq(DepartmentAudience(deptCode, Seq(UndergradStudents))))).get
-      verify(audienceLookupDao, times(1)).resolveUndergraduates(deptCode)
+      when(audienceLookupDao.resolveUndergraduatesInDept(deptCode, UndergradStudents.All)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
+      service.resolve(Audience(Seq(DepartmentAudience(deptCode, Seq(UndergradStudents.All))))).get
+      verify(audienceLookupDao, times(1)).resolveUndergraduatesInDept(deptCode, UndergradStudents.All)
       verifyNoMoreInteractions(audienceLookupDao)
       verifyZeroInteractions(webgroups)
     }
@@ -199,14 +211,14 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
         WebGroupAudience(GroupName("in-winners")),
         WebGroupAudience(GroupName("in-losers")),
         ModuleAudience("CS102"),
-        DepartmentAudience("CH", Seq(UndergradStudents)),
-        DepartmentAudience("PH", Seq(UndergradStudents, TeachingStaff))
+        DepartmentAudience("CH", Seq(UndergradStudents.All)),
+        DepartmentAudience("PH", Seq(UndergradStudents.All, TeachingStaff))
       ))).get
       verify(webgroups).getWebGroup(GroupName("in-winners"))
       verify(webgroups).getWebGroup(GroupName("in-losers"))
       verify(audienceLookupDao).resolveModule("CS102")
-      verify(audienceLookupDao).resolveUndergraduates("CH")
-      verify(audienceLookupDao).resolveUndergraduates("PH")
+      verify(audienceLookupDao).resolveUndergraduatesInDept("CH", UndergradStudents.All)
+      verify(audienceLookupDao).resolveUndergraduatesInDept("PH", UndergradStudents.All)
       verify(audienceLookupDao).resolveTeachingStaff("PH")
       verifyNoMoreInteractions(webgroups)
       verifyNoMoreInteractions(audienceLookupDao)
@@ -215,7 +227,7 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
     "deduplicate usercodes" in new Ctx {
       webgroupsAllContainBarry()
       val users: Set[Usercode] = service.resolve(Audience(Seq(
-        ResearchPostgrads, TaughtPostgrads, UndergradStudents
+        ResearchPostgrads, TaughtPostgrads, AdminStaff
       ))).get
 
       users must be (Set(Usercode("cuddz")))
@@ -246,14 +258,33 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
 
       when(userLookup.getUsers(any[Seq[Usercode]]))
         .thenReturn(Try(codes.map(c => c -> Fixtures.user.makeFoundUser(c.string)).toMap))
-      when(userLookup.getUsers(ids.map(_.string).map(UniversityID), false))
+      when(userLookup.getUsers(ids.map(_.string).map(UniversityID), includeDisabled = false))
         .thenReturn(Try(Seq(UniversityID(validId.string) -> Fixtures.user.makeFoundUser(validId.string)).toMap))
+      when(userLookup.getUsers(Seq.empty[UniversityID])).thenReturn(Failure(new UserLookupException))
 
-      val actual = service.validateUsercodes(codesAndIds.toSet)
-      verify(userLookup, times(1)).getUsers(ids.map(u => UniversityID(u.string)))
-      verify(userLookup, times(1)).getUsers(codesAndIds)
+      val actual = service.validateUsers(codesAndIds.toSet)
 
       actual must be (Left(Set(invalidId)))
+    }
+
+    "handle prepending 'u' to uni ids" in new Ctx {
+      val validUsercode = Seq(Usercode("u1234567"))
+
+      val bobsId = UniversityID("7654321")
+      val bobsUsercode = Usercode("pacman")
+      val bobsIdDisguisedAsUsercode = Seq(Usercode(s"u${bobsId.string}"))
+
+      val codes: Seq[Usercode] = validUsercode ++ bobsIdDisguisedAsUsercode
+
+      when(userLookup.getUsers(Seq.empty[UniversityID])).thenReturn(Failure[Map[UniversityID, User]](new Exception("epic fail")))
+      when(userLookup.getUsers(codes))
+        .thenReturn(Try(validUsercode.map(c => c -> Fixtures.user.makeFoundUser(c.string)).toMap))
+      when(userLookup.getUsers(Seq(bobsId), includeDisabled = false))
+        .thenReturn(Try(Seq(bobsId -> Fixtures.user.makeFoundUser(bobsUsercode.string)).toMap))
+
+      val actual: Either[Set[Usercode], Set[Usercode]] = service.validateUsers(codes.toSet)
+
+      actual must be (Right((validUsercode :+ bobsUsercode).toSet))
     }
   }
 }

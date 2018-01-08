@@ -10,10 +10,11 @@ import org.scalatest.mockito.MockitoSugar
 import models.publishing.Publisher
 import play.api.cache.CacheApi
 import play.api.i18n.MessagesApi
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.json._
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
+import services.ActivityError.InvalidUsercodeAudience
 import services._
 import warwick.sso._
 
@@ -86,7 +87,7 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
 
     "return created activity ID on success" in {
       when(publisherService.getRoleForUser(Matchers.eq(tabulaPublisherId), any())).thenReturn(APINotificationsManager)
-      when(activityService.save(any(), Matchers.eq(Audience.usercode(Usercode("someone"))))).thenReturn(Right("created-activity-id"))
+      when(activityService.save(any(), any())).thenReturn(Right("created-activity-id"))
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
 
@@ -173,10 +174,104 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
       (json \ "errors" \ 0 \ "message").as[String] mustBe "All usercodes must be non-empty"
     }
 
+    "have warnings attached to the success response if some usercodes are invalid" in {
+      when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
+      when(publisherService.getRoleForUser(any(), any())).thenReturn(APINotificationsManager)
+      when(audienceService.resolve(any())).thenReturn(Try(Set(Usercode("u123123"), Usercode("u2938484"))))
+      when(activityService.save(any(), any())).thenReturn(Right("created-activity-id"))
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(Json.obj(
+        "type" -> "due",
+        "title" -> "Coursework due soon",
+        "url" -> "http://tabula.warwick.ac.uk",
+        "text" -> "Your submission for CS118 is due tomorrow",
+        "recipients" -> Json.obj(
+          "users" -> Json.arr(
+            "u123123",
+            "u2938484",
+            "invalid,sd",
+          )
+        )
+      )))
+
+      status(result) mustBe CREATED
+      val json = contentAsJson(result)
+      (json \ "warnings").isDefined mustBe true
+      (json \ "warnings" \ 0 \ "message").as[String] mustBe "The request contains one or more invalid usercode: List(Usercode(invalid,sd))"
+    }
+
+
+    "bad request response if all usercodes are invalid" in {
+      when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
+      when(publisherService.getRoleForUser(any(), any())).thenReturn(APINotificationsManager)
+      when(activityService.save(any(), any())).thenReturn(Right("created-activity-id"))
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(Json.obj(
+        "type" -> "due",
+        "title" -> "Coursework due soon",
+        "url" -> "http://tabula.warwick.ac.uk",
+        "text" -> "Your submission for CS118 is due tomorrow",
+        "recipients" -> Json.obj(
+          "users" -> Json.arr(
+            "u12, 3123",
+            "u,2938484",
+            "invalid,sd",
+          )
+        )
+      )))
+
+      status(result) mustBe BAD_REQUEST
+      val json = contentAsJson(result)
+      (json \ "warnings").isEmpty mustBe true
+      (json \ "errors" \ 0 \ "message").as[String] mustBe "All usercodes from this request seem to be invalid"
+    }
+
+    "happy with empty useraudiences" in {
+      when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
+      when(publisherService.getRoleForUser(any(), any())).thenReturn(APINotificationsManager)
+      when(activityService.save(any(), any())).thenReturn(Right("created-activity-id"))
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(Json.obj(
+        "type" -> "due",
+        "title" -> "Coursework due soon",
+        "url" -> "http://tabula.warwick.ac.uk",
+        "text" -> "Your submission for CS118 is due tomorrow",
+        "recipients" -> Json.obj(
+          "users" -> Json.arr(),
+          "groups" -> Json.arr(
+            "in-trigue"
+          )
+        )
+      )))
+      status(result) mustBe CREATED
+      val json = contentAsJson(result)
+      (json \ "warnings").isEmpty mustBe true
+    }
+
+    "happy with all valid usercodes" in {
+      when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
+      when(publisherService.getRoleForUser(any(), any())).thenReturn(APINotificationsManager)
+      when(activityService.save(any(), any())).thenReturn(Right("created-activity-id"))
+      val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(Json.obj(
+        "type" -> "due",
+        "title" -> "Coursework due soon",
+        "url" -> "http://tabula.warwick.ac.uk",
+        "text" -> "Your submission for CS118 is due tomorrow",
+        "recipients" -> Json.obj(
+          "users" -> Json.arr(
+            "sdf",
+            "123sdf",
+            "9jd@sdf.com"
+          ),
+        )
+      )))
+
+      status(result) mustBe CREATED
+      val json = contentAsJson(result)
+      (json \ "warnings").isEmpty mustBe true
+    }
+
     "fail for too many recipients" in {
       when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
       when(publisherService.find(tabulaPublisherId)).thenReturn(Some(tabulaPublisher.copy(maxRecipients = Some(1))))
-      when(audienceService.resolve(Audience(Seq(Audience.UsercodesAudience(Set(Usercode("cusfal"), Usercode("cusebr"))))))).thenReturn(Try(Set(Usercode("cusfal"), Usercode("cusebr"))))
+      when(audienceService.resolve(any())).thenReturn(Try(Set(Usercode("cusfal"), Usercode("cusebr"))))
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(Json.obj(
         "type" -> "due",
         "title" -> "Coursework due soon",
