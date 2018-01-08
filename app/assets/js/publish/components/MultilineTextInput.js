@@ -1,6 +1,5 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import _ from 'lodash-es';
 
 export default class MultilineTextInput extends React.PureComponent {
   static defaultProps = {
@@ -28,8 +27,7 @@ export default class MultilineTextInput extends React.PureComponent {
   }
 
   handleTextChange({ target: { value } }) {
-    const items = _.filter(value.split('\n'), val => val.length > 4);
-    this.props.handleChange(items, this.props.type);
+    this.props.handleChange(value.split('\n'), this.props.type);
   }
 
   render() {
