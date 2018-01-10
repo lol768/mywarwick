@@ -115,14 +115,14 @@ export default class AgendaTile extends TileContent {
   }
 
   showModal(heading, subHeading, body, href) {
-    const modal = <DismissableInfoModal
+    const modal = (<DismissableInfoModal
       heading={heading}
       subHeading={subHeading}
       onDismiss={this.hideModal}
       href={href}
     >
       {body}
-    </DismissableInfoModal>;
+    </DismissableInfoModal>);
     this.props.showModal(modal);
   }
 
