@@ -114,11 +114,15 @@ export default class AgendaTile extends TileContent {
     this.props.showModal(null);
   }
 
-  showModal(heading, subHeading, body) {
-    const modal =
-      (<DismissableInfoModal heading={heading} subHeading={subHeading} onDismiss={this.hideModal}>
-        {body}
-      </DismissableInfoModal>);
+  showModal(heading, subHeading, body, href) {
+    const modal = <DismissableInfoModal
+      heading={heading}
+      subHeading={subHeading}
+      onDismiss={this.hideModal}
+      href={href}
+    >
+      {body}
+    </DismissableInfoModal>;
     this.props.showModal(modal);
   }
 
@@ -169,7 +173,7 @@ export default class AgendaTile extends TileContent {
       return null;
     }
 
-    const { title, location, extraInfo, organiser, staff } = event;
+    const { title, location, extraInfo, organiser, staff, href } = event;
 
     const eventDate = AgendaTile.renderSingleEventDate(event);
     const list =
@@ -204,6 +208,7 @@ export default class AgendaTile extends TileContent {
             title,
             <span> <FAClock /> {eventDate} <FAMap /> {location.name}</span>,
             extraInfo,
+            href,
           )}
           target="_blank"
           tabIndex={0}
@@ -215,7 +220,7 @@ export default class AgendaTile extends TileContent {
     }
 
     return (
-      <Hyperlink href={ event.href } style={{ display: 'block' }}>
+      <Hyperlink href={ href } style={{ display: 'block' }}>
         { list }
       </Hyperlink>
     );
@@ -350,11 +355,12 @@ export class AgendaTileItem extends React.PureComponent {
   }
 
   handleShowModal() {
-    const { showModal, title, location: { name: locName }, extraInfo } = this.props;
+    const { showModal, title, location: { name: locName }, extraInfo, href } = this.props;
     showModal(
       title,
       <span> <FAClock /> {AgendaTile.renderSingleEventDate(this.props)} <FAMap /> {locName}</span>,
       extraInfo,
+      href,
     );
   }
 

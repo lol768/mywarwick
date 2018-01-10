@@ -1,5 +1,6 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
+import HyperLink from './Hyperlink';
 
 export default class DismissableInfoModal extends React.PureComponent {
   static propTypes = {
@@ -9,6 +10,7 @@ export default class DismissableInfoModal extends React.PureComponent {
       PropTypes.node,
     ]),
     children: PropTypes.node,
+    href: PropTypes.string,
     onDismiss: PropTypes.func,
   };
 
@@ -31,6 +33,14 @@ export default class DismissableInfoModal extends React.PureComponent {
                 {this.props.children}
               </div>
               <div className="modal-footer">
+                { this.props.href &&
+                <HyperLink
+                  type="button"
+                  className="btn btn-default"
+                  href={this.props.href}
+                >
+                  More
+                </HyperLink> }
                 <button
                   type="button"
                   className="btn btn-default"
