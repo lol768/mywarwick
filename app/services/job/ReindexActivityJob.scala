@@ -23,7 +23,7 @@ class ReindexActivityJob @Inject()(
     toSmallerIntervals(getDateTimeRangeFromContext(context), Period.hours(6))
       .foreach(activityService.getActivitiesForDateTimeRange(_)
         .grouped(1000).map(_.map(IndexActivityRequest(_, None)))
-        .foreach(activityESService.index)
+        .foreach(activityESService.indexActivityReqs)
       )
   }
 }

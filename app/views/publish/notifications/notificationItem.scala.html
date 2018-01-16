@@ -34,9 +34,18 @@
               To: @c
                 @if(c == 1) { recipient } else { recipients }
                 @if(item.audienceComponents.nonEmpty) {
-                  <i class="audience-details fa collapsed" data-toggle="collapse" data-target="#@item.activity.id"></i>
+                  <i class="activity-item__audience-details fa collapsed" data-toggle="collapse" data-target="#@item.activity.id" data-is-sent="@item.isSent"></i>
                   <div id="@item.activity.id" class="collapse">
-                    @tags.audienceComponents(item.audienceComponents, allDepartments)
+                    <strong>
+                      Audience:</strong> @tags.audienceComponents(item.audienceComponents, allDepartments)
+                    <div class="activity-item__sent-details" style="display: none">
+                      <div class="activity-item__sent-details-successful">
+                        Successful: <i class="fa fa-spin fa-refresh"></i></div>
+                      <div class="activity-item__sent-details-failed">
+                        Failed: <i class="fa fa-spin fa-refresh"></i></div>
+                      <div class="activity-item__sent-details-skipped">
+                        Skipped: <i class="fa fa-spin fa-refresh"></i></div>
+                    </div>
                   </div>
                 }
               </span>
@@ -47,7 +56,7 @@
         @if(item.isSendingNow) {
         <div class="activity-item__audience activity-item__send-progress">
           <i class="fa fa-spin fa-refresh"></i>
-          Sent to
+          Processed
           <span class="activity-item__sent-count">
             @("%,d".format(item.sentCount))
           </span>

@@ -15,6 +15,7 @@ import AudienceIndicator from './publish/components/AudienceIndicator';
 import store from './publish/publishStore';
 import promiseSubmit from './publish/utils';
 import { Provider } from 'react-redux';
+import log from 'loglevel';
 
 function setupAudienceIndicator() {
   const audienceIndicator = $('.audience-indicator');
@@ -178,11 +179,37 @@ function setupPublisherPermissionsForm() {
   });
 }
 
+function fetchActivityStatus(activityId) {
+  return fetchWithCredentials(`alerts/${activityId}/status`)
+    .then(response => response.text())
+    .then(text => JSON.parse(text));
+}
+
+function addSentDetailsClickListener() {
+  $('.activity-item__audience-details.collapsed[data-is-sent=true]').on('click', (e) => {
+    const $item = $(e.target);
+    const activityId = $item.data('target');
+    const $activityDetails = $(`${activityId} > .activity-item__sent-details`).show();
+    fetchActivityStatus(activityId.slice(1))
+      .then(({ sent }) =>
+        _.keys(sent).forEach((state) => {
+          const $state = $activityDetails.find(`.activity-item__sent-details-${state}`);
+          $state.text(`${_.capitalize(state)} - `);
+          _.keys(sent[state]).forEach(output =>
+            $state.append(`${output}: ${sent[state][output].length} `),
+          );
+        }),
+      )
+      .catch(err => log.error(`Error updating alert sent details from json response. Alert Id: ${activityId}`, err));
+  });
+}
+
 $(() => {
   setupAudienceIndicator();
   setupAudiencePicker();
   setupPublisherDepartmentsForm();
   setupPublisherPermissionsForm();
+  addSentDetailsClickListener();
 
   $('[data-background-color]').each(function applyBackgroundColour() {
     $(this).css('background-color', $(this).data('background-color'));
@@ -213,12 +240,10 @@ $(() => {
     const activityId = $activity.data('activity-id');
 
     const interval = setInterval(() => {
-      fetchWithCredentials(`alerts/${activityId}/status`)
-        .then(response => response.text())
-        .then(text => JSON.parse(text))
+      fetchActivityStatus(activityId)
         .then((response) => {
           if (response.sendingNow) {
-            $activity.find('.activity-item__sent-count').text(response.sentCount);
+            $activity.find('.activity-item__sent-count').text(response.sent.total);
           } else {
             clearInterval(interval);
             $activity.find('.activity-item__send-progress').remove();
@@ -228,6 +253,10 @@ $(() => {
             }
 
             $activity.prependTo('#sent-activities');
+            $activity.find('.activity-item__audience-details')
+              .attr('data-is-sent', true)
+              .next(`#${activityId}`).collapse('hide');
+            addSentDetailsClickListener();
           }
         });
     }, 2000);

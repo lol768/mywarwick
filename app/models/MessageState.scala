@@ -10,8 +10,9 @@ object MessageState {
   val Taken = MessageState("T")
   val Success = MessageState("S")
   val Failure = MessageState("F")
+  val Skipped = MessageState("O")
 
-  private val values = Set(Available, Taken, Success, Failure)
+  private val values = Set(Available, Taken, Success, Failure, Skipped)
 
   def parse(dbValue: String): MessageState = values.find(_.dbValue == dbValue).getOrElse(throw new IllegalArgumentException(dbValue))
 

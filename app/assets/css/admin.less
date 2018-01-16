@@ -90,15 +90,17 @@ dd.error {
   }
 }
 
-.activity-item {
-  .audience-details {
-    margin-left: 4px;
-    &:after {
-      content: @fa-var-chevron-down;
-    }
-    &.collapsed:after {
-      content: @fa-var-chevron-right;
-    }
+.activity-item__sent-details div {
+
+}
+
+.activity-item__audience-details {
+  margin-left: 4px;
+  &:after {
+    content: @fa-var-chevron-down;
+  }
+  &.collapsed:after {
+    content: @fa-var-chevron-right;
   }
 }
 

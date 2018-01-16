@@ -11,7 +11,8 @@ import play.api.libs.json.{JsValue, Json}
 
 trait ActivityESServiceHelper {
 
-  val documentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
+  val activityDocumentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
+  val messageSentDocumentType = "message_send"
   val indexNameForAlert = "alert"
   val indexNameForActivity = "activity"
   val separator = "_"
@@ -33,17 +34,19 @@ trait ActivityESServiceHelper {
     val created_by = "created_by"
   }
 
-  def indexNameToday(isNotification: Boolean = true, today: String = DateTime.now().toString("yyyy_MM")): String = {
+  def dateSuffixString(date: DateTime = DateTime.now()) = s"$separator${date.toString("yyyy_MM")}"
+
+  def indexNameToday(isNotification: Boolean = true): String = {
     isNotification match {
-      case true => s"$indexNameForAlert$separator$today"
-      case false => s"$indexNameForActivity$separator$today"
+      case true => s"$indexNameForAlert${dateSuffixString()}"
+      case false => s"$indexNameForActivity${dateSuffixString()}"
     }
   }
 
   def indexNameForDateTime(dateTime: DateTime, isNotification: Boolean = true) = {
     isNotification match {
-      case true => s"$indexNameForAlert$separator${dateTime.toString("yyyy_MM")}"
-      case false => s"$indexNameForActivity$separator${dateTime.toString("yyyy_MM")}"
+      case true => s"$indexNameForAlert${dateSuffixString(dateTime)}"
+      case false => s"$indexNameForActivity${dateSuffixString(dateTime)}"
     }
   }
 
@@ -162,6 +165,31 @@ trait ActivityESServiceHelper {
 
   val activityEsTemplates: JsValue = getEsTemplate(indexNameForActivity)
   val alertEsTemplates: JsValue = getEsTemplate(indexNameForAlert)
+  val messageSentEsTemplates: JsValue = Json.parse({
+    s"""
+      {
+        "template": "message_sent*",
+        "mappings": {
+          "message_sent": {
+            "properties": {
+              "activity_id": {
+                "type": "keyword"
+              },
+              "usercode": {
+                "type": "keyword"
+              },
+              "output": {
+                "type": "keyword"
+              },
+              "state": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    """
+  })
 }
 
 object ActivityESServiceUpdateHelper extends ActivityESServiceHelper {
@@ -170,8 +198,6 @@ object ActivityESServiceUpdateHelper extends ActivityESServiceHelper {
   }
 
 }
-
-object ActivityESServiceDeleteHelper extends ActivityESServiceHelper
 
 object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 

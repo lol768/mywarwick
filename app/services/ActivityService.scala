@@ -9,6 +9,7 @@ import org.quartz._
 import play.api.db.{Database, NamedDatabase}
 import services.ActivityError._
 import services.dao._
+import services.elasticsearch.ActivityESService
 import services.job.PublishActivityJob
 import warwick.sso.{User, UserLookupService, Usercode}
 
