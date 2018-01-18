@@ -33,7 +33,7 @@ class ActivityRecipientDaoTest extends BaseSpec with OneStartAppPerSuite {
       val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
 
       activityRecipientDao.create(activityId, "someone", None, shouldNotify = false)
-      activityRecipientDao.markSent(activityId, "someone")
+      activityRecipientDao.markProcessed(activityId, "someone")
 
       val date = SQL"SELECT SENT_AT FROM ACTIVITY_RECIPIENT WHERE ACTIVITY_ID = $activityId AND USERCODE = 'someone'"
         .as(scalar[DateTime].singleOpt)

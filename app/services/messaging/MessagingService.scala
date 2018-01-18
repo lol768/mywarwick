@@ -91,7 +91,7 @@ class MessagingServiceImpl @Inject()(
       if (mutedUsercodes.nonEmpty) {
         logger.info(s"Muted sending activity ${activity.id} to: ${mutedUsercodes.map(_.string).mkString(",")}")
 
-        mutedUsercodes.foreach(activities.markSent(activity.id, _))
+        mutedUsercodes.foreach(activities.markProcessed(activity.id, _))
       }
       recipients.diff(mutedUsercodes)
     }.getOrElse(recipients)
@@ -135,7 +135,7 @@ class MessagingServiceImpl @Inject()(
   def sendMobileFor(user: Usercode, activity: Activity): Boolean = true
 
   override def processNow(message: MessageSend.Light): Future[ProcessingResult] = {
-    activities.markSent(message.activity, message.user)
+    activities.markProcessed(message.activity, message.user)
     activities.getActivityById(message.activity).map { activity =>
       users.getUsers(Seq(message.user)).get.get(message.user).map { user =>
         val heavyMessage = message.fill(user, activity)
