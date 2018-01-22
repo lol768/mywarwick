@@ -63,6 +63,8 @@ trait ActivityDao {
   def getSentCounts(ids: Seq[String])(implicit c: Connection): Map[String, Int]
 
   def setSentCount(id: String, count: Int)(implicit c: Connection): Unit
+
+  def getActivityReadCountSincePublishedDate(activityId: String)(implicit c: Connection): Int
 }
 
 class ActivityDaoImpl @Inject()(
@@ -312,6 +314,15 @@ class ActivityDaoImpl @Inject()(
       case (a, xs) => a :: xs
     }
   }
+
+  override def getActivityReadCountSincePublishedDate(activityId: String)(implicit c: Connection): Int =
+    SQL(
+      s"""
+        SELECT COUNT(*) FROM ACTIVITY_RECIPIENT_READ r JOIN ACTIVITY_RECIPIENT a ON r.USERCODE = a.USERCODE
+        WHERE ACTIVITY_ID = '$activityId'
+        AND NOTIFICATIONS_LAST_READ > PUBLISHED_AT
+      """)
+      .as(scalar[Int].single)
 
   override def getLastReadDate(usercode: String)(implicit c: Connection): Option[DateTime] = {
     SQL(
