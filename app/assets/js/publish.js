@@ -191,15 +191,18 @@ function addSentDetailsClickListener() {
     const activityId = $item.data('target');
     const $activityDetails = $(`${activityId} > .activity-item__sent-details`).show();
     fetchActivityStatus(activityId.slice(1))
-      .then(({ sent }) =>
-        _.keys(sent).forEach((state) => {
+      .then(({ sent: { details } }) => {
+        if (!details) {
+          $activityDetails.html('<i class="fa fa-exclamation-triangle"></i> Error fetching sent details for this alert');
+        }
+        _.keys(details).forEach((state) => {
           const $state = $activityDetails.find(`.activity-item__sent-details-${state}`);
           $state.text(`${_.capitalize(state)} - `);
-          _.keys(sent[state]).forEach(output =>
-            $state.append(`${output}: ${sent[state][output].length} `),
+          _.keys(details[state]).forEach(output =>
+            $state.append(`${output}: ${details[state][output].length} `),
           );
-        }),
-      )
+        });
+      })
       .catch(err => log.error(`Error updating alert sent details from json response. Alert Id: ${activityId}`, err));
   });
 }

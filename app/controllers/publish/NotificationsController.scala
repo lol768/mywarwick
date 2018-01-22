@@ -72,7 +72,8 @@ class NotificationsController @Inject()(
       activityWithAudience.map { activity =>
         Ok(Json.obj(
           "audienceSize" -> activity.audienceSize.toOption,
-          "sent" -> (Json.obj("total" -> activity.sentCount) ++ Json.toJson(sentDetails).asOpt[JsObject].getOrElse(JsObject(Nil))),
+          "sent" -> (Json.obj("total" -> activity.sentCount)
+            ++ sentDetails.map(sd => Json.obj("details" -> Json.toJson(sd))).getOrElse(JsObject(Nil))),
           "sendingNow" -> activity.isSendingNow
         ))
       }.getOrElse(NotFound(Json.obj("error" -> "not_found")))

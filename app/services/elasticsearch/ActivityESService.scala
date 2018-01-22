@@ -9,7 +9,7 @@ import org.apache.http.entity.ContentType
 import org.apache.http.nio.entity.NStringEntity
 import org.elasticsearch.action.bulk.{BulkRequest, BulkResponse}
 import org.elasticsearch.action.index.IndexRequest
-import org.elasticsearch.client.{Response, RestClient, RestHighLevelClient}
+import org.elasticsearch.client.{Response, ResponseException, RestClient, RestHighLevelClient}
 import org.elasticsearch.common.xcontent.{XContentBuilder, XContentFactory}
 import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
@@ -150,7 +150,7 @@ class ActivityESServiceImpl @Inject()(
     )
   }
 
-  def messageSentDetailsForActivity(activityId: String, publishedAt: Option[DateTime]): Future[Option[MessageSentDetails]] = {
+  override def messageSentDetailsForActivity(activityId: String, publishedAt: Option[DateTime]): Future[Option[MessageSentDetails]] = {
     publishedAt.map { date =>
       val query = Json.parse(s"""{"query": {"match": {"${ESFieldName.activity_id}" : "$activityId" }}}""")
 
@@ -159,7 +159,9 @@ class ActivityESServiceImpl @Inject()(
         path = s"/${helper.messageSentDocumentType}${helper.dateSuffixString(date)}/_search",
         entity = Some(new NStringEntity(query.toString, ContentType.APPLICATION_JSON)),
         lowLevelClient = lowLevelClient
-      ).map(handleMessageSentDetailsResponse)
+      ).map(handleMessageSentDetailsResponse).recover {
+        case _ => None // exception is logged by es client
+      }
     }.getOrElse(Future(None))
   }
 

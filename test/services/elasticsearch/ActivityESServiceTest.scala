@@ -3,7 +3,7 @@ package services.elasticsearch
 import java.util
 import javax.ws.rs.HttpMethod
 
-import helpers.BaseSpec
+import helpers.{BaseSpec, MinimalAppPerSuite}
 import org.apache.http.HttpEntity
 import org.apache.http.entity.ContentType
 import org.apache.http.nio.entity.NStringEntity
@@ -24,7 +24,9 @@ import warwick.sso.Usercode
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
-class ActivityESServiceTest extends BaseSpec with MockitoSugar with InjectedController {
+class ActivityESServiceTest extends BaseSpec with MockitoSugar with BaseController with MinimalAppPerSuite {
+
+  val controllerComponents: ControllerComponents = get[ControllerComponents]
 
   val audienceService: AudienceService = mock[AudienceService]
   val publisherService: PublisherService = mock[PublisherService]

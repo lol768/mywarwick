@@ -3,7 +3,7 @@ package services.messaging
 import java.sql.Connection
 import javax.inject.{Inject, Named, Provider}
 
-import actors.MessageProcessing.ProcessingResult
+import actors.MessageProcessing._
 import com.google.inject.ImplementedBy
 import models._
 import org.joda.time.DateTime
@@ -135,8 +135,8 @@ class MessagingServiceImpl @Inject()(
   def sendMobileFor(user: Usercode, activity: Activity): Boolean = true
 
   override def processNow(message: MessageSend.Light): Future[ProcessingResult] = {
-    activities.markProcessed(message.activity, message.user)
     activities.getActivityById(message.activity).map { activity =>
+      activities.markProcessed(message.activity, message.user)
       users.getUsers(Seq(message.user)).get.get(message.user).map { user =>
         val heavyMessage = message.fill(user, activity)
         heavyMessage.output match {
@@ -145,10 +145,10 @@ class MessagingServiceImpl @Inject()(
           case Output.Mobile => mobile.send(heavyMessage)
         }
       }.getOrElse {
-        Future.successful(ProcessingResult(success = false, s"User ${message.user} not found"))
+        Future.successful(ProcessingResult(success = false, s"User ${message.user} not found", error = Some(UserNotFound)))
       }
     }.getOrElse {
-      Future.successful(ProcessingResult(success = false, s"Activity ${message.activity} not found"))
+      Future.successful(ProcessingResult(success = false, s"Activity ${message.activity} not found", error = Some(ActivityNotFound)))
     }
   }
 
