@@ -72,6 +72,8 @@ trait ActivityService {
   def getActivitiesForDateTimeRange(from: DateTime, to: DateTime): Seq[Activity]
 
   def getActivitiesForDateTimeRange(interval: Interval): Seq[Activity]
+
+  def getActivityReadCountSincePublishedDate(activityId: String): Int
 }
 
 class ActivityServiceImpl @Inject()(
@@ -339,6 +341,9 @@ class ActivityServiceImpl @Inject()(
       dao.getActivitiesForDateTimeRange(from, to)
     })
   }
+
+  override def getActivityReadCountSincePublishedDate(activityId: String): Int =
+    db.withConnection(implicit c => dao.getActivityReadCountSincePublishedDate(activityId))
 
   override def getActivitiesForDateTimeRange(interval: Interval): Seq[Activity] = {
     this.getActivitiesForDateTimeRange(interval.getStart, interval.getEnd)
