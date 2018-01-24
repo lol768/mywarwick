@@ -128,22 +128,21 @@ class ActivityESServiceImpl @Inject()(
 
   private def handleMessageSentDetailsResponse(res: Response): Option[MessageSentDetails] = {
     val json = Json.parse(scala.io.Source.fromInputStream(res.getEntity.getContent).mkString)
-    (json \ "hits" \ "hits").validateOpt[Seq[MessageSent]].fold(
+    (json \ "hits" \ "hits").validate[Seq[MessageSent]].fold(
       invalid => {
-        logger.error("Could not parse JSON in Elastic Search response")
+        logger.error(s"Could not parse JSON in Elastic Search response:\\n${Json.prettyPrint(json)}")
         invalid.foreach { case (path, errs) => logger.error(s"$path: ${errs.map(_.message).mkString(", ")}") }
         None
       },
       valid => valid match {
-        case Some(messageSents) =>
+        case messageSents if messageSents.nonEmpty =>
           val groupedByState = messageSents.par.groupBy(_.state)
           import MessageState._
           Some(MessageSentDetails(
-            successful = buildSentDetails(groupedByState.getOrElse(Success, Nil).seq),
             failed = buildSentDetails(groupedByState.getOrElse(Failure, Nil).seq),
             skipped = buildSentDetails(groupedByState.getOrElse(Skipped, Nil).seq)
           ))
-        case None =>
+        case _ =>
           logger.debug(s"MessageSent data not found in Elastic Search json response:\n${Json.prettyPrint(json)}")
           None
       }

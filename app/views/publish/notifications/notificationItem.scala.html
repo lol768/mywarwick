@@ -36,15 +36,18 @@
                 @if(item.audienceComponents.nonEmpty) {
                   <i class="activity-item__audience-details fa collapsed" data-toggle="collapse" data-target="#@item.activity.id" data-is-sent="@item.isSent"></i>
                   <div id="@item.activity.id" class="collapse">
-                    <strong>
-                      Audience:</strong> @tags.audienceComponents(item.audienceComponents, allDepartments)
-                    <div class="activity-item__sent-details" style="display: none">
-                      <div class="activity-item__sent-details-successful">
-                        Successful: <i class="fa fa-spin fa-refresh"></i></div>
-                      <div class="activity-item__sent-details-failed">
-                        Failed: <i class="fa fa-spin fa-refresh"></i></div>
-                      <div class="activity-item__sent-details-skipped">
-                        Skipped: <i class="fa fa-spin fa-refresh"></i></div>
+                    <div><strong>Audience</strong></div>
+                    <div style="margin-left: 15px;">@tags.audienceComponents(item.audienceComponents, allDepartments)</div>
+                    <div><strong>Sent details</strong></div>
+                    <div style="margin-left: 15px;">
+                      <div class="activity-item__sent-details" style="display: none">
+                        <div class="activity-item__sent-details-read-count">
+                          Read: <i class="fa fa-spin fa-refresh"></i></div>
+                        <div class="activity-item__sent-details-failed">
+                          Failed: <i class="fa fa-spin fa-refresh"></i></div>
+                        <div class="activity-item__sent-details-skipped">
+                          Skipped: <i class="fa fa-spin fa-refresh"></i></div>
+                      </div>
                     </div>
                   </div>
                 }

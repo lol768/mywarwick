@@ -189,11 +189,14 @@ function addSentDetailsClickListener() {
   $('.activity-item__audience-details.collapsed[data-is-sent=true]').on('click', (e) => {
     const $item = $(e.target);
     const activityId = $item.data('target');
-    const $activityDetails = $(`${activityId} > .activity-item__sent-details`).show();
+    const $activityDetails = $(`${activityId} .activity-item__sent-details`).show();
     fetchActivityStatus(activityId.slice(1))
-      .then(({ sent: { details } }) => {
-        if (!details) {
+      .then(({ sent: { details, readCount } }) => {
+        $activityDetails.find('.activity-item__sent-details-read-count').text(`Read: ${readCount}`);
+        if (!details && !readCount) {
           $activityDetails.html('<i class="fa fa-exclamation-triangle"></i> Error fetching sent details for this alert');
+        } else if (!details) {
+          $activityDetails.find('[class^=activity-item__sent-details-]:not([class$=read-count])').hide();
         }
         _.keys(details).forEach((state) => {
           const $state = $activityDetails.find(`.activity-item__sent-details-${state}`);
@@ -203,7 +206,10 @@ function addSentDetailsClickListener() {
           );
         });
       })
-      .catch(err => log.error(`Error updating alert sent details from json response. Alert Id: ${activityId}`, err));
+      .catch((err) => {
+        $activityDetails.html('<i class="fa fa-exclamation-triangle"></i> Error fetching sent details for this alert');
+        log.error(`Error updating alert sent details from json response. Alert Id: ${activityId}`, err);
+      });
   });
 }
 

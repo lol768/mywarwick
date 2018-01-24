@@ -118,7 +118,6 @@ class ActivityESServiceTest extends BaseSpec with MockitoSugar with BaseControll
 
       val expected: Option[MessageSentDetails] =
         Some(MessageSentDetails(
-          successful = sentDetails(),
           failed = sentDetails(mobile = Seq(Usercode("cusjau"))),
           skipped = sentDetails()
         ))

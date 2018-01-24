@@ -11,15 +11,12 @@ case class SentDetails(
 
 object SentDetails {
   implicit val readsUserCode: Reads[Usercode] = Json.reads[Usercode]
-  implicit val writesUsercode: Writes[Usercode] = new Writes[Usercode] {
-    override def writes(o: Usercode): JsValue = JsString(o.string)
-  }
+  implicit val writesUsercode: Writes[Usercode] = (o: Usercode) => JsString(o.string)
   implicit val formatUsercode: Format[Usercode] = Format(readsUserCode, writesUsercode)
   implicit val format: Format[SentDetails] = Json.format[SentDetails]
 }
 
 case class MessageSentDetails(
-  successful: SentDetails,
   failed: SentDetails,
   skipped: SentDetails
 )

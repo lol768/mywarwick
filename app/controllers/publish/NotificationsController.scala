@@ -68,12 +68,16 @@ class NotificationsController @Inject()(
   def status(publisherId: String, activityId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request => {
     import services.elasticsearch.MessageSentDetails._
     val activityWithAudience = activityService.getActivityWithAudience(activityId).filter(_.activity.publisherId.contains(publisherId))
+
     activityESService.messageSentDetailsForActivity(activityId, activityWithAudience.map(_.activity.publishedAt)).map { sentDetails =>
       activityWithAudience.map { activity =>
         Ok(Json.obj(
           "audienceSize" -> activity.audienceSize.toOption,
-          "sent" -> (Json.obj("total" -> activity.sentCount)
-            ++ sentDetails.map(sd => Json.obj("details" -> Json.toJson(sd))).getOrElse(JsObject(Nil))),
+          "sent" -> (
+            Json.obj("total" -> activity.sentCount)
+              ++ Json.obj("readCount" -> activityService.getActivityReadCountSincePublishedDate(activityId))
+              ++ sentDetails.map(sd => Json.obj("details" -> Json.toJson(sd))).getOrElse(JsObject(Nil))
+            ),
           "sendingNow" -> activity.isSendingNow
         ))
       }.getOrElse(NotFound(Json.obj("error" -> "not_found")))
