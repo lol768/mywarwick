@@ -27,12 +27,12 @@
         set to have your notifications copied to email.
       </p>
 
-      <p>You can <a href="@baseUrl @optOutRoute">disable this</a>.</p>
+      <p>You can <a href="@{baseUrl+optOutRoute}">disable this</a>.</p>
     } else {
       <p>
         This email was sent by My Warwick. You can receive future
         messages as push notifications to your phone by <a href="@baseUrl">downloading</a>
-        the My Warwick app, or you can <a href="@baseUrl @optOutRoute">disable these emails</a>
+        the My Warwick app, or you can <a href="@{baseUrl+optOutRoute}">disable these emails</a>
         entirely.
       </p>
     }
