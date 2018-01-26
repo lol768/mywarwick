@@ -12,13 +12,17 @@
   </head>
   <body style="font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif">
     <p>Hi@user.name.first.map(" " + _).getOrElse(""), you have a new notification from My Warwick:</p>
-
-    <blockquote style="font-style: italic"><p>@activity.title@(activity.url.map(u => s" ($u)").getOrElse(""))</p>
+    <blockquote style="font-style: italic">
+      <p>@{
+        activity
+            .url
+            .map(url => s"""<a href="$url">${activity.title}</a>""")
+            .getOrElse(activity.title)
+      }</p>
       @if(activity.text.nonEmpty) {
         <p>@Html(MarkdownRenderer.renderMarkdown(activity.text.get))</p>
       }
     </blockquote>
-
     <hr>
 
     @if(loggedInBefore) {
