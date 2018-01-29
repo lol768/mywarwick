@@ -99,7 +99,7 @@ export function resizeTile(tile, layoutWidth, width, height) {
 }
 
 export function persistTiles() {
-  return (dispatch, getState) => { // eslint-disable-line consistent-return
+  return (dispatch, getState) => {
     if (getState().tiles.fetched) { // NEWSTART-1290 disappearing tiles
       const tiles = getState().tiles.data.tiles.map(item =>
         _.pick(item, ['id', 'preferences', 'removed']),
@@ -113,6 +113,7 @@ export function persistTiles() {
         body: JSON.stringify({ tiles, layout }),
       });
     }
+    return Promise.resolve();
   };
 }
 
