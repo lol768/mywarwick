@@ -192,7 +192,7 @@ export default class AgendaTile extends TileContent {
           { AgendaTile.getLocationString(location) }
         </li>
         }
-        { (organiser || staff) &&
+        { (organiser || _.isEmpty(staff)) &&
         <li className="text-overflow-block">
           <FAUser fw />
           { AgendaTile.renderUser({ organiser, staff }) }
