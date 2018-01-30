@@ -192,7 +192,7 @@ export default class AgendaTile extends TileContent {
           { AgendaTile.getLocationString(location) }
         </li>
         }
-        { (organiser || _.isEmpty(staff)) &&
+        { (organiser || !_.isEmpty(staff)) &&
         <li className="text-overflow-block">
           <FAUser fw />
           { AgendaTile.renderUser({ organiser, staff }) }
@@ -201,12 +201,14 @@ export default class AgendaTile extends TileContent {
       </ul>);
 
     if (extraInfo) {
+      const locName = AgendaTile.getLocationString(location);
       return (
         <a
           role="button"
           onClick={() => this.showModal(
             title,
-            <span> <FAClock /> {eventDate} <FAMap /> {location.name}</span>,
+            <span> <FAClock /> {eventDate}&nbsp;
+              {locName && <span><FAMap /> {location.name}</span>}</span>,
             extraInfo,
             href,
           )}
@@ -355,10 +357,11 @@ export class AgendaTileItem extends React.PureComponent {
   }
 
   handleShowModal() {
-    const { showModal, title, location: { name: locName }, extraInfo, href } = this.props;
+    const { showModal, title, location, extraInfo, href } = this.props;
     showModal(
       title,
-      <span> <FAClock /> {AgendaTile.renderSingleEventDate(this.props)} <FAMap /> {locName}</span>,
+      <span> <FAClock /> {AgendaTile.renderSingleEventDate(this.props)}&nbsp;
+        {location && <span><FAMap /> {location.name}</span>}</span>,
       extraInfo,
       href,
     );
@@ -445,7 +448,7 @@ export class AgendaTileItem extends React.PureComponent {
 
   render() {
     const { extraInfo, href } = this.props;
-
+    const renderedUser = AgendaTile.renderUser(this.props);
     const content = (
       <div className="agenda-item">
         <div className="agenda-item__cell" style={{ paddingRight: '.25em' }}>
@@ -460,9 +463,8 @@ export class AgendaTileItem extends React.PureComponent {
             : <Hyperlink href={href}>{ this.renderTitle() }</Hyperlink> }
           { ' ' }
           { this.renderLocation() }
-          {<div className="text--translucent tile-list-item__organiser">
-            { <FAUser /> }
-            { AgendaTile.renderUser(this.props) }
+          { renderedUser && <div className="text--translucent tile-list-item__organiser">
+            <FAUser/> {renderedUser}
           </div>}
         </div>
       </div>

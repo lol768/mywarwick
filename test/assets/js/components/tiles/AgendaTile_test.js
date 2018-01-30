@@ -331,6 +331,29 @@ describe('AgendaTileItem', () => {
     },
   };
 
+  it('handles staff prop as array', () => {
+    const staffMember = {
+      email: 'E.L.Blagrove@warwick.ac.uk',
+      firstName: 'Dr Nic',
+      lastName: 'Duke',
+      universityId: '123456',
+      userType: 'Staff'
+    };
+    const propsWithStaff = {...props, staff: [staffMember]};
+    const html = shallow(<AgendaTileItem zoomed={ true } { ...propsWithStaff } />);
+
+    const staffInner = html.find('.tile-list-item__organiser');
+    expect(staffInner.html()).to.include(`${staffMember.firstName} ${staffMember.lastName}`)
+  });
+
+  it('handles staff prop as empty array', () => {
+    const propsWithEmptyStaff = {...props, staff: []};
+    const html = shallow(<AgendaTileItem zoomed={ true } { ...propsWithEmptyStaff } />);
+
+    const staffInner = html.find('.tile-list-item__organiser');
+    expect(staffInner.length).to.equal(0)
+  });
+
   it('renders correctly without a href', () => {
     const html = shallow(<AgendaTileItem zoomed={ true } { ...props } />);
 
