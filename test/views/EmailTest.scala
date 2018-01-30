@@ -22,7 +22,7 @@ class EmailTest extends BaseSpec {
       val loggedInBefore = true
       val result = views.html.email(user, activity, date, baseUrl, optOutRoute, loggedInBefore)
       val content = contentAsString(result)
-      content must contain (s"""<a href="http://tabula.warwick.ac.uk">Coursework due</a>""")
+      content must include (s"""<a href="http://tabula.warwick.ac.uk">Coursework due</a>""")
     }
   }
 
