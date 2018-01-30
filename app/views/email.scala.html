@@ -16,7 +16,7 @@
       <p>@{
         activity
             .url
-            .map(url => s"""<a href="$url">${activity.title}</a>""")
+            .map(url => <a href={s""""$url""""}>${activity.title}</a>)
             .getOrElse(activity.title)
       }</p>
       @if(activity.text.nonEmpty) {
