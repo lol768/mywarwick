@@ -12,7 +12,7 @@ const TIMINGS = [
   60,
 ];
 
-class TimetableAlarmsView extends HideableView {
+export class TimetableAlarmsView extends HideableView {
   static propTypes = {
     enabled: PropTypes.bool.isRequired,
     minutesBeforeEvent: PropTypes.number.isRequired,
@@ -70,7 +70,7 @@ class TimetableAlarmsView extends HideableView {
         <div className="list-group setting-colour-1">
           {TIMINGS.map(minutes =>
             (<RadioListGroupItem
-              description={`${TimetableAlarmsView.getDescriptionForMinute(minutes)}`}
+              description={`${TimetableAlarmsView.getDescriptionForTiming(minutes)}`}
               onClick={this.onSetTiming(minutes)}
               value={minutes}
               checked={minutesBeforeEvent === minutes}
@@ -81,13 +81,15 @@ class TimetableAlarmsView extends HideableView {
     );
   }
 
-  static getDescriptionForMinute(minutes) {
-    const unit = minutes < 60 && minutes > 1 ? 'minutes' : minutes === 60 ? 'hour' : 'hours';
-    if (minutes < 60) {
-      return `${minutes} ${minutes > 1 ? 'minutes' : 'minute'} before`;
-    }
-    const hours = ~~(minutes / 60); // we only do hours in whole right now
-    return `${hours} ${hours > 1 ? 'hours' : 'hour'}`;
+  static getDescriptionForTiming(minutes) {
+    const makeHourPhrase = (hours) => `${hours} ${hours > 1 ? 'hours' : 'hour'}`;
+    const makeMinutePhrase = (minutes) => `${minutes} ${minutes > 1 ? 'minutes' : 'minute'}`;
+    if (minutes < 60) return `${makeMinutePhrase(minutes)} before`;
+    const hours = ~~(minutes / 60);
+    const remaining = minutes - hours * 60;
+    return remaining > 0 ?
+      `${makeHourPhrase(hours)} ${makeMinutePhrase(remaining)} before` :
+      `${makeHourPhrase(hours)} before`
   }
 }
 
