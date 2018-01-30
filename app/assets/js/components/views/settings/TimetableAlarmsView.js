@@ -87,7 +87,7 @@ export class TimetableAlarmsView extends HideableView {
     const makeMinutePhrase = minutes => `${minutes} ${pluralise('minute', minutes)}`;
     if (timingInMinute < 60) return `${makeMinutePhrase(timingInMinute)} before`;
     const hours = Math.floor(timingInMinute / 60);
-    const remaining = timingInMinute - (hours * 60);
+    const remaining = timingInMinute % 60;
     return remaining > 0 ?
       `${makeHourPhrase(hours)} ${makeMinutePhrase(remaining)} before` :
       `${makeHourPhrase(hours)} before`;
