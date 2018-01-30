@@ -464,7 +464,7 @@ export class AgendaTileItem extends React.PureComponent {
           { ' ' }
           { this.renderLocation() }
           { renderedUser && <div className="text--translucent tile-list-item__organiser">
-            <FAUser/> {renderedUser}
+            <FAUser /> {renderedUser}
           </div>}
         </div>
       </div>
