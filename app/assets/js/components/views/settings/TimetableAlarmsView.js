@@ -82,14 +82,14 @@ export class TimetableAlarmsView extends HideableView {
   }
 
   static getDescriptionForTiming(minutes) {
-    const makeHourPhrase = (hours) => `${hours} ${hours > 1 ? 'hours' : 'hour'}`;
-    const makeMinutePhrase = (minutes) => `${minutes} ${minutes > 1 ? 'minutes' : 'minute'}`;
+    const makeHourPhrase = hours => `${hours} ${hours > 1 ? 'hours' : 'hour'}`;
+    const makeMinutePhrase = mins => `${mins} ${mins > 1 ? 'minutes' : 'minute'}`;
     if (minutes < 60) return `${makeMinutePhrase(minutes)} before`;
-    const hours = ~~(minutes / 60);
-    const remaining = minutes - hours * 60;
+    const hours = Math.floor(minutes / 60);
+    const remaining = minutes - (hours * 60);
     return remaining > 0 ?
       `${makeHourPhrase(hours)} ${makeMinutePhrase(remaining)} before` :
-      `${makeHourPhrase(hours)} before`
+      `${makeHourPhrase(hours)} before`;
   }
 }
 
