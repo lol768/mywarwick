@@ -9,6 +9,7 @@ const TIMINGS = [
   5,
   15,
   30,
+  60,
 ];
 
 class TimetableAlarmsView extends HideableView {
