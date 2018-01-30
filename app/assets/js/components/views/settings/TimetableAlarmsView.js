@@ -70,7 +70,7 @@ class TimetableAlarmsView extends HideableView {
         <div className="list-group setting-colour-1">
           {TIMINGS.map(minutes =>
             (<RadioListGroupItem
-              description={`${minutes} minutes before`}
+              description={`${TimetableAlarmsView.getDescriptionForMinute(minutes)}`}
               onClick={this.onSetTiming(minutes)}
               value={minutes}
               checked={minutesBeforeEvent === minutes}
@@ -79,6 +79,15 @@ class TimetableAlarmsView extends HideableView {
         </div>}
       </div>
     );
+  }
+
+  static getDescriptionForMinute(minutes) {
+    const unit = minutes < 60 && minutes > 1 ? 'minutes' : minutes === 60 ? 'hour' : 'hours';
+    if (minutes < 60) {
+      return `${minutes} ${minutes > 1 ? 'minutes' : 'minute'} before`;
+    }
+    const hours = ~~(minutes / 60); // we only do hours in whole right now
+    return `${hours} ${hours > 1 ? 'hours' : 'hour'}`;
   }
 }
 
