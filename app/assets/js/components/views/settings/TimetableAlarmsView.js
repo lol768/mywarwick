@@ -4,6 +4,7 @@ import HideableView from '../HideableView';
 import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 import RadioListGroupItem from '../../ui/RadioListGroupItem';
 import { update } from '../../../state/timetable-alarms';
+import { pluralise } from '../../../helpers';
 
 const TIMINGS = [
   5,
@@ -81,12 +82,12 @@ export class TimetableAlarmsView extends HideableView {
     );
   }
 
-  static getDescriptionForTiming(minutes) {
-    const makeHourPhrase = hours => `${hours} ${hours > 1 ? 'hours' : 'hour'}`;
-    const makeMinutePhrase = mins => `${mins} ${mins > 1 ? 'minutes' : 'minute'}`;
-    if (minutes < 60) return `${makeMinutePhrase(minutes)} before`;
-    const hours = Math.floor(minutes / 60);
-    const remaining = minutes - (hours * 60);
+  static getDescriptionForTiming(timingInMinute) {
+    const makeHourPhrase = hours => `${hours} ${pluralise('hour', hours)}`;
+    const makeMinutePhrase = minutes => `${minutes} ${pluralise('minute', minutes)}`;
+    if (timingInMinute < 60) return `${makeMinutePhrase(timingInMinute)} before`;
+    const hours = Math.floor(timingInMinute / 60);
+    const remaining = timingInMinute - (hours * 60);
     return remaining > 0 ?
       `${makeHourPhrase(hours)} ${makeMinutePhrase(remaining)} before` :
       `${makeHourPhrase(hours)} before`;
