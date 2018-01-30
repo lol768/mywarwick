@@ -5,31 +5,31 @@ describe('timing phrasing helper', () =>{
   it('should render minutes properly', () => {
     const expected = '15 minutes before';
     const actual = TimetableAlarmsView.getDescriptionForTiming(15);
-    expect(expected).to.equal(actual);
+   expect(actual).to.equal(expected);
   });
 
   it('should render hours properly', () => {
     const expected = '1 hour before';
     const actual = TimetableAlarmsView.getDescriptionForTiming(60);
-    expect(expected).to.equal(actual);
+   expect(actual).to.equal(expected);
   });
 
   it('should render hours properly', () => {
     const expected = '2 hours before';
     const actual = TimetableAlarmsView.getDescriptionForTiming(120);
-    expect(expected).to.equal(actual);
+    expect(actual).to.equal(expected);
   });
 
   it('should render hours and minutes properly', () => {
     const expected = '1 hour 22 minutes before';
     const actual = TimetableAlarmsView.getDescriptionForTiming(82);
-    expect(expected).to.equal(actual);
+    expect(actual).to.equal(expected);
   });
 
   it('should render hours and minutes properly', () => {
     const expected = '1 hour 1 minute before';
     const actual = TimetableAlarmsView.getDescriptionForTiming(61);
-    expect(expected).to.equal(actual);
+    expect(actual).to.equal(expected);
   });
 
 });
