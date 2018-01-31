@@ -11,7 +11,8 @@ import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.Json.JsValueWrapper
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.{ActionFilter, Result}
 import services._
 import services.dao.DepartmentInfoDao
@@ -98,27 +99,37 @@ class NewsController @Inject()(
   }
 
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNews).async { implicit request =>
-    sharedAudienceInfo(audienceService, groupedUsercodes =>{
+    sharedAudienceInfo(audienceService, groupedUsercodes => {
       val usercodesInTargetLocations: Set[Usercode] = groupedUsercodes.flatMap { case (component, usercodes) =>
         component match {
           case c if Audience.LocationOptIn.values.contains(c) => usercodes
           case _ => Seq.empty
         }
       }.toSet
-      Json.obj(
-        "baseAudience" -> groupedUsercodes.flatMap {
-          case (_, usercodes) => usercodes
-        }.size,
-        "groupedAudience" -> Json.toJson(groupedUsercodes.map {
-          case (component, usercodes) =>
-            if (usercodesInTargetLocations.isEmpty) {
-              (component.entryName, usercodes.size)
-            } else {
-              (component.entryName, usercodes.count(usercodesInTargetLocations.contains))
-            }
-        })
-      )}
-    )
+
+      def baseAudience(u: Map[Audience.Component, Set[Usercode]]): (String, JsValueWrapper) = "baseAudience" -> u.flatMap {
+        case (_, usercodes) => usercodes
+      }.toSet.size
+
+      def groupedAudience(u: Map[Audience.Component, Set[Usercode]]): (String, JsValueWrapper) = "groupedAudience" -> Json.toJson(u.map {
+        case (component, usercodes) => (component.entryName, usercodes.size)
+      })
+
+      if (usercodesInTargetLocations.isEmpty) {
+        Json.obj(
+          baseAudience(groupedUsercodes),
+          groupedAudience(groupedUsercodes)
+        )
+      } else {
+        val targetedAudiences = groupedUsercodes.map {
+          case (component, usercodes) => (component, usercodes.intersect(usercodesInTargetLocations))
+        }
+        Json.obj(
+          baseAudience(targetedAudiences),
+          groupedAudience(targetedAudiences)
+        )
+      }
+    })
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNews) { implicit request =>

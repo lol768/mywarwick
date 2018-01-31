@@ -55,7 +55,7 @@ class NotificationsController @Inject()(
       Json.obj(
         "baseAudience" -> groupedUsercodes.flatMap {
           case (_, usercodes) => usercodes
-        }.size,
+        }.toSet.size,
         "groupedAudience" -> Json.toJson(groupedUsercodes.map {
           case (component, usercodes) => (component.entryName, usercodes.size)
         })
