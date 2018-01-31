@@ -70,7 +70,7 @@ class AudienceServiceImpl @Inject()(
       case DepartmentAudience(code, subsets) => Future.sequence(subsets.map(subset =>
         makeResult(resolveDepartmentGroup(code, subset), subset)
       )).map(_.flatten)
-      case optIn: OptIn => makeResult(Future.successful(optInDao.getUsercodes(optIn)))
+      case optIn: OptIn => makeResult(Future.successful(db.withConnection(implicit c => optInDao.getUsercodes(optIn))))
     }
   }
 
