@@ -3,6 +3,8 @@
 @import org.joda.time.LocalDateTime
 @import models.publishing.Publisher
 @import services.dao.DepartmentInfo
+@import play.api.libs.json.{Json, JsValue}
+
 @(
     form: Form[_],
     publisher: Publisher,
@@ -10,7 +12,8 @@
     categories: Seq[NewsCategory],
     permissionScope: PermissionScope,
     audience: Audience,
-    createOrUpdate: String
+    createOrUpdate: String,
+    audienceJson: JsValue = Json.obj()
 )(implicit fc: b3.B3FieldConstructor, messages: Messages, context: RequestContext)
 
 @context.csrfHelper.formField
@@ -18,7 +21,7 @@
 
 <div class="split-form__sections">
   <section>
-    @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true, audience = audience)
+    @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true, audience = audience, audienceJson)
     @tags.categoryPicker(form, "categories", categories, "news item")
   </section>
 
