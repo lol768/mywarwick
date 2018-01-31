@@ -18,7 +18,7 @@ class EmailTest extends BaseSpec {
       val activity = Fixtures.activity.fromSave("1", Fixtures.activitySave.submissionDue)
       val date = "2049"
       val baseUrl = "https://my.warwick.invalid"
-      val optOutRoute = "https://options.invalid/optout"
+      val optOutRoute = "/optout"
       val loggedInBefore = true
       val result = views.html.email(user, activity, date, baseUrl, optOutRoute, loggedInBefore)
       val content = contentAsString(result)
