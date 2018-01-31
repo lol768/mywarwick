@@ -20,6 +20,7 @@ import uk.ac.warwick.util.web.Uri
 import views.html.errors
 import warwick.sso.Usercode
 
+import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 case class PublishNewsItemData(item: NewsItemData, categoryIds: Seq[String], audience: AudienceData) extends PublishableWithAudience
@@ -97,31 +98,27 @@ class NewsController @Inject()(
   }
 
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNews).async { implicit request =>
-    val formData = newsAudienceForm.bindFromRequest.value
-    sharedAudienceInfo(
-      audienceService,
-      groupedUsercodes => {
-        val allAudienceUsercodes = groupedUsercodes.flatMap { case (_, usercodes) => usercodes }.toSet
-        formData
-          .filterNot(_.ignoreCategories)
-          .map { data =>
-            val initialisedUsers = userPreferencesService.countInitialisedUsers(allAudienceUsercodes)
-            val newsRecipients = userNewsCategoryService.getRecipientsOfNewsInCategories(data.categoryIds).intersect(allAudienceUsercodes).size
-
-            Json.obj(
-              "baseAudience" -> allAudienceUsercodes.size,
-              "categorySubset" -> (allAudienceUsercodes.size - initialisedUsers + newsRecipients),
-              "groupedAudience" -> Json.toJson(groupedUsercodes.map {
-                case (component, usercodes) => (component.entryName, usercodes.size)
-              })
-            )
-          }
-          .getOrElse(
-            Json.obj(
-              "baseAudience" -> allAudienceUsercodes.size
-            )
-          )
-      })
+    sharedAudienceInfo(audienceService, groupedUsercodes =>{
+      val usercodesInTargetLocations: Set[Usercode] = groupedUsercodes.flatMap { case (component, usercodes) =>
+        component match {
+          case c if Audience.LocationOptIn.values.contains(c) => usercodes
+          case _ => Seq.empty
+        }
+      }.toSet
+      Json.obj(
+        "baseAudience" -> groupedUsercodes.flatMap {
+          case (_, usercodes) => usercodes
+        }.size,
+        "groupedAudience" -> Json.toJson(groupedUsercodes.map {
+          case (component, usercodes) =>
+            if (usercodesInTargetLocations.isEmpty) {
+              (component.entryName, usercodes.size)
+            } else {
+              (component.entryName, usercodes.count(usercodesInTargetLocations.contains))
+            }
+        })
+      )}
+    )
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNews) { implicit request =>

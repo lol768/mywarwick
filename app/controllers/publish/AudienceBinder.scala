@@ -10,10 +10,9 @@ import play.api.data.FormError
 import services.{AudienceService, PublisherService}
 import services.dao.DepartmentInfoDao
 import uk.ac.warwick.util.core.StringUtils
-import warwick.sso.{GroupName, Usercode}
+import warwick.sso.{GroupName}
 
 import scala.concurrent.Future
-import scala.util.Try
 
 /**
   * For converting bits of a raw request Form into an actual Audience.
@@ -43,21 +42,7 @@ class AudienceBinder @Inject()(
         Future.successful(Right(Audience.Public))
       }
     } else {
-
-      val targetLocations = data.audience.groupBy(_.startsWith("OptIn:Location:"))
-
-      // get all usercodes that from these optin location
-      val usercodesInTargetLocations: Try[Set[Usercode]] = audienceService.resolveUsersForComponentsGrouped(targetLocations
-        .getOrElse(false, Nil)
-        .map(LocationOptIn.fromValue)
-        .filter(_.isDefined)
-        .map(_.get))
-        .map(_.flatMap {
-          case (_, usercodes) => usercodes
-        }.toSet)
-
       val groupedComponents = data.audience.groupBy(_.startsWith("Dept:"))
-
       // Bits of audience not related to a department.
       val nonDeptComponents = groupedComponents.getOrElse(false, Nil).flatMap {
         case Audience.ComponentParameter(component) => Some(component)
