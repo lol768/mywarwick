@@ -14,8 +14,7 @@
     <p>Hi@user.name.first.map(" " + _).getOrElse(""), you have a new notification from My Warwick:</p>
     <blockquote style="font-style: italic">
       <p>@{
-        activity
-            .url
+        activity.url
             .map(url => <a href={url}>{activity.title}</a>)
             .getOrElse(activity.title)
       }</p>
