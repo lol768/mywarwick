@@ -139,6 +139,7 @@ class ActivityESServiceImpl @Inject()(
           val groupedByState = messageSents.par.groupBy(_.state)
           import MessageState._
           Some(MessageSentDetails(
+            successful = buildSentDetails(groupedByState.getOrElse(Success, Nil).seq),
             failed = buildSentDetails(groupedByState.getOrElse(Failure, Nil).seq),
             skipped = buildSentDetails(groupedByState.getOrElse(Skipped, Nil).seq)
           ))

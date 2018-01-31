@@ -24,61 +24,63 @@
         @item.activity.text.map { text =>
           <div class="activity-item__text">@text</div>
         }
-        <div class="activity-item__audience">
-          @item.audienceSize match {
-            case AudienceSize.Public => {
-              <span>To: public</span>
-            }
-            case AudienceSize.Finite(c) => {
-              <span>
-              To: @c
-                @if(c == 1) { recipient } else { recipients }
-                @if(item.audienceComponents.nonEmpty) {
-                  <i class="activity-item__audience-details fa collapsed" data-toggle="collapse" data-target="#@item.activity.id" data-is-sent="@item.isSent"></i>
-                  <div id="@item.activity.id" class="collapse">
-                    <dl>
-                      <dt>Audience</dt>
-                      <dd>@tags.audienceComponents(item.audienceComponents, allDepartments)</dd>
-                      <dt>Sent details</dt>
-                      <dd>
-                        <div class="activity-item__sent-details" style="display: none">
-                          <div class="activity-item__sent-details-read-count">
-                            Read: <i class="fa fa-spin fa-refresh"></i></div>
-                          <div class="activity-item__sent-details-failed">
-                            Failed: <i class="fa fa-spin fa-refresh"></i></div>
-                          <div class="activity-item__sent-details-skipped">
-                            Skipped: <i class="fa fa-spin fa-refresh"></i></div>
-                        </div>
-                      </dd>
-                    </dl>
-                  </div>
-                }
-              </span>
-            }
-            case _ => {}
-          }
-        </div>
-        @if(item.isSendingNow) {
-        <div class="activity-item__audience activity-item__send-progress">
-          <i class="fa fa-spin fa-refresh"></i>
-          Processed
-          <span class="activity-item__sent-count">
-            @("%,d".format(item.sentCount))
-          </span>
-          @item.audienceSize match {
-            case AudienceSize.Finite(size) => {
-              of @("%,d".format(size))
-            }
-            case _ => {}
-          }
-          recipients
-        </div>
-        }
+
         <div class="activity-item__date">
           @models.DateFormats.emailDateTime(item.activity.publishedAt)
           by
           @item.createdBy.name.full.getOrElse("[Unknown]") (@item.createdBy.usercode.string)
         </div>
+        @if(item.audienceComponents.nonEmpty) {
+          <div id="@item.activity.id" class="activity-item__audience row" data-sent="@item.isSent">
+            <div class="col-sm-2">
+              <div>Audience</div>
+              <div class="activity-item__messages-delivered-name">Delivered</div>
+              <div class="activity-item__messages-read-name">Read</div>
+            </div>
+            <div class="col-sm-1">
+              <div class="activity-item__audience-total">
+              @item.audienceSize match {
+                case AudienceSize.Public => {public}
+                case AudienceSize.Finite(c) => {@c}
+                case _ => {}
+              }
+              </div>
+              <div class="activity-item__messages-delivered-val">
+                <i class="fa fa-spin fa-refresh"></i>
+              </div>
+              <div class="activity-item__messages-read-val">
+                <i class="fa fa-spin fa-refresh"></i>
+              </div>
+            </div>
+            <div class="col-sm-1">
+              <div>
+                (<a
+                role="button"
+                class="toggle-popover"
+                title="Audience"
+                data-content="<p>@tags.audienceComponents(item.audienceComponents, allDepartments)</p>"
+                data-html="true"
+                >Who?</a>)
+              </div>
+            </div>
+          </div>
+        }
+        @if(item.isSendingNow) {
+          <div class="activity-item__audience activity-item__send-progress">
+            <i class="fa fa-spin fa-refresh"></i>
+            Processed
+            <span class="activity-item__sent-count">
+            @("%,d".format(item.sentCount))
+            </span>
+            @item.audienceSize match {
+              case AudienceSize.Finite(size) => {
+                of @("%,d".format(size))
+              }
+              case _ => {}
+            }
+            recipients
+          </div>
+        }
         @item.activity.url.map { url =>
           <div class="activity-item__visible-link">
             Link to  <a href="@url">@url</a>
@@ -87,17 +89,17 @@
       </div>
     </div>
     <div class="col-xs-2">
-      @if(item.activity.publishedAt.isAfterNow) {
-        <div class="btn-toolbar pull-right">
+    @if(item.activity.publishedAt.isAfterNow) {
+      <div class="btn-toolbar pull-right">
         @if(user can EditNotifications) {
-            <a href="@controllers.publish.routes.NotificationsController.updateForm(publisher.id, item.activity.id)" class="btn btn-default">
-              Edit</a>
-          }
+          <a href="@controllers.publish.routes.NotificationsController.updateForm(publisher.id, item.activity.id)" class="btn btn-default">
+            Edit</a>
+        }
         @if(user can DeleteNotifications) {
           <a href=""
           class="btn btn-danger delete"
           >Delete</a>
-      </div>
+        </div>
       <div class="btn-toolbar pull-right confirm-delete">
         <p>Are you sure?</p>
         @helper.form(controllers.publish.routes.NotificationsController.delete(publisher.id, item.activity.id)) {
@@ -108,6 +110,6 @@
       </div>
       } else { </div> }
     }
-    </div>
   </div>
+</div>
 </div>

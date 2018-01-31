@@ -7,7 +7,10 @@ case class SentDetails(
   sms: Seq[Usercode],
   email: Seq[Usercode],
   mobile: Seq[Usercode]
-)
+) {
+  // count of usercodes that appear in at-least-one output (sms, email, mobile)
+  def distinctCount: Int = (sms ++ email ++ mobile).distinct.size
+}
 
 object SentDetails {
   implicit val readsUserCode: Reads[Usercode] = Json.reads[Usercode]
@@ -17,6 +20,7 @@ object SentDetails {
 }
 
 case class MessageSentDetails(
+  successful: SentDetails,
   failed: SentDetails,
   skipped: SentDetails
 )

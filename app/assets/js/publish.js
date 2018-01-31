@@ -185,29 +185,26 @@ function fetchActivityStatus(activityId) {
     .then(text => JSON.parse(text));
 }
 
-function addSentDetailsClickListener() {
-  $('.activity-item__audience-details.collapsed[data-is-sent=true]').on('click', (e) => {
-    const $item = $(e.target);
-    const activityId = $item.data('target');
-    const $activityDetails = $(`${activityId} .activity-item__sent-details`).show();
-    fetchActivityStatus(activityId.slice(1))
-      .then(({ sent: { details, readCount } }) => {
-        $activityDetails.find('.activity-item__sent-details-read-count').text(`Read: ${readCount}`);
-        if (!details && !readCount) {
-          $activityDetails.html('<i class="fa fa-exclamation-triangle"></i> Error fetching sent details for this alert');
-        } else if (!details) {
-          $activityDetails.find('[class^=activity-item__sent-details-]:not([class$=read-count])').hide();
+function initSentDetails() {
+  const $sentActivityItems = $('.activity-item__audience[data-sent=true]');
+  $sentActivityItems.find('.activity-item__messages-*').show();
+
+  $sentActivityItems.each((i, el) => {
+    const $item = $(el);
+    const activityId = $item.parents('.activity-item').data('activity-id');
+    fetchActivityStatus(activityId)
+      .then(({ sent: { delivered, readCount } }) => {
+        $item.find('.activity-item__messages-read-val').text(readCount);
+        if (!delivered && !readCount) {
+          $item.html('<div class="col-sm-12"><i class="fa fa-exclamation-triangle"></i> Error fetching sent details for this alert</div>');
+        } else if (!delivered) { // NEWSTART-124 old alerts won't have this data
+          $item.find('[class^=activity-item__messages-delivered-]').hide();
+        } else {
+          $item.find('.activity-item__messages-delivered-val').text(delivered.total);
         }
-        _.keys(details).forEach((state) => {
-          const $state = $activityDetails.find(`.activity-item__sent-details-${state}`);
-          $state.text(`${_.capitalize(state)} - `);
-          _.keys(details[state]).forEach(output =>
-            $state.append(`${output}: ${details[state][output].length} `),
-          );
-        });
       })
       .catch((err) => {
-        $activityDetails.html('<i class="fa fa-exclamation-triangle"></i> Error fetching sent details for this alert');
+        $item.html('<div class="col-sm-12"><i class="fa fa-exclamation-triangle"></i> Error fetching sent details for this alert</div>');
         log.error(`Error updating alert sent details from json response. Alert Id: ${activityId}`, err);
       });
   });
@@ -218,7 +215,7 @@ $(() => {
   setupAudiencePicker();
   setupPublisherDepartmentsForm();
   setupPublisherPermissionsForm();
-  addSentDetailsClickListener();
+  initSentDetails();
 
   $('[data-background-color]').each(function applyBackgroundColour() {
     $(this).css('background-color', $(this).data('background-color'));
@@ -262,10 +259,8 @@ $(() => {
             }
 
             $activity.prependTo('#sent-activities');
-            $activity.find('.activity-item__audience-details')
-              .attr('data-is-sent', true)
-              .next(`#${activityId}`).collapse('hide');
-            addSentDetailsClickListener();
+            $activity.find('.activity-item__audience').attr('data-sent', true);
+            initSentDetails();
           }
         });
     }, 2000);

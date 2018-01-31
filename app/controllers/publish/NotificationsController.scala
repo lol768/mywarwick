@@ -76,7 +76,12 @@ class NotificationsController @Inject()(
           "sent" -> (
             Json.obj("total" -> activity.sentCount)
               ++ Json.obj("readCount" -> activityService.getActivityReadCountSincePublishedDate(activityId))
-              ++ sentDetails.map(sd => Json.obj("details" -> Json.toJson(sd))).getOrElse(JsObject(Nil))
+              ++ sentDetails.map(sd =>
+              Json.obj("delivered" -> Json.obj(
+                "total" -> sd.successful.distinctCount, // count of usercodes where at-least-one output was successful (sms, email, mobile)
+                "details" -> Json.toJson(sd)
+              ))
+            ).getOrElse(JsObject(Nil))
             ),
           "sendingNow" -> activity.isSendingNow
         ))
