@@ -34,6 +34,7 @@ class AudienceBinder @Inject()(
     var errors = Seq.empty[FormError]
     val scope: PermissionScope = publisherService.getPermissionScope(publisherRequest.publisher.id)
 
+
     if (data.audience.contains("Public")) {
       if (restrictedRecipients) {
         Future.successful(Left(Seq(FormError("audience", "error.audience.tooMany.public"))))
@@ -43,6 +44,7 @@ class AudienceBinder @Inject()(
     } else {
 
       val groupedComponents = data.audience.groupBy(_.startsWith("Dept:"))
+      val targetLocations = data.audience.groupBy(_.startsWith("OptIn:Location:"))
 
       // Bits of audience not related to a department.
       val nonDeptComponents = groupedComponents.getOrElse(false, Nil).flatMap {
