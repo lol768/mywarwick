@@ -9,6 +9,7 @@ import GroupedList from '../ui/GroupedList';
 import { formatDateTime, formatDate, formatTime, localMoment } from '../../dateFormats';
 import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from './TileContent';
 import Hyperlink from '../ui/Hyperlink';
+import DismissableInfoModal from '../ui/DismissableInfoModal';
 
 const moduleColours = [
   '#00b2dd', // Bright Sky blue
@@ -96,11 +97,33 @@ const agendaViewTransform = (items) => {
   )(items);
 };
 
+const FAClock = props => <i className={`fa fa-clock-o${props.fw ? ' fa-fw' : ''}`} />; // eslint-disable-line react/prop-types
+const FAMap = props => <i className={`fa fa-map-marker${props.fw ? ' fa-fw' : ''}`} />; // eslint-disable-line react/prop-types
+const FAUser = props => <i className={`fa fa-user-o${props.fw ? ' fa-fw' : ''}`} />; // eslint-disable-line react/prop-types
+
 export default class AgendaTile extends TileContent {
   constructor(props) {
     super(props);
-
     this.agendaViewSelector = createSelector(_.identity, agendaViewTransform);
+    this.showModal = this.showModal.bind(this);
+    this.hideModal = this.hideModal.bind(this);
+    this.renderSingleEvent = this.renderSingleEvent.bind(this);
+  }
+
+  hideModal() {
+    this.props.showModal(null);
+  }
+
+  showModal(heading, subHeading, body, href) {
+    const modal = (<DismissableInfoModal
+      heading={heading}
+      subHeading={subHeading}
+      onDismiss={this.hideModal}
+      href={href}
+    >
+      {body}
+    </DismissableInfoModal>);
+    this.props.showModal(modal);
   }
 
   getEventsToday() {
@@ -120,7 +143,7 @@ export default class AgendaTile extends TileContent {
 
   getLargeBody() {
     const items = this.getAgendaViewItems();
-    return <LargeBody>{ items }</LargeBody>;
+    return <LargeBody showModal={this.showModal}>{ items }</LargeBody>;
   }
 
   static renderSingleEventDate(event) {
@@ -145,35 +168,62 @@ export default class AgendaTile extends TileContent {
     return location.name;
   }
 
-  static renderSingleEvent(event) {
+  renderSingleEvent(event) {
     if (!event) {
       return null;
     }
 
+    const { title, location, extraInfo, organiser, staff, href } = event;
+
+    const eventDate = AgendaTile.renderSingleEventDate(event);
+    const list =
+      (<ul className="list-unstyled">
+        <li className="text-overflow-block agenda__date">
+          <FAClock fw />
+          { eventDate }
+        </li>
+        <li className="text-overflow-block">
+          <i className="fa fa-fw fa-calendar-check-o" />
+          { title }
+        </li>
+        { !_.isEmpty(location) &&
+        <li className="text-overflow-block">
+          <FAMap fw />
+          { AgendaTile.getLocationString(location) }
+        </li>
+        }
+        { (organiser || !_.isEmpty(staff)) &&
+        <li className="text-overflow-block">
+          <FAUser fw />
+          { AgendaTile.renderUser({ organiser, staff }) }
+        </li>
+        }
+      </ul>);
+
+    if (extraInfo) {
+      const locName = AgendaTile.getLocationString(location);
+      return (
+        <a
+          role="button"
+          onClick={() => this.showModal(
+            title,
+            <span> <FAClock /> {eventDate}&nbsp;
+              {locName && <span><FAMap /> {location.name}</span>}</span>,
+            extraInfo,
+            href,
+          )}
+          target="_blank"
+          tabIndex={0}
+          style={{ display: 'block' }}
+        >
+          { list }
+        </a>
+      );
+    }
+
     return (
-      <Hyperlink href={ event.href } style={{ display: 'block' }}>
-        <ul className="list-unstyled">
-          <li className="text-overflow-block agenda__date">
-            <i className="fa fa-fw fa-clock-o" />
-            { AgendaTile.renderSingleEventDate(event) }
-          </li>
-          <li className="text-overflow-block">
-            <i className="fa fa-fw fa-calendar-check-o" />
-            { event.title }
-          </li>
-          { !_.isEmpty(event.location) &&
-          <li className="text-overflow-block">
-            <i className="fa fa-fw fa-map-marker" />
-            { AgendaTile.getLocationString(event.location) }
-          </li>
-          }
-          { event.organiser &&
-          <li className="text-overflow-block">
-            <i className="fa fa-fw fa-user-o" />
-            { event.organiser.name }
-          </li>
-          }
-        </ul>
+      <Hyperlink href={ href } style={{ display: 'block' }}>
+        { list }
       </Hyperlink>
     );
   }
@@ -194,10 +244,10 @@ export default class AgendaTile extends TileContent {
       <div className="container-fluid">
         <div className="row">
           <div className="col-xs-6">
-            { AgendaTile.renderSingleEvent(event1) }
+            { this.renderSingleEvent(event1) }
           </div>
           <div className="col-xs-6">
-            { AgendaTile.renderSingleEvent(event2) }
+            { this.renderSingleEvent(event2) }
             { items.length > 2 &&
             <div className="text-right">
               <a
@@ -229,7 +279,7 @@ export default class AgendaTile extends TileContent {
 
     return (
       <div>
-        { AgendaTile.renderSingleEvent(event) }
+        { this.renderSingleEvent(event) }
         { items.length > 1 &&
         <div className="text-right">
           <a
@@ -256,19 +306,44 @@ export default class AgendaTile extends TileContent {
   static supportedTileSizes() {
     return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
   }
+
+  static renderUser(event) {
+    const { staff, organiser } = event;
+
+    warning(
+      !(staff && organiser),
+      'Event has both staff and organiser set - only one should be used: %s',
+      this.props,
+    );
+
+    const users = staff || (organiser && [organiser]);
+
+    if (!users || users.length === 0) {
+      return null;
+    }
+
+    function personToString(person) {
+      return person.firstName ?
+        `${person.firstName} ${person.lastName}`
+        : person.name;
+    }
+
+    return users.map(personToString).join(', ');
+  }
 }
 
 export class LargeBody extends React.PureComponent {
   static propTypes = {
     children: PropTypes.arrayOf(PropTypes.shape(AgendaTileItemPropTypes)).isRequired,
+    showModal: PropTypes.func.isRequired,
   };
 
   render() {
-    const { children } = this.props;
+    const { children, showModal } = this.props;
     return (
       <GroupedList className="tile-list-group" groupBy={groupItemsForAgendaTile}>
         {children.map(event =>
-          <AgendaTileItem key={event.id} {...event} />,
+          <AgendaTileItem key={event.id} showModal={showModal} {...event} />,
         )}
       </GroupedList>
     );
@@ -276,6 +351,22 @@ export class LargeBody extends React.PureComponent {
 }
 
 export class AgendaTileItem extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.handleShowModal = this.handleShowModal.bind(this);
+  }
+
+  handleShowModal() {
+    const { showModal, title, location, extraInfo, href } = this.props;
+    showModal(
+      title,
+      <span> <FAClock /> {AgendaTile.renderSingleEventDate(this.props)}&nbsp;
+        {location && <span><FAMap /> {location.name}</span>}</span>,
+      extraInfo,
+      href,
+    );
+  }
+
   renderDate() {
     const { isAllDay, start, end } = this.props;
 
@@ -310,32 +401,21 @@ export class AgendaTileItem extends React.PureComponent {
     return null;
   }
 
-  renderParent() {
-    const { parent } = this.props;
-
-    if (parent) {
-      return (
-        <div>
-          { parent.shortName } { parent.fullName }
-        </div>
-      );
-    }
-
-    return null;
-  }
-
   renderTitle() {
-    const { title, href } = this.props;
+    const { title, href, extraInfo, parent } = this.props;
 
     return (
-      <span
-        title={ title }
-        className={ classNames({
-          'tile-list-item__title': true,
-          'text--dotted-underline': href,
-        }) }
-      >
-        <Hyperlink href={ href }>{ title }</Hyperlink>
+      <span>
+        {parent && <div>{parent.shortName} {parent.fullName}</div>}
+        <span
+          title={title}
+          className={classNames({
+            'tile-list-item__title': true,
+            'text--dotted-underline': extraInfo || href,
+          })}
+        >
+          {title}
+        </span>
       </span>
     );
   }
@@ -353,7 +433,7 @@ export class AgendaTileItem extends React.PureComponent {
           <Hyperlink href={ location.href } className="text--dotted-underline">
             { location.name }
           &nbsp;
-            <i className="fa fa-map-marker" />
+            <FAMap />
           </Hyperlink>
         </span>
       );
@@ -366,37 +446,9 @@ export class AgendaTileItem extends React.PureComponent {
     );
   }
 
-  renderUser() {
-    const { staff, organiser } = this.props;
-
-    warning(
-      !(staff && organiser),
-      'Event has both staff and organiser set - only one should be used: %s',
-      this.props,
-    );
-
-    const users = staff || (organiser && [organiser]);
-
-    if (!users || users.length === 0) {
-      return null;
-    }
-
-    function personToString(person) {
-      return person.firstName ?
-        `${person.firstName} ${person.lastName}`
-        : person.name;
-    }
-
-    return (
-      <div className="text--translucent">
-        <i className="fa fa-user-o" />
-        &nbsp;
-        { users.map(personToString).join(', ') }
-      </div>
-    );
-  }
-
   render() {
+    const { extraInfo, href } = this.props;
+    const renderedUser = AgendaTile.renderUser(this.props);
     const content = (
       <div className="agenda-item">
         <div className="agenda-item__cell" style={{ paddingRight: '.25em' }}>
@@ -404,11 +456,16 @@ export class AgendaTileItem extends React.PureComponent {
         </div>
         { this.renderMarker() }
         <div className="agenda-item__cell" style={{ paddingLeft: '.5em' }}>
-          { this.renderParent() }
-          { this.renderTitle() }
+          { extraInfo ?
+            <a role="button" tabIndex={0} onClick={this.handleShowModal} target="_blank">
+              { this.renderTitle() }
+            </a>
+            : <Hyperlink href={href}>{ this.renderTitle() }</Hyperlink> }
           { ' ' }
           { this.renderLocation() }
-          { this.renderUser() }
+          { renderedUser && <div className="text--translucent tile-list-item__organiser">
+            <FAUser /> {renderedUser}
+          </div>}
         </div>
       </div>
     );
@@ -440,6 +497,7 @@ const AgendaTileItemPropTypes = {
     fullName: PropTypes.string,
   }),
   type: PropTypes.string,
+  extraInfo: PropTypes.string,
   staff: PropTypes.arrayOf(PropTypes.shape({
     email: PropTypes.string,
     lastName: PropTypes.string,
@@ -447,6 +505,7 @@ const AgendaTileItemPropTypes = {
     userType: PropTypes.string,
     universityId: PropTypes.string,
   })),
+  showModal: PropTypes.func.isRequired,
 };
 
 AgendaTileItem.propTypes = AgendaTileItemPropTypes;
