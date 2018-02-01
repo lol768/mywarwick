@@ -100,12 +100,12 @@ class NewsController @Inject()(
 
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNews).async { implicit request =>
     sharedAudienceInfo(audienceService, groupedUsercodes => {
-      val usercodesInTargetLocations: Set[Usercode] = groupedUsercodes.flatMap { case (component, usercodes) =>
+      val usercodesInTargetLocations: Map[Boolean, Set[Usercode]] = groupedUsercodes.map { case (component, usercodes) =>
         component match {
-          case c if Audience.LocationOptIn.values.contains(c) => usercodes
-          case _ => Seq.empty
+          case c if Audience.LocationOptIn.values.contains(c) => (true, usercodes)
+          case _ => (false, Set.empty[Usercode])
         }
-      }.toSet
+      }
 
       def baseAudience(u: Map[Audience.Component, Set[Usercode]]): (String, JsValueWrapper) = "baseAudience" -> u.flatMap {
         case (_, usercodes) => usercodes
@@ -115,14 +115,14 @@ class NewsController @Inject()(
         case (component, usercodes) => (component.entryName, usercodes.size)
       })
 
-      if (usercodesInTargetLocations.isEmpty) {
+      if (!usercodesInTargetLocations.keySet.contains(true)) {
         Json.obj(
           baseAudience(groupedUsercodes),
           groupedAudience(groupedUsercodes)
         )
       } else {
         val targetedAudiences = groupedUsercodes.map {
-          case (component, usercodes) => (component, usercodes.intersect(usercodesInTargetLocations))
+          case (component, usercodes) => (component, usercodes.intersect(usercodesInTargetLocations.getOrElse(true, Set.empty)))
         }
         Json.obj(
           baseAudience(targetedAudiences),
