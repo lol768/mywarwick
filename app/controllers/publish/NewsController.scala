@@ -100,11 +100,9 @@ class NewsController @Inject()(
 
   def audienceInfo(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNews).async {
     implicit request => {
-      // TODO grab news categories
-      val newsCat = Set.empty[String]
       sharedAudienceInfo(
-        audienceService = audienceService,
-        processGroupedUsercodes = groupedUsercodes => {
+        audienceService,
+        groupedUsercodes => {
           val usercodesInTargetLocations: Map[Boolean, Set[Usercode]] = groupedUsercodes.map { case (component, usercodes) =>
             component match {
               case c if Audience.LocationOptIn.values.contains(c) => (true, usercodes)
@@ -134,7 +132,11 @@ class NewsController @Inject()(
               groupedAudience(targetedAudiences)
             )
           }
-        })
+        },
+        newsAudienceForm.bindFromRequest.value.flatMap { formData =>
+          Some(formData.categoryIds.map(newsCategoryService.getNewsCategoryForCatId))
+        }.getOrElse(Iterable.empty[NewsCategory]).toSet
+      )
     }
   }
 

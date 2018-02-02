@@ -95,7 +95,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
   def sharedAudienceInfo(
     audienceService: AudienceService,
     processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => GroupedUsercodes,
-    newsCategories: Option[Set[NewsCategory]] = Option.empty
+    newsCategories: Set[NewsCategory] = Set.empty
   )(implicit request: PublisherRequest[_]): Future[Result] =
     audienceForm.bindFromRequest.fold(
       formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),

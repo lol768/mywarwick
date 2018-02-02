@@ -33,8 +33,6 @@ class AudienceBinder @Inject()(
   def bindAudience(data: AudienceData, restrictedRecipients: Boolean = false)(implicit publisherRequest: PublisherRequest[_]): Future[Either[Seq[FormError], Audience]] = {
     var errors = Seq.empty[FormError]
     val scope: PermissionScope = publisherService.getPermissionScope(publisherRequest.publisher.id)
-
-
     if (data.audience.contains("Public")) {
       if (restrictedRecipients) {
         Future.successful(Left(Seq(FormError("audience", "error.audience.tooMany.public"))))
