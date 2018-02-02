@@ -7,7 +7,7 @@ import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
-import services._
+import services.{UserNewsCategoryService, _}
 import services.dao.DepartmentInfo
 import system.{ImplicitRequestContext, Logging, ThreadPools}
 import warwick.sso.{AuthenticatedRequest, Usercode}
@@ -90,12 +90,44 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
     )
   }
 
-  case class GroupedUsercodes(baseAudience: Set[Usercode], groupedUsercodes: Map[String, Set[Usercode]])
+  case class GroupedResolvedAudience(baseAudience: Set[Usercode], groupedUsercodes: Map[String, Set[Usercode]])
+
+  def makeJsonResultWithoutNewsCategories(
+    groupedResolvedAudience: GroupedResolvedAudience
+  ) = {
+    Json.obj(
+      "baseAudience" -> groupedResolvedAudience.baseAudience.size,
+      "groupedAudience" -> groupedResolvedAudience.groupedUsercodes.map {
+        case (groupName, usercodes) => (groupName, usercodes.size)
+      }
+    )
+  }
+
+  def makeJsonResultWithNewCategories(
+    groupedResolvedAudience: GroupedResolvedAudience,
+    service: UserNewsCategoryService,
+    newsCats: Set[NewsCategory]
+  ) = {
+    val usercodesInTargetedNewsCats = service.getRecipientsOfNewsInCategories(newsCats.map(_.id).toSeq)
+    Json.obj(
+      "baseAudience" -> groupedResolvedAudience
+        .baseAudience
+        .intersect(usercodesInTargetedNewsCats)
+        .size,
+      "groupedAudience" -> groupedResolvedAudience.groupedUsercodes.map {
+        case (groupName, usercodes) => (
+          groupName,
+          usercodes.intersect(usercodesInTargetedNewsCats).size
+        )
+      }
+    )
+  }
 
   def sharedAudienceInfo(
     audienceService: AudienceService,
-    processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => GroupedUsercodes,
-    newsCategories: Set[NewsCategory] = Set.empty
+    processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => GroupedResolvedAudience,
+    newsCategories: Set[NewsCategory] = Set.empty,
+    userNewsCategoryService: Option[UserNewsCategoryService] = Option.empty
   )(implicit request: PublisherRequest[_]): Future[Result] =
     audienceForm.bindFromRequest.fold(
       formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
@@ -109,24 +141,17 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
               ))))
             } else {
               audienceService.resolveUsersForComponentsGrouped(audience.components).map(_.toMap).map(processGroupedUsercodes) match {
-                case Success(groupedUsercodes) =>
-                  // then intersect with news category
-                  // TODO
-
+                case Success(groupedResolvedAudience) =>
                   val jsonData = if (newsCategories.isEmpty) {
-                    Json.obj(
-                      "baseAudience" -> groupedUsercodes.baseAudience.size,
-                      "groupedAudience" -> groupedUsercodes.groupedUsercodes.map {
-                        case (groupName, usercodes) => (groupName, usercodes.size)
-                      }
-                    )
+                    makeJsonResultWithoutNewsCategories(groupedResolvedAudience)
                   } else {
-                    Json.obj(
-                      "baseAudience" -> groupedUsercodes.baseAudience.size,
-                      "groupedAudience" -> groupedUsercodes.groupedUsercodes.map {
-                        case (groupName, usercodes) => (groupName, usercodes.size)
-                      }
-                    )
+                    userNewsCategoryService.map { service =>
+                      makeJsonResultWithNewCategories(
+                        groupedResolvedAudience,
+                        service,
+                        newsCategories
+                      )
+                    }.getOrElse(makeJsonResultWithoutNewsCategories(groupedResolvedAudience))
                   }
                   Ok(Json.toJson(API.Success[JsObject](data = jsonData)))
                 case Failure(err) =>
