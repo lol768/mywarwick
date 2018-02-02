@@ -14,8 +14,6 @@ trait UserNewsCategoryService {
 
   def getRecipientsOfNewsInCategories(categoryIds: Seq[String]): Set[Usercode]
 
-  def getRecipientsOfNewsInCategory(categoryId: String): Set[Usercode]
-
 }
 
 @Singleton
@@ -33,6 +31,4 @@ class UserNewsCategoryServiceImpl @Inject()(
   override def getRecipientsOfNewsInCategories(categoryIds: Seq[String]) =
     db.withConnection(implicit c => dao.getRecipientsOfNewsInCategories(categoryIds))
 
-  override def getRecipientsOfNewsInCategory(categoryId: String): Set[Usercode] =
-    db.withConnection(implicit c => dao.getRecipientsOfNewsInCategories(Seq(categoryId)))
 }
