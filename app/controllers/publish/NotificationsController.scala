@@ -52,19 +52,10 @@ class NotificationsController @Inject()(
   }
 
   def audienceInfo(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
-    sharedAudienceInfo(audienceService, groupedUsercodes => {
-      GroupedResolvedAudience(
-        baseAudience = groupedUsercodes.flatMap {
-          case (_, usercodes) => usercodes
-        }.toSet,
-        groupedUsercodes = groupedUsercodes.map {
-          case (component, usercodes) => (component.entryName, usercodes)
-        }
-      )
-    })
+    sharedAudienceInfo(
+      audienceService,
+      PublishingHelper.postProcessGroupedResolvedAudience)
   }
-
-
 
   def status(publisherId: String, activityId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
     activityService.getActivityWithAudience(activityId)

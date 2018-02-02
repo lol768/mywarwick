@@ -102,37 +102,7 @@ class NewsController @Inject()(
     implicit request => {
       sharedAudienceInfo(
         audienceService,
-        groupedUsercodes => {
-          val usercodesInTargetLocations: Map[Boolean, Set[Usercode]] = groupedUsercodes.map { case (component, usercodes) =>
-            component match {
-              case c if Audience.LocationOptIn.values.contains(c) => (true, usercodes)
-              case _ => (false, Set.empty[Usercode])
-            }
-          }
-
-          def baseAudience(u: Map[Audience.Component, Set[Usercode]]): Set[Usercode] = u.flatMap {
-            case (_, usercodes) => usercodes
-          }.toSet
-
-          def groupedAudience(u: Map[Audience.Component, Set[Usercode]]): Map[String, Set[Usercode]] = u.map {
-            case (component, usercodes) => (component.entryName, usercodes)
-          }
-
-          if (!usercodesInTargetLocations.keySet.contains(true)) {
-            GroupedResolvedAudience(
-              baseAudience(groupedUsercodes),
-              groupedAudience(groupedUsercodes)
-            )
-          } else {
-            val targetedAudiences = groupedUsercodes.map {
-              case (component, usercodes) => (component, usercodes.intersect(usercodesInTargetLocations.getOrElse(true, Set.empty)))
-            }
-            GroupedResolvedAudience(
-              baseAudience(targetedAudiences),
-              groupedAudience(targetedAudiences)
-            )
-          }
-        },
+        PublishingHelper.postProcessGroupedResolvedAudience,
         newsAudienceForm.bindFromRequest.value.flatMap { formData =>
           Some(formData.categoryIds.map(newsCategoryService.getNewsCategoryForCatId))
         }.getOrElse(Iterable.empty[NewsCategory]).toSet,
