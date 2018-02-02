@@ -251,12 +251,10 @@ object PublishingHelper {
   }
 
   def postProcessGroupedResolvedAudience (groupedUsercodes:Map[Audience.Component, Set[Usercode]]): GroupedResolvedAudience = {
-    val usercodesInTargetLocations: Map[Boolean, Set[Usercode]] = groupedUsercodes.groupBy{
-      case(component, _) => component.isInstanceOf[Audience.LocationOptIn]
+    val usercodesInTargetLocations: Map[Boolean, Set[Usercode]] = groupedUsercodes.groupBy {
+      case (component, _) => component.isInstanceOf[Audience.LocationOptIn]
     }.map {
-      case (matched, items) => (matched, items.flatMap {
-        case (_, usercodes) => usercodes
-      }.toSet)
+      case (matched, items) => (matched, items.flatMap { case (_, usercodes) => usercodes }.toSet)
     }
 
     def baseAudience(u: Map[Audience.Component, Set[Usercode]]): Set[Usercode] = u.flatMap {
