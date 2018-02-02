@@ -119,7 +119,7 @@ class NewsController @Inject()(
           }
 
           if (!usercodesInTargetLocations.keySet.contains(true)) {
-            GroupedUsercodes(
+            GroupedResolvedAudience(
               baseAudience(groupedUsercodes),
               groupedAudience(groupedUsercodes)
             )
@@ -127,7 +127,7 @@ class NewsController @Inject()(
             val targetedAudiences = groupedUsercodes.map {
               case (component, usercodes) => (component, usercodes.intersect(usercodesInTargetLocations.getOrElse(true, Set.empty)))
             }
-            GroupedUsercodes(
+            GroupedResolvedAudience(
               baseAudience(targetedAudiences),
               groupedAudience(targetedAudiences)
             )
@@ -135,7 +135,8 @@ class NewsController @Inject()(
         },
         newsAudienceForm.bindFromRequest.value.flatMap { formData =>
           Some(formData.categoryIds.map(newsCategoryService.getNewsCategoryForCatId))
-        }.getOrElse(Iterable.empty[NewsCategory]).toSet
+        }.getOrElse(Iterable.empty[NewsCategory]).toSet,
+        Some(userNewsCategoryService)
       )
     }
   }

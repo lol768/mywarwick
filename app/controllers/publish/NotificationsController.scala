@@ -53,7 +53,7 @@ class NotificationsController @Inject()(
 
   def audienceInfo(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
     sharedAudienceInfo(audienceService, groupedUsercodes => {
-      GroupedUsercodes(
+      GroupedResolvedAudience(
         baseAudience = groupedUsercodes.flatMap {
           case (_, usercodes) => usercodes
         }.toSet,
