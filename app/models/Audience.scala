@@ -123,6 +123,12 @@ object Audience {
     def fromValue(value: String): Option[OptIn] = values.find(_.value == value)
   }
 
+  object NewsCategoryAudience {
+
+  }
+
+  case class NewsCategoryAudience(id: String) extends Component
+
   val moduleCodeRegex: Regex = "^Module:(.+)".r
   val undergradRegex: Regex = "^UndergradStudents:(.+)".r
   val seminarGroupRegex: Regex = "^SeminarGroup:(.+)".r
