@@ -11,11 +11,12 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
-import play.api.mvc.{ActionFilter, Result}
+import play.api.mvc.{Action, ActionFilter, AnyContent, Result}
 import services._
 import system.{ThreadPools, Validation}
 import views.html.errors
 import views.html.publish.{notifications => views}
+import warwick.sso.Usercode
 
 import scala.concurrent.Future
 
@@ -50,18 +51,20 @@ class NotificationsController @Inject()(
     Ok(views.list(request.publisher, futureNotifications, sendingNotifications, pastNotifications, request.userRole, allDepartments))
   }
 
-  def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
-    sharedAudienceInfo(audienceService, groupedUsercodes =>
-      Json.obj(
-        "baseAudience" -> groupedUsercodes.flatMap {
+  def audienceInfo(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
+    sharedAudienceInfo(audienceService, groupedUsercodes => {
+      GroupedUsercodes(
+        baseAudience = groupedUsercodes.flatMap {
           case (_, usercodes) => usercodes
-        }.toSet.size,
-        "groupedAudience" -> Json.toJson(groupedUsercodes.map {
-          case (component, usercodes) => (component.entryName, usercodes.size)
-        })
+        }.toSet,
+        groupedUsercodes = groupedUsercodes.map {
+          case (component, usercodes) => (component.entryName, usercodes)
+        }
       )
-    )
+    })
   }
+
+
 
   def status(publisherId: String, activityId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
     activityService.getActivityWithAudience(activityId)

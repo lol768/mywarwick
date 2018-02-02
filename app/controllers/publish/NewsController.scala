@@ -13,7 +13,7 @@ import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json.{JsObject, JsValue, Json}
-import play.api.mvc.{ActionFilter, Result}
+import play.api.mvc.{Action, ActionFilter, AnyContent, Result}
 import services._
 import services.dao.DepartmentInfoDao
 import system._
@@ -98,38 +98,44 @@ class NewsController @Inject()(
     Ok(views.html.publish.news.list(request.publisher, newsPending, newsPublished, request.userRole, allDepartments))
   }
 
-  def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNews).async { implicit request =>
-    sharedAudienceInfo(audienceService, groupedUsercodes => {
-      val usercodesInTargetLocations: Map[Boolean, Set[Usercode]] = groupedUsercodes.map { case (component, usercodes) =>
-        component match {
-          case c if Audience.LocationOptIn.values.contains(c) => (true, usercodes)
-          case _ => (false, Set.empty[Usercode])
-        }
-      }
+  def audienceInfo(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNews).async {
+    implicit request => {
+      // TODO grab news categories
+      val newsCat = Set.empty[String]
+      sharedAudienceInfo(
+        audienceService = audienceService,
+        processGroupedUsercodes = groupedUsercodes => {
+          val usercodesInTargetLocations: Map[Boolean, Set[Usercode]] = groupedUsercodes.map { case (component, usercodes) =>
+            component match {
+              case c if Audience.LocationOptIn.values.contains(c) => (true, usercodes)
+              case _ => (false, Set.empty[Usercode])
+            }
+          }
 
-      def baseAudience(u: Map[Audience.Component, Set[Usercode]]): (String, JsValueWrapper) = "baseAudience" -> u.flatMap {
-        case (_, usercodes) => usercodes
-      }.toSet.size
+          def baseAudience(u: Map[Audience.Component, Set[Usercode]]): Set[Usercode] = u.flatMap {
+            case (_, usercodes) => usercodes
+          }.toSet
 
-      def groupedAudience(u: Map[Audience.Component, Set[Usercode]]): (String, JsValueWrapper) = "groupedAudience" -> Json.toJson(u.map {
-        case (component, usercodes) => (component.entryName, usercodes.size)
-      })
+          def groupedAudience(u: Map[Audience.Component, Set[Usercode]]): Map[String, Set[Usercode]] = u.map {
+            case (component, usercodes) => (component.entryName, usercodes)
+          }
 
-      if (!usercodesInTargetLocations.keySet.contains(true)) {
-        Json.obj(
-          baseAudience(groupedUsercodes),
-          groupedAudience(groupedUsercodes)
-        )
-      } else {
-        val targetedAudiences = groupedUsercodes.map {
-          case (component, usercodes) => (component, usercodes.intersect(usercodesInTargetLocations.getOrElse(true, Set.empty)))
-        }
-        Json.obj(
-          baseAudience(targetedAudiences),
-          groupedAudience(targetedAudiences)
-        )
-      }
-    })
+          if (!usercodesInTargetLocations.keySet.contains(true)) {
+            GroupedUsercodes(
+              baseAudience(groupedUsercodes),
+              groupedAudience(groupedUsercodes)
+            )
+          } else {
+            val targetedAudiences = groupedUsercodes.map {
+              case (component, usercodes) => (component, usercodes.intersect(usercodesInTargetLocations.getOrElse(true, Set.empty)))
+            }
+            GroupedUsercodes(
+              baseAudience(targetedAudiences),
+              groupedAudience(targetedAudiences)
+            )
+          }
+        })
+    }
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNews) { implicit request =>
