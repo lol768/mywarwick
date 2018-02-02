@@ -2,7 +2,7 @@ package controllers.publish
 
 import controllers.admin.addFormErrors
 import models.publishing._
-import models.{API, Audience}
+import models.{API, Audience, NewsCategory}
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import play.api.libs.json.{JsObject, Json}
@@ -90,9 +90,12 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
     )
   }
 
+  case class GroupedUsercodes(baseAudience: Set[Usercode], groupedUsercodes: Map[String, Set[Usercode]])
+
   def sharedAudienceInfo(
     audienceService: AudienceService,
-    processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => JsObject
+    processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => GroupedUsercodes,
+    newsCategories: Option[Set[NewsCategory]] = Option.empty
   )(implicit request: PublisherRequest[_]): Future[Result] =
     audienceForm.bindFromRequest.fold(
       formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
@@ -106,7 +109,25 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
               ))))
             } else {
               audienceService.resolveUsersForComponentsGrouped(audience.components).map(_.toMap).map(processGroupedUsercodes) match {
-                case Success(jsonData) =>
+                case Success(groupedUsercodes) =>
+                  // then intersect with news category
+                  // TODO
+
+                  val jsonData = if (newsCategories.isEmpty) {
+                    Json.obj(
+                      "baseAudience" -> groupedUsercodes.baseAudience.size,
+                      "groupedAudience" -> groupedUsercodes.groupedUsercodes.map {
+                        case (groupName, usercodes) => (groupName, usercodes.size)
+                      }
+                    )
+                  } else {
+                    Json.obj(
+                      "baseAudience" -> groupedUsercodes.baseAudience.size,
+                      "groupedAudience" -> groupedUsercodes.groupedUsercodes.map {
+                        case (groupName, usercodes) => (groupName, usercodes.size)
+                      }
+                    )
+                  }
                   Ok(Json.toJson(API.Success[JsObject](data = jsonData)))
                 case Failure(err) =>
                   logger.error("Failed to resolve audience", err)
