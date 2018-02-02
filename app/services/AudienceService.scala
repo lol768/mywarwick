@@ -34,7 +34,8 @@ class AudienceServiceImpl @Inject()(
   optInDao: UserNewsOptInDao,
   @Named("tabula") audienceLookupDao: AudienceLookupDao,
   db: Database,
-  userLookupService: UserLookupService
+  userLookupService: UserLookupService,
+  userNewsCategoryService: UserNewsCategoryService
 ) extends AudienceService with Logging {
 
   import system.ThreadPools.externalData
@@ -71,6 +72,7 @@ class AudienceServiceImpl @Inject()(
         makeResult(resolveDepartmentGroup(code, subset), subset)
       )).map(_.flatten)
       case optIn: OptIn => makeResult(Future.successful(db.withConnection(implicit c => optInDao.getUsercodes(optIn))))
+      case newsCatAudience: NewsCategoryAudience => makeResult(Future.successful(userNewsCategoryService.getRecipientsOfNewsInCategory(newsCatAudience.id)))
     }
   }
 
