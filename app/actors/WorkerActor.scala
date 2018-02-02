@@ -37,6 +37,9 @@ class WorkerActor @Inject()(
             case Success(res) if res.error.exists(MessageProcessing.skippableErrors.contains(_)) =>
               log.warning(s"Message failed to send: ${res.message}")
               messaging.skipped(message)
+            case Success(res) =>
+              log.warning(s"Message failed to send: ${res.message}")
+              messaging.failure(message)
             case Failure(ex) =>
               log.error(s"Message-sending threw an exception", ex)
               messaging.failure(message)

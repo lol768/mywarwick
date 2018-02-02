@@ -13,7 +13,9 @@ case class SentDetails(
 }
 
 object SentDetails {
-  implicit val readsUserCode: Reads[Usercode] = Json.reads[Usercode]
+  implicit val readsUserCode: Reads[Usercode] = new Reads[Usercode] {
+    override def reads(jsVal: JsValue): JsResult[Usercode] = jsVal.validate[String].map(Usercode)
+  }
   implicit val writesUsercode: Writes[Usercode] = (o: Usercode) => JsString(o.string)
   implicit val formatUsercode: Format[Usercode] = Format(readsUserCode, writesUsercode)
   implicit val format: Format[SentDetails] = Json.format[SentDetails]
