@@ -52,6 +52,20 @@ function setupAudiencePicker() {
   }
 }
 
+function findReactDom(dom)  {
+  for (let key in dom) {
+    if (key.startsWith("__reactInternalInstance$")) {
+      return  dom[key]._currentElement._owner._instance;
+    }
+  }
+}
+
+function setupCategoryPicker() {
+  $('#item_category_field .checkbox').change(() => {
+    findReactDom(document.getElementById("AudienceIndicator")).fetchAudienceEstimate();
+  })
+}
+
 /*
  Attempt to register service worker - we don't do notifications or offline but it's nice to keep it
  up to date.
@@ -183,6 +197,7 @@ $(() => {
   setupAudiencePicker();
   setupPublisherDepartmentsForm();
   setupPublisherPermissionsForm();
+  setupCategoryPicker();
 
   $('[data-background-color]').each(function applyBackgroundColour() {
     $(this).css('background-color', $(this).data('background-color'));
