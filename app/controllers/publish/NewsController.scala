@@ -100,15 +100,17 @@ class NewsController @Inject()(
 
   def audienceInfo(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNews).async {
     implicit request => {
-      val formData =  newsAudienceForm.bindFromRequest.value
+      request.body.asJson
       sharedAudienceInfo(
-        audienceService = audienceService,
-        processGroupedUsercodes = PublishingHelper.postProcessGroupedResolvedAudience,
-        newsCategories = formData.flatMap { data =>
-          Some(data.categoryIds.map(newsCategoryService.getNewsCategoryForCatId))
-        }.getOrElse(Iterable.empty[NewsCategory]).toSet,
-        userNewsCategoryService = Some(userNewsCategoryService),
-        ignoreNewsCategories = formData.flatMap { data => Some(data.ignoreCategories)}.getOrElse(false)
+        SharedAudienceInfoForNews(
+          audienceService = audienceService,
+          processGroupedUsercodes = PublishingHelper.postProcessGroupedResolvedAudience,
+          newsCategories = newsAudienceForm.bindFromRequest.value.flatMap { data =>
+            Some(data.categoryIds.map(newsCategoryService.getNewsCategoryForCatId))
+          }.getOrElse(Iterable.empty[NewsCategory]).toSet,
+          userNewsCategoryService = Some(userNewsCategoryService),
+          ignoreNewsCategories = request.body.asFormUrlEncoded.get.get("item.ignoreCategories").map(_.mkString).exists(_.toBoolean)
+        )
       )
     }
   }
