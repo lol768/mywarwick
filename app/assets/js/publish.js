@@ -53,9 +53,9 @@ function setupAudiencePicker() {
 }
 
 function findReactDom(dom)  {
-  for (let key in dom) {
+  for (const key in dom) {
     if (key.startsWith("__reactInternalInstance$")) {
-      return  dom[key]._currentElement._owner._instance;
+      return dom[key]._currentElement._owner._instance;
     }
   }
 }

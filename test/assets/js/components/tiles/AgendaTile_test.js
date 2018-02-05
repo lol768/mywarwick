@@ -200,10 +200,10 @@ describe('AgendaTile', () => {
     };
     atMoment(() => {
       const html = shallow(<AgendaTile size="wide" content={ content } />);
-      html.find('.agenda__date').map(n => n.text()).should.deep.equal([
-        'Sat 12:00',
-        'Sat 12:00–14:00'
-      ]);
+      const expected = ['Sat 12:00', 'Sat 12:00–14:00'];
+      html.find('.agenda__date').forEach((date, i) =>
+        expect(date.children().at(1).text()).to.equal(expected[i])
+      )
     }, now);
   });
 
@@ -331,14 +331,36 @@ describe('AgendaTileItem', () => {
     },
   };
 
+  it('handles staff prop as array', () => {
+    const staffMember = {
+      email: 'E.L.Blagrove@warwick.ac.uk',
+      firstName: 'Dr Nic',
+      lastName: 'Duke',
+      universityId: '123456',
+      userType: 'Staff'
+    };
+    const propsWithStaff = {...props, staff: [staffMember]};
+    const html = shallow(<AgendaTileItem zoomed={ true } { ...propsWithStaff } />);
+
+    const staffInner = html.find('.tile-list-item__organiser');
+    expect(staffInner.html()).to.include(`${staffMember.firstName} ${staffMember.lastName}`)
+  });
+
+  it('handles staff prop as empty array', () => {
+    const propsWithEmptyStaff = {...props, staff: []};
+    const html = shallow(<AgendaTileItem zoomed={ true } { ...propsWithEmptyStaff } />);
+
+    const staffInner = html.find('.tile-list-item__organiser');
+    expect(staffInner.length).to.equal(0)
+  });
+
   it('renders correctly without a href', () => {
     const html = shallow(<AgendaTileItem zoomed={ true } { ...props } />);
 
     html.hasClass('tile-list-item').should.equal(true);
     const titleElement = html.find('.tile-list-item__title');
     titleElement.props().title.should.equal(props.title);
-    titleElement.find(Hyperlink).children().text().should.equal(props.title);
-
+    html.find(Hyperlink).first().children().text().should.equal(props.title);
     html.find('.agenda-item__cell').first().text().should.equal('17:00 –18:00');
   });
 
@@ -362,7 +384,7 @@ describe('AgendaTileItem', () => {
     const locationInner = html.find('.tile-list-item__location');
     locationInner.hasClass('text--light').should.equal(true);
     locationInner.contains('Heronbank').should.equal(true);
-    locationInner.find('.fa-map-marker').exists().should.equal(true);
+    locationInner.html().should.include('<i class="fa fa-map-marker"></i>');
 
     const link = locationInner.find(Hyperlink);
     link.childAt(0).text().should.equal('Heronbank');

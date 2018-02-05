@@ -17,6 +17,7 @@ import HideableView from './HideableView';
 import { Routes } from '../AppRoot';
 import wrapKeyboardSelect from '../../keyboard-nav';
 import { pluralise } from '../../helpers';
+import DismissableInfoModal from '../ui/DismissableInfoModal';
 
 const rowHeight = 125;
 const margin = [4, 4];
@@ -59,14 +60,19 @@ class MeView extends HideableView {
     layout: PropTypes.array,
     deviceWidth: PropTypes.number,
     tiles: PropTypes.array,
+    activeModal: PropTypes.instanceOf(DismissableInfoModal),
   };
 
   constructor(props) {
     super(props);
+    this.state = {
+      activeModal: null,
+    };
     this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
     this.onAdd = this.onAdd.bind(this);
+    this.showModal = this.showModal.bind(this);
   }
 
   componentWillHide() {
@@ -81,6 +87,12 @@ class MeView extends HideableView {
     // Disable rubber banding so the users' finger and the tile they are dragging
     // don't get out of sync.  (iOS)
     $('.id7-main-content-area').css('-webkit-overflow-scrolling', 'auto');
+  }
+
+  showModal(modal) {
+    this.setState({
+      activeModal: modal,
+    });
   }
 
   onLayoutChange(layout) {
@@ -155,13 +167,13 @@ class MeView extends HideableView {
 
   renderTile(props) {
     const { id } = props;
-
     return (
       <TileView
         ref={id}
         key={id}
         id={id}
         view={this}
+        showModal={this.showModal}
         editing={this.props.editing}
         editingAny={this.props.editing}
         size={this.getTileSize(id)}
@@ -251,6 +263,7 @@ class MeView extends HideableView {
           <div className={classes}>
             {this.renderTiles()}
           </div>
+          {this.state.activeModal}
         </div>
       </ScrollRestore>
     );
