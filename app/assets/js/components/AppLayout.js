@@ -55,12 +55,12 @@ export class AppLayout extends React.PureComponent {
               path={ `/${Routes.ACTIVITY}` }
               isDisabled={ !authenticated }
             />
-            {/* <TabBarItem
+            {<TabBarItem
               title="News"
               icon="newspaper-o"
               selectedIcon="newspaper-o"
-              path={ `/${Routes.NEWS}` }
-            /> */}
+              path={`/${Routes.NEWS}`}
+            />}
             <TabBarItem
               title="Search"
               icon="search"
