@@ -94,7 +94,8 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
     audienceService: AudienceService,
     processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => GroupedResolvedAudience,
     newsCategories: Set[NewsCategory] = Set.empty,
-    userNewsCategoryService: Option[UserNewsCategoryService] = Option.empty
+    userNewsCategoryService: Option[UserNewsCategoryService] = Option.empty,
+    ignoreNewsCategories: Boolean = false,
   )(implicit request: PublisherRequest[_]): Future[Result] =
     audienceForm.bindFromRequest.fold(
       formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
@@ -109,7 +110,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
             } else {
               audienceService.resolveUsersForComponentsGrouped(audience.components).map(_.toMap).map(processGroupedUsercodes) match {
                 case Success(groupedResolvedAudience) =>
-                  val jsonData = if (newsCategories.isEmpty) {
+                  val jsonData = if (ignoreNewsCategories) {
                     PublishingHelper.makeAudienceInfoJsonResultWithoutNewsCategories(groupedResolvedAudience)
                   } else {
                     userNewsCategoryService.map { service =>

@@ -52,13 +52,21 @@ function setupAudiencePicker() {
   }
 }
 
-function findReactDom(dom) {
-  const reactDom = _.values(_.pickBy(dom, (v, k) => _.startsWith(k, '__reactInternalInstance$')))[0];
-  return reactDom._currentElement._owner._instance;
+// reviewers: this is to be updated!
+function findReactDom(dom)  {
+  for (const key in dom) {
+    if (key.startsWith("__reactInternalInstance$")) {
+      return dom[key]._currentElement._owner._instance;
+    }
+  }
 }
 
+// reviewers: this is to be updated!
 function setupCategoryPicker() {
   $('#item_category_field .checkbox').change(() => {
+    findReactDom(document.getElementById('AudienceIndicator')).fetchAudienceEstimate();
+  });
+  $('#item_ignoreCategories').change(() => {
     findReactDom(document.getElementById('AudienceIndicator')).fetchAudienceEstimate();
   });
 }
