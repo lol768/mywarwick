@@ -100,7 +100,6 @@ class NewsController @Inject()(
 
   def audienceInfo(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNews).async {
     implicit request => {
-      request.body.asJson
       sharedAudienceInfo(
         SharedAudienceInfoForNews(
           audienceService = audienceService,

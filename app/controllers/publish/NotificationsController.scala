@@ -52,9 +52,7 @@ class NotificationsController @Inject()(
   }
 
   def audienceInfo(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
-    sharedAudienceInfo(
-      audienceService,
-      PublishingHelper.postProcessGroupedResolvedAudience)
+    sharedAudienceInfo(SharedAudienceInfoForNotifications(audienceService, PublishingHelper.postProcessGroupedResolvedAudience))
   }
 
   def status(publisherId: String, activityId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>

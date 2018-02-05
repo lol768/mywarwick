@@ -90,46 +90,65 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
     )
   }
 
-  def sharedAudienceInfo(
-    audienceService: AudienceService,
-    processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => GroupedResolvedAudience,
+  abstract class SharedAudienceInfo(
+    val audienceService: AudienceService,
+    val processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => GroupedResolvedAudience
+  )
+  case class SharedAudienceInfoForNotifications(
+    override val audienceService: AudienceService,
+    override val processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => GroupedResolvedAudience
+  ) extends SharedAudienceInfo(audienceService, processGroupedUsercodes)
+
+  case class SharedAudienceInfoForNews(
+    override val audienceService: AudienceService,
+    override val processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => GroupedResolvedAudience,
     newsCategories: Set[NewsCategory] = Set.empty,
     userNewsCategoryService: Option[UserNewsCategoryService] = Option.empty,
     ignoreNewsCategories: Boolean = false,
-  )(implicit request: PublisherRequest[_]): Future[Result] =
+  ) extends SharedAudienceInfo(audienceService, processGroupedUsercodes)
+
+  def sharedAudienceInfo(info: SharedAudienceInfo)(implicit request: PublisherRequest[_]): Future[Result] = {
     audienceForm.bindFromRequest.fold(
       formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
-      audienceData => {
-        audienceBinder.bindAudience(audienceData).map {
-          case Left(errors) => BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", errors.map(e => API.Error(e.key, e.message)))))
-          case Right(audience) =>
-            if (audience.public) {
-              Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
-                "public" -> true
-              ))))
-            } else {
-              audienceService.resolveUsersForComponentsGrouped(audience.components).map(_.toMap).map(processGroupedUsercodes) match {
-                case Success(groupedResolvedAudience) =>
-                  val jsonData = if (ignoreNewsCategories) {
+      audienceData => audienceBinder.bindAudience(audienceData).map {
+        case Left(errors) => BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", errors.map(e => API.Error(e.key, e.message)))))
+        case Right(audience) =>
+          val audienceService = info.audienceService
+          val processGroupedUsercodes = info.processGroupedUsercodes
+          if (audience.public) {
+            Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
+              "public" -> true
+            ))))
+          } else {
+            audienceService.resolveUsersForComponentsGrouped(audience.components).map(_.toMap).map(processGroupedUsercodes) match {
+              case Success(groupedResolvedAudience) => {
+                val jsonData = info match {
+                  case _: SharedAudienceInfoForNotifications =>
                     PublishingHelper.makeAudienceInfoJsonResultWithoutNewsCategories(groupedResolvedAudience)
-                  } else {
-                    userNewsCategoryService.map { service =>
-                      PublishingHelper.makeAudienceInfoJsonResultWithNewCategories(
-                        groupedResolvedAudience,
-                        service,
-                        newsCategories
-                      )
-                    }.getOrElse(PublishingHelper.makeAudienceInfoJsonResultWithoutNewsCategories(groupedResolvedAudience))
+                  case news: SharedAudienceInfoForNews => {
+                    if (news.ignoreNewsCategories) {
+                      PublishingHelper.makeAudienceInfoJsonResultWithoutNewsCategories(groupedResolvedAudience)
+                    } else {
+                      news.userNewsCategoryService.map { service =>
+                        PublishingHelper.makeAudienceInfoJsonResultWithNewCategories(
+                          groupedResolvedAudience,
+                          service,
+                          news.newsCategories
+                        )
+                      }.getOrElse(PublishingHelper.makeAudienceInfoJsonResultWithoutNewsCategories(groupedResolvedAudience))
+                    }
                   }
-                  Ok(Json.toJson(API.Success[JsObject](data = jsonData)))
-                case Failure(err) =>
-                  logger.error("Failed to resolve audience", err)
-                  InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience")))))
+                }
+                Ok(Json.toJson(API.Success[JsObject](data = jsonData)))
               }
+              case Failure(err) =>
+                logger.error("Failed to resolve audience", err)
+                InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience")))))
             }
-        }
+          }
       }
     )
+  }
 }
 
 trait PublishableWithAudience {
