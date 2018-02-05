@@ -110,15 +110,15 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
               audienceService.resolveUsersForComponentsGrouped(audience.components).map(_.toMap).map(processGroupedUsercodes) match {
                 case Success(groupedResolvedAudience) =>
                   val jsonData = if (newsCategories.isEmpty) {
-                    PublishingHelper.makeJsonResultWithoutNewsCategories(groupedResolvedAudience)
+                    PublishingHelper.makeAudienceInfoJsonResultWithoutNewsCategories(groupedResolvedAudience)
                   } else {
                     userNewsCategoryService.map { service =>
-                      PublishingHelper.makeJsonResultWithNewCategories(
+                      PublishingHelper.makeAudienceInfoJsonResultWithNewCategories(
                         groupedResolvedAudience,
                         service,
                         newsCategories
                       )
-                    }.getOrElse(PublishingHelper.makeJsonResultWithoutNewsCategories(groupedResolvedAudience))
+                    }.getOrElse(PublishingHelper.makeAudienceInfoJsonResultWithoutNewsCategories(groupedResolvedAudience))
                   }
                   Ok(Json.toJson(API.Success[JsObject](data = jsonData)))
                 case Failure(err) =>
@@ -219,7 +219,7 @@ trait PublishingActionRefiner {
 case class GroupedResolvedAudience(baseAudience: Set[Usercode], groupedUsercodes: Map[String, Set[Usercode]])
 
 object PublishingHelper {
-  def makeJsonResultWithoutNewsCategories(
+  def makeAudienceInfoJsonResultWithoutNewsCategories(
     groupedResolvedAudience: GroupedResolvedAudience
   ): JsObject = {
     Json.obj(
@@ -230,7 +230,7 @@ object PublishingHelper {
     )
   }
 
-  def makeJsonResultWithNewCategories(
+  def makeAudienceInfoJsonResultWithNewCategories(
     groupedResolvedAudience: GroupedResolvedAudience,
     service: UserNewsCategoryService,
     newsCats: Set[NewsCategory]

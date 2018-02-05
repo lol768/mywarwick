@@ -25,6 +25,8 @@ describe('AppLayout', () => {
           title="Activity" icon="tachometer" selectedIcon="tachometer" path="/activity"
           isDisabled={ true }
         />
+        <TabBarItem
+          title="News" icon="newspaper-o" selectedIcon="newspaper-o"  path="/news" />
         <TabBarItem title="Search" icon="search" selectedIcon="search" path="/search" />
       </TabBar>
     );
