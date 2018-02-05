@@ -52,18 +52,15 @@ function setupAudiencePicker() {
   }
 }
 
-function findReactDom(dom)  {
-  for (const key in dom) {
-    if (key.startsWith("__reactInternalInstance$")) {
-      return dom[key]._currentElement._owner._instance;
-    }
-  }
+function findReactDom(dom) {
+  const reactDom = _.values(_.pickBy(dom, (v, k) => _.startsWith(k, '__reactInternalInstance$')))[0];
+  return reactDom._currentElement._owner._instance;
 }
 
 function setupCategoryPicker() {
   $('#item_category_field .checkbox').change(() => {
-    findReactDom(document.getElementById("AudienceIndicator")).fetchAudienceEstimate();
-  })
+    findReactDom(document.getElementById('AudienceIndicator')).fetchAudienceEstimate();
+  });
 }
 
 /*
