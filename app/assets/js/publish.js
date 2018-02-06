@@ -16,20 +16,21 @@ import store from './publish/publishStore';
 import promiseSubmit from './publish/utils';
 import { Provider } from 'react-redux';
 import log from 'loglevel';
-import { NesCategoryPucker } from './publish/components/NewsCategoryPicker';
-
-const audienceIndicatorDom = (
-  <Provider store={store} >
-    <AudienceIndicator promiseSubmit={promiseSubmit} />
-  </Provider>
-);
+import NewsCategoryPicker from './publish/components/NewsCategoryPicker';
 
 function setupAudienceIndicator() {
   const audienceIndicator = $('.audience-indicator');
   if (audienceIndicator.length) {
     setTimeout(() => {
       ReactDOM.render(
-        audienceIndicatorDom,
+        <Provider store={store}>
+          <AudienceIndicator
+            promiseSubmit={promiseSubmit}
+            ref={indicator => {
+              setupCategoryPicker(indicator);
+            }}
+          />
+        </Provider>,
         audienceIndicator.get(0),
       );
     }, 200);
@@ -57,15 +58,15 @@ function setupAudiencePicker() {
   }
 }
 
-function setupCategoryPicker() {
-  const categoryPicker = $('#category-picker');
+function setupCategoryPicker(audienceIndicator) {
+  const categoryPicker = $('.category-picker');
   if (categoryPicker.length) {
     const props = {
       newsCategories: categoryPicker.data('categories') || {},
-      updateAudienceIndicator: audienceIndicatorDom.fetchAudienceEstimate
+      audienceIndicator,
     };
     ReactDOM.render(
-      <NesCategoryPucker {...props} />,
+      <NewsCategoryPicker {...props} />,
       categoryPicker.get(0),
     );
   }
@@ -233,7 +234,6 @@ $(() => {
   setupAudiencePicker();
   setupPublisherDepartmentsForm();
   setupPublisherPermissionsForm();
-  setupCategoryPicker();
   initSentDetails();
 
   $('[data-background-color]').each(function applyBackgroundColour() {

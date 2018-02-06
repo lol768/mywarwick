@@ -163,7 +163,7 @@ export class AudienceIndicator extends React.PureComponent {
     const baseNum = baseAudience !== undefined ? baseAudience.toLocaleString() : '0';
 
     return (
-      <div className="alert alert-info" id="AudienceIndicator">
+      <div className="alert alert-info">
         <div>
           <p>When sending alerts, please remember that alerts should be specific or personal to the
             recipient, and something they need to be aware of or take action on immediately, and
