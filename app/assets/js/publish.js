@@ -16,16 +16,20 @@ import store from './publish/publishStore';
 import promiseSubmit from './publish/utils';
 import { Provider } from 'react-redux';
 import log from 'loglevel';
+import { NesCategoryPucker } from './publish/components/NewsCategoryPicker';
+
+const audienceIndicatorDom = (
+  <Provider store={store} >
+    <AudienceIndicator promiseSubmit={promiseSubmit} />
+  </Provider>
+);
 
 function setupAudienceIndicator() {
   const audienceIndicator = $('.audience-indicator');
-
   if (audienceIndicator.length) {
     setTimeout(() => {
       ReactDOM.render(
-        <Provider store={store} >
-          <AudienceIndicator promiseSubmit={promiseSubmit} />
-        </Provider>,
+        audienceIndicatorDom,
         audienceIndicator.get(0),
       );
     }, 200);
@@ -54,7 +58,17 @@ function setupAudiencePicker() {
 }
 
 function setupCategoryPicker() {
-  // TODO render categories picker component
+  const categoryPicker = $('#category-picker');
+  if (categoryPicker.length) {
+    const props = {
+      newsCategories: categoryPicker.data('categories') || {},
+      updateAudienceIndicator: audienceIndicatorDom.fetchAudienceEstimate
+    };
+    ReactDOM.render(
+      <NesCategoryPucker {...props} />,
+      categoryPicker.get(0),
+    );
+  }
 }
 
 /*
