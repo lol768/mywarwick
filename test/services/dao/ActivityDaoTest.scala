@@ -300,5 +300,28 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
       saved must not be empty
       saved.get.api mustBe true
     }
+
+    "get recipient read count for activity id" in transaction { implicit c =>
+      val now = DateTime.now
+      val usercodeOne = "usercodeOne"
+      val usercodeTwo = "usercodeTwo"
+      val activityId = activityDao.save(activitySave, audienceId, AudienceSize.Public, Seq.empty)
+
+      SQL(s"""
+      INSERT INTO activity_recipient VALUES
+      ('$activityId', '$usercodeOne', {threeDaysAgo}, null, null, null, {threeDaysAgo}, 1, 0),
+      ('$activityId', '$usercodeTwo', {threeDaysAgo}, null, null, null, {threeDaysAgo}, 1, 0)
+        """)
+        .on('threeDaysAgo -> now.minusDays(3), 'usercodeOne -> usercodeOne, 'usercodeTwo -> usercodeTwo)
+        .execute()
+
+      SQL(s"INSERT INTO activity_recipient_read VALUES ('$usercodeOne', {now}), ('$usercodeTwo', {fiveDaysAgo})")
+        .on('now -> now, 'fiveDaysAgo -> now.minusDays(4))
+        .execute()
+
+      val count: Int = activityDao.getActivityReadCountSincePublishedDate(activityId)
+
+      count mustBe 1
+    }
   }
 }

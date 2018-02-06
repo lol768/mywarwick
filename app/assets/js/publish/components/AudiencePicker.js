@@ -326,6 +326,7 @@ export class AudiencePicker extends React.PureComponent {
         >
           <div>
             <MultilineTextInput
+              className="listOfUsercodes"
               formPath={prefixPath('.groups.listOfUsercodes')}
               type="listOfUsercodes"
               name="audience.audience[]"

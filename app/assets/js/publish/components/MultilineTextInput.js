@@ -1,6 +1,5 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import _ from 'lodash-es';
 
 export default class MultilineTextInput extends React.PureComponent {
   static defaultProps = {
@@ -19,6 +18,7 @@ export default class MultilineTextInput extends React.PureComponent {
     items: PropTypes.arrayOf(PropTypes.string),
     type: PropTypes.string,
     valuePrefix: PropTypes.string,
+    className: PropTypes.string,
   };
 
   constructor(props) {
@@ -27,15 +27,14 @@ export default class MultilineTextInput extends React.PureComponent {
   }
 
   handleTextChange({ target: { value } }) {
-    const items = _.filter(value.split('\n'), val => val.length > 4);
-    this.props.handleChange(items, this.props.type);
+    this.props.handleChange(value.split('\n'), this.props.type);
   }
 
   render() {
     const itemString = this.props.items.join('\r\n');
 
     return (
-      <div>
+      <div className={this.props.className}>
         <textarea
           name={this.props.items.length ? this.props.name : ''} // don't appear as submittable form field if no value
           hidden

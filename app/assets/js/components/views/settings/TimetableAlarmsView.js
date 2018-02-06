@@ -4,14 +4,16 @@ import HideableView from '../HideableView';
 import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 import RadioListGroupItem from '../../ui/RadioListGroupItem';
 import { update } from '../../../state/timetable-alarms';
+import { pluralise } from '../../../helpers';
 
 const TIMINGS = [
   5,
   15,
   30,
+  60,
 ];
 
-class TimetableAlarmsView extends HideableView {
+export class TimetableAlarmsView extends HideableView {
   static propTypes = {
     enabled: PropTypes.bool.isRequired,
     minutesBeforeEvent: PropTypes.number.isRequired,
@@ -69,7 +71,7 @@ class TimetableAlarmsView extends HideableView {
         <div className="list-group setting-colour-1">
           {TIMINGS.map(minutes =>
             (<RadioListGroupItem
-              description={`${minutes} minutes before`}
+              description={`${TimetableAlarmsView.getDescriptionForTiming(minutes)}`}
               onClick={this.onSetTiming(minutes)}
               value={minutes}
               checked={minutesBeforeEvent === minutes}
@@ -78,6 +80,17 @@ class TimetableAlarmsView extends HideableView {
         </div>}
       </div>
     );
+  }
+
+  static getDescriptionForTiming(timingInMinute) {
+    const makeHourPhrase = hours => `${hours} ${pluralise('hour', hours)}`;
+    const makeMinutePhrase = minutes => `${minutes} ${pluralise('minute', minutes)}`;
+    if (timingInMinute < 60) return `${makeMinutePhrase(timingInMinute)} before`;
+    const hours = Math.floor(timingInMinute / 60);
+    const remaining = timingInMinute % 60;
+    return remaining > 0 ?
+      `${makeHourPhrase(hours)} ${makeMinutePhrase(remaining)} before` :
+      `${makeHourPhrase(hours)} before`;
   }
 }
 

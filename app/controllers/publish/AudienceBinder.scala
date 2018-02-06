@@ -59,7 +59,7 @@ class AudienceBinder @Inject()(
         audienceService.validateUsers(component.usercodes) match {
           case Right(validUsercodes) => Some(UsercodesAudience(validUsercodes))
           case Left(invalidUsercodes) => {
-            errors :+= FormError("audience", "error.audience.usercodes.invalid", Seq(invalidUsercodes.map(_.string).mkString(", ")))
+            errors :+= FormError("audience.usercodes", "error.audience.usercodes.invalid", Seq(invalidUsercodes.map(_.string).mkString(", ")))
             None
           }
         }

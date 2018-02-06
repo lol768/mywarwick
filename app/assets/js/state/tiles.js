@@ -100,17 +100,20 @@ export function resizeTile(tile, layoutWidth, width, height) {
 
 export function persistTiles() {
   return (dispatch, getState) => {
-    const tiles = getState().tiles.data.tiles.map(item =>
-      _.pick(item, ['id', 'preferences', 'removed']),
-    );
+    if (getState().tiles.fetched) { // NEWSTART-1290 disappearing tiles
+      const tiles = getState().tiles.data.tiles.map(item =>
+        _.pick(item, ['id', 'preferences', 'removed']),
+      );
 
-    const layout = getState().tiles.data.layout;
+      const layout = getState().tiles.data.layout;
 
-    return fetchWithCredentials('/api/tiles', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tiles, layout }),
-    });
+      return fetchWithCredentials('/api/tiles', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tiles, layout }),
+      });
+    }
+    return Promise.resolve();
   };
 }
 
