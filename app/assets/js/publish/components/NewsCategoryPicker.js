@@ -5,7 +5,6 @@ import { Checkbox } from '../../components/ui/Checkbox';
 import { connect } from 'react-redux';
 
 export class NewsCategoryPicker extends React.PureComponent {
-
   static propTypes = {
     newsCategories: PropTypes.arrayOf(PropTypes.shape({
       id: PropTypes.string,
@@ -24,60 +23,58 @@ export class NewsCategoryPicker extends React.PureComponent {
     this.updateAudienceIndicator = this.updateAudienceIndicator.bind(this);
   }
 
-  updateAudienceIndicator(){
+  updateAudienceIndicator() {
     this.props.audienceDidUpdate();
   }
 
-  handleCategoriesChange(value, type, path) {
-    console.log(`Handle change! ${value} ${type} ${path}`);
+  handleCategoriesChange() {
     this.updateAudienceIndicator();
   }
 
-  handleIgnore(value, type, path) {
-    console.log(`Handle ignore! ${value} ${type} ${path}`);
+  handleIgnore(value) {
     this.setState({
-      ignoreCategories: !value
+      ignoreCategories: !value,
     });
     this.updateAudienceIndicator();
   }
 
   makeOptions(newsCategories) {
-    return <div>
+    return (<div>
       {
-        _.map(newsCategories, (name, id) => (
-            <Checkbox
-              key={id}
-              handleChange={this.handleCategoriesChange}
-              label={name}
-              name='categories[]'
-              formPath=''
-              value={id}
-            />
-          )
+        _.map(newsCategories, (name, id) =>
+          (<Checkbox
+            key={id}
+            handleChange={this.handleCategoriesChange}
+            label={name}
+            name="categories[]"
+            formPath=""
+            value={id}
+          />),
         )
       }
-    </div>;
+    </div>);
   }
 
   render() {
     return (
       <div>
-        <label className='control-label'>
+        <label className="control-label">
           What categories should this news to be tagged with?
         </label>
-        { this.makeOptions(this.props.newsCategories) }
+        {this.makeOptions(this.props.newsCategories)}
         <Checkbox
           handleChange={this.handleIgnore}
-          name='item.ignoreCategories'
+          name="item.ignoreCategories"
           label={'Show to everyone in the audience, regardless of their category preferences'}
           checked={this.state.ignoreCategories}
           value={this.state.ignoreCategories}
-          formPath=''
+          formPath=""
         />
       </div>
     );
   }
 }
+
 function mapDispatchToProps(dispatch) {
   return ({
     audienceDidUpdate: components => dispatch({

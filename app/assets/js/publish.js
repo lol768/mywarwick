@@ -45,9 +45,6 @@ function setupAudiencePicker() {
       locationOpts: audiencePicker.data('location-opts') || {},
       deptSubsetOpts: audiencePicker.data('dept-subset-opts') || {},
       store,
-      ref: instance => {
-        setupCategoryPicker(instance.state);
-      }
     };
     ReactDOM.render(
       <Provider store={store}>

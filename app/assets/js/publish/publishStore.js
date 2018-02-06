@@ -5,7 +5,6 @@ const initialState = {
 };
 
 function reducer(state = initialState, action) {
-  console.log(state);
   switch (action.type) {
     case 'AUDIENCE_UPDATE':
       return {
