@@ -7,6 +7,7 @@ import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import services.dao._
+import services.elasticsearch.ActivityESService
 import services.messaging.{MessagingServiceImpl, OutputService}
 import warwick.sso.{UserLookupService, Usercode}
 
@@ -24,6 +25,7 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
     val messagingDao: MessagingDao = mock[MessagingDao]
     val emailPrefService: EmailNotificationsPrefService = mock[EmailNotificationsPrefService]
     val smsPrefService: SmsNotificationsPrefService = mock[SmsNotificationsPrefService]
+    val activityESService: ActivityESService = mock[ActivityESService]
 
     val service = new MessagingServiceImpl(
       new MockDatabase(),
@@ -34,7 +36,8 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
       emailer,
       mobile,
       sms,
-      messagingDao
+      messagingDao,
+      activityESService
     )
   }
 

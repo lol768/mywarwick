@@ -22,12 +22,12 @@
         case other => other.displayName
       })} in ${allDepartments.find(_.code == dept.deptCode).map(_.shortName).getOrElse(dept.deptCode)}")
     case All => Seq(s"All university members")
-    case Staff => Seq(s"All staff")
-    case TeachingStaff => Seq(s"All teaching staff")
-      case UndergradStudents.All => Seq(s"All undergraduate students")
-      case ug: UndergradStudents => Seq(s"${ug.value} year undergraduate students")
-    case TaughtPostgrads => Seq(s"All taught postgraduates")
-    case ResearchPostgrads => Seq(s"All research postgraduates")
+    case Staff => Seq(s"All staff at the University")
+    case TeachingStaff => Seq(s"All teaching staff at the University")
+    case UndergradStudents.All => Seq(s"All undergraduate students at the University")
+    case ug: UndergradStudents => Seq(s"${ug.value} year undergraduate students at the University")
+    case TaughtPostgrads => Seq(s"All taught postgraduates at the University")
+    case ResearchPostgrads => Seq(s"All research postgraduates at the University")
     case unknown => Seq(unknown.toString)
   }).mkString(", ")
 }

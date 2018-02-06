@@ -12,7 +12,12 @@ object MessageProcessing {
   //case class RegisterWorker(worker: ActorRef) extends Message
   //case class Work[T](work: T) extends Message
 
+  sealed trait MessageProcessingError
+  case object UserNotFound extends MessageProcessingError
+  case object ActivityNotFound extends MessageProcessingError
+  val skippableErrors: Seq[MessageProcessingError] = Seq(UserNotFound, ActivityNotFound)
+
   // TODO could just use an Either[String, String]
-  case class ProcessingResult(success: Boolean, message: String)
+  case class ProcessingResult(success: Boolean, message: String, error: Option[MessageProcessingError] = None)
 }
 

@@ -15,6 +15,7 @@ import AudienceIndicator from './publish/components/AudienceIndicator';
 import store from './publish/publishStore';
 import promiseSubmit from './publish/utils';
 import { Provider } from 'react-redux';
+import log from 'loglevel';
 
 function setupAudienceIndicator() {
   const audienceIndicator = $('.audience-indicator');
@@ -197,12 +198,44 @@ function setupPublisherPermissionsForm() {
   });
 }
 
+function fetchActivityStatus(activityId) {
+  return fetchWithCredentials(`alerts/${activityId}/status`)
+    .then(response => response.text())
+    .then(text => JSON.parse(text));
+}
+
+function initSentDetails() {
+  const $sentActivityItems = $('.activity-item__audience[data-sent=true]');
+  $sentActivityItems.find('.activity-item__messages-*').show();
+
+  $sentActivityItems.each((i, el) => {
+    const $item = $(el);
+    const activityId = $item.parents('.activity-item').data('activity-id');
+    fetchActivityStatus(activityId)
+      .then(({ sent: { delivered, readCount } }) => {
+        $item.find('.activity-item__messages-read-val').text(readCount);
+        if (!delivered && !readCount) {
+          $item.html('<div class="col-sm-12"><i class="fa fa-exclamation-triangle"></i> Error fetching sent details for this alert</div>');
+        } else if (!delivered) { // NEWSTART-124 old alerts won't have this data
+          $item.find('[class^=activity-item__messages-delivered-]').hide();
+        } else {
+          $item.find('.activity-item__messages-delivered-val').text(delivered.total);
+        }
+      })
+      .catch((err) => {
+        $item.html('<div class="col-sm-12"><i class="fa fa-exclamation-triangle"></i> Error fetching sent details for this alert</div>');
+        log.error(`Error updating alert sent details from json response. Alert Id: ${activityId}`, err);
+      });
+  });
+}
+
 $(() => {
   setupAudienceIndicator();
   setupAudiencePicker();
   setupPublisherDepartmentsForm();
   setupPublisherPermissionsForm();
   setupCategoryPicker();
+  initSentDetails();
 
   $('[data-background-color]').each(function applyBackgroundColour() {
     $(this).css('background-color', $(this).data('background-color'));
@@ -233,12 +266,10 @@ $(() => {
     const activityId = $activity.data('activity-id');
 
     const interval = setInterval(() => {
-      fetchWithCredentials(`alerts/${activityId}/status`)
-        .then(response => response.text())
-        .then(text => JSON.parse(text))
+      fetchActivityStatus(activityId)
         .then((response) => {
           if (response.sendingNow) {
-            $activity.find('.activity-item__sent-count').text(response.sentCount);
+            $activity.find('.activity-item__sent-count').text(response.sent.total);
           } else {
             clearInterval(interval);
             $activity.find('.activity-item__send-progress').remove();
@@ -248,6 +279,8 @@ $(() => {
             }
 
             $activity.prependTo('#sent-activities');
+            $activity.find('.activity-item__audience').attr('data-sent', true);
+            initSentDetails();
           }
         });
     }, 2000);

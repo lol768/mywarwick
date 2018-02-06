@@ -44,6 +44,8 @@ object Audience {
   case object PublicAudience extends Component
 
   case class UsercodesAudience(usercodes: Set[Usercode]) extends DepartmentSubset {
+    override val displayName: String = s"Usercodes( ${usercodes.map(_.string).mkString(", ")})"
+
     def size: Int = usercodes.size
 
     def getLikelyInvalidUsercodes: Set[Usercode] = Audience.helper.getLikelyInvalidUsercodes(this)

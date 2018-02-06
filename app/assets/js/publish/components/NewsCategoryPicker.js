@@ -9,6 +9,4 @@ export class NesCategoryPucker extends React.PureComponent {
 
   }
 
-
-
 }
