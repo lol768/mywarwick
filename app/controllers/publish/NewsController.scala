@@ -103,7 +103,7 @@ class NewsController @Inject()(
       sharedAudienceInfo(
         SharedAudienceInfoForNews(
           audienceService = audienceService,
-          processGroupedUsercodes = PublishingHelper.postProcessGroupedResolvedAudience,
+          processGroupedUsercodes = AudienceInfoHelper.postProcessGroupedResolvedAudience,
           newsCategories = newsAudienceForm.bindFromRequest.value.flatMap { data =>
             Some(data.categoryIds.map(newsCategoryService.getNewsCategoryForCatId))
           }.getOrElse(Iterable.empty[NewsCategory]).toSet,

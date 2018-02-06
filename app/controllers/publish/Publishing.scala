@@ -115,29 +115,26 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
         case Right(audience) =>
           val audienceService = info.audienceService
           val processGroupedUsercodes = info.processGroupedUsercodes
-          if (audience.public) {
-            Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
-              "public" -> true
-            ))))
-          } else {
+          if (audience.public) Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
+            "public" -> true
+          )))) else {
             audienceService.resolveUsersForComponentsGrouped(audience.components).map(_.toMap).map(processGroupedUsercodes) match {
               case Success(groupedResolvedAudience) => {
                 val jsonData = info match {
                   case _: SharedAudienceInfoForNotifications =>
-                    PublishingHelper.makeAudienceInfoJsonResultWithoutNewsCategories(groupedResolvedAudience)
-                  case news: SharedAudienceInfoForNews => {
+                    AudienceInfoHelper.JsonResult.withoutNewsCategories(groupedResolvedAudience)
+                  case news: SharedAudienceInfoForNews =>
                     if (news.ignoreNewsCategories) {
-                      PublishingHelper.makeAudienceInfoJsonResultWithoutNewsCategories(groupedResolvedAudience)
+                      AudienceInfoHelper.JsonResult.withoutNewsCategories(groupedResolvedAudience)
                     } else {
                       news.userNewsCategoryService.map { service =>
-                        PublishingHelper.makeAudienceInfoJsonResultWithNewCategories(
+                        AudienceInfoHelper.JsonResult.withNewsCategories(
                           groupedResolvedAudience,
                           service,
                           news.newsCategories
                         )
-                      }.getOrElse(PublishingHelper.makeAudienceInfoJsonResultWithoutNewsCategories(groupedResolvedAudience))
+                      }.getOrElse(AudienceInfoHelper.JsonResult.withoutNewsCategories(groupedResolvedAudience))
                     }
-                  }
                 }
                 Ok(Json.toJson(API.Success[JsObject](data = jsonData)))
               }
@@ -238,36 +235,40 @@ trait PublishingActionRefiner {
 
 case class GroupedResolvedAudience(baseAudience: Set[Usercode], groupedUsercodes: Map[String, Set[Usercode]])
 
-object PublishingHelper {
-  def makeAudienceInfoJsonResultWithoutNewsCategories(
-    groupedResolvedAudience: GroupedResolvedAudience
-  ): JsObject = {
-    Json.obj(
-      "baseAudience" -> groupedResolvedAudience.baseAudience.size,
-      "groupedAudience" -> groupedResolvedAudience.groupedUsercodes.map {
-        case (groupName, usercodes) => (groupName, usercodes.size)
-      }
-    )
-  }
+object AudienceInfoHelper {
 
-  def makeAudienceInfoJsonResultWithNewCategories(
-    groupedResolvedAudience: GroupedResolvedAudience,
-    service: UserNewsCategoryService,
-    newsCats: Set[NewsCategory]
-  ): JsObject = {
-    val usercodesInTargetedNewsCats = service.getRecipientsOfNewsInCategories(newsCats.map(_.id).toSeq)
-    Json.obj(
-      "baseAudience" -> groupedResolvedAudience
-        .baseAudience
-        .intersect(usercodesInTargetedNewsCats)
-        .size,
-      "groupedAudience" -> groupedResolvedAudience.groupedUsercodes.map {
-        case (groupName, usercodes) => (
-          groupName,
-          usercodes.intersect(usercodesInTargetedNewsCats).size
-        )
-      }
-    )
+  object JsonResult {
+
+    def withoutNewsCategories(
+      groupedResolvedAudience: GroupedResolvedAudience
+    ): JsObject = {
+      Json.obj(
+        "baseAudience" -> groupedResolvedAudience.baseAudience.size,
+        "groupedAudience" -> groupedResolvedAudience.groupedUsercodes.map {
+          case (groupName, usercodes) => (groupName, usercodes.size)
+        }
+      )
+    }
+
+    def withNewsCategories(
+      groupedResolvedAudience: GroupedResolvedAudience,
+      service: UserNewsCategoryService,
+      newsCats: Set[NewsCategory]
+    ): JsObject = {
+      val usercodesInTargetedNewsCats = service.getRecipientsOfNewsInCategories(newsCats.map(_.id).toSeq)
+      Json.obj(
+        "baseAudience" -> groupedResolvedAudience
+          .baseAudience
+          .intersect(usercodesInTargetedNewsCats)
+          .size,
+        "groupedAudience" -> groupedResolvedAudience.groupedUsercodes.map {
+          case (groupName, usercodes) => (
+            groupName,
+            usercodes.intersect(usercodesInTargetedNewsCats).size
+          )
+        }
+      )
+    }
   }
 
   def postProcessGroupedResolvedAudience (groupedUsercodes:Map[Audience.Component, Set[Usercode]]): GroupedResolvedAudience = {
