@@ -26,9 +26,6 @@ function setupAudienceIndicator() {
         <Provider store={store}>
           <AudienceIndicator
             promiseSubmit={promiseSubmit}
-            ref={indicator => {
-              setupCategoryPicker(indicator);
-            }}
           />
         </Provider>,
         audienceIndicator.get(0),
@@ -48,6 +45,9 @@ function setupAudiencePicker() {
       locationOpts: audiencePicker.data('location-opts') || {},
       deptSubsetOpts: audiencePicker.data('dept-subset-opts') || {},
       store,
+      ref: instance => {
+        setupCategoryPicker(instance.state);
+      }
     };
     ReactDOM.render(
       <Provider store={store}>
@@ -58,15 +58,17 @@ function setupAudiencePicker() {
   }
 }
 
-function setupCategoryPicker(audienceIndicator) {
+function setupCategoryPicker() {
   const categoryPicker = $('.category-picker');
   if (categoryPicker.length) {
     const props = {
       newsCategories: categoryPicker.data('categories') || {},
-      audienceIndicator,
+      store,
     };
     ReactDOM.render(
-      <NewsCategoryPicker {...props} />,
+      <Provider store={store}>
+        <NewsCategoryPicker {...props} />
+      </Provider>,
       categoryPicker.get(0),
     );
   }
@@ -234,6 +236,7 @@ $(() => {
   setupAudiencePicker();
   setupPublisherDepartmentsForm();
   setupPublisherPermissionsForm();
+  setupCategoryPicker();
   initSentDetails();
 
   $('[data-background-color]').each(function applyBackgroundColour() {

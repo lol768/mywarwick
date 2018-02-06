@@ -2,8 +2,7 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
 import { Checkbox } from '../../components/ui/Checkbox';
-import { AudienceIndicator } from './AudienceIndicator';
-import ReactDOM from 'react-dom';
+import { connect } from 'react-redux';
 
 export class NewsCategoryPicker extends React.PureComponent {
 
@@ -12,7 +11,7 @@ export class NewsCategoryPicker extends React.PureComponent {
       id: PropTypes.string,
       name: PropTypes.string,
     })),
-    audienceIndicator: PropTypes.objectOf(AudienceIndicator),
+    audienceDidUpdate: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -22,10 +21,16 @@ export class NewsCategoryPicker extends React.PureComponent {
     };
     this.handleCategoriesChange = this.handleCategoriesChange.bind(this);
     this.handleIgnore = this.handleIgnore.bind(this);
+    this.updateAudienceIndicator = this.updateAudienceIndicator.bind(this);
+  }
+
+  updateAudienceIndicator(){
+    this.props.audienceDidUpdate();
   }
 
   handleCategoriesChange(value, type, path) {
     console.log(`Handle change! ${value} ${type} ${path}`);
+    this.updateAudienceIndicator();
   }
 
   handleIgnore(value, type, path) {
@@ -33,6 +38,7 @@ export class NewsCategoryPicker extends React.PureComponent {
     this.setState({
       ignoreCategories: !value
     });
+    this.updateAudienceIndicator();
   }
 
   makeOptions(newsCategories) {
@@ -72,5 +78,13 @@ export class NewsCategoryPicker extends React.PureComponent {
     );
   }
 }
+function mapDispatchToProps(dispatch) {
+  return ({
+    audienceDidUpdate: components => dispatch({
+      type: 'AUDIENCE_UPDATE',
+      components,
+    }),
+  });
+}
 
-export default (NewsCategoryPicker);
+export default connect(_, mapDispatchToProps)(NewsCategoryPicker);

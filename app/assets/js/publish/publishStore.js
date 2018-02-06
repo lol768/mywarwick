@@ -5,11 +5,12 @@ const initialState = {
 };
 
 function reducer(state = initialState, action) {
+  console.log(state);
   switch (action.type) {
     case 'AUDIENCE_UPDATE':
       return {
         ...state,
-        audience: action.components,
+        audience: (action.components ? action.components : { ...state.audience }),
       };
     default:
       return state;
