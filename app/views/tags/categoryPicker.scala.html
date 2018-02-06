@@ -7,7 +7,7 @@
 
 <div
 data-error='@form.errorsAsJson'
-data-form-categories='@Json.obj(categories.map(cat => cat.id -> Json.toJsFieldJsValueWrapper(cat.name)): _*)'
+data-categories='@Json.obj(categories.map(cat => cat.id -> Json.toJsFieldJsValueWrapper(cat.name)): _*)'
 class="category-picker form-group col-md-12"
 id="category-picker">
 </div>
