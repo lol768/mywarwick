@@ -90,7 +90,7 @@ class PublishActivityJob @Inject()(
     if (activity.shouldNotify) {
       messaging.send(recipients, activity)
     }
-    activityESService.index(IndexActivityRequest(activity, Some(recipients.toSeq)))
+    activityESService.indexActivityReq(IndexActivityRequest(activity, Some(recipients.toSeq)))
       .failed.foreach { e =>
         logger.error("Failed to index activity to ES", e)
       }

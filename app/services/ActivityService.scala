@@ -9,6 +9,7 @@ import org.quartz._
 import play.api.db.{Database, NamedDatabase}
 import services.ActivityError._
 import services.dao._
+import services.elasticsearch.ActivityESService
 import services.job.PublishActivityJob
 import warwick.sso.{User, UserLookupService, Usercode}
 
@@ -65,7 +66,7 @@ trait ActivityService {
 
   def updateAudienceCount(activityId: String, audienceId: String, recipients: Set[Usercode]): Unit
 
-  def markSent(id: String, usercode: Usercode): Unit
+  def markProcessed(id: String, usercode: Usercode): Unit
 
   def getActivityWithAudience(id: String): Option[ActivityRenderWithAudience]
 
@@ -333,8 +334,8 @@ class ActivityServiceImpl @Inject()(
       dao.updateAudienceCount(activityId, audienceSize)
     }
 
-  override def markSent(id: String, usercode: Usercode): Unit =
-    db.withTransaction(implicit c => recipientDao.markSent(id, usercode.string))
+  override def markProcessed(id: String, usercode: Usercode): Unit =
+    db.withTransaction(implicit c => recipientDao.markProcessed(id, usercode.string))
 
   override def getActivitiesForDateTimeRange(from: DateTime, to: DateTime): Seq[Activity] = {
     db.withConnection(implicit c => {

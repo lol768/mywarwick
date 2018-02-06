@@ -17,7 +17,6 @@ import play.api.data.JodaForms._
 class ActivityToESController @Inject()(
   security: SecurityService,
   activityService: ActivityService,
-  activityESService: ActivityESService,
   scheduler: SchedulerService
 ) extends MyController with I18nSupport {
 

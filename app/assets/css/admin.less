@@ -90,15 +90,12 @@ dd.error {
   }
 }
 
-.activity-item {
-  .audience-details {
-    margin-left: 4px;
-    &:after {
-      content: @fa-var-chevron-down;
-    }
-    &.collapsed:after {
-      content: @fa-var-chevron-right;
-    }
+.activity-item__audience {
+  & > div:first-child {
+    text-align: right;
+  }
+  &:not([data-sent=true]) [class^="activity-item__messages-"] {
+    display: none;
   }
 }
 
