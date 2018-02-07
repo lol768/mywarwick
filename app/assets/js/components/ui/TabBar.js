@@ -28,7 +28,7 @@ export default class TabBar extends PureComponent {
   }
 
   getChildren() {
-    return this.props.children.map(el => (
+    return _.filter(this.props.children).map(el => (
       React.cloneElement(el, {
         key: el.props.title,
         ref: el.props.title.toLowerCase(),

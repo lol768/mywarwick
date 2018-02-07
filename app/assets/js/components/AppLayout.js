@@ -19,6 +19,7 @@ export class AppLayout extends React.PureComponent {
     authenticated: PropTypes.bool.isRequired,
     notificationsCount: PropTypes.number.isRequired,
     children: PropTypes.node.isRequired,
+    features: PropTypes.object,
   };
 
   constructor(props) {
@@ -55,12 +56,12 @@ export class AppLayout extends React.PureComponent {
               path={ `/${Routes.ACTIVITY}` }
               isDisabled={ !authenticated }
             />
-            {<TabBarItem
+            {this.props.features.news ? <TabBarItem
               title="News"
               icon="newspaper-o"
               selectedIcon="newspaper-o"
               path={`/${Routes.NEWS}`}
-            />}
+            />: null}
             <TabBarItem
               title="Search"
               icon="search"
