@@ -8,7 +8,7 @@ export default class RadioListGroupItem extends React.PureComponent {
     name: PropTypes.string,
     value: PropTypes.string.isRequired,
     checked: PropTypes.bool.isRequired,
-    settingColour: PropTypes.string,
+    settingColour: PropTypes.number,
   };
 
   static defaultProps = {

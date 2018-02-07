@@ -13,7 +13,7 @@ export default class ListGroupItem extends React.PureComponent {
     failure: PropTypes.bool,
     disabled: PropTypes.bool,
     uiControl: PropTypes.any,
-    settingColour: PropTypes.string,
+    settingColour: PropTypes.number,
   };
 
   static defaultProps = {
