@@ -94,9 +94,8 @@ export class NewsCategoryPicker extends React.PureComponent {
 
 function mapDispatchToProps(dispatch) {
   return ({
-    audienceDidUpdate: components => dispatch({
+    audienceDidUpdate: () => dispatch({
       type: 'AUDIENCE_UPDATE',
-      components,
     }),
   });
 }
