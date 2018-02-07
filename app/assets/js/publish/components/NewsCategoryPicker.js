@@ -10,13 +10,18 @@ export class NewsCategoryPicker extends React.PureComponent {
       id: PropTypes.string,
       name: PropTypes.string,
     })),
+    formData: PropTypes.objectOf(PropTypes.shape({
+      chosenCategories: PropTypes.arrayOf(PropTypes.string),
+      ignoreCategories: PropTypes.bool,
+    })),
     audienceDidUpdate: PropTypes.func.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      ignoreCategories: false,
+      ignoreCategories: Boolean(this.props.formData.ignoreCategories),
+      chosenCategories: this.props.formData.chosenCategories.slice(),
     };
     this.handleCategoriesChange = this.handleCategoriesChange.bind(this);
     this.handleIgnore = this.handleIgnore.bind(this);
@@ -27,21 +32,26 @@ export class NewsCategoryPicker extends React.PureComponent {
     this.props.audienceDidUpdate();
   }
 
-  handleCategoriesChange() {
-    this.updateAudienceIndicator();
-  }
-
-  handleIgnore(value) {
+  handleCategoriesChange(value) {
     this.setState({
-      ignoreCategories: !value,
+      chosenCategories: _.includes(this.state.chosenCategories, value) ?
+        _.remove(this.state.chosenCategories.slice(), id => id !== value) :
+        this.state.chosenCategories.slice().concat([value])
     });
     this.updateAudienceIndicator();
   }
 
-  makeOptions(newsCategories) {
+  handleIgnore() {
+    this.setState({
+      ignoreCategories: !Boolean(this.state.ignoreCategories),
+    });
+    this.updateAudienceIndicator();
+  }
+
+  makeOptions() {
     return (<div>
       {
-        _.map(newsCategories, (name, id) =>
+        _.map(this.props.newsCategories, (name, id) =>
           (<Checkbox
             key={id}
             handleChange={this.handleCategoriesChange}
@@ -49,6 +59,7 @@ export class NewsCategoryPicker extends React.PureComponent {
             name="categories[]"
             formPath=""
             value={id}
+            isChecked={_.includes(this.state.chosenCategories, id)}
           />),
         )
       }
@@ -61,12 +72,12 @@ export class NewsCategoryPicker extends React.PureComponent {
         <label className="control-label">
           What categories should this news to be tagged with?
         </label>
-        {this.makeOptions(this.props.newsCategories)}
+        {this.makeOptions()}
         <Checkbox
           handleChange={this.handleIgnore}
           name="item.ignoreCategories"
           label={'Show to everyone in the audience, regardless of their category preferences'}
-          checked={this.state.ignoreCategories}
+          isChecked={this.state.ignoreCategories}
           value={this.state.ignoreCategories}
           formPath=""
         />
