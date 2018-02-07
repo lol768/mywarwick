@@ -22,7 +22,7 @@ class HomeController @Inject()(
     configuration.getOptional[String]("mywarwick.search.root").map(SearchRootUrl)
       .getOrElse(throw new IllegalStateException("Search root URL not configured - check mywarwick.search.root property"))
 
-  def index = Action {
+  def index = Action { implicit request =>
     Ok(views.html.index())
   }
 
