@@ -61,7 +61,7 @@ export class AppLayout extends React.PureComponent {
               icon="newspaper-o"
               selectedIcon="newspaper-o"
               path={`/${Routes.NEWS}`}
-            />: null}
+            /> : null}
             <TabBarItem
               title="Search"
               icon="search"
