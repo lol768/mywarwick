@@ -60,6 +60,10 @@ function setupCategoryPicker() {
   if (categoryPicker.length) {
     const props = {
       newsCategories: categoryPicker.data('categories') || {},
+      formData: _.isEmpty(categoryPicker.data('form-data')) ? {
+        ignoreCategories: false,
+        chosenCategories: []
+      } : categoryPicker.data('form-data'),
       store,
     };
     ReactDOM.render(
