@@ -19,9 +19,15 @@ export class NewsCategoryPicker extends React.PureComponent {
 
   constructor(props) {
     super(props);
+
+    const formData = _.isEmpty(this.props.formData) ? {
+      ignoreCategories: false,
+      chosenCategories: [],
+    } : this.props.formData;
+
     this.state = {
-      ignoreCategories: Boolean(this.props.formData.ignoreCategories),
-      chosenCategories: this.props.formData.chosenCategories.slice(),
+      ignoreCategories: Boolean(formData.ignoreCategories),
+      chosenCategories: formData.chosenCategories.slice(),
     };
     this.handleCategoriesChange = this.handleCategoriesChange.bind(this);
     this.handleIgnore = this.handleIgnore.bind(this);
@@ -36,14 +42,14 @@ export class NewsCategoryPicker extends React.PureComponent {
     this.setState({
       chosenCategories: _.includes(this.state.chosenCategories, value) ?
         _.remove(this.state.chosenCategories.slice(), id => id !== value) :
-        this.state.chosenCategories.slice().concat([value])
+        this.state.chosenCategories.slice().concat([value]),
     });
     this.updateAudienceIndicator();
   }
 
   handleIgnore() {
     this.setState({
-      ignoreCategories: !Boolean(this.state.ignoreCategories),
+      ignoreCategories: !this.state.ignoreCategories,
     });
     this.updateAudienceIndicator();
   }
