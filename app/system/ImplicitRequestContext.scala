@@ -2,7 +2,7 @@ package system
 
 import com.google.inject.Inject
 import play.api.mvc.Request
-import services.NavigationService
+import services.{Features, NavigationService}
 import warwick.sso.{AuthenticatedRequest, SSOClient}
 
 trait ImplicitRequestContext {
@@ -16,13 +16,16 @@ trait ImplicitRequestContext {
   @Inject
   val csrfPageHelperFactory: CSRFPageHelperFactory = null
 
+  @Inject
+  val features: Features = null
+
   implicit def requestContext(implicit request: Request[_]): RequestContext = request match {
     case req: AuthenticatedRequest[_] =>
       val nav = navigationService.getNavigation(req.context)
-      RequestContext.authenticated(ssoClient, req, nav, csrfPageHelperFactory)
+      RequestContext.authenticated(ssoClient, req, nav, csrfPageHelperFactory, features)
     case _ =>
       // Assumes anonymous users have no navigation
-      RequestContext.anonymous(ssoClient, request, Seq.empty, csrfPageHelperFactory)
+      RequestContext.anonymous(ssoClient, request, Seq.empty, csrfPageHelperFactory, features)
   }
 
 }
