@@ -10,6 +10,7 @@ describe('AppLayout', () => {
     const result = shallowRender(<AppLayout
       location={location}
       user={({})}
+      features={{news: true}}
       notificationsCount="7"
       onSelectItem={()=>{}} />);
 
