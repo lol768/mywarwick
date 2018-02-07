@@ -13,7 +13,8 @@
     permissionScope: PermissionScope,
     audience: Audience,
     createOrUpdate: String,
-    audienceJson: JsValue = Json.obj()
+    audienceJson: JsValue = Json.obj(),
+    categoriesJson: JsValue = Json.obj()
 )(implicit fc: b3.B3FieldConstructor, messages: Messages, context: RequestContext)
 
 @context.csrfHelper.formField
@@ -21,8 +22,21 @@
 
 <div class="split-form__sections">
   <section>
-    @tags.audiencePicker(form, "audience", departmentOptions, "news item", permissionScope, allowPublic = true, audience = audience, audienceJson)
-    @tags.categoryPicker(form, categories)
+    @tags.audiencePicker(
+      form,
+      "audience",
+      departmentOptions,
+      "news item",
+      permissionScope,
+      allowPublic = true,
+      audience = audience,
+      audienceJson
+    )
+    @tags.categoryPicker(
+      form,
+      categories,
+      categoriesJson
+    )
   </section>
 
   <section>
