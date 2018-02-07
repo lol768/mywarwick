@@ -73,8 +73,8 @@ abstract class BooleanFlagsAccessor[T : ClassTag](config: Configuration) extends
       val className = tClass.getName
       throw new IllegalStateException(
         s"""Feature keys in config didn't match $className object -
-           |In config but not FeatureData: ${confKeys diff traitKeys}
-           |In FeatureData but not config: ${traitKeys diff confKeys}
+           |In config but not $className: ${confKeys diff traitKeys}
+           |In $className but not config: ${traitKeys diff confKeys}
          """.stripMargin)
     }
   }
