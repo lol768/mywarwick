@@ -55,7 +55,8 @@ trait NavigationService {
 @Singleton
 class NavigationServiceImpl @Inject()(
   roleService: RoleService,
-  publisherService: PublisherService
+  publisherService: PublisherService,
+  featuresService: FeaturesService
 ) extends NavigationService {
 
   def getNavigation(loginContext: LoginContext): Seq[Navigation] = loginContext.user.map { user =>
@@ -76,10 +77,16 @@ class NavigationServiceImpl @Inject()(
   def navigationForPublisher(publisher: Publisher, user: User): Navigation = {
     val publishingRole = publisherService.getRoleForUser(publisher.id, user.usercode)
 
-    val children = Seq(
-      ViewNews -> NavigationPage("News", publishRoutes.NewsController.list(publisher.id)),
-      ViewNotifications -> NavigationPage("Alerts", publishRoutes.NotificationsController.list(publisher.id))
-    ).collect { case (ability, page) if publishingRole.can(ability) => page }
+    val children:Seq[NavigationPage] = (if ( featuresService.get.news) {
+      Seq(
+        ViewNews -> NavigationPage("News", publishRoutes.NewsController.list(publisher.id)),
+        ViewNotifications -> NavigationPage("Alerts", publishRoutes.NotificationsController.list(publisher.id))
+      )
+    } else {
+      Seq(
+        ViewNotifications -> NavigationPage("Alerts", publishRoutes.NotificationsController.list(publisher.id))
+      )
+    }).collect { case (ability, page) if publishingRole.can(ability) => page }
 
     NavigationPage(publisher.name, publishRoutes.PublishersController.show(publisher.id), children)
   }
