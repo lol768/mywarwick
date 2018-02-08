@@ -44,5 +44,22 @@ describe('NewsCategoryPicker', () => {
 
   });
 
+  it('should set initial state according to supplied formData', () => {
+    let shallow = enzyme.shallow(<NewsCategoryPicker {...{
+      ...props, formData: {
+        ignoreCategories: true,
+        chosenCategories: ['mac', 'linux']
+      }
+    }} />);
+    expect(shallow.state().ignoreCategories).to.eql(true);
+    expect(shallow.state().chosenCategories).to.eql(['mac', 'linux']);
+  });
+
+  it('should should render the correct number of checkboxes', () => {
+    let shallow = enzyme.shallow(<NewsCategoryPicker {...props} />);
+    expect(shallow.find(Checkbox).length).to.eql(4);
+  });
+
+
 
 });
