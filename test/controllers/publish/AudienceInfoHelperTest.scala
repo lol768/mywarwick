@@ -77,8 +77,8 @@ class AudienceInfoHelperTest extends BaseSpec {
         oncampus -> oncampusUsers,
         webgroupAudience -> Set(Usercode("123"))
       ))
-      result.baseAudience.size mustBe 2
-      result.groupedUsercodes.size mustBe 4
+      result.baseAudience.size mustBe 1
+      result.groupedUsercodes.size mustBe 2
       result.groupedUsercodes.head._2.size mustBe 1
       result.groupedUsercodes.last._2.size mustBe 0
     }

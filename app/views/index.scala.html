@@ -1,9 +1,8 @@
 @import services.analytics.AnalyticsTrackingID
-@import play.api.libs.json.{Json, JsValue}
+@import play.api.libs.json.{Json}
 @import system.RequestContext
 @()(
-    implicit analyticsTrackingId: Option[AnalyticsTrackingID],
-    context: RequestContext,
+    implicit analyticsTrackingId: Option[AnalyticsTrackingID], context: RequestContext,
     searchRootUrl: SearchRootUrl
 )
 <!DOCTYPE html>

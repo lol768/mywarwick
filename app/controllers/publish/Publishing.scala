@@ -94,6 +94,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
     val audienceService: AudienceService,
     val processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => GroupedResolvedAudience
   )
+
   case class SharedAudienceInfoForNotifications(
     override val audienceService: AudienceService,
     override val processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => GroupedResolvedAudience
@@ -228,8 +229,10 @@ trait PublishingActionRefiner {
         }
       }
     }
+
     override protected def executionContext = ThreadPools.web
   }
+
   def PublisherAction(id: String, requiredAbilities: Ability*) = RequiredUserAction andThen GetPublisher(id, requiredAbilities)
 }
 
@@ -271,9 +274,12 @@ object AudienceInfoHelper {
     }
   }
 
-  def postProcessGroupedResolvedAudience (groupedUsercodes:Map[Audience.Component, Set[Usercode]]): GroupedResolvedAudience = {
+  def postProcessGroupedResolvedAudience(groupedUsercodes: Map[Audience.Component, Set[Usercode]]): GroupedResolvedAudience = {
     val usercodesInTargetLocations: Map[Boolean, Set[Usercode]] = groupedUsercodes.groupBy {
-      case (component, _) => component.isInstanceOf[Audience.LocationOptIn]
+      case (component, _) => component match {
+        case _: Audience.LocationOptIn => true
+        case _ => false
+      }
     }.map {
       case (matched, items) => (matched, items.flatMap { case (_, usercodes) => usercodes }.toSet)
     }
@@ -292,8 +298,13 @@ object AudienceInfoHelper {
         groupedAudience(groupedUsercodes)
       )
     } else {
-      val targetedAudiences = groupedUsercodes.map {
+      val targetedAudiences: Map[Audience.Component, Set[Usercode]] = groupedUsercodes.map {
         case (component, usercodes) => (component, usercodes.intersect(usercodesInTargetLocations.getOrElse(true, Set.empty)))
+      }.filter { case (component, _) =>
+        component match {
+          case _: Audience.LocationOptIn => false
+          case _ => true
+        }
       }
       GroupedResolvedAudience(
         baseAudience(targetedAudiences),
