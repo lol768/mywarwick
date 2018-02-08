@@ -75,18 +75,23 @@ export class NewsCategoryPicker extends React.PureComponent {
   render() {
     return (
       <div>
-        <label className="control-label">
-          What categories should this news to be tagged with?
-        </label>
-        {this.makeOptions()}
-        <Checkbox
-          handleChange={this.handleIgnore}
-          name="item.ignoreCategories"
-          label="Show to everyone in the audience, regardless of their category preferences"
-          isChecked={this.state.ignoreCategories}
-          value={this.state.ignoreCategories.toString()}
-          formPath=""
-        />
+        <div className="list-group">
+          <label className="control-label">
+            What should this news item be tagged with?
+          </label>
+          {this.makeOptions()}
+        </div>
+        <div className="list-group">
+          <Checkbox
+            handleChange={this.handleIgnore}
+            name="item.ignoreCategories"
+            label="Show to everyone in the audience, regardless of their category preferences"
+            isChecked={this.state.ignoreCategories}
+            value={this.state.ignoreCategories.toString()}
+            formPath=""
+          />
+          <span className="help-block">Use sparingly!</span>
+        </div>
       </div>
     );
   }
