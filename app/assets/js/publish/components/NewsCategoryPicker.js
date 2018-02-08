@@ -10,10 +10,10 @@ export class NewsCategoryPicker extends React.PureComponent {
       id: PropTypes.string,
       name: PropTypes.string,
     })),
-    formData: PropTypes.objectOf(PropTypes.shape({
+    formData: PropTypes.shape({
       chosenCategories: PropTypes.arrayOf(PropTypes.string),
       ignoreCategories: PropTypes.bool,
-    })),
+    }),
     audienceDidUpdate: PropTypes.func.isRequired,
   };
 
@@ -59,12 +59,12 @@ export class NewsCategoryPicker extends React.PureComponent {
       {
         _.map(this.props.newsCategories, (name, id) =>
           (<Checkbox
-            key={id}
+            key={id.toString()}
             handleChange={this.handleCategoriesChange}
-            label={name}
+            label={name.toString()}
             name="categories[]"
             formPath=""
-            value={id}
+            value={id.toString()}
             isChecked={_.includes(this.state.chosenCategories, id)}
           />),
         )
@@ -82,9 +82,9 @@ export class NewsCategoryPicker extends React.PureComponent {
         <Checkbox
           handleChange={this.handleIgnore}
           name="item.ignoreCategories"
-          label={'Show to everyone in the audience, regardless of their category preferences'}
+          label="Show to everyone in the audience, regardless of their category preferences"
           isChecked={this.state.ignoreCategories}
-          value={this.state.ignoreCategories}
+          value={this.state.ignoreCategories.toString()}
           formPath=""
         />
       </div>
