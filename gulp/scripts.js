@@ -183,9 +183,10 @@ function generateServiceWorker(watch) {
   return getCachedAssetsAsync().then(cachedAssets =>
     swPrecache.generate({
       cacheId: 'start',
-      handleFetch: false,
-      clientsClaim: false,
-      staticFileGlobs: [],
+      handleFetch: OFFLINE_WORKERS,
+      staticFileGlobs: [
+        'public/**/*',
+      ].concat(cachedAssets),
       stripPrefixMulti: {
         'target/gulp/': 'assets/',
         'public/': 'assets/'
