@@ -1,26 +1,13 @@
 package controllers
 
-import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import helpers.{BaseSpec, MinimalAppPerSuite}
-import play.api.Configuration
+import helpers.{BaseSpec, OneStartAppPerSuite}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import services.analytics.{AnalyticsMeasurementService, AnalyticsTrackingID}
-import system.AppMetrics
 
-class HomeControllerTest extends BaseSpec with MockitoSugar with Results with MinimalAppPerSuite {
-  val metrics = mock[AppMetrics]
-
-  val configuration = Configuration(
-    "mywarwick.search.root" -> "https://search-dev.warwick.ac.uk"
-  )
-
-  val measurementService = mock[AnalyticsMeasurementService]
-  when(measurementService.trackingID).thenReturn(AnalyticsTrackingID("UA-123456-7"))
-
-  val controller = new HomeController(metrics, configuration, measurementService)
+class HomeControllerTest extends BaseSpec with MockitoSugar with Results with OneStartAppPerSuite {
+  val controller: HomeController = get[HomeController]
   controller.setControllerComponents(get[ControllerComponents])
 
   "ApplicationController#index" should {
@@ -28,6 +15,7 @@ class HomeControllerTest extends BaseSpec with MockitoSugar with Results with Mi
       val result = controller.index(FakeRequest())
       status(result) must be(200)
       contentAsString(result) must include("id=\"app-container\"")
+      contentAsString(result) must include("data-features=\"{&quot;news&quot;:false}\"")
     }
   }
 }
