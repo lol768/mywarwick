@@ -60,6 +60,22 @@ describe('NewsCategoryPicker', () => {
     expect(shallow.find(Checkbox).length).to.eql(4);
   });
 
+  it('should update states according to checkbox changes', () => {
+    let wrapper = enzyme.mount(<NewsCategoryPicker {...props} />, { context });
+
+    wrapper.find(Checkbox).first().find('input').simulate('change');
+    expect(wrapper.state().chosenCategories.length).to.eql(1);
+
+    wrapper.find(Checkbox).first().find('input').simulate('change');
+    expect(wrapper.state().chosenCategories.length).to.eql(0);
+
+    wrapper.find(Checkbox).first().find('input').simulate('change');
+    wrapper.find(Checkbox).at(1).find('input').simulate('change');
+    wrapper.find(Checkbox).last().find('input').simulate('change');
+    expect(wrapper.state().chosenCategories.length).to.eql(2);
+    expect(wrapper.state().ignoreCategories).to.eql(true);
+
+  })
 
 
 });
