@@ -4,6 +4,7 @@ import $ from 'jquery';
 import log from 'loglevel';
 import 'jquery-form/jquery.form';
 import promiseSubmit from './utils';
+import _ from 'lodash-es';
 
 const SPLIT_FORM = 'form.split-form';
 const SLIDE_DURATION = 350;
@@ -93,12 +94,17 @@ $(SPLIT_FORM).each((i, form) => {
     $currentSection.find('.has-error').removeClass('has-error');
 
     const errorsAsJson = $(html).find('.audience-picker').data('errors');
-
     const $audiencePicker = $('.audience-picker');
+    const $categoryPicker = $('.category-picker');
 
-    if (errorsAsJson.audience !== undefined) {
+    if (!_.isEmpty(errorsAsJson.audience)) {
       $audiencePicker.addClass('has-error');
       prependErrorsToElem($audiencePicker, errorsAsJson.audience, 'audience');
+    }
+    
+    if (!_.isEmpty(errorsAsJson.categories)) {
+      $categoryPicker.addClass('has-error');
+      prependErrorsToElem($categoryPicker, errorsAsJson.categories, 'category');
     }
 
     const usercodeErrors = errorsAsJson['audience.usercodes'];
