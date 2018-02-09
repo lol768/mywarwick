@@ -11,6 +11,10 @@ export class AudienceIndicator extends React.PureComponent {
   static propTypes = {
     audienceComponents: PropTypes.object,
     promiseSubmit: PropTypes.func.isRequired,
+    hint: PropTypes.shape({
+      text: PropTypes.string,
+      link: PropTypes.string,
+    }),
   };
 
   constructor(props) {
@@ -165,11 +169,10 @@ export class AudienceIndicator extends React.PureComponent {
     return (
       <div className="alert alert-info">
         <div>
-          <p>When sending alerts, please remember that alerts should be specific or personal to the
-            recipient, and something they need to be aware of or take action on immediately, and
-            concise - a sentence or two at most. <Hyperlink
-              href="https://warwick.ac.uk/mw-support/faqs/usingalerts"
-            >More info…</Hyperlink></p>
+          <p>
+            {this.props.hint.text}{this.props.hint.link ?
+            <Hyperlink href={this.props.hint.link}>&nbspMore info…</Hyperlink> : null}
+          </p>
         </div>
 
         <div className="pull-right">

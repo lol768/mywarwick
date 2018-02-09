@@ -20,12 +20,17 @@ import NewsCategoryPicker from './publish/components/NewsCategoryPicker';
 
 function setupAudienceIndicator() {
   const audienceIndicator = $('.audience-indicator');
+  const hint = audienceIndicator.data('hint');
+  const props = {
+    promiseSubmit,
+    hint,
+  };
   if (audienceIndicator.length) {
     setTimeout(() => {
       ReactDOM.render(
         <Provider store={store}>
           <AudienceIndicator
-            promiseSubmit={promiseSubmit}
+            {...props}
           />
         </Provider>,
         audienceIndicator.get(0),
