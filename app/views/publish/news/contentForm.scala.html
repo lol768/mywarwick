@@ -5,6 +5,8 @@
 @import services.dao.DepartmentInfo
 @import play.api.libs.json.{Json, JsValue}
 
+@import play.api.libs.json.JsString
+@import play.api.libs.json.JsObject
 @(
     form: Form[_],
     publisher: Publisher,
@@ -14,11 +16,18 @@
     audience: Audience,
     createOrUpdate: String,
     audienceJson: JsValue = Json.obj(),
-    categoriesJson: JsValue = Json.obj()
+    categoriesJson: JsValue = Json.obj(),
+    audienceIndicatorHint: JsValue = JsObject(Seq(
+      "text" -> JsString("When sending news, please remember that news should be specific or personal to the recipient, and something they need to be aware of or take action on immediately, and concise - a sentence or two at most."),
+      "link" -> JsString("https://warwick.ac.uk/services/its/servicessupport/web/mywarwick/faqs-staff/sending-news")
+    ))
 )(implicit fc: b3.B3FieldConstructor, messages: Messages, context: RequestContext)
 
 @context.csrfHelper.formField
-<div class="audience-indicator"></div>
+<div
+class="audience-indicator"
+data-hint="@audienceIndicatorHint"
+></div>
 
 <div class="split-form__sections">
   <section>
