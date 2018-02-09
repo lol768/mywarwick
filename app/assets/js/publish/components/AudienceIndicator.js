@@ -14,6 +14,7 @@ export class AudienceIndicator extends React.PureComponent {
     hint: PropTypes.shape({
       text: PropTypes.string.isRequired,
       link: PropTypes.string,
+      isNews: PropTypes.bool.isRequired,
     }),
   };
 
@@ -183,7 +184,7 @@ export class AudienceIndicator extends React.PureComponent {
         have been selected"
           />
         </div>
-        <div>This alert will be published to:</div>
+        <div>This { this.props.hint.isNews ? 'news' : 'alert' } will be published to:</div>
         <div className="audience-component-list">{this.readableAudienceComponents()}</div>
         <div>{fetching ?
           <i className="fa fa-spin fa-fw fa-refresh" /> : `(${baseNum} people in total)` }</div>

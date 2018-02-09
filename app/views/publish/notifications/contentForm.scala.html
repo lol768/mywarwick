@@ -7,6 +7,7 @@
 @import play.api.libs.json.{Json, JsValue}
 @import play.api.libs.json.JsString
 @import play.api.libs.json.JsObject
+@import play.api.libs.json.JsBoolean
 
 @(
     form: PublishNotificationForm,
@@ -19,7 +20,8 @@
     audienceJson: JsValue = Json.obj(),
     audienceIndicatorHint: JsValue = JsObject(Seq(
       "text" -> JsString("When sending alerts, please remember that alerts should be specific or personal to the recipient, and something they need to be aware of or take action on immediately, and concise - a sentence or two at most."),
-      "link" -> JsString("https://warwick.ac.uk/mw-support/faqs-staff/sending-alerts")
+      "link" -> JsString("https://warwick.ac.uk/mw-support/faqs-staff/sending-alerts"),
+      "isNews" -> JsBoolean(false)
     ))
 )(implicit fc: b3.B3FieldConstructor, messages: Messages, context: RequestContext)
 
