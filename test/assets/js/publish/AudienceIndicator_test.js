@@ -4,13 +4,50 @@ import * as enzyme from 'enzyme';
 
 describe('AudienceIndicator', () => {
 
-  it('handles \'everyone in department\' case', () => {
-    const props = {
+  const baseProps = {
+    hint: {
+      text: "the ultimate hint text, go figure.",
+      link: "https://warwick.ac.uk",
+    },
+  };
+
+  it('renders hint block properly', () => {
+    const render = enzyme.shallow(<AudienceIndicator {...{
+      ...baseProps,
       audienceComponents: {
         department: { name: 'School of Bodybuilding' },
         audience: {
           department: { 'Dept:All': undefined }
-        }
+        },
+      },
+    }} />);
+    expect(render.html()).to.contain('the ultimate hint text, go figure. ');
+    expect(render.html()).to.contain("\<a href=\"https://warwick.ac.uk\" target=\"_blank\"\>More info…\<\/a\>");
+  });
+
+  it('renders hint block without link properly', () => {
+    const render = enzyme.shallow(<AudienceIndicator {...{
+      hint: {
+        text: "the ultimate hint text, go figure.",
+      },
+      audienceComponents: {
+        department: { name: 'School of Bodybuilding' },
+        audience: {
+          department: { 'Dept:All': undefined }
+        },
+      },
+    }} />);
+    expect(render.html()).to.contain('the ultimate hint text, go figure.');
+  });
+
+  it('handles \'everyone in department\' case', () => {
+    const props = {
+      ...baseProps,
+      audienceComponents: {
+        department: { name: 'School of Bodybuilding' },
+        audience: {
+          department: { 'Dept:All': undefined }
+        },
       },
     };
 
@@ -22,6 +59,7 @@ describe('AudienceIndicator', () => {
 
   it('renders readable ', () => {
     const props = {
+      ...baseProps,
       audienceComponents: {
         department: { name: 'Anatomy and Physiology' },
         audience: {
@@ -98,6 +136,7 @@ describe('AudienceIndicator', () => {
 
   it('displays nothing for no audience', () => {
     const props = {
+      ...baseProps,
       audienceComponents: {
         department: undefined
       },
@@ -111,6 +150,7 @@ describe('AudienceIndicator', () => {
 
   it('handles \'everyone in university\' case', () => {
     const props = {
+      ...baseProps,
       audienceComponents: {
         audience: {
           universityWide: {
@@ -132,6 +172,7 @@ describe('AudienceIndicator', () => {
 
   it('don\'t render \'undefined\' as department name', () => {
     const props = {
+      ...baseProps,
       audienceComponents: {
         department: {},
         audience: {
@@ -153,13 +194,22 @@ describe('AudienceIndicator', () => {
 
   it('groups undergraduate subsets and combines audience count', () => {
     const props = {
+      ...baseProps,
       audienceComponents: {
         department: { name: 'Anatomy and Physiology' },
-        audience: { department: { groups: { undergraduates: { year: {
-              'Dept:UndergradStudents:First': undefined,
-              'Dept:UndergradStudents:Second': undefined,
-              'Dept:UndergradStudents:Final': undefined,
-            } } } } }
+        audience: {
+          department: {
+            groups: {
+              undergraduates: {
+                year: {
+                  'Dept:UndergradStudents:First': undefined,
+                  'Dept:UndergradStudents:Second': undefined,
+                  'Dept:UndergradStudents:Final': undefined,
+                }
+              }
+            }
+          }
+        }
       },
     };
 
