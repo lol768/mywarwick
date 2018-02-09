@@ -83,7 +83,7 @@ export class AudienceIndicator extends React.PureComponent {
     const getCount = (groups) => {
       const peopleCount = _.reduce(groups, (acc, group) => acc + (groupedAudience[group] || 0), 0);
       return (fetching ?
-        <i className="fa fa-spin fa-fw fa-refresh"/> : `${peopleCount} people`);
+        <i className="fa fa-spin fa-fw fa-refresh" /> : `${peopleCount} people`);
     };
 
     if (audienceComponents.audience) {
@@ -117,12 +117,10 @@ export class AudienceIndicator extends React.PureComponent {
               case 'staffRelationships':
                 return _.flatMap(components, rel =>
                   rel.options.map(opt =>
-                    _.map(opt, val =>
-                      (val.selected ?
-                          (
-                            <div>{`${_.startCase(val.studentRole)}s of ${rel.text}`}: {getCount([`RelationshipAudience(personalTutor,UniversityID(${rel.value}))`])}</div>) :
-                          (<div/>)
-                      ))));
+                    _.map(opt, val => (val.selected ?
+                      (<div>{`${_.startCase(val.studentRole)}s of ${rel.text}`}: {getCount([`RelationshipAudience(personalTutor,UniversityID(${rel.value}))`])}</div>) :
+                      (<div />)
+                    ))));
               case 'undergraduates':
                 if (components !== undefined) {
                   const subset = dept.name !== undefined ? dept.name : 'the University';
@@ -171,8 +169,8 @@ export class AudienceIndicator extends React.PureComponent {
       <div className="alert alert-info">
         <div>
           <p>
-            {this.props.hint.text + ' '}{this.props.hint.link ?
-            <Hyperlink href={this.props.hint.link}>More info…</Hyperlink> : null}
+            {`${this.props.hint.text} ` }{this.props.hint.link ?
+              <Hyperlink href={this.props.hint.link}>More info…</Hyperlink> : null}
           </p>
         </div>
 
@@ -188,7 +186,7 @@ export class AudienceIndicator extends React.PureComponent {
         <div>This alert will be published to:</div>
         <div className="audience-component-list">{this.readableAudienceComponents()}</div>
         <div>{fetching ?
-          <i className="fa fa-spin fa-fw fa-refresh"/> : `(${baseNum} people in total)`}</div>
+          <i className="fa fa-spin fa-fw fa-refresh" /> : `(${baseNum} people in total)` }</div>
       </div>
     );
   }
