@@ -101,7 +101,6 @@ $(SPLIT_FORM).each((i, form) => {
       $audiencePicker.addClass('has-error');
       prependErrorsToElem($audiencePicker, errorsAsJson.audience, 'audience');
     }
-    
     if (!_.isEmpty(errorsAsJson.categories)) {
       $categoryPicker.addClass('has-error');
       prependErrorsToElem($categoryPicker, errorsAsJson.categories, 'category');
