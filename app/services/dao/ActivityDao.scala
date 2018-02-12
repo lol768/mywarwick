@@ -17,11 +17,11 @@ import warwick.sso.Usercode
 
 @ImplementedBy(classOf[ActivityDaoImpl])
 trait ActivityDao {
-  def getPastActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender]
+  def getPastActivitiesByPublisherId(publisherId: String, limit: Int, includeApiUser: Int)(implicit c: Connection): Seq[ActivityRender]
 
-  def getSendingActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender]
+  def getSendingActivitiesByPublisherId(publisherId: String, limit: Int, includeApiUser: Int)(implicit c: Connection): Seq[ActivityRender]
 
-  def getFutureActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender]
+  def getFutureActivitiesByPublisherId(publisherId: String, limit: Int, includeApiUser: Int)(implicit c: Connection): Seq[ActivityRender]
 
   def getPushNotificationsSinceDate(usercode: String, sinceDate: DateTime)(implicit c: Connection): Seq[Activity]
 
@@ -133,7 +133,7 @@ class ActivityDaoImpl @Inject()(
         .as(activityParser.*)
     }.toSeq
 
-  override def getPastActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
+  override def getPastActivitiesByPublisherId(publisherId: String, limit: Int, includeApiUser: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
     SQL(
       s"""
       $selectActivityRender
@@ -146,17 +146,18 @@ class ActivityDaoImpl @Inject()(
           WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
             AND ACTIVITY.PUBLISHED_AT <= {now}
             AND ACTIVITY.SENT_COUNT = ACTIVITY.AUDIENCE_SIZE
+            AND ACTIVITY.API = {includeApiUser}
           ORDER BY ACTIVITY.PUBLISHED_AT DESC"""
         )
       }
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC
       """)
-      .on('publisherId -> publisherId, 'now -> DateTime.now)
+      .on('publisherId -> publisherId, 'now -> DateTime.now, 'includeApiUser -> includeApiUser)
       .as(activityRenderParser.*)
   }
 
-  override def getSendingActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
+  override def getSendingActivitiesByPublisherId(publisherId: String, limit: Int, includeApiUser: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
     SQL(
       s"""
       $selectActivityRender
@@ -169,17 +170,18 @@ class ActivityDaoImpl @Inject()(
           WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
             AND ACTIVITY.PUBLISHED_AT <= {now}
             AND ACTIVITY.SENT_COUNT < ACTIVITY.AUDIENCE_SIZE
+            AND ACTIVITY.API = {includeApiUser}
           ORDER BY ACTIVITY.PUBLISHED_AT DESC"""
         )
       }
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC
       """)
-      .on('publisherId -> publisherId, 'now -> DateTime.now)
+      .on('publisherId -> publisherId, 'now -> DateTime.now, 'includeApiUser -> includeApiUser)
       .as(activityRenderParser.*)
   }
 
-  override def getFutureActivitiesByPublisherId(publisherId: String, limit: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
+  override def getFutureActivitiesByPublisherId(publisherId: String, limit: Int, includeApiUser: Int)(implicit c: Connection): Seq[ActivityRender] = combineActivities {
     SQL(
       s"""
       $selectActivityRender
@@ -191,13 +193,14 @@ class ActivityDaoImpl @Inject()(
             ID FROM ACTIVITY
           WHERE ACTIVITY.PUBLISHER_ID = {publisherId}
             AND ACTIVITY.PUBLISHED_AT > {now}
+            AND ACTIVITY.API = {includeApiUser}
           ORDER BY ACTIVITY.PUBLISHED_AT DESC"""
         )
       }
       )
       ORDER BY ACTIVITY.PUBLISHED_AT DESC
       """)
-      .on('publisherId -> publisherId, 'now -> DateTime.now)
+      .on('publisherId -> publisherId, 'now -> DateTime.now, 'includeApiUser -> includeApiUser)
       .as(activityRenderParser.*)
   }
 
