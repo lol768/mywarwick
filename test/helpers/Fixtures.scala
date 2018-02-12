@@ -2,8 +2,9 @@ package helpers
 
 import anorm._
 import models.news.{NewsItemRender, NewsItemSave}
-import models.{Activity, ActivitySave}
+import models.{Activity, ActivityRenderWithAudience, ActivitySave}
 import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import warwick.sso._
 
 /**
@@ -56,6 +57,8 @@ object Fixtures {
 
   object activity {
 
+    val aTime = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss").parseDateTime("12/02/2018 11:11:11")
+
     def fromSave(id: String, activity: ActivitySave) = Activity(
       id = id,
       providerId = activity.providerId,
@@ -64,11 +67,11 @@ object Fixtures {
       text = activity.text,
       url = activity.url,
       replacedBy = None,
-      publishedAt = activity.publishedAt.getOrElse(DateTime.now),
-      createdAt = DateTime.now,
+      publishedAt = activity.publishedAt.getOrElse(aTime),
+      createdAt = aTime,
       createdBy = activity.changedBy,
       shouldNotify = activity.shouldNotify,
-      api = false
+      api = activity.api
     )
 
   }
