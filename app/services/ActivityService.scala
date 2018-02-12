@@ -37,11 +37,11 @@ trait ActivityService {
 
   def setLastReadDate(user: User, dateTime: DateTime): Boolean
 
-  def getFutureActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int = 50): Seq[ActivityRenderWithAudience]
+  def getFutureActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int = 50, includeApiUser:Boolean = true): Seq[ActivityRenderWithAudience]
 
-  def getSendingActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int = 50): Seq[ActivityRenderWithAudience]
+  def getSendingActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int = 50, includeApiUser:Boolean = true): Seq[ActivityRenderWithAudience]
 
-  def getPastActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int = 50): Seq[ActivityRenderWithAudience]
+  def getPastActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int = 50, includeApiUser:Boolean = true): Seq[ActivityRenderWithAudience]
 
   def getActivityIcon(providerId: String): Option[ActivityIcon]
 
@@ -218,14 +218,14 @@ class ActivityServiceImpl @Inject()(
   override def setLastReadDate(user: User, dateTime: DateTime): Boolean =
     db.withConnection(implicit c => dao.saveLastReadDate(user.usercode.string, dateTime))
 
-  override def getFutureActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int): Seq[ActivityRenderWithAudience] =
-    mixinAudience(db.withConnection(implicit c => dao.getFutureActivitiesByPublisherId(publisherId, limit)))
+  override def getFutureActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int, includeApiUser: Boolean): Seq[ActivityRenderWithAudience] =
+    mixinAudience(db.withConnection(implicit c => dao.getFutureActivitiesByPublisherId(publisherId, limit, includeApiUser.compare(false))))
 
-  override def getSendingActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int): Seq[ActivityRenderWithAudience] =
-    mixinAudience(db.withConnection(implicit c => dao.getSendingActivitiesByPublisherId(publisherId, limit)))
+  override def getSendingActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int, includeApiUser:Boolean): Seq[ActivityRenderWithAudience] =
+    mixinAudience(db.withConnection(implicit c => dao.getSendingActivitiesByPublisherId(publisherId, limit, includeApiUser.compare(false))))
 
-  override def getPastActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int): Seq[ActivityRenderWithAudience] =
-    mixinAudience(db.withConnection(implicit c => dao.getPastActivitiesByPublisherId(publisherId, limit)))
+  override def getPastActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int, includeApiUser:Boolean): Seq[ActivityRenderWithAudience] =
+    mixinAudience(db.withConnection(implicit c => dao.getPastActivitiesByPublisherId(publisherId, limit, includeApiUser.compare(false))))
 
   override def getActivityWithAudience(id: String): Option[ActivityRenderWithAudience] =
     mixinAudience(db.withConnection(implicit c => dao.getActivityRenderById(id).toSeq)).headOption

@@ -46,10 +46,9 @@ class NotificationsController @Inject()(
   )(PublishNotificationData.apply)(PublishNotificationData.unapply))
 
   def list(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNotifications) { implicit request => {
-    import ControllerHelper.nonApiActivities
-    val futureNotifications = nonApiActivities(activityService.getFutureActivitiesWithAudienceByPublisherId(publisherId))
-    val sendingNotifications = nonApiActivities(activityService.getSendingActivitiesWithAudienceByPublisherId(publisherId))
-    val pastNotifications = nonApiActivities(activityService.getPastActivitiesWithAudienceByPublisherId(publisherId))
+    val futureNotifications = activityService.getFutureActivitiesWithAudienceByPublisherId(publisherId, includeApiUser = false)
+    val sendingNotifications = activityService.getSendingActivitiesWithAudienceByPublisherId(publisherId, includeApiUser = false)
+    val pastNotifications = activityService.getPastActivitiesWithAudienceByPublisherId(publisherId, includeApiUser = false)
     Ok(views.list(request.publisher, futureNotifications, sendingNotifications, pastNotifications, request.userRole, allDepartments))
   }}
 
