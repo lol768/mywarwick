@@ -5,6 +5,9 @@
 @import models.publishing.Publisher
 @import services.dao.DepartmentInfo
 @import play.api.libs.json.{Json, JsValue}
+@import play.api.libs.json.JsString
+@import play.api.libs.json.JsObject
+@import play.api.libs.json.JsBoolean
 
 @(
     form: PublishNotificationForm,
@@ -14,7 +17,12 @@
     permissionScope: PermissionScope,
     audience: Audience,
     createOrUpdate: String,
-    audienceJson: JsValue = Json.obj()
+    audienceJson: JsValue = Json.obj(),
+    audienceIndicatorHint: JsValue = JsObject(Seq(
+      "text" -> JsString("When sending alerts, please remember that alerts should be specific or personal to the recipient, and something they need to be aware of or take action on immediately, and concise - a sentence or two at most."),
+      "link" -> JsString("https://warwick.ac.uk/mw-support/faqs-staff/sending-alerts"),
+      "isNews" -> JsBoolean(false)
+    ))
 )(implicit fc: b3.B3FieldConstructor, messages: Messages, context: RequestContext)
 
 @context.csrfHelper.formField
@@ -22,7 +30,10 @@
   <div class="alert alert-danger">@error.message</div>
 }
 
-<div class="audience-indicator"></div>
+<div
+class="audience-indicator"
+data-hint="@audienceIndicatorHint"
+></div>
 
 <div class="split-form__sections">
   <section>

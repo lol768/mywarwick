@@ -1,25 +1,14 @@
+@import play.api.libs.json.{Json, JsValue}
+
 @(
     form: Form[_],
-    fieldName: String,
     categories: Seq[NewsCategory],
-    itemName: String
+    categoriesJson: JsValue = Json.obj()
 )(implicit fc: b3.B3FieldConstructor, messages: Messages)
-@defining(form(fieldName)) { field =>
 
-  @b3.multifieldFormGroup(
-    Seq(field),
-    Seq('_label -> s"What should this $itemName be tagged with?", 'id -> "item_category"),
-    Nil) { info =>
-    @for((msg, i) <- info.errorsAndInfos.zipWithIndex) { <span class="help-block" id="item_category_error_@i">@msg</span> }
-
-    @for(category <- categories) {
-      @tags.seqCheckbox(form, "categories", '_text -> category.name, 'value -> category.id)
-    }
-  }
-
-  @b3.checkbox(form("item.ignoreCategories"),
-    '_text -> "Show to everyone in the audience, regardless of their category preferences",
-    '_help -> "Use sparingly!"
-  )
-
-}
+<div
+data-form-data='@categoriesJson'
+data-categories='@Json.obj(categories.map(cat => cat.id -> Json.toJsFieldJsValueWrapper(cat.name)): _*)'
+class="category-picker form-group col-md-12"
+id="category-picker">
+</div>

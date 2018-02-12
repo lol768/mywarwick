@@ -11,8 +11,8 @@ import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.{ActionFilter, Result}
+import play.api.libs.json._
+import play.api.mvc.{Action, ActionFilter, AnyContent, Result}
 import services._
 import services.dao.DepartmentInfoDao
 import system._
@@ -20,6 +20,7 @@ import uk.ac.warwick.util.web.Uri
 import views.html.errors
 import warwick.sso.Usercode
 
+import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 case class PublishNewsItemData(item: NewsItemData, categoryIds: Seq[String], audience: AudienceData) extends PublishableWithAudience
@@ -96,32 +97,20 @@ class NewsController @Inject()(
     Ok(views.html.publish.news.list(request.publisher, newsPending, newsPublished, request.userRole, allDepartments))
   }
 
-  def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNews).async { implicit request =>
-    val formData = newsAudienceForm.bindFromRequest.value
-    sharedAudienceInfo(
-      audienceService,
-      groupedUsercodes => {
-        val allAudienceUsercodes = groupedUsercodes.flatMap { case (_, usercodes) => usercodes }.toSet
-        formData
-          .filterNot(_.ignoreCategories)
-          .map { data =>
-            val initialisedUsers = userPreferencesService.countInitialisedUsers(allAudienceUsercodes)
-            val newsRecipients = userNewsCategoryService.getRecipientsOfNewsInCategories(data.categoryIds).intersect(allAudienceUsercodes).size
-
-            Json.obj(
-              "baseAudience" -> allAudienceUsercodes.size,
-              "categorySubset" -> (allAudienceUsercodes.size - initialisedUsers + newsRecipients),
-              "groupedAudience" -> Json.toJson(groupedUsercodes.map {
-                case (component, usercodes) => (component.entryName, usercodes.size)
-              })
-            )
-          }
-          .getOrElse(
-            Json.obj(
-              "baseAudience" -> allAudienceUsercodes.size
-            )
-          )
-      })
+  def audienceInfo(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNews).async {
+    implicit request => {
+      sharedAudienceInfo(
+        SharedAudienceInfoForNews(
+          audienceService = audienceService,
+          processGroupedUsercodes = AudienceInfoHelper.postProcessGroupedResolvedAudience,
+          newsCategories = newsAudienceForm.bindFromRequest.value.flatMap { data =>
+            Some(data.categoryIds.map(newsCategoryService.getNewsCategoryForCatId))
+          }.getOrElse(Iterable.empty[NewsCategory]).toSet,
+          userNewsCategoryService = Some(userNewsCategoryService),
+          ignoreNewsCategories = request.body.asFormUrlEncoded.get.get("item.ignoreCategories").map(_.mkString).exists(_.toBoolean)
+        )
+      )
+    }
   }
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNews) { implicit request =>
@@ -155,19 +144,34 @@ class NewsController @Inject()(
 
   def updateForm(publisherId: String, id: String) = EditAction(id, publisherId, EditNews).async { implicit request =>
     withNewsItem(id, publisherId, item => {
-      val categoryIds = newsCategoryService.getNewsCategories(id).map(_.id)
+      val categoryIds: Seq[String] = newsCategoryService.getNewsCategories(id).map(_.id)
       val audience = news.getAudience(id).get
       val unboundAudience = audienceBinder.unbindAudience(audience)
       val formWithData = publishNewsForm.fill(PublishNewsItemData(item.toData, categoryIds, unboundAudience))
-
-      Future.successful(Ok(renderUpdateForm(publisherId, id, formWithData, audience)))
+      val audienceJson = audienceService.audienceToJson(audience)
+      val ignoreCategories = news.getNewsItem(id).exists(_.ignoreCategories)
+      val categoryJson = JsObject(Map("chosenCategories" -> Json.toJson(categoryIds), "ignoreCategories" -> JsBoolean(ignoreCategories)))
+      Future.successful(Ok(renderUpdateForm(
+        publisherId,
+        id,
+        formWithData,
+        audience,
+        audienceJson,
+        categoryJson
+      )))
     })
   }
 
   def update(publisherId: String, id: String, submitted: Boolean) = EditAction(id, publisherId, EditNews).async { implicit request =>
     withNewsItem(id, publisherId, _ => {
       bindFormWithAudience[PublishNewsItemData](publishNewsForm, submitted, restrictedRecipients = false,
-        formWithErrors => Ok(renderUpdateForm(publisherId, id, formWithErrors, Audience())),
+        formWithErrors => Ok(renderUpdateForm(
+          publisherId,
+          id,
+          formWithErrors,
+          Audience(),
+          audienceService.audienceToJson(news.getAudience(id).get)
+        )),
         (data, audience) => {
           val newsItem = data.item.toSave(request.context.user.get.usercode, publisherId)
 
@@ -217,7 +221,14 @@ class NewsController @Inject()(
       .getOrElse(Future.successful(NotFound(views.html.errors.notFound())))
   }
 
-  private def renderUpdateForm(publisherId: String, id: String, form: Form[PublishNewsItemData], audience: Audience)(implicit request: PublisherRequest[_]) = {
+  private def renderUpdateForm(
+    publisherId: String,
+    id: String,
+    form: Form[PublishNewsItemData],
+    audience: Audience,
+    audienceJson: JsValue,
+    categoriesJson: JsValue = Json.obj()
+  )(implicit request: PublisherRequest[_]) = {
     views.html.publish.news.updateForm(
       publisher = request.publisher,
       id = id,
@@ -225,7 +236,9 @@ class NewsController @Inject()(
       categories = categoryOptions,
       permissionScope = permissionScope,
       departmentOptions = departmentOptions,
-      audience = audience
+      audience = audience,
+      audienceJson = audienceJson,
+      categoriesJson = categoriesJson
     )
   }
 

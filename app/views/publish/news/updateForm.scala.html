@@ -4,6 +4,7 @@
 @import models.publishing.PermissionScope
 @import models.publishing.Publisher
 @import services.dao.DepartmentInfo
+@import play.api.libs.json.{Json, JsValue}
 
 @(
     publisher: Publisher,
@@ -12,7 +13,9 @@
     departmentOptions: Seq[DepartmentInfo],
     categories: Seq[NewsCategory],
     permissionScope: PermissionScope,
-    audience: Audience
+    audience: Audience,
+    audienceJson: JsValue = Json.obj(),
+    categoriesJson: JsValue = Json.obj()
 )(implicit messages: Messages, context: RequestContext)
 
 @implicitFieldConstructor = @{
@@ -21,6 +24,6 @@
 
 @common.admin("Update news") {
   @b3.form(action = controllers.publish.routes.NewsController.update(publisher.id, id, submitted = true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.publish.routes.NewsController.audienceInfo(publisher.id)) {
-    @views.html.publish.news.contentForm(form, publisher, departmentOptions, categories, permissionScope, audience, "Update")
+    @views.html.publish.news.contentForm(form, publisher, departmentOptions, categories, permissionScope, audience, "Update", audienceJson,categoriesJson)
   }
 }

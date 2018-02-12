@@ -18,6 +18,8 @@ trait NewsCategoryDao {
 
   def deleteNewsCategories(newsItemId: String)(implicit c: Connection): Unit
 
+  def getCategory(catId: String)(implicit c: Connection): NewsCategory
+
 }
 
 @Singleton
@@ -41,4 +43,6 @@ class NewsCategoryDaoImpl extends NewsCategoryDao {
   override def deleteNewsCategories(newsItemId: String)(implicit c: Connection) =
     SQL"DELETE FROM NEWS_ITEM_CATEGORY WHERE NEWS_ITEM_ID=$newsItemId".execute()
 
+  override def getCategory(catId: String)(implicit c: Connection): NewsCategory =
+    SQL"SELECT * FROM NEWS_CATEGORY WHERE ID = $catId".as(parser.single)
 }
