@@ -2,7 +2,7 @@ package helpers
 
 import anorm._
 import models.news.{NewsItemRender, NewsItemSave}
-import models.{Activity, ActivityRenderWithAudience, ActivitySave}
+import models._
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import warwick.sso._
@@ -53,6 +53,29 @@ object Fixtures {
         api = true
       )
 
+  }
+
+  object activityRenderWithAudience {
+
+    val fakeActivityProvider: ActivityProvider = ActivityProvider(
+      "id",
+      sendEmail = true,
+      Some("cool")
+    )
+
+    val fakeActivityType = ActivityType("type", Some("cool type"))
+
+    def fromActivitySave(save: ActivitySave) = ActivityRenderWithAudience(
+      Fixtures.activity.fromSave("1", save),
+      Option.empty,
+      Seq(),
+      fakeActivityProvider,
+      fakeActivityType,
+      Fixtures.user.makeFoundUser(),
+      AudienceSize.Public,
+      Seq(),
+      1
+    )
   }
 
   object activity {
