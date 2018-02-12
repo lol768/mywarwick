@@ -2,7 +2,7 @@ package controllers.publish
 
 import controllers.admin.addFormErrors
 import models.publishing._
-import models.{API, ActivityRenderWithAudience, Audience, NewsCategory}
+import models.{API, Audience, NewsCategory}
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import play.api.libs.json.{JsObject, Json}

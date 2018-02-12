@@ -6,7 +6,7 @@ import controllers.MyController
 import models.news.NotificationData
 import models.publishing.Ability._
 import models.publishing.{Ability, Publisher}
-import models.{ActivityRenderWithAudience, Audience, DateFormats}
+import models.{Audience, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
