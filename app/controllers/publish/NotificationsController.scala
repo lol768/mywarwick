@@ -6,12 +6,12 @@ import controllers.MyController
 import models.news.NotificationData
 import models.publishing.Ability._
 import models.publishing.{Ability, Publisher}
-import models.{Audience, DateFormats}
+import models.{ActivityRenderWithAudience, Audience, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.{ActionFilter, Result}
+import play.api.mvc.{Action, ActionFilter, AnyContent, Result}
 import services._
 import services.elasticsearch.ActivityESService
 import system.{ThreadPools, Validation}
@@ -44,13 +44,13 @@ class NotificationsController @Inject()(
     "audience" -> audienceMapping.verifying("Alerts cannot be public", !_.audience.contains("Public"))
   )(PublishNotificationData.apply)(PublishNotificationData.unapply))
 
-  def list(publisherId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
-    val futureNotifications = activityService.getFutureActivitiesWithAudienceByPublisherId(publisherId)
-    val sendingNotifications = activityService.getSendingActivitiesWithAudienceByPublisherId(publisherId)
-    val pastNotifications = activityService.getPastActivitiesWithAudienceByPublisherId(publisherId)
-
+  def list(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNotifications) { implicit request => {
+    import ControllerHelper.nonApiActivities
+    val futureNotifications = nonApiActivities(activityService.getFutureActivitiesWithAudienceByPublisherId(publisherId))
+    val sendingNotifications = nonApiActivities(activityService.getSendingActivitiesWithAudienceByPublisherId(publisherId))
+    val pastNotifications = nonApiActivities(activityService.getPastActivitiesWithAudienceByPublisherId(publisherId))
     Ok(views.list(request.publisher, futureNotifications, sendingNotifications, pastNotifications, request.userRole, allDepartments))
-  }
+  }}
 
   def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
     sharedAudienceInfo(audienceService, groupedUsercodes =>
