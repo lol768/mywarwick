@@ -270,11 +270,16 @@ export function launch(userData) {
   window.Store = store;
 
   // Actually render the app
+  const appContainer = $('#app-container');
+  const appContainerProps = {
+    history,
+    features: appContainer.data('features'),
+  };
   ReactDOM.render(
     <Provider store={store}>
-      <AppRoot history={history} />
+      <AppRoot { ...appContainerProps } />
     </Provider>,
-    document.getElementById('app-container'),
+    appContainer.get(0),
   );
 
   if (window.myWarwickErrorHandler) {

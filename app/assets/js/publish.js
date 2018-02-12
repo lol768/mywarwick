@@ -16,15 +16,22 @@ import store from './publish/publishStore';
 import promiseSubmit from './publish/utils';
 import { Provider } from 'react-redux';
 import log from 'loglevel';
+import NewsCategoryPicker from './publish/components/NewsCategoryPicker';
 
 function setupAudienceIndicator() {
   const audienceIndicator = $('.audience-indicator');
-
+  const hint = audienceIndicator.data('hint');
+  const props = {
+    promiseSubmit,
+    hint,
+  };
   if (audienceIndicator.length) {
     setTimeout(() => {
       ReactDOM.render(
-        <Provider store={store} >
-          <AudienceIndicator promiseSubmit={promiseSubmit} />
+        <Provider store={store}>
+          <AudienceIndicator
+            {...props}
+          />
         </Provider>,
         audienceIndicator.get(0),
       );
@@ -49,6 +56,23 @@ function setupAudiencePicker() {
         <AudiencePicker {...props} />
       </Provider>,
       audiencePicker.get(0),
+    );
+  }
+}
+
+function setupCategoryPicker() {
+  const categoryPicker = $('.category-picker');
+  if (categoryPicker.length) {
+    const props = {
+      newsCategories: categoryPicker.data('categories') || {},
+      formData: categoryPicker.data('form-data') || {},
+      store,
+    };
+    ReactDOM.render(
+      <Provider store={store}>
+        <NewsCategoryPicker {...props} />
+      </Provider>,
+      categoryPicker.get(0),
     );
   }
 }
@@ -215,6 +239,7 @@ $(() => {
   setupAudiencePicker();
   setupPublisherDepartmentsForm();
   setupPublisherPermissionsForm();
+  setupCategoryPicker();
   initSentDetails();
 
   $('[data-background-color]').each(function applyBackgroundColour() {

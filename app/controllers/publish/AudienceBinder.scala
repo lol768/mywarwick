@@ -10,7 +10,7 @@ import play.api.data.FormError
 import services.{AudienceService, PublisherService}
 import services.dao.DepartmentInfoDao
 import uk.ac.warwick.util.core.StringUtils
-import warwick.sso.{GroupName, Usercode}
+import warwick.sso.{GroupName}
 
 import scala.concurrent.Future
 
@@ -33,7 +33,6 @@ class AudienceBinder @Inject()(
   def bindAudience(data: AudienceData, restrictedRecipients: Boolean = false)(implicit publisherRequest: PublisherRequest[_]): Future[Either[Seq[FormError], Audience]] = {
     var errors = Seq.empty[FormError]
     val scope: PermissionScope = publisherService.getPermissionScope(publisherRequest.publisher.id)
-
     if (data.audience.contains("Public")) {
       if (restrictedRecipients) {
         Future.successful(Left(Seq(FormError("audience", "error.audience.tooMany.public"))))
@@ -41,9 +40,7 @@ class AudienceBinder @Inject()(
         Future.successful(Right(Audience.Public))
       }
     } else {
-
       val groupedComponents = data.audience.groupBy(_.startsWith("Dept:"))
-
       // Bits of audience not related to a department.
       val nonDeptComponents = groupedComponents.getOrElse(false, Nil).flatMap {
         case Audience.ComponentParameter(component) => Some(component)
@@ -70,7 +67,7 @@ class AudienceBinder @Inject()(
         case component: Audience.Component => Some(component)
       }
 
-      val deptComponentValues = groupedComponents.getOrElse(true, Nil)
+      val deptComponentValues: Seq[DepartmentSubset] = groupedComponents.getOrElse(true, Nil)
         .map(_.replaceFirst("^Dept:", ""))
         .flatMap {
           case Audience.DepartmentSubset(subset) => Some(subset)

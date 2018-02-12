@@ -11,12 +11,13 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.{ActionFilter, Result}
+import play.api.mvc.{Action, ActionFilter, AnyContent, Result}
 import services._
 import services.elasticsearch.ActivityESService
 import system.{ThreadPools, Validation}
 import views.html.errors
 import views.html.publish.{notifications => views}
+import warwick.sso.Usercode
 
 import scala.concurrent.Future
 
@@ -52,17 +53,8 @@ class NotificationsController @Inject()(
     Ok(views.list(request.publisher, futureNotifications, sendingNotifications, pastNotifications, request.userRole, allDepartments))
   }
 
-  def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
-    sharedAudienceInfo(audienceService, groupedUsercodes =>
-      Json.obj(
-        "baseAudience" -> groupedUsercodes.flatMap {
-          case (_, usercodes) => usercodes
-        }.size,
-        "groupedAudience" -> Json.toJson(groupedUsercodes.map {
-          case (component, usercodes) => (component.entryName, usercodes.size)
-        })
-      )
-    )
+  def audienceInfo(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
+    sharedAudienceInfo(SharedAudienceInfoForNotifications(audienceService, AudienceInfoHelper.postProcessGroupedResolvedAudience))
   }
 
   def status(publisherId: String, activityId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request => {
