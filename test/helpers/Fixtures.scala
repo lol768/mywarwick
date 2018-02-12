@@ -28,6 +28,19 @@ object Fixtures {
         shouldNotify = true
       )
 
+    lazy val submissionDueFromApi =
+      ActivitySave(
+        changedBy = Usercode("custard"),
+        publisherId = "elab",
+        providerId = "tabula",
+        `type` = "due",
+        title = "Coursework due",
+        text = Some("Your coursework is due in 7 days"),
+        url = Some("http://tabula.warwick.ac.uk"),
+        shouldNotify = true,
+        api = true
+      )
+
     lazy val submissionDueWithoutUrl =
       ActivitySave(
         changedBy = Usercode("custard"),
@@ -53,29 +66,6 @@ object Fixtures {
         api = true
       )
 
-  }
-
-  object activityRenderWithAudience {
-
-    val fakeActivityProvider: ActivityProvider = ActivityProvider(
-      "id",
-      sendEmail = true,
-      Some("cool")
-    )
-
-    val fakeActivityType = ActivityType("type", Some("cool type"))
-
-    def fromActivitySave(save: ActivitySave) = ActivityRenderWithAudience(
-      Fixtures.activity.fromSave("1", save),
-      Option.empty,
-      Seq(),
-      fakeActivityProvider,
-      fakeActivityType,
-      Fixtures.user.makeFoundUser(),
-      AudienceSize.Public,
-      Seq(),
-      1
-    )
   }
 
   object activity {

@@ -219,13 +219,13 @@ class ActivityServiceImpl @Inject()(
     db.withConnection(implicit c => dao.saveLastReadDate(user.usercode.string, dateTime))
 
   override def getFutureActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int, includeApiUser: Boolean): Seq[ActivityRenderWithAudience] =
-    mixinAudience(db.withConnection(implicit c => dao.getFutureActivitiesByPublisherId(publisherId, limit, includeApiUser.compare(false))))
+    mixinAudience(db.withConnection(implicit c => dao.getFutureActivitiesByPublisherId(publisherId, limit, includeApiUser)))
 
   override def getSendingActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int, includeApiUser:Boolean): Seq[ActivityRenderWithAudience] =
-    mixinAudience(db.withConnection(implicit c => dao.getSendingActivitiesByPublisherId(publisherId, limit, includeApiUser.compare(false))))
+    mixinAudience(db.withConnection(implicit c => dao.getSendingActivitiesByPublisherId(publisherId, limit, includeApiUser)))
 
   override def getPastActivitiesWithAudienceByPublisherId(publisherId: String, limit: Int, includeApiUser:Boolean): Seq[ActivityRenderWithAudience] =
-    mixinAudience(db.withConnection(implicit c => dao.getPastActivitiesByPublisherId(publisherId, limit, includeApiUser.compare(false))))
+    mixinAudience(db.withConnection(implicit c => dao.getPastActivitiesByPublisherId(publisherId, limit, includeApiUser)))
 
   override def getActivityWithAudience(id: String): Option[ActivityRenderWithAudience] =
     mixinAudience(db.withConnection(implicit c => dao.getActivityRenderById(id).toSeq)).headOption
