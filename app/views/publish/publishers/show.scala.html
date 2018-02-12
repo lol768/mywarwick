@@ -7,7 +7,7 @@
   <p>From here you may manage publishing items to the department(s) you have access to.</p>
 
   <ul>
-    @if(user.can(ViewNews) & context.features.news) {
+    @if(user.can(ViewNews) && context.features.news) {
       <li>
         <a href="@controllers.publish.routes.NewsController.list(publisher.id)">News</a>
         - short paragraphs with an image and a link to a longer article.
