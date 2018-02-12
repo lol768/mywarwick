@@ -186,10 +186,6 @@ trait DepartmentOptions {
 
 }
 
-object ControllerHelper {
-  def nonApiActivities(allActivities: Seq[ActivityRenderWithAudience]): Seq[ActivityRenderWithAudience] = allActivities.filterNot(_.activity.api)
-}
-
 trait CategoryOptions {
 
   val newsCategoryService: NewsCategoryService
