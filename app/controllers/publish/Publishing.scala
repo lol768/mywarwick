@@ -2,7 +2,7 @@ package controllers.publish
 
 import controllers.admin.addFormErrors
 import models.publishing._
-import models.{API, Audience}
+import models.{API, ActivityRenderWithAudience, Audience}
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import play.api.libs.json.{JsObject, Json}
@@ -153,6 +153,10 @@ trait DepartmentOptions {
         allPublishableDepartments.filter(dept => deptCodes.contains(dept.code))
     }
 
+}
+
+object ControllerHelper {
+  def nonApiActivities(allActivities: Seq[ActivityRenderWithAudience]): Seq[ActivityRenderWithAudience] = allActivities.filterNot(_.activity.api)
 }
 
 trait CategoryOptions {
