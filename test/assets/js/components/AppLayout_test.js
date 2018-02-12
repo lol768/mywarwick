@@ -54,9 +54,13 @@ describe('AppLayout', () => {
       />);
 
     // comparing JSX with JSX is a good idea
-    result.should.not.include(
-        <TabBarItem
-          title="News" icon="newspaper-o" selectedIcon="newspaper-o" path="/news"/>
+    result.should.include(
+      <TabBar onSelectItem={function noRefCheck() {}} selectedItem="/" >
+        <TabBarItem icon="user-o" path="/" selectedIcon="user" title="Me" />
+        <TabBarItem badge="7" icon="bell-o" isDisabled={true} path="/alerts" selectedIcon="bell" title="Alerts" />
+        <TabBarItem icon="tachometer" isDisabled={true} path="/activity" selectedIcon="tachometer" title="Activity" />
+        <TabBarItem icon="search" path="/search" selectedIcon="search" title="Search" />
+      </TabBar>
     );
   })
 
