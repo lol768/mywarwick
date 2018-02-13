@@ -68,7 +68,9 @@ object Audience {
 
   case object All extends DepartmentSubset
 
-  case object Staff extends DepartmentSubset // No longer available in Audience Picker UI
+  case object Staff extends DepartmentSubset {
+    override val displayName: String = "Staff"
+  }
 
   case object TeachingStaff extends DepartmentSubset {
     override val displayName = "Teaching Staff"

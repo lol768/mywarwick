@@ -38,6 +38,7 @@ case class LookupRelationshipType(
 trait AudienceLookupDao {
 
   def resolveDepartment(departmentCode: String): Future[Seq[Usercode]]
+  def resolveStaff(departmentCode: String): Future[Seq[Usercode]]
   def resolveTeachingStaff(departmentCode: String): Future[Seq[Usercode]]
   def resolveAdminStaff(departmentCode: String): Future[Seq[Usercode]]
   def resolveUndergraduatesInDept(departmentCode: String, level: UndergradStudents): Future[Seq[Usercode]]
@@ -86,6 +87,10 @@ class TabulaAudienceLookupDao @Inject()(
 
   override def resolveDepartment(departmentCode: String): Future[Seq[Usercode]] = {
     getAuthenticatedAsJson(tabulaDepartmentAllUrl(departmentCode)).map(parseUsercodeSeq)
+  }
+
+  override def resolveStaff(departmentCode: String): Future[Seq[Usercode]] = {
+    getAuthenticatedAsJson(tabulaDepartmentStaffUrl(departmentCode)).map(parseUsercodeSeq)
   }
 
   override def resolveTeachingStaff(departmentCode: String): Future[Seq[Usercode]] = {
@@ -211,6 +216,14 @@ trait TabulaAudienceLookupProperties {
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.allSuffix in application.conf"))
 
   protected def tabulaDepartmentAllUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/${departmentCode.toLowerCase}$tabulaDepartmentAllSuffix"
+
+
+  private val tabulaDepartmentStaffSuffix = configuration.getOptional[String]("mywarwick.tabula.department.staff")
+    .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.staff in application.conf"))
+
+  protected def tabulaDepartmentStaffUrl(departmentCode: String) = s"$tabulaDepartmentBaseUrl/${departmentCode.toLowerCase}$tabulaDepartmentStaffSuffix"
+
+
 
   private val tabulaDepartmentTeachingStaffSuffix = configuration.getOptional[String]("mywarwick.tabula.department.teachingStaffSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.department.teachingStaffSuffix in application.conf"))
