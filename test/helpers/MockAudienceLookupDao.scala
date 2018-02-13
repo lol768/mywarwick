@@ -8,8 +8,6 @@ import scala.concurrent.Future
 
 class MockAudienceLookupDao extends AudienceLookupDao {
   override def resolveDepartment(departmentCode: String): Future[Seq[Usercode]] = Future.successful(Nil)
-  override def resolveTeachingStaff(departmentCode: String): Future[Seq[Usercode]] = Future.successful(Nil)
-  override def resolveAdminStaff(departmentCode: String): Future[Seq[Usercode]] = Future.successful(Nil)
   override def resolveUndergraduatesInDept(departmentCode: String, level: UndergradStudents): Future[Seq[Usercode]] = Future.successful(Nil)
   override def resolveUndergraduatesUniWide(level: UndergradStudents): Future[Seq[Usercode]] = Future.successful(Nil)
   override def resolveTaughtPostgraduates(departmentCode: String): Future[Seq[Usercode]] = Future.successful(Nil)

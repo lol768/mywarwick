@@ -34,11 +34,10 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       when(audienceLookupDao.resolveUndergraduatesUniWide(any())).thenReturn(Future.successful(Seq()))
       when(audienceLookupDao.resolveTaughtPostgraduates(any())).thenReturn(Future.successful(Seq()))
       when(audienceLookupDao.resolveResearchPostgraduates(any())).thenReturn(Future.successful(Seq()))
-      when(audienceLookupDao.resolveTeachingStaff(any())).thenReturn(Future.successful(Seq()))
-      when(audienceLookupDao.resolveAdminStaff(any())).thenReturn(Future.successful(Seq()))
       when(audienceLookupDao.resolveModule(any())).thenReturn(Future.successful(Seq()))
       when(audienceLookupDao.resolveSeminarGroup(any())).thenReturn(Future.successful(Seq()))
       when(audienceLookupDao.resolveRelationship(any(), any())).thenReturn(Future.successful(Seq()))
+      when(audienceLookupDao.resolveStaff(any())).thenReturn(Future.successful(Seq()))
     }
 
     def newGroup(name: String, users: Seq[String], `type`:String="Arbitrary") =
@@ -114,6 +113,14 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       verifyZeroInteractions(audienceLookupDao)
     }
 
+    "search for all staff in WebGroups" in new Ctx {
+      webgroupsIsEmpty()
+      service.resolve(Audience(Seq(Staff))).get
+      verify(webgroups).getWebGroup(GroupName("all-staff"))
+      verifyNoMoreInteractions(webgroups)
+      verifyZeroInteractions(audienceLookupDao)
+    }
+
     "search for specific group in WebGroups" in new Ctx {
       webgroupsIsEmpty()
       service.resolve(Audience(Seq(WebGroupAudience(GroupName("in-foo"))))).get
@@ -158,24 +165,6 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       verifyZeroInteractions(webgroups)
     }
 
-    "search for all teaching staff in department" in new Ctx {
-      val deptCode = "ch"
-      when(audienceLookupDao.resolveTeachingStaff(deptCode)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
-      service.resolve(Audience(Seq(DepartmentAudience(deptCode, Seq(TeachingStaff))))).get
-      verify(audienceLookupDao, times(1)).resolveTeachingStaff(deptCode)
-      verifyNoMoreInteractions(audienceLookupDao)
-      verifyZeroInteractions(webgroups)
-    }
-
-    "search for all admin staff in department" in new Ctx {
-      val deptCode = "ch"
-      when(audienceLookupDao.resolveAdminStaff(deptCode)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
-      service.resolve(Audience(Seq(DepartmentAudience(deptCode, Seq(AdminStaff))))).get
-      verify(audienceLookupDao, times(1)).resolveAdminStaff(deptCode)
-      verifyNoMoreInteractions(audienceLookupDao)
-      verifyZeroInteractions(webgroups)
-    }
-
     "search for a module" in new Ctx {
       val moduleCode = "CH160"
       when(audienceLookupDao.resolveModule(moduleCode)).thenReturn(Future.successful(Seq(Usercode("cusfal"))))
@@ -212,14 +201,14 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
         WebGroupAudience(GroupName("in-losers")),
         ModuleAudience("CS102"),
         DepartmentAudience("CH", Seq(UndergradStudents.All)),
-        DepartmentAudience("PH", Seq(UndergradStudents.All, TeachingStaff))
+        DepartmentAudience("PH", Seq(UndergradStudents.All, Staff))
       ))).get
       verify(webgroups).getWebGroup(GroupName("in-winners"))
       verify(webgroups).getWebGroup(GroupName("in-losers"))
       verify(audienceLookupDao).resolveModule("CS102")
       verify(audienceLookupDao).resolveUndergraduatesInDept("CH", UndergradStudents.All)
       verify(audienceLookupDao).resolveUndergraduatesInDept("PH", UndergradStudents.All)
-      verify(audienceLookupDao).resolveTeachingStaff("PH")
+      verify(audienceLookupDao).resolveStaff("PH")
       verifyNoMoreInteractions(webgroups)
       verifyNoMoreInteractions(audienceLookupDao)
     }
