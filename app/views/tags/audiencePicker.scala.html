@@ -16,8 +16,9 @@
 @* TODO receive list of allowed audiences from controller - each user's will be different *@
 
 @defining(Seq(
-  TeachingStaff,
-  AdminStaff,
+  Staff,
+//  TeachingStaff,
+//  AdminStaff,
   TaughtPostgrads,
   // UndergradStudents - this option is now defined in frontend js
   ResearchPostgrads)) { deptSubsets: Seq[DepartmentSubset] =>
