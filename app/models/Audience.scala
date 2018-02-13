@@ -72,10 +72,11 @@ object Audience {
     override val displayName: String = "Staff"
   }
 
+  //  "these are kept only for existing data, we no longer differentiate between admin or teaching staff.",
+  //  "NEWSTART-1313"
   case object TeachingStaff extends DepartmentSubset {
     override val displayName = "Teaching Staff"
   }
-
   case object AdminStaff extends DepartmentSubset {
     override val displayName = "Administrative Staff"
   }
