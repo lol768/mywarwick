@@ -2,7 +2,7 @@ package system
 
 import play.api.mvc.{Flash, Request, RequestHeader}
 import play.filters.csrf.CSRF
-import services.Navigation
+import services.{Features, Navigation}
 import warwick.sso.{AuthenticatedRequest, SSOClient, User}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -17,25 +17,26 @@ case class RequestContext(
   logoutUrl: String,
   navigation: Seq[Navigation],
   flash: Flash,
-  csrfHelper: CSRFPageHelper
+  csrfHelper: CSRFPageHelper,
+  features: Features
 )
 
 object RequestContext {
 
-  def authenticated(sso: SSOClient, request: AuthenticatedRequest[_], navigation: Seq[Navigation], csrfHelperFactory: CSRFPageHelperFactory) =
-    RequestContext(sso, request, request.context.user, request.context.actualUser, navigation, csrfHelperFactory)
+  def authenticated(sso: SSOClient, request: AuthenticatedRequest[_], navigation: Seq[Navigation], csrfHelperFactory: CSRFPageHelperFactory, features: Features) =
+    RequestContext(sso, request, request.context.user, request.context.actualUser, navigation, csrfHelperFactory, features)
 
-  def authenticated(sso: SSOClient, request: RequestHeader, csrfHelperFactory: CSRFPageHelperFactory): RequestContext = {
+  def authenticated(sso: SSOClient, request: RequestHeader, csrfHelperFactory: CSRFPageHelperFactory, features: Features): RequestContext = {
     val eventualRequestContext = sso.withUser(request) { loginContext =>
-      Future.successful(Right(RequestContext(sso, request, loginContext.user, loginContext.actualUser, Nil, csrfHelperFactory)))
+      Future.successful(Right(RequestContext(sso, request, loginContext.user, loginContext.actualUser, Nil, csrfHelperFactory, features)))
     }.map(_.right.get)
 
     Await.result(eventualRequestContext, Duration.Inf)
   }
 
-  def anonymous(sso: SSOClient, request: RequestHeader, navigation: Seq[Navigation], csrfHelperFactory: CSRFPageHelperFactory) = RequestContext(sso, request, None, None, navigation, csrfHelperFactory)
+  def anonymous(sso: SSOClient, request: RequestHeader, navigation: Seq[Navigation], csrfHelperFactory: CSRFPageHelperFactory, features: Features) = RequestContext(sso, request, None, None, navigation, csrfHelperFactory, features)
 
-  def apply(sso: SSOClient, request: RequestHeader, user: Option[User], actualUser: Option[User], navigation: Seq[Navigation], csrfPageHelperFactory: CSRFPageHelperFactory): RequestContext = {
+  def apply(sso: SSOClient, request: RequestHeader, user: Option[User], actualUser: Option[User], navigation: Seq[Navigation], csrfPageHelperFactory: CSRFPageHelperFactory, features: Features): RequestContext = {
     val target = (if (request.secure) "https://" else "http://") + request.host + request.uri
     val linkGenerator = sso.linkGenerator(request)
     linkGenerator.setTarget(target)
@@ -48,7 +49,8 @@ object RequestContext {
       logoutUrl = linkGenerator.getLogoutUrl,
       navigation = navigation,
       flash = request.flash,
-      csrfHelper = transformCsrfHelper(csrfPageHelperFactory, request)
+      csrfHelper = transformCsrfHelper(csrfPageHelperFactory, request),
+      features = features
     )
   }
 

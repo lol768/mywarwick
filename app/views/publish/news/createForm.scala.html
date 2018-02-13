@@ -19,7 +19,10 @@
 }
 
 @common.admin("Create news") {
-  @b3.form(action = controllers.publish.routes.NewsController.create(publisher.id, submitted = true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.publish.routes.NewsController.audienceInfo(publisher.id)) {
+  @b3.form(
+    action = controllers.publish.routes.NewsController.create(publisher.id, submitted = true),
+    'class -> "split-form",
+    Symbol("data-audience-action") -> controllers.publish.routes.NewsController.audienceInfo(publisher.id)) {
     @views.html.publish.news.contentForm(form, publisher, departmentOptions, categories, permissionScope, audience, "Create")
   }
 }

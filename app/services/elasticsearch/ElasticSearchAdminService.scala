@@ -1,12 +1,13 @@
 package services.elasticsearch
 
 import javax.inject.{Inject, Singleton}
+import javax.ws.rs.HttpMethod
 
 import com.google.inject.ImplementedBy
 import org.elasticsearch.client.{Response, RestClient}
-import play.api.libs.json.{JsValue}
+import play.api.libs.json.JsValue
 
-import scala.concurrent.{Future}
+import scala.concurrent.Future
 
 @ImplementedBy(classOf[ElasticSearchAdminServiceImpl])
 trait ElasticSearchAdminService {
@@ -45,7 +46,7 @@ class ElasticSearchAdminServiceImpl @Inject()(
     name: String
   ): Future[Response] = {
     performRequestAsync(
-      method = Method.put,
+      method = HttpMethod.PUT,
       path = s"$templateRootPath/$name",
       entity = Some(httpEntityFromJsValue(template)),
       lowLevelClient = lowLevelClient
@@ -56,7 +57,7 @@ class ElasticSearchAdminServiceImpl @Inject()(
     name: String
   ): Future[Response] = {
     performRequestAsync(
-      method = Method.delete,
+      method = HttpMethod.DELETE,
       path = s"$templateRootPath/$name",
       lowLevelClient = lowLevelClient
     )
@@ -66,7 +67,7 @@ class ElasticSearchAdminServiceImpl @Inject()(
     name: String
   ): Future[Response] = {
     performRequestAsync(
-      method = Method.get,
+      method = HttpMethod.GET,
       path = s"$templateRootPath/$name",
       lowLevelClient = lowLevelClient
     )
@@ -80,7 +81,7 @@ class ElasticSearchAdminServiceImpl @Inject()(
     name: String
   ): Future[Response] = {
     performRequestAsync(
-      method = Method.head,
+      method = HttpMethod.HEAD,
       path = s"$templateRootPath/$name",
       lowLevelClient = lowLevelClient
     )
@@ -88,7 +89,7 @@ class ElasticSearchAdminServiceImpl @Inject()(
 
   override def getIndex(name: String) = {
     performRequestAsync(
-      Method.get,
+      HttpMethod.GET,
       path = s"/$name",
       lowLevelClient = lowLevelClient
     )

@@ -20,7 +20,7 @@ trait ActivityRecipientDao {
 
   def create(activityId: String, usercode: String, publishedAt: Option[DateTime], shouldNotify: Boolean)(implicit c: Connection): Unit
 
-  def markSent(activityId: String, usercode: String)(implicit c: Connection): Unit
+  def markProcessed(activityId: String, usercode: String)(implicit c: Connection): Unit
 
 }
 
@@ -33,7 +33,7 @@ class ActivityRecipientDaoImpl @Inject()() extends ActivityRecipientDao {
          VALUES ($activityId, $usercode, $now, $published, $shouldNotify)""".execute()
   }
 
-  override def markSent(activityId: String, usercode: String)(implicit c: Connection): Unit = {
+  override def markProcessed(activityId: String, usercode: String)(implicit c: Connection): Unit = {
     val now = DateTime.now
     val updated = SQL"UPDATE ACTIVITY_RECIPIENT SET SENT_AT = $now WHERE SENT_AT IS NULL AND ACTIVITY_ID = $activityId AND USERCODE = $usercode"
       .executeUpdate()

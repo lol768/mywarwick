@@ -11,7 +11,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
 /**
-  * Testing concurrency of markSent. This is in its own test suite because it
+  * Testing concurrency of markProcessed. This is in its own test suite because it
   * commits transactions so should use a fresh app + DB.
   */
 class ActivityRecipientDaoMarkSentTest extends BaseSpec with OneStartAppPerSuite with ScalaFutures {
@@ -45,7 +45,7 @@ class ActivityRecipientDaoMarkSentTest extends BaseSpec with OneStartAppPerSuite
         _ <- 1 to 5
       } yield Future {
         transaction(rollback=false) { implicit c =>
-          activityRecipientDao.markSent(activityId, usercode)
+          activityRecipientDao.markProcessed(activityId, usercode)
         }
       }
 

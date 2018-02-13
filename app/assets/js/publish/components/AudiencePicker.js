@@ -137,7 +137,7 @@ export class AudiencePicker extends React.PureComponent {
     return (
       <div className="list-group">
         <label className="control-label">
-          Is this alert specific to where people live ?&nbsp;
+          Is this alert specific to where people live?&nbsp;
           <i
             className="fa fa-info-circle"
             data-toggle="tooltip"

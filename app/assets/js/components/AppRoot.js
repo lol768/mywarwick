@@ -167,6 +167,7 @@ class AppRoot extends React.Component {
       options: PropTypes.object.isRequired,
     }).isRequired,
     dispatch: PropTypes.func.isRequired,
+    features: PropTypes.object.isRequired,
   };
 
   constructor(props) {

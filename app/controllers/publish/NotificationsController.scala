@@ -10,12 +10,14 @@ import models.{Audience, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.Json
-import play.api.mvc.{ActionFilter, Result}
+import play.api.libs.json.{JsObject, Json}
+import play.api.mvc.{Action, ActionFilter, AnyContent, Result}
 import services._
+import services.elasticsearch.ActivityESService
 import system.{ThreadPools, Validation}
 import views.html.errors
 import views.html.publish.{notifications => views}
+import warwick.sso.Usercode
 
 import scala.concurrent.Future
 
@@ -26,7 +28,8 @@ class NotificationsController @Inject()(
   val audienceBinder: AudienceBinder,
   activityService: ActivityService,
   val newsCategoryService: NewsCategoryService,
-  audienceService: AudienceService
+  audienceService: AudienceService,
+  activityESService: ActivityESService
 ) extends MyController with I18nSupport with Publishing {
 
   val notificationMapping = mapping(
@@ -50,30 +53,33 @@ class NotificationsController @Inject()(
     Ok(views.list(request.publisher, futureNotifications, sendingNotifications, pastNotifications, request.userRole, allDepartments))
   }
 
-  def audienceInfo(publisherId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
-    sharedAudienceInfo(audienceService, groupedUsercodes =>
-      Json.obj(
-        "baseAudience" -> groupedUsercodes.flatMap {
-          case (_, usercodes) => usercodes
-        }.size,
-        "groupedAudience" -> Json.toJson(groupedUsercodes.map {
-          case (component, usercodes) => (component.entryName, usercodes.size)
-        })
-      )
-    )
+  def audienceInfo(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
+    sharedAudienceInfo(SharedAudienceInfoForNotifications(audienceService, AudienceInfoHelper.postProcessGroupedResolvedAudience))
   }
 
-  def status(publisherId: String, activityId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
-    activityService.getActivityWithAudience(activityId)
-      .filter(_.activity.publisherId.contains(publisherId))
-      .map { activity =>
+  def status(publisherId: String, activityId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request => {
+    import services.elasticsearch.MessageSentDetails._
+    val activityWithAudience = activityService.getActivityWithAudience(activityId).filter(_.activity.publisherId.contains(publisherId))
+
+    activityESService.messageSentDetailsForActivity(activityId, activityWithAudience.map(_.activity.publishedAt)).map { sentDetails =>
+      activityWithAudience.map { activity =>
         Ok(Json.obj(
           "audienceSize" -> activity.audienceSize.toOption,
-          "sentCount" -> activity.sentCount,
+          "sent" -> (
+            Json.obj("total" -> activity.sentCount)
+              ++ Json.obj("readCount" -> activityService.getActivityReadCountSincePublishedDate(activityId))
+              ++ sentDetails.map(sd =>
+              Json.obj("delivered" -> Json.obj(
+                "total" -> sd.successful.distinctCount, // count of usercodes where at-least-one output was successful (sms, email, mobile)
+                "details" -> Json.toJson(sd)
+              ))
+            ).getOrElse(JsObject(Nil))
+            ),
           "sendingNow" -> activity.isSendingNow
         ))
       }.getOrElse(NotFound(Json.obj("error" -> "not_found")))
-  }
+    }
+  }}
 
   def createForm(publisherId: String) = PublisherAction(publisherId, CreateNotifications) { implicit request =>
     Ok(renderCreateForm(request.publisher, publishNotificationForm, Audience()))

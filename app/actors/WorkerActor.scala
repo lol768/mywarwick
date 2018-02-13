@@ -34,6 +34,9 @@ class WorkerActor @Inject()(
           val processing = messaging.processNow(message)
           processing.onComplete {
             case Success(res) if res.success => messaging.success(message)
+            case Success(res) if res.error.exists(MessageProcessing.skippableErrors.contains(_)) =>
+              log.warning(s"Message failed to send: ${res.message}")
+              messaging.skipped(message)
             case Success(res) =>
               log.warning(s"Message failed to send: ${res.message}")
               messaging.failure(message)

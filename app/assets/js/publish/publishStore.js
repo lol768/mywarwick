@@ -9,7 +9,7 @@ function reducer(state = initialState, action) {
     case 'AUDIENCE_UPDATE':
       return {
         ...state,
-        audience: action.components,
+        audience: (action.components ? action.components : { ...state.audience }),
       };
     default:
       return state;

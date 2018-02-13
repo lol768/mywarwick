@@ -2,12 +2,12 @@ package controllers.publish
 
 import controllers.admin.addFormErrors
 import models.publishing._
-import models.{API, Audience}
+import models.{API, Audience, NewsCategory}
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
-import services._
+import services.{UserNewsCategoryService, _}
 import services.dao.DepartmentInfo
 import system.{ImplicitRequestContext, Logging, ThreadPools}
 import warwick.sso.{AuthenticatedRequest, Usercode}
@@ -90,32 +90,63 @@ trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOpt
     )
   }
 
-  def sharedAudienceInfo(
-    audienceService: AudienceService,
-    processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => JsObject
-  )(implicit request: PublisherRequest[_]): Future[Result] =
+  abstract class SharedAudienceInfo(
+    val audienceService: AudienceService,
+    val processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => GroupedResolvedAudience
+  )
+
+  case class SharedAudienceInfoForNotifications(
+    override val audienceService: AudienceService,
+    override val processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => GroupedResolvedAudience
+  ) extends SharedAudienceInfo(audienceService, processGroupedUsercodes)
+
+  case class SharedAudienceInfoForNews(
+    override val audienceService: AudienceService,
+    override val processGroupedUsercodes: Map[Audience.Component, Set[Usercode]] => GroupedResolvedAudience,
+    newsCategories: Set[NewsCategory] = Set.empty,
+    userNewsCategoryService: Option[UserNewsCategoryService] = Option.empty,
+    ignoreNewsCategories: Boolean = false,
+  ) extends SharedAudienceInfo(audienceService, processGroupedUsercodes)
+
+  def sharedAudienceInfo(info: SharedAudienceInfo)(implicit request: PublisherRequest[_]): Future[Result] = {
     audienceForm.bindFromRequest.fold(
       formWithErrors => Future.successful(BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", formWithErrors.errors.map(e => API.Error(e.key, e.message)))))),
-      audienceData => {
-        audienceBinder.bindAudience(audienceData).map {
-          case Left(errors) => BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", errors.map(e => API.Error(e.key, e.message)))))
-          case Right(audience) =>
-            if (audience.public) {
-              Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
-                "public" -> true
-              ))))
-            } else {
-              audienceService.resolveUsersForComponentsGrouped(audience.components).map(_.toMap).map(processGroupedUsercodes) match {
-                case Success(jsonData) =>
-                  Ok(Json.toJson(API.Success[JsObject](data = jsonData)))
-                case Failure(err) =>
-                  logger.error("Failed to resolve audience", err)
-                  InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience")))))
+      audienceData => audienceBinder.bindAudience(audienceData).map {
+        case Left(errors) => BadRequest(Json.toJson(API.Failure[JsObject]("Bad Request", errors.map(e => API.Error(e.key, e.message)))))
+        case Right(audience) =>
+          val audienceService = info.audienceService
+          val processGroupedUsercodes = info.processGroupedUsercodes
+          if (audience.public) Ok(Json.toJson(API.Success[JsObject](data = Json.obj(
+            "public" -> true
+          )))) else {
+            audienceService.resolveUsersForComponentsGrouped(audience.components).map(_.toMap).map(processGroupedUsercodes) match {
+              case Success(groupedResolvedAudience) => {
+                val jsonData = info match {
+                  case _: SharedAudienceInfoForNotifications =>
+                    AudienceInfoHelper.JsonResult.withoutNewsCategories(groupedResolvedAudience)
+                  case news: SharedAudienceInfoForNews =>
+                    if (news.ignoreNewsCategories) {
+                      AudienceInfoHelper.JsonResult.withoutNewsCategories(groupedResolvedAudience)
+                    } else {
+                      news.userNewsCategoryService.map { service =>
+                        AudienceInfoHelper.JsonResult.withNewsCategories(
+                          groupedResolvedAudience,
+                          service,
+                          news.newsCategories
+                        )
+                      }.getOrElse(AudienceInfoHelper.JsonResult.withoutNewsCategories(groupedResolvedAudience))
+                    }
+                }
+                Ok(Json.toJson(API.Success[JsObject](data = jsonData)))
               }
+              case Failure(err) =>
+                logger.error("Failed to resolve audience", err)
+                InternalServerError(Json.toJson(API.Failure[JsObject]("Internal Server Error", Seq(API.Error("resolve-audience", "Failed to resolve audience")))))
             }
-        }
+          }
       }
     )
+  }
 }
 
 trait PublishableWithAudience {
@@ -200,10 +231,87 @@ trait PublishingActionRefiner {
     }
 
     override protected def executionContext = ThreadPools.web
-
   }
 
   def PublisherAction(id: String, requiredAbilities: Ability*) = RequiredUserAction andThen GetPublisher(id, requiredAbilities)
+}
+
+case class GroupedResolvedAudience(baseAudience: Set[Usercode], groupedUsercodes: Map[String, Set[Usercode]])
+
+object AudienceInfoHelper {
+
+  object JsonResult {
+
+    def withoutNewsCategories(
+      groupedResolvedAudience: GroupedResolvedAudience
+    ): JsObject = {
+      Json.obj(
+        "baseAudience" -> groupedResolvedAudience.baseAudience.size,
+        "groupedAudience" -> groupedResolvedAudience.groupedUsercodes.map {
+          case (groupName, usercodes) => (groupName, usercodes.size)
+        }
+      )
+    }
+
+    def withNewsCategories(
+      groupedResolvedAudience: GroupedResolvedAudience,
+      service: UserNewsCategoryService,
+      newsCats: Set[NewsCategory]
+    ): JsObject = {
+      val usercodesInTargetedNewsCats = service.getRecipientsOfNewsInCategories(newsCats.map(_.id).toSeq)
+      Json.obj(
+        "baseAudience" -> groupedResolvedAudience
+          .baseAudience
+          .intersect(usercodesInTargetedNewsCats)
+          .size,
+        "groupedAudience" -> groupedResolvedAudience.groupedUsercodes.map {
+          case (groupName, usercodes) => (
+            groupName,
+            usercodes.intersect(usercodesInTargetedNewsCats).size
+          )
+        }
+      )
+    }
+  }
+
+  def postProcessGroupedResolvedAudience(groupedUsercodes: Map[Audience.Component, Set[Usercode]]): GroupedResolvedAudience = {
+    val usercodesInTargetLocations: Map[Boolean, Set[Usercode]] = groupedUsercodes.groupBy {
+      case (component, _) => component match {
+        case _: Audience.LocationOptIn => true
+        case _ => false
+      }
+    }.map {
+      case (matched, items) => (matched, items.flatMap { case (_, usercodes) => usercodes }.toSet)
+    }
+
+    def baseAudience(u: Map[Audience.Component, Set[Usercode]]): Set[Usercode] = u.flatMap {
+      case (_, usercodes) => usercodes
+    }.toSet
+
+    def groupedAudience(u: Map[Audience.Component, Set[Usercode]]): Map[String, Set[Usercode]] = u.map {
+      case (component, usercodes) => (component.entryName, usercodes)
+    }
+
+    if (!usercodesInTargetLocations.keySet.contains(true)) {
+      GroupedResolvedAudience(
+        baseAudience(groupedUsercodes),
+        groupedAudience(groupedUsercodes)
+      )
+    } else {
+      val targetedAudiences: Map[Audience.Component, Set[Usercode]] = groupedUsercodes.map {
+        case (component, usercodes) => (component, usercodes.intersect(usercodesInTargetLocations.getOrElse(true, Set.empty)))
+      }.filter { case (component, _) =>
+        component match {
+          case _: Audience.LocationOptIn => false
+          case _ => true
+        }
+      }
+      GroupedResolvedAudience(
+        baseAudience(targetedAudiences),
+        groupedAudience(targetedAudiences)
+      )
+    }
+  }
 
 }
 

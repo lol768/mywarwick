@@ -271,6 +271,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with Mi
       when(audienceService.resolveUsersForComponentsGrouped(audience.components)).thenReturn(Success(Seq((Audience.DepartmentAudience("IN", Seq(Staff)), Set("a", "b", "c").map(Usercode)))))
       when(userPreferencesService.countInitialisedUsers(Set("a", "b", "c").map(Usercode))).thenReturn(2)
       when(userNewsCategoryService.getRecipientsOfNewsInCategories(Seq("abc"))).thenReturn(Set("a", "e").map(Usercode))
+      when(newsCategoryService.getNewsCategoryForCatId("abc")).thenReturn(NewsCategory("abc", "Campus"))
 
       val result = call(newsController.audienceInfo("xyz"), FakeRequest("POST", "/").withFormUrlEncodedBody(validData: _*))
 
@@ -278,8 +279,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with Mi
       val json = contentAsJson(result)
 
       (json \ "status").as[String] must be("ok")
-      (json \ "data" \ "baseAudience").as[Int] must be(3)
-      (json \ "data" \ "categorySubset").as[Int] must be(2)
+      (json \ "data" \ "baseAudience").as[Int] must be(1)
     }
 
     "respond with public" in {

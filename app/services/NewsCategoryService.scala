@@ -13,6 +13,8 @@ trait NewsCategoryService {
 
   def getNewsCategories(newsItemId: String): Seq[NewsCategory]
 
+  def getNewsCategoryForCatId(catId: String): NewsCategory
+
 }
 
 @Singleton
@@ -26,5 +28,7 @@ class NewsCategoryServiceImpl @Inject()(
   override def getNewsCategories(newsItemId: String) =
     db.withConnection(implicit c => dao.getNewsCategories(newsItemId))
 
+  override def getNewsCategoryForCatId(catId: String): NewsCategory =
+    db.withConnection(implicit c=> dao.getCategory(catId))
 }
 

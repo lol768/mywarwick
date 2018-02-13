@@ -129,7 +129,8 @@ case class ActivityRenderWithAudience(
   audienceComponents: Seq[Audience.Component],
   sentCount: Int
 ) extends ActivityRenderFields {
-  def isSendingNow = !activity.publishedAt.isAfterNow && audienceSize.toOption.exists(as => sentCount < as)
+  def isSendingNow: Boolean = !activity.publishedAt.isAfterNow && audienceSize.toOption.exists(as => sentCount < as)
+  def isSent: Boolean = !activity.publishedAt.isAfterNow && audienceSize.toOption.contains(sentCount)
 }
 
 object ActivityTag {

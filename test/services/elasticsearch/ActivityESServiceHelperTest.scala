@@ -17,9 +17,9 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
       DateTimeUtils.useMockDateTime(DateTime.parse("2016-06-30T01:20"), new Callback {
         override def doSomething() = {
 
-          ActivityESServiceHelper.indexNameToday(true, DateTime.now().toString("yyyy_MM")) must be("alert_2016_06")
+          ActivityESServiceHelper.indexNameToday(true) must be("alert_2016_06")
 
-          ActivityESServiceHelper.indexNameToday(false, DateTime.now().toString("yyyy_MM")) must be("activity_2016_06")
+          ActivityESServiceHelper.indexNameToday(false) must be("activity_2016_06")
         }
       })
 
