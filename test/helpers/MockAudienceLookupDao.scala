@@ -21,4 +21,5 @@ class MockAudienceLookupDao extends AudienceLookupDao {
   override def findModules(query: String): Future[Seq[LookupModule]] = Future.successful(Nil)
   override def findSeminarGroups(query: String): Future[Seq[LookupSeminarGroup]] = Future.successful(Nil)
   override def findRelationships(agentId: UniversityID): Future[Map[LookupRelationshipType, Seq[User]]] = Future.successful(Map.empty)
+  override def resolveStaff(departmentCode: String): Future[Seq[Usercode]] = Future.successful(Nil)
 }
