@@ -153,6 +153,23 @@ export class AudienceIndicator extends React.PureComponent {
     return null;
   }
 
+
+  static makePeopleInTotalText(isNews, baseAudience, groupedAudience) {
+    if (baseAudience === '0' && _.isEmpty(groupedAudience)) {
+      return isNews ?
+        'did not choose, 0 audience, news' :
+        'did not choose, 0 audience, not news';
+    }
+
+    if (baseAudience === '0') {
+      return isNews ?
+        'chose something, but 0 audience, is news' :
+        'chose something, but 0 audience, not news';
+    }
+
+    return `${totalNumber} people in total`;
+  }
+
   render() {
     const { baseAudience, fetching } = this.state;
 
@@ -187,7 +204,11 @@ export class AudienceIndicator extends React.PureComponent {
         <div>This { this.props.hint.isNews ? 'news' : 'alert' } will be published to:</div>
         <div className="audience-component-list">{this.readableAudienceComponents()}</div>
         <div>{fetching ?
-          <i className="fa fa-spin fa-fw fa-refresh" /> : `(${baseNum} people in total)` }</div>
+          <i className="fa fa-spin fa-fw fa-refresh" /> : AudienceIndicator.makePeopleInTotalText(
+            this.props.hint.isNews,
+            this.state.baseAudience,
+            this.state.groupedAudience,
+          ) }</div>
       </div>
     );
   }
