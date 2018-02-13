@@ -218,4 +218,85 @@ class ActivityMuteDaoTest extends BaseSpec with OneStartAppPerSuite {
     expiredMute.head.expiresAt.get.isBeforeNow must be (true)
   }
 
+  "update an existing mute" in transaction { implicit c =>
+    val activity = Activity(
+      id = null,
+      providerId = "providerId",
+      `type` = "activityType",
+      title = null,
+      text = null,
+      url = null,
+      replacedBy = null,
+      publishedAt = null,
+      createdAt = null,
+      createdBy = null,
+      shouldNotify = true,
+      audienceId = null,
+      publisherId = null,
+      api = false
+    )
+
+    val mute = ActivityMuteSave(
+      usercode = Usercode("cusfal"),
+      expiresAt = Some(DateTime.now.plusDays(1)),
+      activityType = Some(activity.`type`),
+      providerId = Some(activity.providerId),
+      tags = Seq(
+        ActivityTag(
+          name = "tagName",
+          displayName = None,
+          value = TagValue("tagValue")
+        )
+      )
+    )
+
+    val muteId = dao.save(mute)
+
+    val activity2 = Activity(
+      id = null,
+      providerId = "providerId2",
+      `type` = "activityType2",
+      title = null,
+      text = null,
+      url = null,
+      replacedBy = null,
+      publishedAt = null,
+      createdAt = null,
+      createdBy = null,
+      shouldNotify = true,
+      audienceId = null,
+      publisherId = null,
+      api = false
+    )
+
+    val updatedMute = mute.copy(
+      expiresAt = Some(DateTime.now.plusDays(2)),
+      activityType = Some(activity2.`type`),
+      providerId = Some(activity2.providerId),
+      tags = Seq(
+        ActivityTag(
+          name = "tagName2",
+          displayName = None,
+          value = TagValue("tagValue2")
+        )
+      )
+    )
+
+    dao.update(muteId, updatedMute)
+
+    dao.mutesForActivity(activity).isEmpty must be (true)
+
+    val mutes = dao.mutesForActivity(activity2)
+
+    mutes must have length 1
+    mutes.head.usercode.string must equal (updatedMute.usercode.string)
+    mutes.head.createdAt must not be null
+    mutes.head.expiresAt.get must equal (updatedMute.expiresAt.get)
+    mutes.head.activityType must equal (updatedMute.activityType)
+    mutes.head.providerId must equal (updatedMute.providerId)
+    mutes.head.tags must have length 1
+    mutes.head.tags.head.name must equal (updatedMute.tags.head.name)
+    mutes.head.tags.head.value.internalValue must equal (updatedMute.tags.head.value.internalValue)
+  }
+
 }

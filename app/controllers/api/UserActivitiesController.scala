@@ -90,12 +90,29 @@ class UserActivitiesController @Inject()(
       request.body.asJson.map { body =>
         body.validate[SaveMuteRequest] match {
           case JsSuccess(data, _) =>
-            activityService.save(ActivityMuteSave.fromRequest(data, user.usercode)).fold(
-              errors => BadRequest(Json.toJson(
-                API.Failure[JsObject]("error", errors.map(error => API.Error(error.getClass.getSimpleName, error.message)))
-              )),
-              _ => Ok(Json.toJson(API.Success("ok", "saved")))
+            val newMute = ActivityMuteSave.fromRequest(data, user.usercode)
+            val existingMute = activityService.getActivityMutesForRecipient(user.usercode).find(mute =>
+              mute.provider.map(_.id) == newMute.providerId &&
+              mute.activityType.map(_.name) == newMute.activityType &&
+              mute.tags.lengthCompare(newMute.tags.length) == 0 &&
+              mute.tags.forall(newMute.tags.contains)
             )
+            existingMute match {
+              case Some(mute) =>
+                activityService.update(mute.id, newMute).fold(
+                  errors => BadRequest(Json.toJson(
+                    API.Failure[JsObject]("error", errors.map(error => API.Error(error.getClass.getSimpleName, error.message)))
+                  )),
+                  _ => Ok(Json.toJson(API.Success("ok", "saved")))
+                )
+              case _ =>
+                activityService.save(newMute).fold(
+                  errors => BadRequest(Json.toJson(
+                    API.Failure[JsObject]("error", errors.map(error => API.Error(error.getClass.getSimpleName, error.message)))
+                  )),
+                  _ => Ok(Json.toJson(API.Success("ok", "saved")))
+                )
+            }
           case error: JsError =>
             BadRequest(Json.toJson(API.Failure[JsObject]("error", API.Error.fromJsError(error))))
         }

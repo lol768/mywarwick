@@ -56,6 +56,8 @@ trait ActivityService {
 
   def save(activityMute: ActivityMuteSave): Either[Seq[ActivityError], String]
 
+  def update(id: String, activityMute: ActivityMuteSave): Either[Seq[ActivityError], Unit]
+
   def expireActivityMute(recipient: Usercode, id: String): Either[Seq[ActivityError], ActivityMuteRender]
 
   def allProviders: Seq[(ActivityProvider, Option[ActivityIcon])]
@@ -270,6 +272,14 @@ class ActivityServiceImpl @Inject()(
       Left(Seq(MuteNoOptions))
     } else {
       Right(db.withConnection(implicit c => muteDao.save(activityMute)))
+    }
+  }
+
+  override def update(id: String, activityMute: ActivityMuteSave): Either[Seq[ActivityError], Unit] = {
+    if (activityMute.activityType.isEmpty && activityMute.providerId.isEmpty && activityMute.tags.isEmpty) {
+      Left(Seq(MuteNoOptions))
+    } else {
+      Right(db.withConnection(implicit c => muteDao.update(id, activityMute)))
     }
   }
 
