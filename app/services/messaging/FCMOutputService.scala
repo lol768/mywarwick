@@ -48,7 +48,8 @@ class FCMOutputService @Inject()(
       "to" -> token,
       "notification" -> Json.obj(
         "title" -> JsString(message.activity.url.map(_ => s"${message.activity.title} $ARROW_EMOJI").getOrElse(message.activity.title)),
-        "body" -> message.activity.text
+        "body" -> message.activity.text,
+        "sound" -> "default"
       )
     )
 

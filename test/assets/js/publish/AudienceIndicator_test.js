@@ -11,6 +11,26 @@ describe('AudienceIndicator', () => {
     },
   };
 
+  it('makes correct help text when user did not choose any audience', () => {
+    expect(enzyme
+      .shallow(AudienceIndicator.makePeopleInTotalText(0, {}))
+      .html())
+      .to.equal('<em>(Waiting for all options to be selected…)</em>');
+
+    expect(enzyme
+      .shallow(AudienceIndicator.makePeopleInTotalText(0, null))
+      .html())
+      .to.equal('<em>(Waiting for all options to be selected…)</em>');
+
+  });
+
+  it('makes correct help text when user did choose some audience, but resulted in 0 audience', () => {
+    expect(enzyme
+      .shallow(AudienceIndicator.makePeopleInTotalText(0, { group1: 0 }))
+      .html())
+      .to.equal('<div>0 people in current selection</div>');
+  });
+
   it('renders hint block properly', () => {
     const render = enzyme.shallow(<AudienceIndicator {...{
       ...baseProps,

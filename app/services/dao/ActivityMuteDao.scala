@@ -19,6 +19,8 @@ trait ActivityMuteDao {
 
   def save(mute: ActivityMuteSave)(implicit c: Connection): String
 
+  def update(id: String, mute: ActivityMuteSave)(implicit c: Connection): Unit
+
   def expire(mute: ActivityMuteRender)(implicit c: Connection): Boolean
 
   def mutesForActivity(activity: Activity, recipients: Set[Usercode] = Set.empty)(implicit c: Connection): Seq[ActivityMute]
@@ -50,6 +52,20 @@ class ActivityMuteDaoImpl extends ActivityMuteDao {
       .execute()
 
     id
+  }
+
+  override def update(id: String, mute: ActivityMuteSave)(implicit c: Connection): Unit = {
+    import mute._
+    val tagString = JsArray(tags.map(Json.toJson[ActivityTag])).toString()
+    val expiresAtOrNull: DateTime = expiresAt.orNull
+    SQL"""
+      UPDATE ACTIVITY_MUTE SET
+        EXPIRES_AT = $expiresAtOrNull,
+        ACTIVITY_TYPE = $activityType,
+        PROVIDER_ID = $providerId,
+        TAGS = $tagString
+      WHERE ID = $id
+    """.execute()
   }
 
   override def expire(mute: ActivityMuteRender)(implicit c: Connection): Boolean = {

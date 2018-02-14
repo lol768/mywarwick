@@ -155,7 +155,6 @@ class TileDaoImpl @Inject()() extends TileDao {
       .execute()
 
   override def saveTileConfiguration(usercode: String, tileLayout: Seq[UserTileSetting])(implicit c: Connection): Unit = {
-    val updateRemoved = "UPDATE USER_TILE SET REMOVED = {removed}, UPDATED_AT = {now} WHERE USERCODE = {usercode} AND TILE_ID = {id}"
     val update = "UPDATE USER_TILE SET PREFERENCES = {preferences}, REMOVED = {removed}, UPDATED_AT = {now} WHERE USERCODE = {usercode} AND TILE_ID = {id}"
     val insert = "INSERT INTO USER_TILE (USERCODE, TILE_ID, PREFERENCES, REMOVED, CREATED_AT, UPDATED_AT) VALUES ({usercode}, {id}, {preferences}, {removed}, {now}, {now})"
 
@@ -169,7 +168,7 @@ class TileDaoImpl @Inject()() extends TileDao {
           'usercode -> usercode
         )
 
-        SQL(if (tile.removed) updateRemoved else update).on(params: _*).executeUpdate() > 0 || SQL(insert).on(params: _*).execute()
+        SQL(update).on(params: _*).executeUpdate() > 0 || SQL(insert).on(params: _*).execute()
     }
   }
 
