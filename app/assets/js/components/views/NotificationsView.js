@@ -121,7 +121,7 @@ class NotificationsView extends HideableView {
   }
 
   beginMarkReadTimeout() {
-    if (!document.hidden && document.hasFocus()) {
+    if (!document.hidden && (document.hasFocus() || isEmbedded())) {
       if (this.timeout) {
         clearTimeout(this.timeout);
       }
