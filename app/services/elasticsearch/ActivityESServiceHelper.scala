@@ -19,6 +19,7 @@ trait ActivityESServiceHelper {
 
   object ESFieldName {
     val activity_id = "activity_id"
+    val activity_id_keyword = s"$activity_id.keyword"
     val provider_id = "provider_id"
     val activity_type = "activity_type"
     val title = "title"

@@ -152,7 +152,7 @@ class ActivityESServiceImpl @Inject()(
 
   override def messageSentDetailsForActivity(activityId: String, publishedAt: Option[DateTime]): Future[Option[MessageSentDetails]] = {
     publishedAt.map { date =>
-      val query = Json.parse(s"""{"query": {"match": {"${ESFieldName.activity_id}" : "$activityId" }}}""")
+      val query = Json.parse(s"""{"query": {"term": {"${ESFieldName.activity_id_keyword}" : "$activityId" }}}""")
 
       LowLevelClientHelper.performRequestAsync(
         method = HttpMethod.GET,
