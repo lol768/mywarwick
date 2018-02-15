@@ -37,7 +37,7 @@ export default class ListTile extends TileContent {
       href={href}
       moreButton={this.modalMoreButton()}
     >
-      {(body.length) ? _.map(_.filter(body, item => item.length > 0), item => (
+      {(body && body.length) ? _.map(_.filter(body, item => item.length > 0), item => (
         <p>{item}</p>
       )) : body}
     </DismissableInfoModal>);
@@ -67,9 +67,12 @@ export default class ListTile extends TileContent {
     const itemsToDisplay = this.props.zoomed ?
       content.items : _.take(content.items, this.getNumberOfItemsToDisplay());
     return (<ul className="list-unstyled tile-list-group">
-      {_.compact(itemsToDisplay).map(item =>
-        <ListTileItem key={item.id} onClick={this.onItemClick} {...item} />,
-      )}
+      {_.compact(itemsToDisplay).map((item) => {
+        const clickProps = (item.body) ? { onClick: this.onItemClick } : {};
+        return (
+          <ListTileItem key={item.id} {...clickProps} {...item} />
+        );
+      })}
     </ul>);
   }
 }
