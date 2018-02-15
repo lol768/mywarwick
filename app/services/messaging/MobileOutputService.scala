@@ -1,13 +1,21 @@
 package services.messaging
 
 import actors.MessageProcessing.ProcessingResult
-import com.google.inject.{ImplementedBy, Inject}
 import com.google.inject.name.Named
-import models.MessageSend
+import com.google.inject.{ImplementedBy, Inject}
+import models.{Activity, ActivitySave, MessageSend}
 import warwick.sso.Usercode
 
 import scala.concurrent.Future
-import scala.util.Try
+
+case class PushNotification(title: String, text: Option[String], url: Option[String])
+
+object MobileOutputService {
+  def toPushNotification(activity: ActivitySave): PushNotification =
+    PushNotification(activity.title, activity.text, activity.url)
+  def toPushNotification(activity: Activity): PushNotification =
+    PushNotification(activity.title, activity.text, activity.url)
+}
 
 @ImplementedBy(classOf[MobileOutputServiceImpl])
 trait MobileOutputService extends OutputService {

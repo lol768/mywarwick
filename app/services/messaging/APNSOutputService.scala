@@ -2,6 +2,7 @@ package services.messaging
 
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.Inject
+import com.google.inject.name.Named
 import com.notnoop.apns.APNS
 import models.Platform._
 import models.{MessageSend, PushRegistration}
@@ -12,6 +13,7 @@ import warwick.sso.Usercode
 
 import scala.concurrent.Future
 
+@Named("apns")
 class APNSOutputService @Inject()(
   @NamedDatabase("default") db: Database,
   apnsProvider: APNSProvider,
@@ -24,15 +26,16 @@ class APNSOutputService @Inject()(
 
   private val LINK_EMOJI = "🔗"
 
-  override def send(message: MessageSend.Heavy): Future[ProcessingResult] = Future {
-    import message._
+  override def send(message: MessageSend.Heavy): Future[ProcessingResult] =
+    send(message.user.usercode, MobileOutputService.toPushNotification(message.activity))
 
+  def send(usercode: Usercode, pushNotification: PushNotification): Future[ProcessingResult] = Future {
     val payload = makePayload(
-      title = activity.url.map(_ => s"${activity.title} $LINK_EMOJI").getOrElse(activity.title),
-      badge = getUnreadNotificationCount(user.usercode)
+      title = pushNotification.url.map(_ => s"${pushNotification.title} $LINK_EMOJI").getOrElse(pushNotification.title),
+      badge = getUnreadNotificationCount(usercode)
     )
 
-    getApplePushRegistrations(user.usercode).foreach(device => apns.push(device.token, payload))
+    getApplePushRegistrations(usercode).foreach(device => apns.push(device.token, payload))
 
     ProcessingResult(success = true, message = s"Push notification(s) sent")
   }

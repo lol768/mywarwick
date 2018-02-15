@@ -2,6 +2,7 @@ package services.messaging
 
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.Inject
+import com.google.inject.name.Named
 import models.MessageSend
 import models.Platform.Google
 import play.api.Configuration
@@ -14,7 +15,7 @@ import warwick.sso.Usercode
 
 import scala.concurrent.Future
 
-
+@Named("fcm")
 class FCMOutputService @Inject()(
   pushRegistrationDao: PushRegistrationDao,
   @NamedDatabase("default") db: Database,
@@ -26,29 +27,29 @@ class FCMOutputService @Inject()(
 
   private val ARROW_EMOJI = "↗️"
 
-  val apiKey = configuration.getOptional[String]("mywarwick.fcm.apiKey")
+  val apiKey: String = configuration.getOptional[String]("mywarwick.fcm.apiKey")
     .getOrElse(throw new IllegalStateException("Missing FCM API key - set mywarwick.fcm.apiKey"))
 
-  def send(message: MessageSend.Heavy): Future[ProcessingResult] = {
-    val usercode = message.user.usercode
+  def send(message: MessageSend.Heavy): Future[ProcessingResult] =
+    send(message.user.usercode, MobileOutputService.toPushNotification(message.activity))
 
+  def send(usercode: Usercode, pushNotification: PushNotification): Future[ProcessingResult] =
     db.withConnection { implicit c =>
       val sendNotifications =
         pushRegistrationDao.getPushRegistrationsForUser(usercode)
           .filter(_.platform == Google)
           .map(_.token)
-          .map(sendNotification(message))
+          .map(sendNotification(pushNotification))
 
       Future.sequence(sendNotifications).map(_ => ProcessingResult(success = true, "yay"))
     }
-  }
 
-  def sendNotification(message: MessageSend.Heavy)(token: String): Future[Unit] = {
+  def sendNotification(pushNotification: PushNotification)(token: String): Future[Unit] = {
     val body = Json.obj(
       "to" -> token,
       "notification" -> Json.obj(
-        "title" -> JsString(message.activity.url.map(_ => s"${message.activity.title} $ARROW_EMOJI").getOrElse(message.activity.title)),
-        "body" -> message.activity.text
+        "title" -> JsString(pushNotification.url.map(_ => s"${pushNotification.title} $ARROW_EMOJI").getOrElse(pushNotification.title)),
+        "body" -> pushNotification.text
       )
     )
 

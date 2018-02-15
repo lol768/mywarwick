@@ -12,6 +12,7 @@ import play.api.libs.json._
 import play.api.mvc.Result
 import services.ActivityError.{InvalidProviderId, InvalidUsercodeAudience}
 import services._
+import services.messaging.MessagingService
 import warwick.sso.{AuthenticatedRequest, GroupName, User, Usercode}
 
 @Singleton
@@ -19,10 +20,32 @@ class IncomingActivitiesController @Inject()(
   securityService: SecurityService,
   activityService: ActivityService,
   publisherService: PublisherService,
-  audienceService: AudienceService
+  audienceService: AudienceService,
+  messagingService: MessagingService
 ) extends MyController with I18nSupport {
 
   import securityService._
+
+  def transientPushNotification(providerId: String) = APIAction(parse.json) { implicit request =>
+    publisherService.getParentPublisherId(providerId) match {
+      case Some(publisherId) =>
+        request.context.user.map { user =>
+          if (publisherService.getRoleForUser(publisherId, user.usercode).can(CreateAPINotifications)
+            && activityService.getProvider(providerId).exists(_.transientPush)) {
+            request.body.validate[IncomingActivityData].map { data =>
+              val pushNotification: ActivitySave = ActivitySave.fromApi(user.usercode, publisherId, providerId, shouldNotify = false, data)
+              val usercodes: Set[Usercode] = data.recipients.users.getOrElse(Seq.empty).map(Usercode).toSet
+              messagingService.processTransientPushNotification(usercodes, pushNotification)
+
+            }.recoverTotal(validationError)
+          }
+          else {
+            forbidden(providerId, user)
+          }
+        }.get
+      case None => ???
+    }
+  }
 
   def postActivity(providerId: String) = APIAction(parse.json) { implicit request =>
     postItem(providerId, shouldNotify = false)

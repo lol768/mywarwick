@@ -388,6 +388,7 @@ class ActivityDaoImpl @Inject()(
         ACTIVITY.*,
         PROVIDER.SEND_EMAIL            AS PROVIDER_SEND_EMAIL,
         PROVIDER.DISPLAY_NAME          AS PROVIDER_DISPLAY_NAME,
+        PROVIDER.TRANSIENT_PUSH        AS PROVIDER_TRANSIENT_PUSH,
         PROVIDER.ICON,
         PROVIDER.COLOUR,
         ACTIVITY_TAG.NAME              AS TAG_NAME,
@@ -417,7 +418,8 @@ class ActivityDaoImpl @Inject()(
       SELECT
         ID AS PROVIDER_ID,
         SEND_EMAIL AS PROVIDER_SEND_EMAIL,
-        DISPLAY_NAME AS PROVIDER_DISPLAY_NAME
+        DISPLAY_NAME AS PROVIDER_DISPLAY_NAME,
+        TRANSIENT_PUSH AS PROVIDER_TRANSIENT_PUSH
       FROM PROVIDER
     """
       .as(activityProviderParser.*)
@@ -427,7 +429,8 @@ class ActivityDaoImpl @Inject()(
       SELECT
         ID AS PROVIDER_ID,
         SEND_EMAIL AS PROVIDER_SEND_EMAIL,
-        DISPLAY_NAME AS PROVIDER_DISPLAY_NAME
+        DISPLAY_NAME AS PROVIDER_DISPLAY_NAME,
+        TRANSIENT_PUSH AS PROVIDER_TRANSIENT_PUSH
       FROM PROVIDER WHERE ID = $id
     """
       .as(activityProviderParser.singleOpt)
@@ -482,8 +485,9 @@ class ActivityDaoImpl @Inject()(
   private lazy val activityProviderParser: RowParser[ActivityProvider] =
     get[String]("PROVIDER_ID") ~
       get[Option[Boolean]]("PROVIDER_SEND_EMAIL") ~
-      get[Option[String]]("PROVIDER_DISPLAY_NAME") map {
-      case id ~ sendEmail ~ displayName => ActivityProvider(id, sendEmail.getOrElse(false), displayName)
+      get[Option[String]]("PROVIDER_DISPLAY_NAME") ~
+      get[Boolean]("PROVIDER_TRANSIENT_PUSH") map {
+      case id ~ sendEmail ~ displayName ~ transientPush => ActivityProvider(id, sendEmail.getOrElse(false), displayName, transientPush)
     }
 
   private lazy val activityTypeParser: RowParser[ActivityType] =

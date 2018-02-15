@@ -127,6 +127,7 @@ DELETE        /api/streams/mute                              @controllers.api.Us
 POST          /api/streams/:providerId/notifications         @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
 POST          /api/streams/:providerId/alerts                @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
 POST          /api/streams/:providerId/activities            @controllers.api.IncomingActivitiesController.postActivity(providerId: String)
+POST          /api/streams/:providerId/push                  @controllers.api.IncomingActivitiesController.transientPushNotification(providerId: String)
 
 GET           /api/tiles                                     @controllers.api.TilesController.getLayout
 GET           /api/tiles/content                             @controllers.api.TilesController.content

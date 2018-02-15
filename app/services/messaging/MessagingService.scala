@@ -3,18 +3,21 @@ package services.messaging
 import java.sql.Connection
 import javax.inject.{Inject, Named, Provider}
 
+import actors.MessageProcessing
 import actors.MessageProcessing._
 import com.google.inject.ImplementedBy
+import models.Platform.{Apple, Google}
 import models._
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.dao.MessagingDao
 import services.elasticsearch.{ActivityESService, MessageSent}
 import services.{ActivityService, EmailNotificationsPrefService, SmsNotificationsPrefService}
-import system.Logging
+import system.{AuditLogContext, Logging}
 import warwick.sso.{UserLookupService, Usercode}
 
 import scala.concurrent.Future
+import scala.util.Success
 
 /**
   * Handles message sending via a job table.
@@ -43,7 +46,9 @@ trait MessagingService {
   def getOldestUnsentMessageCreatedAt: Option[DateTime]
 
   def getSmsSentLast24Hours: Int
-}
+
+  def processTransientPushNotification(usercodes: Set[Usercode], pushNotification: ActivitySave)(implicit context: AuditLogContext): Unit
+  }
 
 class MessagingServiceImpl @Inject()(
   @NamedDatabase("default") db: Database,
@@ -54,12 +59,29 @@ class MessagingServiceImpl @Inject()(
   @Named("email") emailer: OutputService,
   @Named("mobile") mobile: OutputService,
   @Named("sms") sms: OutputService,
+  apns: APNSOutputService,
+  fcm: FCMOutputService,
   messagingDao: MessagingDao,
   activityESService: ActivityESService,
 ) extends MessagingService with Logging {
 
   // weak sauce way to resolve cyclic dependency.
   private lazy val activities = activitiesProvider.get
+
+  override def processTransientPushNotification(usercodes: Set[Usercode], activity: ActivitySave)(implicit context: AuditLogContext): Future[Seq[MessageProcessing.ProcessingResult]] = {
+    val pushNotification = MobileOutputService.toPushNotification(activity)
+    val results = users.getUsers(usercodes.toSeq).get.keysIterator.map { usercode =>
+      fcm.send(usercode, pushNotification).map { _ =>
+        auditLog('SendTransientPushNotification, 'platform -> Google.dbValue, 'usercode -> usercode.string, 'type -> activity.`type`)
+        ProcessingResult(success = true, "perfect")
+      }
+      apns.send(usercode, pushNotification).map { _ =>
+        auditLog('SendTransientPushNotification, 'platform -> Apple.dbValue, 'usercode -> usercode.string, 'type -> activity.`type`)
+        ProcessingResult(success = true, "perfect")
+      }
+    }
+    Future.sequence(results.toSeq)
+  }
 
   override def send(recipients: Set[Usercode], activity: Activity): Unit = {
     def save(output: Output, user: Usercode)(implicit c: Connection) = {

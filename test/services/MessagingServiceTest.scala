@@ -8,7 +8,7 @@ import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import services.dao._
 import services.elasticsearch.ActivityESService
-import services.messaging.{MessagingServiceImpl, OutputService}
+import services.messaging.{APNSOutputService, FCMOutputService, MessagingServiceImpl, OutputService}
 import warwick.sso.{UserLookupService, Usercode}
 
 class MessagingServiceTest extends BaseSpec with MockitoSugar {
@@ -36,6 +36,8 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
       emailer,
       mobile,
       sms,
+      mock[APNSOutputService],
+      mock[FCMOutputService],
       messagingDao,
       activityESService
     )
