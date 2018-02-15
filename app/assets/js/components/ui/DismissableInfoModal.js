@@ -12,7 +12,25 @@ export default class DismissableInfoModal extends React.PureComponent {
     children: PropTypes.node,
     href: PropTypes.string,
     onDismiss: PropTypes.func,
+    moreButton: PropTypes.element,
   };
+
+  renderMoreButton() {
+    if (this.props.moreButton) {
+      return this.props.moreButton;
+    } else if (this.props.href) {
+      return (
+        <HyperLink
+          type="button"
+          className="btn btn-default"
+          href={this.props.href}
+        >
+          More
+        </HyperLink>
+      );
+    }
+    return null;
+  }
 
   render() {
     return (
@@ -33,14 +51,7 @@ export default class DismissableInfoModal extends React.PureComponent {
                 {this.props.children}
               </div>
               <div className="modal-footer">
-                { this.props.href &&
-                <HyperLink
-                  type="button"
-                  className="btn btn-default"
-                  href={this.props.href}
-                >
-                  More
-                </HyperLink> }
+                {this.renderMoreButton()}
                 <button
                   type="button"
                   className="btn btn-default"
