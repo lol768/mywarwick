@@ -68,7 +68,7 @@ export default class ListTile extends TileContent {
       content.items : _.take(content.items, this.getNumberOfItemsToDisplay());
     return (<ul className="list-unstyled tile-list-group">
       {_.compact(itemsToDisplay).map((item) => {
-        const clickProps = (item.body) ? { onClick: this.onItemClick } : {};
+        const clickProps = (item.body) ? { handleOnClick: this.onItemClick } : {};
         return (
           <ListTileItem key={item.id} {...clickProps} {...item} />
         );
@@ -83,7 +83,7 @@ export class ListTileItem extends React.PureComponent {
     href: PropTypes.string,
     text: PropTypes.string,
     title: PropTypes.string,
-    onClick: PropTypes.func,
+    handleOnClick: PropTypes.func,
   };
 
   constructor(props) {
@@ -93,11 +93,11 @@ export class ListTileItem extends React.PureComponent {
 
   onClick(e) {
     e.preventDefault();
-    this.props.onClick(this.props);
+    this.props.handleOnClick(this.props);
   }
 
   render() {
-    const clickProps = (this.props.onClick) ? {
+    const clickProps = (this.props.handleOnClick) ? {
       onClick: this.onClick,
       onKeyUp: this.onClick,
       role: 'button',
