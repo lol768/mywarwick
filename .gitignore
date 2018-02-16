@@ -3,6 +3,7 @@
 /conf/worker.conf
 /conf/ehcache.properties
 /conf/*secret*
+/conf/fcm-service-account-key.json
 /logs
 /classes
 /target
