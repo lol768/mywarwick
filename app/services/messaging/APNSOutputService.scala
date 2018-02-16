@@ -1,5 +1,6 @@
 package services.messaging
 
+import actors.MessageProcessing
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.Inject
 import com.google.inject.name.Named
@@ -29,9 +30,12 @@ class APNSOutputService @Inject()(
   override def send(message: MessageSend.Heavy): Future[ProcessingResult] =
     send(message.user.usercode, MobileOutputService.toPushNotification(message.activity))
 
+  def processPushNotification(usercodes: Set[Usercode], pushNotification: PushNotification): Future[ProcessingResult] =
+    Future.sequence(usercodes.map(send(_, pushNotification))).map(_ => ProcessingResult(success = true, "ok"))
+
   def send(usercode: Usercode, pushNotification: PushNotification): Future[ProcessingResult] = Future {
     val payload = makePayload(
-      title = pushNotification.url.map(_ => s"${pushNotification.title} $LINK_EMOJI").getOrElse(pushNotification.title),
+      title = pushNotification.payload.url.map(_ => s"${pushNotification.payload.title} $LINK_EMOJI").getOrElse(pushNotification.payload.title),
       badge = getUnreadNotificationCount(usercode)
     )
 

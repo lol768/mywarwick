@@ -16,7 +16,7 @@ import play.api.test.Helpers._
 import play.api.test._
 import services.ActivityError.InvalidUsercodeAudience
 import services._
-import services.messaging.MessagingService
+import services.messaging.{MessagingService, MobileOutputService}
 import warwick.sso._
 
 import scala.util.Try
@@ -50,7 +50,8 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
     activityService,
     publisherService,
     audienceService,
-    messagingService
+    messagingService,
+    mock[MobileOutputService]
   ) {
     override val navigationService = new MockNavigationService()
     override val ssoClient: MockSSOClient = mockSSOClient

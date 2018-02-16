@@ -1,5 +1,6 @@
 package services.messaging
 
+import actors.MessageProcessing
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.Inject
 import com.google.inject.name.Named
@@ -33,6 +34,9 @@ class FCMOutputService @Inject()(
   def send(message: MessageSend.Heavy): Future[ProcessingResult] =
     send(message.user.usercode, MobileOutputService.toPushNotification(message.activity))
 
+  def processPushNotification(usercodes: Set[Usercode], pushNotification: PushNotification): Future[ProcessingResult] =
+    Future.sequence(usercodes.map(send(_, pushNotification))).map(_ => ProcessingResult(success = true, "ok"))
+
   def send(usercode: Usercode, pushNotification: PushNotification): Future[ProcessingResult] =
     db.withConnection { implicit c =>
       val sendNotifications =
@@ -48,8 +52,8 @@ class FCMOutputService @Inject()(
     val body = Json.obj(
       "to" -> token,
       "notification" -> Json.obj(
-        "title" -> JsString(pushNotification.url.map(_ => s"${pushNotification.title} $ARROW_EMOJI").getOrElse(pushNotification.title)),
-        "body" -> pushNotification.text
+        "title" -> JsString(pushNotification.payload.url.map(_ => s"${pushNotification.payload.title} $ARROW_EMOJI").getOrElse(pushNotification.payload.title)),
+        "body" -> pushNotification.payload.text
       )
     )
 
