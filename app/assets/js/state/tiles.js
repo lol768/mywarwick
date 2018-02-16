@@ -98,33 +98,6 @@ export function resizeTile(tile, layoutWidth, width, height) {
   };
 }
 
-export function persistTiles() {
-  return (dispatch, getState) => {
-    if (getState().tiles.fetched) { // NEWSTART-1290 disappearing tiles
-      const tiles = getState().tiles.data.tiles.map(item =>
-        _.pick(item, ['id', 'preferences', 'removed']),
-      );
-
-      const layout = getState().tiles.data.layout;
-
-      return fetchWithCredentials('/api/tiles', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tiles, layout }),
-      }).then(() => dispatch(fetchTiles()));
-    }
-    return Promise.resolve();
-  };
-}
-
-export function storeTilePreferences(tile, preferences) {
-  return {
-    type: TILE_PREFERENCES_SAVE,
-    tile,
-    preferences,
-  };
-}
-
 const ALL_TILES = undefined;
 export function fetchTileContent(tileSpec = ALL_TILES) {
   return (dispatch, getState) => {
@@ -156,6 +129,33 @@ export function fetchTileContent(tileSpec = ALL_TILES) {
           return dispatch(failedTileContentFetch(tileId, NETWORK_ERRORS));
         });
     }));
+  };
+}
+
+export function persistTiles() {
+  return (dispatch, getState) => {
+    if (getState().tiles.fetched) { // NEWSTART-1290 disappearing tiles
+      const tiles = getState().tiles.data.tiles.map(item =>
+        _.pick(item, ['id', 'preferences', 'removed']),
+      );
+
+      const layout = getState().tiles.data.layout;
+
+      return fetchWithCredentials('/api/tiles', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tiles, layout }),
+      }).then(() => dispatch(fetchTileContent()));
+    }
+    return Promise.resolve();
+  };
+}
+
+export function storeTilePreferences(tile, preferences) {
+  return {
+    type: TILE_PREFERENCES_SAVE,
+    tile,
+    preferences,
   };
 }
 
