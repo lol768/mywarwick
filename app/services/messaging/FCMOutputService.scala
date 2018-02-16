@@ -1,7 +1,9 @@
 package services.messaging
 
-import actors.MessageProcessing
+import java.io.FileInputStream
+
 import actors.MessageProcessing.ProcessingResult
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import models.MessageSend
@@ -13,7 +15,7 @@ import play.api.libs.ws.WSClient
 import services.dao.PushRegistrationDao
 import system.Logging
 import warwick.sso.Usercode
-
+import collection.JavaConverters._
 import scala.concurrent.Future
 
 @Named("fcm")
@@ -28,8 +30,27 @@ class FCMOutputService @Inject()(
 
   private val ARROW_EMOJI = "↗️"
 
-  val apiKey: String = configuration.getOptional[String]("mywarwick.fcm.apiKey")
-    .getOrElse(throw new IllegalStateException("Missing FCM API key - set mywarwick.fcm.apiKey"))
+  private val FCMProjectId = configuration.getOptional[String]("mywarwick.fcm.projectId")
+    .getOrElse(throw new IllegalStateException("Missing FCM config - set mywarwick.fcm.projectId"))
+
+  private val FCMServiceAccountKeyPath = configuration.getOptional[String]("mywarwick.fcm.serviceAccountKeyPath")
+    .getOrElse(throw new IllegalStateException("Missing FCM config - set mywarwick.fcm.serviceAccountKeyPath"))
+
+  private val FCMScope = "https://www.googleapis.com/auth/firebase.messaging"
+
+  private lazy val googleCredential: GoogleCredential =
+    GoogleCredential.fromStream(new FileInputStream(FCMServiceAccountKeyPath)).createScoped(Seq(FCMScope).asJava)
+
+  private def getFCMAccessToken: String = {
+    // Check if there's a valid token that expires more than a minute from now
+    Option(googleCredential.getExpiresInSeconds)
+      .filter(_ > 60)
+      .map(_ => googleCredential.getAccessToken)
+      .getOrElse {
+        googleCredential.refreshToken()
+        googleCredential.getAccessToken
+      }
+  }
 
   def send(message: MessageSend.Heavy): Future[ProcessingResult] =
     send(message.user.usercode, MobileOutputService.toPushNotification(message.activity))
@@ -50,32 +71,48 @@ class FCMOutputService @Inject()(
 
   def sendNotification(pushNotification: PushNotification)(token: String): Future[Unit] = {
     val body = Json.obj(
-      "to" -> token,
-      "notification" -> Json.obj(
-        "title" -> JsString(pushNotification.payload.url.map(_ => s"${pushNotification.payload.title} $ARROW_EMOJI").getOrElse(pushNotification.payload.title)),
-        "body" -> pushNotification.payload.text
+      "message" -> Json.obj(
+        "token" -> token,
+        "notification" -> Json.obj(
+          "title" -> JsString(pushNotification.payload.url.map(_ => s"${pushNotification.payload.title} $ARROW_EMOJI").getOrElse(pushNotification.payload.title)),
+          "body" -> pushNotification.payload.text
+        ),
+        "android" -> Json.obj(
+          "ttl" -> s"${5 * 60}s", // the default ttl is 4 weeks! So I've set it at 5 mins
+          "notification" -> Json.obj(
+            "sound" -> "default"
+          )
+        )
       )
     )
 
-    ws.url("https://fcm.googleapis.com/fcm/send")
+    val FCMToken = getFCMAccessToken
+
+    ws.url(s"https://fcm.googleapis.com/v1/projects/$FCMProjectId/messages:send")
       .addHttpHeaders(
-        "Authorization" -> s"key=$apiKey",
+        "Authorization" -> s"Bearer $FCMToken",
         "Content-Type" -> "application/json"
       )
       .post(body)
       .map { response =>
-        val errors = (response.json \ "results" \\ "error").map(_.as[String])
-
-        if (errors.contains("NotRegistered")) {
-          logger.info(s"Received NotRegistered FCM error, removing token=$token")
-          db.withConnection { implicit c =>
-            pushRegistrationDao.removeRegistration(token)
+        (response.json \ "error_code").validateOpt[String].fold(
+          errors => {
+            logger.error(s"Could not parse JSON result from FCM:")
+            errors.foreach { case (path, validationErrors) =>
+              logger.error(s"$path: ${validationErrors.map(_.message).mkString(", ")}")
+            }
+          },
+          e => e.foreach { error =>
+            if (error == "UNREGISTERED") {
+              logger.info(s"Received UNREGISTERED FCM error, removing token=$token")
+              db.withConnection { implicit c =>
+                pushRegistrationDao.removeRegistration(token)
+              }
+            } else {
+              logger.warn(s"FCM error: $error")
+            }
           }
-        }
-
-        if (errors.nonEmpty && !errors.forall(_ == "NotRegistered")) {
-          logger.warn("FCM errors: " + errors.mkString(", "))
-        }
+        )
       }
   }
 

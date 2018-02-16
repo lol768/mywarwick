@@ -131,15 +131,12 @@ class AudienceServiceImpl @Inject()(
   private def resolveDepartmentGroup(departmentCode: String, subset: DepartmentSubset): Future[Seq[Usercode]] =
     subset match {
       case All => audienceLookupDao.resolveDepartment(departmentCode)
-      case Staff => Future.sequence(Seq(
-        audienceLookupDao.resolveAdminStaff(departmentCode),
-        audienceLookupDao.resolveTeachingStaff(departmentCode)
-      )).map(_.flatten.toSeq)
+      case Staff => audienceLookupDao.resolveStaff(departmentCode)
+      case AdminStaff => Future.successful(Nil)
+      case TeachingStaff => Future.successful(Nil)
       case ug: UndergradStudents => audienceLookupDao.resolveUndergraduatesInDept(departmentCode, ug)
       case ResearchPostgrads => audienceLookupDao.resolveResearchPostgraduates(departmentCode)
       case TaughtPostgrads => audienceLookupDao.resolveTaughtPostgraduates(departmentCode)
-      case TeachingStaff => audienceLookupDao.resolveTeachingStaff(departmentCode)
-      case AdminStaff => audienceLookupDao.resolveAdminStaff(departmentCode)
       case ModuleAudience(code) => audienceLookupDao.resolveModule(code)
       case SeminarGroupAudience(groupId) => audienceLookupDao.resolveSeminarGroup(groupId)
       case RelationshipAudience(relationshipType, agentId) => audienceLookupDao.resolveRelationship(agentId, relationshipType)

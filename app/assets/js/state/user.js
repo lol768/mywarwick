@@ -100,7 +100,8 @@ export function userReceive(currentUser) {
           .then(() => localforage.setItem('user', currentUser))
           .then(() => dispatch(receiveUserIdentity(currentUser)));
       } else {
-        dispatch(receiveUserIdentity(currentUser));
+        localforage.setItem('user', currentUser)
+          .then(() => dispatch(receiveUserIdentity(currentUser)));
       }
     });
 }

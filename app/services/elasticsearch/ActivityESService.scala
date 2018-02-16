@@ -150,9 +150,15 @@ class ActivityESServiceImpl @Inject()(
     )
   }
 
-  override def messageSentDetailsForActivity(activityId: String, publishedAt: Option[DateTime]): Future[Option[MessageSentDetails]] = {
+  override def messageSentDetailsForActivity(activityId: String, publishedAt: Option[DateTime]): Future[Option[MessageSentDetails]] =
     publishedAt.map { date =>
-      val query = Json.parse(s"""{"query": {"match": {"${ESFieldName.activity_id}" : "$activityId" }}}""")
+      val query = Json.obj(
+        "query" -> Json.obj(
+          "term" -> Json.obj(
+            ESFieldName.activity_id_keyword -> activityId
+          )
+        )
+      )
 
       LowLevelClientHelper.performRequestAsync(
         method = HttpMethod.GET,
@@ -163,7 +169,6 @@ class ActivityESServiceImpl @Inject()(
         case _ => None // exception is logged by es client
       }
     }.getOrElse(Future(None))
-  }
 
   override def count(input: ActivityESSearchQuery): Future[Int] = {
     val lowHelper = LowLevelClientHelper

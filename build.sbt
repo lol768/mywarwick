@@ -67,6 +67,7 @@ val appDeps = Seq(
 //  "com.google.guava" % "guava" % "22.0",
   "com.google.apis" % "google-api-services-analyticsreporting" % "v4-rev10-1.22.0"
     exclude("com.google.guava","guava-jdk5"),
+  "com.google.api-client" % "google-api-client" % "1.23.0",
   "com.beachape" %% "enumeratum" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play-json" % enumeratumVersion,
