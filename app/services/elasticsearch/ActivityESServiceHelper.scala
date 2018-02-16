@@ -13,6 +13,7 @@ trait ActivityESServiceHelper {
 
   val activityDocumentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
   val messageSentDocumentType = "message_send"
+  val indexNameForMessageSent = "message_sent"
   val indexNameForAlert = "alert"
   val indexNameForActivity = "activity"
   val separator = "_"
@@ -105,10 +106,16 @@ trait ActivityESServiceHelper {
     builder
   }
 
-  def getEsTemplate(name: String) = Json.parse({
+  val templatesForActivityAndAlert: JsValue = getTemplatesForActivityAndAlert()
+  val messageSentEsTemplates: JsValue = getMessageSentEsTemplates()
+
+  def getTemplatesForActivityAndAlert(
+    indexNameForActivity: String = indexNameForActivity,
+    indexNameForAlert:String = indexNameForAlert
+  ): JsValue = Json.parse({
     s"""
       {
-        "template": "${name}*",
+        "index_patterns": ["$indexNameForActivity*", "$indexNameForAlert"],
         "mappings": {
           "activity": {
             "properties": {
@@ -164,12 +171,12 @@ trait ActivityESServiceHelper {
     """
   })
 
-  val activityEsTemplates: JsValue = getEsTemplate(indexNameForActivity)
-  val alertEsTemplates: JsValue = getEsTemplate(indexNameForAlert)
-  val messageSentEsTemplates: JsValue = Json.parse({
+  def getMessageSentEsTemplates(
+    indexNameForMessageSent: String = indexNameForMessageSent
+  ): JsValue = Json.parse({
     s"""
       {
-        "template": "message_sent*",
+        "index_patterns": "$indexNameForMessageSent*",
         "mappings": {
           "message_sent": {
             "properties": {

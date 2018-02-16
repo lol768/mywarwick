@@ -59,8 +59,13 @@ class ActivityESServiceImpl @Inject()(
   elasticSearchAdminService: ElasticSearchAdminService
 ) extends ActivityESService with Logging {
 
-  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.activityEsTemplates, "activity_template_default")
-  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.alertEsTemplates, "alert_template_default")
+  // new template for both alerts and activities in es6
+  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.templatesForActivityAndAlert, "activity_alert_template_default")
+
+  // delete the old individual template existed in es5
+  elasticSearchAdminService.deleteTemplate("activity_template_default")
+  elasticSearchAdminService.deleteTemplate("alert_template_default")
+
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.messageSentEsTemplates, "message_sent_template_default")
 
   private val client: RestHighLevelClient = eSClientConfig.highLevelClient
