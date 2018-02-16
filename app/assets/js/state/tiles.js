@@ -111,7 +111,7 @@ export function persistTiles() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tiles, layout }),
-      });
+      }).then(() => dispatch(fetchTiles()));
     }
     return Promise.resolve();
   };
