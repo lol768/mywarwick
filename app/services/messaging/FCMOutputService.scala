@@ -41,8 +41,14 @@ class FCMOutputService @Inject()(
     GoogleCredential.fromStream(new FileInputStream(FCMServiceAccountKeyPath)).createScoped(Seq(FCMScope).asJava)
 
   private def getFCMAccessToken: String = {
-    googleCredential.refreshToken()
-    googleCredential.getAccessToken
+    // Check if there's a valid token that expires more than a minute from now
+    Option(googleCredential.getExpiresInSeconds)
+      .filter(_ > 60)
+      .map(_ => googleCredential.getAccessToken)
+      .getOrElse {
+        googleCredential.refreshToken()
+        googleCredential.getAccessToken
+      }
   }
 
   def send(message: MessageSend.Heavy): Future[ProcessingResult] = {
