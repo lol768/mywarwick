@@ -153,6 +153,7 @@ class ActivityESServiceImpl @Inject()(
   override def messageSentDetailsForActivity(activityId: String, publishedAt: Option[DateTime]): Future[Option[MessageSentDetails]] =
     publishedAt.map { date =>
       val query = Json.obj(
+        "size" -> 10000,
         "query" -> Json.obj(
           "term" -> Json.obj(
             ESFieldName.activity_id_keyword -> activityId
