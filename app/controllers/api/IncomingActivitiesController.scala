@@ -31,12 +31,15 @@ class IncomingActivitiesController @Inject()(
 
   import securityService._
 
+  private def canSendTransientPush(publisherId: String, providerId: String, usercode: Usercode): Boolean =
+    publisherService.getRoleForUser(publisherId, usercode).can(CreateAPINotifications) &&
+      activityService.getProvider(providerId).exists(_.transientPush)
+
   def transientPushNotification(providerId: String) = APIAction(parse.json).async { implicit request =>
     publisherService.getParentPublisherId(providerId) match {
       case Some(publisherId) =>
         request.context.user.map { user =>
-          if (publisherService.getRoleForUser(publisherId, user.usercode).can(CreateAPINotifications)
-            && activityService.getProvider(providerId).exists(_.transientPush))
+          if (canSendTransientPush(publisherId, providerId, user.usercode)) {
             request.body.validate[IncomingActivityData].map { data =>
               import data._
               val pushNotification: PushNotification =
@@ -47,7 +50,7 @@ class IncomingActivitiesController @Inject()(
                 case _ => Future(Created(Json.toJson(API.Success("ok", Json.obj()))))
               }
             }.recoverTotal(jsErr => Future(validationError(jsErr)))
-          else
+          } else
             Future(forbidden(providerId, user))
         }.get
       case None => Future(badRequest(Seq(InvalidProviderId(providerId))))
