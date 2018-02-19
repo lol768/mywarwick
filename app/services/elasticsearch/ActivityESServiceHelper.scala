@@ -12,7 +12,7 @@ import play.api.libs.json.{JsValue, Json}
 trait ActivityESServiceHelper {
 
   val activityDocumentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
-  val messageSentDocumentType = "message_send"
+  val messageSendDocumentType = "message_send"
   val indexNameForAlert = "alert"
   val indexNameForActivity = "activity"
   val separator = "_"
@@ -166,15 +166,15 @@ trait ActivityESServiceHelper {
 
   val activityEsTemplates: JsValue = getEsTemplate(indexNameForActivity)
   val alertEsTemplates: JsValue = getEsTemplate(indexNameForAlert)
-  val messageSentEsTemplates: JsValue = Json.parse({
+  val messageSendEsTemplates: JsValue = Json.parse({
     s"""
       {
-        "template": "message_sent*",
+        "template": "message_send*",
         "mappings": {
-          "message_sent": {
+          "message_send": {
             "properties": {
               "activity_id": {
-                "type": "keyword"
+                "type": "text"
               },
               "usercode": {
                 "type": "keyword"
