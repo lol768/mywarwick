@@ -50,6 +50,11 @@ html.ios.app.is-iphone-x .modal-dialog {
   max-width: 95%;
 }
 
+.modal-title small {
+  display: block;
+  line-height: @modal-title-line-height;
+}
+
 // More native looking mobile modals
 
 html {
@@ -69,10 +74,6 @@ html:not(.ios) {
     font-weight: 500;
   }
 
-  .modal-footer {
-    border-top: none;
-  }
-
   .modal-header {
     border-bottom: none;
   }
@@ -86,25 +87,32 @@ html:not(.ios) {
     border-radius: 2px;
   }
 
-  .modal-footer .btn {
-    text-transform: uppercase;
-    background: transparent;
-    border: none;
-    transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms; // Material-UI
+  .modal-footer {
+    border-top: none;
+
+    .btn {
+      text-transform: uppercase;
+      background: transparent;
+      border: none;
+      transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms; // Material-UI
+
+      &:not(:disabled):hover {
+        background-color: rgba(153, 153, 153, 0.2) !important;
+      }
+    }
+
+    a, button {
+      &.btn-primary, &.btn-default {
+        color: #0093f7 !important; // Bootstrap uses !important on .btn-{class} :(
+        font-weight: 500;
+      }
+    }
+
+    .btn:disabled {
+      color: rgba(0, 0, 0, 0.3) !important;
+    }
   }
 
-  .modal-footer .btn:not(:disabled):hover {
-    background-color: rgba(153, 153, 153, 0.2) !important;
-  }
-
-  .modal-footer button.btn-primary, .modal-footer button.btn-default {
-    color: #0093f7 !important; // Bootstrap uses !important on .btn-{class} :(
-    font-weight: 500;
-  }
-
-  .modal-footer .btn:disabled {
-    color: rgba(0, 0, 0, 0.3) !important;
-  }
 }
 
 html.ios {
@@ -126,24 +134,26 @@ html.ios {
 
   .modal-footer {
     border-top: 1px solid #e5e5e5;
-  }
 
-  .modal-footer .btn {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-  }
+    .btn {
+      background: transparent;
+      border: none;
+      box-shadow: none;
 
-  .modal-footer .btn:active:not(:disabled) {
-    background-color: #cdcdcd !important;
-  }
+      &:active:not(:disabled) {
+        background-color: #cdcdcd !important;
+      }
+    }
 
-  .modal-footer button.btn-primary, .modal-footer button.btn-default {
-    color: #0069f8 !important; // Bootstrap uses !important on .btn-{class} :(
-    font-weight: 400;
-  }
+    a, button {
+      &.btn-primary, &.btn-default {
+        color: #0069f8 !important; // Bootstrap uses !important on .btn-{class} :(
+        font-weight: 400;
+      }
+    }
 
-  .modal-footer button:disabled.btn-primary, .modal-footer button:disabled.btn-default {
-    color: #5d5d5d !important;
+    button:disabled.btn-primary, button:disabled.btn-default {
+      color: #5d5d5d !important;
+    }
   }
 }
