@@ -145,7 +145,7 @@ export function persistTiles() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tiles, layout }),
-      }).then(() => dispatch(fetchTileContent()));
+      });
     }
     return Promise.resolve();
   };
@@ -162,7 +162,7 @@ export function storeTilePreferences(tile, preferences) {
 export function saveTilePreferences(tile, preferences) {
   return (dispatch) => {
     dispatch(storeTilePreferences(tile, preferences));
-    return dispatch(persistTiles());
+    return dispatch(persistTiles()).then(() => dispatch(fetchTileContent()));
   };
 }
 
