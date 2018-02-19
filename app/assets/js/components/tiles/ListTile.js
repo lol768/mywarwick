@@ -29,10 +29,10 @@ export default class ListTile extends TileContent {
     this.props.showModal(null);
   }
 
-  showModal(heading, subHeading, body, href) {
+  showModal(heading, subHeadings, body, href) {
     const modal = (<DismissableInfoModal
       heading={heading}
-      subHeading={subHeading}
+      subHeadings={subHeadings}
       onDismiss={this.hideModal}
       href={href}
       moreButton={this.modalMoreButton()}
@@ -58,7 +58,7 @@ export default class ListTile extends TileContent {
   }
 
   onItemClick(itemProps) {
-    this.showModal(itemProps.text, itemProps.title, itemProps.body.split('\r\n'), itemProps.href);
+    this.showModal(itemProps.text, [itemProps.title], itemProps.body.split('\r\n'), itemProps.href);
   }
 
   getSmallBody() {
