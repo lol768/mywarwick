@@ -170,7 +170,7 @@ trait ActivityESServiceHelper {
   val messageSendEsTemplates: JsValue = Json.parse({
     s"""
       {
-        "template": "$messageSendDocumentType*",
+        "template": "$messageSendIndexName*",
         "mappings": {
           "$messageSendDocumentType": {
             "properties": {
