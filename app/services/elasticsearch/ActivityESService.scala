@@ -91,7 +91,7 @@ class ActivityESServiceImpl @Inject()(
         .field("output", output.name)
         .field("state", state.dbValue)
         .endObject()
-      val indexName = s"${helper.messageSendDocumentType}${helper.dateSuffixString()}"
+      val indexName = s"${helper.messageSendIndexName}${helper.dateSuffixString()}"
       helper.makeIndexRequest(indexName, helper.messageSendDocumentType, s"$activityId:${usercode.string}:${output.name}", xContent)
     }
     makeBulkRequest(writeReqs)
@@ -162,7 +162,7 @@ class ActivityESServiceImpl @Inject()(
 
       LowLevelClientHelper.performRequestAsync(
         method = HttpMethod.GET,
-        path = s"/${helper.messageSendDocumentType}${helper.dateSuffixString(date)}/_search",
+        path = s"/${helper.messageSendIndexName}${helper.dateSuffixString(date)}/_search",
         entity = Some(new NStringEntity(query.toString, ContentType.APPLICATION_JSON)),
         lowLevelClient = lowLevelClient
       ).map(handleMessageSentDetailsResponse).recover {

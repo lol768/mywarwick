@@ -13,6 +13,7 @@ trait ActivityESServiceHelper {
 
   val activityDocumentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
   val messageSendDocumentType = "message_send"
+  val messageSendIndexName = messageSendDocumentType
   val indexNameForAlert = "alert"
   val indexNameForActivity = "activity"
   val separator = "_"
@@ -169,12 +170,18 @@ trait ActivityESServiceHelper {
   val messageSendEsTemplates: JsValue = Json.parse({
     s"""
       {
-        "template": "message_send*",
+        "template": "$messageSendDocumentType*",
         "mappings": {
-          "message_send": {
+          "$messageSendDocumentType": {
             "properties": {
               "activity_id": {
-                "type": "text"
+                "type": "text",
+               	"fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
               },
               "usercode": {
                 "type": "keyword"
