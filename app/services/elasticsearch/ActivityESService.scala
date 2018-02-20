@@ -61,7 +61,7 @@ class ActivityESServiceImpl @Inject()(
 
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.activityEsTemplates, "activity_template_default")
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.alertEsTemplates, "alert_template_default")
-  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.messageSendEsTemplates, "message_send_template_default")
+  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.messageSendEsTemplates, "message_sent_template_default")
 
   private val client: RestHighLevelClient = eSClientConfig.highLevelClient
   private val lowLevelClient: RestClient = eSClientConfig.lowLevelClient
