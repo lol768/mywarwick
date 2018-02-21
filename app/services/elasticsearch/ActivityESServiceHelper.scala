@@ -33,6 +33,12 @@ trait ActivityESServiceHelper {
     val api = "api"
     val created_at = "created_at"
     val created_by = "created_by"
+
+    val usercode = "usercode"
+    val usercode_keyword = s"$usercode.keyword"
+    val state = "state"
+    val state_keyword = s"$state.keyword"
+    val distinct_users_agg = "distinct_users"
   }
 
   def dateSuffixString(date: DateTime = DateTime.now()) = s"$separator${date.toString("yyyy_MM")}"
@@ -176,13 +182,14 @@ trait ActivityESServiceHelper {
               "activity_id": {
                 "type": "keyword"
               },
-              "usercode": {
+              "${ESFieldName.usercode}": {
                 "type": "keyword"
               },
               "output": {
                 "type": "keyword"
               },
-              "state": {
+              "${ESFieldName.state}": {
+
                 "type": "keyword"
               }
             }
@@ -191,6 +198,11 @@ trait ActivityESServiceHelper {
       }
     """
   })
+}
+
+case class AlertDeliveryReport(successful: Option[Int])
+object AlertDeliveryReport {
+  def empty = AlertDeliveryReport(None)
 }
 
 object ActivityESServiceUpdateHelper extends ActivityESServiceHelper {

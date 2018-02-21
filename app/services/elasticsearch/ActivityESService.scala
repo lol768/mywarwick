@@ -5,12 +5,16 @@ import javax.ws.rs.HttpMethod
 
 import com.google.inject.ImplementedBy
 import models.{Activity, MessageState, Output}
-import org.apache.http.entity.ContentType
-import org.apache.http.nio.entity.NStringEntity
 import org.elasticsearch.action.bulk.{BulkRequest, BulkResponse}
 import org.elasticsearch.action.index.IndexRequest
-import org.elasticsearch.client.{Response, ResponseException, RestClient, RestHighLevelClient}
+import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
+import org.elasticsearch.client.{RestClient, RestHighLevelClient}
 import org.elasticsearch.common.xcontent.{XContentBuilder, XContentFactory}
+import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.rest.RestStatus
+import org.elasticsearch.search.aggregations.AggregationBuilders
+import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality
+import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -48,7 +52,7 @@ trait ActivityESService {
 
   def count(activityESSearchQuery: ActivityESSearchQuery): Future[Int]
 
-  def messageSentDetailsForActivity(activityId: String, publishedAt: Option[DateTime]): Future[Option[MessageSentDetails]]
+  def deliveryReportForActivity(activityId: String, publishedAt: Option[DateTime]): Future[AlertDeliveryReport]
 }
 
 @Singleton
@@ -116,60 +120,36 @@ class ActivityESServiceImpl @Inject()(
     makeBulkRequest(writeReqs)
   }
 
-  private def buildSentDetails(seq: Seq[MessageSent]): SentDetails = {
-    import Output._
-    val groupedByOutput = seq.groupBy(_.output)
-    SentDetails(
-      sms = groupedByOutput.getOrElse(SMS, Nil).map(_.usercode),
-      email = groupedByOutput.getOrElse(Email, Nil).map(_.usercode),
-      mobile = groupedByOutput.getOrElse(Mobile, Nil).map(_.usercode)
-    )
+  private def handleDeliveryReportResponse(searchResponse: SearchResponse): AlertDeliveryReport = {
+    val cardinality: Cardinality = searchResponse.getAggregations.get(ESFieldName.distinct_users_agg)
+    AlertDeliveryReport(Some(cardinality.getValue.toInt))
   }
 
-  private def handleMessageSentDetailsResponse(res: Response): Option[MessageSentDetails] = {
-    val json = Json.parse(scala.io.Source.fromInputStream(res.getEntity.getContent).mkString)
-    (json \ "hits" \ "hits").validate[Seq[MessageSent]].fold(
-      invalid => {
-        logger.error(s"Could not parse JSON in Elastic Search response:\\n${Json.prettyPrint(json)}")
-        invalid.foreach { case (path, errs) => logger.error(s"$path: ${errs.map(_.message).mkString(", ")}") }
-        None
-      },
-      valid => valid match {
-        case messageSents if messageSents.nonEmpty =>
-          val groupedByState = messageSents.par.groupBy(_.state)
-          import MessageState._
-          Some(MessageSentDetails(
-            successful = buildSentDetails(groupedByState.getOrElse(Success, Nil).seq),
-            failed = buildSentDetails(groupedByState.getOrElse(Failure, Nil).seq),
-            skipped = buildSentDetails(groupedByState.getOrElse(Skipped, Nil).seq)
-          ))
-        case _ =>
-          logger.debug(s"MessageSent data not found in Elastic Search json response:\n${Json.prettyPrint(json)}")
-          None
-      }
-    )
-  }
-
-  override def messageSentDetailsForActivity(activityId: String, publishedAt: Option[DateTime]): Future[Option[MessageSentDetails]] =
+  override def deliveryReportForActivity(activityId: String, publishedAt: Option[DateTime]): Future[AlertDeliveryReport] =
     publishedAt.map { date =>
-      val query = Json.obj(
-        "size" -> 10000,
-        "query" -> Json.obj(
-          "term" -> Json.obj(
-            ESFieldName.activity_id_keyword -> activityId
-          )
-        )
+      import ESFieldName._
+      val path = s"${helper.messageSentDocumentType}${helper.dateSuffixString(date)}"
+      val searchRequest: SearchRequest = new SearchRequest(path).types(helper.messageSentDocumentType)
+      searchRequest.source(
+        new SearchSourceBuilder().size(0)
+          .query(QueryBuilders.boolQuery()
+            .must(QueryBuilders.termQuery(state_keyword, MessageState.Success.dbValue))
+            .must(QueryBuilders.termQuery(activity_id_keyword, activityId)))
+          .aggregation(AggregationBuilders.cardinality(distinct_users_agg).field(usercode_keyword))
       )
-
-      LowLevelClientHelper.performRequestAsync(
-        method = HttpMethod.GET,
-        path = s"/${helper.messageSentDocumentType}${helper.dateSuffixString(date)}/_search",
-        entity = Some(new NStringEntity(query.toString, ContentType.APPLICATION_JSON)),
-        lowLevelClient = lowLevelClient
-      ).map(handleMessageSentDetailsResponse).recover {
-        case _ => None // exception is logged by es client
-      }
-    }.getOrElse(Future(None))
+      val listener = new FutureActionListener[SearchResponse]
+      client.searchAsync(searchRequest, listener)
+      listener.future.map(response =>
+        if (response.status() == RestStatus.OK) {
+          handleDeliveryReportResponse(response)
+        } else {
+          logger.error(s"ES activity delivery report query responded with status: ${response.status().getStatus}")
+          AlertDeliveryReport.empty
+        })
+    }.getOrElse {
+      logger.debug("Unable to query delivery report for activity when publishedAt is None")
+      Future(AlertDeliveryReport.empty)
+    }
 
   override def count(input: ActivityESSearchQuery): Future[Int] = {
     val lowHelper = LowLevelClientHelper
