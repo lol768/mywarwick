@@ -106,98 +106,58 @@ trait ActivityESServiceHelper {
     builder
   }
 
-  def getEsTemplate(name: String) = Json.parse({
-    s"""
-      {
-        "template": "${name}*",
-        "mappings": {
-          "activity": {
-            "properties": {
-              "activity_id": {
-                "type": "keyword"
-              },
-              "activity_type": {
-                "type": "keyword"
-              },
-              "audience_components": {
-                "type": "keyword"
-              },
-              "provider_id": {
-                "type": "keyword"
-              },
-              "published_at": {
-                "type": "date"
-              },
-              "publisher": {
-                "type": "keyword"
-              },
-              "replaced_by": {
-                "type": "keyword"
-              },
-              "resolved_users": {
-                "type": "keyword"
-              },
-              "text": {
-                "type": "text"
-              },
-              "title": {
-                "type": "text",
-                "fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
-                }
-              },
-              "url": {
-                "type": "text",
-                "fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    """
-  })
+  val typeKeyword: JsValue = Json.obj("type" -> "keyword")
+  val propsBoilerplate: JsValue = Json.obj(
+    "type" -> "text",
+    "fields" -> Json.obj(
+      "keyword" -> Json.obj(
+        "type" -> "keyword",
+        "ignore_above" -> 256
+      )
+    )
+  )
+
+  def getEsTemplate(name: String) = Json.obj(
+    "template" -> s"$name*",
+    "mappings" -> Json.obj(
+      "activity" -> Json.obj(
+        "properties" -> Json.obj(
+          "activity_id" -> typeKeyword,
+          "activity_type" -> typeKeyword,
+          "audience_components" -> typeKeyword,
+          "provider_id" -> typeKeyword,
+          "published_at" -> Json.obj(
+            "type" -> "date"
+          ),
+          "publisher" -> typeKeyword,
+          "replaced_by" -> typeKeyword,
+          "resolved_users" -> typeKeyword,
+          "text" -> Json.obj(
+            "type" -> "text"
+          ),
+          "title" -> propsBoilerplate,
+          "url" -> propsBoilerplate
+        )
+      )
+    )
+  )
 
   val activityEsTemplates: JsValue = getEsTemplate(indexNameForActivity)
   val alertEsTemplates: JsValue = getEsTemplate(indexNameForAlert)
-  val messageSendEsTemplates: JsValue = Json.parse({
-    s"""
-      {
-        "template": "$messageSendIndexName*",
-        "mappings": {
-          "$messageSendDocumentType": {
-            "properties": {
-              "activity_id": {
-                "type": "text",
-               	"fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
-                }
-              },
-              "usercode": {
-                "type": "keyword"
-              },
-              "output": {
-                "type": "keyword"
-              },
-              "state": {
-                "type": "keyword"
-              }
-            }
-          }
-        }
-      }
-    """
-  })
+
+  val messageSendEsTemplates: JsValue = Json.obj(
+    "template" -> s"$messageSendIndexName*",
+    "mappings" -> Json.obj(
+      messageSendDocumentType -> Json.obj(
+        "properties" -> Json.obj(
+          "activity_id" -> propsBoilerplate,
+          "usercode" -> propsBoilerplate,
+          "output" -> propsBoilerplate,
+          "state" -> propsBoilerplate
+        )
+      )
+    )
+  )
 }
 
 object ActivityESServiceUpdateHelper extends ActivityESServiceHelper {
