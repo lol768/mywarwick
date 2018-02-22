@@ -12,6 +12,7 @@ import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
 import wrapKeyboardSelect from '../../keyboard-nav';
 import DismissableInfoModal from '../ui/DismissableInfoModal';
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 class TileView extends React.PureComponent {
   constructor(props) {
@@ -142,7 +143,17 @@ class TileView extends React.PureComponent {
         <ScrollRestore url={`/${Routes.TILES}/${id}`} forceTop>
           <div>
             {tileElement}
-            {this.state.activeModal}
+            <ReactCSSTransitionGroup
+              transitionName="grow-shrink-modal"
+              transitionAppear
+              transitionAppearTimeout={200}
+              transitionEnter
+              transitionEnterTimeout={200}
+              transitionLeave
+              transitionLeaveTimeout={200}
+            >
+              {this.state.activeModal}
+            </ReactCSSTransitionGroup>
           </div>
         </ScrollRestore>
       );
