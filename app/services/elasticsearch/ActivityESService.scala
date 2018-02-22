@@ -90,10 +90,10 @@ class ActivityESServiceImpl @Inject()(
     val writeReqs: Seq[IndexRequest] = reqs.map { req =>
       import req._
       val xContent: XContentBuilder = XContentFactory.jsonBuilder().startObject()
-        .field("activity_id", activityId)
-        .field("usercode", usercode.string)
-        .field("output", output.name)
-        .field("state", state.dbValue)
+        .field(ESFieldName.activity_id, activityId)
+        .field(ESFieldName.usercode, usercode.string)
+        .field(ESFieldName.output, output.name)
+        .field(ESFieldName.state, state.dbValue)
         .endObject()
       val indexName = s"${helper.messageSentDocumentType}${helper.dateSuffixString()}"
       helper.makeIndexRequest(indexName, helper.messageSentDocumentType, s"$activityId:${usercode.string}:${output.name}", xContent)
@@ -145,7 +145,11 @@ class ActivityESServiceImpl @Inject()(
         } else {
           logger.error(s"ES activity delivery report query responded with status: ${response.status().getStatus}")
           AlertDeliveryReport.empty
-        })
+        }).recover {
+        case e: Throwable =>
+          logger.error(s"ES request for delivery report failed", e)
+          AlertDeliveryReport.empty
+      }
     }.getOrElse {
       logger.debug("Unable to query delivery report for activity when publishedAt is None")
       Future(AlertDeliveryReport.empty)

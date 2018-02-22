@@ -38,6 +38,7 @@ trait ActivityESServiceHelper {
     val usercode_keyword = s"$usercode.keyword"
     val state = "state"
     val state_keyword = s"$state.keyword"
+    val output = "output"
     val distinct_users_agg = "distinct_users"
   }
 
