@@ -47,7 +47,7 @@ trait MessagingService {
   def getSmsSentLast24Hours: Int
 
   def processTransientPushNotification(usercodes: Set[Usercode], pushNotification: PushNotification)(implicit context: AuditLogContext): Future[MessageProcessing.ProcessingResult]
-  }
+}
 
 class MessagingServiceImpl @Inject()(
   @NamedDatabase("default") db: Database,
@@ -68,14 +68,14 @@ class MessagingServiceImpl @Inject()(
   override def processTransientPushNotification(usercodes: Set[Usercode], pushNotification: PushNotification)(implicit context: AuditLogContext): Future[MessageProcessing.ProcessingResult] = {
     val foundUsers: Set[Usercode] = users.getUsers(usercodes.toSeq).get.keySet
     val notFoundUsers = usercodes -- foundUsers
-    mobile.processPushNotification(foundUsers, pushNotification).flatMap { processingResult =>
+    mobile.processPushNotification(foundUsers, pushNotification).map { processingResult =>
       foundUsers.foreach(u =>
         auditLog('SendTransientPushNotification, 'usercode -> u.string, 'publisherId -> pushNotification.publisherId, 'providerId -> pushNotification.providerId, 'type -> pushNotification.notificationType)
       )
       if (notFoundUsers.nonEmpty) {
-        Future(ProcessingResult(success = true, "userlookup failed for some users", Some(UsersNotFound(notFoundUsers))))
+        ProcessingResult(success = true, "userlookup failed for some users", Some(UsersNotFound(notFoundUsers)))
       } else {
-        Future(processingResult)
+        processingResult
       }
     }
   }

@@ -13,7 +13,7 @@ import play.api.libs.json._
 import play.api.mvc.Result
 import services.ActivityError.{InvalidProviderId, InvalidUsercodeAudience}
 import services._
-import services.messaging.{MessagingService, MobileOutputService, Payload, PushNotification}
+import services.messaging._
 import warwick.sso.{AuthenticatedRequest, GroupName, User, Usercode}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -38,22 +38,31 @@ class IncomingActivitiesController @Inject()(
   def transientPushNotification(providerId: String) = APIAction(parse.json).async { implicit request =>
     publisherService.getParentPublisherId(providerId) match {
       case Some(publisherId) =>
-        request.context.user.map { user =>
-          if (canSendTransientPush(publisherId, providerId, user.usercode)) {
-            request.body.validate[IncomingActivityData].map { data =>
-              import data._
-              val pushNotification: PushNotification =
-                PushNotification(Payload(title, text, url), Some(publisherId), providerId, `type`)
-              val usercodes: Set[Usercode] = data.recipients.users.getOrElse(Seq.empty).map(Usercode).toSet
-              messagingService.processTransientPushNotification(usercodes, pushNotification).map(_.error).flatMap {
-                case Some(UsersNotFound(notFound)) => Future(createdWithUsersNotFound(notFound, Seq(InvalidUsercodeAudience(notFound.toSeq))))
-                case _ => Future(Created(Json.toJson(API.Success("ok", Json.obj()))))
-              }
-            }.recoverTotal(jsErr => Future(validationError(jsErr)))
-          } else
-            Future(forbidden(providerId, user))
-        }.get
-      case None => Future(badRequest(Seq(InvalidProviderId(providerId))))
+        val user = request.context.user.get
+        if (canSendTransientPush(publisherId, providerId, user.usercode)) {
+          request.body.validate[IncomingTransientPushData].map { data =>
+            import data._
+            val pushNotification: PushNotification =
+              PushNotification(
+                Payload(title, text, url),
+                Some(publisherId),
+                providerId,
+                `type`,
+                ttlSeconds = ttlSeconds,
+                fcmSound,
+                apnsSound,
+                tag
+              )
+
+            val usercodes: Set[Usercode] = data.recipients.users.getOrElse(Seq.empty).map(Usercode).toSet
+            messagingService.processTransientPushNotification(usercodes, pushNotification).map(_.error).map {
+              case Some(UsersNotFound(notFound)) => createdWithUsersNotFound(notFound, Seq(InvalidUsercodeAudience(notFound.toSeq)))
+              case _ => Created(Json.toJson(API.Success("ok", Json.obj())))
+            }
+          }.recoverTotal(jsErr => Future.successful(validationError(jsErr)))
+        } else
+          Future.successful(forbidden(providerId, user))
+      case None => Future.successful(badRequest(Seq(InvalidProviderId(providerId))))
     }
   }
 

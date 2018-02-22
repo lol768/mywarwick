@@ -17,6 +17,7 @@ import system.Logging
 import warwick.sso.Usercode
 import collection.JavaConverters._
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 @Named("fcm")
 class FCMOutputService @Inject()(
@@ -27,8 +28,6 @@ class FCMOutputService @Inject()(
 ) extends MobileOutputService with Logging {
 
   import system.ThreadPools.mobile
-
-  private val ARROW_EMOJI = "↗️"
 
   private val FCMProjectId = configuration.getOptional[String]("mywarwick.fcm.projectId")
     .getOrElse(throw new IllegalStateException("Missing FCM config - set mywarwick.fcm.projectId"))
@@ -52,6 +51,9 @@ class FCMOutputService @Inject()(
       }
   }
 
+  val notificationSound: String = "default"
+  val defaultTtl: FiniteDuration = 5.minutes
+
   def send(message: MessageSend.Heavy): Future[ProcessingResult] =
     send(message.user.usercode, MobileOutputService.toPushNotification(message.activity))
 
@@ -74,13 +76,14 @@ class FCMOutputService @Inject()(
       "message" -> Json.obj(
         "token" -> token,
         "notification" -> Json.obj(
-          "title" -> JsString(pushNotification.payload.url.map(_ => s"${pushNotification.payload.title} $ARROW_EMOJI").getOrElse(pushNotification.payload.title)),
-          "body" -> pushNotification.payload.text
+          "title" -> JsString(pushNotification.buildTitle(Emoji.ARROW)),
+          "body" -> pushNotification.payload.text,
+          "tag" -> JsString(pushNotification.tag.getOrElse(""))
         ),
         "android" -> Json.obj(
-          "ttl" -> s"${5 * 60}s", // the default ttl is 4 weeks! So I've set it at 5 mins
+          "ttl" -> s"${pushNotification.ttlSeconds.getOrElse(defaultTtl.toSeconds.toInt)}s",
           "notification" -> Json.obj(
-            "sound" -> "default"
+            "sound" -> JsString(pushNotification.fcmSound.getOrElse(notificationSound))
           )
         )
       )

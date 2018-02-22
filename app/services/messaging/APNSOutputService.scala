@@ -25,7 +25,7 @@ class APNSOutputService @Inject()(
   import apnsProvider.apns
   import system.ThreadPools.mobile
 
-  private val LINK_EMOJI = "🔗"
+  val notificationSound: String = "Alert.wav"
 
   override def send(message: MessageSend.Heavy): Future[ProcessingResult] =
     send(message.user.usercode, MobileOutputService.toPushNotification(message.activity))
@@ -35,8 +35,9 @@ class APNSOutputService @Inject()(
 
   def send(usercode: Usercode, pushNotification: PushNotification): Future[ProcessingResult] = Future {
     val payload = makePayload(
-      title = pushNotification.payload.url.map(_ => s"${pushNotification.payload.title} $LINK_EMOJI").getOrElse(pushNotification.payload.title),
-      badge = getUnreadNotificationCount(usercode)
+      title = pushNotification.buildTitle(Emoji.LINK),
+      badge = getUnreadNotificationCount(usercode),
+      sound = pushNotification.apnsSound.getOrElse(notificationSound)
     )
 
     getApplePushRegistrations(usercode).foreach(device => apns.push(device.token, payload))
@@ -44,11 +45,11 @@ class APNSOutputService @Inject()(
     ProcessingResult(success = true, message = s"Push notification(s) sent")
   }
 
-  def makePayload(title: String, badge: Int): String = {
+  private def makePayload(title: String, badge: Int, sound: String): String = {
     APNS.newPayload()
       .alertBody(title)
       .badge(badge)
-      .sound("Alert.wav")
+      .sound(sound)
       .build()
   }
 

@@ -1,6 +1,5 @@
 package services.messaging
 
-import actors.MessageProcessing
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Inject}
@@ -9,9 +8,6 @@ import system.Logging
 import warwick.sso.Usercode
 
 import scala.concurrent.Future
-
-case class Payload(title: String, text: Option[String], url: Option[String])
-case class PushNotification(payload: Payload, publisherId: Option[String], providerId: String, notificationType: String)
 
 object MobileOutputService {
   def toPushNotification(activity: Activity): PushNotification =
