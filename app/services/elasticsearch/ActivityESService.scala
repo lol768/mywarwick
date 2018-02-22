@@ -61,7 +61,7 @@ class ActivityESServiceImpl @Inject()(
 
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.activityEsTemplates, "activity_template_default")
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.alertEsTemplates, "alert_template_default")
-  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.messageSentEsTemplates, "message_sent_template_default")
+  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.messageSendEsTemplates, "message_sent_template_default")
 
   private val client: RestHighLevelClient = eSClientConfig.highLevelClient
   private val lowLevelClient: RestClient = eSClientConfig.lowLevelClient
@@ -91,8 +91,8 @@ class ActivityESServiceImpl @Inject()(
         .field("output", output.name)
         .field("state", state.dbValue)
         .endObject()
-      val indexName = s"${helper.messageSentDocumentType}${helper.dateSuffixString()}"
-      helper.makeIndexRequest(indexName, helper.messageSentDocumentType, s"$activityId:${usercode.string}:${output.name}", xContent)
+      val indexName = s"${helper.messageSendIndexName}${helper.dateSuffixString()}"
+      helper.makeIndexRequest(indexName, helper.messageSendDocumentType, s"$activityId:${usercode.string}:${output.name}", xContent)
     }
     makeBulkRequest(writeReqs)
   }
@@ -163,7 +163,7 @@ class ActivityESServiceImpl @Inject()(
 
       LowLevelClientHelper.performRequestAsync(
         method = HttpMethod.GET,
-        path = s"/${helper.messageSentDocumentType}${helper.dateSuffixString(date)}/_search",
+        path = s"/${helper.messageSendIndexName}${helper.dateSuffixString(date)}/_search",
         entity = Some(new NStringEntity(query.toString, ContentType.APPLICATION_JSON)),
         lowLevelClient = lowLevelClient
       ).map(handleMessageSentDetailsResponse).recover {
