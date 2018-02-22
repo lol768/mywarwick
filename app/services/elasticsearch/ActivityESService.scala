@@ -135,7 +135,10 @@ class ActivityESServiceImpl @Inject()(
           .query(QueryBuilders.boolQuery()
             .must(QueryBuilders.termQuery(state_keyword, MessageState.Success.dbValue))
             .must(QueryBuilders.termQuery(activity_id_keyword, activityId)))
-          .aggregation(AggregationBuilders.cardinality(distinct_users_agg).field(usercode_keyword))
+          .aggregation(AggregationBuilders.cardinality(distinct_users_agg)
+            .field(usercode_keyword)
+            .precisionThreshold(40000) // 40000 is max precision threshold (https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-cardinality-aggregation.html#CO67-1)
+          )
       )
       val listener = new FutureActionListener[SearchResponse]
       client.searchAsync(searchRequest, listener)
@@ -152,7 +155,7 @@ class ActivityESServiceImpl @Inject()(
       }
     }.getOrElse {
       logger.debug("Unable to query delivery report for activity when publishedAt is None")
-      Future(AlertDeliveryReport.empty)
+      Future.successful(AlertDeliveryReport.empty)
     }
 
   override def count(input: ActivityESSearchQuery): Future[Int] = {
