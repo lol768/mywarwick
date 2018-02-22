@@ -65,7 +65,7 @@ class ActivityESServiceImpl @Inject()(
 
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.activityEsTemplates, "activity_template_default")
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.alertEsTemplates, "alert_template_default")
-  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.messageSentEsTemplates, "message_sent_template_default")
+  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.messageSendEsTemplates, "message_sent_template_default")
 
   private val client: RestHighLevelClient = eSClientConfig.highLevelClient
   private val lowLevelClient: RestClient = eSClientConfig.lowLevelClient
@@ -95,8 +95,8 @@ class ActivityESServiceImpl @Inject()(
         .field(ESFieldName.output, output.name)
         .field(ESFieldName.state, state.dbValue)
         .endObject()
-      val indexName = s"${helper.messageSentDocumentType}${helper.dateSuffixString()}"
-      helper.makeIndexRequest(indexName, helper.messageSentDocumentType, s"$activityId:${usercode.string}:${output.name}", xContent)
+      val indexName = s"${helper.messageSendIndexName}${helper.dateSuffixString()}"
+      helper.makeIndexRequest(indexName, helper.messageSendDocumentType, s"$activityId:${usercode.string}:${output.name}", xContent)
     }
     makeBulkRequest(writeReqs)
   }
@@ -128,8 +128,8 @@ class ActivityESServiceImpl @Inject()(
   override def deliveryReportForActivity(activityId: String, publishedAt: Option[DateTime]): Future[AlertDeliveryReport] =
     publishedAt.map { date =>
       import ESFieldName._
-      val path = s"${helper.messageSentDocumentType}${helper.dateSuffixString(date)}"
-      val searchRequest: SearchRequest = new SearchRequest(path).types(helper.messageSentDocumentType)
+      val path = s"${helper.messageSendDocumentType}${helper.dateSuffixString(date)}"
+      val searchRequest: SearchRequest = new SearchRequest(path).types(helper.messageSendDocumentType)
       searchRequest.source(
         new SearchSourceBuilder().size(0)
           .query(QueryBuilders.boolQuery()
