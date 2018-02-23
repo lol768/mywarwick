@@ -8,6 +8,7 @@ import models.{Activity, MessageState, Output}
 import org.elasticsearch.action.bulk.{BulkRequest, BulkResponse}
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
+import org.elasticsearch.action.support.IndicesOptions
 import org.elasticsearch.client.{RestClient, RestHighLevelClient}
 import org.elasticsearch.common.xcontent.{XContentBuilder, XContentFactory}
 import org.elasticsearch.index.query.QueryBuilders
@@ -130,6 +131,7 @@ class ActivityESServiceImpl @Inject()(
       import ESFieldName._
       val path = s"${helper.messageSendDocumentType}${helper.dateSuffixString(date)}"
       val searchRequest: SearchRequest = new SearchRequest(path).types(helper.messageSendDocumentType)
+      searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen())
       searchRequest.source(
         new SearchSourceBuilder().size(0)
           .query(QueryBuilders.boolQuery()
