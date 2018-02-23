@@ -78,12 +78,12 @@ class FCMOutputService @Inject()(
         "notification" -> Json.obj(
           "title" -> JsString(pushNotification.buildTitle(Emoji.ARROW)),
           "body" -> pushNotification.payload.text,
-          "tag" -> JsString(pushNotification.tag.getOrElse(""))
         ),
         "android" -> Json.obj(
           "ttl" -> s"${pushNotification.ttlSeconds.getOrElse(defaultTtl.toSeconds.toInt)}s",
           "notification" -> Json.obj(
-            "sound" -> JsString(pushNotification.fcmSound.getOrElse(notificationSound))
+            "sound" -> JsString(pushNotification.fcmSound.getOrElse(notificationSound)),
+            "tag" -> JsString(pushNotification.tag.getOrElse(""))
           )
         )
       )
