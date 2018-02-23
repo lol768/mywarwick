@@ -219,12 +219,12 @@ function initSentDetails() {
     fetchActivityStatus(activityId)
       .then(({ sent: { delivered, readCount } }) => {
         $item.find('.activity-item__messages-read-val').text(readCount);
-        if (!delivered && !readCount) {
+        if (typeof delivered === 'undefined' && typeof readCount === 'undefined') {
           $item.html('<div class="col-sm-12"><i class="fa fa-exclamation-triangle"></i> Error fetching sent details for this alert</div>');
-        } else if (!delivered) { // NEWSTART-124 old alerts won't have this data
+        } else if (typeof delivered === 'undefined') { // NEWSTART-1240 old alerts won't have this data
           $item.find('[class^=activity-item__messages-delivered-]').hide();
         } else {
-          $item.find('.activity-item__messages-delivered-val').text(delivered.total);
+          $item.find('.activity-item__messages-delivered-val').text(delivered);
         }
       })
       .catch((err) => {
