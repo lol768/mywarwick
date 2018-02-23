@@ -77,7 +77,7 @@ class FCMOutputService @Inject()(
         "token" -> token,
         "notification" -> Json.obj(
           "title" -> JsString(pushNotification.buildTitle(Emoji.ARROW)),
-          "body" -> pushNotification.payload.text,
+          "body" -> pushNotification.payload.text
         ),
         "android" -> Json.obj(
           "ttl" -> s"${pushNotification.ttlSeconds.getOrElse(defaultTtl.toSeconds.toInt)}s",
@@ -98,14 +98,14 @@ class FCMOutputService @Inject()(
       )
       .post(body)
       .map { response =>
-        (response.json \ "error_code").validateOpt[String].fold(
+        (response.json \ "error_code").validate[String].fold(
           errors => {
             logger.error(s"Could not parse JSON result from FCM:")
             errors.foreach { case (path, validationErrors) =>
               logger.error(s"$path: ${validationErrors.map(_.message).mkString(", ")}")
             }
           },
-          e => e.foreach { error =>
+          error =>
             if (error == "UNREGISTERED") {
               logger.info(s"Received UNREGISTERED FCM error, removing token=$token")
               db.withConnection { implicit c =>
@@ -114,7 +114,6 @@ class FCMOutputService @Inject()(
             } else {
               logger.warn(s"FCM error: $error")
             }
-          }
         )
       }
   }
