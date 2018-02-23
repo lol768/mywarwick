@@ -13,7 +13,7 @@ import org.elasticsearch.client.{RestClient, RestHighLevelClient}
 import org.elasticsearch.common.xcontent.{XContentBuilder, XContentFactory}
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.rest.RestStatus
-import org.elasticsearch.search.aggregations.AggregationBuilders
+import org.elasticsearch.search.aggregations.{AggregationBuilders, Aggregations}
 import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.joda.time.DateTime
@@ -122,8 +122,12 @@ class ActivityESServiceImpl @Inject()(
   }
 
   private def handleDeliveryReportResponse(searchResponse: SearchResponse): AlertDeliveryReport = {
-    val cardinality: Cardinality = searchResponse.getAggregations.get(ESFieldName.distinct_users_agg)
-    AlertDeliveryReport(Some(cardinality.getValue.toInt))
+    Option(searchResponse.getAggregations) match {
+      case Some(aggregations: Aggregations) =>
+        val cardinality: Cardinality = aggregations.get(ESFieldName.distinct_users_agg)
+        AlertDeliveryReport(Some(cardinality.getValue.toInt))
+      case _ => AlertDeliveryReport.empty
+    }
   }
 
   override def deliveryReportForActivity(activityId: String, publishedAt: Option[DateTime]): Future[AlertDeliveryReport] =
