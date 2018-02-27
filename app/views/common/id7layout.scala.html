@@ -15,6 +15,12 @@
         <a class="sr-only sr-only-focusable" href="#main">Skip to main content</a>
 
         <header class="id7-page-header">
+          @if(context.user != context.actualUser) {
+            <div class="top-page-notice masquerade">
+              Masquerading as <strong>@context.user.flatMap(_.name.full).getOrElse("[Unknown user]")</strong>
+              (@context.user.map(_.usercode.string).getOrElse("[Unknown user]")). <a href="@controllers.admin.routes.MasqueradeController.masquerade()">Change</a>
+            </div>
+          }
           <div class="id7-utility-masthead">
             <nav class="id7-utility-bar" id="utility-bar-container">
               <ul>
