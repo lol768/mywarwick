@@ -183,7 +183,10 @@ export default class AgendaTile extends TileContent {
           { eventDate }
         </li>
         <li className="text-overflow-block">
-          <i className="fa fa-fw fa-calendar-check-o" />
+          {extraInfo ?
+            <i className="fa fa-fw fa-info-circle pulse-opacity" />
+            : <i className="fa fa-fw fa-calendar-check-o" />
+          }
           { title }
         </li>
         { !_.isEmpty(location) &&
@@ -209,7 +212,7 @@ export default class AgendaTile extends TileContent {
             title,
             [
               (<span><FAClock /> {eventDate}</span>),
-              locName && (<span><FAMap /> {location.name} </span>)
+              locName && (<span><FAMap /> {location.name} </span>),
             ],
             extraInfo,
             href,
@@ -364,7 +367,7 @@ export class AgendaTileItem extends React.PureComponent {
       title,
       [
         (<span> <FAClock /> {AgendaTile.renderSingleEventDate(this.props)}),
-        location && (<span><FAMap /> {location.name}</span>}</span>)
+        location && (<span><FAMap /> {location.name}</span></span>),
       ],
       extraInfo,
       href,
@@ -463,6 +466,7 @@ export class AgendaTileItem extends React.PureComponent {
           { extraInfo ?
             <a role="button" tabIndex={0} onClick={this.handleShowModal} target="_blank">
               { this.renderTitle() }
+              <i className="fa fa-fw fa-info-circle pulse-opacity" />
             </a>
             : <Hyperlink href={href}>{ this.renderTitle() }</Hyperlink> }
           { ' ' }
