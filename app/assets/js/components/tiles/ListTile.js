@@ -83,6 +83,7 @@ export class ListTileItem extends React.PureComponent {
     href: PropTypes.string,
     text: PropTypes.string,
     title: PropTypes.string,
+    body: PropTypes.string,
     handleOnClick: PropTypes.func,
   };
 
@@ -108,7 +109,12 @@ export class ListTileItem extends React.PureComponent {
         <a href={this.props.href} target="_blank" {...clickProps}>
           { this.props.title && <span className="list-group-item__title">{this.props.title}</span> }
           { this.props.date && <span className="list-group-item__date">{formatDateTime(this.props.date)}</span> }
-          <span className="list-group-item__text">{this.props.text}</span>
+          <span className="list-group-item__text">
+            {this.props.text}
+            {this.props.body &&
+              <i className="fa fa-fw fa-info-circle" />
+            }
+          </span>
         </a>
       </li>
     );

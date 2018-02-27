@@ -43,10 +43,8 @@ export default class DismissableInfoModal extends React.PureComponent {
               <div className="modal-header">
                 <h5 className="modal-title">
                   {this.props.heading}
-                  {_.map(this.props.subHeadings, (subHeading) =>
-                    <small>
-                      {subHeading}
-                    </small>
+                  {_.map(this.props.subHeadings, subHeading =>
+                    <small>{subHeading}</small>,
                   )}
                 </h5>
               </div>
