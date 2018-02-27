@@ -1,13 +1,14 @@
 /* eslint-env browser */
+import React from 'react';
 import ListTile from './ListTile';
 
 export default class MailTile extends ListTile {
-  static overridesOnClick() {
-    return true;
+  constructor(props) {
+    super(props);
+    this.modalMoreButtonOnClick = this.modalMoreButtonOnClick.bind(this);
   }
 
-  onClick() {
-    const { content } = this.props;
+  modalMoreButtonOnClick() {
     const preferences = this.props.preferences || {};
     const externalapp = preferences.externalapp || 'webmail';
     if (externalapp !== 'webmail' &&
@@ -15,12 +16,22 @@ export default class MailTile extends ListTile {
       'openMailApp' in window.MyWarwickNative
     ) {
       window.MyWarwickNative.openMailApp(externalapp);
-    } else if (content.href) {
-      if (window.navigator.userAgent.indexOf('MyWarwick/') >= 0) {
-        window.location = content.href;
-      } else {
-        window.open(content.href);
-      }
+    } else if (window.navigator.userAgent.indexOf('MyWarwick/') >= 0) {
+      window.location = 'http://webmail.warwick.ac.uk/';
+    } else {
+      window.open('http://webmail.warwick.ac.uk/');
     }
+  }
+
+  modalMoreButton() {
+    return (
+      <button
+        type="button"
+        className="btn btn-default"
+        onClick={this.modalMoreButtonOnClick}
+      >
+        Open inbox
+      </button>
+    );
   }
 }

@@ -45,35 +45,28 @@ class NotificationsController @Inject()(
     "audience" -> audienceMapping.verifying("Alerts cannot be public", !_.audience.contains("Public"))
   )(PublishNotificationData.apply)(PublishNotificationData.unapply))
 
-  def list(publisherId: String) = PublisherAction(publisherId, ViewNotifications) { implicit request =>
-    val futureNotifications = activityService.getFutureActivitiesWithAudienceByPublisherId(publisherId)
-    val sendingNotifications = activityService.getSendingActivitiesWithAudienceByPublisherId(publisherId)
-    val pastNotifications = activityService.getPastActivitiesWithAudienceByPublisherId(publisherId)
-
+  def list(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNotifications) { implicit request => {
+    val futureNotifications = activityService.getFutureActivitiesWithAudienceByPublisherId(publisherId, includeApiUser = false)
+    val sendingNotifications = activityService.getSendingActivitiesWithAudienceByPublisherId(publisherId, includeApiUser = false)
+    val pastNotifications = activityService.getPastActivitiesWithAudienceByPublisherId(publisherId, includeApiUser = false)
     Ok(views.list(request.publisher, futureNotifications, sendingNotifications, pastNotifications, request.userRole, allDepartments))
-  }
+  }}
 
   def audienceInfo(publisherId: String): Action[AnyContent] = PublisherAction(publisherId, ViewNotifications).async { implicit request =>
     sharedAudienceInfo(SharedAudienceInfoForNotifications(audienceService, AudienceInfoHelper.postProcessGroupedResolvedAudience))
   }
 
   def status(publisherId: String, activityId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request => {
-    import services.elasticsearch.MessageSentDetails._
     val activityWithAudience = activityService.getActivityWithAudience(activityId).filter(_.activity.publisherId.contains(publisherId))
 
-    activityESService.messageSentDetailsForActivity(activityId, activityWithAudience.map(_.activity.publishedAt)).map { sentDetails =>
+    activityESService.deliveryReportForActivity(activityId, activityWithAudience.map(_.activity.publishedAt)).map { deliveryReport =>
       activityWithAudience.map { activity =>
         Ok(Json.obj(
           "audienceSize" -> activity.audienceSize.toOption,
           "sent" -> (
             Json.obj("total" -> activity.sentCount)
               ++ Json.obj("readCount" -> activityService.getActivityReadCountSincePublishedDate(activityId))
-              ++ sentDetails.map(sd =>
-              Json.obj("delivered" -> Json.obj(
-                "total" -> sd.successful.distinctCount, // count of usercodes where at-least-one output was successful (sms, email, mobile)
-                "details" -> Json.toJson(sd)
-              ))
-            ).getOrElse(JsObject(Nil))
+              ++ deliveryReport.successful.map(count => Json.obj("delivered" -> count)).getOrElse(JsObject(Nil))
             ),
           "sendingNow" -> activity.isSendingNow
         ))
