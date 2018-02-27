@@ -51,7 +51,9 @@ class IncomingActivitiesController @Inject()(
                 ttlSeconds = ttlSeconds,
                 fcmSound,
                 apnsSound,
-                tag
+                tag,
+                channel,
+                priority
               )
 
             val usercodes: Set[Usercode] = data.recipients.users.getOrElse(Seq.empty).map(Usercode).toSet

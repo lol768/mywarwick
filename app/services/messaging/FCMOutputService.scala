@@ -80,6 +80,10 @@ class FCMOutputService @Inject()(
           "body" -> pushNotification.payload.text
         ),
         "android" -> Json.obj(
+          "priority" -> Json.toJson(pushNotification.priority.getOrElse(Priority.NORMAL)),
+          "data" -> Json.obj(
+            "channel_id" -> JsString(pushNotification.channel.getOrElse("default")),
+          ),
           "ttl" -> s"${pushNotification.ttlSeconds.getOrElse(defaultTtl.toSeconds.toInt)}s",
           "notification" -> Json.obj(
             "sound" -> JsString(pushNotification.fcmSound.getOrElse(notificationSound)),

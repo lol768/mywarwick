@@ -1,6 +1,5 @@
 package services.messaging
 
-import actors.MessageProcessing
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.Inject
 import com.google.inject.name.Named
@@ -37,7 +36,8 @@ class APNSOutputService @Inject()(
     val payload = makePayload(
       title = pushNotification.buildTitle(Emoji.LINK),
       badge = getUnreadNotificationCount(usercode),
-      sound = pushNotification.apnsSound.getOrElse(notificationSound)
+      sound = pushNotification.apnsSound.getOrElse(notificationSound),
+      priority = pushNotification.priority.getOrElse(Priority.NORMAL)
     )
 
     getApplePushRegistrations(usercode).foreach(device => apns.push(device.token, payload))
@@ -45,11 +45,12 @@ class APNSOutputService @Inject()(
     ProcessingResult(success = true, message = s"Push notification(s) sent")
   }
 
-  private def makePayload(title: String, badge: Int, sound: String): String = {
+  private def makePayload(title: String, badge: Int, sound: String, priority: Priority): String = {
     APNS.newPayload()
       .alertBody(title)
       .badge(badge)
       .sound(sound)
+      .customField("priority", priority.value)
       .build()
   }
 
