@@ -1,14 +1,15 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import HyperLink from './Hyperlink';
+import _ from 'lodash-es';
 
 export default class DismissableInfoModal extends React.PureComponent {
   static propTypes = {
     heading: PropTypes.string,
-    subHeading: PropTypes.oneOfType([
+    subHeadings: PropTypes.arrayOf(PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.node,
-    ]),
+    ])),
     children: PropTypes.node,
     href: PropTypes.string,
     onDismiss: PropTypes.func,
@@ -42,9 +43,9 @@ export default class DismissableInfoModal extends React.PureComponent {
               <div className="modal-header">
                 <h5 className="modal-title">
                   {this.props.heading}
-                  <small>
-                    &nbsp;{this.props.subHeading}
-                  </small>
+                  {_.map(this.props.subHeadings, subHeading =>
+                    <small>{subHeading}</small>,
+                  )}
                 </h5>
               </div>
               <div className="modal-body">
