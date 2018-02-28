@@ -184,7 +184,7 @@ export default class AgendaTile extends TileContent {
         </li>
         <li className="text-overflow-block">
           {extraInfo ?
-            <i className="fa fa-fw fa-info-circle pulse-opacity" />
+            <i className="fa fa-fw fa-info-circle" />
             : <i className="fa fa-fw fa-calendar-check-o" />
           }
           { title }
@@ -466,7 +466,7 @@ export class AgendaTileItem extends React.PureComponent {
           { extraInfo ?
             <a role="button" tabIndex={0} onClick={this.handleShowModal} target="_blank">
               { this.renderTitle() }
-              <i className="fa fa-fw fa-info-circle pulse-opacity" />
+              <i className="fa fa-fw fa-info-circle" />
             </a>
             : <Hyperlink href={href}>{ this.renderTitle() }</Hyperlink> }
           { ' ' }
