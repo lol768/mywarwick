@@ -44,7 +44,7 @@ describe('ListTileItem', () => {
     title.props.children.should.equal(props.title);
     text.type.should.equal('span');
     text.props.className.should.equal('list-group-item__text');
-    text.props.children.should.equal(props.text);
+    text.props.children[0].should.equal(props.text);
   });
 
   it('should render a date when one is present', () => {
