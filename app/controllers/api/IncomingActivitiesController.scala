@@ -1,5 +1,6 @@
 package controllers.api
 
+import java.util.UUID
 import javax.inject.Singleton
 
 import actors.MessageProcessing.UsersNotFound
@@ -44,14 +45,12 @@ class IncomingActivitiesController @Inject()(
             import data._
             val pushNotification: PushNotification =
               PushNotification(
+                id =  UUID.randomUUID.toString,
                 Payload(title, text, url),
                 Some(publisherId),
                 providerId,
                 `type`,
                 ttlSeconds = ttlSeconds,
-                fcmSound,
-                apnsSound,
-                tag,
                 channel,
                 priority
               )

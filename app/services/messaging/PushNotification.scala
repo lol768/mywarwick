@@ -1,8 +1,8 @@
 package services.messaging
 
-import models.{ActivityRecipients, ActivityTag}
+import models.{ActivityRecipients, ActivityTag, DateFormats}
 import org.joda.time.DateTime
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json._
 
 case class Payload(title: String, text: Option[String], url: Option[String])
 
@@ -11,8 +11,11 @@ object Priority {
   val HIGH: Priority = Priority("high")
   val NORMAL: Priority = Priority("normal")
   private val values = Set(HIGH, NORMAL)
-  def parse(priority: String): Option[Priority] = values.find(_.value == priority)
-  implicit val reads: Reads[Priority] = Json.reads[Priority]
+  def parse(priority: String): Priority = values.find(_.value == priority).getOrElse(throw new IllegalArgumentException(priority))
+  implicit val format: Format[Priority] = new Format[Priority] {
+    def reads(json: JsValue) = JsSuccess(parse(json.as[String]))
+    def writes(priority: Priority) = JsString(priority.value)
+  }
 }
 
 object Emoji {
@@ -21,14 +24,12 @@ object Emoji {
 }
 
 case class PushNotification(
+  id: String, // the activityId
   payload: Payload,
   publisherId: Option[String],
   providerId: String,
   notificationType: String,
   ttlSeconds: Option[Int] = None,
-  fcmSound: Option[String] = None,
-  apnsSound: Option[String] = None,
-  tag: Option[String] = None,
   channel: Option[String] = None,
   priority: Option[Priority] = None
 ) {
@@ -46,15 +47,13 @@ case class IncomingTransientPushData(
   generated_at: Option[DateTime],
   recipients: ActivityRecipients,
   send_email: Option[Boolean],
-  tag: Option[String],
   ttlSeconds: Option[Int],
-  fcmSound: Option[String],
-  apnsSound: Option[String],
   channel: Option[String],
   priority: Option[Priority]
 )
 
 object IncomingTransientPushData {
+  import DateFormats.isoDateReads
   implicit val reads: Reads[IncomingTransientPushData] = Json.reads[IncomingTransientPushData]
 }
 

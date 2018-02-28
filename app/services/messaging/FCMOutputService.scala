@@ -51,7 +51,6 @@ class FCMOutputService @Inject()(
       }
   }
 
-  val notificationSound: String = "default"
   val defaultTtl: FiniteDuration = 5.minutes
 
   def send(message: MessageSend.Heavy): Future[ProcessingResult] =
@@ -72,23 +71,23 @@ class FCMOutputService @Inject()(
     }
 
   def sendNotification(pushNotification: PushNotification)(token: String): Future[Unit] = {
+    import pushNotification._
     val body = Json.obj(
       "message" -> Json.obj(
         "token" -> token,
         "notification" -> Json.obj(
-          "title" -> JsString(pushNotification.buildTitle(Emoji.ARROW)),
-          "body" -> pushNotification.payload.text
+          "title" -> JsString(buildTitle(Emoji.ARROW)),
+          "body" -> payload.text
         ),
         "android" -> Json.obj(
-          "priority" -> Json.toJson(pushNotification.priority.getOrElse(Priority.NORMAL)),
-          "data" -> Json.obj(
-            "channel_id" -> JsString(pushNotification.channel.getOrElse("default")),
-          ),
-          "ttl" -> s"${pushNotification.ttlSeconds.getOrElse(defaultTtl.toSeconds.toInt)}s",
-          "notification" -> Json.obj(
-            "sound" -> JsString(pushNotification.fcmSound.getOrElse(notificationSound)),
-            "tag" -> JsString(pushNotification.tag.getOrElse(""))
-          )
+          "ttl" -> s"${ttlSeconds.getOrElse(defaultTtl.toSeconds.toInt)}s",
+          "priority" -> Json.toJson(priority.getOrElse(Priority.NORMAL)),
+          "data" -> (Json.obj(
+            "notification_id" -> id,
+            "priority" -> Json.toJson(priority.getOrElse(Priority.NORMAL))
+          ) ++ channel.map(channel => Json.obj(
+            "channel" -> JsString(channel)
+          )).getOrElse(JsObject(Nil))),
         )
       )
     )
@@ -102,24 +101,31 @@ class FCMOutputService @Inject()(
       )
       .post(body)
       .map { response =>
-        (response.json \ "error_code").validate[String].fold(
+        response.json.validate[FCMResponse].fold(
           errors => {
             logger.error(s"Could not parse JSON result from FCM:")
             errors.foreach { case (path, validationErrors) =>
               logger.error(s"$path: ${validationErrors.map(_.message).mkString(", ")}")
             }
           },
-          error =>
-            if (error == "UNREGISTERED") {
+          res => {
+            res.error.foreach(err => logger.warn(s"FCM error: ${Json.prettyPrint(err)}"))
+            if (res.error_code.contains("UNREGISTERED")) {
               logger.info(s"Received UNREGISTERED FCM error, removing token=$token")
               db.withConnection { implicit c =>
                 pushRegistrationDao.removeRegistration(token)
               }
             } else {
-              logger.warn(s"FCM error: $error")
+              res.error_code.foreach(code => s"FCM error code: $code")
             }
+          }
         )
       }
+  }
+
+  case class FCMResponse(name: Option[String], error: Option[JsValue], error_code: Option[String])
+  object FCMResponse {
+    implicit val reads: Reads[FCMResponse] = Json.reads[FCMResponse]
   }
 
   override def clearUnreadCount(user: Usercode): Unit = {

@@ -11,7 +11,7 @@ import scala.concurrent.Future
 
 object MobileOutputService {
   def toPushNotification(activity: Activity): PushNotification =
-    PushNotification(Payload(activity.title, activity.text, activity.url), activity.publisherId, activity.providerId, activity.`type`)
+    PushNotification(activity.id, Payload(activity.title, activity.text, activity.url), activity.publisherId, activity.providerId, activity.`type`)
 }
 
 @ImplementedBy(classOf[MobileOutputServiceImpl])

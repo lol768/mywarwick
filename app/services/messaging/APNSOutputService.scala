@@ -36,7 +36,6 @@ class APNSOutputService @Inject()(
     val payload = makePayload(
       title = pushNotification.buildTitle(Emoji.LINK),
       badge = getUnreadNotificationCount(usercode),
-      sound = pushNotification.apnsSound.getOrElse(notificationSound),
       priority = pushNotification.priority.getOrElse(Priority.NORMAL)
     )
 
@@ -45,11 +44,11 @@ class APNSOutputService @Inject()(
     ProcessingResult(success = true, message = s"Push notification(s) sent")
   }
 
-  private def makePayload(title: String, badge: Int, sound: String, priority: Priority): String = {
+  private def makePayload(title: String, badge: Int, priority: Priority): String = {
     APNS.newPayload()
       .alertBody(title)
       .badge(badge)
-      .sound(sound)
+      .sound(notificationSound)
       .customField("priority", priority.value)
       .build()
   }
