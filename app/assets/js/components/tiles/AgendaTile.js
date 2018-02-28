@@ -366,8 +366,12 @@ export class AgendaTileItem extends React.PureComponent {
     showModal(
       title,
       [
-        (<span> <FAClock /> {AgendaTile.renderSingleEventDate(this.props)}),
-        location && (<span><FAMap /> {location.name}</span></span>),
+        (
+          <span> <FAClock /> {AgendaTile.renderSingleEventDate(this.props)}</span>
+        ),
+        location && (
+          <span><FAMap /> {location.name}</span>
+        ),
       ],
       extraInfo,
       href,
