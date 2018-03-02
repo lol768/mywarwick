@@ -4,6 +4,8 @@ import models.{ActivityRecipients, ActivityTag, DateFormats}
 import org.joda.time.DateTime
 import play.api.libs.json._
 
+import scala.concurrent.duration.FiniteDuration
+
 case class Payload(title: String, text: Option[String], url: Option[String])
 
 case class Priority(value: String)
@@ -29,7 +31,7 @@ case class PushNotification(
   publisherId: Option[String],
   providerId: String,
   notificationType: String,
-  ttlSeconds: Option[Int] = None,
+  ttl: Option[FiniteDuration] = None,
   channel: Option[String] = None,
   priority: Option[Priority] = None
 ) {
@@ -47,7 +49,7 @@ case class IncomingTransientPushData(
   generated_at: Option[DateTime],
   recipients: ActivityRecipients,
   send_email: Option[Boolean],
-  ttlSeconds: Option[Int],
+  ttl: Option[Int],
   channel: Option[String],
   priority: Option[Priority]
 )

@@ -1,6 +1,7 @@
 package services.messaging
 
 import java.io.FileInputStream
+import java.util.concurrent.TimeUnit
 
 import actors.MessageProcessing.ProcessingResult
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
@@ -15,7 +16,8 @@ import play.api.libs.ws.WSClient
 import services.dao.PushRegistrationDao
 import system.Logging
 import warwick.sso.Usercode
-import collection.JavaConverters._
+
+import scala.collection.JavaConverters._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
@@ -51,7 +53,7 @@ class FCMOutputService @Inject()(
       }
   }
 
-  val defaultTtl: FiniteDuration = 5.minutes
+  lazy val defaultTtl: FiniteDuration = FiniteDuration(28, TimeUnit.DAYS) // later
 
   def send(message: MessageSend.Heavy): Future[ProcessingResult] =
     send(message.user.usercode, MobileOutputService.toPushNotification(message.activity))
@@ -72,22 +74,27 @@ class FCMOutputService @Inject()(
 
   def sendNotification(pushNotification: PushNotification)(token: String): Future[Unit] = {
     import pushNotification._
+    val notificationChannel: JsObject = if (channel.nonEmpty) Json.obj("android_channel_id" -> JsString(channel.get)) else JsObject(Nil)
+
     val body = Json.obj(
       "message" -> Json.obj(
         "token" -> token,
+        // TODO: remove notication payload when we are satisfied everyone has native android app supporting data-only FCM transmission
         "notification" -> Json.obj(
           "title" -> JsString(buildTitle(Emoji.ARROW)),
           "body" -> payload.text
         ),
         "android" -> Json.obj(
-          "ttl" -> s"${ttlSeconds.getOrElse(defaultTtl.toSeconds.toInt)}s",
+          "ttl" -> s"${ttl.getOrElse(defaultTtl.toSeconds.toInt)}s",
           "priority" -> Json.toJson(priority.getOrElse(Priority.NORMAL)),
           "data" -> (Json.obj(
-            "notification_id" -> id,
+            "notification" -> Json.obj(
+              "id" -> id,
+              "title" -> JsString(buildTitle(Emoji.ARROW)),
+              "body" -> payload.text
+            ),
             "priority" -> Json.toJson(priority.getOrElse(Priority.NORMAL))
-          ) ++ channel.map(channel => Json.obj(
-            "channel" -> JsString(channel)
-          )).getOrElse(JsObject(Nil))),
+          ) ++ notificationChannel),
         )
       )
     )
@@ -109,21 +116,32 @@ class FCMOutputService @Inject()(
             }
           },
           res => {
-            res.error.foreach(err => logger.warn(s"FCM error: ${Json.prettyPrint(err)}"))
-            if (res.error_code.contains("UNREGISTERED")) {
-              logger.info(s"Received UNREGISTERED FCM error, removing token=$token")
-              db.withConnection { implicit c =>
-                pushRegistrationDao.removeRegistration(token)
+            res.error.foreach(err => {
+              err.details.flatMap(_.errorCode).map {
+                case code: String if code.contains("UNREGISTERED") =>
+                  logger.info(s"Received UNREGISTERED FCM error, removing token=$token")
+                  db.withConnection { implicit c =>
+                    pushRegistrationDao.removeRegistration(token)
+                  }
+                case code: String => logger.error(s"FCM response status: ${err.status}, code $code")
               }
-            } else {
-              res.error_code.foreach(code => s"FCM error code: $code")
-            }
+            })
           }
         )
       }
   }
 
-  case class FCMResponse(name: Option[String], error: Option[JsValue], error_code: Option[String])
+  case class FCMErrorDetails(errorCode: Option[String], fieldViolation: Option[String])
+  object FCMErrorDetails {
+    implicit val reads: Reads[FCMErrorDetails] = Json.reads[FCMErrorDetails]
+  }
+
+  case class FCMError(code: Int, message: String, status: String, details: Seq[FCMErrorDetails])
+  object FCMError {
+    implicit val reads: Reads[FCMError] = Json.reads[FCMError]
+  }
+
+  case class FCMResponse(name: Option[String], error: Option[FCMError])
   object FCMResponse {
     implicit val reads: Reads[FCMResponse] = Json.reads[FCMResponse]
   }

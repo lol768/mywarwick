@@ -1,6 +1,7 @@
 package controllers.api
 
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 import actors.MessageProcessing.UsersNotFound
@@ -19,6 +20,7 @@ import warwick.sso.{AuthenticatedRequest, GroupName, User, Usercode}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration.FiniteDuration
 
 @Singleton
 class IncomingActivitiesController @Inject()(
@@ -50,7 +52,7 @@ class IncomingActivitiesController @Inject()(
                 Some(publisherId),
                 providerId,
                 `type`,
-                ttlSeconds = ttlSeconds,
+                ttl = if (ttl.nonEmpty) Some(FiniteDuration(ttl.get, TimeUnit.SECONDS)) else None,
                 channel,
                 priority
               )
