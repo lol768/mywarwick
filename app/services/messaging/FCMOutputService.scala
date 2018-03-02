@@ -88,11 +88,9 @@ class FCMOutputService @Inject()(
           "ttl" -> s"${ttl.getOrElse(defaultTtl.toSeconds.toInt)}s",
           "priority" -> Json.toJson(priority.getOrElse(Priority.NORMAL)),
           "data" -> (Json.obj(
-            "notification" -> Json.obj(
-              "id" -> id,
-              "title" -> JsString(buildTitle(Emoji.ARROW)),
-              "body" -> payload.text
-            ),
+            "id" -> id,
+            "title" -> JsString(buildTitle(Emoji.ARROW)),
+            "body" -> payload.text,
             "priority" -> Json.toJson(priority.getOrElse(Priority.NORMAL))
           ) ++ notificationChannel),
         )
