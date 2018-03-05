@@ -36,7 +36,8 @@ class APNSOutputService @Inject()(
     val payload = makePayload(
       title = pushNotification.buildTitle(Emoji.LINK),
       badge = getUnreadNotificationCount(usercode),
-      priority = pushNotification.priority.getOrElse(Priority.NORMAL)
+      priority = pushNotification.priority.getOrElse(Priority.NORMAL),
+      transient = pushNotification.transient,
     )
 
     getApplePushRegistrations(usercode).foreach(device => apns.push(device.token, payload))
@@ -44,14 +45,14 @@ class APNSOutputService @Inject()(
     ProcessingResult(success = true, message = s"Push notification(s) sent")
   }
 
-  private def makePayload(title: String, badge: Int, priority: Priority): String = {
+  private def makePayload(title: String, badge: Int, priority: Priority, transient: Boolean): String =
     APNS.newPayload()
       .alertBody(title)
       .badge(badge)
       .sound(notificationSound)
       .customField("priority", priority.value)
+      .customField("transient", transient)
       .build()
-  }
 
   def getUnreadNotificationCount(usercode: Usercode): Int = db.withConnection { implicit c =>
     val lastReadNotification = activityDao.getLastReadDate(usercode.string).getOrElse(new DateTime(0))

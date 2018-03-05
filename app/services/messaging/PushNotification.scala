@@ -33,7 +33,8 @@ case class PushNotification(
   notificationType: String,
   ttl: Option[FiniteDuration] = None,
   channel: Option[String] = None,
-  priority: Option[Priority] = None
+  priority: Option[Priority] = None,
+  transient: Boolean = false,
 ) {
   def buildTitle(emoji: String): String =
     payload.url.map(_ => s"${payload.title} $emoji").getOrElse(payload.title)

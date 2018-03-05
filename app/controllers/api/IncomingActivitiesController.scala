@@ -54,7 +54,8 @@ class IncomingActivitiesController @Inject()(
                 `type`,
                 ttl = if (ttl.nonEmpty) Some(FiniteDuration(ttl.get, TimeUnit.SECONDS)) else None,
                 channel,
-                priority
+                priority,
+                transient = true
               )
 
             val usercodes: Set[Usercode] = data.recipients.users.getOrElse(Seq.empty).map(Usercode).toSet
