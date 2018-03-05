@@ -16,7 +16,7 @@ describe('ListTile', () => {
     html.props.children.length.should.equal(3);
   });
 
-  it('should all items when zoomed', () => {
+  it('should show all items when zoomed', () => {
     const html = shallowRender(<ListTile zoomed={ true } { ...props } />);
     html.type.should.equal('ul');
     html.props.children.length.should.equal(4);
