@@ -41,7 +41,7 @@ export default class MailTile extends ListTile {
     if (this.isEmpty()) {
       return (
         <div>
-          <p>No unread messages</p>
+          <p>{this.props.content.defaultText}</p>
           <a
             role="button"
             className="text--dotted-underline"
