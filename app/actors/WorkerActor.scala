@@ -26,6 +26,7 @@ class WorkerActor @Inject()(
   log.debug("WorkerActor created")
 
   def receive = {
+
     case WorkAvailable =>
       log.debug("Checking for work")
       messaging.lockRecord() match {

@@ -263,7 +263,17 @@ class MeView extends HideableView {
           <div className={classes}>
             {this.renderTiles()}
           </div>
-          {this.state.activeModal}
+          <ReactCSSTransitionGroup
+            transitionName="grow-shrink-modal"
+            transitionAppear
+            transitionAppearTimeout={200}
+            transitionEnter
+            transitionEnterTimeout={200}
+            transitionLeave
+            transitionLeaveTimeout={200}
+          >
+            {this.state.activeModal}
+          </ReactCSSTransitionGroup>
         </div>
       </ScrollRestore>
     );

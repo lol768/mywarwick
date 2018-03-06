@@ -7,6 +7,7 @@ const SET_NATIVE = 'SET_NATIVE';
 const initialState = {
   enabled: true,
   minutesBeforeEvent: 15,
+  soundEnabled: true,
 };
 
 function updateNativeWithState(state) {
@@ -14,6 +15,9 @@ function updateNativeWithState(state) {
   if (!!native && 'setTimetableNotificationsEnabled' in native) {
     native.setTimetableNotificationsEnabled(state.enabled);
     native.setTimetableNotificationTiming(state.minutesBeforeEvent);
+    if (native.setTimetableNotificationsSoundEnabled) {
+      native.setTimetableNotificationsSoundEnabled(state.soundEnabled);
+    }
   }
 }
 
@@ -41,7 +45,7 @@ export function reducer(state = initialState, action) {
   if (action.type === UPDATE) {
     return {
       ...state,
-      ...pick(action.payload, ['enabled', 'minutesBeforeEvent']),
+      ...pick(action.payload, ['enabled', 'minutesBeforeEvent', 'soundEnabled']),
     };
   }
 

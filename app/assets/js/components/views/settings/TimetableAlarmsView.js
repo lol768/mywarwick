@@ -1,3 +1,4 @@
+/* eslint-env browser */
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import HideableView from '../HideableView';
@@ -17,6 +18,7 @@ export class TimetableAlarmsView extends HideableView {
   static propTypes = {
     enabled: PropTypes.bool.isRequired,
     minutesBeforeEvent: PropTypes.number.isRequired,
+    soundEnabled: PropTypes.bool.isRequired,
   };
 
   onToggleEnabled = () => {
@@ -31,8 +33,14 @@ export class TimetableAlarmsView extends HideableView {
     }));
   };
 
+  onToggleSoundEnabled = () => {
+    this.props.dispatch(update({
+      soundEnabled: !this.props.soundEnabled,
+    }));
+  };
+
   render() {
-    const { enabled, minutesBeforeEvent } = this.props;
+    const { enabled, minutesBeforeEvent, soundEnabled } = this.props;
 
     return (
       <div>
@@ -51,7 +59,7 @@ export class TimetableAlarmsView extends HideableView {
           </p>
         </div>
 
-        <div className="list-group setting-colour-0">
+        <div className="list-group setting-colour-2">
           <SwitchListGroupItem
             id="timetableAlarmsEnabled"
             value=""
@@ -68,7 +76,7 @@ export class TimetableAlarmsView extends HideableView {
         </div>
 
         {enabled &&
-        <div className="list-group setting-colour-1">
+        <div className="list-group setting-colour-2">
           {TIMINGS.map(minutes =>
             (<RadioListGroupItem
               description={`${TimetableAlarmsView.getDescriptionForTiming(minutes)}`}
@@ -77,6 +85,25 @@ export class TimetableAlarmsView extends HideableView {
               checked={minutesBeforeEvent === minutes}
             />),
           )}
+        </div>}
+
+        {enabled &&
+        window.MyWarwickNative &&
+        window.MyWarwickNative.setTimetableNotificationsSoundEnabled &&
+        <div className="list-group setting-colour-2">
+          <SwitchListGroupItem
+            id="timetableAlarmsSoundEnabled"
+            value=""
+            icon="volume-up"
+            description="Play notification sound"
+            role="button"
+            tabIndex={0}
+            onClick={this.onToggleSoundEnabled}
+            checked={soundEnabled}
+            failure={false}
+            loading={false}
+            disabled={false}
+          />
         </div>}
       </div>
     );

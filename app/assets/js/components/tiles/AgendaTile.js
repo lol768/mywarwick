@@ -114,12 +114,17 @@ export default class AgendaTile extends TileContent {
     this.props.showModal(null);
   }
 
-  showModal(heading, subHeading, body, href) {
+  modalMoreButton() {
+    return null;
+  }
+
+  showModal(heading, subHeadings, body, href) {
     const modal = (<DismissableInfoModal
       heading={heading}
-      subHeading={subHeading}
+      subHeadings={subHeadings}
       onDismiss={this.hideModal}
       href={href}
+      moreButton={this.modalMoreButton()}
     >
       {body}
     </DismissableInfoModal>);
@@ -183,7 +188,10 @@ export default class AgendaTile extends TileContent {
           { eventDate }
         </li>
         <li className="text-overflow-block">
-          <i className="fa fa-fw fa-calendar-check-o" />
+          {extraInfo ?
+            <i className="fa fa-fw fa-info-circle" />
+            : <i className="fa fa-fw fa-calendar-check-o" />
+          }
           { title }
         </li>
         { !_.isEmpty(location) &&
@@ -207,8 +215,10 @@ export default class AgendaTile extends TileContent {
           role="button"
           onClick={() => this.showModal(
             title,
-            <span> <FAClock /> {eventDate}&nbsp;
-              {locName && <span><FAMap /> {location.name}</span>}</span>,
+            [
+              (<span><FAClock /> {eventDate}</span>),
+              locName && (<span><FAMap /> {location.name} </span>),
+            ],
             extraInfo,
             href,
           )}
@@ -360,8 +370,14 @@ export class AgendaTileItem extends React.PureComponent {
     const { showModal, title, location, extraInfo, href } = this.props;
     showModal(
       title,
-      <span> <FAClock /> {AgendaTile.renderSingleEventDate(this.props)}&nbsp;
-        {location && <span><FAMap /> {location.name}</span>}</span>,
+      [
+        (
+          <span> <FAClock /> {AgendaTile.renderSingleEventDate(this.props)}</span>
+        ),
+        location && (
+          <span><FAMap /> {location.name}</span>
+        ),
+      ],
       extraInfo,
       href,
     );
@@ -459,6 +475,7 @@ export class AgendaTileItem extends React.PureComponent {
           { extraInfo ?
             <a role="button" tabIndex={0} onClick={this.handleShowModal} target="_blank">
               { this.renderTitle() }
+              <i className="fa fa-fw fa-info-circle" />
             </a>
             : <Hyperlink href={href}>{ this.renderTitle() }</Hyperlink> }
           { ' ' }

@@ -164,7 +164,7 @@ class MessagingServiceImpl @Inject()(
           case Output.Mobile => mobile.send(heavyMessage)
         }
       }.getOrElse {
-        Future.successful(ProcessingResult(success = false, s"User ${message.user} not found", error = Some(UserNotFound)))
+        Future.successful(ProcessingResult(success = false, s"User ${message.user.string} not found", error = Some(UserNotFound)))
       }
     }.getOrElse {
       Future.successful(ProcessingResult(success = false, s"Activity ${message.activity} not found", error = Some(ActivityNotFound)))

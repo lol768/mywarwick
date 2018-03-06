@@ -32,7 +32,7 @@ lazy val root = (project in file("."))
 // Versions of things for below
 val enumeratumVersion = "1.5.12"
 val akkaVersion = "2.5.3"
-val playUtilsVersion = "1.10"
+val playUtilsVersion = "1.11"
 
 val appDeps = Seq(
   jdbc,
