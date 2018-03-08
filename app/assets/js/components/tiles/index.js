@@ -10,3 +10,4 @@ export { default as map } from './MapTile';
 export { default as workarea } from './WorkareaTile';
 export { default as account } from './AccountTile';
 export { default as mail } from './MailTile';
+export { default as calendar } from './O365CalendarTile';
