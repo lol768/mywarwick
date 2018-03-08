@@ -79,9 +79,10 @@ export class TimetableAlarmsView extends HideableView {
         <div className="list-group setting-colour-2">
           {TIMINGS.map(minutes =>
             (<RadioListGroupItem
+              key={`timetable-minutes-${minutes.toString(10)}`}
               description={`${TimetableAlarmsView.getDescriptionForTiming(minutes)}`}
               onClick={this.onSetTiming(minutes)}
-              value={minutes}
+              value={minutes.toString(10)}
               checked={minutesBeforeEvent === minutes}
             />),
           )}
