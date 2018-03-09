@@ -4,6 +4,9 @@ import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
 import org.apache.http.HttpHost
+import org.apache.http.client.config.RequestConfig
+import org.apache.http.config.ConnectionConfig
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.elasticsearch.client.{RestClient, RestClientBuilder, RestHighLevelClient}
 import play.api.Configuration
 
@@ -22,8 +25,25 @@ class ESClientConfigImpl @Inject()(
 ) extends ESClientConfig {
 
   val allHttpHosts: Seq[HttpHost] = this.nodes.map(node => new HttpHost(node.node, node.port, node.protocol))
-  val lowLevel: RestClientBuilder = RestClient.builder(allHttpHosts.toArray: _*).setMaxRetryTimeoutMillis(60000)
-  val highLevel: RestHighLevelClient = new RestHighLevelClient(lowLevel)
+
+  val lowLevelBuilder: RestClientBuilder = RestClient
+    .builder(allHttpHosts.toArray: _*)
+    .setMaxRetryTimeoutMillis(60000)
+    .setHttpClientConfigCallback((configBuilder: HttpAsyncClientBuilder) => {
+      configBuilder
+        .setDefaultRequestConfig(
+          RequestConfig.custom()
+            .setSocketTimeout(60000)
+            .setConnectTimeout(60000)
+            .build()
+        )
+        .setMaxConnPerRoute(50)
+        .setMaxConnTotal(200)
+    })
+  // NEWSTART-1377 with the increase MaxConns we might be able to resolve this,
+  // if it comes up again, we might need to add some retry logic so it will try again later.
+
+  val highLevel: RestHighLevelClient = new RestHighLevelClient(lowLevelBuilder)
 
   override def nodes: Seq[ESNode] =
     ESNode.fromConfigs(config
