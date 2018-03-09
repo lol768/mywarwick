@@ -8,7 +8,7 @@ import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import services.dao._
 import services.elasticsearch.ActivityESService
-import services.messaging.{MessagingServiceImpl, OutputService}
+import services.messaging._
 import warwick.sso.{UserLookupService, Usercode}
 
 class MessagingServiceTest extends BaseSpec with MockitoSugar {
@@ -20,7 +20,7 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
     }
     val userLookupService: UserLookupService = mock[UserLookupService]
     val emailer: OutputService = mock[OutputService]
-    val mobile: OutputService = mock[OutputService]
+    val mobile: MobileOutputService = mock[MobileOutputService]
     val sms: OutputService = mock[OutputService]
     val messagingDao: MessagingDao = mock[MessagingDao]
     val emailPrefService: EmailNotificationsPrefService = mock[EmailNotificationsPrefService]

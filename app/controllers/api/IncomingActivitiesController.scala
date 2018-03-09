@@ -1,7 +1,10 @@
 package controllers.api
 
+import java.util.UUID
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
+import actors.MessageProcessing.UsersNotFound
 import com.google.inject.Inject
 import controllers.MyController
 import models.Audience.UsercodesAudience
@@ -12,17 +15,60 @@ import play.api.libs.json._
 import play.api.mvc.Result
 import services.ActivityError.{InvalidProviderId, InvalidUsercodeAudience}
 import services._
+import services.messaging._
 import warwick.sso.{AuthenticatedRequest, GroupName, User, Usercode}
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration.FiniteDuration
 
 @Singleton
 class IncomingActivitiesController @Inject()(
   securityService: SecurityService,
   activityService: ActivityService,
   publisherService: PublisherService,
-  audienceService: AudienceService
+  audienceService: AudienceService,
+  messagingService: MessagingService,
+  mobileOutputService: MobileOutputService
 ) extends MyController with I18nSupport {
 
   import securityService._
+
+  private def canSendTransientPush(publisherId: String, providerId: String, usercode: Usercode): Boolean =
+    publisherService.getRoleForUser(publisherId, usercode).can(CreateAPINotifications) &&
+      activityService.getProvider(providerId).exists(_.transientPush)
+
+  def transientPushNotification(providerId: String) = APIAction(parse.json).async { implicit request =>
+    publisherService.getParentPublisherId(providerId) match {
+      case Some(publisherId) =>
+        val user = request.context.user.get
+        if (canSendTransientPush(publisherId, providerId, user.usercode)) {
+          request.body.validate[IncomingTransientPushData].map { data =>
+            import data._
+            val pushNotification: PushNotification =
+              PushNotification(
+                id =  UUID.randomUUID.toString,
+                Payload(title, text, url),
+                Some(publisherId),
+                providerId,
+                `type`,
+                ttl = if (ttl.nonEmpty) Some(FiniteDuration(ttl.get, TimeUnit.SECONDS)) else None,
+                channel,
+                priority,
+                transient = true
+              )
+
+            val usercodes: Set[Usercode] = data.recipients.users.getOrElse(Seq.empty).map(Usercode).toSet
+            messagingService.processTransientPushNotification(usercodes, pushNotification).map(_.error).map {
+              case Some(UsersNotFound(notFound)) => createdWithUsersNotFound(notFound, Seq(InvalidUsercodeAudience(notFound.toSeq)))
+              case _ => Created(Json.toJson(API.Success("ok", Json.obj())))
+            }
+          }.recoverTotal(jsErr => Future.successful(validationError(jsErr)))
+        } else
+          Future.successful(forbidden(providerId, user))
+      case None => Future.successful(badRequest(Seq(InvalidProviderId(providerId))))
+    }
+  }
 
   def postActivity(providerId: String) = APIAction(parse.json) { implicit request =>
     postItem(providerId, shouldNotify = false)
@@ -103,6 +149,11 @@ class IncomingActivitiesController @Inject()(
     warnings.map(warning => API.Error(warning.getClass.getSimpleName, warning.message)),
   )))
 
+  private def createdWithUsersNotFound(notFoundUsers: Set[Usercode], warnings: Seq[ActivityError]): Result = Created(Json.toJson(API.PartialSuccess(
+    "ok",
+    Json.obj("notFound" -> notFoundUsers.map(_.string)),
+    warnings.map(warning => API.Error(warning.getClass.getSimpleName, warning.message)),
+  )))
 
   private def validationError(error: JsError): Result =
     BadRequest(Json.toJson(API.Failure[JsObject]("bad_request", API.Error.fromJsError(error))))

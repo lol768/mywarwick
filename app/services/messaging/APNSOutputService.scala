@@ -2,6 +2,7 @@ package services.messaging
 
 import actors.MessageProcessing.ProcessingResult
 import com.google.inject.Inject
+import com.google.inject.name.Named
 import com.notnoop.apns.APNS
 import models.Platform._
 import models.{MessageSend, PushRegistration}
@@ -12,6 +13,7 @@ import warwick.sso.Usercode
 
 import scala.concurrent.Future
 
+@Named("apns")
 class APNSOutputService @Inject()(
   @NamedDatabase("default") db: Database,
   apnsProvider: APNSProvider,
@@ -22,28 +24,35 @@ class APNSOutputService @Inject()(
   import apnsProvider.apns
   import system.ThreadPools.mobile
 
-  private val LINK_EMOJI = "🔗"
+  val notificationSound: String = "Alert.wav"
 
-  override def send(message: MessageSend.Heavy): Future[ProcessingResult] = Future {
-    import message._
+  override def send(message: MessageSend.Heavy): Future[ProcessingResult] =
+    send(message.user.usercode, MobileOutputService.toPushNotification(message.activity))
 
+  def processPushNotification(usercodes: Set[Usercode], pushNotification: PushNotification): Future[ProcessingResult] =
+    Future.sequence(usercodes.map(send(_, pushNotification))).map(_ => ProcessingResult(success = true, "ok"))
+
+  def send(usercode: Usercode, pushNotification: PushNotification): Future[ProcessingResult] = Future {
     val payload = makePayload(
-      title = activity.url.map(_ => s"${activity.title} $LINK_EMOJI").getOrElse(activity.title),
-      badge = getUnreadNotificationCount(user.usercode)
+      title = pushNotification.buildTitle(Emoji.LINK),
+      badge = getUnreadNotificationCount(usercode),
+      priority = pushNotification.priority.getOrElse(Priority.NORMAL),
+      transient = pushNotification.transient,
     )
 
-    getApplePushRegistrations(user.usercode).foreach(device => apns.push(device.token, payload))
+    getApplePushRegistrations(usercode).foreach(device => apns.push(device.token, payload))
 
     ProcessingResult(success = true, message = s"Push notification(s) sent")
   }
 
-  def makePayload(title: String, badge: Int): String = {
+  private def makePayload(title: String, badge: Int, priority: Priority, transient: Boolean): String =
     APNS.newPayload()
       .alertBody(title)
       .badge(badge)
-      .sound("Alert.wav")
+      .sound(notificationSound)
+      .customField("priority", priority.value)
+      .customField("transient", transient)
       .build()
-  }
 
   def getUnreadNotificationCount(usercode: Usercode): Int = db.withConnection { implicit c =>
     val lastReadNotification = activityDao.getLastReadDate(usercode.string).getOrElse(new DateTime(0))
