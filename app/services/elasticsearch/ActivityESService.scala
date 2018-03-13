@@ -146,7 +146,7 @@ class ActivityESServiceImpl @Inject()(
       searchRequest.source(
         new SearchSourceBuilder().size(0)
           .query(QueryBuilders.boolQuery()
-            .must(QueryBuilders.termQuery(state_keyword, MessageState.Success.dbValue))
+            .must(QueryBuilders.termsQuery(state_keyword, MessageState.Success.dbValue, MessageState.Muted.dbValue))
             .must(QueryBuilders.termQuery(activity_id_keyword, activityId)))
           .aggregation(AggregationBuilders.cardinality(distinct_users_agg)
             .field(usercode_keyword)
