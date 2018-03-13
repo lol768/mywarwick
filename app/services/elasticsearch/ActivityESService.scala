@@ -64,6 +64,9 @@ class ActivityESServiceImpl @Inject()(
   elasticSearchAdminService: ElasticSearchAdminService
 ) extends ActivityESService with Logging {
 
+  // can be removed following successful deletion (NEWSTART-1343)
+  elasticSearchAdminService.deleteTemplate("message_sent_template_default")
+
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.activityEsTemplates, "activity_template_default")
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.alertEsTemplates, "alert_template_default")
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.deliveryReportEsTemplates, "delivery_report_template_default")
