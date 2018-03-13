@@ -110,7 +110,10 @@ class MessagingServiceImpl @Inject()(
       if (mutedUsercodes.nonEmpty) {
         logger.info(s"Muted sending activity ${activity.id} to: ${mutedUsercodes.map(_.string).mkString(",")}")
 
-        mutedUsercodes.foreach(activities.markProcessed(activity.id, _))
+        mutedUsercodes.foreach { user =>
+          activities.markProcessed(activity.id, user)
+          activityESService.indexMessageSentReq(MessageSent(activity.id, user, MessageState.Muted, Output.Mobile))
+        }
       }
       recipients.diff(mutedUsercodes)
     }.getOrElse(recipients)

@@ -80,7 +80,7 @@ class ActivityESServiceTest extends BaseSpec with MockitoSugar with BaseControll
              "failed": 0
            },
            "hits": {
-             "total": 0,
+             "total": 99,
              "max_score": null,
              "hits": []
            },
@@ -94,7 +94,8 @@ class ActivityESServiceTest extends BaseSpec with MockitoSugar with BaseControll
     )
 
     val routes: Routes = {
-      case GET(p"/message_send_$date/message_send/_search") => // / index_name / document_type / api
+      // message_send index should remain until reindex to delivery_report is complete (NEWSTART-1343)
+      case GET(p"/delivery_report_$dateOne,message_send_$dateTwo/delivery_report,message_send/_search") => // / index_name / document_type / api
         Action(Ok(responseJson))
     }
 

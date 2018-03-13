@@ -66,7 +66,7 @@ class ActivityESServiceImpl @Inject()(
 
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.activityEsTemplates, "activity_template_default")
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.alertEsTemplates, "alert_template_default")
-  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.messageSendEsTemplates, "message_sent_template_default")
+  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.deliveryReportEsTemplates, "delivery_report_template_default")
 
   private val client: RestHighLevelClient = eSClientConfig.highLevelClient
   private val lowLevelClient: RestClient = eSClientConfig.lowLevelClient
@@ -96,8 +96,8 @@ class ActivityESServiceImpl @Inject()(
         .field(ESFieldName.output, output.name)
         .field(ESFieldName.state, state.dbValue)
         .endObject()
-      val indexName = s"${helper.messageSendIndexName}${helper.dateSuffixString()}"
-      helper.makeIndexRequest(indexName, helper.messageSendDocumentType, s"$activityId:${usercode.string}:${output.name}", xContent)
+      val indexName = s"${helper.deliveryReportIndexName}${helper.dateSuffixString()}"
+      helper.makeIndexRequest(indexName, helper.deliveryReportDocumentType, s"$activityId:${usercode.string}:${output.name}", xContent)
     }
     makeBulkRequest(writeReqs)
   }
@@ -124,8 +124,11 @@ class ActivityESServiceImpl @Inject()(
   private def handleDeliveryReportResponse(searchResponse: SearchResponse): AlertDeliveryReport = {
     Option(searchResponse.getAggregations) match {
       case Some(aggregations: Aggregations) =>
-        val cardinality: Cardinality = aggregations.get(ESFieldName.distinct_users_agg)
-        AlertDeliveryReport(Some(cardinality.getValue.toInt))
+        // did the query actually match anything, cardinality will still exist as 0 if we didn't
+        if (searchResponse.getHits.getTotalHits > 0) {
+          val cardinality: Cardinality = aggregations.get(ESFieldName.distinct_users_agg)
+          AlertDeliveryReport(Some(cardinality.getValue.toInt))
+        } else AlertDeliveryReport.empty
       case _ => AlertDeliveryReport.empty
     }
   }
@@ -133,8 +136,12 @@ class ActivityESServiceImpl @Inject()(
   override def deliveryReportForActivity(activityId: String, publishedAt: Option[DateTime]): Future[AlertDeliveryReport] =
     publishedAt.map { date =>
       import ESFieldName._
-      val path = s"${helper.messageSendDocumentType}${helper.dateSuffixString(date)}"
-      val searchRequest: SearchRequest = new SearchRequest(path).types(helper.messageSendDocumentType)
+
+      // message_send index should remain until reindex to delivery_report is complete (NEWSTART-1343)
+      val deliveryReportIndex = s"${helper.deliveryReportIndexName}${helper.dateSuffixString(date)}"
+      val messageSendIndex = s"${helper.messageSendIndexName}${helper.dateSuffixString(date)}"
+
+      val searchRequest: SearchRequest = new SearchRequest(deliveryReportIndex, messageSendIndex).types(helper.deliveryReportDocumentType, helper.messageSendDocumentType)
       searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen())
       searchRequest.source(
         new SearchSourceBuilder().size(0)
