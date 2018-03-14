@@ -1,0 +1,86 @@
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'lodash-es';
+import { formatDateTime, formatDate, formatTime, localMoment } from '../../../dateFormats';
+import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from '../TileContent';
+import Hyperlink from '../../ui/Hyperlink';
+import AgendaTile from './AgendaTile';
+import { eventPropType } from './constants';
+import * as FA  from './FA';
+
+/**
+ * Card component - display one or two for small and wide renditions.
+ */
+export default class SingleEvent extends React.PureComponent {
+
+  render() {
+    const event = this.props.event;
+    if (!event) {
+      return null;
+    }
+
+    const { title, location, extraInfo, organiser, staff, href } = event;
+
+    const eventDate = AgendaTile.renderSingleEventDate(event);
+    const list =
+      (<ul className="list-unstyled">
+        <li className="text-overflow-block agenda__date">
+          <FA.Clock fw />
+          { eventDate }
+        </li>
+        <li className="text-overflow-block">
+          {extraInfo ?
+            <i className="fa fa-fw fa-info-circle" />
+            : <i className="fa fa-fw fa-calendar-check-o" />
+          }
+          { title }
+        </li>
+        { !_.isEmpty(location) &&
+        <li className="text-overflow-block">
+          <FA.Map fw />
+          { AgendaTile.getLocationString(location) }
+        </li>
+        }
+        { (organiser || !_.isEmpty(staff)) &&
+        <li className="text-overflow-block">
+          <FA.User fw />
+          { AgendaTile.renderUser({ organiser, staff }) }
+        </li>
+        }
+      </ul>);
+
+    if (extraInfo) {
+      const locName = AgendaTile.getLocationString(location);
+      return (
+        <a
+          role="button"
+          onClick={() => this.props.showModal(
+            title,
+            [
+              (<span><FA.Clock /> {eventDate}</span>),
+              locName && (<span><FA.Map /> {location.name} </span>),
+            ],
+            extraInfo,
+            href,
+          )}
+          target="_blank"
+          tabIndex={0}
+          style={{ display: 'block' }}
+        >
+          { list }
+        </a>
+      );
+    }
+
+    return (
+      <Hyperlink href={ href } style={{ display: 'block' }}>
+        { list }
+      </Hyperlink>
+    );
+  }
+
+  static propTypes = {
+    event: eventPropType,
+    showModal: PropTypes.func.isRequired
+  };
+}

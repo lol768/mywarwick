@@ -1,5 +1,5 @@
 import React from 'react';
-import AgendaTile from './AgendaTile';
+import AgendaTile from './agenda/AgendaTile';
 
 export default class O365CalendarTile extends AgendaTile {
   contentOrDefault(contentFunction) {

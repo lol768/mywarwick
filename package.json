@@ -128,7 +128,7 @@
     "gulp": "gulp",
     "flow": "flow",
     "lint": "gulp lint",
-    "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" node node_modules/mocha/bin/mocha -r babel-activate -r TestHelper --recursive test/assets/js",
+    "test": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" mocha -r babel-activate -r TestHelper --recursive test/assets/js",
     "bamboo": "NODE_PATH=\"$PWD/app/assets/js:$PWD/test/assets/js\" /usr/nodejs/5/bin/node node_modules/mocha/bin/mocha -R mocha-bamboo-reporter -r babel-activate -r TestHelper --recursive test/assets/js",
     "count-modules": "find . -name node_modules -type d -exec ls -1 {} \\; | sort | uniq -c  | sort -n"
   },
