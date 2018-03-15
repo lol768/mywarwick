@@ -84,12 +84,12 @@ describe('SingleEvent', () => {
     items.at(3).childAt(1).text().should.equal('John Smith');
   });
 
-  /*it('includes the parent in the title', () => {
+  it('includes the parent in the title', () => {
     const event = ITEMS.parentOnly;
 
     const html = shallowAtMoment(<SingleEvent event={event} />, now);
     html.find('li').at(1).text().should.equal('IN101 Introduction to IT');
-  });*/
+  });
 
   it('renders all-day events when small', () => {
     const event = ITEMS.singleDayAllDay;
