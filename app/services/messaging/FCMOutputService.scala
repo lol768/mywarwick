@@ -85,7 +85,7 @@ class FCMOutputService @Inject()(
           "body" -> payload.text
         ),
         "android" -> Json.obj(
-          "ttl" -> s"${ttl.getOrElse(defaultTtl.toSeconds.toInt)}s",
+          "ttl" -> s"${ttl.getOrElse(defaultTtl).toSeconds.toInt}s",
           "priority" -> Json.toJson(priority.getOrElse(Priority.NORMAL)),
           "data" -> (Json.obj(
             "id" -> id,
@@ -115,6 +115,7 @@ class FCMOutputService @Inject()(
           },
           res => {
             res.error.foreach(err => {
+              logger.error(s"FCM Error: code=${err.code} message=${err.message} status=${err.status}")
               err.details.flatMap(_.errorCode).map {
                 case code: String if code.contains("UNREGISTERED") =>
                   logger.info(s"Received UNREGISTERED FCM error, removing token=$token")
