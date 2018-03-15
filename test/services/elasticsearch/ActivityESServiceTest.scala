@@ -11,7 +11,7 @@ import org.apache.http.nio.entity.NStringEntity
 import org.elasticsearch.action.ActionListener
 import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
 import org.elasticsearch.client.{ResponseListener, RestClient, RestHighLevelClient}
-import org.elasticsearch.index.query.{BoolQueryBuilder, TermQueryBuilder}
+import org.elasticsearch.index.query.{BoolQueryBuilder, TermQueryBuilder, TermsQueryBuilder}
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers._
@@ -57,11 +57,13 @@ class ActivityESServiceTest extends BaseSpec with MockitoSugar with BaseControll
     verify(restClient).searchAsync(searchRequestCaptor.capture, any[ActionListener[SearchResponse]])
 
     val builder: BoolQueryBuilder = searchRequestCaptor.getValue.source.query().asInstanceOf[BoolQueryBuilder]
-    val termQueryOne: TermQueryBuilder = builder.must().get(0).asInstanceOf[TermQueryBuilder]
+    val termsQueryOne: TermsQueryBuilder = builder.must().get(0).asInstanceOf[TermsQueryBuilder]
     val termQueryTwo: TermQueryBuilder = builder.must().get(1).asInstanceOf[TermQueryBuilder]
 
-    termQueryOne.fieldName() must equal (ESFieldName.state_keyword)
-    termQueryOne.value().asInstanceOf[String] must equal (MessageState.Success.dbValue)
+    termsQueryOne.fieldName() must equal (ESFieldName.state_keyword)
+    termsQueryOne.values().get(0).asInstanceOf[String] must equal (MessageState.Success.dbValue)
+    termsQueryOne.values().get(1).asInstanceOf[String] must equal (MessageState.Muted.dbValue)
+
     termQueryTwo.fieldName() must equal (ESFieldName.activity_id_keyword)
     termQueryTwo.value().asInstanceOf[String] must equal (activityId)
   }
@@ -80,7 +82,7 @@ class ActivityESServiceTest extends BaseSpec with MockitoSugar with BaseControll
              "failed": 0
            },
            "hits": {
-             "total": 0,
+             "total": 99,
              "max_score": null,
              "hits": []
            },
@@ -94,7 +96,8 @@ class ActivityESServiceTest extends BaseSpec with MockitoSugar with BaseControll
     )
 
     val routes: Routes = {
-      case GET(p"/message_send_$date/message_send/_search") => // / index_name / document_type / api
+      // message_send index should remain until reindex to delivery_report is complete (NEWSTART-1343)
+      case GET(p"/delivery_report_$dateOne,message_send_$dateTwo/delivery_report,message_send/_search") => // / index_name / document_type / api
         Action(Ok(responseJson))
     }
 

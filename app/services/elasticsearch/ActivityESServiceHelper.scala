@@ -11,9 +11,13 @@ import play.api.libs.json.{JsValue, Json}
 
 trait ActivityESServiceHelper {
 
+  // message_send index should remain until reindex to delivery_report is complete (NEWSTART-1343)
+  val messageSendIndexName = "message_send"
+  val messageSendDocumentType = messageSendIndexName
+
   val activityDocumentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
-  val messageSendDocumentType = "message_send"
-  val messageSendIndexName = messageSendDocumentType
+  val deliveryReportDocumentType = "delivery_report"
+  val deliveryReportIndexName = deliveryReportDocumentType
   val indexNameForAlert = "alert"
   val indexNameForActivity = "activity"
   val separator = "_"
@@ -152,10 +156,10 @@ trait ActivityESServiceHelper {
   val activityEsTemplates: JsValue = getEsTemplate(indexNameForActivity)
   val alertEsTemplates: JsValue = getEsTemplate(indexNameForAlert)
 
-  val messageSendEsTemplates: JsValue = Json.obj(
-    "template" -> s"$messageSendIndexName*",
+  val deliveryReportEsTemplates: JsValue = Json.obj(
+    "template" -> s"$deliveryReportIndexName*",
     "mappings" -> Json.obj(
-      messageSendDocumentType -> Json.obj(
+      deliveryReportDocumentType -> Json.obj(
         "properties" -> Json.obj(
           "activity_id" -> propsBoilerplate,
           "usercode" -> propsBoilerplate,
