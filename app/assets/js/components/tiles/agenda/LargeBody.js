@@ -7,7 +7,7 @@ import Hyperlink from '../../ui/Hyperlink';
 import GroupedList from '../../ui/GroupedList';
 import AgendaTile from './AgendaTile';
 import { eventPropType, eventShape } from './constants';
-import * as FA from './FA';
+import * as FA from '../../FA';
 import moment from 'moment-timezone';
 
 const moduleColours = [

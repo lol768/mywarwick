@@ -1,12 +1,10 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash-es';
-import { formatDateTime, formatDate, formatTime, localMoment } from '../../../dateFormats';
-import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from '../TileContent';
 import Hyperlink from '../../ui/Hyperlink';
 import AgendaTile from './AgendaTile';
 import { eventPropType } from './constants';
-import * as FA  from './FA';
+import * as FA  from '../../FA';
 
 /**
  * Card component - display one or two for small and wide renditions.
@@ -19,7 +17,17 @@ export default class SingleEvent extends React.PureComponent {
       return null;
     }
 
-    const { title, location, extraInfo, organiser, staff, href } = event;
+    const { location, extraInfo, organiser, staff, href, parent } = event;
+
+    let titleComponents = [];
+    if (parent) {
+      titleComponents.push(parent.shortName);
+      titleComponents.push(parent.fullName);
+    }
+    if (event.title) {
+      titleComponents.push(event.title);
+    }
+    const title = titleComponents.join(' ');
 
     const eventDate = AgendaTile.renderSingleEventDate(event);
     const list =
@@ -30,8 +38,8 @@ export default class SingleEvent extends React.PureComponent {
         </li>
         <li className="text-overflow-block">
           {extraInfo ?
-            <i className="fa fa-fw fa-info-circle" />
-            : <i className="fa fa-fw fa-calendar-check-o" />
+            <i className="fa fa-fw fa-info-circle" /> :
+            <i className="fa fa-fw fa-calendar-check-o" />
           }
           { title }
         </li>
