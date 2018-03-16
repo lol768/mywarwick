@@ -23,8 +23,8 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val insertSkynetProvider =
     SQL"""
-        INSERT INTO provider (id, display_name, icon, colour, publisher_id) VALUES
-        ('skynet', 'Skynet', 'eye-o', 'greyish', 'default')
+        INSERT INTO provider (id, display_name, icon, colour, publisher_id, transient_push) VALUES
+        ('skynet', 'Skynet', 'eye-o', 'greyish', 'default', 0)
       """
 
   val deleteFixtureProvider =
@@ -34,8 +34,8 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val insertFixtureProvider =
     SQL"""
-        INSERT INTO provider (id, display_name, icon, colour, publisher_id) VALUES
-        (${activitySave.providerId}, 'Tabula display name', 'eye-o', 'greyish', 'default')
+        INSERT INTO provider (id, display_name, icon, colour, publisher_id, transient_push) VALUES
+        (${activitySave.providerId}, 'Tabula display name', 'eye-o', 'greyish', 'default', 0)
       """
 
   val deleteFixtureType =

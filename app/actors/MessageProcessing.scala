@@ -1,5 +1,7 @@
 package actors
 
+import warwick.sso.Usercode
+
 /**
   * Messages relating to work processing.
   */
@@ -14,6 +16,7 @@ object MessageProcessing {
 
   sealed trait MessageProcessingError
   case object UserNotFound extends MessageProcessingError
+  case class UsersNotFound(notFound: Set[Usercode]) extends MessageProcessingError
   case object ActivityNotFound extends MessageProcessingError
   val skippableErrors: Seq[MessageProcessingError] = Seq(UserNotFound, ActivityNotFound)
 

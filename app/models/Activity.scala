@@ -161,7 +161,7 @@ case class ActivityTag(
 
 case class TagValue(internalValue: String, displayValue: Option[String] = None)
 
-case class ActivityProvider(id: String, sendEmail: Boolean, displayName: Option[String] = None)
+case class ActivityProvider(id: String, sendEmail: Boolean, displayName: Option[String] = None, transientPush: Boolean = false)
 
 case class ActivityType(name: String, displayName: Option[String] = None)
 
