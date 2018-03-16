@@ -107,6 +107,11 @@ GET           /service/healthcheck                           @controllers.Servic
 GET           /service/cluster/state                         @controllers.admin.ClusterStateController.get
 GET           /service/revision                              @controllers.VersionController.revision
 
+POST          /api/push/apns/subscribe                       @controllers.api.APNSPushNotificationsController.subscribe
+POST          /api/push/web/subscribe                        @controllers.api.WebPushNotificationsController.subscribe
+POST          /api/push/fcm/subscribe                        @controllers.api.FCMPushNotificationsController.subscribe
+POST          /api/push/unsubscribe                          @controllers.api.PushNotificationsController.unsubscribe
+
 POST          /api/streams/read                              @controllers.api.UserActivitiesController.markAsRead
 
 GET           /api/streams/notifications                     @controllers.api.UserActivitiesController.notifications(since: Option[String], before: Option[String], limit: Int ?= 100)
@@ -124,10 +129,14 @@ GET           /api/streams/mute                              @controllers.api.Us
 PUT           /api/streams/mute                              @controllers.api.UserActivitiesController.saveMute
 DELETE        /api/streams/mute                              @controllers.api.UserActivitiesController.removeMute(id: String)
 
++ nocsrf
 POST          /api/streams/:providerId/notifications         @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
++ nocsrf
 POST          /api/streams/:providerId/alerts                @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
++ nocsrf
 POST          /api/streams/:providerId/activities            @controllers.api.IncomingActivitiesController.postActivity(providerId: String)
 
++ nocsrf
 POST          /api/push/:providerId                          @controllers.api.IncomingActivitiesController.transientPushNotification(providerId: String)
 
 GET           /api/tiles                                     @controllers.api.TilesController.getLayout
@@ -147,11 +156,6 @@ POST          /api/errors/js                                 @controllers.api.Er
 
 GET           /user/info                                     @controllers.UserInfoController.info
 GET           /logout                                        @controllers.UserInfoController.logout
-
-POST          /api/push/apns/subscribe                       @controllers.api.APNSPushNotificationsController.subscribe
-POST          /api/push/web/subscribe                        @controllers.api.WebPushNotificationsController.subscribe
-POST          /api/push/fcm/subscribe                        @controllers.api.FCMPushNotificationsController.subscribe
-POST          /api/push/unsubscribe                          @controllers.api.PushNotificationsController.unsubscribe
 
 # Handle trailing slashes in URLs
 GET           /*path/                                        @controllers.HomeController.redirectToPath(path: String)
