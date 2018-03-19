@@ -118,7 +118,10 @@ class FCMOutputService @Inject()(
           },
           res => {
             res.error.foreach(err => {
-              err.details.map(_.errorCode).map {
+              if (err.details.isEmpty)
+                logger.error(s"FCM Error: code=${err.code} message=${err.message} status=${err.status}")
+
+              err.details.map(_.errorCode).foreach {
                 case Some(code) if code.contains("UNREGISTERED") =>
                   logger.info(s"Received UNREGISTERED FCM error, removing token=$token")
                   db.withConnection { implicit c =>
