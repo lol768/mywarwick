@@ -85,6 +85,9 @@ class FCMOutputService @Inject()(
           "body" -> payload.text
         ),
         "android" -> Json.obj(
+          "notification" -> Json.obj(
+            "sound" -> "default"
+          ),
           "ttl" -> s"${ttl.getOrElse(defaultTtl).toSeconds.toInt}s",
           "priority" -> Json.toJson(priority.getOrElse(Priority.NORMAL)),
           "data" -> (Json.obj(
