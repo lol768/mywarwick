@@ -118,14 +118,15 @@ class FCMOutputService @Inject()(
           },
           res => {
             res.error.foreach(err => {
-              logger.error(s"FCM Error: code=${err.code} message=${err.message} status=${err.status}")
-              err.details.flatMap(_.errorCode).map {
-                case code: String if code.contains("UNREGISTERED") =>
+              err.details.map(_.errorCode).map {
+                case Some(code) if code.contains("UNREGISTERED") =>
                   logger.info(s"Received UNREGISTERED FCM error, removing token=$token")
                   db.withConnection { implicit c =>
                     pushRegistrationDao.removeRegistration(token)
                   }
-                case code: String => logger.error(s"FCM response status: ${err.status}, code $code")
+
+                case Some(code) => logger.error(s"FCM response status: ${err.status}, code $code, message=${err.message}")
+                case None => logger.error(s"FCM Error: message=${err.message} status=${err.status}")
               }
             })
           }
