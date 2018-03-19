@@ -125,8 +125,8 @@ class FCMOutputService @Inject()(
                     pushRegistrationDao.removeRegistration(token)
                   }
 
-                case Some(code) => logger.error(s"FCM response status: ${err.status}, code $code, message=${err.message}")
-                case None => logger.error(s"FCM Error: message=${err.message} status=${err.status}")
+                case Some(code) => logger.error(s"FCM response status: ${err.code} ${err.status}, code $code, message=${err.message}")
+                case None => logger.error(s"FCM Error: message=${err.message} status=${err.code} ${err.status}")
               }
             })
           }
