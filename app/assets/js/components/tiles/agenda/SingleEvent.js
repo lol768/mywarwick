@@ -4,12 +4,16 @@ import _ from 'lodash-es';
 import Hyperlink from '../../ui/Hyperlink';
 import AgendaTile from './AgendaTile';
 import { eventPropType } from './constants';
-import * as FA  from '../../FA';
+import * as FA from '../../FA';
 
 /**
  * Card component - display one or two for small and wide renditions.
  */
 export default class SingleEvent extends React.PureComponent {
+  static propTypes = {
+    event: eventPropType,
+    showModal: PropTypes.func.isRequired,
+  };
 
   render() {
     const event = this.props.event;
@@ -19,7 +23,7 @@ export default class SingleEvent extends React.PureComponent {
 
     const { location, extraInfo, organiser, staff, href, parent } = event;
 
-    let titleComponents = [];
+    const titleComponents = [];
     if (parent) {
       titleComponents.push(parent.shortName);
       titleComponents.push(parent.fullName);
@@ -86,9 +90,4 @@ export default class SingleEvent extends React.PureComponent {
       </Hyperlink>
     );
   }
-
-  static propTypes = {
-    event: eventPropType,
-    showModal: PropTypes.func.isRequired
-  };
 }

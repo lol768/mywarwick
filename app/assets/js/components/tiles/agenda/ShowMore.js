@@ -1,13 +1,15 @@
 // @flow
-import React from 'react';
+import * as React from 'react';
 
 type Props = {
   items: any[],
   showing: number,
-  onClick: (Event) => void
+  onClick: (SyntheticEvent<HTMLElement>) => void
 };
 
 export default class ShowMore extends React.PureComponent<Props> {
+  props: Props;
+
   render() {
     const items = this.props.items;
     const showing = this.props.showing;

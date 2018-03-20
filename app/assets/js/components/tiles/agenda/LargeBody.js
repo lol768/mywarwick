@@ -77,6 +77,11 @@ export default class LargeBody extends React.PureComponent {
 }
 
 export class AgendaTileItem extends React.PureComponent {
+  static propTypes = {
+    ...eventShape,
+    showModal: PropTypes.func.isRequired,
+  };
+
   constructor(props) {
     super(props);
     this.handleShowModal = this.handleShowModal.bind(this);
@@ -210,10 +215,5 @@ export class AgendaTileItem extends React.PureComponent {
         { content }
       </div>
     );
-  }
-
-  static propTypes = {
-    ...eventShape,
-    showModal: PropTypes.func.isRequired,
   }
 }
