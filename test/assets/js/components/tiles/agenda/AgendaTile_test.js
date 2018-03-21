@@ -1,211 +1,13 @@
-import AgendaTile, {
-  AgendaTileItem,
-  LargeBody
-} from 'components/tiles/AgendaTile';
-import Hyperlink from 'components/ui/Hyperlink';
 import { shallow } from 'enzyme';
+import React from 'react';
+import AgendaTile from 'components/tiles/agenda/AgendaTile';
+import LargeBody, { AgendaTileItem } from 'components/tiles/agenda/LargeBody';
+import Hyperlink from 'components/ui/Hyperlink';
+import SingleEvent from 'components/tiles/agenda/SingleEvent';
 
-const now = new Date('2016-05-19T13:00:00+01:00');
-const end = new Date('2016-05-19T14:00:00+01:00');
-const today = new Date('2016-05-19T00:00:00Z').toISOString();
-const tomorrow = new Date('2016-05-20T00:00:00Z').toISOString();
-
-const ITEMS = {
-  firstEvent: {
-    id: '1',
-    title: 'First Event',
-    start: now.toISOString(),
-    end: end.toISOString(),
-    location: {
-      name: 'Location'
-    },
-    organiser: {
-      name: 'John Smith'
-    },
-  },
-  secondEvent: {
-    id: '2',
-    title: 'Second Event',
-    start: end.toISOString(),
-    end: end.toISOString(),
-    location: {
-      name: 'Location'
-    },
-    organiser: {
-      name: 'John Smith'
-    },
-  },
-  twoWeeker: {
-    id: 'xyz',
-    start: '2016-05-16T00:00:00Z',
-    end: '2016-05-28T00:00:00Z',
-    isAllDay: true,
-    title: 'Two-week event'
-  },
-  singleDayAllDay: {
-    id: '3',
-    start: '2016-06-16T00:00:00Z',
-    isAllDay: true,
-    title: 'One day event'
-  }
-};
+import { ITEMS, now } from './data';
 
 describe('AgendaTile', () => {
-
-  it('renders all-day events when small', () => {
-    const content = {
-      items: [
-        {
-          id: '1',
-          title: 'AFD',
-          start: today,
-          end: tomorrow,
-          isAllDay: true,
-        },
-      ],
-    };
-
-    const html = renderAtMoment(<AgendaTile size="small" content={ content }/>, now);
-
-    findChild(html, [0, 0, 0, 1]).should.equal('All day today');
-    findChild(html, [0, 0, 1, 1]).should.equal('AFD');
-  });
-
-  it('renders an event when small', () => {
-    const content = {
-      items: [ ITEMS.firstEvent ]
-    };
-
-    const html = renderAtMoment(<AgendaTile size="small" content={ content }/>, now);
-
-    findChild(html, [0, 0, 0, 1]).should.equal('Today 13:00–14:00');
-    findChild(html, [0, 0, 1, 1]).should.equal('First Event');
-    findChild(html, [0, 0, 2, 1]).should.equal('Location');
-    findChild(html, [0, 0, 3, 1]).should.equal('John Smith');
-  });
-
-  it('renders an event with multiple locations when small', () => {
-    const content = {
-      items: [
-        {
-          ...ITEMS.firstEvent,
-          location: [
-            {
-              name: 'Location',
-            },
-            {
-              name: 'Location',
-            },
-            {
-              name: 'Location',
-            },
-          ]
-        }
-      ],
-    };
-
-    const html = renderAtMoment(<AgendaTile size="small" content={ content }/>, now);
-
-    findChild(html, [0, 0, 0, 1]).should.equal('Today 13:00–14:00');
-    findChild(html, [0, 0, 1, 1]).should.equal('First Event');
-    findChild(html, [0, 0, 2, 1]).should.equal('Location, Location, Location');
-    findChild(html, [0, 0, 3, 1]).should.equal('John Smith');
-  });
-
-  it('renders an event with the start time only when start = end time', () => {
-    const content = {
-      items: [ ITEMS.secondEvent ]
-    };
-
-    const html = renderAtMoment(<AgendaTile size="small" content={ content }/>, now);
-
-    findChild(html, [0, 0, 0, 1]).should.equal('Today 14:00');
-    findChild(html, [0, 0, 1, 1]).should.equal('Second Event');
-    findChild(html, [0, 0, 2, 1]).should.equal('Location');
-    findChild(html, [0, 0, 3, 1]).should.equal('John Smith');
-  });
-
-  it('include the weekday when rendering an event for tomorrow when small', () => {
-    const content = {
-      items: [
-        {
-          id: '1',
-          title: 'Lunch tomorrow',
-          start: '2016-05-20T12:00:00+01:00',
-          end: '2016-05-20T14:00:00+01:00',
-          isAllDay: false,
-        },
-      ],
-    };
-
-    const html = renderAtMoment(<AgendaTile size="small" content={ content }/>, now);
-
-    findChild(html, [0, 0, 0, 1]).should.equal('Fri 12:00–14:00');
-    findChild(html, [0, 0, 1, 1]).should.equal('Lunch tomorrow');
-  });
-
-  it('include the weekday when rendering an event for tomorrow when wide', () => {
-    const content = {
-      items: [
-        {
-          id: '1',
-          title: 'Lunch tomorrow',
-          start: '2016-05-20T12:00:00+01:00',
-          end: '2016-05-20T14:00:00+01:00',
-          isAllDay: false,
-        },
-      ],
-    };
-
-    const html = renderAtMoment(<AgendaTile size="wide" content={ content }/>, now);
-
-    findChild(html, [0, 0, 0, 0, 0, 1]).should.equal('Fri 12:00–14:00');
-    findChild(html, [0, 0, 0, 0, 1, 1]).should.equal('Lunch tomorrow');
-  });
-
-  it('renders a single time when start == end', () => {
-    const content = {
-      items: [
-        {
-          id: '1',
-          title: 'Cinema',
-          start: '2016-05-20T12:00:00+01:00',
-          end: '2016-05-20T12:00:00+01:00',
-          isAllDay: false,
-        },
-      ],
-    };
-
-    const html = renderAtMoment(<AgendaTile size="wide" content={ content }/>, now);
-
-    findChild(html, [0, 0, 0, 0, 0, 1]).should.equal('Fri 12:00');
-  });
-
-  it('renders a date for tomorrow', () => {
-    const content = {
-      items: [
-        {
-          id: '1',
-          title: 'Cinema',
-          start: '2016-05-21T12:00:00+01:00',
-          end: '2016-05-21T12:00:00+01:00',
-        },
-        {
-          id: '2',
-          title: 'Fun',
-          start: '2016-05-21T12:00:00+01:00',
-          end: '2016-05-21T14:00:00+01:00',
-        },
-      ],
-    };
-    atMoment(() => {
-      const html = shallow(<AgendaTile size="wide" content={ content } />);
-      const expected = ['Sat 12:00', 'Sat 12:00–14:00'];
-      html.find('.agenda__date').forEach((date, i) =>
-        expect(date.children().at(1).text()).to.equal(expected[i])
-      )
-    }, now);
-  });
 
   it('renders a weekday only', () => {
     const itemSingleTime = {
@@ -234,13 +36,10 @@ describe('AgendaTile', () => {
       ]
     };
 
-    const html = renderAtMoment(<AgendaTile size="wide" content={content}/>, now);
+    const result = shallowAtMoment(<AgendaTile size="wide" content={content}/>, now);
 
-    findChild(html, [0, 0, 0, 0, 0, 1]).should.equal('Today 13:00–14:00');
-    findChild(html, [0, 0, 0, 0, 1, 1]).should.equal('First Event');
+    result.find(SingleEvent).should.have.length(2);
 
-    findChild(html, [0, 1, 0, 0, 0, 1]).should.equal('Today 14:00');
-    findChild(html, [0, 1, 0, 0, 1, 1]).should.equal('Second Event');
   });
 
   it('displays all items when zoomed', () => {

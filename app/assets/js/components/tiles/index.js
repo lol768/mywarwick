@@ -1,4 +1,4 @@
-export { default as agenda } from './AgendaTile';
+export { default as agenda } from './agenda/AgendaTile';
 export { default as count } from './CountTile';
 export { default as list } from './ListTile';
 export { default as coursework } from './CourseworkTile';
