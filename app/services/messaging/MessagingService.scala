@@ -70,7 +70,15 @@ class MessagingServiceImpl @Inject()(
     val notFoundUsers = usercodes -- foundUsers
     mobile.processPushNotification(foundUsers, pushNotification).map { processingResult =>
       foundUsers.foreach(u =>
-        auditLog('SendTransientPushNotification, 'usercode -> u.string, 'publisherId -> pushNotification.publisherId, 'providerId -> pushNotification.providerId, 'type -> pushNotification.notificationType)
+        auditLog('SendTransientPushNotification,
+          'usercode -> u.string,
+          'publisher_id -> pushNotification.publisherId,
+          'provider_id -> pushNotification.providerId,
+          'type -> pushNotification.notificationType,
+          'ttl -> pushNotification.ttl.orNull.toSeconds,
+          'channel_id -> pushNotification.channel.orNull,
+          'priority -> pushNotification.priority.orNull.value
+        )
       )
       if (notFoundUsers.nonEmpty) {
         ProcessingResult(success = true, "userlookup failed for some users", Some(UsersNotFound(notFoundUsers)))

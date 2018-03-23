@@ -16,8 +16,10 @@ import * as smsNotifications from '../../state/sms-notifications';
 import { loadDeviceDetails, signOut } from '../../userinfo';
 import SwitchListGroupItem from '../ui/SwitchListGroupItem';
 import wrapKeyboardSelect from '../../keyboard-nav';
+import * as FA from '../FA';
 
-const FAChevronRight = () => <i className="fa fa-fw fa-chevron-right" />;
+const FAChevronRight = () => <FA.ChevronRight fw />;
+
 const ListGroupItemBtn = props => (
   <div
     className="list-group-item"
