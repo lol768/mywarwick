@@ -76,26 +76,24 @@ class FCMOutputService @Inject()(
     import pushNotification._
     val notificationChannel: JsObject = if (channel.nonEmpty) Json.obj("android_channel_id" -> JsString(channel.get)) else JsObject(Nil)
 
+    /*
+     This is a "data-only" message which means our native MessageHandler
+     will always handle it. Do not add any "notification" properties to
+     the message. You can add more data to the "data" object as required,
+     but the native app will need updating to do anything with it.
+     */
     val body = Json.obj(
       "message" -> Json.obj(
         "token" -> token,
-        // TODO: remove notication payload when we are satisfied everyone has native android app supporting data-only FCM transmission
-        "notification" -> Json.obj(
-          "title" -> JsString(buildTitle(Emoji.ARROW)),
-          "body" -> payload.text
-        ),
         "android" -> Json.obj(
-          "notification" -> Json.obj(
-            "sound" -> "default"
-          ),
           "ttl" -> s"${ttl.getOrElse(defaultTtl).toSeconds.toInt}s",
-          "priority" -> Json.toJson(priority.getOrElse(Priority.NORMAL)),
+          "priority" -> Json.toJson(priority.getOrElse(Priority.HIGH)),
           "data" -> (Json.obj(
             "id" -> id,
             "title" -> JsString(buildTitle(Emoji.ARROW)),
             "body" -> payload.text,
             "priority" -> Json.toJson(priority.getOrElse(Priority.NORMAL))
-          ) ++ notificationChannel),
+          ) ++ notificationChannel)
         )
       )
     )
