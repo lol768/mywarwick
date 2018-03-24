@@ -182,6 +182,7 @@ case class ActivitySave(
 )
 
 object ActivitySave {
+  import system.StringUtils.{truncateToBytes => trunc}
   def fromApi(usercode: Usercode, publisherId: String, providerId: String, shouldNotify: Boolean, data: IncomingActivityData): ActivitySave = {
     import data._
     ActivitySave(
@@ -190,15 +191,31 @@ object ActivitySave {
       providerId = providerId,
       shouldNotify = shouldNotify,
       `type` = `type`,
-      title = title.replaceAll("\\r\\n|\\r|\\n", " "),
-      text = text.map(_.replaceAll("\\r\\n|\\r|\\n", " ")),
+      title = stripNewlines(title),
+      text = text.map(stripNewlines),
       url = url,
-      tags = tags.getOrElse(Seq.empty),
-      replace = replace.getOrElse(Map.empty),
+      tags = tags.getOrElse(Nil).map(truncateForDb),
+      replace = replace.getOrElse(Map.empty).map(truncateReplaceForDb),
       publishedAt = generated_at,
       sendEmail = send_email,
       api = true
     )
+  }
+
+  private def stripNewlines(s: String) =
+    s.replaceAll("\\r\\n|\\r|\\n", " ")
+
+  private def truncateForDb(tag: ActivityTag) =
+    tag.copy(
+      name = trunc(255, tag.name),
+      value = tag.value.copy(
+        internalValue = trunc(255, tag.value.internalValue),
+        displayValue = tag.value.displayValue.map(trunc(255, _)),
+      )
+    )
+
+  private def truncateReplaceForDb(pair: (String, String)): (String, String) = {
+    case (key, value) => trunc(255, key) -> trunc(255, value)
   }
 }
 
