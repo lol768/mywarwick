@@ -214,7 +214,7 @@ object ActivitySave {
       )
     )
 
-  private def truncateReplaceForDb(pair: (String, String)): (String, String) = {
+  private def truncateReplaceForDb(pair: (String, String)): (String, String) = pair match {
     case (key, value) => trunc(255, key) -> trunc(255, value)
   }
 }
