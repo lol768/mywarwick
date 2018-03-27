@@ -14,11 +14,20 @@ export default class ListTile extends TileContent {
     return DEFAULT_TILE_SIZES.concat([TILE_SIZES.LARGE, TILE_SIZES.TALL]);
   }
 
+  static needsContentToRender() {
+    return true;
+  }
+
   constructor(props) {
     super(props);
     this.showModal = this.showModal.bind(this);
     this.hideModal = this.hideModal.bind(this);
     this.onItemClick = this.onItemClick.bind(this);
+    this.listItem = this.listItem.bind(this);
+  }
+
+  listItem(props) {
+    return <ListTileItem {...props} />;
   }
 
   modalMoreButton() {
@@ -66,14 +75,14 @@ export default class ListTile extends TileContent {
 
     const itemsToDisplay = this.props.zoomed ?
       content.items : _.take(content.items, this.getNumberOfItemsToDisplay());
-    return (<ul className="list-unstyled tile-list-group">
-      {_.compact(itemsToDisplay).map((item) => {
-        const clickProps = (item.body) ? { handleOnClick: this.onItemClick } : {};
-        return (
-          <ListTileItem key={item.id} {...clickProps} {...item} />
-        );
-      })}
-    </ul>);
+    return (
+      <ul className="list-unstyled tile-list-group">
+        {_.compact(itemsToDisplay).map((item) => {
+          const clickProps = (item.body) ? { handleOnClick: this.onItemClick } : {};
+          return this.listItem({ key: item.id, size: this.props.size, ...clickProps, ...item });
+        })}
+      </ul>
+    );
   }
 }
 

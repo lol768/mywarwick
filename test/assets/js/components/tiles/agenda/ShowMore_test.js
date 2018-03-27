@@ -1,4 +1,4 @@
-import ShowMore from 'components/tiles/agenda/ShowMore';
+import ShowMore from 'components/tiles/ShowMore';
 
 describe('ShowMore', () => {
   const items = [1,2,3,4,5];
