@@ -2,8 +2,7 @@ import React from 'react';
 import ListTile, { ListTileItem } from './ListTile';
 import ShowMore from './ShowMore';
 import * as PropTypes from 'prop-types';
-import { formatDateTime, localMoment } from '../../dateFormats';
-import { Exclaim } from '../FA';
+import { formatDateTime } from '../../dateFormats';
 
 class ModuleTileItem extends ListTileItem {
   static propTypes = {
@@ -24,11 +23,10 @@ class ModuleTileItem extends ListTileItem {
         </li>
       );
     }
-    const isUpdated = localMoment(lastUpdated).isAfter(localMoment(lastAccessed));
     return (
       <li className="tile-list-item text-overflow-block">
-        <span className="text--underline">{fullName}</span>
-        <br />Last updated: {formatDateTime(lastUpdated)} {isUpdated && <Exclaim fw />}
+        <span className="text--underline">{moduleCode}: {fullName}</span>
+        <br />Last updated: {formatDateTime(lastUpdated)}
         <br />Your last visit: {formatDateTime(lastAccessed)}
       </li>
     );
