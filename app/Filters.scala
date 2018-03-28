@@ -16,5 +16,5 @@ class Filters @Inject()(
   corsFilter: CORSFilter,
   csrfFilter: CSRFFilter
 ) extends HttpFilters {
-  def filters = Seq(csrfFilter, corsFilter, securityHeadersFilter, accessLog, gzipFilter, metricsFilter)
+  def filters = Seq(accessLog, csrfFilter, corsFilter, securityHeadersFilter, gzipFilter, metricsFilter)
 }
