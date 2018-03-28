@@ -26,8 +26,8 @@ class ModuleTileItem extends ListTileItem {
     return (
       <li className="tile-list-item text-overflow-block">
         <span className="text--underline">{moduleCode}: {fullName}</span>
-        <br />Last updated: {formatDateTime(lastUpdated)}
-        <br />Your last visit: {formatDateTime(lastAccessed)}
+        <div>Last updated: {formatDateTime(lastUpdated)}</div>
+        <div>Your last visit: {formatDateTime(lastAccessed)}</div>
       </li>
     );
   }
