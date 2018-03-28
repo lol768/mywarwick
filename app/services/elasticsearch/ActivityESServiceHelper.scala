@@ -11,10 +11,6 @@ import play.api.libs.json.{JsValue, Json}
 
 trait ActivityESServiceHelper {
 
-  // message_send index should remain until reindex to delivery_report is complete (NEWSTART-1343)
-  val messageSendIndexName = "message_send"
-  val messageSendDocumentType = messageSendIndexName
-
   val activityDocumentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
   val deliveryReportDocumentType = "delivery_report"
   val deliveryReportIndexName = deliveryReportDocumentType

@@ -64,9 +64,6 @@ class ActivityESServiceImpl @Inject()(
   elasticSearchAdminService: ElasticSearchAdminService
 ) extends ActivityESService with Logging {
 
-  // can be removed following successful deletion (NEWSTART-1343)
-  elasticSearchAdminService.deleteTemplate("message_sent_template_default")
-
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.activityEsTemplates, "activity_template_default")
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.alertEsTemplates, "alert_template_default")
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.deliveryReportEsTemplates, "delivery_report_template_default")
@@ -139,12 +136,8 @@ class ActivityESServiceImpl @Inject()(
   override def deliveryReportForActivity(activityId: String, publishedAt: Option[DateTime]): Future[AlertDeliveryReport] =
     publishedAt.map { date =>
       import ESFieldName._
-
-      // message_send index should remain until reindex to delivery_report is complete (NEWSTART-1343)
       val deliveryReportIndex = s"${helper.deliveryReportIndexName}${helper.dateSuffixString(date)}"
-      val messageSendIndex = s"${helper.messageSendIndexName}${helper.dateSuffixString(date)}"
-
-      val searchRequest: SearchRequest = new SearchRequest(deliveryReportIndex, messageSendIndex).types(helper.deliveryReportDocumentType, helper.messageSendDocumentType)
+      val searchRequest: SearchRequest = new SearchRequest(deliveryReportIndex).types(helper.deliveryReportDocumentType)
       searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen())
       searchRequest.source(
         new SearchSourceBuilder().size(0)
