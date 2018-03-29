@@ -7,27 +7,26 @@ import { formatDateTime } from '../../dateFormats';
 class ModuleTileItem extends ListTileItem {
   static propTypes = {
     id: PropTypes.number.isRequired,
-    moduleCode: PropTypes.string.isRequired,
+    moduleCode: PropTypes.string,
     fullName: PropTypes.string.isRequired,
     href: PropTypes.string.isRequired,
-    lastAccessed: PropTypes.string.isRequired,
     lastUpdated: PropTypes.string.isRequired,
   };
 
   render() {
-    const { size, moduleCode, fullName, lastUpdated, lastAccessed } = this.props;
+    const { size, moduleCode, fullName, lastUpdated } = this.props;
     if (size === 'small' || size === 'wide') {
       return (
         <li className="tile-list-item text-overflow-block">
-          <span className="text--underline">{moduleCode}:</span> {fullName}
+          <span className="text--underline">{moduleCode ? `${moduleCode}:` : fullName}</span>
+          &nbsp;{moduleCode && fullName}
         </li>
       );
     }
     return (
       <li className="tile-list-item text-overflow-block">
-        <span className="text--underline">{moduleCode}: {fullName}</span>
+        <span className="text--underline">{moduleCode && `${moduleCode}: `}{fullName}</span>
         <div>Last updated: {formatDateTime(lastUpdated)}</div>
-        <div>Your last visit: {formatDateTime(lastAccessed)}</div>
       </li>
     );
   }
