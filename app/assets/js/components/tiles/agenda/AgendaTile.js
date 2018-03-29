@@ -7,7 +7,7 @@ import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from '../TileContent';
 import DismissableInfoModal from '../../ui/DismissableInfoModal';
 import LargeBody from './LargeBody';
 import SingleEvent from './SingleEvent';
-import ShowMore from './ShowMore';
+import ShowMore from '../ShowMore';
 
 // Create an agenda view for the given calendar events.  All-day events
 // spanning multiple days appear on each day.  Events are sorted by start
