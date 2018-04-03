@@ -41,6 +41,21 @@ const eventGrouping = {
     return date.unix();
   },
 
+  academicWeek: 0,
+
+  resetAcademicWeek() {
+    this.academicWeek = 0;
+    return this;
+  },
+
+  subtitleForGroup(items) {
+    if (items[0].props.academicWeek > this.academicWeek) {
+      this.academicWeek = items[0].props.academicWeek;
+      return `(week ${items[0].props.academicWeek})`;
+    }
+    return null;
+  },
+
   titleForGroup(group) {
     switch (parseInt(group, 10)) {
       case 0: return 'Today';
@@ -67,7 +82,7 @@ export default class LargeBody extends React.PureComponent {
   render() {
     const { children, showModal } = this.props;
     return (
-      <GroupedList className="tile-list-group" groupBy={eventGrouping}>
+      <GroupedList className="tile-list-group" groupBy={eventGrouping.resetAcademicWeek()}>
         {children.map(event =>
           <AgendaTileItem key={event.id} showModal={showModal} {...event} />,
         )}

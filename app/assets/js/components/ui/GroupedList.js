@@ -11,6 +11,7 @@ export default class GroupedList extends React.PureComponent {
       getGroupedItems: PropTypes.func,
       groupForItem: PropTypes.func,
       titleForGroup: PropTypes.func.isRequired,
+      subtitleForGroup: PropTypes.func,
     }),
     children: PropTypes.node.isRequired,
     className: PropTypes.string,
@@ -53,6 +54,9 @@ export default class GroupedList extends React.PureComponent {
         <ListHeader
           key={`group-header-${group}`}
           title={this.props.groupBy.titleForGroup(group)}
+          subtitle={
+            this.props.groupBy.subtitleForGroup ? this.props.groupBy.subtitleForGroup(items) : null
+          }
         />
         {items}
       </div>
