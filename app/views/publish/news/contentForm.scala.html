@@ -31,7 +31,11 @@
 </div>
 
 <div class="row">
-  <div class="col-xs-8 split-form__sections">
+  <div
+  class=" col-lg-4 col-lg-push-8 audience-indicator"
+  data-hint="@audienceIndicatorHint"
+  ></div>
+  <div class="col-lg-8 col-lg-pull-4 split-form__sections">
   <section>
     @tags.audiencePicker(
       form,
@@ -92,8 +96,4 @@
     @tags.submitOrCancel(createOrUpdate, controllers.publish.routes.NewsController.list(publisher.id))
   </section>
 </div>
-  <div
-  class=" col-xs-4 audience-indicator"
-  data-hint="@audienceIndicatorHint"
-  ></div>
 </div>
