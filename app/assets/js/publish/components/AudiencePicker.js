@@ -179,7 +179,7 @@ export class AudiencePicker extends React.PureComponent {
   groupsInput() {
     const isPublic = this.isChecked('audience.universityWide');
     const deptSelect = Object.keys(this.props.departments).length > 1 ?
-      (<select
+      (<div className="dept-select"><select
         defaultValue={this.state.department === ELLIPSIS ? '' : this.state.department.code}
         name="audience.department"
         className="form-control"
@@ -191,7 +191,7 @@ export class AudiencePicker extends React.PureComponent {
         {_.map(this.props.departments, ({ name }, code) => (
           <option key={code} value={code}>{name}</option>
         ))}
-      </select>)
+      </select></div>)
       : (<input
         name="audience.department"
         value={Object.keys(this.props.departments)[0]}

@@ -132,7 +132,8 @@ function getCachedAssetsAsync() {
     currentRevisionOfAsync('/js/bundle.js'),
     currentRevisionOfAsync('/js/vendor.bundle.js'),
     currentRevisionOfAsync('/js/0.js'),
-    currentRevisionOfAsync('/js/1.js'),
+    // following NEWSTART-1307 change webpack started writing to 3.js instead of 1.js shrug
+    currentRevisionOfAsync('/js/3.js'),
     Promise.resolve('/lib/id7/fonts/fontawesome-webfont.ttf'),
     Promise.resolve('/lib/id7/fonts/fontawesome-webfont.woff'),
     Promise.resolve('/lib/id7/images/masthead-logo-bleed-sm*'),
@@ -172,7 +173,8 @@ function generateServiceWorker(watch) {
     'target/gulp/js/bundle.js.md5',
     'target/gulp/js/vendor.bundle.js.md5',
     'target/gulp/js/0.js.md5',
-    'target/gulp/js/1.js.md5',
+    // following NEWSTART-1307 change webpack started writing to 3.js instead of 1.js shrug
+    'target/gulp/js/3.js.md5',
     'app/assets/js/push-worker.js',
     'app/views/index.scala.html',
     'app/views/common/head.scala.html',
