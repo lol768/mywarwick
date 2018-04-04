@@ -5,8 +5,6 @@
 @import services.dao.DepartmentInfo
 @import play.api.libs.json.{Json, JsValue}
 
-@import play.api.libs.json.JsString
-@import play.api.libs.json.JsObject
 @import play.api.libs.json.JsBoolean
 @(
     form: Form[_],
@@ -18,20 +16,22 @@
     createOrUpdate: String,
     audienceJson: JsValue = Json.obj(),
     categoriesJson: JsValue = Json.obj(),
-    audienceIndicatorHint: JsValue = JsObject(Seq(
-      "text" -> JsString("When sending news, please remember that news should be relevant to the chosen recipients, and concise - a short paragraph at most. You can include a link to a page containing a longer article."),
-      "link" -> JsString("https://warwick.ac.uk/mw-support/faqs-staff/sending-news"),
+    audienceIndicatorHint: JsValue = Json.obj(
       "isNews" -> JsBoolean(true)
-    ))
+    )
 )(implicit fc: b3.B3FieldConstructor, messages: Messages, context: RequestContext)
 
 @context.csrfHelper.formField
-<div
-class="audience-indicator"
-data-hint="@audienceIndicatorHint"
-></div>
 
-<div class="split-form__sections">
+<div class="alert alert-info">
+  <p>
+    When sending news, please remember that news should be relevant to the chosen recipients, and concise - a short paragraph at most. You can include a link to a page containing a longer article.
+    &nbsp;<a href="https://warwick.ac.uk/mw-support/faqs-staff/sending-news">More info…</a>
+  </p>
+</div>
+
+<div class="row">
+  <div class="col-xs-8 split-form__sections">
   <section>
     @tags.audiencePicker(
       form,
@@ -91,4 +91,9 @@ data-hint="@audienceIndicatorHint"
 
     @tags.submitOrCancel(createOrUpdate, controllers.publish.routes.NewsController.list(publisher.id))
   </section>
+</div>
+  <div
+  class=" col-xs-4 audience-indicator"
+  data-hint="@audienceIndicatorHint"
+  ></div>
 </div>
