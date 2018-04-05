@@ -12,6 +12,7 @@ export default class GroupedList extends React.PureComponent {
       groupForItem: PropTypes.func,
       titleForGroup: PropTypes.func.isRequired,
       subtitleForGroup: PropTypes.func,
+      noRepeatSubtitle: PropTypes.bool,
     }),
     children: PropTypes.node.isRequired,
     className: PropTypes.string,
@@ -48,15 +49,24 @@ export default class GroupedList extends React.PureComponent {
       groups = groups.reverse();
     }
 
+    let subtitle;
+    const getSubtitle = (items) => {
+      const newSub = this.props.groupBy.subtitleForGroup ?
+        this.props.groupBy.subtitleForGroup(items) : null;
+      if (this.props.groupBy.noRepeatSubtitle) {
+        subtitle = newSub !== subtitle ? newSub : null;
+        return subtitle;
+      }
+      return newSub;
+    };
+
     const orderedGroups = groups.map(([group, items]) => (
       // Title the group with a list header
       <div key={`group-${group}`} className="list-group">
         <ListHeader
           key={`group-header-${group}`}
           title={this.props.groupBy.titleForGroup(group)}
-          subtitle={
-            this.props.groupBy.subtitleForGroup ? this.props.groupBy.subtitleForGroup(items) : null
-          }
+          subtitle={getSubtitle(items)}
         />
         {items}
       </div>

@@ -30,6 +30,7 @@ const colourForModule = _.memoize(() => {
 
 const eventGrouping = {
   description: 'by-date--agenda',
+  noRepeatSubtitle: true,
 
   groupForItem(item, now = localMoment()) {
     const date = localMoment(item.props.start).startOf('day');
@@ -41,19 +42,8 @@ const eventGrouping = {
     return date.unix();
   },
 
-  academicWeek: 0,
-
-  resetAcademicWeek() {
-    this.academicWeek = 0;
-    return this;
-  },
-
   subtitleForGroup(items) {
-    if (items[0].props.academicWeek > this.academicWeek) {
-      this.academicWeek = items[0].props.academicWeek;
-      return `(week ${items[0].props.academicWeek})`;
-    }
-    return null;
+    return items[0].props.academicWeek ? `(week ${items[0].props.academicWeek})` : null;
   },
 
   titleForGroup(group) {
@@ -82,7 +72,7 @@ export default class LargeBody extends React.PureComponent {
   render() {
     const { children, showModal } = this.props;
     return (
-      <GroupedList className="tile-list-group" groupBy={eventGrouping.resetAcademicWeek()}>
+      <GroupedList className="tile-list-group" groupBy={eventGrouping}>
         {children.map(event =>
           <AgendaTileItem key={event.id} showModal={showModal} {...event} />,
         )}
