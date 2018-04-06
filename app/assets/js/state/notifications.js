@@ -264,8 +264,7 @@ export function saveActivityMute(activity, options) {
       tags,
     };
 
-    return global.fetch('/api/streams/mute', {
-      credentials: 'same-origin',
+    return fetchWithCredentials('/api/streams/mute', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -276,15 +275,14 @@ export function saveActivityMute(activity, options) {
 }
 
 export function deleteActivityMute(activity) {
-  return dispatch => global.fetch(`/api/streams/mute?id=${activity.id}`, {
+  return dispatch => fetchWithCredentials(`/api/streams/mute?id=${activity.id}`, {
     credentials: 'same-origin',
     method: 'DELETE',
   }).then(() => dispatch(fetchActivityMutes()));
 }
 
 export function persistActivityFilter(filter) {
-  return dispatch => global.fetch('/api/streams/activities/filter', {
-    credentials: 'same-origin',
+  return dispatch => fetchWithCredentials('/api/streams/activities/filter', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -294,8 +292,7 @@ export function persistActivityFilter(filter) {
 }
 
 export function persistNotificationFilter(filter) {
-  return dispatch => global.fetch('/api/streams/alerts/filter', {
-    credentials: 'same-origin',
+  return dispatch => fetchWithCredentials('/api/streams/alerts/filter', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
