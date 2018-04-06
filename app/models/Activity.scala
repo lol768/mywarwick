@@ -192,7 +192,7 @@ object ActivitySave {
       shouldNotify = shouldNotify,
       `type` = `type`,
       title = stripNewlines(title),
-      text = text.map(stripNewlines),
+      text = text,
       url = url,
       tags = tags.getOrElse(Nil).map(truncateForDb),
       replace = replace.getOrElse(Map.empty).map(truncateReplaceForDb),
