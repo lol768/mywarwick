@@ -60,7 +60,11 @@ class ActivityItem extends React.PureComponent {
                   { this.props.title }
                   { this.props.url && <i className="fa fa-external-link activity-item__link-indicator" /> }
                 </div>
-                { this.props.textAsHtml && <div className="activity-item__text" dangerouslySetInnerHTML={{ __html: this.props.textAsHtml }} /> }
+                { (this.props.textAsHtml) ?
+                  <div className="activity-item__text"
+                       dangerouslySetInnerHTML={{ __html: this.props.textAsHtml }}/> :
+                  (this.props.text) && <div className="activity-item__text">{this.props.text}</div>
+                }
 
                 <div className="activity-item__date">
                   { dateFormats.forActivity(this.props.date, this.props.grouped) }
