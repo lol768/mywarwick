@@ -8,6 +8,7 @@ import play.api.libs.json._
 import warwick.sso.{User, Usercode}
 import play.api.libs.json.Reads.filter
 import uk.ac.warwick.util.core.StringUtils
+import views.utils.MarkdownRenderer
 
 case class ActivityIcon(name: String, colour: Option[String])
 object ActivityIcon {
@@ -74,6 +75,7 @@ object ActivityRender {
         "typeDisplayName" -> o.`type`.displayName,
         "title" -> o.activity.title,
         "text" -> o.activity.text,
+        "textAsHtml" -> o.activity.text.map(MarkdownRenderer.renderMarkdown),
         "url" -> o.activity.url,
         "tags" -> o.tags,
         "date" -> o.activity.publishedAt
