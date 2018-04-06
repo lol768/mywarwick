@@ -276,7 +276,6 @@ export function saveActivityMute(activity, options) {
 
 export function deleteActivityMute(activity) {
   return dispatch => fetchWithCredentials(`/api/streams/mute?id=${activity.id}`, {
-    credentials: 'same-origin',
     method: 'DELETE',
   }).then(() => dispatch(fetchActivityMutes()));
 }
