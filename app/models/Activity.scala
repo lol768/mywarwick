@@ -2,7 +2,6 @@ package models
 
 import controllers.api.SaveMuteRequest
 import org.joda.time.DateTime
-import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import warwick.sso.{User, Usercode}
@@ -75,7 +74,11 @@ object ActivityRender {
         "typeDisplayName" -> o.`type`.displayName,
         "title" -> o.activity.title,
         "text" -> o.activity.text,
-        "textAsHtml" -> o.activity.text.map(MarkdownRenderer.renderMarkdown),
+        "textAsHtml" ->
+          o.activity.text
+            .filter { text => MarkdownRenderer.specialCharacters.exists(c => text.contains(c)) }
+            .map(MarkdownRenderer.renderMarkdown)
+            .filterNot(_ == s"<p>${o.activity.text.get}</p>\n"),
         "url" -> o.activity.url,
         "tags" -> o.tags,
         "date" -> o.activity.publishedAt
