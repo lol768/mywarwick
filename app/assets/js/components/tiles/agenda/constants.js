@@ -29,6 +29,7 @@ export const eventShape = {
     userType: PropTypes.string,
     universityId: PropTypes.string,
   })),
+  academicWeek: PropTypes.number,
 };
 
 export const eventPropType = PropTypes.shape(eventShape);

@@ -93,16 +93,15 @@ export class AgendaTileItem extends React.PureComponent {
   }
 
   handleShowModal() {
-    const { showModal, title, location, extraInfo, href } = this.props;
+    const { showModal, title, location, extraInfo, href, academicWeek } = this.props;
+    const locName = AgendaTile.getLocationString(location);
+    const fullEventDate = AgendaTile.renderSingleEventDate(this.props, { shortDates: false });
     showModal(
       title,
       [
-        (
-          <span><FA.Clock /> {AgendaTile.renderSingleEventDate(this.props)}</span>
-        ),
-        location && (
-          <span><FA.Map /> {location.name}</span>
-        ),
+        (<span><FA.Clock fw /> {fullEventDate}</span>),
+        academicWeek && (<span><FA.Calendar fw /> Week {academicWeek}</span>),
+        locName && (<span><FA.Map fw /> {locName}</span>),
       ],
       extraInfo,
       href,

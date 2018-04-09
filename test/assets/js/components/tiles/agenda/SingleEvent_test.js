@@ -13,17 +13,17 @@ describe('SingleEvent', () => {
       {
         id: '1',
         title: 'Cinema',
-        start: '2016-05-20T12:00:00+01:00',
-        end: '2016-05-20T12:00:00+01:00',
+        start: '2016-05-21T12:00:00+01:00',
+        end: '2016-05-21T12:00:00+01:00',
         isAllDay: false,
       };
 
     const html = shallowAtMoment(<SingleEvent event={event} />, now);
 
-    extractDate(html).should.equal('Fri 12:00');
+    extractDate(html).should.equal('Sat 12:00');
   });
 
-  it('include the weekday when rendering an event for tomorrow', () => {
+  it('include tomorrow when rendering an event for tomorrow', () => {
     const event =
       {
         id: '1',
@@ -35,11 +35,11 @@ describe('SingleEvent', () => {
 
     const html = shallowAtMoment(<SingleEvent event={event} />, now);
 
-    extractDate(html).should.equal('Fri 12:00–14:00');
+    extractDate(html).should.equal('Tomorrow 12:00–14:00');
     html.find('li').at(1).text().should.include ('Lunch tomorrow');
   });
 
-  it('renders a date for tomorrow', () => {
+  it('renders the weekday for the day after tomorrow', () => {
     const content = {
       items: [
         {
@@ -63,6 +63,22 @@ describe('SingleEvent', () => {
     const event1 = shallowAtMoment(<SingleEvent event={content.items[1]} />, now);
     extractDate(event1).should.equal('Sat 12:00–14:00');
 
+  });
+
+  it('include the weekday when rendering an event for the day after tomorrow', () => {
+    const event =
+      {
+        id: '1',
+        title: 'Lunch the day after tomorrow',
+        start: '2016-05-21T12:00:00+01:00',
+        end: '2016-05-21T14:00:00+01:00',
+        isAllDay: false,
+      };
+
+    const html = shallowAtMoment(<SingleEvent event={event} />, now);
+
+    extractDate(html).should.equal('Sat 12:00–14:00');
+    html.find('li').at(1).text().should.include ('Lunch the day after tomorrow');
   });
 
   it('renders an event with multiple locations when small', () => {
