@@ -2,12 +2,12 @@ package models
 
 import controllers.api.SaveMuteRequest
 import org.joda.time.DateTime
-import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import warwick.sso.{User, Usercode}
 import play.api.libs.json.Reads.filter
 import uk.ac.warwick.util.core.StringUtils
+import views.utils.MarkdownRenderer
 
 case class ActivityIcon(name: String, colour: Option[String])
 object ActivityIcon {
@@ -74,6 +74,11 @@ object ActivityRender {
         "typeDisplayName" -> o.`type`.displayName,
         "title" -> o.activity.title,
         "text" -> o.activity.text,
+        "textAsHtml" ->
+          o.activity.text
+            .filter { text => MarkdownRenderer.specialCharacters.exists(c => text.contains(c)) }
+            .map(MarkdownRenderer.renderMarkdown)
+            .filterNot(_ == s"<p>${o.activity.text.get}</p>\n"),
         "url" -> o.activity.url,
         "tags" -> o.tags,
         "date" -> o.activity.publishedAt

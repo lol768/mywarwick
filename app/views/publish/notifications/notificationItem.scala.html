@@ -4,6 +4,7 @@
 @import models.publishing.Ability.DeleteNotifications
 @import system.RequestContext
 @import services.dao.DepartmentInfo
+
 @(
     publisher: Publisher,
     item: ActivityRenderWithAudience,
@@ -22,7 +23,7 @@
       <div class="media-body">
         <div class="activity-item__title">@item.activity.title</div>
         @item.activity.text.map { text =>
-          <div class="activity-item__text">@text</div>
+          <div class="activity-item__text">@Markdown(text)</div>
         }
 
         <div class="activity-item__date">
