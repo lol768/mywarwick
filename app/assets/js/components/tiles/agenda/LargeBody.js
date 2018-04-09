@@ -108,18 +108,26 @@ export class AgendaTileItem extends React.PureComponent {
     const { isAllDay, start, end } = this.props;
 
     if (isAllDay) {
-      return 'All day';
+      return (
+        <div className="agenda-item__cell__times">
+          All day
+        </div>
+      );
     }
 
     if ((start && !end) || start === end) {
-      return formatTime(start);
+      return (
+        <div className="agenda-item__cell__times">
+          <span className="agenda-item__cell__times__start-time">{ formatTime(start) }</span>
+        </div>
+      );
     }
 
     return (
-      <div>
-        { formatTime(start) }&nbsp;–
+      <div className="agenda-item__cell__times">
+        <span className="agenda-item__cell__times__start-time">{ formatTime(start) }</span>
         <br />
-        { formatTime(end) }
+        <span className="agenda-item__cell__times__end-time">{ formatTime(end) }</span>
       </div>
     );
   }

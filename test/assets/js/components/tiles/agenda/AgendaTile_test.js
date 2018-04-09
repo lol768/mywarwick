@@ -160,7 +160,8 @@ describe('AgendaTileItem', () => {
     const titleElement = html.find('.tile-list-item__title');
     titleElement.props().title.should.equal(props.title);
     html.find(Hyperlink).first().children().text().should.equal(props.title);
-    html.find('.agenda-item__cell').first().text().should.equal('17:00 –18:00');
+    html.find('.agenda-item__cell').first().find('.agenda-item__cell__times__start-time').text().should.equal('17:00');
+    html.find('.agenda-item__cell').first().find('.agenda-item__cell__times__end-time').text().should.equal('18:00');
   });
 
   it('renders with a href', () => {
