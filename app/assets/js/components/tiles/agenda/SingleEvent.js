@@ -69,9 +69,9 @@ export default class SingleEvent extends React.PureComponent {
           onClick={() => this.props.showModal(
             title,
             [
-              (<span><FA.Clock fw={true} /> {AgendaTile.renderSingleEventDate(event, {shortDates: false})}</span>),
-              academicWeek && (<span><FA.Calendar fw={true} /> Week {academicWeek}</span>),
-              locName && (<span><FA.Map fw={true} /> {locName}</span>),
+              (<span><FA.Clock fw /> {AgendaTile.renderSingleEventDate(event, {shortDates: false})}</span>),
+              academicWeek && (<span><FA.Calendar fw /> Week {academicWeek}</span>),
+              locName && (<span><FA.Map fw /> {locName}</span>),
             ],
             extraInfo,
             href,
