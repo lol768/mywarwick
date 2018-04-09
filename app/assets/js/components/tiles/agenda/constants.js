@@ -1,5 +1,10 @@
 import * as PropTypes from 'prop-types';
 
+const locationPropType = PropTypes.shape({
+  name: PropTypes.string,
+  href: PropTypes.string,
+});
+
 export const eventShape = {
   id: PropTypes.string,
   start: PropTypes.string,
@@ -9,10 +14,7 @@ export const eventShape = {
   organiser: PropTypes.shape({
     name: PropTypes.string,
   }),
-  location: PropTypes.shape({
-    name: PropTypes.string,
-    href: PropTypes.string,
-  }),
+  location: PropTypes.arrayOf(locationPropType),
   href: PropTypes.string,
   parent: PropTypes.shape({
     shortName: PropTypes.string,
