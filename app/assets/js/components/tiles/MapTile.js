@@ -7,7 +7,7 @@ const defaultMapUrl = 'https://campus.warwick.ac.uk/?lite=1&autoLocate=true';
 
 export default class MapTile extends TileContent {
   static propTypes = {
-    params: PropTypes.object.isRequired,
+    params: PropTypes.object,
   };
 
   static defaultProps = {

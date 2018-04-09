@@ -11,3 +11,4 @@ export const Clock = create('clock-o');
 export const Map = create('map-marker');
 export const User = create('user-o');
 export const ChevronRight = create('chevron-right');
+export const Calendar = create('calendar');

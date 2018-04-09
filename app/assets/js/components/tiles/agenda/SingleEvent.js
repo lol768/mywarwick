@@ -21,7 +21,7 @@ export default class SingleEvent extends React.PureComponent {
       return null;
     }
 
-    const { location, extraInfo, organiser, staff, href, parent } = event;
+    const { location, extraInfo, organiser, staff, href, parent, academicWeek } = event;
 
     const titleComponents = [];
     if (parent) {
@@ -69,8 +69,9 @@ export default class SingleEvent extends React.PureComponent {
           onClick={() => this.props.showModal(
             title,
             [
-              (<span><FA.Clock /> {eventDate}</span>),
-              locName && (<span><FA.Map /> {location.name} </span>),
+              (<span><FA.Clock fw={true} /> {AgendaTile.renderSingleEventDate(event, {shortDates: false})}</span>),
+              academicWeek && (<span><FA.Calendar fw={true} /> Week {academicWeek}</span>),
+              locName && (<span><FA.Map fw={true} /> {locName}</span>),
             ],
             extraInfo,
             href,
