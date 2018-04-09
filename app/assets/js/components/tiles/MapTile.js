@@ -26,7 +26,7 @@ export default class MapTile extends TileContent {
   }
 
   getZoomedBody() {
-    const queryParams = this.props.params.queryParams || {};
+    const queryParams = (this.props.params || {}).queryParams || {};
     const extraParams = _.map(queryParams, (value, key) => `&${key}=${value}`).join('');
     const iframeUrl = defaultMapUrl + extraParams;
     return (

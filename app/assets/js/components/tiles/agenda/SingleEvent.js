@@ -63,13 +63,14 @@ export default class SingleEvent extends React.PureComponent {
 
     if (extraInfo) {
       const locName = AgendaTile.getLocationString(location);
+      const fullEventDate = AgendaTile.renderSingleEventDate(event, { shortDates: false });
       return (
         <a
           role="button"
           onClick={() => this.props.showModal(
             title,
             [
-              (<span><FA.Clock fw /> {AgendaTile.renderSingleEventDate(event, {shortDates: false})}</span>),
+              (<span><FA.Clock fw /> {fullEventDate}</span>),
               academicWeek && (<span><FA.Calendar fw /> Week {academicWeek}</span>),
               locName && (<span><FA.Map fw /> {locName}</span>),
             ],

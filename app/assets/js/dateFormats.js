@@ -8,8 +8,10 @@ export const localMomentUnix = date => moment.unix(date).tz(TZ);
 /**
  * @typedef {Object} DateTimeOptions
  * @property {boolean} [printToday=false] - whether to include "Today" if it's today.
- * @property {boolean} [onlyWeekday=false] - when printing date, only print the weekday (even if in a different week).
- * @property {boolean} [shortDates=false] - when printing date, print full dates rather than short ones.
+ * @property {boolean} [onlyWeekday=false] - when printing date, only print the weekday
+ *  (even if in a different week).
+ * @property {boolean} [shortDates=false] - when printing date, print full dates rather than short
+ *  ones.
  */
 
 const NO_OPTIONS = {};
@@ -73,7 +75,11 @@ function formatDateTimeMoment(then, now, options = NO_OPTIONS) {
   } = options;
 
   if (then.isSame(now, 'day')) {
-    return then.format(printToday ? (shortDates ? SHORT_TODAY_TIME : FULL_TODAY_TIME) : ONLY_TIME);
+    if (printToday) {
+      return then.format(shortDates ? SHORT_TODAY_TIME : FULL_TODAY_TIME);
+    }
+
+    return then.format(ONLY_TIME);
   }
 
   if (then.isSame(now.clone().subtract(1, 'day'), 'day')) {
