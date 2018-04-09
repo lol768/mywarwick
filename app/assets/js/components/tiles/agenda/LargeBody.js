@@ -30,6 +30,7 @@ const colourForModule = _.memoize(() => {
 
 const eventGrouping = {
   description: 'by-date--agenda',
+  noRepeatSubtitle: true,
 
   groupForItem(item, now = localMoment()) {
     const date = localMoment(item.props.start).startOf('day');
@@ -39,6 +40,10 @@ const eventGrouping = {
       return 1; // tomorrow
     }
     return date.unix();
+  },
+
+  subtitleForGroup(items) {
+    return items[0].props.academicWeek ? `(week ${items[0].props.academicWeek})` : null;
   },
 
   titleForGroup(group) {
