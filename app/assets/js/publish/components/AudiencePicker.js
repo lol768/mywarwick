@@ -179,7 +179,7 @@ export class AudiencePicker extends React.PureComponent {
   groupsInput() {
     const isPublic = this.isChecked('audience.universityWide');
     const deptSelect = Object.keys(this.props.departments).length > 1 ?
-      (<select
+      (<div className="dept-select"><select
         defaultValue={this.state.department === ELLIPSIS ? '' : this.state.department.code}
         name="audience.department"
         className="form-control"
@@ -191,7 +191,7 @@ export class AudiencePicker extends React.PureComponent {
         {_.map(this.props.departments, ({ name }, code) => (
           <option key={code} value={code}>{name}</option>
         ))}
-      </select>)
+      </select></div>)
       : (<input
         name="audience.department"
         value={Object.keys(this.props.departments)[0]}
@@ -201,6 +201,28 @@ export class AudiencePicker extends React.PureComponent {
 
     const prefixPath = text => `audience.${isPublic ? 'universityWide' : 'department'}${text}`;
     const prefixDeptSubset = text => `${isPublic ? '' : 'Dept:'}${text}`;
+
+    const listOfUsercodes = (
+      <Checkbox
+        handleChange={this.handleChange}
+        isChecked={this.isChecked(prefixPath('.groups.listOfUsercodes'))}
+        label="A list of people I'll type or paste in"
+        value="listOfUsercodes"
+        formPath={prefixPath('.groups')}
+      >
+        <div>
+          <MultilineTextInput
+            className="listOfUsercodes"
+            formPath={prefixPath('.groups.listOfUsercodes')}
+            type="listOfUsercodes"
+            name="audience.audience[]"
+            handleChange={this.handleChange}
+            items={_.get(this.state, prefixPath('.groups.listOfUsercodes'), [])}
+            placeholder="Type in usercodes or university IDs, one per line"
+            valuePrefix={prefixDeptSubset('')}
+          />
+        </div>
+      </Checkbox>);
 
     const groups = (
       <div>
@@ -317,26 +339,7 @@ export class AudiencePicker extends React.PureComponent {
             placeholderText="Start typing the name or usercode of the staff member"
           />
         </Checkbox>
-        <Checkbox
-          handleChange={this.handleChange}
-          isChecked={this.isChecked(prefixPath('.groups.listOfUsercodes'))}
-          label="A list of people I'll type or paste in"
-          value="listOfUsercodes"
-          formPath={prefixPath('.groups')}
-        >
-          <div>
-            <MultilineTextInput
-              className="listOfUsercodes"
-              formPath={prefixPath('.groups.listOfUsercodes')}
-              type="listOfUsercodes"
-              name="audience.audience[]"
-              handleChange={this.handleChange}
-              items={_.get(this.state, prefixPath('.groups.listOfUsercodes'), [])}
-              placeholder="Type in usercodes or university IDs, one per line"
-              valuePrefix={prefixDeptSubset('')}
-            />
-          </div>
-        </Checkbox>
+        { listOfUsercodes }
       </div>
     );
 
@@ -355,7 +358,6 @@ export class AudiencePicker extends React.PureComponent {
               name="audience.audience[]"
               formPath={prefixPath('')}
             />
-            { this.isTeachingDepartment() &&
             <RadioButton
               handleChange={this.handleChange}
               isChecked={this.isChecked(prefixPath('.groups'))}
@@ -364,8 +366,8 @@ export class AudiencePicker extends React.PureComponent {
               value="groups"
               formPath={prefixPath('')}
             >
-              {groups}
-            </RadioButton> }
+              { this.isTeachingDepartment() ? groups : listOfUsercodes }
+            </RadioButton>
           </div>
       } </div>
     );

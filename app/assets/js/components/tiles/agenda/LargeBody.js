@@ -30,6 +30,7 @@ const colourForModule = _.memoize(() => {
 
 const eventGrouping = {
   description: 'by-date--agenda',
+  noRepeatSubtitle: true,
 
   groupForItem(item, now = localMoment()) {
     const date = localMoment(item.props.start).startOf('day');
@@ -39,6 +40,10 @@ const eventGrouping = {
       return 1; // tomorrow
     }
     return date.unix();
+  },
+
+  subtitleForGroup(items) {
+    return items[0].props.academicWeek ? `(week ${items[0].props.academicWeek})` : null;
   },
 
   titleForGroup(group) {
@@ -88,16 +93,15 @@ export class AgendaTileItem extends React.PureComponent {
   }
 
   handleShowModal() {
-    const { showModal, title, location, extraInfo, href } = this.props;
+    const { showModal, title, location, extraInfo, href, academicWeek } = this.props;
+    const locName = AgendaTile.getLocationString(location);
+    const fullEventDate = AgendaTile.renderSingleEventDate(this.props, { shortDates: false });
     showModal(
       title,
       [
-        (
-          <span><FA.Clock /> {AgendaTile.renderSingleEventDate(this.props)}</span>
-        ),
-        location && (
-          <span><FA.Map /> {location.name}</span>
-        ),
+        (<span><FA.Clock fw /> {fullEventDate}</span>),
+        academicWeek && (<span><FA.Calendar fw /> Week {academicWeek}</span>),
+        locName && (<span><FA.Map fw /> {locName}</span>),
       ],
       extraInfo,
       href,
@@ -108,18 +112,26 @@ export class AgendaTileItem extends React.PureComponent {
     const { isAllDay, start, end } = this.props;
 
     if (isAllDay) {
-      return 'All day';
+      return (
+        <div className="agenda-item__cell__times">
+          All day
+        </div>
+      );
     }
 
     if ((start && !end) || start === end) {
-      return formatTime(start);
+      return (
+        <div className="agenda-item__cell__times">
+          <span className="agenda-item__cell__times__start-time">{ formatTime(start) }</span>
+        </div>
+      );
     }
 
     return (
-      <div>
-        { formatTime(start) }&nbsp;–
+      <div className="agenda-item__cell__times">
+        <span className="agenda-item__cell__times__start-time">{ formatTime(start) }</span>
         <br />
-        { formatTime(end) }
+        <span className="agenda-item__cell__times__end-time">{ formatTime(end) }</span>
       </div>
     );
   }

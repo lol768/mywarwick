@@ -9,7 +9,8 @@ import { ITEMS, now } from './data';
 
 describe('AgendaTile', () => {
 
-  it('renders a weekday only', () => {
+  // This used to render just the day of the week but that only made sense in an old design
+  it('renders full dates even if the same week', () => {
     const itemSingleTime = {
       start: '2016-05-24T09:00:00+01:00',
     };
@@ -22,9 +23,9 @@ describe('AgendaTile', () => {
       end: '2016-05-24T10:30:00+01:00',
     };
     atMoment(() => {
-      AgendaTile.renderSingleEventDate(itemSingleTime).should.equal('Tue 09:00');
-      AgendaTile.renderSingleEventDate(itemDuplicateTime).should.equal('Tue 09:00');
-      AgendaTile.renderSingleEventDate(itemWithEnd).should.equal('Tue 09:00–10:30');
+      AgendaTile.renderSingleEventDate(itemSingleTime).should.equal('Tue 24 May, 09:00');
+      AgendaTile.renderSingleEventDate(itemDuplicateTime).should.equal('Tue 24 May, 09:00');
+      AgendaTile.renderSingleEventDate(itemWithEnd).should.equal('Tue 24 May, 09:00–10:30');
     }, now);
   });
 
@@ -160,7 +161,8 @@ describe('AgendaTileItem', () => {
     const titleElement = html.find('.tile-list-item__title');
     titleElement.props().title.should.equal(props.title);
     html.find(Hyperlink).first().children().text().should.equal(props.title);
-    html.find('.agenda-item__cell').first().text().should.equal('17:00 –18:00');
+    html.find('.agenda-item__cell').first().find('.agenda-item__cell__times__start-time').text().should.equal('17:00');
+    html.find('.agenda-item__cell').first().find('.agenda-item__cell__times__end-time').text().should.equal('18:00');
   });
 
   it('renders with a href', () => {

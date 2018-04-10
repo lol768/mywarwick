@@ -7,7 +7,7 @@ import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from '../TileContent';
 import DismissableInfoModal from '../../ui/DismissableInfoModal';
 import LargeBody from './LargeBody';
 import SingleEvent from './SingleEvent';
-import ShowMore from './ShowMore';
+import ShowMore from '../ShowMore';
 
 // Create an agenda view for the given calendar events.  All-day events
 // spanning multiple days appear on each day.  Events are sorted by start
@@ -182,11 +182,12 @@ export default class AgendaTile extends TileContent {
     return users.map(personToString).join(', ');
   }
 
-  static renderSingleEventDate(event) {
+  static renderSingleEventDate(event, options) {
     if (event.isAllDay) {
       return `All day ${formatDate(event.start)}`;
     }
-    const DATETIME_OPTIONS = { printToday: true, onlyWeekday: true };
+    const DEFAULT_DATETIME_OPTIONS = { printToday: true };
+    const DATETIME_OPTIONS = { ...DEFAULT_DATETIME_OPTIONS, ...options };
     const renderedStart = formatDateTime(event.start, undefined, DATETIME_OPTIONS);
     return event.end === undefined || event.start === event.end ?
       renderedStart : `${renderedStart}–${formatTime(event.end)}`;

@@ -1,16 +1,10 @@
 package services.elasticsearch
 
-import java.util
-import javax.ws.rs.HttpMethod
-
 import helpers.{BaseSpec, MinimalAppPerSuite}
 import models.MessageState
-import org.apache.http.HttpEntity
-import org.apache.http.entity.ContentType
-import org.apache.http.nio.entity.NStringEntity
 import org.elasticsearch.action.ActionListener
 import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
-import org.elasticsearch.client.{ResponseListener, RestClient, RestHighLevelClient}
+import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.index.query.{BoolQueryBuilder, TermQueryBuilder, TermsQueryBuilder}
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
@@ -96,8 +90,7 @@ class ActivityESServiceTest extends BaseSpec with MockitoSugar with BaseControll
     )
 
     val routes: Routes = {
-      // message_send index should remain until reindex to delivery_report is complete (NEWSTART-1343)
-      case GET(p"/delivery_report_$dateOne,message_send_$dateTwo/delivery_report,message_send/_search") => // / index_name / document_type / api
+      case GET(p"/delivery_report_$date/delivery_report/_search") => // / index_name / document_type / api
         Action(Ok(responseJson))
     }
 

@@ -12,6 +12,7 @@ class ActivityItem extends React.PureComponent {
     providerDisplayName: PropTypes.string,
     title: PropTypes.string.isRequired,
     text: PropTypes.string,
+    textAsHtml: PropTypes.string,
     date: PropTypes.string.isRequired,
     url: PropTypes.string,
     unread: PropTypes.bool,
@@ -59,7 +60,10 @@ class ActivityItem extends React.PureComponent {
                   { this.props.title }
                   { this.props.url && <i className="fa fa-external-link activity-item__link-indicator" /> }
                 </div>
-                <div className="activity-item__text">{ this.props.text }</div>
+                { (this.props.textAsHtml) ?
+                  <div className="activity-item__text" dangerouslySetInnerHTML={{ __html: this.props.textAsHtml }} /> : // eslint-disable-line react/no-danger
+                  (this.props.text) && <div className="activity-item__text">{this.props.text}</div>
+                }
 
                 <div className="activity-item__date">
                   { dateFormats.forActivity(this.props.date, this.props.grouped) }

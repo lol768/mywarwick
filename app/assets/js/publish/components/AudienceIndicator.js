@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import log from 'loglevel';
 import $ from 'jquery';
 import _ from 'lodash-es';
-import Hyperlink from '../../components/ui/Hyperlink';
 import { mkString } from '../../helpers';
 
 export class AudienceIndicator extends React.PureComponent {
@@ -12,8 +11,6 @@ export class AudienceIndicator extends React.PureComponent {
     audienceComponents: PropTypes.object,
     promiseSubmit: PropTypes.func.isRequired,
     hint: PropTypes.shape({
-      text: PropTypes.string.isRequired,
-      link: PropTypes.string,
       isNews: PropTypes.bool.isRequired,
     }),
   };
@@ -177,13 +174,6 @@ export class AudienceIndicator extends React.PureComponent {
 
     return (
       <div className="alert alert-info">
-        <div>
-          <p>
-            {`${this.props.hint.text} ` }{this.props.hint.link ?
-              <Hyperlink href={this.props.hint.link}>More info…</Hyperlink> : null}
-          </p>
-        </div>
-
         <div className="pull-right">
           <i
             className="fa fa-info-circle"

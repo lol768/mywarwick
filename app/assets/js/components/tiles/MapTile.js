@@ -7,7 +7,7 @@ const defaultMapUrl = 'https://campus.warwick.ac.uk/?lite=1&autoLocate=true';
 
 export default class MapTile extends TileContent {
   static propTypes = {
-    params: PropTypes.object.isRequired,
+    params: PropTypes.object,
   };
 
   static defaultProps = {
@@ -26,7 +26,7 @@ export default class MapTile extends TileContent {
   }
 
   getZoomedBody() {
-    const queryParams = this.props.params.queryParams || {};
+    const queryParams = (this.props.params || {}).queryParams || {};
     const extraParams = _.map(queryParams, (value, key) => `&${key}=${value}`).join('');
     const iframeUrl = defaultMapUrl + extraParams;
     return (

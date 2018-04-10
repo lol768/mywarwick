@@ -11,3 +11,4 @@ export { default as workarea } from './WorkareaTile';
 export { default as account } from './AccountTile';
 export { default as mail } from './MailTile';
 export { default as calendar } from './O365CalendarTile';
+export { default as modules } from './ModulesTile';
