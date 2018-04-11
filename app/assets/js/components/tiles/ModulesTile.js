@@ -47,11 +47,16 @@ class ModuleTileItem extends ListTileItem {
 
   handleClick() {
     const { fullName, announcements, moduleCode, showModal, hideModal, lastUpdated } = this.props;
+    const modalMoreBtn =
+      (<HyperLink type="button" className="btn btn-default" href={this.props.href}>
+        Open module in Moodle
+      </HyperLink>);
     const modal =
       (<DismissableInfoModal
         heading={moduleCode ? `${moduleCode}: ${fullName}` : fullName}
         subHeadings={[`Last updated: ${formatDateTime(lastUpdated)}`]}
         onDismiss={hideModal}
+        moreButton={modalMoreBtn}
       >
         <h6>Announcements</h6>
         <ul>
