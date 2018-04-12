@@ -6,8 +6,6 @@ import RadioListGroupItem from '../ui/RadioListGroupItem';
 import wrapKeyboardSelect from '../../keyboard-nav';
 import { lowercaseFirst } from '../../helpers';
 
-const TagKeyPrefix = 'tag-';
-
 // exported for tests
 export const PublishNotificationType = 'mywarwick-user-publish-notification';
 export const PROVIDER_SCOPE = 'providerId';
@@ -29,10 +27,6 @@ export default class ActivityMutingView extends React.PureComponent {
     onMutingDismiss: PropTypes.func.isRequired,
     onMutingSave: PropTypes.func.isRequired,
   };
-
-  static toTagKey(tag) {
-    return `${TagKeyPrefix}${tag.name}-${tag.value}`;
-  }
 
   constructor(props) {
     super(props);
@@ -73,6 +67,10 @@ export default class ActivityMutingView extends React.PureComponent {
     }, e);
   }
 
+  isPublishNotification() {
+    return this.props.activityType === PublishNotificationType;
+  }
+
   renderScope() {
     return (
       <div className="form-group">
@@ -97,10 +95,6 @@ export default class ActivityMutingView extends React.PureComponent {
         </div>
       </div>
     );
-  }
-
-  isPublishNotification() {
-    return this.props.activityType === PublishNotificationType;
   }
 
   renderForm() {
