@@ -8,6 +8,7 @@ import ScrollRestore from '../../ui/ScrollRestore';
 import { Routes } from '../../AppRoot';
 import EmptyState from '../../ui/EmptyState';
 import wrapKeyboardSelect from '../../../keyboard-nav';
+import { Mute } from '../../FA';
 
 class ActivityMutesView extends React.PureComponent {
   static propTypes = {
@@ -112,7 +113,7 @@ class ActivityMutesView extends React.PureComponent {
                 </div>),
               )
               : <EmptyState>
-                  You haven&apos;t muted any alerts. Use the dropdown arrow next to each
+                  You haven&apos;t muted any alerts. Use the <Mute fw /> icon next to each
                   alert to specify similar types of alerts to mute in future.
                   Muted alerts still appear in the list of alerts;
                   they just don&apos;t pop up on your device.

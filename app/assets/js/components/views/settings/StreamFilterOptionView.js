@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import * as notifications from '../../../state/notifications';
 import Switch from '../../ui/Switch';
 import wrapKeyboardSelect from '../../../keyboard-nav';
+import { Mute } from '../../FA';
 
 class StreamFilterOptionView extends React.PureComponent {
   static propTypes = {
@@ -82,6 +83,12 @@ class StreamFilterOptionView extends React.PureComponent {
 
     return (
       <div>
+        {plural === 'Alerts' &&
+        <p className="hint-text container-fluid">
+          Filtering alerts will not stop them popping up on your device. To stop this you
+          should use the <Mute fw /> icon next to each alert in the Alerts tab.
+        </p>
+        }
         <p className="hint-text container-fluid">
           On my { plural } tab, show { plural.toLowerCase() } that come from
         </p>
