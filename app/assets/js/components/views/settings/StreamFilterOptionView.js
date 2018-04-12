@@ -85,7 +85,8 @@ class StreamFilterOptionView extends React.PureComponent {
       <div>
         {plural === 'Alerts' &&
         <p className="text--hint container-fluid">
-          Filtering alerts will not stop them popping up on your device. To stop this you
+          Filtering alerts will not stop them playing a sound or appearing on
+          your phone’s lock screen. To stop this you
           should use the <Mute fw /> icon next to each alert in the Alerts tab.
         </p>
         }

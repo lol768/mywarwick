@@ -77,8 +77,8 @@ export class ActivityMutesView extends React.PureComponent {
                     <div className="media-body">
                       <div className="activity-item__title">{
                         mute.expiresAt ?
-                          `Mute until ${handleDateCase(dateFormats.forActivity(mute.expiresAt))}`
-                          : 'Mute until removed'
+                          `Muted until ${handleDateCase(dateFormats.forActivity(mute.expiresAt))}`
+                          : 'Muted until removed'
                       }</div>
                       <div className="activity-item__text">
                         <MuteDescription mute={mute} />

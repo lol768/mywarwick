@@ -101,9 +101,9 @@ export default class ActivityMutingView extends React.PureComponent {
   renderForm() {
     return (
       <form className="form" id={ `muting-${this.props.id}-form` }>
+        { (this.props.activityType !== PublishNotificationType) ? this.renderScope() : null }
         <p className="text--hint">Muted alerts still appear in this list, but they don’t play a sound or appear on
           your phone’s lock screen when they’re delivered</p>
-        { (this.props.activityType !== PublishNotificationType) ? this.renderScope() : null }
         <div className="list-group">
           <label>
             { (this.props.activityType === PublishNotificationType) ?
