@@ -125,7 +125,7 @@ export class ActivityMutesView extends React.PureComponent {
 
 export class MuteDescription extends React.PureComponent {
   static propTypes = {
-    mute: activityMuteType
+    mute: activityMuteType,
   };
 
   render() {
@@ -139,26 +139,26 @@ export class MuteDescription extends React.PureComponent {
 
     if (mute.provider && mute.activityType && tagsEmpty) {
       // Display as a single item
-      return <ul>
-        <li>'{typeName()}' alerts from {providerName()}</li>
-      </ul>;
-    } else {
-      return (
-        <ul>
-          {mute.activityType && <li>'{typeName()}' alerts</li>}
-          {mute.provider &&
-            <li>{providerOnly ? 'All ' : null}{providerName()} alerts</li>
-          }
-          {
-            _.map(mute.tags, tag =>
-              <li key={`${mute.id}-tag-${tag.name}-${tag.value}`}>
-                {tag.display_value || tag.value}
-              </li>
-            )
-          }
-        </ul>
-      );
+      return (<ul>
+        <li>‘{typeName()}’ alerts from {providerName()}</li>
+      </ul>);
     }
+
+    return (
+      <ul>
+        {mute.activityType && <li>‘{typeName()}’ alerts</li>}
+        {mute.provider &&
+          <li>{providerOnly ? 'All ' : null}{providerName()} alerts</li>
+        }
+        {
+          _.map(mute.tags, tag => (
+            <li key={`${mute.id}-tag-${tag.name}-${tag.value}`}>
+              {tag.display_value || tag.value}
+            </li>
+          ))
+        }
+      </ul>
+    );
   }
 }
 

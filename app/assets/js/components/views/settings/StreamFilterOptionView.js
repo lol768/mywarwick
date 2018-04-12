@@ -73,9 +73,9 @@ class StreamFilterOptionView extends React.PureComponent {
     if (providers.length === 0) {
       return (
         <div className="empty-state">
-          You haven&apos;t recorded any { plural.toLowerCase() } yet. When you do, you&apos;ll be
+          You haven’t recorded any { plural.toLowerCase() } yet. When you do, you’ll be
           able to use this screen to choose which types
-          of { this.props.filterType.toLowerCase() } you&apos;d like to see on
+          of { this.props.filterType.toLowerCase() } you’d like to see on
           your { this.props.filterType } tab.
         </div>
       );

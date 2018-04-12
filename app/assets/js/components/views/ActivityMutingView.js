@@ -37,7 +37,7 @@ export default class ActivityMutingView extends React.PureComponent {
     super(props);
     this.state = {
       duration: null,
-      scope: null
+      scope: null,
     };
     this.handleDurationChange = this.handleDurationChange.bind(this);
     this.handleScopeChange = this.handleScopeChange.bind(this);
@@ -57,7 +57,7 @@ export default class ActivityMutingView extends React.PureComponent {
 
   handleScopeChange(value) {
     this.setState({
-      scope: value
+      scope: value,
     });
   }
 
@@ -82,7 +82,7 @@ export default class ActivityMutingView extends React.PureComponent {
             name="scope"
             value={TYPE_SCOPE}
             onClick={this.handleScopeChange}
-            description={`Just '${lowercaseFirst(this.props.activityTypeDisplayName || this.props.activityType)}' alerts`}
+            description={`Just ‘${lowercaseFirst(this.props.activityTypeDisplayName || this.props.activityType)}’ alerts`}
             checked={this.state.scope === TYPE_SCOPE}
           />
           <RadioListGroupItem

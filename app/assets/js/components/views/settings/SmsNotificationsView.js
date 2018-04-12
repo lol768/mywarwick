@@ -208,8 +208,8 @@ class SmsNotificationsView extends HideableView {
                     }
                   </div>
                   <p className="text--hint">
-                    We&apos;ll use the number you provide only to send My Warwick alerts to, and we
-                    won&apos;t share the number with any other application or with any third party.
+                    We’ll use the number you provide only to send My Warwick alerts to, and we
+                    won’t share the number with any other application or with any third party.
                     You can turn off SMS alerting at any time.
                   </p>
                   { this.state.verificationRequired &&
@@ -220,7 +220,7 @@ class SmsNotificationsView extends HideableView {
                       }) }
                       >
                         <label htmlFor="Settings:SMSNumber-verificationCode">
-                          We&apos;ve sent you a code to verify your phone number. Enter it below.
+                          We’ve sent you a code to verify your phone number. Enter it below.
                         </label>
                         <input
                           type="tel"
