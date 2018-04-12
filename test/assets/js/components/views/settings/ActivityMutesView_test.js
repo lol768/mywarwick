@@ -8,7 +8,7 @@ describe('ActivityMutesView', () => {
       activityMutes={[]}
       isOnline={true}
     />);
-    result.find('EmptyState').childAt(0).text().should.contain("You haven't muted any alerts");
+    result.find('EmptyState').childAt(0).text().should.contain("You haven’t muted any alerts");
     result.find('MuteDescription').should.have.length(0);
   })
 });
@@ -28,7 +28,7 @@ describe('MuteDescription', () => {
     const result = enzyme.shallow(<MuteDescription mute={mute} />);
     const lis = result.find('li');
     lis.should.have.length(3);
-    lis.at(0).text().should.equal("'coursework-due' alerts");
+    lis.at(0).text().should.equal("‘coursework-due’ alerts");
     lis.at(1).text().should.equal("tabula alerts");
     lis.at(2).text().should.equal("Chemistry");
   });
@@ -46,7 +46,7 @@ describe('MuteDescription', () => {
     const result = enzyme.shallow(<MuteDescription mute={mute} />);
     const lis = result.find('li');
     lis.should.have.length(1);
-    lis.at(0).text().should.equal("'coursework-due' alerts from tabula");
+    lis.at(0).text().should.equal("‘coursework-due’ alerts from tabula");
   });
 
   // This case will become uncommon as the new UI will always include
@@ -56,6 +56,6 @@ describe('MuteDescription', () => {
     const result = enzyme.shallow(<MuteDescription mute={mute} />);
     const lis = result.find('li');
     lis.should.have.length(1);
-    lis.at(0).text().should.equal("'coursework-due' alerts");
+    lis.at(0).text().should.equal("‘coursework-due’ alerts");
   });
 });
