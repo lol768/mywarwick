@@ -103,11 +103,19 @@ export class ActivityMutesView extends React.PureComponent {
                 </div>),
               )
               : <EmptyState>
-                  You haven&apos;t muted any alerts. Use the <Mute fw /> icon next to each
-                  alert to specify similar types of alerts to mute in future.
-                  Muted alerts still appear in the list of alerts;
-                  they just don&apos;t pop up on your device.
+                You haven’t muted any alerts. Use the <Mute fw /> icon next to each alert on the
+                Alerts tab if you want to mute that type of alert in the future. Muted alerts still
+                appear on the Alerts tab, but they don’t play a sound or appear on your phone’s
+                lock screen when they’re delivered.
               </EmptyState>
+          }
+          {
+            this.props.activityMutes.length > 0 &&
+            <div className="activity-item-padding text--hint">
+              Muted alerts still appear in the Alerts tab,
+              but they don’t play a sound or appear on
+              your phone’s lock screen when they’re delivered
+            </div>
           }
         </div>
       </ScrollRestore>

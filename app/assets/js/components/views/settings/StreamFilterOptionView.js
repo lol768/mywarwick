@@ -84,12 +84,12 @@ class StreamFilterOptionView extends React.PureComponent {
     return (
       <div>
         {plural === 'Alerts' &&
-        <p className="hint-text container-fluid">
+        <p className="text--hint container-fluid">
           Filtering alerts will not stop them popping up on your device. To stop this you
           should use the <Mute fw /> icon next to each alert in the Alerts tab.
         </p>
         }
-        <p className="hint-text container-fluid">
+        <p className="text--hint container-fluid">
           On my { plural } tab, show { plural.toLowerCase() } that come from
         </p>
         <div className="list-group">

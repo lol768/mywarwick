@@ -207,7 +207,7 @@ class SmsNotificationsView extends HideableView {
                       <span className="help-block">{ this.state.submitErrors.phoneNumber }</span>
                     }
                   </div>
-                  <p className="hint-text">
+                  <p className="text--hint">
                     We&apos;ll use the number you provide only to send My Warwick alerts to, and we
                     won&apos;t share the number with any other application or with any third party.
                     You can turn off SMS alerting at any time.
