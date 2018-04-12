@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import * as notifications from '../../../state/notifications';
 import Switch from '../../ui/Switch';
 import wrapKeyboardSelect from '../../../keyboard-nav';
+import { Mute } from '../../FA';
 
 class StreamFilterOptionView extends React.PureComponent {
   static propTypes = {
@@ -72,9 +73,9 @@ class StreamFilterOptionView extends React.PureComponent {
     if (providers.length === 0) {
       return (
         <div className="empty-state">
-          You haven&apos;t recorded any { plural.toLowerCase() } yet. When you do, you&apos;ll be
+          You haven’t recorded any { plural.toLowerCase() } yet. When you do, you’ll be
           able to use this screen to choose which types
-          of { this.props.filterType.toLowerCase() } you&apos;d like to see on
+          of { this.props.filterType.toLowerCase() } you’d like to see on
           your { this.props.filterType } tab.
         </div>
       );
@@ -82,7 +83,14 @@ class StreamFilterOptionView extends React.PureComponent {
 
     return (
       <div>
-        <p className="hint-text container-fluid">
+        {plural === 'Alerts' &&
+        <p className="text--hint container-fluid">
+          Filtering alerts will not stop them playing a sound or appearing on
+          your phone’s lock screen. To stop this you
+          should use the <Mute fw /> icon next to each alert in the Alerts tab.
+        </p>
+        }
+        <p className="text--hint container-fluid">
           On my { plural } tab, show { plural.toLowerCase() } that come from
         </p>
         <div className="list-group">

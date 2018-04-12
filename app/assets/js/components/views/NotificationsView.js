@@ -58,7 +58,7 @@ class NotificationsView extends HideableView {
         <p>
           When there are things that need your attention &ndash;
           coursework due in, library books due back, that kind of thing &ndash;
-          you&apos;ll see those alerts here.
+          you’ll see those alerts here.
         </p>
       </EmptyState>
     );

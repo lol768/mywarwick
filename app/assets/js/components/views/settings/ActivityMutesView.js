@@ -8,30 +8,41 @@ import ScrollRestore from '../../ui/ScrollRestore';
 import { Routes } from '../../AppRoot';
 import EmptyState from '../../ui/EmptyState';
 import wrapKeyboardSelect from '../../../keyboard-nav';
+import { Mute } from '../../FA';
 
-class ActivityMutesView extends React.PureComponent {
+const activityMuteType = PropTypes.shape({
+  id: PropTypes.string.isRequired,
+  usercode: PropTypes.string.isRequired,
+  createdAt: PropTypes.string.isRequired,
+  expiresAt: PropTypes.string,
+  activityType: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    displayName: PropTypes.string,
+  }),
+  provider: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    displayName: PropTypes.string,
+  }),
+  tags: PropTypes.arrayOf(PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    display_name: PropTypes.string,
+    value: PropTypes.string.isRequired,
+    display_value: PropTypes.string,
+  })),
+});
+
+// Should handle this generally in the date format functions -
+// maybe they should always format text for the middle of a sentence,
+// as it's easier to capitalise the first letter afterward than to do
+// the reverse.
+function handleDateCase(formattedDate) {
+  return formattedDate.replace('Tomorrow', 'tomorrow');
+}
+
+export class ActivityMutesView extends React.PureComponent {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
-    activityMutes: PropTypes.arrayOf(PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      usercode: PropTypes.string.isRequired,
-      createdAt: PropTypes.string.isRequired,
-      expiresAt: PropTypes.string,
-      activityType: PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        displayName: PropTypes.string,
-      }),
-      provider: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        displayName: PropTypes.string,
-      }),
-      tags: PropTypes.arrayOf(PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        display_name: PropTypes.string,
-        value: PropTypes.string.isRequired,
-        display_value: PropTypes.string,
-      })),
-    })).isRequired,
+    activityMutes: PropTypes.arrayOf(activityMuteType).isRequired,
     isOnline: PropTypes.bool.isRequired,
   };
 
@@ -66,31 +77,11 @@ class ActivityMutesView extends React.PureComponent {
                     <div className="media-body">
                       <div className="activity-item__title">{
                         mute.expiresAt ?
-                          `Mute until ${dateFormats.forActivity(mute.expiresAt)}`
-                          : 'Mute until removed'
+                          `Muted until ${handleDateCase(dateFormats.forActivity(mute.expiresAt))}`
+                          : 'Muted until removed'
                       }</div>
                       <div className="activity-item__text">
-                        <ul>
-                          {
-                            mute.activityType ?
-                              <li>{
-                                mute.activityType.displayName || mute.activityType.name
-                              }</li> : null
-                          }
-                          {
-                            mute.provider ?
-                              <li>{
-                                mute.provider.displayName || mute.provider.id
-                              }</li> : null
-                          }
-                          {
-                            _.map(mute.tags, tag =>
-                              (<li key={ `${mute.id}-tag-${tag.name}-${tag.value}` }>
-                                { tag.display_value || tag.value }
-                              </li>),
-                            )
-                          }
-                        </ul>
+                        <MuteDescription mute={mute} />
                       </div>
                       <div className="activity-item__date">
                         Created { dateFormats.forActivity(mute.createdAt) }
@@ -112,14 +103,61 @@ class ActivityMutesView extends React.PureComponent {
                 </div>),
               )
               : <EmptyState>
-                  You haven&apos;t muted any alerts. Use the dropdown arrow next to each
-                  alert to specify similar types of alerts to mute in future.
-                  Muted alerts still appear in the list of alerts;
-                  they just don&apos;t pop up on your device.
+                You haven’t muted any alerts. Use the <Mute fw /> icon next to each alert on the
+                Alerts tab if you want to mute that type of alert in the future. Muted alerts still
+                appear on the Alerts tab, but they don’t play a sound or appear on your phone’s
+                lock screen when they’re delivered.
               </EmptyState>
+          }
+          {
+            this.props.activityMutes.length > 0 &&
+            <div className="activity-item-padding text--hint">
+              Muted alerts still appear in the Alerts tab,
+              but they don’t play a sound or appear on
+              your phone’s lock screen when they’re delivered
+            </div>
           }
         </div>
       </ScrollRestore>
+    );
+  }
+}
+
+export class MuteDescription extends React.PureComponent {
+  static propTypes = {
+    mute: activityMuteType,
+  };
+
+  render() {
+    const mute = this.props.mute;
+
+    const tagsEmpty = _.isEmpty(mute.tags);
+    const providerOnly = mute.provider && !mute.activityType && tagsEmpty;
+
+    const typeName = () => mute.activityType.displayName || mute.activityType.name;
+    const providerName = () => mute.provider.displayName || mute.provider.id;
+
+    if (mute.provider && mute.activityType && tagsEmpty) {
+      // Display as a single item
+      return (<ul>
+        <li>‘{typeName()}’ alerts from {providerName()}</li>
+      </ul>);
+    }
+
+    return (
+      <ul>
+        {mute.activityType && <li>‘{typeName()}’ alerts</li>}
+        {mute.provider &&
+          <li>{providerOnly ? 'All ' : null}{providerName()} alerts</li>
+        }
+        {
+          _.map(mute.tags, tag => (
+            <li key={`${mute.id}-tag-${tag.name}-${tag.value}`}>
+              {tag.display_value || tag.value}
+            </li>
+          ))
+        }
+      </ul>
     );
   }
 }

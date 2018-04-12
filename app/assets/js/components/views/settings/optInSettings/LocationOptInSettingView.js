@@ -57,9 +57,9 @@ export default class LocationOptInSettingsView extends React.PureComponent {
           </div>
         </div>
 
-        <p className="hint-text container-fluid">
+        <p className="text--hint container-fluid">
           If you want, we can send you news and notifications specific to where you live.
-          Choose any of the following if you&apos;d like news about those areas
+          Choose any of the following if you’d like news about those areas
           (or just leave them all unchecked if not).
         </p>
 

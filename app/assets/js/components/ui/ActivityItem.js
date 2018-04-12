@@ -5,6 +5,7 @@ import Hyperlink from './Hyperlink';
 import * as dateFormats from '../../dateFormats';
 import AppIcon from './AppIcon';
 import wrapKeyboardSelect from '../../keyboard-nav';
+import { Mute, ChevronDown } from '../FA';
 
 class ActivityItem extends React.PureComponent {
   static propTypes = {
@@ -46,7 +47,7 @@ class ActivityItem extends React.PureComponent {
       <div className={ classNames }>
         { (this.props.muteable) ?
           <div className="muting" onClick={ this.onMuting } onKeyUp={ this.onMuting } role="button" tabIndex={0}>
-            <i className="fa fa-chevron-down" />
+            <Mute /><ChevronDown size="xs" />
           </div> : null
         }
         <Hyperlink href={ this.props.url }>
