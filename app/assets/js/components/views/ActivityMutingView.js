@@ -2,12 +2,15 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 import * as _ from 'lodash-es';
 import { activityMuteDurations } from '../../state/notifications';
-import CheckboxListGroupItem from '../ui/CheckboxListGroupItem';
 import RadioListGroupItem from '../ui/RadioListGroupItem';
 import wrapKeyboardSelect from '../../keyboard-nav';
+import { lowercaseFirst } from '../../helpers';
 
 const TagKeyPrefix = 'tag-';
 const PublishNotificationType = 'mywarwick-user-publish-notification';
+
+export const PROVIDER_SCOPE = 'providerId';
+export const TYPE_SCOPE = 'activityType';
 
 export default class ActivityMutingView extends React.PureComponent {
   static propTypes = {
@@ -32,19 +35,12 @@ export default class ActivityMutingView extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    const formValues = {
-      activityType: true,
-      providerId: true,
-    };
-    _.forEach(props.tags, (tag) => {
-      formValues[ActivityMutingView.toTagKey(tag)] = true;
-    });
     this.state = {
       duration: null,
-      formValues,
+      scope: null,
     };
     this.handleDurationChange = this.handleDurationChange.bind(this);
-    this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
+    this.handleScopeChange = this.handleScopeChange.bind(this);
     this.saveMuting = this.saveMuting.bind(this);
     this.onMutingDismiss = this.onMutingDismiss.bind(this);
   }
@@ -59,67 +55,44 @@ export default class ActivityMutingView extends React.PureComponent {
     });
   }
 
-  handleCheckboxChange(value, name) {
-    const keyName = (name.indexOf(TagKeyPrefix) === 0) ?
-      ActivityMutingView.toTagKey({ name: name.replace(TagKeyPrefix, ''), value }) : name;
+  handleScopeChange(value) {
     this.setState({
-      formValues: {
-        ...this.state.formValues,
-        [keyName]: !this.state.formValues[keyName],
-      },
+      scope: value,
     });
   }
 
   saveMuting(e) {
     wrapKeyboardSelect(() => {
       const nameValues = {
-        activityType: (this.state.formValues.activityType) ? this.props.activityType : null,
-        providerId: (this.state.formValues.providerId) ? this.props.provider : null,
+        activityType: (this.state.scope === 'activityType') ? this.props.activityType : null,
+        providerId: this.props.provider, // mutes are always scoped to provider now
         duration: this.state.duration,
       };
-      _.forEach(this.props.tags, (tag) => {
-        if (this.state.formValues[ActivityMutingView.toTagKey(tag)]) {
-          nameValues[`tags[${tag.name}]`] = tag.value;
-        }
-      });
       this.props.onMutingSave(nameValues);
     }, e);
   }
 
-  renderCheckboxes() {
+  renderScope() {
     return (
       <div className="form-group">
         <div className="list-group">
-          <label>Mute alerts about:</label>
-          <CheckboxListGroupItem
+          <label>Mute:</label>
+          <RadioListGroupItem
             id="activityType"
-            name="activityType"
-            value={this.props.activityType}
-            onClick={this.handleCheckboxChange}
-            description={this.props.activityTypeDisplayName || this.props.activityType}
-            checked={this.state.formValues.activityType}
+            name="scope"
+            value={TYPE_SCOPE}
+            onClick={this.handleScopeChange}
+            description={`Just ‘${lowercaseFirst(this.props.activityTypeDisplayName || this.props.activityType)}’ alerts`}
+            checked={this.state.scope === TYPE_SCOPE}
           />
-          <CheckboxListGroupItem
+          <RadioListGroupItem
             id="providerId"
-            name="providerId"
-            value={this.props.provider}
-            onClick={this.handleCheckboxChange}
-            description={this.props.providerDisplayName || this.props.provider}
-            checked={this.state.formValues.providerId}
+            name="scope"
+            value={PROVIDER_SCOPE}
+            onClick={this.handleScopeChange}
+            description={`All ${this.props.providerDisplayName || this.props.provider} alerts`}
+            checked={this.state.scope === PROVIDER_SCOPE}
           />
-          {
-            _.map(this.props.tags, tag => (
-              <CheckboxListGroupItem
-                key={tag.name}
-                id={`tag-${tag.name}`}
-                name={`tag-${tag.name}`}
-                value={tag.value}
-                onClick={this.handleCheckboxChange}
-                description={tag.display_value || tag.value}
-                checked={this.state.formValues[ActivityMutingView.toTagKey(tag)]}
-              />
-            ))
-          }
         </div>
       </div>
     );
@@ -128,7 +101,9 @@ export default class ActivityMutingView extends React.PureComponent {
   renderForm() {
     return (
       <form className="form" id={ `muting-${this.props.id}-form` }>
-        { (this.props.activityType !== PublishNotificationType) ? this.renderCheckboxes() : null }
+        { (this.props.activityType !== PublishNotificationType) ? this.renderScope() : null }
+        <p className="text--hint">Muted alerts still appear in this list, but they don’t play a sound or appear on
+          your phone’s lock screen when they’re delivered</p>
         <div className="list-group">
           <label>
             { (this.props.activityType === PublishNotificationType) ?
@@ -153,7 +128,7 @@ export default class ActivityMutingView extends React.PureComponent {
   }
 
   render() {
-    const someChecked = _.find(this.state.formValues, value => value === true) !== undefined;
+    const someChecked = !!this.state.scope;
 
     return (
       <div className="activity-muting">

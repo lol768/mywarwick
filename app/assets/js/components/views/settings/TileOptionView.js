@@ -195,7 +195,7 @@ export class TileOptionView extends React.PureComponent {
 
         { _.flatMap(this.props.tileOptions, (tileOption, section) =>
           (<div key={ section }>
-            <p className="hint-text container-fluid">
+            <p className="text--hint container-fluid">
               { tileOption.description }
             </p>
             <div key={ section } className="list-group">

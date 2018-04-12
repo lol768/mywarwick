@@ -24,6 +24,13 @@ export function mkString(list) {
   return `${list.slice(0, list.length - 1).join(', ')}${list.length > 2 ? ',' : ''} and ${list[list.length - 1]}`;
 }
 
+export function lowercaseFirst(string) {
+  if (string && string.length > 0) {
+    return string[0].toLowerCase() + string.slice(1);
+  }
+  return string;
+}
+
 export function isiPhoneX() {
   const theWindow = window;
   const height = theWindow.screen.height;

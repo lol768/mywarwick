@@ -43,7 +43,7 @@ class ActivityView extends React.PureComponent {
         <p>
           When you do something at Warwick &ndash;
           like signing in, submitting your coursework, or enrolling for a module &ndash;
-          you&apos;ll see a record of it here.
+          you’ll see a record of it here.
         </p>
       </EmptyState>
     );
