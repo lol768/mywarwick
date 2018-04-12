@@ -7,7 +7,10 @@ import wrapKeyboardSelect from '../../keyboard-nav';
 export default class ListGroupItem extends React.PureComponent {
   static propTypes = {
     icon: PropTypes.string,
-    description: PropTypes.string.isRequired,
+    description: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.node,
+    ]).isRequired,
     onClick: PropTypes.func,
     loading: PropTypes.bool,
     failure: PropTypes.bool,
