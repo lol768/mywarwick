@@ -7,8 +7,9 @@ import wrapKeyboardSelect from '../../keyboard-nav';
 import { lowercaseFirst } from '../../helpers';
 
 const TagKeyPrefix = 'tag-';
-const PublishNotificationType = 'mywarwick-user-publish-notification';
 
+// exported for tests
+export const PublishNotificationType = 'mywarwick-user-publish-notification';
 export const PROVIDER_SCOPE = 'providerId';
 export const TYPE_SCOPE = 'activityType';
 
@@ -37,7 +38,7 @@ export default class ActivityMutingView extends React.PureComponent {
     super(props);
     this.state = {
       duration: null,
-      scope: null,
+      scope: this.isPublishNotification() ? PROVIDER_SCOPE : null,
     };
     this.handleDurationChange = this.handleDurationChange.bind(this);
     this.handleScopeChange = this.handleScopeChange.bind(this);
@@ -98,15 +99,19 @@ export default class ActivityMutingView extends React.PureComponent {
     );
   }
 
+  isPublishNotification() {
+    return this.props.activityType === PublishNotificationType;
+  }
+
   renderForm() {
     return (
       <form className="form" id={ `muting-${this.props.id}-form` }>
-        { (this.props.activityType !== PublishNotificationType) ? this.renderScope() : null }
+        { this.isPublishNotification() ? null : this.renderScope() }
         <p className="text--hint">Muted alerts still appear in this list, but they don’t play a sound or appear on
           your phone’s lock screen when they’re delivered</p>
         <div className="list-group">
           <label>
-            { (this.props.activityType === PublishNotificationType) ?
+            { this.isPublishNotification() ?
               `Mute alerts from ${this.props.providerDisplayName || this.props.provider} for:`
               : 'For:'
             }
