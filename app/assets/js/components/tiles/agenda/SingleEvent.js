@@ -20,7 +20,7 @@ export default class SingleEvent extends React.PureComponent {
       (<span><FA.Clock fw /> {date}</span>),
       typeof week === 'number' && (<span><FA.Calendar fw /> Week {week}</span>),
       locName && (<span><FA.Map fw /> {locName}</span>),
-    ]
+    ];
   }
 
   render() {
@@ -29,7 +29,7 @@ export default class SingleEvent extends React.PureComponent {
       return null;
     }
 
-    const { location, extraInfo, organiser, staff, href, parent } = event;
+    const { location, extraInfo, organiser, staff, href, parent, academicWeek } = event;
 
     const titleComponents = [];
     if (parent) {
