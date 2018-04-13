@@ -34,6 +34,17 @@ describe('ActivityMutingView', () => {
     expect(wrapper.state().scope).to.equal(null);
   });
 
+  it('sets up state for publish alerts', () => {
+    const props = {
+      ...commonProps,
+      activityType: constants.PublishNotificationType,
+      onMutingDismiss: () => {},
+      onMutingSave: () => {},
+    };
+    const wrapper = enzyme.shallow(<ActivityMutingView {...props} />);
+    expect(wrapper.state().scope).to.equal(constants.PROVIDER_SCOPE);
+  });
+
   it('toggles state', () => {
     const props = {
       ...commonProps,
