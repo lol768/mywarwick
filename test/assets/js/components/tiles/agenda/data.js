@@ -13,6 +13,7 @@ export const ITEMS = {
     organiser: {
       name: 'John Smith'
     },
+    academicWeek: 0,
   },
   secondEvent: {
     id: '2',
@@ -25,6 +26,7 @@ export const ITEMS = {
     organiser: {
       name: 'John Smith'
     },
+    academicWeek: 1
   },
   parentOnly: {
     id: '2',
