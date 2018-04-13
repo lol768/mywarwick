@@ -1,5 +1,6 @@
 import React from 'react';
 import SingleEvent from 'components/tiles/agenda/SingleEvent';
+import * as enzyme from 'enzyme';
 
 import { ITEMS, now } from './data';
 
@@ -114,5 +115,10 @@ describe('SingleEvent', () => {
 
     extractDate(html).should.equal('All day Thu 16 Jun');
   });
+
+  it('includes academic week in the modal', () => {
+    const children = SingleEvent.getModalChildren('Wednesday', 0, 'Library');
+    enzyme.shallow(children[1]).html().should.equal('<span><i class="fa fa-calendar fa-fw"></i> Week 0</span>');
+  })
 
 });
