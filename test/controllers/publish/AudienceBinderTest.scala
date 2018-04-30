@@ -9,6 +9,7 @@ import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.data.FormError
+import play.api.test.FakeRequest
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
 import services.{AudienceService, PublisherService}
 import warwick.sso.{AuthenticatedRequest, UniversityID, Usercode}
@@ -29,7 +30,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
   val defaultMockPublisherService: PublisherService = mockPublisherService("**")
   val publisher = Publisher("xyz", "Publisher", Some(1))
-  implicit val defaultPublisherRequest: PublisherRequest[_] = new PublisherRequest(publisher, null, new AuthenticatedRequest(null, null))
+  implicit val defaultPublisherRequest: PublisherRequest[_] = new PublisherRequest(publisher, null, new AuthenticatedRequest(null, FakeRequest()))
 
   "AudienceBinder" should {
 
@@ -235,7 +236,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       val mockAudienceService = mock[AudienceService]
       when(mockAudienceService.resolve(Audience(Seq(Audience.ComponentParameter.unapply("TaughtPostgrads").get)))).thenReturn(Try(Set.apply[Usercode](Usercode("a"), Usercode("b"))))
       val audienceBinder = new AudienceBinder(null, mockAudienceService, defaultMockPublisherService)
-      val result = audienceBinder.bindAudience(audienceData, restrictedRecipients = true)(new PublisherRequest(publisher, null, new AuthenticatedRequest(null, null))).futureValue
+      val result = audienceBinder.bindAudience(audienceData, restrictedRecipients = true)(new PublisherRequest(publisher, null, new AuthenticatedRequest(null, FakeRequest()))).futureValue
       result mustBe Left(Seq(FormError("audience", "error.audience.tooMany", Seq(1))))
     }
 

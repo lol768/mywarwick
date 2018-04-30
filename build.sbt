@@ -44,7 +44,7 @@ val appDeps = Seq(
   jodaForms,
   "com.typesafe.play" %% "anorm" % "2.5.3",
   "com.oracle" % "ojdbc7" % "12.1.0.2.0",
-  "uk.ac.warwick.sso" %% "sso-client-play" % "2.38",
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.40-SNAPSHOT",
   "uk.ac.warwick.play-utils" %% "accesslog" % playUtilsVersion,
   "uk.ac.warwick.play-utils" %% "anorm" % playUtilsVersion,
   "uk.ac.warwick.play-utils" %% "objectstore" % playUtilsVersion,
