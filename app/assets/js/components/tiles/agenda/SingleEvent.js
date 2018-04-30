@@ -15,6 +15,14 @@ export default class SingleEvent extends React.PureComponent {
     showModal: PropTypes.func.isRequired,
   };
 
+  static getModalChildren(date, week, locName) {
+    return [
+      (<span><FA.Clock fw /> {date}</span>),
+      typeof week === 'number' && (<span><FA.Calendar fw /> Week {week}</span>),
+      locName && (<span><FA.Map fw /> {locName}</span>),
+    ];
+  }
+
   render() {
     const event = this.props.event;
     if (!event) {
@@ -69,11 +77,7 @@ export default class SingleEvent extends React.PureComponent {
           role="button"
           onClick={() => this.props.showModal(
             title,
-            [
-              (<span><FA.Clock fw /> {fullEventDate}</span>),
-              academicWeek && (<span><FA.Calendar fw /> Week {academicWeek}</span>),
-              locName && (<span><FA.Map fw /> {locName}</span>),
-            ],
+            SingleEvent.getModalChildren(fullEventDate, academicWeek, locName),
             extraInfo,
             href,
           )}

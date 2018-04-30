@@ -102,6 +102,8 @@ describe('LargeBody', () => {
       const grouper = wrapper.props().groupBy;
       const unixTime = now.getTime() / 1000;
       grouper.titleForGroup(unixTime).should.equal('Thu 19th May');
+      grouper.subtitleForGroup([{props:items[0]}]).should.equal('(week 0)');
+      grouper.subtitleForGroup([{props:items[1]}]).should.equal('(week 1)');
     }, new Date(2016, 5, 1))
   );
 

@@ -43,7 +43,7 @@ const eventGrouping = {
   },
 
   subtitleForGroup(items) {
-    return items[0].props.academicWeek ? `(week ${items[0].props.academicWeek})` : null;
+    return typeof items[0].props.academicWeek === 'number' ? `(week ${items[0].props.academicWeek})` : null;
   },
 
   titleForGroup(group) {
@@ -100,7 +100,7 @@ export class AgendaTileItem extends React.PureComponent {
       title,
       [
         (<span><FA.Clock fw /> {fullEventDate}</span>),
-        academicWeek && (<span><FA.Calendar fw /> Week {academicWeek}</span>),
+        typeof academicWeek === 'number' && (<span><FA.Calendar fw /> Week {academicWeek}</span>),
         locName && (<span><FA.Map fw /> {locName}</span>),
       ],
       extraInfo,

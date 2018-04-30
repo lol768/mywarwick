@@ -16,3 +16,4 @@ export const ChevronRight = create('chevron-right');
 export const ChevronDown = create('chevron-down');
 export const Calendar = create('calendar');
 export const Mute = create('bell-slash-o');
+export const Info = create('info-circle');
