@@ -91,16 +91,22 @@ function clearUserData() {
 
 
 export function userReceive(currentUser) {
+  function setItemFailed(e) {
+    log.error(`Failed to cache user`, e);
+    return {}; // result is ignored below anyway.
+  }
+
   return dispatch =>
     // If we are a different user than we were before (incl. anonymous),
     // nuke the store, which also clears local storage
     loadUserFromLocalStorage(dispatch).then((previousUser) => {
       if (previousUser.usercode !== currentUser.usercode) {
-        dispatch(clearUserData())
-          .then(() => localforage.setItem('user', currentUser))
+        return dispatch(clearUserData())
+          .then(() => localforage.setItem('user', currentUser).catch(setItemFailed))
           .then(() => dispatch(receiveUserIdentity(currentUser)));
       } else {
-        localforage.setItem('user', currentUser)
+        return localforage.setItem('user', currentUser)
+          .catch(setItemFailed)
           .then(() => dispatch(receiveUserIdentity(currentUser)));
       }
     });
