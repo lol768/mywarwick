@@ -78,7 +78,7 @@ export default class SingleEvent extends React.PureComponent {
           onClick={() => this.props.showModal(
             title,
             SingleEvent.getModalChildren(fullEventDate, academicWeek, locName),
-            extraInfo,
+            extraInfo.split('\r\n'),
             href,
           )}
           target="_blank"

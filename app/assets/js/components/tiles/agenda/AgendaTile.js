@@ -74,7 +74,9 @@ export default class AgendaTile extends TileContent {
       href={href}
       moreButton={this.modalMoreButton()}
     >
-      {body}
+      {(body && body.length) ? _.map(_.filter(body, item => item.length > 0), item => (
+        <p>{item}</p>
+      )) : body}
     </DismissableInfoModal>);
     this.props.showModal(modal);
   }
