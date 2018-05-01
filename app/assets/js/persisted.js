@@ -42,7 +42,7 @@ export default function init(opts) {
         // Whenever the value at this key path changes
         const selector = createSelector(
           state => get(state, keyPathArray),
-          value => localforage.setItem(keyPath, freeze(value)).catch(e => {
+          value => localforage.setItem(keyPath, freeze(value)).catch((e) => {
             log.error(`Error persisting key ${keyPath} to storage.`, e);
           }),
         );

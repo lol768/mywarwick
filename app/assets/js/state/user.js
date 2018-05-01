@@ -92,7 +92,7 @@ function clearUserData() {
 
 export function userReceive(currentUser) {
   function setItemFailed(e) {
-    log.error(`Failed to cache user`, e);
+    log.error('Failed to cache user', e);
     return {}; // result is ignored below anyway.
   }
 
@@ -104,10 +104,9 @@ export function userReceive(currentUser) {
         return dispatch(clearUserData())
           .then(() => localforage.setItem('user', currentUser).catch(setItemFailed))
           .then(() => dispatch(receiveUserIdentity(currentUser)));
-      } else {
-        return localforage.setItem('user', currentUser)
-          .catch(setItemFailed)
-          .then(() => dispatch(receiveUserIdentity(currentUser)));
       }
+      return localforage.setItem('user', currentUser)
+        .catch(setItemFailed)
+        .then(() => dispatch(receiveUserIdentity(currentUser)));
     });
 }

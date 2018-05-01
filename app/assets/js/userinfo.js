@@ -32,8 +32,8 @@ export function receiveUserInfo(response) {
           if (!data.user.authenticated) {
             window.location = data.links.login;
           }
-        }).catch(e => {
-          log.error(`Error receiving user data`, e);
+        }).catch((e) => {
+          log.error('Error receiving user data', e);
         });
       }
     })
