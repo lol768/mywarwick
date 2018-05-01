@@ -50,7 +50,8 @@ export default function init() {
     window.addEventListener('unhandledrejection', (e) => {
       // e: https://developer.mozilla.org/en-US/docs/Web/API/PromiseRejectionEvent
       log.error('Unhandled promise rejection', e);
-      onError(`Unhandled promise rejection: ${e.reason}`, null, null, null, e.reason);
+      const message = (e.reason && e.reason.message) ? ` (${e.reason.message})` : '';
+      onError(`Unhandled promise rejection: ${e.reason}${message}`, null, null, null, e.reason);
       e.preventDefault();
     });
   }
