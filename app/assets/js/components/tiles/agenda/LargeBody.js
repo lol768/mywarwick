@@ -103,7 +103,7 @@ export class AgendaTileItem extends React.PureComponent {
         typeof academicWeek === 'number' && (<span><FA.Calendar fw /> Week {academicWeek}</span>),
         locName && (<span><FA.Map fw /> {locName}</span>),
       ],
-      extraInfo,
+      (extraInfo ? extraInfo.split('\r\n') : extraInfo),
       href,
     );
   }

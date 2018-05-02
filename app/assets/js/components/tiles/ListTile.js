@@ -46,8 +46,8 @@ export default class ListTile extends TileContent {
       href={href}
       moreButton={this.modalMoreButton()}
     >
-      {(body && body.length) ? _.map(_.filter(body, item => item.length > 0), item => (
-        <p>{item}</p>
+      {(body && body.length) ? _.map(_.filter(body, item => item.length > 0), (item, i) => (
+        <p key={`body-${i}`}>{item}</p>
       )) : body}
     </DismissableInfoModal>);
     this.props.showModal(modal);
