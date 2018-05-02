@@ -23,6 +23,12 @@ export default class TextTile extends TileContent {
     }
   }
 
+  componentDidUpdate() {
+    if (this.props.content && this.props.content.items) {
+      this.setTransitionInterval();
+    }
+  }
+
   componentWillReceiveProps(nextProps) {
     if (!nextProps.content || !nextProps.content.items
       || this.state.itemIndex >= nextProps.content.items.length) {
