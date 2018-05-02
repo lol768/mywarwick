@@ -235,9 +235,9 @@ function generateServiceWorker(watch) {
 
       return generateSW(workboxConfig);
     })
-    .then(({count, size, warnings}) => {
-      gutil.log(`Generated service worker with ${count} pre-cached entries totalling ${size}b`);
-      warnings.forEach(w => gutil.log(gutil.colors.yellow(w.toString())));
+    .then((results) => {
+      gutil.log(`Generated service worker with ${results.count} pre-cached entries totalling ${results.size}b`);
+      results.warnings.forEach(w => gutil.log(gutil.colors.yellow(w.toString())));
     });
 }
 
