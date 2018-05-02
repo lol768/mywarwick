@@ -166,7 +166,8 @@ gulp.task('lint', () => {
 });
 
 function generateServiceWorker(watch) {
-  const swPrecache = require('sw-precache');
+  const {generateSW} = require('workbox-build');
+
   // Things that should cause fresh HTML to be downloaded
   const htmlDependencies = [
     'target/gulp/css/main.css.md5',
@@ -183,18 +184,23 @@ function generateServiceWorker(watch) {
   ];
 
   return getCachedAssetsAsync().then(cachedAssets =>
-    swPrecache.generate({
+    generateSW({
+      swDest: path.join(paths.assetsOut, 'service-worker.js'),
+      importWorkboxFrom: 'cdn',
       cacheId: 'start',
-      handleFetch: false,
-      clientsClaim: false,
-      staticFileGlobs: [],
-      stripPrefixMulti: {
+      clientsClaim: true,
+      skipWaiting: true,
+      globDirectory: path.join(__dirname, '..'),
+      globPatterns: [
+        'public/**/*',
+      ].concat(cachedAssets),
+      modifyUrlPrefix: {
         'target/gulp/': 'assets/',
         'public/': 'assets/'
       },
+      dontCacheBustUrlsMatching: /\/[0-9a-f]{32}-/,
       ignoreUrlParametersMatching: [/^v$/],
-      logger: gutil.log,
-      dynamicUrlToDependencies: {
+      templatedUrls: {
         '/': htmlDependencies
       },
       // If any of these other URLs are hit, use the same cache entry as /
@@ -209,22 +215,15 @@ function generateServiceWorker(watch) {
         /^\/settings/,
       ],
       maximumFileSizeToCacheInBytes: 10 * 1000 * 1000,
+      importScripts: [
+        'assets/js/push-worker.js',
+      ],
     })
   )
-    .then((offlineWorker) => {
-      const bopts = browserifyOptions(cacheName('push-worker'), 'push-worker.js');
-      bopts.debug = false; // no sourcemaps, uglify removes them and they're broken here anyway.
-      const b = createBrowserify(bopts);
-      return b.bundle()
-        .on('error', (e) => {
-          gutil.log(gutil.colors.red(e.toString()));
-        })
-        .pipe(source('service-worker.js'))
-        .pipe(buffer())
-        .pipe(insert.prepend(offlineWorker))
-        .pipe(UGLIFY ? uglify() : gutil.noop())
-        .pipe(gulp.dest(paths.assetsOut));
-    });
+  .then(({count, size, warnings}) => {
+    gutil.log(`Generated service worker with ${count} pre-cached entries totalling ${size}b`);
+    warnings.forEach(w => gutil.log(gutil.colors.yellow(w.toString())));
+  });
 }
 
 // Not strictly a script thing, but here it is in scripts.js.
