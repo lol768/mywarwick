@@ -166,7 +166,7 @@ gulp.task('lint', () => {
 });
 
 function generateServiceWorker(watch) {
-  const {generateSW} = require('workbox-build');
+  const generateSW = require('workbox-build').generateSW;
 
   // Things that should cause fresh HTML to be downloaded
   const htmlDependencies = [
@@ -183,47 +183,62 @@ function generateServiceWorker(watch) {
     'app/views/common/id7layout.scala.html',
   ];
 
-  return getCachedAssetsAsync().then(cachedAssets =>
-    generateSW({
-      swDest: path.join(paths.assetsOut, 'service-worker.js'),
-      importWorkboxFrom: 'cdn',
-      cacheId: 'start',
-      clientsClaim: true,
-      skipWaiting: true,
-      globDirectory: path.join(__dirname, '..'),
-      globPatterns: [
-        'public/**/*',
-      ].concat(cachedAssets),
-      modifyUrlPrefix: {
-        'target/gulp/': 'assets/',
-        'public/': 'assets/'
-      },
-      dontCacheBustUrlsMatching: /\/[0-9a-f]{32}-/,
-      ignoreUrlParametersMatching: [/^v$/],
-      templatedUrls: {
-        '/': htmlDependencies
-      },
-      // If any of these other URLs are hit, use the same cache entry as /
-      // because the HTML is the same for all of them.
-      navigateFallback: '/',
-      navigateFallbackWhitelist: [
-        /^\/notifications/,
-        /^\/alerts/,
-        /^\/activities/,
-        /^\/search/,
-        /^\/news\/?$/,
-        /^\/settings/,
-      ],
-      maximumFileSizeToCacheInBytes: 10 * 1000 * 1000,
-      importScripts: [
-        'assets/js/push-worker.js',
-      ],
+  // Scripts that should be imported from the Service Worker
+  const commonSWScripts = [
+    'assets/js/push-worker.js',
+  ];
+
+  const debugSWScripts = [
+    'assets/js/sw-debug.js',
+  ];
+
+  const swScripts = PRODUCTION ? commonSWScripts : [].concat(commonSWScripts).concat(debugSWScripts);
+
+  const swConfig = {
+    swDest: path.join(paths.assetsOut, 'service-worker.js'),
+    importWorkboxFrom: 'cdn',
+    cacheId: 'start',
+    globDirectory: path.join(__dirname, '..'),
+    modifyUrlPrefix: {
+      'target/gulp/': 'assets/',
+      'public/': 'assets/'
+    },
+    dontCacheBustUrlsMatching: /\/[0-9a-f]{32}-/,
+    ignoreUrlParametersMatching: [/^v$/],
+    templatedUrls: {
+      '/': htmlDependencies
+    },
+    // If any of these other URLs are hit, use the same cache entry as /
+    // because the HTML is the same for all of them.
+    navigateFallback: '/',
+    navigateFallbackWhitelist: [
+      /^\/notifications/,
+      /^\/alerts/,
+      /^\/activities/,
+      /^\/search/,
+      /^\/news\/?$/,
+      /^\/settings/,
+    ],
+    maximumFileSizeToCacheInBytes: 10 * 1000 * 1000,
+    importScripts: swScripts,
+  };
+
+  return getCachedAssetsAsync()
+    .then(cachedAssets => {
+      const assetCaching = {
+        globPatterns: [
+          'public/**/*',
+        ].concat(cachedAssets),
+      };
+
+      const workboxConfig = OFFLINE_WORKERS ? Object.assign({}, swConfig, assetCaching) : swConfig;
+
+      return generateSW(workboxConfig);
     })
-  )
-  .then(({count, size, warnings}) => {
-    gutil.log(`Generated service worker with ${count} pre-cached entries totalling ${size}b`);
-    warnings.forEach(w => gutil.log(gutil.colors.yellow(w.toString())));
-  });
+    .then(({count, size, warnings}) => {
+      gutil.log(`Generated service worker with ${count} pre-cached entries totalling ${size}b`);
+      warnings.forEach(w => gutil.log(gutil.colors.yellow(w.toString())));
+    });
 }
 
 // Not strictly a script thing, but here it is in scripts.js.
