@@ -166,7 +166,8 @@ gulp.task('lint', () => {
 });
 
 function generateServiceWorker(watch) {
-  const swPrecache = require('sw-precache');
+  const generateSW = require('workbox-build').generateSW;
+
   // Things that should cause fresh HTML to be downloaded
   const htmlDependencies = [
     'target/gulp/css/main.css.md5',
@@ -182,48 +183,61 @@ function generateServiceWorker(watch) {
     'app/views/common/id7layout.scala.html',
   ];
 
-  return getCachedAssetsAsync().then(cachedAssets =>
-    swPrecache.generate({
-      cacheId: 'start',
-      handleFetch: false,
-      clientsClaim: false,
-      staticFileGlobs: [],
-      stripPrefixMulti: {
-        'target/gulp/': 'assets/',
-        'public/': 'assets/'
-      },
-      ignoreUrlParametersMatching: [/^v$/],
-      logger: gutil.log,
-      dynamicUrlToDependencies: {
-        '/': htmlDependencies
-      },
-      // If any of these other URLs are hit, use the same cache entry as /
-      // because the HTML is the same for all of them.
-      navigateFallback: '/',
-      navigateFallbackWhitelist: [
-        /^\/notifications/,
-        /^\/alerts/,
-        /^\/activities/,
-        /^\/search/,
-        /^\/news\/?$/,
-        /^\/settings/,
-      ],
-      maximumFileSizeToCacheInBytes: 10 * 1000 * 1000,
+  // Scripts that should be imported from the Service Worker
+  const commonSWScripts = [
+    'assets/js/push-worker.js',
+  ];
+
+  const debugSWScripts = [
+    'assets/js/sw-debug.js',
+  ];
+
+  const swScripts = PRODUCTION ? commonSWScripts : [].concat(commonSWScripts).concat(debugSWScripts);
+
+  const swConfig = {
+    swDest: path.join(paths.assetsOut, 'service-worker.js'),
+    importWorkboxFrom: 'cdn',
+    cacheId: 'start',
+    globDirectory: path.join(__dirname, '..'),
+    modifyUrlPrefix: {
+      'target/gulp/': 'assets/',
+      'public/': 'assets/'
+    },
+    dontCacheBustUrlsMatching: /\/[0-9a-f]{32}-/,
+    ignoreUrlParametersMatching: [/^v$/],
+    templatedUrls: {
+      '/': htmlDependencies
+    },
+    // If any of these other URLs are hit, use the same cache entry as /
+    // because the HTML is the same for all of them.
+    navigateFallback: '/',
+    navigateFallbackWhitelist: [
+      /^\/notifications/,
+      /^\/alerts/,
+      /^\/activities/,
+      /^\/search/,
+      /^\/news\/?$/,
+      /^\/settings/,
+    ],
+    maximumFileSizeToCacheInBytes: 10 * 1000 * 1000,
+    importScripts: swScripts,
+  };
+
+  return getCachedAssetsAsync()
+    .then(cachedAssets => {
+      const assetCaching = {
+        globPatterns: [
+          'public/**/*',
+        ].concat(cachedAssets),
+      };
+
+      const workboxConfig = OFFLINE_WORKERS ? Object.assign({}, swConfig, assetCaching) : swConfig;
+
+      return generateSW(workboxConfig);
     })
-  )
-    .then((offlineWorker) => {
-      const bopts = browserifyOptions(cacheName('push-worker'), 'push-worker.js');
-      bopts.debug = false; // no sourcemaps, uglify removes them and they're broken here anyway.
-      const b = createBrowserify(bopts);
-      return b.bundle()
-        .on('error', (e) => {
-          gutil.log(gutil.colors.red(e.toString()));
-        })
-        .pipe(source('service-worker.js'))
-        .pipe(buffer())
-        .pipe(insert.prepend(offlineWorker))
-        .pipe(UGLIFY ? uglify() : gutil.noop())
-        .pipe(gulp.dest(paths.assetsOut));
+    .then((results) => {
+      gutil.log(`Generated service worker with ${results.count} pre-cached entries totalling ${results.size}b`);
+      results.warnings.forEach(w => gutil.log(gutil.colors.yellow(w.toString())));
     });
 }
 
