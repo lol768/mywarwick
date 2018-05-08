@@ -12,3 +12,4 @@ export { default as account } from './AccountTile';
 export { default as mail } from './MailTile';
 export { default as calendar } from './O365CalendarTile';
 export { default as modules } from './ModulesTile';
+export { default as todo } from './ToDoTile';
