@@ -120,8 +120,8 @@ export class TileOptionView extends React.PureComponent {
         key={ `${sectionName}:${possibleChoice.value}` }
         id={ `${sectionName}:${possibleChoice.value}` }
         value={ possibleChoice.value }
-        icon={tileOptions[sectionName].icon || tile.icon}
-        description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
+        icon={ possibleChoice.icon || tileOptions[sectionName].icon || tile.icon }
+        description={ possibleChoice.name || possibleChoice.value }
         onClick={ this.onCheckboxClick }
         checked={ checked }
         name={ sectionName }
