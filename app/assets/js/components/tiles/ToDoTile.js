@@ -3,7 +3,8 @@ import React from 'react';
 import ListTile from './ListTile';
 import ListTileItem from './ListTile';
 import * as PropTypes from 'prop-types';
-import { formatDateTime } from '../../dateFormats';
+import { formatDate } from '../../dateFormats';
+import { TILE_SIZES } from './TileContent';
 
 export default class ToDoTile extends ListTile {
 
@@ -13,6 +14,21 @@ export default class ToDoTile extends ListTile {
 
   listItem(props) {
     return (<ToDoItem {...props} />);
+  }
+
+  getNumberOfItemsToDisplay() {
+    switch (this.props.size) {
+      case TILE_SIZES.SMALL:
+        return 3;
+      case TILE_SIZES.WIDE:
+        return 3;
+      case TILE_SIZES.LARGE:
+        return 7;
+      case TILE_SIZES.TALL:
+        return 15;
+      default:
+        return 40;
+    }
   }
 
 }
@@ -47,9 +63,9 @@ class ToDoItem extends ListTileItem {
           {this.props.title && <span className="list-group-item__title">{this.props.subject}</span>}
           {
             this.props.dueDateTime &&
-            <span className="list-group-item__date">{formatDateTime(this.props.dueDateTime)}</span>
+            <span className="list-group-item__date">{formatDate(this.props.dueDateTime)}</span>
           }
-          <span className="list-group-item__text">
+          <span className={`list-group-item__text${this.props.completed ? '--deleted' : ''}`}>
             {this.props.subject}
           </span>
         </a>
