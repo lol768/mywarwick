@@ -213,9 +213,11 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
     if (isSameYear && isSameMonth) {
       s"${start.getYear}_${start.toString("MM")}"
     } else {
-      Iterator.iterate(start) {
+      val startMonth: DateTime = start.withDayOfMonth(1)
+      val endMonth: DateTime = interval.getEnd.withDayOfMonth(1)
+      Iterator.iterate(startMonth) {
         _.plusMonths(1)
-      }.takeWhile(!_.isAfter(interval.getEnd))
+      }.takeWhile(!_.isAfter(endMonth))
         .map(d => s"${d.getYear}_${"%02d".format(d.getMonthOfYear)}")
         .mkString(",")
     }

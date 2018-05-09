@@ -95,6 +95,17 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
       actual must be(expected)
     }
 
+    "return correct multi-index string when end day-of-month < start day-of-month" in {
+      val interval: Interval = new Interval(
+        new DateTime().withYear(2017).withMonthOfYear(9).withDayOfMonth(21),
+        new DateTime().withYear(2018).withMonthOfYear(2).withDayOfMonth(9)
+      )
+      val actual: String = ActivityESServiceSearchHelper.partialIndexNameForInterval(interval)
+      val expected: String = "2017_09,2017_10,2017_11,2017_12,2018_01,2018_02"
+
+      actual must be(expected)
+    }
+
     "give correct index name based on datetime interval" in {
 
       val `20170701`: DateTime = new DateTime().withYear(2017).withMonthOfYear(7).withDayOfMonth(1)
