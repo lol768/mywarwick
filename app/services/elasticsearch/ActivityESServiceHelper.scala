@@ -6,7 +6,7 @@ import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
 import org.elasticsearch.search.builder.SearchSourceBuilder
-import org.joda.time.{DateTime, Interval}
+import org.joda.time.{DateTime, Interval, Months}
 import play.api.libs.json.{JsValue, Json}
 
 trait ActivityESServiceHelper {
@@ -206,27 +206,19 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
   }
 
   def partialIndexNameForInterval(interval: Interval): String = {
-    val start = interval.getStart
-    val end = interval.getEnd
+    val start: DateTime = interval.getStart
+    val isSameYear: Boolean = start.getYear == interval.getEnd.getYear
+    val isSameMonth: Boolean = start.getMonthOfYear == interval.getEnd.getMonthOfYear
 
-    val startYear = interval.getStart.getYear
-    val endYear = interval.getEnd.getYear
-
-    if (startYear == endYear) {
-      val sameYear = startYear
-      val startMonth = start.toString("MM")
-      val endMonth = end.toString("MM")
-
-      if (startMonth == endMonth) {
-        val sameMonth = startMonth
-        s"${sameYear}_${sameMonth}"
-      } else {
-        s"${sameYear}*"
-      }
+    if (isSameYear && isSameMonth) {
+      s"${start.getYear}_${start.toString("MM")}"
     } else {
-      "*"
+      Iterator.iterate(start) {
+        _.plusMonths(1)
+      }.takeWhile(!_.isAfter(interval.getEnd))
+        .map(d => s"${d.getYear}_${"%02d".format(d.getMonthOfYear)}")
+        .mkString(",")
     }
-
   }
 
   def makeSearchSourceBuilder(queryBuilder: QueryBuilder): SearchSourceBuilder = {
@@ -239,8 +231,8 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 
     val rootBoolQuery: BoolQueryBuilder = new BoolQueryBuilder()
 
-    import QueryBuilders._
     import ESFieldName._
+    import QueryBuilders._
 
     for (v <- activityESSearchQuery.activity_id) rootBoolQuery.must(termQuery(activity_id, v))
 
