@@ -1,17 +1,11 @@
 /* eslint-env browser */
 import React from 'react';
-import ListTile from './ListTile';
-import ListTileItem from './ListTile';
+import ListTile, { ListTileItem } from './ListTile';
 import * as PropTypes from 'prop-types';
 import { formatDate } from '../../dateFormats';
 import { TILE_SIZES } from './TileContent';
 
 export default class ToDoTile extends ListTile {
-
-  constructor(props) {
-    super(props);
-  }
-
   listItem(props) {
     return (<ToDoItem {...props} />);
   }
@@ -27,15 +21,12 @@ export default class ToDoTile extends ListTile {
       case TILE_SIZES.TALL:
         return 15;
       default:
-        return 40;
+        return 200;
     }
   }
-
 }
 
-
 class ToDoItem extends ListTileItem {
-
   static propTypes = {
     id: PropTypes.string.isRequired,
     subject: PropTypes.string.isRequired,
@@ -45,10 +36,6 @@ class ToDoItem extends ListTileItem {
     completed: PropTypes.bool,
     handleOnClick: PropTypes.func,
   };
-
-  constructor(props) {
-    super(props);
-  }
 
   render() {
     const clickProps = (this.props.handleOnClick) ? {
