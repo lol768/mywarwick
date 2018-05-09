@@ -6,7 +6,7 @@ import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
 import org.elasticsearch.search.builder.SearchSourceBuilder
-import org.joda.time.{DateTime, Interval, Months}
+import org.joda.time.{DateTime, Interval}
 import play.api.libs.json.{JsValue, Json}
 
 trait ActivityESServiceHelper {
