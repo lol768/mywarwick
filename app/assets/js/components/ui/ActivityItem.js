@@ -11,6 +11,7 @@ class ActivityItem extends React.PureComponent {
   static propTypes = {
     provider: PropTypes.string.isRequired,
     providerDisplayName: PropTypes.string,
+    providerOverrideMuting: PropTypes.bool.isRequired,
     title: PropTypes.string.isRequired,
     text: PropTypes.string,
     textAsHtml: PropTypes.string,

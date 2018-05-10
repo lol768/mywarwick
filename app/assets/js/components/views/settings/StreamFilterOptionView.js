@@ -17,6 +17,7 @@ class StreamFilterOptionView extends React.PureComponent {
         displayName: PropTypes.string,
         icon: PropTypes.string,
         colour: PropTypes.string,
+        overrideMuting: PropTypes.bool,
       })).isRequired,
     }).isRequired,
     saveFilter: PropTypes.func.isRequired,
@@ -56,7 +57,7 @@ class StreamFilterOptionView extends React.PureComponent {
 
   onClick(event) {
     wrapKeyboardSelect(() => {
-      if (!this.props.isOnline) return;
+      if (event.currentTarget.dataset.disabled) return;
       const value = event.currentTarget.dataset.value;
       const name = event.currentTarget.dataset.name;
       const newOption = _.cloneDeep(this.state[name]);
@@ -102,6 +103,7 @@ class StreamFilterOptionView extends React.PureComponent {
                 className="list-group-item"
                 data-name="provider"
                 data-value={option.id}
+                data-disabled={!this.props.isOnline || option.overrideMuting}
                 role="button"
                 tabIndex={0}
                 onClick={ this.onClick }
@@ -123,7 +125,7 @@ class StreamFilterOptionView extends React.PureComponent {
                     <Switch
                       id={ `${this.props.filterType}:provider:${option.id}` }
                       checked={ this.state.provider[option.id] }
-                      disabled={ !this.props.isOnline }
+                      disabled={ !this.props.isOnline || option.overrideMuting }
                     />
                   </div>
                 </div>

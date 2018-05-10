@@ -199,7 +199,7 @@ class NotificationsView extends HideableView {
           key={ n.id }
           grouped={ shouldBeGrouped }
           unread={ this.isUnread(n) }
-          muteable
+          muteable={ !n.providerOverrideMuting }
           onMuting={ this.onMuting }
           {...n}
         />),

@@ -4,11 +4,12 @@ import anorm._
 import helpers.OneStartAppPerSuite
 import models.publishing.PublishingRole.{NewsManager, NotificationsManager}
 import helpers.BaseSpec
+import services.ProviderSave
 import warwick.sso.Usercode
 
 class PublisherDaoTest extends BaseSpec with OneStartAppPerSuite {
 
-  val dao = get[PublisherDao]
+  private val dao = get[PublisherDao]
 
   "PublisherDao" should {
 
@@ -65,6 +66,55 @@ class PublisherDaoTest extends BaseSpec with OneStartAppPerSuite {
 
       dao.isPublisher("shylock") mustBe true
 
+    }
+
+    "save provider" in transaction { implicit c =>
+      SQL"INSERT INTO PUBLISHER (ID, NAME) VALUES ('publisher-id', 'Test Publisher')"
+        .execute()
+
+      val provider = ProviderSave(
+        name = Some("Provider name"),
+        icon = Some("fa-sun"),
+        colour = Some("00ff00"),
+        sendEmail = true,
+        overrideMuting = true
+      )
+
+      dao.saveProvider("publisher-id", "provider-id", provider)
+
+      val providers = dao.getProviders("publisher-id")
+      providers.exists(_.id == "provider-id") must be (true)
+      providers.find(_.id == "provider-id").get.name must be (provider.name)
+      providers.find(_.id == "provider-id").get.icon must be (provider.icon)
+      providers.find(_.id == "provider-id").get.colour must be (provider.colour)
+      providers.find(_.id == "provider-id").get.sendEmail must be (provider.sendEmail)
+      providers.find(_.id == "provider-id").get.overrideMuting must be (provider.overrideMuting)
+    }
+
+    "update provider" in transaction { implicit c =>
+      SQL"INSERT INTO PUBLISHER (ID, NAME) VALUES ('publisher-id', 'Test Publisher')"
+        .execute()
+
+      SQL"INSERT INTO PROVIDER VALUES ('provider-id', 'Test Provider', 'fa-clock', '000000', 'publisher-id', 0, 0, 0)"
+        .execute()
+
+      val provider = ProviderSave(
+        name = Some("Provider name"),
+        icon = Some("fa-sun"),
+        colour = Some("00ff00"),
+        sendEmail = true,
+        overrideMuting = true
+      )
+
+      dao.updateProvider("publisher-id", "provider-id", provider)
+
+      val providers = dao.getProviders("publisher-id")
+      providers.exists(_.id == "provider-id") must be (true)
+      providers.find(_.id == "provider-id").get.name must be (provider.name)
+      providers.find(_.id == "provider-id").get.icon must be (provider.icon)
+      providers.find(_.id == "provider-id").get.colour must be (provider.colour)
+      providers.find(_.id == "provider-id").get.sendEmail must be (provider.sendEmail)
+      providers.find(_.id == "provider-id").get.overrideMuting must be (provider.overrideMuting)
     }
 
   }
