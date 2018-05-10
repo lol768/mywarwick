@@ -15,7 +15,7 @@ import warwick.sso.{AuthenticatedRequest, Usercode}
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-trait Publishing extends DepartmentOptions with CategoryOptions with ProviderOptions with PublishingActionRefiner with Logging {
+trait Publishing extends DepartmentOptions with CategoryOptions with HasProviders with PublishingActionRefiner with Logging {
   self: ImplicitRequestContext with BaseController =>
 
   implicit val executionContext = system.ThreadPools.web
@@ -153,12 +153,11 @@ trait PublishableWithAudience {
   val audience: AudienceData
 }
 
-trait ProviderOptions {
+trait HasProviders {
   val publisherService: PublisherService
 
-  def providerOptions(implicit publisherRequest: PublisherRequest[_]): Seq[(String, String)] =
+  def publisherProviders(implicit publisherRequest: PublisherRequest[_]): Seq[ProviderRender] =
     publisherService.getProviders(publisherRequest.publisher.id)
-      .map(provider => provider.id -> provider.name.getOrElse(provider.id))
 
 }
 
