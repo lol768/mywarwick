@@ -1,15 +1,14 @@
 package controllers.admin.publishers
 
-import javax.inject.Singleton
-
 import com.google.inject.Inject
 import controllers.MyController
+import javax.inject.Singleton
 import models.publishing.Publisher
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation.Constraints
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Result
+import play.api.i18n.I18nSupport
+import play.api.mvc.{Action, AnyContent, Result}
 import services.{ProviderRender, ProviderSave, PublisherService, SecurityService}
 import system.{RequestContext, Roles}
 
@@ -34,16 +33,17 @@ class ProvidersController @Inject() (
     "name" -> optional(text),
     "icon" -> optional(text),
     "colour" -> optional(text),
-    "sendEmail" -> boolean
+    "sendEmail" -> boolean,
+    "overrideMuting" -> boolean
   )(ProviderSave.apply)(ProviderSave.unapply))
 
-  def createForm(publisherId: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
+  def createForm(publisherId: String): Action[AnyContent] = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     withPublisher(publisherId, { publisher =>
       Ok(views.html.admin.providers.createForm(publisher, createProviderIdForm(publisherId), providerForm))
     })
   }
 
-  def create(publisherId: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
+  def create(publisherId: String): Action[AnyContent] = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     withPublisher(publisherId, { publisher =>
       createProviderIdForm(publisherId).bindFromRequest.fold(
         idFormWithErrors => Ok(views.html.admin.providers.createForm(publisher, idFormWithErrors, providerForm.bindFromRequest)),
@@ -61,18 +61,17 @@ class ProvidersController @Inject() (
     })
   }
 
-  def updateForm(publisherId: String, providerId: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-
+  def updateForm(publisherId: String, providerId: String): Action[AnyContent] = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     withPublisherAndProvider(publisherId, providerId, { (publisher, provider) =>
       Ok(views.html.admin.providers.updateForm(
         publisher,
         providerId,
-        providerForm.fill(ProviderSave(provider.name, provider.icon, provider.colour, provider.sendEmail))))
+        providerForm.fill(ProviderSave(provider.name, provider.icon, provider.colour, provider.sendEmail, provider.overrideMuting))))
     })
   }
 
-  def update(publisherId: String, providerId: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
-    withPublisherAndProvider(publisherId, providerId, { (publisher, provider) =>
+  def update(publisherId: String, providerId: String): Action[AnyContent] = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
+    withPublisherAndProvider(publisherId, providerId, { (publisher, _) =>
       providerForm.bindFromRequest.fold(
         formWithErrors => Ok(views.html.admin.providers.updateForm(publisher, publisherId, formWithErrors)),
         data => {

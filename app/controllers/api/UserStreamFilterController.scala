@@ -23,7 +23,8 @@ class UserStreamFilterController @Inject()(
         "id" -> provider.id,
         "displayName" -> provider.displayName.orNull[String],
         "icon" -> icon.map(_.name).orNull[String],
-        "colour" -> icon.flatMap(_.colour).orNull[String]
+        "colour" -> icon.flatMap(_.colour).orNull[String],
+        "overrideMuting" -> provider.overrideMuting
       )}
     )
   }
