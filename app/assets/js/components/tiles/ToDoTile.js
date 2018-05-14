@@ -53,7 +53,7 @@ class ToDoItem extends ListTileItem {
             this.props.dueDateTime &&
             <span className="list-group-item__date">{formatDate(this.props.dueDateTime)}</span>
           }
-          <span className='list-group-item__text'>
+          <span className="list-group-item__text">
             {this.props.subject}
           </span>
         </a>
