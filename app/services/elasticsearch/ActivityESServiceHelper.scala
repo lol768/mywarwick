@@ -5,6 +5,9 @@ import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
+import org.elasticsearch.script.Script
+import org.elasticsearch.search.aggregations.AggregationBuilders
+import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.joda.time.{DateTime, Interval}
 import play.api.libs.json.{JsObject, JsValue, Json}
@@ -182,9 +185,21 @@ object ActivityESServiceUpdateHelper extends ActivityESServiceHelper {
 
 }
 
+object ActivityESServiceCountHelper extends ActivityESServiceHelper {
+
+  object Aggregation {
+    object TotalUserCount {
+      lazy val fieldName = "totalUserCount"
+      lazy val builder: SumAggregationBuilder = AggregationBuilders
+        .sum("totalUserCount")
+        .script(new Script("doc['resolved_users'].values.length"))
+    }
+  }
+}
+
 object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 
-  def indexNameForActivitySearchQuery(query: ActivityESSearchQuery): String = {
+  def indexNameForActivitySearchQuery(query: ActivityESSearch.SearchQuery): String = {
     val indexForInterval: Seq[String] = query.publish_at match {
       case i: Some[Interval] => i.map(partialIndexNameForInterval).getOrElse(Seq("*"))
       case _ => Seq("*")
@@ -233,7 +248,7 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
     searchSourceBuilder.query(queryBuilder)
   }
 
-  def makeBoolQueryBuilder(activityESSearchQuery: ActivityESSearchQuery): BoolQueryBuilder = {
+  def makeBoolQueryBuilder(activityESSearchQuery: ActivityESSearch.SearchQuery): BoolQueryBuilder = {
 
     val rootBoolQuery: BoolQueryBuilder = new BoolQueryBuilder()
 
