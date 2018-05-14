@@ -5,7 +5,6 @@ import org.joda.time.{DateTime, Interval}
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
 import uk.ac.warwick.util.core.jodatime.DateTimeUtils
-import uk.ac.warwick.util.core.jodatime.DateTimeUtils.Callback
 
 
 class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
@@ -14,13 +13,11 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     "produce correct monthly index name for alerts and activity" in {
 
-      DateTimeUtils.useMockDateTime(DateTime.parse("2016-06-30T01:20"), new Callback {
-        override def doSomething() = {
+      DateTimeUtils.useMockDateTime(DateTime.parse("2016-06-30T01:20"), () => {
 
-          ActivityESServiceHelper.indexNameToday(true) must be("alert_2016_06")
+        ActivityESServiceHelper.indexNameToday() must be("alert_2016_06")
 
-          ActivityESServiceHelper.indexNameToday(false) must be("activity_2016_06")
-        }
+        ActivityESServiceHelper.indexNameToday(false) must be("activity_2016_06")
       })
     }
 
@@ -78,8 +75,8 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
         new DateTime().withYear(2017).withMonthOfYear(2).withDayOfMonth(9),
         new DateTime().withYear(2017).withMonthOfYear(7).withDayOfMonth(21)
       )
-      val actual: String = ActivityESServiceSearchHelper.partialIndexNameForInterval(interval)
-      val expected: String = "2017_02,2017_03,2017_04,2017_05,2017_06,2017_07"
+      val actual = ActivityESServiceSearchHelper.partialIndexNameForInterval(interval)
+      val expected = Seq("2017_02","2017_03","2017_04","2017_05","2017_06","2017_07")
 
       actual must be(expected)
     }
@@ -89,8 +86,8 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
         new DateTime().withYear(2017).withMonthOfYear(9).withDayOfMonth(9),
         new DateTime().withYear(2018).withMonthOfYear(2).withDayOfMonth(21)
       )
-      val actual: String = ActivityESServiceSearchHelper.partialIndexNameForInterval(interval)
-      val expected: String = "2017_09,2017_10,2017_11,2017_12,2018_01,2018_02"
+      val actual = ActivityESServiceSearchHelper.partialIndexNameForInterval(interval)
+      val expected = Seq("2017_09","2017_10","2017_11","2017_12","2018_01","2018_02")
 
       actual must be(expected)
     }
@@ -100,8 +97,8 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
         new DateTime().withYear(2017).withMonthOfYear(9).withDayOfMonth(21),
         new DateTime().withYear(2018).withMonthOfYear(2).withDayOfMonth(9)
       )
-      val actual: String = ActivityESServiceSearchHelper.partialIndexNameForInterval(interval)
-      val expected: String = "2017_09,2017_10,2017_11,2017_12,2018_01,2018_02"
+      val actual = ActivityESServiceSearchHelper.partialIndexNameForInterval(interval)
+      val expected = Seq("2017_09","2017_10","2017_11","2017_12","2018_01","2018_02")
 
       actual must be(expected)
     }
@@ -113,20 +110,20 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
       val sameYearDifferentMonthInterval = new Interval(`20170701`, `20170801`)
 
-      partialIndexNameForInterval(sameYearDifferentMonthInterval) must be("2017_07,2017_08")
+      partialIndexNameForInterval(sameYearDifferentMonthInterval) must be(Seq("2017_07","2017_08"))
 
       val `20150801`: DateTime = new DateTime().withYear(2015).withMonthOfYear(8).withDayOfMonth(1)
       val `20160801`: DateTime = new DateTime().withYear(2016).withMonthOfYear(8).withDayOfMonth(1)
 
       val differentYear = new Interval(`20150801`, `20160801`)
 
-      partialIndexNameForInterval(differentYear) must be("2015_08,2015_09,2015_10,2015_11,2015_12,2016_01,2016_02,2016_03,2016_04,2016_05,2016_06,2016_07,2016_08")
+      partialIndexNameForInterval(differentYear) must be(Seq("2015_08","2015_09","2015_10","2015_11","2015_12","2016_01","2016_02","2016_03","2016_04","2016_05","2016_06","2016_07","2016_08"))
 
       val `20170810`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(10)
       val `20170829`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(29)
 
       val sameYearSameMonth = new Interval(`20170810`, `20170829`)
-      partialIndexNameForInterval(sameYearSameMonth) must be("2017_08")
+      partialIndexNameForInterval(sameYearSameMonth) must be(Seq("2017_08"))
 
     }
 
@@ -152,6 +149,18 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
       indexNameForActivitySearchQuery(query3) must be("alert_2017_08")
     }
 
+    "generate correct index for query with type and interval over multiple months" in {
+
+      val `20170710`: DateTime = new DateTime().withYear(2017).withMonthOfYear(7).withDayOfMonth(10)
+      val `20170829`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(29)
+
+      val query3 = ActivityESSearchQuery(
+        isAlert = Some(true),
+        publish_at = Some(new Interval(`20170710`, `20170829`))
+      )
+      indexNameForActivitySearchQuery(query3) must be("alert_2017_07,alert_2017_08")
+    }
+
     "generate correct index for a with interval but no type" in {
 
       val `20170810`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(10)
@@ -161,6 +170,17 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
         publish_at = Some(new Interval(`20170810`, `20170829`))
       )
       indexNameForActivitySearchQuery(query4) must be("*_2017_08")
+    }
+
+    "generate correct index for a with interval but no type over multiple months" in {
+
+      val `20170710`: DateTime = new DateTime().withYear(2017).withMonthOfYear(7).withDayOfMonth(10)
+      val `20170829`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(29)
+
+      val query4 = ActivityESSearchQuery(
+        publish_at = Some(new Interval(`20170710`, `20170829`))
+      )
+      indexNameForActivitySearchQuery(query4) must be("*_2017_07,*_2017_08")
     }
 
     "build an empty query if the supplied ActivityESSearchQuery is empty" in {

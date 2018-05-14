@@ -7,13 +7,13 @@ import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.joda.time.{DateTime, Interval}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 
 trait ActivityESServiceHelper {
 
   val activityDocumentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
   val deliveryReportDocumentType = "delivery_report"
-  val deliveryReportIndexName = deliveryReportDocumentType
+  val deliveryReportIndexName: String = deliveryReportDocumentType
   val indexNameForAlert = "alert"
   val indexNameForActivity = "activity"
   val separator = "_"
@@ -46,16 +46,18 @@ trait ActivityESServiceHelper {
   def dateSuffixString(date: DateTime = DateTime.now()) = s"$separator${date.toString("yyyy_MM")}"
 
   def indexNameToday(isNotification: Boolean = true): String = {
-    isNotification match {
-      case true => s"$indexNameForAlert${dateSuffixString()}"
-      case false => s"$indexNameForActivity${dateSuffixString()}"
+    if (isNotification) {
+      s"$indexNameForAlert${dateSuffixString()}"
+    } else {
+      s"$indexNameForActivity${dateSuffixString()}"
     }
   }
 
-  def indexNameForDateTime(dateTime: DateTime, isNotification: Boolean = true) = {
-    isNotification match {
-      case true => s"$indexNameForAlert${dateSuffixString(dateTime)}"
-      case false => s"$indexNameForActivity${dateSuffixString(dateTime)}"
+  def indexNameForDateTime(dateTime: DateTime, isNotification: Boolean = true): String = {
+    if (isNotification) {
+      s"$indexNameForAlert${dateSuffixString(dateTime)}"
+    } else {
+      s"$indexNameForActivity${dateSuffixString(dateTime)}"
     }
   }
 
@@ -67,9 +69,10 @@ trait ActivityESServiceHelper {
   }
 
   def indexNameForAllTime(isNotification: Boolean = true): String = {
-    isNotification match {
-      case true => s"$indexNameForAlert*"
-      case false => s"$indexNameForActivity*"
+    if (isNotification) {
+      s"$indexNameForAlert*"
+    } else {
+      s"$indexNameForActivity*"
     }
   }
 
@@ -124,7 +127,7 @@ trait ActivityESServiceHelper {
     )
   )
 
-  def getEsTemplate(name: String) = Json.obj(
+  def getEsTemplate(name: String): JsObject = Json.obj(
     "template" -> s"$name*",
     "mappings" -> Json.obj(
       "activity" -> Json.obj(
@@ -182,9 +185,9 @@ object ActivityESServiceUpdateHelper extends ActivityESServiceHelper {
 object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 
   def indexNameForActivitySearchQuery(query: ActivityESSearchQuery): String = {
-    val indexForInterval = query.publish_at match {
-      case i: Some[Interval] => i.map(partialIndexNameForInterval).getOrElse("*")
-      case _ => "*"
+    val indexForInterval: Seq[String] = query.publish_at match {
+      case i: Some[Interval] => i.map(partialIndexNameForInterval).getOrElse(Seq("*"))
+      case _ => Seq("*")
     }
 
     val indexForActivityType = query.isAlert match {
@@ -193,25 +196,26 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
     }
 
     (indexForActivityType, indexForInterval) match {
-      case ("*", "*") => "*"
-      case _ => s"$indexForActivityType$separator$indexForInterval"
+      case ("*", "*" :: Nil) => "*"
+      case _ => indexForInterval.map(index => s"$indexForActivityType$separator$index").mkString(",")
     }
   }
 
   def partialIndexNameForActivityType(isAlert: Boolean): String = {
-    isAlert match {
-      case true => indexNameForAlert
-      case false => indexNameForActivity
+    if (isAlert) {
+      indexNameForAlert
+    } else {
+      indexNameForActivity
     }
   }
 
-  def partialIndexNameForInterval(interval: Interval): String = {
+  def partialIndexNameForInterval(interval: Interval): Seq[String] = {
     val start: DateTime = interval.getStart
     val isSameYear: Boolean = start.getYear == interval.getEnd.getYear
     val isSameMonth: Boolean = start.getMonthOfYear == interval.getEnd.getMonthOfYear
 
     if (isSameYear && isSameMonth) {
-      s"${start.getYear}_${start.toString("MM")}"
+      Seq(s"${start.getYear}_${start.toString("MM")}")
     } else {
       val startMonth: DateTime = start.withDayOfMonth(1)
       val endMonth: DateTime = interval.getEnd.withDayOfMonth(1)
@@ -219,7 +223,7 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
         _.plusMonths(1)
       }.takeWhile(!_.isAfter(endMonth))
         .map(d => s"${d.getYear}_${"%02d".format(d.getMonthOfYear)}")
-        .mkString(",")
+        .toSeq
     }
   }
 
