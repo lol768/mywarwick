@@ -392,6 +392,7 @@ class ActivityDaoImpl @Inject()(
         PROVIDER.SEND_EMAIL            AS PROVIDER_SEND_EMAIL,
         PROVIDER.DISPLAY_NAME          AS PROVIDER_DISPLAY_NAME,
         PROVIDER.TRANSIENT_PUSH        AS PROVIDER_TRANSIENT_PUSH,
+        PROVIDER.OVERRIDE_MUTING       AS PROVIDER_OVERRIDE_MUTING,
         PROVIDER.ICON,
         PROVIDER.COLOUR,
         ACTIVITY_TAG.NAME              AS TAG_NAME,
@@ -422,7 +423,8 @@ class ActivityDaoImpl @Inject()(
         ID AS PROVIDER_ID,
         SEND_EMAIL AS PROVIDER_SEND_EMAIL,
         DISPLAY_NAME AS PROVIDER_DISPLAY_NAME,
-        TRANSIENT_PUSH AS PROVIDER_TRANSIENT_PUSH
+        TRANSIENT_PUSH AS PROVIDER_TRANSIENT_PUSH,
+        OVERRIDE_MUTING AS PROVIDER_OVERRIDE_MUTING
       FROM PROVIDER
     """
       .as(activityProviderParser.*)
@@ -433,7 +435,8 @@ class ActivityDaoImpl @Inject()(
         ID AS PROVIDER_ID,
         SEND_EMAIL AS PROVIDER_SEND_EMAIL,
         DISPLAY_NAME AS PROVIDER_DISPLAY_NAME,
-        TRANSIENT_PUSH AS PROVIDER_TRANSIENT_PUSH
+        TRANSIENT_PUSH AS PROVIDER_TRANSIENT_PUSH,
+        OVERRIDE_MUTING AS PROVIDER_OVERRIDE_MUTING
       FROM PROVIDER WHERE ID = $id
     """
       .as(activityProviderParser.singleOpt)
@@ -489,8 +492,9 @@ class ActivityDaoImpl @Inject()(
     get[String]("PROVIDER_ID") ~
       get[Option[Boolean]]("PROVIDER_SEND_EMAIL") ~
       get[Option[String]]("PROVIDER_DISPLAY_NAME") ~
-      get[Boolean]("PROVIDER_TRANSIENT_PUSH") map {
-      case id ~ sendEmail ~ displayName ~ transientPush => ActivityProvider(id, sendEmail.getOrElse(false), displayName, transientPush)
+      get[Boolean]("PROVIDER_TRANSIENT_PUSH") ~
+      get[Boolean]("PROVIDER_OVERRIDE_MUTING") map {
+      case id ~ sendEmail ~ displayName ~ transientPush ~ overrideMuting => ActivityProvider(id, sendEmail.getOrElse(false), displayName, transientPush, overrideMuting)
     }
 
   private lazy val activityTypeParser: RowParser[ActivityType] =

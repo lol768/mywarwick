@@ -89,7 +89,7 @@ class MessagingServiceImpl @Inject()(
   }
 
   override def send(recipients: Set[Usercode], activity: Activity): Unit = {
-    def save(output: Output, user: Usercode)(implicit c: Connection) = {
+    def save(output: Output, user: Usercode)(implicit c: Connection): Unit = {
       if (logger.isDebugEnabled) logger.logger.debug(s"Sending ${output.name} to $user about ${activity.id}")
       messagingDao.save(activity, user, output)
     }
@@ -111,19 +111,24 @@ class MessagingServiceImpl @Inject()(
 
   def unmutedRecipients(recipients: Set[Usercode], activity: Activity): Set[Usercode] = {
     activities.getActivityRenderById(activity.id).map { activityRender =>
-      val mutedUsercodes = recipients.intersect(
-        activities.getActivityMutes(activityRender.activity, activityRender.tags, recipients)
-          .map(_.usercode).toSet
-      )
-      if (mutedUsercodes.nonEmpty) {
-        logger.info(s"Muted sending activity ${activity.id} to: ${mutedUsercodes.map(_.string).mkString(",")}")
+      if (activityRender.provider.overrideMuting) {
+        logger.info(s"Ignoring muting for activity ${activity.id}")
+        recipients
+      } else {
+        val mutedUsercodes = recipients.intersect(
+          activities.getActivityMutes(activityRender.activity, activityRender.tags, recipients)
+            .map(_.usercode).toSet
+        )
+        if (mutedUsercodes.nonEmpty) {
+          logger.info(s"Muted sending activity ${activity.id} to: ${mutedUsercodes.map(_.string).mkString(",")}")
 
-        mutedUsercodes.foreach { user =>
-          activities.markProcessed(activity.id, user)
-          activityESService.indexMessageSentReq(MessageSent(activity.id, user, MessageState.Muted, Output.Mobile))
+          mutedUsercodes.foreach { user =>
+            activities.markProcessed(activity.id, user)
+            activityESService.indexMessageSentReq(MessageSent(activity.id, user, MessageState.Muted, Output.Mobile))
+          }
         }
+        recipients.diff(mutedUsercodes)
       }
-      recipients.diff(mutedUsercodes)
     }.getOrElse(recipients)
   }
 

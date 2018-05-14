@@ -22,8 +22,6 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
           ActivityESServiceHelper.indexNameToday(false) must be("activity_2016_06")
         }
       })
-
-
     }
 
     "produce correct all time index name for alerts and activity" in {
@@ -74,6 +72,40 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     }
 
+
+    "use elastic multi-index api for date intervals spanning > 1 month" in {
+      val interval: Interval = new Interval(
+        new DateTime().withYear(2017).withMonthOfYear(2).withDayOfMonth(9),
+        new DateTime().withYear(2017).withMonthOfYear(7).withDayOfMonth(21)
+      )
+      val actual: String = ActivityESServiceSearchHelper.partialIndexNameForInterval(interval)
+      val expected: String = "2017_02,2017_03,2017_04,2017_05,2017_06,2017_07"
+
+      actual must be(expected)
+    }
+
+    "use elastic multi-index api for date intervals spanning > 1 year" in {
+      val interval: Interval = new Interval(
+        new DateTime().withYear(2017).withMonthOfYear(9).withDayOfMonth(9),
+        new DateTime().withYear(2018).withMonthOfYear(2).withDayOfMonth(21)
+      )
+      val actual: String = ActivityESServiceSearchHelper.partialIndexNameForInterval(interval)
+      val expected: String = "2017_09,2017_10,2017_11,2017_12,2018_01,2018_02"
+
+      actual must be(expected)
+    }
+
+    "return correct multi-index string when end day-of-month < start day-of-month" in {
+      val interval: Interval = new Interval(
+        new DateTime().withYear(2017).withMonthOfYear(9).withDayOfMonth(21),
+        new DateTime().withYear(2018).withMonthOfYear(2).withDayOfMonth(9)
+      )
+      val actual: String = ActivityESServiceSearchHelper.partialIndexNameForInterval(interval)
+      val expected: String = "2017_09,2017_10,2017_11,2017_12,2018_01,2018_02"
+
+      actual must be(expected)
+    }
+
     "give correct index name based on datetime interval" in {
 
       val `20170701`: DateTime = new DateTime().withYear(2017).withMonthOfYear(7).withDayOfMonth(1)
@@ -81,14 +113,14 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
       val sameYearDifferentMonthInterval = new Interval(`20170701`, `20170801`)
 
-      partialIndexNameForInterval(sameYearDifferentMonthInterval) must be("2017*")
+      partialIndexNameForInterval(sameYearDifferentMonthInterval) must be("2017_07,2017_08")
 
       val `20150801`: DateTime = new DateTime().withYear(2015).withMonthOfYear(8).withDayOfMonth(1)
       val `20160801`: DateTime = new DateTime().withYear(2016).withMonthOfYear(8).withDayOfMonth(1)
 
       val differentYear = new Interval(`20150801`, `20160801`)
 
-      partialIndexNameForInterval(differentYear) must be("*")
+      partialIndexNameForInterval(differentYear) must be("2015_08,2015_09,2015_10,2015_11,2015_12,2016_01,2016_02,2016_03,2016_04,2016_05,2016_06,2016_07,2016_08")
 
       val `20170810`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(10)
       val `20170829`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(29)
@@ -355,6 +387,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
                 "range": {
                   "published_at": {
                     "from": "${range.getStart}",
+                    "to": "${range.getEnd}",
                     "to": "${range.getEnd}",
                     "include_lower": true,
                     "include_upper": true,

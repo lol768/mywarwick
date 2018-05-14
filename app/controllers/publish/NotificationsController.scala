@@ -81,7 +81,7 @@ class NotificationsController @Inject()(
   def create(publisherId: String, submitted: Boolean) = PublisherAction(publisherId, CreateNotifications).async { implicit request =>
     bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted, restrictedRecipients = true,
       formWithErrors =>
-        Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope, Audience())),
+        Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, publisherProviders, permissionScope, Audience())),
       (publish, audience) => {
         val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
         val redirect = Redirect(routes.NotificationsController.list(publisherId))
@@ -115,7 +115,7 @@ class NotificationsController @Inject()(
     val form = publishNotificationForm.fill(PublishNotificationData(notificationData, audienceData))
 
     Future.successful(
-      Ok(views.updateForm(request.publisher, activity, form, departmentOptions, providerOptions, permissionScope, audience, audienceJson))
+      Ok(views.updateForm(request.publisher, activity, form, departmentOptions, publisherProviders, permissionScope, audience, audienceJson))
     )
   }
 
@@ -126,7 +126,7 @@ class NotificationsController @Inject()(
 
     bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted, restrictedRecipients = true,
       formWithErrors =>
-        Ok(views.updateForm(request.publisher, activity, formWithErrors, departmentOptions, providerOptions, permissionScope, audience, audienceJson)),
+        Ok(views.updateForm(request.publisher, activity, formWithErrors, departmentOptions, publisherProviders, permissionScope, audience, audienceJson)),
       (publish, audience) => {
         val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
@@ -181,7 +181,7 @@ class NotificationsController @Inject()(
       publisher = publisher,
       form = form,
       departmentOptions = departmentOptions,
-      providerOptions = providerOptions,
+      providers = publisherProviders,
       permissionScope = permissionScope,
       audience = audience
     )

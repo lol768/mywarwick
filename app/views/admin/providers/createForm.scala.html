@@ -41,6 +41,9 @@
     @b3.checkbox(providerForm("sendEmail"),
       '_text -> "Send emails")
 
+    @b3.checkbox(providerForm("overrideMuting"),
+      '_text -> "Override muting")
+
     @tags.submitOrCancel("Create", controllers.admin.publishers.routes.PublishersController.index())
   }
 

@@ -206,27 +206,21 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
   }
 
   def partialIndexNameForInterval(interval: Interval): String = {
-    val start = interval.getStart
-    val end = interval.getEnd
+    val start: DateTime = interval.getStart
+    val isSameYear: Boolean = start.getYear == interval.getEnd.getYear
+    val isSameMonth: Boolean = start.getMonthOfYear == interval.getEnd.getMonthOfYear
 
-    val startYear = interval.getStart.getYear
-    val endYear = interval.getEnd.getYear
-
-    if (startYear == endYear) {
-      val sameYear = startYear
-      val startMonth = start.toString("MM")
-      val endMonth = end.toString("MM")
-
-      if (startMonth == endMonth) {
-        val sameMonth = startMonth
-        s"${sameYear}_${sameMonth}"
-      } else {
-        s"${sameYear}*"
-      }
+    if (isSameYear && isSameMonth) {
+      s"${start.getYear}_${start.toString("MM")}"
     } else {
-      "*"
+      val startMonth: DateTime = start.withDayOfMonth(1)
+      val endMonth: DateTime = interval.getEnd.withDayOfMonth(1)
+      Iterator.iterate(startMonth) {
+        _.plusMonths(1)
+      }.takeWhile(!_.isAfter(endMonth))
+        .map(d => s"${d.getYear}_${"%02d".format(d.getMonthOfYear)}")
+        .mkString(",")
     }
-
   }
 
   def makeSearchSourceBuilder(queryBuilder: QueryBuilder): SearchSourceBuilder = {
@@ -239,8 +233,8 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 
     val rootBoolQuery: BoolQueryBuilder = new BoolQueryBuilder()
 
-    import QueryBuilders._
     import ESFieldName._
+    import QueryBuilders._
 
     for (v <- activityESSearchQuery.activity_id) rootBoolQuery.must(termQuery(activity_id, v))
 

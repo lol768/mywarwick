@@ -70,6 +70,7 @@ object ActivityRender {
         "notification" -> o.activity.shouldNotify,
         "provider" -> o.activity.providerId,
         "providerDisplayName" -> o.provider.displayName,
+        "providerOverrideMuting" -> o.provider.overrideMuting,
         "type" -> o.activity.`type`,
         "typeDisplayName" -> o.`type`.displayName,
         "title" -> o.activity.title,
@@ -166,7 +167,7 @@ case class ActivityTag(
 
 case class TagValue(internalValue: String, displayValue: Option[String] = None)
 
-case class ActivityProvider(id: String, sendEmail: Boolean, displayName: Option[String] = None, transientPush: Boolean = false)
+case class ActivityProvider(id: String, sendEmail: Boolean, displayName: Option[String] = None, transientPush: Boolean = false, overrideMuting: Boolean)
 
 case class ActivityType(name: String, displayName: Option[String] = None)
 
@@ -315,13 +316,14 @@ object ActivityMuteRender {
     )
   }
 
+  // Currently only used for testing
   def fromActivityMuteSave(id: String, activityMute: ActivityMuteSave) = ActivityMuteRender(
     id,
     activityMute.usercode,
     DateTime.now,
     activityMute.expiresAt,
     activityMute.activityType.map(ActivityType(_)),
-    activityMute.providerId.map(ActivityProvider(_, sendEmail = false)),
+    activityMute.providerId.map(ActivityProvider(_, sendEmail = false, overrideMuting = false)),
     activityMute.tags
   )
 }

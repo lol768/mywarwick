@@ -301,4 +301,19 @@ $(() => {
     }, 500);
     $input.on('keydown', debouncedPicker);
   });
+
+  $('#item_provider').each((i, select) => {
+    const $select = $(select);
+    const data = $select.data('overrideMuting');
+    const $overrideMutingInfo = $select.closest('.form-group').next('.form-group');
+    function update() {
+      if (data && data[$select.val()]) {
+        $overrideMutingInfo.removeClass('hidden');
+      } else {
+        $overrideMutingInfo.addClass('hidden');
+      }
+    }
+    $select.on('change', update);
+    update();
+  });
 });

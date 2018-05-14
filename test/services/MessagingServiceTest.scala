@@ -15,7 +15,7 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
 
   class Scope {
     val activityService: ActivityService = mock[ActivityService]
-    val activityServiceProvider = new javax.inject.Provider[ActivityService] {
+    private val activityServiceProvider = new javax.inject.Provider[ActivityService] {
       override def get(): ActivityService = activityService
     }
     val userLookupService: UserLookupService = mock[UserLookupService]
@@ -64,6 +64,29 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
 
       verify(messagingDao, times(1)).save(Matchers.eq(activity), Matchers.eq(Usercode("cusebr")), Matchers.eq(Output.Mobile))(Matchers.any())
       verify(messagingDao, times(0)).save(Matchers.eq(activity), Matchers.eq(Usercode("cusfal")), Matchers.eq(Output.Mobile))(Matchers.any())
+    }
+
+    "don't mute recipients if overridden" in new Scope {
+      private val activity = getTestingActivity
+      private val activityRender = getTestingRenderFromActivity(activity, overrideMuting = true)
+
+      private val recipients = Set(Usercode("cusebr"), Usercode("cusfal"))
+      when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))
+      when(activityService.getActivityMutes(activityRender.activity, activityRender.tags, recipients)).thenReturn(Seq(
+        ActivityMute(
+          usercode = Usercode("cusfal"),
+          createdAt = null,
+          expiresAt = None,
+          activityType = None,
+          providerId = None,
+          tags = Nil
+        )
+      ))
+
+      service.send(recipients, activity)
+
+      verify(messagingDao, times(1)).save(Matchers.eq(activity), Matchers.eq(Usercode("cusebr")), Matchers.eq(Output.Mobile))(Matchers.any())
+      verify(messagingDao, times(1)).save(Matchers.eq(activity), Matchers.eq(Usercode("cusfal")), Matchers.eq(Output.Mobile))(Matchers.any())
     }
 
     "doesn't send emails when the user is opted-out" in new Scope {
@@ -184,11 +207,11 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
 
   private def getTestingActivity = Fixtures.activity.fromSave("123", Fixtures.activitySave.submissionDue)
 
-  private def getTestingRenderFromActivity(activity: Activity, providerSendEmail: Boolean = true) = ActivityRender(
+  private def getTestingRenderFromActivity(activity: Activity, providerSendEmail: Boolean = true, overrideMuting: Boolean = false) = ActivityRender(
     activity = activity,
     icon = None,
     tags = Nil,
-    provider = ActivityProvider(activity.providerId, providerSendEmail),
+    provider = ActivityProvider(activity.providerId, providerSendEmail, overrideMuting = overrideMuting),
     `type` = ActivityType(activity.`type`)
   )
 }

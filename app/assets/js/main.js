@@ -151,6 +151,25 @@ export function launch(userData) {
     }
   });
 
+  /*
+   Request that storage should be persistent if it isn't already
+   */
+  if ('storage' in navigator && 'persist' in navigator.storage) {
+    navigator.storage.persisted().then((persistent) => {
+      if (persistent) {
+        log.info('Persistent storage not requested as store is already persistent.');
+      } else {
+        navigator.storage.persist().then((granted) => {
+          if (granted) {
+            log.info('Storage will not be cleared except by explicit user action.');
+          } else {
+            log.info('Storage may be cleared by the UA under storage pressure.');
+          }
+        });
+      }
+    });
+  }
+
 
   const freezeDate = d => ((!!d && 'format' in d) ? d.format() : d);
   const thawDate = d => (d ? moment(d) : d);
