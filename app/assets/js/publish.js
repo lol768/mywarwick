@@ -17,6 +17,7 @@ import promiseSubmit from './publish/utils';
 import { Provider } from 'react-redux';
 import log from 'loglevel';
 import NewsCategoryPicker from './publish/components/NewsCategoryPicker';
+import Tablesort from 'tablesort';
 
 function setupAudienceIndicator() {
   const audienceIndicator = $('.audience-indicator');
@@ -234,6 +235,12 @@ function initSentDetails() {
   });
 }
 
+function sortableTables() {
+  $('table.sortable-table').each((i, el) =>
+    new Tablesort(el),
+  );
+}
+
 $(() => {
   setupAudienceIndicator();
   setupAudiencePicker();
@@ -241,6 +248,7 @@ $(() => {
   setupPublisherPermissionsForm();
   setupCategoryPicker();
   initSentDetails();
+  sortableTables();
 
   $('[data-background-color]').each(function applyBackgroundColour() {
     $(this).css('background-color', $(this).data('background-color'));
