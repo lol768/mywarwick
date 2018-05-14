@@ -32,6 +32,7 @@ class ToDoItem extends ListTileItem {
     subject: PropTypes.string.isRequired,
     dueDateTime: PropTypes.string,
     completedDateTime: PropTypes.string,
+    createdDateTime: PropTypes.string,
     reminderDateTime: PropTypes.string,
     completed: PropTypes.bool,
     handleOnClick: PropTypes.func,
@@ -52,7 +53,7 @@ class ToDoItem extends ListTileItem {
             this.props.dueDateTime &&
             <span className="list-group-item__date">{formatDate(this.props.dueDateTime)}</span>
           }
-          <span className={`list-group-item__text${this.props.completed ? '--deleted' : ''}`}>
+          <span className='list-group-item__text'>
             {this.props.subject}
           </span>
         </a>
