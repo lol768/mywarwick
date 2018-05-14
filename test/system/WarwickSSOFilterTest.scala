@@ -28,14 +28,19 @@ object WarwickSSOFilterTest {
       u.setFoundUser(true)
     }
 
+    val nonsenseCookie = Cookie(WARWICK_SSO_COOKIE_NAME, "dingdong")
+
     when(lookup.getUserByToken(cusxxxToken)).thenReturn(cusxxx)
 
     def reqWithToken =
       FakeRequest()
         .withCookies(cusxxxCookie)
 
-    def reqWithTokenForPath =
+    def reqForPath =
       FakeRequest(GET, controllers.api.routes.NotificationsSnapshotController.unreads().url)
+
+    def reqWithTokenForPath =
+      reqForPath
         .withCookies(cusxxxCookie)
 
     def action(req: RequestHeader): Future[Result] =
@@ -68,6 +73,10 @@ class WarwickSSOFilterTest extends BaseSpec with WithActorSystem {
   "WarwickSSOFilter" should {
     "ignore missing cookie" in new Context {
       assertNoUser(runFilter(FakeRequest()))
+    }
+
+    "ignore incorrect cookie" in new Context {
+      assertNoUser(runFilter(reqForPath.withCookies(nonsenseCookie)))
     }
 
     "resolve user" in new Context {
