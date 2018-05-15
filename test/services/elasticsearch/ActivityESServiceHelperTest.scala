@@ -154,7 +154,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
       val `20170710`: DateTime = new DateTime().withYear(2017).withMonthOfYear(7).withDayOfMonth(10)
       val `20170829`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(29)
 
-      val query3 = ActivityESSearchQuery(
+      val query3 = ActivityESSearch.SearchQuery(
         isAlert = Some(true),
         publish_at = Some(new Interval(`20170710`, `20170829`))
       )
@@ -177,7 +177,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
       val `20170710`: DateTime = new DateTime().withYear(2017).withMonthOfYear(7).withDayOfMonth(10)
       val `20170829`: DateTime = new DateTime().withYear(2017).withMonthOfYear(8).withDayOfMonth(29)
 
-      val query4 = ActivityESSearchQuery(
+      val query4 = ActivityESSearch.SearchQuery(
         publish_at = Some(new Interval(`20170710`, `20170829`))
       )
       indexNameForActivitySearchQuery(query4) must be("*_2017_07,*_2017_08")
