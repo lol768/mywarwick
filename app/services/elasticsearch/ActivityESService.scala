@@ -193,13 +193,11 @@ class ActivityESServiceImpl @Inject()(
               .asInstanceOf[Sum]
               .getValue
               .toLong
-          }.fold(
-            error => {
+          }.recover{
+            case error =>
               logger.error(s"Exception thrown when getting aggregation value", error)
-              0
-            },
-            value => value
-          )
+              0L
+          }.getOrElse(0L)
         )
       } else {
         CountQueryResponse.empty
