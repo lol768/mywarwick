@@ -19,6 +19,13 @@ import log from 'loglevel';
 import NewsCategoryPicker from './publish/components/NewsCategoryPicker';
 import Tablesort from 'tablesort';
 
+function tablesortAddNumberSorting() {
+  Tablesort.extend('number',
+    item => item.match(/^[-+]?(\d)*-?([,.]){0,1}-?(\d)+([E,e][-+][\d]+)?%?$/),
+    (a, b) => parseInt(a, 10) - parseInt(b, 10),
+  );
+}
+
 function setupAudienceIndicator() {
   const audienceIndicator = $('.audience-indicator');
   const hint = audienceIndicator.data('hint');
@@ -248,6 +255,7 @@ $(() => {
   setupPublisherPermissionsForm();
   setupCategoryPicker();
   initSentDetails();
+  tablesortAddNumberSorting();
   sortableTables();
 
   $('[data-background-color]').each(function applyBackgroundColour() {
