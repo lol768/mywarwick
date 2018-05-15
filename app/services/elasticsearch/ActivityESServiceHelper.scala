@@ -191,7 +191,7 @@ object ActivityESServiceCountHelper extends ActivityESServiceHelper {
     object TotalUserCount {
       lazy val fieldName = "totalUserCount"
       lazy val builder: SumAggregationBuilder = AggregationBuilders
-        .sum("totalUserCount")
+        .sum(fieldName)
         .script(new Script("doc['resolved_users'].values.length"))
     }
   }
