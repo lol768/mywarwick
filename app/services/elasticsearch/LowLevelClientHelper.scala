@@ -24,16 +24,6 @@ trait LowLevelClientHelper extends Logging {
     .toString()
     .toInt
 
-  def makeQueryForCountApiFromActivityESSearchQuery(input: ActivityESSearch.SearchQuery): JsValue = JsObject(Seq(
-    "query" -> JsObject(Seq(
-      "bool" -> (Json.parse(ActivityESServiceSearchHelper.makeBoolQueryBuilder(input).toString) \ "bool").get
-    ))
-  ))
-
-  def makePathForCountApiFromActivityEsSearchQuery(input: ActivityESSearch.SearchQuery): String = {
-    countPathForIndexName(ActivityESServiceSearchHelper.indexNameForActivitySearchQuery(input))
-  }
-
   val emptyParam: util.Map[String, String] = Collections.emptyMap()
 
   def httpEntityFromJsValue(json: JsValue) = new NStringEntity(Json.stringify(json), ContentType.APPLICATION_JSON)
