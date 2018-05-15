@@ -188,12 +188,11 @@ class ActivityESServiceImpl @Inject()(
         CountQueryResponse(
           activityCount = response.getHits.totalHits,
           totalUserCount = Try(
-            response.getAggregations.get(
-              ActivityESServiceCountHelper
-                .Aggregation
-                .TotalUserCount
-                .fieldName
-            ).asInstanceOf[Sum].getValue.toLong
+            response.getAggregations
+              .get(ActivityESServiceCountHelper.Aggregation.TotalUserCount.fieldName)
+              .asInstanceOf[Sum]
+              .getValue
+              .toLong
           ).getOrElse(0)
         )
       } else {
