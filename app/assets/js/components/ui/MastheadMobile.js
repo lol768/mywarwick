@@ -48,15 +48,12 @@ export default class MastheadMobile extends React.PureComponent {
         { this.props.showEditButton &&
         <div
           className="edit-btn pulse"
-          onClick={this.props.onEdit}
-          onKeyUp={this.props.onEdit}
+          onClick={this.props.onEditComplete}
+          onKeyUp={this.props.onEditComplete}
           role="button"
           tabIndex={0}
         >
-          { this.props.editing ?
-            <i className="fa fa-fw fa-check" /> :
-            <i className="fa fa-fw fa-arrows" />
-          }
+          { this.props.editing && <i className="fa fa-fw fa-check" /> }
         </div>
         }
         <ReactCSSTransitionGroup
@@ -94,7 +91,7 @@ export default class MastheadMobile extends React.PureComponent {
 MastheadMobile.propTypes = {
   path: PropTypes.string,
   onBackClick: PropTypes.func,
-  onEdit: PropTypes.func,
+  onEditComplete: PropTypes.func,
   editing: PropTypes.bool,
   showEditButton: PropTypes.bool,
   onSettings: PropTypes.func,

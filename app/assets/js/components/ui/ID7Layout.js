@@ -58,7 +58,7 @@ class ID7Layout extends React.PureComponent {
   constructor(props) {
     super(props);
     this.onBackClick = this.onBackClick.bind(this);
-    this.onEdit = this.onEdit.bind(this);
+    this.onEditComplete = this.onEditComplete.bind(this);
     this.onSettings = this.onSettings.bind(this);
     this.dismissBetaWarning = this.dismissBetaWarning.bind(this);
 
@@ -107,12 +107,10 @@ class ID7Layout extends React.PureComponent {
     wrapKeyboardSelect(() => this.props.dispatch(goBack()), e);
   }
 
-  onEdit(e) {
+  onEditComplete(e) {
     wrapKeyboardSelect(() => {
       if (this.isEditing()) {
         this.props.dispatch(goBack());
-      } else {
-        this.props.dispatch(push(`/${Routes.EDIT}`));
       }
     }, e);
   }
@@ -170,7 +168,7 @@ class ID7Layout extends React.PureComponent {
                 user={user}
                 onBackClick={this.onBackClick}
                 path={path}
-                onEdit={this.onEdit}
+                onEditComplete={this.onEditComplete}
                 editing={this.isEditing()}
                 showEditButton={
                   this.isEditing() ||

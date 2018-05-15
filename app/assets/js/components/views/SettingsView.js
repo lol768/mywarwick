@@ -54,6 +54,7 @@ class SettingsView extends HideableView {
     this.onLocationPreferences = this.onLocationPreferences.bind(this);
     this.onActivityFilter = this.onActivityFilter.bind(this);
     this.onNotificationFilter = this.onNotificationFilter.bind(this);
+    this.onEditTiles = this.onEditTiles.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -364,6 +365,12 @@ class SettingsView extends HideableView {
     }, e);
   };
 
+  onEditTiles(e) {
+    wrapKeyboardSelect(() => {
+      this.props.dispatch(push(`/${Routes.EDIT}`));
+    }, e);
+  }
+
   static onSendFeedback(e) {
     wrapKeyboardSelect(loadDeviceDetails, e);
   }
@@ -391,6 +398,13 @@ class SettingsView extends HideableView {
           </div>
 
           <div className="list-group setting-colour-0">
+            <ListGroupItemBtn handler={this.onEditTiles}>
+              {SettingsView.renderSetting(
+                'th-large',
+                'Rearrange, resize & show or hide tiles',
+                <FAChevronRight />,
+              )}
+            </ListGroupItemBtn>
             <ListGroupItemBtn handler={this.onTilePreferences}>
               {SettingsView.renderSetting(
                 'check-square-o',
