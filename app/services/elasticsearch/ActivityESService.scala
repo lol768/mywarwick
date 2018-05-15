@@ -187,13 +187,19 @@ class ActivityESServiceImpl @Inject()(
       if (response.status() == RestStatus.OK) {
         CountQueryResponse(
           activityCount = response.getHits.totalHits,
-          totalUserCount = Try(
+          totalUserCount = Try {
             response.getAggregations
               .get(ActivityESServiceCountHelper.Aggregation.TotalUserCount.fieldName)
               .asInstanceOf[Sum]
               .getValue
               .toLong
-          ).getOrElse(0)
+          }.fold(
+            error => {
+              logger.error(s"Exception thrown when getting aggregation value", error)
+              0
+            },
+            value => value
+          )
         )
       } else {
         CountQueryResponse.empty
