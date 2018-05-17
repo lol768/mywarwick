@@ -122,6 +122,7 @@
     "reselect": "~2.3.0",
     "shallow-compare": "^1.2.1",
     "skycons": "~1.0.0",
+    "tablesort": "^5.0.2",
     "warning": "^3.0.0",
     "warwick-search-frontend": "git+ssh://git@repo.elab.warwick.ac.uk/sch/omni.git#c7d4b6fd572",
     "wrappy": "^1.0.2"
