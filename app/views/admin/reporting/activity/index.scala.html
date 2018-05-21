@@ -2,7 +2,8 @@
 @import services.elasticsearch.ActivityDocument
 @import controllers.admin.reporting.ActivityReportFormData
 
-@(allAlertsCountByProviders: Iterable[(ActivityProvider, Int)], formData: Form[ActivityReportFormData])(implicit messages: Messages, context: RequestContext)
+@import services.elasticsearch.ActivityESSearch.CountQueryResponse
+@(allAlertsCountByProviders: Iterable[(ActivityProvider, CountQueryResponse)], formData: Form[ActivityReportFormData])(implicit messages: Messages, context: RequestContext)
 @implicitFieldConstructor = @{
   b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
 }
@@ -31,16 +32,18 @@
       <thead class="thead">
         <th scope="col">Provider</th>
         <th scope="col">Alerts sent</th>
+        <th scope="col">Total recipients</th>
       </thead>
       <tbody>
-      @for((provider, count) <- allAlertsCountByProviders) {
-        @if(count == 0) {
+      @for((provider, countQueryResponse) <- allAlertsCountByProviders) {
+        @if(countQueryResponse.activityCount == 0) {
           <tr class="text-muted">
         } else {
           <tr>
           }
         <td>@provider.displayName</td>
-        <td>@count</td>
+        <td>@countQueryResponse.activityCount</td>
+        <td>@countQueryResponse.totalUserCount</td>
       </tr>
       }
       </tbody>

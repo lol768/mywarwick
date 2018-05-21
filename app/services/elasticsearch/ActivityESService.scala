@@ -2,7 +2,6 @@ package services.elasticsearch
 
 import javax.inject.{Inject, Singleton}
 import javax.ws.rs.HttpMethod
-
 import com.google.inject.ImplementedBy
 import models.{Activity, MessageState, Output}
 import org.elasticsearch.action.bulk.{BulkRequest, BulkResponse}
@@ -11,14 +10,18 @@ import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
 import org.elasticsearch.action.support.IndicesOptions
 import org.elasticsearch.client.{RestClient, RestHighLevelClient}
 import org.elasticsearch.common.xcontent.{XContentBuilder, XContentFactory}
-import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
 import org.elasticsearch.rest.RestStatus
+import org.elasticsearch.search.aggregations.bucket.terms.Terms
+import org.elasticsearch.search.aggregations.metrics.avg.Avg
 import org.elasticsearch.search.aggregations.{AggregationBuilders, Aggregations}
 import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality
+import org.elasticsearch.search.aggregations.metrics.sum.Sum
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import services.elasticsearch.ActivityESSearch.CountQueryResponse
 import services.elasticsearch.ActivityESServiceHelper.ESFieldName
 import services.{AudienceService, PublisherService}
 import system.ThreadPools.elastic
@@ -26,8 +29,10 @@ import warwick.core.Logging
 import warwick.sso.Usercode
 
 import scala.concurrent.Future
+import scala.util.Try
 
 case class IndexActivityRequest(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None)
+
 case class MessageSent(activityId: String, usercode: Usercode, state: MessageState, output: Output)
 
 object MessageSent {
@@ -36,7 +41,7 @@ object MessageSent {
       (JsPath \ "_source" \ "usercode").read[String].map(Usercode) ~
       (JsPath \ "_source" \ "state").read[String].map(s => MessageState.parse(s)) ~
       (JsPath \ "_source" \ "output").read[String].map(s => Output.parse(s))
-    )(MessageSent.apply _)
+    ) (MessageSent.apply _)
 }
 
 @ImplementedBy(classOf[ActivityESServiceImpl])
@@ -51,7 +56,7 @@ trait ActivityESService {
 
   def indexMessageSentReqs(reqs: Seq[MessageSent]): Future[Unit]
 
-  def count(activityESSearchQuery: ActivityESSearchQuery): Future[Int]
+  def count(activityESSearchQuery: ActivityESSearch.SearchQuery): Future[ActivityESSearch.CountQueryResponse]
 
   def deliveryReportForActivity(activityId: String, publishedAt: Option[DateTime]): Future[AlertDeliveryReport]
 }
@@ -167,15 +172,40 @@ class ActivityESServiceImpl @Inject()(
       Future.successful(AlertDeliveryReport.empty)
     }
 
-  override def count(input: ActivityESSearchQuery): Future[Int] = {
-    val lowHelper = LowLevelClientHelper
-    lowHelper.performRequestAsync(
-      method = HttpMethod.GET,
-      path = lowHelper.makePathForCountApiFromActivityEsSearchQuery(input),
-      entity = Some(lowHelper.httpEntityFromJsValue(lowHelper.makeQueryForCountApiFromActivityESSearchQuery(input))),
-      lowLevelClient = lowLevelClient
-    ).map {
-      lowHelper.getCountFromCountApiRes
+  override def count(input: ActivityESSearch.SearchQuery): Future[ActivityESSearch.CountQueryResponse] = {
+    val searchRequest: SearchRequest = new SearchRequest(ActivityESServiceSearchHelper.indexNameForActivitySearchQuery(input))
+      .types(ActivityESServiceHelper.activityDocumentType)
+      .source(new SearchSourceBuilder()
+        .size(0)
+        .query(ActivityESServiceSearchHelper.makeBoolQueryBuilder(input))
+        .aggregation(ActivityESServiceCountHelper.Aggregation.TotalUserCount.builder)
+      )
+
+    val listener = new FutureActionListener[SearchResponse]
+    client.searchAsync(searchRequest, listener)
+    listener.future.map { response =>
+      if (response.status() == RestStatus.OK) {
+        CountQueryResponse(
+          activityCount = response.getHits.totalHits,
+          totalUserCount = Try {
+            response.getAggregations
+              .get(ActivityESServiceCountHelper.Aggregation.TotalUserCount.fieldName)
+              .asInstanceOf[Sum]
+              .getValue
+              .toLong
+          }.recover{
+            case error =>
+              logger.error(s"Exception thrown when getting aggregation value", error)
+              0L
+          }.getOrElse(0L)
+        )
+      } else {
+        CountQueryResponse.empty
+      }
+    }.recover {
+      case e: Throwable =>
+        logger.error(s"ES request for activities counts failed", e)
+        CountQueryResponse.empty
     }
   }
 }
