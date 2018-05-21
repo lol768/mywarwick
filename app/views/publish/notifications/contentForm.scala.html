@@ -1,16 +1,15 @@
 @import controllers.publish.NotificationsController.PublishNotificationForm
-@import models.publishing.PermissionScope
+@import models.publishing.{PermissionScope, Publisher}
 @import org.joda.time.LocalDateTime
-@import system.RequestContext
-@import models.publishing.Publisher
+@import play.api.libs.json.{JsBoolean, JsValue, Json}
+@import services.ProviderRender
 @import services.dao.DepartmentInfo
-@import play.api.libs.json.{Json, JsValue, JsBoolean}
-
+@import system.RequestContext
 @(
     form: PublishNotificationForm,
     publisher: Publisher,
     departmentOptions: Seq[DepartmentInfo],
-    providerOptions: Seq[(String, String)],
+    providers: Seq[ProviderRender],
     permissionScope: PermissionScope,
     audience: Audience,
     createOrUpdate: String,
@@ -47,14 +46,29 @@
       '_help -> "Keep it super short"
     )
 
-    @if(providerOptions.size == 1) {
-      @b3.hidden("item.provider", providerOptions.head._1)
+    @if(providers.size == 1) {
+      @b3.hidden("item.provider", providers.head.id)
+
+      @if(providers.head.overrideMuting) {
+        @b3.free() {
+          <div class="alert alert-info">
+            This source overrides any mutes set up by the recipient
+          </div>
+        }
+      }
     } else {
-      @b3.select(form("item.provider"), providerOptions,
+      @b3.select(form("item.provider"), providers.map(p => p.id -> p.name.getOrElse(p.id)),
         '_label -> "Source",
         '_default -> "",
-        '_help -> "Select the source of this alert"
+        '_help -> "Select the source of this alert",
+        Symbol("data-override-muting") -> Json.stringify(Json.toJson(providers.map(p => p.id -> p.overrideMuting).toMap))
       )
+
+      @b3.free('_class -> "hidden") {
+        <div class="alert alert-info">
+          This source overrides any mutes set up by the recipient
+        </div>
+      }
     }
 
     @b3.text(form("item.linkHref"),

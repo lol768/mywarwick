@@ -17,6 +17,14 @@ import promiseSubmit from './publish/utils';
 import { Provider } from 'react-redux';
 import log from 'loglevel';
 import NewsCategoryPicker from './publish/components/NewsCategoryPicker';
+import Tablesort from 'tablesort';
+
+function tablesortAddNumberSorting() {
+  Tablesort.extend('number',
+    item => item.match(/^[-+]?(\d)*-?([,.]){0,1}-?(\d)+([E,e][-+][\d]+)?%?$/),
+    (a, b) => parseInt(a, 10) - parseInt(b, 10),
+  );
+}
 
 function setupAudienceIndicator() {
   const audienceIndicator = $('.audience-indicator');
@@ -234,6 +242,12 @@ function initSentDetails() {
   });
 }
 
+function sortableTables() {
+  $('table.sortable-table').each((i, el) =>
+    new Tablesort(el),
+  );
+}
+
 $(() => {
   setupAudienceIndicator();
   setupAudiencePicker();
@@ -241,6 +255,8 @@ $(() => {
   setupPublisherPermissionsForm();
   setupCategoryPicker();
   initSentDetails();
+  tablesortAddNumberSorting();
+  sortableTables();
 
   $('[data-background-color]').each(function applyBackgroundColour() {
     $(this).css('background-color', $(this).data('background-color'));
@@ -300,5 +316,20 @@ $(() => {
         .prop('class', `fa fa-fw fa-${$input.val()}`);
     }, 500);
     $input.on('keydown', debouncedPicker);
+  });
+
+  $('#item_provider').each((i, select) => {
+    const $select = $(select);
+    const data = $select.data('overrideMuting');
+    const $overrideMutingInfo = $select.closest('.form-group').next('.form-group');
+    function update() {
+      if (data && data[$select.val()]) {
+        $overrideMutingInfo.removeClass('hidden');
+      } else {
+        $overrideMutingInfo.addClass('hidden');
+      }
+    }
+    $select.on('change', update);
+    update();
   });
 });

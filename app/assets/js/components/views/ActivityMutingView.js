@@ -16,6 +16,7 @@ export default class ActivityMutingView extends React.PureComponent {
     id: PropTypes.string.isRequired,
     provider: PropTypes.string.isRequired,
     providerDisplayName: PropTypes.string,
+    providerOverrideMuting: PropTypes.bool.isRequired,
     activityType: PropTypes.string.isRequired,
     activityTypeDisplayName: PropTypes.string,
     tags: PropTypes.arrayOf(PropTypes.shape({
@@ -98,6 +99,14 @@ export default class ActivityMutingView extends React.PureComponent {
   }
 
   renderForm() {
+    if (this.props.providerOverrideMuting) {
+      return (
+        <div>Alerts from {
+          this.props.providerDisplayName || this.props.provider
+        } cannot be muted</div>
+      );
+    }
+
     return (
       <form className="form" id={ `muting-${this.props.id}-form` }>
         { this.isPublishNotification() ? null : this.renderScope() }

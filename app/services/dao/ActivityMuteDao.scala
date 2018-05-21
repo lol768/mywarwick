@@ -122,17 +122,18 @@ class ActivityMuteDaoImpl extends ActivityMuteDao {
       get[Option[String]]("PROVIDER_ID") ~
       get[Option[Boolean]]("PROVIDER_SEND_EMAIL") ~
       get[Option[String]]("PROVIDER_DISPLAY_NAME") ~
+      get[Option[Boolean]]("PROVIDER_OVERRIDE_MUTING") ~
       get[Option[String]]("ACTIVITY_TYPE") ~
       get[Option[String]]("ACTIVITY_TYPE_DISPLAY_NAME") ~
       get[Option[String]]("TAGS") map {
-      case id ~ usercode ~ createdAt ~ expiresAt ~ providerOption ~ providerSendEmail ~ providerDisplayName ~ activityTypeOption ~ activityTypeDisplayName ~ tagString =>
+      case id ~ usercode ~ createdAt ~ expiresAt ~ providerOption ~ providerSendEmail ~ providerDisplayName ~ providerOverrideMuting ~ activityTypeOption ~ activityTypeDisplayName ~ tagString =>
         ActivityMuteRender(
           id,
           Usercode(usercode),
           createdAt,
           expiresAt,
           activityTypeOption.map(activityType => ActivityType(activityType, activityTypeDisplayName)),
-          providerOption.map(provider => ActivityProvider(provider, providerSendEmail.get, providerDisplayName)),
+          providerOption.map(provider => ActivityProvider(provider, providerSendEmail.get, providerDisplayName, overrideMuting = providerOverrideMuting.get)),
           tagString
             .map(Json.parse(_).as[JsArray].value.map(_.as[ActivityTag]))
             .getOrElse(Nil)
@@ -145,6 +146,7 @@ class ActivityMuteDaoImpl extends ActivityMuteDao {
         ACTIVITY_MUTE.*,
         PROVIDER.SEND_EMAIL        AS PROVIDER_SEND_EMAIL,
         PROVIDER.DISPLAY_NAME      AS PROVIDER_DISPLAY_NAME,
+        PROVIDER.OVERRIDE_MUTING   AS PROVIDER_OVERRIDE_MUTING,
         ACTIVITY_TYPE.DISPLAY_NAME AS ACTIVITY_TYPE_DISPLAY_NAME
       FROM ACTIVITY_MUTE
         LEFT JOIN PROVIDER ON ACTIVITY_MUTE.PROVIDER_ID = PROVIDER.ID
@@ -161,19 +163,19 @@ class ActivityMuteDaoImpl extends ActivityMuteDao {
       .executeUpdate()
   }
 
-  override def mutesForProvider(provider: ActivityProvider)(implicit c: Connection) = {
+  override def mutesForProvider(provider: ActivityProvider)(implicit c: Connection): Seq[ActivityMute] = {
     SQL(s"select * from ACTIVITY_MUTE where PROVIDER_ID = {PROVIDER_ID}")
       .on("PROVIDER_ID" -> provider.id)
       .as(activityMuteParser.*)
   }
 
-  override def mutesCountForProvider(provider: ActivityProvider)(implicit c: Connection) = {
+  override def mutesCountForProvider(provider: ActivityProvider)(implicit c: Connection): Int = {
     SQL(s"select count(*) from ACTIVITY_MUTE where PROVIDER_ID = {PROVIDER_ID}")
       .on("PROVIDER_ID" -> provider.id)
       .as(scalar[Int].single)
   }
 
-  override def mutesCountForProviders(providers: Seq[ActivityProvider])(implicit c: Connection) = {
+  override def mutesCountForProviders(providers: Seq[ActivityProvider])(implicit c: Connection): Int = {
     SQL(s"select count(*) from ACTIVITY_MUTE where PROVIDER_ID in ({PROVIDER_IDs})")
       .on("PROVIDER_IDs" -> providers.map(_.id))
       .as(scalar[Int].single)

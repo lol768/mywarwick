@@ -1,15 +1,13 @@
 package controllers.api
 
-import java.util.concurrent.TimeUnit
-
 import actors.MessageProcessing.ProcessingResult
 import helpers.{BaseSpec, MinimalAppPerSuite}
 import models.publishing.Publisher
 import models.publishing.PublishingRole.{APINotificationsManager, NotificationsManager}
 import models.{ActivityProvider, Audience}
-import org.mockito.{ArgumentCaptor, Matchers}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.mockito.{ArgumentCaptor, Matchers}
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json._
 import play.api.mvc._
@@ -21,8 +19,7 @@ import system.AuditLogContext
 import warwick.sso._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.concurrent.Future
 import scala.util.Try
 
 class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with Results with MinimalAppPerSuite {
@@ -30,12 +27,12 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
   val tabula = "tabula"
   val tabulaPublisherId = "tabulaPublisherId"
   val tabulaPublisher = Publisher(tabulaPublisherId, "Tabula")
-  val tabulaProvider: ActivityProvider = ActivityProvider(tabula, sendEmail = false)
+  val tabulaProvider: ActivityProvider = ActivityProvider(tabula, sendEmail = false, overrideMuting = false)
 
   val transientPushProviderId = "transientPushProviderId"
   val transientPushPublisherId = "transientPushPublisherId"
   val transientPushPublisher = Publisher(transientPushPublisherId, "Transient Push")
-  val transientPushProvider: ActivityProvider = ActivityProvider(transientPushProviderId, sendEmail = false, transientPush = true)
+  val transientPushProvider: ActivityProvider = ActivityProvider(transientPushProviderId, sendEmail = false, transientPush = true, overrideMuting = false)
 
   val ron: User = Users.create(usercode = Usercode("ron"))
 
@@ -55,7 +52,7 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
   val audienceService: AudienceService = mock[AudienceService]
   val messagingService: MessagingService = mock[MessagingService]
 
-  val controller = new IncomingActivitiesController(
+  val controller: IncomingActivitiesController = new IncomingActivitiesController(
     new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], PlayBodyParsers()),
     activityService,
     publisherService,

@@ -44,7 +44,7 @@ val appDeps = Seq(
   jodaForms,
   "com.typesafe.play" %% "anorm" % "2.5.3",
   "com.oracle" % "ojdbc7" % "12.1.0.2.0",
-  "uk.ac.warwick.sso" %% "sso-client-play" % "2.38",
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.40",
   "uk.ac.warwick.play-utils" %% "accesslog" % playUtilsVersion,
   "uk.ac.warwick.play-utils" %% "anorm" % playUtilsVersion,
   "uk.ac.warwick.play-utils" %% "objectstore" % playUtilsVersion,
@@ -62,7 +62,7 @@ val appDeps = Seq(
   "com.google.inject.extensions" % "guice-multibindings" % "4.0",
   "com.adrianhurt" %% "play-bootstrap" % "1.2-P26-B3",
   "org.imgscalr" % "imgscalr-lib" % "4.2",
-  "com.github.mumoshu" %% "play2-memcached-play26" % "0.9.1",
+  "com.github.mumoshu" %% "play2-memcached-play26" % "0.9.2-warwick",
   "ch.qos.logback" % "logback-access" % "1.1.7",
 //  "com.google.guava" % "guava" % "22.0",
   "com.google.apis" % "google-api-services-analyticsreporting" % "v4-rev10-1.22.0"
