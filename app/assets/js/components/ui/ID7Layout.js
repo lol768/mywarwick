@@ -32,6 +32,7 @@ class ID7Layout extends React.PureComponent {
     zoomedTile: PropTypes.string,
     notificationsCount: PropTypes.number,
     children: PropTypes.node,
+    features: PropTypes.object.isRequired,
   };
 
   /** Set the theme on the html element, so that we can style everything. */
@@ -111,6 +112,8 @@ class ID7Layout extends React.PureComponent {
     wrapKeyboardSelect(() => {
       if (this.isEditing()) {
         this.props.dispatch(goBack());
+      } else if (!this.props.features.eap) {
+        this.props.dispatch(push(`/${Routes.EDIT}`));
       }
     }, e);
   }
@@ -149,7 +152,7 @@ class ID7Layout extends React.PureComponent {
   }
 
   renderMobile() {
-    const { user, path } = this.props;
+    const { user, path, features } = this.props;
 
     const showSettingsButton = !(
       _.startsWith(path, `/${Routes.SETTINGS}`) ||
@@ -176,6 +179,7 @@ class ID7Layout extends React.PureComponent {
                 }
                 onSettings={this.onSettings}
                 showSettingsButton={showSettingsButton}
+                features={features}
               />
             </header>
           </div>

@@ -5,6 +5,7 @@ import play.api.Configuration
 
 trait MyTestFeatures {
   def news: Boolean
+  def eap: Boolean
   def potato: Boolean
 }
 
@@ -15,10 +16,12 @@ class BooleanFlagsAccessorTest extends PlaySpec {
     "work" in {
       val features = new MyTestAccessor(Configuration(
           "news" -> true,
+          "eap" -> true,
           "potato" -> false
       )).get
       features.news mustBe true
       features.potato mustBe false
+      features.eap mustBe true
     }
 
     "reject extra conf keys" in {

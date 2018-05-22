@@ -1,13 +1,14 @@
 package services
 
 import java.lang.reflect.{InvocationHandler, Method}
-import javax.inject.{Inject, Provider, Singleton}
 
+import javax.inject.{Inject, Provider, Singleton}
 import com.google.inject.ImplementedBy
 
 import scala.reflect.runtime.{universe => ru}
 import scala.reflect.classTag
 import play.api.Configuration
+import play.api.libs.json.{Json, Writes}
 
 import scala.reflect.ClassTag
 
@@ -19,6 +20,7 @@ import scala.reflect.ClassTag
   */
 trait Features {
   def news: Boolean
+  def eap: Boolean
 }
 
 /**

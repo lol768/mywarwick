@@ -53,7 +53,9 @@ export default class MastheadMobile extends React.PureComponent {
           role="button"
           tabIndex={0}
         >
-          { this.props.editing && <i className="fa fa-fw fa-check" /> }
+          { this.props.editing ? <i className="fa fa-fw fa-check" />
+          : !this.props.features.eap && <i className="fa fa-fw fa-arrows" />
+          }
         </div>
         }
         <ReactCSSTransitionGroup
@@ -96,4 +98,5 @@ MastheadMobile.propTypes = {
   showEditButton: PropTypes.bool,
   onSettings: PropTypes.func,
   showSettingsButton: PropTypes.bool,
+  features: PropTypes.object.isRequired,
 };

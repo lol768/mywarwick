@@ -62,6 +62,7 @@ class SettingsView extends HideableView {
   }
 
   static propTypes = {
+    features: PropTypes.object.isRequired,
     mutes: PropTypes.number.isRequired,
     newsCategories: PropTypes.shape({
       fetching: PropTypes.bool.isRequired,
@@ -398,13 +399,14 @@ class SettingsView extends HideableView {
           </div>
 
           <div className="list-group setting-colour-0">
+            {this.props.features.eap &&
             <ListGroupItemBtn handler={this.onEditTiles}>
               {SettingsView.renderSetting(
                 'th-large',
                 'Rearrange, resize & show or hide tiles',
                 <FAChevronRight />,
               )}
-            </ListGroupItemBtn>
+            </ListGroupItemBtn>}
             <ListGroupItemBtn handler={this.onTilePreferences}>
               {SettingsView.renderSetting(
                 'check-square-o',
