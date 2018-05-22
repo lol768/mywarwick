@@ -53,8 +53,8 @@ export default class MastheadMobile extends React.PureComponent {
           role="button"
           tabIndex={0}
         >
-          { this.props.editing ? <i className="fa fa-fw fa-check" />
-          : !this.props.features.eap && <i className="fa fa-fw fa-arrows" />
+          {this.props.editing ? <i className="fa fa-fw fa-check" />
+            : !this.props.features.eap && <i className="fa fa-fw fa-arrows" />
           }
         </div>
         }

@@ -245,7 +245,7 @@ class AppRoot extends React.Component {
             React.createElement(
               args.view,
               Object.assign(
-                {features: {...this.props.features}},
+                { features: { ...this.props.features } },
                 (args.extraProps || {}),
               ),
             )
