@@ -329,7 +329,7 @@ object TabulaResponseParsers {
   )
 
   object Address {
-    private implicit val addressReads: Reads[Address] = Json.reads[Address]
+    implicit val addressReads: Reads[Address] = Json.reads[Address]
   }
 
   case class TabulaUserData(userId: String, universityId: String, termtimeAddress: Option[Address])

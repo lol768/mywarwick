@@ -66,12 +66,15 @@ object Audience {
 
   case class DepartmentAudience(deptCode: String, subset: Seq[DepartmentSubset]) extends Component
 
-  case class ResidenceAudience(residence: Residence) extends Component
+  case class ResidenceAudience(residence: Residence) extends Component {
+    val displayName: String = "Halls of residence"
+  }
 
   // not sure if we would need queryParameters here
-  abstract case class Residence(id: String, displayName: String, queryParameters: Seq[(String, String)]) extends Component
+  abstract class Residence(val id: String, val displayName: String, val queryParameters: Seq[(String, String)])
 
   object Residence {
+
     case object ArthurVick extends Residence("arthurVick", "Arthur Vick", Seq(("hallsOfResidence", "Arthur+Vick")))
     case object Benefactors extends Residence("benefactors", "Benefactors", Seq(("hallsOfResidence", "Benefactors")))
     case object Bluebell extends Residence("bluebell", "Bluebell", Seq(("hallsOfResidence", "Bluebell")))
@@ -89,7 +92,7 @@ object Audience {
 
     def all: Seq[Residence] = Seq(
       ArthurVick, Benefactors, Bluebell, Claycroft, Cryfield, Heronbank, JackMartin,
-      Lakeside, Redfern, Rootes, Sherbourne, Tocil, Westwood, Whitefields, Unknown
+      Lakeside, Redfern, Rootes, Sherbourne, Tocil, Westwood, Whitefields
     )
 
     def fromId(id: String): Residence = all.find(_.id == id)
