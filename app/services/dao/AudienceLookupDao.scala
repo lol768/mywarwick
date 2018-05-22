@@ -131,14 +131,12 @@ class TabulaAudienceLookupDao @Inject()(
       .map(_.get.members)
       .getOrElse(Seq.empty[Usercode])
       .map(userLookupService.getUser)
-      .map(possibleUser => possibleUser.fold(_ => Future.successful(Option.empty), user => {
-        getUserResidence(user).map { r =>
-          if (r.contains(residence))
-            Some(user)
-          else
-            Option.empty
-        }
-      }))).map(_.flatten.map(_.usercode))
+      .map(possibleUser => possibleUser
+        .fold(
+          _ => Future.successful(Option.empty),
+          user => getUserResidence(user).map(r => if (r.contains(residence)) Some(user) else Option.empty)
+        )
+      )).map(_.flatten.map(_.usercode))
   }
 
   override def resolveSeminarGroup(groupId: String): Future[Seq[Usercode]] = {
