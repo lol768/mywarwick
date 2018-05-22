@@ -1,9 +1,9 @@
 package services.dao
 
 import java.io.IOException
-import javax.inject.{Inject, Named}
 
-import models.Audience.UndergradStudents
+import javax.inject.{Inject, Named}
+import models.Audience.{Residence, UndergradStudents}
 import play.api.Configuration
 import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
@@ -11,7 +11,7 @@ import play.api.libs.json._
 import play.api.libs.ws._
 import system.{Logging, TrustedAppsError}
 import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplicationsManager}
-import warwick.sso.{UniversityID, User, UserLookupService, Usercode}
+import warwick.sso._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -46,6 +46,7 @@ trait AudienceLookupDao {
   def resolveModule(moduleCode: String): Future[Seq[Usercode]]
   def resolveSeminarGroup(groupId: String): Future[Seq[Usercode]]
   def resolveRelationship(agentId: UniversityID, relationshipType: String): Future[Seq[Usercode]]
+  def resolveResidence(residence: Residence): Future[Seq[Usercode]]
 
   def getSeminarGroupById(groupId: String): Future[Option[LookupSeminarGroup]]
 
@@ -60,7 +61,8 @@ class TabulaAudienceLookupDao @Inject()(
   ws: WSClient,
   trustedApplicationsManager: TrustedApplicationsManager,
   val configuration: Configuration,
-  userLookupService: UserLookupService
+  userLookupService: UserLookupService,
+  groupService: GroupService
 ) extends AudienceLookupDao with Logging with TabulaAudienceLookupProperties {
 
   import system.ThreadPools.externalData
@@ -109,6 +111,34 @@ class TabulaAudienceLookupDao @Inject()(
 
   override def resolveModule(moduleCode: String): Future[Seq[Usercode]] = {
     getAuthenticatedAsJson(tabulaModuleStudentsUrl(moduleCode)).map(parseUsercodeSeq)
+  }
+
+  private def getUserResidence(user: User): Future[Option[Residence]] = {
+    getAuthenticatedAsJson(tabulaMemberUrl(user)).map(
+      TabulaResponseParsers.validateAPIResponse(_, TabulaResponseParsers.tabulaUserDataReads).fold(
+        handleValidationError(_, Option.empty[Residence]),
+        tabulaUserDate => {
+          tabulaUserDate.termtimeAddress.flatMap { address =>
+            address.line2.flatMap(line2 => Residence.all.find(_.displayName == line2))
+          }
+        }
+      )
+    )
+  }
+
+  override def resolveResidence(residence: Residence): Future[Seq[Usercode]] = {
+    Future.sequence(groupService.getWebGroup(GroupName("all-all"))
+      .map(_.get.members)
+      .getOrElse(Seq.empty[Usercode])
+      .map(userLookupService.getUser)
+      .map(possibleUser => possibleUser.fold(_ => Future.successful(Option.empty), user => {
+        getUserResidence(user).map { r =>
+          if (r.contains(residence))
+            Some(user)
+          else
+            Option.empty
+        }
+      }))).map(_.flatten.map(_.usercode))
   }
 
   override def resolveSeminarGroup(groupId: String): Future[Seq[Usercode]] = {
@@ -190,6 +220,7 @@ class TabulaAudienceLookupDao @Inject()(
       .url(url)
       .addHttpHeaders(trustedHeaders: _*)
   }
+
 }
 
 trait TabulaAudienceLookupProperties {
@@ -257,6 +288,8 @@ trait TabulaAudienceLookupProperties {
   private val tabulaMemberBaseUrl = configuration.getOptional[String]("mywarwick.tabula.member.base")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.member.base in application.conf"))
 
+  protected def tabulaMemberUrl(user: User) = s"$tabulaMemberBaseUrl/${user.universityId.getOrElse(throw new IllegalArgumentException).string}"
+
   private val tabulaMemberRelationshipsSuffix = configuration.getOptional[String]("mywarwick.tabula.member.relationshipsSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.member.relationshipsSuffix in application.conf"))
 
@@ -287,8 +320,22 @@ object TabulaResponseParsers {
       Reads.pure("")
     ) (LookupSeminarGroup.apply _)
 
-  case class TabulaUserData(userId: String, universityId: String)
-  private val tabulaUserDataReads = Json.reads[TabulaUserData]
+  case class Address(
+    line1: Option[String],
+    line2: Option[String],
+    line3: Option[String],
+    line4: Option[String],
+    line5: Option[String],
+    postcode: Option[String],
+    telephone: Option[String]
+  )
+
+  object Address {
+    private implicit val addressReads: Reads[Address] = Json.reads[Address]
+  }
+
+  case class TabulaUserData(userId: String, universityId: String, termtimeAddress: Option[Address])
+  val tabulaUserDataReads = Json.reads[TabulaUserData]
 
   object MemberRelationship {
     case class MemberRelationship(relationshipType: LookupRelationshipType, students: Seq[TabulaUserData])
