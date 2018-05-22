@@ -25,6 +25,7 @@
   ResearchPostgrads)) { deptSubsets: Seq[DepartmentSubset] =>
   <div
   data-is-god="@(permissionScope == PermissionScope.AllDepartments)"
+  data-halls-of-residence='@Json.obj(Residence.all.map(res => res.id -> Json.toJsFieldJsValueWrapper(res.displayName)):_*)'
   data-form-data='@audienceJson'
   data-errors='@form.errorsAsJson'
   data-location-opts='@Json.obj(LocationOptIn.values.map(loc => loc.value -> Json.toJsFieldJsValueWrapper(loc.description)): _*)'

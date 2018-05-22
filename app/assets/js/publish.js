@@ -57,6 +57,7 @@ function setupAudiencePicker() {
       formData: audiencePicker.data('form-data') || {},
       locationOpts: audiencePicker.data('location-opts') || {},
       deptSubsetOpts: audiencePicker.data('dept-subset-opts') || {},
+      hallsOfResidence: audiencePicker.data('halls-of-residence') || {},
       store,
     };
     ReactDOM.render(
