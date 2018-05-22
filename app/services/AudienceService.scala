@@ -71,6 +71,7 @@ class AudienceServiceImpl @Inject()(
         makeResult(resolveDepartmentGroup(code, subset), subset)
       )).map(_.flatten)
       case optIn: OptIn => makeResult(Future.successful(db.withConnection(implicit c => optInDao.getUsercodes(optIn))))
+      case ResidenceAudience(residence) => makeResult(audienceLookupDao.resolveResidence(residence))
     }
   }
 
