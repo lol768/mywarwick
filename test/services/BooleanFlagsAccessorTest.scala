@@ -5,7 +5,6 @@ import play.api.Configuration
 
 trait MyTestFeatures {
   def news: Boolean
-  def eap: Boolean
   def potato: Boolean
 }
 
@@ -21,7 +20,6 @@ class BooleanFlagsAccessorTest extends PlaySpec {
       )).get
       features.news mustBe true
       features.potato mustBe false
-      features.eap mustBe true
     }
 
     "reject extra conf keys" in {

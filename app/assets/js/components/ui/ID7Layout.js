@@ -112,7 +112,7 @@ class ID7Layout extends React.PureComponent {
     wrapKeyboardSelect(() => {
       if (this.isEditing()) {
         this.props.dispatch(goBack());
-      } else if (!this.props.features.eap) {
+      } else if (!this.props.features.updateTileEditUI) {
         this.props.dispatch(push(`/${Routes.EDIT}`));
       }
     }, e);

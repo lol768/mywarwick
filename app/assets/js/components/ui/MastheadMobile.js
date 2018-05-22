@@ -54,7 +54,7 @@ export default class MastheadMobile extends React.PureComponent {
           tabIndex={0}
         >
           {this.props.editing ? <i className="fa fa-fw fa-check" />
-            : !this.props.features.eap && <i className="fa fa-fw fa-arrows" />
+            : !this.props.features.updateTileEditUI && <i className="fa fa-fw fa-arrows" />
           }
         </div>
         }

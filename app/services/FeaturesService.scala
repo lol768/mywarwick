@@ -20,7 +20,7 @@ import scala.reflect.ClassTag
   */
 trait Features {
   def news: Boolean
-  def eap: Boolean
+  def updateTileEditUI: Boolean
 }
 
 /**

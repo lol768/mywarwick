@@ -399,7 +399,7 @@ class SettingsView extends HideableView {
           </div>
 
           <div className="list-group setting-colour-0">
-            {this.props.features.eap &&
+            {this.props.features.updateTileEditUI &&
             <ListGroupItemBtn handler={this.onEditTiles}>
               {SettingsView.renderSetting(
                 'th-large',
