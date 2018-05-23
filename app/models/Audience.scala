@@ -71,24 +71,24 @@ object Audience {
   }
 
   // not sure if we would need queryParameters here
-  abstract class Residence(val id: String, val displayName: String, val queryParameters: Seq[(String, String)])
+  abstract class Residence(val id: String, val displayName: String)
 
   object Residence {
 
-    case object ArthurVick extends Residence("arthurVick", "Arthur Vick", Seq(("hallsOfResidence", "Arthur+Vick")))
-    case object Benefactors extends Residence("benefactors", "Benefactors", Seq(("hallsOfResidence", "Benefactors")))
-    case object Bluebell extends Residence("bluebell", "Bluebell", Seq(("hallsOfResidence", "Bluebell")))
-    case object Claycroft extends Residence("claycroft", "Claycroft", Seq(("hallsOfResidence", "Claycroft")))
-    case object Cryfield extends Residence("cryfield", "Cryfield", Seq(("hallsOfResidence", "Cryfield")))
-    case object Heronbank extends Residence("heronbank", "Heronbank", Seq(("hallsOfResidence", "Heronbank")))
-    case object JackMartin extends Residence("jackMartin", "Jack Martin", Seq(("hallsOfResidence", "Jack+Martin")))
-    case object Lakeside extends Residence("lakeside", "Lakeside", Seq(("hallsOfResidence", "Lakeside")))
-    case object Redfern extends Residence("redfern", "Redfern", Seq(("hallsOfResidence", "Redfern")))
-    case object Rootes extends Residence("rootes", "Rootes", Seq(("hallsOfResidence", "Rootes")))
-    case object Sherbourne extends Residence("sherbourne", "Sherbourne", Seq(("hallsOfResidence", "Sherbourne")))
-    case object Tocil extends Residence("tocil", "Tocil", Seq(("hallsOfResidence", "Tocil")))
-    case object Westwood extends Residence("westwood", "Westwood", Seq(("hallsOfResidence", "Westwood")))
-    case object Whitefields extends Residence("whitefields", "Whitefields", Seq(("hallsOfResidence", "Whitefields")))
+    case object ArthurVick extends Residence("arthurVick", "Arthur Vick")
+    case object Benefactors extends Residence("benefactors", "Benefactors")
+    case object Bluebell extends Residence("bluebell", "Bluebell")
+    case object Claycroft extends Residence("claycroft", "Claycroft")
+    case object Cryfield extends Residence("cryfield", "Cryfield")
+    case object Heronbank extends Residence("heronbank", "Heronbank")
+    case object JackMartin extends Residence("jackMartin", "Jack Martin")
+    case object Lakeside extends Residence("lakeside", "Lakeside")
+    case object Redfern extends Residence("redfern", "Redfern")
+    case object Rootes extends Residence("rootes", "Rootes")
+    case object Sherbourne extends Residence("sherbourne", "Sherbourne")
+    case object Tocil extends Residence("tocil", "Tocil")
+    case object Westwood extends Residence("westwood", "Westwood")
+    case object Whitefields extends Residence("whitefields", "Whitefields")
 
     def all: Seq[Residence] = Seq(
       ArthurVick, Benefactors, Bluebell, Claycroft, Cryfield, Heronbank, JackMartin,
