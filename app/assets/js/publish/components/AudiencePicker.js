@@ -21,6 +21,7 @@ export class AudiencePicker extends React.PureComponent {
       faculty: PropTypes.string,
     })),
     deptSubsetOpts: PropTypes.object,
+    hallsOfResidence: PropTypes.object,
     locationOpts: PropTypes.object,
     audienceDidUpdate: PropTypes.func.isRequired,
   };
@@ -31,6 +32,7 @@ export class AudiencePicker extends React.PureComponent {
     departments: {},
     deptSubsetOpts: {},
     locationOpts: {},
+    hallsOfResidence: {},
   };
 
   constructor(props) {
@@ -202,6 +204,28 @@ export class AudiencePicker extends React.PureComponent {
     const prefixPath = text => `audience.${isPublic ? 'universityWide' : 'department'}${text}`;
     const prefixDeptSubset = text => `${isPublic ? '' : 'Dept:'}${text}`;
 
+    const hallsOfResidenceInput = (
+      <Checkbox
+        handleChange={this.handleChange}
+        isChecked={this.isChecked(prefixPath('.groups.yesHallsOfResidence'))}
+        label="Halls of residence"
+        value="yesHallsOfResidence"
+        formPath={prefixPath('.groups')}
+      >
+        {Object.keys(this.props.hallsOfResidence).map(key =>
+          (<Checkbox
+            key={key}
+            handleChange={this.handleChange}
+            formPath={prefixPath('.groups.hallsOfResidence')}
+            label={this.props.hallsOfResidence[key]}
+            name="audience.audience[]"
+            value={`hallsOfResidence:${key}`}
+            isChecked={this.isChecked(prefixPath(`.groups.hallsOfResidence.hallsOfResidence:${key}`))}
+          />),
+        )}
+      </Checkbox>
+    );
+
     const listOfUsercodes = (
       <Checkbox
         handleChange={this.handleChange}
@@ -339,6 +363,7 @@ export class AudiencePicker extends React.PureComponent {
             placeholderText="Start typing the name or usercode of the staff member"
           />
         </Checkbox>
+        { hallsOfResidenceInput }
         { listOfUsercodes }
       </div>
     );
