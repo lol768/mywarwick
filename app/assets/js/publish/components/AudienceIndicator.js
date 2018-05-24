@@ -5,6 +5,7 @@ import log from 'loglevel';
 import $ from 'jquery';
 import _ from 'lodash-es';
 import { mkString } from '../../helpers';
+const changeCase = require('change-case');
 
 export class AudienceIndicator extends React.PureComponent {
   static propTypes = {
@@ -89,8 +90,8 @@ export class AudienceIndicator extends React.PureComponent {
     const { fetching, groupedAudience } = this.state;
     const dept = audienceComponents.department;
 
-    const getCount = (groups) => {
-      const peopleCount = _.reduce(groups, (acc, group) => acc + (groupedAudience[group] || 0), 0);
+    const getCount = (groups, grouped = groupedAudience) => {
+      const peopleCount = _.reduce(groups, (acc, group) => acc + (grouped[group] || 0), 0);
       return (fetching ?
         <i className="fa fa-spin fa-fw fa-refresh" /> : `${peopleCount} people`);
     };
@@ -107,6 +108,22 @@ export class AudienceIndicator extends React.PureComponent {
         return (<div> {
           _.map(audience.groups, (components, audienceType) => {
             switch (audienceType) {
+              case 'hallsOfResidence':
+                if (components) {
+                  const halls = components.hall;
+                  if (halls) {
+                    console.dir(audience.groups);
+                    console.dir(halls);
+                    return _.map(halls, (value, key) =>
+                      (
+                        <div key={key}>
+                          {changeCase.sentenceCase(_.last(key.split(":")))}: {getCount(key, halls)}
+                        </div>
+                      )
+                    );
+                  }
+                }
+                break;
               case 'modules':
                 return _.map(components, ({ text, value }) =>
                   (<div
