@@ -1,6 +1,7 @@
 @import services.analytics.AnalyticsTrackingID
 @import play.api.libs.json.{Json}
 @import system.RequestContext
+@import play.api.libs.json.JsBoolean
 @()(
     implicit analyticsTrackingId: Option[AnalyticsTrackingID], context: RequestContext,
     searchRootUrl: SearchRootUrl
@@ -51,7 +52,10 @@
     <div id="app-container"
       @for(trackingId <- analyticsTrackingId) {data-analytics-tracking-id="@{trackingId.string}"}
       data-search-root-url="@searchRootUrl.string"
-      data-features="@Json.obj("news" -> context.features.news)"
+      data-features="@Json.obj(
+        "news" -> JsBoolean(context.features.news),
+        "updateTileEditUI" -> JsBoolean(context.features.updateTileEditUI),
+      )"
     >
       <div id="react-app-spinner" class="react-loading">
         <i class="fa fa-pulse">
