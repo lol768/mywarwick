@@ -15,7 +15,6 @@ class BooleanFlagsAccessorTest extends PlaySpec {
     "work" in {
       val features = new MyTestAccessor(Configuration(
           "news" -> true,
-          "eap" -> true,
           "potato" -> false
       )).get
       features.news mustBe true
