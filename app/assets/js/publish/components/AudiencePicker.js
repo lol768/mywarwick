@@ -207,22 +207,38 @@ export class AudiencePicker extends React.PureComponent {
     const hallsOfResidenceInput = (
       <Checkbox
         handleChange={this.handleChange}
-        isChecked={this.isChecked(prefixPath('.groups.yesHallsOfResidence'))}
+        isChecked={this.isChecked(prefixPath('.groups.hallsOfResidence'))}
         label="Halls of residence"
-        value="yesHallsOfResidence"
+        value="hallsOfResidence"
         formPath={prefixPath('.groups')}
       >
-        {Object.keys(this.props.hallsOfResidence).map(key =>
-          (<Checkbox
-            key={key}
-            handleChange={this.handleChange}
-            formPath={prefixPath('.groups.hallsOfResidence')}
-            label={this.props.hallsOfResidence[key]}
-            name="audience.audience[]"
-            value={`hallsOfResidence:${key}`}
-            isChecked={this.isChecked(prefixPath(`.groups.hallsOfResidence.hallsOfResidence:${key}`))}
-          />),
-        )}
+        <RadioButton
+          handleChange={this.handleChange}
+          isChecked={!this.isChecked(prefixPath('.groups.hallsOfResidence.hall'))}
+          label="All"
+          name="audience.audience[]"
+          value="hallsOfResidence:all"
+          formPath={prefixPath('.groups.hallsOfResidence')}
+        />
+        <RadioButton
+          handleChange={this.handleChange}
+          isChecked={this.isChecked(prefixPath('.groups.hallsOfResidence.hall'))}
+          label="Choose the hall"
+          value="hall"
+          formPath={prefixPath('.groups.hallsOfResidence')}
+        >
+          {Object.keys(this.props.hallsOfResidence).map(key =>
+            (<Checkbox
+              handleChange={this.handleChange}
+              isChecked={this.isChecked(prefixPath(`.groups.hallsOfResidence.hall.hallsOfResidence:${key}`))}
+              label={this.props.hallsOfResidence[key]}
+              name="audience.audience[]"
+              value={`hallsOfResidence:${key}`}
+              formPath={prefixPath('.groups.hallsOfResidence.hall')}
+            />),
+          )}
+        </RadioButton>
+
       </Checkbox>
     );
 
