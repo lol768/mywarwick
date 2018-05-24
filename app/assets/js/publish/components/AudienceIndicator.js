@@ -117,7 +117,7 @@ export class AudienceIndicator extends React.PureComponent {
                     return _.map(halls, (value, key) =>
                       (
                         <div key={key}>
-                          {changeCase.sentenceCase(_.last(key.split(":")))}: {getCount(key, halls)}
+                          {changeCase.titleCase(changeCase.sentenceCase(_.last(key.split(":"))))}: {getCount(key, halls)}
                         </div>
                       )
                     );
