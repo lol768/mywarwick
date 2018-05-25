@@ -36,6 +36,7 @@ class ToDoItem extends ListTileItem {
     reminderDateTime: PropTypes.string,
     completed: PropTypes.bool,
     handleOnClick: PropTypes.func,
+    href: PropTypes.string,
   };
 
   render() {
