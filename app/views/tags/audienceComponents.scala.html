@@ -28,6 +28,7 @@
     case ug: UndergradStudents => Seq(s"${ug.value} year undergraduate students at the University")
     case TaughtPostgrads => Seq(s"All taught postgraduates at the University")
     case ResearchPostgrads => Seq(s"All research postgraduates at the University")
+    case ResidenceAudience(residence) => Seq(s"People from ${residence.displayName}") // TODO
     case unknown => Seq(unknown.toString)
   }).mkString(", ")
 }

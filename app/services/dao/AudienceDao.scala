@@ -123,6 +123,7 @@ class AudienceDaoImpl extends AudienceDao {
       case DepartmentAudience(code, subsets) => subsets.flatMap { subset => resolveSubset(Some(code), subset) }
       case WebGroupAudience(group) => Seq(AudienceComponentSave("WebGroup", Some(group.string), None))
       case optIn: OptIn => Seq(AudienceComponentSave(s"OptIn:${optIn.optInType}", Some(optIn.optInValue), None))
+      case residenceAudience: ResidenceAudience => Seq.empty //TODO
     }
 
   private def resolveSubset(deptCode: Option[String], subset: DepartmentSubset): Seq[AudienceComponentSave] =
