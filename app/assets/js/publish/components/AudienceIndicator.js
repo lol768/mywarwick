@@ -90,8 +90,8 @@ export class AudienceIndicator extends React.PureComponent {
     const { fetching, groupedAudience } = this.state;
     const dept = audienceComponents.department;
 
-    const getCount = (groups, grouped = groupedAudience) => {
-      const peopleCount = _.reduce(groups, (acc, group) => acc + (grouped[group] || 0), 0);
+    const getCount = (groups) => {
+      const peopleCount = _.reduce(groups, (acc, group) => acc + (groupedAudience[group] || 0), 0);
       return (fetching ?
         <i className="fa fa-spin fa-fw fa-refresh" /> : `${peopleCount} people`);
     };
@@ -112,12 +112,14 @@ export class AudienceIndicator extends React.PureComponent {
                 if (components) {
                   const halls = components.hall;
                   if (halls) {
-                    return _.map(halls, (value, key) =>
-                      (
-                        <div key={key}>
-                          All residents of {changeCase.titleCase(changeCase.sentenceCase(_.last(key.split(":"))))}: {getCount(key, halls)}
-                        </div>
-                      )
+                    return _.map(halls, (value, key) => {
+                      const displayName = changeCase.titleCase(changeCase.sentenceCase(_.last(key.split(":"))));
+                        return (
+                          <div key={key}>
+                            All residents of {displayName}: {getCount([`ResidenceAudience(${displayName})`], halls)}
+                          </div>
+                        );
+                      }
                     );
                   }
                 }

@@ -115,11 +115,7 @@ class TabulaAudienceLookupDao @Inject()(
 
 
   override def resolveResidence(residence: Residence): Future[Seq[Usercode]] = {
-    val queryParam = residence match {
-      case Residence.All => Residence.all.map(hall => ("hallsOfResidence", hall.id))
-      case _ => Seq(("hallsOfResidence", residence.id))
-    }
-    getAuthenticatedAsJson(tabulaAudienceLookUpUrl, queryParam)
+    getAuthenticatedAsJson(tabulaAudienceLookUpUrl, residence.queryParameters)
       .map(
         TabulaResponseParsers.validateAPIResponse(_, TabulaResponseParsers.universityIdResultReads).fold(
           handleValidationError(_, Seq()),
