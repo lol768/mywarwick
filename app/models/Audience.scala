@@ -69,7 +69,6 @@ object Audience {
   case class ResidenceAudience(residence: Residence) extends Component {
     val displayName: String = "Halls of residence"
   }
-
   // not sure if we would need queryParameters here
   abstract class Residence(val id: String, val displayName: String)
 
@@ -89,6 +88,7 @@ object Audience {
     case object Tocil extends Residence("tocil", "Tocil")
     case object Westwood extends Residence("westwood", "Westwood")
     case object Whitefields extends Residence("whitefields", "Whitefields")
+    case object All extends Residence("all", "all")
 
     def all: Seq[Residence] = Seq(
       ArthurVick, Benefactors, Bluebell, Claycroft, Cryfield, Heronbank, JackMartin,
@@ -167,6 +167,7 @@ object Audience {
   val relationshipRegex: Regex = "^Relationship:(.+):(.+)".r
   val webGroupRegex: Regex = "^WebGroup:(.+)".r
   val optInRegex: Regex = "^OptIn:(.+):(.+)".r
+  val hallsOfResidenceRegex: Regex = "^hallsOfResidence:(.+)".r
 
   object ComponentParameter {
     def unapply(paramValue: String): Option[Component] = paramValue match {
@@ -181,6 +182,13 @@ object Audience {
       case seminarGroupRegex(groupId) => Some(SeminarGroupAudience(groupId))
       case relationshipRegex(relationshipType, agentId) => Some(RelationshipAudience(relationshipType, UniversityID(agentId)))
       case optInRegex(optInType, optInValue) if optInType == LocationOptIn.optInType => LocationOptIn.fromValue(optInValue)
+      case hallsOfResidenceRegex(id) =>
+        val hall = id.split(":").toList.last
+        if (hall == "all") {
+          Some(ResidenceAudience(Residence.All))
+        } else {
+          Some(ResidenceAudience(Residence.fromId(hall)))
+        }
       case string if string.nonEmpty => {
         val validUsercodes: Set[Usercode] = string.split("\n").map(_.trim).flatMap { usercode =>
           if (!usercode.contains(":")) Some(Usercode(usercode))

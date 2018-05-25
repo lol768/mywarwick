@@ -112,8 +112,6 @@ export class AudienceIndicator extends React.PureComponent {
                 if (components) {
                   const halls = components.hall;
                   if (halls) {
-                    console.dir(audience.groups);
-                    console.dir(halls);
                     return _.map(halls, (value, key) =>
                       (
                         <div key={key}>
