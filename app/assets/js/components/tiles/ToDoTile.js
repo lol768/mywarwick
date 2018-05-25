@@ -24,6 +24,23 @@ export default class ToDoTile extends ListTile {
         return 200;
     }
   }
+
+  contentOrDefault(contentFunction) {
+    if (this.isEmpty()) {
+      return (
+        <a
+          href="https://outlook.office.com/owa/?path=/tasks"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span>
+            {this.props.content.defaultText || 'Nothing to show.'}
+          </span>
+        </a>
+      );
+    }
+    return contentFunction.call(this);
+  }
 }
 
 class ToDoItem extends ListTileItem {
