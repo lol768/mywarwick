@@ -14,7 +14,7 @@ import play.filters.csrf.CSRF
 import play.filters.csrf.CSRF.Token
 import play.twirl.api.Html
 import services.analytics.AnalyticsMeasurementService
-import services.{MockNavigationService, PhotoService, UserInitialisationService}
+import services.{FeaturesService, MockNavigationService, PhotoService, UserInitialisationService}
 import system.{CSRFPageHelper, CSRFPageHelperFactory}
 import uk.ac.warwick.sso.client.cache.{UserCache, UserCacheItem}
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
@@ -27,6 +27,7 @@ class UserInfoControllerTest extends BaseSpec with MockitoSugar with Results wit
   val baseConfig = new BaseConfiguration
   val ssoConfig = new SSOConfiguration(baseConfig)
   val userCache = mock[UserCache]
+  val features = mock[FeaturesService]
 
   val HOSTNAME = "example.warwick.ac.uk"
 
@@ -64,7 +65,7 @@ class UserInfoControllerTest extends BaseSpec with MockitoSugar with Results wit
 
     when(mockCsrfPageHelperFactory.getInstance(Matchers.any[Option[Token]])).thenReturn(mockCsrfHelper)
 
-    new UserInfoController(ssoConfig, userCache, ssoClient, mock[UserInitialisationService], photoService, measurementService) {
+    new UserInfoController(ssoConfig, userCache, ssoClient, mock[UserInitialisationService], photoService, measurementService, features) {
       override val csrfPageHelperFactory: CSRFPageHelperFactory = mockCsrfPageHelperFactory
       override val navigationService = new MockNavigationService()
       override val ssoClient: SSOClient = mockSSOClient

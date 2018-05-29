@@ -1,5 +1,6 @@
 package services
 
+import models.FeaturePreferences
 import org.scalatestplus.play.PlaySpec
 import play.api.Configuration
 
@@ -8,15 +9,16 @@ trait MyTestFeatures {
   def potato: Boolean
 }
 
-class MyTestAccessor(c: Configuration) extends BooleanFlagsAccessor[MyTestFeatures](c)
+class MyTestAccessor(c: Configuration, prefs: FeaturePreferences)
+  extends FlagsAccessor[MyTestFeatures](c, prefs)
 
-class BooleanFlagsAccessorTest extends PlaySpec {
-  "BooleanFlagsAccessor" should {
+class FlagsAccessorTest extends PlaySpec {
+  "FlagsAccessor" should {
     "work" in {
       val features = new MyTestAccessor(Configuration(
-          "news" -> true,
-          "potato" -> false
-      )).get
+          "news" -> "on",
+          "potato" -> "off"
+      ), FeaturePreferences.empty).get
       features.news mustBe true
       features.potato mustBe false
     }
@@ -24,18 +26,18 @@ class BooleanFlagsAccessorTest extends PlaySpec {
     "reject extra conf keys" in {
       intercept[IllegalStateException] {
         new MyTestAccessor(Configuration(
-          "news" -> true,
-          "potato" -> false,
-          "bums" -> true
-        )).get
+          "news" -> "on",
+          "potato" -> "off",
+          "bums" -> "on"
+        ), FeaturePreferences.empty).get
       }
     }
 
     "reject missing conf keys" in {
       intercept[IllegalStateException] {
         new MyTestAccessor(Configuration(
-          "news" -> true
-        )).get
+          "news" -> "on"
+        ), FeaturePreferences.empty).get
       }
     }
   }

@@ -1,11 +1,11 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.mvc.{Action, Cookie, DiscardingCookie}
 import services.analytics.AnalyticsMeasurementService
-import services.{PhotoService, UserInitialisationService}
+import services.{FeaturesService, PhotoService, UserInitialisationService}
+import system.RequestContext
 import system.ThreadPools.externalData
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl.GLOBAL_LOGIN_COOKIE_NAME
 import uk.ac.warwick.sso.client.SSOToken.SSC_TICKET_TYPE
@@ -29,7 +29,8 @@ class UserInfoController @Inject()(
   ssoClient: SSOClient,
   userInitialisationService: UserInitialisationService,
   photoService: PhotoService,
-  measurementService: AnalyticsMeasurementService
+  measurementService: AnalyticsMeasurementService,
+  features: FeaturesService
 ) extends MyController {
 
   val SSC_NAME = ssoConfig.getString("shire.sscookie.name")
@@ -48,6 +49,8 @@ class UserInfoController @Inject()(
   def info = ssoClient.Lenient(parse.default).disallowRedirect.async { implicit request =>
     val ltc = request.cookies.get(GLOBAL_LOGIN_COOKIE_NAME).filter(hasValue)
     val ssc = request.cookies.get(SSC_NAME).filter(hasValue)
+
+    val requestContext = implicitly[RequestContext]
 
     val refresh = ssc.exists(tokenNotInUserCache) || (ssc.isEmpty && ltc.nonEmpty)
 
@@ -70,6 +73,7 @@ class UserInfoController @Inject()(
       Ok(Json.obj(
         "refresh" -> (if (refresh) loginUrl else false),
         "user" -> augmentedInfo,
+        "features"-> requestContext.features,
         "links" -> Json.obj(
           "login" -> links.getPermissionDeniedLink(request.context.user.nonEmpty),
           "logout" -> logoutUrl
