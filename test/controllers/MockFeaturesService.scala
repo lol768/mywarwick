@@ -1,16 +1,14 @@
 package controllers
 
-import java.lang.reflect.{InvocationHandler, Method}
-import java.util
+import java.lang.reflect.Method
 
 import services.{Features, FeaturesService}
+import utils.JavaProxy
 import warwick.sso.User
 
 class MockFeaturesService extends FeaturesService {
   override def get(user: Option[User]): Features =
-    java.lang.reflect.Proxy.newProxyInstance(
-      getClass.getClassLoader,
-      Array(classOf[Features]),
-      (o: scala.Any, method: Method, objects: Array[AnyRef]) => java.lang.Boolean.FALSE
-    ).asInstanceOf[Features]
+    JavaProxy[Features] { (_: Any, _: Method, _: Array[AnyRef]) =>
+      java.lang.Boolean.FALSE
+    }
 }

@@ -1,4 +1,4 @@
-package services
+package utils
 
 import play.api.libs.json._
 
@@ -15,6 +15,9 @@ class BoolTraitWrites[T : ClassTag] extends OWrites[T] {
       m.getReturnType == classOf[Boolean] && m.getParameterCount == 0
     }.map { m =>
       m.getName -> JsBoolean(m.invoke(o).asInstanceOf[Boolean])
+    }
+    if (items.length == 0) {
+      throw new IllegalArgumentException("No boolean accessors found")
     }
     JsObject(items.toSeq)
   }

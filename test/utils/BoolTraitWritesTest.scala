@@ -1,4 +1,4 @@
-package services
+package utils
 
 import helpers.BaseSpec
 import play.api.libs.json.Json

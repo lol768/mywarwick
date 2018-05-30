@@ -16,6 +16,7 @@ import warwick.sso.User
 import scala.reflect.ClassTag
 import enumeratum.{Enum, EnumEntry}
 import play.api.libs.json.{JsObject, Json, OWrites}
+import utils.{BoolTraitWrites, JavaProxy}
 
 import scala.collection.immutable
 
@@ -86,22 +87,14 @@ class FlagsAccessor[T : ClassTag](config: Configuration, prefs: FeaturePreferenc
 
   private val allowedValues: Set[String] = FeatureState.namesToValuesMap.keySet
 
-  private class FeaturesInvocationHandler extends InvocationHandler {
-    override def invoke(o: scala.Any, method: Method, objects: Array[AnyRef]): AnyRef = {
-      val keyName = method.getName
-      val value = config.getAndValidate[String](keyName, allowedValues)
-      val state: FeatureState = FeatureState.withName(value)
-      Boolean.box(state.resolve(prefs))
-    }
-  }
-
   private val tClass = classTag[T].runtimeClass
 
-  private val proxy: T = java.lang.reflect.Proxy.newProxyInstance(
-      getClass.getClassLoader,
-      Array(tClass),
-      new FeaturesInvocationHandler
-    ).asInstanceOf[T]
+  private val proxy: T = JavaProxy[T]{ (_: Any, method: Method, _: Array[AnyRef]) =>
+    val keyName = method.getName
+    val value = config.getAndValidate[String](keyName, allowedValues)
+    val state: FeatureState = FeatureState.withName(value)
+    Boolean.box(state.resolve(prefs))
+  }
 
   private def precheck(): Unit = {
     val confKeys = config.subKeys
@@ -115,6 +108,7 @@ class FlagsAccessor[T : ClassTag](config: Configuration, prefs: FeaturePreferenc
          """.stripMargin)
     }
 
+    // throw if any values are invalid
     for (keyName <- config.subKeys) {
       config.getAndValidate[String](keyName, allowedValues)
     }
