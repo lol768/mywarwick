@@ -16,7 +16,8 @@ class ErrorsController extends MyController {
     request.body.asJson.flatMap(_.validate[Seq[Map[String, JsValue]]].asOpt).toSeq.flatten.foreach { error =>
       val message = error.get("message").flatMap(_.asOpt[String]).getOrElse("-")
       val stacktrace = StructuredArguments.keyValue("stack_trace", error.get("stack").flatMap(_.asOpt[String]).getOrElse("-"))
-      slf4jLogger.info(message, stacktrace)
+      val sourceIp = StructuredArguments.keyValue("source_ip", request.remoteAddress)
+      slf4jLogger.info(message, Array(stacktrace, sourceIp):_*)
     }
     Ok("")
   }
