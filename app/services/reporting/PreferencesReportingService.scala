@@ -16,11 +16,11 @@ trait PreferencesReportingService {
 
   def userWantsSMS(usercode: Usercode): Boolean
 
-  def getMutesByProviders(providers: Seq[ActivityProvider]): Map[ActivityProvider, Seq[ActivityMute]]
+  def getActiveMutesByProviders(providers: Seq[ActivityProvider]): Map[ActivityProvider, Seq[ActivityMute]]
 
   def getMutesCountByProviders(providers: Seq[ActivityProvider]): Int
 
-  def getAllMutesGroupedByProviders(): Map[ActivityProvider, Seq[ActivityMute]]
+  def getAllActiveMutesGroupedByProviders: Map[ActivityProvider, Seq[ActivityMute]]
 
   def getAllUserTileSettings(): Map[Tile, Seq[UserTile]]
 
@@ -40,9 +40,11 @@ class PreferencesReportingServiceImpl @Inject()(
 
   override def userWantsSMS(usercode: Usercode) = ???
 
-  override def getMutesByProviders(providers: Seq[ActivityProvider]): Map[ActivityProvider, Seq[ActivityMute]] = {
+  override def getActiveMutesByProviders(providers: Seq[ActivityProvider]): Map[ActivityProvider, Seq[ActivityMute]] = {
     db.withConnection(implicit c => {
-      providers.map(provider => provider -> activityMuteDao.mutesForProvider(provider)).toMap
+      providers.map(provider => provider ->
+        activityMuteDao.mutesForProvider(provider).filter(m => m.expiresAt.isEmpty || m.expiresAt.exists(_.isAfterNow))
+      ).toMap
     })
   }
 
@@ -52,9 +54,9 @@ class PreferencesReportingServiceImpl @Inject()(
     })
   }
 
-  override def getAllMutesGroupedByProviders() = {
+  override def getAllActiveMutesGroupedByProviders = {
     db.withConnection(implicit c => {
-      this.getMutesByProviders(publisherDao.getAllProviders().map(ProviderRender.toActivityProvider))
+      this.getActiveMutesByProviders(publisherDao.getAllProviders().map(ProviderRender.toActivityProvider))
     })
   }
 
