@@ -32,6 +32,7 @@ class ID7Layout extends React.PureComponent {
     zoomedTile: PropTypes.string,
     notificationsCount: PropTypes.number,
     children: PropTypes.node,
+    features: PropTypes.object.isRequired,
   };
 
   /** Set the theme on the html element, so that we can style everything. */
@@ -58,7 +59,7 @@ class ID7Layout extends React.PureComponent {
   constructor(props) {
     super(props);
     this.onBackClick = this.onBackClick.bind(this);
-    this.onEdit = this.onEdit.bind(this);
+    this.onEditComplete = this.onEditComplete.bind(this);
     this.onSettings = this.onSettings.bind(this);
     this.dismissBetaWarning = this.dismissBetaWarning.bind(this);
 
@@ -107,11 +108,11 @@ class ID7Layout extends React.PureComponent {
     wrapKeyboardSelect(() => this.props.dispatch(goBack()), e);
   }
 
-  onEdit(e) {
+  onEditComplete(e) {
     wrapKeyboardSelect(() => {
       if (this.isEditing()) {
         this.props.dispatch(goBack());
-      } else {
+      } else if (!this.props.features.updateTileEditUI) {
         this.props.dispatch(push(`/${Routes.EDIT}`));
       }
     }, e);
@@ -151,7 +152,7 @@ class ID7Layout extends React.PureComponent {
   }
 
   renderMobile() {
-    const { user, path } = this.props;
+    const { user, path, features } = this.props;
 
     const showSettingsButton = !(
       _.startsWith(path, `/${Routes.SETTINGS}`) ||
@@ -170,7 +171,7 @@ class ID7Layout extends React.PureComponent {
                 user={user}
                 onBackClick={this.onBackClick}
                 path={path}
-                onEdit={this.onEdit}
+                onEditComplete={this.onEditComplete}
                 editing={this.isEditing()}
                 showEditButton={
                   this.isEditing() ||
@@ -178,6 +179,7 @@ class ID7Layout extends React.PureComponent {
                 }
                 onSettings={this.onSettings}
                 showSettingsButton={showSettingsButton}
+                features={features}
               />
             </header>
           </div>

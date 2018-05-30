@@ -138,16 +138,13 @@ export class AgendaTileItem extends React.PureComponent {
 
   renderMarker() {
     const { parent } = this.props;
+    const style = (parent) ? { color: colourForModule(parent.shortName) } : {};
 
-    if (parent) {
-      return (
-        <div className="agenda-item__cell" style={{ paddingLeft: '.5em', paddingRight: '.25em' }}>
-          <i className="fa fa-circle" style={{ color: colourForModule(parent.shortName) }} />
-        </div>
-      );
-    }
-
-    return null;
+    return (
+      <div className="agenda-item__cell marker" style={{ paddingLeft: '.5em', paddingRight: '.25em' }}>
+        <i className={`fa fa-circle ${(parent) ? '' : 'invisible'}`} style={style} />
+      </div>
+    );
   }
 
   renderTitle() {
