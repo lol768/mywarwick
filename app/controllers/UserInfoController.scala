@@ -2,9 +2,9 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsObject, JsString, Json}
-import play.api.mvc.{Action, Cookie, DiscardingCookie}
+import play.api.mvc.{Cookie, DiscardingCookie}
 import services.analytics.AnalyticsMeasurementService
-import services.{FeaturesService, PhotoService, UserInitialisationService}
+import services.{PhotoService, UserInitialisationService}
 import system.ThreadPools.externalData
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl.GLOBAL_LOGIN_COOKIE_NAME
 import uk.ac.warwick.sso.client.SSOToken.SSC_TICKET_TYPE
