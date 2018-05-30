@@ -152,7 +152,6 @@ class AudienceServiceImpl @Inject()(
   override def getAudience(audienceId: String): Audience =
     db.withConnection(implicit c => dao.getAudience(audienceId))
 
-
   override def audienceToJson(audience: Audience): JsValue = {
 
     def resolveStaffRelationship(agentId: UniversityID, checkedRelationships: Seq[String]): Future[JsValue] = {

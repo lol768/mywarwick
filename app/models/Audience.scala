@@ -69,7 +69,7 @@ object Audience {
   case class ResidenceAudience(residence: Residence) extends Component {
     val displayName: String = "Halls of residence"
   }
-  // not sure if we would need queryParameters here
+
   abstract class Residence(val id: String, val displayName: String, val queryParameters: Seq[(String, String)])
 
   object Residence {
@@ -88,15 +88,21 @@ object Audience {
     case object Tocil extends Residence("tocil", "Tocil", Seq(("hallsOfResidence", "Tocil")))
     case object Westwood extends Residence("westwood", "Westwood", Seq(("hallsOfResidence", "Westwood")))
     case object Whitefields extends Residence("whitefields", "Whitefields", Seq(("hallsOfResidence", "Whitefields")))
-    case object All extends Residence("all", "all", all.flatMap(_.queryParameters))
+    case object All extends Residence("all", "All", all.flatMap(_.queryParameters))
 
     def all: Seq[Residence] = Seq(
       ArthurVick, Benefactors, Bluebell, Claycroft, Cryfield, Heronbank, JackMartin,
       Lakeside, Redfern, Rootes, Sherbourne, Tocil, Westwood, Whitefields
     )
 
-    def fromId(id: String): Residence = all.find(_.id == id)
-      .getOrElse(throw new IllegalArgumentException(s"Cannot find Residence AudienceComponent with id $id"))
+    def fromId(id: String): Residence = {
+      if (id == All.id) {
+        All
+      } else {
+        all.find(_.id == id)
+          .getOrElse(throw new IllegalArgumentException(s"Cannot find Residence AudienceComponent with id $id"))
+      }
+    }
   }
 
   case object All extends DepartmentSubset
