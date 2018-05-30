@@ -28,15 +28,18 @@ export default class ToDoTile extends ListTile {
   contentOrDefault(contentFunction) {
     if (this.isEmpty()) {
       return (
-        <a
-          href="https://warwick.ac.uk/o365-tasks"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <span>
-            {this.props.content.defaultText || 'Nothing to show.'}
-          </span>
-        </a>
+        <div>
+          <p>{this.props.content.defaultText || 'Nothing to show.'}</p>
+          <a
+            role="button"
+            className="text--dotted-underline"
+            tabIndex={0}
+            href="https://warwick.ac.uk/o365-tasks"
+            target="_blank"
+          >
+          Open in O365
+          </a>
+        </div>
       );
     }
     return contentFunction.call(this);
