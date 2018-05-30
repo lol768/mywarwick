@@ -28,14 +28,14 @@ export class AppLayout extends React.PureComponent {
   }
 
   render() {
-    const { location, notificationsCount, children, authenticated }
+    const { location, notificationsCount, children, authenticated, features }
       = this.props;
 
     log.debug('AppLayout.render');
 
     return (
       <div>
-        <ID7Layout path={ location.pathname }>
+        <ID7Layout path={ location.pathname } features={ features }>
           { children }
         </ID7Layout>
         {
