@@ -76,19 +76,22 @@ class FeaturesServiceImpl @Inject() (
 }
 
 /**
-  * General purpose mapper from a Configuration containing only boolean items,
+  * General purpose mapper from a Configuration containing only FeatureState values,
   * to a trait containing only boolean defs.
+  *
+  * @param config the Configuration to read from
+  * @param prefs prefs derived for the current user (based on their EAP opt-in selection) - determines
+  *              how things are resolved to a boolean.
   */
 class FlagsAccessor[T : ClassTag](config: Configuration, prefs: FeaturePreferences) extends Provider[T] {
 
   override def get: T = proxy
 
-  // Plain old java.lang.reflect.Proxy
-
   private val allowedValues: Set[String] = FeatureState.namesToValuesMap.keySet
 
   private val tClass = classTag[T].runtimeClass
 
+  // Plain old java.lang.reflect.Proxy
   private val proxy: T = JavaProxy[T]{ (_: Any, method: Method, _: Array[AnyRef]) =>
     val keyName = method.getName
     val value = config.getAndValidate[String](keyName, allowedValues)
