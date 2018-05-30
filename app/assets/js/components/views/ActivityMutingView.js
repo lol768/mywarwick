@@ -27,6 +27,7 @@ export default class ActivityMutingView extends React.PureComponent {
     })),
     onMutingDismiss: PropTypes.func.isRequired,
     onMutingSave: PropTypes.func.isRequired,
+    isOnline: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -149,29 +150,50 @@ export default class ActivityMutingView extends React.PureComponent {
         >
           <div className="modal-dialog" role="document">
             <div className="modal-content">
-              <div className="modal-body">
-                { this.renderForm() }
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-default"
-                  data-dismiss="modal"
-                  onClick={ this.onMutingDismiss }
-                  onKeyUp={ this.onMutingDismiss }
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={ this.saveMuting }
-                  onKeyUp={ this.saveMuting }
-                  disabled={ !this.state.duration || !someChecked }
-                >
-                  Save changes
-                </button>
-              </div>
+              {this.props.isOnline ?
+                <div>
+                  <div className="modal-body">
+                    { this.renderForm() }
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-default"
+                      data-dismiss="modal"
+                      onClick={ this.onMutingDismiss }
+                      onKeyUp={ this.onMutingDismiss }
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={ this.saveMuting }
+                      onKeyUp={ this.saveMuting }
+                      disabled={ !this.state.duration || !someChecked }
+                    >
+                      Save changes
+                    </button>
+                  </div>
+                </div>
+                :
+                <div>
+                  <div className="modal-body">
+                    You cannot mute an alert while your device is offline
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-default"
+                      data-dismiss="modal"
+                      onClick={ this.onMutingDismiss }
+                      onKeyUp={ this.onMutingDismiss }
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              }
             </div>
           </div>
         </div>
