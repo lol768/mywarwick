@@ -6,6 +6,7 @@ import controllers.MyController
 import net.logstash.logback.argument.StructuredArguments
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.JsValue
+import scala.collection.JavaConverters._
 
 @Singleton
 class ErrorsController extends MyController {
@@ -15,9 +16,11 @@ class ErrorsController extends MyController {
   def js = Action { implicit request =>
     request.body.asJson.flatMap(_.validate[Seq[Map[String, JsValue]]].asOpt).toSeq.flatten.foreach { error =>
       val message = error.get("message").flatMap(_.asOpt[String]).getOrElse("-")
-      val stacktrace = StructuredArguments.keyValue("stack_trace", error.get("stack").flatMap(_.asOpt[String]).getOrElse("-"))
-      val sourceIp = StructuredArguments.keyValue("source_ip", request.remoteAddress)
-      slf4jLogger.info(message, Array(stacktrace, sourceIp):_*)
+      val entries = StructuredArguments.entries(Map(
+        "stack_trace" -> error.get("stack").flatMap(_.asOpt[String]).getOrElse("-"),
+        "source_ip" -> request.remoteAddress
+      ).asJava)
+      slf4jLogger.info(message, entries)
     }
     Ok("")
   }
