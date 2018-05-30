@@ -31,11 +31,12 @@ export default class ToDoTile extends ListTile {
         <div>
           <p>{this.props.content.defaultText || 'Nothing to show.'}</p>
           <a
+            target="_blank"
+            rel="noopener noreferrer"
             role="button"
             className="text--dotted-underline"
             tabIndex={0}
             href="https://warwick.ac.uk/o365-tasks"
-            target="_blank"
           >
           Open To-Do
           </a>
