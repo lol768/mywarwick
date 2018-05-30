@@ -37,7 +37,7 @@ export default class ToDoTile extends ListTile {
             href="https://warwick.ac.uk/o365-tasks"
             target="_blank"
           >
-          Open in O365
+          Open in To-Do
           </a>
         </div>
       );
