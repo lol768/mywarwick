@@ -29,7 +29,7 @@ export default class ToDoTile extends ListTile {
     if (this.isEmpty()) {
       return (
         <a
-          href="https://outlook.office.com/owa/?path=/tasks"
+          href="https://warwick.ac.uk/o365-tasks"
           target="_blank"
           rel="noopener noreferrer"
         >
