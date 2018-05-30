@@ -238,7 +238,6 @@ export class AudiencePicker extends React.PureComponent {
             />),
           )}
         </RadioButton>
-
       </Checkbox>
     );
 
@@ -379,7 +378,7 @@ export class AudiencePicker extends React.PureComponent {
             placeholderText="Start typing the name or usercode of the staff member"
           />
         </Checkbox>
-        { hallsOfResidenceInput }
+        { this.state.department.code ? null : hallsOfResidenceInput }
         { listOfUsercodes }
       </div>
     );
