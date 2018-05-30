@@ -30,7 +30,7 @@ lazy val root = (project in file("."))
   )
 
 // Versions of things for below
-val enumeratumVersion = "1.5.12"
+val enumeratumVersion = "1.5.13"
 val akkaVersion = "2.5.3"
 val playUtilsVersion = "1.11"
 

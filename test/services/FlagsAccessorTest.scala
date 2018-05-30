@@ -2,7 +2,7 @@ package services
 
 import models.FeaturePreferences
 import org.scalatestplus.play.PlaySpec
-import play.api.Configuration
+import play.api.{Configuration, PlayException}
 
 trait MyTestFeatures {
   def news: Boolean
@@ -21,6 +21,16 @@ class FlagsAccessorTest extends PlaySpec {
       ), FeaturePreferences.empty).get
       features.news mustBe true
       features.potato mustBe false
+    }
+
+    "reject invalid values" in {
+      intercept[PlayException] {
+        val features = new MyTestAccessor(Configuration(
+          "news" -> "on",
+          "potato" -> "quarg"
+        ), FeaturePreferences.empty).get
+        features.potato
+      }
     }
 
     "reject extra conf keys" in {

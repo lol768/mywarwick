@@ -15,15 +15,15 @@ import warwick.sso.User
 
 import scala.reflect.ClassTag
 import enumeratum.{Enum, EnumEntry}
-import play.api.libs.json.{Json, OWrites}
+import play.api.libs.json.{JsObject, Json, OWrites}
 
 import scala.collection.immutable
 
 /**
   * To work with feature flags:
   *  - Add Boolean defs here
-  *  - Define them under mywarwick.features in default.conf
-  *  - @Inject Features into wherever.
+  *  - Define them under mywarwick.features in default.conf as a FeatureState value
+  *  - @Inject FeaturesService into wherever.
   */
 trait Features {
   def news: Boolean
@@ -31,7 +31,7 @@ trait Features {
 }
 
 object Features {
-  implicit val writes: OWrites[Features] = Json.writes[Features]
+  implicit val writes: OWrites[Features] = new BoolTraitWrites[Features]
 }
 
 
@@ -40,14 +40,14 @@ sealed abstract class FeatureState extends EnumEntry {
 }
 object FeatureState extends Enum[FeatureState] {
   val values: immutable.IndexedSeq[FeatureState] = findValues
-  object on extends FeatureState {
+  case object on extends FeatureState {
     override def resolve(prefs: FeaturePreferences) = true
   }
-  object off extends FeatureState {
+  case object off extends FeatureState {
     override def resolve(prefs: FeaturePreferences) = false
   }
-  object eap extends FeatureState {
-    override def resolve(prefs: FeaturePreferences) = prefs.eap
+  case object eap extends FeatureState {
+    override def resolve(prefs: FeaturePreferences): Boolean = prefs.eap
   }
 }
 
@@ -67,7 +67,7 @@ class FeaturesServiceImpl @Inject() (
   override def get(user: Option[User]): Features = {
     val featurePreferences = user.map { user =>
       userPreferences.getFeaturePreferences(user.usercode)
-    } getOrElse {
+    }.getOrElse {
       FeaturePreferences.empty
     }
     new FlagsAccessor[Features](featuresConfig, featurePreferences).get
@@ -90,7 +90,7 @@ class FlagsAccessor[T : ClassTag](config: Configuration, prefs: FeaturePreferenc
     override def invoke(o: scala.Any, method: Method, objects: Array[AnyRef]): AnyRef = {
       val keyName = method.getName
       val value = config.getAndValidate[String](keyName, allowedValues)
-      val state: FeatureState = FeatureState.namesToValuesMap(value)
+      val state: FeatureState = FeatureState.withName(value)
       Boolean.box(state.resolve(prefs))
     }
   }
@@ -105,7 +105,7 @@ class FlagsAccessor[T : ClassTag](config: Configuration, prefs: FeaturePreferenc
 
   private def precheck(): Unit = {
     val confKeys = config.subKeys
-    val traitKeys = tClass.getDeclaredMethods.map(_.getName).toSet
+    val traitKeys = tClass.getDeclaredMethods.filter(m => m.getReturnType == classOf[Boolean]).map(_.getName).toSet
     if (confKeys != traitKeys) {
       val className = tClass.getName
       throw new IllegalStateException(
@@ -113,6 +113,10 @@ class FlagsAccessor[T : ClassTag](config: Configuration, prefs: FeaturePreferenc
            |In config but not $className: ${confKeys diff traitKeys}
            |In $className but not config: ${traitKeys diff confKeys}
          """.stripMargin)
+    }
+
+    for (keyName <- config.subKeys) {
+      config.getAndValidate[String](keyName, allowedValues)
     }
   }
 

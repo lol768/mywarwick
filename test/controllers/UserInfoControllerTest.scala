@@ -14,7 +14,7 @@ import play.filters.csrf.CSRF
 import play.filters.csrf.CSRF.Token
 import play.twirl.api.Html
 import services.analytics.AnalyticsMeasurementService
-import services.{FeaturesService, MockNavigationService, PhotoService, UserInitialisationService}
+import services._
 import system.{CSRFPageHelper, CSRFPageHelperFactory}
 import uk.ac.warwick.sso.client.cache.{UserCache, UserCacheItem}
 import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
@@ -69,6 +69,7 @@ class UserInfoControllerTest extends BaseSpec with MockitoSugar with Results wit
       override val csrfPageHelperFactory: CSRFPageHelperFactory = mockCsrfPageHelperFactory
       override val navigationService = new MockNavigationService()
       override val ssoClient: SSOClient = mockSSOClient
+      override val features: FeaturesService = new MockFeaturesService
       setControllerComponents(get[ControllerComponents])
     }
   }
