@@ -88,7 +88,7 @@ object Audience {
     case object Tocil extends Residence("tocil", "Tocil", Seq(("hallsOfResidence", "Tocil")))
     case object Westwood extends Residence("westwood", "Westwood", Seq(("hallsOfResidence", "Westwood")))
     case object Whitefields extends Residence("whitefields", "Whitefields", Seq(("hallsOfResidence", "Whitefields")))
-    case object All extends Residence("all", "all", all.map(hall => ("hallsOfResidence", hall.displayName)))
+    case object All extends Residence("all", "all", all.flatMap(_.queryParameters))
 
     def all: Seq[Residence] = Seq(
       ArthurVick, Benefactors, Bluebell, Claycroft, Cryfield, Heronbank, JackMartin,
