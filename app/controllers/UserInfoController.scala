@@ -28,8 +28,7 @@ class UserInfoController @Inject()(
   ssoClient: SSOClient,
   userInitialisationService: UserInitialisationService,
   photoService: PhotoService,
-  measurementService: AnalyticsMeasurementService,
-  features: FeaturesService
+  measurementService: AnalyticsMeasurementService
 ) extends MyController {
 
   val SSC_NAME = ssoConfig.getString("shire.sscookie.name")
