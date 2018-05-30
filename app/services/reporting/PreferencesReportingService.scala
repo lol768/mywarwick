@@ -42,8 +42,8 @@ class PreferencesReportingServiceImpl @Inject()(
 
   override def getActiveMutesByProviders(providers: Seq[ActivityProvider]): Map[ActivityProvider, Seq[ActivityMute]] = {
     db.withConnection(implicit c => {
-      providers.map(provider => provider ->
-        activityMuteDao.mutesForProvider(provider).filter(m => m.expiresAt.isEmpty || m.expiresAt.exists(_.isAfterNow))
+      providers.map(provider =>
+        provider -> activityMuteDao.mutesForProvider(provider).filterNot(_.expired())
       ).toMap
     })
   }
