@@ -43,14 +43,14 @@ const eventGrouping = {
   },
 
   subtitleForGroup(items) {
-    if (items.length === 1 && items[0].props.currentWeek) {
+    if (items.length === 1 && typeof items[0].props.currentWeek === 'number') {
       return `(week ${items[0].props.currentWeek})`;
     }
     return typeof items[0].props.academicWeek === 'number' ? `(week ${items[0].props.academicWeek})` : null;
   },
 
   titleForGroup(group, items = []) {
-    if (items.length === 1 && items[0].props.currentWeek) {
+    if (items.length === 1 && typeof items[0].props.currentWeek === 'number') {
       return 'Today';
     }
 
