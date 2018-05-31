@@ -98,7 +98,14 @@ export default class AgendaTile extends TileContent {
 
   getLargeBody() {
     const items = this.getAgendaViewItems();
-    return <LargeBody showModal={this.showModal}>{ items }</LargeBody>;
+    return (
+      <LargeBody
+        showModal={this.showModal}
+        currentWeek={this.props.content.currentWeek}
+      >
+        { items }
+      </LargeBody>
+    );
   }
 
   getWideBody() {

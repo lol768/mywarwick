@@ -65,7 +65,7 @@ export default class GroupedList extends React.PureComponent {
       <div key={`group-${group}`} className="list-group">
         <ListHeader
           key={`group-header-${group}`}
-          title={this.props.groupBy.titleForGroup(group)}
+          title={this.props.groupBy.titleForGroup(group, items)}
           subtitle={getSubtitle(items)}
         />
         {items}
