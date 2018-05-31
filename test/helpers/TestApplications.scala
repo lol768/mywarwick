@@ -71,9 +71,12 @@ object TestApplications {
     * controllers will not be immediately created either.
     */
   def fullNoRoutes(user: Option[User] = None) =
-    fullBuilder(user)
-        .router(Router.empty)
+    fullNoRoutesBuilder(user)
         .build()
+
+  def fullNoRoutesBuilder(user: Option[User]) =
+    fullBuilder(user)
+      .router(Router.empty)
 
   def functional() =
     GuiceApplicationBuilder(loadConfiguration = functionalConfig)
