@@ -24,6 +24,27 @@ export default class ToDoTile extends ListTile {
         return 200;
     }
   }
+
+  contentOrDefault(contentFunction) {
+    if (this.isEmpty()) {
+      return (
+        <div>
+          <p>{this.props.content.defaultText || 'Nothing to show.'}</p>
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            role="button"
+            className="text--dotted-underline"
+            tabIndex={0}
+            href="https://warwick.ac.uk/o365-tasks"
+          >
+          Open To-Do
+          </a>
+        </div>
+      );
+    }
+    return contentFunction.call(this);
+  }
 }
 
 class ToDoItem extends ListTileItem {
@@ -36,6 +57,7 @@ class ToDoItem extends ListTileItem {
     reminderDateTime: PropTypes.string,
     completed: PropTypes.bool,
     handleOnClick: PropTypes.func,
+    href: PropTypes.string,
   };
 
   render() {
