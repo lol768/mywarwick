@@ -60,10 +60,17 @@
   background-color: rgba(91, 48, 105, 0.62);
 }
 
+.switch__checkbox:disabled + .switch__length:before {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
 .switch__checkbox:checked + .switch__length:after {
   background-color: #5b3069;
   margin-left: 1.125em;
+}
 
+.switch__checkbox:disabled + .switch__length:after {
+  background-color: #bdbdbd;
 }
 
 
@@ -113,5 +120,9 @@ html.ios {
 
   .switch__checkbox:checked + .switch__length:before {
     background-color: #8ce196;
+  }
+
+  .switch__checkbox:disabled + .switch__length {
+    opacity: 0.5;
   }
 }

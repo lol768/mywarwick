@@ -259,12 +259,12 @@ class ActivityServiceImpl @Inject()(
   ): Seq[ActivityMute] = {
     val recipientsToSend: Set[Usercode] = if (recipients.size < 100) recipients else Set.empty
     val mutes = db.withConnection(implicit c => muteDao.mutesForActivity(activity, recipientsToSend))
-    mutes.filterNot(_.expiresAt.exists(_.isBefore(now))).filter(_.matchesTags(tags))
+    mutes.filterNot(_.expired(now)).filter(_.matchesTags(tags))
   }
 
   override def getActivityMutesForRecipient(recipient: Usercode, now: DateTime = DateTime.now): Seq[ActivityMuteRender] = {
     val mutes = db.withConnection(implicit c => muteDao.mutesForRecipient(recipient))
-    mutes.filterNot(_.expiresAt.exists(_.isBefore(now)))
+    mutes.filterNot(_.expired(now))
   }
 
   override def save(activityMute: ActivityMuteSave): Either[Seq[ActivityError], String] = {
