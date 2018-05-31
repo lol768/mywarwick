@@ -292,7 +292,7 @@ export function launch(userData) {
   const appContainer = $('#app-container');
   const appContainerProps = {
     history,
-    features: appContainer.data('features'),
+    features: userData.features,
   };
   ReactDOM.render(
     <Provider store={store}>
