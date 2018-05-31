@@ -10,8 +10,16 @@ import warwick.sso.Usercode
 import scala.concurrent.Future
 
 object MobileOutputService {
-  def toPushNotification(activity: Activity): PushNotification =
-    PushNotification(activity.id, Payload(activity.title, activity.text, activity.url), activity.publisherId, activity.providerId, activity.`type`)
+  def toPushNotification(activity: Activity, priority: Option[Priority] = Some(Priority.NORMAL), channelId: Option[String] = None): PushNotification =
+    PushNotification(
+      activity.id,
+      Payload(activity.title, activity.text, activity.url),
+      activity.publisherId,
+      activity.providerId,
+      activity.`type`,
+      channel = channelId,
+      priority = priority
+    )
 }
 
 @ImplementedBy(classOf[MobileOutputServiceImpl])
