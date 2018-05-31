@@ -49,6 +49,11 @@
         </p>
       </div>
     </div>
+
+    @*
+      TODO remove data-features once new code is in place using the user info API.
+      Kept here for backcompat until clients update.
+    *@
     <div id="app-container"
       @for(trackingId <- analyticsTrackingId) {data-analytics-tracking-id="@{trackingId.string}"}
       data-search-root-url="@searchRootUrl.string"
