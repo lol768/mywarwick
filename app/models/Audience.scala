@@ -189,11 +189,10 @@ object Audience {
       case relationshipRegex(relationshipType, agentId) => Some(RelationshipAudience(relationshipType, UniversityID(agentId)))
       case optInRegex(optInType, optInValue) if optInType == LocationOptIn.optInType => LocationOptIn.fromValue(optInValue)
       case hallsOfResidenceRegex(id) =>
-        val hall = id.split(":").toList.last
-        if (hall == "all") {
+        if (id == "all") {
           Some(ResidenceAudience(Residence.All))
         } else {
-          Some(ResidenceAudience(Residence.fromId(hall)))
+          Some(ResidenceAudience(Residence.fromId(id)))
         }
       case string if string.nonEmpty => {
         val validUsercodes: Set[Usercode] = string.split("\n").map(_.trim).flatMap { usercode =>
