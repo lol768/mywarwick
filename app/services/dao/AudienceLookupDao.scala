@@ -305,24 +305,10 @@ object TabulaResponseParsers {
       Reads.pure("")
     ) (LookupSeminarGroup.apply _)
 
-  case class Address(
-    line1: Option[String],
-    line2: Option[String],
-    line3: Option[String],
-    line4: Option[String],
-    line5: Option[String],
-    postcode: Option[String],
-    telephone: Option[String]
-  )
-
-  object Address {
-    implicit val addressReads: Reads[Address] = Json.reads[Address]
-  }
-
   val universityIdResultReads: Reads[Seq[UniversityID]] = (__ \ "universityIds").read[Seq[String]].map(s => s.map(UniversityID))
 
-  case class TabulaUserData(userId: String, universityId: String, termtimeAddress: Option[Address])
-  val tabulaUserDataReads = Json.reads[TabulaUserData]
+  case class TabulaUserData(userId: String, universityId: String)
+  val tabulaUserDataReads: Reads[TabulaUserData] = Json.reads[TabulaUserData]
   object MemberRelationship {
     case class MemberRelationship(relationshipType: LookupRelationshipType, students: Seq[TabulaUserData])
     case class MemberRelationshipsResponse(
