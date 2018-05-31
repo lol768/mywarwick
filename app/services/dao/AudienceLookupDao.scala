@@ -61,8 +61,7 @@ class TabulaAudienceLookupDao @Inject()(
   ws: WSClient,
   trustedApplicationsManager: TrustedApplicationsManager,
   val configuration: Configuration,
-  userLookupService: UserLookupService,
-  groupService: GroupService
+  userLookupService: UserLookupService
 ) extends AudienceLookupDao with Logging with TabulaAudienceLookupProperties {
 
   import system.ThreadPools.externalData
