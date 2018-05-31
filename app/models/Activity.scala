@@ -268,6 +268,8 @@ case class ActivityMute(
         matchTag.name == tag.name && matchTag.value.internalValue == tag.value.internalValue
       ))
   }
+
+  def expired(now: DateTime = DateTime.now): Boolean = expiresAt.exists(_.isBefore(now))
 }
 
 object ActivityMute {
@@ -293,7 +295,9 @@ case class ActivityMuteRender(
   activityType: Option[ActivityType],
   provider: Option[ActivityProvider],
   tags: Seq[ActivityTag]
-)
+) {
+  def expired(now: DateTime = DateTime.now): Boolean = expiresAt.exists(_.isBefore(now))
+}
 
 object ActivityMuteRender {
   import DateFormats.isoDateWrites

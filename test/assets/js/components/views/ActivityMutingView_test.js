@@ -22,6 +22,7 @@ describe('ActivityMutingView', () => {
         value: 'Tag 2 Value 1',
       },
     ],
+    isOnline: true,
   };
 
   it('sets up state correctly', () => {
