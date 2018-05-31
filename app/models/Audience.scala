@@ -189,7 +189,7 @@ object Audience {
       case relationshipRegex(relationshipType, agentId) => Some(RelationshipAudience(relationshipType, UniversityID(agentId)))
       case optInRegex(optInType, optInValue) if optInType == LocationOptIn.optInType => LocationOptIn.fromValue(optInValue)
       case hallsOfResidenceRegex(id) =>
-        if (id == "all") {
+        if (id == Residence.All.id) {
           Some(ResidenceAudience(Residence.All))
         } else {
           Some(ResidenceAudience(Residence.fromId(id)))
