@@ -1,10 +1,8 @@
 package controllers.admin.reporting
 
-import javax.inject.{Inject, Singleton}
-
 import controllers.MyController
-import models.{ActivityMute, ActivityProvider}
-import play.api.i18n.{I18nSupport, MessagesApi}
+import javax.inject.{Inject, Singleton}
+import play.api.i18n.I18nSupport
 import services.SecurityService
 import services.reporting.PreferencesReportingService
 import system.Roles
@@ -23,7 +21,7 @@ class PreferencesReportingController @Inject()(
   def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
 
     val allActivityMutes = ListMap(preferencesReportingService
-      .getAllMutesGroupedByProviders()
+      .getAllActiveMutesGroupedByProviders
       .toSeq.sortBy({ case (key, _) => key.displayName.getOrElse(key.id) }): _*)
 
     val allTileHiddenCount = ListMap(preferencesReportingService
