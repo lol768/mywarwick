@@ -1,10 +1,11 @@
 package services.elasticsearch
 
+import java.time.{LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
+
 import helpers.BaseSpec
-import org.joda.time.{DateTime, Interval}
+import org.joda.time.{DateTime, DateTimeUtils, Interval}
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
-import uk.ac.warwick.util.core.jodatime.DateTimeUtils
 
 
 class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
@@ -12,13 +13,12 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
   "ActivityESServiceHelper" should {
 
     "produce correct monthly index name for alerts and activity" in {
+      DateTimeUtils.setCurrentMillisFixed(DateTime.parse("2016-06-30T01:20").getMillis)
 
-      DateTimeUtils.useMockDateTime(DateTime.parse("2016-06-30T01:20"), () => {
+      ActivityESServiceHelper.indexNameToday() must be("alert_2016_06")
 
-        ActivityESServiceHelper.indexNameToday() must be("alert_2016_06")
+      ActivityESServiceHelper.indexNameToday(false) must be("activity_2016_06")
 
-        ActivityESServiceHelper.indexNameToday(false) must be("activity_2016_06")
-      })
     }
 
     "produce correct all time index name for alerts and activity" in {
