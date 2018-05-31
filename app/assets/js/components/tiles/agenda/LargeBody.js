@@ -43,17 +43,10 @@ const eventGrouping = {
   },
 
   subtitleForGroup(items) {
-    if (items.length === 1 && items[0].props.currentWeek) {
-      return `(week ${items[0].props.currentWeek})`;
-    }
     return typeof items[0].props.academicWeek === 'number' ? `(week ${items[0].props.academicWeek})` : null;
   },
 
-  titleForGroup(group, items) {
-    if (items.length === 1 && items[0].props.currentWeek) {
-      return 'Today';
-    }
-
+  titleForGroup(group) {
     switch (parseInt(group, 10)) {
       case 0: return 'Today';
       case 1: return 'Tomorrow';
@@ -74,43 +67,16 @@ export default class LargeBody extends React.PureComponent {
   static propTypes = {
     children: PropTypes.arrayOf(eventPropType).isRequired,
     showModal: PropTypes.func.isRequired,
-    currentWeek: PropTypes.number,
   };
 
   render() {
     const { children, showModal } = this.props;
-    const hasEventsThisWeek = !this.props.currentWeek ||
-      _.find(children, c => c.academicWeek === this.props.currentWeek);
-    const items = children.map(event =>
-      <AgendaTileItem key={event.id} showModal={showModal} {...event} />,
-    );
     return (
       <GroupedList className="tile-list-group" groupBy={eventGrouping}>
-        { hasEventsThisWeek ?
-          items
-          :
-          [<ThisWeekStubAgendaTileItem key="stub" currentWeek={this.props.currentWeek} />]
-            .concat(items)
-        }
+        {children.map(event =>
+          <AgendaTileItem key={event.id} showModal={showModal} {...event} />,
+        )}
       </GroupedList>
-    );
-  }
-}
-
-class ThisWeekStubAgendaTileItem extends React.PureComponent {
-  static propTypes = {
-    currentWeek: PropTypes.number.isRequired,
-  };
-
-  render() {
-    return (
-      <div className="tile-list-item">
-        <div className="agenda-item">
-          <div className="agenda-item__cell">
-            <i>No events this week</i>
-          </div>
-        </div>
-      </div>
     );
   }
 }
