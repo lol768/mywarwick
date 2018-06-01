@@ -117,7 +117,7 @@ export class AudienceIndicator extends React.PureComponent {
                       return (
                         <div key={key}>
                           All residents
-                          of {displayName}: {getCount([`ResidenceAudience(${displayName.replace(' ','')})`], halls)}
+                          of {displayName}: {getCount([`ResidenceAudience(${displayName.replace(' ', '')})`], halls)}
                         </div>
                       );
                     }) : null;
