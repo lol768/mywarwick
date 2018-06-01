@@ -9,7 +9,7 @@ import play.api.libs.json.Json
 
 
 class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
-  
+
   "ActivityESServiceHelper" should {
 
     "produce correct monthly index name for alerts and activity" in {
@@ -19,6 +19,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
       ActivityESServiceHelper.indexNameToday(false) must be("activity_2016_06")
 
+      DateTimeUtils.setCurrentMillisSystem()
     }
 
     "produce correct all time index name for alerts and activity" in {
