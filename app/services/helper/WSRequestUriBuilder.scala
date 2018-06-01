@@ -1,4 +1,4 @@
-package services.helpers
+package services.helper
 
 import play.api.libs.ws.WSRequest
 import play.api.libs.ws.ahc.AhcWSRequest

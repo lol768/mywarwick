@@ -1,4 +1,4 @@
-package services.helpers
+package services.helper
 
 import helpers.BaseSpec
 import org.scalatest.mockito.MockitoSugar

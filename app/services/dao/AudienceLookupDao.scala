@@ -9,7 +9,7 @@ import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws._
-import services.helpers.WSRequestUriBuilder
+import services.helper.WSRequestUriBuilder
 import system.{Logging, TrustedAppsError}
 import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplicationsManager}
 import warwick.sso.{UniversityID, _}
