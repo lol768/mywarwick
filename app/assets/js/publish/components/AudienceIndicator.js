@@ -5,8 +5,7 @@ import log from 'loglevel';
 import $ from 'jquery';
 import _ from 'lodash-es';
 import { mkString } from '../../helpers';
-
-const changeCase = require('change-case');
+import { titleCase, sentenceCase } from 'change-case';
 
 export class AudienceIndicator extends React.PureComponent {
   static propTypes = {
@@ -113,7 +112,7 @@ export class AudienceIndicator extends React.PureComponent {
                   const halls = components.hall;
                   return halls ?
                     _.map(halls, (value, key) => {
-                      const displayName = changeCase.titleCase(changeCase.sentenceCase(_.last(key.split(':'))));
+                      const displayName = titleCase(sentenceCase(_.last(key.split(':'))));
                       return (
                         <div key={key}>
                           All residents
