@@ -80,7 +80,7 @@ class AudienceServiceImpl @Inject()(
   }
 
   override def resolveUsersForComponentsGrouped(audienceComponents: Seq[Audience.Component]): Try[Seq[(Audience.Component, Set[Usercode])]] = {
-    Await.ready(Future.sequence(audienceComponents.map(this.resolveUsersForComponentWithGroup)).map(_.flatten), 60.seconds).value.get
+    Await.ready(Future.sequence(audienceComponents.map(this.resolveUsersForComponentWithGroup)).map(_.flatten), 240.seconds).value.get
   }
 
   def resolveFuture(audience: Audience): Future[Set[Usercode]] = {
