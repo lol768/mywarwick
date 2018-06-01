@@ -74,13 +74,13 @@ object Audience {
 
   object Residence {
 
-    case object ArthurVick extends Residence("arthurVick", "Arthur Vick", Seq("hallsOfResidence" -> "Arthur+Vick"))
+    case object ArthurVick extends Residence("arthurVick", "Arthur Vick", Seq("hallsOfResidence" -> "Arthur Vick"))
     case object Benefactors extends Residence("benefactors", "Benefactors", Seq("hallsOfResidence" -> "Benefactors"))
     case object Bluebell extends Residence("bluebell", "Bluebell", Seq("hallsOfResidence" -> "Bluebell"))
     case object Claycroft extends Residence("claycroft", "Claycroft", Seq("hallsOfResidence" -> "Claycroft"))
     case object Cryfield extends Residence("cryfield", "Cryfield", Seq("hallsOfResidence" -> "Cryfield"))
     case object Heronbank extends Residence("heronbank", "Heronbank", Seq("hallsOfResidence" -> "Heronbank"))
-    case object JackMartin extends Residence("jackMartin", "Jack Martin", Seq("hallsOfResidence" -> "Jack+Martin"))
+    case object JackMartin extends Residence("jackMartin", "Jack Martin", Seq("hallsOfResidence" -> "Jack Martin"))
     case object Lakeside extends Residence("lakeside", "Lakeside", Seq("hallsOfResidence" -> "Lakeside"))
     case object Redfern extends Residence("redfern", "Redfern", Seq("hallsOfResidence" -> "Redfern"))
     case object Rootes extends Residence("rootes", "Rootes", Seq("hallsOfResidence" -> "Rootes"))

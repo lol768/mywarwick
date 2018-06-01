@@ -9,6 +9,7 @@ import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws._
+import services.helpers.WSRequestUriBuilder
 import system.{Logging, TrustedAppsError}
 import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplicationsManager}
 import warwick.sso.{UniversityID, _}
@@ -198,7 +199,11 @@ class TabulaAudienceLookupDao @Inject()(
 
   private def setupRequest(url: String, params: Seq[(String, String)] = Nil): WSRequest = {
     val request = ws.url(url).addQueryStringParameters(params: _*)
-    val trustedHeaders = TrustedApplicationUtils.getRequestHeaders(trustedApplicationsManager.getCurrentApplication, tabulaUsercode, request.uri.toString)
+    val trustedHeaders = TrustedApplicationUtils.getRequestHeaders(
+      trustedApplicationsManager.getCurrentApplication,
+      tabulaUsercode,
+      WSRequestUriBuilder.buildUri(request).toString
+    )
       .asScala.map(h => h.getName -> h.getValue).toSeq
     request.addHttpHeaders(trustedHeaders: _*)
   }
