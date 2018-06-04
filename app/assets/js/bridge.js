@@ -88,7 +88,7 @@ export default function init(opts) {
       }));
     }
 
-    if (appPlatform === 'android' && native.setFeatures) {
+    if (native.setFeatures) {
       native.setFeatures(JSON.stringify(features));
     }
 
