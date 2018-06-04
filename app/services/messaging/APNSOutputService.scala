@@ -1,9 +1,8 @@
 package services.messaging
 
 import actors.MessageProcessing.ProcessingResult
-import com.google.inject.Inject
-import com.google.inject.name.Named
 import com.notnoop.apns.APNS
+import javax.inject.{Inject, Named}
 import models.Platform._
 import models.{MessageSend, PushRegistration}
 import org.joda.time.DateTime
@@ -11,7 +10,7 @@ import play.api.db.{Database, NamedDatabase}
 import services.dao.{ActivityDao, PublisherDao, PushRegistrationDao}
 import warwick.sso.Usercode
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Named("apns")
 class APNSOutputService @Inject()(
@@ -20,10 +19,9 @@ class APNSOutputService @Inject()(
   pushRegistrationDao: PushRegistrationDao,
   activityDao: ActivityDao,
   publisherDao: PublisherDao
-) extends MobileOutputService {
+)(implicit @Named("mobile") ec: ExecutionContext) extends MobileOutputService {
 
   import apnsProvider.apns
-  import system.ThreadPools.mobile
 
   val notificationSound: String = "Alert.wav"
 

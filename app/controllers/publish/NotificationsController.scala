@@ -1,25 +1,24 @@
 package controllers.publish
 
-import javax.inject.Inject
-
+import com.google.inject.name.Named
 import controllers.MyController
+import javax.inject.Inject
 import models.news.NotificationData
 import models.publishing.Ability._
 import models.publishing.{Ability, Publisher}
 import models.{Audience, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.I18nSupport
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Action, ActionFilter, AnyContent, Result}
 import services._
 import services.elasticsearch.ActivityESService
-import system.{ThreadPools, Validation}
+import system.Validation
 import views.html.errors
 import views.html.publish.{notifications => views}
-import warwick.sso.Usercode
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class NotificationsController @Inject()(
   val securityService: SecurityService,
@@ -30,7 +29,9 @@ class NotificationsController @Inject()(
   val newsCategoryService: NewsCategoryService,
   audienceService: AudienceService,
   activityESService: ActivityESService
-) extends MyController with I18nSupport with Publishing {
+)(implicit @Named("web") webEC: ExecutionContext) extends MyController with I18nSupport with Publishing {
+
+  override protected val ec: ExecutionContext = webEC
 
   val notificationMapping = mapping(
     "text" -> nonEmptyText,
@@ -173,7 +174,7 @@ class NotificationsController @Inject()(
       }
     }
 
-    override protected def executionContext = ThreadPools.web
+    override protected def executionContext: ExecutionContext = ec
   }
 
   def renderCreateForm(publisher: Publisher, form: Form[PublishNotificationData], audience: Audience)(implicit request: PublisherRequest[_]) =

@@ -1,27 +1,27 @@
 package controllers.admin.reporting
 
-import javax.inject.{Inject, Singleton}
-
 import controllers.MyController
+import javax.inject.{Inject, Named, Singleton}
 import org.joda.time.{DateTime, Interval}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.JodaForms.jodaDate
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Request, RequestHeader}
+import play.api.mvc.Request
 import services.SecurityService
 import services.reporting.ActivityReportingService
-import system.{RequestContext, Roles}
+import system.Roles
+
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class ActivityReportingController @Inject()(
   activityReportingService: ActivityReportingService,
   securityService: SecurityService,
-) extends MyController with I18nSupport {
+)(implicit @Named("web") ec: ExecutionContext) extends MyController with I18nSupport {
 
   import Roles._
   import securityService._
-  import system.ThreadPools.web
 
   private val form = Form(
     mapping(

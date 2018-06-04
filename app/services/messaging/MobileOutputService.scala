@@ -1,13 +1,13 @@
 package services.messaging
 
 import actors.MessageProcessing.ProcessingResult
-import com.google.inject.name.Named
-import com.google.inject.{ImplementedBy, Inject}
+import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Named}
 import models.{Activity, MessageSend}
 import system.Logging
 import warwick.sso.Usercode
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object MobileOutputService {
   def toPushNotification(activity: Activity, priority: Option[Priority] = Some(Priority.NORMAL), channelId: Option[String] = None): PushNotification =
@@ -33,9 +33,7 @@ class MobileOutputServiceImpl @Inject()(
   apns: APNSOutputService,
   fcm: FCMOutputService,
   webPush: WebPushOutputService
-) extends MobileOutputService with Logging {
-
-  import system.ThreadPools.mobile
+)(implicit @Named("mobile") ec: ExecutionContext) extends MobileOutputService with Logging {
 
   override def send(message: MessageSend.Heavy): Future[ProcessingResult] = {
     Future.sequence(Seq(

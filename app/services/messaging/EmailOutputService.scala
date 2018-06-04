@@ -1,7 +1,6 @@
 package services.messaging
 
 import javax.inject.{Inject, Named}
-
 import actors.MessageProcessing.ProcessingResult
 import models.{Activity, DateFormats, MessageSend}
 import play.api.Configuration
@@ -9,16 +8,14 @@ import play.api.libs.mailer.{Email, MailerClient}
 import services.UserPreferencesService
 import warwick.sso.User
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Named("email")
 class EmailOutputService @Inject() (
   mailer: MailerClient,
   config: Configuration,
   userPreferencesService: UserPreferencesService
-) extends OutputService {
-
-  import system.ThreadPools.email
+)(implicit @Named("email") ec: ExecutionContext) extends OutputService {
 
   // defaults to mywarwick.mail.from
   val from = config.getOptional[String]("mywarwick.mail.notifications.from")

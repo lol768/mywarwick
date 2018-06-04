@@ -7,18 +7,18 @@ import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
-import services.{UserNewsCategoryService, _}
 import services.dao.DepartmentInfo
-import system.{ImplicitRequestContext, Logging, ThreadPools}
+import services.{UserNewsCategoryService, _}
+import system.{ImplicitRequestContext, Logging}
 import warwick.sso.{AuthenticatedRequest, Usercode}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 trait Publishing extends DepartmentOptions with CategoryOptions with HasProviders with PublishingActionRefiner with Logging {
   self: ImplicitRequestContext with BaseController =>
 
-  implicit val executionContext = system.ThreadPools.web
+  implicit protected val ec: ExecutionContext
 
   val audienceBinder: AudienceBinder
 
@@ -207,6 +207,8 @@ trait PublishingActionRefiner {
 
   val securityService: SecurityService
 
+  protected val ec: ExecutionContext
+
   import securityService._
 
   private def GetPublisher(id: String, requiredAbilities: Seq[Ability]) = new ActionRefiner[AuthenticatedRequest, PublisherRequest] {
@@ -229,7 +231,7 @@ trait PublishingActionRefiner {
       }
     }
 
-    override protected def executionContext = ThreadPools.web
+    override protected def executionContext: ExecutionContext = ec
   }
 
   def PublisherAction(id: String, requiredAbilities: Ability*) = RequiredUserAction andThen GetPublisher(id, requiredAbilities)
