@@ -4,6 +4,7 @@ import java.sql.Connection
 
 import anorm.SqlParser._
 import anorm._
+import warwick.anorm.converters.ColumnConversions._
 import com.google.inject.{ImplementedBy, Singleton}
 import controllers.api.ColourScheme
 import models.FeaturePreferences
