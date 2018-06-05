@@ -8,7 +8,7 @@ import models.Platform._
 import models.{MessageSend, PushRegistration}
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
-import services.dao.{ActivityDao, PushRegistrationDao}
+import services.dao.{ActivityDao, PublisherDao, PushRegistrationDao}
 import warwick.sso.Usercode
 
 import scala.concurrent.Future
@@ -18,7 +18,8 @@ class APNSOutputService @Inject()(
   @NamedDatabase("default") db: Database,
   apnsProvider: APNSProvider,
   pushRegistrationDao: PushRegistrationDao,
-  activityDao: ActivityDao
+  activityDao: ActivityDao,
+  publisherDao: PublisherDao
 ) extends MobileOutputService {
 
   import apnsProvider.apns
@@ -27,7 +28,14 @@ class APNSOutputService @Inject()(
   val notificationSound: String = "Alert.wav"
 
   override def send(message: MessageSend.Heavy): Future[ProcessingResult] =
-    send(message.user.usercode, MobileOutputService.toPushNotification(message.activity))
+    db.withConnection { implicit c =>
+      publisherDao.getProvider(message.activity.providerId) match {
+        case Some(provider) if provider.overrideMuting =>
+          send(message.user.usercode, MobileOutputService.toPushNotification(message.activity, Some(Priority.HIGH)))
+        case _ =>
+          send(message.user.usercode, MobileOutputService.toPushNotification(message.activity))
+      }
+    }
 
   def processPushNotification(usercodes: Set[Usercode], pushNotification: PushNotification): Future[ProcessingResult] =
     Future.sequence(usercodes.map(send(_, pushNotification))).map(_ => ProcessingResult(success = true, "ok"))

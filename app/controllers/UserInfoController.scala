@@ -1,9 +1,8 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.libs.json.{JsObject, JsString, Json}
-import play.api.mvc.{Action, Cookie, DiscardingCookie}
+import play.api.mvc.{Cookie, DiscardingCookie}
 import services.analytics.AnalyticsMeasurementService
 import services.{PhotoService, UserInitialisationService}
 import system.ThreadPools.externalData
@@ -70,6 +69,7 @@ class UserInfoController @Inject()(
       Ok(Json.obj(
         "refresh" -> (if (refresh) loginUrl else false),
         "user" -> augmentedInfo,
+        "features"-> requestContext.features,
         "links" -> Json.obj(
           "login" -> links.getPermissionDeniedLink(request.context.user.nonEmpty),
           "logout" -> logoutUrl

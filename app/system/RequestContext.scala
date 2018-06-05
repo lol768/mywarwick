@@ -2,7 +2,7 @@ package system
 
 import play.api.mvc.{Flash, Request, RequestHeader}
 import play.filters.csrf.CSRF
-import services.{Features, Navigation}
+import services.{Features, FeaturesService, Navigation}
 import warwick.sso.{AuthenticatedRequest, SSOClient, User}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,7 +18,7 @@ case class RequestContext(
   navigation: Seq[Navigation],
   flash: Flash,
   csrfHelper: CSRFPageHelper,
-  features: Features
+  features: Features // User's specific features, depending on their EAP preferences
 )
 
 object RequestContext {
@@ -26,9 +26,9 @@ object RequestContext {
   def authenticated(sso: SSOClient, request: AuthenticatedRequest[_], navigation: Seq[Navigation], csrfHelperFactory: CSRFPageHelperFactory, features: Features) =
     RequestContext(sso, request, request.context.user, request.context.actualUser, navigation, csrfHelperFactory, features)
 
-  def authenticated(sso: SSOClient, request: RequestHeader, csrfHelperFactory: CSRFPageHelperFactory, features: Features): RequestContext = {
+  def authenticated(sso: SSOClient, request: RequestHeader, csrfHelperFactory: CSRFPageHelperFactory, features: FeaturesService): RequestContext = {
     val eventualRequestContext = sso.withUser(request) { loginContext =>
-      Future.successful(Right(RequestContext(sso, request, loginContext.user, loginContext.actualUser, Nil, csrfHelperFactory, features)))
+      Future.successful(Right(RequestContext(sso, request, loginContext.user, loginContext.actualUser, Nil, csrfHelperFactory, features.get(loginContext.user))))
     }.map(_.right.get)
 
     Await.result(eventualRequestContext, Duration.Inf)

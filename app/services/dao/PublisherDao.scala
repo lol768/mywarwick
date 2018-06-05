@@ -45,6 +45,8 @@ trait PublisherDao {
 
   def updateProvider(publisherId: String, providerId: String, data: ProviderSave)(implicit c: Connection): Unit
 
+  def getProvider(providerId: String)(implicit c: Connection): Option[ProviderRender]
+
 }
 
 @Singleton
@@ -171,6 +173,9 @@ class PublisherDaoImpl extends PublisherDao {
       WHERE id = $providerId and PUBLISHER_ID = $publisherId
     """.executeUpdate()
   }
+
+  override def getProvider(providerId: String)(implicit c: Connection): Option[ProviderRender] =
+    SQL"SELECT * FROM PROVIDER WHERE ID = $providerId".executeQuery().as(providerParser.singleOpt)
 }
 
 

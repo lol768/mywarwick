@@ -2,10 +2,14 @@ package services
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import controllers.api.ColourScheme
+import models.FeaturePreferences
+import play.api.cache.{Cached, SyncCacheApi}
 import play.api.db.{Database, NamedDatabase}
 import play.api.libs.json.JsObject
 import services.dao.UserPreferencesDao
 import warwick.sso.Usercode
+
+import scala.concurrent.duration._
 
 @ImplementedBy(classOf[UserPreferencesServiceImpl])
 trait UserPreferencesService {
@@ -27,6 +31,8 @@ trait UserPreferencesService {
   def getChosenColourScheme(usercode: Usercode): ColourScheme
 
   def setChosenColourScheme(usercode: Usercode, chosenScheme: ColourScheme): Unit
+
+  def getFeaturePreferences(usercode: Usercode): FeaturePreferences
 
 }
 
@@ -60,4 +66,7 @@ class UserPreferencesServiceImpl @Inject()(
 
   override def setChosenColourScheme(usercode: Usercode, chosenScheme: ColourScheme): Unit =
     db.withConnection(implicit c => dao.setColourSchemePreference(usercode, chosenScheme))
+
+  override def getFeaturePreferences(usercode: Usercode): FeaturePreferences =
+    db.withConnection(implicit c => dao.getFeaturePreferences(usercode))
 }

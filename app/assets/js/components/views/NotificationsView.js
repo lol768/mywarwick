@@ -37,6 +37,7 @@ class NotificationsView extends HideableView {
     notificationPermission: PropTypes.string,
     numberToShow: PropTypes.number.isRequired,
     isFiltered: PropTypes.bool.isRequired,
+    isOnline: PropTypes.bool.isRequired,
   };
 
   static defaultProps = {
@@ -185,6 +186,7 @@ class NotificationsView extends HideableView {
           onMutingSave={ this.onMutingSave(activity) }
           activityType={ activity.type }
           activityTypeDisplayName={ activity.typeDisplayName }
+          isOnline={ this.props.isOnline }
         />
       );
     }
@@ -261,6 +263,7 @@ function select(state) {
     olderItemsOnServer: state.notifications.olderItemsOnServer,
     notificationPermission: state.device.notificationPermission,
     numberToShow: state.notifications.numberToShow,
+    isOnline: state.device.isOnline,
   };
 }
 
