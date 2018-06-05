@@ -12,7 +12,8 @@ import play.api.libs.ws._
 import services.helper.WSRequestUriBuilder
 import system.{Logging, TrustedAppsError}
 import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplicationsManager}
-import warwick.sso.{UniversityID, _}
+import utils.UserLookupUtils._
+import warwick.sso._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -122,7 +123,10 @@ class TabulaAudienceLookupDao @Inject()(
           uniIds => uniIds
         )
       )
-      .map(uniIds => userLookupService.getUsers(uniIds))
+      .map(uniIds => {
+        logger.debug(s"Fetching info about ${uniIds.length} Uni IDs")
+        userLookupService.getUsersChunked(uniIds)
+      })
       .map(_.map(_.values.map(_.usercode).toSeq).getOrElse(Seq()))
   }
 
