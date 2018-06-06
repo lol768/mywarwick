@@ -1,11 +1,10 @@
 package services.dao
 
 import java.io.IOException
-import javax.inject.{Inject, Named}
 
+import javax.inject.{Inject, Named}
 import models.Audience.UndergradStudents
 import play.api.Configuration
-import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws._
@@ -14,7 +13,7 @@ import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplica
 import warwick.sso.{UniversityID, User, UserLookupService, Usercode}
 
 import scala.collection.JavaConverters._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class LookupModule(
   code: String,
@@ -61,9 +60,7 @@ class TabulaAudienceLookupDao @Inject()(
   trustedApplicationsManager: TrustedApplicationsManager,
   val configuration: Configuration,
   userLookupService: UserLookupService
-) extends AudienceLookupDao with Logging with TabulaAudienceLookupProperties {
-
-  import system.ThreadPools.externalData
+)(implicit @Named("externalData") ec: ExecutionContext) extends AudienceLookupDao with Logging with TabulaAudienceLookupProperties {
 
   private val tabulaUsercode = configuration.getOptional[String]("mywarwick.tabula.user")
     .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.user in application.conf"))

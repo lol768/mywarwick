@@ -1,20 +1,22 @@
 package controllers.publish
 
-import javax.inject.Inject
-
+import javax.inject.{Inject, Named}
 import controllers.MyController
 import models.publishing.PermissionScope.{AllDepartments, Departments}
 import play.api.libs.json._
 import services.{PublisherService, SecurityService}
 import warwick.sso.{Group, GroupService}
 
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 class WebGroupsController @Inject()(
   groupService: GroupService,
   val publisherService: PublisherService,
   val securityService: SecurityService
-) extends MyController with PublishingActionRefiner {
+)(implicit @Named("web") webEC: ExecutionContext) extends MyController with PublishingActionRefiner {
+
+  override protected val ec: ExecutionContext = webEC
 
   val excludedGroupSuffixes = Seq(
     "-all",
