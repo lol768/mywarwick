@@ -27,6 +27,7 @@ export default class ActivityMutingView extends React.PureComponent {
     })),
     onMutingDismiss: PropTypes.func.isRequired,
     onMutingSave: PropTypes.func.isRequired,
+    isOnline: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -107,11 +108,18 @@ export default class ActivityMutingView extends React.PureComponent {
       );
     }
 
+    const isPublishNotification = this.isPublishNotification();
+    const hintText = (
+      <p className="text--hint">
+        Muted alerts still appear in this list, but they don’t play a
+        sound or appear on your phone’s lock screen when they’re delivered
+      </p>
+    );
+
     return (
       <form className="form" id={ `muting-${this.props.id}-form` }>
-        { this.isPublishNotification() ? null : this.renderScope() }
-        <p className="text--hint">Muted alerts still appear in this list, but they don’t play a sound or appear on
-          your phone’s lock screen when they’re delivered</p>
+        { isPublishNotification ? null : this.renderScope() }
+        { !isPublishNotification && hintText }
         <div className="list-group">
           <label>
             { this.isPublishNotification() ?
@@ -131,6 +139,7 @@ export default class ActivityMutingView extends React.PureComponent {
             ))
           }
         </div>
+        { isPublishNotification && hintText }
       </form>
     );
   }
@@ -149,29 +158,50 @@ export default class ActivityMutingView extends React.PureComponent {
         >
           <div className="modal-dialog" role="document">
             <div className="modal-content">
-              <div className="modal-body">
-                { this.renderForm() }
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-default"
-                  data-dismiss="modal"
-                  onClick={ this.onMutingDismiss }
-                  onKeyUp={ this.onMutingDismiss }
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={ this.saveMuting }
-                  onKeyUp={ this.saveMuting }
-                  disabled={ !this.state.duration || !someChecked }
-                >
-                  Save changes
-                </button>
-              </div>
+              {this.props.isOnline ?
+                <div>
+                  <div className="modal-body">
+                    { this.renderForm() }
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-default"
+                      data-dismiss="modal"
+                      onClick={ this.onMutingDismiss }
+                      onKeyUp={ this.onMutingDismiss }
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={ this.saveMuting }
+                      onKeyUp={ this.saveMuting }
+                      disabled={ !this.state.duration || !someChecked }
+                    >
+                      Save changes
+                    </button>
+                  </div>
+                </div>
+                :
+                <div>
+                  <div className="modal-body">
+                    You cannot mute an alert while your device is offline
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-default"
+                      data-dismiss="modal"
+                      onClick={ this.onMutingDismiss }
+                      onKeyUp={ this.onMutingDismiss }
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              }
             </div>
           </div>
         </div>

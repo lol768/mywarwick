@@ -5,37 +5,38 @@ import java.util.concurrent.TimeUnit
 
 import actors.MessageProcessing.ProcessingResult
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
-import com.google.inject.Inject
-import com.google.inject.name.Named
+import javax.inject.{Inject, Named}
 import models.MessageSend
 import models.Platform.Google
 import play.api.Configuration
 import play.api.db._
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
-import services.dao.PushRegistrationDao
+import services.dao.{PublisherDao, PushRegistrationDao}
 import system.Logging
 import warwick.sso.Usercode
 
 import scala.collection.JavaConverters._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
 @Named("fcm")
 class FCMOutputService @Inject()(
   pushRegistrationDao: PushRegistrationDao,
+  publisherDao: PublisherDao,
   @NamedDatabase("default") db: Database,
   configuration: Configuration,
   ws: WSClient
-) extends MobileOutputService with Logging {
-
-  import system.ThreadPools.mobile
+)(implicit @Named("mobile") ec: ExecutionContext) extends MobileOutputService with Logging {
 
   private val FCMProjectId = configuration.getOptional[String]("mywarwick.fcm.projectId")
     .getOrElse(throw new IllegalStateException("Missing FCM config - set mywarwick.fcm.projectId"))
 
   private val FCMServiceAccountKeyPath = configuration.getOptional[String]("mywarwick.fcm.serviceAccountKeyPath")
     .getOrElse(throw new IllegalStateException("Missing FCM config - set mywarwick.fcm.serviceAccountKeyPath"))
+
+  private lazy val urgentChannelId: String = configuration.getOptional[String]("mywarwick.fcm.urgentChannelId")
+    .getOrElse(throw new IllegalStateException("Missing FCM config - set mywarwick.fcm.urgentChannelId"))
 
   private val FCMScope = "https://www.googleapis.com/auth/firebase.messaging"
 
@@ -56,7 +57,14 @@ class FCMOutputService @Inject()(
   lazy val defaultTtl: FiniteDuration = FiniteDuration(28, TimeUnit.DAYS) // later
 
   def send(message: MessageSend.Heavy): Future[ProcessingResult] =
-    send(message.user.usercode, MobileOutputService.toPushNotification(message.activity))
+    db.withConnection { implicit c =>
+      publisherDao.getProvider(message.activity.providerId) match {
+        case Some(provider) if provider.overrideMuting =>
+          send(message.user.usercode, MobileOutputService.toPushNotification(message.activity, Some(Priority.HIGH), Some(urgentChannelId)))
+        case _ =>
+          send(message.user.usercode, MobileOutputService.toPushNotification(message.activity))
+      }
+    }
 
   def processPushNotification(usercodes: Set[Usercode], pushNotification: PushNotification): Future[ProcessingResult] =
     Future.sequence(usercodes.map(send(_, pushNotification))).map(_ => ProcessingResult(success = true, "ok"))

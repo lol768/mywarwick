@@ -1,7 +1,6 @@
 package services.messaging
 
-import javax.inject.Inject
-
+import javax.inject.{Inject, Named}
 import actors.MessageProcessing.ProcessingResult
 import models.MessageSend.Heavy
 import models.Platform.WebPush
@@ -13,15 +12,13 @@ import play.api.libs.json.Json
 import services.dao.PushRegistrationDao
 import system.Logging
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class WebPushOutputService @Inject()(
   pushRegistrationDao: PushRegistrationDao,
   @NamedDatabase("default") db: Database,
   configuration: Configuration
-) extends OutputService with Logging {
-
-  import system.ThreadPools.mobile
+)(implicit @Named("mobile") ec: ExecutionContext) extends OutputService with Logging {
 
   val apiKey = configuration.getOptional[String]("mywarwick.fcm.apiKey")
     .getOrElse(throw new IllegalStateException("Missing FCM API key - set mywarwick.fcm.apiKey"))

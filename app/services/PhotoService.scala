@@ -3,13 +3,13 @@ package services
 import java.security.MessageDigest
 
 import com.google.inject.{ImplementedBy, Inject}
+import javax.inject.Named
 import play.api.Configuration
 import play.api.libs.ws.WSClient
 import system.Logging
-import system.ThreadPools.externalData
 import warwick.sso.UniversityID
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[PhotoServiceImpl])
 trait PhotoService {
@@ -19,7 +19,7 @@ trait PhotoService {
 class PhotoServiceImpl @Inject()(
   configuration: Configuration,
   ws: WSClient
-) extends PhotoService with Logging {
+)(implicit @Named("externalData") ec: ExecutionContext) extends PhotoService with Logging {
 
   private val photosHost = configuration.getOptional[String]("mywarwick.photos.host")
     .getOrElse(throw new IllegalStateException("Missing Photos host - set mywarwick.photos.host"))

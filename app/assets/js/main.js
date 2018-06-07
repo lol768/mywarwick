@@ -38,7 +38,7 @@ import bridge from './bridge';
 import { hasAuthoritativeAuthenticatedUser, hasAuthoritativeUser } from './state';
 
 export function launch(userData) {
-  bridge({ store, tiles, notifications, userinfo, news });
+  bridge({ store, tiles, notifications, userinfo, news, features: userData.features });
 
   localforage.config({
     name: 'Start',
@@ -292,7 +292,7 @@ export function launch(userData) {
   const appContainer = $('#app-container');
   const appContainerProps = {
     history,
-    features: appContainer.data('features'),
+    features: userData.features,
   };
   ReactDOM.render(
     <Provider store={store}>

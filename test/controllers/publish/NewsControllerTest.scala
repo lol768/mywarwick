@@ -1,5 +1,6 @@
 package controllers.publish
 
+import controllers.MockFeaturesService
 import helpers.{BaseSpec, Fixtures, MinimalAppPerSuite, OneStartAppPerSuite}
 import models.Audience.Staff
 import models.publishing.PublishingRole.NewsManager
@@ -71,6 +72,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with Mi
     override val navigationService = new MockNavigationService()
     override val ssoClient: MockSSOClient = mockSSOClient
     override val csrfPageHelperFactory: CSRFPageHelperFactory = mockCsrfPageHelperFactory
+    override val features = new MockFeaturesService
 
     setControllerComponents(get[ControllerComponents])
   }

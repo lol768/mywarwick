@@ -2,6 +2,7 @@ package services.job
 
 import actors.WebSocketActor.Notification
 import com.google.inject.Inject
+import javax.inject.Named
 import models.ActivityRender
 import org.quartz._
 import services._
@@ -9,6 +10,8 @@ import services.elasticsearch.{ActivityESService, IndexActivityRequest}
 import services.messaging.MessagingService
 import system.Logging
 import warwick.sso.Usercode
+
+import scala.concurrent.ExecutionContext
 
 @DisallowConcurrentExecution
 @PersistJobDataAfterExecution
@@ -61,9 +64,7 @@ class PublishActivityJob @Inject()(
   pubSub: PubSub,
   activityESService: ActivityESService,
   override val scheduler: SchedulerService
-) extends PublishingJob {
-
-  import system.ThreadPools.publishing
+)(implicit @Named("elastic") ec: ExecutionContext) extends PublishingJob {
 
   override def executeJob(context: JobExecutionContext): Unit = {
     val dataMap = context.getJobDetail.getJobDataMap

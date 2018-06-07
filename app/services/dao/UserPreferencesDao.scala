@@ -4,11 +4,12 @@ import java.sql.Connection
 
 import anorm.SqlParser._
 import anorm._
+import warwick.anorm.converters.ColumnConversions._
 import com.google.inject.{ImplementedBy, Singleton}
 import controllers.api.ColourScheme
+import models.FeaturePreferences
 import org.joda.time.DateTime
 import play.api.libs.json.{JsObject, Json}
-import warwick.anorm.converters.ColumnConversions._
 import warwick.sso.Usercode
 
 @ImplementedBy(classOf[UserPreferencesDaoImpl])
@@ -54,10 +55,18 @@ trait UserPreferencesDao {
 
   def getVerificationNumber(usercode: Usercode)(implicit c: Connection): Option[String]
 
+  def getFeaturePreferences(usercode: Usercode)(implicit c: Connection): FeaturePreferences
+
 }
 
 @Singleton
 class UserPreferencesDaoImpl extends UserPreferencesDao {
+
+  private val featurePreferencesParser =
+    get[DateTime]("EAP_UNTIL").?
+      .map {
+        until => FeaturePreferences(until)
+      }
 
   override def exists(usercode: Usercode)(implicit c: Connection): Boolean =
     SQL"SELECT CREATED_AT FROM USER_PREFERENCE WHERE USERCODE = ${usercode.string}"
@@ -189,4 +198,9 @@ class UserPreferencesDaoImpl extends UserPreferencesDao {
       .as(get[Option[String]]("sms_number_to_verify").singleOpt)
       .flatten
   }
+
+  override def getFeaturePreferences(usercode: Usercode)(implicit c: Connection): FeaturePreferences =
+    SQL"""SELECT EAP_UNTIL FROM USER_PREFERENCE WHERE USERCODE = ${usercode.string}"""
+      .as(featurePreferencesParser.singleOpt)
+      .getOrElse(FeaturePreferences.empty)
 }
