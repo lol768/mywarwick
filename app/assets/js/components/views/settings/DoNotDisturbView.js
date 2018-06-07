@@ -98,7 +98,9 @@ class DoNotDisturbView extends HideableView {
         <div className="text--hint container-fluid">
           <p>
             Turning &lsquo;Do not disturb&rsquo; on means alerts won&apos;t pop up on your phone
-            between <strong>start</strong> and <strong>end</strong> times each day.
+            between <strong>from</strong> and <strong>until</strong> times each day. Any alerts that
+            would have arrived during this period will instead be delivered shortly after the period
+            ends.
           </p>
         </div>
 
@@ -113,17 +115,11 @@ class DoNotDisturbView extends HideableView {
           />
         </div>
 
-        {this.props.enabled &&
-        <div className="text--hint container-fluid">
-          <p><Info fw /> You have a do not disturb period of {this.dndPeriodHrs()} hours.</p>
-        </div>
-        }
-
         <div className="list-group setting-colour-2">
           <div className="container-fluid">
             <div className="row">
               <div className="col-xs-6">
-                <label>Start</label>
+                <label>From</label>
                 <SelectNumberInput
                   disabled={!this.props.enabled}
                   min={DoNotDisturbView.MIN_HOUR}
@@ -135,7 +131,7 @@ class DoNotDisturbView extends HideableView {
                 />
               </div>
               <div className="col-xs-6">
-                <label>End</label>
+                <label>Until</label>
                 <SelectNumberInput
                   disabled={!this.props.enabled}
                   min={DoNotDisturbView.MIN_HOUR}
@@ -149,6 +145,12 @@ class DoNotDisturbView extends HideableView {
             </div>
           </div>
         </div>
+
+        {this.props.enabled &&
+        <div className="text--hint container-fluid">
+          <p><Info fw /> You have a do not disturb period of {this.dndPeriodHrs()} hours.</p>
+        </div>
+        }
 
       </div>
     );

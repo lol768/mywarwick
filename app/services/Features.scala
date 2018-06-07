@@ -29,6 +29,7 @@ import scala.collection.immutable
 trait Features {
   def news: Boolean
   def updateTileEditUI : Boolean
+  def doNotDisturb : Boolean
 }
 
 object Features {

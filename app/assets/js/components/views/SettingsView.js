@@ -143,8 +143,10 @@ class SettingsView extends HideableView {
     return ('MyWarwickNative' in window) && ('setTimetableNotificationsEnabled' in window.MyWarwickNative); // eslint-disable-line no-undef, max-len
   }
 
-  static shouldShowDoNotDisturb() {
-    return ('MyWarwickNative' in window) && ('setDoNotDisturb' in window.MyWarwickNative);
+  shouldShowDoNotDisturb() {
+    return ('MyWarwickNative' in window) &&
+      ('setDoNotDisturb' in window.MyWarwickNative) &&
+      this.props.features.doNotDisturb;
   }
 
   static renderSingleCount(number) {
@@ -446,7 +448,7 @@ class SettingsView extends HideableView {
                 SettingsView.renderSingleCount(this.props.mutes),
               )}
             </ListGroupItemBtn>
-            {SettingsView.shouldShowDoNotDisturb() &&
+            {this.shouldShowDoNotDisturb() &&
             <ListGroupItemBtn handler={this.onDoNotDisturb}>
               {SettingsView.renderSetting(
                 'clock-o',
