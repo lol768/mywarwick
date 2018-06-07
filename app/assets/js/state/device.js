@@ -1,6 +1,28 @@
 /* eslint-env browser */
 
 import _ from 'lodash-es';
+import { createAction } from 'redux-actions';
+
+const DO_NOT_DISTURB_UPDATE = 'DO_NOT_DISTURB_UPDATE';
+const DO_NOT_DISTURB_LOAD = 'DO_NOT_DISTURB_LOAD';
+
+function updateNativeWithState({ enabled, weekday, weekend, loaded }) {
+  const native = window.MyWarwickNative;
+  if (!!native && 'setDoNotDisturb' in native && loaded) {
+    native.setDoNotDisturb(JSON.stringify({ enabled, weekday, weekend }));
+  }
+}
+
+export const loadDoNotDisturb = createAction(DO_NOT_DISTURB_LOAD);
+export function updateDoNotDisturb(payload) {
+  return (dispatch, getState) => {
+    dispatch({
+      type: DO_NOT_DISTURB_UPDATE,
+      payload,
+    });
+    updateNativeWithState(getState().device.doNotDisturb);
+  };
+}
 
 function getDevicePixelWidth() {
   const MAX = 2208;
@@ -12,6 +34,18 @@ const initialState = {
   pixelWidth: getDevicePixelWidth(),
   width: window.innerWidth,
   isOnline: navigator.onLine,
+  doNotDisturb: {
+    loaded: false,
+    enabled: false,
+    weekend: {
+      start: 21,
+      end: 7,
+    },
+    weekday: {
+      start: 21,
+      end: 7,
+    },
+  },
 };
 
 export function reducer(state = initialState, action) {
@@ -26,6 +60,22 @@ export function reducer(state = initialState, action) {
       return {
         ...state,
         isOnline: action.isOnline,
+      };
+    case DO_NOT_DISTURB_LOAD:
+      return {
+        ...state,
+        doNotDisturb: {
+          ...action.payload,
+          loaded: true,
+        },
+      };
+    case DO_NOT_DISTURB_UPDATE:
+      return {
+        ...state,
+        doNotDisturb: {
+          ...state.doNotDisturb,
+          ...action.payload,
+        },
       };
     default:
       return state;

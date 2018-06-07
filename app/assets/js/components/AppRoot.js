@@ -24,6 +24,7 @@ import ColourSchemesView from './views/settings/ColourSchemesView';
 import TileOptionView from './views/settings/TileOptionView';
 import PostTourView from './views/PostTourView';
 import TimetableAlarmsView from './views/settings/TimetableAlarmsView';
+import DoNotDisturbView from './views/settings/DoNotDisturbView';
 import {
   ActivityStreamFilterOptionView,
   NotificationStreamFilterOptionView,
@@ -52,6 +53,7 @@ export const Routes = {
     NOTIFICATION_FILTER: 'notificationfilter',
     SMS: 'sms',
     TIMETABLE_ALARMS: 'timetable_alarms',
+    DO_NOT_DISTURB: 'do_not_disturb',
   },
   POST_TOUR: 'post_tour',
 };
@@ -123,6 +125,10 @@ RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`] = {
 RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}`] = {
   rendered: false,
   view: OptInSettingsView,
+};
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.DO_NOT_DISTURB}`] = {
+  rendered: false,
+  view: DoNotDisturbView,
 };
 RouteViews[`/${Routes.POST_TOUR}`] = {
   rendered: false,
