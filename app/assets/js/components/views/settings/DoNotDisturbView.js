@@ -116,33 +116,29 @@ class DoNotDisturbView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-2">
-          <div className="container-fluid">
-            <div className="row">
-              <div className="col-xs-6">
-                <label>From</label>
-                <SelectNumberInput
-                  disabled={!this.props.enabled}
-                  min={DoNotDisturbView.MIN_HOUR}
-                  max={DoNotDisturbView.MAX_HOUR}
-                  disabledOption={this.props.weekday.end}
-                  selectedValue={this.props.weekday.start}
-                  formatOptionDisplayName={DoNotDisturbView.formatOptionDisplayName}
-                  onChange={this.onStartHourChange}
-                />
-              </div>
-              <div className="col-xs-6">
-                <label>Until</label>
-                <SelectNumberInput
-                  disabled={!this.props.enabled}
-                  min={DoNotDisturbView.MIN_HOUR}
-                  max={DoNotDisturbView.MAX_HOUR}
-                  disabledOption={this.props.weekday.start}
-                  selectedValue={this.props.weekday.end}
-                  formatOptionDisplayName={DoNotDisturbView.formatOptionDisplayName}
-                  onChange={this.onEndHourChange}
-                />
-              </div>
-            </div>
+          <div className="list-group-item">
+            <label>From</label>
+            <SelectNumberInput
+              disabled={!this.props.enabled}
+              min={DoNotDisturbView.MIN_HOUR}
+              max={DoNotDisturbView.MAX_HOUR}
+              disabledOption={this.props.weekday.end}
+              selectedValue={this.props.weekday.start}
+              formatOptionDisplayName={DoNotDisturbView.formatOptionDisplayName}
+              onChange={this.onStartHourChange}
+            />
+          </div>
+          <div className="list-group-item">
+            <label>Until</label>
+            <SelectNumberInput
+              disabled={!this.props.enabled}
+              min={DoNotDisturbView.MIN_HOUR}
+              max={DoNotDisturbView.MAX_HOUR}
+              disabledOption={this.props.weekday.start}
+              selectedValue={this.props.weekday.end}
+              formatOptionDisplayName={DoNotDisturbView.formatOptionDisplayName}
+              onChange={this.onEndHourChange}
+            />
           </div>
         </div>
 
