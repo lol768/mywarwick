@@ -152,6 +152,9 @@ POST          /api/smsNotificationPreferences                @controllers.api.Sm
 GET           /api/colour-schemes                            @controllers.api.ColourSchemesController.get
 POST          /api/colour-schemes                            @controllers.api.ColourSchemesController.persist
 
+GET           /api/eap                                       @controllers.api.EAPPrefController.get
+POST          /api/eap                                       @controllers.api.EAPPrefController.update
+
 POST          /api/errors/js                                 @controllers.api.ErrorsController.js
 
 GET           /user/info                                     @controllers.UserInfoController.info

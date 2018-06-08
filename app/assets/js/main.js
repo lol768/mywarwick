@@ -32,6 +32,7 @@ import * as device from './state/device';
 import * as analytics from './analytics';
 import * as stream from './stream';
 import * as timetableAlarms from './state/timetable-alarms';
+import * as eap from './state/eap';
 import store, { browserHistory } from './store';
 import AppRoot from './components/AppRoot';
 import bridge from './bridge';
@@ -199,6 +200,7 @@ export function launch(userData) {
     ({ colourTheme, schemeColour }) => ({ colourTheme, schemeColour }),
     ({ colourTheme, schemeColour }) => ({ colourTheme, schemeColour }),
   );
+  persisted('eap', eap.receive, ({ enabled }) => ({ enabled }));
 
   persisted(
     'newsCategories',
@@ -290,13 +292,9 @@ export function launch(userData) {
 
   // Actually render the app
   const appContainer = $('#app-container');
-  const appContainerProps = {
-    history,
-    features: userData.features,
-  };
   ReactDOM.render(
     <Provider store={store}>
-      <AppRoot { ...appContainerProps } />
+      <AppRoot history={history} />
     </Provider>,
     appContainer.get(0),
   );

@@ -3,13 +3,16 @@ package services.dao
 import anorm.SqlParser._
 import anorm._
 import helpers.{BaseSpec, OneStartAppPerSuite, TestApplications}
+import models.FeaturePreferences
+import org.joda.time.DateTime
+import play.api.Application
 import warwick.sso.Usercode
 
 class UserPreferencesDaoTest extends BaseSpec with OneStartAppPerSuite {
 
-  override lazy val app = TestApplications.fullNoRoutes()
+  override lazy val app: Application = TestApplications.fullNoRoutes()
 
-  val dao = get[UserPreferencesDao]
+  private val dao = get[UserPreferencesDao]
 
   "UserPreferencesDao" should {
 
@@ -39,6 +42,20 @@ class UserPreferencesDaoTest extends BaseSpec with OneStartAppPerSuite {
     "get colour schemes" in transaction { implicit c =>
       dao.save(custard)
       dao.getColourSchemePreference(custard).highContrast mustBe false
+    }
+
+    "update EAP" in transaction { implicit c =>
+      val until = DateTime.now.plusHours(1)
+      dao.setFeaturePreferences(custard, FeaturePreferences(Some(until)))
+      val enabled = dao.getFeaturePreferences(custard)
+      enabled.eap mustBe true
+      enabled.eapUntil.isDefined mustBe true
+      enabled.eapUntil.get.isEqual(until) mustBe true
+
+      dao.setFeaturePreferences(custard, FeaturePreferences(None))
+      val disabled = dao.getFeaturePreferences(custard)
+      disabled.eap mustBe false
+      disabled.eapUntil.isDefined mustBe false
     }
 
   }

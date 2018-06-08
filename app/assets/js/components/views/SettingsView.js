@@ -13,6 +13,7 @@ import * as newsCategories from '../../state/news-categories';
 import * as newsOptIn from '../../state/news-optin';
 import * as emailNotificationsOptIn from '../../state/email-notifications-opt-in';
 import * as smsNotifications from '../../state/sms-notifications';
+import * as eap from '../../state/eap';
 import { loadDeviceDetails, signOut } from '../../userinfo';
 import SwitchListGroupItem from '../ui/SwitchListGroupItem';
 import wrapKeyboardSelect from '../../keyboard-nav';
@@ -55,6 +56,7 @@ class SettingsView extends HideableView {
     this.onActivityFilter = this.onActivityFilter.bind(this);
     this.onNotificationFilter = this.onNotificationFilter.bind(this);
     this.onEditTiles = this.onEditTiles.bind(this);
+    this.onEAP = this.onEAP.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -114,6 +116,12 @@ class SettingsView extends HideableView {
     }).isRequired,
     dispatch: PropTypes.func.isRequired,
     isOnline: PropTypes.bool.isRequired,
+    eap: PropTypes.shape({
+      fetched: PropTypes.bool.isRequired,
+      fetching: PropTypes.bool.isRequired,
+      failed: PropTypes.bool.isRequired,
+      enabled: PropTypes.bool.isRequired,
+    }).isRequired,
   };
 
   static renderSetting(icon, title, rightView, disabled = false) {
@@ -182,7 +190,7 @@ class SettingsView extends HideableView {
     return SettingsView.renderFractionCount(selected, total);
   }
 
-  static renderFetchedBool(props) {
+  static renderFetchedBool(props, enabledLabel = 'Enabled', disabledLabel = 'Disabled') {
     const { fetching, failed, enabled, fetched } = props;
     if (fetching) {
       return (
@@ -201,7 +209,7 @@ class SettingsView extends HideableView {
     }
     return (
       <div>
-        {(enabled) ? 'Enabled' : 'Disabled'}
+        {(enabled) ? enabledLabel : disabledLabel}
         <FAChevronRight />
       </div>
     );
@@ -213,6 +221,7 @@ class SettingsView extends HideableView {
       this.props.dispatch(newsOptIn.fetch());
       this.props.dispatch(emailNotificationsOptIn.fetch());
       this.props.dispatch(smsNotifications.fetch());
+      this.props.dispatch(eap.fetch());
     }
   }
 
@@ -372,6 +381,12 @@ class SettingsView extends HideableView {
     }, e);
   }
 
+  onEAP(e) {
+    wrapKeyboardSelect(() => {
+      this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.EAP}`));
+    }, e);
+  }
+
   static onSendFeedback(e) {
     wrapKeyboardSelect(loadDeviceDetails, e);
   }
@@ -399,6 +414,16 @@ class SettingsView extends HideableView {
           </div>
 
           <div className="list-group setting-colour-0">
+            {this.props.features.eap &&
+            <ListGroupItemBtn handler={this.onEAP}>
+              {SettingsView.renderSetting(
+                'eye',
+                'Early access program',
+                SettingsView.renderFetchedBool({
+                  ...this.props.eap,
+                }, 'On', 'Off'),
+              )}
+            </ListGroupItemBtn>}
             {this.props.features.updateTileEditUI &&
             <ListGroupItemBtn handler={this.onEditTiles}>
               {SettingsView.renderSetting(
@@ -673,6 +698,13 @@ const select = (state) => {
     appVersion: state.app.native.version,
     isOnline: state.device.isOnline,
     timetableAlarms: state.timetableAlarms,
+    eap: {
+      enabled: state.eap.enabled,
+      fetched: state.eap.fetched,
+      fetching: state.eap.fetching,
+      failed: state.eap.failed,
+    },
+    features: state.user.features,
   };
 };
 
