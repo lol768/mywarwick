@@ -1,9 +1,9 @@
 package services
 
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Named}
 import models.Audience.DepartmentSubset
 import models.news.{NewsItemRender, NewsItemRenderWithAuditAndAudience, NewsItemSave}
 import models.{Audience, AudienceSize}
@@ -12,14 +12,13 @@ import org.quartz.JobBuilder.newJob
 import org.quartz.SimpleScheduleBuilder.simpleSchedule
 import org.quartz.TriggerBuilder.newTrigger
 import org.quartz._
-import play.api.cache.{CacheApi, SyncCacheApi}
+import play.api.cache.SyncCacheApi
 import play.api.db.Database
 import services.dao.{AudienceDao, NewsCategoryDao, NewsDao, NewsImageDao}
 import services.job.PublishNewsItemJob
-import system.ThreadPools.web
 import warwick.sso.{GroupName, UserLookupService, Usercode}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.Duration
 
 @ImplementedBy(classOf[AnormNewsService])
@@ -68,7 +67,7 @@ class AnormNewsService @Inject()(
   scheduler: SchedulerService,
   userLookupService: UserLookupService,
   cache: SyncCacheApi
-) extends NewsService {
+)(implicit @Named("web") ec: ExecutionContext) extends NewsService {
 
   override def delete(newsId: String): Unit = db.withTransaction { implicit c =>
     newsImageDao.deleteForNewsItemId(newsId)

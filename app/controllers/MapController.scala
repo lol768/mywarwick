@@ -1,23 +1,20 @@
 package controllers
 
-import javax.inject.{Inject, Singleton}
-
 import akka.stream.Materializer
+import javax.inject.{Inject, Named, Singleton}
 import org.joda.time.DateTime
 import play.api.http.HttpEntity
 import play.api.libs.ws.WSResponse
 import play.api.mvc.{Action, AnyContent}
-import play.api.libs.ws.ahc._
 import services.MapService
-import system.ThreadPools.externalData
 
-import scala.collection.JavaConverters._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class MapController @Inject()(
   implicit val mat: Materializer,
-  mapService: MapService
+  mapService: MapService,
+  @Named("externalData") ec: ExecutionContext
 ) extends MyController {
 
   private val PUBLIC_MAX_AGE_ONE_WEEK = "public, max-age: 604800"

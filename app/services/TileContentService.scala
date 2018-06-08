@@ -2,8 +2,8 @@ package services
 
 import java.io.{IOException, InputStreamReader}
 import java.net.SocketTimeoutException
-import javax.inject.Inject
 
+import javax.inject.{Inject, Named}
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.google.common.base.Charsets
 import com.google.common.io.CharStreams
@@ -18,11 +18,11 @@ import play.api.Configuration
 import play.api.cache._
 import play.api.libs.json.{JsObject, _}
 import play.api.libs.ws.WSClient
-import system.{Logging, ThreadPools}
+import system.Logging
 import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils}
 import warwick.sso.Usercode
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.Try
 
@@ -50,7 +50,7 @@ class TileContentServiceImpl @Inject()(
   ws: WSClient,
   cache: AsyncCacheApi,
   config: Configuration
-) extends TileContentService with Logging {
+)(implicit @Named("tileData") ec: ExecutionContext) extends TileContentService with Logging {
 
   import TileContentService._
 
@@ -63,8 +63,6 @@ class TileContentServiceImpl @Inject()(
 
   val preferenceCacheDuration: FiniteDuration = config
     .get[Int]("mywarwick.cache.tile-preferences.seconds").seconds
-
-  import ThreadPools.tileData
 
   override def getTilesOptions(tiles: Seq[Tile]): Future[JsValue] = {
     getCachedTilesOptions(tiles).map(JsObject.apply)

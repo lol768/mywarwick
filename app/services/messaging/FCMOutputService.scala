@@ -5,8 +5,7 @@ import java.util.concurrent.TimeUnit
 
 import actors.MessageProcessing.ProcessingResult
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
-import com.google.inject.Inject
-import com.google.inject.name.Named
+import javax.inject.{Inject, Named}
 import models.MessageSend
 import models.Platform.Google
 import play.api.Configuration
@@ -18,7 +17,7 @@ import system.Logging
 import warwick.sso.Usercode
 
 import scala.collection.JavaConverters._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
 @Named("fcm")
@@ -28,9 +27,7 @@ class FCMOutputService @Inject()(
   @NamedDatabase("default") db: Database,
   configuration: Configuration,
   ws: WSClient
-) extends MobileOutputService with Logging {
-
-  import system.ThreadPools.mobile
+)(implicit @Named("mobile") ec: ExecutionContext) extends MobileOutputService with Logging {
 
   private val FCMProjectId = configuration.getOptional[String]("mywarwick.fcm.projectId")
     .getOrElse(throw new IllegalStateException("Missing FCM config - set mywarwick.fcm.projectId"))

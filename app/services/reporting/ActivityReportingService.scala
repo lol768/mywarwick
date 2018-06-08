@@ -1,6 +1,6 @@
 package services.reporting
 
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 import com.google.inject.ImplementedBy
 import models.ActivityProvider
 import org.joda.time.Interval
@@ -10,7 +10,7 @@ import services.dao.PublisherDao
 import services.elasticsearch.ActivityESSearch.CountQueryResponse
 import services.elasticsearch.{ActivityESSearch, ActivityESService}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[ActivityReportingServiceImpl])
 trait ActivityReportingService {
@@ -32,7 +32,7 @@ class ActivityReportingServiceImpl @Inject()(
   activityESService: ActivityESService,
   publisherDao: PublisherDao,
   @NamedDatabase("default") db: Database
-) extends ActivityReportingService {
+)(implicit @Named("elastic") ec: ExecutionContext) extends ActivityReportingService {
 
   override def alertsCountByProvider(provider: ActivityProvider, interval: Interval): Future[CountQueryResponse] = {
     val query = ActivityESSearch.SearchQuery(
@@ -44,7 +44,6 @@ class ActivityReportingServiceImpl @Inject()(
   }
 
   override def alertsCountByProviders(providers: Map[ActivityProvider, Interval]): Future[ProviderCounts] = {
-    import system.ThreadPools.elastic
     Future.sequence(providers.map {
       case (provider, interval) => (provider, this.alertsCountByProvider(provider, interval))
     }.map {

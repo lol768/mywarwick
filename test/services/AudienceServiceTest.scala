@@ -10,6 +10,7 @@ import services.dao.{AudienceDao, AudienceLookupDao, UserNewsOptInDao}
 import uk.ac.warwick.userlookup.UserLookupException
 import warwick.sso._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 

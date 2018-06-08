@@ -19,6 +19,8 @@ import services.messaging.MessagingService
 import system.NullCacheApi
 import warwick.sso.{UserLookupService, Usercode}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSuite {
 
   private val db = get[Database]

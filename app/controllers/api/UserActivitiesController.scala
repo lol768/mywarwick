@@ -1,17 +1,16 @@
 package controllers.api
 
-import javax.inject.Singleton
-
 import com.google.inject.Inject
 import controllers.MyController
+import javax.inject.{Named, Singleton}
 import models.API.Error
 import models._
 import org.joda.time.DateTime
 import play.api.libs.json._
 import services.messaging.MobileOutputService
 import services.{ActivityService, SecurityService}
-import system.ThreadPools.mobile
-import scala.concurrent.Future
+
+import scala.concurrent.{ExecutionContext, Future}
 
 case class SaveMuteRequest(
   expiresAt: Option[DateTime],
@@ -31,7 +30,7 @@ class UserActivitiesController @Inject()(
   activityService: ActivityService,
   securityService: SecurityService,
   mobileOutput: MobileOutputService
-) extends MyController {
+)(implicit @Named("web") ec: ExecutionContext) extends MyController {
 
   import DateFormats.{isoDateReads, isoDateWrites}
   import securityService._
