@@ -1,7 +1,6 @@
 package services
 
 import javax.inject.{Inject, Named}
-
 import com.google.inject.ImplementedBy
 import models.Audience
 import models.Audience.{LocationOptIn, _}
@@ -12,7 +11,7 @@ import system.Logging
 import warwick.sso._
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.Try
 
 @ImplementedBy(classOf[AudienceServiceImpl])
@@ -35,9 +34,7 @@ class AudienceServiceImpl @Inject()(
   @Named("tabula") audienceLookupDao: AudienceLookupDao,
   db: Database,
   userLookupService: UserLookupService
-) extends AudienceService with Logging {
-
-  import system.ThreadPools.externalData
+)(implicit @Named("externalData") ec: ExecutionContext) extends AudienceService with Logging {
 
   override def resolve(audience: Audience): Try[Set[Usercode]] = {
     Await.ready(resolveFuture(audience), 30.seconds).value.get

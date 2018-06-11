@@ -19,6 +19,7 @@ import play.api.routing.sird._
 import services.elasticsearch.ActivityESServiceHelper.ESFieldName
 import services.{AudienceService, PublisherService}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 

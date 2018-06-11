@@ -12,6 +12,7 @@ export default class MastheadMobile extends React.PureComponent {
       backButtonVisible:
       props.path.indexOf(`/${Routes.SETTINGS}`) === 0 ||
       props.path.indexOf(`/${Routes.TILES}`) === 0 ||
+      (props.features.updateTileEditUI && props.path.indexOf(`/${Routes.EDIT}`) === 0) ||
       props.path.indexOf(`/${Routes.EDIT}/${Routes.ADD}`) === 0,
       backButtonText: props.path === `/${Routes.SETTINGS}` ? 'Done' : 'Back',
     };
@@ -53,8 +54,9 @@ export default class MastheadMobile extends React.PureComponent {
           role="button"
           tabIndex={0}
         >
-          {this.props.editing ? <i className="fa fa-fw fa-check" />
-            : !this.props.features.updateTileEditUI && <i className="fa fa-fw fa-arrows" />
+          {this.props.editing ?
+            <i className="fa fa-fw fa-check" /> :
+            <i className="fa fa-fw fa-arrows" />
           }
         </div>
         }

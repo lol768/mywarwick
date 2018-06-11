@@ -1,8 +1,7 @@
 package services.elasticsearch
 
-import javax.inject.{Inject, Singleton}
-import javax.ws.rs.HttpMethod
 import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Named, Singleton}
 import models.{Activity, MessageState, Output}
 import org.elasticsearch.action.bulk.{BulkRequest, BulkResponse}
 import org.elasticsearch.action.index.IndexRequest
@@ -10,13 +9,11 @@ import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
 import org.elasticsearch.action.support.IndicesOptions
 import org.elasticsearch.client.{RestClient, RestHighLevelClient}
 import org.elasticsearch.common.xcontent.{XContentBuilder, XContentFactory}
-import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
+import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.rest.RestStatus
-import org.elasticsearch.search.aggregations.bucket.terms.Terms
-import org.elasticsearch.search.aggregations.metrics.avg.Avg
-import org.elasticsearch.search.aggregations.{AggregationBuilders, Aggregations}
 import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality
 import org.elasticsearch.search.aggregations.metrics.sum.Sum
+import org.elasticsearch.search.aggregations.{AggregationBuilders, Aggregations}
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
@@ -24,11 +21,10 @@ import play.api.libs.json._
 import services.elasticsearch.ActivityESSearch.CountQueryResponse
 import services.elasticsearch.ActivityESServiceHelper.ESFieldName
 import services.{AudienceService, PublisherService}
-import system.ThreadPools.elastic
 import warwick.core.Logging
 import warwick.sso.Usercode
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 case class IndexActivityRequest(activity: Activity, resolvedUsers: Option[Seq[Usercode]] = None)
@@ -67,7 +63,7 @@ class ActivityESServiceImpl @Inject()(
   audienceService: AudienceService,
   publisherService: PublisherService,
   elasticSearchAdminService: ElasticSearchAdminService
-) extends ActivityESService with Logging {
+)(implicit @Named("elastic") ec: ExecutionContext) extends ActivityESService with Logging {
 
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.activityEsTemplates, "activity_template_default")
   elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.alertEsTemplates, "alert_template_default")

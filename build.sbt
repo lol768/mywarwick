@@ -75,7 +75,8 @@ val appDeps = Seq(
   "com.vladsch.flexmark" % "flexmark" % "0.32.18",
   "com.vladsch.flexmark" % "flexmark-ext-autolink" % "0.32.18",
   "com.googlecode.libphonenumber" % "libphonenumber" % "8.6.0",
-  "org.elasticsearch.client" % "elasticsearch-rest-high-level-client" % "6.0.0"
+  "org.elasticsearch.client" % "elasticsearch-rest-high-level-client" % "6.0.0",
+  "org.apache.logging.log4j" % "log4j-to-slf4j" % "2.11.0"
 )
 
 val testDeps = Seq(

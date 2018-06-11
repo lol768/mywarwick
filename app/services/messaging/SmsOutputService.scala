@@ -1,14 +1,13 @@
 package services.messaging
 
 import actors.MessageProcessing.ProcessingResult
-import com.google.inject.Inject
-import com.google.inject.name.Named
+import javax.inject.{Inject, Named}
 import models.MessageSend
 import play.api.Configuration
 import play.api.libs.json.JsBoolean
 import services.SmsNotificationsPrefService
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
 object SmsOutputService {
@@ -20,9 +19,7 @@ object SmsOutputService {
 class SmsOutputService @Inject()(
   val configuration: Configuration,
   smsNotificationsPrefService: SmsNotificationsPrefService
-) extends OutputService with SmsSendingService {
-
-  import system.ThreadPools.sms
+)(implicit @Named("sms") ec: ExecutionContext) extends OutputService with SmsSendingService {
 
   private val rootDomain: String = configuration.getOptional[String]("mywarwick.rootDomain").getOrElse("my.warwick.ac.uk")
   private val messageSuffix: String = s"\nTo opt-out visit $rootDomain/settings"

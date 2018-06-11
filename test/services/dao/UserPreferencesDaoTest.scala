@@ -36,6 +36,11 @@ class UserPreferencesDaoTest extends BaseSpec with OneStartAppPerSuite {
         .as(scalar[String].singleOpt) must contain("custard")
     }
 
+    "get colour schemes" in transaction { implicit c =>
+      dao.save(custard)
+      dao.getColourSchemePreference(custard).highContrast mustBe false
+    }
+
   }
 
 }
