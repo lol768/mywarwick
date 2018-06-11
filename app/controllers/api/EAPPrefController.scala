@@ -37,7 +37,10 @@ class EAPPrefController @Inject()(
         val newEnabledUntil = if (enabled) Some(DateTime.now.plusMonths(eapDurationInMonths)) else None
         val newPref = oldPref.copy(eapUntil = newEnabledUntil)
         userPreferences.setFeaturePreferences(user.usercode, newPref)
-        auditLog('UpdateEAP, ('enabled, newEnabledUntil.map(ISODateTimeFormat.dateTime().print)))
+        auditLog('UpdateEAP,
+          'enabled -> newEnabledUntil.nonEmpty,
+          'until -> newEnabledUntil.map(ISODateTimeFormat.dateTime().print)
+        )
         Ok(Json.obj(
           "success" -> true,
           "data" -> Json.obj(
