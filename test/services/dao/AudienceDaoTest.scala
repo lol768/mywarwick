@@ -81,6 +81,16 @@ class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
       saved mustBe Seq(AudienceComponentSave("OptIn:Location", Some("CentralCampusResidences"), None))
     }
 
+    "save residence audience" in {
+      val audience = Audience(Seq(Residence.Westwood, Residence.Claycroft).map(ResidenceAudience))
+      val saved = audienceDao.audienceToComponents(audience)
+
+      saved mustBe Seq(
+        AudienceComponentSave("HallsOfResidence", Some("westwood"), None),
+        AudienceComponentSave("HallsOfResidence", Some("claycroft"), None)
+      )
+    }
+
     "reconstitute usercodes audience" in {
       val components = Seq(
         AudienceComponentSave("Usercode", Some("a"), None),
@@ -153,6 +163,14 @@ class AudienceDaoTest extends BaseSpec with OneStartAppPerSuite {
 
     "read Components from db into Audience" in transaction {implicit c =>
       val audience = Audience(Seq(Staff))
+      val id = audienceDao.saveAudience(audience)
+      val audienceRead = audienceDao.getAudience(id)
+
+      audienceRead mustBe audience
+    }
+
+    "read residence Audience from db" in transaction {implicit c =>
+      val audience = Audience(Seq(Residence.Westwood, Residence.Claycroft).map(ResidenceAudience))
       val id = audienceDao.saveAudience(audience)
       val audienceRead = audienceDao.getAudience(id)
 
