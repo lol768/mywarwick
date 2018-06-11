@@ -1,0 +1,19 @@
+@import system.RequestContext
+@(form: Form[Boolean], id: String)(implicit messages: Messages, context: RequestContext)
+
+@implicitFieldConstructor = @{
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
+}
+
+@common.admin("Administration", "Early Access Program features", "Delete") {
+
+  @b3.form(controllers.admin.routes.EAPFeaturesController.delete(id)) {
+
+    @context.csrfHelper.formField
+
+    @b3.checkbox(form("confirm"), '_text -> "I confirm that I want to delete this feature")
+
+    @tags.submitOrCancel("Delete", controllers.admin.routes.EAPFeaturesController.index())
+  }
+
+}

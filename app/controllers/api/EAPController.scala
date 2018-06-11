@@ -3,24 +3,25 @@ package controllers.api
 import com.google.inject.Inject
 import controllers.MyController
 import javax.inject.Singleton
-import models.API
+import models.{API, EAPFeatureRender}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
-import services.{FeaturesService, SecurityService, UserPreferencesService}
+import services._
 
 @Singleton
-class EAPPrefController @Inject()(
+class EAPController @Inject()(
   security: SecurityService,
   userPreferences: UserPreferencesService,
-  featuresService: FeaturesService
+  featuresService: FeaturesService,
+  eapFeaturesService: EAPFeaturesService
 ) extends MyController {
 
   import security._
 
   private val eapDurationInMonths = 3
 
-  def get = RequiredUserAction { request =>
+  def getPreference = RequiredUserAction { request =>
     val user = request.context.user.get
 
     val data = JsObject(Map(
@@ -30,7 +31,7 @@ class EAPPrefController @Inject()(
     Ok(Json.toJson(API.Success(data = data)))
   }
 
-  def update = RequiredUserAction { implicit request =>
+  def updatePreference = RequiredUserAction { implicit request =>
     request.context.user.map { user =>
       request.body.asJson.flatMap(_.asInstanceOf[JsObject].value.get("enabled")).map(_.as[Boolean]).map { enabled =>
         val oldPref = userPreferences.getFeaturePreferences(user.usercode)
@@ -47,5 +48,18 @@ class EAPPrefController @Inject()(
         ))
       }.getOrElse(BadRequest("Must specify new preference value"))
     }.get
+  }
+
+  def tile = RequiredUserAction { request =>
+    if (featuresService.get(request.context.user).eap) {
+      Ok(Json.toJson(API.Success(data = Json.obj(
+        "items" -> Json.toJson(
+          eapFeaturesService.all.filter(_.available()).sorted
+        )(Writes.seq(EAPFeatureRender.writes)),
+        "defaultText" -> "No Early Access features are currently available"
+      ))))
+    } else {
+      BadRequest("Early Access Program feature not enabled for user")
+    }
   }
 }

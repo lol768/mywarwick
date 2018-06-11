@@ -8,7 +8,9 @@ import com.google.inject.{ImplementedBy, Inject}
 import models._
 import org.joda.time.DateTime
 import play.api.libs.json.{JsObject, Json}
+import services.{FeaturesService, TileService, UserPreferencesService}
 import warwick.anorm.converters.ColumnConversions._
+import warwick.sso.Usercode
 
 @ImplementedBy(classOf[TileDaoImpl])
 trait TileDao {
@@ -31,7 +33,10 @@ trait TileDao {
 
 }
 
-class TileDaoImpl @Inject()() extends TileDao {
+class TileDaoImpl @Inject()(
+  userPreferences: UserPreferencesService,
+  featuresService: FeaturesService
+) extends TileDao {
 
   override def getTilesByIds(usercode: String, ids: Seq[String], groups: Set[String])(implicit c: Connection): Seq[TileInstance] =
     if (ids.isEmpty)
@@ -64,7 +69,18 @@ class TileDaoImpl @Inject()() extends TileDao {
       ).as(userTileParser.*)
 
     val defaultsNotOverridden = defaultTiles.filterNot(dt => userTiles.map(_.tile.id).contains(dt.tile.id))
-    defaultsNotOverridden ++ userTiles
+
+    val eapTile = if (
+      (ids.isEmpty || ids.contains(TileService.EAPTileId)) &&
+      featuresService.get(Usercode(usercode)).eap &&
+      userPreferences.getFeaturePreferences(Usercode(usercode)).eap
+    ) {
+      Seq(getAllTiles().find(_.id == TileService.EAPTileId).map(t => TileInstance(t, None, removed = false))).flatten
+    } else {
+      Seq.empty
+    }
+
+    eapTile ++ defaultsNotOverridden ++ userTiles
   }
 
   override def getDefaultTilesForGroups(groups: Set[String], ids: Seq[String] = Nil)(implicit c: Connection): Seq[TileInstance] = {

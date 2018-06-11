@@ -197,12 +197,14 @@ export default class Tile extends HideableView {
             <div className="icon"><i className="fa fa-arrow-up" /></div>
           </div>
 
-          <div
-            className="tile__edit-control bottom-left tile__drag-handle"
-            title="Drag to re-arrange tile"
-          >
-            <div className="icon"><i className="fa fa-arrows" /></div>
-          </div>
+          { this.getContentInstance() && this.getContentInstance().constructor.isMovable() &&
+            <div
+              className="tile__edit-control bottom-left tile__drag-handle"
+              title="Drag to re-arrange tile"
+            >
+              <div className="icon"><i className="fa fa-arrows" /></div>
+            </div>
+          }
 
           <TileWrap
             icon={this.getIcon()}

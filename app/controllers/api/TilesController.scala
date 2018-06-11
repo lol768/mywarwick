@@ -1,13 +1,12 @@
 package controllers.api
 
 import javax.inject.Singleton
-
 import com.google.inject.Inject
 import controllers.MyController
 import models._
-import play.api.libs.json.{JsError, JsObject, JsSuccess, Json}
-import play.api.mvc.Result
-import services.{SecurityService, TileContentService, TileService}
+import play.api.libs.json._
+import play.api.mvc.{Action, AnyContent, Result}
+import services._
 import warwick.sso.User
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,19 +18,20 @@ case class SaveTilesRequest(
 )
 
 object SaveTilesRequest {
-  implicit val format = Json.format[SaveTilesRequest]
+  implicit val format: OFormat[SaveTilesRequest] = Json.format[SaveTilesRequest]
 }
 
 @Singleton
 class TilesController @Inject()(
   securityService: SecurityService,
   tileService: TileService,
-  tileContentService: TileContentService
+  tileContentService: TileContentService,
+  featuresService: FeaturesService
 ) extends MyController {
 
   import securityService._
 
-  def getLayout = UserAction.async { request =>
+  def getLayout: Action[AnyContent] = UserAction.async { request =>
     val user = request.context.user
     val tiles = tileService.getTilesForUser(user)
     val layout = tileService.getTileLayoutForUser(user)
@@ -63,7 +63,7 @@ class TilesController @Inject()(
     }.get // RequiredUserAction
   }
 
-  def content = UserAction.async { request =>
+  def content: Action[AnyContent] = UserAction.async { request =>
     val tileLayout = tileService.getTilesForUser(request.context.user)
     tilesContent(request.context.user, tileLayout)
   }
@@ -81,11 +81,24 @@ class TilesController @Inject()(
     }
   }
 
-  def contentById(id: String) = UserAction.async { request =>
-    val tiles = tileService.getTilesByIds(request.context.user, Seq(id))
-    tiles match {
-      case Seq(_) => tilesContent(request.context.user, tiles)
-      case Seq() => Future(BadRequest(Json.toJson(API.Failure[JsObject]("bad request", Seq(API.Error("no-tile", s"Cannot fetch content. No tiles exist with id '$id'"))))))
+  def contentById(id: String): Action[AnyContent] = UserAction.async { request =>
+    if (id == TileService.EAPTileId) {
+      val eapTile = tileService.getEAPTile
+      if (
+        eapTile.nonEmpty &&
+        request.context.user.nonEmpty &&
+        featuresService.get(request.context.user).eap
+      ) {
+        tilesContent(request.context.user, Seq(TileInstance(eapTile.get, None, removed = false)))
+      } else {
+        Future(BadRequest(Json.toJson(API.Failure[JsObject]("bad request", Seq(API.Error("no-tile", "Cannot fetch EAP tile"))))))
+      }
+    } else {
+      val tiles = tileService.getTilesByIds(request.context.user, Seq(id))
+      tiles match {
+        case Seq(_) => tilesContent(request.context.user, tiles)
+        case Seq() => Future(BadRequest(Json.toJson(API.Failure[JsObject]("bad request", Seq(API.Error("no-tile", s"Cannot fetch content. No tiles exist with id '$id'"))))))
+      }
     }
   }
 }

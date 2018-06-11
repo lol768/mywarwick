@@ -21,6 +21,8 @@ object DateFormats {
   private val emailStart = DateTimeFormat.forPattern("HH:mm 'on' EEE d")
   private val emailEnd = DateTimeFormat.forPattern(" MMM, YYYY")
 
+  val localDate: DateTimeFormatter = DateTimeFormat.forPattern("EEE d MMM yyyy")
+
   /**
     * Friendly date for emails, e.g. "14:36 on Mon 3rd Feb, 2016".
     */
@@ -92,6 +94,29 @@ object DateFormats {
     )
   }
 
+  object LocalDateFormatter extends Formatter[LocalDate] {
+    private val parser = new DateTimeFormatterBuilder()
+      .append(ISODateTimeFormat.date())
+      .toParser
+    private val printer = new DateTimeFormatterBuilder()
+      .append(ISODateTimeFormat.date())
+      .toPrinter
+    private val formatter = new DateTimeFormatterBuilder().append(printer, parser).toFormatter
+
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] =
+      try {
+        data.get(key).map(formatter.parseLocalDate).map(Right(_)).getOrElse {
+          Left(Seq(FormError(key, "missing")))
+        }
+      } catch {
+        case e: IllegalArgumentException => Left(Seq(FormError(key, "badness")))
+      }
+
+    override def unbind(key: String, value: LocalDate): Map[String, String] = Map(
+      key -> formatter.print(value)
+    )
+  }
+
   class JodaWrites(fmt: DateTimeFormatter) extends Writes[ReadableInstant] {
     override def writes(o: ReadableInstant): JsValue = JsString(o.toInstant.toString(fmt))
   }
@@ -101,5 +126,7 @@ object DateFormats {
 
   /** Use as a form mapping for a LocalDateTime property against a datetime-local input */
   val dateTimeLocalMapping: FieldMapping[LocalDateTime] = of(LocalDateTimeFormatter)
+
+  val dateLocalMapping: FieldMapping[LocalDate] = of(LocalDateFormatter)
 
 }

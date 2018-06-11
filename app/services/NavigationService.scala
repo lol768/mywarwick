@@ -95,6 +95,7 @@ class NavigationServiceImpl @Inject()(
       NavigationPage("Masquerade", adminRoutes.MasqueradeController.masquerade()),
       NavigationPage("Cluster State", adminRoutes.ClusterStateController.html()),
       NavigationPage("ElasticSearch", controllers.admin.elasticsearch.routes.ActivityToESController.index()),
+      NavigationPage("EAP Features", adminRoutes.EAPFeaturesController.index()),
       NavigationPage("Reports", controllers.admin.reporting.routes.HomeController.index(), Seq(
         NavigationPage("Preferences Report", controllers.admin.reporting.routes.PreferencesReportingController.index()),
         NavigationPage("Activity Report", controllers.admin.reporting.routes.ActivityReportingController.index())

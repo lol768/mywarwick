@@ -1,6 +1,7 @@
 import { createAction } from 'redux-actions';
 import { fetchWithCredentials, postJsonWithCredentials } from '../serverpipe';
 import { fetchUserInfo, receiveUserInfo } from '../userinfo';
+import { fetchTiles } from './tiles';
 
 export const EAP_REQUEST = 'eap.request';
 export const EAP_RECEIVE = 'eap.receive';
@@ -25,10 +26,11 @@ export function fetch() {
 }
 
 export function persist(enabled) {
-  return () =>
+  return dispatch =>
     postJsonWithCredentials('/api/eap', { enabled })
       .then(fetchUserInfo)
-      .then(receiveUserInfo);
+      .then(receiveUserInfo)
+      .then(dispatch(fetchTiles));
 }
 
 export function toggleEnabled(value) {

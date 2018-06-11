@@ -50,7 +50,7 @@ global.paths = {
   ],
 };
 
-global.PRODUCTION = option('PRODUCTION', true);
+global.PRODUCTION = option('PRODUCTION', false);
 global.UGLIFY = option('UGLIFY', PRODUCTION);
 global.OFFLINE_WORKERS = option('OFFLINE_WORKERS', true);
 if (PRODUCTION) {
