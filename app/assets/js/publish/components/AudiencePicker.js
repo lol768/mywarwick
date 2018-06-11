@@ -212,6 +212,9 @@ export class AudiencePicker extends React.PureComponent {
         value="hallsOfResidence"
         formPath={prefixPath('.groups')}
       >
+        {/*
+        disabled for now, as lookup all HOR uniId to usercode is too slow from cold
+        we may want to reenable this once TAB-6311 is deployed
         <RadioButton
           handleChange={this.handleChange}
           isChecked={!this.isChecked(prefixPath('.groups.hallsOfResidence.hall'))}
@@ -227,17 +230,22 @@ export class AudiencePicker extends React.PureComponent {
           value="hall"
           formPath={prefixPath('.groups.hallsOfResidence')}
         >
-          {Object.keys(this.props.hallsOfResidence).map(key =>
-            (<Checkbox
-              handleChange={this.handleChange}
-              isChecked={this.isChecked(prefixPath(`.groups.hallsOfResidence.hall.hallsOfResidence:${key}`))}
-              label={this.props.hallsOfResidence[key]}
-              name="audience.audience[]"
-              value={`hallsOfResidence:${key}`}
-              formPath={prefixPath('.groups.hallsOfResidence.hall')}
-            />),
-          )}
+        */}
+
+        {Object.keys(this.props.hallsOfResidence).map(key =>
+          (<Checkbox
+            handleChange={this.handleChange}
+            isChecked={this.isChecked(prefixPath(`.groups.hallsOfResidence.hall.hallsOfResidence:${key}`))}
+            label={this.props.hallsOfResidence[key]}
+            name="audience.audience[]"
+            value={`hallsOfResidence:${key}`}
+            formPath={prefixPath('.groups.hallsOfResidence.hall')}
+          />),
+        )}
+
+        {/*
         </RadioButton>
+        */}
       </Checkbox>
     );
 
