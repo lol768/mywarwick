@@ -30,7 +30,7 @@ export function persist(enabled) {
     postJsonWithCredentials('/api/eap', { enabled })
       .then(fetchUserInfo)
       .then(receiveUserInfo)
-      .then(dispatch(fetchTiles));
+      .then(() => dispatch(fetchTiles()));
 }
 
 export function toggleEnabled(value) {
