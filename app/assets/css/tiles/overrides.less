@@ -62,18 +62,22 @@
 
 .tile--eap {
   .feature {
-    .date-and-name, .more-info, .feedback {
-      display: inline-block;
+    display: flex;
+    .date-and-name {
       margin-right: 16px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .more-info {
+      margin-right: 12px;
     }
     .more-info, .feedback {
+      white-space: nowrap;
       text-decoration: underline;
       i.fa {
         margin-right: 4px;
       }
-    }
-    .feedback {
-      margin-right: 0;
     }
   }
 }
