@@ -6,6 +6,7 @@ import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 import { updateDoNotDisturb } from '../../../state/device';
 import SelectInput from '../../ui/SelectInput';
 import { Info } from '../../FA';
+import _ from 'lodash-es';
 
 const time24PropType = function timePropType(props, propName, componentName) {
   if (!/([01][0-9]|2[0-3]):[0-5][0-9]/.test(props[propName])) {
@@ -29,7 +30,8 @@ class DoNotDisturbView extends HideableView {
     weekday: doNotDisturbPeriodPropType.isRequired,
   };
 
-  static values = [...Array(24).keys()].map(i => `${(i + '').padStart(2, '0')}:00`);
+  // static values = [...Array(24).keys()].map(i => `${(i + '').padStart(2, '0')}:00`);
+  static values = [...Array(24).keys()].map(i => `${_.padStart(i, 2, '0')}:00`);
 
   constructor(props) {
     super(props);
