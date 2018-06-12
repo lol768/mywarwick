@@ -66,6 +66,45 @@ object Audience {
 
   case class DepartmentAudience(deptCode: String, subset: Seq[DepartmentSubset]) extends Component
 
+  case class ResidenceAudience(residence: Residence) extends Component {
+    val displayName: String = "Halls of residence"
+  }
+
+  abstract class Residence(val id: String, val displayName: String, val queryParameters: Seq[(String, String)])
+
+  object Residence {
+
+    case object ArthurVick extends Residence("arthurVick", "Arthur Vick", Seq("hallsOfResidence" -> "Arthur Vick"))
+    case object Benefactors extends Residence("benefactors", "Benefactors", Seq("hallsOfResidence" -> "Benefactors"))
+    case object Bluebell extends Residence("bluebell", "Bluebell", Seq("hallsOfResidence" -> "Bluebell"))
+    case object Claycroft extends Residence("claycroft", "Claycroft", Seq("hallsOfResidence" -> "Claycroft"))
+    case object Cryfield extends Residence("cryfield", "Cryfield", Seq("hallsOfResidence" -> "Cryfield"))
+    case object Heronbank extends Residence("heronbank", "Heronbank", Seq("hallsOfResidence" -> "Heronbank"))
+    case object JackMartin extends Residence("jackMartin", "Jack Martin", Seq("hallsOfResidence" -> "Jack Martin"))
+    case object Lakeside extends Residence("lakeside", "Lakeside", Seq("hallsOfResidence" -> "Lakeside"))
+    case object Redfern extends Residence("redfern", "Redfern", Seq("hallsOfResidence" -> "Redfern"))
+    case object Rootes extends Residence("rootes", "Rootes", Seq("hallsOfResidence" -> "Rootes"))
+    case object Sherbourne extends Residence("sherbourne", "Sherbourne", Seq("hallsOfResidence" -> "Sherbourne"))
+    case object Tocil extends Residence("tocil", "Tocil", Seq("hallsOfResidence" -> "Tocil"))
+    case object Westwood extends Residence("westwood", "Westwood", Seq("hallsOfResidence" -> "Westwood"))
+    case object Whitefields extends Residence("whitefields", "Whitefields", Seq("hallsOfResidence" -> "Whitefields"))
+    case object All extends Residence("all", "All halls of residence", all.flatMap(_.queryParameters))
+
+    def all: Seq[Residence] = Seq(
+      ArthurVick, Benefactors, Bluebell, Claycroft, Cryfield, Heronbank, JackMartin,
+      Lakeside, Redfern, Rootes, Sherbourne, Tocil, Westwood, Whitefields
+    )
+
+    def fromId(id: String): Residence = {
+      if (id == All.id) {
+        All
+      } else {
+        all.find(_.id == id)
+          .getOrElse(throw new IllegalArgumentException(s"Cannot find Residence AudienceComponent with id $id"))
+      }
+    }
+  }
+
   case object All extends DepartmentSubset
 
   case object Staff extends DepartmentSubset {
@@ -134,6 +173,7 @@ object Audience {
   val relationshipRegex: Regex = "^Relationship:(.+):(.+)".r
   val webGroupRegex: Regex = "^WebGroup:(.+)".r
   val optInRegex: Regex = "^OptIn:(.+):(.+)".r
+  val hallsOfResidenceRegex: Regex = "^hallsOfResidence:(.+)".r
 
   object ComponentParameter {
     def unapply(paramValue: String): Option[Component] = paramValue match {
@@ -148,6 +188,12 @@ object Audience {
       case seminarGroupRegex(groupId) => Some(SeminarGroupAudience(groupId))
       case relationshipRegex(relationshipType, agentId) => Some(RelationshipAudience(relationshipType, UniversityID(agentId)))
       case optInRegex(optInType, optInValue) if optInType == LocationOptIn.optInType => LocationOptIn.fromValue(optInValue)
+      case hallsOfResidenceRegex(id) =>
+        if (id == Residence.All.id) {
+          Some(ResidenceAudience(Residence.All))
+        } else {
+          Some(ResidenceAudience(Residence.fromId(id)))
+        }
       case string if string.nonEmpty => {
         val validUsercodes: Set[Usercode] = string.split("\n").map(_.trim).flatMap { usercode =>
           if (!usercode.contains(":")) Some(Usercode(usercode))

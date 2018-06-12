@@ -1,5 +1,6 @@
 package helpers
 
+import models.Audience
 import models.Audience.UndergradStudents
 import services.dao.{AudienceLookupDao, LookupModule, LookupRelationshipType, LookupSeminarGroup}
 import warwick.sso.{UniversityID, User, Usercode}
@@ -20,4 +21,5 @@ class MockAudienceLookupDao extends AudienceLookupDao {
   override def findSeminarGroups(query: String): Future[Seq[LookupSeminarGroup]] = Future.successful(Nil)
   override def findRelationships(agentId: UniversityID): Future[Map[LookupRelationshipType, Seq[User]]] = Future.successful(Map.empty)
   override def resolveStaff(departmentCode: String): Future[Seq[Usercode]] = Future.successful(Nil)
+  override def resolveResidence(residence: Audience.Residence): Future[Seq[Usercode]] = Future.successful(Nil)
 }

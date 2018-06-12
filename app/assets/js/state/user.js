@@ -6,6 +6,7 @@ export const USER_LOAD = 'USER_LOAD';
 export const USER_RECEIVE = 'USER_RECEIVE';
 export const USER_CLEAR = 'USER_CLEAR';
 export const SSO_LINKS_RECEIVE = 'SSO_LINKS_RECEIVE';
+export const FEATURES_RECEIVE = 'FEATURES_RECEIVE';
 
 const initialState = {
   data: {
@@ -17,6 +18,7 @@ const initialState = {
     login: null,
     logout: null,
   },
+  features: {},
 };
 
 export function reducer(state = initialState, action) {
@@ -43,6 +45,10 @@ export function reducer(state = initialState, action) {
       return { ...state,
         links: action.links,
       };
+    case FEATURES_RECEIVE:
+      return { ...state,
+        features: action.features,
+      };
     default:
       return state;
   }
@@ -66,6 +72,13 @@ export function receiveSSOLinks(links) {
   return {
     type: SSO_LINKS_RECEIVE,
     links,
+  };
+}
+
+export function receiveFeatures(features) {
+  return {
+    type: FEATURES_RECEIVE,
+    features,
   };
 }
 

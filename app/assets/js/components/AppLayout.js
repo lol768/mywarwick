@@ -28,14 +28,14 @@ export class AppLayout extends React.PureComponent {
   }
 
   render() {
-    const { location, notificationsCount, children, authenticated, features }
+    const { location, notificationsCount, children, authenticated }
       = this.props;
 
     log.debug('AppLayout.render');
 
     return (
       <div>
-        <ID7Layout path={ location.pathname } features={ features }>
+        <ID7Layout path={ location.pathname }>
           { children }
         </ID7Layout>
         {
@@ -80,6 +80,7 @@ function mapStateToProps(state) {
     notificationsCount:
       getNumItemsSince(state.notifications.stream, _.get(state, ['notificationsLastRead', 'date'])),
     authenticated: state.user.data.authenticated,
+    features: state.user.features,
   };
 }
 

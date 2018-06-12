@@ -30,6 +30,7 @@ import {
   NotificationStreamFilterOptionView,
 } from './views/settings/StreamFilterOptionView';
 import SmsNotificationsView from './views/settings/SmsNotificationsView';
+import EAPPreferenceView from './views/settings/EAPPreferenceView';
 
 export const Routes = {
   EDIT: 'edit',
@@ -54,6 +55,7 @@ export const Routes = {
     SMS: 'sms',
     TIMETABLE_ALARMS: 'timetable_alarms',
     DO_NOT_DISTURB: 'do_not_disturb',
+    EAP: 'eap',
   },
   POST_TOUR: 'post_tour',
 };
@@ -150,6 +152,10 @@ RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TIMETABLE_ALARMS}`] = {
   rendered: false,
   view: TimetableAlarmsView,
 };
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.EAP}`] = {
+  rendered: false,
+  view: EAPPreferenceView,
+};
 
 class AppRoot extends React.Component {
   static propTypes = {
@@ -173,7 +179,6 @@ class AppRoot extends React.Component {
       options: PropTypes.object.isRequired,
     }).isRequired,
     dispatch: PropTypes.func.isRequired,
-    features: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -250,10 +255,7 @@ class AppRoot extends React.Component {
           {
             React.createElement(
               args.view,
-              Object.assign(
-                { features: { ...this.props.features } },
-                (args.extraProps || {}),
-              ),
+              args.extraProps || {},
             )
           }
         </Visible> : null

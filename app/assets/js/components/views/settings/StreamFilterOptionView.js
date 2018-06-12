@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import * as notifications from '../../../state/notifications';
 import Switch from '../../ui/Switch';
 import wrapKeyboardSelect from '../../../keyboard-nav';
+import $ from 'jquery';
 import { Mute } from '../../FA';
 
 class StreamFilterOptionView extends React.PureComponent {
@@ -56,10 +57,11 @@ class StreamFilterOptionView extends React.PureComponent {
   }
 
   onClick(event) {
-    wrapKeyboardSelect(() => {
-      if (event.currentTarget.dataset.disabled) return;
-      const value = event.currentTarget.dataset.value;
-      const name = event.currentTarget.dataset.name;
+    wrapKeyboardSelect((e) => {
+      const dataset = $(e.currentTarget).data();
+      if (dataset.disabled) return;
+      const value = dataset.value;
+      const name = dataset.name;
       const newOption = _.cloneDeep(this.state[name]);
       newOption[value] = !newOption[value];
 

@@ -2,6 +2,7 @@ package controllers.publish
 
 import helpers.BaseSpec
 import models.Audience
+import models.Audience.{Residence, ResidenceAudience}
 import models.publishing.PermissionScope.{AllDepartments, Departments}
 import models.publishing.Publisher
 import org.mockito.Matchers._
@@ -151,6 +152,13 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       val audienceBinder = new AudienceBinder(departmentInfoDao, null, defaultMockPublisherService)
 
       audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.Staff)))
+    }
+
+    "bind halls of residence audience data" in {
+      val audienceData = AudienceData(Seq("hallsOfResidence:westwood","hallsOfResidence:claycroft"), None)
+
+      val audienceBinder = new AudienceBinder(null, null, defaultMockPublisherService)
+      audienceBinder.bindAudience(audienceData).futureValue mustBe Right(Audience(Seq(Residence.Westwood, Residence.Claycroft).map(ResidenceAudience)))
     }
 
     "raise error message when binding with invalid department code" in {
