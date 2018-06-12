@@ -29,7 +29,7 @@ class DoNotDisturbView extends HideableView {
     weekday: doNotDisturbPeriodPropType.isRequired,
   };
 
-  static values = [...Array(24).keys()].map(i => `${i.toString().padStart(2, '0')}:00`);
+  static values = [...Array(24).keys()].map(i => `${(i + '').padStart(2, '0')}:00`);
 
   constructor(props) {
     super(props);
