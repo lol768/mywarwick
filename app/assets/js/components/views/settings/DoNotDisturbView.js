@@ -4,12 +4,21 @@ import HideableView from '../HideableView';
 import { connect } from 'react-redux';
 import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 import { updateDoNotDisturb } from '../../../state/device';
-import SelectNumberInput from '../../ui/NumberSelectInput';
+import SelectInput from '../../ui/SelectInput';
 import { Info } from '../../FA';
 
+const time24PropType = function timePropType(props, propName, componentName) {
+  if (!/([01][0-9]|2[0-3]):[0-5][0-9]/.test(props[propName])) {
+    return new Error(
+      `Invalid prop '${propName}' supplied to '${componentName}'. Should be format "HH:mm".`,
+    );
+  }
+  return null;
+};
+
 const doNotDisturbPeriodPropType = PropTypes.shape({
-  start: PropTypes.number.isRequired,
-  end: PropTypes.number.isRequired,
+  start: time24PropType.isRequired,
+  end: time24PropType.isRequired,
 });
 
 class DoNotDisturbView extends HideableView {
@@ -20,18 +29,14 @@ class DoNotDisturbView extends HideableView {
     weekday: doNotDisturbPeriodPropType.isRequired,
   };
 
-  static MIN_HOUR = 0;
-  static MAX_HOUR = 23;
-
-  static formatOptionDisplayName(val) {
-    return `${val.toString().padStart(2, '0')}:00`;
-  }
+  static values = [...Array(24).keys()].map(i => `${i.toString().padStart(2, '0')}:00`);
 
   constructor(props) {
     super(props);
     this.toggleDoNotDisturb = this.toggleDoNotDisturb.bind(this);
     this.onStartHourChange = this.onStartHourChange.bind(this);
     this.onEndHourChange = this.onEndHourChange.bind(this);
+    this.dndHoursAsNumbers = this.dndHoursAsNumbers.bind(this);
   }
 
   toggleDoNotDisturb() {
@@ -76,8 +81,17 @@ class DoNotDisturbView extends HideableView {
     }));
   }
 
+  dndHoursAsNumbers() {
+    return {
+      weekday: {
+        start: parseInt(this.props.weekday.start.slice(2), 10),
+        end: parseInt(this.props.weekday.end.slice(2), 10),
+      },
+    };
+  }
+
   dndPeriodHrs() {
-    const { weekday: { start, end } } = this.props;
+    const { weekday: { start, end } } = this.dndHoursAsNumbers();
     if (end < start) {
       return Math.abs((end + 12) - (start % 12));
     }
@@ -118,25 +132,21 @@ class DoNotDisturbView extends HideableView {
         <div className="list-group setting-colour-2">
           <div className="list-group-item">
             <label>From</label>
-            <SelectNumberInput
+            <SelectInput
               disabled={!this.props.enabled}
-              min={DoNotDisturbView.MIN_HOUR}
-              max={DoNotDisturbView.MAX_HOUR}
+              values={DoNotDisturbView.values}
               disabledOption={this.props.weekday.end}
               selectedValue={this.props.weekday.start}
-              formatOptionDisplayName={DoNotDisturbView.formatOptionDisplayName}
               onChange={this.onStartHourChange}
             />
           </div>
           <div className="list-group-item">
             <label>Until</label>
-            <SelectNumberInput
+            <SelectInput
               disabled={!this.props.enabled}
-              min={DoNotDisturbView.MIN_HOUR}
-              max={DoNotDisturbView.MAX_HOUR}
+              values={DoNotDisturbView.values}
               disabledOption={this.props.weekday.start}
               selectedValue={this.props.weekday.end}
-              formatOptionDisplayName={DoNotDisturbView.formatOptionDisplayName}
               onChange={this.onEndHourChange}
             />
           </div>

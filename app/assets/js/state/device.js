@@ -38,12 +38,12 @@ const initialState = {
     loaded: false,
     enabled: false,
     weekend: {
-      start: 21,
-      end: 7,
+      start: '21:00',
+      end: '07:00',
     },
     weekday: {
-      start: 21,
-      end: 7,
+      start: '21:00',
+      end: '07:00',
     },
   },
 };
