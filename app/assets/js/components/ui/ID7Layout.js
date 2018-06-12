@@ -215,6 +215,7 @@ const select = state => ({
   schemeColour: state.ui.schemeColour,
   colourSchemesLoaded: state.colourSchemes.loaded,
   zoomedTile: state.ui.zoomedTile,
+  features: state.user.features,
 });
 
 export default connect(select)(ID7Layout);

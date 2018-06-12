@@ -34,6 +34,8 @@ trait UserPreferencesService {
 
   def getFeaturePreferences(usercode: Usercode): FeaturePreferences
 
+  def setFeaturePreferences(usercode: Usercode, prefs: FeaturePreferences): Unit
+
 }
 
 @Singleton
@@ -69,4 +71,7 @@ class UserPreferencesServiceImpl @Inject()(
 
   override def getFeaturePreferences(usercode: Usercode): FeaturePreferences =
     db.withConnection(implicit c => dao.getFeaturePreferences(usercode))
+
+  override def setFeaturePreferences(usercode: Usercode, prefs: FeaturePreferences): Unit =
+    db.withConnection(implicit c => dao.setFeaturePreferences(usercode, prefs))
 }

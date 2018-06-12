@@ -25,3 +25,4 @@ export { reducer as device } from './device';
 export { reducer as analytics } from './analytics';
 export { reducer as colourSchemes } from './colour-schemes';
 export { reducer as timetableAlarms } from './timetable-alarms';
+export { reducer as eap } from './eap';
