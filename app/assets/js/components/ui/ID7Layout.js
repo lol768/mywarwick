@@ -123,7 +123,7 @@ class ID7Layout extends React.PureComponent {
   }
 
   isEditing() {
-    return this.props.path === `/${Routes.EDIT}`;
+    return this.props.path === `/${Routes.EDIT}` && !this.props.features.updateTileEditUI;
   }
 
   dismissBetaWarning() {
@@ -156,7 +156,8 @@ class ID7Layout extends React.PureComponent {
 
     const showSettingsButton = !(
       _.startsWith(path, `/${Routes.SETTINGS}`) ||
-      _.startsWith(path, `/${Routes.POST_TOUR}`)
+      _.startsWith(path, `/${Routes.POST_TOUR}`) ||
+      (features.updateTileEditUI && _.startsWith(path, `/${Routes.EDIT}`))
     );
 
     return (
@@ -175,7 +176,7 @@ class ID7Layout extends React.PureComponent {
                 editing={this.isEditing()}
                 showEditButton={
                   this.isEditing() ||
-                  path === '/'
+                  (path === '/' && !this.props.features.updateTileEditUI)
                 }
                 onSettings={this.onSettings}
                 showSettingsButton={showSettingsButton}

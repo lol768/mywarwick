@@ -1,5 +1,6 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import { connect } from 'react-redux';
 import HideableView from '../HideableView';
 import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
@@ -50,8 +51,8 @@ class EAPPreferenceView extends HideableView {
   renderDisabledWarning() {
     return (
       <div>
-        <div className="modal-backdrop fade in" />
-        <div className="modal fade in" id="EAPDisableWarning" tabIndex="-1" role="dialog">
+        <div className="modal-backdrop in" />
+        <div className="modal in" id="EAPDisableWarning" tabIndex="-1" role="dialog">
           <div className="modal-dialog" role="document">
             <div className="modal-content">
               <div className="modal-body">
@@ -94,15 +95,19 @@ class EAPPreferenceView extends HideableView {
 
         <p className="text--hint container-fluid">
           Enrolling in the early access program means that you&apos;ll see tiles and other features
-          that we&apos;re currently working on which may not be in their final form.
+          that we&apos;re currently working on which may not be in their final form. Early access
+          features appear for a limited period, so what you see will vary over time.
         </p>
         <p className="text--hint container-fluid">
-          Your feedback on these features will help us to decide whether they should be made
-          available to everyone, or if they need adjustment, or even, in some cases, whether they
-          should not be released.
+          Joining the early access program will add a tile to the top of your current tiles to show
+          what features are currently being tested, and to provide a channel for you to give us your
+          feedback. This will help us to decide which features should be made available to everyone,
+          which ones need adjustment, and which ones may not be useful enough to be worth releasing.
         </p>
         <p className="text--hint container-fluid">
-          Touch the switch below if you would like to join the early access program.
+          Touch the switch below if you&apos;d like to join the early access program. You can turn
+          off early access at any time, and early access also turns itself off automatically after
+          three months.
         </p>
 
         <div className="list-group setting-colour-0">
@@ -117,7 +122,17 @@ class EAPPreferenceView extends HideableView {
           />
         </div>
 
-        { this.state.showDisableWarning && this.renderDisabledWarning() }
+        <ReactCSSTransitionGroup
+          transitionName="grow-shrink-modal"
+          transitionAppear
+          transitionAppearTimeout={200}
+          transitionEnter
+          transitionEnterTimeout={200}
+          transitionLeave
+          transitionLeaveTimeout={200}
+        >
+          { this.state.showDisableWarning && this.renderDisabledWarning() }
+        </ReactCSSTransitionGroup>
       </div>
     );
   }

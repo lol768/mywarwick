@@ -698,12 +698,7 @@ const select = (state) => {
     appVersion: state.app.native.version,
     isOnline: state.device.isOnline,
     timetableAlarms: state.timetableAlarms,
-    eap: {
-      enabled: state.eap.enabled,
-      fetched: state.eap.fetched,
-      fetching: state.eap.fetching,
-      failed: state.eap.failed,
-    },
+    eap: { ...state.eap },
     features: state.user.features,
   };
 };
