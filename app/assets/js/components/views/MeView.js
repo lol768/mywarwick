@@ -152,13 +152,17 @@ class MeView extends HideableView {
   getTileLayout(layout) {
     return layout
       .filter(tile => tile.layoutWidth === this.props.layoutWidth)
-      .map(item => ({
-        i: item.tile,
-        x: item.x,
-        y: item.y,
-        w: item.width,
-        h: item.height,
-      }));
+      .map((item) => {
+        const tileType = TILE_TYPES[item.tile];
+        return {
+          i: item.tile,
+          x: item.x,
+          y: item.y,
+          w: item.width,
+          h: item.height,
+          static: tileType !== undefined && !tileType.isRemovable() && !tileType.isMovable(),
+        };
+      });
   }
 
   getGridLayoutWidth() {
