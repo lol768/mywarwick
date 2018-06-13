@@ -114,7 +114,7 @@ class DoNotDisturbView extends HideableView {
         <div className="text--hint container-fluid">
           <p>
             Turning &lsquo;Do not disturb&rsquo; on means alerts won&apos;t pop up on your phone
-            between <strong>from</strong> and <strong>until</strong> times each day. Any alerts that
+            between <strong>From</strong> and <strong>Until</strong> times each day. Any alerts that
             would have arrived during this period will instead be delivered shortly after the period
             ends.
           </p>
