@@ -86,8 +86,8 @@ class DoNotDisturbView extends HideableView {
   dndHoursAsNumbers() {
     return {
       weekday: {
-        start: parseInt(this.props.weekday.start.slice(2), 10),
-        end: parseInt(this.props.weekday.end.slice(2), 10),
+        start: parseInt(this.props.weekday.start.slice(0, 2), 10),
+        end: parseInt(this.props.weekday.end.slice(0, 2), 10),
       },
     };
   }
