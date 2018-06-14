@@ -7,8 +7,10 @@ import anorm._
 import warwick.anorm.converters.ColumnConversions._
 import com.google.inject.{ImplementedBy, Singleton}
 import controllers.api.ColourScheme
+import javax.inject.Inject
 import models.FeaturePreferences
 import org.joda.time.DateTime
+import play.api.Configuration
 import play.api.libs.json.{JsObject, Json}
 import warwick.sso.Usercode
 
@@ -62,7 +64,11 @@ trait UserPreferencesDao {
 }
 
 @Singleton
-class UserPreferencesDaoImpl extends UserPreferencesDao {
+class UserPreferencesDaoImpl @Inject()(
+  config: Configuration
+) extends UserPreferencesDao {
+
+  private lazy val defaultEAP = config.get[Boolean]("mywarwick.defaultEAP")
 
   private val featurePreferencesParser =
     get[DateTime]("EAP_UNTIL").?
@@ -77,7 +83,13 @@ class UserPreferencesDaoImpl extends UserPreferencesDao {
       .nonEmpty
 
   override def save(usercode: Usercode)(implicit c: Connection): Unit =
-    SQL"INSERT INTO USER_PREFERENCE (USERCODE, CREATED_AT) VALUES (${usercode.string}, SYSDATE)"
+    SQL"""
+      INSERT INTO USER_PREFERENCE (USERCODE, CREATED_AT, EAP_UNTIL)
+      VALUES (
+        ${usercode.string},
+        SYSDATE,
+        ${if (defaultEAP) DateTime.now.plusYears(10) else null}
+    )"""
       .execute()
 
   override def countInitialisedUsers(usercodes: Set[Usercode])(implicit c: Connection): Int =
