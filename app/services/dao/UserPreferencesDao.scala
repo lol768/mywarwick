@@ -57,6 +57,8 @@ trait UserPreferencesDao {
 
   def getFeaturePreferences(usercode: Usercode)(implicit c: Connection): FeaturePreferences
 
+  def setFeaturePreferences(usercode: Usercode, prefs: FeaturePreferences)(implicit c: Connection): Boolean
+
 }
 
 @Singleton
@@ -203,4 +205,12 @@ class UserPreferencesDaoImpl extends UserPreferencesDao {
     SQL"""SELECT EAP_UNTIL FROM USER_PREFERENCE WHERE USERCODE = ${usercode.string}"""
       .as(featurePreferencesParser.singleOpt)
       .getOrElse(FeaturePreferences.empty)
+
+  override def setFeaturePreferences(usercode: Usercode, prefs: FeaturePreferences)(implicit c: Connection): Boolean = {
+    if (!exists(usercode)) {
+      save(usercode)
+    }
+
+    SQL"UPDATE USER_PREFERENCE SET EAP_UNTIL = ${prefs.eapUntil.orNull[DateTime]} WHERE USERCODE = ${usercode.string}".execute()
+  }
 }

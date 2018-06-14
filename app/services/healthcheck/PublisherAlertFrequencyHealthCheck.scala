@@ -43,7 +43,10 @@ class PublisherAlertFrequencyHealthCheck @Inject()(
     }
   }
 
-  override def perfData: Seq[PerfData[Int]] = counts.map(pub => PerfData(pub.id, pub.count, Option(tooMany), Option(farTooMany)))
+  override def perfData: Seq[PerfData[Int]] = counts.map(pub =>
+    // NEWSTART-1516 "-" character breaks CheckMK perfData parsing
+    PerfData(pub.id.replace("-", "_"), pub.count, Option(tooMany), Option(farTooMany))
+  )
 
   override def value: Int = warningPublishers.length
 

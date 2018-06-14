@@ -5,6 +5,7 @@ import log from 'loglevel';
 import $ from 'jquery';
 import _ from 'lodash-es';
 import { mkString } from '../../helpers';
+import { titleCase, sentenceCase } from 'change-case';
 
 export class AudienceIndicator extends React.PureComponent {
   static propTypes = {
@@ -103,10 +104,24 @@ export class AudienceIndicator extends React.PureComponent {
         if ('Dept:All' in audience && dept.name !== undefined) {
           return <div>{`Everyone in ${dept.name}`}</div>;
         }
-
         return (<div> {
           _.map(audience.groups, (components, audienceType) => {
             switch (audienceType) {
+              case 'hallsOfResidence':
+                if (components !== undefined) {
+                  const halls = components.hall;
+                  return halls ?
+                    _.map(halls, (value, key) => {
+                      const displayName = titleCase(sentenceCase(_.last(key.split(':'))));
+                      return (
+                        <div key={key}>
+                          All residents
+                          of {displayName}: {getCount([`ResidenceAudience(${displayName.replace(' ', '')})`], halls)}
+                        </div>
+                      );
+                    }) : null;
+                }
+                return null;
               case 'modules':
                 return _.map(components, ({ text, value }) =>
                   (<div

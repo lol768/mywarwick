@@ -21,6 +21,7 @@ export class AudiencePicker extends React.PureComponent {
       faculty: PropTypes.string,
     })),
     deptSubsetOpts: PropTypes.object,
+    hallsOfResidence: PropTypes.object,
     locationOpts: PropTypes.object,
     audienceDidUpdate: PropTypes.func.isRequired,
   };
@@ -31,6 +32,7 @@ export class AudiencePicker extends React.PureComponent {
     departments: {},
     deptSubsetOpts: {},
     locationOpts: {},
+    hallsOfResidence: {},
   };
 
   constructor(props) {
@@ -202,6 +204,51 @@ export class AudiencePicker extends React.PureComponent {
     const prefixPath = text => `audience.${isPublic ? 'universityWide' : 'department'}${text}`;
     const prefixDeptSubset = text => `${isPublic ? '' : 'Dept:'}${text}`;
 
+    const hallsOfResidenceInput = (
+      <Checkbox
+        handleChange={this.handleChange}
+        isChecked={this.isChecked(prefixPath('.groups.hallsOfResidence'))}
+        label="Halls of residence"
+        value="hallsOfResidence"
+        formPath={prefixPath('.groups')}
+      >
+        {/*
+        disabled for now, as lookup all HOR uniId to usercode is too slow from cold
+        we may want to reenable this once TAB-6311 is deployed
+        <RadioButton
+          handleChange={this.handleChange}
+          isChecked={!this.isChecked(prefixPath('.groups.hallsOfResidence.hall'))}
+          label="All"
+          name="audience.audience[]"
+          value="hallsOfResidence:all"
+          formPath={prefixPath('.groups.hallsOfResidence')}
+        />
+        <RadioButton
+          handleChange={this.handleChange}
+          isChecked={this.isChecked(prefixPath('.groups.hallsOfResidence.hall'))}
+          label="Choose the hall"
+          value="hall"
+          formPath={prefixPath('.groups.hallsOfResidence')}
+        >
+        */}
+
+        {Object.keys(this.props.hallsOfResidence).map(key =>
+          (<Checkbox
+            handleChange={this.handleChange}
+            isChecked={this.isChecked(prefixPath(`.groups.hallsOfResidence.hall.hallsOfResidence:${key}`))}
+            label={this.props.hallsOfResidence[key]}
+            name="audience.audience[]"
+            value={`hallsOfResidence:${key}`}
+            formPath={prefixPath('.groups.hallsOfResidence.hall')}
+          />),
+        )}
+
+        {/*
+        </RadioButton>
+        */}
+      </Checkbox>
+    );
+
     const listOfUsercodes = (
       <Checkbox
         handleChange={this.handleChange}
@@ -339,6 +386,7 @@ export class AudiencePicker extends React.PureComponent {
             placeholderText="Start typing the name or usercode of the staff member"
           />
         </Checkbox>
+        { this.state.department.code ? null : hallsOfResidenceInput }
         { listOfUsercodes }
       </div>
     );
