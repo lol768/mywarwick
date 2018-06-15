@@ -186,7 +186,7 @@ class SmsNotificationsView extends HideableView {
           <div className="modal-dialog" role="document">
             <div className="modal-content">
               <div className="modal-body">
-                <form className="form" id="Settings:SMSNumber-form">
+                <form className="form" id="Settings:SMSNumber-form" onSubmit={this.onEditSubmit}>
                   <div className={ classNames({
                     'form-group': true,
                     'has-error': this.state.submitErrors && this.state.submitErrors.phoneNumber,
