@@ -30,5 +30,17 @@ object UserLookupUtils {
     }
 
   }
+  
+  implicit class UserStringer(val user: User) {
+    def toTypeString: String = {
+      if (user.isStudent) "Student"
+      else if (user.isStaffNotPGR) "Staff"
+      else if (user.isStaffOrPGR) "Research student"
+      else if (user.isAlumni) "Graduate"
+      else if (user.userSource.isDefined) s"${user.userSource.get} user"
+      else if (user.isFound) "Non-member"
+      else "Non-existent user"
+    }
+  }
 
 }

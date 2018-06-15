@@ -1,0 +1,42 @@
+@import system.RequestContext
+@import warwick.sso.Department
+@import org.joda.time.DateTime
+@(now: DateTime, membershipByType: Iterable[(String, Int)], membershipByDepartment: Iterable[(Option[Department], Int)])(implicit messages: Messages, context: RequestContext)
+
+@common.admin("Administration", "Reports", "Early Access Program Report") {
+  <h2>Membership by type</h2>
+
+  <table class="table table-condensed table-hover sortable-table">
+    <thead class="thead">
+      <th scope="col" class="text-right">Count</th>
+      <th scope="col">Type</th>
+    </thead>
+    <tbody>
+    @for((memberType, count) <- membershipByType) {
+      <tr>
+        <td class="text-right count-column">@count</td>
+        <td>@memberType</td>
+      </tr>
+    }
+    </tbody>
+  </table>
+
+  <h2>Membership by department</h2>
+
+  <table class="table table-condensed table-hover sortable-table">
+    <thead class="thead">
+      <th scope="col" class="text-right">Count</th>
+      <th scope="col">Department</th>
+    </thead>
+    <tbody>
+    @for((department, count) <- membershipByDepartment) {
+      <tr>
+        <td class="text-right count-column">@count</td>
+        <td>@department.fold("Unknown department")(_.name.get)</td>
+      </tr>
+    }
+    </tbody>
+  </table>
+  
+  <p class="text-muted"><i>Report generated at @models.DateFormats.emailDateTime(now)</i></p>
+}
