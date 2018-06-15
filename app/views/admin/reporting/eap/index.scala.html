@@ -1,7 +1,7 @@
 @import system.RequestContext
 @import warwick.sso.Department
 @import org.joda.time.DateTime
-@(now: DateTime, membershipByType: Iterable[(String, Int)], membershipByDepartment: Iterable[(Option[Department], Int)])(implicit messages: Messages, context: RequestContext)
+@(now: DateTime, total: Int, membershipByType: Iterable[(String, Int)], membershipByDepartment: Iterable[(Option[Department], Int)])(implicit messages: Messages, context: RequestContext)
 
 @common.admin("Administration", "Reports", "Early Access Program Report") {
   <h2>Membership by type</h2>
@@ -19,6 +19,12 @@
       </tr>
     }
     </tbody>
+    <tfoot>
+      <tr>
+        <th class="text-right count-column">@total</th>
+        <th>Total</th>
+      </tr>
+    </tfoot>
   </table>
 
   <h2>Membership by department</h2>
