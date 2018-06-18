@@ -8,6 +8,7 @@ import play.api.mvc.{Action, AnyContent}
 import services.SecurityService
 import services.reporting.EAPReportingService
 import system.Roles
+import utils.UserLookupUtils.DepartmentStringer
 
 @Singleton
 class EAPReportingController @Inject()(
@@ -30,7 +31,7 @@ class EAPReportingController @Inject()(
       .getMembershipByDepartment()
       .toSeq
       .sortBy({ case (_, count) => -count })
-      .map({case (dept, count) => (dept.toString, count)})
+      .map({case (dept, count) => (dept.toSafeString, count)})
     
     Ok(views.html.admin.reporting.eap.index(
       DateTime.now,

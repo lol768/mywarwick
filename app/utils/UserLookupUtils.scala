@@ -44,7 +44,7 @@ object UserLookupUtils {
   }
 
   implicit class DepartmentStringer(val dept: Option[Department]) {
-    override def toString: String = {
+    def toSafeString: String = {
       dept match {
         case Some(d) if d.name.isDefined => d.name.get
         case Some(d) if d.code.isDefined => s"Unknown department (${d.code.get})"
