@@ -17,7 +17,7 @@ class EAPReportingController @Inject()(
   import Roles._
   import securityService._
   
-  private def sum(m: Iterable[(Any, Int)]): Int = m.foldLeft(0)((acc, kv) => acc + kv._2)
+  private def sum(m: Iterable[(Any, Int)]): Int = m.map(_._2).sum
 
   def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     val typedMembership = eapReportingService.getMembershipByType().toSeq.sortBy({ case (_, count) => -count })
