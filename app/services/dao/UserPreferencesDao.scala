@@ -4,7 +4,7 @@ import java.sql.Connection
 
 import anorm.SqlParser._
 import anorm._
-import com.google.inject.{ImplementedBy, Inject, Singleton}
+import com.google.inject.{ImplementedBy, Singleton}
 import controllers.api.ColourScheme
 import javax.inject.Inject
 import models.FeaturePreferences
