@@ -6,8 +6,10 @@ import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import controllers.api.ColourScheme
+import javax.inject.Inject
 import models.FeaturePreferences
 import org.joda.time.DateTime
+import play.api.Configuration
 import play.api.libs.json.{JsObject, Json}
 import warwick.anorm.converters.ColumnConversions._
 import warwick.sso.{Department, User, UserLookupService, Usercode}
@@ -68,8 +70,11 @@ trait UserPreferencesDao {
 
 @Singleton
 class UserPreferencesDaoImpl @Inject()(
-  userLookupService: UserLookupService
+  userLookupService: UserLookupService,
+  config: Configuration
 ) extends UserPreferencesDao {
+
+  private lazy val defaultEAP = config.get[Boolean]("mywarwick.defaultEAP")
 
   private val featurePreferencesParser =
     get[DateTime]("EAP_UNTIL").?
@@ -90,7 +95,13 @@ class UserPreferencesDaoImpl @Inject()(
       .nonEmpty
 
   override def save(usercode: Usercode)(implicit c: Connection): Unit =
-    SQL"INSERT INTO USER_PREFERENCE (USERCODE, CREATED_AT) VALUES (${usercode.string}, SYSDATE)"
+    SQL"""
+      INSERT INTO USER_PREFERENCE (USERCODE, CREATED_AT, EAP_UNTIL)
+      VALUES (
+        ${usercode.string},
+        SYSDATE,
+        ${if (defaultEAP) DateTime.now.plusYears(10) else null}
+    )"""
       .execute()
 
   override def countInitialisedUsers(usercodes: Set[Usercode])(implicit c: Connection): Int =
@@ -226,38 +237,38 @@ class UserPreferencesDaoImpl @Inject()(
 
     SQL"UPDATE USER_PREFERENCE SET EAP_UNTIL = ${prefs.eapUntil.orNull[DateTime]} WHERE USERCODE = ${usercode.string}".execute()
   }
-  
+
   private def allFeaturePreferences()(implicit c: Connection): Seq[(User, FeaturePreferences)] = {
     val usercodedPrefs = SQL"SELECT USERCODE, EAP_UNTIL FROM USER_PREFERENCE"
       .as((usercodeParser ~ featurePreferencesParser).*)
       .map {
         case usercode ~ fp => usercode -> fp
       }
-    
+
     val allUsers = userLookupService.getUsers(usercodedPrefs.map(_._1)).getOrElse(Map.empty)
-    
+
     usercodedPrefs.map {
-      case (usercode, fp) if allUsers.isDefinedAt(usercode) => allUsers.get(usercode).get -> fp
+      case (usercode, fp) if allUsers.isDefinedAt(usercode) => allUsers(usercode) -> fp
       case (usercode, fp) => User.unknown(usercode) -> fp
       case _ => User.unknown(Usercode("-")) -> FeaturePreferences.empty
     }
   }
-  
+
   override def countEAPByType()(implicit c: Connection): Map[String, Int] = {
     import utils.UserLookupUtils.UserStringer
 
     ListMap((for {
-           (userType, pair) <- allFeaturePreferences().groupBy(_._1.toTypeString)
-           fps = pair.map(_._2)
-           eapCount = fps.filter(_.eap).length
-         } yield userType -> eapCount)(collection.breakOut): _*)
+      (userType, pair) <- allFeaturePreferences().groupBy(_._1.toTypeString)
+      fps = pair.map(_._2)
+      eapCount = fps.count(_.eap)
+    } yield userType -> eapCount)(collection.breakOut): _*)
   }
-  
+
   override def countEAPByDepartment()(implicit c: Connection): Map[Option[Department], Int] = {
     ListMap((for {
       (dept, pair) <- allFeaturePreferences().groupBy(_._1.department)
       fps = pair.map(_._2)
-      eapCount = fps.filter(_.eap).length
+      eapCount = fps.count(_.eap)
     } yield dept -> eapCount)(collection.breakOut): _*)
   }
 }

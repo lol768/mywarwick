@@ -20,6 +20,9 @@ export default function wrapKeyboardSelect(callback, event) {
     (event.keyCode === ENTER_KEYCODE || event.keyCode === SPACE_KEYCODE)) {
     event.preventDefault();
     callback(event);
+  } else if (event.type === 'submit') {
+    event.preventDefault();
+    callback(event);
   }
   // other keyboard event, do nothing
 }
