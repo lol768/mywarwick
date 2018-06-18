@@ -1,7 +1,6 @@
-@import system.RequestContext
-@import warwick.sso.Department
 @import org.joda.time.DateTime
-@(now: DateTime, total: Int, membershipByType: Iterable[(String, Int)], membershipByDepartment: Iterable[(Option[Department], Int)])(implicit messages: Messages, context: RequestContext)
+@import system.RequestContext
+@(now: DateTime, total: Int, membershipByType: Iterable[(String, Int)], membershipByDepartment: Iterable[(String, Int)])(implicit messages: Messages, context: RequestContext)
 
 @common.admin("Administration", "Reports", "Early Access Program Report") {
   <h2>Membership by type</h2>
@@ -38,7 +37,7 @@
     @for((department, count) <- membershipByDepartment) {
       <tr>
         <td class="text-right count-column">@count</td>
-        <td>@department.fold("Unknown department")(_.name.get)</td>
+        <td>@department</td>
       </tr>
     }
     </tbody>

@@ -1,6 +1,6 @@
 package utils
 
-import warwick.sso.{UniversityID, User, UserLookupService}
+import warwick.sso.{Department, UniversityID, User, UserLookupService}
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -30,7 +30,7 @@ object UserLookupUtils {
     }
 
   }
-  
+
   implicit class UserStringer(val user: User) {
     def toTypeString: String = {
       if (user.isStudent) "Student"
@@ -40,6 +40,16 @@ object UserLookupUtils {
       else if (user.userSource.isDefined) s"${user.userSource.get} user"
       else if (user.isFound) "Non-member"
       else "Non-existent user"
+    }
+  }
+
+  implicit class DepartmentStringer(val dept: Option[Department]) {
+    override def toString: String = {
+      dept match {
+        case Some(d) if d.name.isDefined => d.name.get
+        case Some(d) if d.code.isDefined => s"Unknown department (${d.code.get})"
+        case _ => "Unknown department"
+      }
     }
   }
 
