@@ -4,6 +4,7 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import controllers.admin.{routes => adminRoutes}
 import controllers.admin.publishers.{routes => adminPublishersRoutes}
+import controllers.admin.reporting.{routes => adminReportingRoutes}
 import controllers.publish.{routes => publishRoutes}
 import models.publishing.Ability.{ViewNews, ViewNotifications}
 import models.publishing.{Ability, Publisher}
@@ -96,9 +97,10 @@ class NavigationServiceImpl @Inject()(
       NavigationPage("Cluster State", adminRoutes.ClusterStateController.html()),
       NavigationPage("ElasticSearch", controllers.admin.elasticsearch.routes.ActivityToESController.index()),
       NavigationPage("EAP Features", adminRoutes.EAPFeaturesController.index()),
-      NavigationPage("Reports", controllers.admin.reporting.routes.HomeController.index(), Seq(
-        NavigationPage("Preferences Report", controllers.admin.reporting.routes.PreferencesReportingController.index()),
-        NavigationPage("Activity Report", controllers.admin.reporting.routes.ActivityReportingController.index())
+      NavigationPage("Reports", adminReportingRoutes.HomeController.index(), Seq(
+        NavigationPage("Preferences Report", adminReportingRoutes.PreferencesReportingController.index()),
+        NavigationPage("Activity Report", adminReportingRoutes.ActivityReportingController.index()),
+        NavigationPage("EAP Report", adminReportingRoutes.EAPReportingController.index())
       ))
     ))
   }
