@@ -30,7 +30,7 @@ class EAPReportingController @Inject()(
       .getMembershipByDepartment()
       .toSeq
       .sortBy({ case (_, count) => -count })
-      .map({case (d, c) => (d.toString, c)})
+      .map({case (dept, count) => (dept.toString, count)})
     
     Ok(views.html.admin.reporting.eap.index(
       DateTime.now,
