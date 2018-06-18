@@ -2,7 +2,7 @@ package services.elasticsearch
 
 import java.util
 
-import models.Audience._
+import models.Audience.{UndergradStudents, _}
 import models.publishing.Publisher
 import models.{Activity, Audience}
 import org.elasticsearch.action.search.SearchResponse
@@ -115,6 +115,8 @@ object ActivityDocument {
         case e: DepartmentAudience => e.subset.map(subset => {
           s"${simpleClassName(e)}:${e.deptCode}:${subset.entryName}"
         })
+        // NEWSTART-1522
+        case e: UndergradStudents => Seq(s"UndergradStudents:${e.value}")
         case e: Audience.Component => Seq(simpleClassName(e))
       }
       case _ => Nil
