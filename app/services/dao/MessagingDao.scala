@@ -14,7 +14,7 @@ import warwick.sso.Usercode
 @ImplementedBy(classOf[MessagingDaoImpl])
 trait MessagingDao {
 
-  def save(activity: Activity, usercode: Usercode, output: Output)(implicit c: Connection): Unit
+  def save(activity: Activity, usercode: Usercode, output: Output, sendAt: Option[DateTime])(implicit c: Connection): Unit
 
   def complete(messageId: String, state: MessageState)(implicit c: Connection): Unit
 
@@ -36,7 +36,7 @@ class MessagingDaoImpl extends MessagingDao {
     get[String]("OUTPUT") ~
       get[String]("STATE") ~
       get[Int]("COUNT") map {
-      case (output ~ state ~ count) =>
+      case output ~ state ~ count =>
         QueueStatus(MessageState.parse(state), Output.parse(output), count)
     }
 
@@ -52,14 +52,15 @@ class MessagingDaoImpl extends MessagingDao {
     SQL"SELECT COUNT(*) FROM MESSAGE_SEND WHERE OUTPUT = ${Output.SMS.name} AND UPDATED_AT > SYSDATE - 1"
       .as(scalar[Int].single)
 
-  override def save(activity: Activity, usercode: Usercode, output: Output)(implicit c: Connection): Unit = {
-    SQL("INSERT INTO MESSAGE_SEND (ID, ACTIVITY_ID, USERCODE, OUTPUT, UPDATED_AT) VALUES ({id}, {activityId}, {usercode}, {output}, {updatedAt})")
+  override def save(activity: Activity, usercode: Usercode, output: Output, sendAt: Option[DateTime])(implicit c: Connection): Unit = {
+    SQL("INSERT INTO MESSAGE_SEND (ID, ACTIVITY_ID, USERCODE, OUTPUT, UPDATED_AT, SEND_AT) VALUES ({id}, {activityId}, {usercode}, {output}, {updatedAt}, {sendAt)")
       .on(
         'id -> UUID.randomUUID().toString,
         'activityId -> activity.id,
         'usercode -> usercode.string,
         'output -> output.name,
-        'updatedAt -> DateTime.now
+        'updatedAt -> DateTime.now,
+        'sendAt -> sendAt.orNull
       )
       .execute()
   }
@@ -91,7 +92,7 @@ class MessagingDaoImpl extends MessagingDao {
     */
   def lockRecord()(implicit c: Connection): Option[MessageSend.Light] = {
     // 4 is arbitrary but any number > number of workers is good
-    val select = SQL("SELECT * FROM MESSAGE_SEND WHERE STATE='A' AND ROWNUM <= 4 FOR UPDATE")
+    val select = SQL("SELECT * FROM MESSAGE_SEND WHERE STATE='A' AND (SEND_AT IS NULL OR SEND_AT <= SYSDATE) AND ROWNUM <= 4 FOR UPDATE")
     val update = SQL("UPDATE MESSAGE_SEND SET STATE='T', UPDATED_AT={now} WHERE ID={id} AND STATE='A'")
 
     val records = select.as(MessageSend.rowParser.*)

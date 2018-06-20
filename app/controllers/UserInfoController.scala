@@ -5,6 +5,7 @@ import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.mvc.{Cookie, DiscardingCookie}
 import services.{PhotoService, UserInitialisationService}
 import services.analytics.AnalyticsMeasurementService
+import services.messaging.DoNotDisturbService
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl.GLOBAL_LOGIN_COOKIE_NAME
 import uk.ac.warwick.sso.client.SSOToken.SSC_TICKET_TYPE
 import uk.ac.warwick.sso.client.cache.UserCache
@@ -27,7 +28,8 @@ class UserInfoController @Inject()(
   ssoClient: SSOClient,
   userInitialisationService: UserInitialisationService,
   photoService: PhotoService,
-  measurementService: AnalyticsMeasurementService
+  measurementService: AnalyticsMeasurementService,
+  doNotDisturbService: DoNotDisturbService
 )(implicit @Named("externalData") ec: ExecutionContext) extends MyController {
 
   val SSC_NAME = ssoConfig.getString("shire.sscookie.name")

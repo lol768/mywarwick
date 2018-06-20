@@ -60,6 +60,7 @@ class MessagingServiceImpl @Inject()(
   @Named("sms") sms: OutputService,
   messagingDao: MessagingDao,
   activityESService: ActivityESService,
+  dndService: DoNotDisturbService
 ) extends MessagingService with Logging {
 
   // weak sauce way to resolve cyclic dependency.
@@ -91,7 +92,7 @@ class MessagingServiceImpl @Inject()(
   override def send(recipients: Set[Usercode], activity: Activity): Unit = {
     def save(output: Output, user: Usercode)(implicit c: Connection): Unit = {
       if (logger.isDebugEnabled) logger.logger.debug(s"Sending ${output.name} to $user about ${activity.id}")
-      messagingDao.save(activity, user, output)
+      messagingDao.save(activity, user, output, dndService.getRescheduleTime(user))
     }
 
     db.withTransaction { implicit c =>
