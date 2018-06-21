@@ -1,9 +1,7 @@
-@import system.RequestContext
-@import services.elasticsearch.ActivityDocument
-@import controllers.admin.reporting.ActivityReportFormData
-
+@import controllers.admin.reporting.DatedReportFormData
 @import services.elasticsearch.ActivityESSearch.CountQueryResponse
-@(allAlertsCountByProviders: Iterable[(ActivityProvider, CountQueryResponse)], formData: Form[ActivityReportFormData])(implicit messages: Messages, context: RequestContext)
+@import system.RequestContext
+@(allAlertsCountByProviders: Iterable[(ActivityProvider, CountQueryResponse)], formData: Form[DatedReportFormData])(implicit messages: Messages, context: RequestContext)
 @implicitFieldConstructor = @{
   b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
 }

@@ -17,6 +17,8 @@ trait ESClientConfig {
   def highLevelClient: RestHighLevelClient
 
   def lowLevelClient: RestClient
+  
+  def clogsClient: RestHighLevelClient
 }
 
 @Singleton
@@ -52,6 +54,29 @@ class ESClientConfigImpl @Inject()(
   override def highLevelClient: RestHighLevelClient = highLevel
 
   override def lowLevelClient: RestClient = highLevel.getLowLevelClient
+  
+  override def clogsClient: RestHighLevelClient = {
+    val clogsNodes = ESNode
+      .fromConfigs(config.get[Seq[String]]("clogs.nodes"))
+      .map(node => new HttpHost(node.node, node.port, node.protocol))
+    
+    val clogsLowLevelBuilder = RestClient
+      .builder(clogsNodes.toArray: _*)
+      .setMaxRetryTimeoutMillis(60000)
+      .setHttpClientConfigCallback((configBuilder: HttpAsyncClientBuilder) => {
+        configBuilder
+          .setDefaultRequestConfig(
+            RequestConfig.custom()
+              .setSocketTimeout(60000)
+              .setConnectTimeout(60000)
+              .build()
+          )
+          .setMaxConnPerRoute(50)
+          .setMaxConnTotal(200)
+      })
+    
+    new RestHighLevelClient(clogsLowLevelBuilder)
+  }
 }
 
 case class ESNode(node: String, port: Int, protocol: String = "http")

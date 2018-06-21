@@ -58,6 +58,8 @@ GET           /admin/reports/preferences                     @controllers.admin.
 GET           /admin/reports/eap                             @controllers.admin.reporting.EAPReportingController.index
 GET           /admin/reports/activity                        @controllers.admin.reporting.ActivityReportingController.index
 POST          /admin/reports/activity                        @controllers.admin.reporting.ActivityReportingController.formSubmit
+GET           /admin/reports/clients                         @controllers.admin.reporting.ClientReportingController.index
+POST          /admin/reports/clients                         @controllers.admin.reporting.ClientReportingController.formSubmit
 
 GET           /publish/:publisher/webgroups                  @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 
