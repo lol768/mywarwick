@@ -3,6 +3,7 @@ import * as PropTypes from 'prop-types';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import { connect } from 'react-redux';
 import HideableView from '../HideableView';
+import BootstrapModal from '../../ui/BootstrapModal';
 import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 import { toggleEnabled, fetch } from '../../../state/eap';
 
@@ -50,35 +51,28 @@ class EAPPreferenceView extends HideableView {
 
   renderDisabledWarning() {
     return (
-      <div>
-        <div className="modal-backdrop in" />
-        <div className="modal in" id="EAPDisableWarning" tabIndex="-1" role="dialog">
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-body">
-                <p>
-                  You have been removed from the early access program.
-                </p>
-                <p>
-                  Any changes you made to your settings or tile layout while in the program
-                  will <strong>not</strong> be reset unless you manually change them.
-                </p>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-default"
-                  data-dismiss="modal"
-                  onClick={ this.onModalClose }
-                  onKeyUp={ this.onModalClose }
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
+      <BootstrapModal id="EAPDisableWarning">
+        <div className="modal-body">
+          <p>
+            You have been removed from the early access program.
+          </p>
+          <p>
+            Any changes you made to your settings or tile layout while in the program
+            will <strong>not</strong> be reset unless you manually change them.
+          </p>
         </div>
-      </div>
+        <div className="modal-footer">
+          <button
+            type="button"
+            className="btn btn-default"
+            data-dismiss="modal"
+            onClick={ this.onModalClose }
+            onKeyUp={ this.onModalClose }
+          >
+            Close
+          </button>
+        </div>
+      </BootstrapModal>
     );
   }
 

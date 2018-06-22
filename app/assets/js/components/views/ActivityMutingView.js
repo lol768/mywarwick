@@ -2,6 +2,7 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 import * as _ from 'lodash-es';
 import { activityMuteDurations } from '../../state/notifications';
+import BootstrapModal from '../ui/BootstrapModal';
 import RadioListGroupItem from '../ui/RadioListGroupItem';
 import wrapKeyboardSelect from '../../keyboard-nav';
 import { lowercaseFirst } from '../../helpers';
@@ -149,62 +150,52 @@ export default class ActivityMutingView extends React.PureComponent {
 
     return (
       <div className="activity-muting">
-        <div className="modal-backdrop in" />
-        <div
-          className="modal"
-          id={`muting-${this.props.id}`}
-          tabIndex="-1"
-          role="dialog"
-        >
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              {this.props.isOnline ?
-                <div>
-                  <div className="modal-body">
-                    { this.renderForm() }
-                  </div>
-                  <div className="modal-footer">
-                    <button
-                      type="button"
-                      className="btn btn-default"
-                      data-dismiss="modal"
-                      onClick={ this.onMutingDismiss }
-                      onKeyUp={ this.onMutingDismiss }
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={ this.saveMuting }
-                      onKeyUp={ this.saveMuting }
-                      disabled={ !this.state.duration || !someChecked }
-                    >
-                      Save changes
-                    </button>
-                  </div>
-                </div>
-                :
-                <div>
-                  <div className="modal-body">
-                    You cannot mute an alert while your device is offline
-                  </div>
-                  <div className="modal-footer">
-                    <button
-                      type="button"
-                      className="btn btn-default"
-                      data-dismiss="modal"
-                      onClick={ this.onMutingDismiss }
-                      onKeyUp={ this.onMutingDismiss }
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              }
+        <BootstrapModal id={`muting-${this.props.id}`}>
+          {this.props.isOnline ?
+            <div>
+              <div className="modal-body">
+                { this.renderForm() }
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-default"
+                  data-dismiss="modal"
+                  onClick={ this.onMutingDismiss }
+                  onKeyUp={ this.onMutingDismiss }
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={ this.saveMuting }
+                  onKeyUp={ this.saveMuting }
+                  disabled={ !this.state.duration || !someChecked }
+                >
+                  Save changes
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
+            :
+            <div>
+              <div className="modal-body">
+                You cannot mute an alert while your device is offline
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-default"
+                  data-dismiss="modal"
+                  onClick={ this.onMutingDismiss }
+                  onKeyUp={ this.onMutingDismiss }
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          }
+        </BootstrapModal>
       </div>
     );
   }
