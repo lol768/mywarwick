@@ -71,6 +71,7 @@ class MeView extends HideableView {
     this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
+    this.onDragStop = this.onDragStop.bind(this);
     this.onAdd = this.onAdd.bind(this);
     this.showModal = this.showModal.bind(this);
   }
@@ -81,12 +82,17 @@ class MeView extends HideableView {
     }
   }
 
+  onDragStop() {
+    $('.id7-main-content-area').removeClass('is-dragging');
+  }
+
   onDragStart(layout, item, newItem, placeholder, e) {
     e.preventDefault();
 
     // Disable rubber banding so the users' finger and the tile they are dragging
     // don't get out of sync.  (iOS)
-    $('.id7-main-content-area').css('-webkit-overflow-scrolling', 'auto');
+    // Also expose that there's a drag operation underway
+    $('.id7-main-content-area').css('-webkit-overflow-scrolling', 'auto').addClass('is-dragging');
   }
 
   showModal(modal) {
@@ -216,6 +222,7 @@ class MeView extends HideableView {
             onLayoutChange={this.onLayoutChange}
             verticalCompact
             onDragStart={this.onDragStart}
+            onDragStop={this.onDragStop}
             width={this.getGridLayoutWidth()}
             draggableHandle=".tile__drag-handle"
           >

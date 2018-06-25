@@ -34,7 +34,7 @@ import * as stream from './stream';
 import * as timetableAlarms from './state/timetable-alarms';
 import * as eap from './state/eap';
 import store, { browserHistory } from './store';
-import AppRoot, { Routes } from './components/AppRoot';
+import AppRoot from './components/AppRoot';
 import bridge from './bridge';
 import { hasAuthoritativeAuthenticatedUser, hasAuthoritativeUser } from './state';
 
@@ -86,8 +86,8 @@ export function launch(userData) {
     // Body element never scrolls on touch, main content scrolls, unless editing tiles
     document.body.addEventListener('touchmove', (e) => {
       const isMainContent = $(e.target).parents().addBack().hasClass('id7-main-content-area');
-      const isEditingTiles = window.location.pathname.indexOf(Routes.EDIT) !== -1;
-      if (isMainContent && !isEditingTiles) {
+      const isDragging = $('.id7-main-content-area').hasClass('is-dragging');
+      if (isMainContent && !isDragging) {
         e.stopPropagation();
         closeTooltips();
         return;
