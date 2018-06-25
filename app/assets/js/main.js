@@ -34,7 +34,7 @@ import * as stream from './stream';
 import * as timetableAlarms from './state/timetable-alarms';
 import * as eap from './state/eap';
 import store, { browserHistory } from './store';
-import AppRoot from './components/AppRoot';
+import AppRoot, { Routes } from './components/AppRoot';
 import bridge from './bridge';
 import { hasAuthoritativeAuthenticatedUser, hasAuthoritativeUser } from './state';
 
@@ -83,11 +83,18 @@ export function launch(userData) {
       $('.tooltip-active').tooltip('hide').removeClass('tooltip-active');
     }
 
-    // Prevent the body element from scrolling on touch.
-    $(document.body).on('touchmove', e => e.preventDefault());
-    $(document.body).on('touchmove', '.id7-main-content-area', (e) => {
-      e.stopPropagation();
-      closeTooltips();
+    // Body element never scrolls on touch, main content scrolls, unless editing tiles
+    document.body.addEventListener('touchmove', (e) => {
+      const isMainContent = $(e.target).parents().addBack().hasClass('id7-main-content-area');
+      const isEditingTiles = window.location.pathname.indexOf(Routes.EDIT) !== -1;
+      if (isMainContent && !isEditingTiles) {
+        e.stopPropagation();
+        closeTooltips();
+        return;
+      }
+      e.preventDefault();
+    }, {
+      passive: false,
     });
 
     $(document).on('click', (e) => {
