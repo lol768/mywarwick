@@ -60,7 +60,7 @@ class BasicFuncTest extends RemoteFuncTestBase {
 
         eventually {
           executeScript("window.scrollBy(0, 10000)")
-          find("app-container").get.text should include ("There are no older notifications.")
+          find("app-container").get.text should include ("There are no older notifications")
         }
       }
     }

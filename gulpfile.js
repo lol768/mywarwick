@@ -54,9 +54,9 @@ global.PRODUCTION = option('PRODUCTION', true);
 global.UGLIFY = option('UGLIFY', PRODUCTION);
 global.OFFLINE_WORKERS = option('OFFLINE_WORKERS', true);
 if (PRODUCTION) {
-  gutil.log(gutil.colors.yellow('Production build.'));
+  gutil.log(gutil.colors.yellow('Production build'));
 } else {
-  gutil.log(gutil.colors.yellow('Development build.'));
+  gutil.log(gutil.colors.yellow('Development build'));
 }
 gutil.log("Uglify: " + UGLIFY);
 gutil.log("Appcache/SW generation: " + OFFLINE_WORKERS);

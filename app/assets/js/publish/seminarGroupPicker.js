@@ -51,7 +51,7 @@ class SeminarGroupPicker {
 export default function seminarGroupPicker(options = {}) {
   const $this = $(this);
   if ($this.data('seminar-group-picker')) {
-    throw new Error('SeminarGroupPicker has already been added to this element.');
+    throw new Error('SeminarGroupPicker has already been added to this element');
   }
   $this.data('seminar-group-picker', new SeminarGroupPicker(this, options));
 }

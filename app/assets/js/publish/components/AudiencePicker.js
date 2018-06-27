@@ -145,7 +145,7 @@ export class AudiencePicker extends React.PureComponent {
             data-toggle="tooltip"
             data-placement="left"
             title="Users can select one or more locations to receive
-             alerts, or may choose not to specify any."
+             alerts, or may choose not to specify any"
           />
         </label>
         <RadioButton

@@ -165,13 +165,13 @@ export function launch(userData) {
   if ('storage' in navigator && 'persist' in navigator.storage) {
     navigator.storage.persisted().then((persistent) => {
       if (persistent) {
-        log.info('Persistent storage not requested as store is already persistent.');
+        log.info('Persistent storage not requested as store is already persistent');
       } else {
         navigator.storage.persist().then((granted) => {
           if (granted) {
-            log.info('Storage will not be cleared except by explicit user action.');
+            log.info('Storage will not be cleared except by explicit user action');
           } else {
-            log.info('Storage may be cleared by the UA under storage pressure.');
+            log.info('Storage may be cleared by the UA under storage pressure');
           }
         });
       }
