@@ -11,8 +11,8 @@ describe('WeatherTile', () => {
     },
     props = {
       'content': {
-        minutelySummary: 'Partly cloudy for the hour.',
-        hourlySummary: 'Partly cloudy until this afternoon.',
+        minutelySummary: 'Partly cloudy for the hour',
+        hourlySummary: 'Partly cloudy until this afternoon',
         currentConditions: { time: 1456316008, ...data },
         items: [
           { id: 1456316008, time: 1456316008, ...data },
@@ -54,7 +54,7 @@ describe('WeatherTile', () => {
     degrees.should.equal(4);
     degreesSymbol.should.equal('°');
 
-    caption.should.equal('Partly cloudy for the hour.');
+    caption.should.equal('Partly cloudy for the hour');
   });
 
   function testWideLayout(theseProps) {
@@ -89,7 +89,7 @@ describe('WeatherTile', () => {
     } = renderAtMoment(calloutComponent);
     calloutClassName.should.equal('tile__callout');
 
-    caption.should.equal('Partly cloudy for the hour.');
+    caption.should.equal('Partly cloudy for the hour');
 
     const {
       props: {
@@ -158,7 +158,7 @@ describe('WeatherTile', () => {
         children: message,
       },
     } = renderAtMoment(<WeatherTile {...props} />, new Date(2030, 1, 7));
-    message.should.equal('Unable to show recent weather information.');
+    message.should.equal('Unable to show recent weather information');
   });
 
 });

@@ -59,7 +59,7 @@ describe('TrafficTile', () => {
     props.fetchedAt = 1440288000000;
     const html = shallowRender(<TrafficTile {... props} />);
     html.type.should.equal('div');
-    html.props.children.should.equal('Unable to show recent traffic information.');
+    html.props.children.should.equal('Unable to show recent traffic information');
   });
 
   it('Shows inboud Traffic conditions before home time', () => {

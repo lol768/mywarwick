@@ -32,7 +32,7 @@ class NotificationsSnapshotController @Inject()(
     val originHeader = request.headers.get(ORIGIN)
 
     if (!isValidOrigin(originHeader))
-      Forbidden("Not permitted: CORS origin not allowed.")
+      Forbidden("Not permitted: CORS origin not allowed")
     else
       getUser(request).map { user =>
         val userCode = user.usercode
@@ -46,6 +46,6 @@ class NotificationsSnapshotController @Inject()(
           .withHeaders(ACCESS_CONTROL_ALLOW_HEADERS -> "x-requested-by")
           .withHeaders(ACCESS_CONTROL_ALLOW_CREDENTIALS -> "true")
           .withHeaders(VARY -> ORIGIN)
-      }.getOrElse(Forbidden("Not permitted: unauthenticated."))
+      }.getOrElse(Forbidden("Not permitted: unauthenticated"))
   }
 }

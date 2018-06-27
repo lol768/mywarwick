@@ -27,7 +27,7 @@ const TILE_PREFERENCES_SAVE = 'tiles.preferences.save';
 const NETWORK_ERRORS = [
   {
     id: 'network',
-    message: 'Unable to contact the server.',
+    message: 'Unable to contact the server',
   },
 ];
 

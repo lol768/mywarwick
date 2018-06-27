@@ -31,19 +31,19 @@ class ActivityView extends React.PureComponent {
   static renderEmpty(isFiltered) {
     if (isFiltered) {
       return (
-        <EmptyState lead="You don't have any activity to display.">
+        <EmptyState lead="You don't have any activity to display">
           <p>
-            There may be others hidden due to your Activity filter settings.
+            There may be others hidden due to your Activity filter settings
           </p>
         </EmptyState>
       );
     }
     return (
-      <EmptyState lead="You don't have any activity yet.">
+      <EmptyState lead="You don't have any activity yet">
         <p>
           When you do something at Warwick &ndash;
           like signing in, submitting your coursework, or enrolling for a module &ndash;
-          you’ll see a record of it here.
+          you’ll see a record of it here
         </p>
       </EmptyState>
     );
@@ -100,7 +100,7 @@ class ActivityView extends React.PureComponent {
               hasMore={ hasMore }
               onLoadMore={ this.loadMore }
               showLoading
-              endOfListPhrase="There are no older activities."
+              endOfListPhrase="There are no older activities"
             >
               <GroupedList groupBy={shouldBeGrouped ? groupItemsByDate : undefined}>
                 {activities}

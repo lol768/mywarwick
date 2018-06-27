@@ -66,7 +66,7 @@ class ActivityToESController @Inject()(
           .usingJobData(jobDateKeyForToDate, toDate.toString(dateTimeFormat))
           .build()
         scheduler.triggerJobNow(jobDetail)
-        Redirect(controllers.admin.elasticsearch.routes.ActivityToESController.index()).flashing("success" -> "The task is now added to scheduler queue.")
+        Redirect(controllers.admin.elasticsearch.routes.ActivityToESController.index()).flashing("success" -> "The task is now added to scheduler queue")
       }
     )
   }

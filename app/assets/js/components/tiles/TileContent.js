@@ -106,7 +106,7 @@ export default class TileContent extends React.PureComponent {
 
   contentOrDefault(contentFunction) {
     if (this.isEmpty()) {
-      return <span>{ this.props.content.defaultText || 'Nothing to show.' }</span>;
+      return <span>{ this.props.content.defaultText || 'Nothing to show' }</span>;
     }
 
     return contentFunction.call(this);
@@ -129,7 +129,7 @@ export default class TileContent extends React.PureComponent {
       }
     }
     if (this.isError()) {
-      return <span>Unexpected error displaying this tile.</span>;
+      return <span>Unexpected error displaying this tile</span>;
     }
     return null;
   }

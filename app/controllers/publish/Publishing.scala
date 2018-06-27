@@ -32,7 +32,7 @@ trait Publishing extends DepartmentOptions with CategoryOptions with HasProvider
       "department" -> optional(text)
     )(AudienceData.apply)(AudienceData.unapply)
       .verifying(
-        "You do not have the required permissions to publish to that audience.",
+        "You do not have the required permissions to publish to that audience",
         data => userCanPublishToAudience(data)
       )
 

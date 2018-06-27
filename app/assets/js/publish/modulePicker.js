@@ -48,7 +48,7 @@ class ModulePicker {
 export default function modulePicker(options = {}) {
   const $this = $(this);
   if ($this.data('module-picker')) {
-    throw new Error('ModulePicker has already been added to this element.');
+    throw new Error('ModulePicker has already been added to this element');
   }
   $this.data('module-picker', new ModulePicker(this, options));
 }
