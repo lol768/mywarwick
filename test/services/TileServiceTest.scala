@@ -2,24 +2,27 @@ package services
 
 import java.sql.Connection
 
+import controllers.MockFeaturesService
 import helpers.{BaseSpec, Fixtures}
-import models.TileLayout
+import models.{FeaturePreferences, Tile, TileLayout}
+import org.joda.time.DateTime
 import org.mockito.Matchers.{eq => isEq, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import services.dao.{TileDao, TileLayoutDao}
+import warwick.sso.User
 
 class TileServiceTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
-  val jim = Fixtures.user.makeFoundUser("jim")
+  private val jim = Fixtures.user.makeFoundUser("jim")
   val jimsLayout = Seq(
     TileLayout("mail", 2, 0,0, 1,1),
     TileLayout("mail", 4, 0,0, 1,1),
     TileLayout("coursework", 2, 0,1, 1,1)
   )
 
-  val ada = Fixtures.user.makeFoundUser("ada")
+  private val ada = Fixtures.user.makeFoundUser("ada")
 
   val studentLayout = Seq(
     TileLayout("sport", 2, 0,0, 2,1),
@@ -28,10 +31,15 @@ class TileServiceTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
   trait Scope {
     val db = new MockDatabase
-    val tileLayoutDao = mock[TileLayoutDao]
-    val service = new TileServiceImpl(null, tileLayoutDao, db)
+    val tileDao: TileDao = mock[TileDao]
+    val tileLayoutDao: TileLayoutDao = mock[TileLayoutDao]
+    val userPreferencesService: UserPreferencesService = mock[UserPreferencesService]
+    val features: Features = mock[Features]
+    when(features.eap).thenReturn(false)
+    private val featuresService = new MockFeaturesService(features)
+    val service = new TileServiceImpl(tileDao, tileLayoutDao, db, userPreferencesService, featuresService)
 
-    def conn = any[Connection]
+    def conn: Connection = any[Connection]
 
     // shared stubs
     when(tileLayoutDao.getDefaultTileLayoutForGroup(isEq("student"))(conn)).thenReturn(studentLayout)
@@ -57,7 +65,7 @@ class TileServiceTest extends BaseSpec with MockitoSugar with ScalaFutures {
     }
 
     "return WBS tile set for WBS user" in new Scope {
-      val bob = Fixtures.user.makeFoundUser("bob").copy(userSource = Some("WBSLdap"))
+      private val bob = Fixtures.user.makeFoundUser("bob").copy(userSource = Some("WBSLdap"))
       val wbsLayout = Seq(TileLayout("business", 2, 0,0, 1,1))
 
       when(tileLayoutDao.getTileLayoutForUser(isEq(bob.usercode.string))(conn)).thenReturn(Nil)
@@ -67,13 +75,54 @@ class TileServiceTest extends BaseSpec with MockitoSugar with ScalaFutures {
     }
 
     "return Account tile for users with no university ID" in new Scope {
-      val tim = Fixtures.user.makeFoundUser("tim").copy(universityId = None)
+      private val tim = Fixtures.user.makeFoundUser("tim").copy(universityId = None)
       val accountTile = Seq(TileLayout("account", 2, 0,0, 1,1))
 
       when(tileLayoutDao.getTileLayoutForUser(isEq(tim.usercode.string))(conn)).thenReturn(Nil)
       when(tileLayoutDao.getDefaultTileLayoutForGroup(isEq("no-uni-id"))(conn)).thenReturn(accountTile)
 
       service.getTileLayoutForUser(Some(tim)) must be (accountTile)
+    }
+
+    "include EAP tile in layout in applicable" in {
+      val tim = Fixtures.user.makeFoundUser("tim").copy(universityId = None)
+      val eapTile = Tile("eap", "eap", 0, None, "Early Access", None, 0)
+      val enabledFeaturePreferences = FeaturePreferences(Some(DateTime.now().plusDays(1)))
+
+      new Scope {
+        when(tileLayoutDao.getTileLayoutForUser(isEq(tim.usercode.string))(conn)).thenReturn(Nil)
+        when(tileLayoutDao.getDefaultTileLayoutForGroup(isEq("no-uni-id"))(conn)).thenReturn(Nil)
+
+        // Feature enabled but no tile
+        when(features.eap).thenReturn(true)
+        when(tileDao.getAllTiles()(conn)).thenReturn(Nil)
+        service.getTileLayoutForUser(Some(tim)) mustBe Nil
+      }
+
+      new Scope {
+        when(tileLayoutDao.getTileLayoutForUser(isEq(tim.usercode.string))(conn)).thenReturn(Nil)
+        when(tileLayoutDao.getDefaultTileLayoutForGroup(isEq("no-uni-id"))(conn)).thenReturn(Nil)
+
+        // Feature enabled and tile exists but not enabled for user
+        when(features.eap).thenReturn(true)
+        when(tileDao.getAllTiles()(conn)).thenReturn(Seq(eapTile))
+        when(userPreferencesService.getFeaturePreferences(tim.usercode)).thenReturn(FeaturePreferences.empty)
+        service.getTileLayoutForUser(Some(tim)) mustBe Nil
+      }
+
+      new Scope {
+        when(tileLayoutDao.getTileLayoutForUser(isEq(tim.usercode.string))(conn)).thenReturn(Nil)
+        when(tileLayoutDao.getDefaultTileLayoutForGroup(isEq("no-uni-id"))(conn)).thenReturn(Nil)
+
+        // Feature enabled and tile exists and enabled for user
+        when(features.eap).thenReturn(true)
+        when(tileDao.getAllTiles()(conn)).thenReturn(Seq(eapTile))
+        when(userPreferencesService.getFeaturePreferences(tim.usercode)).thenReturn(enabledFeaturePreferences)
+        private val result = service.getTileLayoutForUser(Some(tim))
+        result.length mustBe 1
+        result.head.tile mustBe TileService.EAPTileId
+      }
+
     }
 
   }

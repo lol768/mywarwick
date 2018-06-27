@@ -33,6 +33,10 @@ export default class TileContent extends React.PureComponent {
     return true;
   }
 
+  static isMovable() {
+    return true;
+  }
+
   static expandsOnClick() {
     return false;
   }

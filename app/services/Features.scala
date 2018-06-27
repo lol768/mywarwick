@@ -1,24 +1,18 @@
 package services
 
-import java.lang.reflect.{InvocationHandler, Method}
+import java.lang.reflect.Method
 
-import javax.inject.{Inject, Provider, Singleton}
 import com.google.inject.ImplementedBy
-import enumeratum.EnumEntry
-import models.FeaturePreferences
-import models.Platform.findValues
-
-import scala.reflect.runtime.{universe => ru}
-import scala.reflect.classTag
-import play.api.Configuration
-import warwick.sso.User
-
-import scala.reflect.ClassTag
 import enumeratum.{Enum, EnumEntry}
-import play.api.libs.json.{JsObject, Json, OWrites}
+import javax.inject.{Inject, Provider, Singleton}
+import models.FeaturePreferences
+import play.api.Configuration
+import play.api.libs.json.OWrites
 import utils.{BoolTraitWrites, JavaProxy}
+import warwick.sso.{User, Usercode}
 
 import scala.collection.immutable
+import scala.reflect.{ClassTag, classTag}
 
 /**
   * To work with feature flags:
@@ -57,6 +51,7 @@ object FeatureState extends Enum[FeatureState] {
 @ImplementedBy(classOf[FeaturesServiceImpl])
 trait FeaturesService {
   def get(user: Option[User]): Features
+  def get(usercode: Usercode): Features
 }
 
 @Singleton
@@ -73,6 +68,10 @@ class FeaturesServiceImpl @Inject() (
       FeaturePreferences.empty
     }
     new FlagsAccessor[Features](featuresConfig, featurePreferences).get
+  }
+
+  override def get(usercode: Usercode): Features = {
+    new FlagsAccessor[Features](featuresConfig, userPreferences.getFeaturePreferences(usercode)).get
   }
 }
 
