@@ -285,7 +285,7 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
         UndergradStudents.All,
         TaughtPostgrads,
         ResearchPostgrads
-      ))).as[JsObject].value("audience").as[JsObject].value("universityWide").as[JsObject].value("groups").as[JsObject].value
+      )))("audience")("universityWide")("groups")
       universityWideGroups("All") mustBe JsString("undefined")
       universityWideGroups("Staff") mustBe JsString("undefined")
       universityWideGroups("TaughtPostgrads") mustBe JsString("undefined")
@@ -296,11 +296,10 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
         UndergradStudents.First,
         UndergradStudents.Second,
         UndergradStudents.Final
-      ))).as[JsObject].value("audience").as[JsObject].value("universityWide").as[JsObject].value("groups").as[JsObject].value("undergraduates").as[JsObject].value
-      private val undergraduateYears = undergraduateGroups("year").as[JsObject].value
-      undergraduateYears("UndergradStudents:First") mustBe JsString("undefined")
-      undergraduateYears("UndergradStudents:Second") mustBe JsString("undefined")
-      undergraduateYears("UndergradStudents:Final") mustBe JsString("undefined")
+      )))("audience")("universityWide")("groups")("undergraduates")
+      undergraduateGroups("year")("UndergradStudents:First") mustBe JsString("undefined")
+      undergraduateGroups("year")("UndergradStudents:Second") mustBe JsString("undefined")
+      undergraduateGroups("year")("UndergradStudents:Final") mustBe JsString("undefined")
 
       when(audienceLookupDao.findModules("CH160")).thenReturn(Future.successful(Seq(LookupModule("CH160", "Module", "Description"))))
       when(audienceLookupDao.getSeminarGroupById("1234")).thenReturn(Future.successful(Some(LookupSeminarGroup("1234", "Group", "Description", "CH160"))))
@@ -312,13 +311,10 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
         SeminarGroupAudience("1234"),
         RelationshipAudience("tutor", UniversityID("1234567")),
         ResidenceAudience(Residence.All)
-      ))).as[JsObject].value("audience").as[JsObject].value("universityWide").as[JsObject].value("groups").as[JsObject].value
-      private val relationship = otherAudience("staffRelationships").as[JsArray].value.head.as[JsObject].value
-      relationship("value") mustBe JsString("1234567")
-      private val seminarGroup = otherAudience("seminarGroups").as[JsArray].value.head.as[JsObject].value
-      seminarGroup("value") mustBe JsString("1234")
-      private val module = otherAudience("modules").as[JsArray].value.head.as[JsObject].value
-      module("value") mustBe JsString("CH160")
+      )))("audience")("universityWide")("groups")
+      otherAudience("staffRelationships")(0)("value") mustBe JsString("1234567")
+      otherAudience("seminarGroups")(0)("value") mustBe JsString("1234")
+      otherAudience("modules")(0)("value") mustBe JsString("CH160")
       private val usercodes = otherAudience("listOfUsercodes").as[JsArray].value
       usercodes must contain (JsString("cusfal"))
       usercodes must contain (JsString("cuscao"))
