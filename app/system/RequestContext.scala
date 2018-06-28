@@ -28,7 +28,7 @@ object RequestContext {
 
   def authenticated(sso: SSOClient, request: RequestHeader, csrfHelperFactory: CSRFPageHelperFactory, features: FeaturesService): RequestContext = {
     val eventualRequestContext = sso.withUser(request) { loginContext =>
-      Future.successful(Right(RequestContext(sso, request, loginContext.user, loginContext.actualUser, Nil, csrfHelperFactory, features.get(loginContext.user.map(_.usercode)))))
+      Future.successful(Right(RequestContext(sso, request, loginContext.user, loginContext.actualUser, Nil, csrfHelperFactory, features.get(loginContext.user))))
     }.map(_.right.get)
 
     Await.result(eventualRequestContext, Duration.Inf)

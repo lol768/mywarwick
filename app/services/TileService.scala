@@ -7,6 +7,10 @@ import services.dao.{TileDao, TileLayoutDao}
 import system.{AuditLogContext, Logging}
 import warwick.sso.User
 
+object TileService {
+  val EAPTileId = "eap"
+}
+
 @ImplementedBy(classOf[TileServiceImpl])
 trait TileService {
 
@@ -20,12 +24,16 @@ trait TileService {
 
   def saveTileLayoutForUser(user: User, tileLayout: Seq[TileLayout])(implicit context: AuditLogContext): Unit
 
+  def getEAPTile: Option[Tile]
+
 }
 
 class TileServiceImpl @Inject()(
   tileDao: TileDao,
   tileLayoutDao: TileLayoutDao,
-  @NamedDatabase("default") db: Database
+  @NamedDatabase("default") db: Database,
+  userPreferences: UserPreferencesService,
+  featuresService: FeaturesService
 ) extends TileService with Logging {
 
   override def getTileLayoutForUser(user: Option[User]): Seq[TileLayout] = db.withConnection {
@@ -46,7 +54,13 @@ class TileServiceImpl @Inject()(
         defaultLayouts.filterNot(tl => userTiles.contains(tl.tile))
       }
 
-      userTileLayout ++ defaults
+      val eapLayout = if (featuresService.get(user).eap && getEAPTile.nonEmpty && userPreferences.getFeaturePreferences(user.get.usercode).eap) {
+        Seq(TileLayout(TileService.EAPTileId, 2, 0, 0, 2, 1))
+      } else {
+        Seq.empty
+      }
+
+      eapLayout ++ userTileLayout ++ defaults
   }
 
   override def saveTileLayoutForUser(user: User, tileLayout: Seq[TileLayout])(implicit context: AuditLogContext): Unit = {
@@ -87,7 +101,7 @@ class TileServiceImpl @Inject()(
       // Tiles not sent in the request
       val missingTileIds = defaultTileIds.toSet -- tileLayout.map(_.id)
 
-      val tiles = tileLayout ++ missingTileIds.map(UserTileSetting.removed)
+      val tiles = tileLayout.filterNot(_.id == TileService.EAPTileId) ++ missingTileIds.map(UserTileSetting.removed)
 
       tileDao.saveTileConfiguration(user.usercode.string, tiles)
 
@@ -117,5 +131,9 @@ class TileServiceImpl @Inject()(
       val isOther = if (!user.isStaffOrPGR && !user.isStudent) Set("other") else Set()
       isStaff ++ isStudent ++ isOther ++ user.department.flatMap(_.shortName).toSet
     }
+  }
+
+  override def getEAPTile: Option[Tile] = db.withConnection { implicit c =>
+    tileDao.getAllTiles().find(_.id == TileService.EAPTileId)
   }
 }

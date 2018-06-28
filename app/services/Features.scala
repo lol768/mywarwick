@@ -1,24 +1,19 @@
 package services
 
-import java.lang.reflect.{InvocationHandler, Method}
+import java.lang.reflect.Method
 
-import javax.inject.{Inject, Provider, Singleton}
 import com.google.inject.ImplementedBy
-import enumeratum.EnumEntry
-import models.FeaturePreferences
-import models.Platform.findValues
-
-import scala.reflect.runtime.{universe => ru}
-import scala.reflect.classTag
-import play.api.Configuration
-import warwick.sso.Usercode
-
-import scala.reflect.ClassTag
 import enumeratum.{Enum, EnumEntry}
-import play.api.libs.json.{JsObject, Json, OWrites}
+import javax.inject.{Inject, Provider, Singleton}
+import models.FeaturePreferences
+import play.api.Configuration
+import enumeratum.{Enum, EnumEntry}
+import play.api.libs.json.OWrites
 import utils.{BoolTraitWrites, JavaProxy}
+import warwick.sso.{User, Usercode}
 
 import scala.collection.immutable
+import scala.reflect.{ClassTag, classTag}
 
 /**
   * To work with feature flags:
@@ -57,7 +52,8 @@ object FeatureState extends Enum[FeatureState] {
 
 @ImplementedBy(classOf[FeaturesServiceImpl])
 trait FeaturesService {
-  def get(usercode: Option[Usercode]): Features
+  def get(user: Option[User]): Features
+  def get(usercode: Usercode): Features
 }
 
 @Singleton
@@ -67,13 +63,17 @@ class FeaturesServiceImpl @Inject() (
 ) extends FeaturesService {
   private val featuresConfig = config.get[Configuration]("mywarwick.features")
 
-  override def get(usercode: Option[Usercode]): Features = {
-    val featurePreferences = usercode.map { usercode =>
-      userPreferences.getFeaturePreferences(usercode)
+  override def get(user: Option[User]): Features = {
+    val featurePreferences = user.map { user =>
+      userPreferences.getFeaturePreferences(user.usercode)
     }.getOrElse {
       FeaturePreferences.empty
     }
     new FlagsAccessor[Features](featuresConfig, featurePreferences).get
+  }
+
+  override def get(usercode: Usercode): Features = {
+    new FlagsAccessor[Features](featuresConfig, userPreferences.getFeaturePreferences(usercode)).get
   }
 }
 

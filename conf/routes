@@ -27,6 +27,14 @@ GET           /admin/sysadmin                                @controllers.admin.
 GET           /admin/cluster                                 @controllers.admin.ClusterStateController.html
 GET           /admin/masquerade                              @controllers.admin.MasqueradeController.masquerade
 
+GET           /admin/eap                                     @controllers.admin.EAPFeaturesController.index
+GET           /admin/eap/new                                 @controllers.admin.EAPFeaturesController.createForm
+POST          /admin/eap/new                                 @controllers.admin.EAPFeaturesController.create
+GET           /admin/eap/:id/edit                            @controllers.admin.EAPFeaturesController.updateForm(id: String)
+POST          /admin/eap/:id/edit                            @controllers.admin.EAPFeaturesController.update(id: String)
+GET           /admin/eap/:id/delete                          @controllers.admin.EAPFeaturesController.deleteForm(id: String)
+POST          /admin/eap/:id/delete                          @controllers.admin.EAPFeaturesController.delete(id: String)
+
 GET           /admin/publishers                                     @controllers.admin.publishers.PublishersController.index
 GET           /admin/publishers/new                                 @controllers.admin.publishers.PublishersController.createForm
 POST          /admin/publishers                                     @controllers.admin.publishers.PublishersController.create
@@ -45,8 +53,9 @@ POST          /admin/publishers/:publisher/providers/:provider      @controllers
 GET           /admin/elasticsearch/activity                  @controllers.admin.elasticsearch.ActivityToESController.index
 POST          /admin/elasticsearch/reindex                   @controllers.admin.elasticsearch.ActivityToESController.reindexActivitiesInDateTimeRange
 
-GET           /admin/reports/preferences                     @controllers.admin.reporting.PreferencesReportingController.index
 GET           /admin/reports                                 @controllers.admin.reporting.HomeController.index
+GET           /admin/reports/preferences                     @controllers.admin.reporting.PreferencesReportingController.index
+GET           /admin/reports/eap                             @controllers.admin.reporting.EAPReportingController.index
 GET           /admin/reports/activity                        @controllers.admin.reporting.ActivityReportingController.index
 POST          /admin/reports/activity                        @controllers.admin.reporting.ActivityReportingController.formSubmit
 
@@ -155,8 +164,9 @@ POST          /api/smsNotificationPreferences                @controllers.api.Sm
 GET           /api/colour-schemes                            @controllers.api.ColourSchemesController.get
 POST          /api/colour-schemes                            @controllers.api.ColourSchemesController.persist
 
-GET           /api/eap                                       @controllers.api.EAPPrefController.get
-POST          /api/eap                                       @controllers.api.EAPPrefController.update
+GET           /api/eap                                       @controllers.api.EAPController.getPreference
+POST          /api/eap                                       @controllers.api.EAPController.updatePreference
+POST          /api/eap/tile                                  @controllers.api.EAPController.tile
 
 POST          /api/errors/js                                 @controllers.api.ErrorsController.js
 

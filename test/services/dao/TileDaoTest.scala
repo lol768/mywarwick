@@ -1,15 +1,18 @@
 package services.dao
 
-import anorm.SQL
+import anorm._
 import anorm.SqlParser.scalar
-import helpers.OneStartAppPerSuite
-import models.UserTileSetting
-import helpers.BaseSpec
+import helpers.{BaseSpec, OneStartAppPerSuite}
+import models.{FeaturePreferences, UserTileSetting}
+import org.joda.time.DateTime
 import play.api.libs.json.Json
+import services.{TileService, UserPreferencesService}
+import warwick.sso.Usercode
 
 class TileDaoTest extends BaseSpec with OneStartAppPerSuite {
 
-  val tileDao = app.injector.instanceOf[TileDao]
+  private val tileDao = app.injector.instanceOf[TileDao]
+  private val userPreferencesService = app.injector.instanceOf[UserPreferencesService]
 
   "TileDao" should {
 
@@ -159,7 +162,7 @@ class TileDaoTest extends BaseSpec with OneStartAppPerSuite {
 
       // UPDATE non-removed tiles
 
-      tileDao.saveTileConfiguration("usercode", Seq(UserTileSetting("tile", None, removed = false)))
+      tileDao.saveTileConfiguration("usercode", Seq(UserTileSetting("tile", None)))
 
       val tiles = tileDao.getTilesForUser("usercode", Set.empty)
 
@@ -172,6 +175,32 @@ class TileDaoTest extends BaseSpec with OneStartAppPerSuite {
       SQL("SELECT COUNT(*) FROM USER_TILE WHERE USERCODE = 'usercode' AND TILE_ID = 'tile' AND REMOVED = 1")
         .as(scalar[Int].single) mustBe 1
 
+    }
+
+
+    "return EAP tile if appropriate" in transaction { implicit c =>
+      // Tile doesn't exist
+      val noTiles1 = tileDao.getTilesByIds("usercode", Seq(TileService.EAPTileId), Set.empty)
+      noTiles1.isEmpty mustBe true
+
+      // Tile exists but didn't ask for it
+      SQL"""
+        INSERT INTO TILE (ID, FETCH_URL, TITLE, ICON) VALUES
+        (${TileService.EAPTileId}, 'http://provider', 'Early Access', 'eye');
+      """.execute()
+      val noTiles2 = tileDao.getTilesByIds("usercode", Seq("other"), Set.empty)
+      noTiles2.isEmpty mustBe true
+
+      // Feature disabled
+      userPreferencesService.setFeaturePreferences(Usercode("usercode"), FeaturePreferences.empty)
+      val noTiles3 = tileDao.getTilesByIds("usercode", Seq(TileService.EAPTileId), Set.empty)
+      noTiles3.isEmpty mustBe true
+
+      // Feature enabled
+      userPreferencesService.setFeaturePreferences(Usercode("usercode"), FeaturePreferences(Some(DateTime.now.plusDays(1))))
+      val tiles = tileDao.getTilesByIds("usercode", Seq(TileService.EAPTileId), Set.empty)
+      tiles.length mustBe 1
+      tiles.head.tile.id mustBe TileService.EAPTileId
     }
 
   }

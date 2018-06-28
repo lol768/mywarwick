@@ -172,7 +172,7 @@ $.fn.flexiPicker = function initFlexiPicker(options = {}) {
   return this.each((i, element) => {
     const $this = $(element);
     if ($this.data('flexi-picker')) {
-      throw new Error('FlexiPicker has already been added to this element.');
+      throw new Error('FlexiPicker has already been added to this element');
     }
 
     const allOptions = {

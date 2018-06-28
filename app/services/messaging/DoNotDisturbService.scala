@@ -32,7 +32,7 @@ class DoNotDisturbServiceImpl @Inject()(
     }
 
   override def getRescheduleTime(usercode: Usercode): Option[DateTime] =
-    if (featuresService.get(Option(usercode)).doNotDisturb) reschedule(usercode)
+    if (featuresService.get(usercode).doNotDisturb) reschedule(usercode)
     else None
 
   private def reschedule (user: Usercode): Option[DateTime] = {

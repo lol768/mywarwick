@@ -9,7 +9,7 @@ function isIE() {
   const msie = ua.indexOf('MSIE ');
   const ie = (msie > 0 || !!navigator.userAgent.match(/Trident.*rv:11\./));
   if (ie) {
-    log.debug('Running on MS IE.');
+    log.debug('Running on MS IE');
   }
   return ie;
 }

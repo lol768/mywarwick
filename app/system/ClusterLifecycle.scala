@@ -30,17 +30,17 @@ class ClusterLifecycle @Inject() (
     import akka.dispatcher
 
     lifecycle.addStopHook(() => {
-      logger.info("Leaving cluster because app is shutting down.")
+      logger.info("Leaving cluster because app is shutting down")
       val p = Promise[Unit]
 
       if (cluster.state.members.isEmpty) {
         // This mainly happens in functional tests - node might not have had time to join itself.
-        logger.info("Cluster is empty, okay to continue shutdown.")
+        logger.info("Cluster is empty, okay to continue shutdown")
         Future.successful[Unit](())
       } else {
         cluster.leave(cluster.selfAddress)
         cluster.registerOnMemberRemoved {
-          logger.info("Left cluster cleanly, okay to continue shutdown.")
+          logger.info("Left cluster cleanly, okay to continue shutdown")
           p.complete(Try(Unit))
         }
 
@@ -54,7 +54,7 @@ class ClusterLifecycle @Inject() (
     })
 
   } else {
-    logger.info("ClusterActorRefProvider not in use, so I'll do nothing.")
+    logger.info("ClusterActorRefProvider not in use, so I'll do nothing")
   }
 
 

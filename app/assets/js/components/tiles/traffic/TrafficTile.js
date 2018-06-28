@@ -29,7 +29,7 @@ export default class TrafficTile extends TileContent {
   renderIfFresh(contentFunction) {
     const msSinceFetch = new Date().getTime() - this.props.fetchedAt;
     if (msSinceFetch > STALE_AFTER) {
-      return <div>Unable to show recent traffic information.</div>;
+      return <div>Unable to show recent traffic information</div>;
     }
 
     return contentFunction.call(this);

@@ -85,7 +85,7 @@ export default class RestartableWebSocket {
         this.connected = false;
 
         if (this.explicitlyClosed) {
-          log.info('Socket explicitly closed, not reopening.');
+          log.info('Socket explicitly closed, not reopening');
         } else {
           this.backoff.retry(() => {
             this.ensureConnection();
