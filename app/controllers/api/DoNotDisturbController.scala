@@ -8,10 +8,8 @@ import play.api.libs.json.{Format, JsObject, JsValue, Json}
 import play.api.mvc.Action
 import services.SecurityService
 import services.messaging.DoNotDisturbService
-import warwick.core.Logging
-import system.AuditLogContext
 
-sealed case class IncomingDoNotDisturbData(enabled: Boolean, doNotDisturb: Option[DoNotDisturbPeriod])
+sealed case class IncomingDoNotDisturbData(enabled: Boolean, doNotDisturb: DoNotDisturbPeriod)
 
 private object IncomingDoNotDisturbData {
   implicit val format: Format[IncomingDoNotDisturbData] = Json.format[IncomingDoNotDisturbData]
@@ -42,7 +40,7 @@ class DoNotDisturbController @Inject()(
     val user = request.context.user.get
     request.body.validate[IncomingDoNotDisturbData].map { data =>
       if (data.enabled) {
-        data.doNotDisturb.flatMap(DoNotDisturbPeriod.validate).map { dnd =>
+        DoNotDisturbPeriod.validate(data.doNotDisturb).map { dnd =>
           doNotDisturbService.set(user.usercode, dnd)
           import dnd._
           auditLog('UpdateDoNotDisturb, 'enabled -> true, 'start -> Map('hour -> start.hr, 'min -> start.min), 'end -> Map('hour -> end.hr, 'min -> end.min))
@@ -56,8 +54,9 @@ class DoNotDisturbController @Inject()(
         auditLog('UpdateDoNotDisturb, 'enabled -> false)
         Ok(Json.toJson(API.Success("ok", "disabled")))
       }
-    }.recoverTotal(jsErr =>
+    }.recoverTotal(jsErr => {
+      logger.error(s"Error validating Do Not Disturb JSON. $jsErr")
       BadRequest(Json.toJson(API.Failure[JsObject]("bad_request", API.Error.fromJsError(jsErr))))
-    )
+    })
   }
 }

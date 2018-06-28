@@ -4,6 +4,7 @@ import com.google.inject.{ImplementedBy, Inject}
 import models.messaging.DoNotDisturbPeriod
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
+import services.FeaturesService
 import services.dao.DoNotDisturbDao
 import warwick.core.Logging
 import warwick.sso.Usercode
@@ -21,7 +22,8 @@ trait DoNotDisturbService {
 
 class DoNotDisturbServiceImpl @Inject()(
   @NamedDatabase("default") db: Database,
-  dao: DoNotDisturbDao
+  dao: DoNotDisturbDao,
+  featuresService: FeaturesService
 ) extends DoNotDisturbService with Logging {
 
   override def get(user: Usercode): Option[DoNotDisturbPeriod] =
@@ -29,7 +31,11 @@ class DoNotDisturbServiceImpl @Inject()(
       dao.get(user)
     }
 
-  override def getRescheduleTime(user: Usercode): Option[DateTime] = {
+  override def getRescheduleTime(usercode: Usercode): Option[DateTime] =
+    if (featuresService.get(Option(usercode)).doNotDisturb) reschedule(usercode)
+    else None
+
+  private def reschedule (user: Usercode): Option[DateTime] = {
     val now: DateTime = DateTime.now
     val nowHr: Int = now.getHourOfDay
     val nowMin: Int = now.getMinuteOfHour

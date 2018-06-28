@@ -75,7 +75,7 @@ class NavigationServiceImpl @Inject()(
 
   def navigationForPublisher(publisher: Publisher, user: User): Navigation = {
     val publishingRole = publisherService.getRoleForUser(publisher.id, user.usercode)
-    val features = featuresService.get(Option(user))
+    val features = featuresService.get(Option(user.usercode))
 
     val children: Seq[NavigationPage] = Seq(
         if (features.news) ViewNews -> NavigationPage("News", publishRoutes.NewsController.list(publisher.id)) else null,

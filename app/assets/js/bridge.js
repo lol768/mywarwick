@@ -17,7 +17,6 @@ import { navRequest } from './state/ui';
 import { loadNative } from './state/app';
 import { showFeedbackForm } from './userinfo';
 import { isiPhoneX } from './helpers';
-import { loadDoNotDisturb } from './state/device';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -100,15 +99,6 @@ export default function init(opts) {
 
       if (window.applicationCache.status === window.applicationCache.IDLE) {
         setAppCached();
-      }
-    }
-
-    if ('getDoNotDisturb' in native) {
-      const dnd = native.getDoNotDisturb();
-      if (dnd) {
-        store.dispatch(loadDoNotDisturb(
-          JSON.parse(dnd),
-        ));
       }
     }
 

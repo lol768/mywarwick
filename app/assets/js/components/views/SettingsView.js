@@ -152,9 +152,7 @@ class SettingsView extends HideableView {
   }
 
   shouldShowDoNotDisturb() {
-    return ('MyWarwickNative' in window) &&
-      ('setDoNotDisturb' in window.MyWarwickNative) &&
-      this.props.features.doNotDisturb;
+    return this.props.features.doNotDisturb;
   }
 
   static renderSingleCount(number) {

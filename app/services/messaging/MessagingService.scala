@@ -1,15 +1,15 @@
 package services.messaging
 
 import java.sql.Connection
-import javax.inject.{Inject, Named, Provider}
 
+import javax.inject.{Inject, Named, Provider}
 import actors.MessageProcessing
 import actors.MessageProcessing._
 import com.google.inject.ImplementedBy
 import models._
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
-import services.dao.MessagingDao
+import services.dao.{MessagingDao, PublisherDao}
 import services.elasticsearch.{ActivityESService, MessageSent}
 import services.{ActivityService, EmailNotificationsPrefService, SmsNotificationsPrefService}
 import system.{AuditLogContext, Logging}
@@ -60,7 +60,8 @@ class MessagingServiceImpl @Inject()(
   @Named("sms") sms: OutputService,
   messagingDao: MessagingDao,
   activityESService: ActivityESService,
-  dndService: DoNotDisturbService
+  dndService: DoNotDisturbService,
+  publisherDao: PublisherDao
 ) extends MessagingService with Logging {
 
   // weak sauce way to resolve cyclic dependency.
@@ -92,7 +93,14 @@ class MessagingServiceImpl @Inject()(
   override def send(recipients: Set[Usercode], activity: Activity): Unit = {
     def save(output: Output, user: Usercode)(implicit c: Connection): Unit = {
       if (logger.isDebugEnabled) logger.logger.debug(s"Sending ${output.name} to $user about ${activity.id}")
-      messagingDao.save(activity, user, output, dndService.getRescheduleTime(user))
+      db.withConnection { implicit c =>
+        publisherDao.getProvider(activity.providerId) match {
+          case Some(provider) if provider.overrideMuting =>
+            messagingDao.save(activity, user, output, None)
+          case _ =>
+            messagingDao.save(activity, user, output, dndService.getRescheduleTime(user))
+        }
+      }
     }
 
     db.withTransaction { implicit c =>

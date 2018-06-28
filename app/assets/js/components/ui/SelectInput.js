@@ -7,16 +7,19 @@ export default class SelectInput extends React.PureComponent {
   };
 
   static propTypes = {
-    values: PropTypes.arrayOf(PropTypes.string).isRequired,
+    options: PropTypes.arrayOf(PropTypes.shape({
+      val: PropTypes.number.isRequired,
+      displayName: PropTypes.string,
+    })).isRequired,
     onChange: PropTypes.func.isRequired,
     className: PropTypes.string,
-    selectedValue: PropTypes.string,
+    selectedValue: PropTypes.number,
     disabled: PropTypes.bool,
-    disabledOption: PropTypes.string,
+    disabledOption: PropTypes.number,
   };
 
   render() {
-    const { selectedValue, onChange, className, disabled, disabledOption } = this.props;
+    const { selectedValue, onChange, className, disabled, disabledOption, options } = this.props;
     return (
       <select
         disabled={disabled}
@@ -26,9 +29,9 @@ export default class SelectInput extends React.PureComponent {
           onChange(value)
         }
       >
-        {this.props.values.map((val, i) => (
-          <option disabled={disabledOption === val} key={i} value={val}>
-            {val}
+        {options.map((opt, i) => (
+          <option disabled={disabledOption === opt.val} key={i} value={opt.val}>
+            {opt.displayName}
           </option>
         ))}
       </select>

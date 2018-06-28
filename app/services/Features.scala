@@ -11,7 +11,7 @@ import models.Platform.findValues
 import scala.reflect.runtime.{universe => ru}
 import scala.reflect.classTag
 import play.api.Configuration
-import warwick.sso.User
+import warwick.sso.Usercode
 
 import scala.reflect.ClassTag
 import enumeratum.{Enum, EnumEntry}
@@ -57,7 +57,7 @@ object FeatureState extends Enum[FeatureState] {
 
 @ImplementedBy(classOf[FeaturesServiceImpl])
 trait FeaturesService {
-  def get(user: Option[User]): Features
+  def get(usercode: Option[Usercode]): Features
 }
 
 @Singleton
@@ -67,9 +67,9 @@ class FeaturesServiceImpl @Inject() (
 ) extends FeaturesService {
   private val featuresConfig = config.get[Configuration]("mywarwick.features")
 
-  override def get(user: Option[User]): Features = {
-    val featurePreferences = user.map { user =>
-      userPreferences.getFeaturePreferences(user.usercode)
+  override def get(usercode: Option[Usercode]): Features = {
+    val featurePreferences = usercode.map { usercode =>
+      userPreferences.getFeaturePreferences(usercode)
     }.getOrElse {
       FeaturePreferences.empty
     }

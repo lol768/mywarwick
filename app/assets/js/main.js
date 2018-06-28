@@ -235,6 +235,7 @@ export function launch(userData) {
     if (hasAuthoritativeAuthenticatedUser(store.getState())) {
       store.dispatch(colourSchemes.fetch());
       store.dispatch(notifications.fetch());
+      store.dispatch(device.fetchDoNotDisturb());
     }
   });
 
