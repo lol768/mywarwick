@@ -5,7 +5,6 @@ import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.mvc.{Cookie, DiscardingCookie}
 import services.{PhotoService, UserInitialisationService}
 import services.analytics.AnalyticsMeasurementService
-import services.messaging.DoNotDisturbService
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl.GLOBAL_LOGIN_COOKIE_NAME
 import uk.ac.warwick.sso.client.SSOToken.SSC_TICKET_TYPE
 import uk.ac.warwick.sso.client.cache.UserCache

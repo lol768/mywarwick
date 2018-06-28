@@ -7,7 +7,6 @@ import enumeratum.{Enum, EnumEntry}
 import javax.inject.{Inject, Provider, Singleton}
 import models.FeaturePreferences
 import play.api.Configuration
-import enumeratum.{Enum, EnumEntry}
 import play.api.libs.json.OWrites
 import utils.{BoolTraitWrites, JavaProxy}
 import warwick.sso.{User, Usercode}
