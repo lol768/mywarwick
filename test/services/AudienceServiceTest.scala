@@ -6,7 +6,8 @@ import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import services.dao.{AudienceDao, AudienceLookupDao, UserNewsOptInDao}
+import play.api.libs.json.{JsArray, JsObject, JsString}
+import services.dao._
 import uk.ac.warwick.userlookup.UserLookupException
 import warwick.sso._
 
@@ -275,6 +276,52 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
       val actual: Either[Set[Usercode], Set[Usercode]] = service.validateUsers(codes.toSet)
 
       actual must be (Right((validUsercode :+ bobsUsercode).toSet))
+    }
+
+    "serialize audience JSON" in new Ctx {
+      private val universityWideGroups = service.audienceToJson(Audience(Seq(
+        All,
+        Staff,
+        UndergradStudents.All,
+        TaughtPostgrads,
+        ResearchPostgrads
+      ))).as[JsObject].value("audience").as[JsObject].value("universityWide").as[JsObject].value("groups").as[JsObject].value
+      universityWideGroups("All") mustBe JsString("undefined")
+      universityWideGroups("Staff") mustBe JsString("undefined")
+      universityWideGroups("TaughtPostgrads") mustBe JsString("undefined")
+      universityWideGroups("ResearchPostgrads") mustBe JsString("undefined")
+      universityWideGroups("undergraduates") mustBe JsString("UndergradStudents:All")
+
+      private val undergraduateGroups = service.audienceToJson(Audience(Seq(
+        UndergradStudents.First,
+        UndergradStudents.Second,
+        UndergradStudents.Final
+      ))).as[JsObject].value("audience").as[JsObject].value("universityWide").as[JsObject].value("groups").as[JsObject].value("undergraduates").as[JsObject].value
+      private val undergraduateYears = undergraduateGroups("year").as[JsObject].value
+      undergraduateYears("UndergradStudents:First") mustBe JsString("undefined")
+      undergraduateYears("UndergradStudents:Second") mustBe JsString("undefined")
+      undergraduateYears("UndergradStudents:Final") mustBe JsString("undefined")
+
+      when(audienceLookupDao.findModules("CH160")).thenReturn(Future.successful(Seq(LookupModule("CH160", "Module", "Description"))))
+      when(audienceLookupDao.getSeminarGroupById("1234")).thenReturn(Future.successful(Some(LookupSeminarGroup("1234", "Group", "Description", "CH160"))))
+      when(audienceLookupDao.findRelationships(UniversityID("1234567"))).thenReturn(Future.successful(Map(LookupRelationshipType("tutor", "tutor", "tutee") -> Seq(User.unknown(Usercode("cusfal"))))))
+      when(userLookup.getUsers(Seq(UniversityID("1234567")))).thenReturn(Success(Map(UniversityID("1234567") -> User.unknown(Usercode("cusfal")))))
+      private val otherAudience = service.audienceToJson(Audience(Seq(
+        UsercodesAudience(Set(Usercode("cusfal"), Usercode("cuscao"))),
+        ModuleAudience("CH160"),
+        SeminarGroupAudience("1234"),
+        RelationshipAudience("tutor", UniversityID("1234567")),
+        ResidenceAudience(Residence.All)
+      ))).as[JsObject].value("audience").as[JsObject].value("universityWide").as[JsObject].value("groups").as[JsObject].value
+      private val relationship = otherAudience("staffRelationships").as[JsArray].value.head.as[JsObject].value
+      relationship("value") mustBe JsString("1234567")
+      private val seminarGroup = otherAudience("seminarGroups").as[JsArray].value.head.as[JsObject].value
+      seminarGroup("value") mustBe JsString("1234")
+      private val module = otherAudience("modules").as[JsArray].value.head.as[JsObject].value
+      module("value") mustBe JsString("CH160")
+      private val usercodes = otherAudience("listOfUsercodes").as[JsArray].value
+      usercodes must contain (JsString("cusfal"))
+      usercodes must contain (JsString("cuscao"))
     }
   }
 }
