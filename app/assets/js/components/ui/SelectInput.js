@@ -18,16 +18,23 @@ export default class SelectInput extends React.PureComponent {
     disabledOption: PropTypes.number,
   };
 
+  constructor(props) {
+    super(props);
+    this.onChange = this.onChange.bind(this);
+  }
+
+  onChange({ target: { value } }) {
+    this.props.onChange(value);
+  }
+
   render() {
-    const { selectedValue, onChange, className, disabled, disabledOption, options } = this.props;
+    const { selectedValue, className, disabled, disabledOption, options } = this.props;
     return (
       <select
         disabled={disabled}
         value={selectedValue}
         className={`form-control ${className || ''}`}
-        onChange={({ target: { value } }) =>
-          onChange(value)
-        }
+        onChange={this.onChange}
       >
         {options.map((opt, i) => (
           <option disabled={disabledOption === opt.val} key={i} value={opt.val}>

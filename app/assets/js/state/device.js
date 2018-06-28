@@ -9,19 +9,20 @@ const DO_NOT_DISTURB_UPDATE = 'DO_NOT_DISTURB_UPDATE';
 const DO_NOT_DISTURB_RECEIVE = 'DO_NOT_DISTURB_RECEIVE';
 const DO_NOT_DISTURB_REQUEST = 'DO_NOT_DISTURB_REQUEST';
 
-const receive = createAction(DO_NOT_DISTURB_RECEIVE);
+export const receive = createAction(DO_NOT_DISTURB_RECEIVE);
 const request = createAction(DO_NOT_DISTURB_REQUEST);
 
 function updateServerWithState({ enabled, start, end, fetched }) {
   if (fetched) {
     postJsonWithCredentials('/api/donotdisturb', { enabled, doNotDisturb: { start, end } })
       .then(response => response.json())
-      .then(response => {
-        if (response.status !== 'ok')
+      .then((response) => {
+        if (response.status !== 'ok') {
           log.error(`Failed to POST request to Do Not Disturb API. 
-          Response was ${JSON.stringify(response)}`)
+          Response was ${JSON.stringify(response)}`);
+        }
       })
-      .catch(e => log.error('Failed to POST request to Do Not Disturb API', e))
+      .catch(e => log.error('Failed to POST request to Do Not Disturb API', e));
   }
 }
 
@@ -52,7 +53,7 @@ export function updateDoNotDisturb(payload) {
       type: DO_NOT_DISTURB_UPDATE,
       payload,
     });
-    postToServer(getState)
+    postToServer(getState);
   };
 }
 
@@ -103,7 +104,7 @@ export function reducer(state = initialState, action) {
           fetching: true,
           failed: false,
           fetched: false,
-        }
+        },
       };
     case DO_NOT_DISTURB_RECEIVE:
       if (action.error) {
@@ -114,7 +115,7 @@ export function reducer(state = initialState, action) {
             fetching: false,
             failed: true,
             fetched: true,
-          }
+          },
         };
       }
       return {

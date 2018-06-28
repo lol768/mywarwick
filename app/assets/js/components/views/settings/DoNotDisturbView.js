@@ -3,7 +3,7 @@ import * as PropTypes from 'prop-types';
 import HideableView from '../HideableView';
 import { connect } from 'react-redux';
 import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
-import { updateDoNotDisturb } from '../../../state/device';
+import { updateDoNotDisturb, fetchDoNotDisturb } from '../../../state/device';
 import SelectInput from '../../ui/SelectInput';
 import { Info } from '../../FA';
 import _ from 'lodash-es';
@@ -26,13 +26,15 @@ const doNotDisturbTimePropType = PropTypes.shape({
 
 class DoNotDisturbView extends HideableView {
   static propTypes = {
+    dispatch: PropTypes.func.isRequired,
+    isOnline: PropTypes.bool.isRequired,
     enabled: PropTypes.bool.isRequired,
     start: doNotDisturbTimePropType.isRequired,
     end: doNotDisturbTimePropType.isRequired,
   };
 
   static options = [...Array(24).keys()].map(i =>
-    ({ val: i, displayName: `${_.padStart(i, 2, '0')}:00` })
+    ({ val: i, displayName: `${_.padStart(i, 2, '0')}:00` }),
   );
 
   constructor(props) {
@@ -41,6 +43,11 @@ class DoNotDisturbView extends HideableView {
     this.onStartChange = this.onStartChange.bind(this);
     this.onEndChange = this.onEndChange.bind(this);
     this.dndPeriodHrs = this.dndPeriodHrs.bind(this);
+  }
+
+  componentDidShow() {
+    if (!this.props.isOnline) return;
+    this.props.dispatch(fetchDoNotDisturb());
   }
 
   toggleDoNotDisturb() {
@@ -56,7 +63,7 @@ class DoNotDisturbView extends HideableView {
   onStartChange(value) {
     this.props.dispatch(updateDoNotDisturb({
       start: {
-        hr: parseInt(value),
+        hr: parseInt(value, 10),
         min: 0,
       },
     }));
@@ -69,7 +76,7 @@ class DoNotDisturbView extends HideableView {
   onEndChange(value) {
     this.props.dispatch(updateDoNotDisturb({
       end: {
-        hr: parseInt(value),
+        hr: parseInt(value, 10),
         min: 0,
       },
     }));
@@ -78,7 +85,7 @@ class DoNotDisturbView extends HideableView {
   dndPeriodHrs() {
     const { start, end } = this.props;
     if (end.hr < start.hr) {
-      return Math.abs((end.hr + 12) - (start.hr % 12));
+      return Math.abs((start.hr + 12) - (end.hr % 12));
     }
     return end.hr - start.hr;
   }
@@ -149,7 +156,10 @@ class DoNotDisturbView extends HideableView {
 }
 
 function select(state) {
-  return state.device.doNotDisturb;
+  return {
+    ...state.device.doNotDisturb,
+    isOnline: state.device.isOnline,
+  };
 }
 
 export default connect(select)(DoNotDisturbView);

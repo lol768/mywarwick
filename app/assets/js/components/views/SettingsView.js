@@ -14,6 +14,7 @@ import * as newsOptIn from '../../state/news-optin';
 import * as emailNotificationsOptIn from '../../state/email-notifications-opt-in';
 import * as smsNotifications from '../../state/sms-notifications';
 import * as eap from '../../state/eap';
+import * as device from '../../state/device';
 import { loadDeviceDetails, signOut } from '../../userinfo';
 import SwitchListGroupItem from '../ui/SwitchListGroupItem';
 import wrapKeyboardSelect from '../../keyboard-nav';
@@ -228,6 +229,7 @@ class SettingsView extends HideableView {
       this.props.dispatch(emailNotificationsOptIn.fetch());
       this.props.dispatch(smsNotifications.fetch());
       this.props.dispatch(eap.fetch());
+      this.props.dispatch(device.fetchDoNotDisturb());
     }
   }
 

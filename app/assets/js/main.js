@@ -235,6 +235,9 @@ export function launch(userData) {
   persisted('timetableAlarms', timetableAlarms.update).then(() => {
     store.dispatch(timetableAlarms.setNative);
   });
+
+  persisted('device.doNotDisturb', device.receive, ({ enabled, start, end }) => ({ enabled, start, end }));
+
   /** Initial requests for data */
 
   const loadDataFromServer = _.once(() => {
@@ -242,7 +245,6 @@ export function launch(userData) {
     if (hasAuthoritativeAuthenticatedUser(store.getState())) {
       store.dispatch(colourSchemes.fetch());
       store.dispatch(notifications.fetch());
-      store.dispatch(device.fetchDoNotDisturb());
     }
   });
 

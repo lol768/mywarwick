@@ -3,20 +3,26 @@ package services.messaging
 import java.sql.Connection
 
 import helpers.BaseSpec
-import models.messaging.{Time, DoNotDisturbPeriod}
+import models.messaging.{DoNotDisturbPeriod, Time}
 import org.joda.time.{DateTime, DateTimeUtils}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
-import services.MockDatabase
-import services.dao.DoNotDisturbDao
+import services.{Features, FeaturesService, MockDatabase}
+import services.dao.{DoNotDisturbDao, MessagingDao}
 import warwick.sso.Usercode
 
 class DoNotDisturbServiceTest extends BaseSpec with MockitoSugar with BeforeAndAfterEach {
   val dao: DoNotDisturbDao = mock[DoNotDisturbDao]
-  val service: DoNotDisturbService = new DoNotDisturbServiceImpl(new MockDatabase(), dao)
+  val messagingDao: MessagingDao = mock[MessagingDao]
+  val featuresService: FeaturesService = mock[FeaturesService]
+  val features: Features = mock[Features]
+  when(features.doNotDisturb).thenReturn(true)
+  when(featuresService.get(any[Usercode])).thenReturn(features)
+
+  val service: DoNotDisturbService = new DoNotDisturbServiceImpl(new MockDatabase(), dao, messagingDao, featuresService)
   val fred: Usercode = Usercode("fred")
 
   val testDate: DateTime = DateTime.parse("2018-06-20T00:00")

@@ -93,13 +93,11 @@ class MessagingServiceImpl @Inject()(
   override def send(recipients: Set[Usercode], activity: Activity): Unit = {
     def save(output: Output, user: Usercode)(implicit c: Connection): Unit = {
       if (logger.isDebugEnabled) logger.logger.debug(s"Sending ${output.name} to $user about ${activity.id}")
-      db.withConnection { implicit c =>
-        publisherDao.getProvider(activity.providerId) match {
-          case Some(provider) if provider.overrideMuting =>
-            messagingDao.save(activity, user, output, None)
-          case _ =>
-            messagingDao.save(activity, user, output, dndService.getRescheduleTime(user))
-        }
+      publisherDao.getProvider(activity.providerId) match {
+        case Some(provider) if provider.overrideMuting =>
+          messagingDao.save(activity, user, output, None)
+        case _ =>
+          messagingDao.save(activity, user, output, dndService.getRescheduleTime(user))
       }
     }
 

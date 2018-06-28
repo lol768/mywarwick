@@ -54,7 +54,7 @@ export const Routes = {
     NOTIFICATION_FILTER: 'notificationfilter',
     SMS: 'sms',
     TIMETABLE_ALARMS: 'timetable_alarms',
-    DO_NOT_DISTURB: 'do_not_disturb',
+    DO_NOT_DISTURB: 'donotdisturb',
     EAP: 'eap',
   },
   POST_TOUR: 'post_tour',

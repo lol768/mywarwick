@@ -105,7 +105,7 @@ class MessagingDaoImpl extends MessagingDao {
   }
 
   override def updateMessageSendAtForUser(usercode: Usercode, sendAt: Option[DateTime])(implicit c: Connection): Unit =
-    SQL("UPDATE message_send SET send_at={sendAt} WHERE send_at > SYSDATE AND usercode={usercode}")
+    SQL("UPDATE message_send SET send_at={sendAt} WHERE state='A' AND send_at > SYSDATE AND usercode={usercode}")
     .on('usercode -> usercode.string)
     .on('sendAt -> sendAt.orNull)
     .executeUpdate()
