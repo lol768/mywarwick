@@ -5,7 +5,7 @@ import models.messaging.DoNotDisturbPeriod
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.FeaturesService
-import services.dao.DoNotDisturbDao
+import services.dao.{DoNotDisturbDao, MessagingDao}
 import warwick.core.Logging
 import warwick.sso.Usercode
 
@@ -23,6 +23,7 @@ trait DoNotDisturbService {
 class DoNotDisturbServiceImpl @Inject()(
   @NamedDatabase("default") db: Database,
   dao: DoNotDisturbDao,
+  messagingDao: MessagingDao,
   featuresService: FeaturesService
 ) extends DoNotDisturbService with Logging {
 
@@ -59,13 +60,18 @@ class DoNotDisturbServiceImpl @Inject()(
     }
   }
 
-  override def set(user: Usercode, doNotDisturbPeriod: DoNotDisturbPeriod): Unit =
+  override def set(user: Usercode, doNotDisturbPeriod: DoNotDisturbPeriod): Unit = {
     db.withTransaction { implicit connection =>
       dao.set(user, doNotDisturbPeriod)
     }
+    db.withTransaction { implicit connection =>
+      messagingDao.updateMessageSendAtForUser(user, reschedule(user))
+    }
+  }
 
   override def disable(user: Usercode): Int =
     db.withTransaction { implicit connection =>
+      messagingDao.updateMessageSendAtForUser(user, None)
       dao.disable(user)
     }
 }

@@ -28,6 +28,7 @@ trait MessagingDao {
 
   def getSmsSentLast24Hours()(implicit c: Connection): Int
 
+  def updateMessageSendAtForUser(usercode: Usercode, sendAt: Option[DateTime])(implicit c: Connection): Unit
 }
 
 class MessagingDaoImpl extends MessagingDao {
@@ -53,7 +54,7 @@ class MessagingDaoImpl extends MessagingDao {
       .as(scalar[Int].single)
 
   override def save(activity: Activity, usercode: Usercode, output: Output, sendAt: Option[DateTime])(implicit c: Connection): Unit = {
-    SQL("INSERT INTO MESSAGE_SEND (ID, ACTIVITY_ID, USERCODE, OUTPUT, UPDATED_AT, SEND_AT) VALUES ({id}, {activityId}, {usercode}, {output}, {updatedAt}, {sendAt)")
+    SQL("INSERT INTO MESSAGE_SEND (ID, ACTIVITY_ID, USERCODE, OUTPUT, UPDATED_AT, SEND_AT) VALUES ({id}, {activityId}, {usercode}, {output}, {updatedAt}, {sendAt})")
       .on(
         'id -> UUID.randomUUID().toString,
         'activityId -> activity.id,
@@ -102,5 +103,11 @@ class MessagingDaoImpl extends MessagingDao {
       update.on('id -> record.id, 'now -> DateTime.now).executeUpdate() > 0
     }
   }
+
+  override def updateMessageSendAtForUser(usercode: Usercode, sendAt: Option[DateTime])(implicit c: Connection): Unit =
+    SQL("UPDATE message_send SET send_at={sendAt} WHERE send_at > SYSDATE AND usercode={usercode}")
+    .on('usercode -> usercode.string)
+    .on('sendAt -> sendAt.orNull)
+    .executeUpdate()
 
 }

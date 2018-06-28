@@ -5,7 +5,7 @@ import com.google.inject.ImplementedBy
 import models.Audience
 import models.Audience.{LocationOptIn, _}
 import play.api.db.Database
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsUndefined, JsValue, Json}
 import services.dao._
 import system.Logging
 import warwick.sso._
