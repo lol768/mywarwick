@@ -3,7 +3,7 @@ import * as PropTypes from 'prop-types';
 import HideableView from '../HideableView';
 import { connect } from 'react-redux';
 import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
-import { updateDoNotDisturb, fetchDoNotDisturb } from '../../../state/device';
+import { update, fetch } from '../../../state/do-not-disturb';
 import SelectInput from '../../ui/SelectInput';
 import { Info } from '../../FA';
 import _ from 'lodash-es';
@@ -47,11 +47,11 @@ class DoNotDisturbView extends HideableView {
 
   componentDidShow() {
     if (!this.props.isOnline) return;
-    this.props.dispatch(fetchDoNotDisturb());
+    this.props.dispatch(fetch());
   }
 
   toggleDoNotDisturb() {
-    this.props.dispatch(updateDoNotDisturb({
+    this.props.dispatch(update({
       enabled: !this.props.enabled,
     }));
   }
@@ -61,7 +61,7 @@ class DoNotDisturbView extends HideableView {
    * @param value passed in as string from synthesised event object, must parseInt
    */
   onStartChange(value) {
-    this.props.dispatch(updateDoNotDisturb({
+    this.props.dispatch(update({
       start: {
         hr: parseInt(value, 10),
         min: 0,
@@ -74,7 +74,7 @@ class DoNotDisturbView extends HideableView {
    * @param value passed in as string from synthesised event object, must parseInt
    */
   onEndChange(value) {
-    this.props.dispatch(updateDoNotDisturb({
+    this.props.dispatch(update({
       end: {
         hr: parseInt(value, 10),
         min: 0,
@@ -157,7 +157,7 @@ class DoNotDisturbView extends HideableView {
 
 function select(state) {
   return {
-    ...state.device.doNotDisturb,
+    ...state.doNotDisturb,
     isOnline: state.device.isOnline,
   };
 }

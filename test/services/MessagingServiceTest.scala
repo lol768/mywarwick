@@ -1,5 +1,7 @@
 package services
 
+import java.sql.Connection
+
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import helpers.{BaseSpec, Fixtures}
 import models._
@@ -78,13 +80,14 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
 
       private val recipients = Set(Usercode("cusebr"), Usercode("cusfal"))
       when(activityService.getActivityRenderById(activity.id)).thenReturn(Some(activityRender))
+      when(publisherDao.getProvider(Matchers.any[String])(Matchers.any[Connection])).thenReturn(Some(ProviderRender("provider", None, None, None, sendEmail = false, overrideMuting = true)))
       when(activityService.getActivityMutes(activityRender.activity, activityRender.tags, recipients)).thenReturn(Seq(
         ActivityMute(
           usercode = Usercode("cusfal"),
           createdAt = null,
           expiresAt = None,
           activityType = None,
-          providerId = None,
+          providerId = None,I
           tags = Nil
         )
       ))

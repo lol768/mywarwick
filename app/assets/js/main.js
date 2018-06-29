@@ -29,6 +29,7 @@ import * as newsOptIn from './state/news-optin';
 import * as colourSchemes from './state/colour-schemes';
 import * as ui from './state/ui';
 import * as device from './state/device';
+import * as doNotDisturb from './state/do-not-disturb';
 import * as analytics from './analytics';
 import * as stream from './stream';
 import * as timetableAlarms from './state/timetable-alarms';
@@ -236,7 +237,7 @@ export function launch(userData) {
     store.dispatch(timetableAlarms.setNative);
   });
 
-  persisted('device.doNotDisturb', device.receive, ({ enabled, start, end }) => ({ enabled, start, end }));
+  persisted('doNotDisturb', doNotDisturb.receive, ({ enabled, start, end }) => ({ enabled, start, end }));
 
   /** Initial requests for data */
 
