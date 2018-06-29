@@ -87,7 +87,7 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
           createdAt = null,
           expiresAt = None,
           activityType = None,
-          providerId = None,I
+          providerId = None,
           tags = Nil
         )
       ))
