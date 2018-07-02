@@ -20,8 +20,8 @@ const numberRangePropType =
   };
 
 const doNotDisturbTimePropType = PropTypes.shape({
-  hr: numberRangePropType(25).isRequired,
-  min: numberRangePropType(61).isRequired,
+  hr: numberRangePropType(24),
+  min: numberRangePropType(60),
 });
 
 class DoNotDisturbView extends HideableView {
