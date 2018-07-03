@@ -31,7 +31,7 @@ class DoNotDisturbDaoImpl extends DoNotDisturbDao {
   override def set(user: Usercode, doNotDisturbPeriod: DoNotDisturbPeriod)(implicit c: Connection): Unit = {
     import doNotDisturbPeriod._
     if (exists(user)) {
-      SQL"UPDATE do_not_disturb SET start_time=${start.format(DoNotDisturbPeriod.dateTimeFormatter)}, end_time=${end.format(DoNotDisturbPeriod.dateTimeFormatter)}WHERE usercode=${user.string}"
+      SQL"UPDATE do_not_disturb SET start_time=${start.format(DoNotDisturbPeriod.dateTimeFormatter)}, end_time=${end.format(DoNotDisturbPeriod.dateTimeFormatter)} WHERE usercode=${user.string}"
         .executeUpdate()
     } else {
       SQL"INSERT INTO do_not_disturb (usercode, start_time, end_time) VALUES (${user.string}, ${start.format(DoNotDisturbPeriod.dateTimeFormatter)}, ${end.format(DoNotDisturbPeriod.dateTimeFormatter)})"
