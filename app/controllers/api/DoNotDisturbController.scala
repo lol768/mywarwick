@@ -4,7 +4,7 @@ import controllers.MyController
 import javax.inject.{Inject, Singleton}
 import models.API
 import models.messaging.DoNotDisturbPeriod
-import play.api.libs.json.{Format, JsObject, JsValue, Json}
+import play.api.libs.json._
 import play.api.mvc.Action
 import services.SecurityService
 import services.messaging.DoNotDisturbService
@@ -40,15 +40,9 @@ class DoNotDisturbController @Inject()(
     val user = request.context.user.get
     request.body.validate[IncomingDoNotDisturbData].map { data =>
       if (data.enabled) {
-        DoNotDisturbPeriod.validate(data.doNotDisturb).map { dnd =>
-          doNotDisturbService.set(user.usercode, dnd)
-          import dnd._
-          auditLog('UpdateDoNotDisturb, 'enabled -> true, 'start -> Map('hour -> start.hr, 'min -> start.min), 'end -> Map('hour -> end.hr, 'min -> end.min))
+          doNotDisturbService.set(user.usercode, data.doNotDisturb)
+          auditLog('UpdateDoNotDisturb, 'enabled -> true, 'start -> data.doNotDisturb.start.format(DoNotDisturbPeriod.dateTimeFormatter), 'end -> data.doNotDisturb.end.format(DoNotDisturbPeriod.dateTimeFormatter))
           Ok(Json.toJson(API.Success("ok", "updated")))
-        }.getOrElse {
-          logger.error(s"Failed to update DoNotDisturb for user ${user.usercode.string}. Bad JSON ${Json.prettyPrint(request.body)}")
-          BadRequest(Json.toJson(API.Failure[JsObject]("invalid_data", Seq(API.Error("invalid_data", "do not disturb values were invalid")))))
-        }
       } else {
         doNotDisturbService.disable(user.usercode)
         auditLog('UpdateDoNotDisturb, 'enabled -> false)

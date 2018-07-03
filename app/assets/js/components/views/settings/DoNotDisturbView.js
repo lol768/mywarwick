@@ -85,7 +85,7 @@ class DoNotDisturbView extends HideableView {
   dndPeriodHrs() {
     const { start, end } = this.props;
     if (end.hr < start.hr) {
-      return Math.abs((start.hr + 12) - (end.hr % 12));
+      return Math.abs((start.hr < 12 ? end.hr + 24 : end.hr + 12) - (start.hr % 12));
     }
     return end.hr - start.hr;
   }

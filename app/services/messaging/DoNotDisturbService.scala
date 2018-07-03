@@ -1,8 +1,9 @@
 package services.messaging
 
+import java.time._
+
 import com.google.inject.{ImplementedBy, Inject}
 import models.messaging.DoNotDisturbPeriod
-import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.FeaturesService
 import services.dao.{DoNotDisturbDao, MessagingDao}
@@ -15,7 +16,7 @@ trait DoNotDisturbService {
 
   def set(user: Usercode, doNotDisturbPeriod: DoNotDisturbPeriod): Unit
 
-  def getRescheduleTime(user: Usercode): Option[DateTime]
+  def getRescheduleTime(user: Usercode)(implicit clock: Clock = Clock.systemDefaultZone()): Option[ZonedDateTime]
 
   def disable(user: Usercode): Int
 }
@@ -32,26 +33,24 @@ class DoNotDisturbServiceImpl @Inject()(
       dao.get(user)
     }
 
-  override def getRescheduleTime(usercode: Usercode): Option[DateTime] =
-    if (featuresService.get(usercode).doNotDisturb) reschedule(usercode)
+  override def getRescheduleTime(usercode: Usercode)(implicit clock: Clock = Clock.systemDefaultZone()): Option[ZonedDateTime] =
+    if (featuresService.get(usercode).doNotDisturb) reschedule(usercode)(clock)
     else None
 
-  private def reschedule (user: Usercode): Option[DateTime] = {
-    val now: DateTime = DateTime.now
-    val nowHr: Int = now.getHourOfDay
-    val nowMin: Int = now.getMinuteOfHour
+  private def reschedule (user: Usercode)(implicit clock: Clock = Clock.systemDefaultZone()): Option[ZonedDateTime] = {
+    val now: LocalTime = LocalTime.now(clock)
 
     get(user).flatMap { dnd =>
-      val reschedDate: DateTime = now.withHourOfDay(dnd.end.hr).withMinuteOfHour(dnd.end.min)
+      val reschedDate: ZonedDateTime = ZonedDateTime.of(LocalDate.now(clock), dnd.end, ZoneId.systemDefault())
       if (dnd.spansDays) {
-        if (dnd.startIsBeforeOrEqual(nowHr, nowMin))
+        if (!dnd.start.isAfter(now))
           Some(reschedDate.plusDays(1))
-        else if (dnd.endIsAfter(nowHr, nowMin))
+        else if (dnd.end.isAfter(now))
           Some(reschedDate)
         else
           None
       }
-      else if (dnd.startIsBeforeOrEqual(nowHr, nowMin) && dnd.endIsAfter(nowHr, nowMin)) {
+      else if (!dnd.start.isAfter(now) && dnd.end.isAfter(now)) {
         Some(reschedDate)
       }
       else {

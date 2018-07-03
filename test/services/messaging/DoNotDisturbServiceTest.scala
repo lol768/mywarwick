@@ -1,10 +1,10 @@
 package services.messaging
 
 import java.sql.Connection
+import java.time._
 
 import helpers.BaseSpec
-import models.messaging.{DoNotDisturbPeriod, Time}
-import org.joda.time.{DateTime, DateTimeUtils}
+import models.messaging.DoNotDisturbPeriod
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
@@ -12,6 +12,7 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
 import services.{Features, FeaturesService, MockDatabase}
 import services.dao.{DoNotDisturbDao, MessagingDao}
+import uk.ac.warwick.util.core.DateTimeUtils
 import warwick.sso.Usercode
 
 class DoNotDisturbServiceTest extends BaseSpec with MockitoSugar with BeforeAndAfterEach {
@@ -25,94 +26,83 @@ class DoNotDisturbServiceTest extends BaseSpec with MockitoSugar with BeforeAndA
   val service: DoNotDisturbService = new DoNotDisturbServiceImpl(new MockDatabase(), dao, messagingDao, featuresService)
   val fred: Usercode = Usercode("fred")
 
-  val testDate: DateTime = DateTime.parse("2018-06-20T00:00")
+  val testDate: ZonedDateTime = LocalDateTime.parse("2018-06-20T00:00").atZone(ZoneId.systemDefault())
   val dayOfMonth: Int = testDate.getDayOfMonth
 
   def updateDnd(startHr: Int, endHr: Int, startMin: Int = 0, endMin: Int = 0): OngoingStubbing[Option[DoNotDisturbPeriod]] =
-    when(dao.get(any[Usercode])(any[Connection])).thenReturn(Some(DoNotDisturbPeriod(Time(startHr, startMin), Time(endHr, endMin))))
+    when(dao.get(any[Usercode])(any[Connection])).thenReturn(Some(DoNotDisturbPeriod(LocalTime.of(startHr, startMin), LocalTime.of(endHr, endMin))))
 
-  def setTime(hr: Int, min: Int = 0): Unit =
-    DateTimeUtils.setCurrentMillisFixed(testDate.withHourOfDay(hr).withMinuteOfHour(min).getMillis)
+  def withTime[A](hr: Int, min: Int = 0)(fn: Clock => A): A =
+    fn(Clock.fixed(testDate.withHour(hr).withMinute(min).toInstant, ZoneId.systemDefault()))
 
-  override def afterEach: Unit = DateTimeUtils.setCurrentMillisSystem()
+  override def afterEach(): Unit = Clock.systemDefaultZone()
 
   "DoNotDisturbService" should {
-    "reschedule for same day" in {
+    "reschedule for same day" in withTime(12) { implicit clock =>
       updateDnd(9, 18)
-      setTime(12)
       val rescheduled = service.getRescheduleTime(fred).get
       rescheduled.getDayOfMonth must be(dayOfMonth)
-      rescheduled.getHourOfDay must be(18)
+      rescheduled.getHour must be(18)
     }
 
-    "reschedule (hour is dnd start hour)" in {
+    "reschedule (hour is dnd start hour)" in withTime(9) { implicit clock =>
       updateDnd(9, 18)
-      setTime(9)
       val rescheduled = service.getRescheduleTime(fred).get
       rescheduled.getDayOfMonth must be(dayOfMonth)
-      rescheduled.getHourOfDay must be(18)
+      rescheduled.getHour must be(18)
     }
 
-    "no reschedule (hour after dnd)" in {
+    "no reschedule (hour after dnd)" in withTime(21) { implicit clock =>
       updateDnd(9, 18)
-      setTime(21)
-      service.getRescheduleTime(fred) must be (Option.empty[DateTime])
+      service.getRescheduleTime(fred) must be (Option.empty[ZonedDateTime])
     }
 
-    "no reschedule (hour before dnd)" in {
+    "no reschedule (hour before dnd)" in withTime(8) { implicit clock =>
       updateDnd(9, 18)
-      setTime(8)
-      service.getRescheduleTime(fred) must be (Option.empty[DateTime])
+      service.getRescheduleTime(fred) must be (Option.empty[ZonedDateTime])
     }
 
-    "no reschedule (hour is dnd end hour)" in {
+    "no reschedule (hour is dnd end hour)" in withTime(18) { implicit clock =>
       updateDnd(9, 18)
-      setTime(18)
-      service.getRescheduleTime(fred) must be (Option.empty[DateTime])
+      service.getRescheduleTime(fred) must be (Option.empty[ZonedDateTime])
     }
 
-    "reschedule for next day (dnd spans day)" in {
+    "reschedule for next day (dnd spans day)" in withTime(23) { implicit clock =>
       updateDnd(21, 7)
-      setTime(23)
       val rescheduled = service.getRescheduleTime(fred).get
       rescheduled.getDayOfMonth must be(dayOfMonth + 1)
-      rescheduled.getHourOfDay must be(7)
+      rescheduled.getHour must be(7)
     }
 
-    "reschedule for same day (dnd spans day)" in {
+    "reschedule for same day (dnd spans day)" in withTime(3) { implicit clock =>
       updateDnd(21, 7)
-      setTime(3)
       val rescheduled = service.getRescheduleTime(fred).get
       rescheduled.getDayOfMonth must be(dayOfMonth)
-      rescheduled.getHourOfDay must be(7)
+      rescheduled.getHour must be(7)
     }
 
-    "reschedule with zero hour start" in {
+    "reschedule with zero hour start" in withTime(3) { implicit clock =>
       updateDnd(0, 7)
-      setTime(3)
       val rescheduled = service.getRescheduleTime(fred).get
       rescheduled.getDayOfMonth must be(dayOfMonth)
-      rescheduled.getHourOfDay must be(7)
+      rescheduled.getHour must be(7)
     }
 
-    "reschedule with zero hour end" in {
+    "reschedule with zero hour end" in withTime(23) { implicit clock =>
       updateDnd(21, 0)
-      setTime(23)
       val rescheduled = service.getRescheduleTime(fred).get
       rescheduled.getDayOfMonth must be(dayOfMonth + 1)
-      rescheduled.getHourOfDay must be(0)
+      rescheduled.getHour must be(0)
     }
 
-    "no reschedule with zero hour start" in {
+    "no reschedule with zero hour start" in withTime(8) { implicit clock =>
       updateDnd(0, 7)
-      setTime(8)
-      service.getRescheduleTime(fred) must be (Option.empty[DateTime])
+      service.getRescheduleTime(fred) must be (Option.empty[ZonedDateTime])
     }
 
-    "no reschedule with zero hour end" in {
+    "no reschedule with zero hour end" in withTime(3) { implicit clock =>
       updateDnd(21, 0)
-      setTime(3)
-      service.getRescheduleTime(fred) must be (Option.empty[DateTime])
+      service.getRescheduleTime(fred) must be (Option.empty[ZonedDateTime])
     }
   }
 }

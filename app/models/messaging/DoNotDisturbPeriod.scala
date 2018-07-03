@@ -1,43 +1,64 @@
 package models.messaging
 
+import java.time.format.DateTimeFormatter
+import java.time.{DateTimeException, LocalTime}
+import java.time.temporal.ChronoUnit
+
 import anorm._
 import anorm.RowParser
 import anorm.SqlParser._
 import play.api.libs.json._
 
 object DoNotDisturbPeriod {
-  def is24Hour(hr: Int): Boolean = 0 until 24 contains hr
-
-  def is24Minute(min: Int): Boolean = 0 until 60 contains min
-
-  def validate(doNotDisturbPeriod: DoNotDisturbPeriod): Option[DoNotDisturbPeriod] = {
-    import doNotDisturbPeriod._
-    if (is24Hour(start.hr) && is24Hour(end.hr) && is24Minute(start.min) && is24Minute(end.min))
-      Some(DoNotDisturbPeriod(Time(start.hr, start.min), Time(end.hr, end.min)))
-    else
-      None
-  }
-
+  val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
   val rowParser: RowParser[DoNotDisturbPeriod] =
-    get[Int]("start_hr") ~
-      get[Int]("start_min") ~
-      get[Int]("end_hr") ~
-      get[Int]("end_min") map {
-      case startHr ~ startMin ~ endHr ~ endMin =>
-        DoNotDisturbPeriod(Time(startHr, startMin), Time(endHr, endMin))
+    get[LocalTime]("start_time") ~
+    get[LocalTime]("end_time") map {
+      case start ~ end =>
+        DoNotDisturbPeriod(start, end)
+    }
+
+  implicit def columnToLocalTime: Column[LocalTime] =
+    Column.nonNull { (value, meta) =>
+      val MetaDataItem(qualified, _, _) = meta
+      value match {
+        case str: String if str.nonEmpty => Right(LocalTime.parse(str))
+        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value: ${value.asInstanceOf[AnyRef].getClass} to DateTime for column $qualified"))
+      }
     }
   
-  implicit val formats: Format[DoNotDisturbPeriod] = Json.format[DoNotDisturbPeriod]
+  implicit val formats: Format[DoNotDisturbPeriod] = new Format[DoNotDisturbPeriod] {
+    override def writes(o: DoNotDisturbPeriod): JsValue = Json.obj(
+      "start" -> Json.obj(
+        "hr" -> o.start.getHour,
+        "min" -> o.start.getMinute
+      ),
+      "end" -> Json.obj(
+        "hr" -> o.end.getHour,
+        "min" -> o.end.getMinute
+      ),
+    )
+
+    override def reads(json: JsValue): JsResult[DoNotDisturbPeriod] =
+      try {
+        JsSuccess(DoNotDisturbPeriod(
+          LocalTime.of(
+            (json \ "start" \ "hr").as[Int],
+            (json \ "start" \ "min").as[Int]
+          ),
+          LocalTime.of(
+            (json \ "end" \ "hr").as[Int],
+            (json \ "end" \ "min").as[Int]
+          )
+        ))
+      } catch {
+        case jse: JsResultException => JsError(jse.errors)
+        case dte: DateTimeException => JsError(dte.getMessage)
+      }
+  }
 }
 
-case class Time(hr: Int, min: Int)
-object Time {
-  implicit val formats: Format[Time] = Json.format[Time]
-}
-
-case class DoNotDisturbPeriod(start: Time, end: Time) {
-  def spansDays: Boolean = end.hr < start.hr || (end.hr == start.hr && end.min < start.min)
-  def endIsAfter(hr: Int, min: Int): Boolean = end.hr > hr || (end.hr == hr && end.min > min)
-  def startIsBeforeOrEqual(hr: Int, min: Int): Boolean = hr > start.hr || (hr == start.hr && min >= start.min)
+case class DoNotDisturbPeriod(start: LocalTime, end: LocalTime) {
+  def spansDays: Boolean = start.until(end, ChronoUnit.MINUTES) < 0
 }
 

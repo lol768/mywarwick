@@ -1,6 +1,7 @@
 package services.messaging
 
 import java.sql.Connection
+import java.time.ZonedDateTime
 
 import javax.inject.{Inject, Named, Provider}
 import actors.MessageProcessing
@@ -91,7 +92,7 @@ class MessagingServiceImpl @Inject()(
   }
 
   override def send(recipients: Set[Usercode], activity: Activity): Unit = {
-    def save(output: Output, user: Usercode, sendAt: Option[DateTime])(implicit c: Connection): Unit = {
+    def save(output: Output, user: Usercode, sendAt: Option[ZonedDateTime])(implicit c: Connection): Unit = {
       if (logger.isDebugEnabled) logger.logger.debug(s"Sending ${output.name} to $user about ${activity.id}")
       messagingDao.save(activity, user, output, sendAt)
     }
@@ -104,7 +105,7 @@ class MessagingServiceImpl @Inject()(
       } else {
         unmutedRecipients(recipients, activity)
       }).foreach { user =>
-        val sendAt: Option[DateTime] = if (ignoreMutes) None else dndService.getRescheduleTime(user)
+        val sendAt: Option[ZonedDateTime] = if (ignoreMutes) None else dndService.getRescheduleTime(user)
         if (sendEmailFor(user, activity)) {
           save(Output.Email, user, sendAt)
         }

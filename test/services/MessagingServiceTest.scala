@@ -1,6 +1,7 @@
 package services
 
 import java.sql.Connection
+import java.time.Clock
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import helpers.{BaseSpec, Fixtures}
@@ -29,7 +30,7 @@ class MessagingServiceTest extends BaseSpec with MockitoSugar {
     val smsPrefService: SmsNotificationsPrefService = mock[SmsNotificationsPrefService]
     val activityESService: ActivityESService = mock[ActivityESService]
     val doNotDisturbService: DoNotDisturbService = mock[DoNotDisturbService]
-    when(doNotDisturbService.getRescheduleTime(Matchers.any())).thenReturn(None)
+    when(doNotDisturbService.getRescheduleTime(Matchers.any())(Matchers.any[Clock])).thenReturn(None)
     val publisherDao: PublisherDao = mock[PublisherDao]
     when(publisherDao.getProvider(Matchers.any())(Matchers.any())).thenReturn(None)
 
