@@ -77,7 +77,7 @@ class TabulaAudienceLookupDao @Inject()(
   }
 
   private def parseUsercodeSeq(jsValue: JsValue): Seq[Usercode] = {
-    TabulaResponseParsers.validateAPIResponse(jsValue, TabulaResponseParsers.usercodesResultReads).fold(
+    TabulaResponseParsers.validateAPIResponse(jsValue, (__ \ "usercodes").read[Seq[String]].map(_.map(Usercode))).fold(
       err => handleValidationError(err, Nil),
       usercodes => usercodes
     )
@@ -285,6 +285,7 @@ trait TabulaAudienceLookupProperties {
 object TabulaResponseParsers {
   val userCodesResultReads: Reads[Seq[Usercode]] = (__ \ "userCodes").read[Seq[String]].map(_.map(Usercode))
 
+
   val lookupModuleReads: Reads[LookupModule] = (
     (__ \ "code").read[String] and
       (__ \ "name").read[String] and
@@ -304,8 +305,6 @@ object TabulaResponseParsers {
       Reads.pure("") and
       Reads.pure("")
     ) (LookupSeminarGroup.apply _)
-
-  val universityIdResultReads: Reads[Seq[UniversityID]] = (__ \ "universityIds").read[Seq[String]].map(_.map(UniversityID))
 
   case class TabulaUserData(userId: String, universityId: String)
   val tabulaUserDataReads: Reads[TabulaUserData] = Json.reads[TabulaUserData]
