@@ -77,7 +77,7 @@ class TabulaAudienceLookupDao @Inject()(
   }
 
   private def parseUsercodeSeq(jsValue: JsValue): Seq[Usercode] = {
-    TabulaResponseParsers.validateAPIResponse(jsValue, (__ \ "usercodes").read[Seq[String]].map(_.map(Usercode))).fold(
+    TabulaResponseParsers.validateAPIResponse(jsValue, TabulaResponseParsers.usercodesResultReads).fold(
       err => handleValidationError(err, Nil),
       usercodes => usercodes
     )
@@ -115,7 +115,7 @@ class TabulaAudienceLookupDao @Inject()(
   override def resolveResidence(residence: Residence): Future[Seq[Usercode]] = {
     getAuthenticatedAsJson(tabulaAudienceLookUpUrl, residence.queryParameters)
       .map(
-        TabulaResponseParsers.validateAPIResponse(_, TabulaResponseParsers.userCodesResultReads).fold(
+        TabulaResponseParsers.validateAPIResponse(_, TabulaResponseParsers.usercodesResultReads).fold(
           handleValidationError(_, Seq()),
           userCodes => userCodes
         )
@@ -283,8 +283,7 @@ trait TabulaAudienceLookupProperties {
 }
 
 object TabulaResponseParsers {
-  val userCodesResultReads: Reads[Seq[Usercode]] = (__ \ "userCodes").read[Seq[String]].map(_.map(Usercode))
-
+  val usercodesResultReads: Reads[Seq[Usercode]] = (__ \ "usercodes").read[Seq[String]].map(_.map(Usercode))
 
   val lookupModuleReads: Reads[LookupModule] = (
     (__ \ "code").read[String] and
