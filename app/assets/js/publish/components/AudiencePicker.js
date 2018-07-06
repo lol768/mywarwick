@@ -145,7 +145,7 @@ export class AudiencePicker extends React.PureComponent {
             data-toggle="tooltip"
             data-placement="left"
             title="Users can select one or more locations to receive
-             alerts, or may choose not to specify any."
+             alerts, or may choose not to specify any"
           />
         </label>
         <RadioButton
@@ -234,6 +234,7 @@ export class AudiencePicker extends React.PureComponent {
 
         {Object.keys(this.props.hallsOfResidence).map(key =>
           (<Checkbox
+            key={key}
             handleChange={this.handleChange}
             isChecked={this.isChecked(prefixPath(`.groups.hallsOfResidence.hall.hallsOfResidence:${key}`))}
             label={this.props.hallsOfResidence[key]}

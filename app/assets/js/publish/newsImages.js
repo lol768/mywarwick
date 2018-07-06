@@ -5,10 +5,10 @@ import $ from 'jquery';
 export const API_BASE = '/api/news/images';
 
 const errorMessages = {
-  timeout: 'The request timed out.',
-  error: 'Unable to contact the server.',
-  abort: 'The request was aborted.',
-  parsererror: 'The server response was invalid.',
+  timeout: 'The request timed out',
+  error: 'Unable to contact the server',
+  abort: 'The request was aborted',
+  parsererror: 'The server response was invalid',
 };
 
 export function put(file, progressCallback) {

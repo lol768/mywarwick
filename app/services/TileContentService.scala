@@ -120,11 +120,11 @@ class TileContentServiceImpl @Inject()(
             logger.warn(s"Error fetching tile content: user=${usercode.map(_.string).getOrElse("anonymous")}, tile=${tileInstance.tile.id}", e)
             throw e
         }.recover {
-          case _: JsonProcessingException | _: JsResultException => error('parse, s"The $serviceName service returned an unexpected response.")
-          case _: HttpHostConnectException => error('io, s"Couldn't connect to the $serviceName service.")
-          case _: SocketTimeoutException => error('timeout, s"The $serviceName service isn't responding right now.")
-          case _: IOException => error('io, s"Couldn't read from the $serviceName service.")
-          case _ => error('unknown, "An error occurred.")
+          case _: JsonProcessingException | _: JsResultException => error('parse, s"The $serviceName service returned an unexpected response")
+          case _: HttpHostConnectException => error('io, s"Couldn't connect to the $serviceName service")
+          case _: SocketTimeoutException => error('timeout, s"The $serviceName service isn't responding right now")
+          case _: IOException => error('io, s"Couldn't read from the $serviceName service")
+          case _ => error('unknown, "An error occurred")
         }
 
         if (response != null) response.close()

@@ -72,7 +72,7 @@ class RelationshipPicker {
 export default function relationshipPicker(options = {}) {
   const $this = $(this);
   if ($this.data('relationship-picker')) {
-    throw new Error('RelationshipPicker has already been added to this element.');
+    throw new Error('RelationshipPicker has already been added to this element');
   }
   $this.data('relationship-picker', new RelationshipPicker(this, options));
 }

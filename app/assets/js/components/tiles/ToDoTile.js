@@ -29,7 +29,7 @@ export default class ToDoTile extends ListTile {
     if (this.isEmpty()) {
       return (
         <div>
-          <p>{this.props.content.defaultText || 'Nothing to show.'}</p>
+          <p>{this.props.content.defaultText || 'Nothing to show'}</p>
           <a
             target="_blank"
             rel="noopener noreferrer"

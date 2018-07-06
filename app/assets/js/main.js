@@ -83,11 +83,18 @@ export function launch(userData) {
       $('.tooltip-active').tooltip('hide').removeClass('tooltip-active');
     }
 
-    // Prevent the body element from scrolling on touch.
-    $(document.body).on('touchmove', e => e.preventDefault());
-    $(document.body).on('touchmove', '.id7-main-content-area', (e) => {
-      e.stopPropagation();
-      closeTooltips();
+    // Body element never scrolls on touch, main content scrolls, unless editing tiles
+    document.body.addEventListener('touchmove', (e) => {
+      const isMainContent = $(e.target).parents().addBack().hasClass('id7-main-content-area');
+      const isDragging = $('.id7-main-content-area').hasClass('is-dragging');
+      if (isMainContent && !isDragging) {
+        e.stopPropagation();
+        closeTooltips();
+        return;
+      }
+      e.preventDefault();
+    }, {
+      passive: false,
     });
 
     $(document).on('click', (e) => {
@@ -158,13 +165,13 @@ export function launch(userData) {
   if ('storage' in navigator && 'persist' in navigator.storage) {
     navigator.storage.persisted().then((persistent) => {
       if (persistent) {
-        log.info('Persistent storage not requested as store is already persistent.');
+        log.info('Persistent storage not requested as store is already persistent');
       } else {
         navigator.storage.persist().then((granted) => {
           if (granted) {
-            log.info('Storage will not be cleared except by explicit user action.');
+            log.info('Storage will not be cleared except by explicit user action');
           } else {
-            log.info('Storage may be cleared by the UA under storage pressure.');
+            log.info('Storage may be cleared by the UA under storage pressure');
           }
         });
       }

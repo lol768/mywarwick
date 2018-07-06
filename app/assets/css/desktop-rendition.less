@@ -120,6 +120,10 @@ html.not-app .bg-stand-in {
   .not-app {
     body {
       overflow-y: scroll;
+      
+      &.modal-open {
+        overflow-y: hidden;
+      }
     }
 
     #app-container:after, header.id7-page-header:before {
