@@ -273,7 +273,7 @@ trait TabulaAudienceLookupProperties {
 
   protected def tabulaMemberUrl(user: User) = s"$tabulaMemberBaseUrl/${user.universityId.getOrElse(throw new IllegalArgumentException).string}"
 
-  protected def tabulaAudienceLookUpUrl = s"$tabulaAPIBaseUrl/userCodeSearch"
+  protected def tabulaAudienceLookUpUrl = s"$tabulaAPIBaseUrl/usercodeSearch"
 
   private val tabulaMemberRelationshipsSuffix = configuration.getOptional[String]("mywarwick.tabula.member.relationshipsSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.member.relationshipsSuffix in application.conf"))
