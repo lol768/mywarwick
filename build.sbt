@@ -62,7 +62,7 @@ val appDeps = Seq(
   "com.google.inject.extensions" % "guice-multibindings" % "4.0",
   "com.adrianhurt" %% "play-bootstrap" % "1.2-P26-B3",
   "org.imgscalr" % "imgscalr-lib" % "4.2",
-  "com.github.mumoshu" %% "play2-memcached-play26" % "0.9.2-warwick",
+  "com.github.mumoshu" %% "play2-memcached-play26" % "0.9.3-warwick",
   "ch.qos.logback" % "logback-access" % "1.1.7",
 //  "com.google.guava" % "guava" % "22.0",
   "com.google.apis" % "google-api-services-analyticsreporting" % "v4-rev10-1.22.0"
