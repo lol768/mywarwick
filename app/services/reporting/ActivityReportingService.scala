@@ -34,8 +34,7 @@ class ActivityReportingServiceImpl @Inject()(
   @NamedDatabase("default") db: Database
 )(implicit @Named("elastic") ec: ExecutionContext) extends ActivityReportingService {
 
-  override def alertsCountByProvider(provider:
-  ActivityProvider, interval: Interval): Future[CountQueryResponse] = {
+  override def alertsCountByProvider(provider: ActivityProvider, interval: Interval): Future[CountQueryResponse] = {
     val query = ActivityESSearch.SearchQuery(
       provider_id = Some(provider.id),
       publish_at = Some(interval),

@@ -58,7 +58,6 @@ class ESClientConfigImpl @Inject()(
     val clogsHttpHosts = ESNode
       .fromConfigStrings(config.get[Seq[String]]("clogs.nodes"))
       .map(_.httpHost)
-      
 
     val credentialsProvider = new BasicCredentialsProvider
     credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(config.get[String]("clogs.user"), config.get[String]("clogs.password")))
