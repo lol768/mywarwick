@@ -1,11 +1,12 @@
 package services.elasticsearch
 
-import javax.inject.{Inject, Singleton}
-
+import akka.http.scaladsl.model.Uri
 import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Singleton}
 import org.apache.http.HttpHost
+import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
 import org.apache.http.client.config.RequestConfig
-import org.apache.http.config.ConnectionConfig
+import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.elasticsearch.client.{RestClient, RestClientBuilder, RestHighLevelClient}
 import play.api.Configuration
@@ -26,7 +27,7 @@ class ESClientConfigImpl @Inject()(
   config: Configuration
 ) extends ESClientConfig {
 
-  val allHttpHosts: Seq[HttpHost] = this.nodes.map(node => new HttpHost(node.node, node.port, node.protocol))
+  val allHttpHosts: Seq[HttpHost] = this.nodes.map(_.httpHost)
 
   val lowLevelBuilder: RestClientBuilder = RestClient
     .builder(allHttpHosts.toArray: _*)
@@ -47,21 +48,23 @@ class ESClientConfigImpl @Inject()(
 
   val highLevel: RestHighLevelClient = new RestHighLevelClient(lowLevelBuilder)
 
-  override def nodes: Seq[ESNode] =
-    ESNode.fromConfigs(config
-      .get[Seq[String]]("es.nodes"))
+  override def nodes: Seq[ESNode] = ESNode.fromConfigStrings(config.get[Seq[String]]("es.nodes"))
 
   override def highLevelClient: RestHighLevelClient = highLevel
 
   override def lowLevelClient: RestClient = highLevel.getLowLevelClient
   
   override def clogsClient: RestHighLevelClient = {
-    val clogsNodes = ESNode
-      .fromConfigs(config.get[Seq[String]]("clogs.nodes"))
-      .map(node => new HttpHost(node.node, node.port, node.protocol))
+    val clogsHttpHosts = ESNode
+      .fromConfigStrings(config.get[Seq[String]]("clogs.nodes"))
+      .map(_.httpHost)
+      
+
+    val credentialsProvider = new BasicCredentialsProvider
+    credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(config.get[String]("clogs.user"), config.get[String]("clogs.password")))
     
     val clogsLowLevelBuilder = RestClient
-      .builder(clogsNodes.toArray: _*)
+      .builder(clogsHttpHosts.toArray: _*)
       .setMaxRetryTimeoutMillis(60000)
       .setHttpClientConfigCallback((configBuilder: HttpAsyncClientBuilder) => {
         configBuilder
@@ -73,21 +76,28 @@ class ESClientConfigImpl @Inject()(
           )
           .setMaxConnPerRoute(50)
           .setMaxConnTotal(200)
+          .setDefaultCredentialsProvider(credentialsProvider)
       })
     
     new RestHighLevelClient(clogsLowLevelBuilder)
   }
 }
 
-case class ESNode(node: String, port: Int, protocol: String = "http")
+case class ESNode(httpHost: HttpHost)
 
 object ESNode {
-  def fromSingleConfigString(config: String): ESNode = {
-    val configArr = config.split(":")
-    ESNode(configArr(0).trim, configArr(1).trim.toInt)
+  def fromConfigString(confString: String): ESNode = {
+    val uri = confString match {
+      case s if s.isEmpty => throw new IllegalArgumentException("Missing configuration parameter for ESNode")
+      case s if s.startsWith("//") => Uri(s"http:$s")
+      case s if s.contains("//") => Uri(s)
+      case s => Uri(s"http://$s")
+    }
+
+    ESNode(new HttpHost(uri.authority.host.toString, uri.authority.port, uri.scheme))
   }
 
-  def fromConfigs(configs: Seq[String]): Seq[ESNode] = {
-    configs.map(fromSingleConfigString)
+  def fromConfigStrings(configs: Seq[String]): Seq[ESNode] = {
+    configs.map(fromConfigString)
   }
 }

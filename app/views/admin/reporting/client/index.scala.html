@@ -1,10 +1,10 @@
 @import controllers.admin.reporting.DatedReportFormData
-@import controllers.admin.reporting.ClientMetrics
 @import system.RequestContext
-@import org.joda.time.DateTime
+
 @(
-    now: DateTime,
-    metrics: ClientMetrics,
+    start: Long,
+    end: Long,
+    cacheLife: String,
     formData: Form[DatedReportFormData]
 )(
     implicit messages: Messages,
@@ -15,86 +15,31 @@
 }
 
 @common.admin("Administration", "Reports", "Client Report") {
-  @if(metrics.available) {
-    <div>
-      @b3.form(controllers.admin.reporting.routes.ClientReportingController.formSubmit) {
+  <div class="clearfix">
+    @b3.form(controllers.admin.reporting.routes.ClientReportingController.formSubmit) {
 
-        @context.csrfHelper.formField
+      @context.csrfHelper.formField
 
-        @tags.datetimePicker(formData("fromDate"), '_label -> "From")
+      @tags.datetimePicker(formData("fromDate"), '_label -> "From")
 
-        @tags.datetimePicker(formData("toDate"), '_label -> "To")
+      @tags.datetimePicker(formData("toDate"), '_label -> "To")
 
-        @b3.submit('class -> "btn btn-primary") { Search }
-      }
-
-      @if(formData.hasGlobalErrors) {
-        @for(error <- formData.globalErrors) {
-          <div class="alert alert-danger">@error.message</div>
-        }
-      }
-    </div>
-
-    <h2>Unique users</h2>
-
-    <table class="table table-condensed table-hover sortable-table">
-      <thead class="thead">
-        <th scope="col" class="count-column">Count</th>
-        <th scope="col">Metric</th>
-      </thead>
+      @b3.submit('class -> "btn btn-primary", '_help -> "This is a slow operation. Expect to wait several minutes for the report, depending on its date range.") { Search }
       
-      <tbody>
-        <tr>
-          <td class="count-column">@metrics.uniqueUserCount</td>
-          <td>Unique users</td>
-        </tr>
-        <tr>
-          <td class="count-column">@metrics.appUserCount</td>
-          <td>App users</td>
-        </tr>
-        <tr>
-          <td class="count-column">@metrics.webUserCount</td>
-          <td>Web users</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h2>Users by type</h2>
-
-    <table class="table table-condensed table-hover sortable-table">
-      <thead class="thead">
-        <th scope="col" class="count-column">Count</th>
-        <th scope="col">Type</th>
-      </thead>
-      <tbody>
-      @for((memberType, count) <- metrics.typedUserCount) {
-        <tr>
-          <td class="count-column">@count</td>
-          <td>@memberType</td>
-        </tr>
+      @if(formData.hasGlobalErrors) {
+          <div class="alert alert-danger col-md-offset-2 col-md-10">
+            @for(error <- formData.globalErrors) {
+              <p>@error.message</p>
+            }
+          </p>
       }
-      </tbody>
-    </table>
+    }
+  </div>
 
-    <h2>Users by department</h2>
+  <div class="report-content" data-start="@start" data-end="@end" data-cachelife="@cacheLife">
+    <p class="alert alert-info"><i class="fa fa-fw fa-cog fa-spin"></i> Building report, please wait...</p> 
+  </div>
 
-    <table class="table table-condensed table-hover sortable-table">
-      <thead class="thead">
-        <th scope="col" class="count-column">Count</th>
-        <th scope="col">Department</th>
-      </thead>
-      <tbody>
-      @for((department, count) <- metrics.deptUserCount) {
-        <tr>
-          <td class="count-column">@count</td>
-          <td>@department</td>
-        </tr>
-      }
-      </tbody>
-    </table>
-
-    <p class="text-muted"><i>Report generated at @models.DateFormats.emailDateTime(now)</i></p>
-  } else {
-    <p class="alert alert-danger"><i class="fa fa-fw fa-times"></i> Sorry, the Elasticsearch service is currently unavailable. Please check configuration or try later.</p>
-  }
+  <script src="@routes.Assets.versioned("js/axios.min.js")"></script>
+  <script src="@routes.Assets.versioned("js/client-report.js")"></script>
 }

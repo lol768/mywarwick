@@ -7,9 +7,8 @@ import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc.Request
 import services.SecurityService
-import services.reporting.ClientReportingService
+import services.reporting._
 import system.Roles
-import warwick.sso.Department
 
 import scala.concurrent.ExecutionContext
 
@@ -25,46 +24,33 @@ class ClientReportingController @Inject()(
   private val form = DatedReportFormData.form
 
   private def defaultData = DatedReportFormData(
-    DateTime.now().minusDays(7),
-    DateTime.now()
+    DateTime.now().withTimeAtStartOfDay().minusDays(1),
+    DateTime.now().withTimeAtStartOfDay()
   )
 
   private def defaultForm = form.fill(defaultData)
+  
+  private def render(data: DatedReportFormData, form: Form[DatedReportFormData] = defaultForm)(implicit req: Request[_]) = {
+    Ok(views.html.admin.reporting.client.index(data.interval.getStartMillis, data.interval.getEndMillis, clientReportingService.getCacheLifetime, form))
+  }
 
   def index = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     render(defaultData, defaultForm)
   }
-
+  
   def formSubmit = RequiredActualUserRoleAction(Sysadmin) { implicit request =>
     defaultForm.bindFromRequest.fold(
       formError => render(defaultData, formError),
       data => render(data, defaultForm.fill(data))
     )
   }
-
-  private def render(data: DatedReportFormData, form: Form[DatedReportFormData])(implicit req: Request[_]) = {
-    val metrics = ClientMetrics(
-      clientReportingService.available,
-      clientReportingService.countUniqueUsers(data.interval),
-      clientReportingService.countAppUsers(data.interval),
-      clientReportingService.countWebUsers(data.interval),
-      clientReportingService.countUniqueUsersByDepartment(data.interval),
-      clientReportingService.countUniqueUsersByType(data.interval)
-    )
-    
-    Ok(views.html.admin.reporting.client.index(DateTime.now, metrics, form))
+  
+  def report(start: String, end: String) = RequiredActualUserRoleAction(Sysadmin) { implicit request => 
+    val interval = clientReportingService.getInterval(start, end).getOrElse(defaultData.interval)
+    clientReportingService.getMetrics(interval) match {
+      case metrics if metrics.isComplete => Ok(views.html.admin.reporting.client.report(DateTime.now, Option(metrics)))
+      case metrics if metrics.isFault => Ok(views.html.admin.reporting.client.report(DateTime.now, None))
+      case _ => Accepted("Calculating...")
+    }
   }
-}
-
-case class ClientMetrics(
-  available: Boolean = false,
-  uniqueUserCount: Int = 0,
-  appUserCount: Int = 0,
-  webUserCount: Int =0 ,
-  deptUserCount: Map[Option[Department], Int] = Map.empty,
-  typedUserCount: Map[String, Int] = Map.empty
-)
-
-object ClientMetrics {
-  def empty = ClientMetrics()
 }

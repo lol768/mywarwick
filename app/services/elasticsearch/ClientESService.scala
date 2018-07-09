@@ -2,24 +2,24 @@ package services.elasticsearch
 
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named, Singleton}
-import org.elasticsearch.action.search.{ClearScrollRequest, SearchRequest, SearchResponse, SearchScrollRequest}
+import org.elasticsearch.action.search.{ClearScrollRequest, SearchRequest, SearchScrollRequest}
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
 import org.elasticsearch.rest.RestStatus
+import org.elasticsearch.search.Scroll
 import org.elasticsearch.search.builder.SearchSourceBuilder
-import org.elasticsearch.search.{Scroll, SearchHit}
-import org.joda.time.Interval
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
+import org.joda.time.{Duration, Interval}
 import services.reporting.UserAccess
 import warwick.core.Logging
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[ClientESServiceImpl])
 trait ClientESService {
   def available: Boolean
-  def fetchAccesses(interval: Interval): Future[Seq[UserAccess]]
+  def fetchAccesses(interval: Interval): ClientAccessData
 }
 
 @Singleton
@@ -31,81 +31,82 @@ class ClientESServiceImpl @Inject()(
   private val client: RestHighLevelClient = eSClientConfig.clogsClient
   private val fmt: DateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
   private val oneMinute = TimeValue.timeValueMinutes(1L)
-  
-  private def parseAccessHit(sh: SearchHit): UserAccess = UserAccess(
-    sh.field("username").getValue[String],
-    sh.field("user-agent-detail.device").getValue[String],
-    sh.field("user-agent-detail.os").getValue[String],
-    sh.field("request_headers.user-agent").getValue[String]
-  )
-  
+  private val scrollSize = 5000
+    
   private def buildAccountLookupQuery(interval: Interval): BoolQueryBuilder = {
     QueryBuilders.boolQuery
-      // TODO: better to derive deployment from conf
       .must(QueryBuilders.termQuery("node_deployment", "prod"))
       .must(QueryBuilders.termQuery("node_app", "mywarwick"))
       .must(QueryBuilders.termQuery("requested_uri", "/api/tiles/content/account"))
-      .must(QueryBuilders.rangeQuery("@timestamp").from(s"${fmt.print(interval.getStart)}||/D").to(s"${fmt.print(interval.getEnd)}||/D"))
+      .must(QueryBuilders.rangeQuery("@timestamp").from(s"${fmt.print(interval.getStart)}||/m").to(s"${fmt.print(interval.getEnd)}||/m"))
   }
   
   def available: Boolean = try {
     client.ping()
   } catch {
-    case e: Exception => {
-      logger.error("Exception testing ES availability", e)
+    case e: Exception =>
+      logger.error("Exception testing CLogS availability", e)
       false
+  }
+  
+  private def clearScroll(scrollId: Option[String]): Unit = {
+    // Can't currently DELETE on CLogS as it's firewalled, so just allow the scrolls to expire naturally
+    return 
+    
+    scrollId.map { id =>
+      val clearScrollRequest = new ClearScrollRequest
+      clearScrollRequest.addScrollId(id)
+      client.clearScroll(clearScrollRequest)
     }
   }
   
-  def fetchAccesses(interval: Interval): Future[Seq[UserAccess]] = {
+  def fetchAccesses(interval: Interval): ClientAccessData = {
     var results = Seq.empty[UserAccess]
-    
+    val startTime = System.currentTimeMillis
+
     val searchRequest = new SearchRequest("web-development-*")
     val searchSourceBuilder = new SearchSourceBuilder
     val scroll = new Scroll(oneMinute)
     searchSourceBuilder.query(buildAccountLookupQuery(interval))
-    searchSourceBuilder.size(500)
+    searchSourceBuilder.size(scrollSize)
     searchSourceBuilder.timeout(oneMinute)
     searchSourceBuilder.fetchSource(Array[String]("username", "user-agent-detail.device", "user-agent-detail.os", "request_headers.user-agent"), null)
     searchRequest.source(searchSourceBuilder)
     searchRequest.scroll(scroll)
     
-    val listener = new FutureActionListener[SearchResponse]
-    client.searchAsync(searchRequest, listener)
-    listener.future.map { response =>
-      if (response.status == RestStatus.OK) {
-        var scrollId = Option(response.getScrollId)
-        var searchHits = Option(response.getHits.getHits).getOrElse(Array.empty)
-        
-        while (searchHits.nonEmpty) {
-          results ++= searchHits.map(parseAccessHit)
+    val response = client.search(searchRequest)
+    if (response.status == RestStatus.OK) {
+      logger.debug(s"CLogS has ${response.getHits.totalHits} hits\nFirst lookup (hits 1 - ${scrollSize - 1}")
+      var scrollId = Option(response.getScrollId)
+      var searchHits = Option(response.getHits.getHits).getOrElse(Array.empty)
+      
+      var round: Int = 0
+      
+      while (searchHits.nonEmpty) {
+        results ++= searchHits.map(UserAccess.fromESSearchHit)
+        round += 1;
+        logger.debug(s"Scroll $round (hits ${round * scrollSize}-${(round + 1) * scrollSize - 1})")
 
-          val scrollRequest = new SearchScrollRequest(scrollId.getOrElse(""))
-          scrollRequest.scroll(scroll)
-          val searchResponse = client.searchScroll(scrollRequest)
-          scrollId = Option(searchResponse.getScrollId)
-          searchHits = Option(searchResponse.getHits.getHits).getOrElse(Array.empty)
-        }
-
-        if (searchHits.nonEmpty) {
-          results ++= searchHits.map(parseAccessHit)
-        }
-
-        scrollId.map { id =>
-          val clearScrollRequest = new ClearScrollRequest
-          clearScrollRequest.addScrollId(id)
-          client.clearScroll(clearScrollRequest)
-        }
-        
-        results
-      } else {
-        logger.warn(s"ES request for client statistical data returned unexpected status ${response.status.getStatus}")
-        Seq.empty
+        val scrollRequest = new SearchScrollRequest(scrollId.getOrElse(""))
+        scrollRequest.scroll(scroll)
+        val searchResponse = client.searchScroll(scrollRequest)
+        scrollId = Option(searchResponse.getScrollId)
+        searchHits = Option(searchResponse.getHits.getHits).getOrElse(Array.empty)
       }
-    }.recover {
-      case e: Throwable =>
-        logger.error("ES request for client statistical data failed", e)
-        Seq.empty
+
+      if (searchHits.nonEmpty) {
+        results ++= searchHits.map(UserAccess.fromESSearchHit)
+      }
+
+      clearScroll(scrollId)
+      val endTime = System.currentTimeMillis
+      val requestTime = new Duration(endTime - startTime)
+      ClientAccessData(requestTime, results)
+    } else {
+      logger.warn(s"CLogS request for client statistical data returned unexpected status ${response.status.getStatus}")
+      ClientAccessData(new Duration(0), Seq.empty)
     }
   }
 }
+
+case class ClientAccessData(val duration: Duration, val accesses: Seq[UserAccess])
