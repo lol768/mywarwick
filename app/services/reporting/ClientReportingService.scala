@@ -13,6 +13,7 @@ import warwick.core.Logging
 import warwick.sso.{Department, UserLookupService, Usercode}
 
 import scala.collection.JavaConverters._
+import scala.collection.immutable.ListMap
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
@@ -46,17 +47,17 @@ class ClientReportingServiceImpl @Inject()(
     accesses.distinct.filterNot(_.userAgent.isApp).length
   }
 
-  private def countUniqueUsersByDepartment(accesses: Seq[UserAccess]): Map[Option[Department], Int] = {
+  private def countUniqueUsersByDepartment(accesses: Seq[UserAccess]): ListMap[Option[Department], Int] = {
     val uniqueUsercodes = accesses.map(_.usercode).distinct
     val allUsers = userLookupService.getUsers(uniqueUsercodes).getOrElse(Map.empty)
     val deptOccurrences = uniqueUsercodes.collect {
       case usercode if allUsers.isDefinedAt(usercode) => allUsers(usercode).department
     }
 
-    deptOccurrences.distinct.map(x => (x, deptOccurrences.count(_ == x))).toMap
+    ListMap(deptOccurrences.distinct.map(x => (x, deptOccurrences.count(_ == x))).sortWith(_._2 > _._2):_*)
   }
 
-  private def countUniqueUsersByType(accesses: Seq[UserAccess]): Map[String, Int] = {
+  private def countUniqueUsersByType(accesses: Seq[UserAccess]): ListMap[String, Int] = {
     import utils.UserLookupUtils.UserStringer
 
     val uniqueUsercodes = accesses.map(_.usercode).distinct
@@ -65,7 +66,7 @@ class ClientReportingServiceImpl @Inject()(
       case usercode if allUsers.isDefinedAt(usercode) => allUsers(usercode).toTypeString
     }
 
-    typeOccurrences.distinct.map(x => (x, typeOccurrences.count(_ == x))).toMap
+    ListMap(typeOccurrences.distinct.map(x => (x, typeOccurrences.count(_ == x))).sortWith(_._2 > _._2):_*)
   }
   
   override def getKey(interval: Interval): String = {
@@ -176,8 +177,8 @@ case class ClientMetrics(
   uniqueUserCount: Int = 0,
   appUserCount: Int = 0,
   webUserCount: Int =0 ,
-  deptUserCount: Map[String, Int] = Map.empty,
-  typedUserCount: Map[String, Int] = Map.empty
+  deptUserCount: ListMap[String, Int] = ListMap.empty,
+  typedUserCount: ListMap[String, Int] = ListMap.empty
 )
 
 case class TimedClientMetrics(state: State = Pending, duration: Duration = new Duration(0), metrics: ClientMetrics = ClientMetrics()) {
