@@ -100,7 +100,7 @@ class UserPreferencesDaoImpl @Inject()(
       VALUES (
         ${usercode.string},
         SYSDATE,
-        ${if (defaultEAP) DateTime.now.plusYears(10) else null}
+        ${Option(DateTime.now.plusYears(10)).filter(_ => defaultEAP).orNull[DateTime]}
     )"""
       .execute()
 
