@@ -9,7 +9,6 @@ import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
 import org.elasticsearch.rest.RestStatus
 import org.elasticsearch.search.Scroll
 import org.elasticsearch.search.builder.SearchSourceBuilder
-import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import org.joda.time.{Duration, Interval}
 import services.reporting.UserAccess
 import warwick.core.Logging
@@ -29,18 +28,9 @@ class ClientESServiceImpl @Inject()(
 )(implicit @Named("elastic") ec: ExecutionContext) extends ClientESService with Logging {
 
   private val client: RestHighLevelClient = eSClientConfig.clogsClient
-  private val fmt: DateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
   private val oneMinute = TimeValue.timeValueMinutes(1L)
   private val scrollSize = 5000
     
-  private def buildAccountLookupQuery(interval: Interval): BoolQueryBuilder = {
-    QueryBuilders.boolQuery
-      .must(QueryBuilders.termQuery("node_deployment", "prod"))
-      .must(QueryBuilders.termQuery("node_app", "mywarwick"))
-      .must(QueryBuilders.termQuery("requested_uri", "/api/tiles/content/account"))
-      .must(QueryBuilders.rangeQuery("@timestamp").from(s"${fmt.print(interval.getStart)}||/m").to(s"${fmt.print(interval.getEnd)}||/m"))
-  }
-  
   def available: Boolean = try {
     client.ping()
   } catch {
@@ -60,11 +50,28 @@ class ClientESServiceImpl @Inject()(
     }
   }
   
+  private def buildIndexName(interval: Interval): String = {
+    Iterator.iterate(interval.getStart) {
+      _.plusDays(1)
+    }.takeWhile(!_.isAfter(interval.getEnd))
+      .map(d => s"web-development-access-${d.getYear}.${"%02d".format(d.getMonthOfYear)}.${"%02d".format(d.getDayOfMonth)}")
+      .toSeq
+      .mkString(",")
+  }
+
+  private def buildAccountLookupQuery(interval: Interval): BoolQueryBuilder = {
+    QueryBuilders.boolQuery
+      .must(QueryBuilders.termQuery("node_deployment", "prod"))
+      .must(QueryBuilders.termQuery("node_app", "mywarwick"))
+      .must(QueryBuilders.termQuery("requested_uri", "/api/tiles/content/account"))
+      .must(QueryBuilders.rangeQuery("@timestamp").from(interval.getStart.getMillis).to(interval.getEnd.getMillis))
+  }
+
   def fetchAccesses(interval: Interval): ClientAccessData = {
     var results = Seq.empty[UserAccess]
     val startTime = System.currentTimeMillis
-
-    val searchRequest = new SearchRequest("web-development-*")
+ 
+    val searchRequest = new SearchRequest(buildIndexName(interval))
     val searchSourceBuilder = new SearchSourceBuilder
     val scroll = new Scroll(oneMinute)
     searchSourceBuilder.query(buildAccountLookupQuery(interval))
