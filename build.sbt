@@ -53,6 +53,7 @@ val appDeps = Seq(
   "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
   "com.typesafe.akka" %% "akka-cluster-tools" % akkaVersion,
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
+  "com.typesafe.akka" %% "akka-http" % "10.1.3",
   "com.kenshoo" %% "metrics-play" % "2.6.6_0.6.2",
   "com.typesafe.play" %% "play-mailer" % "6.0.1",
   "com.typesafe.play" %% "play-mailer-guice" % "6.0.1",
