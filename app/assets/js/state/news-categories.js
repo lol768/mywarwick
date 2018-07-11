@@ -16,7 +16,7 @@ const unsub = createAction(NEWS_CATEGORY_UNSUBSCRIBE);
 
 export function fetch() {
   return (dispatch) => {
-    log.debug('Fetching news categories.');
+    log.debug('Fetching news categories');
     dispatch(start());
     return fetchWithCredentials('/api/news/categories')
       .then(response => response.json())

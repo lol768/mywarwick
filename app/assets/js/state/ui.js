@@ -12,7 +12,7 @@ let mq;
 try {
   mq = require('modernizr').mq;
 } catch (e) {
-  log.warn('modernizr not present, using fallback.');
+  log.warn('modernizr not present, using fallback');
   mq = () => global.mqResult;
 }
 /* eslint-enable */
