@@ -24,7 +24,7 @@ function pollForClientReport() {
   const endTime = Number(new Date()) + pollTimeoutInMillis;
 
   return fetch(`/admin/reports/clients/${start}/${end}`, {
-    credentials: 'include',
+    credentials: 'same-origin',
   })
     .then((response) => {
       if (response.status === 200) {
