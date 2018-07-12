@@ -16,7 +16,7 @@ function boot() {
         if (userData !== null) {
           setMethod('userInfo', userData);
         }
-        return import('./main').then(main =>
+        return import(/* webpackChunkName: "main-import" */'./main').then(main =>
           main.launch(userData),
         );
       }

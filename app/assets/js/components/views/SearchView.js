@@ -9,7 +9,7 @@ const Loading = () => <div />;
 // Returns a Promise for the module.
 // Using once() so it reuses the same value,
 // though import() may mostly handle that anyway.
-const importSearch = once(() => import('warwick-search-frontend'));
+const importSearch = once(() => import(/* webpackChunkName: "search-import" */'warwick-search-frontend'));
 
 // Do this once after module has loaded
 function initialiseSearch(mod) {
