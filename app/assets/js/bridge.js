@@ -157,7 +157,7 @@ export default function init(opts) {
 
       search(query) {
         // lazy load the Search module
-        import('warwick-search-frontend').then(s => s.submitSearch(query));
+        import(/* webpackChunkName: "search-import" */'warwick-search-frontend').then(s => s.submitSearch(query));
       },
 
       feedback(detailJson) {

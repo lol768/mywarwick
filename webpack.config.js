@@ -60,7 +60,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'target/gulp/js'),
     filename: '[name].js',
-    chunkFilename: '[chunkhash]-[id].js',
+    chunkFilename: '[name].js',
     publicPath: '/assets/js/',
   },
   resolve: {
