@@ -23,17 +23,9 @@ class ActivityReportingController @Inject()(
   import Roles._
   import securityService._
 
-  private val form = Form(
-    mapping(
-      "fromDate" -> jodaDate("yyyy-MM-dd'T'HH:mm:ss"),
-      "toDate" -> jodaDate("yyyy-MM-dd'T'HH:mm:ss")
-    )(ActivityReportFormData.apply)(ActivityReportFormData.unapply) verifying(
-      """"From" date must be before "To" date""",
-      data => data.fromDate.isBefore(data.toDate)
-    )
-  )
+  private val form = DatedReportFormData.form
 
-  private def defaultData = ActivityReportFormData(
+  private def defaultData = DatedReportFormData(
     DateTime.now().minusDays(14),
     DateTime.now()
   )
@@ -51,12 +43,9 @@ class ActivityReportingController @Inject()(
     )
   }
 
-  private def render(data: ActivityReportFormData, form: Form[ActivityReportFormData])(implicit req: Request[_]) =
+  private def render(data: DatedReportFormData, form: Form[DatedReportFormData])(implicit req: Request[_]) =
     activityReportingService.allAlertsCountByProviders(data.interval).map { result =>
       Ok(views.html.admin.reporting.activity.index(result, form))
     }
 }
 
-case class ActivityReportFormData(fromDate: DateTime, toDate: DateTime) {
-  def interval: Interval = new Interval(fromDate, toDate)
-}

@@ -8,6 +8,8 @@ import play.api.data.validation.ValidationError
 import play.api.data.{FieldMapping, FormError}
 import play.api.libs.json._
 
+import scala.concurrent
+import scala.concurrent.duration
 import scala.util._
 
 /**
@@ -40,6 +42,24 @@ object DateFormats {
     val dt = dateTime.toDateTime
     dt.toString(emailStart) + ordinal(dateTime.getDayOfMonth) + dt.toString(emailEnd)
   }
+
+  def durationFromMillisToHumanReadable(duration: Long, zero: String): String = {
+    if (duration == 0) zero else {
+      val seconds = (duration / 1000L) % 60L
+      val minutes = (duration / (1000L * 60L)) % 60L
+      val hours = (duration / (1000L * 3600L)) % 24L
+
+      val sb = new scala.collection.mutable.StringBuilder()
+
+      sb.append("%02d:" format hours)
+      sb.append("%02d:" format minutes)
+      sb.append("%02d" format seconds)
+
+      sb.toString.trim
+    }
+  }
+  
+  def durationToHumanReadable(duration: Duration, zero: String = "an instant"): String = durationFromMillisToHumanReadable(duration.getMillis, zero)
 
 
   ///// JSON FORMATTERS

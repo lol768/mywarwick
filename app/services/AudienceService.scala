@@ -209,7 +209,7 @@ class AudienceServiceImpl @Inject()(
       case ds: DepartmentSubset => ds match {
         case UndergradStudents.All | UndergradStudents.First | UndergradStudents.Second | UndergradStudents.Final  =>
           undergradSubsets :+= s"UndergradStudents:${ds.toString}"
-        case All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | AdminStaff =>
+        case All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | AdminStaff | Staff =>
           departmentSubsets :+= ds.toString
         case subset => matchDeptSubset(subset)
       }
@@ -218,7 +218,7 @@ class AudienceServiceImpl @Inject()(
         subsets.foreach {
           case subset@(UndergradStudents.All | UndergradStudents.First | UndergradStudents.Second | UndergradStudents.Final)  =>
             undergradSubsets :+= s"Dept:UndergradStudents:${subset.toString}"
-          case subset@(All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | AdminStaff) =>
+          case subset@(All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | AdminStaff | Staff) =>
             departmentSubsets :+= s"Dept:${subset.entryName}"
           case subset => matchDeptSubset(subset)
         }
@@ -263,7 +263,7 @@ class AudienceServiceImpl @Inject()(
 
     val undergraduates =
       if (undergradSubsets.nonEmpty)
-        if (undergradSubsets.contains("all"))
+        if (undergradSubsets.contains(s"UndergradStudents:${UndergradStudents.All.toString}"))
           Json.obj("undergraduates" -> s"${if (department.isEmpty) "" else "Dept:"}UndergradStudents:All")
         else
           Json.obj("undergraduates" -> Json.obj("year" -> Json.obj(

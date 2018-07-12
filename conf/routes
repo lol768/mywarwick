@@ -49,7 +49,6 @@ POST          /admin/publishers/:publisher/providers                @controllers
 GET           /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.updateForm(publisher: String, provider: String)
 POST          /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.update(publisher: String, provider: String)
 
-
 GET           /admin/elasticsearch/activity                  @controllers.admin.elasticsearch.ActivityToESController.index
 POST          /admin/elasticsearch/reindex                   @controllers.admin.elasticsearch.ActivityToESController.reindexActivitiesInDateTimeRange
 
@@ -58,6 +57,9 @@ GET           /admin/reports/preferences                     @controllers.admin.
 GET           /admin/reports/eap                             @controllers.admin.reporting.EAPReportingController.index
 GET           /admin/reports/activity                        @controllers.admin.reporting.ActivityReportingController.index
 POST          /admin/reports/activity                        @controllers.admin.reporting.ActivityReportingController.formSubmit
+GET           /admin/reports/clients                         @controllers.admin.reporting.ClientReportingController.index
+POST          /admin/reports/clients                         @controllers.admin.reporting.ClientReportingController.formSubmit
+GET           /admin/reports/clients/:start/:end             @controllers.admin.reporting.ClientReportingController.report(start: String, end: String)
 
 GET           /publish/:publisher/webgroups                  @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 

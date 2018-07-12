@@ -234,6 +234,7 @@ export class AudiencePicker extends React.PureComponent {
 
         {Object.keys(this.props.hallsOfResidence).map(key =>
           (<Checkbox
+            key={key}
             handleChange={this.handleChange}
             isChecked={this.isChecked(prefixPath(`.groups.hallsOfResidence.hall.hallsOfResidence:${key}`))}
             label={this.props.hallsOfResidence[key]}
