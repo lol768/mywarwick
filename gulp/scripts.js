@@ -132,8 +132,9 @@ function getCachedAssetsAsync() {
     currentRevisionOfAsync('/js/bundle.js'),
     currentRevisionOfAsync('/js/vendor.bundle.js'),
     currentRevisionOfAsync('/js/0.js'),
-    // following NEWSTART-1307 change webpack started writing to 3.js instead of 1.js shrug
-    currentRevisionOfAsync('/js/3.js'),
+    // following NEWSTART-1074 change, webpack started writing to 4.js instead of 3.js, which appeared after NEWSTART-1307, instead of 1.js.
+    // so much shrug
+    currentRevisionOfAsync('/js/4.js'),
     Promise.resolve('/lib/id7/fonts/fontawesome-webfont.ttf'),
     Promise.resolve('/lib/id7/fonts/fontawesome-webfont.woff'),
     Promise.resolve('/lib/id7/images/masthead-logo-bleed-sm*'),
