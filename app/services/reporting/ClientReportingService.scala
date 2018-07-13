@@ -68,7 +68,19 @@ class ClientReportingServiceImpl @Inject()(
 
     ListMap(typeOccurrences.distinct.map(x => (x, typeOccurrences.count(_ == x))).sortWith(_._2 > _._2):_*)
   }
-  
+
+  private def countByOS(accesses: Seq[UserAccess]): ListMap[String, Int] = {
+    ListMap(accesses.distinct.groupBy(_.userAgent.os).map(x => x._1 -> x._2.length).toSeq.sortWith(_._2 > _._2):_*)
+  }
+
+  private def countByDevice(accesses: Seq[UserAccess]): ListMap[String, Int] = {
+    ListMap(accesses.distinct.groupBy(_.userAgent.device).map(x => x._1 -> x._2.length).toSeq.sortWith(_._2 > _._2):_*)
+  }
+
+  private def countByAppVersion(accesses: Seq[UserAccess]): ListMap[String, Int] = {
+    ListMap(accesses.distinct.groupBy(_.userAgent.appVersion).map(x => x._1.getOrElse("-") -> x._2.length).toSeq.sortWith(_._2 > _._2):_*)
+  }
+
   override def getKey(interval: Interval): String = {
     s"clientMetrics-${interval.getStartMillis}-${interval.getEndMillis}"
   }
@@ -104,7 +116,10 @@ class ClientReportingServiceImpl @Inject()(
             countAppUsers(cad.accesses),
             countWebUsers(cad.accesses),
             countUniqueUsersByDepartment(cad.accesses).map({ case (dept, count) => (dept.toSafeString, count) }),
-            countUniqueUsersByType(cad.accesses)
+            countUniqueUsersByType(cad.accesses),
+            countByOS(cad.accesses),
+            countByDevice(cad.accesses),
+            countByAppVersion(cad.accesses)
           ))
           cache.set(key, metrics, cacheLifetime)
           metrics
@@ -176,9 +191,12 @@ object UserAgent {
 case class ClientMetrics(
   uniqueUserCount: Int = 0,
   appUserCount: Int = 0,
-  webUserCount: Int =0 ,
+  webUserCount: Int = 0,
   deptUserCount: ListMap[String, Int] = ListMap.empty,
-  typedUserCount: ListMap[String, Int] = ListMap.empty
+  typedUserCount: ListMap[String, Int] = ListMap.empty,
+  osCount: ListMap[String, Int] = ListMap.empty,
+  deviceCount: ListMap[String, Int] = ListMap.empty,
+  appVersionCount: ListMap[String, Int] = ListMap.empty
 )
 
 case class TimedClientMetrics(state: State = Pending, duration: Duration = new Duration(0), metrics: ClientMetrics = ClientMetrics()) {
