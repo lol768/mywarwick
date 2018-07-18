@@ -131,16 +131,15 @@ function getCachedAssetsAsync() {
     currentRevisionOfAsync('/css/main.css'),
     currentRevisionOfAsync('/js/bundle.js'),
     currentRevisionOfAsync('/js/vendor.bundle.js'),
-    currentRevisionOfAsync('/js/0.js'),
-    // following NEWSTART-1307 change webpack started writing to 3.js instead of 1.js shrug
-    currentRevisionOfAsync('/js/3.js'),
-    Promise.resolve('/lib/id7/fonts/fontawesome-webfont.ttf'),
-    Promise.resolve('/lib/id7/fonts/fontawesome-webfont.woff'),
-    Promise.resolve('/lib/id7/images/masthead-logo-bleed-sm*'),
-    Promise.resolve('/lib/id7/images/masthead-logo-bleed-xs*'),
-    Promise.resolve('/lib/id7/images/newwindow.gif'),
-    Promise.resolve('/lib/id7/images/shim.gif'),
-    Promise.resolve('/lib/id7/js/id7-bundle.min.js'),
+    currentRevisionOfAsync('/js/main-import.js'),
+    currentRevisionOfAsync('/js/search-import.js'),
+    '/lib/id7/fonts/fontawesome-webfont.ttf',
+    '/lib/id7/fonts/fontawesome-webfont.woff',
+    '/lib/id7/images/masthead-logo-bleed-sm*',
+    '/lib/id7/images/masthead-logo-bleed-xs*',
+    '/lib/id7/images/newwindow.gif',
+    '/lib/id7/images/shim.gif',
+    '/lib/id7/js/id7-bundle.min.js',
   ]).then(array => array.map(asset => path.join(paths.assetsOut, asset)));
 }
 
@@ -173,9 +172,8 @@ function generateServiceWorker(watch) {
     'target/gulp/css/main.css.md5',
     'target/gulp/js/bundle.js.md5',
     'target/gulp/js/vendor.bundle.js.md5',
-    'target/gulp/js/0.js.md5',
-    // following NEWSTART-1307 change webpack started writing to 3.js instead of 1.js shrug
-    'target/gulp/js/3.js.md5',
+    'target/gulp/js/main-import.js.md5',
+    'target/gulp/js/search-import.js.md5',
     'app/assets/js/push-worker.js',
     'app/views/index.scala.html',
     'app/views/common/head.scala.html',

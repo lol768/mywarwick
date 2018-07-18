@@ -115,16 +115,11 @@ class TabulaAudienceLookupDao @Inject()(
   override def resolveResidence(residence: Residence): Future[Seq[Usercode]] = {
     getAuthenticatedAsJson(tabulaAudienceLookUpUrl, residence.queryParameters)
       .map(
-        TabulaResponseParsers.validateAPIResponse(_, TabulaResponseParsers.universityIdResultReads).fold(
+        TabulaResponseParsers.validateAPIResponse(_, TabulaResponseParsers.usercodesResultReads).fold(
           handleValidationError(_, Seq()),
-          uniIds => uniIds
+          userCodes => userCodes
         )
       )
-      .map(uniIds => {
-        logger.debug(s"Fetching info about ${uniIds.length} Uni IDs")
-        userLookupService.getUsersChunked(uniIds)
-      })
-      .map(_.map(_.values.map(_.usercode).toSeq).getOrElse(Seq()))
   }
 
   override def resolveSeminarGroup(groupId: String): Future[Seq[Usercode]] = {
@@ -278,7 +273,7 @@ trait TabulaAudienceLookupProperties {
 
   protected def tabulaMemberUrl(user: User) = s"$tabulaMemberBaseUrl/${user.universityId.getOrElse(throw new IllegalArgumentException).string}"
 
-  protected def tabulaAudienceLookUpUrl = s"$tabulaAPIBaseUrl/universityIdSearch"
+  protected def tabulaAudienceLookUpUrl = s"$tabulaAPIBaseUrl/usercodeSearch"
 
   private val tabulaMemberRelationshipsSuffix = configuration.getOptional[String]("mywarwick.tabula.member.relationshipsSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.member.relationshipsSuffix in application.conf"))
@@ -288,7 +283,7 @@ trait TabulaAudienceLookupProperties {
 }
 
 object TabulaResponseParsers {
-  val usercodesResultReads: Reads[Seq[Usercode]] = (__ \ "usercodes").read[Seq[String]].map(s => s.map(Usercode))
+  val usercodesResultReads: Reads[Seq[Usercode]] = (__ \ "usercodes").read[Seq[String]].map(_.map(Usercode))
 
   val lookupModuleReads: Reads[LookupModule] = (
     (__ \ "code").read[String] and
@@ -309,8 +304,6 @@ object TabulaResponseParsers {
       Reads.pure("") and
       Reads.pure("")
     ) (LookupSeminarGroup.apply _)
-
-  val universityIdResultReads: Reads[Seq[UniversityID]] = (__ \ "universityIds").read[Seq[String]].map(s => s.map(UniversityID))
 
   case class TabulaUserData(userId: String, universityId: String)
   val tabulaUserDataReads: Reads[TabulaUserData] = Json.reads[TabulaUserData]

@@ -33,8 +33,10 @@ class NotificationsController @Inject()(
 
   override protected val ec: ExecutionContext = webEC
 
-  val notificationMapping = mapping(
-    "text" -> nonEmptyText,
+  private val urlPattern = """.*https{0,1}://[^\s]+.*""".r
+
+  val notificationMapping: Mapping[NotificationData] = mapping(
+    "text" -> nonEmptyText.verifying("The URL should be put in the Link URL field so that it is clickable", t => urlPattern.findFirstIn(t).isEmpty),
     "provider" -> nonEmptyText,
     "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url),
     "publishDateSet" -> boolean,
