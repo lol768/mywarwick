@@ -1,7 +1,7 @@
 package services
 
-import javax.inject.{Inject, Named}
 import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Named}
 import models.Audience
 import models.Audience.{LocationOptIn, _}
 import play.api.db.Database

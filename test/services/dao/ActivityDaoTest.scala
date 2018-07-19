@@ -107,7 +107,7 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
           'nowDate -> nowDate
         ).execute()
 
-      messagingDao.save(newActivity, usercode, Mobile)
+      messagingDao.save(newActivity, usercode, Mobile, sendAt = None)
 
       activityDao.getPushNotificationsSinceDate(usercode.string, lastFetchedDate) mustBe Seq(newActivity)
     }
