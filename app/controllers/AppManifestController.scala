@@ -27,8 +27,37 @@ class AppManifestController @Inject()(
         "theme_color" -> "#8C6E96",
         "icons" -> Json.arr(
           Json.obj(
+            "src" -> "/assets/images/icon-48.png",
+            "sizes" -> "48x48",
+            "type" -> "image/png"
+          ),Json.obj(
+            "src" -> "/assets/images/icon-72.png",
+            "sizes" -> "72x72",
+            "type" -> "image/png"
+          ),Json.obj(
+            "src" -> "/assets/images/icon-76.png",
+            "sizes" -> "76x76",
+            "type" -> "image/png"
+          ),Json.obj(
+            "src" -> "/assets/images/icon-96.png",
+            "sizes" -> "96x96",
+            "type" -> "image/png"
+          ),Json.obj(
+            "src" -> "/assets/images/icon-120.png",
+            "sizes" -> "120x120",
+            "type" -> "image/png"
+          ),Json.obj(
             "src" -> "/assets/images/icon-144.png",
             "sizes" -> "144x144",
+            "type" -> "image/png"
+          ),Json.obj(
+            "src" -> "/assets/images/icon-152.png",
+            "sizes" -> "152x152",
+            "type" -> "image/png"
+          ),
+          Json.obj(
+            "src" -> "/assets/images/icon-180.png",
+            "sizes" -> "180x180",
             "type" -> "image/png"
           ),
           Json.obj(
