@@ -21,47 +21,37 @@ class EventsMergeController @Inject()(
   security: SecurityService
 )(implicit @Named("tileData") ec: ExecutionContext) extends MyController {
 
-  object EventsMergeController {
-    val defaultCalendars = Seq(
-      "calendar",
-      "timetable"
-    )
+  sealed abstract class Calendar(val value: String, val name: String)
+  case object O365 extends Calendar("calendar", "Office 365 Calendar")
+  case object UniEvents extends Calendar("uni-events", "University Events")
+  case object Timetable extends Calendar("timetable", "Timetable")
+  case object Sports extends Calendar("sports", "Sports")
+  val allCalendars = Set(O365, Sports, Timetable, UniEvents)
+  private val defaultCalendars = Set(O365, Timetable)
 
-    val preferences = Json.obj(
+  private def buildPreferences(calendars: Set[Calendar]) =
+    Json.obj(
       "calendars" -> Json.obj(
         "type" -> "array",
         "description" -> "Show events from these calendars",
-        "options" -> Json.arr(
+        "options" -> calendars.map(cal =>
           Json.obj(
-            "name" -> "calendar",
-            "value" -> "Office 365 Calendar"
-          ),
-          Json.obj(
-            "name" -> "timetable",
-            "value" -> "Timetable"
-          ),
-          Json.obj(
-            "name" -> "sports",
-            "value" -> "Sports"
-          ),
-          Json.obj(
-            "name" -> "uni-events",
-            "value" -> "University Events"
-          ),
+            "name" -> cal.name,
+            "value" -> cal.value
+          )
         ),
-        "default" -> defaultCalendars
+        "default" -> defaultCalendars.filter(calendars.contains(_)).map(_.value)
       )
     )
-  }
 
-  private def preferenceListToSeq(value: JsValue): Seq[String] =
+  private def preferenceListToSeq(value: JsValue): Set[String] =
     value.asOpt[Map[String, Boolean]]
       .map(_.flatMap {
         case (key, true) => Some(key)
         case _ => None
       })
       .getOrElse(Nil)
-      .toSeq
+      .toSet
 
   private def mergeJsonItems(responses: Seq[API.Response[JsObject]]): Seq[JsValue] = {
     val items = responses.map {
@@ -75,9 +65,9 @@ class EventsMergeController @Inject()(
   }
 
   def index: Action[AnyContent] = security.RequiredUserAction.async { implicit req =>
-    val calendars: Seq[String] = req.body.asJson.flatMap(json =>
+    val calendars: Set[String] = req.body.asJson.flatMap(json =>
       (json \ "calendars").asOpt[JsValue].map(preferenceListToSeq)
-    ).getOrElse(EventsMergeController.defaultCalendars)
+    ).getOrElse(defaultCalendars.map(_.value))
 
     val user = req.context.user
 
@@ -101,7 +91,9 @@ class EventsMergeController @Inject()(
       }
   }
 
-  def preferences: Action[AnyContent] = Action {
-    Ok(EventsMergeController.preferences)
+  def preferences: Action[AnyContent] = security.RequiredUserAction { implicit req =>
+    val ids = tileService.getTilesForUser(req.context.user).map(_.tile.id)
+    val filteredPreferences: JsObject = buildPreferences(allCalendars.filter(c => ids.contains(c.value)).toSet)
+    Ok(filteredPreferences)
   }
 }

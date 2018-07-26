@@ -35,7 +35,7 @@ class TilesController @Inject()(
     val user = request.context.user
     val tiles = tileService.getTilesForUser(user)
     val layout = tileService.getTileLayoutForUser(user)
-    val optionsFuture = tileContentService.getTilesOptions(tiles.map(_.tile))
+    val optionsFuture = tileContentService.getTilesOptions(user, tiles.map(_.tile))
 
     for {
       options <- optionsFuture
