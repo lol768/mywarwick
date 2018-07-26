@@ -77,7 +77,7 @@ class EventsMergeController @Inject()(
         .map(tileContentService.getTileContent(user.map(_.usercode), _))
     )
       .map(mergeJsonItems(_))
-      .map { events => {
+      .map { events =>
         val temporal: Temporal = ZonedDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION)
         val academicWeek = AcademicYear.forDate(temporal).getAcademicWeek(temporal).getWeekNumber
         Ok(Json.toJson(API.Success(
@@ -87,7 +87,6 @@ class EventsMergeController @Inject()(
             "currentWeek" -> academicWeek
           )
         )))
-      }
       }
   }
 
