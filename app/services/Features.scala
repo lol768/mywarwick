@@ -24,6 +24,7 @@ import scala.reflect.{ClassTag, classTag}
 trait Features {
   def news: Boolean
   def updateTileEditUI : Boolean
+  def doNotDisturb : Boolean
   def eap: Boolean
 }
 
