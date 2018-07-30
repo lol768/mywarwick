@@ -77,7 +77,7 @@ class TileContentServiceTest extends BaseSpec with ScalaFutures with MockitoSuga
       ExternalServers.runBrokenServer { port =>
         val ut = userPrinterTile(Some(s"http://localhost:$port/content/printcredits"))
         val fallbackResponse = List(("printcredits", Json.obj()))
-        service.getCachedTilesOptions(Seq(ut.tile)).futureValue mustBe fallbackResponse
+        service.getCachedTilesOptions(None, Seq(ut.tile)).futureValue mustBe fallbackResponse
       }
     }
   }

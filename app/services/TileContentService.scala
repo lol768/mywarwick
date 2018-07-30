@@ -17,10 +17,10 @@ import org.apache.http.impl.client.{CloseableHttpClient, HttpClientBuilder}
 import play.api.Configuration
 import play.api.cache._
 import play.api.libs.json.{JsObject, _}
-import play.api.libs.ws.WSClient
+import play.api.libs.ws.{WSClient, WSRequest}
 import system.Logging
-import uk.ac.warwick.sso.client.trusted.{CurrentApplication, TrustedApplicationUtils}
-import warwick.sso.Usercode
+import uk.ac.warwick.sso.client.trusted.{CurrentApplication, EncryptedCertificate, TrustedApplication, TrustedApplicationUtils}
+import warwick.sso.{User, Usercode}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -40,7 +40,7 @@ object TileContentService {
 
 @ImplementedBy(classOf[TileContentServiceImpl])
 trait TileContentService {
-  def getTilesOptions(tiles: Seq[Tile]): Future[JsValue]
+  def getTilesOptions(user: Option[User], tiles: Seq[Tile]): Future[JsValue]
 
   def getTileContent(user: Option[Usercode], tileInstance: TileInstance): Future[API.Response[JsObject]]
 }
@@ -64,15 +64,25 @@ class TileContentServiceImpl @Inject()(
   val preferenceCacheDuration: FiniteDuration = config
     .get[Int]("mywarwick.cache.tile-preferences.seconds").seconds
 
-  override def getTilesOptions(tiles: Seq[Tile]): Future[JsValue] = {
-    getCachedTilesOptions(tiles).map(JsObject.apply)
+  override def getTilesOptions(user: Option[User], tiles: Seq[Tile]): Future[JsValue] = {
+    getCachedTilesOptions(user, tiles).map(JsObject.apply)
   }
 
-  def getCachedTilesOptions(tiles: Seq[Tile]): Future[Seq[(String, JsValue)]] = {
+  private def signWSRequest(application: CurrentApplication, user: Option[User], req: WSRequest): WSRequest =
+    user.map { u =>
+      val certificate: EncryptedCertificate = application.encode(u.usercode.string, req.uri.toString)
+      req.addHttpHeaders(
+        (TrustedApplication.HEADER_PROVIDER_ID, certificate.getProviderID),
+        (TrustedApplication.HEADER_CERTIFICATE, certificate.getCertificate),
+        (TrustedApplication.HEADER_SIGNATURE, certificate.getSignature)
+      )
+    }.getOrElse(req)
+
+  def getCachedTilesOptions(user: Option[User], tiles: Seq[Tile]): Future[Seq[(String, JsValue)]] = {
     Future.sequence(tiles.map { tile =>
       tile.fetchUrl.map { url =>
         cache.getOrElseUpdate(s"tile-preferences-${tile.id}", preferenceCacheDuration) {
-          ws.url(s"$url/preferences.json").get()
+          signWSRequest(trustedApp, user, ws.url(s"$url/preferences.json")).get()
             .map(res =>
               res.status match {
                 case 200 => (tile.id, res.json)
@@ -84,7 +94,7 @@ class TileContentServiceImpl @Inject()(
             )
             .recover {
               case e =>
-                logger.error("Error requesting preferences for tile ${tile.id}", e)
+                logger.error(s"Error requesting preferences for tile ${tile.id}", e)
                 (tile.id, Json.obj())
             }
         }
