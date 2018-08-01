@@ -69,6 +69,61 @@ class AppManifestController @Inject()(
             "src" -> "/assets/images/icon-512.png",
             "sizes" -> "512x512",
             "type" -> "image/png"
+          ),
+          Json.obj(
+            "src" -> "/assets/images/icon-1024.png",
+            "sizes" -> "1024x1024",
+            "type" -> "image/png"
+          ),
+          Json.obj(
+            "src" -> "/assets/images/launch-640x960.png",
+            "sizes" -> "640x960",
+            "type" -> "image/png"
+          ),
+          Json.obj(
+            "src" -> "/assets/images/launch-750x1334.png",
+            "sizes" -> "750x1334",
+            "type" -> "image/png"
+          ),
+          Json.obj(
+            "src" -> "/assets/images/launch-768x1024.png",
+            "sizes" -> "768x1024",
+            "type" -> "image/png"
+          ),
+          Json.obj(
+            "src" -> "/assets/images/launch-1024x768.png",
+            "sizes" -> "1024x768",
+            "type" -> "image/png"
+          ),
+          Json.obj(
+            "src" -> "/assets/images/launch-1136x640.png",
+            "sizes" -> "1136x640",
+            "type" -> "image/png"
+          ),
+          Json.obj(
+            "src" -> "/assets/images/launch-1242x2208.png",
+            "sizes" -> "1242x2208",
+            "type" -> "image/png"
+          ),
+          Json.obj(
+            "src" -> "/assets/images/launch-1334x750.png",
+            "sizes" -> "1334x750",
+            "type" -> "image/png"
+          ),
+          Json.obj(
+            "src" -> "/assets/images/launch-1536x2048.png",
+            "sizes" -> "1536x2048",
+            "type" -> "image/png"
+          ),
+          Json.obj(
+            "src" -> "/assets/images/launch-2048x1536.png",
+            "sizes" -> "2048x1536",
+            "type" -> "image/png"
+          ),
+          Json.obj(
+            "src" -> "/assets/images/launch-2208x1242.png",
+            "sizes" -> "2208x1242",
+            "type" -> "image/png"
           )
         ),
         "gcm_sender_id" -> senderId,
