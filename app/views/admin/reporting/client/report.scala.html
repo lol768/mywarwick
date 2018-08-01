@@ -1,0 +1,124 @@
+@import org.joda.time.DateTime
+@import services.reporting.TimedClientMetrics
+@import system.RequestContext
+@(
+    now: DateTime,
+    metrics: Option[TimedClientMetrics]
+)(
+    implicit messages: Messages,
+    context: RequestContext
+)
+  @if(metrics.isDefined) {
+    <h2>Unique users</h2>
+
+    <table class="table table-condensed table-hover sortable-table">
+      <thead class="thead">
+        <th scope="col" class="count-column">Count</th>
+        <th scope="col">Metric</th>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td class="count-column">@metrics.get.metrics.uniqueUserCount</td>
+          <td>Unique users</td>
+        </tr>
+        <tr>
+          <td class="count-column">@metrics.get.metrics.appUserCount</td>
+          <td>App users</td>
+        </tr>
+        <tr>
+          <td class="count-column">@metrics.get.metrics.webUserCount</td>
+          <td>Web users</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Users by type</h2>
+
+    <table class="table table-condensed table-hover sortable-table">
+      <thead class="thead">
+        <th scope="col" class="count-column">Count</th>
+        <th scope="col">Type</th>
+      </thead>
+      <tbody>
+      @for((memberType, count) <- metrics.get.metrics.typedUserCount) {
+        <tr>
+          <td class="count-column">@count</td>
+          <td>@memberType</td>
+        </tr>
+      }
+      </tbody>
+    </table>
+
+    <h2>Users by department</h2>
+
+    <table class="table table-condensed table-hover sortable-table">
+      <thead class="thead">
+        <th scope="col" class="count-column">Count</th>
+        <th scope="col">Department</th>
+      </thead>
+      <tbody>
+      @for((department, count) <- metrics.get.metrics.deptUserCount) {
+        <tr>
+          <td class="count-column">@count</td>
+          <td>@department</td>
+        </tr>
+      }
+      </tbody>
+    </table>
+
+    <h2>OS breakdown</h2>
+
+    <table class="table table-condensed table-hover sortable-table">
+      <thead class="thead">
+        <th scope="col" class="count-column">Count</th>
+        <th scope="col">Operating system</th>
+      </thead>
+      <tbody>
+      @for((os, count) <- metrics.get.metrics.osCount) {
+        <tr>
+          <td class="count-column">@count</td>
+          <td>@os</td>
+        </tr>
+      }
+      </tbody>
+    </table>
+
+    <h2>Device breakdown</h2>
+
+    <table class="table table-condensed table-hover sortable-table">
+      <thead class="thead">
+        <th scope="col" class="count-column">Count</th>
+        <th scope="col">Device</th>
+      </thead>
+      <tbody>
+      @for((device, count) <- metrics.get.metrics.deviceCount) {
+        <tr>
+          <td class="count-column">@count</td>
+          <td>@device</td>
+        </tr>
+      }
+      </tbody>
+    </table>
+
+    <h2>Version breakdown</h2>
+
+    <table class="table table-condensed table-hover sortable-table">
+      <thead class="thead">
+        <th scope="col" class="count-column">Count</th>
+        <th scope="col">App version</th>
+      </thead>
+      <tbody>
+      @for((version, count) <- metrics.get.metrics.appVersionCount) {
+        <tr>
+          <td class="count-column">@count</td>
+          <td>@version</td>
+        </tr>
+      }
+      </tbody>
+    </table>
+
+    <p class="text-muted"><i>Report completed at @models.DateFormats.emailDateTime(now) (took @models.DateFormats.durationToHumanReadable(metrics.get.duration)).</i></p>
+  } else {
+    <p class="alert alert-danger"><i class="fa fa-fw fa-exclamation-triangle"></i> Sorry, this report could not be generated right now.</p>
+  }

@@ -8,6 +8,7 @@ import javax.inject.{Inject, Provider, Singleton}
 import models.FeaturePreferences
 import play.api.Configuration
 import play.api.libs.json.OWrites
+import system.Logging
 import utils.{BoolTraitWrites, JavaProxy}
 import warwick.sso.{User, Usercode}
 
@@ -23,6 +24,7 @@ import scala.reflect.{ClassTag, classTag}
 trait Features {
   def news: Boolean
   def updateTileEditUI : Boolean
+  def doNotDisturb : Boolean
   def eap: Boolean
 }
 
@@ -83,7 +85,7 @@ class FeaturesServiceImpl @Inject() (
   * @param prefs prefs derived for the current user (based on their EAP opt-in selection) - determines
   *              how things are resolved to a boolean.
   */
-class FlagsAccessor[T : ClassTag](config: Configuration, prefs: FeaturePreferences) extends Provider[T] {
+class FlagsAccessor[T : ClassTag](config: Configuration, prefs: FeaturePreferences) extends Provider[T] with Logging {
 
   override def get: T = proxy
 
@@ -102,12 +104,13 @@ class FlagsAccessor[T : ClassTag](config: Configuration, prefs: FeaturePreferenc
   private def precheck(): Unit = {
     val confKeys = config.subKeys
     val traitKeys = tClass.getDeclaredMethods.filter(m => m.getReturnType == classOf[Boolean]).map(_.getName).toSet
-    if (confKeys != traitKeys) {
+
+    val onlyInTrait = traitKeys.diff(confKeys)
+    if (onlyInTrait.nonEmpty) {
       val className = tClass.getName
       throw new IllegalStateException(
         s"""Feature keys in config didn't match $className object -
-           |In config but not $className: ${confKeys diff traitKeys}
-           |In $className but not config: ${traitKeys diff confKeys}
+           |In $className but not config: ${onlyInTrait.mkString(", ")}
          """.stripMargin)
     }
 

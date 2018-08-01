@@ -14,6 +14,7 @@ import * as newsOptIn from '../../state/news-optin';
 import * as emailNotificationsOptIn from '../../state/email-notifications-opt-in';
 import * as smsNotifications from '../../state/sms-notifications';
 import * as eap from '../../state/eap';
+import * as doNotDisturb from '../../state/do-not-disturb';
 import { loadDeviceDetails, signOut } from '../../userinfo';
 import SwitchListGroupItem from '../ui/SwitchListGroupItem';
 import wrapKeyboardSelect from '../../keyboard-nav';
@@ -56,6 +57,7 @@ class SettingsView extends HideableView {
     this.onActivityFilter = this.onActivityFilter.bind(this);
     this.onNotificationFilter = this.onNotificationFilter.bind(this);
     this.onEditTiles = this.onEditTiles.bind(this);
+    this.onDoNotDisturb = this.onDoNotDisturb.bind(this);
     this.onEAP = this.onEAP.bind(this);
   }
 
@@ -122,6 +124,7 @@ class SettingsView extends HideableView {
       failed: PropTypes.bool.isRequired,
       enabled: PropTypes.bool.isRequired,
     }).isRequired,
+    doNotDisturbEnabled: PropTypes.bool.isRequired,
   };
 
   static renderSetting(icon, title, rightView, disabled = false) {
@@ -147,6 +150,10 @@ class SettingsView extends HideableView {
 
   static shouldShowTimetableAlarms() {
     return ('MyWarwickNative' in window) && ('setTimetableNotificationsEnabled' in window.MyWarwickNative); // eslint-disable-line no-undef, max-len
+  }
+
+  shouldShowDoNotDisturb() {
+    return this.props.features.doNotDisturb;
   }
 
   static renderSingleCount(number) {
@@ -222,6 +229,7 @@ class SettingsView extends HideableView {
       this.props.dispatch(emailNotificationsOptIn.fetch());
       this.props.dispatch(smsNotifications.fetch());
       this.props.dispatch(eap.fetch());
+      this.props.dispatch(doNotDisturb.fetch());
     }
   }
 
@@ -373,11 +381,17 @@ class SettingsView extends HideableView {
         push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TIMETABLE_ALARMS}`),
       );
     }, e);
-  };
+  }
 
   onEditTiles(e) {
     wrapKeyboardSelect(() => {
       this.props.dispatch(push(`/${Routes.EDIT}`));
+    }, e);
+  }
+
+  onDoNotDisturb(e) {
+    wrapKeyboardSelect(() => {
+      this.props.dispatch(push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.DO_NOT_DISTURB}`));
     }, e);
   }
 
@@ -459,6 +473,15 @@ class SettingsView extends HideableView {
                 SettingsView.renderSingleCount(this.props.mutes),
               )}
             </ListGroupItemBtn>
+            {this.shouldShowDoNotDisturb() &&
+            <ListGroupItemBtn handler={this.onDoNotDisturb}>
+              {SettingsView.renderSetting(
+                'clock-o',
+                'Do not disturb',
+                <span>{this.props.doNotDisturbEnabled ? 'On' : 'Off'} <FAChevronRight /></span>,
+              )}
+            </ListGroupItemBtn>
+            }
             <SwitchListGroupItem
               id="copyNotificationsEmail"
               value=""
@@ -697,6 +720,7 @@ const select = (state) => {
     assetsRevision: state.app.assets.revision,
     appVersion: state.app.native.version,
     isOnline: state.device.isOnline,
+    doNotDisturbEnabled: state.doNotDisturb.enabled,
     timetableAlarms: state.timetableAlarms,
     eap: { ...state.eap },
     features: state.user.features,

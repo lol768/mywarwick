@@ -33,14 +33,14 @@ class FlagsAccessorTest extends PlaySpec {
       }
     }
 
-    "reject extra conf keys" in {
-      intercept[IllegalStateException] {
-        new MyTestAccessor(Configuration(
-          "news" -> "on",
-          "potato" -> "off",
-          "bums" -> "on"
-        ), FeaturePreferences.empty).get
-      }
+    "ignore extra conf keys" in {
+      val features = new MyTestAccessor(Configuration(
+        "news" -> "on",
+        "potato" -> "off",
+        "bums" -> "on"
+      ), FeaturePreferences.empty).get
+      features.news mustBe true
+      features.potato mustBe false
     }
 
     "reject missing conf keys" in {

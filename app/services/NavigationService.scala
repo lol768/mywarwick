@@ -100,7 +100,8 @@ class NavigationServiceImpl @Inject()(
       NavigationPage("Reports", adminReportingRoutes.HomeController.index(), Seq(
         NavigationPage("Preferences Report", adminReportingRoutes.PreferencesReportingController.index()),
         NavigationPage("Activity Report", adminReportingRoutes.ActivityReportingController.index()),
-        NavigationPage("EAP Report", adminReportingRoutes.EAPReportingController.index())
+        NavigationPage("EAP Report", adminReportingRoutes.EAPReportingController.index()),
+        NavigationPage("Client Report", adminReportingRoutes.ClientReportingController.index())
       ))
     ))
   }

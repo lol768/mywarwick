@@ -53,13 +53,14 @@ function getPlugins() {
 module.exports = {
   entry: {
     bundle: './app/assets/js/boot.js',
+    'admin-bundle': './app/assets/js/admin.js',
     'publish-bundle': './app/assets/js/publish.js',
-    vendor: ['react','react-dom','redux','react-redux','moment']
+    vendor: ['react','react-dom','redux','react-redux','moment'],
   },
   output: {
     path: path.resolve(__dirname, 'target/gulp/js'),
     filename: '[name].js',
-    chunkFilename: '[chunkhash]-[id].js',
+    chunkFilename: '[name].js',
     publicPath: '/assets/js/',
   },
   resolve: {

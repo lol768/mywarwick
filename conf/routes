@@ -49,7 +49,6 @@ POST          /admin/publishers/:publisher/providers                @controllers
 GET           /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.updateForm(publisher: String, provider: String)
 POST          /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.update(publisher: String, provider: String)
 
-
 GET           /admin/elasticsearch/activity                  @controllers.admin.elasticsearch.ActivityToESController.index
 POST          /admin/elasticsearch/reindex                   @controllers.admin.elasticsearch.ActivityToESController.reindexActivitiesInDateTimeRange
 
@@ -58,6 +57,9 @@ GET           /admin/reports/preferences                     @controllers.admin.
 GET           /admin/reports/eap                             @controllers.admin.reporting.EAPReportingController.index
 GET           /admin/reports/activity                        @controllers.admin.reporting.ActivityReportingController.index
 POST          /admin/reports/activity                        @controllers.admin.reporting.ActivityReportingController.formSubmit
+GET           /admin/reports/clients                         @controllers.admin.reporting.ClientReportingController.index
+POST          /admin/reports/clients                         @controllers.admin.reporting.ClientReportingController.formSubmit
+GET           /admin/reports/clients/:start/:end             @controllers.admin.reporting.ClientReportingController.report(start: String, end: String)
 
 GET           /publish/:publisher/webgroups                  @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 
@@ -94,6 +96,9 @@ GET           /service-worker.js                             @controllers.HomeCo
 
 # Android App Links
 GET           /.well-known/assetlinks.json                   @controllers.Assets.at(path="/public", file="assetlinks.json")
+
+GET           /api/donotdisturb                              @controllers.api.DoNotDisturbController.index
+POST          /api/donotdisturb                              @controllers.api.DoNotDisturbController.update
 
 GET           /api/news/feed                                 @controllers.api.ReadNewsController.feed(offset: Int ?= 0)
 GET           /api/news/feed.atom                            @controllers.api.ReadNewsController.atomFeed
@@ -152,6 +157,10 @@ GET           /api/tiles                                     @controllers.api.Ti
 GET           /api/tiles/content                             @controllers.api.TilesController.content
 GET           /api/tiles/content/:id                         @controllers.api.TilesController.contentById(id: String)
 PUT           /api/tiles                                     @controllers.api.TilesController.saveLayout
+
+GET           /api/merge/calendar                            @controllers.api.EventsMergeController.index
+POST          /api/merge/calendar                            @controllers.api.EventsMergeController.index
+GET           /api/merge/calendar/preferences.json           @controllers.api.EventsMergeController.preferences
 
 GET           /api/emailNotificationPreferences              @controllers.api.EmailNotificationsPrefController.get
 POST          /api/emailNotificationPreferences              @controllers.api.EmailNotificationsPrefController.update
