@@ -81,6 +81,11 @@ class AppManifestController @Inject()(
             "type" -> "image/png"
           ),
           Json.obj(
+            "src" -> "/assets/images/launch-640x1136.png",
+            "sizes" -> "640x1136",
+            "type" -> "image/png"
+          ),
+          Json.obj(
             "src" -> "/assets/images/launch-750x1334.png",
             "sizes" -> "750x1334",
             "type" -> "image/png"
@@ -93,11 +98,6 @@ class AppManifestController @Inject()(
           Json.obj(
             "src" -> "/assets/images/launch-1024x768.png",
             "sizes" -> "1024x768",
-            "type" -> "image/png"
-          ),
-          Json.obj(
-            "src" -> "/assets/images/launch-1136x640.png",
-            "sizes" -> "1136x640",
             "type" -> "image/png"
           ),
           Json.obj(
