@@ -52,7 +52,7 @@ export default class Tile extends HideableView {
   getIconTitle() {
     const { errors, fetchedAt } = this.props;
 
-    if (errors) {
+    if (errors && errors.length) {
       return `Last updated ${localMoment(fetchedAt).calendar()}. ${errors[0].message}`;
     }
 

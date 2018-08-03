@@ -29,11 +29,13 @@ export function put(file, progressCallback) {
           resolve(json.data);
         } else {
           // Wouldn't expect to be here, but need to ensure we resolve or reject
-          reject(new Error(json.errors[0].message));
+          const errMsg = (json.errors && json.errors.length) ?
+            json.errors[0].message : 'file upload was unsuccessful';
+          reject(new Error(errMsg));
         }
       },
       error: (e, errorType, statusText) => {
-        if (e.responseJSON) {
+        if (e.responseJSON.errors && e.responseJSON.errors.length) {
           reject(new Error(e.responseJSON.errors[0].message));
         } else {
           reject(new Error(statusText || errorMessages[errorType || 'error']));
