@@ -35,7 +35,7 @@ export function put(file, progressCallback) {
         }
       },
       error: (e, errorType, statusText) => {
-        if (e.responseJSON.errors && e.responseJSON.errors.length) {
+        if (e.responseJSON && e.responseJSON.errors && e.responseJSON.errors.length) {
           reject(new Error(e.responseJSON.errors[0].message));
         } else {
           reject(new Error(statusText || errorMessages[errorType || 'error']));
