@@ -47,7 +47,7 @@ class MessagingDaoImpl extends MessagingDao {
       .as(queueParser.*)
 
   override def getOldestUnsentMessageCreatedAt()(implicit c: Connection): Option[DateTime] =
-    SQL("SELECT UPDATED_AT FROM MESSAGE_SEND WHERE STATE = 'A' AND ROWNUM = 1 ORDER BY UPDATED_AT ASC")
+    SQL("SELECT UPDATED_AT FROM MESSAGE_SEND WHERE SEND_AT <= UPDATED_AT AND STATE = 'A' AND ROWNUM = 1 ORDER BY UPDATED_AT ASC")
       .as(scalar[DateTime].singleOpt)
 
   override def getSmsSentLast24Hours()(implicit c: Connection): Int =
