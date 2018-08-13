@@ -5,7 +5,12 @@ import models.Platform
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
 import services.dao.PushRegistrationDao
+import system.Logging
 import warwick.sso.Usercode
+
+object PushRegistrationService {
+  val blacklisted = "BLACKLISTED"
+}
 
 @ImplementedBy(classOf[PushRegistrationServiceImpl])
 trait PushRegistrationService {
@@ -19,12 +24,18 @@ trait PushRegistrationService {
 class PushRegistrationServiceImpl @Inject()(
   @NamedDatabase("default") db: Database,
   pushRegistrationDao: PushRegistrationDao
-) extends PushRegistrationService {
+) extends PushRegistrationService with Logging {
 
-  override def save(usercode: Usercode, platform: Platform, token: String, deviceString: Option[String]): Boolean =
-    db.withConnection { implicit c =>
-      pushRegistrationDao.saveRegistration(usercode, platform, token, deviceString)
+  override def save(usercode: Usercode, platform: Platform, token: String, deviceString: Option[String]): Boolean = {
+    if (token != PushRegistrationService.blacklisted) {
+      db.withConnection { implicit c =>
+        pushRegistrationDao.saveRegistration(usercode, platform, token, deviceString)
+      }
+    } else {
+      logger.error(s"Not saving push registration for ${usercode.string} as it is blacklisted")
+      false
     }
+  }
 
   override def remove(token: String): Boolean =
     db.withConnection { implicit c =>

@@ -124,18 +124,17 @@ class FCMOutputService @Inject()(
           },
           res => {
             res.error.foreach(err => {
-              if (err.details.isEmpty)
+              if (err.details.isEmpty) {
                 logger.error(s"FCM Error: code=${err.code} message=${err.message} status=${err.status}")
-
-              err.details.map(_.errorCode).foreach {
-                case Some(code) if code.contains("UNREGISTERED") =>
-                  logger.info(s"Received UNREGISTERED FCM error, removing token=$token")
-                  db.withConnection { implicit c =>
-                    pushRegistrationDao.removeRegistration(token)
-                  }
-
-                case Some(code) => logger.error(s"FCM response status: ${err.code} ${err.status}, code $code, message=${err.message}")
-                case None => logger.error(s"FCM Error: message=${err.message} status=${err.code} ${err.status}")
+              } else if (err.details.exists(_.errorCode.contains("UNREGISTERED"))) {
+                logger.info(s"Received UNREGISTERED FCM error, removing token=$token")
+                db.withConnection { implicit c =>
+                  pushRegistrationDao.removeRegistration(token)
+                }
+              } else {
+                val errorCode = err.details.find(_.errorCode.nonEmpty).flatMap(_.errorCode).map(c => s"errorCode=$c").getOrElse("[Unknown error code]")
+                val fieldViolations = err.details.flatMap(_.fieldViolations).flatten.map(_.stringify).mkString(", ")
+                logger.info(s"FCM response status: ${err.code} ${err.status}, $errorCode $fieldViolations")
               }
             })
           }
@@ -143,7 +142,14 @@ class FCMOutputService @Inject()(
       }
   }
 
-  case class FCMErrorDetails(errorCode: Option[String], fieldViolation: Option[String])
+  case class FCMFieldViolation(field: Option[String], description: Option[String]) {
+    val stringify: String = Seq(field.orElse(Some("[Unknown field]")), description).flatten.mkString(": ")
+  }
+  object FCMFieldViolation {
+    implicit val reads: Reads[FCMFieldViolation] = Json.reads[FCMFieldViolation]
+  }
+
+  case class FCMErrorDetails(errorCode: Option[String], fieldViolations: Option[Seq[FCMFieldViolation]])
   object FCMErrorDetails {
     implicit val reads: Reads[FCMErrorDetails] = Json.reads[FCMErrorDetails]
   }

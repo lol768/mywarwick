@@ -158,6 +158,10 @@ GET           /api/tiles/content                             @controllers.api.Ti
 GET           /api/tiles/content/:id                         @controllers.api.TilesController.contentById(id: String)
 PUT           /api/tiles                                     @controllers.api.TilesController.saveLayout
 
+GET           /api/merge/calendar                            @controllers.api.EventsMergeController.index
+POST          /api/merge/calendar                            @controllers.api.EventsMergeController.index
+GET           /api/merge/calendar/preferences.json           @controllers.api.EventsMergeController.preferences
+
 GET           /api/emailNotificationPreferences              @controllers.api.EmailNotificationsPrefController.get
 POST          /api/emailNotificationPreferences              @controllers.api.EmailNotificationsPrefController.update
 GET           /api/smsNotificationPreferences                @controllers.api.SmsNotificationsPrefController.get
