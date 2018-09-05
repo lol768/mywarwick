@@ -5,7 +5,7 @@ import * as PropTypes from 'prop-types';
 import { formatDateTime } from '../../dateFormats';
 import HyperLink from '../ui/Hyperlink';
 import DismissableInfoModal from '../ui/DismissableInfoModal';
-import { Info } from '../FA';
+// import { Info } from '../FA';
 
 class ModuleAnnouncement extends React.PureComponent {
   static propTypes = {
@@ -67,7 +67,8 @@ class ModuleTileItem extends ListTileItem {
   }
 
   render() {
-    const { size, moduleCode, fullName, lastUpdated, href, announcements } = this.props;
+    const { size, moduleCode, fullName, href } = this.props;
+    // const { lastUpdated, announcements} = this.props;
     const isSmall = size === 'small' || size === 'wide';
     const content = isSmall ?
       (<span><span className="text--underline">{moduleCode ? `${moduleCode}:` : fullName}</span>
@@ -76,18 +77,18 @@ class ModuleTileItem extends ListTileItem {
       (<span className="text--underline">{moduleCode && `${moduleCode}: `}{fullName}</span>);
 
     return (
-      <li className="tile-list-item">
-        {announcements.length ?
-          <a onClick={this.handleClick} role="button" target="_blank" tabIndex={0}>
-            {content}
-            <Info fw />
-          </a>
-          :
-          <HyperLink href={href}>
-            {content}
-          </HyperLink>
-        }
-        {!isSmall && <div>Last updated: {formatDateTime(lastUpdated)}</div>}
+      <li className="tile-list-item--big">
+        {/* {announcements.length ?*/}
+        {/* <a onClick={this.handleClick} role="button" target="_blank" tabIndex={0}>*/}
+        {/* {content}*/}
+        {/* <Info fw />*/}
+        {/* </a>*/}
+        {/* :*/}
+        <HyperLink href={href}>
+          {content}
+        </HyperLink>
+        {/* }*/}
+        {/* {!isSmall && <div>Last updated: {formatDateTime(lastUpdated)}</div>}*/}
       </li>
     );
   }
