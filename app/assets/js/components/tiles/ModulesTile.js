@@ -77,7 +77,7 @@ class ModuleTileItem extends ListTileItem {
       (<span className="text--underline">{moduleCode && `${moduleCode}: `}{fullName}</span>);
 
     return (
-      <li className="tile-list-item--big">
+      <li className="tile-list-item">
         {/* {announcements.length ?*/}
         {/* <a onClick={this.handleClick} role="button" target="_blank" tabIndex={0}>*/}
         {/* {content}*/}
