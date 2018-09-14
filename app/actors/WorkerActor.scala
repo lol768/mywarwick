@@ -42,7 +42,7 @@ class WorkerActor @Inject()(
               log.warning(s"Message failed to send: ${res.message}")
               messaging.failure(message)
             case Failure(ex) =>
-              log.error(s"Message-sending threw an exception", ex)
+              log.error(ex,"Message-sending threw an exception")
               messaging.failure(message)
           }
           processing.onComplete {
