@@ -278,7 +278,7 @@ export function launch(userData) {
 
   user.loadUserFromLocalStorage(store.dispatch);
   //
-  const userInfoPromise = userData ? Promise.resolve(userData) : userinfo.fetchUserInfo();
+  const userInfoPromise = userData ? Promise.resolve(userData) : userinfo.fetchUserInfo().catch(e => log.warning("Failed to fetch user info", e));
   // ensure local version is written first, then remote version if available.
   persistedUserLinks
     .then(() => userInfoPromise)
