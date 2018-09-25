@@ -40,7 +40,7 @@ import bridge from './bridge';
 import { hasAuthoritativeAuthenticatedUser, hasAuthoritativeUser } from './state';
 
 export function launch(userData) {
-  bridge({ store, tiles, notifications, userinfo, news, features: userData.features });
+  bridge({ store, tiles, notifications, userinfo, news });
 
   localforage.config({
     name: 'Start',
