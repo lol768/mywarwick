@@ -23,7 +23,7 @@ import { isiPhoneX } from './helpers';
  * with different dependencies.
  */
 export default function init(opts) {
-  const { store, tiles, notifications, userinfo, news, features } = opts;
+  const { store, tiles, notifications, userinfo, news } = opts;
 
   function doInit(native) {
     const nativeSelectors = [
@@ -62,6 +62,14 @@ export default function init(opts) {
           }
         },
       ),
+      createSelector(
+        state => state.user.features,
+        (features) => {
+          if (native.setFeatures) {
+            native.setFeatures(JSON.stringify(features));
+          }
+        }
+      )
     ];
 
     function update() {
@@ -86,10 +94,6 @@ export default function init(opts) {
         version: native.getAppVersion(),
         build: native.getAppBuild(),
       }));
-    }
-
-    if (native.setFeatures) {
-      native.setFeatures(JSON.stringify(features));
     }
 
     if ('applicationCache' in window) {
