@@ -68,8 +68,8 @@ export default function init(opts) {
           if (native.setFeatures) {
             native.setFeatures(JSON.stringify(features));
           }
-        }
-      )
+        },
+      ),
     ];
 
     function update() {
