@@ -277,12 +277,13 @@ export function launch(userData) {
   store.subscribe(() => persistNotificationsLastRead(store.getState()));
 
   user.loadUserFromLocalStorage(store.dispatch);
-  //
-  const userInfoPromise = userData ? Promise.resolve(userData) : userinfo.fetchUserInfo().catch(e => log.warning("Failed to fetch user info", e));
+
+  const userInfoPromise = userData ? Promise.resolve(userData) : () => userinfo.fetchUserInfo();
   // ensure local version is written first, then remote version if available.
   persistedUserLinks
-    .then(() => userInfoPromise)
-    .then(data => userinfo.receiveUserInfo(data));
+    .then(userInfoPromise)
+    .then(data => userinfo.receiveUserInfo(data))
+    .catch(e => log.warn('Failed to fetch user info', e));
 
   // Refresh all tile content every five minutes
   setInterval(() => {
