@@ -21,6 +21,7 @@ const agendaViewTransform = (items) => {
       if (e.isAllDay) {
         const date = localMoment(e.start);
         const end = (e.end !== undefined) ? localMoment(e.end) : localMoment(e.start);
+        let academicWeek = e.academicWeek;
 
         const instances = [];
 
@@ -28,15 +29,24 @@ const agendaViewTransform = (items) => {
           instances.push({
             ...e,
             start: date.format(),
+            academicWeek,
           });
 
           date.add(1, 'day');
+
+          if (typeof academicWeek === 'number' && date.day() === 1) {
+            academicWeek += 1;
+            if (academicWeek > 44) {
+              academicWeek = -8;
+            }
+          }
         }
 
         if (instances.length === 0) {
           instances.push({
             ...e,
             start: date.format(),
+            academicWeek,
           });
         }
 
