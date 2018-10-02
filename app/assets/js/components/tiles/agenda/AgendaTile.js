@@ -59,7 +59,8 @@ const agendaViewTransform = (items) => {
         instances.push({
           ...e,
           start: date.format(),
-        academicWeek,});
+          academicWeek,
+        });
       }
 
       return instances;
