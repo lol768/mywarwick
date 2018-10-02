@@ -18,32 +18,37 @@ const agendaViewTransform = (items) => {
 
   return _.flow(
     i => _.flatMap(i, (e) => {
-      if (e.isAllDay) {
-        const date = localMoment(e.start);
-        const end = (e.end !== undefined) ? localMoment(e.end) : localMoment(e.start);
+      const date = localMoment(e.start);
+      const end = (e.end !== undefined) ? localMoment(e.end) : localMoment(e.start);
+      const instances = [];
 
-        const instances = [];
+      while (date.isBefore(end)) {
+        instances.push({
+          ...e,
+          start: date.format(),
+          // Handle events that started before today and end tomorrow
+          // Displaying them as midnight to midnight looks a bit rubbish
+          // so just display them as all day
+          isAllDay: e.isAllDay || (
+            localMoment(e.start).isBefore(date) &&
+            date.clone().add(1, 'day').isBefore(end)
+          ),
+        });
 
-        while (date.isBefore(end)) {
-          instances.push({
-            ...e,
-            start: date.format(),
-          });
-
-          date.add(1, 'day');
+        date.add(1, 'day');
+        if (!e.isAllDay) {
+          date.startOf('day');
         }
-
-        if (instances.length === 0) {
-          instances.push({
-            ...e,
-            start: date.format(),
-          });
-        }
-
-        return instances;
       }
 
-      return e;
+      if (instances.length === 0) {
+        instances.push({
+          ...e,
+          start: date.format(),
+        });
+      }
+
+      return instances;
     }),
     i => _.filter(i, e => startOfToday.isBefore(e.start)),
     i => _.sortBy(i, e => e.start),
