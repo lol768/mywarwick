@@ -21,6 +21,7 @@ const agendaViewTransform = (items) => {
       if (e.isAllDay) {
         const date = localMoment(e.start);
         const end = (e.end !== undefined) ? localMoment(e.end) : localMoment(e.start);
+        let academicWeek = e.academicWeek;
 
         const instances = [];
 
@@ -28,15 +29,29 @@ const agendaViewTransform = (items) => {
           instances.push({
             ...e,
             start: date.format(),
+            academicWeek,
           });
 
           date.add(1, 'day');
+
+          if (typeof academicWeek === 'number' && date.day() === 1) {
+            // If the newly incremented date is a Monday we've advanced a week,
+            // so increment the academic week
+            academicWeek += 1;
+            // Week 1 is always the first week of the Autumn term, and weeks count backwards from
+            // then until 1st August. There aren't exactly 52 weeks in any calendar year, but
+            // this takes a stab at correcting for if the event spans academic years
+            if (academicWeek > 44) {
+              academicWeek = -8;
+            }
+          }
         }
 
         if (instances.length === 0) {
           instances.push({
             ...e,
             start: date.format(),
+            academicWeek,
           });
         }
 
