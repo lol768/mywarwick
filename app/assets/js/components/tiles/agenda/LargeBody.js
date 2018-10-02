@@ -153,7 +153,7 @@ export class AgendaTileItem extends React.PureComponent {
       );
     }
 
-    if ((start && !end) || start === end) {
+    if ((start && !end) || localMoment(start).isSame(localMoment(end))) {
       return (
         <div className="agenda-item__cell__times">
           <span className="agenda-item__cell__times__start-time">{ formatTime(start) }</span>
