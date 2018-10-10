@@ -3,7 +3,7 @@
 import $ from 'jquery';
 import _ from 'lodash-es';
 import moment from 'moment';
-import localforage from 'localforage';
+import localforage from './localdata';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -42,9 +42,16 @@ import { hasAuthoritativeAuthenticatedUser, hasAuthoritativeUser } from './state
 export function launch(userData) {
   bridge({ store, tiles, notifications, userinfo, news });
 
-  localforage.config({
-    name: 'Start',
-  });
+  // Expose to the world for debugging purposes
+  // (no harm in having this in production)
+  window.localforage = localforage;
+
+  // sets and gets are implicitly wrapped in ready() waiting so no need to
+  // wait on this promise for any ops.
+  localforage.ready()
+    .then(() => {
+      log.info('localforage DB info:', localforage._dbInfo);
+    });
 
   const history = syncHistoryWithStore(browserHistory, store);
   history.listen(location =>
