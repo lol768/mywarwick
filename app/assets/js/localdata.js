@@ -19,10 +19,19 @@ function isWebKit() {
 
 const config = { name: 'Start' };
 
-if (isWebKit()) {
+const webkit = isWebKit();
+
+if (webkit) {
   // Safari's IndexedDB has rampant disk usage.
   log.info('Detected buggy AppleWebKit; using WebSQL instead of IndexedDB.');
-  config.driver = localforage.WEBSQL;
+  // Provide a list, just in case we get UA detection wrong, or Safari drops WebSQL support
+  // (and hoping they can fix their bug in the meantime).
+  // localforage will pick the first one that works.
+  config.driver = [
+    localforage.WEBSQL,
+    localforage.INDEXEDDB,
+    localforage.LOCALSTORAGE
+  ];
 
   // Delete any existing IndexedDB to free space (successful noop if nonexistent).
   // Wait for default localforage to init and close its DB first, otherwise the delete
@@ -45,5 +54,11 @@ if (isWebKit()) {
 }
 
 const instance = localforage.createInstance(config);
+
+instance.ready().then(() => {
+  if (webkit && instance.driver() !== localforage.WEBSQL) {
+    log.warn(`Tried to force WebSQL but instead we've got ${instance.driver()}`);
+  }
+});
 
 export default instance;
