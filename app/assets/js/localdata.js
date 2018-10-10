@@ -10,32 +10,38 @@ import log from 'loglevel';
  use createInstance and mostly ignore the default instance.
 */
 
-function isSafari() {
-  // Only matches iOS Safari, not Mac OS Safari, but don't care
+function isWebKit() {
+  // Anything on iOS, otherwise anything that says it's Safari that isn't Chrome
   const ua = navigator.userAgent;
   const has = (str) => ua.indexOf(str) > -1;
-  return has('Safari') &&
-    (!has('Chrome') || has('iP'));
+  return has('iP') || (has('Safari') && !has('Chrome'));
 }
 
 const config = { name: 'Start' };
 
-if (isSafari()) {
+if (isWebKit()) {
   // Safari's IndexedDB has rampant disk usage.
-  log.info('Detected buggy Safari, using WebSQL instead of IndexedDB.');
+  log.info('Detected buggy AppleWebKit; using WebSQL instead of IndexedDB.');
+  config.driver = localforage.WEBSQL;
+
   // Delete any existing IndexedDB to free space (successful noop if nonexistent).
   // Wait for default localforage to init and close its DB first, otherwise the delete
   // operation may be pending forever while it waits for a connection to close.
+  // (Having thought about it a bit, we probably _don't_ need to wait for localforage
+  // to be ready since it'll be created a default one with a different name - localforage -
+  // but no harm at all in waiting.
   localforage.ready().then(() => {
     if (localforage._dbInfo && localforage._dbInfo.db) {
       localforage._dbInfo.db.close();
     }
     if (window.indexedDB) {
-      log.info('Deleting any existing IndexedDB');
-      indexedDB.deleteDatabase('Start');
+      log.info(`Deleting any existing IndexedDB called ${config.name}`);
+      const req = indexedDB.deleteDatabase(config.name);
+      req.onsuccess = e => log.debug(`✓ IndexedDB ${config.name} deleted (or didn't exist)`);
+      req.onerror = e => log.warn(`✗ IndexedDB ${config.name} deletion error`, e);
+      req.onblocked = e => log.warn(`✗ Request to delete IndexedDB called ${config.name} is being blocked.`, e);
     }
   });
-  config.driver = localforage.WEBSQL;
 }
 
 const instance = localforage.createInstance(config);
