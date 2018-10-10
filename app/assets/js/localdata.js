@@ -24,12 +24,13 @@ const webkit = isWebKit();
 if (webkit) {
   // Safari's IndexedDB has rampant disk usage.
   log.info('Detected buggy AppleWebKit; using WebSQL instead of IndexedDB.');
-  // Provide a list, just in case we get UA detection wrong, or Safari drops WebSQL support
-  // (and hoping they can fix their bug in the meantime).
+  // Provide a list, just in case we get UA detection wrong, or Safari drops WebSQL support.
   // localforage will pick the first one that works.
+  // Not including INDEXEDDB here for a couple of reasons:
+  //  - We don't know that WebKit's bug will have been fixed
+  //  - We'd be constantly deleting its database in the below code
   config.driver = [
     localforage.WEBSQL,
-    localforage.INDEXEDDB,
     localforage.LOCALSTORAGE
   ];
 
