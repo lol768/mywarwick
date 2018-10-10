@@ -1,4 +1,4 @@
-import localforage from 'localforage';
+import localforage from '../localdata';
 import log from 'loglevel';
 import _ from 'lodash-es';
 
