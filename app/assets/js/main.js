@@ -50,7 +50,7 @@ export function launch(userData) {
   // wait on this promise for any ops.
   localforage.ready()
     .then(() => {
-      console.log('localforage DB info:', localforage._dbInfo);
+      log.info('localforage DB info:', localforage._dbInfo);
     });
 
   const history = syncHistoryWithStore(browserHistory, store);

@@ -1,3 +1,5 @@
+/* eslint-env browser */
+
 import localforage from 'localforage';
 import log from 'loglevel';
 
@@ -13,7 +15,7 @@ import log from 'loglevel';
 function isWebKit() {
   // Anything on iOS, otherwise anything that says it's Safari that isn't Chrome
   const ua = navigator.userAgent;
-  const has = (str) => ua.indexOf(str) > -1;
+  const has = str => ua.indexOf(str) > -1;
   return has('iP') || (has('Safari') && !has('Chrome'));
 }
 
@@ -31,7 +33,7 @@ if (webkit) {
   //  - We'd be constantly deleting its database in the below code
   config.driver = [
     localforage.WEBSQL,
-    localforage.LOCALSTORAGE
+    localforage.LOCALSTORAGE,
   ];
 
   // Delete any existing IndexedDB to free space (successful noop if nonexistent).
@@ -47,7 +49,7 @@ if (webkit) {
     if (window.indexedDB) {
       log.info(`Deleting any existing IndexedDB called ${config.name}`);
       const req = indexedDB.deleteDatabase(config.name);
-      req.onsuccess = e => log.debug(`✓ IndexedDB ${config.name} deleted (or didn't exist)`);
+      req.onsuccess = () => log.debug(`✓ IndexedDB ${config.name} deleted (or didn't exist)`);
       req.onerror = e => log.warn(`✗ IndexedDB ${config.name} deletion error`, e);
       req.onblocked = e => log.warn(`✗ Request to delete IndexedDB called ${config.name} is being blocked.`, e);
     }
