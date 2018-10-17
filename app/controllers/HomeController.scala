@@ -1,12 +1,13 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
+import play.Environment
 import play.api.Configuration
 import play.api.mvc._
 import services.analytics.{AnalyticsMeasurementService, AnalyticsTrackingID}
 import system.AppMetrics
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 case class SearchRootUrl(string: String)
 
@@ -15,7 +16,9 @@ class HomeController @Inject()(
   metrics: AppMetrics,
   configuration: Configuration,
   measurementService: AnalyticsMeasurementService,
-  assets: Assets
+  assets: Assets,
+  assetsConf: AssetsConfiguration,
+  env: Environment
 )(implicit executionContext: ExecutionContext) extends MyController {
 
   implicit val analyticsTrackingId: Option[AnalyticsTrackingID] = Some(measurementService.trackingID)
@@ -39,7 +42,16 @@ class HomeController @Inject()(
   }
 
   def serviceWorker: Action[AnyContent] = Action.async(parse.default) { implicit request =>
-    assets.at(path="/public", file="service-worker.js")(request)
+    assets.at(path = "/public", file = "service-worker.js")(request)
       .map(_.withHeaders("Expires" -> "0"))
+  }
+
+  def defaultMainImport(id: String): Action[AnyContent] = Action.async(parse.default) { implicit request =>
+    val file = env.getFile("app/"+assetsConf.urlPrefix+"/js")
+    val resource = file.listFiles(fn => fn.isFile && fn.getName.contains("-main-import")).toSeq.headOption
+    resource.fold(Future {
+      NotFound(views.html.errors.notFound())
+    })(f => assets.at(path = "/public", file = f.getName)(request)
+    )
   }
 }

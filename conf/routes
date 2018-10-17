@@ -89,6 +89,10 @@ GET           /publish/:publisher/alerts/:id/status          @controllers.publis
 GET           /websockets/page/                              @controllers.WebSocketController.socket
 
 GET           /assets/manifest.json                          @controllers.AppManifestController.getAppManifest
+
+# Handle {id}-main-import.js requests
+GET           /assets/js/$id<[0-9a-z]{20}>-main-import.js    @controllers.HomeController.defaultMainImport(id: String)
+
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                  @controllers.Assets.versioned(path="/public", file: Asset)
 
