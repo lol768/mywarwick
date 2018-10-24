@@ -33,7 +33,7 @@ class DoNotDisturbView extends HideableView {
     end: doNotDisturbTimePropType.isRequired,
   };
 
-  static options = [...Array(24).keys()].map(i =>
+  static options = [..._.range(24)].map(i =>
     ({ val: i, displayName: `${_.padStart(i, 2, '0')}:00` }),
   );
 

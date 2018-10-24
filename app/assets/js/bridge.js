@@ -17,6 +17,7 @@ import { navRequest } from './state/ui';
 import { loadNative } from './state/app';
 import { showFeedbackForm } from './userinfo';
 import { isiPhoneX } from './helpers';
+import log from 'loglevel';
 
 /**
  * Factory method for bridge so you can create an instance
@@ -161,7 +162,12 @@ export default function init(opts) {
 
       search(query) {
         // lazy load the Search module
-        import(/* webpackChunkName: "search-import" */'warwick-search-frontend').then(s => s.submitSearch(query));
+        import(/* webpackChunkName: "search-import" */'warwick-search-frontend')
+          .then(s => s.submitSearch(query))
+          .catch((e) => {
+            log.error(e);
+            throw e;
+          });
       },
 
       feedback(detailJson) {
