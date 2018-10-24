@@ -219,8 +219,6 @@ function generateServiceWorker(watch) {
     ],
     maximumFileSizeToCacheInBytes: 10 * 1000 * 1000,
     importScripts: swScripts,
-    skipWaiting: true,
-    clientsClaim: true,
   };
 
   return getCachedAssetsAsync()
