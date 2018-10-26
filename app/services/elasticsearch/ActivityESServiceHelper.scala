@@ -44,6 +44,9 @@ trait ActivityESServiceHelper {
     val state_keyword = s"$state.keyword"
     val output = "output"
     val distinct_users_agg = "distinct_users"
+
+    val timestamp = "@timestamp"
+
   }
 
   def dateSuffixString(date: DateTime = DateTime.now()) = s"$separator${date.toString("yyyy_MM")}"

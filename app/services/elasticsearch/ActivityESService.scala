@@ -1,5 +1,8 @@
 package services.elasticsearch
 
+import java.text.SimpleDateFormat
+import java.util.{Date, Locale, TimeZone}
+
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named, Singleton}
 import models.{Activity, MessageState, Output}
@@ -96,11 +99,18 @@ class ActivityESServiceImpl @Inject()(
         .field(ESFieldName.usercode, usercode.string)
         .field(ESFieldName.output, output.name)
         .field(ESFieldName.state, state.dbValue)
+        .field(ESFieldName.timestamp, isoDateStr(new Date()))
         .endObject()
       val indexName = s"${helper.deliveryReportIndexName}${helper.dateSuffixString()}"
       helper.makeIndexRequest(indexName, helper.deliveryReportDocumentType, s"$activityId:${usercode.string}:${output.name}", xContent)
     }
     makeBulkRequest(writeReqs)
+  }
+
+  private def isoDateStr(date: Date) = {
+    val dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
+    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
+    dateFormat.format(date)
   }
 
   def indexActivityReqs(reqs: Seq[IndexActivityRequest]): Future[Unit] = {
