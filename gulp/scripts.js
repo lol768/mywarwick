@@ -184,6 +184,7 @@ function generateServiceWorker(watch) {
   // Scripts that should be imported from the Service Worker
   const commonSWScripts = [
     'assets/js/push-worker.js',
+    'assets/js/reload-logic-worker.js'
   ];
 
   const debugSWScripts = [
