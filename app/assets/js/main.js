@@ -133,6 +133,16 @@ export function launch(userData) {
       .then((reg) => {
         pushNotifications.init();
 
+        if (window.addEventListener) {
+          window.addEventListener('beforeunload', () => {
+            // We're about to reload the page
+            // NEWSTART-1606: forcibly activate new SW
+            if (reg.waiting) {
+              reg.waiting.postMessage('force-activate');
+            }
+          });
+        }
+
         reg.onupdatefound = () => { // eslint-disable-line no-param-reassign
           const installingWorker = reg.installing;
 
@@ -153,6 +163,16 @@ export function launch(userData) {
           };
         };
       });
+
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (!event.data) {
+        return;
+      }
+
+      if (event.data === 'reload-window') {
+        window.location.reload();
+      }
+    });
   }
 
   SocketDatapipe.subscribe((data) => {

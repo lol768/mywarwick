@@ -53,7 +53,9 @@ self.addEventListener('push', (event) => {
 });
 
 self.addEventListener('message', (event) => {
-  self.token = event.data.token;
+  if ('token' in event.data) {
+    self.token = event.data.token;
+  }
 });
 
 self.addEventListener('notificationclick', (event) => {
