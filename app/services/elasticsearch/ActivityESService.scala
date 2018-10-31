@@ -1,5 +1,8 @@
 package services.elasticsearch
 
+import java.time.format.DateTimeFormatter
+import java.time.{OffsetDateTime, ZoneId}
+
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named, Singleton}
 import models.{Activity, MessageState, Output}
@@ -71,6 +74,7 @@ class ActivityESServiceImpl @Inject()(
 
   private val client: RestHighLevelClient = eSClientConfig.highLevelClient
   private val lowLevelClient: RestClient = eSClientConfig.lowLevelClient
+  private val iso8601DateFormat = DateTimeFormatter.ISO_OFFSET_DATE_TIME.withZone(ZoneId.of("UTC"))
 
   override def indexActivityReq(req: IndexActivityRequest): Future[Unit] = indexActivityReqs(Seq(req))
 
@@ -96,12 +100,14 @@ class ActivityESServiceImpl @Inject()(
         .field(ESFieldName.usercode, usercode.string)
         .field(ESFieldName.output, output.name)
         .field(ESFieldName.state, state.dbValue)
+        .field(ESFieldName.timestamp, iso8601DateFormat.format(OffsetDateTime.now()))
         .endObject()
       val indexName = s"${helper.deliveryReportIndexName}${helper.dateSuffixString()}"
       helper.makeIndexRequest(indexName, helper.deliveryReportDocumentType, s"$activityId:${usercode.string}:${output.name}", xContent)
     }
     makeBulkRequest(writeReqs)
   }
+
 
   def indexActivityReqs(reqs: Seq[IndexActivityRequest]): Future[Unit] = {
     val writeReqs: Seq[IndexRequest] = reqs.map { req =>
