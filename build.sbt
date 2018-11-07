@@ -44,7 +44,7 @@ val appDeps = Seq(
   jodaForms,
   "com.typesafe.play" %% "anorm" % "2.5.3",
   "com.oracle" % "ojdbc7" % "12.1.0.2.0",
-  "uk.ac.warwick.sso" %% "sso-client-play" % "2.43",
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.57",
   "uk.ac.warwick.play-utils" %% "accesslog" % playUtilsVersion,
   "uk.ac.warwick.play-utils" %% "anorm" % playUtilsVersion,
   "uk.ac.warwick.play-utils" %% "objectstore" % playUtilsVersion,
@@ -85,7 +85,7 @@ val testDeps = Seq(
   "org.scalatest" %% "scalatest" % "3.0.1",
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0",
   "com.typesafe.akka" %% "akka-testkit" % "2.4.19",
-  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.37",
+  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.57",
   "org.eclipse.jetty" % "jetty-server" % "9.4.7.v20170914",
   "com.h2database" % "h2" % "1.4.196"
 ).map(_ % Test)
@@ -100,8 +100,10 @@ javaOptions in Test += "-Dlogger.resource=test-logging.xml"
 
 libraryDependencies ++= (appDeps ++ testDeps ++ funcTestDeps).map(_.excludeAll(
   ExclusionRule(organization = "commons-logging"),
-  // ehcache renamed ehcache-core, don't load in the old version
-  ExclusionRule(organization = "net.sf.ehcache", name = "ehcache")
+  // No EhCache please we're British
+  ExclusionRule(organization = "net.sf.ehcache"),
+  ExclusionRule(organization = "org.ehcache"),
+  ExclusionRule(organization = "ehcache")
 ))
 
 // https://bugs.elab.warwick.ac.uk/browse/SSO-1653

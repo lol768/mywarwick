@@ -241,41 +241,39 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
     }
 
     "validate both usercodes and university ids" in new Ctx {
-      val codes = Seq(Usercode("cusebh"), Usercode("cusjau"))
-      val validId = Usercode("0123456")
-      val invalidId = Usercode("1234567")
+      val codes = Seq("cusebh", "cusjau")
+      val validId = "0123456"
+      val invalidId = "1234567"
       val ids = Seq(validId, invalidId)
-      val codesAndIds: Seq[Usercode] = codes ++ ids
+      val codesAndIds: Seq[String] = codes ++ ids
 
       when(userLookup.getUsers(any[Seq[Usercode]]))
-        .thenReturn(Try(codes.map(c => c -> Fixtures.user.makeFoundUser(c.string)).toMap))
-      when(userLookup.getUsers(ids.map(_.string).map(UniversityID), includeDisabled = false))
-        .thenReturn(Try(Seq(UniversityID(validId.string) -> Fixtures.user.makeFoundUser(validId.string)).toMap))
+        .thenReturn(Try(codes.map(c => Usercode(c) -> Fixtures.user.makeFoundUser(c)).toMap))
+      when(userLookup.getUsers(ids.map(UniversityID), includeDisabled = true))
+        .thenReturn(Try(Seq(UniversityID(validId) -> Fixtures.user.makeFoundUser(validId)).toMap))
       when(userLookup.getUsers(Seq.empty[UniversityID])).thenReturn(Failure(new UserLookupException))
 
       val actual = service.validateUsers(codesAndIds.toSet)
-
       actual must be (Left(Set(invalidId)))
     }
 
     "handle prepending 'u' to uni ids" in new Ctx {
-      val validUsercode = Seq(Usercode("u1234567"))
+      val validUsercode = Seq("u1234567")
 
       val bobsId = UniversityID("7654321")
       val bobsUsercode = Usercode("pacman")
-      val bobsIdDisguisedAsUsercode = Seq(Usercode(s"u${bobsId.string}"))
+      val bobsIdDisguisedAsUsercode = Seq(s"u${bobsId.string}")
 
-      val codes: Seq[Usercode] = validUsercode ++ bobsIdDisguisedAsUsercode
+      val codes: Seq[String] = validUsercode ++ bobsIdDisguisedAsUsercode
 
-      when(userLookup.getUsers(Seq.empty[UniversityID])).thenReturn(Failure[Map[UniversityID, User]](new Exception("epic fail")))
-      when(userLookup.getUsers(codes))
-        .thenReturn(Try(validUsercode.map(c => c -> Fixtures.user.makeFoundUser(c.string)).toMap))
-      when(userLookup.getUsers(Seq(bobsId), includeDisabled = false))
+      when(userLookup.getUsers(Seq.empty[UniversityID], includeDisabled = true)).thenReturn(Failure[Map[UniversityID, User]](new Exception("epic fail")))
+      when(userLookup.getUsers(codes.map(Usercode.apply)))
+        .thenReturn(Try(validUsercode.map(c => Usercode(c) -> Fixtures.user.makeFoundUser(c)).toMap))
+      when(userLookup.getUsers(Seq(bobsId), includeDisabled = true))
         .thenReturn(Try(Seq(bobsId -> Fixtures.user.makeFoundUser(bobsUsercode.string)).toMap))
 
-      val actual: Either[Set[Usercode], Set[Usercode]] = service.validateUsers(codes.toSet)
-
-      actual must be (Right((validUsercode :+ bobsUsercode).toSet))
+      val actual: Either[Set[String], Set[Usercode]] = service.validateUsers(codes.toSet)
+      actual must be (Right((validUsercode.map(Usercode.apply) :+ bobsUsercode).toSet))
     }
 
     "serialize audience JSON" in new Ctx {

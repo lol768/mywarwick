@@ -6,6 +6,7 @@ import models.Audience
 import models.Audience.{LocationOptIn, _}
 import play.api.db.Database
 import play.api.libs.json.{JsValue, Json}
+import services.AudienceService._
 import services.dao._
 import system.Logging
 import warwick.sso._
@@ -24,7 +25,12 @@ trait AudienceService {
 
   def audienceToJson(audience: Audience): JsValue
 
-  def validateUsers(usercodes: Set[Usercode]): Either[Set[Usercode], Set[Usercode]]
+  def validateUsers(input: Set[String]): Either[Set[String], Set[Usercode]]
+}
+
+object AudienceService {
+  // The number of users to validate in a single call to UserLookupService
+  val ValidateBatchSize = 100
 }
 
 class AudienceServiceImpl @Inject()(
@@ -315,23 +321,31 @@ class AudienceServiceImpl @Inject()(
     }
   }
 
-  override def validateUsers(inputUsercodes: Set[Usercode]): Either[Set[Usercode], Set[Usercode]] = {
-    def validateUsercodes(usercodes: Set[Usercode]): (Set[String], Set[String]) = {
-      val valid = userLookupService.getUsers(usercodes.toSeq).toOption.map(_.keys).getOrElse(Nil).map(_.string).toSet
-      val invalid = usercodes.map(_.string).diff(valid)
-      (valid, invalid)
+  override def validateUsers(input: Set[String]): Either[Set[String], Set[Usercode]] = {
+    // returns a tuple of (valid usercodes, invalid input)
+    def batchedValidate[A](all: Iterable[A], fn: Seq[A] => Try[Map[A, User]]): (Set[Usercode], Set[A]) = {
+      if (all.isEmpty) (Set(), Set())
+      else {
+        val valid = all.toSeq.grouped(ValidateBatchSize).toSeq.par.map(fn(_).getOrElse(Map())).reduce(_ ++ _)
+        val validInputs = valid.keys.toSet
+        val validUsercodes = valid.values.map(_.usercode).toSet
+        val invalidInputs = all.toSet.diff(validInputs)
+        (validUsercodes, invalidInputs)
+      }
     }
 
-    def validateUniIds(uniIds: Set[UniversityID]): (Set[String], Set[String]) = {
-      val valid = userLookupService.getUsers(uniIds.toSeq).toOption
-      val validUniIds: Set[String] = valid.map(_.keys).getOrElse(Nil).map(_.string).toSet
-      val validUsercodes = valid.map(_.values).getOrElse(Nil).map(_.usercode.string).toSet
-      val invalid = uniIds.map(_.string).diff(validUniIds)
-      (validUsercodes, invalid)
+    def validateUsercodes(usercodes: Set[Usercode]): (Set[Usercode], Set[String]) = {
+      val (valid, invalid) = batchedValidate(usercodes, userLookupService.getUsers)
+      (valid, invalid.map(_.string))
+    }
+
+    def validateUniIds(uniIds: Set[UniversityID]): (Set[Usercode], Set[String]) = {
+      val (validUsercodes, invalidUniIds) = batchedValidate[UniversityID](uniIds, userLookupService.getUsers(_, includeDisabled = true))
+      (validUsercodes, invalidUniIds.map(_.string))
     }
 
     // split codes into allDigits and not allDigits
-    val (ids, codes) = inputUsercodes.map(_.string).partition(_.forall(Character.isDigit))
+    val (ids, codes) = input.partition(_.forall(Character.isDigit))
 
     // run Usercode lookup for anything that isn't all digits
     val (validUsercodes, invalidUsercodes) = validateUsercodes(codes.map(Usercode))
@@ -342,15 +356,13 @@ class AudienceServiceImpl @Inject()(
     // run lookup as UniversityIDs for anything that is allDigits
     val (validCodesFromIds, invalidCodesFromIds) = validateUniIds((ids ++ mistypedUniIds.map(_.drop(1))).map(UniversityID))
 
-    val allValid: Set[String] = validUsercodes ++ validCodesFromIds
+    val allValid: Set[Usercode] = validUsercodes ++ validCodesFromIds
 
     val allInvalid: Set[String] = invalidCodesFromIds ++ badCodes
 
-    if (allInvalid.isEmpty) {
-      Right(allValid.map(Usercode))
-    }
-    else {
-      Left(allInvalid.map(Usercode))
-    }
+    if (allInvalid.isEmpty)
+      Right(allValid)
+    else
+      Left(allInvalid)
   }
 }
