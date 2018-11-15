@@ -89,7 +89,10 @@ GET           /publish/:publisher/alerts/:id/status          @controllers.publis
 GET           /websockets/page/                              @controllers.WebSocketController.socket
 
 GET           /assets/manifest.json                          @controllers.AppManifestController.getAppManifest
-# Map static resources from the /public folder to the /assets URL path
+# Map static resources from the /public folder to the /assets URL path -
+# Has some custom handling for files that might used to have existed
+GET           /assets/*file                                  @controllers.AssetsController.versioned(path="/public", file: Asset)
+# This never serves requests directly any more but it's required so Play generates reverse routes.
 GET           /assets/*file                                  @controllers.Assets.versioned(path="/public", file: Asset)
 
 GET           /service-worker.js                             @controllers.HomeController.serviceWorker
