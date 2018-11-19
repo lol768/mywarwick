@@ -14,7 +14,7 @@ const icons = {
   close: 'fa fa-times',
 };
 
-const dateTimeHiddenFieldFormat = 'YYYY-MM-DDTHH:mm:ss';
+const dateTimeHiddenFieldFormat = 'YYYY-MM-DD[T]HH:mm:ss';
 const dateTimeTextFieldFormat = 'Do MMM YYYY, HH:mm';
 
 $('.datetimepicker').each(function setUpDateTimePicker() {
