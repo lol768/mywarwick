@@ -322,39 +322,39 @@ class AudienceServiceImpl @Inject()(
   }
 
   override def validateUsers(input: Set[String]): Either[Set[String], Set[Usercode]] = {
-    // returns a tuple of (valid usercodes, invalid input)
-    def batchedValidate[A](all: Iterable[A], fn: Seq[A] => Try[Map[A, User]]): (Set[Usercode], Set[A]) = {
+    // returns a tuple of (invalid input, valid usercodes)
+    def batchedValidate[A](all: Iterable[A], fn: Seq[A] => Try[Map[A, User]]): (Set[A], Set[Usercode]) = {
       if (all.isEmpty) (Set(), Set())
       else {
         val valid = all.toSeq.grouped(ValidateBatchSize).toSeq.par.map(fn(_).getOrElse(Map())).reduce(_ ++ _)
         val validInputs = valid.keys.toSet
         val validUsercodes = valid.values.map(_.usercode).toSet
         val invalidInputs = all.toSet.diff(validInputs)
-        (validUsercodes, invalidInputs)
+        (invalidInputs, validUsercodes)
       }
     }
 
-    def validateUsercodes(usercodes: Set[Usercode]): (Set[Usercode], Set[String]) = {
-      val (valid, invalid) = batchedValidate(usercodes, userLookupService.getUsers)
-      (valid, invalid.map(_.string))
+    def validateUsercodes(usercodes: Set[Usercode]): (Set[String], Set[Usercode]) = {
+      val (invalid, valid) = batchedValidate(usercodes, userLookupService.getUsers)
+      (invalid.map(_.string), valid)
     }
 
-    def validateUniIds(uniIds: Set[UniversityID]): (Set[Usercode], Set[String]) = {
-      val (validUsercodes, invalidUniIds) = batchedValidate[UniversityID](uniIds, userLookupService.getUsers(_, includeDisabled = true))
-      (validUsercodes, invalidUniIds.map(_.string))
+    def validateUniIds(uniIds: Set[UniversityID]): (Set[String], Set[Usercode]) = {
+      val (invalidUniIds, validUsercodes) = batchedValidate[UniversityID](uniIds, userLookupService.getUsers(_, includeDisabled = true))
+      (invalidUniIds.map(_.string), validUsercodes)
     }
 
     // split codes into allDigits and not allDigits
     val (ids, codes) = input.partition(_.forall(Character.isDigit))
 
     // run Usercode lookup for anything that isn't all digits
-    val (validUsercodes, invalidUsercodes) = validateUsercodes(codes.map(Usercode))
+    val (invalidUsercodes, validUsercodes) = validateUsercodes(codes.map(Usercode))
 
     // university ids mistyped as usercodes
     val (mistypedUniIds, badCodes) = invalidUsercodes.partition(_.matches("^u\\d.+"))
 
     // run lookup as UniversityIDs for anything that is allDigits
-    val (validCodesFromIds, invalidCodesFromIds) = validateUniIds((ids ++ mistypedUniIds.map(_.drop(1))).map(UniversityID))
+    val (invalidCodesFromIds, validCodesFromIds) = validateUniIds((ids ++ mistypedUniIds.map(_.drop(1))).map(UniversityID))
 
     val allValid: Set[Usercode] = validUsercodes ++ validCodesFromIds
 
