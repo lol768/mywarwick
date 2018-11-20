@@ -198,7 +198,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH", "X")))
 
       val audienceService = mock[AudienceService]
-      when(audienceService.validateUsers(Set(Usercode("TeachingApple")))).thenReturn(Left(Set(Usercode("TeachingApple"))))
+      when(audienceService.validateUsers(Set("TeachingApple"))).thenReturn(Left(Set("TeachingApple")))
 
       val audienceBinder = new AudienceBinder(departmentInfoDao, audienceService, defaultMockPublisherService)
 
@@ -219,7 +219,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       )
 
       val mockAudienceService = mock[AudienceService]
-      when(mockAudienceService.validateUsers(Set(Usercode(unrecognisedAudience)))).thenReturn(Left(Set(Usercode(unrecognisedAudience))))
+      when(mockAudienceService.validateUsers(Set(unrecognisedAudience))).thenReturn(Left(Set(unrecognisedAudience)))
 
       val audienceBinder = new AudienceBinder(null, mockAudienceService, defaultMockPublisherService)
 
