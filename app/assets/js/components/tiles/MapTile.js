@@ -29,12 +29,16 @@ export default class MapTile extends TileContent {
     const queryParams = (this.props.params || {}).queryParams || {};
     const extraParams = _.map(queryParams, (value, key) => `&${key}=${value}`).join('');
     const iframeUrl = defaultMapUrl + extraParams;
+    const iframeHTML = `<iframe src=${iframeUrl} frameBorder="0" title="Interactive Campus Map" allow="geolocation" />`;
     return (
       <div>
         <div className="tile-loading">
           <i className="fa fa-spinner fa-pulse" />
         </div>
-        <iframe src={iframeUrl} frameBorder="0" title="Interactive Campus Map" />
+        <div
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: iframeHTML }}
+        />
       </div>
     );
   }
