@@ -27,9 +27,9 @@ export default class MapTile extends TileContent {
 
   getZoomedBody() {
     const queryParams = (this.props.params || {}).queryParams || {};
-    const extraParams = _.map(queryParams, (value, key) => `&${key}=${value}`).join('');
+    const extraParams = _.map(queryParams, (value, key) => `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`).join('');
     const iframeUrl = defaultMapUrl + extraParams;
-    const iframeHTML = `<iframe src=${iframeUrl} frameBorder="0" title="Interactive Campus Map" allow="geolocation" />`;
+    const iframeHTML = `<iframe src="${iframeUrl}" frameBorder="0" title="Interactive Campus Map" allow="geolocation" />`;
     return (
       <div>
         <div className="tile-loading">
