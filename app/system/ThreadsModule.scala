@@ -1,56 +1,21 @@
 package system
 
 import akka.actor.ActorSystem
-import com.google.inject.name.Named
-import com.google.inject.{AbstractModule, Provides}
-import javax.inject.Singleton
+import play.api.inject._
+import javax.inject.{Inject, Provider}
+import play.api.Configuration
+import play.api.inject.SimpleModule
 
 import scala.concurrent.ExecutionContext
 
-class ThreadsModule extends AbstractModule {
+class ThreadsModule extends SimpleModule((_, configuration) => {
+  configuration.get[Configuration]("threads").subKeys.toSeq.map { name =>
+    bind[ExecutionContext].qualifiedWith(name).to(new NamedThreadPoolProvider(name))
+  }
+})
 
-  override def configure(): Unit = {}
+class NamedThreadPoolProvider(name: String) extends Provider[ExecutionContext] {
+  @Inject private var akka: ActorSystem = _
 
-  @Provides
-  @Singleton
-  @Named("tileData")
-  def tileData(akka: ActorSystem): ExecutionContext =
-    akka.dispatchers.lookup("threads.tileData")
-
-  @Provides
-  @Singleton
-  @Named("email")
-  def email(akka: ActorSystem): ExecutionContext =
-    akka.dispatchers.lookup("threads.email")
-
-  @Provides
-  @Singleton
-  @Named("mobile")
-  def mobile(akka: ActorSystem): ExecutionContext =
-    akka.dispatchers.lookup("threads.mobile")
-
-  @Provides
-  @Singleton
-  @Named("sms")
-  def sms(akka: ActorSystem): ExecutionContext =
-    akka.dispatchers.lookup("threads.sms")
-
-  @Provides
-  @Singleton
-  @Named("externalData")
-  def externalData(akka: ActorSystem): ExecutionContext =
-    akka.dispatchers.lookup("threads.externalData")
-
-  @Provides
-  @Singleton
-  @Named("elastic")
-  def elastic(akka: ActorSystem): ExecutionContext =
-    akka.dispatchers.lookup("threads.elastic")
-
-  @Provides
-  @Singleton
-  @Named("web")
-  def web(akka: ActorSystem): ExecutionContext =
-    akka.dispatchers.lookup("threads.web")
-
+  lazy val get: ExecutionContext = akka.dispatchers.lookup(s"threads.$name")
 }
