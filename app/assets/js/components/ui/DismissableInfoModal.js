@@ -2,6 +2,7 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 import HyperLink from './Hyperlink';
 import BootstrapModal from './BootstrapModal';
+import classNames from 'classnames';
 import _ from 'lodash-es';
 
 export default class DismissableInfoModal extends React.PureComponent {
@@ -15,6 +16,11 @@ export default class DismissableInfoModal extends React.PureComponent {
     href: PropTypes.string,
     onDismiss: PropTypes.func,
     moreButton: PropTypes.element,
+    selectableText: PropTypes.bool.isRequired,
+  };
+
+  static defaultProps = {
+    selectableText: false,
   };
 
   renderMoreButton() {
@@ -36,7 +42,8 @@ export default class DismissableInfoModal extends React.PureComponent {
 
   render() {
     return (
-      <BootstrapModal id={this.props.heading}>
+      <BootstrapModal id={this.props.heading}
+                      className={classNames({'selectable': this.props.selectableText})}>
         <div className="modal-header">
           <h5 className="modal-title">
             {this.props.heading}
