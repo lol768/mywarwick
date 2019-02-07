@@ -2,6 +2,13 @@
   display: flex;
   flex-direction: column;
   z-index: 410;
+
+  // Allow selecting text
+  &.selectable {
+    .modal-body, .modal-title span {
+      user-select: text;
+    }
+  }
 }
 
 .modal-backdrop {
