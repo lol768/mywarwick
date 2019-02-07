@@ -45,7 +45,7 @@ export default class ListTile extends TileContent {
       onDismiss={this.hideModal}
       href={href}
       moreButton={this.modalMoreButton()}
-      selectableText={true}
+      selectableText
     >
       {(body && body.length) ? _.map(_.filter(body, item => item.length > 0), (item, i) => (
         <p key={`body-${i}`}>{item}</p>

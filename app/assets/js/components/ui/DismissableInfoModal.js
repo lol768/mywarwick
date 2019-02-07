@@ -42,8 +42,10 @@ export default class DismissableInfoModal extends React.PureComponent {
 
   render() {
     return (
-      <BootstrapModal id={this.props.heading}
-                      className={classNames({'selectable': this.props.selectableText})}>
+      <BootstrapModal
+        id={this.props.heading}
+        className={classNames({ selectable: this.props.selectableText })}
+      >
         <div className="modal-header">
           <h5 className="modal-title">
             {this.props.heading}

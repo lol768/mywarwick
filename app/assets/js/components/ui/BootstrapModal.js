@@ -8,7 +8,7 @@ export default class BootstrapModal extends React.PureComponent {
   static propTypes = {
     id: PropTypes.string,
     children: PropTypes.node,
-    className: PropTypes.string
+    className: PropTypes.string,
   }
 
   componentDidMount() {
@@ -23,7 +23,7 @@ export default class BootstrapModal extends React.PureComponent {
     return (
       <div>
         <div className="modal-backdrop in" />
-        <div className={classNames("modal", this.props.className)} id={this.props.id} tabIndex="-1" role="dialog">
+        <div className={classNames('modal', this.props.className)} id={this.props.id} tabIndex="-1" role="dialog">
           <div className="modal-dialog" role="document">
             <div className="modal-content">
               {this.props.children}
