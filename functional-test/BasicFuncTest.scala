@@ -71,8 +71,8 @@ class BasicFuncTest extends RemoteFuncTestBase {
   private def printLogs(browser: TestBrowser): Unit = {
     val logs = browser.manage.logs
     for (logtype <- logs.getAvailableLogTypes.asScala) {
-      println(s"-- Examining ${logtype} logs --")
-      for (entry <- logs.get(logtype).filter(Level.INFO).asScala) {
+      println(s"-- Examining $logtype logs --")
+      for (entry <- logs.get(logtype).getAll.asScala.filter(_.getLevel.intValue() >= Level.INFO.intValue())) {
         println(s"[${entry.getTimestamp}] - ${entry.getLevel} - ${entry.getMessage}")
       }
     }

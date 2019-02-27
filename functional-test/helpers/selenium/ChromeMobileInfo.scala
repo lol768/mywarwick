@@ -9,12 +9,12 @@ import scala.collection.JavaConverters._
 case object ChromeMobileInfo extends BrowserInfo("[Chrome Mobile]", "org.scalatest.tags.ChromeBrowser") {
 
   override def createWebDriver() = {
-    val capabilities = DesiredCapabilities.chrome()
-    capabilities.setCapability(ChromeOptions.CAPABILITY, Map(
+    val options = new ChromeOptions
+    options.setCapability(ChromeOptions.CAPABILITY, Map(
       "mobileEmulation" -> Map("deviceName" -> "Google Nexus 5").asJava
     ).asJava)
 
-    new ChromeDriver(capabilities)
+    new ChromeDriver(options)
   }
 
 }

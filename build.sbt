@@ -6,7 +6,7 @@ name := """my-warwick"""
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.7"
 
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
 
@@ -18,8 +18,7 @@ scalacOptions ++= Seq(
   "-unchecked",
   "-Yno-adapted-args",
   "-Ywarn-numeric-widen",
-  "-Xfatal-warnings",
-  "-Xsource:2.13"
+  "-Xfatal-warnings"
 )
 scalacOptions in Test ++= Seq("-Yrangepos")
 scalacOptions in (Compile, doc) ++= Seq("-no-link-warnings")
