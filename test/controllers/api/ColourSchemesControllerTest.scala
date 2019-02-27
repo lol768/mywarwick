@@ -6,7 +6,6 @@ import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.Configuration
-import play.api.cache.CacheApi
 import play.api.libs.json._
 import play.api.mvc.{PlayBodyParsers, Result, Results}
 import play.api.test.FakeRequest

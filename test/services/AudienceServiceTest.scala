@@ -2,8 +2,7 @@ package services
 
 import helpers.{BaseSpec, Fixtures}
 import models.Audience
-import org.mockito.Matchers
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers.{eq => isEq, _}
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.{JsArray, JsObject, JsString}
@@ -225,7 +224,7 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
     }
 
     "combine opt-in components" in new Ctx {
-      when(newsOptInDao.getUsercodes(Matchers.eq(LocationOptIn.CentralCampusResidences))(Matchers.any())).thenReturn(Set(
+      when(newsOptInDao.getUsercodes(isEq(LocationOptIn.CentralCampusResidences))(any())).thenReturn(Set(
         Usercode("cusfal"),
         Usercode("cusebr"),
         Usercode("cuscao")

@@ -6,10 +6,9 @@ import models.Audience.Staff
 import models.publishing.PublishingRole.NewsManager
 import models.publishing._
 import models.{Audience, NewsCategory}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers.{eq => isEq, _}
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import play.api.cache.CacheApi
 import play.api.i18n.MessagesApi
 import play.api.mvc.{ControllerComponents, PlayBodyParsers, Results}
 import play.api.test.Helpers._
@@ -66,7 +65,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with Mi
   when(mockCsrfHelper.metaElementHeader()).thenReturn(Html(s"""<meta name="_csrf_header" content="Csrf-Token"/>"""))
   when(mockCsrfHelper.metaElementToken()).thenReturn(Html(s"""<meta name="_csrf" content="TokenValue"/>"""))
 
-  when(mockCsrfPageHelperFactory.getInstance(Matchers.any[Option[Token]])).thenReturn(mockCsrfHelper)
+  when(mockCsrfPageHelperFactory.getInstance(any[Option[Token]])).thenReturn(mockCsrfHelper)
 
   val newsController = new NewsController(securityServiceImpl, publisherService, newsService, departmentInfoService, audienceBinder, newsCategoryService, userNewsCategoryService, mock[ErrorHandler], audienceService, userPreferencesService) {
     override val navigationService = new MockNavigationService()
@@ -166,16 +165,16 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with Mi
       val audience = Audience(Seq(Audience.DepartmentAudience("IN", Seq(Audience.Staff))))
       when(
         audienceBinder.bindAudience(
-          Matchers.eq(AudienceData(Seq("Dept:Staff"), Some("IN"))),
-          Matchers.eq(false)
-        )(Matchers.any())
+          isEq(AudienceData(Seq("Dept:Staff"), Some("IN"))),
+          isEq(false)
+        )(any())
       ).thenReturn(Future.successful(Right(audience)))
 
       val result = call(newsController.create("xyz", submitted = true), FakeRequest("POST", "/").withFormUrlEncodedBody(validData: _*))
 
       redirectLocation(result) must contain("/publish/xyz/news")
 
-      verify(newsService).save(Matchers.any(), Matchers.eq(audience), Matchers.eq(Seq("abc")))
+      verify(newsService).save(any(), isEq(audience), isEq(Seq("abc")))
     }
 
     "not publish to audience without permission" in {
@@ -203,16 +202,16 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with Mi
       val audience = Audience(Seq(Audience.DepartmentAudience("IN", Seq(Audience.Staff))))
       when(
         audienceBinder.bindAudience(
-          Matchers.eq(AudienceData(Seq("Dept:Staff"), Some("IN"))),
-          Matchers.eq(false)
-        )(Matchers.any())
+          isEq(AudienceData(Seq("Dept:Staff"), Some("IN"))),
+          isEq(false)
+        )(any())
       ).thenReturn(Future.successful(Right(audience)))
 
       val result = call(newsController.create("xyz", submitted = false), FakeRequest("POST", "/").withFormUrlEncodedBody(validData: _*))
 
       contentAsString(result) must include("Big news")
 
-      verify(newsService, never()).save(Matchers.any(), Matchers.eq(audience), Matchers.eq(Seq("abc")))
+      verify(newsService, never()).save(any(), isEq(audience), isEq(Seq("abc")))
     }
 
   }
@@ -265,9 +264,9 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with Mi
       val audience = Audience(Seq(Audience.DepartmentAudience("IN", Seq(Staff))))
       when(
         audienceBinder.bindAudience(
-          Matchers.eq(AudienceData(Seq("Dept:Staff"), Some("IN"))),
-          Matchers.eq(false)
-        )(Matchers.any())
+          isEq(AudienceData(Seq("Dept:Staff"), Some("IN"))),
+          isEq(false)
+        )(any())
       ).thenReturn(Future.successful(Right(audience)))
       when(audienceService.resolve(audience)).thenReturn(Success(Set("a", "b", "c").map(Usercode)))
       when(audienceService.resolveUsersForComponentsGrouped(audience.components)).thenReturn(Success(Seq((Audience.DepartmentAudience("IN", Seq(Staff)), Set("a", "b", "c").map(Usercode)))))
@@ -287,9 +286,9 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with Mi
     "respond with public" in {
       when(
         audienceBinder.bindAudience(
-          Matchers.eq(AudienceData(Seq("Public"), None)),
-          Matchers.eq(false)
-        )(Matchers.any())
+          isEq(AudienceData(Seq("Public"), None)),
+          isEq(false)
+        )(any())
       ).thenReturn(Future.successful(Right(Audience.Public)))
       when(audienceService.resolve(Audience.Public)).thenReturn(Success(Set(Usercode("*"))))
       when(publisherService.getPermissionScope("xyz")).thenReturn(PermissionScope.AllDepartments)

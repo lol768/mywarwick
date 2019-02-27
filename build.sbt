@@ -98,6 +98,7 @@ val appDeps = Seq(
 
 val testDeps = Seq(
   "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.1",
+  "org.mockito" % "mockito-core" % "2.24.5",
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
   "uk.ac.warwick.sso" %% "sso-client-play-testing" % ssoClientVersion,
   "org.eclipse.jetty" % "jetty-server" % "9.4.15.v20190215",

@@ -5,7 +5,7 @@ import models.{Platform, PushRegistration}
 import org.joda.time.DateTime
 import helpers.BaseSpec
 import org.mockito.Mockito._
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.scalatest.mockito.MockitoSugar
 import play.api.Configuration
 import warwick.sso.Usercode

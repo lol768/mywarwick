@@ -5,7 +5,7 @@ import java.time._
 
 import helpers.BaseSpec
 import models.messaging.DoNotDisturbPeriod
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.BeforeAndAfterEach

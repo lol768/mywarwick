@@ -2,9 +2,8 @@ package controllers.api
 
 import helpers.{BaseSpec, WithActorSystem}
 import models.{API, Tile, TileInstance}
-import org.mockito.Matchers
 import org.scalatest.mockito.MockitoSugar
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers.{eq => isEq, _}
 import org.mockito.Mockito._
 import play.api.libs.json.{JsArray, JsDefined, Json}
 import play.api.mvc._
@@ -48,22 +47,22 @@ class EventsMergeControllerTest extends BaseSpec with MockitoSugar with Results 
 
 
     val calendarJson = Json.arr(Json.obj("calendarOne" -> 1, "start" -> "2"))
-    when(tileContentService.getTileContent(any(), Matchers.eq(calendarTile)))
+    when(tileContentService.getTileContent(any(), isEq(calendarTile)))
       .thenReturn(Future.successful(API.Success(data = Json.obj(
         "items" -> calendarJson
       ))))
     val timetableJson = Json.arr(Json.obj("timetableOne" -> 1, "start" -> "4"))
-    when(tileContentService.getTileContent(any(), Matchers.eq(timetableTile)))
+    when(tileContentService.getTileContent(any(), isEq(timetableTile)))
       .thenReturn(Future.successful(API.Success(data = Json.obj(
         "items" -> timetableJson
       ))))
     val sportsJson = Json.arr(Json.obj("sportsOne" -> 1, "start" -> "3"))
-    when(tileContentService.getTileContent(any(), Matchers.eq(sportsTile)))
+    when(tileContentService.getTileContent(any(), isEq(sportsTile)))
       .thenReturn(Future.successful(API.Success(data = Json.obj(
         "items" -> sportsJson
       ))))
     val uniEventJson = Json.arr(Json.obj("uniEventOne" -> 1, "start" -> "1"))
-    when(tileContentService.getTileContent(any(), Matchers.eq(uniEventTile)))
+    when(tileContentService.getTileContent(any(), isEq(uniEventTile)))
       .thenReturn(Future.successful(API.Success(data = Json.obj(
         "items" -> uniEventJson
       ))))

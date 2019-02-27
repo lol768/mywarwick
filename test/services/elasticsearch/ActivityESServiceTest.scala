@@ -4,11 +4,11 @@ import helpers.{BaseSpec, MinimalAppPerSuite}
 import models.MessageState
 import org.elasticsearch.action.ActionListener
 import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
-import org.elasticsearch.client.RestHighLevelClient
+import org.elasticsearch.client.{RestHighLevelClient, RequestOptions}
 import org.elasticsearch.index.query.{BoolQueryBuilder, TermQueryBuilder, TermsQueryBuilder}
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import play.api.Configuration
@@ -44,12 +44,12 @@ class ActivityESServiceTest extends BaseSpec with MockitoSugar with BaseControll
       elasticSearchAdminService
     )
 
-    doNothing().when(restClient).searchAsync(any[SearchRequest], any[ActionListener[SearchResponse]])
+    doNothing().when(restClient).searchAsync(any[SearchRequest], any[RequestOptions], any[ActionListener[SearchResponse]])
 
     val activityId = "777"
     activityESService.deliveryReportForActivity(activityId, Some(DateTime.now))
     val searchRequestCaptor = ArgumentCaptor.forClass(classOf[SearchRequest])
-    verify(restClient).searchAsync(searchRequestCaptor.capture, any[ActionListener[SearchResponse]])
+    verify(restClient).searchAsync(searchRequestCaptor.capture, any[RequestOptions], any[ActionListener[SearchResponse]])
 
     val builder: BoolQueryBuilder = searchRequestCaptor.getValue.source.query().asInstanceOf[BoolQueryBuilder]
     val termsQueryOne: TermsQueryBuilder = builder.must().get(0).asInstanceOf[TermsQueryBuilder]

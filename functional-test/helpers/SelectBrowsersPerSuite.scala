@@ -45,7 +45,7 @@ protected trait SelectBrowsersPerSuite extends WebBrowser with TestSuiteMixin {
     "chrome-mobile" -> ChromeMobileInfo,
     "safari" -> SafariInfo,
     "ie" -> InternetExplorerInfo
-  ) withDefault { key =>
+  ) withDefault[BrowserInfo] { key =>
     throw new Error(s"There is no browser called $key - valid options are [${browserMappings.keys.mkString(", ")}]")
   }
 

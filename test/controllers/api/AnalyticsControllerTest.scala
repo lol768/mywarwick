@@ -1,7 +1,7 @@
 package controllers.api
 
 import helpers.{BaseSpec, MinimalAppPerSuite, OneStartAppPerSuite, WithActorSystem}
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json

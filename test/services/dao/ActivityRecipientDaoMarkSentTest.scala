@@ -29,7 +29,7 @@ class ActivityRecipientDaoMarkSentTest extends BaseSpec with OneStartAppPerSuite
 
       val COUNT = 10
       val usercodes: Seq[String] = (1 to COUNT).map(i => s"user$i")
-      usercodes must have length COUNT
+      usercodes must have length COUNT.toLong
 
       // create the activity recipients
       val activityId = transaction(rollback=false) { implicit c =>

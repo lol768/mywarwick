@@ -59,7 +59,7 @@ object ExternalServers {
   object JettyHandler {
     def apply(routes: PartialFunction[(String, String), Response]): Handler = new AbstractHandler {
       override def handle(s: String, req: server.Request, request: HttpServletRequest, res: HttpServletResponse): Unit = {
-        routes.lift.apply(req.getMethod.toUpperCase, req.getRequestURI) match {
+        routes.lift.apply((req.getMethod.toUpperCase, req.getRequestURI)) match {
           case Some(result) =>
             res.setStatus(result.status)
             for ((key, value) <- result.headers) {

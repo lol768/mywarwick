@@ -2,8 +2,7 @@ package services
 
 import java.io.{File, FileOutputStream, InputStream}
 
-import org.mockito.Matchers
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers.{eq => isEq, _}
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import helpers.BaseSpec
@@ -22,7 +21,7 @@ class NewsImageServiceTest extends BaseSpec with MockitoSugar {
   "NewsImageService#find" should {
     "call the dao" in {
       val someImage = Some(mock[NewsImage])
-      when(dao.find(Matchers.eq("image-id"))(any())).thenReturn(someImage)
+      when(dao.find(isEq("image-id"))(any())).thenReturn(someImage)
 
       service.find("image-id") mustBe someImage
     }
@@ -71,7 +70,7 @@ class NewsImageServiceTest extends BaseSpec with MockitoSugar {
         contentLength = 184392
       )
 
-      when(dao.save(Matchers.eq(newsImageSave))(any())).thenReturn("image-id")
+      when(dao.save(isEq(newsImageSave))(any())).thenReturn("image-id")
 
       service.put(file) mustBe Success("image-id")
 
@@ -81,8 +80,8 @@ class NewsImageServiceTest extends BaseSpec with MockitoSugar {
         fileHash = None
       )
 
-      verify(dao).save(Matchers.eq(newsImageSave))(any())
-      verify(objectStorageService).put(Matchers.eq("image-id"), any(), Matchers.eq(metadata))
+      verify(dao).save(isEq(newsImageSave))(any())
+      verify(objectStorageService).put(isEq("image-id"), any(), isEq(metadata))
     }
   }
 

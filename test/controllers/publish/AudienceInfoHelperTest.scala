@@ -2,7 +2,7 @@ package controllers.publish
 
 import helpers.BaseSpec
 import models.Audience.{LocationOptIn, UsercodesAudience, WebGroupAudience}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import warwick.sso.{GroupName, Usercode}
 

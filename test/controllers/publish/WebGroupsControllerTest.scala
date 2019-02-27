@@ -6,7 +6,6 @@ import models.publishing.Publisher
 import models.publishing.PublishingRole.NewsManager
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import play.api.cache.CacheApi
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._

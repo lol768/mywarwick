@@ -4,7 +4,7 @@ import java.util.Arrays.asList
 
 import com.google.api.services.analyticsreporting.v4.model._
 import helpers.BaseSpec
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import play.api.Configuration

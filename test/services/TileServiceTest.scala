@@ -6,7 +6,7 @@ import controllers.MockFeaturesService
 import helpers.{BaseSpec, Fixtures}
 import models.{FeaturePreferences, Tile, TileLayout}
 import org.joda.time.DateTime
-import org.mockito.Matchers.{eq => isEq, _}
+import org.mockito.ArgumentMatchers.{eq => isEq, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
