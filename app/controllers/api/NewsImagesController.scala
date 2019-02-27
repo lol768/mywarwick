@@ -1,20 +1,21 @@
 package controllers.api
 
 import java.io.ByteArrayOutputStream
-import javax.imageio.ImageIO
 
 import com.google.common.io.ByteStreams
 import com.google.inject.Inject
 import controllers.MyController
+import javax.imageio.ImageIO
 import models.API
-import play.api.cache.{CacheApi, SyncCacheApi}
+import play.api.cache.SyncCacheApi
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.MultipartFormData.FilePart
-import play.api.mvc.{Action, MultipartFormData, Request, Result}
+import play.api.mvc.{MultipartFormData, Request, Result}
 import services.{ImageManipulator, NewsImageService, PublisherService, SecurityService}
 import system.EitherValidation
 
+import scala.language.implicitConversions
 import scala.util.{Failure, Success}
 
 class NewsImagesController @Inject()(

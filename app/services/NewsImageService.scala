@@ -38,7 +38,7 @@ class NewsImageServiceImpl @Inject()(
   def fetchStream(id: String) = objectStorageService.fetch(id)
 
   def put(file: File): Try[String] = Try {
-    val contentLength = file.length().toInt
+    val contentLength = file.length()
 
     val byteSource = Files.asByteSource(file)
 
@@ -48,7 +48,7 @@ class NewsImageServiceImpl @Inject()(
     val metadata = Metadata(contentLength, contentType, fileHash = None)
 
     db.withTransaction { implicit c =>
-      val id = dao.save(NewsImageSave(width, height, contentType, contentLength))
+      val id = dao.save(NewsImageSave(width, height, contentType, contentLength.toInt))
       objectStorageService.put(id, byteSource, metadata)
       id
     }

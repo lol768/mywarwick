@@ -1,17 +1,16 @@
 package controllers.api
 
-import javax.inject.Singleton
-
 import com.google.inject.Inject
-import com.sun.syndication.feed.synd._
-import com.sun.syndication.io.WireFeedOutput
+import com.rometools.rome.feed.synd._
+import com.rometools.rome.io.WireFeedOutput
 import controllers.MyController
+import javax.inject.Singleton
 import models.Audience.DepartmentSubset
 import models.news.NewsItemRender
 import models.{API, PageViewHit}
-import org.jdom.{Element, Namespace}
+import org.jdom2.{Element, Namespace}
 import play.api.libs.json._
-import play.api.mvc.{Action, RequestHeader}
+import play.api.mvc.RequestHeader
 import services.analytics.AnalyticsMeasurementService
 import services.{NewsService, SecurityService}
 import warwick.sso.GroupName

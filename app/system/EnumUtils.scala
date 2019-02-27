@@ -2,6 +2,8 @@ package system
 
 import play.api.libs.json._
 
+import scala.language.implicitConversions
+
 // Builds JSON reads/writes for Scala enumerations (from http://stackoverflow.com/a/15489179)
 object EnumUtils {
 

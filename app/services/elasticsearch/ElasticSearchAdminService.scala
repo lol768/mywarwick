@@ -1,13 +1,13 @@
 package services.elasticsearch
 
+import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Singleton}
 import javax.ws.rs.HttpMethod
-
-import com.google.inject.ImplementedBy
 import org.elasticsearch.client.{Response, RestClient}
 import play.api.libs.json.JsValue
 
 import scala.concurrent.Future
+import scala.language.implicitConversions
 
 @ImplementedBy(classOf[ElasticSearchAdminServiceImpl])
 trait ElasticSearchAdminService {

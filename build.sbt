@@ -1,14 +1,28 @@
 import warwick.Testing._
 import warwick.Gulp
 
-name := """start"""
+organization := "uk.ac.warwick"
+name := """my-warwick"""
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := Common.scalaVersion
+scalaVersion := "2.12.8"
 
-// ULTRAVIOLENCE
-scalacOptions ++= Seq("-language:implicitConversions", "-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
+javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
+
+scalacOptions ++= Seq(
+  "-encoding", "UTF-8", // yes, this is 2 args
+  "-target:jvm-1.8",
+  "-deprecation",
+  "-feature",
+  "-unchecked",
+  "-Yno-adapted-args",
+  "-Ywarn-numeric-widen",
+  "-Xfatal-warnings",
+  "-Xsource:2.13"
+)
+scalacOptions in Test ++= Seq("-Yrangepos")
+scalacOptions in (Compile, doc) ++= Seq("-no-link-warnings")
 
 // Avoid some of the constant SBT "Updating"
 updateOptions := updateOptions.value.withCachedResolution(true)
@@ -17,9 +31,11 @@ val gitRevision = SettingKey[String]("gitRevision")
 gitRevision := git.gitHeadCommit.value.getOrElse("Unset")
 
 lazy val root = (project in file("."))
-  .enablePlugins(WarwickProject, PlayScala, PlayNettyServer, BuildInfoPlugin)
-  .disablePlugins(PlayAkkaHttpServer)
-  .configs(config("fun").extend(Test))
+  .enablePlugins(WarwickProject, PlayScala, BuildInfoPlugin)
+  .configs({
+    val Fun = config("fun").extend(Test)
+    Fun
+  })
   .settings(
     Gulp.settings,
     // Package up assets before we build tar.gz
@@ -31,8 +47,10 @@ lazy val root = (project in file("."))
 
 // Versions of things for below
 val enumeratumVersion = "1.5.13"
-val akkaVersion = "2.5.3"
-val playUtilsVersion = "1.11"
+val akkaVersion = "2.5.21"
+val playUtilsVersion = "1.29"
+val ssoClientVersion = "2.63"
+val warwickUtilsVersion = "20190221"
 
 val appDeps = Seq(
   jdbc,
@@ -42,58 +60,52 @@ val appDeps = Seq(
   evolutions,
   guice,
   jodaForms,
-  "com.typesafe.play" %% "anorm" % "2.5.3",
-  "com.oracle" % "ojdbc7" % "12.1.0.2.0",
-  "uk.ac.warwick.sso" %% "sso-client-play" % "2.60",
+  "org.playframework.anorm" %% "anorm" % "2.6.2",
+  "com.oracle" % "ojdbc8" % "12.2.0.1.0",
+  "uk.ac.warwick.sso" %% "sso-client-play" % ssoClientVersion,
   "uk.ac.warwick.play-utils" %% "accesslog" % playUtilsVersion,
   "uk.ac.warwick.play-utils" %% "anorm" % playUtilsVersion,
   "uk.ac.warwick.play-utils" %% "objectstore" % playUtilsVersion,
-  "uk.ac.warwick.util" % "warwickutils-cache" % "20180518",
-  "uk.ac.warwick.util" % "warwickutils-core" % "20180518",
+  "uk.ac.warwick.util" % "warwickutils-cache" % warwickUtilsVersion,
+  "uk.ac.warwick.util" % "warwickutils-core" % warwickUtilsVersion,
   "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
   "com.typesafe.akka" %% "akka-cluster-tools" % akkaVersion,
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
-  "com.typesafe.akka" %% "akka-http" % "10.1.3",
-  "com.kenshoo" %% "metrics-play" % "2.6.6_0.6.2",
-  "com.typesafe.play" %% "play-mailer" % "6.0.1",
-  "com.typesafe.play" %% "play-mailer-guice" % "6.0.1",
-  "org.apache.commons" % "commons-email" % "1.5",
+  "com.typesafe.akka" %% "akka-http" % "10.1.7",
+  "com.kenshoo" %% "metrics-play" % "2.7.0_0.8.0",
+  "com.typesafe.play" %% "play-mailer" % "7.0.0",
+  "com.typesafe.play" %% "play-mailer-guice" % "7.0.0",
   "com.notnoop.apns" % "apns" % "1.0.0.Beta6",
-  "org.quartz-scheduler" % "quartz" % "2.2.1",
-  "com.google.inject.extensions" % "guice-multibindings" % "4.0",
+  "org.quartz-scheduler" % "quartz" % "2.3.0" exclude("com.zaxxer", "HikariCP-java6"),
+  "com.google.inject.extensions" % "guice-multibindings" % "4.2.2",
   "com.adrianhurt" %% "play-bootstrap" % "1.2-P26-B3",
   "org.imgscalr" % "imgscalr-lib" % "4.2",
-  "com.github.mumoshu" %% "play2-memcached-play26" % "0.9.3-warwick",
-  "ch.qos.logback" % "logback-access" % "1.1.7",
-//  "com.google.guava" % "guava" % "22.0",
-  "com.google.apis" % "google-api-services-analyticsreporting" % "v4-rev10-1.22.0"
+  "com.github.mumoshu" %% "play2-memcached-play27" % "0.10.0-RC3",
+  "com.google.apis" % "google-api-services-analyticsreporting" % "v4-rev128-1.25.0"
     exclude("com.google.guava","guava-jdk5"),
-  "com.google.api-client" % "google-api-client" % "1.23.0",
+  "com.google.api-client" % "google-api-client" % "1.28.0",
   "com.beachape" %% "enumeratum" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play-json" % enumeratumVersion,
-  "nl.martijndwars" % "web-push" % "2.0.0",
-  "com.vladsch.flexmark" % "flexmark" % "0.32.18",
-  "com.vladsch.flexmark" % "flexmark-ext-autolink" % "0.32.18",
+  "nl.martijndwars" % "web-push" % "5.0.1",
+  "com.vladsch.flexmark" % "flexmark" % "0.40.18",
+  "com.vladsch.flexmark" % "flexmark-ext-autolink" % "0.40.18",
   "com.googlecode.libphonenumber" % "libphonenumber" % "8.6.0",
-  "org.elasticsearch.client" % "elasticsearch-rest-high-level-client" % "6.0.0",
-  "org.apache.logging.log4j" % "log4j-to-slf4j" % "2.11.0"
+  "org.elasticsearch.client" % "elasticsearch-rest-high-level-client" % "6.6.1",
+  "org.apache.logging.log4j" % "log4j-to-slf4j" % "2.11.2",
+  "com.rometools" % "rome" % "1.12.0"
 )
 
 val testDeps = Seq(
-  "org.mockito" % "mockito-all" % "1.10.19",
-  "org.scalatest" %% "scalatest" % "3.0.1",
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0",
-  "com.typesafe.akka" %% "akka-testkit" % "2.4.19",
-  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.57",
-  "org.eclipse.jetty" % "jetty-server" % "9.4.7.v20170914",
-  "com.h2database" % "h2" % "1.4.196"
+  "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.1",
+  "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
+  "uk.ac.warwick.sso" %% "sso-client-play-testing" % ssoClientVersion,
+  "org.eclipse.jetty" % "jetty-server" % "9.4.15.v20190215",
+  "com.h2database" % "h2" % "1.4.198"
 ).map(_ % Test)
 
 val funcTestDeps = Seq(
-  // Note - from 2.53 selenium-htmlunit is not bundled so will need to
-  // play with dependencies if you need to upgrade.
-  "org.seleniumhq.selenium" % "selenium-java" % "3.4.0"
+  "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.1"
 ).map(_ % "fun")
 
 javaOptions in Test += "-Dlogger.resource=test-logging.xml"
@@ -109,11 +121,8 @@ libraryDependencies ++= (appDeps ++ testDeps ++ funcTestDeps).map(_.excludeAll(
 // https://bugs.elab.warwick.ac.uk/browse/SSO-1653
 dependencyOverrides += "xml-apis" % "xml-apis" % "1.4.01"
 
-// Because jclouds is terrible
-dependencyOverrides += "com.google.guava" % "guava" % "20.0"
-
-// Because jclouds is terrible
-dependencyOverrides += "com.google.code.gson" % "gson" % "2.4"
+// JClouds requires v2.5 https://issues.apache.org/jira/browse/JCLOUDS-1166
+dependencyOverrides += "com.google.code.gson" % "gson" % "2.5"
 
 // Fix a dependency warning
 dependencyOverrides += "org.json" % "json" % "20171018"
@@ -131,10 +140,5 @@ resolvers += "jclouds-snapshots" at "https://repository.apache.org/content/repos
 
 // Run Gulp when Play runs
 //playRunHooks <+= baseDirectory.map(base => Gulp(base))
-
-// code coverage settings (run jacoco:cover)
-jacoco.settings
-
-parallelExecution in jacoco.Config := false
 
 TwirlKeys.templateImports ++= Seq("views.utils._")

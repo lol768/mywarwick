@@ -50,7 +50,9 @@ class WsDepartmentInfoDao @Inject()(
     }
   }
 
-  val cache = Caches.newCache("departmentInfo", factory, 24.hours.toSeconds)
+  val cache = Caches.builder("departmentInfo", factory)
+    .expireAfterWrite(java.time.Duration.ofHours(24))
+    .build()
 
   if (environment.mode == Dev) {
     cache.clear()

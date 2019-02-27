@@ -10,7 +10,7 @@ import org.elasticsearch.action.bulk.{BulkRequest, BulkResponse}
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
 import org.elasticsearch.action.support.IndicesOptions
-import org.elasticsearch.client.{RestClient, RestHighLevelClient}
+import org.elasticsearch.client.{RequestOptions, RestClient, RestHighLevelClient}
 import org.elasticsearch.common.xcontent.{XContentBuilder, XContentFactory}
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.rest.RestStatus
@@ -81,7 +81,7 @@ class ActivityESServiceImpl @Inject()(
   private def makeBulkRequest(writeReqs: Seq[IndexRequest]): Future[Unit] = {
     val bulkRequest = new BulkRequest().add(writeReqs: _*)
     val listener = new FutureActionListener[BulkResponse]
-    client.bulkAsync(bulkRequest, listener)
+    client.bulkAsync(bulkRequest, RequestOptions.DEFAULT, listener)
     listener.future.map { response =>
       if (response.hasFailures) {
         logger.error(response.buildFailureMessage)
@@ -157,7 +157,7 @@ class ActivityESServiceImpl @Inject()(
           )
       )
       val listener = new FutureActionListener[SearchResponse]
-      client.searchAsync(searchRequest, listener)
+      client.searchAsync(searchRequest, RequestOptions.DEFAULT, listener)
       listener.future.map(response =>
         if (response.status() == RestStatus.OK) {
           handleDeliveryReportResponse(response)
@@ -184,7 +184,7 @@ class ActivityESServiceImpl @Inject()(
       )
 
     val listener = new FutureActionListener[SearchResponse]
-    client.searchAsync(searchRequest, listener)
+    client.searchAsync(searchRequest, RequestOptions.DEFAULT, listener)
     listener.future.map { response =>
       if (response.status() == RestStatus.OK) {
         CountQueryResponse(

@@ -52,7 +52,7 @@ class IncomingActivitiesController @Inject()(
                 Some(publisherId),
                 providerId,
                 `type`,
-                ttl = if (ttl.nonEmpty) Some(FiniteDuration(ttl.get, TimeUnit.SECONDS)) else None,
+                ttl = if (ttl.nonEmpty) Some(FiniteDuration(ttl.get.toLong, TimeUnit.SECONDS)) else None,
                 channel,
                 priority,
                 transient = true
