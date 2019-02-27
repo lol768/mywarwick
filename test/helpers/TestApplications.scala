@@ -37,7 +37,6 @@ object TestApplications {
     */
   def minimal() =
     minimalBuilder
-      .router(Router.empty)
       .build()
 
   def fullBuilder(user: Option[User]) =
@@ -76,7 +75,7 @@ object TestApplications {
 
   def fullNoRoutesBuilder(user: Option[User]) =
     fullBuilder(user)
-      .router(Router.empty)
+      .configure("play.http.router" -> "helpers.EmptyRouter")
 
   def functional() =
     GuiceApplicationBuilder(loadConfiguration = functionalConfig)
