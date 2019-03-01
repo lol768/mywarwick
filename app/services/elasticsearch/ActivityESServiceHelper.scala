@@ -115,7 +115,7 @@ trait ActivityESServiceHelper {
   ): JsValue = Json.parse({
     s"""
       {
-        "index_patterns": ["$indexNameForActivity*", "$indexNameForAlert"],
+        "index_patterns": ["$indexNameForActivity*", "$indexNameForAlert*"],
         "mappings": {
           "activity": {
             "properties": {
