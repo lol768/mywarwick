@@ -80,7 +80,7 @@ export class NewsView extends HideableView {
 
     const maybeMessage = !fetching ?
       (<div className="container-fluid">
-        <p>No news to show you yet.</p>
+        <p>No news to show you yet</p>
       </div>) : null;
 
     return (
@@ -90,7 +90,7 @@ export class NewsView extends HideableView {
             <InfiniteScrollable
               hasMore={moreAvailable}
               onLoadMore={this.loadMore}
-              endOfListPhrase="There is no older news."
+              endOfListPhrase="There is no older news"
             >
               {itemComponents}
             </InfiniteScrollable>

@@ -4,6 +4,7 @@
 @import models.publishing.Ability.DeleteNotifications
 @import system.RequestContext
 @import services.dao.DepartmentInfo
+
 @(
     publisher: Publisher,
     item: ActivityRenderWithAudience,
@@ -22,7 +23,7 @@
       <div class="media-body">
         <div class="activity-item__title">@item.activity.title</div>
         @item.activity.text.map { text =>
-          <div class="activity-item__text">@text</div>
+          <div class="activity-item__text">@Markdown(text)</div>
         }
 
         <div class="activity-item__date">
@@ -32,12 +33,12 @@
         </div>
         @if(item.audienceComponents.nonEmpty) {
           <div id="@item.activity.id" class="activity-item__audience row" data-sent="@item.isSent">
-            <div class="col-sm-2">
+            <div class="col-xs-4 col-sm-2">
               <div>Audience</div>
               <div class="activity-item__messages-delivered-name">Delivered</div>
               <div class="activity-item__messages-read-name">Read</div>
             </div>
-            <div class="col-sm-1">
+            <div class="col-xs-4 col-sm-1">
               <div class="activity-item__audience-total">
               @item.audienceSize match {
                 case AudienceSize.Public => {public}
@@ -52,7 +53,7 @@
                 <i class="fa fa-spin fa-refresh"></i>
               </div>
             </div>
-            <div class="col-sm-1">
+            <div class="col-xs-4 col-sm-1">
               <div>
                 (<a
                 role="button"

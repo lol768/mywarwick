@@ -4,6 +4,7 @@ import HideableView from '../HideableView';
 import * as smsNotifications from '../../../state/sms-notifications';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
+import BootstrapModal from '../../ui/BootstrapModal';
 import ListGroupItem from '../../ui/ListGroupItem';
 import NetworkAwareControl from '../../ui/NetworkAwareControl';
 import Switch from '../../ui/Switch';
@@ -175,99 +176,87 @@ class SmsNotificationsView extends HideableView {
 
   renderEdit() {
     return (
-      <div>
-        <div className="modal-backdrop fade in" />
-        <div
-          className="modal fade in"
-          id="Settings:SMSNumber"
-          tabIndex="-1"
-          role="dialog"
-        >
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-body">
-                <form className="form" id="Settings:SMSNumber-form">
-                  <div className={ classNames({
-                    'form-group': true,
-                    'has-error': this.state.submitErrors && this.state.submitErrors.phoneNumber,
-                  }) }
-                  >
-                    <label htmlFor="Settings:SMSNumber-input">
-                      Phone number
-                    </label>
-                    <input
-                      type="tel"
-                      id="Settings:SMSNumber-input"
-                      className="form-control"
-                      placeholder="Phone number"
-                      defaultValue={ this.state.smsNumber || '' }
-                      ref={ (i) => { this.phoneNumberInput = i; } }
-                    />
-                    { this.state.submitErrors && this.state.submitErrors.phoneNumber &&
-                      <span className="help-block">{ this.state.submitErrors.phoneNumber }</span>
-                    }
-                  </div>
-                  <p className="hint-text">
-                    We&apos;ll use the number you provide only to send My Warwick alerts to, and we
-                    won&apos;t share the number with any other application or with any third party.
-                    You can turn off SMS alerting at any time.
-                  </p>
-                  { this.state.verificationRequired &&
-                    <div>
-                      <div className={ classNames({
-                        'form-group': true,
-                        'has-error': this.state.submitErrors && this.state.submitErrors.verificationCode,
-                      }) }
-                      >
-                        <label htmlFor="Settings:SMSNumber-verificationCode">
-                          We&apos;ve sent you a code to verify your phone number. Enter it below.
-                        </label>
-                        <input
-                          type="tel"
-                          id="Settings:SMSNumber-verificationCode"
-                          className="form-control"
-                          placeholder="Verification code"
-                          ref={ (i) => { this.verificationCodeInput = i; } }
-                        />
-                        { this.state.submitErrors && this.state.submitErrors.verificationCode &&
-                          <span className="help-block">{ this.state.submitErrors.verificationCode }</span>
-                        }
-                      </div>
-                      <button
-                        type="button"
-                        onClick={ this.onEditSubmitResend }
-                        className="btn btn-default"
-                      >
-                        Re-send verification code
-                      </button>
-                    </div>
-                  }
-                </form>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-default"
-                  data-dismiss="modal"
-                  onClick={ this.onEditCancel }
-                  onKeyUp={ this.onEditCancel }
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={ this.onEditSubmit }
-                  onKeyUp={ this.onEditSubmit }
-                  disabled={ this.state.submitting }
-                >
-                  Save
-                </button>
-              </div>
+      <BootstrapModal id="Settings:SMSNumber">
+        <div className="modal-body">
+          <form className="form" id="Settings:SMSNumber-form" onSubmit={this.onEditSubmit}>
+            <div className={ classNames({
+              'form-group': true,
+              'has-error': this.state.submitErrors && this.state.submitErrors.phoneNumber,
+            }) }
+            >
+              <label htmlFor="Settings:SMSNumber-input">
+                Phone number
+              </label>
+              <input
+                type="tel"
+                id="Settings:SMSNumber-input"
+                className="form-control"
+                placeholder="Phone number"
+                defaultValue={ this.state.smsNumber || '' }
+                ref={ (i) => { this.phoneNumberInput = i; } }
+              />
+              { this.state.submitErrors && this.state.submitErrors.phoneNumber &&
+              <span className="help-block">{ this.state.submitErrors.phoneNumber }</span>
+              }
             </div>
-          </div>
+            <p className="text--hint">
+              We’ll use the number you provide only to send My Warwick alerts to, and we
+              won’t share the number with any other application or with any third party.
+              You can turn off SMS alerting at any time.
+            </p>
+            { this.state.verificationRequired &&
+            <div>
+              <div className={ classNames({
+                'form-group': true,
+                'has-error': this.state.submitErrors && this.state.submitErrors.verificationCode,
+              }) }
+              >
+                <label htmlFor="Settings:SMSNumber-verificationCode">
+                  We’ve sent you a code to verify your phone number. Enter it below.
+                </label>
+                <input
+                  type="tel"
+                  id="Settings:SMSNumber-verificationCode"
+                  className="form-control"
+                  placeholder="Verification code"
+                  ref={ (i) => { this.verificationCodeInput = i; } }
+                />
+                { this.state.submitErrors && this.state.submitErrors.verificationCode &&
+                <span className="help-block">{ this.state.submitErrors.verificationCode }</span>
+                }
+              </div>
+              <button
+                type="button"
+                onClick={ this.onEditSubmitResend }
+                className="btn btn-default"
+              >
+                Re-send verification code
+              </button>
+            </div>
+            }
+          </form>
         </div>
-      </div>
+        <div className="modal-footer">
+          <button
+            type="button"
+            className="btn btn-default"
+            data-dismiss="modal"
+            onClick={ this.onEditCancel }
+            onKeyUp={ this.onEditCancel }
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={ this.onEditSubmit }
+            onKeyUp={ this.onEditSubmit }
+            disabled={ this.state.submitting }
+          >
+            Save
+          </button>
+        </div>
+      </BootstrapModal>
     );
   }
 

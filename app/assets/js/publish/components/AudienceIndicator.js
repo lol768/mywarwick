@@ -4,16 +4,14 @@ import { connect } from 'react-redux';
 import log from 'loglevel';
 import $ from 'jquery';
 import _ from 'lodash-es';
-import Hyperlink from '../../components/ui/Hyperlink';
 import { mkString } from '../../helpers';
+import { titleCase, sentenceCase } from 'change-case';
 
 export class AudienceIndicator extends React.PureComponent {
   static propTypes = {
     audienceComponents: PropTypes.object,
     promiseSubmit: PropTypes.func.isRequired,
     hint: PropTypes.shape({
-      text: PropTypes.string.isRequired,
-      link: PropTypes.string,
       isNews: PropTypes.bool.isRequired,
     }),
   };
@@ -106,10 +104,24 @@ export class AudienceIndicator extends React.PureComponent {
         if ('Dept:All' in audience && dept.name !== undefined) {
           return <div>{`Everyone in ${dept.name}`}</div>;
         }
-
         return (<div> {
           _.map(audience.groups, (components, audienceType) => {
             switch (audienceType) {
+              case 'hallsOfResidence':
+                if (components !== undefined) {
+                  const halls = components.hall;
+                  return halls ?
+                    _.map(halls, (value, key) => {
+                      const displayName = titleCase(sentenceCase(_.last(key.split(':'))));
+                      return (
+                        <div key={key}>
+                          All residents
+                          of {displayName}: {getCount([`ResidenceAudience(${displayName.replace(' ', '')})`], halls)}
+                        </div>
+                      );
+                    }) : null;
+                }
+                return null;
               case 'modules':
                 return _.map(components, ({ text, value }) =>
                   (<div
@@ -177,13 +189,6 @@ export class AudienceIndicator extends React.PureComponent {
 
     return (
       <div className="alert alert-info">
-        <div>
-          <p>
-            {`${this.props.hint.text} ` }{this.props.hint.link ?
-              <Hyperlink href={this.props.hint.link}>More info…</Hyperlink> : null}
-          </p>
-        </div>
-
         <div className="pull-right">
           <i
             className="fa fa-info-circle"

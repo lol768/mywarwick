@@ -26,7 +26,7 @@ describe('NewsView', () => {
     };
 
     let result = shallowRender(<NewsView {...props} />);
-    result.should.include("Unable to fetch news.");
+    result.should.include("Unable to fetch news");
 
   });
 

@@ -1,25 +1,24 @@
 package controllers.publish
 
-import javax.inject.Inject
-
+import com.google.inject.name.Named
 import controllers.MyController
+import javax.inject.Inject
 import models.news.NotificationData
 import models.publishing.Ability._
 import models.publishing.{Ability, Publisher}
 import models.{Audience, DateFormats}
 import play.api.data.Forms._
 import play.api.data._
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.I18nSupport
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Action, ActionFilter, AnyContent, Result}
 import services._
 import services.elasticsearch.ActivityESService
-import system.{ThreadPools, Validation}
+import system.Validation
 import views.html.errors
 import views.html.publish.{notifications => views}
-import warwick.sso.Usercode
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class NotificationsController @Inject()(
   val securityService: SecurityService,
@@ -30,10 +29,14 @@ class NotificationsController @Inject()(
   val newsCategoryService: NewsCategoryService,
   audienceService: AudienceService,
   activityESService: ActivityESService
-) extends MyController with I18nSupport with Publishing {
+)(implicit @Named("web") webEC: ExecutionContext) extends MyController with I18nSupport with Publishing {
 
-  val notificationMapping = mapping(
-    "text" -> nonEmptyText,
+  override protected val ec: ExecutionContext = webEC
+
+  private val urlPattern = """.*https{0,1}://[^\s]+.*""".r
+
+  val notificationMapping: Mapping[NotificationData] = mapping(
+    "text" -> nonEmptyText.verifying("The URL should be put in the Link URL field so that it is clickable", t => urlPattern.findFirstIn(t).isEmpty),
     "provider" -> nonEmptyText,
     "linkHref" -> optional(text).verifying("Invalid URL format", Validation.url),
     "publishDateSet" -> boolean,
@@ -57,22 +60,16 @@ class NotificationsController @Inject()(
   }
 
   def status(publisherId: String, activityId: String) = PublisherAction(publisherId, ViewNotifications).async { implicit request => {
-    import services.elasticsearch.MessageSentDetails._
     val activityWithAudience = activityService.getActivityWithAudience(activityId).filter(_.activity.publisherId.contains(publisherId))
 
-    activityESService.messageSentDetailsForActivity(activityId, activityWithAudience.map(_.activity.publishedAt)).map { sentDetails =>
+    activityESService.deliveryReportForActivity(activityId, activityWithAudience.map(_.activity.publishedAt)).map { deliveryReport =>
       activityWithAudience.map { activity =>
         Ok(Json.obj(
           "audienceSize" -> activity.audienceSize.toOption,
           "sent" -> (
             Json.obj("total" -> activity.sentCount)
               ++ Json.obj("readCount" -> activityService.getActivityReadCountSincePublishedDate(activityId))
-              ++ sentDetails.map(sd =>
-              Json.obj("delivered" -> Json.obj(
-                "total" -> sd.successful.distinctCount, // count of usercodes where at-least-one output was successful (sms, email, mobile)
-                "details" -> Json.toJson(sd)
-              ))
-            ).getOrElse(JsObject(Nil))
+              ++ deliveryReport.successful.map(count => Json.obj("delivered" -> count)).getOrElse(JsObject(Nil))
             ),
           "sendingNow" -> activity.isSendingNow
         ))
@@ -87,7 +84,7 @@ class NotificationsController @Inject()(
   def create(publisherId: String, submitted: Boolean) = PublisherAction(publisherId, CreateNotifications).async { implicit request =>
     bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted, restrictedRecipients = true,
       formWithErrors =>
-        Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, providerOptions, permissionScope, Audience())),
+        Ok(views.createForm(request.publisher, formWithErrors, departmentOptions, publisherProviders, permissionScope, Audience())),
       (publish, audience) => {
         val notification = publish.item.toSave(request.context.user.get.usercode, publisherId)
         val redirect = Redirect(routes.NotificationsController.list(publisherId))
@@ -121,7 +118,7 @@ class NotificationsController @Inject()(
     val form = publishNotificationForm.fill(PublishNotificationData(notificationData, audienceData))
 
     Future.successful(
-      Ok(views.updateForm(request.publisher, activity, form, departmentOptions, providerOptions, permissionScope, audience, audienceJson))
+      Ok(views.updateForm(request.publisher, activity, form, departmentOptions, publisherProviders, permissionScope, audience, audienceJson))
     )
   }
 
@@ -132,7 +129,7 @@ class NotificationsController @Inject()(
 
     bindFormWithAudience[PublishNotificationData](publishNotificationForm, submitted, restrictedRecipients = true,
       formWithErrors =>
-        Ok(views.updateForm(request.publisher, activity, formWithErrors, departmentOptions, providerOptions, permissionScope, audience, audienceJson)),
+        Ok(views.updateForm(request.publisher, activity, formWithErrors, departmentOptions, publisherProviders, permissionScope, audience, audienceJson)),
       (publish, audience) => {
         val redirect = Redirect(routes.NotificationsController.list(publisherId))
 
@@ -179,7 +176,7 @@ class NotificationsController @Inject()(
       }
     }
 
-    override protected def executionContext = ThreadPools.web
+    override protected def executionContext: ExecutionContext = ec
   }
 
   def renderCreateForm(publisher: Publisher, form: Form[PublishNotificationData], audience: Audience)(implicit request: PublisherRequest[_]) =
@@ -187,7 +184,7 @@ class NotificationsController @Inject()(
       publisher = publisher,
       form = form,
       departmentOptions = departmentOptions,
-      providerOptions = providerOptions,
+      providers = publisherProviders,
       permissionScope = permissionScope,
       audience = audience
     )

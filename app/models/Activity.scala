@@ -2,12 +2,12 @@ package models
 
 import controllers.api.SaveMuteRequest
 import org.joda.time.DateTime
-import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import warwick.sso.{User, Usercode}
 import play.api.libs.json.Reads.filter
 import uk.ac.warwick.util.core.StringUtils
+import views.utils.MarkdownRenderer
 
 case class ActivityIcon(name: String, colour: Option[String])
 object ActivityIcon {
@@ -70,10 +70,16 @@ object ActivityRender {
         "notification" -> o.activity.shouldNotify,
         "provider" -> o.activity.providerId,
         "providerDisplayName" -> o.provider.displayName,
+        "providerOverrideMuting" -> o.provider.overrideMuting,
         "type" -> o.activity.`type`,
         "typeDisplayName" -> o.`type`.displayName,
         "title" -> o.activity.title,
         "text" -> o.activity.text,
+        "textAsHtml" ->
+          o.activity.text
+            .filter { text => MarkdownRenderer.specialCharacters.exists(c => text.contains(c)) }
+            .map(MarkdownRenderer.renderMarkdown)
+            .filterNot(_ == s"<p>${o.activity.text.get}</p>\n"),
         "url" -> o.activity.url,
         "tags" -> o.tags,
         "date" -> o.activity.publishedAt
@@ -161,7 +167,7 @@ case class ActivityTag(
 
 case class TagValue(internalValue: String, displayValue: Option[String] = None)
 
-case class ActivityProvider(id: String, sendEmail: Boolean, displayName: Option[String] = None)
+case class ActivityProvider(id: String, sendEmail: Boolean, displayName: Option[String] = None, transientPush: Boolean = false, overrideMuting: Boolean)
 
 case class ActivityType(name: String, displayName: Option[String] = None)
 
@@ -182,6 +188,7 @@ case class ActivitySave(
 )
 
 object ActivitySave {
+  import system.StringUtils.{truncateToBytes => trunc}
   def fromApi(usercode: Usercode, publisherId: String, providerId: String, shouldNotify: Boolean, data: IncomingActivityData): ActivitySave = {
     import data._
     ActivitySave(
@@ -190,15 +197,31 @@ object ActivitySave {
       providerId = providerId,
       shouldNotify = shouldNotify,
       `type` = `type`,
-      title = title.replaceAll("\\r\\n|\\r|\\n", " "),
-      text = text.map(_.replaceAll("\\r\\n|\\r|\\n", " ")),
+      title = stripNewlines(title),
+      text = text,
       url = url,
-      tags = tags.getOrElse(Seq.empty),
-      replace = replace.getOrElse(Map.empty),
+      tags = tags.getOrElse(Nil).map(truncateForDb),
+      replace = replace.getOrElse(Map.empty).map(truncateReplaceForDb),
       publishedAt = generated_at,
       sendEmail = send_email,
       api = true
     )
+  }
+
+  private def stripNewlines(s: String) =
+    s.replaceAll("\\r\\n|\\r|\\n", " ")
+
+  private def truncateForDb(tag: ActivityTag) =
+    tag.copy(
+      name = trunc(255, tag.name),
+      value = tag.value.copy(
+        internalValue = trunc(255, tag.value.internalValue),
+        displayValue = tag.value.displayValue.map(trunc(255, _)),
+      )
+    )
+
+  private def truncateReplaceForDb(pair: (String, String)): (String, String) = pair match {
+    case (key, value) => trunc(255, key) -> trunc(255, value)
   }
 }
 
@@ -245,6 +268,8 @@ case class ActivityMute(
         matchTag.name == tag.name && matchTag.value.internalValue == tag.value.internalValue
       ))
   }
+
+  def expired(now: DateTime = DateTime.now): Boolean = expiresAt.exists(_.isBefore(now))
 }
 
 object ActivityMute {
@@ -270,7 +295,9 @@ case class ActivityMuteRender(
   activityType: Option[ActivityType],
   provider: Option[ActivityProvider],
   tags: Seq[ActivityTag]
-)
+) {
+  def expired(now: DateTime = DateTime.now): Boolean = expiresAt.exists(_.isBefore(now))
+}
 
 object ActivityMuteRender {
   import DateFormats.isoDateWrites
@@ -293,13 +320,14 @@ object ActivityMuteRender {
     )
   }
 
+  // Currently only used for testing
   def fromActivityMuteSave(id: String, activityMute: ActivityMuteSave) = ActivityMuteRender(
     id,
     activityMute.usercode,
     DateTime.now,
     activityMute.expiresAt,
     activityMute.activityType.map(ActivityType(_)),
-    activityMute.providerId.map(ActivityProvider(_, sendEmail = false)),
+    activityMute.providerId.map(ActivityProvider(_, sendEmail = false, overrideMuting = false)),
     activityMute.tags
   )
 }

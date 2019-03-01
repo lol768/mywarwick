@@ -23,8 +23,8 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val insertSkynetProvider =
     SQL"""
-        INSERT INTO provider (id, display_name, icon, colour, publisher_id) VALUES
-        ('skynet', 'Skynet', 'eye-o', 'greyish', 'default')
+        INSERT INTO provider (id, display_name, icon, colour, publisher_id, transient_push, override_muting) VALUES
+        ('skynet', 'Skynet', 'eye-o', 'greyish', 'default', 0, 0)
       """
 
   val deleteFixtureProvider =
@@ -34,8 +34,8 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
 
   val insertFixtureProvider =
     SQL"""
-        INSERT INTO provider (id, display_name, icon, colour, publisher_id) VALUES
-        (${activitySave.providerId}, 'Tabula display name', 'eye-o', 'greyish', 'default')
+        INSERT INTO provider (id, display_name, icon, colour, publisher_id, transient_push, override_muting) VALUES
+        (${activitySave.providerId}, 'Tabula display name', 'eye-o', 'greyish', 'default', 0, 0)
       """
 
   val deleteFixtureType =
@@ -107,7 +107,7 @@ class ActivityDaoTest extends BaseSpec with OneStartAppPerSuite {
           'nowDate -> nowDate
         ).execute()
 
-      messagingDao.save(newActivity, usercode, Mobile)
+      messagingDao.save(newActivity, usercode, Mobile, sendAt = None)
 
       activityDao.getPushNotificationsSinceDate(usercode.string, lastFetchedDate) mustBe Seq(newActivity)
     }

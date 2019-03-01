@@ -52,7 +52,7 @@ export default class Tile extends HideableView {
   getIconTitle() {
     const { errors, fetchedAt } = this.props;
 
-    if (errors) {
+    if (errors && errors.length) {
       return `Last updated ${localMoment(fetchedAt).calendar()}. ${errors[0].message}`;
     }
 
@@ -186,23 +186,27 @@ export default class Tile extends HideableView {
             </div>
           }
 
-          <div
-            className="tile__edit-control bottom-right"
-            onClick={ this.props.onResize }
-            onKeyUp={ this.props.onResize }
-            role="button"
-            tabIndex={0}
-            title={`Make tile ${_.last(supportedTileSizes) === size ? 'smaller' : 'bigger'}`}
-          >
-            <div className="icon"><i className="fa fa-arrow-up" /></div>
-          </div>
+          { this.getContentInstance() && this.getContentInstance().constructor.isMovable() &&
+            <div
+              className="tile__edit-control bottom-right"
+              onClick={ this.props.onResize }
+              onKeyUp={ this.props.onResize }
+              role="button"
+              tabIndex={0}
+              title={`Make tile ${_.last(supportedTileSizes) === size ? 'smaller' : 'bigger'}`}
+            >
+              <div className="icon"><i className="fa fa-arrow-up" /></div>
+            </div>
+          }
 
-          <div
-            className="tile__edit-control bottom-left tile__drag-handle"
-            title="Drag to re-arrange tile"
-          >
-            <div className="icon"><i className="fa fa-arrows" /></div>
-          </div>
+          { this.getContentInstance() && this.getContentInstance().constructor.isMovable() &&
+            <div
+              className="tile__edit-control bottom-left tile__drag-handle"
+              title="Drag to re-arrange tile"
+            >
+              <div className="icon"><i className="fa fa-arrows" /></div>
+            </div>
+          }
 
           <TileWrap
             icon={this.getIcon()}

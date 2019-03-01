@@ -1,7 +1,7 @@
 /* eslint-env browser */
 /* global ga */
 
-import localforage from 'localforage';
+import localforage from './localdata';
 import $ from 'jquery';
 import log from 'loglevel';
 import _ from 'lodash-es';

@@ -1,0 +1,23 @@
+@import system.RequestContext
+@(form: Form[EAPFeatureSave])(implicit fc: b3.B3FieldConstructor, messages: Messages, context: RequestContext)
+
+@context.csrfHelper.formField
+
+@b3.text(form("name"),
+  '_label -> "Name",
+  Symbol("data-autofocus") -> true,
+  'required -> true)
+
+@tags.datePicker(form("startDate"),
+  '_label -> "Start date")
+
+@tags.datePicker(form("endDate"),
+  '_label -> "End date")
+
+@b3.textarea(form("summary"),
+  '_label -> "Summary",
+  'rows -> 5,
+  '_help -> "Supports markdown")
+
+@b3.text(form("feedbackUrl"),
+  '_label -> "Feedback URL")

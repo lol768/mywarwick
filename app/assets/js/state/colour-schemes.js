@@ -61,7 +61,7 @@ export function toggleHighContrast(value) {
 
 export function fetch() {
   return (dispatch) => {
-    log.debug('Fetching colour scheme preference.');
+    log.debug('Fetching colour scheme preference');
     dispatch(start());
     return fetchWithCredentials('/api/colour-schemes')
       .then(response => response.json())

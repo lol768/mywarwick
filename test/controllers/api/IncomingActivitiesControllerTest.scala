@@ -1,31 +1,39 @@
 package controllers.api
 
-import helpers.{BaseSpec, MinimalAppPerSuite, WithActorSystem}
-import models.Audience
+import actors.MessageProcessing.ProcessingResult
+import helpers.{BaseSpec, MinimalAppPerSuite}
+import models.publishing.Publisher
 import models.publishing.PublishingRole.{APINotificationsManager, NotificationsManager}
-import org.mockito.Matchers
+import models.{ActivityProvider, Audience}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.mockito.{ArgumentCaptor, Matchers}
 import org.scalatest.mockito.MockitoSugar
-import models.publishing.Publisher
-import play.api.cache.CacheApi
-import play.api.i18n.MessagesApi
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import services.ActivityError.InvalidUsercodeAudience
 import services._
+import services.messaging._
+import system.AuditLogContext
 import warwick.sso._
 
-import scala.util.Try
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.Try
 
 class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with Results with MinimalAppPerSuite {
 
   val tabula = "tabula"
   val tabulaPublisherId = "tabulaPublisherId"
   val tabulaPublisher = Publisher(tabulaPublisherId, "Tabula")
+  val tabulaProvider: ActivityProvider = ActivityProvider(tabula, sendEmail = false, overrideMuting = false)
+
+  val transientPushProviderId = "transientPushProviderId"
+  val transientPushPublisherId = "transientPushPublisherId"
+  val transientPushPublisher = Publisher(transientPushPublisherId, "Transient Push")
+  val transientPushProvider: ActivityProvider = ActivityProvider(transientPushProviderId, sendEmail = false, transientPush = true, overrideMuting = false)
+
   val ron: User = Users.create(usercode = Usercode("ron"))
 
   val mockSSOClient = new MockSSOClient(new LoginContext {
@@ -42,12 +50,15 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
   val publisherService: PublisherService = mock[PublisherService]
   val activityService: ActivityService = mock[ActivityService]
   val audienceService: AudienceService = mock[AudienceService]
+  val messagingService: MessagingService = mock[MessagingService]
 
-  val controller = new IncomingActivitiesController(
+  val controller: IncomingActivitiesController = new IncomingActivitiesController(
     new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], PlayBodyParsers()),
     activityService,
     publisherService,
-    audienceService
+    audienceService,
+    messagingService,
+    mock[MobileOutputService]
   ) {
     override val navigationService = new MockNavigationService()
     override val ssoClient: MockSSOClient = mockSSOClient
@@ -66,6 +77,69 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
       )
     )
   )
+
+  "IncomingActivitiesController#transientPushNotification" should {
+    when(publisherService.getParentPublisherId(transientPushProviderId)).thenReturn(Some(transientPushPublisherId))
+    when(publisherService.getRoleForUser(transientPushPublisherId, ron.usercode)).thenReturn(APINotificationsManager)
+    when(activityService.getProvider(transientPushProviderId)).thenReturn(Some(transientPushProvider))
+
+    "parse IncomingTransientPushData to PushNotification model" in {
+      val transientPushBody: JsObject = Json.obj(
+        "type" -> "two_step_code",
+        "title" -> "Your two-step code is hidden inside your phone",
+        "priority" -> "high",
+        "ttl" -> 240,
+        "channel" -> "two_step_codes",
+        "url" -> "http://websignon.warwick.ac.uk",
+        "recipients" -> Json.obj(
+          "users" -> Json.arr(
+            "someone"
+          )
+        )
+      )
+      when(messagingService.processTransientPushNotification(any[Set[Usercode]], any[PushNotification])(any[AuditLogContext])).thenReturn(
+        Future.successful(ProcessingResult(success = true, "created"))
+      )
+      await(call(controller.transientPushNotification(transientPushProviderId), FakeRequest().withJsonBody(transientPushBody)))
+
+      val captor = ArgumentCaptor.forClass(classOf[PushNotification])
+      verify(messagingService).processTransientPushNotification(any(), captor.capture)(any())
+
+      val push: PushNotification = captor.getValue
+
+      push.ttl.get.toMinutes mustBe 4
+      push.priority.get mustBe Priority.HIGH
+      push.channel.get mustBe "two_step_codes"
+    }
+
+    "process transient push message" in {
+      when(messagingService.processTransientPushNotification(any[Set[Usercode]], any[PushNotification])(any[AuditLogContext])).thenReturn(
+        Future.successful(ProcessingResult(success = true, "created"))
+      )
+      val result = call(controller.transientPushNotification(transientPushProviderId), FakeRequest().withJsonBody(body))
+
+      status(result) mustBe CREATED
+
+      val json = contentAsJson(result)
+      (json \ "success").as[Boolean] mustBe true
+      (json \ "status").as[String] mustBe "ok"
+    }
+
+    "return forbidden when a provider does not have transient push permission" in {
+      when(publisherService.getParentPublisherId(tabula)).thenReturn(Some(tabulaPublisherId))
+      when(publisherService.getRoleForUser(tabulaPublisherId, ron.usercode)).thenReturn(APINotificationsManager)
+      when(activityService.getProvider(tabula)).thenReturn(Some(tabulaProvider))
+
+      val result = call(controller.transientPushNotification(tabula), FakeRequest().withJsonBody(body))
+      status(result) mustBe FORBIDDEN
+
+      val json = contentAsJson(result)
+
+      (json \ "success").as[Boolean] mustBe false
+      (json \ "status").as[String] mustBe "forbidden"
+      (json \ "errors" \\ "message").map(_.as[String]).head must include("does not have permission")
+    }
+  }
 
   "IncomingActivitiesController#postNotification" should {
 

@@ -8,14 +8,11 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Seconds, Span}
 import play.api.Configuration
-import play.api.cache._
 import play.api.libs.json.{JsObject, Json}
-import play.api.libs.ws.WSClient
 import system.NullCacheApi
 import uk.ac.warwick.sso.client.trusted.CurrentApplication
 
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class TileContentServiceTest extends BaseSpec with ScalaFutures with MockitoSugar with WithWebClient with WithActorSystem {
 
@@ -65,7 +62,7 @@ class TileContentServiceTest extends BaseSpec with ScalaFutures with MockitoSuga
 
     "fetch a Tile's URL" in {
       ExternalServers.runServer(handler) { port =>
-        val ut = userPrinterTile(Some(s"http://localhost:${port}/content/printcredits"))
+        val ut = userPrinterTile(Some(s"http://localhost:$port/content/printcredits"))
         service.getTileContent(Some(user.usercode), ut).futureValue must be(response)
       }
     }
@@ -78,9 +75,9 @@ class TileContentServiceTest extends BaseSpec with ScalaFutures with MockitoSuga
 
     "return empty preferences if a backend fails" in {
       ExternalServers.runBrokenServer { port =>
-        val ut = userPrinterTile(Some(s"http://localhost:${port}/content/printcredits"))
+        val ut = userPrinterTile(Some(s"http://localhost:$port/content/printcredits"))
         val fallbackResponse = List(("printcredits", Json.obj()))
-        service.getCachedTilesOptions(Seq(ut.tile)).futureValue mustBe fallbackResponse
+        service.getCachedTilesOptions(None, Seq(ut.tile)).futureValue mustBe fallbackResponse
       }
     }
   }

@@ -27,6 +27,14 @@ GET           /admin/sysadmin                                @controllers.admin.
 GET           /admin/cluster                                 @controllers.admin.ClusterStateController.html
 GET           /admin/masquerade                              @controllers.admin.MasqueradeController.masquerade
 
+GET           /admin/eap                                     @controllers.admin.EAPFeaturesController.index
+GET           /admin/eap/new                                 @controllers.admin.EAPFeaturesController.createForm
+POST          /admin/eap/new                                 @controllers.admin.EAPFeaturesController.create
+GET           /admin/eap/:id/edit                            @controllers.admin.EAPFeaturesController.updateForm(id: String)
+POST          /admin/eap/:id/edit                            @controllers.admin.EAPFeaturesController.update(id: String)
+GET           /admin/eap/:id/delete                          @controllers.admin.EAPFeaturesController.deleteForm(id: String)
+POST          /admin/eap/:id/delete                          @controllers.admin.EAPFeaturesController.delete(id: String)
+
 GET           /admin/publishers                                     @controllers.admin.publishers.PublishersController.index
 GET           /admin/publishers/new                                 @controllers.admin.publishers.PublishersController.createForm
 POST          /admin/publishers                                     @controllers.admin.publishers.PublishersController.create
@@ -41,14 +49,17 @@ POST          /admin/publishers/:publisher/providers                @controllers
 GET           /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.updateForm(publisher: String, provider: String)
 POST          /admin/publishers/:publisher/providers/:provider      @controllers.admin.publishers.ProvidersController.update(publisher: String, provider: String)
 
-
 GET           /admin/elasticsearch/activity                  @controllers.admin.elasticsearch.ActivityToESController.index
 POST          /admin/elasticsearch/reindex                   @controllers.admin.elasticsearch.ActivityToESController.reindexActivitiesInDateTimeRange
 
-GET           /admin/reports/preferences                     @controllers.admin.reporting.PreferencesReportingController.index
 GET           /admin/reports                                 @controllers.admin.reporting.HomeController.index
+GET           /admin/reports/preferences                     @controllers.admin.reporting.PreferencesReportingController.index
+GET           /admin/reports/eap                             @controllers.admin.reporting.EAPReportingController.index
 GET           /admin/reports/activity                        @controllers.admin.reporting.ActivityReportingController.index
 POST          /admin/reports/activity                        @controllers.admin.reporting.ActivityReportingController.formSubmit
+GET           /admin/reports/clients                         @controllers.admin.reporting.ClientReportingController.index
+POST          /admin/reports/clients                         @controllers.admin.reporting.ClientReportingController.formSubmit
+GET           /admin/reports/clients/:start/:end             @controllers.admin.reporting.ClientReportingController.report(start: String, end: String)
 
 GET           /publish/:publisher/webgroups                  @controllers.publish.WebGroupsController.results(publisher: String, query: String)
 
@@ -78,13 +89,19 @@ GET           /publish/:publisher/alerts/:id/status          @controllers.publis
 GET           /websockets/page/                              @controllers.WebSocketController.socket
 
 GET           /assets/manifest.json                          @controllers.AppManifestController.getAppManifest
-# Map static resources from the /public folder to the /assets URL path
+# Map static resources from the /public folder to the /assets URL path -
+# Has some custom handling for files that might used to have existed
+GET           /assets/*file                                  @controllers.AssetsController.versioned(path="/public", file: Asset)
+# This never serves requests directly any more but it's required so Play generates reverse routes.
 GET           /assets/*file                                  @controllers.Assets.versioned(path="/public", file: Asset)
 
-GET           /service-worker.js                             @controllers.Assets.at(path="/public", file="service-worker.js")
+GET           /service-worker.js                             @controllers.HomeController.serviceWorker
 
 # Android App Links
 GET           /.well-known/assetlinks.json                   @controllers.Assets.at(path="/public", file="assetlinks.json")
+
+GET           /api/donotdisturb                              @controllers.api.DoNotDisturbController.index
+POST          /api/donotdisturb                              @controllers.api.DoNotDisturbController.update
 
 GET           /api/news/feed                                 @controllers.api.ReadNewsController.feed(offset: Int ?= 0)
 GET           /api/news/feed.atom                            @controllers.api.ReadNewsController.atomFeed
@@ -107,6 +124,11 @@ GET           /service/healthcheck                           @controllers.Servic
 GET           /service/cluster/state                         @controllers.admin.ClusterStateController.get
 GET           /service/revision                              @controllers.VersionController.revision
 
+POST          /api/push/apns/subscribe                       @controllers.api.APNSPushNotificationsController.subscribe
+POST          /api/push/web/subscribe                        @controllers.api.WebPushNotificationsController.subscribe
+POST          /api/push/fcm/subscribe                        @controllers.api.FCMPushNotificationsController.subscribe
+POST          /api/push/unsubscribe                          @controllers.api.PushNotificationsController.unsubscribe
+
 POST          /api/streams/read                              @controllers.api.UserActivitiesController.markAsRead
 
 GET           /api/streams/notifications                     @controllers.api.UserActivitiesController.notifications(since: Option[String], before: Option[String], limit: Int ?= 100)
@@ -124,14 +146,24 @@ GET           /api/streams/mute                              @controllers.api.Us
 PUT           /api/streams/mute                              @controllers.api.UserActivitiesController.saveMute
 DELETE        /api/streams/mute                              @controllers.api.UserActivitiesController.removeMute(id: String)
 
++ nocsrf
 POST          /api/streams/:providerId/notifications         @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
++ nocsrf
 POST          /api/streams/:providerId/alerts                @controllers.api.IncomingActivitiesController.postNotification(providerId: String)
++ nocsrf
 POST          /api/streams/:providerId/activities            @controllers.api.IncomingActivitiesController.postActivity(providerId: String)
+
++ nocsrf
+POST          /api/push/:providerId                          @controllers.api.IncomingActivitiesController.transientPushNotification(providerId: String)
 
 GET           /api/tiles                                     @controllers.api.TilesController.getLayout
 GET           /api/tiles/content                             @controllers.api.TilesController.content
 GET           /api/tiles/content/:id                         @controllers.api.TilesController.contentById(id: String)
 PUT           /api/tiles                                     @controllers.api.TilesController.saveLayout
+
+GET           /api/merge/calendar                            @controllers.api.EventsMergeController.index
+POST          /api/merge/calendar                            @controllers.api.EventsMergeController.index
+GET           /api/merge/calendar/preferences.json           @controllers.api.EventsMergeController.preferences
 
 GET           /api/emailNotificationPreferences              @controllers.api.EmailNotificationsPrefController.get
 POST          /api/emailNotificationPreferences              @controllers.api.EmailNotificationsPrefController.update
@@ -141,15 +173,14 @@ POST          /api/smsNotificationPreferences                @controllers.api.Sm
 GET           /api/colour-schemes                            @controllers.api.ColourSchemesController.get
 POST          /api/colour-schemes                            @controllers.api.ColourSchemesController.persist
 
+GET           /api/eap                                       @controllers.api.EAPController.getPreference
+POST          /api/eap                                       @controllers.api.EAPController.updatePreference
+POST          /api/eap/tile                                  @controllers.api.EAPController.tile
+
 POST          /api/errors/js                                 @controllers.api.ErrorsController.js
 
 GET           /user/info                                     @controllers.UserInfoController.info
 GET           /logout                                        @controllers.UserInfoController.logout
-
-POST          /api/push/apns/subscribe                       @controllers.api.APNSPushNotificationsController.subscribe
-POST          /api/push/web/subscribe                        @controllers.api.WebPushNotificationsController.subscribe
-POST          /api/push/fcm/subscribe                        @controllers.api.FCMPushNotificationsController.subscribe
-POST          /api/push/unsubscribe                          @controllers.api.PushNotificationsController.unsubscribe
 
 # Handle trailing slashes in URLs
 GET           /*path/                                        @controllers.HomeController.redirectToPath(path: String)

@@ -6,6 +6,8 @@
 .tile__body {
   .tile--small.tile--agenda &,
   .tile--wide.tile--agenda &,
+  .tile--small.tile--calendar &,
+  .tile--wide.tile--calendar &,
   .tile--account & {
     & ul {
       line-height: 0.8 !important;
@@ -48,6 +50,34 @@
     li {
       white-space: nowrap;
       text-overflow: ellipsis;
+    }
+  }
+}
+
+.tile--mail, .tile--agenda, .tile--calendar {
+  .fa-info-circle {
+    opacity: 1;
+  }
+}
+
+.tile--eap {
+  .feature {
+    display: flex;
+    .date-and-name {
+      margin-right: 16px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .more-info {
+      margin-right: 12px;
+    }
+    .more-info, .feedback {
+      white-space: nowrap;
+      text-decoration: underline;
+      i.fa {
+        margin-right: 4px;
+      }
     }
   }
 }

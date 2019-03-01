@@ -4,16 +4,39 @@
 }
 
 .text {
+  &--underline {
+    border-bottom: 1px solid rgba(255, 255, 255, .5);
+    display: inline-block;
+  }
+
   &--dotted-underline {
     border-bottom: 1px dotted rgba(255, 255, 255, .5);
   }
 
+  .modal-body &--dotted-underline {
+    border-bottom: 1px dotted rgba(135, 135, 135, .5); // #878787
+  }
+
   &--light {
     opacity: 0.7;
+    font-weight: normal;
   }
 
   &--translucent {
     color: rgba(255, 255, 255, .8);
+  }
+
+  &--hint {
+    .small;
+    .text-muted;
+    html.ios & {
+      font: -apple-system-caption1;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+      margin-top: (@line-height-computed / 2);
+    }
   }
 }
 

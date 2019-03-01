@@ -59,8 +59,8 @@ For JavaScript, use the `csrfToken` module with exported functions `getCsrfHeade
 have CSRF support baked in.
 
 If there is an exceptional reason why your route needs to be exempt from the CSRF protection,
-you can add a regexp-based path exception in the `mywarwick.csrfWhitelist` configuration list. By
-default the SSO access control route is covered with this.
+you can tag it with `+ nocsrf` in the routes file. By default the SSO access control route is
+covered with this.
 
 Functional tests
 ----------------

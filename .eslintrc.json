@@ -1,8 +1,11 @@
 {
   "parser": "babel-eslint",
   "extends": "airbnb",
-  "plugins": ["mw"],
+  "plugins": ["mw","flowtype"],
   "rules": {
+    "flowtype/define-flow-type": 1,
+    "flowtype/use-flow-type": 1,
+
     "class-methods-use-this": 0,
     "no-underscore-dangle": 0,
     "no-plusplus": 0,

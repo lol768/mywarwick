@@ -2,6 +2,7 @@ package controllers.publish
 
 import helpers.BaseSpec
 import models.Audience
+import models.Audience.{Residence, ResidenceAudience}
 import models.publishing.PermissionScope.{AllDepartments, Departments}
 import models.publishing.Publisher
 import org.mockito.Matchers._
@@ -9,6 +10,7 @@ import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.data.FormError
+import play.api.test.FakeRequest
 import services.dao.{DepartmentInfo, DepartmentInfoDao}
 import services.{AudienceService, PublisherService}
 import warwick.sso.{AuthenticatedRequest, UniversityID, Usercode}
@@ -29,7 +31,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
   val defaultMockPublisherService: PublisherService = mockPublisherService("**")
   val publisher = Publisher("xyz", "Publisher", Some(1))
-  implicit val defaultPublisherRequest: PublisherRequest[_] = new PublisherRequest(publisher, null, new AuthenticatedRequest(null, null))
+  implicit val defaultPublisherRequest: PublisherRequest[_] = new PublisherRequest(publisher, null, new AuthenticatedRequest(null, FakeRequest()))
 
   "AudienceBinder" should {
 
@@ -152,6 +154,13 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       audienceBinder.bindAudience(audienceData)(defaultPublisherRequest).futureValue mustBe Right(Audience(Seq(Audience.Staff)))
     }
 
+    "bind halls of residence audience data" in {
+      val audienceData = AudienceData(Seq("hallsOfResidence:westwood","hallsOfResidence:claycroft"), None)
+
+      val audienceBinder = new AudienceBinder(null, null, defaultMockPublisherService)
+      audienceBinder.bindAudience(audienceData).futureValue mustBe Right(Audience(Seq(Residence.Westwood, Residence.Claycroft).map(ResidenceAudience)))
+    }
+
     "raise error message when binding with invalid department code" in {
 
       val departmentCode = "AH"
@@ -189,7 +198,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       when(departmentInfoDao.allDepartments).thenReturn(Seq(DepartmentInfo("AH", "AH", "AH", "AH", "AH", "X")))
 
       val audienceService = mock[AudienceService]
-      when(audienceService.validateUsers(Set(Usercode("TeachingApple")))).thenReturn(Left(Set(Usercode("TeachingApple"))))
+      when(audienceService.validateUsers(Set("TeachingApple"))).thenReturn(Left(Set("TeachingApple")))
 
       val audienceBinder = new AudienceBinder(departmentInfoDao, audienceService, defaultMockPublisherService)
 
@@ -210,7 +219,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       )
 
       val mockAudienceService = mock[AudienceService]
-      when(mockAudienceService.validateUsers(Set(Usercode(unrecognisedAudience)))).thenReturn(Left(Set(Usercode(unrecognisedAudience))))
+      when(mockAudienceService.validateUsers(Set(unrecognisedAudience))).thenReturn(Left(Set(unrecognisedAudience)))
 
       val audienceBinder = new AudienceBinder(null, mockAudienceService, defaultMockPublisherService)
 
@@ -235,7 +244,7 @@ class AudienceBinderTest extends BaseSpec with MockitoSugar with ScalaFutures {
       val mockAudienceService = mock[AudienceService]
       when(mockAudienceService.resolve(Audience(Seq(Audience.ComponentParameter.unapply("TaughtPostgrads").get)))).thenReturn(Try(Set.apply[Usercode](Usercode("a"), Usercode("b"))))
       val audienceBinder = new AudienceBinder(null, mockAudienceService, defaultMockPublisherService)
-      val result = audienceBinder.bindAudience(audienceData, restrictedRecipients = true)(new PublisherRequest(publisher, null, new AuthenticatedRequest(null, null))).futureValue
+      val result = audienceBinder.bindAudience(audienceData, restrictedRecipients = true)(new PublisherRequest(publisher, null, new AuthenticatedRequest(null, FakeRequest()))).futureValue
       result mustBe Left(Seq(FormError("audience", "error.audience.tooMany", Seq(1))))
     }
 

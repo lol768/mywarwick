@@ -12,6 +12,7 @@ export default class MastheadMobile extends React.PureComponent {
       backButtonVisible:
       props.path.indexOf(`/${Routes.SETTINGS}`) === 0 ||
       props.path.indexOf(`/${Routes.TILES}`) === 0 ||
+      (props.features.updateTileEditUI && props.path.indexOf(`/${Routes.EDIT}`) === 0) ||
       props.path.indexOf(`/${Routes.EDIT}/${Routes.ADD}`) === 0,
       backButtonText: props.path === `/${Routes.SETTINGS}` ? 'Done' : 'Back',
     };
@@ -48,12 +49,12 @@ export default class MastheadMobile extends React.PureComponent {
         { this.props.showEditButton &&
         <div
           className="edit-btn pulse"
-          onClick={this.props.onEdit}
-          onKeyUp={this.props.onEdit}
+          onClick={this.props.onEditComplete}
+          onKeyUp={this.props.onEditComplete}
           role="button"
           tabIndex={0}
         >
-          { this.props.editing ?
+          {this.props.editing ?
             <i className="fa fa-fw fa-check" /> :
             <i className="fa fa-fw fa-arrows" />
           }
@@ -94,9 +95,10 @@ export default class MastheadMobile extends React.PureComponent {
 MastheadMobile.propTypes = {
   path: PropTypes.string,
   onBackClick: PropTypes.func,
-  onEdit: PropTypes.func,
+  onEditComplete: PropTypes.func,
   editing: PropTypes.bool,
   showEditButton: PropTypes.bool,
   onSettings: PropTypes.func,
   showSettingsButton: PropTypes.bool,
+  features: PropTypes.object.isRequired,
 };

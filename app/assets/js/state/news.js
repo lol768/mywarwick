@@ -18,7 +18,7 @@ export function fetch() {
       return null;
     }
 
-    log.debug('Fetching news.');
+    log.debug('Fetching news');
     dispatch(start());
 
     const { offset } = getState().news;

@@ -20,19 +20,19 @@ function uploadSubscription(subscription) {
 export function init() {
   // Check if push messaging is supported
   if (!('PushManager' in window)) {
-    log.warn('Push messaging isn\'t supported.');
+    log.warn('Push messaging isn\'t supported');
     return;
   }
 
   // Are Notifications supported?
   if (!('Notification' in window && 'showNotification' in ServiceWorkerRegistration.prototype)) {
-    log.warn('Notifications aren\'t supported.');
+    log.warn('Notifications aren\'t supported');
     return;
   }
 
   // If the user has disabled notifications
   if (Notification.permission === 'denied') {
-    log.warn('The user has disabled notifications.');
+    log.warn('The user has disabled notifications');
     return;
   }
 
@@ -58,7 +58,7 @@ export function subscribe() {
         if (Notification.permission === 'denied') {
           log.warn('Permission for Notifications was denied', e);
         } else {
-          log.error('Unable to subscribe to push.', e);
+          log.error('Unable to subscribe to push', e);
         }
       })
       .then(() => store.dispatch(device.updateNotificationPermissions));

@@ -1,19 +1,22 @@
 package services.messaging
 
 import java.sql.Connection
-import javax.inject.{Inject, Named, Provider}
+import java.time.ZonedDateTime
 
+import javax.inject.{Inject, Named, Provider}
+import actors.MessageProcessing
 import actors.MessageProcessing._
 import com.google.inject.ImplementedBy
 import models._
 import org.joda.time.DateTime
 import play.api.db.{Database, NamedDatabase}
-import services.dao.MessagingDao
+import services.dao.{MessagingDao, PublisherDao}
 import services.elasticsearch.{ActivityESService, MessageSent}
 import services.{ActivityService, EmailNotificationsPrefService, SmsNotificationsPrefService}
-import system.Logging
+import system.{AuditLogContext, Logging}
 import warwick.sso.{UserLookupService, Usercode}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 /**
@@ -43,6 +46,8 @@ trait MessagingService {
   def getOldestUnsentMessageCreatedAt: Option[DateTime]
 
   def getSmsSentLast24Hours: Int
+
+  def processTransientPushNotification(usercodes: Set[Usercode], pushNotification: PushNotification)(implicit context: AuditLogContext): Future[MessageProcessing.ProcessingResult]
 }
 
 class MessagingServiceImpl @Inject()(
@@ -52,31 +57,63 @@ class MessagingServiceImpl @Inject()(
   emailNotificationsPrefService: EmailNotificationsPrefService,
   smsNotificationsPrefService: SmsNotificationsPrefService,
   @Named("email") emailer: OutputService,
-  @Named("mobile") mobile: OutputService,
+  mobile: MobileOutputService,
   @Named("sms") sms: OutputService,
   messagingDao: MessagingDao,
   activityESService: ActivityESService,
+  dndService: DoNotDisturbService,
+  publisherDao: PublisherDao
 ) extends MessagingService with Logging {
 
   // weak sauce way to resolve cyclic dependency.
   private lazy val activities = activitiesProvider.get
 
+  override def processTransientPushNotification(usercodes: Set[Usercode], pushNotification: PushNotification)(implicit context: AuditLogContext): Future[MessageProcessing.ProcessingResult] = {
+    val foundUsers: Set[Usercode] = users.getUsers(usercodes.toSeq).get.keySet
+    val notFoundUsers = usercodes -- foundUsers
+    mobile.processPushNotification(foundUsers, pushNotification).map { processingResult =>
+      foundUsers.foreach(u =>
+        auditLog('SendTransientPushNotification,
+          'usercode -> u.string,
+          'publisher_id -> pushNotification.publisherId,
+          'provider_id -> pushNotification.providerId,
+          'type -> pushNotification.notificationType,
+          'ttl -> pushNotification.ttl.orNull.toSeconds,
+          'channel_id -> pushNotification.channel.orNull,
+          'priority -> pushNotification.priority.orNull.value
+        )
+      )
+      if (notFoundUsers.nonEmpty) {
+        ProcessingResult(success = true, "userlookup failed for some users", Some(UsersNotFound(notFoundUsers)))
+      } else {
+        processingResult
+      }
+    }
+  }
+
   override def send(recipients: Set[Usercode], activity: Activity): Unit = {
-    def save(output: Output, user: Usercode)(implicit c: Connection) = {
+    def save(output: Output, user: Usercode, sendAt: Option[ZonedDateTime])(implicit c: Connection): Unit = {
       if (logger.isDebugEnabled) logger.logger.debug(s"Sending ${output.name} to $user about ${activity.id}")
-      messagingDao.save(activity, user, output)
+      messagingDao.save(activity, user, output, sendAt)
     }
 
     db.withTransaction { implicit c =>
-      unmutedRecipients(recipients, activity).foreach { user =>
+      val ignoreMutes = publisherDao.getProvider(activity.providerId).exists(_.overrideMuting)
+      (if (ignoreMutes) {
+        logger.info(s"Ignoring muting for activity ${activity.id}")
+        recipients
+      } else {
+        unmutedRecipients(recipients, activity)
+      }).foreach { user =>
+        val sendAt: Option[ZonedDateTime] = if (ignoreMutes) None else dndService.getRescheduleTime(user)
         if (sendEmailFor(user, activity)) {
-          save(Output.Email, user)
+          save(Output.Email, user, sendAt)
         }
         if (sendSmsFor(user, activity)) {
-          save(Output.SMS, user)
+          save(Output.SMS, user, sendAt)
         }
         if (sendMobileFor(user, activity)) {
-          save(Output.Mobile, user)
+          save(Output.Mobile, user, sendAt)
         }
       }
     }
@@ -91,7 +128,10 @@ class MessagingServiceImpl @Inject()(
       if (mutedUsercodes.nonEmpty) {
         logger.info(s"Muted sending activity ${activity.id} to: ${mutedUsercodes.map(_.string).mkString(",")}")
 
-        mutedUsercodes.foreach(activities.markProcessed(activity.id, _))
+        mutedUsercodes.foreach { user =>
+          activities.markProcessed(activity.id, user)
+          activityESService.indexMessageSentReq(MessageSent(activity.id, user, MessageState.Muted, Output.Mobile))
+        }
       }
       recipients.diff(mutedUsercodes)
     }.getOrElse(recipients)
@@ -145,7 +185,7 @@ class MessagingServiceImpl @Inject()(
           case Output.Mobile => mobile.send(heavyMessage)
         }
       }.getOrElse {
-        Future.successful(ProcessingResult(success = false, s"User ${message.user} not found", error = Some(UserNotFound)))
+        Future.successful(ProcessingResult(success = false, s"User ${message.user.string} not found", error = Some(UserNotFound)))
       }
     }.getOrElse {
       Future.successful(ProcessingResult(success = false, s"Activity ${message.activity} not found", error = Some(ActivityNotFound)))

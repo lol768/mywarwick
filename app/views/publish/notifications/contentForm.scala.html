@@ -1,41 +1,41 @@
 @import controllers.publish.NotificationsController.PublishNotificationForm
-@import models.publishing.PermissionScope
+@import models.publishing.{PermissionScope, Publisher}
 @import org.joda.time.LocalDateTime
-@import system.RequestContext
-@import models.publishing.Publisher
+@import play.api.libs.json.{JsBoolean, JsValue, Json}
+@import services.ProviderRender
 @import services.dao.DepartmentInfo
-@import play.api.libs.json.{Json, JsValue}
-@import play.api.libs.json.JsString
-@import play.api.libs.json.JsObject
-@import play.api.libs.json.JsBoolean
-
+@import system.RequestContext
 @(
     form: PublishNotificationForm,
     publisher: Publisher,
     departmentOptions: Seq[DepartmentInfo],
-    providerOptions: Seq[(String, String)],
+    providers: Seq[ProviderRender],
     permissionScope: PermissionScope,
     audience: Audience,
     createOrUpdate: String,
     audienceJson: JsValue = Json.obj(),
-    audienceIndicatorHint: JsValue = JsObject(Seq(
-      "text" -> JsString("When sending alerts, please remember that alerts should be specific or personal to the recipient, and something they need to be aware of or take action on immediately, and concise - a sentence or two at most."),
-      "link" -> JsString("https://warwick.ac.uk/mw-support/faqs-staff/sending-alerts"),
+    audienceIndicatorHint: JsValue = Json.obj(
       "isNews" -> JsBoolean(false)
-    ))
+    )
 )(implicit fc: b3.B3FieldConstructor, messages: Messages, context: RequestContext)
 
 @context.csrfHelper.formField
 @form.globalErrors.map { error =>
   <div class="alert alert-danger">@error.message</div>
 }
+<div class="alert alert-info">
+    <p>
+      When sending alerts, please remember that alerts should be specific or personal to the recipient, and something they need to be aware of or take action on immediately, and concise - a sentence or two at most.
+      &nbsp;<a href="https://warwick.ac.uk/mw-support/faqs-staff/sending-alerts">More info…</a>
+    </p>
+</div>
 
-<div
-class="audience-indicator"
-data-hint="@audienceIndicatorHint"
-></div>
-
-<div class="split-form__sections">
+<div class="row">
+  <div
+  class=" col-lg-4 col-lg-push-8 audience-indicator"
+  data-hint="@audienceIndicatorHint"
+  ></div>
+<div class="col-lg-8 col-lg-pull-4 split-form__sections">
   <section>
     @tags.audiencePicker(form, "audience", departmentOptions, "alert", permissionScope, allowPublic = false, audience = audience, audienceJson)
   </section>
@@ -46,14 +46,29 @@ data-hint="@audienceIndicatorHint"
       '_help -> "Keep it super short"
     )
 
-    @if(providerOptions.size == 1) {
-      @b3.hidden("item.provider", providerOptions.head._1)
+    @if(providers.size == 1) {
+      @b3.hidden("item.provider", providers.head.id)
+
+      @if(providers.head.overrideMuting) {
+        @b3.free() {
+          <div class="alert alert-info">
+            This source overrides any mutes set up by the recipient
+          </div>
+        }
+      }
     } else {
-      @b3.select(form("item.provider"), providerOptions,
+      @b3.select(form("item.provider"), providers.map(p => p.id -> p.name.getOrElse(p.id)),
         '_label -> "Source",
         '_default -> "",
-        '_help -> "Select the source of this alert"
+        '_help -> "Select the source of this alert",
+        Symbol("data-override-muting") -> Json.stringify(Json.toJson(providers.map(p => p.id -> p.overrideMuting).toMap))
       )
+
+      @b3.free('_class -> "hidden") {
+        <div class="alert alert-info">
+          This source overrides any mutes set up by the recipient
+        </div>
+      }
     }
 
     @b3.text(form("item.linkHref"),
@@ -81,4 +96,5 @@ data-hint="@audienceIndicatorHint"
     @tags.submitOrCancel(createOrUpdate, controllers.publish.routes.NotificationsController.list(publisher.id))
   </section>
 
+</div>
 </div>

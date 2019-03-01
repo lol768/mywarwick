@@ -15,7 +15,6 @@ class HomeControllerTest extends BaseSpec with MockitoSugar with Results with On
       val result = controller.index(FakeRequest())
       status(result) must be(200)
       contentAsString(result) must include("id=\"app-container\"")
-      contentAsString(result) must include("data-features=\"{&quot;news&quot;:false}\"")
     }
   }
 }

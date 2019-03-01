@@ -5,8 +5,6 @@ import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Provides, TypeLiteral}
 import org.quartz.Scheduler
 import play.api.libs.concurrent.AkkaGuiceSupport
-import services.FeaturesService
-import services.Features
 import services.elasticsearch.{ActivityESService, ActivityESServiceImpl}
 import services.dao.{AudienceLookupDao, TabulaAudienceLookupDao}
 import services.healthcheck._
@@ -37,8 +35,6 @@ class AppModule extends AbstractModule with AkkaGuiceSupport {
 
     // eagerly bind ActivityESService to ensure activity's template is set at first
     bind(classOf[ActivityESService]).to(classOf[ActivityESServiceImpl]).asEagerSingleton()
-
-    bind(classOf[Features]).toProvider(classOf[FeaturesService])
 
     bindHealthChecks()
   }

@@ -5,13 +5,16 @@ import Hyperlink from './Hyperlink';
 import * as dateFormats from '../../dateFormats';
 import AppIcon from './AppIcon';
 import wrapKeyboardSelect from '../../keyboard-nav';
+import { Mute, ChevronDown } from '../FA';
 
 class ActivityItem extends React.PureComponent {
   static propTypes = {
     provider: PropTypes.string.isRequired,
     providerDisplayName: PropTypes.string,
+    providerOverrideMuting: PropTypes.bool.isRequired,
     title: PropTypes.string.isRequired,
     text: PropTypes.string,
+    textAsHtml: PropTypes.string,
     date: PropTypes.string.isRequired,
     url: PropTypes.string,
     unread: PropTypes.bool,
@@ -45,7 +48,7 @@ class ActivityItem extends React.PureComponent {
       <div className={ classNames }>
         { (this.props.muteable) ?
           <div className="muting" onClick={ this.onMuting } onKeyUp={ this.onMuting } role="button" tabIndex={0}>
-            <i className="fa fa-chevron-down" />
+            <Mute /><ChevronDown size="xs" />
           </div> : null
         }
         <Hyperlink href={ this.props.url }>
@@ -59,7 +62,10 @@ class ActivityItem extends React.PureComponent {
                   { this.props.title }
                   { this.props.url && <i className="fa fa-external-link activity-item__link-indicator" /> }
                 </div>
-                <div className="activity-item__text">{ this.props.text }</div>
+                { (this.props.textAsHtml) ?
+                  <div className="activity-item__text" dangerouslySetInnerHTML={{ __html: this.props.textAsHtml }} /> : // eslint-disable-line react/no-danger
+                  (this.props.text) && <div className="activity-item__text">{this.props.text}</div>
+                }
 
                 <div className="activity-item__date">
                   { dateFormats.forActivity(this.props.date, this.props.grouped) }

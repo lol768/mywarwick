@@ -27,6 +27,14 @@ trait AnalyticsMeasurementService {
 
   def tracker(implicit request: RequestHeader, context: RequestContext): AnalyticsTracker
 
+  /**
+    * An anonymised version of the user identifier that a data processor (like Google)
+    * cannot reverse back to the usercode. Typically a salted hash.
+    *
+    * Although data processors can't make the connection, we are allowed to so e.g. if
+    * we needed to remove all data for a usercode, we can run this to get the identifier
+    * and then remove all trace of that from GA using Google's tools.
+    */
   def getUserIdentifier(usercode: Usercode): String
 
   val trackingID: AnalyticsTrackingID

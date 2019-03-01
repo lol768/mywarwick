@@ -1,0 +1,17 @@
+@import system.RequestContext
+@(form: Form[EAPFeatureSave])(implicit messages: Messages, context: RequestContext)
+
+@implicitFieldConstructor = @{
+  b3.horizontal.fieldConstructor("col-md-3", "col-md-9")
+}
+
+@common.admin("Administration", "Early Access Program features", "Create") {
+
+  @b3.form(controllers.admin.routes.EAPFeaturesController.create()) {
+
+    @views.html.admin.eap.contentForm(form)
+
+    @tags.submitOrCancel("Create", controllers.admin.routes.EAPFeaturesController.index())
+  }
+
+}

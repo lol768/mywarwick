@@ -26,6 +26,7 @@ class WorkerActor @Inject()(
   log.debug("WorkerActor created")
 
   def receive = {
+
     case WorkAvailable =>
       log.debug("Checking for work")
       messaging.lockRecord() match {
@@ -41,7 +42,7 @@ class WorkerActor @Inject()(
               log.warning(s"Message failed to send: ${res.message}")
               messaging.failure(message)
             case Failure(ex) =>
-              log.error(s"Message-sending threw an exception", ex)
+              log.error(ex,"Message-sending threw an exception")
               messaging.failure(message)
           }
           processing.onComplete {

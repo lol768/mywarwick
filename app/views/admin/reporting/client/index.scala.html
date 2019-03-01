@@ -1,0 +1,42 @@
+@import controllers.admin.reporting.DatedReportFormData
+@import system.RequestContext
+
+@(
+    start: Long,
+    end: Long,
+    cacheLife: String,
+    formData: Form[DatedReportFormData]
+)(
+    implicit messages: Messages,
+    context: RequestContext
+)
+@implicitFieldConstructor = @{
+  b3.horizontal.fieldConstructor("col-md-2", "col-md-10")
+}
+
+@common.admin("Administration", "Reports", "Client Report") {
+  <div class="clearfix">
+    @b3.form(controllers.admin.reporting.routes.ClientReportingController.formSubmit) {
+
+      @context.csrfHelper.formField
+
+      @tags.datetimePicker(formData("fromDate"), '_label -> "From")
+
+      @tags.datetimePicker(formData("toDate"), '_label -> "To")
+
+      @b3.submit('class -> "btn btn-primary", '_help -> "This is a slow operation. Expect to wait several minutes for the report, depending on its date range.") { Search }
+      
+      @if(formData.hasGlobalErrors) {
+          <div class="alert alert-danger col-md-offset-2 col-md-10">
+            @for(error <- formData.globalErrors) {
+              <p>@error.message</p>
+            }
+          </p>
+      }
+    }
+  </div>
+
+  <div class="client-report" data-start="@start" data-end="@end" data-cachelife="@cacheLife">
+    <p class="alert alert-info"><i class="fa fa-fw fa-cog fa-spin"></i> Building report, please wait...</p> 
+  </div>
+}

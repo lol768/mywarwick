@@ -1,7 +1,6 @@
 package services.dao
 
-import javax.inject.Inject
-
+import javax.inject.{Inject, Named}
 import com.google.inject.ImplementedBy
 import play.api.Mode.Dev
 import play.api.libs.json._
@@ -10,7 +9,7 @@ import play.api.{Configuration, Environment}
 import system.Logging
 import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration._
 
 case class DepartmentInfo(
@@ -35,9 +34,7 @@ class WsDepartmentInfoDao @Inject()(
   ws: WSClient,
   config: Configuration,
   environment: Environment
-) extends DepartmentInfoDao with Logging {
-
-  import system.ThreadPools.externalData
+)(implicit @Named("externalData") ec: ExecutionContext) extends DepartmentInfoDao with Logging {
 
   val factory = new SingularCacheEntryFactory[String, List[DepartmentInfo]] {
     override def shouldBeCached(value: List[DepartmentInfo]): Boolean = true

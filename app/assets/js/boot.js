@@ -16,9 +16,13 @@ function boot() {
         if (userData !== null) {
           setMethod('userInfo', userData);
         }
-        return import('./main').then(main =>
-          main.launch(userData),
-        );
+        return import(/* webpackChunkName: "main-import" */'./main')
+          .then(main =>
+            main.launch(userData),
+          ).catch((e) => {
+            log.error(e);
+            throw e;
+          });
       }
       // we are redirecting to SSO, so do nothing else.
       return null;

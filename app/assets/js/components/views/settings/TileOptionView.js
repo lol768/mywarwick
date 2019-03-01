@@ -120,8 +120,8 @@ export class TileOptionView extends React.PureComponent {
         key={ `${sectionName}:${possibleChoice.value}` }
         id={ `${sectionName}:${possibleChoice.value}` }
         value={ possibleChoice.value }
-        icon={tileOptions[sectionName].icon || tile.icon}
-        description={ possibleChoice.name ? possibleChoice.name : possibleChoice.value }
+        icon={ possibleChoice.icon || tileOptions[sectionName].icon || tile.icon }
+        description={ possibleChoice.name || possibleChoice.value }
         onClick={ this.onCheckboxClick }
         checked={ checked }
         name={ sectionName }
@@ -195,7 +195,7 @@ export class TileOptionView extends React.PureComponent {
 
         { _.flatMap(this.props.tileOptions, (tileOption, section) =>
           (<div key={ section }>
-            <p className="hint-text container-fluid">
+            <p className="text--hint container-fluid">
               { tileOption.description }
             </p>
             <div key={ section } className="list-group">

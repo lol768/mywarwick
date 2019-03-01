@@ -1,4 +1,4 @@
-export { default as agenda } from './AgendaTile';
+export { default as agenda } from './agenda/AgendaTile';
 export { default as count } from './CountTile';
 export { default as list } from './ListTile';
 export { default as coursework } from './CourseworkTile';
@@ -10,3 +10,7 @@ export { default as map } from './MapTile';
 export { default as workarea } from './WorkareaTile';
 export { default as account } from './AccountTile';
 export { default as mail } from './MailTile';
+export { default as calendar } from './O365CalendarTile';
+export { default as modules } from './ModulesTile';
+export { default as todo } from './ToDoTile';
+export { default as eap } from './EAPTile';

@@ -1,18 +1,18 @@
 package services
 
-import javax.inject.{Inject, Named}
-
 import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Named}
 import models.Audience
 import models.Audience.{LocationOptIn, _}
 import play.api.db.Database
 import play.api.libs.json.{JsValue, Json}
+import services.AudienceService._
 import services.dao._
 import system.Logging
 import warwick.sso._
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.Try
 
 @ImplementedBy(classOf[AudienceServiceImpl])
@@ -25,7 +25,12 @@ trait AudienceService {
 
   def audienceToJson(audience: Audience): JsValue
 
-  def validateUsers(usercodes: Set[Usercode]): Either[Set[Usercode], Set[Usercode]]
+  def validateUsers(input: Set[String]): Either[Set[String], Set[Usercode]]
+}
+
+object AudienceService {
+  // The number of users to validate in a single call to UserLookupService
+  val ValidateBatchSize = 100
 }
 
 class AudienceServiceImpl @Inject()(
@@ -35,9 +40,7 @@ class AudienceServiceImpl @Inject()(
   @Named("tabula") audienceLookupDao: AudienceLookupDao,
   db: Database,
   userLookupService: UserLookupService
-) extends AudienceService with Logging {
-
-  import system.ThreadPools.externalData
+)(implicit @Named("externalData") ec: ExecutionContext) extends AudienceService with Logging {
 
   override def resolve(audience: Audience): Try[Set[Usercode]] = {
     Await.ready(resolveFuture(audience), 30.seconds).value.get
@@ -71,6 +74,7 @@ class AudienceServiceImpl @Inject()(
         makeResult(resolveDepartmentGroup(code, subset), subset)
       )).map(_.flatten)
       case optIn: OptIn => makeResult(Future.successful(db.withConnection(implicit c => optInDao.getUsercodes(optIn))))
+      case ResidenceAudience(residence) => makeResult(audienceLookupDao.resolveResidence(residence))
     }
   }
 
@@ -151,7 +155,6 @@ class AudienceServiceImpl @Inject()(
   override def getAudience(audienceId: String): Audience =
     db.withConnection(implicit c => dao.getAudience(audienceId))
 
-
   override def audienceToJson(audience: Audience): JsValue = {
 
     def resolveStaffRelationship(agentId: UniversityID, checkedRelationships: Seq[String]): Future[JsValue] = {
@@ -212,7 +215,7 @@ class AudienceServiceImpl @Inject()(
       case ds: DepartmentSubset => ds match {
         case UndergradStudents.All | UndergradStudents.First | UndergradStudents.Second | UndergradStudents.Final  =>
           undergradSubsets :+= s"UndergradStudents:${ds.toString}"
-        case All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | AdminStaff =>
+        case All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | AdminStaff | Staff =>
           departmentSubsets :+= ds.toString
         case subset => matchDeptSubset(subset)
       }
@@ -221,7 +224,7 @@ class AudienceServiceImpl @Inject()(
         subsets.foreach {
           case subset@(UndergradStudents.All | UndergradStudents.First | UndergradStudents.Second | UndergradStudents.Final)  =>
             undergradSubsets :+= s"Dept:UndergradStudents:${subset.toString}"
-          case subset@(All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | AdminStaff) =>
+          case subset@(All | TeachingStaff | ResearchPostgrads | TaughtPostgrads | AdminStaff | Staff) =>
             departmentSubsets :+= s"Dept:${subset.entryName}"
           case subset => matchDeptSubset(subset)
         }
@@ -266,7 +269,7 @@ class AudienceServiceImpl @Inject()(
 
     val undergraduates =
       if (undergradSubsets.nonEmpty)
-        if (undergradSubsets.contains("all"))
+        if (undergradSubsets.contains(s"UndergradStudents:${UndergradStudents.All.toString}"))
           Json.obj("undergraduates" -> s"${if (department.isEmpty) "" else "Dept:"}UndergradStudents:All")
         else
           Json.obj("undergraduates" -> Json.obj("year" -> Json.obj(
@@ -318,42 +321,48 @@ class AudienceServiceImpl @Inject()(
     }
   }
 
-  override def validateUsers(inputUsercodes: Set[Usercode]): Either[Set[Usercode], Set[Usercode]] = {
-    def validateUsercodes(usercodes: Set[Usercode]): (Set[String], Set[String]) = {
-      val valid = userLookupService.getUsers(usercodes.toSeq).toOption.map(_.keys).getOrElse(Nil).map(_.string).toSet
-      val invalid = usercodes.map(_.string).diff(valid)
-      (valid, invalid)
+  override def validateUsers(input: Set[String]): Either[Set[String], Set[Usercode]] = {
+    // returns a tuple of (invalid input, valid usercodes)
+    def batchedValidate[A](all: Iterable[A], fn: Seq[A] => Try[Map[A, User]]): (Set[A], Set[Usercode]) = {
+      if (all.isEmpty) (Set(), Set())
+      else {
+        val valid = all.toSeq.grouped(ValidateBatchSize).toSeq.par.map(fn(_).getOrElse(Map())).reduce(_ ++ _)
+        val validInputs = valid.keys.toSet
+        val validUsercodes = valid.values.map(_.usercode).toSet
+        val invalidInputs = all.toSet.diff(validInputs)
+        (invalidInputs, validUsercodes)
+      }
     }
 
-    def validateUniIds(uniIds: Set[UniversityID]): (Set[String], Set[String]) = {
-      val valid = userLookupService.getUsers(uniIds.toSeq).toOption
-      val validUniIds: Set[String] = valid.map(_.keys).getOrElse(Nil).map(_.string).toSet
-      val validUsercodes = valid.map(_.values).getOrElse(Nil).map(_.usercode.string).toSet
-      val invalid = uniIds.map(_.string).diff(validUniIds)
-      (validUsercodes, invalid)
+    def validateUsercodes(usercodes: Set[Usercode]): (Set[String], Set[Usercode]) = {
+      val (invalid, valid) = batchedValidate(usercodes, userLookupService.getUsers)
+      (invalid.map(_.string), valid)
+    }
+
+    def validateUniIds(uniIds: Set[UniversityID]): (Set[String], Set[Usercode]) = {
+      val (invalidUniIds, validUsercodes) = batchedValidate[UniversityID](uniIds, userLookupService.getUsers(_, includeDisabled = true))
+      (invalidUniIds.map(_.string), validUsercodes)
     }
 
     // split codes into allDigits and not allDigits
-    val (ids, codes) = inputUsercodes.map(_.string).partition(_.forall(Character.isDigit))
+    val (ids, codes) = input.partition(_.forall(Character.isDigit))
 
     // run Usercode lookup for anything that isn't all digits
-    val (validUsercodes, invalidUsercodes) = validateUsercodes(codes.map(Usercode))
+    val (invalidUsercodes, validUsercodes) = validateUsercodes(codes.map(Usercode))
 
     // university ids mistyped as usercodes
     val (mistypedUniIds, badCodes) = invalidUsercodes.partition(_.matches("^u\\d.+"))
 
     // run lookup as UniversityIDs for anything that is allDigits
-    val (validCodesFromIds, invalidCodesFromIds) = validateUniIds((ids ++ mistypedUniIds.map(_.drop(1))).map(UniversityID))
+    val (invalidCodesFromIds, validCodesFromIds) = validateUniIds((ids ++ mistypedUniIds.map(_.drop(1))).map(UniversityID))
 
-    val allValid: Set[String] = validUsercodes ++ validCodesFromIds
+    val allValid: Set[Usercode] = validUsercodes ++ validCodesFromIds
 
     val allInvalid: Set[String] = invalidCodesFromIds ++ badCodes
 
-    if (allInvalid.isEmpty) {
-      Right(allValid.map(Usercode))
-    }
-    else {
-      Left(allInvalid.map(Usercode))
-    }
+    if (allInvalid.isEmpty)
+      Right(allValid)
+    else
+      Left(allInvalid)
   }
 }

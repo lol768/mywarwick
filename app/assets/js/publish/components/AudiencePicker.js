@@ -21,6 +21,7 @@ export class AudiencePicker extends React.PureComponent {
       faculty: PropTypes.string,
     })),
     deptSubsetOpts: PropTypes.object,
+    hallsOfResidence: PropTypes.object,
     locationOpts: PropTypes.object,
     audienceDidUpdate: PropTypes.func.isRequired,
   };
@@ -31,6 +32,7 @@ export class AudiencePicker extends React.PureComponent {
     departments: {},
     deptSubsetOpts: {},
     locationOpts: {},
+    hallsOfResidence: {},
   };
 
   constructor(props) {
@@ -143,7 +145,7 @@ export class AudiencePicker extends React.PureComponent {
             data-toggle="tooltip"
             data-placement="left"
             title="Users can select one or more locations to receive
-             alerts, or may choose not to specify any."
+             alerts, or may choose not to specify any"
           />
         </label>
         <RadioButton
@@ -179,7 +181,7 @@ export class AudiencePicker extends React.PureComponent {
   groupsInput() {
     const isPublic = this.isChecked('audience.universityWide');
     const deptSelect = Object.keys(this.props.departments).length > 1 ?
-      (<select
+      (<div className="dept-select"><select
         defaultValue={this.state.department === ELLIPSIS ? '' : this.state.department.code}
         name="audience.department"
         className="form-control"
@@ -191,7 +193,7 @@ export class AudiencePicker extends React.PureComponent {
         {_.map(this.props.departments, ({ name }, code) => (
           <option key={code} value={code}>{name}</option>
         ))}
-      </select>)
+      </select></div>)
       : (<input
         name="audience.department"
         value={Object.keys(this.props.departments)[0]}
@@ -201,6 +203,74 @@ export class AudiencePicker extends React.PureComponent {
 
     const prefixPath = text => `audience.${isPublic ? 'universityWide' : 'department'}${text}`;
     const prefixDeptSubset = text => `${isPublic ? '' : 'Dept:'}${text}`;
+
+    const hallsOfResidenceInput = (
+      <Checkbox
+        handleChange={this.handleChange}
+        isChecked={this.isChecked(prefixPath('.groups.hallsOfResidence'))}
+        label="Halls of residence"
+        value="hallsOfResidence"
+        formPath={prefixPath('.groups')}
+      >
+        {/*
+        disabled for now, as lookup all HOR uniId to usercode is too slow from cold
+        we may want to reenable this once TAB-6311 is deployed
+        <RadioButton
+          handleChange={this.handleChange}
+          isChecked={!this.isChecked(prefixPath('.groups.hallsOfResidence.hall'))}
+          label="All"
+          name="audience.audience[]"
+          value="hallsOfResidence:all"
+          formPath={prefixPath('.groups.hallsOfResidence')}
+        />
+        <RadioButton
+          handleChange={this.handleChange}
+          isChecked={this.isChecked(prefixPath('.groups.hallsOfResidence.hall'))}
+          label="Choose the hall"
+          value="hall"
+          formPath={prefixPath('.groups.hallsOfResidence')}
+        >
+        */}
+
+        {Object.keys(this.props.hallsOfResidence).map(key =>
+          (<Checkbox
+            key={key}
+            handleChange={this.handleChange}
+            isChecked={this.isChecked(prefixPath(`.groups.hallsOfResidence.hall.hallsOfResidence:${key}`))}
+            label={this.props.hallsOfResidence[key]}
+            name="audience.audience[]"
+            value={`hallsOfResidence:${key}`}
+            formPath={prefixPath('.groups.hallsOfResidence.hall')}
+          />),
+        )}
+
+        {/*
+        </RadioButton>
+        */}
+      </Checkbox>
+    );
+
+    const listOfUsercodes = (
+      <Checkbox
+        handleChange={this.handleChange}
+        isChecked={this.isChecked(prefixPath('.groups.listOfUsercodes'))}
+        label="A list of people I'll type or paste in"
+        value="listOfUsercodes"
+        formPath={prefixPath('.groups')}
+      >
+        <div>
+          <MultilineTextInput
+            className="listOfUsercodes"
+            formPath={prefixPath('.groups.listOfUsercodes')}
+            type="listOfUsercodes"
+            name="audience.audience[]"
+            handleChange={this.handleChange}
+            items={_.get(this.state, prefixPath('.groups.listOfUsercodes'), [])}
+            placeholder="Type in usercodes or university IDs, one per line"
+            valuePrefix={prefixDeptSubset('')}
+          />
+        </div>
+      </Checkbox>);
 
     const groups = (
       <div>
@@ -317,26 +387,8 @@ export class AudiencePicker extends React.PureComponent {
             placeholderText="Start typing the name or usercode of the staff member"
           />
         </Checkbox>
-        <Checkbox
-          handleChange={this.handleChange}
-          isChecked={this.isChecked(prefixPath('.groups.listOfUsercodes'))}
-          label="A list of people I'll type or paste in"
-          value="listOfUsercodes"
-          formPath={prefixPath('.groups')}
-        >
-          <div>
-            <MultilineTextInput
-              className="listOfUsercodes"
-              formPath={prefixPath('.groups.listOfUsercodes')}
-              type="listOfUsercodes"
-              name="audience.audience[]"
-              handleChange={this.handleChange}
-              items={_.get(this.state, prefixPath('.groups.listOfUsercodes'), [])}
-              placeholder="Type in usercodes or university IDs, one per line"
-              valuePrefix={prefixDeptSubset('')}
-            />
-          </div>
-        </Checkbox>
+        { this.state.department.code ? null : hallsOfResidenceInput }
+        { listOfUsercodes }
       </div>
     );
 
@@ -355,7 +407,6 @@ export class AudiencePicker extends React.PureComponent {
               name="audience.audience[]"
               formPath={prefixPath('')}
             />
-            { this.isTeachingDepartment() &&
             <RadioButton
               handleChange={this.handleChange}
               isChecked={this.isChecked(prefixPath('.groups'))}
@@ -364,8 +415,8 @@ export class AudiencePicker extends React.PureComponent {
               value="groups"
               formPath={prefixPath('')}
             >
-              {groups}
-            </RadioButton> }
+              { this.isTeachingDepartment() ? groups : listOfUsercodes }
+            </RadioButton>
           </div>
       } </div>
     );

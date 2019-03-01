@@ -7,6 +7,7 @@ import * as user from './state/user';
 import * as analytics from './analytics';
 import { fetchUserInfo, handleRedirects } from './userinfo-base';
 import { hasAuthoritativeAuthenticatedUser } from './state';
+import log from 'loglevel';
 
 export { fetchUserInfo } from './userinfo-base';
 
@@ -15,6 +16,7 @@ export function receiveUserInfo(response) {
     .then(([data, handled]) => {
       if (!handled) {
         store.dispatch(user.receiveSSOLinks(data.links));
+        store.dispatch(user.receiveFeatures(data.features));
 
         const analyticsData = data.user.analytics;
         if (analyticsData !== undefined) {
@@ -31,6 +33,8 @@ export function receiveUserInfo(response) {
           if (!data.user.authenticated) {
             window.location = data.links.login;
           }
+        }).catch((e) => {
+          log.error('Error receiving user data', e);
         });
       }
     })

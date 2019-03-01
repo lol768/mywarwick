@@ -24,11 +24,13 @@ import ColourSchemesView from './views/settings/ColourSchemesView';
 import TileOptionView from './views/settings/TileOptionView';
 import PostTourView from './views/PostTourView';
 import TimetableAlarmsView from './views/settings/TimetableAlarmsView';
+import DoNotDisturbView from './views/settings/DoNotDisturbView';
 import {
   ActivityStreamFilterOptionView,
   NotificationStreamFilterOptionView,
 } from './views/settings/StreamFilterOptionView';
 import SmsNotificationsView from './views/settings/SmsNotificationsView';
+import EAPPreferenceView from './views/settings/EAPPreferenceView';
 
 export const Routes = {
   EDIT: 'edit',
@@ -52,6 +54,8 @@ export const Routes = {
     NOTIFICATION_FILTER: 'notificationfilter',
     SMS: 'sms',
     TIMETABLE_ALARMS: 'timetable_alarms',
+    DO_NOT_DISTURB: 'donotdisturb',
+    EAP: 'eap',
   },
   POST_TOUR: 'post_tour',
 };
@@ -124,6 +128,10 @@ RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}`] = {
   rendered: false,
   view: OptInSettingsView,
 };
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.DO_NOT_DISTURB}`] = {
+  rendered: false,
+  view: DoNotDisturbView,
+};
 RouteViews[`/${Routes.POST_TOUR}`] = {
   rendered: false,
   view: PostTourView,
@@ -143,6 +151,10 @@ RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.SMS}`] = {
 RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TIMETABLE_ALARMS}`] = {
   rendered: false,
   view: TimetableAlarmsView,
+};
+RouteViews[`/${Routes.SETTINGS}/${Routes.SettingsRoutes.EAP}`] = {
+  rendered: false,
+  view: EAPPreferenceView,
 };
 
 class AppRoot extends React.Component {
@@ -167,7 +179,6 @@ class AppRoot extends React.Component {
       options: PropTypes.object.isRequired,
     }).isRequired,
     dispatch: PropTypes.func.isRequired,
-    features: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -244,10 +255,7 @@ class AppRoot extends React.Component {
           {
             React.createElement(
               args.view,
-              Object.assign(
-                {},
-                (args.extraProps || {}),
-              ),
+              args.extraProps || {},
             )
           }
         </Visible> : null

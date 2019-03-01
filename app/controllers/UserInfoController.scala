@@ -1,12 +1,10 @@
 package controllers
 
-import javax.inject.{Inject, Singleton}
-
+import javax.inject.{Inject, Named, Singleton}
 import play.api.libs.json.{JsObject, JsString, Json}
-import play.api.mvc.{Action, Cookie, DiscardingCookie}
-import services.analytics.AnalyticsMeasurementService
+import play.api.mvc.{Cookie, DiscardingCookie}
 import services.{PhotoService, UserInitialisationService}
-import system.ThreadPools.externalData
+import services.analytics.AnalyticsMeasurementService
 import uk.ac.warwick.sso.client.SSOClientHandlerImpl.GLOBAL_LOGIN_COOKIE_NAME
 import uk.ac.warwick.sso.client.SSOToken.SSC_TICKET_TYPE
 import uk.ac.warwick.sso.client.cache.UserCache
@@ -14,7 +12,7 @@ import uk.ac.warwick.sso.client.{SSOConfiguration, SSOToken}
 import uk.ac.warwick.util.core.StringUtils
 import warwick.sso.{LoginContext, SSOClient}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * This is some weird SSO stuff for My Warwick, while we're still working out
@@ -30,7 +28,7 @@ class UserInfoController @Inject()(
   userInitialisationService: UserInitialisationService,
   photoService: PhotoService,
   measurementService: AnalyticsMeasurementService
-) extends MyController {
+)(implicit @Named("externalData") ec: ExecutionContext) extends MyController {
 
   val SSC_NAME = ssoConfig.getString("shire.sscookie.name")
   val SSC_PATH = ssoConfig.getString("shire.sscookie.path")
@@ -70,6 +68,7 @@ class UserInfoController @Inject()(
       Ok(Json.obj(
         "refresh" -> (if (refresh) loginUrl else false),
         "user" -> augmentedInfo,
+        "features"-> requestContext.features,
         "links" -> Json.obj(
           "login" -> links.getPermissionDeniedLink(request.context.user.nonEmpty),
           "logout" -> logoutUrl

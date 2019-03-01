@@ -11,6 +11,10 @@ const fs = require('fs');
  * Adds a .md5 file containing that hash
  * Adds a HASH-FILENAME copy of the original file.
  *
+ * However if it detects a filename that already has a hash, it will use that
+ * hash and put it in the .md5 hash file (it doesn't matter if it is actually MD5).
+ * This is useful as Webpack likes to generate its own hashes.
+ *
  * Logic based on the gulp-play-assets module.
  */
 
@@ -22,8 +26,9 @@ function apply(options, compiler) {
     for (const filename in assets) {
       if (assets.hasOwnProperty(filename)) {
 
-        const dynamicChunk = filename.match(/^([a-z0-9]+)-([0-9]+.js(\.map)?)$/)
+        const dynamicChunk = filename.match(/^([a-f0-9]{16,})-([\w\-]+.js(\.map)?)$/)
         if (dynamicChunk) {
+          //console.log('Found dynamic chunk', dynamicChunk);
           // This is a dynamic chunk that uses [chunkhash]
           // in its filename already - so reverse engineer the .md5 file
           // to allow the Gulp script to find the fingerprinted version.

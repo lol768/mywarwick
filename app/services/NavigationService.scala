@@ -1,13 +1,13 @@
 package services
 
 import javax.inject.{Inject, Singleton}
-
 import com.google.inject.ImplementedBy
 import controllers.admin.{routes => adminRoutes}
 import controllers.admin.publishers.{routes => adminPublishersRoutes}
+import controllers.admin.reporting.{routes => adminReportingRoutes}
 import controllers.publish.{routes => publishRoutes}
 import models.publishing.Ability.{ViewNews, ViewNotifications}
-import models.publishing.Publisher
+import models.publishing.{Ability, Publisher}
 import play.api.mvc.Call
 import system.Roles.Sysadmin
 import warwick.sso.{LoginContext, RoleService, User}
@@ -76,17 +76,16 @@ class NavigationServiceImpl @Inject()(
 
   def navigationForPublisher(publisher: Publisher, user: User): Navigation = {
     val publishingRole = publisherService.getRoleForUser(publisher.id, user.usercode)
+    val features = featuresService.get(Option(user))
 
-    val children:Seq[NavigationPage] = (if ( featuresService.get.news) {
-      Seq(
-        ViewNews -> NavigationPage("News", publishRoutes.NewsController.list(publisher.id)),
+    val children: Seq[NavigationPage] = Seq(
+        if (features.news) ViewNews -> NavigationPage("News", publishRoutes.NewsController.list(publisher.id)) else null,
         ViewNotifications -> NavigationPage("Alerts", publishRoutes.NotificationsController.list(publisher.id))
       )
-    } else {
-      Seq(
-        ViewNotifications -> NavigationPage("Alerts", publishRoutes.NotificationsController.list(publisher.id))
-      )
-    }).collect { case (ability, page) if publishingRole.can(ability) => page }
+      .filterNot { _ == null }
+      .collect {
+        case (ability, page) if publishingRole.can(ability) => page
+      }
 
     NavigationPage(publisher.name, publishRoutes.PublishersController.show(publisher.id), children)
   }
@@ -97,9 +96,12 @@ class NavigationServiceImpl @Inject()(
       NavigationPage("Masquerade", adminRoutes.MasqueradeController.masquerade()),
       NavigationPage("Cluster State", adminRoutes.ClusterStateController.html()),
       NavigationPage("ElasticSearch", controllers.admin.elasticsearch.routes.ActivityToESController.index()),
-      NavigationPage("Reports", controllers.admin.reporting.routes.HomeController.index(), Seq(
-        NavigationPage("Preferences Report", controllers.admin.reporting.routes.PreferencesReportingController.index()),
-        NavigationPage("Activity Report", controllers.admin.reporting.routes.ActivityReportingController.index())
+      NavigationPage("EAP Features", adminRoutes.EAPFeaturesController.index()),
+      NavigationPage("Reports", adminReportingRoutes.HomeController.index(), Seq(
+        NavigationPage("Preferences Report", adminReportingRoutes.PreferencesReportingController.index()),
+        NavigationPage("Activity Report", adminReportingRoutes.ActivityReportingController.index()),
+        NavigationPage("EAP Report", adminReportingRoutes.EAPReportingController.index()),
+        NavigationPage("Client Report", adminReportingRoutes.ClientReportingController.index())
       ))
     ))
   }

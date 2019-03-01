@@ -6,7 +6,7 @@ import moment from 'moment';
 
 describe('ActivityView', () => {
 
-  it('only shows Older if it\'s not the only group', () => {
+  it('only shows Older if it’s not the only group', () => {
     const ungroupedProps = {
       activities: mergeNotifications({}, [
           {

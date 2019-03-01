@@ -1,14 +1,16 @@
 package controllers
 
 import com.google.inject.{Inject, Singleton}
+import javax.inject.Named
 import org.apache.http.client.methods.HttpGet
 import play.api.Configuration
 import play.api.libs.ws.{InMemoryBody, WSClient}
 import play.api.mvc.{Action, RawBuffer}
 import services.SecurityService
-import system.ThreadPools.externalData
 import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplicationsManager}
 import warwick.sso.User
+
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class SearchController @Inject()(
@@ -16,7 +18,7 @@ class SearchController @Inject()(
   ws: WSClient,
   trustedApplicationsManager: TrustedApplicationsManager,
   configuration: Configuration
-) extends MyController {
+)(implicit @Named("externalData") ec: ExecutionContext) extends MyController {
 
   import securityService._
 

@@ -37,6 +37,7 @@ class NotificationsView extends HideableView {
     notificationPermission: PropTypes.string,
     numberToShow: PropTypes.number.isRequired,
     isFiltered: PropTypes.bool.isRequired,
+    isOnline: PropTypes.bool.isRequired,
   };
 
   static defaultProps = {
@@ -46,19 +47,19 @@ class NotificationsView extends HideableView {
   static renderEmpty(isFiltered) {
     if (isFiltered) {
       return (
-        <EmptyState lead="You don't have any alerts to display.">
+        <EmptyState lead="You don't have any alerts to display">
           <p>
-            There may be others hidden due to your Alert filter settings.
+            There may be others hidden due to your Alert filter settings
           </p>
         </EmptyState>
       );
     }
     return (
-      <EmptyState lead="You don't have any alerts yet.">
+      <EmptyState lead="You don't have any alerts yet">
         <p>
           When there are things that need your attention &ndash;
           coursework due in, library books due back, that kind of thing &ndash;
-          you&apos;ll see those alerts here.
+          you’ll see those alerts here
         </p>
       </EmptyState>
     );
@@ -185,6 +186,7 @@ class NotificationsView extends HideableView {
           onMutingSave={ this.onMutingSave(activity) }
           activityType={ activity.type }
           activityTypeDisplayName={ activity.typeDisplayName }
+          isOnline={ this.props.isOnline }
         />
       );
     }
@@ -199,7 +201,7 @@ class NotificationsView extends HideableView {
           key={ n.id }
           grouped={ shouldBeGrouped }
           unread={ this.isUnread(n) }
-          muteable
+          muteable={ !n.providerOverrideMuting }
           onMuting={ this.onMuting }
           {...n}
         />),
@@ -236,7 +238,7 @@ class NotificationsView extends HideableView {
               hasMore={ hasMore }
               onLoadMore={ this.loadMore }
               showLoading
-              endOfListPhrase="There are no older alerts."
+              endOfListPhrase="There are no older alerts"
             >
               <GroupedList groupBy={ shouldBeGrouped ? groupItemsByDate : undefined }>
                 { notificationItems }
@@ -261,6 +263,7 @@ function select(state) {
     olderItemsOnServer: state.notifications.olderItemsOnServer,
     notificationPermission: state.device.notificationPermission,
     numberToShow: state.notifications.numberToShow,
+    isOnline: state.device.isOnline,
   };
 }
 

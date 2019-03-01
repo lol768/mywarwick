@@ -19,7 +19,7 @@
             .getOrElse(activity.title)
       }</p>
       @if(activity.text.nonEmpty) {
-        <p>@Html(MarkdownRenderer.renderMarkdown(activity.text.get))</p>
+        @Markdown(activity.text.get)
       }
     </blockquote>
     <hr>

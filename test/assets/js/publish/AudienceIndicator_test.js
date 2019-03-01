@@ -6,8 +6,7 @@ describe('AudienceIndicator', () => {
 
   const baseProps = {
     hint: {
-      text: "the ultimate hint text, go figure.",
-      link: "https://warwick.ac.uk",
+      isNews: false,
     },
   };
 
@@ -41,23 +40,26 @@ describe('AudienceIndicator', () => {
         },
       },
     }} />);
-    expect(render.html()).to.contain('the ultimate hint text, go figure. ');
-    expect(render.html()).to.contain("\<a href=\"https://warwick.ac.uk\" target=\"_blank\"\>More info…\<\/a\>");
+    expect(render.html()).to.contain('Everyone in School of Bodybuilding');
   });
 
-  it('renders hint block without link properly', () => {
+  it('updates audience component list', () => {
     const render = enzyme.shallow(<AudienceIndicator {...{
-      hint: {
-        text: "the ultimate hint text, go figure.",
-      },
+      ...baseProps,
       audienceComponents: {
         department: { name: 'School of Bodybuilding' },
         audience: {
-          department: { 'Dept:All': undefined }
+          department: { groups: {'Dept:Staff': undefined, 'Dept:TaughtPostgrads': undefined} }
         },
       },
     }} />);
-    expect(render.html()).to.contain('the ultimate hint text, go figure.');
+    expect(render.html()).to.contain('All Staff in School of Bodybuilding');
+    expect(render.html()).to.contain('All Taught Postgrads in School of Bodybuilding');
+    expect(render.html()).to.not.contain('All Research Postgrads in School of Bodybuilding');
+
+    expect(render.setProps({ audienceComponents: { department: { name: 'School of Bodybuilding' }, audience: { department: { groups: {'Dept:ResearchPostgrads': undefined}}}}})
+      .html()).to.contain('All Research Postgrads in School of Bodybuilding');
+
   });
 
   it('handles \'everyone in department\' case', () => {

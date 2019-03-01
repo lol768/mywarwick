@@ -15,14 +15,16 @@ case class ProviderRender(
   name: Option[String],
   icon: Option[String],
   colour: Option[String],
-  sendEmail: Boolean
+  sendEmail: Boolean,
+  overrideMuting: Boolean
 )
 
 object ProviderRender {
   def toActivityProvider(providerRender: ProviderRender) = ActivityProvider(
     providerRender.id,
     providerRender.sendEmail,
-    providerRender.name
+    providerRender.name,
+    overrideMuting = providerRender.overrideMuting
   )
 }
 
@@ -30,7 +32,8 @@ case class ProviderSave(
   name: Option[String],
   icon: Option[String],
   colour: Option[String],
-  sendEmail: Boolean
+  sendEmail: Boolean,
+  overrideMuting: Boolean
 )
 
 object PublisherService {

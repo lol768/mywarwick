@@ -74,6 +74,10 @@ global.shallowAtMoment = function(component, now = FROZEN_IN_TIME) {
   return atMoment(() => enzyme.shallow(component), now);
 };
 
+global.mountAtMoment = function(component, now = FROZEN_IN_TIME) {
+  return atMoment(() => enzyme.mount(component), now);
+};
+
 /**
  * Recursively call props.children[i] in accordance with path param
  *

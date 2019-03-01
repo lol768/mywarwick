@@ -1,5 +1,6 @@
 package controllers.publish
 
+import controllers.MockFeaturesService
 import helpers.{BaseSpec, Fixtures, MinimalAppPerSuite, OneStartAppPerSuite}
 import models.Audience.Staff
 import models.publishing.PublishingRole.NewsManager
@@ -71,6 +72,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with Mi
     override val navigationService = new MockNavigationService()
     override val ssoClient: MockSSOClient = mockSSOClient
     override val csrfPageHelperFactory: CSRFPageHelperFactory = mockCsrfPageHelperFactory
+    override val features = new MockFeaturesService
 
     setControllerComponents(get[ControllerComponents])
   }
@@ -192,7 +194,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with Mi
 
       val result = call(newsController.create("xyz", submitted = true), FakeRequest("POST", "/").withFormUrlEncodedBody(data: _*))
 
-      contentAsString(result) must include("You do not have the required permissions to publish to that audience.")
+      contentAsString(result) must include("You do not have the required permissions to publish to that audience")
     }
 
     "do nothing unless submitted" in {
@@ -226,7 +228,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with Mi
       val result = call(newsController.updateForm("xyz", "news"), FakeRequest())
 
       status(result) must be(NOT_FOUND)
-      contentAsString(result) must include("Sorry, there's nothing at this URL.")
+      contentAsString(result) must include("Sorry, there's nothing at this URL")
     }
 
     "return Not Found if the news item does not belong to the requested publisher" in {
@@ -238,7 +240,7 @@ class NewsControllerTest extends BaseSpec with MockitoSugar with Results with Mi
       val result = call(newsController.updateForm("xyz", "news"), FakeRequest())
 
       status(result) must be(NOT_FOUND)
-      contentAsString(result) must include("Sorry, there's nothing at this URL.")
+      contentAsString(result) must include("Sorry, there's nothing at this URL")
     }
 
     "display the update form" in {

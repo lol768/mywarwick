@@ -1,11 +1,12 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.Configuration
 import play.api.mvc._
 import services.analytics.{AnalyticsMeasurementService, AnalyticsTrackingID}
 import system.AppMetrics
+
+import scala.concurrent.ExecutionContext
 
 case class SearchRootUrl(string: String)
 
@@ -13,8 +14,9 @@ case class SearchRootUrl(string: String)
 class HomeController @Inject()(
   metrics: AppMetrics,
   configuration: Configuration,
-  measurementService: AnalyticsMeasurementService
-) extends MyController {
+  measurementService: AnalyticsMeasurementService,
+  assets: Assets
+)(implicit executionContext: ExecutionContext) extends MyController {
 
   implicit val analyticsTrackingId: Option[AnalyticsTrackingID] = Some(measurementService.trackingID)
 
@@ -34,5 +36,10 @@ class HomeController @Inject()(
 
   def redirectToPath(path: String, status: Int = MOVED_PERMANENTLY) = Action { implicit request =>
     Redirect(s"/${path.replaceFirst("^/", "")}", status)
+  }
+
+  def serviceWorker: Action[AnyContent] = Action.async(parse.default) { implicit request =>
+    assets.at(path="/public", file="service-worker.js")(request)
+      .map(_.withHeaders("Expires" -> "0"))
   }
 }

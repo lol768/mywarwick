@@ -228,21 +228,29 @@ describe('AudiencePicker', () => {
     expect(shallow.find('.list-group').at(1).find(RadioButton).at(1).prop('isChecked')).to.eql(true);
   });
 
-  it('only displays \'groups\' ui for teaching departments', () => {
+  it('only displays \'listofUsercodes\' group for non-teaching departments', () => {
     const props = {
       isGod: false,
       departments: {
         MU: { name: 'Agriculture Department', faculty: 'X' }, // faculty:X indicates non-teaching dept
+      },
+      formData : {
+        audience: { department: { groups: { listOfUsercodes: [] } } },
+        department: 'MU'
       },
       audienceDidUpdate: () => {},
     };
 
     const mounted = enzyme.mount(<AudiencePicker {...props} />,  { context });
 
-    expect(mounted.find('.list-group').first().find(RadioButton).length).to.eql(1);
+    expect(mounted.find('.list-group').first().find(RadioButton).length).to.eql(2);
+    expect(mounted.find('.list-group').first().find(RadioButton).at(1).props().label).to.contain('Groups in Agriculture Department');
+    expect(mounted.find('.list-group').first().find(RadioButton).at(1).find(Checkbox).props().label).to.contain('A list of people I\'ll type or paste in');
+
     mounted.setState({ department: { code: 'FU', name: 'Fun Department', faculty: 'Arts' } });
     expect(mounted.find('.list-group').first().find(RadioButton).length).to.eql(2);
     expect(mounted.find('.list-group').first().find(RadioButton).at(1).props().label).to.contain('Groups in Fun Department');
+    expect(mounted.find('.list-group').first().find(RadioButton).at(1).find(Checkbox)).to.have.length(5);
   });
 
   it('displays undergraduate group subsets', () => {

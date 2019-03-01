@@ -1,6 +1,5 @@
-@import warwick.sso.{AuthenticatedRequest, MasqueradeController}
 @import system.RequestContext
-@import views.html.helper.CSRF
+@import warwick.sso.{AuthenticatedRequest, MasqueradeController}
 @()(implicit request: AuthenticatedRequest[_], context: RequestContext)
 
 @common.admin("Masquerade") {
@@ -11,7 +10,7 @@
       @request.context.user.get.name.full.get
       (@request.context.user.get.usercode.string).
     </p>
-    <form action="/sso/unmask" method="post">
+    <form action="@warwick.sso.routes.MasqueradeController.unmask()" method="post">
       @context.csrfHelper.formField
       <p>
         <button class="btn btn-default">Unmask</button>
@@ -26,7 +25,7 @@
 
   <p>Masquerading allows you to see the site exactly as another user would see it.</p>
 
-  <form action="/sso/masquerade" method="post">
+  <form action="@warwick.sso.routes.MasqueradeController.masquerade()" method="post">
     @context.csrfHelper.formField
     <div class="input-group" style="max-width: 300px">
       <input type="text" class="form-control flexi-picker" data-include-groups="false" data-include-emails="false" name="usercode" placeholder="Type a usercode" autofocus autocomplete="off">

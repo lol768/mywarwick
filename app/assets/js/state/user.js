@@ -1,4 +1,4 @@
-import localforage from 'localforage';
+import localforage from '../localdata';
 import log from 'loglevel';
 import _ from 'lodash-es';
 
@@ -6,6 +6,7 @@ export const USER_LOAD = 'USER_LOAD';
 export const USER_RECEIVE = 'USER_RECEIVE';
 export const USER_CLEAR = 'USER_CLEAR';
 export const SSO_LINKS_RECEIVE = 'SSO_LINKS_RECEIVE';
+export const FEATURES_RECEIVE = 'FEATURES_RECEIVE';
 
 const initialState = {
   data: {
@@ -17,6 +18,7 @@ const initialState = {
     login: null,
     logout: null,
   },
+  features: {},
 };
 
 export function reducer(state = initialState, action) {
@@ -42,6 +44,10 @@ export function reducer(state = initialState, action) {
       if (_.isEqual(state.links, action.links)) return state;
       return { ...state,
         links: action.links,
+      };
+    case FEATURES_RECEIVE:
+      return { ...state,
+        features: action.features,
       };
     default:
       return state;
@@ -69,6 +75,13 @@ export function receiveSSOLinks(links) {
   };
 }
 
+export function receiveFeatures(features) {
+  return {
+    type: FEATURES_RECEIVE,
+    features,
+  };
+}
+
 export function loadUserFromLocalStorage(dispatch) {
   return localforage.getItem('user')
     .then((user) => {
@@ -91,17 +104,22 @@ function clearUserData() {
 
 
 export function userReceive(currentUser) {
+  function setItemFailed(e) {
+    log.error('Failed to cache user', e);
+    return {}; // result is ignored below anyway.
+  }
+
   return dispatch =>
     // If we are a different user than we were before (incl. anonymous),
     // nuke the store, which also clears local storage
     loadUserFromLocalStorage(dispatch).then((previousUser) => {
       if (previousUser.usercode !== currentUser.usercode) {
-        dispatch(clearUserData())
-          .then(() => localforage.setItem('user', currentUser))
-          .then(() => dispatch(receiveUserIdentity(currentUser)));
-      } else {
-        localforage.setItem('user', currentUser)
+        return dispatch(clearUserData())
+          .then(() => localforage.setItem('user', currentUser).catch(setItemFailed))
           .then(() => dispatch(receiveUserIdentity(currentUser)));
       }
+      return localforage.setItem('user', currentUser)
+        .catch(setItemFailed)
+        .then(() => dispatch(receiveUserIdentity(currentUser)));
     });
 }

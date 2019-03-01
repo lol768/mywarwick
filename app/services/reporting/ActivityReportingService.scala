@@ -1,22 +1,22 @@
 package services.reporting
 
-import javax.inject.Inject
-
+import javax.inject.{Inject, Named}
 import com.google.inject.ImplementedBy
 import models.ActivityProvider
 import org.joda.time.Interval
 import play.api.db.{Database, NamedDatabase}
 import services.ProviderRender
 import services.dao.PublisherDao
-import services.elasticsearch.{ActivityESSearchQuery, ActivityESService}
+import services.elasticsearch.ActivityESSearch.CountQueryResponse
+import services.elasticsearch.{ActivityESSearch, ActivityESService}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[ActivityReportingServiceImpl])
 trait ActivityReportingService {
-  type ProviderCounts = Seq[(ActivityProvider, Int)]
+  type ProviderCounts = Seq[(ActivityProvider, CountQueryResponse)]
 
-  def alertsCountByProvider(provider: ActivityProvider, interval: Interval): Future[Int]
+  def alertsCountByProvider(provider: ActivityProvider, interval: Interval): Future[CountQueryResponse]
 
   def alertsCountByProviders(providers: Map[ActivityProvider, Interval]): Future[ProviderCounts]
 
@@ -32,10 +32,10 @@ class ActivityReportingServiceImpl @Inject()(
   activityESService: ActivityESService,
   publisherDao: PublisherDao,
   @NamedDatabase("default") db: Database
-) extends ActivityReportingService {
+)(implicit @Named("elastic") ec: ExecutionContext) extends ActivityReportingService {
 
-  override def alertsCountByProvider(provider: ActivityProvider, interval: Interval) = {
-    val query = ActivityESSearchQuery(
+  override def alertsCountByProvider(provider: ActivityProvider, interval: Interval): Future[CountQueryResponse] = {
+    val query = ActivityESSearch.SearchQuery(
       provider_id = Some(provider.id),
       publish_at = Some(interval),
       isAlert = Some(true)
@@ -44,14 +44,13 @@ class ActivityReportingServiceImpl @Inject()(
   }
 
   override def alertsCountByProviders(providers: Map[ActivityProvider, Interval]): Future[ProviderCounts] = {
-    import system.ThreadPools.elastic
     Future.sequence(providers.map {
       case (provider, interval) => (provider, this.alertsCountByProvider(provider, interval))
     }.map {
-      case (provider, futureCount) =>
+      case (provider, eventualCountQueryResponse) =>
         for {
-          count <- futureCount
-        } yield (provider, count)
+          countQueryResponse <- eventualCountQueryResponse
+        } yield (provider, countQueryResponse)
     }).map { result =>
       result.toSeq.sortBy {
         case (provider, _) => provider.displayName.getOrElse(provider.id)

@@ -5,6 +5,9 @@ import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
+import org.elasticsearch.script.Script
+import org.elasticsearch.search.aggregations.AggregationBuilders
+import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.joda.time.{DateTime, Interval}
 import play.api.libs.json.{JsValue, Json}
@@ -12,8 +15,8 @@ import play.api.libs.json.{JsValue, Json}
 trait ActivityESServiceHelper {
 
   val activityDocumentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
-  val messageSentDocumentType = "message_send"
-  val indexNameForMessageSent = "message_sent"
+  val deliveryReportDocumentType = "delivery_report"
+  val indexNameForDeliveryReport: String = deliveryReportDocumentType
   val indexNameForAlert = "alert"
   val indexNameForActivity = "activity"
   val separator = "_"
@@ -34,21 +37,32 @@ trait ActivityESServiceHelper {
     val api = "api"
     val created_at = "created_at"
     val created_by = "created_by"
+
+    val usercode = "usercode"
+    val usercode_keyword = s"$usercode.keyword"
+    val state = "state"
+    val state_keyword = s"$state.keyword"
+    val output = "output"
+    val distinct_users_agg = "distinct_users"
+
+    val timestamp = "@timestamp"
   }
 
   def dateSuffixString(date: DateTime = DateTime.now()) = s"$separator${date.toString("yyyy_MM")}"
 
   def indexNameToday(isNotification: Boolean = true): String = {
-    isNotification match {
-      case true => s"$indexNameForAlert${dateSuffixString()}"
-      case false => s"$indexNameForActivity${dateSuffixString()}"
+    if (isNotification) {
+      s"$indexNameForAlert${dateSuffixString()}"
+    } else {
+      s"$indexNameForActivity${dateSuffixString()}"
     }
   }
 
-  def indexNameForDateTime(dateTime: DateTime, isNotification: Boolean = true) = {
-    isNotification match {
-      case true => s"$indexNameForAlert${dateSuffixString(dateTime)}"
-      case false => s"$indexNameForActivity${dateSuffixString(dateTime)}"
+  def indexNameForDateTime(dateTime: DateTime, isNotification: Boolean = true): String = {
+    if (isNotification) {
+      s"$indexNameForAlert${dateSuffixString(dateTime)}"
+    } else {
+      s"$indexNameForActivity${dateSuffixString(dateTime)}"
     }
   }
 
@@ -60,9 +74,10 @@ trait ActivityESServiceHelper {
   }
 
   def indexNameForAllTime(isNotification: Boolean = true): String = {
-    isNotification match {
-      case true => s"$indexNameForAlert*"
-      case false => s"$indexNameForActivity*"
+    if (isNotification) {
+      s"$indexNameForAlert*"
+    } else {
+      s"$indexNameForActivity*"
     }
   }
 
@@ -106,98 +121,58 @@ trait ActivityESServiceHelper {
     builder
   }
 
-  val templatesForActivityAndAlert: JsValue = getTemplatesForActivityAndAlert()
-  val messageSentEsTemplates: JsValue = getMessageSentEsTemplates()
+  private val typeKeyword: JsValue = Json.obj("type" -> "keyword")
+  private val typeText: JsValue = Json.obj("type" -> "text")
+  private val typeDate: JsValue = Json.obj("type" -> "date")
+  private val propsBoilerplate: JsValue = Json.obj(
+    "type" -> "text",
+    "fields" -> Json.obj(
+      "keyword" -> Json.obj(
+        "type" -> "keyword",
+        "ignore_above" -> 256
+      )
+    )
+  )
 
-  def getTemplatesForActivityAndAlert(
-    indexNameForActivity: String = indexNameForActivity,
-    indexNameForAlert:String = indexNameForAlert
-  ): JsValue = Json.parse({
-    s"""
-      {
-        "index_patterns": ["$indexNameForActivity*", "$indexNameForAlert*"],
-        "mappings": {
-          "activity": {
-            "properties": {
-              "activity_id": {
-                "type": "keyword"
-              },
-              "activity_type": {
-                "type": "keyword"
-              },
-              "audience_components": {
-                "type": "keyword"
-              },
-              "provider_id": {
-                "type": "keyword"
-              },
-              "published_at": {
-                "type": "date"
-              },
-              "publisher": {
-                "type": "keyword"
-              },
-              "replaced_by": {
-                "type": "keyword"
-              },
-              "resolved_users": {
-                "type": "keyword"
-              },
-              "text": {
-                "type": "text"
-              },
-              "title": {
-                "type": "text",
-                "fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
-                }
-              },
-              "url": {
-                "type": "text",
-                "fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    """
-  })
+  val indexPatternsForActivityAndAlert: JsValue = Json.obj(
+    "index_patterns" -> Json.arr(s"$indexNameForActivity*", s"$indexNameForAlert*"),
+    "mappings" -> Json.obj(
+      "activity" -> Json.obj(
+        "properties"-> Json.obj(
+          "activity_id" -> typeKeyword,
+          "activity_type" -> typeKeyword,
+          "audience_components" -> typeKeyword,
+          "provider_id" -> typeKeyword,
+          "published_at" -> typeDate,
+          "publisher" -> typeKeyword,
+          "replaced_by" -> typeKeyword,
+          "resolved_users" -> typeKeyword,
+          "text" -> typeText,
+          "title" -> propsBoilerplate,
+          "url" -> propsBoilerplate
+        )
+      )
+    )
+  )
+  
+  val indexPatternsForDeliveryReports: JsValue = Json.obj(
+    "index_patterns" -> s"$indexNameForDeliveryReport*",
+    "mappings" -> Json.obj(
+      deliveryReportDocumentType -> Json.obj(
+        "properties" -> Json.obj(
+          "activity_id" -> propsBoilerplate,
+          "usercode" -> propsBoilerplate,
+          "output" -> propsBoilerplate,
+          "state" -> propsBoilerplate
+        )
+      )
+    )
+  )
+}
 
-  def getMessageSentEsTemplates(
-    indexNameForMessageSent: String = indexNameForMessageSent
-  ): JsValue = Json.parse({
-    s"""
-      {
-        "index_patterns": "$indexNameForMessageSent*",
-        "mappings": {
-          "message_sent": {
-            "properties": {
-              "activity_id": {
-                "type": "keyword"
-              },
-              "usercode": {
-                "type": "keyword"
-              },
-              "output": {
-                "type": "keyword"
-              },
-              "state": {
-                "type": "keyword"
-              }
-            }
-          }
-        }
-      }
-    """
-  })
+case class AlertDeliveryReport(successful: Option[Int])
+object AlertDeliveryReport {
+  def empty = AlertDeliveryReport(None)
 }
 
 object ActivityESServiceUpdateHelper extends ActivityESServiceHelper {
@@ -207,12 +182,24 @@ object ActivityESServiceUpdateHelper extends ActivityESServiceHelper {
 
 }
 
+object ActivityESServiceCountHelper extends ActivityESServiceHelper {
+
+  object Aggregation {
+    object TotalUserCount {
+      lazy val fieldName = "totalUserCount"
+      lazy val builder: SumAggregationBuilder = AggregationBuilders
+        .sum(fieldName)
+        .script(new Script("doc['resolved_users'].values.length"))
+    }
+  }
+}
+
 object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
 
-  def indexNameForActivitySearchQuery(query: ActivityESSearchQuery): String = {
-    val indexForInterval = query.publish_at match {
-      case i: Some[Interval] => i.map(partialIndexNameForInterval).getOrElse("*")
-      case _ => "*"
+  def indexNameForActivitySearchQuery(query: ActivityESSearch.SearchQuery): String = {
+    val indexForInterval: Seq[String] = query.publish_at match {
+      case i: Some[Interval] => i.map(partialIndexNameForInterval).getOrElse(Seq("*"))
+      case _ => Seq("*")
     }
 
     val indexForActivityType = query.isAlert match {
@@ -221,40 +208,35 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
     }
 
     (indexForActivityType, indexForInterval) match {
-      case ("*", "*") => "*"
-      case _ => s"$indexForActivityType$separator$indexForInterval"
+      case ("*", "*" :: Nil) => "*"
+      case _ => indexForInterval.map(index => s"$indexForActivityType$separator$index").mkString(",")
     }
   }
 
   def partialIndexNameForActivityType(isAlert: Boolean): String = {
-    isAlert match {
-      case true => indexNameForAlert
-      case false => indexNameForActivity
+    if (isAlert) {
+      indexNameForAlert
+    } else {
+      indexNameForActivity
     }
   }
 
-  def partialIndexNameForInterval(interval: Interval): String = {
-    val start = interval.getStart
-    val end = interval.getEnd
+  def partialIndexNameForInterval(interval: Interval): Seq[String] = {
+    val start: DateTime = interval.getStart
+    val isSameYear: Boolean = start.getYear == interval.getEnd.getYear
+    val isSameMonth: Boolean = start.getMonthOfYear == interval.getEnd.getMonthOfYear
 
-    val startYear = interval.getStart.getYear
-    val endYear = interval.getEnd.getYear
-
-    if (startYear == endYear) {
-      val sameYear = startYear
-      val startMonth = start.toString("MM")
-      val endMonth = end.toString("MM")
-
-      if (startMonth == endMonth) {
-        val sameMonth = startMonth
-        s"${sameYear}_${sameMonth}"
-      } else {
-        s"${sameYear}*"
-      }
+    if (isSameYear && isSameMonth) {
+      Seq(s"${start.getYear}_${start.toString("MM")}")
     } else {
-      "*"
+      val startMonth: DateTime = start.withDayOfMonth(1)
+      val endMonth: DateTime = interval.getEnd.withDayOfMonth(1)
+      Iterator.iterate(startMonth) {
+        _.plusMonths(1)
+      }.takeWhile(!_.isAfter(endMonth))
+        .map(d => s"${d.getYear}_${"%02d".format(d.getMonthOfYear)}")
+        .toSeq
     }
-
   }
 
   def makeSearchSourceBuilder(queryBuilder: QueryBuilder): SearchSourceBuilder = {
@@ -263,12 +245,12 @@ object ActivityESServiceSearchHelper extends ActivityESServiceHelper {
     searchSourceBuilder.query(queryBuilder)
   }
 
-  def makeBoolQueryBuilder(activityESSearchQuery: ActivityESSearchQuery): BoolQueryBuilder = {
+  def makeBoolQueryBuilder(activityESSearchQuery: ActivityESSearch.SearchQuery): BoolQueryBuilder = {
 
     val rootBoolQuery: BoolQueryBuilder = new BoolQueryBuilder()
 
-    import QueryBuilders._
     import ESFieldName._
+    import QueryBuilders._
 
     for (v <- activityESSearchQuery.activity_id) rootBoolQuery.must(termQuery(activity_id, v))
 

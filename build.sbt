@@ -30,9 +30,9 @@ lazy val root = (project in file("."))
   )
 
 // Versions of things for below
-val enumeratumVersion = "1.5.12"
+val enumeratumVersion = "1.5.13"
 val akkaVersion = "2.5.3"
-val playUtilsVersion = "1.10"
+val playUtilsVersion = "1.11"
 
 val appDeps = Seq(
   jdbc,
@@ -44,15 +44,16 @@ val appDeps = Seq(
   jodaForms,
   "com.typesafe.play" %% "anorm" % "2.5.3",
   "com.oracle" % "ojdbc7" % "12.1.0.2.0",
-  "uk.ac.warwick.sso" %% "sso-client-play" % "2.38",
+  "uk.ac.warwick.sso" %% "sso-client-play" % "2.60",
   "uk.ac.warwick.play-utils" %% "accesslog" % playUtilsVersion,
   "uk.ac.warwick.play-utils" %% "anorm" % playUtilsVersion,
   "uk.ac.warwick.play-utils" %% "objectstore" % playUtilsVersion,
-  "uk.ac.warwick.util" % "warwickutils-cache" % "20171206",
-  "uk.ac.warwick.util" % "warwickutils-core" % "20171206",
+  "uk.ac.warwick.util" % "warwickutils-cache" % "20180518",
+  "uk.ac.warwick.util" % "warwickutils-core" % "20180518",
   "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
   "com.typesafe.akka" %% "akka-cluster-tools" % akkaVersion,
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
+  "com.typesafe.akka" %% "akka-http" % "10.1.3",
   "com.kenshoo" %% "metrics-play" % "2.6.6_0.6.2",
   "com.typesafe.play" %% "play-mailer" % "6.0.1",
   "com.typesafe.play" %% "play-mailer-guice" % "6.0.1",
@@ -62,7 +63,7 @@ val appDeps = Seq(
   "com.google.inject.extensions" % "guice-multibindings" % "4.0",
   "com.adrianhurt" %% "play-bootstrap" % "1.2-P26-B3",
   "org.imgscalr" % "imgscalr-lib" % "4.2",
-  "com.github.mumoshu" %% "play2-memcached-play26" % "0.9.1",
+  "com.github.mumoshu" %% "play2-memcached-play26" % "0.9.3-warwick",
   "ch.qos.logback" % "logback-access" % "1.1.7",
 //  "com.google.guava" % "guava" % "22.0",
   "com.google.apis" % "google-api-services-analyticsreporting" % "v4-rev10-1.22.0"
@@ -72,10 +73,11 @@ val appDeps = Seq(
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play-json" % enumeratumVersion,
   "nl.martijndwars" % "web-push" % "2.0.0",
-  "com.vladsch.flexmark" % "flexmark" % "0.18.5",
-  "com.vladsch.flexmark" % "flexmark-ext-autolink" % "0.18.5",
+  "com.vladsch.flexmark" % "flexmark" % "0.32.18",
+  "com.vladsch.flexmark" % "flexmark-ext-autolink" % "0.32.18",
   "com.googlecode.libphonenumber" % "libphonenumber" % "8.6.0",
-  "org.elasticsearch.client" % "elasticsearch-rest-high-level-client" % "6.0.0"
+  "org.elasticsearch.client" % "elasticsearch-rest-high-level-client" % "6.0.0",
+  "org.apache.logging.log4j" % "log4j-to-slf4j" % "2.11.0"
 )
 
 val testDeps = Seq(
@@ -83,7 +85,7 @@ val testDeps = Seq(
   "org.scalatest" %% "scalatest" % "3.0.1",
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0",
   "com.typesafe.akka" %% "akka-testkit" % "2.4.19",
-  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.37",
+  "uk.ac.warwick.sso" %% "sso-client-play-testing" % "2.57",
   "org.eclipse.jetty" % "jetty-server" % "9.4.7.v20170914",
   "com.h2database" % "h2" % "1.4.196"
 ).map(_ % Test)
@@ -98,8 +100,10 @@ javaOptions in Test += "-Dlogger.resource=test-logging.xml"
 
 libraryDependencies ++= (appDeps ++ testDeps ++ funcTestDeps).map(_.excludeAll(
   ExclusionRule(organization = "commons-logging"),
-  // ehcache renamed ehcache-core, don't load in the old version
-  ExclusionRule(organization = "net.sf.ehcache", name = "ehcache")
+  // No EhCache please we're British
+  ExclusionRule(organization = "net.sf.ehcache"),
+  ExclusionRule(organization = "org.ehcache"),
+  ExclusionRule(organization = "ehcache")
 ))
 
 // https://bugs.elab.warwick.ac.uk/browse/SSO-1653
@@ -133,3 +137,4 @@ jacoco.settings
 
 parallelExecution in jacoco.Config := false
 
+TwirlKeys.templateImports ++= Seq("views.utils._")

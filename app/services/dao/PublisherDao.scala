@@ -45,56 +45,64 @@ trait PublisherDao {
 
   def updateProvider(publisherId: String, providerId: String, data: ProviderSave)(implicit c: Connection): Unit
 
+  def getProvider(providerId: String)(implicit c: Connection): Option[ProviderRender]
+
 }
 
 @Singleton
 class PublisherDaoImpl extends PublisherDao {
 
-  val publisherParser = str("id") ~ str("name") ~ get[Option[Int]]("max_recipients") map { case id ~ name ~ maxRecipients => Publisher(id, name, maxRecipients) }
-
-  val publisherPermissionParser = str("usercode") ~ str("role") map { case usercode ~ role => PublisherPermission(Usercode(usercode), PublishingRole.withName(role)) }
-
-  var providerParser =
-    str("id") ~
-      get[Option[String]]("display_name") ~
-      get[Option[String]]("icon") ~
-      get[Option[String]]("colour") ~
-      bool("send_email") map {
-      case id ~ name ~ icon ~ colour ~ sendEmail =>
-        ProviderRender(id, name, icon, colour, sendEmail)
+  val publisherParser: RowParser[Publisher] =
+    str("id") ~ str("name") ~ get[Option[Int]]("max_recipients") map {
+      case id ~ name ~ maxRecipients => Publisher(id, name, maxRecipients)
     }
 
-  override def getPublishersForUser(usercode: Usercode)(implicit c: Connection) =
+  val publisherPermissionParser: RowParser[PublisherPermission] = str("usercode") ~ str("role") map {
+    case usercode ~ role => PublisherPermission(Usercode(usercode), PublishingRole.withName(role))
+  }
+
+  var providerParser: RowParser[ProviderRender] =
+    str("id") ~
+    get[Option[String]]("display_name") ~
+    get[Option[String]]("icon") ~
+    get[Option[String]]("colour") ~
+    bool("send_email") ~
+    bool("override_muting") map {
+      case id ~ name ~ icon ~ colour ~ sendEmail ~ overrideMuting =>
+        ProviderRender(id, name, icon, colour, sendEmail, overrideMuting)
+    }
+
+  override def getPublishersForUser(usercode: Usercode)(implicit c: Connection): Seq[Publisher] =
     SQL"SELECT DISTINCT PUBLISHER.* FROM PUBLISHER JOIN PUBLISHER_PERMISSION ON PUBLISHER_PERMISSION.PUBLISHER_ID = PUBLISHER.ID WHERE USERCODE = ${usercode.string}"
       .executeQuery()
       .as(publisherParser.*)
 
-  override def all(implicit c: Connection) =
+  override def all(implicit c: Connection): Seq[Publisher] =
     SQL"SELECT * FROM PUBLISHER"
       .executeQuery()
       .as(publisherParser.*)
 
-  override def find(id: String)(implicit c: Connection) =
+  override def find(id: String)(implicit c: Connection): Option[Publisher] =
     SQL"SELECT * FROM PUBLISHER WHERE ID = $id"
       .executeQuery()
       .as(publisherParser.singleOpt)
 
-  override def getPublisherPermissions(publisherId: String, usercode: Usercode)(implicit c: Connection) =
+  override def getPublisherPermissions(publisherId: String, usercode: Usercode)(implicit c: Connection): Seq[PublisherPermission] =
     SQL"SELECT * FROM PUBLISHER_PERMISSION WHERE PUBLISHER_ID = $publisherId AND USERCODE = ${usercode.string}"
       .executeQuery()
       .as(publisherPermissionParser.*)
 
-  override def getAllPublisherPermissions(publisherId: String)(implicit c: Connection) =
+  override def getAllPublisherPermissions(publisherId: String)(implicit c: Connection): Seq[PublisherPermission] =
     SQL"SELECT * FROM PUBLISHER_PERMISSION WHERE PUBLISHER_ID = $publisherId"
       .executeQuery()
       .as(publisherPermissionParser.*)
 
-  override def getPublisherDepartments(publisherId: String)(implicit c: Connection) =
+  override def getPublisherDepartments(publisherId: String)(implicit c: Connection): Seq[String] =
     SQL"SELECT DEPARTMENT_CODE FROM PUBLISHER_DEPARTMENT WHERE PUBLISHER_ID = $publisherId"
       .executeQuery()
       .as(scalar[String].*)
 
-  override def getParentPublisherId(providerId: String)(implicit c: Connection) =
+  override def getParentPublisherId(providerId: String)(implicit c: Connection): Option[String] =
     SQL"SELECT p.id FROM publisher p JOIN provider pr ON p.id = pr.publisher_id WHERE pr.id = $providerId"
       .executeQuery()
       .as(scalar[String].singleOpt)
@@ -152,8 +160,8 @@ class PublisherDaoImpl extends PublisherDao {
   override def saveProvider(publisherId: String, providerId: String, data: ProviderSave)(implicit c: Connection): String = {
     import data._
     SQL"""
-      INSERT INTO PROVIDER (id, display_name, icon, colour, publisher_id, send_email)
-      VALUES ($providerId, $name, $icon, $colour, $publisherId, $sendEmail)
+      INSERT INTO PROVIDER (id, display_name, icon, colour, publisher_id, send_email, override_muting)
+      VALUES ($providerId, $name, $icon, $colour, $publisherId, $sendEmail, $overrideMuting)
     """.executeUpdate()
     providerId
   }
@@ -161,10 +169,13 @@ class PublisherDaoImpl extends PublisherDao {
   override def updateProvider(publisherId: String, providerId: String, data: ProviderSave)(implicit c: Connection): Unit = {
     import data._
     SQL"""
-      UPDATE PROVIDER SET display_name = $name, icon = $icon, colour = $colour, send_email = $sendEmail
+      UPDATE PROVIDER SET display_name = $name, icon = $icon, colour = $colour, send_email = $sendEmail, override_muting = $overrideMuting
       WHERE id = $providerId and PUBLISHER_ID = $publisherId
     """.executeUpdate()
   }
+
+  override def getProvider(providerId: String)(implicit c: Connection): Option[ProviderRender] =
+    SQL"SELECT * FROM PROVIDER WHERE ID = $providerId".executeQuery().as(providerParser.singleOpt)
 }
 
 

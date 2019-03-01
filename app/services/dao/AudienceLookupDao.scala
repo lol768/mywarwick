@@ -1,20 +1,21 @@
 package services.dao
 
 import java.io.IOException
-import javax.inject.{Inject, Named}
 
-import models.Audience.UndergradStudents
+import javax.inject.{Inject, Named}
+import models.Audience.{Residence, UndergradStudents}
 import play.api.Configuration
-import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws._
+import services.helper.WSRequestUriBuilder
 import system.{Logging, TrustedAppsError}
 import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplicationsManager}
-import warwick.sso.{UniversityID, User, UserLookupService, Usercode}
+import utils.UserLookupUtils._
+import warwick.sso._
 
 import scala.collection.JavaConverters._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class LookupModule(
   code: String,
@@ -46,6 +47,7 @@ trait AudienceLookupDao {
   def resolveModule(moduleCode: String): Future[Seq[Usercode]]
   def resolveSeminarGroup(groupId: String): Future[Seq[Usercode]]
   def resolveRelationship(agentId: UniversityID, relationshipType: String): Future[Seq[Usercode]]
+  def resolveResidence(residence: Residence): Future[Seq[Usercode]]
 
   def getSeminarGroupById(groupId: String): Future[Option[LookupSeminarGroup]]
 
@@ -61,9 +63,7 @@ class TabulaAudienceLookupDao @Inject()(
   trustedApplicationsManager: TrustedApplicationsManager,
   val configuration: Configuration,
   userLookupService: UserLookupService
-) extends AudienceLookupDao with Logging with TabulaAudienceLookupProperties {
-
-  import system.ThreadPools.externalData
+)(implicit @Named("externalData") ec: ExecutionContext) extends AudienceLookupDao with Logging with TabulaAudienceLookupProperties {
 
   private val tabulaUsercode = configuration.getOptional[String]("mywarwick.tabula.user")
     .getOrElse(throw new IllegalStateException("Search root configuration missing - check mywarwick.tabula.user in application.conf"))
@@ -109,6 +109,17 @@ class TabulaAudienceLookupDao @Inject()(
 
   override def resolveModule(moduleCode: String): Future[Seq[Usercode]] = {
     getAuthenticatedAsJson(tabulaModuleStudentsUrl(moduleCode)).map(parseUsercodeSeq)
+  }
+
+
+  override def resolveResidence(residence: Residence): Future[Seq[Usercode]] = {
+    getAuthenticatedAsJson(tabulaAudienceLookUpUrl, residence.queryParameters)
+      .map(
+        TabulaResponseParsers.validateAPIResponse(_, TabulaResponseParsers.usercodesResultReads).fold(
+          handleValidationError(_, Seq()),
+          userCodes => userCodes
+        )
+      )
   }
 
   override def resolveSeminarGroup(groupId: String): Future[Seq[Usercode]] = {
@@ -170,7 +181,7 @@ class TabulaAudienceLookupDao @Inject()(
   }
 
   private def getAuthenticatedAsJson(url: String, params: Seq[(String, String)] = Nil): Future[JsValue] = {
-    setupRequest(url).addQueryStringParameters(params:_*).get()
+    setupRequest(url, params).get()
       .map(response => {
         TrustedAppsError.fromWSResponse(response).foreach { e =>
           throw e
@@ -182,14 +193,17 @@ class TabulaAudienceLookupDao @Inject()(
       })
   }
 
-  private def setupRequest(url: String): WSRequest = {
-    val trustedHeaders = TrustedApplicationUtils.getRequestHeaders(trustedApplicationsManager.getCurrentApplication, tabulaUsercode, url)
+  private def setupRequest(url: String, params: Seq[(String, String)] = Nil): WSRequest = {
+    val request = ws.url(url).addQueryStringParameters(params: _*)
+    val trustedHeaders = TrustedApplicationUtils.getRequestHeaders(
+      trustedApplicationsManager.getCurrentApplication,
+      tabulaUsercode,
+      WSRequestUriBuilder.buildUri(request).toString
+    )
       .asScala.map(h => h.getName -> h.getValue).toSeq
-
-    ws
-      .url(url)
-      .addHttpHeaders(trustedHeaders: _*)
+    request.addHttpHeaders(trustedHeaders: _*)
   }
+
 }
 
 trait TabulaAudienceLookupProperties {
@@ -257,6 +271,10 @@ trait TabulaAudienceLookupProperties {
   private val tabulaMemberBaseUrl = configuration.getOptional[String]("mywarwick.tabula.member.base")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.member.base in application.conf"))
 
+  protected def tabulaMemberUrl(user: User) = s"$tabulaMemberBaseUrl/${user.universityId.getOrElse(throw new IllegalArgumentException).string}"
+
+  protected def tabulaAudienceLookUpUrl = s"$tabulaAPIBaseUrl/usercodeSearch"
+
   private val tabulaMemberRelationshipsSuffix = configuration.getOptional[String]("mywarwick.tabula.member.relationshipsSuffix")
     .getOrElse(throw new IllegalStateException("Configuration missing - check mywarwick.tabula.member.relationshipsSuffix in application.conf"))
 
@@ -265,7 +283,7 @@ trait TabulaAudienceLookupProperties {
 }
 
 object TabulaResponseParsers {
-  val usercodesResultReads: Reads[Seq[Usercode]] = (__ \ "usercodes").read[Seq[String]].map(s => s.map(Usercode))
+  val usercodesResultReads: Reads[Seq[Usercode]] = (__ \ "usercodes").read[Seq[String]].map(_.map(Usercode))
 
   val lookupModuleReads: Reads[LookupModule] = (
     (__ \ "code").read[String] and
@@ -288,8 +306,7 @@ object TabulaResponseParsers {
     ) (LookupSeminarGroup.apply _)
 
   case class TabulaUserData(userId: String, universityId: String)
-  private val tabulaUserDataReads = Json.reads[TabulaUserData]
-
+  val tabulaUserDataReads: Reads[TabulaUserData] = Json.reads[TabulaUserData]
   object MemberRelationship {
     case class MemberRelationship(relationshipType: LookupRelationshipType, students: Seq[TabulaUserData])
     case class MemberRelationshipsResponse(
