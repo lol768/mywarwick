@@ -73,8 +73,8 @@ class ActivityESServiceImpl @Inject()(
   elasticSearchAdminService.deleteTemplate("alert_template_default")
 
   // new template (ok, index_pattern) for both alerts and activities in es6
-  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.templatesForActivityAndAlert, "activity_alert_template_default")
-  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.templatesForDeliveryReports, "delivery_report_template_default")
+  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.templateForActivityAndAlert, "activity_alert_template_default")
+  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.templateForDeliveryReports, "delivery_report_template_default")
 
   private val client: RestHighLevelClient = eSClientConfig.highLevelClient
   private val iso8601DateFormat = DateTimeFormatter.ISO_OFFSET_DATE_TIME.withZone(ZoneId.of("UTC"))

@@ -134,7 +134,7 @@ trait ActivityESServiceHelper {
     )
   )
 
-  val templatesForActivityAndAlert: JsValue = Json.obj(
+  val templateForActivityAndAlert: JsValue = Json.obj(
     "index_patterns" -> Json.arr(s"$indexNameForActivity*", s"$indexNameForAlert*"),
     "mappings" -> Json.obj(
       "activity" -> Json.obj(
@@ -155,7 +155,7 @@ trait ActivityESServiceHelper {
     )
   )
   
-  val templatesForDeliveryReports: JsValue = Json.obj(
+  val templateForDeliveryReports: JsValue = Json.obj(
     "index_patterns" -> s"$indexNameForDeliveryReport*",
     "mappings" -> Json.obj(
       deliveryReportDocumentType -> Json.obj(
