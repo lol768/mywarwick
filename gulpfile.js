@@ -64,7 +64,7 @@ gutil.log("Appcache/SW generation: " + OFFLINE_WORKERS);
 require('./gulp/scripts');
 require('./gulp/styles');
 
-gulp.task('all-static', ['id7-static','scripts','styles']);
+gulp.task('all-static', ['id7-static','fontawesome-pro','scripts','styles']);
 
 // Shortcuts for building all asset types at once
 gulp.task('assets', ['lint', 'all-static', 'appcache', 'service-worker', 'swagger']);

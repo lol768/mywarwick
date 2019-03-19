@@ -133,13 +133,20 @@ function getCachedAssetsAsync() {
     currentRevisionOfAsync('/js/vendor.bundle.js'),
     currentRevisionOfAsync('/js/main-import.js'),
     currentRevisionOfAsync('/js/search-import.js'),
-    '/lib/id7/fonts/fontawesome-webfont.ttf',
-    '/lib/id7/fonts/fontawesome-webfont.woff',
+    '/lib/@fortawesome/fontawesome-pro/fa-light-300.woff2',
+    '/lib/@fortawesome/fontawesome-pro/fa-light-300.woff',
+    '/lib/@fortawesome/fontawesome-pro/fa-light-300.ttf',
+    '/lib/@fortawesome/fontawesome-pro/fa-regular-400.woff2',
+    '/lib/@fortawesome/fontawesome-pro/fa-regular-400.woff',
+    '/lib/@fortawesome/fontawesome-pro/fa-regular-400.ttf',
+    '/lib/@fortawesome/fontawesome-pro/fa-solid-900.woff2',
+    '/lib/@fortawesome/fontawesome-pro/fa-solid-900.woff',
+    '/lib/@fortawesome/fontawesome-pro/fa-solid-900.ttf',
     '/lib/id7/images/masthead-logo-bleed-sm*',
     '/lib/id7/images/masthead-logo-bleed-xs*',
     '/lib/id7/images/newwindow.gif',
     '/lib/id7/images/shim.gif',
-    '/lib/id7/js/id7-bundle.min.js',
+    '/lib/id7/js/id7-bundle.js',
   ]).then(array => array.map(asset => path.join(paths.assetsOut, asset)));
 }
 
@@ -314,7 +321,7 @@ gulp.task('watch-appcache', ['watch-styles'], () => {
 // Get the current FA version for use in the cache manifest
 function getFontAwesomeVersion() {
   return new Promise((resolve, reject) => {
-    fs.readFile('node_modules/id7/less/font-awesome/variables.less', (e, data) => {
+    fs.readFile('node_modules/@fortawesome/fontawesome-pro/less/_variables.less', (e, data) => {
       if (e) {
         reject(e);
       } else {

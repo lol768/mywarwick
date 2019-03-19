@@ -31,6 +31,7 @@ function exportAssetModule(name, taskName, baseDir, extraExtensions) {
 }
 
 exportAssetModule('id7', 'id7-static', 'dist');
+exportAssetModule('@fortawesome/fontawesome-pro', 'fontawesome-pro', 'webfonts');
 
 gulp.task('styles', cb => {
   const styleJob = gulp.src(paths.styleIn)

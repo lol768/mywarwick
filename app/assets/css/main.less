@@ -1,10 +1,12 @@
 @import (reference) 'id7/less/variables.less';
-@import 'id7/less/id7.less';
+@import 'id7/less/id7-no-fa.less';
+@import 'id7/less/font-awesome-pro';
+@import '@fortawesome/fontawesome-pro/less/v4-shims';
 @import 'id7/less/default-theme.less';
 
 @id7-image-root-dir: '../lib/id7/images';
-@icon-font-path: '../lib/id7/fonts';
-@fa-font-path: '../lib/id7/fonts';
+@icon-font-path: '../lib/@fortawesome/fontawesome-pro';
+@fa-font-path: '../lib/@fortawesome/fontawesome-pro';
 
 @import 'variables';
 @import 'fatal-error';
@@ -66,4 +68,24 @@ body {
 .text-overflow-block {
   .text-overflow();
   display: block;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+i.fa:before {
+  // FA5 icons are a big bigger than in FA4 so make them a bit smaller
+  display: block;
+  transform: scale(0.9);
 }
