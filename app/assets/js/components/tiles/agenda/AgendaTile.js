@@ -15,6 +15,8 @@ import ShowMore from '../ShowMore';
 // excluded.
 const agendaViewTransform = (items) => {
   const startOfToday = localMoment().startOf('day');
+  const thirtyMinsAgo = localMoment().subtract(30, 'minutes');
+  const filterStart = startOfToday.isAfter(thirtyMinsAgo) ? startOfToday : thirtyMinsAgo;
 
   return _.flow(
     i => _.flatMap(i, (e) => {
@@ -65,7 +67,10 @@ const agendaViewTransform = (items) => {
 
       return instances;
     }),
-    i => _.filter(i, e => startOfToday.isBefore(e.start)),
+    i => _.filter(i, e =>
+      filterStart.isBefore(e.start) ||
+      (e.isAllDay && startOfToday.isBefore(e.start)),
+    ),
     i => _.sortBy(i, e => e.start),
   )(items);
 };
