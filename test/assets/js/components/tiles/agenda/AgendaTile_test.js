@@ -5,7 +5,7 @@ import LargeBody, { AgendaTileItem } from 'components/tiles/agenda/LargeBody';
 import Hyperlink from 'components/ui/Hyperlink';
 import SingleEvent from 'components/tiles/agenda/SingleEvent';
 
-import { ITEMS, now } from './data';
+import { ITEMS, now, end } from './data';
 
 describe('AgendaTile', () => {
 
@@ -46,19 +46,30 @@ describe('AgendaTile', () => {
   it('displays all items when zoomed', () => {
     const content = {
       items: [
-        { id: '1' }, { id: '2' }, { id: '3' },
+        {
+          id: '1',
+          start: end.toISOString(),
+        },
+        {
+          id: '2',
+          start: end.toISOString(),
+        },
+        {
+          id: '3',
+          start: end.toISOString(),
+        },
       ],
     };
-    const html = shallowRender(<AgendaTile
+    const html = renderAtMoment(<AgendaTile
       zoomed={ true }
       size="small"
       content={ content }
-    />);
+    />, now);
 
     html.props.children.length.should.equal(3);
   });
 
-  it('displays multiple-day all-day events on each future day within the range', () => {
+  it('displays multiple-day all-day events on each day within the range including today', () => {
     const content = {
       items: [ ITEMS.twoWeeker ]
     };
@@ -84,6 +95,37 @@ describe('AgendaTile', () => {
       />
       , now);
     html.props.children.length.should.equal(1);
+  });
+
+  it('displays events ending in the future', () => {
+    const content = {
+      items: [
+        ITEMS.firstEvent,
+        ITEMS.singleDayAllDay,
+        ITEMS.singleDayAllDayToday,
+      ]
+    };
+    const htmlNow = renderAtMoment(
+      <AgendaTile
+        zoomed={ true }
+        content={ content }
+        size="large"
+      />
+      , now);
+    htmlNow.props.children.length.should.equal(3);
+
+    const laterToday = new Date(now.valueOf());
+    laterToday.setHours(now.getHours() + 1);
+
+    const htmlLater = renderAtMoment(
+      <AgendaTile
+        zoomed={ true }
+        content={ content }
+        size="large"
+      />
+      , laterToday);
+    // Still displays both all ay events, but the one that's finished is removed
+    htmlLater.props.children.length.should.equal(2);
   });
 });
 
