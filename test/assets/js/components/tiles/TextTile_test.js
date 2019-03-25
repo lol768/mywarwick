@@ -19,10 +19,11 @@ describe('TextTile', () => {
     const hyperlink = shallowRender(item);
     hyperlink.type.should.equal('div');
     hyperlink.props.className.should.equal('tile__item');
-    const [callout, text] = hyperlink.props.children;
+    const [callout, calloutSub, text] = hyperlink.props.children;
     callout.type.should.equal('span');
     callout.props.className.should.equal('tile__callout');
     callout.props.children.should.equal(props.content.items[0].callout);
+    should.equal(calloutSub, undefined);
     text.type.should.equal('span');
     text.props.className.should.equal('tile__text');
     text.props.children.should.equal(props.content.items[0].text);
