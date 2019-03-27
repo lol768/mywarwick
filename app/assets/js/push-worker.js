@@ -53,7 +53,7 @@ self.addEventListener('push', (event) => {
 });
 
 self.addEventListener('message', (event) => {
-  if ('token' in event.data) {
+  if (typeof event.data.token !== 'undefined') {
     self.token = event.data.token;
   }
 });
