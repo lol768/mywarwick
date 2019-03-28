@@ -35,6 +35,21 @@ to:
 
 The worker should then run with the usual IDE run/debug configurations.
 
+If you receive the following error:
+
+```
+Association with remote system [akka.tcp://application@127.0.1.1:2552] has failed, address is now gated for [5000] ms. Reason: [Association failed with [akka.tcp://application@127.0.1.1:2552]] Caused by: [Connection refused: /127.0.1.1:2552]
+```
+
+Check with `ss -t -l -n | grep 2552` if the listener is running. If it is not bound to `127.0.1.1`,
+check your `/etc/hosts/` file for an entry corresponding to your hostname:
+
+```
+127.0.1.1       myhostname
+```
+
+In 2019, `application-example.conf` was updated to explicitly specify a host to bind with.
+
 Version control
 ---------------
 
