@@ -76,6 +76,7 @@ export default class TextTile extends TileContent {
         <Hyperlink key={item.id} href={item.href}>
           <div className="tile__item">
             <span className="tile__callout">{item.callout}</span>
+            {item.calloutSub && <span className="tile__calloutSub">{item.calloutSub}</span>}
             <span className="tile__text">{item.text}</span>
           </div>
         </Hyperlink>

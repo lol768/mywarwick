@@ -10,13 +10,13 @@ import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.joda.time.{DateTime, Interval}
-import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 
 trait ActivityESServiceHelper {
 
   val activityDocumentType = "activity" // we use the same type for both alert and activity. they are the same structure but in different indexes
   val deliveryReportDocumentType = "delivery_report"
-  val deliveryReportIndexName: String = deliveryReportDocumentType
+  val indexNameForDeliveryReport: String = deliveryReportDocumentType
   val indexNameForAlert = "alert"
   val indexNameForActivity = "activity"
   val separator = "_"
@@ -46,7 +46,6 @@ trait ActivityESServiceHelper {
     val distinct_users_agg = "distinct_users"
 
     val timestamp = "@timestamp"
-
   }
 
   def dateSuffixString(date: DateTime = DateTime.now()) = s"$separator${date.toString("yyyy_MM")}"
@@ -122,8 +121,10 @@ trait ActivityESServiceHelper {
     builder
   }
 
-  val typeKeyword: JsValue = Json.obj("type" -> "keyword")
-  val propsBoilerplate: JsValue = Json.obj(
+  private val typeKeyword: JsValue = Json.obj("type" -> "keyword")
+  private val typeText: JsValue = Json.obj("type" -> "text")
+  private val typeDate: JsValue = Json.obj("type" -> "date")
+  private val propsBoilerplate: JsValue = Json.obj(
     "type" -> "text",
     "fields" -> Json.obj(
       "keyword" -> Json.obj(
@@ -133,36 +134,29 @@ trait ActivityESServiceHelper {
     )
   )
 
-  def getEsTemplate(name: String): JsObject = Json.obj(
-    "template" -> s"$name*",
+  val templateForActivityAndAlert: JsValue = Json.obj(
+    "index_patterns" -> Json.arr(s"$indexNameForActivity*", s"$indexNameForAlert*"),
     "mappings" -> Json.obj(
       "activity" -> Json.obj(
-        "properties" -> Json.obj(
+        "properties"-> Json.obj(
           "activity_id" -> typeKeyword,
           "activity_type" -> typeKeyword,
           "audience_components" -> typeKeyword,
           "provider_id" -> typeKeyword,
-          "published_at" -> Json.obj(
-            "type" -> "date"
-          ),
+          "published_at" -> typeDate,
           "publisher" -> typeKeyword,
           "replaced_by" -> typeKeyword,
           "resolved_users" -> typeKeyword,
-          "text" -> Json.obj(
-            "type" -> "text"
-          ),
+          "text" -> typeText,
           "title" -> propsBoilerplate,
           "url" -> propsBoilerplate
         )
       )
     )
   )
-
-  val activityEsTemplates: JsValue = getEsTemplate(indexNameForActivity)
-  val alertEsTemplates: JsValue = getEsTemplate(indexNameForAlert)
-
-  val deliveryReportEsTemplates: JsValue = Json.obj(
-    "template" -> s"$deliveryReportIndexName*",
+  
+  val templateForDeliveryReports: JsValue = Json.obj(
+    "index_patterns" -> s"$indexNameForDeliveryReport*",
     "mappings" -> Json.obj(
       deliveryReportDocumentType -> Json.obj(
         "properties" -> Json.obj(

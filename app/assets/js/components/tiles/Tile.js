@@ -131,7 +131,7 @@ export default class Tile extends HideableView {
 
     const zoomIcon = () => {
       if (this.shouldDisplayExpandIcon()) {
-        return <i ref="zoom" className="fa fa-expand" role="button" tabIndex={0} onClick={this.onClickExpand} onKeyUp={this.onClickExpand} />;
+        return <i ref="zoom" className="fa fa-expand-alt" role="button" tabIndex={0} onClick={this.onClickExpand} onKeyUp={this.onClickExpand} />;
       }
       return null;
     };
@@ -204,7 +204,7 @@ export default class Tile extends HideableView {
               className="tile__edit-control bottom-left tile__drag-handle"
               title="Drag to re-arrange tile"
             >
-              <div className="icon"><i className="fa fa-arrows" /></div>
+              <div className="icon"><i className="fal fa-arrows-alt" /></div>
             </div>
           }
 

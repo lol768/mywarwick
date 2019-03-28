@@ -10,7 +10,7 @@ import org.elasticsearch.action.bulk.{BulkRequest, BulkResponse}
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
 import org.elasticsearch.action.support.IndicesOptions
-import org.elasticsearch.client.{RestClient, RestHighLevelClient}
+import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.common.xcontent.{XContentBuilder, XContentFactory}
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.rest.RestStatus
@@ -45,7 +45,7 @@ object MessageSent {
 
 @ImplementedBy(classOf[ActivityESServiceImpl])
 trait ActivityESService {
-  val helper = ActivityESServiceIndexHelper
+  val helper: ActivityESServiceIndexHelper.type = ActivityESServiceIndexHelper
 
   def indexActivityReq(req: IndexActivityRequest): Future[Unit]
 
@@ -68,12 +68,15 @@ class ActivityESServiceImpl @Inject()(
   elasticSearchAdminService: ElasticSearchAdminService
 )(implicit @Named("elastic") ec: ExecutionContext) extends ActivityESService with Logging {
 
-  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.activityEsTemplates, "activity_template_default")
-  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.alertEsTemplates, "alert_template_default")
-  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.deliveryReportEsTemplates, "delivery_report_template_default")
+  // delete the old individual template existed in es5
+  elasticSearchAdminService.deleteTemplate("activity_template_default")
+  elasticSearchAdminService.deleteTemplate("alert_template_default")
+
+  // new template (ok, index_pattern) for both alerts and activities in es6
+  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.templateForActivityAndAlert, "activity_alert_template_default")
+  elasticSearchAdminService.putTemplate(ActivityESServiceIndexHelper.templateForDeliveryReports, "delivery_report_template_default")
 
   private val client: RestHighLevelClient = eSClientConfig.highLevelClient
-  private val lowLevelClient: RestClient = eSClientConfig.lowLevelClient
   private val iso8601DateFormat = DateTimeFormatter.ISO_OFFSET_DATE_TIME.withZone(ZoneId.of("UTC"))
 
   override def indexActivityReq(req: IndexActivityRequest): Future[Unit] = indexActivityReqs(Seq(req))
@@ -102,7 +105,7 @@ class ActivityESServiceImpl @Inject()(
         .field(ESFieldName.state, state.dbValue)
         .field(ESFieldName.timestamp, iso8601DateFormat.format(OffsetDateTime.now()))
         .endObject()
-      val indexName = s"${helper.deliveryReportIndexName}${helper.dateSuffixString()}"
+      val indexName = s"${helper.indexNameForDeliveryReport}${helper.dateSuffixString()}"
       helper.makeIndexRequest(indexName, helper.deliveryReportDocumentType, s"$activityId:${usercode.string}:${output.name}", xContent)
     }
     makeBulkRequest(writeReqs)
@@ -143,7 +146,7 @@ class ActivityESServiceImpl @Inject()(
   override def deliveryReportForActivity(activityId: String, publishedAt: Option[DateTime]): Future[AlertDeliveryReport] =
     publishedAt.map { date =>
       import ESFieldName._
-      val deliveryReportIndex = s"${helper.deliveryReportIndexName}${helper.dateSuffixString(date)}"
+      val deliveryReportIndex = s"${helper.indexNameForDeliveryReport}${helper.dateSuffixString(date)}"
       val searchRequest: SearchRequest = new SearchRequest(deliveryReportIndex).types(helper.deliveryReportDocumentType)
       searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen())
       searchRequest.source(

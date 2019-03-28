@@ -55,5 +55,11 @@ export const ITEMS = {
     start: '2016-06-16T00:00:00Z',
     isAllDay: true,
     title: 'One day event'
+  },
+  singleDayAllDayToday: {
+    id: '434652',
+    start: '2016-05-19T00:00:00Z',
+    isAllDay: true,
+    title: 'One day event today'
   }
 };

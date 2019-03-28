@@ -11,10 +11,9 @@ import ShowMore from '../ShowMore';
 
 // Create an agenda view for the given calendar events.  All-day events
 // spanning multiple days appear on each day.  Events are sorted by start
-// time, and any events ending before the start of the current day are
-// excluded.
+// time, and any events ending before now excluded.
 const agendaViewTransform = (items) => {
-  const startOfToday = localMoment().startOf('day');
+  const now = localMoment();
 
   return _.flow(
     i => _.flatMap(i, (e) => {
@@ -24,9 +23,12 @@ const agendaViewTransform = (items) => {
       const instances = [];
 
       while (date.isBefore(end)) {
+        // If the event ends after the current day set the end for this instance to midnight
+        const instanceEnd = end.isSame(date, 'day') ? end : date.clone().add(1, 'day').startOf('day');
         instances.push({
           ...e,
           start: date.format(),
+          end: instanceEnd.format(),
           academicWeek,
           // Handle events that started before today and end tomorrow
           // Displaying them as midnight to midnight looks a bit rubbish
@@ -65,7 +67,11 @@ const agendaViewTransform = (items) => {
 
       return instances;
     }),
-    i => _.filter(i, e => startOfToday.isBefore(e.start)),
+    i => _.filter(i, e => now.isBefore(e.end) || // Include if it hasn't ended
+      (!e.end && now.isBefore(e.start)) || // Or it has no end and it hasn't started
+      (!e.end && e.isAllDay), // Or it has no end and it's all-day
+      // (events spanning multiple days always have an end from the code above)
+    ),
     i => _.sortBy(i, e => e.start),
   )(items);
 };

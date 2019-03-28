@@ -80,7 +80,7 @@ module.exports = {
     }
   },
   externals: {
-    jquery: '$',
+    jquery: 'jQuery',
     modernizr: 'Modernizr',
   },
   module: {

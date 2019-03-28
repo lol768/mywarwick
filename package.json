@@ -7,6 +7,7 @@
     "test": "test"
   },
   "devDependencies": {
+    "@fortawesome/fontawesome-pro": "5.7.2",
     "autoprefixer": "~6.3.6",
     "babel-cli": "^6.24.0",
     "babel-core": "~6.24",
@@ -91,7 +92,7 @@
     "es6-promise": "~3.1.2",
     "eslint-plugin-mw": "file:scripts/eslint-rules",
     "history": "^2.1.2",
-    "id7": "github:universityofwarwick/id7#v1.3.4",
+    "id7": "github:universityofwarwick/id7#v2.3.0",
     "immutability-helper": "^2.3.1",
     "intl-messageformat": "^1.3.0",
     "invariant": "^2.2.2",
@@ -141,7 +142,7 @@
     "url": "-"
   },
   "browserify-shim": {
-    "jquery": "global:$",
+    "jquery": "global:jQuery",
     "modernizr": "global:Modernizr"
   },
   "author": "",
