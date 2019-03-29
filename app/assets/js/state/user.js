@@ -18,7 +18,9 @@ const initialState = {
     login: null,
     logout: null,
   },
-  features: {},
+  features: {
+    updateTileEditUI: true,
+  },
 };
 
 export function reducer(state = initialState, action) {
