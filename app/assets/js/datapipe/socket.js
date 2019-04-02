@@ -14,6 +14,7 @@ export default class SocketDataPipe extends DataPipe {
     this.initialiseSocket();
     this.messageId = 0;
     this.subscribers = [];
+    this.onopen = () => ({});
   }
 
   initialiseSocket() {
