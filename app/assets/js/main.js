@@ -182,6 +182,7 @@ export function launch(userData) {
         // Division!
         log.info("User mismatch, reconnecting the WebSocket...");
         SocketDatapipe.reconnect();
+        return; // don't process this message
       }
     }
     switch (data.type) {
