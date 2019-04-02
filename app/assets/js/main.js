@@ -177,10 +177,10 @@ export function launch(userData) {
 
   SocketDatapipe.subscribe((data) => {
     if (Object.keys(data).indexOf('user') !== -1) {
-      log.debug("Got a user with this message, checking it is as expected...");
+      log.debug('Got a user with this message, checking it is as expected...');
       if (!userData.user.authenticated || userData.user.usercode !== data.user) {
         // Division!
-        log.info("User mismatch, reconnecting the WebSocket...");
+        log.info('User mismatch, reconnecting the WebSocket...');
         SocketDatapipe.reconnect();
         return; // don't process this message
       }
