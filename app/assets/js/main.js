@@ -177,7 +177,6 @@ export function launch(userData) {
 
   SocketDatapipe.subscribe((data) => {
     user.loadUserFromLocalStorage(store.dispatch).then((u) => {
-      log.info(u);
       if (Object.keys(data).indexOf('user') !== -1) {
         log.debug('Got a user with this message, checking it is as expected...');
         if (!u.authenticated || u.usercode !== data.user) {
