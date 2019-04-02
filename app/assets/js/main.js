@@ -176,24 +176,27 @@ export function launch(userData) {
   }
 
   SocketDatapipe.subscribe((data) => {
-    if (Object.keys(data).indexOf('user') !== -1) {
-      log.debug('Got a user with this message, checking it is as expected...');
-      if (!userData.user.authenticated || userData.user.usercode !== data.user) {
-        // Division!
-        log.info('User mismatch, reconnecting the WebSocket...');
-        SocketDatapipe.reconnect();
-        return; // don't process this message
+    user.loadUserFromLocalStorage(store.dispatch).then((u) => {
+      log.info(u);
+      if (Object.keys(data).indexOf('user') !== -1) {
+        log.debug('Got a user with this message, checking it is as expected...');
+        if (!u.authenticated || u.usercode !== data.user) {
+          // Division!
+          log.info('User mismatch, reconnecting the WebSocket...');
+          SocketDatapipe.reconnect();
+          return; // don't process this message
+        }
       }
-    }
-    switch (data.type) {
-      case 'activity':
-        store.dispatch(data.activity.notification ?
-          notifications.receivedNotification(data.activity)
-          : notifications.receivedActivity(data.activity));
-        break;
-      default:
-      // nowt
-    }
+      switch (data.type) {
+        case 'activity':
+          store.dispatch(data.activity.notification ?
+            notifications.receivedNotification(data.activity)
+            : notifications.receivedActivity(data.activity));
+          break;
+        default:
+        // nowt
+      }
+    });
   });
 
   /*
