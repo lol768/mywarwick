@@ -22,7 +22,6 @@ export default class SocketDataPipe extends DataPipe {
     this.ws.onopen = () => {
       this.onopen();
     };
-    this.onopen = () => ({});
   }
 
   /**
