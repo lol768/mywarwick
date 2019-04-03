@@ -60,7 +60,7 @@ class ActivityItem extends React.PureComponent {
               <div className="media-body">
                 <div className="activity-item__title">
                   { this.props.title }
-                  { this.props.url && <i className="fa fa-external-link activity-item__link-indicator" /> }
+                  { this.props.url && <i className="fal fa-external-link activity-item__link-indicator" /> }
                 </div>
                 { (this.props.textAsHtml) ?
                   <div className="activity-item__text" dangerouslySetInnerHTML={{ __html: this.props.textAsHtml }} /> : // eslint-disable-line react/no-danger

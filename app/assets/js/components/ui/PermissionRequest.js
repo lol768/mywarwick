@@ -48,7 +48,7 @@ export default class PermissionRequest extends React.PureComponent {
           </div>
           <div className="permission-dismiss">
             <i
-              className={classNames('fa', 'fa-fw', 'fa-times')}
+              className={classNames('fal', 'fa-fw', 'fa-times')}
               role="button"
               tabIndex={0}
               onClick={this.hide}

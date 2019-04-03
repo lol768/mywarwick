@@ -47,10 +47,10 @@
               }
               </div>
               <div class="activity-item__messages-delivered-val">
-                <i class="fa fa-spin fa-refresh"></i>
+                <i class="fal fa-spin fa-sync"></i>
               </div>
               <div class="activity-item__messages-read-val">
-                <i class="fa fa-spin fa-refresh"></i>
+                <i class="fal fa-spin fa-sync"></i>
               </div>
             </div>
             <div class="col-xs-4 col-sm-1">
@@ -68,7 +68,7 @@
         }
         @if(item.isSendingNow) {
           <div class="activity-item__audience activity-item__send-progress">
-            <i class="fa fa-spin fa-refresh"></i>
+            <i class="fal fa-spin fa-sync"></i>
             Processed
             <span class="activity-item__sent-count">
             @("%,d".format(item.sentCount))

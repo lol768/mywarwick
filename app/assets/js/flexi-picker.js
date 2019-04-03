@@ -126,7 +126,7 @@ export default class FlexiPicker {
 
         return `
           <div class="flexi-picker-result">
-            <i class="fa ${icon}"></i>
+            <i class="fal ${icon}"/>
             <span class="title">${item.title}</span>
             <span class="type">${item.type}</span>
             <div class="description">

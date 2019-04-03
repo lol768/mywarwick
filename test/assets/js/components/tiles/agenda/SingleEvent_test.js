@@ -118,7 +118,7 @@ describe('SingleEvent', () => {
 
   it('includes academic week in the modal', () => {
     const children = SingleEvent.getModalChildren('Wednesday', 0, 'Library');
-    enzyme.shallow(children[1]).html().should.equal('<span><i class="fa fa-calendar fa-fw"></i> Week 0</span>');
+    enzyme.shallow(children[1]).html().should.equal('<span><i class="fal fa-calendar-alt fa-fw"></i> Week 0</span>');
   })
 
 });

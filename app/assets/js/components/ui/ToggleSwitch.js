@@ -26,7 +26,7 @@ export default class ToggleSwitch extends React.PureComponent {
           <i
             tabIndex={0}
             role="button"
-            className={ classNames('fa', 'fa-toggle-on', 'fa-2x', 'active', 'pull-right') }
+            className={ classNames('fal', 'fa-toggle-on', 'fa-2x', 'active', 'pull-right') }
             onClick={ this.handleClick }
           />
           :
@@ -34,7 +34,7 @@ export default class ToggleSwitch extends React.PureComponent {
             tabIndex={0}
             role="button"
             className={
-              classNames('fa', 'fa-toggle-on', 'fa-rotate-180', 'fa-2x', 'inactive', 'pull-right')
+              classNames('fal', 'fa-toggle-on', 'fa-rotate-180', 'fa-2x', 'inactive', 'pull-right')
             }
             onClick={ this.handleClick }
           />

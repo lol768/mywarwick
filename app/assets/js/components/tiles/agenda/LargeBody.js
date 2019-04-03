@@ -176,7 +176,7 @@ export class AgendaTileItem extends React.PureComponent {
 
     return (
       <div className="agenda-item__cell marker" style={{ paddingLeft: '.5em', paddingRight: '.25em' }}>
-        <i className={`fa fa-circle ${(parent) ? '' : 'invisible'}`} style={style} />
+        <i className={`fal fa-circle ${(parent) ? '' : 'invisible'}`} style={style} />
       </div>
     );
   }

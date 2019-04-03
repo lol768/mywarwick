@@ -122,7 +122,7 @@ export default class InfiniteScrollable extends HideableView {
     return (<div>
       {this.props.children}
       { this.props.showLoading && this.state.loading ? <div className="loading-spinner centered">
-        <i className="fa fa-spinner fa-pulse fa-2x" />
+        <i className="fal fa-spinner fa-pulse fa-2x" />
       </div> : ''
       }
       { this.props.hasMore || InfiniteScrollable.noMoreItems(this.props.endOfListPhrase) }

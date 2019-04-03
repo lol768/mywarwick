@@ -17,7 +17,7 @@ export default class MastheadSearch extends React.PureComponent {
                   placeholder="Search Warwick"
                   data-suggest="go"
                 />
-                <i className="fa fa-search fa-2x" />
+                <i className="fal fa-search fa-2x" />
               </div>
             </div>
           </form>

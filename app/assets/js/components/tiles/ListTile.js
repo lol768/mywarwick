@@ -122,7 +122,7 @@ export class ListTileItem extends React.PureComponent {
           <span className="list-group-item__text">
             {this.props.text}
             {this.props.body &&
-              <i className="fa fa-fw fa-info-circle" />
+              <i className="fal fa-fw fa-info-circle" />
             }
           </span>
         </a>

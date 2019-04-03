@@ -11,7 +11,7 @@ export default class TrafficAlert extends React.PureComponent {
     const { title, href } = this.props;
     return (
       <div className="traffic-alert">
-        <i className="fa fa-fw fa-exclamation-triangle" />
+        <i className="fal fa-fw fa-exclamation-triangle" />
         <a href={href}>{title}</a>
       </div>
     );

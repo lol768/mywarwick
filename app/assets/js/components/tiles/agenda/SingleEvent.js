@@ -50,8 +50,8 @@ export default class SingleEvent extends React.PureComponent {
         </li>
         <li className="text-overflow-block">
           {extraInfo ?
-            <i className="fa fa-fw fa-info-circle" /> :
-            <i className="fa fa-fw fa-calendar-check-o" />
+            <i className="fal fa-fw fa-info-circle" /> :
+            <i className="fal fa-fw fa-calendar-check" />
           }
           { title }
         </li>

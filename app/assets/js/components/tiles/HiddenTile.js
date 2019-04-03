@@ -33,12 +33,12 @@ export default class HiddenTile extends React.PureComponent {
       >
         <article className={`tile tile--hidden tile--editing tile--small colour-${colour}`}>
           <div className="tile__edit-control top-left" title={ `Show ${title}` }>
-            <i className="fa fa-plus" />
+            <i className="fal fa-plus" />
           </div>
 
           <div className="tile__wrap">
             <div className="tile__body">
-              <i className={`fa fa-fw fa-${icon} tile--hidden__icon`} />
+              <i className={`fal fa-fw fa-${icon} tile--hidden__icon`} />
               <div className="tile--hidden__title">{ title }</div>
             </div>
           </div>
