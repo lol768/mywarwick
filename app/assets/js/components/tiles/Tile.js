@@ -28,9 +28,9 @@ export default class Tile extends HideableView {
 
     const customIcon = this.getContentInstance() && this.getContentInstance().getIcon();
 
-    const iconJsx = iconName => (
+    const iconJsx = (iconStyle, iconName) => (
       <i
-        className={`fal ${iconName} toggle-tooltip`}
+        className={`${iconStyle} ${iconName} toggle-tooltip`}
         ref="icon"
         title={ this.getIconTitle() }
         data-toggle="tooltip"
@@ -38,11 +38,13 @@ export default class Tile extends HideableView {
       />);
 
     if (fetching) {
-      return iconJsx('fa-sync fa-spin');
+      return iconJsx('fal', 'fa-sync fa-spin');
     } else if (errors) {
-      return iconJsx('fa-exclamation-triangle');
+      return iconJsx('fal', 'fa-exclamation-triangle');
     } else if (customIcon) {
       return customIcon;
+    } else if (icon === 'bus' || 'car') {
+      return iconJsx('fas', `fa-${icon}`);
     } else if (icon) {
       return iconJsx(`fa-${icon}`);
     }

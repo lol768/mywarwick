@@ -56,7 +56,7 @@ export default class MastheadMobile extends React.PureComponent {
         >
           {this.props.editing ?
             <i className="fal fa-fw fa-check" /> :
-            <i className="fa-fw far fa-arrows-alt" />
+            <i className="fal fa-fw fa-arrows-alt" />
           }
         </div>
         }
