@@ -43,12 +43,12 @@ export default class Tile extends HideableView {
       return iconJsx('fal', 'fa-exclamation-triangle');
     } else if (customIcon) {
       return customIcon;
-    } else if (icon === 'bus' || 'car') {
+    } else if (icon === 'bus' || icon === 'car') {
       return iconJsx('fas', `fa-${icon}`);
     } else if (icon) {
-      return iconJsx(`fa-${icon}`);
+      return iconJsx('fal', `fa-${icon}`);
     }
-    return iconJsx('fa-question-circle');
+    return iconJsx('fal', 'fa-question-circle');
   }
 
   getIconTitle() {
@@ -133,7 +133,7 @@ export default class Tile extends HideableView {
 
     const zoomIcon = () => {
       if (this.shouldDisplayExpandIcon()) {
-        return <i ref="zoom" className="far fa-expand-alt" role="button" tabIndex={0} onClick={this.onClickExpand} onKeyUp={this.onClickExpand} />;
+        return <i ref="zoom" className="fas fa-expand-alt" role="button" tabIndex={0} onClick={this.onClickExpand} onKeyUp={this.onClickExpand} />;
       }
       return null;
     };
@@ -197,7 +197,7 @@ export default class Tile extends HideableView {
               tabIndex={0}
               title={`Make tile ${_.last(supportedTileSizes) === size ? 'smaller' : 'bigger'}`}
             >
-              <div className="icon"><i className="far fa-arrow-up" /></div>
+              <div className="icon"><i className="fal fa-arrow-up" /></div>
             </div>
           }
 
