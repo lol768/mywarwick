@@ -169,7 +169,7 @@ class SmsNotificationsView extends HideableView {
     return (
       <div>
         { this.state.smsNumber || 'None' }
-        <i className="fa fa-fw fa-chevron-right" />
+        <i className="fal fa-fw fa-chevron-right" />
       </div>
     );
   }

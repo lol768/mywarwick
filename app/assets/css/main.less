@@ -1,7 +1,6 @@
 @import (reference) 'id7/less/variables.less';
 @import 'id7/less/id7-no-fa.less';
 @import 'id7/less/font-awesome-pro';
-@import '@fortawesome/fontawesome-pro/less/v4-shims';
 @import 'id7/less/default-theme.less';
 
 @id7-image-root-dir: '../lib/id7/images';
@@ -84,7 +83,7 @@ body {
 
 
 
-i.fa:before {
+i.fas:before i.far:before i.fal:before {
   // FA5 icons are a big bigger than in FA4 so make them a bit smaller
   display: block;
   transform: scale(0.9);

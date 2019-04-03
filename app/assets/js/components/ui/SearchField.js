@@ -55,7 +55,7 @@ export default class SearchField extends React.PureComponent {
                   placeholder="Search Warwick"
                 />
                 <i
-                  className="fa fa-search fa-2x"
+                  className="fal fa-search fa-2x"
                   onClick={ this.onClickSearch }
                   role="button"
                   tabIndex={0}

@@ -28,9 +28,9 @@ export default class Tile extends HideableView {
 
     const customIcon = this.getContentInstance() && this.getContentInstance().getIcon();
 
-    const iconJsx = iconName => (
+    const iconJsx = (iconStyle, iconName) => (
       <i
-        className={`fa ${iconName} toggle-tooltip`}
+        className={`${iconStyle} ${iconName} toggle-tooltip`}
         ref="icon"
         title={ this.getIconTitle() }
         data-toggle="tooltip"
@@ -38,15 +38,17 @@ export default class Tile extends HideableView {
       />);
 
     if (fetching) {
-      return iconJsx('fa-refresh fa-spin');
+      return iconJsx('fal', 'fa-sync fa-spin');
     } else if (errors) {
-      return iconJsx('fa-exclamation-triangle');
+      return iconJsx('fal', 'fa-exclamation-triangle');
     } else if (customIcon) {
       return customIcon;
+    } else if (icon === 'bus' || icon === 'car') {
+      return iconJsx('fas', `fa-${icon}`);
     } else if (icon) {
-      return iconJsx(`fa-${icon}`);
+      return iconJsx('fal', `fa-${icon}`);
     }
-    return iconJsx('fa-question-circle');
+    return iconJsx('fal', 'fa-question-circle');
   }
 
   getIconTitle() {
@@ -131,7 +133,7 @@ export default class Tile extends HideableView {
 
     const zoomIcon = () => {
       if (this.shouldDisplayExpandIcon()) {
-        return <i ref="zoom" className="fa fa-expand-alt" role="button" tabIndex={0} onClick={this.onClickExpand} onKeyUp={this.onClickExpand} />;
+        return <i ref="zoom" className="fas fa-expand-alt" role="button" tabIndex={0} onClick={this.onClickExpand} onKeyUp={this.onClickExpand} />;
       }
       return null;
     };
@@ -182,7 +184,7 @@ export default class Tile extends HideableView {
               tabIndex={0}
               title={ `Hide ${title}` }
             >
-              <div className="icon"><i className="fa fa-minus" /></div>
+              <div className="icon"><i className="fal fa-minus" /></div>
             </div>
           }
 
@@ -195,7 +197,7 @@ export default class Tile extends HideableView {
               tabIndex={0}
               title={`Make tile ${_.last(supportedTileSizes) === size ? 'smaller' : 'bigger'}`}
             >
-              <div className="icon"><i className="fa fa-arrow-up" /></div>
+              <div className="icon"><i className="fal fa-arrow-up" /></div>
             </div>
           }
 

@@ -33,7 +33,7 @@ export default class MapTile extends TileContent {
     return (
       <div>
         <div className="tile-loading">
-          <i className="fa fa-spinner fa-pulse" />
+          <i className="fal fa-spinner fa-pulse" />
         </div>
         <div
           // eslint-disable-next-line react/no-danger

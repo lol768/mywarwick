@@ -96,7 +96,7 @@ export class ActivityMutesView extends React.PureComponent {
                         onKeyUp={ e => this.onDelete(e, mute) }
                         disabled={ !this.props.isOnline }
                       >
-                        <i className="fa fa-times" />
+                        <i className="fal fa-times" />
                       </button>
                     </div>
                   </div>

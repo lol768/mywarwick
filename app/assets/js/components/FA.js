@@ -7,14 +7,14 @@ type Props = {
 };
 
 const create = key => (props: Props) =>
-  <i className={`fa fa-${key}${props.fw ? ' fa-fw' : ''}${props.size ? ` fa-${props.size}` : ''}`} />;
+  <i className={`fal fa-${key}${props.fw ? ' fa-fw' : ''}${props.size ? ` fa-${props.size}` : ''}`} />;
 
-export const Clock = create('clock-o');
-export const Map = create('map-marker');
-export const User = create('user-o');
+export const Clock = create('clock');
+export const Map = create('map-marker-alt');
+export const User = create('user');
 export const ChevronRight = create('chevron-right');
 export const ChevronDown = create('chevron-down');
-export const Calendar = create('calendar');
-export const Mute = create('bell-slash-o');
+export const Calendar = create('calendar-alt');
+export const Mute = create('bell-slash');
 export const Info = create('info-circle');
-export const Commenting = create('commenting-o');
+export const Commenting = create('comment-dots');

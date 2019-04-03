@@ -20,7 +20,7 @@ class UpdatePopup extends React.PureComponent {
           <div className="media">
             <div className="media-left">
               <i
-                className="app-icon app-icon--lg fa fa-fw fa-check"
+                className="app-icon app-icon--lg fal fa-fw fa-check"
                 style={{ backgroundColor: '#8c6e96', color: '#fff' }}
               />
             </div>

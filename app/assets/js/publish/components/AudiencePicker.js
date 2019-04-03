@@ -141,7 +141,7 @@ export class AudiencePicker extends React.PureComponent {
         <label className="control-label">
           Is this alert specific to where people live?&nbsp;
           <i
-            className="fa fa-info-circle"
+            className="fal fa-info-circle"
             data-toggle="tooltip"
             data-placement="left"
             title="Users can select one or more locations to receive

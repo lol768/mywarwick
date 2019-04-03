@@ -36,7 +36,7 @@
           @item.createdBy.flatMap(_.name.full).getOrElse("[Unknown]")
           @models.DateFormats.emailDateTime(item.created)
         }
-        <div class="click-count"><i class="fa fa-spin fa-refresh"></i></div>
+        <div class="click-count"><i class="fal fa-spin fa-sync"></i></div>
         @item.audienceSize match {
           case AudienceSize.Public => {
             <span>- public</span>

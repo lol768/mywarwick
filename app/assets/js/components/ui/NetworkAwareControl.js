@@ -11,13 +11,13 @@ export default class NetworkAwareControl extends React.PureComponent {
   render() {
     if (this.props.loading) {
       return (
-        <i className="fa fa-spinner fa-pulse" />
+        <i className="fal fa-spinner fa-pulse" />
       );
     }
 
     if (this.props.failure) {
       return (
-        <i className="fa fa-exclamation-triangle" />
+        <i className="fal fa-exclamation-triangle" />
       );
     }
 

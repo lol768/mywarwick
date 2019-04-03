@@ -3,15 +3,15 @@ import 'eonasdan-bootstrap-datetimepicker';
 import moment from 'moment';
 
 const icons = {
-  time: 'fa fa-clock-o',
-  date: 'fa fa-calendar',
-  up: 'fa fa-chevron-up',
-  down: 'fa fa-chevron-down',
-  previous: 'fa fa-chevron-left',
-  next: 'fa fa-chevron-right',
-  today: 'fa fa-crosshairs',
-  clear: 'fa fa-trash-o',
-  close: 'fa fa-times',
+  time: 'fal fa-clock-o',
+  date: 'fal fa-calendar-alt',
+  up: 'fal fa-chevron-up',
+  down: 'fal fa-chevron-down',
+  previous: 'fal fa-chevron-left',
+  next: 'fal fa-chevron-right',
+  today: 'fal fa-crosshairs',
+  clear: 'fal fa-trash-o',
+  close: 'fal fa-times',
 };
 
 const dateTimeHiddenFieldFormat = 'YYYY-MM-DD[T]HH:mm:ss';

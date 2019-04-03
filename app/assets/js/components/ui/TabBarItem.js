@@ -45,8 +45,8 @@ export default class TabBarItem extends React.PureComponent {
       >
         <i
           className={ this.props.active ?
-            `fa fa-${this.props.selectedIcon}` :
-            `fa fa-${this.props.icon}`
+            `fal fa-${this.props.selectedIcon}` :
+            `fal fa-${this.props.icon}`
           }
         >
           { (this.props.badge > 0) ?

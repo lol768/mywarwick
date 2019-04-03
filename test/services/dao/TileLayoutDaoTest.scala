@@ -17,7 +17,7 @@ class TileLayoutDaoTest extends BaseSpec with OneStartAppPerSuite {
         """
       INSERT INTO TILE (ID, TILE_TYPE, COLOUR, FETCH_URL, TITLE, ICON) VALUES
         ('tile', 'count', 1, 'http://provider', 'Printer Credit', 'print'),
-        ('other-tile', 'count', 2, 'http://provider', 'Mail', 'envelope-o');
+        ('other-tile', 'count', 2, 'http://provider', 'Mail', 'envelope');
       INSERT INTO TILE_GROUP (TILE_ID, "GROUP") VALUES
         ('tile', 'anonymous'),
         ('other-tile', 'anonymous');
@@ -39,7 +39,7 @@ class TileLayoutDaoTest extends BaseSpec with OneStartAppPerSuite {
         """
       INSERT INTO TILE (ID, TILE_TYPE, COLOUR, FETCH_URL, TITLE, ICON) VALUES
         ('tile', 'count', 1, 'http://provider', 'Printer Credit', 'print'),
-        ('other-tile', 'count', 2, 'http://provider', 'Mail', 'envelope-o');
+        ('other-tile', 'count', 2, 'http://provider', 'Mail', 'envelope');
         """
       ).execute()
 

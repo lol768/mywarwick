@@ -87,7 +87,7 @@ const WeatherTable = ({ items }) =>
         <div>{formatTime(item.time)}</div>
         <div>{oneWordWeather(item.icon)}</div>
         <div>
-          <i className="fa fa-tint" /> { Math.round(item.precipProbability * 100) }%
+          <i className="fal fa-tint" /> { Math.round(item.precipProbability * 100) }%
         </div>
       </div>
     ))}

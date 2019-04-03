@@ -40,10 +40,10 @@ export class AppLayout extends React.PureComponent {
         </ID7Layout>
         {
           <TabBar selectedItem={ location.pathname } onSelectItem={ this.onSelectItem }>
-            <TabBarItem title="Me" icon="user-o" selectedIcon="user" path="/" />
+            <TabBarItem title="Me" icon="user" selectedIcon="user" path="/" />
             <TabBarItem
               title="Alerts"
-              icon="bell-o"
+              icon="bell"
               selectedIcon="bell"
               path={ `/${Routes.NOTIFICATIONS}` }
               badge={ notificationsCount }
@@ -58,8 +58,8 @@ export class AppLayout extends React.PureComponent {
             />
             {this.props.features.news ? <TabBarItem
               title="News"
-              icon="newspaper-o"
-              selectedIcon="newspaper-o"
+              icon="newspaper"
+              selectedIcon="newspaper"
               path={`/${Routes.NEWS}`}
             /> : null}
             <TabBarItem

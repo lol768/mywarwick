@@ -58,7 +58,7 @@ export default class ListGroupItem extends React.PureComponent {
         <div className="media">
           { this.props.icon &&
           <div className="media-left">
-            <i className={ `fa fa-fw fa-${this.props.icon}` } />
+            <i className={ `fal fa-fw fa-${this.props.icon}` } />
           </div> }
           <div
             className={ classNames('media-body', { 'media-body-disabled': this.props.disabled }) }

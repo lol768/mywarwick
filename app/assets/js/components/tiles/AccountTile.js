@@ -108,14 +108,14 @@ export default class AccountTile extends TileContent {
   static makeFullName(member) {
     return AccountTile.makeLineItem(
       member.fullName,
-      'fa-user-o',
+      'fa-user',
     );
   }
 
   static makeEmail(member) {
     return AccountTile.makeLineItem(
       member.email,
-      'fa-envelope-o',
+      'fa-envelope',
     );
   }
 
@@ -123,7 +123,7 @@ export default class AccountTile extends TileContent {
     const uniId = member.universityId ? `, ${member.universityId}` : '';
     return AccountTile.makeLineItem(
       `${member.userId}${uniId}`,
-      'fa-id-card-o',
+      'fa-id-card',
     );
   }
 
@@ -137,7 +137,7 @@ export default class AccountTile extends TileContent {
     }
     return AccountTile.makeLineItem(
       `${member.userType}, ${member.homeDepartment.name}`,
-      'fa-address-book-o',
+      'fa-address-book',
     );
   }
 
@@ -177,7 +177,7 @@ export default class AccountTile extends TileContent {
     if (scd) {
       return AccountTile.makeLineItem(
         `Route: ${scd.currentRoute.code.toUpperCase()} ${scd.currentRoute.name}`,
-        'fa-map-o',
+        'fa-map',
       );
     }
     return null;
@@ -188,7 +188,7 @@ export default class AccountTile extends TileContent {
     if (scd) {
       return AccountTile.makeLineItem(
         `Year of study: ${scd.levelCode}`,
-        'fa-calendar-o',
+        'fa-calendar-alt',
       );
     }
     return null;
@@ -208,7 +208,7 @@ export default class AccountTile extends TileContent {
   static makeLineItem(content, icon) {
     return (
       <li>
-        <i className={`fa fa-fw ${icon}`} />
+        <i className={`fal fa-fw ${icon}`} />
         {content}
       </li>
     );

@@ -114,7 +114,7 @@ class StreamFilterOptionView extends React.PureComponent {
                 <div className="media">
                   <div className="media-left">
                     <i
-                      className={ `fa fa-fw fa-${option.icon ? option.icon : 'cog'}` }
+                      className={ `fal fa-fw fa-${option.icon ? option.icon : 'cog'}` }
                       style={{ color: (option.colour ? option.colour : 'black') }}
                     />
                   </div>

@@ -25,9 +25,9 @@ describe('AppLayout', () => {
     result.should.include(
       <TabBar selectedItem='/' onSelectItem={() => {
       }}>
-        <TabBarItem title="Me" icon="user-o" selectedIcon="user" path="/"/>
+        <TabBarItem title="Me" icon="user" selectedIcon="user" path="/"/>
         <TabBarItem
-          title="Alerts" icon="bell-o" selectedIcon="bell" path="/alerts"
+          title="Alerts" icon="bell" selectedIcon="bell" path="/alerts"
           badge='7' isDisabled={true}
         />
         <TabBarItem
@@ -35,7 +35,7 @@ describe('AppLayout', () => {
           isDisabled={true}
         />
         <TabBarItem
-          title="News" icon="newspaper-o" selectedIcon="newspaper-o" path="/news"/>
+          title="News" icon="newspaper" selectedIcon="newspaper" path="/news"/>
         <TabBarItem title="Search" icon="search" selectedIcon="search" path="/search"/>
       </TabBar>
     );
@@ -56,8 +56,8 @@ describe('AppLayout', () => {
     // comparing JSX with JSX is a good idea
     result.should.include(
       <TabBar onSelectItem={function noRefCheck() {}} selectedItem="/" >
-        <TabBarItem icon="user-o" path="/" selectedIcon="user" title="Me" />
-        <TabBarItem badge="7" icon="bell-o" isDisabled={true} path="/alerts" selectedIcon="bell" title="Alerts" />
+        <TabBarItem icon="user" path="/" selectedIcon="user" title="Me" />
+        <TabBarItem badge="7" icon="bell" isDisabled={true} path="/alerts" selectedIcon="bell" title="Alerts" />
         <TabBarItem icon="tachometer" isDisabled={true} path="/activity" selectedIcon="tachometer" title="Activity" />
         <TabBarItem icon="search" path="/search" selectedIcon="search" title="Search" />
       </TabBar>

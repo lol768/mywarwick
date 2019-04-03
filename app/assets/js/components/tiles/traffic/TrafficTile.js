@@ -48,7 +48,7 @@ export default class TrafficTile extends TileContent {
         {
           items.length > 0 ?
             <div className="tile__item">
-              <i className={classNames('fa', 'fa-exclamation-triangle')} />
+              <i className={classNames('fal', 'fa-exclamation-triangle')} />
               <a href={items.length === 1 ? items[0].url.href : content.alerts.href}>
                 <strong className="alert-count">
                   {`${content.alerts.items.length} traffic alert` +
