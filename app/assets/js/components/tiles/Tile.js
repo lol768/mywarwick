@@ -44,7 +44,6 @@ export default class Tile extends HideableView {
     } else if (customIcon) {
       return customIcon;
     } else if (icon) {
-      console.log(icon);
       return iconJsx(`fa-${icon}`);
     }
     return iconJsx('fa-question-circle');
@@ -205,7 +204,7 @@ export default class Tile extends HideableView {
               className="tile__edit-control bottom-left tile__drag-handle"
               title="Drag to re-arrange tile"
             >
-              <div className="icon"><i className="far fa-arrows-alt" /></div>
+              <div className="icon"><i className="fal fa-arrows-alt" /></div>
             </div>
           }
 
