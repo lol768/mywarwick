@@ -15,23 +15,23 @@ export function receiveUserInfo(response) {
   return handleRedirects(response)
     .then(([data, handled]) => {
       if (!handled) {
-        store.dispatch(user.receiveSSOLinks(data.links));
-        store.dispatch(user.receiveFeatures(data.features));
-
-        const analyticsData = data.user.analytics;
-        if (analyticsData !== undefined) {
-          analyticsData.dimensions.forEach(dimension =>
-            analytics.setDimension(dimension.index, dimension.value),
-          );
-
-          analytics.setUserId(analyticsData.identifier);
-        }
-
-        analytics.ready();
-
         store.dispatch(user.userReceive(data.user)).then(() => {
           if (!data.user.authenticated) {
             window.location = data.links.login;
+          } else {
+            store.dispatch(user.receiveSSOLinks(data.links));
+            store.dispatch(user.receiveFeatures(data.features));
+
+            const analyticsData = data.user.analytics;
+            if (analyticsData !== undefined) {
+              analyticsData.dimensions.forEach(dimension =>
+                analytics.setDimension(dimension.index, dimension.value),
+              );
+
+              analytics.setUserId(analyticsData.identifier);
+            }
+
+            analytics.ready();
           }
         }).catch((e) => {
           log.error('Error receiving user data', e);

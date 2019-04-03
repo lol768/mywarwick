@@ -8,6 +8,8 @@ import play.api.libs.json.Json
 import services.SecurityService
 import warwick.sso._
 
+import scala.util.Success
+
 case class FlexiPickerQuery(
   query: String,
   exact: Boolean,
@@ -99,6 +101,12 @@ class FlexiPickerController @Inject()(
 
       if (results.length < EnoughResults)
         results ++= usersMatching(Usercode -> word)
+
+      if (!results.exists(u => u.usercode.string == query))
+        results ++= (userLookupService.getUser(warwick.sso.Usercode(query)) match {
+          case Success(v) => Seq(v)
+          case _ => Seq()
+        })
     }
 
     results.sortBy(_.name.full)
