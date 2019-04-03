@@ -43,7 +43,8 @@ class WebSocketActor(out: ActorRef, pubsub: ActorRef, loginContext: LoginContext
   override def receive = {
     case Notification(activity) => out ! Json.obj(
       "type" -> "activity",
-      "activity" -> activity
+      "activity" -> activity,
+      "user" -> JsString(loginContext.user.map(u => u.usercode.string).getOrElse("Anonymous"))
     )
     case SubscribeAck(Subscribe(topic, group, ref)) =>
       log.debug(s"WebSocket subscribed to PubSub messages on the topic of '$topic'")

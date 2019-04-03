@@ -11,14 +11,18 @@ export default class SocketDataPipe extends DataPipe {
     const port = window.location.port ? `:${location.port}` : '';
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     this.url = options.url || (`${protocol}//${window.location.hostname}${port}${options.path}`);
+    this.initialiseSocket();
+    this.messageId = 0;
+    this.subscribers = [];
+    this.onopen = () => ({});
+  }
+
+  initialiseSocket() {
     this.ws = new RestartableWebSocket(this.url);
     this.ws.onmessage = this.messageReceived.bind(this);
     this.ws.onopen = () => {
       this.onopen();
     };
-    this.onopen = () => ({});
-    this.messageId = 0;
-    this.subscribers = [];
   }
 
   /**
@@ -45,5 +49,11 @@ export default class SocketDataPipe extends DataPipe {
 
   connect() {
 
+  }
+
+  reconnect() {
+    log.debug('Received request to reconnect WS...');
+    this.ws.close();
+    this.initialiseSocket();
   }
 }
