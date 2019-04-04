@@ -5,7 +5,7 @@ import actors.MessageProcessing.ProcessingResult
 import models.MessageSend.Heavy
 import models.Platform.WebPush
 import models.messaging.Subscription
-import nl.martijndwars.webpush.{Notification, PushService}
+import nl.martijndwars.webpush.{Notification, PushService, Utils}
 import play.api.Configuration
 import play.api.db.{Database, NamedDatabase}
 import play.api.libs.json.Json
@@ -20,13 +20,20 @@ class WebPushOutputService @Inject()(
   configuration: Configuration
 )(implicit @Named("mobile") ec: ExecutionContext) extends OutputService with Logging {
 
-  val apiKey = configuration.getOptional[String]("mywarwick.fcm.apiKey")
-    .getOrElse(throw new IllegalStateException("Missing FCM API key - set mywarwick.fcm.apiKey"))
+  private val vapidSubject = configuration.get[String]("mywarwick.vapid.subject")
+  private val vapidPrivateKey = configuration.get[String]("mywarwick.vapid.privateKey")
+  private val vapidPublicKey = configuration.get[String]("mywarwick.vapid.publicKey")
 
+  import org.bouncycastle.jce.provider.BouncyCastleProvider
+  import java.security.Security
+
+  Security.addProvider(new BouncyCastleProvider)
   val pushService = new PushService
-  pushService.setGcmApiKey(apiKey)
+  pushService.setSubject(vapidSubject)
+  pushService.setPrivateKey(Utils.loadPrivateKey(vapidPrivateKey))
+  pushService.setPublicKey(Utils.loadPublicKey(vapidPublicKey))
 
-  override def send(message: Heavy) = db.withConnection { implicit c =>
+  override def send(message: Heavy): Future[ProcessingResult] = db.withConnection { implicit c =>
     val futures = pushRegistrationDao.getPushRegistrationsForUser(message.user.usercode)
       .filter(_.platform == WebPush)
       .flatMap(registration => Json.parse(registration.token).validate[Subscription].asOpt)

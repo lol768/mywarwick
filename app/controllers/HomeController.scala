@@ -24,6 +24,8 @@ class HomeController @Inject()(
     configuration.getOptional[String]("mywarwick.search.root").map(SearchRootUrl)
       .getOrElse(throw new IllegalStateException("Search root URL not configured - check mywarwick.search.root property"))
 
+  implicit val vapidPublicKey: String = configuration.get[String]("mywarwick.vapid.publicKey")
+
   def index = Action { implicit request =>
     Ok(views.html.index())
   }
