@@ -606,7 +606,7 @@ class SettingsView extends HideableView {
             {SettingsView.canLaunchTour() &&
             <ListGroupItemBtn handler={SettingsView.launchTour}>
               {SettingsView.renderSetting(
-                'arrow-circle-o-right',
+                'arrow-alt-circle-right',
                 'Take a tour',
                 <FAChevronRight />,
               )}
