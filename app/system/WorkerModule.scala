@@ -9,7 +9,7 @@ import play.api.libs.concurrent.AkkaGuiceSupport
   */
 class WorkerModule extends AbstractModule with AkkaGuiceSupport {
 
-  def configure = {
+  override def configure(): Unit = {
     // bindActor is eager so this creates the actor straight away
     bindActor[WorkerActor]("worker")
   }

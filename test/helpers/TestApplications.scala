@@ -7,6 +7,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.routing.{Router, SimpleRouter}
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
+import services.elasticsearch.{ActivityESService, ESClientConfig}
 import services.messaging.MobileOutputService
 import services.{CookieSSOClient, NullMobileOutputService, SchedulerService}
 import system.{DatabaseDialect, H2DatabaseDialect, NullCacheModule}
@@ -52,6 +53,7 @@ object TestApplications {
         bind[SSOClient].to[MockSSOClient],
         bind[DatabaseDialect].to[H2DatabaseDialect],
         bind[SchedulerService].to[MockSchedulerService],
+        bind[ActivityESService].to[MockActivityESService],
 
         // Allows putting test versions of migrations under test/resources/evolutions/default
         bind[EvolutionsReader].toInstance(new ClassLoaderEvolutionsReader())

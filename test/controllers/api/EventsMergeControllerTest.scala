@@ -2,14 +2,13 @@ package controllers.api
 
 import helpers.{BaseSpec, WithActorSystem}
 import models.{API, Tile, TileInstance}
-import org.mockito.Matchers
-import org.scalatest.mockito.MockitoSugar
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers.{eq => isEq, _}
 import org.mockito.Mockito._
+import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.{JsArray, JsDefined, Json}
 import play.api.mvc._
-import play.api.test.Helpers._
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import services.{SecurityService, SecurityServiceImpl, TileContentService, TileService}
 import warwick.sso._
 
@@ -38,32 +37,32 @@ class EventsMergeControllerTest extends BaseSpec with MockitoSugar with Results 
     val security: SecurityService = new SecurityServiceImpl(mockSSOClient, mock[BasicAuth], PlayBodyParsers())
     val controller = new EventsMergeController(tileService, tileContentService, security)
 
-    val uniEventTile = TileInstance(Tile("uni-events", "type", 0, None, "title", None, 0), None, false)
-    val calendarTile = TileInstance(Tile("calendar", "type", 0, None, "title", None, 0), None, false)
-    val sportsTile = TileInstance(Tile("sports", "type", 0, None, "title", None, 0), None, false)
-    val timetableTile = TileInstance(Tile("timetable", "type", 0, None, "title", None, 0), None, false)
+    val uniEventTile = TileInstance(Tile("uni-events", "type", 0, None, "title", None, 0), None, removed = false)
+    val calendarTile = TileInstance(Tile("calendar", "type", 0, None, "title", None, 0), None, removed = false)
+    val sportsTile = TileInstance(Tile("sports", "type", 0, None, "title", None, 0), None, removed = false)
+    val timetableTile = TileInstance(Tile("timetable", "type", 0, None, "title", None, 0), None, removed = false)
 
     val tileInstances: Seq[TileInstance] = Seq(uniEventTile, calendarTile, sportsTile, timetableTile)
     when(tileService.getTilesForUser(any())).thenReturn(tileInstances)
 
 
     val calendarJson = Json.arr(Json.obj("calendarOne" -> 1, "start" -> "2"))
-    when(tileContentService.getTileContent(any(), Matchers.eq(calendarTile)))
+    when(tileContentService.getTileContent(any(), isEq(calendarTile)))
       .thenReturn(Future.successful(API.Success(data = Json.obj(
         "items" -> calendarJson
       ))))
     val timetableJson = Json.arr(Json.obj("timetableOne" -> 1, "start" -> "4"))
-    when(tileContentService.getTileContent(any(), Matchers.eq(timetableTile)))
+    when(tileContentService.getTileContent(any(), isEq(timetableTile)))
       .thenReturn(Future.successful(API.Success(data = Json.obj(
         "items" -> timetableJson
       ))))
     val sportsJson = Json.arr(Json.obj("sportsOne" -> 1, "start" -> "3"))
-    when(tileContentService.getTileContent(any(), Matchers.eq(sportsTile)))
+    when(tileContentService.getTileContent(any(), isEq(sportsTile)))
       .thenReturn(Future.successful(API.Success(data = Json.obj(
         "items" -> sportsJson
       ))))
     val uniEventJson = Json.arr(Json.obj("uniEventOne" -> 1, "start" -> "1"))
-    when(tileContentService.getTileContent(any(), Matchers.eq(uniEventTile)))
+    when(tileContentService.getTileContent(any(), isEq(uniEventTile)))
       .thenReturn(Future.successful(API.Success(data = Json.obj(
         "items" -> uniEventJson
       ))))

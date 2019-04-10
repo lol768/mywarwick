@@ -2,11 +2,10 @@ package services
 
 import helpers.{BaseSpec, Fixtures}
 import models.Audience
-import org.mockito.Matchers
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers.{eq => isEq, _}
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import play.api.libs.json.{JsArray, JsObject, JsString}
+import play.api.libs.json.{JsArray, JsString}
 import services.dao._
 import uk.ac.warwick.userlookup.UserLookupException
 import warwick.sso._
@@ -225,7 +224,7 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
     }
 
     "combine opt-in components" in new Ctx {
-      when(newsOptInDao.getUsercodes(Matchers.eq(LocationOptIn.CentralCampusResidences))(Matchers.any())).thenReturn(Set(
+      when(newsOptInDao.getUsercodes(isEq(LocationOptIn.CentralCampusResidences))(any())).thenReturn(Set(
         Usercode("cusfal"),
         Usercode("cusebr"),
         Usercode("cuscao")
@@ -241,10 +240,10 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
     }
 
     "validate both usercodes and university ids" in new Ctx {
-      val codes = Seq("cusebh", "cusjau")
+      private val codes = Seq("cusebh", "cusjau")
       val validId = "0123456"
       val invalidId = "1234567"
-      val ids = Seq(validId, invalidId)
+      private val ids = Seq(validId, invalidId)
       val codesAndIds: Seq[String] = codes ++ ids
 
       when(userLookup.getUsers(any[Seq[Usercode]]))
@@ -253,16 +252,16 @@ class AudienceServiceTest extends BaseSpec with MockitoSugar {
         .thenReturn(Try(Seq(UniversityID(validId) -> Fixtures.user.makeFoundUser(validId)).toMap))
       when(userLookup.getUsers(Seq.empty[UniversityID])).thenReturn(Failure(new UserLookupException))
 
-      val actual = service.validateUsers(codesAndIds.toSet)
+      private val actual = service.validateUsers(codesAndIds.toSet)
       actual must be (Left(Set(invalidId)))
     }
 
     "handle prepending 'u' to uni ids" in new Ctx {
-      val validUsercode = Seq("u1234567")
+      private val validUsercode = Seq("u1234567")
 
       val bobsId = UniversityID("7654321")
       val bobsUsercode = Usercode("pacman")
-      val bobsIdDisguisedAsUsercode = Seq(s"u${bobsId.string}")
+      private val bobsIdDisguisedAsUsercode = Seq(s"u${bobsId.string}")
 
       val codes: Seq[String] = validUsercode ++ bobsIdDisguisedAsUsercode
 

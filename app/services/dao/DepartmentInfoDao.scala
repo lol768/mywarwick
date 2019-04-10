@@ -1,7 +1,7 @@
 package services.dao
 
-import javax.inject.{Inject, Named}
 import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Named}
 import play.api.Mode.Dev
 import play.api.libs.json._
 import play.api.libs.ws.{WSClient, WSRequest}
@@ -9,8 +9,8 @@ import play.api.{Configuration, Environment}
 import system.Logging
 import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
 
-import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext}
 
 case class DepartmentInfo(
   code: String,
@@ -22,7 +22,7 @@ case class DepartmentInfo(
 )
 
 object DepartmentInfo {
-  implicit val jsReads = Json.reads[DepartmentInfo]
+  implicit val jsReads: Reads[DepartmentInfo] = Json.reads[DepartmentInfo]
 }
 
 @ImplementedBy(classOf[WsDepartmentInfoDao])
@@ -36,7 +36,7 @@ class WsDepartmentInfoDao @Inject()(
   environment: Environment
 )(implicit @Named("externalData") ec: ExecutionContext) extends DepartmentInfoDao with Logging {
 
-  val factory = new SingularCacheEntryFactory[String, List[DepartmentInfo]] {
+  private val factory = new SingularCacheEntryFactory[String, List[DepartmentInfo]] {
     override def shouldBeCached(value: List[DepartmentInfo]): Boolean = true
 
     override def create(key: String): List[DepartmentInfo] = {
@@ -50,7 +50,9 @@ class WsDepartmentInfoDao @Inject()(
     }
   }
 
-  val cache = Caches.newCache("departmentInfo", factory, 24.hours.toSeconds)
+  private val cache = Caches.builder("departmentInfo", factory)
+    .expireAfterWrite(java.time.Duration.ofHours(24))
+    .build
 
   if (environment.mode == Dev) {
     cache.clear()

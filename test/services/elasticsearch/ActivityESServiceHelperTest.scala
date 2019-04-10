@@ -1,7 +1,5 @@
 package services.elasticsearch
 
-import java.time.{LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
-
 import helpers.BaseSpec
 import org.joda.time.{DateTime, DateTimeUtils, Interval}
 import org.scalatest.mockito.MockitoSugar
@@ -53,8 +51,9 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
       )
 
       val result = ActivityESServiceHelper.elasticSearchContentBuilderFromActivityDocument(activityDoc)
+      result.flush()
 
-      result.string() must be("""{"activity_id":"test0","provider_id":"test1","activity_type":"test2","title":"test3","url":"test4","text":"test5","replaced_by":"test6","published_at":"1970-01-01T00:00:00.000Z","publisher":"test1","resolved_users":["user1","user2"],"audience_components":["component1","component2"],"api":true,"created_at":"1970-01-01T00:00:10.000Z","created_by":"custard"}""")
+      result.getOutputStream.toString must be("""{"activity_id":"test0","provider_id":"test1","activity_type":"test2","title":"test3","url":"test4","text":"test5","replaced_by":"test6","published_at":"1970-01-01T00:00:00.000Z","publisher":"test1","resolved_users":["user1","user2"],"audience_components":["component1","component2"],"api":true,"created_at":"1970-01-01T00:00:10.000Z","created_by":"custard"}""")
 
     }
 
@@ -205,7 +204,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     "should have correct must term query for activity id" in {
 
-      var query = ActivityESSearch.SearchQuery(Some("sdflsdkfj-sdflksdjf_1231"))
+      val query = ActivityESSearch.SearchQuery(Some("sdflsdkfj-sdflksdjf_1231"))
       val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
 
       val expect = Json.parse(
@@ -235,7 +234,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     "should have correct must query for provider id" in {
 
-      var query = ActivityESSearch.SearchQuery(None, Some("super-provider_id-id"))
+      val query = ActivityESSearch.SearchQuery(None, Some("super-provider_id-id"))
       val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
 
       val expect = Json.parse(
@@ -263,7 +262,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     "should have correct must term query for activity type" in {
 
-      var query = ActivityESSearch.SearchQuery(None, None, Some("cool-activity-type"))
+      val query = ActivityESSearch.SearchQuery(None, None, Some("cool-activity-type"))
       val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
 
       val expect = Json.parse(
@@ -291,7 +290,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     "should have correct must term query for publisher" in {
 
-      var query = ActivityESSearch.SearchQuery(
+      val query = ActivityESSearch.SearchQuery(
         publisher = Some("cool-publisher")
       )
       val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
@@ -322,7 +321,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     "should have correct must match query for text" in {
 
-      var query = ActivityESSearch.SearchQuery(text = Some("this and that"))
+      val query = ActivityESSearch.SearchQuery(text = Some("this and that"))
       val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
 
       val expect = Json.parse(
@@ -340,6 +339,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
                       "fuzzy_transpositions": true,
                       "lenient": false,
                       "zero_terms_query": "NONE",
+                      "auto_generate_synonyms_phrase_query": true,
                       "boost": 1
                     }
                   }
@@ -357,7 +357,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     "should have correct must match query for title" in {
 
-      var query = ActivityESSearch.SearchQuery(title = Some("wonderful title"))
+      val query = ActivityESSearch.SearchQuery(title = Some("wonderful title"))
       val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
 
       val expect = Json.parse(
@@ -375,6 +375,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
                       "fuzzy_transpositions": true,
                       "lenient": false,
                       "zero_terms_query": "NONE",
+                      "auto_generate_synonyms_phrase_query": true,
                       "boost": 1
                     }
                   }
@@ -392,9 +393,9 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     "should have correct must query for published_at time range" in {
 
-      var range = new Interval(DateTime.parse("2017-09-13T12:33:28.855Z"), DateTime.parse("2017-09-13T12:35:28.855Z"))
+      val range = new Interval(DateTime.parse("2017-09-13T12:33:28.855Z"), DateTime.parse("2017-09-13T12:35:28.855Z"))
 
-      var query = ActivityESSearch.SearchQuery(
+      val query = ActivityESSearch.SearchQuery(
         publish_at = Some(range)
       )
       val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
@@ -428,7 +429,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
 
     "should have correct must term query for url" in {
 
-      var query = ActivityESSearch.SearchQuery(
+      val query = ActivityESSearch.SearchQuery(
         url = Some("https://fake.fake.com")
       )
       val result = ActivityESServiceSearchHelper.makeBoolQueryBuilder(query)
@@ -483,6 +484,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
                              "fuzzy_transpositions": true,
                              "lenient": false,
                              "zero_terms_query": "NONE",
+                             "auto_generate_synonyms_phrase_query": true,
                              "boost": 1
                            }
                          }
@@ -497,6 +499,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
                              "fuzzy_transpositions": true,
                              "lenient": false,
                              "zero_terms_query": "NONE",
+                             "auto_generate_synonyms_phrase_query": true,
                              "boost": 1
                            }
                          }
@@ -511,6 +514,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
                              "fuzzy_transpositions": true,
                              "lenient": false,
                              "zero_terms_query": "NONE",
+                             "auto_generate_synonyms_phrase_query": true,
                              "boost": 1
                            }
                          }
@@ -525,6 +529,7 @@ class ActivityESServiceHelperTest extends BaseSpec with MockitoSugar {
                              "fuzzy_transpositions": true,
                              "lenient": false,
                              "zero_terms_query": "NONE",
+                             "auto_generate_synonyms_phrase_query": true,
                              "boost": 1
                            }
                          }

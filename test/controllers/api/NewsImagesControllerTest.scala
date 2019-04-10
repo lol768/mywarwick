@@ -2,15 +2,14 @@ package controllers.api
 
 import java.io.{File, FileInputStream}
 
-import helpers.{MinimalAppPerSuite, OneStartAppPerSuite, TestApplications, WithActorSystem}
+import helpers.MinimalAppPerSuite
 import org.apache.commons.io.FileUtils
 import org.joda.time.DateTime
-import org.mockito.Matchers
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers.{eq => isEq, _}
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.cache.{AsyncCacheApi, CacheApi}
+import play.api.cache.AsyncCacheApi
 import play.api.libs.Files.{TemporaryFile, TemporaryFileCreator}
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc._
@@ -21,15 +20,15 @@ import services.dao.NewsImage
 import system.NullCacheApi
 import warwick.sso._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results with MinimalAppPerSuite {
 
-  val temporaryFileCreator = app.injector.instanceOf[TemporaryFileCreator]
+  private val temporaryFileCreator = app.injector.instanceOf[TemporaryFileCreator]
 
-  val ron = Users.create(usercode = Usercode("ron"))
+  private val ron = Users.create(usercode = Usercode("ron"))
 
   val mockSSOClient = new MockSSOClient(new LoginContext {
     override val user: Option[User] = Some(ron)
@@ -48,7 +47,7 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
   private val imageManipulator = mock[NoopImageManipulator]
   private val publisherService = mock[PublisherService]
   val cache: AsyncCacheApi = new NullCacheApi
-  val controller = new NewsImagesController(
+  private val controller: NewsImagesController = new NewsImagesController(
     securityService,
     service,
     imageManipulator,
@@ -56,13 +55,13 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
     cache.sync
   ) {
     override val navigationService = new MockNavigationService()
-    override val ssoClient = mockSSOClient
+    override val ssoClient: SSOClient = mockSSOClient
 
     setControllerComponents(get[ControllerComponents])
   }
 
   val frog = new File("test/resources/frog.jpg")
-  val tempFile = File.createTempFile("frog", ".jpg")
+  private val tempFile = File.createTempFile("frog", ".jpg")
   tempFile.deleteOnExit()
   FileUtils.copyFile(frog, tempFile, true)
 
@@ -118,7 +117,7 @@ class NewsImagesControllerTest extends PlaySpec with MockitoSugar with Results w
       status(result) mustBe OK
       headers(result).get("Content-Disposition") mustBe Some("inline")
 
-      verify(imageManipulator).resizeToWidth(any(), Matchers.eq(100))
+      verify(imageManipulator).resizeToWidth(any(), isEq(100))
     }
 
   }

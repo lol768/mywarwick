@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object ExternalServers {
 
-  def runServer[A](handler: Handler)(block: (Int) => A): A = {
+  def runServer[A](handler: Handler)(block: Int => A): A = {
     val port = 19000 // pick a random port?
     val server = new Server(port)
     try {
@@ -32,7 +32,7 @@ object ExternalServers {
     * Run a TCP server that on connection prints some
     * text and closes the connection.
     */
-  def runBrokenServer[A](block: (Int) => A): A = {
+  def runBrokenServer[A](block: Int => A): A = {
     val port = 19000
     managed(new ServerSocket(port)).acquireAndGet { acceptor =>
       @volatile var run = true
@@ -50,16 +50,16 @@ object ExternalServers {
   }
 
   case class Response(body: String, status: Int = 200, headers:Map[String,String] = Map()) {
-    def json = copy(headers = headers.updated("Content-Type", "application/json"))
+    def json: Response = copy(headers = headers.updated("Content-Type", "application/json"))
   }
   object Response {
-    def json(value: JsValue) = Response(Json.stringify(value)).json
+    def json(value: JsValue): Response = Response(Json.stringify(value)).json
   }
 
   object JettyHandler {
     def apply(routes: PartialFunction[(String, String), Response]): Handler = new AbstractHandler {
       override def handle(s: String, req: server.Request, request: HttpServletRequest, res: HttpServletResponse): Unit = {
-        routes.lift.apply(req.getMethod.toUpperCase, req.getRequestURI) match {
+        routes.lift.apply((req.getMethod.toUpperCase, req.getRequestURI)) match {
           case Some(result) =>
             res.setStatus(result.status)
             for ((key, value) <- result.headers) {

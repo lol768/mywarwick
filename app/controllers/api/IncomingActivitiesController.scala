@@ -2,8 +2,8 @@ package controllers.api
 
 import java.util.UUID
 import java.util.concurrent.TimeUnit
-import javax.inject.Singleton
 
+import javax.inject.Singleton
 import actors.MessageProcessing.UsersNotFound
 import com.google.inject.Inject
 import controllers.MyController
@@ -12,7 +12,7 @@ import models.publishing.Ability.CreateAPINotifications
 import models.{Audience, _}
 import play.api.i18n.I18nSupport
 import play.api.libs.json._
-import play.api.mvc.Result
+import play.api.mvc.{Action, Result}
 import services.ActivityError.{InvalidProviderId, InvalidUsercodeAudience}
 import services._
 import services.messaging._
@@ -38,7 +38,7 @@ class IncomingActivitiesController @Inject()(
     publisherService.getRoleForUser(publisherId, usercode).can(CreateAPINotifications) &&
       activityService.getProvider(providerId).exists(_.transientPush)
 
-  def transientPushNotification(providerId: String) = APIAction(parse.json).async { implicit request =>
+  def transientPushNotification(providerId: String): Action[JsValue] = APIAction(parse.json).async { implicit request =>
     publisherService.getParentPublisherId(providerId) match {
       case Some(publisherId) =>
         val user = request.context.user.get
@@ -52,7 +52,7 @@ class IncomingActivitiesController @Inject()(
                 Some(publisherId),
                 providerId,
                 `type`,
-                ttl = if (ttl.nonEmpty) Some(FiniteDuration(ttl.get, TimeUnit.SECONDS)) else None,
+                ttl = if (ttl.nonEmpty) Some(FiniteDuration(ttl.get.toLong, TimeUnit.SECONDS)) else None,
                 channel,
                 priority,
                 transient = true
@@ -70,11 +70,11 @@ class IncomingActivitiesController @Inject()(
     }
   }
 
-  def postActivity(providerId: String) = APIAction(parse.json) { implicit request =>
+  def postActivity(providerId: String): Action[JsValue] = APIAction(parse.json) { implicit request =>
     postItem(providerId, shouldNotify = false)
   }
 
-  def postNotification(providerId: String) = APIAction(parse.json) { implicit request =>
+  def postNotification(providerId: String): Action[JsValue] = APIAction(parse.json) { implicit request =>
     postItem(providerId, shouldNotify = true)
   }
 
@@ -98,10 +98,10 @@ class IncomingActivitiesController @Inject()(
               } else {
                 val validUsercodeAudiences = usercodesAudiences.map { usercodesAudience => UsercodesAudience(usercodesAudience.getLikelyValidUsercodes) }
 
-                val warnings: Seq[ActivityError] = validUsercodeAudiences.flatten(_.usercodes).size != usercodesAudiences.flatMap(_.usercodes).size match {
-                  case true =>
-                    Seq(InvalidUsercodeAudience(usercodesAudiences.flatMap(_.getLikelyInvalidUsercodes)))
-                  case _ => Seq.empty
+                val warnings: Seq[ActivityError] = if (validUsercodeAudiences.flatten(_.usercodes).size != usercodesAudiences.flatMap(_.usercodes).size) {
+                  Seq(InvalidUsercodeAudience(usercodesAudiences.flatMap(_.getLikelyInvalidUsercodes)))
+                } else {
+                  Seq.empty
                 }
 
                 val webGroupAudiences: Seq[Audience.WebGroupAudience] = data.recipients.groups.getOrElse(Seq.empty).map(GroupName).map(Audience.WebGroupAudience)

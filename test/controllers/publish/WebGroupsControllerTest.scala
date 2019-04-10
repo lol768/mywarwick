@@ -6,15 +6,14 @@ import models.publishing.Publisher
 import models.publishing.PublishingRole.NewsManager
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import play.api.cache.CacheApi
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
 import services.{PublisherService, SecurityServiceImpl}
 import warwick.sso._
 
-import scala.util.Success
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Success
 
 class WebGroupsControllerTest extends BaseSpec with MockitoSugar with Results with WithActorSystem {
 
@@ -66,7 +65,7 @@ class WebGroupsControllerTest extends BaseSpec with MockitoSugar with Results wi
     "filter the list of WebGroups by departments accessible to the publisher" in {
       when(publisherService.getPermissionScope("test")).thenReturn(Departments(Seq("CS")))
       when(groupService.getGroupsForQuery("elab")).thenReturn(Success(Seq(
-        Fixtures.user.makeGroup(name = "in-elab"),
+        Fixtures.user.makeGroup(),
         Fixtures.user.makeGroup(name = "cs-elab", title = "Programming for Computer Scientists", department = "CS")
       )))
 

@@ -3,11 +3,10 @@ package controllers.api
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber
 import helpers.WithActorSystem
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.cache.CacheApi
 import play.api.libs.json.{JsNull, JsString, Json}
 import play.api.mvc.PlayBodyParsers
 import play.api.test.FakeRequest
@@ -33,7 +32,7 @@ class SmsNotificationsPrefControllerTest extends PlaySpec with MockitoSugar with
 
   trait Fixture {
     protected val smsNotificationsPrefService: SmsNotificationsPrefService = mock[SmsNotificationsPrefService]
-    protected val controller = new SmsNotificationsPrefController(
+    protected val controller: SmsNotificationsPrefController = new SmsNotificationsPrefController(
       securityService,
       smsNotificationsPrefService
     ) {
