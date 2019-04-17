@@ -3,7 +3,7 @@ package services.elasticsearch
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named, Singleton}
 import org.elasticsearch.action.search.{ClearScrollRequest, SearchRequest, SearchScrollRequest}
-import org.elasticsearch.client.RestHighLevelClient
+import org.elasticsearch.client.{RequestOptions, RestHighLevelClient}
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
 import org.elasticsearch.rest.RestStatus
@@ -32,7 +32,7 @@ class ClientESServiceImpl @Inject()(
   private val scrollSize = 5000
     
   def available: Boolean = try {
-    client.ping()
+    client.ping(RequestOptions.DEFAULT)
   } catch {
     case e: Exception =>
       logger.error("Exception testing CLogS availability", e)
@@ -46,7 +46,7 @@ class ClientESServiceImpl @Inject()(
     scrollId.map { id =>
       val clearScrollRequest = new ClearScrollRequest
       clearScrollRequest.addScrollId(id)
-      client.clearScroll(clearScrollRequest)
+      client.clearScroll(clearScrollRequest, RequestOptions.DEFAULT)
     }
   }
   
@@ -81,7 +81,7 @@ class ClientESServiceImpl @Inject()(
     searchRequest.source(searchSourceBuilder)
     searchRequest.scroll(scroll)
     
-    val response = client.search(searchRequest)
+    val response = client.search(searchRequest, RequestOptions.DEFAULT)
     if (response.status == RestStatus.OK) {
       logger.debug(s"CLogS has ${response.getHits.totalHits} hits\nFirst lookup (hits 1 - ${scrollSize - 1}")
       var scrollId = Option(response.getScrollId)
@@ -91,12 +91,12 @@ class ClientESServiceImpl @Inject()(
       
       while (searchHits.nonEmpty) {
         results ++= searchHits.map(UserAccess.fromESSearchHit)
-        round += 1;
+        round += 1
         logger.debug(s"Scroll $round (hits ${round * scrollSize}-${(round + 1) * scrollSize - 1})")
 
         val scrollRequest = new SearchScrollRequest(scrollId.getOrElse(""))
         scrollRequest.scroll(scroll)
-        val searchResponse = client.searchScroll(scrollRequest)
+        val searchResponse = client.scroll(scrollRequest, RequestOptions.DEFAULT)
         scrollId = Option(searchResponse.getScrollId)
         searchHits = Option(searchResponse.getHits.getHits).getOrElse(Array.empty)
       }
@@ -116,4 +116,4 @@ class ClientESServiceImpl @Inject()(
   }
 }
 
-case class ClientAccessData(val duration: Duration, val accesses: Seq[UserAccess])
+case class ClientAccessData(duration: Duration, accesses: Seq[UserAccess])

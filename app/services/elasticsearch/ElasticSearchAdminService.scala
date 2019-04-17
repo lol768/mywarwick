@@ -6,7 +6,7 @@ import javax.ws.rs.HttpMethod
 import com.google.inject.ImplementedBy
 import org.elasticsearch.client.{Response, RestClient}
 import play.api.libs.json.JsValue
-
+import scala.language.implicitConversions
 import scala.concurrent.Future
 
 @ImplementedBy(classOf[ElasticSearchAdminServiceImpl])
@@ -18,13 +18,13 @@ trait ElasticSearchAdminService {
 
   def getTemplate(name: String): Future[Response]
 
-  def getAllTemplates(): Future[Response]
+  def getAllTemplates: Future[Response]
 
   def hasTemplate(name: String): Future[Response]
 
   def getIndex(name: String): Future[Response]
 
-  def getAllIndices(): Future[Response]
+  def getAllIndices: Future[Response]
   //TODO other options that we need
 
 }
@@ -73,7 +73,7 @@ class ElasticSearchAdminServiceImpl @Inject()(
     )
   }
 
-  override def getAllTemplates(): Future[Response] = {
+  override def getAllTemplates: Future[Response] = {
     getTemplate("")
   }
 
@@ -87,7 +87,7 @@ class ElasticSearchAdminServiceImpl @Inject()(
     )
   }
 
-  override def getIndex(name: String) = {
+  override def getIndex(name: String): Future[Response] = {
     performRequestAsync(
       HttpMethod.GET,
       path = s"/$name",
@@ -95,7 +95,7 @@ class ElasticSearchAdminServiceImpl @Inject()(
     )
   }
 
-  override def getAllIndices() = {
+  override def getAllIndices: Future[Response] = {
     getIndex("*")
   }
 }

@@ -5,7 +5,7 @@ import models.Audience
 import models.Audience.{Residence, ResidenceAudience}
 import models.publishing.PermissionScope.{AllDepartments, Departments}
 import models.publishing.Publisher
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar

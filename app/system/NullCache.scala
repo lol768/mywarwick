@@ -1,8 +1,8 @@
 package system
 
 import akka.Done
-import com.google.inject.{AbstractModule, Provides, Singleton}
-import play.api.cache.{AsyncCacheApi, CacheApi, DefaultSyncCacheApi, SyncCacheApi}
+import com.google.inject.{AbstractModule, Singleton}
+import play.api.cache.{AsyncCacheApi, SyncCacheApi}
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
@@ -31,7 +31,7 @@ class NullCacheApi extends AsyncCacheApi {
 
 class NullCacheModule extends AbstractModule {
 
-  override def configure() = {
+  override def configure(): Unit = {
     val cache = new NullCacheApi()
     bind(classOf[AsyncCacheApi]).toInstance(cache)
     bind(classOf[SyncCacheApi]).toInstance(cache.sync)

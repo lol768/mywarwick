@@ -106,7 +106,7 @@ class ActivityMuteDaoImpl extends ActivityMuteDao {
       q.append(s"""
         AND USERCODE IN ({usercodes})
       """)
-      args.append(NamedParameter.string("usercodes", recipients.map(_.string)))
+      args.append("usercodes" -> recipients.map(_.string))
     }
 
     SQL(q.mkString)

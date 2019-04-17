@@ -1,9 +1,9 @@
 package services.elasticsearch
 
 import javax.inject.Inject
-
 import org.elasticsearch.action.bulk.BulkRequest
 import org.elasticsearch.action.index.IndexRequest
+import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.common.xcontent.XContentFactory
 import org.scalatestplus.play.PlaySpec
 import play.api.Configuration
@@ -32,7 +32,7 @@ class ESClientConfigTest @Inject()(Action: DefaultActionBuilder) extends PlaySpe
         val content = XContentFactory.jsonBuilder().startObject.endObject
         val writeReq = new IndexRequest("tweets", "tweet", "1").source(content)
         val req = new BulkRequest().add(writeReq)
-        config.highLevelClient.bulk(req)
+        config.highLevelClient.bulk(req, RequestOptions.DEFAULT)
       }
     }
   }

@@ -1,11 +1,8 @@
 import java.util.logging.Level
 
-import helpers.FuncTestBase
 import helpers.remote.RemoteFuncTestBase
-import org.scalatest.BeforeAndAfter
-import org.scalatestplus.play.{BrowserInfo, PortNumber}
+import org.scalatestplus.play.BrowserInfo
 import play.api.test.TestBrowser
-import uk.ac.warwick.util.web.Uri
 
 import scala.collection.JavaConverters._
 
@@ -33,7 +30,7 @@ class BasicFuncTest extends RemoteFuncTestBase {
     }
 
     "A real user" should {
-      s"see a cool home page ${info.name}" taggedAs(MobileTest) in withScreenshot {
+      s"see a cool home page ${info.name}" taggedAs MobileTest in withScreenshot {
         signInAs(config.users.student1)
 
         go to homepage
@@ -51,7 +48,7 @@ class BasicFuncTest extends RemoteFuncTestBase {
         capture to browserScreenshot(info, "Signed in mobile homepage")
       }
 
-      s"see some notifications ${info.name}" taggedAs(MobileTest) in withScreenshot {
+      s"see some notifications ${info.name}" taggedAs MobileTest in withScreenshot {
         signInAs(config.users.student1)
         go to notifications
         soon {
@@ -71,8 +68,8 @@ class BasicFuncTest extends RemoteFuncTestBase {
   private def printLogs(browser: TestBrowser): Unit = {
     val logs = browser.manage.logs
     for (logtype <- logs.getAvailableLogTypes.asScala) {
-      println(s"-- Examining ${logtype} logs --")
-      for (entry <- logs.get(logtype).filter(Level.INFO).asScala) {
+      println(s"-- Examining $logtype logs --")
+      for (entry <- logs.get(logtype).getAll.asScala.filter(_.getLevel.intValue() >= Level.INFO.intValue())) {
         println(s"[${entry.getTimestamp}] - ${entry.getLevel} - ${entry.getMessage}")
       }
     }

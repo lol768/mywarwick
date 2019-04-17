@@ -1,11 +1,12 @@
 package views.utils
 // From Tabula
 
-import com.vladsch.flexmark.ast.{LinkNode, Node}
+import com.vladsch.flexmark.ast.LinkNode
 import com.vladsch.flexmark.ext.autolink.AutolinkExtension
 import com.vladsch.flexmark.html.renderer.{AttributablePart, LinkResolverContext}
 import com.vladsch.flexmark.html.{AttributeProvider, HtmlRenderer, IndependentAttributeProviderFactory}
 import com.vladsch.flexmark.parser.Parser
+import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.html.Attributes
 import com.vladsch.flexmark.util.options.MutableDataHolder
 import play.twirl.api.Html

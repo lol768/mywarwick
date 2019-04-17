@@ -3,8 +3,7 @@ package services
 import helpers.{BaseSpec, Fixtures, MockSchedulerService}
 import models.{Audience, _}
 import org.joda.time.DateTime
-import org.mockito.Matchers
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.{eq => isEq, _}
 import org.mockito.Mockito._
 import org.quartz.JobKey
 import org.scalatest.LoneElement._
@@ -42,13 +41,13 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       userLookupService
     )
 
-    when(activityTypeService.isValidActivityType(Matchers.any())).thenReturn(true)
-    when(activityTypeService.isValidActivityTagName(Matchers.any())).thenReturn(true)
-    when(activityTypeService.isValidActivityTag(Matchers.any(), Matchers.any())).thenReturn(true)
+    when(activityTypeService.isValidActivityType(any())).thenReturn(true)
+    when(activityTypeService.isValidActivityTagName(any())).thenReturn(true)
+    when(activityTypeService.isValidActivityTag(any(), any())).thenReturn(true)
 
     val submissionDue: ActivitySave = Fixtures.activitySave.submissionDue
 
-    when(activityTagDao.getActivitiesWithTags(Matchers.eq(Map()), Matchers.eq("tabula"))(any())) thenReturn Nil
+    when(activityTagDao.getActivitiesWithTags(isEq(Map()), isEq("tabula"))(any())) thenReturn Nil
   }
 
   "ActivityServiceTest" should {
@@ -60,8 +59,8 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
     "save an item for each recipient" in new Scope {
       private val recipients = Audience.usercode(Usercode("cusebr"))
 
-      when(audienceDao.saveAudience(Matchers.eq(recipients))(any())).thenReturn("audience-id")
-      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(AudienceSize.Finite(1)), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
+      when(audienceDao.saveAudience(isEq(recipients))(any())).thenReturn("audience-id")
+      when(activityDao.save(isEq(submissionDue), isEq("audience-id"), isEq(AudienceSize.Finite(1)), isEq(Seq.empty))(any())).thenReturn("activity-id")
       when(audienceService.resolve(recipients)).thenReturn(Try(Set(Usercode("cusebr"))))
 
       service.save(submissionDue, recipients) must be(Right("activity-id"))
@@ -71,9 +70,9 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
 
     "not fail with invalid activity type" in new Scope {
       private val recipients = Audience.usercode(Usercode("custard"))
-      when(activityTypeService.isValidActivityType(Matchers.any())).thenReturn(false)
-      when(audienceDao.saveAudience(Matchers.any())(any())).thenReturn("audience-id")
-      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(AudienceSize.Finite(1)), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
+      when(activityTypeService.isValidActivityType(any())).thenReturn(false)
+      when(audienceDao.saveAudience(any())(any())).thenReturn("audience-id")
+      when(activityDao.save(isEq(submissionDue), isEq("audience-id"), isEq(AudienceSize.Finite(1)), isEq(Seq.empty))(any())).thenReturn("activity-id")
       when(audienceService.resolve(recipients)).thenReturn(Try(Set(Usercode("custard"))))
 
       private val activity = submissionDue
@@ -84,9 +83,9 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
 
     "not fail with invalid tag name" in new Scope {
       private val recipients = Audience.usercode(Usercode("custard"))
-      when(activityTypeService.isValidActivityTagName(Matchers.any())).thenReturn(false)
-      when(audienceDao.saveAudience(Matchers.any())(any())).thenReturn("audience-id")
-      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(AudienceSize.Finite(1)), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
+      when(activityTypeService.isValidActivityTagName(any())).thenReturn(false)
+      when(audienceDao.saveAudience(any())(any())).thenReturn("audience-id")
+      when(activityDao.save(isEq(submissionDue), isEq("audience-id"), isEq(AudienceSize.Finite(1)), isEq(Seq.empty))(any())).thenReturn("activity-id")
       when(audienceService.resolve(recipients)).thenReturn(Try(Set(Usercode("custard"))))
 
       private val activity = submissionDue
@@ -96,10 +95,10 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
     }
 
     "fail with valid tab name but invalid tag value" in new Scope {
-      when(activityTypeService.isValidActivityTagName(Matchers.any())).thenReturn(true)
-      when(activityTypeService.isValidActivityTag(Matchers.any(),Matchers.any())).thenReturn(false)
-      when(audienceDao.saveAudience(Matchers.any())(any())).thenReturn("audience-id")
-      when(activityDao.save(Matchers.eq(submissionDue), Matchers.eq("audience-id"), Matchers.eq(AudienceSize.Finite(1)), Matchers.eq(Seq.empty))(any())).thenReturn("activity-id")
+      when(activityTypeService.isValidActivityTagName(any())).thenReturn(true)
+      when(activityTypeService.isValidActivityTag(any(), any())).thenReturn(false)
+      when(audienceDao.saveAudience(any())(any())).thenReturn("audience-id")
+      when(activityDao.save(isEq(submissionDue), isEq("audience-id"), isEq(AudienceSize.Finite(1)), isEq(Seq.empty))(any())).thenReturn("activity-id")
 
       private val activity = submissionDue.copy(tags = Seq(ActivityTag("module", None, TagValue("CS118", Some("CS118 Programming for Computer Scientists")))))
       private val result = service.save(activity, Audience.usercode(Usercode("custard")))
@@ -111,7 +110,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
     }
 
     "fail with invalid activity tag value" in new Scope {
-      when(activityTypeService.isValidActivityTag(Matchers.any(), Matchers.any())).thenReturn(false)
+      when(activityTypeService.isValidActivityTag(any(), any())).thenReturn(false)
 
       private val activity = submissionDue.copy(tags = Seq(ActivityTag("module", None, TagValue("CS118", Some("CS118 Programming for Computer Scientists")))))
       private val result = service.save(activity, Audience.usercode(Usercode("custard")))
@@ -124,7 +123,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
     }
 
     "update - fail if activity does not exist" in new Scope {
-      when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(None)
+      when(activityDao.getActivityById(isEq("activity"))(any())).thenReturn(None)
 
       private val result = service.update("activity", submissionDue, Audience.usercode(Usercode("custard")))
 
@@ -134,7 +133,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
 
     "update - fail if activity is already published" in new Scope {
       private val existingActivity = Fixtures.activity.fromSave("activity", submissionDue).copy(publishedAt = DateTime.now.minusHours(1))
-      when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(Some(existingActivity))
+      when(activityDao.getActivityById(isEq("activity"))(any())).thenReturn(Some(existingActivity))
 
       private val result = service.update("activity", submissionDue, Audience.usercode(Usercode("custard")))
 
@@ -144,10 +143,10 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
 
     "update an existing activity" in new Scope {
       private val existingActivity = Fixtures.activity.fromSave("activity", submissionDue).copy(publishedAt = DateTime.now.plusHours(1))
-      when(activityDao.getActivityById(Matchers.eq("activity"))(Matchers.any())).thenReturn(Some(existingActivity))
+      when(activityDao.getActivityById(isEq("activity"))(any())).thenReturn(Some(existingActivity))
 
       private val audience = Audience.usercode(Usercode("custard"))
-      when(audienceDao.saveAudience(Matchers.eq(audience))(any())).thenReturn("audience")
+      when(audienceDao.saveAudience(isEq(audience))(any())).thenReturn("audience")
       when(audienceService.resolve(audience)).thenReturn(Try(Set(Usercode("custard"))))
 
       private val result = service.update("activity", submissionDue, audience)
@@ -155,7 +154,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       result must be a 'right
       result.right.get must be("activity")
 
-      verify(activityDao).update(Matchers.eq("activity"), Matchers.eq(submissionDue), Matchers.eq("audience"), Matchers.eq(AudienceSize.Finite(1)))(Matchers.any())
+      verify(activityDao).update(isEq("activity"), isEq(submissionDue), isEq("audience"), isEq(AudienceSize.Finite(1)))(any())
     }
 
     "get mutes" in {
@@ -170,7 +169,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       // Null expires
       new Scope {
         private val activity = Fixtures.activity.fromSave("activity", submissionDue)
-        when(activityMuteDao.mutesForActivity(Matchers.eq(activity), Matchers.any[Set[Usercode]])(Matchers.any())).thenReturn(Seq(activityMute))
+        when(activityMuteDao.mutesForActivity(isEq(activity), any[Set[Usercode]])(any())).thenReturn(Seq(activityMute))
         private val result = service.getActivityMutes(activity, Nil, Set.empty)
         result must have length 1
       }
@@ -179,7 +178,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
         private val activity = Fixtures.activity.fromSave("activity", submissionDue)
         private val now = DateTime.now
         private val thisMute = activityMute.copy(expiresAt = Some(now.plusDays(1)))
-        when(activityMuteDao.mutesForActivity(Matchers.eq(activity), Matchers.any[Set[Usercode]])(Matchers.any())).thenReturn(Seq(thisMute))
+        when(activityMuteDao.mutesForActivity(isEq(activity), any[Set[Usercode]])(any())).thenReturn(Seq(thisMute))
         private val result = service.getActivityMutes(activity, Nil, Set.empty, now)
         result must have length 1
       }
@@ -188,7 +187,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
         private val activity = Fixtures.activity.fromSave("activity", submissionDue)
         private val now = DateTime.now
         private val thisMute = activityMute.copy(expiresAt = Some(now.minusDays(1)))
-        when(activityMuteDao.mutesForActivity(Matchers.eq(activity), Matchers.any[Set[Usercode]])(Matchers.any())).thenReturn(Seq(thisMute))
+        when(activityMuteDao.mutesForActivity(isEq(activity), any[Set[Usercode]])(any())).thenReturn(Seq(thisMute))
         private val result = service.getActivityMutes(activity, Nil, Set.empty, now)
         result must have length 0
       }
@@ -199,7 +198,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       // Empty mute tags
       new Scope {
         private val activity = Fixtures.activity.fromSave("activity", submissionDue)
-        when(activityMuteDao.mutesForActivity(Matchers.eq(activity), Matchers.any[Set[Usercode]])(Matchers.any())).thenReturn(Seq(activityMute))
+        when(activityMuteDao.mutesForActivity(isEq(activity), any[Set[Usercode]])(any())).thenReturn(Seq(activityMute))
         private val result = service.getActivityMutes(activity, Seq(tag1), Set.empty)
         result must have length 1
       }
@@ -207,7 +206,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       new Scope {
         private val activity = Fixtures.activity.fromSave("activity", submissionDue)
         private val thisMute = activityMute.copy(tags = Seq(tag1))
-        when(activityMuteDao.mutesForActivity(Matchers.eq(activity), Matchers.any[Set[Usercode]])(Matchers.any())).thenReturn(Seq(thisMute))
+        when(activityMuteDao.mutesForActivity(isEq(activity), any[Set[Usercode]])(any())).thenReturn(Seq(thisMute))
         private val result = service.getActivityMutes(activity, Nil, Set.empty)
         result must have length 1
       }
@@ -215,7 +214,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       new Scope {
         private val activity = Fixtures.activity.fromSave("activity", submissionDue)
         private val thisMute = activityMute.copy(tags = Seq(tag1))
-        when(activityMuteDao.mutesForActivity(Matchers.eq(activity), Matchers.any[Set[Usercode]])(Matchers.any())).thenReturn(Seq(thisMute))
+        when(activityMuteDao.mutesForActivity(isEq(activity), any[Set[Usercode]])(any())).thenReturn(Seq(thisMute))
         private val result = service.getActivityMutes(activity, Seq(tag2), Set.empty)
         result must have length 0
       }
@@ -223,7 +222,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       new Scope {
         private val activity = Fixtures.activity.fromSave("activity", submissionDue)
         private val thisMute = activityMute.copy(tags = Seq(tag2))
-        when(activityMuteDao.mutesForActivity(Matchers.eq(activity), Matchers.any[Set[Usercode]])(Matchers.any())).thenReturn(Seq(thisMute))
+        when(activityMuteDao.mutesForActivity(isEq(activity), any[Set[Usercode]])(any())).thenReturn(Seq(thisMute))
         private val result = service.getActivityMutes(activity, Seq(tag3), Set.empty)
         result must have length 0
       }
@@ -231,7 +230,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       new Scope {
         private val activity = Fixtures.activity.fromSave("activity", submissionDue)
         private val thisMute = activityMute.copy(tags = Seq(tag3))
-        when(activityMuteDao.mutesForActivity(Matchers.eq(activity), Matchers.any[Set[Usercode]])(Matchers.any())).thenReturn(Seq(thisMute))
+        when(activityMuteDao.mutesForActivity(isEq(activity), any[Set[Usercode]])(any())).thenReturn(Seq(thisMute))
         private val result = service.getActivityMutes(activity, Seq(tag3), Set.empty)
         result must have length 1
       }
@@ -239,7 +238,7 @@ class ActivityServiceTest extends BaseSpec with MockitoSugar {
       new Scope {
         private val activity = Fixtures.activity.fromSave("activity", submissionDue)
         private val thisMute = activityMute.copy(tags = Seq(tag1, tag2))
-        when(activityMuteDao.mutesForActivity(Matchers.eq(activity), Matchers.any[Set[Usercode]])(Matchers.any())).thenReturn(Seq(thisMute))
+        when(activityMuteDao.mutesForActivity(isEq(activity), any[Set[Usercode]])(any())).thenReturn(Seq(thisMute))
         private val result = service.getActivityMutes(activity, Seq(tag1, tag2, tag3), Set.empty)
         result must have length 1
       }

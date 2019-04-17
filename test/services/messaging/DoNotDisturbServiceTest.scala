@@ -5,14 +5,13 @@ import java.time._
 
 import helpers.BaseSpec
 import models.messaging.DoNotDisturbPeriod
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
-import services.{Features, FeaturesService, MockDatabase}
 import services.dao.{DoNotDisturbDao, MessagingDao}
-import uk.ac.warwick.util.core.DateTimeUtils
+import services.{Features, FeaturesService, MockDatabase}
 import warwick.sso.Usercode
 
 class DoNotDisturbServiceTest extends BaseSpec with MockitoSugar with BeforeAndAfterEach {

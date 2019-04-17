@@ -41,11 +41,11 @@ protected trait SelectBrowsersPerSuite extends WebBrowser with TestSuiteMixin {
   lazy val browserMappings: Map[String, BrowserInfo] = Map(
     "firefox" -> FirefoxInfo(new FirefoxProfile()),
     "htmlunit" -> HtmlUnitInfo(true),
-    "chrome" -> ChromeInfo,
+    "chrome" -> ChromeInfo(),
     "chrome-mobile" -> ChromeMobileInfo,
     "safari" -> SafariInfo,
     "ie" -> InternetExplorerInfo
-  ) withDefault { key =>
+  ).withDefault { key =>
     throw new Error(s"There is no browser called $key - valid options are [${browserMappings.keys.mkString(", ")}]")
   }
 
@@ -78,7 +78,7 @@ protected trait SelectBrowsersPerSuite extends WebBrowser with TestSuiteMixin {
     browsers.find(b => test.name.endsWith(b.name)) match {
       case Some(b) =>
         (
-          if (currentWebDriverName == Some(b.name))
+          if (currentWebDriverName.contains(b.name))
             webDriver // Reuse the current WebDriver
           else {
             closeWebDriverIfNecessary()

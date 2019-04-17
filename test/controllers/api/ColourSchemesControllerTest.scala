@@ -1,12 +1,10 @@
 package controllers.api
 
-import com.typesafe.config.{Config, ConfigFactory}
 import helpers.WithActorSystem
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.Configuration
-import play.api.cache.CacheApi
 import play.api.libs.json._
 import play.api.mvc.{PlayBodyParsers, Result, Results}
 import play.api.test.FakeRequest
@@ -14,9 +12,8 @@ import play.api.test.Helpers.{call, _}
 import services._
 import warwick.sso._
 
-import scala.collection.JavaConverters._
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Results with WithActorSystem {
 
@@ -47,16 +44,16 @@ class ColourSchemesControllerTest extends PlaySpec with MockitoSugar with Result
   })
 
   val prefsMock: UserPreferencesService = mock[UserPreferencesService]
-  when(prefsMock.getChosenColourScheme(fox.usercode)).thenReturn(ColourScheme(2, false))
+  when(prefsMock.getChosenColourScheme(fox.usercode)).thenReturn(ColourScheme(2, highContrast = false))
 
-  val geeseBackground = Map(
+  private val geeseBackground = Map(
     "id" -> 1,
     "name" -> "Geese invasion",
     "url" -> "geese_westwood.jpg",
     "schemeColour" -> "#ffffff"
   )
 
-  val foxBackground = Map(
+  private val foxBackground = Map(
     "id" -> 2,
     "name" -> "Fox den",
     "url" -> "fox_den.jpg",

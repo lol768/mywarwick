@@ -6,17 +6,16 @@ import controllers.MockFeaturesService
 import helpers.{BaseSpec, Fixtures}
 import models.{FeaturePreferences, Tile, TileLayout}
 import org.joda.time.DateTime
-import org.mockito.Matchers.{eq => isEq, _}
+import org.mockito.ArgumentMatchers.{eq => isEq, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import services.dao.{TileDao, TileLayoutDao}
-import warwick.sso.User
 
 class TileServiceTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
   private val jim = Fixtures.user.makeFoundUser("jim")
-  val jimsLayout = Seq(
+  private val jimsLayout = Seq(
     TileLayout("mail", 2, 0,0, 1,1),
     TileLayout("mail", 4, 0,0, 1,1),
     TileLayout("coursework", 2, 0,1, 1,1)
@@ -24,7 +23,7 @@ class TileServiceTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
   private val ada = Fixtures.user.makeFoundUser("ada")
 
-  val studentLayout = Seq(
+  private val studentLayout = Seq(
     TileLayout("sport", 2, 0,0, 2,1),
     TileLayout("mail", 2, 0,0, 2,2)
   )
@@ -66,7 +65,7 @@ class TileServiceTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
     "return WBS tile set for WBS user" in new Scope {
       private val bob = Fixtures.user.makeFoundUser("bob").copy(userSource = Some("WBSLdap"))
-      val wbsLayout = Seq(TileLayout("business", 2, 0,0, 1,1))
+      private val wbsLayout = Seq(TileLayout("business", 2, 0,0, 1,1))
 
       when(tileLayoutDao.getTileLayoutForUser(isEq(bob.usercode.string))(conn)).thenReturn(Nil)
       when(tileLayoutDao.getDefaultTileLayoutForGroup(isEq("wbs"))(conn)).thenReturn(wbsLayout)
@@ -76,7 +75,7 @@ class TileServiceTest extends BaseSpec with MockitoSugar with ScalaFutures {
 
     "return Account tile for users with no university ID" in new Scope {
       private val tim = Fixtures.user.makeFoundUser("tim").copy(universityId = None)
-      val accountTile = Seq(TileLayout("account", 2, 0,0, 1,1))
+      private val accountTile = Seq(TileLayout("account", 2, 0,0, 1,1))
 
       when(tileLayoutDao.getTileLayoutForUser(isEq(tim.usercode.string))(conn)).thenReturn(Nil)
       when(tileLayoutDao.getDefaultTileLayoutForGroup(isEq("no-uni-id"))(conn)).thenReturn(accountTile)

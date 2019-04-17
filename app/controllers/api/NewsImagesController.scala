@@ -1,20 +1,20 @@
 package controllers.api
 
 import java.io.ByteArrayOutputStream
-import javax.imageio.ImageIO
 
 import com.google.common.io.ByteStreams
 import com.google.inject.Inject
 import controllers.MyController
+import javax.imageio.ImageIO
 import models.API
-import play.api.cache.{CacheApi, SyncCacheApi}
+import play.api.cache.SyncCacheApi
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.MultipartFormData.FilePart
-import play.api.mvc.{Action, MultipartFormData, Request, Result}
+import play.api.mvc._
 import services.{ImageManipulator, NewsImageService, PublisherService, SecurityService}
 import system.EitherValidation
-
+import scala.language.implicitConversions
 import scala.util.{Failure, Success}
 
 class NewsImagesController @Inject()(
@@ -28,7 +28,7 @@ class NewsImagesController @Inject()(
   import EitherValidation._
   import securityService._
 
-  def show(id: String) = Action { request =>
+  def show(id: String): Action[AnyContent] = Action { request =>
     newsImageService.find(id).map { newsImage =>
       val targetWidth = request.getQueryString("width").map(_.toInt).filter(_ < newsImage.width)
       val cacheKey = targetWidth.map(w => s"$id@$w").getOrElse(id)
@@ -64,7 +64,7 @@ class NewsImagesController @Inject()(
 
   private val MEGABYTE = 1000 * 1000
 
-  def create = RequiredUserAction(parse.multipartFormData) { implicit request =>
+  def create: Action[MultipartFormData[TemporaryFile]] = RequiredUserAction(parse.multipartFormData) { implicit request =>
     val user = request.context.user
     val usercode = user.map(_.usercode)
     if(usercode.exists(publisherService.isPublisher)) {
@@ -75,7 +75,7 @@ class NewsImagesController @Inject()(
   }
 
   def createInternal(request: Request[MultipartFormData[TemporaryFile]]): Result = {
-    implicit val req = request
+    implicit val req: Request[MultipartFormData[TemporaryFile]] = request
     request.body.file("image").map { maybeValidImage =>
       Right[Result, FilePart[TemporaryFile]](maybeValidImage)
         .verifying(_.contentType.exists(_.startsWith("image/")), API.Error("invalid-content-type", "Invalid image content type"))
