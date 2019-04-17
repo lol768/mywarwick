@@ -64,7 +64,6 @@ val appDeps = Seq(
   "uk.ac.warwick.play-utils" %% "accesslog" % playUtilsVersion,
   "uk.ac.warwick.play-utils" %% "anorm" % playUtilsVersion,
   "uk.ac.warwick.play-utils" %% "objectstore" % playUtilsVersion,
-  "uk.ac.warwick.play-utils" %% "testing" % playUtilsVersion,
   "uk.ac.warwick.util" % "warwickutils-cache" % warwickUtilsVersion,
   "uk.ac.warwick.util" % "warwickutils-core" % warwickUtilsVersion,
   "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
@@ -102,7 +101,8 @@ val testDeps = Seq(
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
   "uk.ac.warwick.sso" %% "sso-client-play-testing" % ssoClientVersion,
   "org.eclipse.jetty" % "jetty-server" % "9.4.15.v20190215",
-  "com.h2database" % "h2" % "1.4.199"
+  "com.h2database" % "h2" % "1.4.199",
+  "uk.ac.warwick.play-utils" %% "testing" % playUtilsVersion
 ).map(_ % Test)
 
 val funcTestDeps = Seq(
