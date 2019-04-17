@@ -46,7 +46,7 @@ lazy val root = (project in file("."))
 // Versions of things for below
 val enumeratumVersion = "1.5.13"
 val akkaVersion = "2.5.22"
-val playUtilsVersion = "1.29"
+val playUtilsVersion = "1.32"
 val ssoClientVersion = "2.64"
 val warwickUtilsVersion = "20190314"
 
@@ -64,6 +64,7 @@ val appDeps = Seq(
   "uk.ac.warwick.play-utils" %% "accesslog" % playUtilsVersion,
   "uk.ac.warwick.play-utils" %% "anorm" % playUtilsVersion,
   "uk.ac.warwick.play-utils" %% "objectstore" % playUtilsVersion,
+  "uk.ac.warwick.play-utils" %% "testing" % playUtilsVersion,
   "uk.ac.warwick.util" % "warwickutils-cache" % warwickUtilsVersion,
   "uk.ac.warwick.util" % "warwickutils-core" % warwickUtilsVersion,
   "com.typesafe.akka" %% "akka-cluster" % akkaVersion,

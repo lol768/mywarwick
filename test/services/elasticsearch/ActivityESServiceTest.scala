@@ -2,7 +2,6 @@ package services.elasticsearch
 
 import helpers.{BaseSpec, MinimalAppPerSuite}
 import models.MessageState
-import org.elasticsearch.action.ActionListener
 import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
 import org.elasticsearch.client.{RequestOptions, RestHighLevelClient}
 import org.elasticsearch.index.query.{BoolQueryBuilder, TermQueryBuilder, TermsQueryBuilder}
