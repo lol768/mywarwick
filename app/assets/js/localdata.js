@@ -53,6 +53,8 @@ if (webkit) {
       req.onerror = e => log.warn(`✗ IndexedDB ${config.name} deletion error`, e);
       req.onblocked = e => log.warn(`✗ Request to delete IndexedDB called ${config.name} is being blocked.`, e);
     }
+  }).catch((e) => {
+    log.warn(`✗ IndexedDB ${config.name} deletion error`, e);
   });
 }
 
