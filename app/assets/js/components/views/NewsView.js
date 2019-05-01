@@ -63,7 +63,7 @@ export class NewsView extends HideableView {
           </p>
           <p>
             <button type="button" onClick={ this.onClickRefresh } className="btn btn-default">
-              <i className="fa fa-refresh fa-fw" />
+              <i className="fal fa-sync fa-fw" />
               Retry
             </button>
           </p>
@@ -98,7 +98,7 @@ export class NewsView extends HideableView {
         }
         { fetching ?
           <div className="centered">
-            <i className="fa fa-lg fa-refresh fa-spin" />
+            <i className="fal fa-lg fa-sync fa-spin" />
           </div> : null }
       </div>
     );

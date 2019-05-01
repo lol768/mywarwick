@@ -5,9 +5,9 @@ import helpers.{BaseSpec, MinimalAppPerSuite}
 import models.publishing.Publisher
 import models.publishing.PublishingRole.{APINotificationsManager, NotificationsManager}
 import models.{ActivityProvider, Audience}
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers.{eq => isEq, _}
 import org.mockito.Mockito._
-import org.mockito.{ArgumentCaptor, Matchers}
+import org.mockito.ArgumentCaptor
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json._
 import play.api.mvc._
@@ -160,7 +160,7 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
     }
 
     "return created activity ID on success" in {
-      when(publisherService.getRoleForUser(Matchers.eq(tabulaPublisherId), any())).thenReturn(APINotificationsManager)
+      when(publisherService.getRoleForUser(isEq(tabulaPublisherId), any())).thenReturn(APINotificationsManager)
       when(activityService.save(any(), any())).thenReturn(Right("created-activity-id"))
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(body))
@@ -176,8 +176,8 @@ class IncomingActivitiesControllerTest extends BaseSpec with MockitoSugar with R
     "send to a webgroup" in {
       val groupAudience = Audience(Seq(Audience.WebGroupAudience(GroupName("in-trigue"))))
 
-      when(publisherService.getRoleForUser(Matchers.eq(tabulaPublisherId), any())).thenReturn(APINotificationsManager)
-      when(activityService.save(any(), Matchers.eq(groupAudience))).thenReturn(Right("created-activity-id"))
+      when(publisherService.getRoleForUser(isEq(tabulaPublisherId), any())).thenReturn(APINotificationsManager)
+      when(activityService.save(any(), isEq(groupAudience))).thenReturn(Right("created-activity-id"))
 
       val result = call(controller.postNotification(tabula), FakeRequest().withJsonBody(
         body + ("recipients" -> Json.obj(

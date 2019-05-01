@@ -16,6 +16,32 @@ function uploadSubscription(subscription) {
   });
 }
 
+export function subscribe() {
+  if ('serviceWorker' in navigator) {
+    const vapidPublicKeyBase64 = document.getElementById('app-container').dataset.vapidPublicKey;
+    const vapidPublicKey = Uint8Array.from(atob(vapidPublicKeyBase64), c => c.charCodeAt(0));
+    navigator.serviceWorker.ready
+      .then(registration => registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: vapidPublicKey,
+      }))
+      .then(subscription => uploadSubscription(subscription))
+      .catch((e) => {
+        if (Notification.permission === 'denied') {
+          log.warn('Permission for Notifications was denied', e);
+        } else {
+          log.error('Unable to subscribe to push', e);
+        }
+      })
+      .then(() => store.dispatch(device.updateNotificationPermissions));
+  } else {
+    // for browsers not supporting service worker
+    Notification.requestPermission(() => {
+      store.dispatch(device.updateNotificationPermissions);
+    });
+  }
+}
+
 // Once the service worker is registered set the initial state
 export function init() {
   // Check if push messaging is supported
@@ -43,29 +69,12 @@ export function init() {
       if (!subscription) {
         return null;
       }
+      if (subscription.endpoint.indexOf('android') >= 0) {
+        return subscription.unsubscribe().then(() => subscribe());
+      }
       // found subscription, send update to server for fresh timez
       return uploadSubscription(subscription);
     })
     .catch(e => log.warn('Error during getSubscription()', e));
 }
 
-export function subscribe() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready
-      .then(registration => registration.pushManager.subscribe({ userVisibleOnly: true }))
-      .then(subscription => uploadSubscription(subscription))
-      .catch((e) => {
-        if (Notification.permission === 'denied') {
-          log.warn('Permission for Notifications was denied', e);
-        } else {
-          log.error('Unable to subscribe to push', e);
-        }
-      })
-      .then(() => store.dispatch(device.updateNotificationPermissions));
-  } else {
-    // for browsers not supporting service worker
-    Notification.requestPermission(() => {
-      store.dispatch(device.updateNotificationPermissions);
-    });
-  }
-}

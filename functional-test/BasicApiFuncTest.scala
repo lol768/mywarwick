@@ -30,7 +30,7 @@ class BasicApiFuncTest extends ApiFuncTestBase {
         val testHeronTile = Json.obj(
           "id" -> "heron-tile",
           "colour" -> 3,
-          "icon" -> "envelope-o",
+          "icon" -> "envelope",
           "preferences" -> JsNull,
           "title" -> "Mail",
           "type" -> "count",

@@ -93,7 +93,7 @@ export class AudienceIndicator extends React.PureComponent {
     const getCount = (groups) => {
       const peopleCount = _.reduce(groups, (acc, group) => acc + (groupedAudience[group] || 0), 0);
       return (fetching ?
-        <i className="fa fa-spin fa-fw fa-refresh" /> : `${peopleCount} people`);
+        <i className="fal fa-spin fa-fw fa-sync" /> : `${peopleCount} people`);
     };
 
     if (audienceComponents.audience) {
@@ -191,7 +191,7 @@ export class AudienceIndicator extends React.PureComponent {
       <div className="alert alert-info">
         <div className="pull-right">
           <i
-            className="fa fa-info-circle"
+            className="fal fa-info-circle"
             data-toggle="tooltip"
             data-placement="left"
             title="Estimated audience size will be shown here, when audience and categories
@@ -201,7 +201,7 @@ export class AudienceIndicator extends React.PureComponent {
         <div>This { this.props.hint.isNews ? 'news' : 'alert' } will be published to:</div>
         <div className="audience-component-list">{this.readableAudienceComponents()}</div>
         <div>{fetching ?
-          <i className="fa fa-spin fa-fw fa-refresh" /> : AudienceIndicator.makePeopleInTotalText(
+          <i className="fal fa-spin fa-fw fa-sync" /> : AudienceIndicator.makePeopleInTotalText(
             baseAudience,
             groupedAudience,
           ) }</div>

@@ -6,8 +6,7 @@ import anorm.SqlParser._
 import anorm._
 import helpers.{BaseSpec, Fixtures, OneStartAppPerSuite}
 import models.{Audience, AudienceSize}
-import org.mockito.Matchers
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers.{eq => isEq, _}
 import org.mockito.Mockito._
 import org.quartz.{JobDataMap, JobDetail, JobExecutionContext}
 import org.scalatest.mockito.MockitoSugar
@@ -119,8 +118,8 @@ class PublishingJobTest extends BaseSpec with MockitoSugar with OneStartAppPerSu
 
         val recipients = Seq(Usercode("dave"), Usercode("james"))
         verify(messaging).send(recipients.toSet, activity)
-        verify(pubSub).publish(Matchers.eq("dave"), any())
-        verify(pubSub).publish(Matchers.eq("james"), any())
+        verify(pubSub).publish(isEq("dave"), any())
+        verify(pubSub).publish(isEq("james"), any())
 
         getRecipients(activity.id) must contain allOf("dave", "james")
 

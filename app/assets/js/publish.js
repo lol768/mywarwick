@@ -314,7 +314,7 @@ $(() => {
       $input
         .closest('div.input-group')
         .find('.input-group-addon i')
-        .prop('class', `fa fa-fw fa-${$input.val()}`);
+        .prop('class', `fal fa-fw fa-${$input.val()}`);
     }, 500);
     $input.on('keydown', debouncedPicker);
   });

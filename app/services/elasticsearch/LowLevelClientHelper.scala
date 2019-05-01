@@ -5,11 +5,10 @@ import java.util.Collections
 
 import org.apache.http.entity.ContentType
 import org.apache.http.nio.entity.NStringEntity
-import org.elasticsearch.client.{Response, RestClient}
-import play.api.libs.json.{JsObject, JsValue, Json}
+import org.elasticsearch.client.{Request, Response, RestClient}
+import play.api.libs.json.{JsValue, Json}
 import warwick.core.Logging
 
-import collection.JavaConverters._
 import scala.concurrent.Future
 
 trait LowLevelClientHelper extends Logging {
@@ -18,8 +17,9 @@ trait LowLevelClientHelper extends Logging {
 
   def countPathForIndexName(path: String) = s"/$path/_count"
 
-  def getCountFromCountApiRes(res: Response): Int = (Json
-    .parse(scala.io.Source.fromInputStream(res.getEntity.getContent).mkString) \ "count")
+  def getCountFromCountApiRes(res: Response): Int = (
+    Json.parse(scala.io.Source.fromInputStream(res.getEntity.getContent).mkString) \ "count"
+  )
     .get
     .toString()
     .toInt
@@ -37,25 +37,11 @@ trait LowLevelClientHelper extends Logging {
   ): Future[Response] = {
     val listener = new FutureResponseListener
 
-    val param = suppliedParam.getOrElse(Map()).asJava
+    val request = new Request(method, path)
+    suppliedParam.getOrElse(Map()).foreach { case (k, v) => request.addParameter(k, v) }
+    entity.foreach(request.setEntity)
 
-    entity match {
-      case Some(nStringEntity: NStringEntity) =>
-        lowLevelClient.performRequestAsync(
-          method,
-          path,
-          param,
-          nStringEntity,
-          listener
-        )
-      case _ =>
-        lowLevelClient.performRequestAsync(
-          method,
-          path,
-          param,
-          listener
-        )
-    }
+    lowLevelClient.performRequestAsync(request, listener)
 
     listener.future
   }

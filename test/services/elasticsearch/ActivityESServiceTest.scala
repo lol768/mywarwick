@@ -2,13 +2,12 @@ package services.elasticsearch
 
 import helpers.{BaseSpec, MinimalAppPerSuite}
 import models.MessageState
-import org.elasticsearch.action.ActionListener
 import org.elasticsearch.action.search.{SearchRequest, SearchResponse}
-import org.elasticsearch.client.RestHighLevelClient
+import org.elasticsearch.client.{RequestOptions, RestHighLevelClient}
 import org.elasticsearch.index.query.{BoolQueryBuilder, TermQueryBuilder, TermsQueryBuilder}
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import play.api.Configuration
@@ -33,7 +32,7 @@ class ActivityESServiceTest extends BaseSpec with MockitoSugar with BaseControll
 
   "send correct request to Elastic Search for message send data" in {
     val eSClientConfig: ESClientConfig = mock[ESClientConfig]
-    val restClient: RestHighLevelClient = mock[RestHighLevelClient]
+    val restClient: RestHighLevelClient = mock[RestHighLevelClient](RETURNS_SMART_NULLS)
 
     when(eSClientConfig.highLevelClient).thenReturn(restClient)
 
@@ -44,12 +43,10 @@ class ActivityESServiceTest extends BaseSpec with MockitoSugar with BaseControll
       elasticSearchAdminService
     )
 
-    doNothing().when(restClient).searchAsync(any[SearchRequest], any[ActionListener[SearchResponse]])
-
     val activityId = "777"
     activityESService.deliveryReportForActivity(activityId, Some(DateTime.now))
     val searchRequestCaptor = ArgumentCaptor.forClass(classOf[SearchRequest])
-    verify(restClient).searchAsync(searchRequestCaptor.capture, any[ActionListener[SearchResponse]])
+    verify(restClient).searchAsync(searchRequestCaptor.capture, any[RequestOptions], any[FutureActionListener[SearchResponse]])
 
     val builder: BoolQueryBuilder = searchRequestCaptor.getValue.source.query().asInstanceOf[BoolQueryBuilder]
     val termsQueryOne: TermsQueryBuilder = builder.must().get(0).asInstanceOf[TermsQueryBuilder]
@@ -91,7 +88,7 @@ class ActivityESServiceTest extends BaseSpec with MockitoSugar with BaseControll
     )
 
     val routes: Routes = {
-      case GET(p"/delivery_report_$date/delivery_report/_search") => // / index_name / document_type / api
+      case POST(p"/delivery_report_$date/delivery_report/_search") => // / index_name / document_type / api
         Action(Ok(responseJson))
     }
 

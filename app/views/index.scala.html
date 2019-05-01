@@ -4,7 +4,8 @@
 @import play.api.libs.json.JsBoolean
 @()(
     implicit analyticsTrackingId: Option[AnalyticsTrackingID], context: RequestContext,
-    searchRootUrl: SearchRootUrl
+    searchRootUrl: SearchRootUrl,
+    vapidPublicKey: String
 )
 <!DOCTYPE html>
 <html lang="en-GB" class="no-js" manifest="@routes.Assets.versioned("appcache.manifest")">
@@ -53,6 +54,7 @@
     <div id="app-container"
       @for(trackingId <- analyticsTrackingId) {data-analytics-tracking-id="@{trackingId.string}"}
       data-search-root-url="@searchRootUrl.string"
+      data-vapid-public-key="@vapidPublicKey"
     >
       <div id="react-app-spinner" class="react-loading">
         <i class="fa fa-pulse">

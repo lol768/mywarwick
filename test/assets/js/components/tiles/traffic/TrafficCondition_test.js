@@ -31,11 +31,11 @@ describe('TrafficCondition', () => {
 
   it('shows the correct icon depending on the delay', () => {
     let [i, ] = usualCondition.props.children;
-    i.props.className.should.equal('fa fa-fw fa-check-circle');
+    i.props.className.should.equal('fal fa-fw fa-check-circle');
     [i, ] = mildCondition.props.children;
-    i.props.className.should.equal('fa fa-fw fa-hourglass-half');
+    i.props.className.should.equal('fal fa-fw fa-hourglass-half');
     [i, ] = heavyCondition.props.children;
-    i.props.className.should.equal('fa fa-fw fa-exclamation-triangle');
+    i.props.className.should.equal('fal fa-fw fa-exclamation-triangle');
   });
 
   it(`Shows the delay in minutes when traffic isn't usual`, () => {

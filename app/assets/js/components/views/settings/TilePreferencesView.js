@@ -61,7 +61,7 @@ class TilePreferencesView extends HideableView {
             >
               <div className="media">
                 <div className="media-left">
-                  <i className={ `fa fa-fw fa-${
+                  <i className={ `fal fa-fw fa-${
                     (tile.id === 'weather') ? 'sun-o' : tile.icon
                   }` }
                   />
@@ -70,7 +70,7 @@ class TilePreferencesView extends HideableView {
                   { tile.title }
                 </div>
                 <div className="media-right">
-                  <i className="fa fa-fw fa-chevron-right" />
+                  <i className="fal fa-fw fa-chevron-right" />
                 </div>
               </div>
             </div>),

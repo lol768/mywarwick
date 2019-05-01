@@ -1,20 +1,19 @@
 package controllers.api
 
-import javax.inject.Singleton
-
 import com.google.inject.Inject
-import com.sun.syndication.feed.synd._
-import com.sun.syndication.io.WireFeedOutput
+import com.rometools.rome.feed.synd._
+import com.rometools.rome.io.WireFeedOutput
 import controllers.MyController
+import javax.inject.Singleton
 import models.Audience.DepartmentSubset
 import models.news.NewsItemRender
 import models.{API, PageViewHit}
-import org.jdom.{Element, Namespace}
 import play.api.libs.json._
-import play.api.mvc.{Action, RequestHeader}
+import play.api.mvc.{Action, AnyContent, RequestHeader}
 import services.analytics.AnalyticsMeasurementService
 import services.{NewsService, SecurityService}
 import warwick.sso.GroupName
+import org.jdom2.{Element, Namespace}
 
 import scala.collection.JavaConverters._
 
@@ -29,21 +28,21 @@ class ReadNewsController @Inject()(
 
   import security._
 
-  def feed(offset: Int) = UserAction { request =>
+  def feed(offset: Int): Action[AnyContent] = UserAction { request =>
     val userNews = news.latestNews(request.context.user.map(_.usercode), limit = 10, offset = offset)
 
     Ok(Json.toJson(API.Success(data = userNews)))
   }
 
-  def rssFeed = Action { implicit request =>
+  def rssFeed: Action[AnyContent] = Action { implicit request =>
     renderFeed("rss_2.0", "application/rss+xml")(request)
   }
 
-  def atomFeed = Action { implicit request =>
+  def atomFeed: Action[AnyContent] = Action { implicit request =>
     renderFeed("atom_1.0", "application/atom+xml")(request)
   }
 
-  def redirect(id: String) = UserAction { implicit request =>
+  def redirect(id: String): Action[AnyContent] = UserAction { implicit request =>
     (for {
       item <- news.getNewsItem(id)
       link <- item.link

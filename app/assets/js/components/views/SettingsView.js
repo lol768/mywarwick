@@ -131,7 +131,7 @@ class SettingsView extends HideableView {
     return (
       <div className="media">
         <div className="media-left">
-          <i className={`fa fa-fw fa-${icon}`} />
+          <i className={`fal fa-fw fa-${icon}`} />
         </div>
         <div className={`media-body ${disabled ? 'media-body-disabled' : ''}`}>
           {title}
@@ -182,14 +182,14 @@ class SettingsView extends HideableView {
     if (fetching) {
       return (
         <div>
-          <i className="fa fa-spinner fa-pulse" />
+          <i className="fal fa-spinner fa-pulse" />
           <FAChevronRight />
         </div>
       );
     } else if ((failed && fetched) || !fetched) {
       return (
         <div>
-          <i className="fa fa-exclamation-circle text-danger" />
+          <i className="fal fa-exclamation-circle text-danger" />
           <FAChevronRight />
         </div>
       );
@@ -202,14 +202,14 @@ class SettingsView extends HideableView {
     if (fetching) {
       return (
         <div>
-          <i className="fa fa-spinner fa-pulse" />
+          <i className="fal fa-spinner fa-pulse" />
           <FAChevronRight />
         </div>
       );
     } else if ((failed && fetched) || !fetched) {
       return (
         <div>
-          <i className="fa fa-exclamation-circle text-danger" />
+          <i className="fal fa-exclamation-circle text-danger" />
           <FAChevronRight />
         </div>
       );
@@ -295,14 +295,14 @@ class SettingsView extends HideableView {
     if (fetching) {
       return (
         <div>
-          <i className="fa fa-spinner fa-pulse" />
+          <i className="fal fa-spinner fa-pulse" />
           <FAChevronRight />
         </div>
       );
     } else if ((failed && fetched) || !fetched) {
       return (
         <div>
-          <i className="fa fa-exclamation-circle text-danger" />
+          <i className="fal fa-exclamation-circle text-danger" />
           <FAChevronRight />
         </div>
       );
@@ -448,7 +448,7 @@ class SettingsView extends HideableView {
             </ListGroupItemBtn>}
             <ListGroupItemBtn handler={this.onTilePreferences}>
               {SettingsView.renderSetting(
-                'check-square-o',
+                'check-square',
                 'Tile preferences',
                 <FAChevronRight />,
               )}
@@ -468,7 +468,7 @@ class SettingsView extends HideableView {
           <div className="list-group setting-colour-0">
             <ListGroupItemBtn handler={this.onNotificationMutes}>
               {SettingsView.renderSetting(
-                'bell-slash-o',
+                'bell-slash',
                 'Muted alerts',
                 SettingsView.renderSingleCount(this.props.mutes),
               )}
@@ -476,7 +476,7 @@ class SettingsView extends HideableView {
             {this.shouldShowDoNotDisturb() &&
             <ListGroupItemBtn handler={this.onDoNotDisturb}>
               {SettingsView.renderSetting(
-                'clock-o',
+                'clock',
                 'Do not disturb',
                 <span>{this.props.doNotDisturbEnabled ? 'On' : 'Off'} <FAChevronRight /></span>,
               )}
@@ -498,7 +498,7 @@ class SettingsView extends HideableView {
             />
             <ListGroupItemBtn handler={this.onSMS}>
               {SettingsView.renderSetting(
-                'mobile',
+                'mobile-alt',
                 'Copy my alerts to SMS',
                 SettingsView.renderFetchedBool({
                   ...this.props.smsNotifications,
@@ -559,7 +559,7 @@ class SettingsView extends HideableView {
           <div className="list-group setting-colour-2">
             <ListGroupItemBtn handler={this.onActivityFilter}>
               {SettingsView.renderSetting(
-                'dashboard',
+                'tachometer-alt',
                 'Activity filter',
                 SettingsView.renderFractionCount(
                   this.props.activityFilter.selected,
@@ -569,7 +569,7 @@ class SettingsView extends HideableView {
             </ListGroupItemBtn>
             <ListGroupItemBtn handler={this.onNotificationFilter}>
               {SettingsView.renderSetting(
-                'bell-o',
+                'bell',
                 'Alerts filter',
                 SettingsView.renderFractionCount(
                   this.props.notificationFilter.selected,
@@ -582,7 +582,7 @@ class SettingsView extends HideableView {
           <div className="list-group setting-colour-3">
             <ListGroupItemBtn handler={SettingsView.onWhatsNew}>
               {SettingsView.renderSetting(
-                'question-circle-o',
+                'question-circle',
                 'What\'s new?',
                 <FAChevronRight />,
               )}
@@ -591,7 +591,7 @@ class SettingsView extends HideableView {
               <div className="media">
                 <div className="media-left feedback">
                   <span className="fa-stack">
-                    <i className="fa fa-fw fa-comment-o fa-stack-2x" />
+                    <i className="fal fa-fw fa-comment fa-stack-2x" />
                     <strong className="fa-fw fa-stack-1x">!</strong>
                   </span>
                 </div>
@@ -606,7 +606,7 @@ class SettingsView extends HideableView {
             {SettingsView.canLaunchTour() &&
             <ListGroupItemBtn handler={SettingsView.launchTour}>
               {SettingsView.renderSetting(
-                'arrow-circle-o-right',
+                'arrow-alt-circle-right',
                 'Take a tour',
                 <FAChevronRight />,
               )}
@@ -621,7 +621,7 @@ class SettingsView extends HideableView {
             <ListGroupItemBtn handler={SettingsView.onSignOut}>
               <div className="media">
                 <div className="media-left signout">
-                  <i className="fa fa-fw fa-sign-out" />
+                  <i className="fal fa-fw fa-sign-out" />
                 </div>
                 <div className="media-body">
                   Sign out

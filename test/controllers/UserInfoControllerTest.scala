@@ -1,7 +1,7 @@
 package controllers
 
 import helpers._
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.Suite
 import org.scalatest.mockito.MockitoSugar
@@ -27,16 +27,16 @@ class UserInfoControllerTest extends BaseSpec with MockitoSugar with Results {
   val LOGIN_URL = s"$REFRESH_URL?permdenied"
   val LOGOUT_URL = s"https://example.warwick.ac.uk/logout?target=https://$HOSTNAME"
 
-  def FakeRequestWithHost() =
+  private def FakeRequestWithHost() =
     FakeRequest().withHeaders(HeaderNames.HOST -> HOSTNAME)
 
-  val mockPhotoService = mock[PhotoService]
+  private val mockPhotoService = mock[PhotoService]
   when(mockPhotoService.photoUrl(any())).thenReturn(Future.failed(new RuntimeException("Fail")))
 
-  val analytics = mock[AnalyticsMeasurementService]
+  private val analytics = mock[AnalyticsMeasurementService]
   when(analytics.getUserIdentifier(Usercode("user"))).thenReturn("user-identifier")
 
-  def appBuilder(user: Option[User]) =
+  private def appBuilder(user: Option[User]) =
     TestApplications.fullNoRoutesBuilder(user)
       .overrides(
         bind[UserInitialisationService].toInstance(mock[UserInitialisationService]),
@@ -46,12 +46,12 @@ class UserInfoControllerTest extends BaseSpec with MockitoSugar with Results {
         bind[AnalyticsMeasurementService].toInstance(analytics)
       )
 
-  override def nestedSuites = immutable.IndexedSeq[Suite](SignedIn, SignedOut)
+  override def nestedSuites: immutable.IndexedSeq[Suite] = immutable.IndexedSeq[Suite](SignedIn, SignedOut)
 
   object SignedOut extends OneStartAppPerSuite {
     override lazy val app: Application = appBuilder(None).build()
 
-    def controller = get[UserInfoController]
+    def controller: UserInfoController = get[UserInfoController]
 
     "SSOController#info signed out" should {
       "handle anonymous" in {
@@ -80,7 +80,7 @@ class UserInfoControllerTest extends BaseSpec with MockitoSugar with Results {
   object SignedIn extends OneStartAppPerSuite {
 
     val its = Department(shortName = Some("IT Services"), name = Some("Information Technology Services"), code = Some("IN"))
-    val user = Fixtures.user.makeFoundUser().copy(
+    private val user = Fixtures.user.makeFoundUser().copy(
       department = Some(its),
       rawProperties = Map(
         "warwickitsclass" -> "Staff",
@@ -94,7 +94,7 @@ class UserInfoControllerTest extends BaseSpec with MockitoSugar with Results {
 
     override lazy val app: Application = appBuilder(Some(user)).build()
 
-    def controller = get[UserInfoController]
+    def controller: UserInfoController = get[UserInfoController]
 
     "SSOController#info signed in" should {
 

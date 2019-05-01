@@ -55,7 +55,7 @@ export default class TrafficCondition extends React.PureComponent {
     }
 
     return (<li>
-      <i className={classNames('fa', 'fa-fw', status)} />
+      <i className={classNames('fal', 'fa-fw', status)} />
       <span className="route-name">{route.name}</span>{message}
     </li>);
   }

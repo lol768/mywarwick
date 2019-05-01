@@ -229,7 +229,7 @@ describe('AgendaTileItem', () => {
     const locationInner = html.find('.tile-list-item__location');
     locationInner.hasClass('text--light').should.equal(true);
     locationInner.contains('Heronbank').should.equal(true);
-    locationInner.html().should.include('<i class="fa fa-map-marker"></i>');
+    locationInner.html().should.include('<i class="fal fa-map-marker-alt"></i>');
 
     const link = locationInner.find(Hyperlink);
     link.childAt(0).text().should.equal('Heronbank');

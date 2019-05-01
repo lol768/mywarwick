@@ -248,7 +248,7 @@ class MeView extends HideableView {
                 role="button"
                 tabIndex={0}
               >
-                <i className="fa fa-plus"/>
+                <i className="fal fa-plus"/>
                 <div className="add-tile-button__text">
                   <div className="num-hidden-tiles">{hiddenTiles.length}</div>
                   <div>

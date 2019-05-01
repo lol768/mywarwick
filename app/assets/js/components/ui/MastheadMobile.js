@@ -43,7 +43,7 @@ export default class MastheadMobile extends React.PureComponent {
           role="button"
           tabIndex={0}
         >
-          <i className="fa fa-fw fa-cog" />
+          <i className="fal fa-fw fa-cog" />
         </div>
         }
         { this.props.showEditButton &&
@@ -55,8 +55,8 @@ export default class MastheadMobile extends React.PureComponent {
           tabIndex={0}
         >
           {this.props.editing ?
-            <i className="fa fa-fw fa-check" /> :
-            <i className="fa-fw fal fa-arrows-alt" />
+            <i className="fal fa-fw fa-check" /> :
+            <i className="fal fa-fw fa-arrows-alt" />
           }
         </div>
         }
@@ -75,7 +75,7 @@ export default class MastheadMobile extends React.PureComponent {
             role="button"
             tabIndex={0}
           >
-            <i className="fa fa-chevron-left" />
+            <i className="fal fa-chevron-left" />
             { this.state.backButtonText }
           </div>
           }

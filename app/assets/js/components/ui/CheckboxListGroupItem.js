@@ -32,7 +32,7 @@ export default class CheckboxListGroupItem extends React.PureComponent {
           'checkbox--disabled': this.props.disabled,
         }) }
       >
-        <i className="fa fa-check" />
+        <i className="fal fa-check" />
       </span>
     );
   }

@@ -83,7 +83,7 @@ $(SPLIT_FORM).each((i, form) => {
       $elem.prepend(
         errorsAsJson.map((err, index) =>
           $('<div>').addClass('help-block').attr('id', `${errorType}_error_${index}`)
-            .html(`<i class="fa fa-exclamation-triangle"></i> ${err}`),
+            .html(`<i class="fal fa-exclamation-triangle"/>${err}`),
         ),
       );
     }

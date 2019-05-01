@@ -1,7 +1,6 @@
 package services
 
-import org.mockito.Matchers
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers.{eq => isEq, _}
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import helpers.BaseSpec
@@ -10,9 +9,9 @@ import warwick.sso.Usercode
 
 class UserInitialisationServiceTest extends BaseSpec with MockitoSugar {
 
-  val userPreferencesDao = mock[UserPreferencesDao]
-  val newsCategoryDao = mock[NewsCategoryDao]
-  val userNewsCategoryDao = mock[UserNewsCategoryDao]
+  private val userPreferencesDao = mock[UserPreferencesDao]
+  private val newsCategoryDao = mock[NewsCategoryDao]
+  private val userNewsCategoryDao = mock[UserNewsCategoryDao]
   val service = new UserInitialisationServiceImpl(userPreferencesDao, newsCategoryDao, userNewsCategoryDao, new MockDatabase)
 
   "UserInitialisationService" should {
@@ -20,21 +19,21 @@ class UserInitialisationServiceTest extends BaseSpec with MockitoSugar {
     val custard = Usercode("custard")
 
     "not initialise already-initialised user" in {
-      when(userPreferencesDao.exists(Matchers.eq(custard))(any())).thenReturn(true)
+      when(userPreferencesDao.exists(isEq(custard))(any())).thenReturn(true)
 
       service.maybeInitialiseUser(custard)
 
-      verify(userPreferencesDao, never).save(Matchers.eq(custard))(any())
+      verify(userPreferencesDao, never).save(isEq(custard))(any())
     }
 
     "initialise users" in {
       when(newsCategoryDao.all()(any())).thenReturn(Seq.empty)
 
-      when(userPreferencesDao.exists(Matchers.eq(custard))(any())).thenReturn(false)
+      when(userPreferencesDao.exists(isEq(custard))(any())).thenReturn(false)
 
       service.maybeInitialiseUser(custard)
 
-      verify(userPreferencesDao).save(Matchers.eq(custard))(any())
+      verify(userPreferencesDao).save(isEq(custard))(any())
     }
 
   }
