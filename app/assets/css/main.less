@@ -69,22 +69,29 @@ body {
   display: block;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 i.fas:before i.far:before i.fal:before {
   // FA5 icons are a big bigger than in FA4 so make them a bit smaller
   display: block;
   transform: scale(0.9);
+}
+
+.update-popup {
+  background-color: #333;
+  color: white;
+  position: fixed;
+  bottom: @start-tab-bar-height;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  padding: 16px;
+  margin: 4px;
+  border-radius: 4px;
+
+  .app.android & {
+    bottom: 4px;
+  }
+
+  .media-body {
+    padding: @padding-base-vertical + 1px 0;
+  }
 }

@@ -16,18 +16,13 @@ class UpdatePopup extends React.PureComponent {
   render() {
     if (this.props.isUpdateReady) {
       return (
-        <div className="alert alert-success update-popup" style={{ marginBottom: 15 }}>
+        <div className="update-popup">
           <div className="media">
-            <div className="media-left">
-              <i
-                className="app-icon app-icon--lg fal fa-fw fa-check"
-                style={{ backgroundColor: '#8c6e96', color: '#fff' }}
-              />
+            <div className="media-body">
+              A new version of My Warwick is available.
             </div>
-            <div className="media-body" style={{ paddingTop: 2 }}>
-              A new version of My Warwick is available. Just&nbsp;
-              <a href="#update-refresh" onClick={UpdatePopup.reload}>refresh the page</a>
-              &nbsp;to upgrade.
+            <div className="media-right">
+              <a href="#update-refresh" className="btn btn-brand" onClick={UpdatePopup.reload}>Update</a>
             </div>
           </div>
         </div>

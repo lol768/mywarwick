@@ -13,7 +13,7 @@ html.not-app .bg-stand-in {
 }
 
 @media screen and (min-width: @screen-md-min) {
-  .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed {
+  .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .update-popup {
     position: fixed;
   }
 
@@ -70,7 +70,7 @@ html.not-app .bg-stand-in {
     }
   }
 
-  body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container {
+  body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed, .add-tile-container, .update-popup {
     margin-right: 0;
     margin-left: 0;
     max-width: 100vw;
@@ -107,7 +107,7 @@ html.not-app .bg-stand-in {
   }
 
   body, .fixed-header, .nav.tab-bar, nav.tab-bar, .in-settings .list-group.fixed,
-  .add-tile-container {
+  .add-tile-container, .update-popup {
     margin-left: auto;
   }
 
@@ -263,6 +263,13 @@ html.not-app .bg-stand-in {
       .permission-request, .permission-warning {
         top: 0;
         bottom: auto;
+      }
+
+      .update-popup {
+        bottom: @desktop-rendition-vertical-border + @start-tab-bar-height;
+        max-width: @desktop-rendition-width - 8px;
+        margin-right: ~"calc(50vw -" (@desktop-rendition-width) ~" + 4px)";
+        left: auto;
       }
     }
   }
