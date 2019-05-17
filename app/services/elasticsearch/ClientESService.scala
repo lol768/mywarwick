@@ -54,7 +54,7 @@ class ClientESServiceImpl @Inject()(
     Iterator.iterate(interval.getStart) {
       _.plusDays(1)
     }.takeWhile(!_.isAfter(interval.getEnd))
-      .map(d => s"web-development-access-${d.getYear}.${"%02d".format(d.getMonthOfYear)}.${"%02d".format(d.getDayOfMonth)}")
+      .map(d => s"web-development-access-${d.getYear}.${"%02d".format(d.getMonthOfYear)}.${"%02d".format(d.getDayOfMonth)}*")
       .toSeq
       .mkString(",")
   }
