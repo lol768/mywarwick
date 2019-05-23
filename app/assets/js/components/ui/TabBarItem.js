@@ -48,12 +48,11 @@ export default class TabBarItem extends React.PureComponent {
             `fal fa-${this.props.selectedIcon}` :
             `fal fa-${this.props.icon}`
           }
-        >
-          { (this.props.badge > 0) ?
-            <span className="badge">{ formatBadgeCount(this.props.badge) }</span> :
-            null
-          }
-        </i>
+        />
+        { (this.props.badge > 0) ?
+          <span className="badge">{ formatBadgeCount(this.props.badge) }</span> :
+          null
+        }
         <span className="tab-label">{ this.props.title }</span>
       </li>
     );
