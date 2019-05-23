@@ -6,6 +6,7 @@ import javax.inject.{Named, Singleton}
 import models.API.Error
 import models._
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 import services.messaging.MobileOutputService
 import services.{ActivityService, SecurityService}
@@ -57,23 +58,31 @@ class UserActivitiesController @Inject()(
   }
 
   def markAsRead = APIAction(parse.json) { implicit request =>
-    request.body.validate[Option[DateTime]]((__ \ "lastRead").formatNullable[DateTime])
-      .map(data => {
-        request.context.user
-          .map(u => {
-            val success = data.forall(activityService.setLastReadDate(u, _))
-            if (success) {
-              Future(mobileOutput.clearUnreadCount(u.usercode))
-                .failed.foreach { e => logger.warn("clearUnreadCount failure", e) }
-              Ok(Json.toJson(API.Success[JsObject](data = Json.obj())))
-            }
-            else InternalServerError(Json.toJson(
+    request.body.validate[Option[DateTime]]((__ \ "lastRead").formatNullable[DateTime]).fold(
+      errors => BadRequest(Json.toJson(API.Failure[JsArray]("error", API.Error.fromJsError(JsError(errors))))),
+      {
+        case Some(data) =>
+          val user = request.context.user.get // APIAction - must be logged in
+          logger.info(s"Setting last read to $data for ${user.usercode.string}")
+
+          val success = activityService.setLastReadDate(user, data)
+          if (success) {
+            Future(mobileOutput.clearUnreadCount(user.usercode))
+              .failed.foreach { e => logger.warn("clearUnreadCount failure", e) }
+
+            val newValue = activityService.getLastReadDate(user)
+            auditLog('UpdateLastRead, 'lastRead -> newValue.map(ISODateTimeFormat.dateTime.print))
+            Ok(Json.toJson(API.Success[JsObject](data = Json.obj())))
+          } else {
+            InternalServerError(Json.toJson(
               apiFailure("last-read-noupdate", "The last read date was not updated")
             ))
-          })
-          .get // APIAction - must be logged in
-      })
-      .recoverTotal(e => BadRequest(Json.toJson(API.Failure[JsObject]("error", API.Error.fromJsError(e)))))
+          }
+        case _ =>
+          logger.warn("Didn't set lastRead as data was missing")
+          Ok(Json.toJson(API.Success[JsObject](data = Json.obj())))
+      }
+    )
   }
 
   def listMutes = RequiredUserAction { request =>
