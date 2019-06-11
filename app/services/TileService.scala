@@ -3,6 +3,7 @@ package services
 import com.google.inject.{ImplementedBy, Inject}
 import models._
 import play.api.db.{Database, NamedDatabase}
+import play.api.libs.json.Json
 import services.dao.{TileDao, TileLayoutDao}
 import system.{AuditLogContext, Logging}
 import warwick.sso.User
@@ -115,7 +116,7 @@ class TileServiceImpl @Inject()(
         auditLog('UpdateTiles, 'tile_added -> newlyAddedTileIds, 'tile_removed -> newlyRemovedTileIds)
       }
       auditLog('UpdateTilePreferences, 'tile_preferences -> getTilesForUser(Some(user)).map(tileInstance =>
-        tileInstance.tile.id -> tileInstance.preferences
+        tileInstance.tile.id -> tileInstance.preferences.getOrElse(Json.obj())
       ).toMap)
   }
 

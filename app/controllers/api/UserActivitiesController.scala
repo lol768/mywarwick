@@ -134,7 +134,7 @@ class UserActivitiesController @Inject()(
         errors => BadRequest(Json.toJson(
           API.Failure[JsObject]("error", errors.map(error => API.Error(error.getClass.getSimpleName, error.message)))
         )),
-        id => {
+        _ => {
           auditLog('RemoveMute, 'id -> id)
           Ok(Json.toJson(API.Success("ok", "removed")))
         }
