@@ -21,26 +21,25 @@ class TilesReportingController @Inject()(
 
     val averageTileHeights = tilesReportingService.getAllUserTileHeights()
 
-    val tileRankingsByArea = tilesReportingService.getAllUserTileAreas().map(tile => {
-      (tile._1,
-      tile._2 match {
-        case x if x == 0 => 0
-        case x if x <= 4 => 6 - x
-        case x if x >= 5 => 1
-      })
-    })
+    val tileRankingsByArea = tilesReportingService.getAllUserTileAreas().mapValues {
+      case x if x == 0 => 0
+      case x if x <= 4 => 6 - x
+      case x if x >= 5 => 1
+    }
 
-    val tileRankings = tilesReportingService.getAllUserTileHeights().map(tile => {
-      (tile._1,
-        if(tileRankingsByArea(tile._1) == 0) 0
-        else if (tile._2 <= 2) tileRankingsByArea(tile._1)
-        else if (tile._2 <= 4) 1 + tileRankingsByArea(tile._1)
-        else if (tile._2 <= 6) 2 + tileRankingsByArea(tile._1)
-        else if (tile._2 <= 8) 3 + tileRankingsByArea(tile._1)
-        else if (tile._2 <= 10) 4 + tileRankingsByArea(tile._1)
-        else 5 + tileRankingsByArea(tile._1)
-      )
-    })
+    val tileRankings = tilesReportingService.getAllUserTileHeights().map {
+      case (tile, ranking) => {
+        (tile,
+        if(tileRankingsByArea(tile) == 0)  0
+        else if (ranking <= 2) tileRankingsByArea(tile)
+        else if (ranking <= 4) 1 + tileRankingsByArea(tile)
+        else if (ranking <= 6) 2 + tileRankingsByArea(tile)
+        else if (ranking <= 8) 3 + tileRankingsByArea(tile)
+        else if (ranking <= 10) 4 + tileRankingsByArea(tile)
+        else 5 + tileRankingsByArea(tile)
+        )
+      }
+    }
 
     Ok(views.html.admin.reporting.populartiles.index(averageTileAreas, averageTileHeights, tileRankings))
   }
