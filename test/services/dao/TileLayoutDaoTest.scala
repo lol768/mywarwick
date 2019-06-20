@@ -2,7 +2,7 @@ package services.dao
 
 import anorm.SQL
 import helpers.OneStartAppPerSuite
-import models.TileLayout
+import models.{TileLayout, UserTileLayout}
 import helpers.BaseSpec
 
 class TileLayoutDaoTest extends BaseSpec with OneStartAppPerSuite {
@@ -60,6 +60,25 @@ class TileLayoutDaoTest extends BaseSpec with OneStartAppPerSuite {
       val tiles = tileLayoutDao.getTileLayoutForUser("johnny-5")
 
       tiles must be ('empty)
+    }
+
+    "return all user tile layouts" in transaction { implicit c =>
+      SQL(
+        """
+          INSERT INTO TILE (ID, TILE_TYPE, COLOUR, FETCH_URL, TITLE, ICON) VALUES
+         ('tile', 'count', 1, 'http://provider', 'Printer Credit', 'print'),
+         ('other-tile', 'count', 2, 'http://provider', 'Mail', 'envelope');
+        INSERT INTO USER_TILE_LAYOUT (USERCODE, TILE_ID, LAYOUT_WIDTH, X, Y, WIDTH, HEIGHT) VALUES
+          ('mary-1', 'tile', 2, 0, 1, 1, 1),
+          ('john-2', 'tile', 1, 1, 1, 1, 1 );
+        """
+      ).execute()
+
+      val tiles = tileLayoutDao.getAllUserTileLayouts()
+
+      tiles must contain(UserTileLayout("mary-1", "tile", 2, 0, 1, 1, 1 ))
+      tiles must contain(UserTileLayout("john-2", "tile", 1, 1, 1, 1, 1 ))
+
     }
 
   }
