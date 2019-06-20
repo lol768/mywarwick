@@ -67,7 +67,7 @@ class ModuleTileItem extends ListTileItem {
   }
 
   render() {
-    const { size, moduleCode, fullName, href } = this.props;
+    const { size, moduleCode, fullName, href, lastUpdated } = this.props;
     // const { lastUpdated, announcements} = this.props;
     const isSmall = size === 'small' || size === 'wide';
     const content = isSmall ?
@@ -88,7 +88,7 @@ class ModuleTileItem extends ListTileItem {
           {content}
         </HyperLink>
         {/* }*/}
-        {/* {!isSmall && <div>Last updated: {formatDateTime(lastUpdated)}</div>}*/}
+        {!isSmall && <div>Last updated: {formatDateTime(lastUpdated)}</div>}
       </li>
     );
   }
