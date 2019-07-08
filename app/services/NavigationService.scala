@@ -101,7 +101,8 @@ class NavigationServiceImpl @Inject()(
         NavigationPage("Preferences Report", adminReportingRoutes.PreferencesReportingController.index()),
         NavigationPage("Activity Report", adminReportingRoutes.ActivityReportingController.index()),
         NavigationPage("EAP Report", adminReportingRoutes.EAPReportingController.index()),
-        NavigationPage("Client Report", adminReportingRoutes.ClientReportingController.index())
+        NavigationPage("Client Report", adminReportingRoutes.ClientReportingController.index()),
+        NavigationPage("Popular Tiles Report", adminReportingRoutes.TilesReportingController.index())
       ))
     ))
   }

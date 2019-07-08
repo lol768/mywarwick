@@ -1,0 +1,34 @@
+@import system.RequestContext
+@(
+    averageTileAreas: Map[Tile, Int],
+    averageTileHeights: Map[Tile, Int],
+    tileRankings: Map[Tile, Any]
+)(implicit messages: Messages, context: RequestContext)
+@common.admin("Administration", "Reports", "Popular Tiles Report") {
+  <div>
+    <h2>Tile Popularity by Size and Position</h2>
+    <p>Ranking from 1 to 10, with 1 being the most popular (unused tiles are ranked at 0), based upon the mean size and positioning of tiles.</p>
+    <table class="table table-hover sortable-table">
+      <thead class="thead">
+        <th scope="col">Tile</th>
+        <th scope="col">Average Area</th>
+        <th scope="col">Average Position (Y Axis)</th>
+        <th scope="col">Estimated Ranking</th>
+      </thead>
+      <tbody>
+      @for((tile, size) <- averageTileAreas) {
+        @if(size == 0) {
+          <tr class="text-muted">
+        } else {
+          <tr>
+          }
+        <td>@tile.title</td>
+        <td>@size</td>
+        <td>@averageTileHeights(tile)</td>
+        <td>@tileRankings(tile)</td>
+      </tr>
+      }
+      </tbody>
+    </table>
+  </div>
+}

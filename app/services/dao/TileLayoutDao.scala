@@ -5,7 +5,7 @@ import java.sql.Connection
 import anorm.SqlParser._
 import anorm._
 import com.google.inject.{ImplementedBy, Singleton}
-import models.TileLayout
+import models.{TileLayout, UserTileLayout}
 
 import scala.util.Try
 
@@ -17,6 +17,8 @@ trait TileLayoutDao {
   def getDefaultTileLayoutForGroup(group: String)(implicit c: Connection): Seq[TileLayout]
 
   def saveTileLayoutForUser(usercode: String, layout: Seq[TileLayout])(implicit c: Connection): Try[Unit]
+
+  def getAllUserTileLayouts()(implicit c: Connection): Seq[UserTileLayout]
 
 }
 
@@ -33,6 +35,20 @@ class TileLayoutDaoImpl extends TileLayoutDao {
       case tileId ~ layoutWidth ~ x ~ y ~ width ~ height =>
         TileLayout(tileId, layoutWidth, x, y, width, height)
     }
+
+  val userTileLayoutParser: RowParser[UserTileLayout] =
+    get[String]("USERCODE") ~
+      get[String]("TILE_ID") ~
+      get[Int]("LAYOUT_WIDTH") ~
+      get[Int]("X") ~
+      get[Int]("Y") ~
+      get[Int]("WIDTH") ~
+      get[Int]("HEIGHT") map {
+      case usercode ~ tileId ~ layoutWidth ~ x ~ y ~ width ~ height =>
+        UserTileLayout(usercode, tileId, layoutWidth, x, y, width, height)
+    }
+
+
 
   override def getTileLayoutForUser(usercode: String)(implicit c: Connection): Seq[TileLayout] =
     SQL("SELECT TILE_ID, LAYOUT_WIDTH, X, Y, WIDTH, HEIGHT FROM USER_TILE_LAYOUT WHERE USERCODE = {usercode}")
@@ -63,5 +79,7 @@ class TileLayoutDaoImpl extends TileLayoutDao {
       }
     }
   }
+
+  override def getAllUserTileLayouts()(implicit c: Connection): Seq[UserTileLayout] = SQL(s"select * from USER_TILE_LAYOUT").as(userTileLayoutParser.*)
 
 }
