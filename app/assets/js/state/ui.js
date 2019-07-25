@@ -4,8 +4,8 @@ import log from 'loglevel';
 import $ from 'jquery';
 import { goBack, replace } from 'react-router-redux';
 import _ from 'lodash-es';
-import { Routes } from '../components/AppRoot';
 import { createSelector } from 'reselect';
+import { Routes } from '../components/AppRoot';
 
 /* eslint-disable */
 let mq;
@@ -116,9 +116,9 @@ export function attachScrollRestore(key) {
 export function navRequest(path, dispatch) {
   if (path === window.location.pathname) {
     window.scrollTo(0, 0);
-  } else if (window.location.pathname.indexOf(Routes.TILES) !== -1 ||
-    window.location.pathname.indexOf(Routes.EDIT) !== -1 ||
-    window.location.pathname.indexOf(Routes.SETTINGS) !== -1
+  } else if (window.location.pathname.indexOf(Routes.TILES) !== -1
+    || window.location.pathname.indexOf(Routes.EDIT) !== -1
+    || window.location.pathname.indexOf(Routes.SETTINGS) !== -1
   ) {
     dispatch({
       type: 'ui.navRequest',
@@ -129,4 +129,3 @@ export function navRequest(path, dispatch) {
     dispatch(replace(path));
   }
 }
-

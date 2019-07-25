@@ -23,7 +23,7 @@ describe('AudiencePicker', () => {
           name: 'Fun Department'
         },
       },
-      
+      audienceDidUpdate: () => {},
     };
 
     const shallow = enzyme.shallow(<AudiencePicker {...props} />);
@@ -48,7 +48,7 @@ describe('AudiencePicker', () => {
         MU: { name: 'Agriculture Department' },
         PU: { name: 'Sewage Department' },
       },
-      
+      audienceDidUpdate: () => {},
     };
 
     const shallow = enzyme.shallow(<AudiencePicker {...props} />);
@@ -74,7 +74,7 @@ describe('AudiencePicker', () => {
         MU: { name: 'Agriculture Department' },
         PU: { name: 'Sewage Department' },
       },
-      
+      audienceDidUpdate: () => {},
     };
     const shallow = enzyme.shallow(<AudiencePicker {...props}/>);
 
@@ -128,7 +128,7 @@ describe('AudiencePicker', () => {
       },
       deptSubsetOpts,
       locationOpts,
-      
+      audienceDidUpdate: () => {},
     };
 
     const html = enzyme.render(<form><AudiencePicker {...props} /></form>);

@@ -5,6 +5,8 @@ import * as PropTypes from 'prop-types';
 import moment from 'moment';
 import _ from 'lodash-es';
 import { connect } from 'react-redux';
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
+
 import ActivityItem from '../ui/ActivityItem';
 import GroupedList from '../ui/GroupedList';
 import * as groupItemsByDate from '../../GroupItemsByDate';
@@ -17,7 +19,6 @@ import ScrollRestore from '../ui/ScrollRestore';
 import { Routes } from '../AppRoot';
 import HideableView from './HideableView';
 import ActivityMutingView from './ActivityMutingView';
-import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import isEmbedded from '../../embedHelper';
 
 const SOME_MORE = 20;
@@ -49,7 +50,7 @@ class NotificationsView extends HideableView {
       return (
         <EmptyState lead="You don't have any alerts to display">
           <p>
-            There may be others hidden due to your Alert filter settings
+            There may be others hidden due to your Alerts filter settings
           </p>
         </EmptyState>
       );
@@ -143,10 +144,13 @@ class NotificationsView extends HideableView {
 
     if (hasOlderItemsLocally) {
       return Promise.resolve(this.showMore());
-    } else if (this.props.olderItemsOnServer) {
+    }
+
+    if (this.props.olderItemsOnServer) {
       return this.props.dispatch(notifications.fetchMoreNotifications())
         .then(() => this.showMore());
     }
+
     return Promise.resolve();
   }
 
@@ -196,16 +200,14 @@ class NotificationsView extends HideableView {
   render() {
     const shouldBeGrouped = this.props.grouped && this.shouldBeGrouped();
     const notificationItems = takeFromStream(this.props.notifications, this.props.numberToShow)
-      .map(n =>
-        (<ActivityItem
+      .map(n => (<ActivityItem
           key={ n.id }
           grouped={ shouldBeGrouped }
           unread={ this.isUnread(n) }
           muteable={ !n.providerOverrideMuting }
           onMuting={ this.onMuting }
           {...n}
-        />),
-      );
+        />));
 
     const streamSize = getStreamSize(this.props.notifications);
     const hasAny = streamSize > 0 || this.props.olderItemsOnServer;
@@ -225,15 +227,15 @@ class NotificationsView extends HideableView {
         >
           { this.renderMuting() }
         </ReactCSSTransitionGroup>
-        { !isEmbedded() && browserPushDisabled ?
-          <div className="permission-warning">
+        { !isEmbedded() && browserPushDisabled
+          ? <div className="permission-warning">
             You have blocked My Warwick from showing system notifications. You&apos;ll need to open
             your browser preferences to change that.
           </div>
           : null
         }
-        { hasAny ?
-          <ScrollRestore url={`/${Routes.NOTIFICATIONS}`}>
+        { hasAny
+          ? <ScrollRestore url={`/${Routes.NOTIFICATIONS}`}>
             <InfiniteScrollable
               hasMore={ hasMore }
               onLoadMore={ this.loadMore }

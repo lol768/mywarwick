@@ -12,7 +12,8 @@ self.addEventListener('message', (event) => {
   if (event.data === 'force-activate') {
     self.skipWaiting();
     clients.claim();
-    clients.matchAll().then(clients =>
-      clients.forEach(client => client.postMessage('reload-window')));
+    clients.matchAll().then(clients => clients.forEach(
+      client => client.postMessage('reload-window'),
+    ));
   }
 });

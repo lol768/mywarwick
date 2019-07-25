@@ -13,7 +13,7 @@ $('input[name="item.publishDateSet"]').on('change', function onChange() {
 
 function populateNewsAnalytics(data) {
   $(NEWS_ITEM).each((i, e) => {
-    const id = e.id;
+    const { id } = e;
     const $elem = $(e);
 
     let guestClicksCount = 0;
@@ -48,8 +48,9 @@ function populateNewsAnalytics(data) {
     }
 
     $elem.find('.click-count').text(
-      (guestClicksCount === 0 && usersClicksCount === 0) ?
-        'Clicked by nobody' : `Clicked by ${msgForGuestClicks}, ${msgForUserClicks}`);
+      (guestClicksCount === 0 && usersClicksCount === 0)
+        ? 'Clicked by nobody' : `Clicked by ${msgForGuestClicks}, ${msgForUserClicks}`,
+    );
   });
 }
 

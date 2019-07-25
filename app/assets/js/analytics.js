@@ -1,10 +1,10 @@
 /* eslint-env browser */
 /* global ga */
 
-import localforage from './localdata';
 import $ from 'jquery';
 import log from 'loglevel';
 import _ from 'lodash-es';
+import localforage from './localdata';
 import store from './store';
 
 const MAX_ITEMS_IN_QUEUE = 100;
@@ -32,8 +32,8 @@ const QUEUE_STORAGE_KEY = 'gaQueue';
 const trackingId = $('#app-container').attr('data-analytics-tracking-id');
 
 if (trackingId === undefined) {
-  log.warn('Google Analytics is not configured.  In application.conf, set ' +
-    'start.analytics.tracking-id to the tracking ID for this property, e.g. UA-XXXXXXXX-X.');
+  log.warn('Google Analytics is not configured.  In application.conf, set '
+    + 'start.analytics.tracking-id to the tracking ID for this property, e.g. UA-XXXXXXXX-X.');
 } else {
   log.info(`Google Analytics tracker created with tracking ID ${trackingId}`);
 
@@ -59,11 +59,13 @@ let analyticsQueue = [];
  * or just an empty array.
  */
 function getQueueFromLocalStorage() {
-  localforage.getItem(QUEUE_STORAGE_KEY).then((storageItem) => {
-    if (storageItem !== null && Array.isArray(storageItem)) {
-      analyticsQueue = [...storageItem, ...analyticsQueue].slice(-100);
-    }
-  });
+  localforage.getItem(QUEUE_STORAGE_KEY)
+    .then((storageItem) => {
+      if (storageItem !== null && Array.isArray(storageItem)) {
+        analyticsQueue = [...storageItem, ...analyticsQueue].slice(-100);
+      }
+    })
+    .catch(err => log.warn(`Error fetching from localstorage: ${err.message}`));
 }
 
 let postNextItemThrottled;
@@ -96,7 +98,9 @@ function getTimeSpentInQueue(timeQueued) {
 function persistAnalyticsQueue() {
   return localforage.setItem(QUEUE_STORAGE_KEY, analyticsQueue).then(() => {
     log.info('Persist finished for GA queue');
-  });
+  }).catch(
+    // don't care about errors
+  );
 }
 
 function postNextItem() {

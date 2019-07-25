@@ -3,30 +3,15 @@
 const gulp = require('gulp');
 const fs = require('fs');
 const gutil = require('gulp-util');
-const sourcemaps = require('gulp-sourcemaps');
-const replace = require('gulp-replace');
-const source = require('vinyl-source-stream');
-const buffer = require('vinyl-buffer');
 const path = require('path');
-const mold = require('mold-source-map');
-const playAssets = require('gulp-play-assets');
-
-const babelify = require('babelify');
 const webpackStream = require('webpack-stream');
 const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
-const browserify = require('browserify');
-const browserifyInc = require('browserify-incremental');
-const browserifyShim = require('browserify-shim');
-const envify = require('loose-envify/custom');
 const eslint = require('gulp-eslint');
 const insert = require('gulp-insert');
 const manifest = require('gulp-manifest');
 const rename = require('gulp-rename');
-const uglify = require('gulp-uglify');
-const watchify = require('watchify');
 const merge = require('merge-stream');
-const _ = require('lodash');
 
 const bundleEvents = require('./events');
 
@@ -42,54 +27,6 @@ WatchEventsPlugin.prototype.apply = (options, compiler) => {
     done();
   })
 };
-
-function browserifyOptions(cacheName, entries) {
-  return {
-    entries: entries,
-    basedir: 'app/assets/js',
-    cacheFile: `./target/browserify-cache-${cacheName}.json`,
-    debug: true, // confusingly, this enables sourcemaps
-    transform: [
-      babelify,
-      [
-        envify({ _: 'purge', NODE_ENV: PRODUCTION ? 'production' : 'development' }),
-        { global: true },
-      ],
-      [browserifyShim, { global: true }],
-    ],
-    // Excluded from bundle, then browserify-shim hooks up require('jquery') to point
-    // at the global version.
-    // TODO use standalone id7 js and be masters of our own jquery
-    excludes: ['jquery'],
-  };
-}
-
-function createBrowserify(options) {
-  var factory = browserifyInc;
-  if (options.incremental === false) {
-    factory = browserify;
-  }
-  const b = factory(options);
-  (options.excludes || []).forEach((el) => b.exclude(el));
-  return b;
-}
-
-// Function for running Browserify on JS, since
-// we reuse it a couple of times.
-function bundle(b, outputFile) {
-  return b.bundle()
-    .on('error', (e) => {
-      gutil.log(gutil.colors.red(e.stack || e));
-    })
-    .pipe(mold.transformSourcesRelativeTo(path.join(__dirname, '..')))
-    .pipe(source(outputFile))
-    .pipe(buffer())
-    .pipe(sourcemaps.init({ loadMaps: true }))
-    .pipe(UGLIFY ? uglify() : gutil.noop())
-    .pipe(playAssets())
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(paths.scriptOut));
-}
 
 // The base non-Gulp Webpack config is in the standard file
 const BASE_WEBPACK_CONFIG = require(path.join(__dirname, '../webpack.config.js'));
@@ -142,16 +79,12 @@ function getCachedAssetsAsync() {
     '/lib/@fortawesome/fontawesome-pro/fa-solid-900.woff2',
     '/lib/@fortawesome/fontawesome-pro/fa-solid-900.woff',
     '/lib/@fortawesome/fontawesome-pro/fa-solid-900.ttf',
-    '/lib/id7/images/masthead-logo-bleed-sm*',
-    '/lib/id7/images/masthead-logo-bleed-xs*',
-    '/lib/id7/images/newwindow.gif',
-    '/lib/id7/images/shim.gif',
-    '/lib/id7/js/id7-bundle.js',
+    '/lib/@universityofwarwick/id7/images/masthead-logo-bleed-sm*',
+    '/lib/@universityofwarwick/id7/images/masthead-logo-bleed-xs*',
+    '/lib/@universityofwarwick/id7/images/newwindow.gif',
+    '/lib/@universityofwarwick/id7/images/shim.gif',
+    '/lib/@universityofwarwick/id7/js/id7-bundle.js',
   ]).then(array => array.map(asset => path.join(paths.assetsOut, asset)));
-}
-
-function cacheName(name) {
-  return name.replace('.js', '');
 }
 
 gulp.task('scripts', () => {
@@ -171,7 +104,7 @@ gulp.task('lint', () => {
     .pipe(eslint.failAfterError());
 });
 
-function generateServiceWorker(watch) {
+function generateServiceWorker() {
   const generateSW = require('workbox-build').generateSW;
 
   // Things that should cause fresh HTML to be downloaded
@@ -303,16 +236,16 @@ gulp.task('appcache', ['all-static'], generateAppcache);
 /* The other watchers have been set up to emit some events that we can listen to */
 
 gulp.task('watch-service-worker', ['watch-styles'], () => {
-  bundleEvents.once('scripts-updated', (watch) => {
-    generateServiceWorker(watch);
+  bundleEvents.once('scripts-updated', () => {
+    generateServiceWorker();
     bundleEvents.on('styles-updated', generateServiceWorker);
     bundleEvents.on('scripts-updated', generateServiceWorker);
   });
 });
 
 gulp.task('watch-appcache', ['watch-styles'], () => {
-  bundleEvents.once('scripts-updated', (watch) => {
-    generateAppcache(watch);
+  bundleEvents.once('scripts-updated', () => {
+    generateAppcache();
     bundleEvents.on('styles-updated', generateAppcache);
     bundleEvents.on('scripts-updated', generateAppcache);
   });

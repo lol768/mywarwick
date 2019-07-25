@@ -30,12 +30,24 @@ export class Checkbox extends React.PureComponent {
   }
 
   toggle() {
-    const { value, type, formPath, handleChange } = this.props;
+    const {
+      value,
+      type,
+      formPath,
+      handleChange,
+    } = this.props;
     handleChange(value, type, formPath);
   }
 
   render() {
-    const { name, label, type, isChecked, children, value } = this.props;
+    const {
+      name,
+      label,
+      type,
+      isChecked,
+      children,
+      value,
+    } = this.props;
 
     return (
       <div className={type}>
@@ -50,10 +62,7 @@ export class Checkbox extends React.PureComponent {
           />
           {label}
         </label>
-        {
-          isChecked &&
-          children
-        }
+        {isChecked && children}
       </div>
     );
   }

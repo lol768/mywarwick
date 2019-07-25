@@ -160,7 +160,8 @@ export function fetchMoreNotifications() {
 
     if (notifications.fetching) {
       return Promise.reject(new UnnecessaryFetchError('Already fetching'));
-    } else if (!notifications.olderItemsOnServer) {
+    }
+    if (!notifications.olderItemsOnServer) {
       return Promise.reject(new UnnecessaryFetchError('No more to fetch'));
     }
 
@@ -186,7 +187,8 @@ export function fetchMoreActivities() {
 
     if (activities.fetching) {
       return Promise.reject(new UnnecessaryFetchError('Already fetching'));
-    } else if (!activities.olderItemsOnServer) {
+    }
+    if (!activities.olderItemsOnServer) {
       return Promise.reject(new UnnecessaryFetchError('No more to fetch'));
     }
 
@@ -252,10 +254,8 @@ export function saveActivityMute(activity, options) {
   return (dispatch) => {
     const duration = _.find(activityMuteDurations, d => d.value === options.duration);
 
-    const tags = _.filter(activity.tags, tag =>
-      options[`tags[${tag.name}]`] !== undefined &&
-        options[`tags[${tag.name}]`] === tag.value,
-    );
+    const tags = _.filter(activity.tags, tag => options[`tags[${tag.name}]`] !== undefined
+      && options[`tags[${tag.name}]`] === tag.value);
 
     const data = {
       expiresAt: duration.toExpiryDate(),
@@ -318,15 +318,14 @@ const initialState = {
 };
 
 function filterFilterOptions(stream, filterOptions) {
-  return _.mapValues(filterOptions, (options, optionType) =>
-    _.filter(options, (option) => {
-      // Include this option is there's at least 1 item in the stream that matches this option
-      // Items are only removed if the filter option is explicitly false, so check for that
-      const streamSizeWithThisOptionRemoved =
-        getStreamSize(filterStream(stream, { [optionType]: { [option.id]: false } }));
-      return getStreamSize(stream) !== streamSizeWithThisOptionRemoved;
-    }),
-  );
+  return _.mapValues(filterOptions, (options, optionType) => _.filter(options, (option) => {
+    // Include this option is there's at least 1 item in the stream that matches this option
+    // Items are only removed if the filter option is explicitly false, so check for that
+    const streamSizeWithThisOptionRemoved = getStreamSize(
+      filterStream(stream, { [optionType]: { [option.id]: false } }),
+    );
+    return getStreamSize(stream) !== streamSizeWithThisOptionRemoved;
+  }));
 }
 
 export function notificationsReducer(state = initialState, action) {
@@ -351,8 +350,8 @@ export function notificationsReducer(state = initialState, action) {
     }
     case NOTIFICATION_FETCH: {
       const updatedStream = mergeNotifications(state.stream, action.payload.items);
-      const filter = action.payload.meta && action.payload.meta.filter ?
-        action.payload.meta.filter : state.filter;
+      const filter = action.payload.meta && action.payload.meta.filter
+        ? action.payload.meta.filter : state.filter;
       const updatedFilteredStream = filterStream(updatedStream, filter);
       const [lastItem] = takeFromStream(updatedStream, 1);
 
@@ -414,8 +413,8 @@ export function activitiesReducer(state = initialState, action) {
     }
     case ACTIVITY_FETCH: {
       const updatedStream = mergeNotifications(state.stream, action.payload.items);
-      const filter = action.payload.meta && action.payload.meta.filter ?
-        action.payload.meta.filter : state.filter;
+      const filter = action.payload.meta && action.payload.meta.filter
+        ? action.payload.meta.filter : state.filter;
       const updatedFilteredStream = filterStream(updatedStream, filter);
       const [lastItem] = takeFromStream(updatedStream, 1);
 
@@ -448,4 +447,3 @@ export function activitiesReducer(state = initialState, action) {
       return state;
   }
 }
-

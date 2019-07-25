@@ -29,8 +29,8 @@ export function put(file, progressCallback) {
           resolve(json.data);
         } else {
           // Wouldn't expect to be here, but need to ensure we resolve or reject
-          const errMsg = (json.errors && json.errors.length) ?
-            json.errors[0].message : 'file upload was unsuccessful';
+          const errMsg = (json.errors && json.errors.length)
+            ? json.errors[0].message : 'file upload was unsuccessful';
           reject(new Error(errMsg));
         }
       },

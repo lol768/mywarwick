@@ -23,6 +23,7 @@ describe('ActivityMutingView', () => {
       },
     ],
     isOnline: true,
+    providerOverrideMuting: false,
   };
 
   it('sets up state correctly', () => {

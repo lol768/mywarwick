@@ -1,9 +1,9 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import HyperLink from './Hyperlink';
-import BootstrapModal from './BootstrapModal';
 import classNames from 'classnames';
 import _ from 'lodash-es';
+import HyperLink from './Hyperlink';
+import BootstrapModal from './BootstrapModal';
 
 export default class DismissableInfoModal extends React.PureComponent {
   static propTypes = {
@@ -26,7 +26,9 @@ export default class DismissableInfoModal extends React.PureComponent {
   renderMoreButton() {
     if (this.props.moreButton) {
       return this.props.moreButton;
-    } else if (this.props.href) {
+    }
+
+    if (this.props.href) {
       return (
         <HyperLink
           type="button"
@@ -49,9 +51,7 @@ export default class DismissableInfoModal extends React.PureComponent {
         <div className="modal-header">
           <h5 className="modal-title">
             {this.props.heading}
-            {_.map(this.props.subHeadings, (subHeading, i) =>
-              <small key={i}>{subHeading}</small>,
-            )}
+            {_.map(this.props.subHeadings, (subHeading, i) => <small key={i}>{subHeading}</small>)}
           </h5>
         </div>
         <div className="modal-body">

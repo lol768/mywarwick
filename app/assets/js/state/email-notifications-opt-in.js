@@ -27,8 +27,9 @@ export function fetch() {
 }
 
 export function persist(wantsEmails) {
-  return () =>
-    postJsonWithCredentials('/api/emailNotificationPreferences', { wantsEmails });
+  return () => postJsonWithCredentials(
+    '/api/emailNotificationPreferences', { wantsEmails },
+  );
 }
 
 const initialState = {

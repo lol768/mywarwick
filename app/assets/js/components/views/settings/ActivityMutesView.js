@@ -70,14 +70,13 @@ export class ActivityMutesView extends React.PureComponent {
             </div>
           </div>
           {
-            this.props.activityMutes.length > 0 ?
-              _.map(this.props.activityMutes, mute =>
-                (<div className="activity-item" key={ mute.id }>
+            this.props.activityMutes.length > 0
+              ? _.map(this.props.activityMutes, mute => (<div className="activity-item" key={ mute.id }>
                   <div className="media">
                     <div className="media-body">
                       <div className="activity-item__title">{
-                        mute.expiresAt ?
-                          `Muted until ${handleDateCase(dateFormats.forActivity(mute.expiresAt))}`
+                        mute.expiresAt
+                          ? `Muted until ${handleDateCase(dateFormats.forActivity(mute.expiresAt))}`
                           : 'Muted until removed'
                       }</div>
                       <div className="activity-item__text">
@@ -100,8 +99,7 @@ export class ActivityMutesView extends React.PureComponent {
                       </button>
                     </div>
                   </div>
-                </div>),
-              )
+                </div>))
               : <EmptyState>
                 You haven’t muted any alerts. Use the <Mute fw /> icon next to each alert on the
                 Alerts tab if you want to mute that type of alert in the future. Muted alerts still
@@ -110,8 +108,8 @@ export class ActivityMutesView extends React.PureComponent {
               </EmptyState>
           }
           {
-            this.props.activityMutes.length > 0 &&
-            <div className="activity-item-padding text--hint">
+            this.props.activityMutes.length > 0
+            && <div className="activity-item-padding text--hint">
               Muted alerts still appear in the Alerts tab,
               but they don’t play a sound or appear on
               your phone’s lock screen when they’re delivered
@@ -129,7 +127,7 @@ export class MuteDescription extends React.PureComponent {
   };
 
   render() {
-    const mute = this.props.mute;
+    const { mute } = this.props;
 
     const tagsEmpty = _.isEmpty(mute.tags);
     const providerOnly = mute.provider && !mute.activityType && tagsEmpty;
@@ -147,8 +145,8 @@ export class MuteDescription extends React.PureComponent {
     return (
       <ul>
         {mute.activityType && <li>‘{typeName()}’ alerts</li>}
-        {mute.provider &&
-          <li>{providerOnly ? 'All ' : null}{providerName()} alerts</li>
+        {mute.provider
+          && <li>{providerOnly ? 'All ' : null}{providerName()} alerts</li>
         }
         {
           _.map(mute.tags, tag => (

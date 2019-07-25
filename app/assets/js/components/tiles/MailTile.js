@@ -13,9 +13,9 @@ export default class MailTile extends ListTile {
   handleInboxLinkClick() {
     const preferences = this.props.preferences || {};
     const externalapp = preferences.externalapp || 'webmail';
-    if (externalapp !== 'webmail' &&
-      'MyWarwickNative' in window &&
-      'openMailApp' in window.MyWarwickNative
+    if (externalapp !== 'webmail'
+      && 'MyWarwickNative' in window
+      && 'openMailApp' in window.MyWarwickNative
     ) {
       window.MyWarwickNative.openMailApp(externalapp);
     } else if (window.navigator.userAgent.indexOf('MyWarwick/') >= 0) {

@@ -1,7 +1,7 @@
 import log from 'loglevel';
 import _ from 'lodash-es';
-import * as theme from './ui';
 import { createAction } from 'redux-actions';
+import * as theme from './ui';
 import { fetchWithCredentials, postJsonWithCredentials } from '../serverpipe';
 
 const COLOUR_SCHEME_PREFERENCE_REQUEST = 'COLOUR_SCHEME_PREFERENCE_REQUEST';
@@ -21,15 +21,12 @@ const doPostToServer = ({ chosen: colourScheme, isHighContrast }) => {
   postJsonWithCredentials('/api/colour-schemes', { colourScheme, isHighContrast });
 };
 
-const postToServer = _.debounce(getState =>
-  doPostToServer(getState().colourSchemes), 500,
-);
+const postToServer = _.debounce(getState => doPostToServer(getState().colourSchemes), 500);
 
 export function updateUi() {
   return (dispatch, getState) => {
-    const chosenId = getState().colourSchemes.chosen;
-    const isHighContrast = getState().colourSchemes.isHighContrast;
-    const chosenScheme = _.find(getState().colourSchemes.schemes, scheme => scheme.id === chosenId);
+    const { chosenId, isHighContrast, schemes } = getState().colourSchemes;
+    const chosenScheme = _.find(schemes, scheme => scheme.id === chosenId);
     dispatch(theme.updateColourTheme({
       colourTheme: `transparent-${chosenId}${isHighContrast ? '--high-contrast' : ''}`,
       schemeColour: chosenScheme.schemeColour,

@@ -42,28 +42,31 @@ if (webkit) {
   // (Having thought about it a bit, we probably _don't_ need to wait for localforage
   // to be ready since it'll be created a default one with a different name - localforage -
   // but no harm at all in waiting.
-  localforage.ready().then(() => {
-    if (localforage._dbInfo && localforage._dbInfo.db) {
-      localforage._dbInfo.db.close();
-    }
-    if (window.indexedDB) {
-      log.info(`Deleting any existing IndexedDB called ${config.name}`);
-      const req = indexedDB.deleteDatabase(config.name);
-      req.onsuccess = () => log.debug(`✓ IndexedDB ${config.name} deleted (or didn't exist)`);
-      req.onerror = e => log.warn(`✗ IndexedDB ${config.name} deletion error`, e);
-      req.onblocked = e => log.warn(`✗ Request to delete IndexedDB called ${config.name} is being blocked.`, e);
-    }
-  }).catch((e) => {
-    log.warn(`✗ IndexedDB ${config.name} deletion error`, e);
-  });
+  localforage.ready()
+    .then(() => {
+      if (localforage._dbInfo && localforage._dbInfo.db) {
+        localforage._dbInfo.db.close();
+      }
+      if (window.indexedDB) {
+        log.info(`Deleting any existing IndexedDB called ${config.name}`);
+        const req = indexedDB.deleteDatabase(config.name);
+        req.onsuccess = () => log.debug(`✓ IndexedDB ${config.name} deleted (or didn't exist)`);
+        req.onerror = e => log.warn(`✗ IndexedDB ${config.name} deletion error`, e);
+        req.onblocked = e => log.warn(`✗ Request to delete IndexedDB called ${config.name} is being blocked.`, e);
+      }
+    }).catch((e) => {
+      log.warn(`✗ IndexedDB ${config.name} deletion error`, e);
+    });
 }
 
 const instance = localforage.createInstance(config);
 
-instance.ready().then(() => {
-  if (webkit && instance.driver() !== localforage.WEBSQL) {
-    log.warn(`Tried to force WebSQL but instead we've got ${instance.driver()}`);
-  }
-});
+instance.ready()
+  .then(() => {
+    if (webkit && instance.driver() !== localforage.WEBSQL) {
+      log.warn(`Tried to force WebSQL but instead we've got ${instance.driver()}`);
+    }
+  })
+  .catch(err => log.warn(`Error opening localstorage: ${err.message}`));
 
 export default instance;

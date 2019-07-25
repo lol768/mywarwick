@@ -49,8 +49,8 @@ $(() => {
             }
           });
       },
-      highlighter: (html, item) => (item.title ?
-        `<strong>${item.name}</strong><br>${item.title}` : `<strong>${item.name}</strong>`),
+      highlighter: (html, item) => (item.title
+        ? `<strong>${item.name}</strong><br>${item.title}` : `<strong>${item.name}</strong>`),
       delay: 200,
       matcher: () => true, // All groups received from the server match the query
       afterSelect: (item) => {

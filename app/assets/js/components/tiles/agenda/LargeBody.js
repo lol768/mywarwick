@@ -2,13 +2,14 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
 import classNames from 'classnames';
+import moment from 'moment-timezone';
+
 import { formatTime, localMoment } from '../../../dateFormats';
 import Hyperlink from '../../ui/Hyperlink';
 import GroupedList from '../../ui/GroupedList';
 import AgendaTile from './AgendaTile';
 import { eventPropType, eventShape } from './constants';
 import * as FA from '../../FA';
-import moment from 'moment-timezone';
 
 const moduleColours = [
   '#00b2dd', // Bright Sky blue
@@ -36,9 +37,12 @@ const eventGrouping = {
     const date = localMoment(item.props.start).startOf('day');
     if (date.isSame(now, 'day')) {
       return 0; // today
-    } else if (date.isSame(now.clone().add(1, 'day'), 'day')) {
+    }
+
+    if (date.isSame(now.clone().add(1, 'day'), 'day')) {
       return 1; // tomorrow
     }
+
     return date.unix();
   },
 
@@ -79,17 +83,16 @@ export default class LargeBody extends React.PureComponent {
 
   render() {
     const { children, showModal } = this.props;
-    const hasEventsThisWeek = !this.props.currentWeek ||
-      _.find(children, c => c.academicWeek === this.props.currentWeek);
-    const items = children.map(event =>
-      <AgendaTileItem key={event.id} showModal={showModal} {...event} />,
+    const hasEventsThisWeek = !this.props.currentWeek
+      || _.find(children, c => c.academicWeek === this.props.currentWeek);
+    const items = children.map(
+      event => <AgendaTileItem key={event.id} showModal={showModal} {...event} />,
     );
     return (
       <GroupedList className="tile-list-group" groupBy={eventGrouping}>
-        { hasEventsThisWeek ?
-          items
-          :
-          [<ThisWeekStubAgendaTileItem key="stub" currentWeek={this.props.currentWeek} />]
+        { hasEventsThisWeek
+          ? items
+          : [<ThisWeekStubAgendaTileItem key="stub" currentWeek={this.props.currentWeek} />]
             .concat(items)
         }
       </GroupedList>
@@ -127,15 +130,22 @@ export class AgendaTileItem extends React.PureComponent {
   }
 
   handleShowModal() {
-    const { showModal, title, location, extraInfo, href, academicWeek } = this.props;
-    const locName = AgendaTile.getLocationString(location);
+    const {
+      showModal,
+      title,
+      location,
+      extraInfo,
+      href,
+      academicWeek,
+    } = this.props;
+    const locName = AgendaTile.buildLocation(location);
     const fullEventDate = AgendaTile.renderSingleEventDate(this.props, { shortDates: false });
     showModal(
       title,
       [
-        (<span><FA.Clock fw /> {fullEventDate}</span>),
-        typeof academicWeek === 'number' && (<span><FA.Calendar fw /> Week {academicWeek}</span>),
-        locName && (<span><FA.Map fw /> {locName}</span>),
+        (<span key="date"><FA.Clock fw /> {fullEventDate}</span>),
+        typeof academicWeek === 'number' && (<span key="week"><FA.Calendar fw /> Week {academicWeek}</span>),
+        locName && (<span key="loc"><FA.Map fw /> {locName}</span>),
       ],
       (extraInfo ? extraInfo.split('\r\n') : extraInfo),
       href,
@@ -182,7 +192,12 @@ export class AgendaTileItem extends React.PureComponent {
   }
 
   renderTitle() {
-    const { title, href, extraInfo, parent } = this.props;
+    const {
+      title,
+      href,
+      extraInfo,
+      parent,
+    } = this.props;
 
     return (
       <span>
@@ -203,25 +218,14 @@ export class AgendaTileItem extends React.PureComponent {
   renderLocation() {
     const { location } = this.props;
 
-    if (_.isEmpty(this.props.location)) {
+    if (_.isEmpty(location)) {
       return null;
-    }
-
-    if (location.href) {
-      return (
-        <span className="tile-list-item__location text--light">
-          <Hyperlink href={ location.href } className="text--dotted-underline">
-            { location.name }
-            &nbsp;
-            <FA.Map />
-          </Hyperlink>
-        </span>
-      );
     }
 
     return (
       <span className="tile-list-item__location text--light">
-        { AgendaTile.getLocationString(location) }
+        <FA.Map fw />
+        {AgendaTile.buildLocation(location)}
       </span>
     );
   }
@@ -236,16 +240,16 @@ export class AgendaTileItem extends React.PureComponent {
         </div>
         { this.renderMarker() }
         <div className="agenda-item__cell" style={{ paddingLeft: '.5em' }}>
-          { extraInfo ?
-            <a role="button" tabIndex={0} onClick={this.handleShowModal} target="_blank">
+          { extraInfo
+            ? <a role="button" tabIndex={0} onClick={this.handleShowModal} target="_blank">
               { this.renderTitle() }
               <i className="fa fa-fw fa-info-circle" />
             </a>
             : <Hyperlink href={href}>{ this.renderTitle() }</Hyperlink> }
           { ' ' }
           { this.renderLocation() }
-          { renderedUser &&
-            <div className="text--translucent tile-list-item__organiser">
+          { renderedUser
+            && <div className="text--translucent tile-list-item__organiser">
               <FA.User /> {renderedUser}
             </div>
           }

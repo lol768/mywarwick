@@ -130,11 +130,13 @@ describe('AgendaTile', () => {
 });
 
 describe('LargeBody', () => {
+  const showModal = () => {};
+
   it('Groups by date', () =>
     atMoment(() => {
       const items = [ITEMS.firstEvent, ITEMS.secondEvent];
       const keys = items.map(n => n.id);
-      const wrapper = shallow(<LargeBody>{items}</LargeBody>);
+      const wrapper = shallow(<LargeBody showModal={showModal}>{items}</LargeBody>);
       wrapper.props().children.map(n => n.key).should.deep.equal(keys);
 
       // could use enzyme.render() and check the actual HTML,
@@ -152,7 +154,7 @@ describe('LargeBody', () => {
   it('includes year in group titles for non-current years', () =>
     atMoment(() => {
       const items = [ITEMS.firstEvent, ITEMS.secondEvent];
-      const wrapper = shallow(<LargeBody>{items}</LargeBody>);
+      const wrapper = shallow(<LargeBody showModal={showModal}>{items}</LargeBody>);
 
       // could use enzyme.render() and check the actual HTML,
       // but instead just checking the function we'd use -
@@ -169,10 +171,11 @@ describe('AgendaTileItem', () => {
     start: '2014-08-04T17:00:00',
     end: '2014-08-04T18:00:00',
     title: 'Heron hunting',
-    location: {
+    location: [{
       name: 'Heronbank',
       href: 'https://campus.warwick.ac.uk/?slid=29129',
-    },
+    }],
+    showModal: () => {},
   };
 
   it('handles staff prop as array', () => {
@@ -225,13 +228,13 @@ describe('AgendaTileItem', () => {
 
   it('renders location text with hyperlink', () => {
     const html = shallow(<AgendaTileItem zoomed={ true } { ...props } />);
+    const location = html.find('.tile-list-item__location');
 
-    const locationInner = html.find('.tile-list-item__location');
-    locationInner.hasClass('text--light').should.equal(true);
-    locationInner.contains('Heronbank').should.equal(true);
-    locationInner.html().should.include('<i class="fal fa-map-marker-alt"></i>');
+    location.hasClass('text--light').should.equal(true);
+    location.contains('Heronbank').should.equal(true);
+    location.html().should.include('<i class="fal fa-map-marker-alt fa-fw"></i>');
 
-    const link = locationInner.find(Hyperlink);
+    const link = location.find(Hyperlink);
     link.childAt(0).text().should.equal('Heronbank');
     link.props().href.should.equal('https://campus.warwick.ac.uk/?slid=29129');
   });
@@ -244,18 +247,18 @@ describe('AgendaTileItem', () => {
           name: 'Location',
         },
         {
-          name: 'Location',
+          name: 'Location?',
         },
         {
-          name: 'Location',
+          name: 'Location!',
         },
       ],
     };
 
     const html = shallow(<AgendaTileItem zoomed={ true } { ...props2 } />);
+    const location = html.find('.tile-list-item__location');
 
-    const locationInner = html.find('.tile-list-item__location');
-    locationInner.hasClass('text--light').should.equal(true);
-    locationInner.contains('Location, Location, Location').should.equal(true);
+    location.hasClass('text--light').should.equal(true);
+    location.text().includes('Location, Location?, Location!').should.equal(true);
   });
 });

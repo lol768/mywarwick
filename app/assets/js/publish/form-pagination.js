@@ -1,10 +1,10 @@
 /* eslint-env browser */
 
 import $ from 'jquery';
+import _ from 'lodash-es';
 import log from 'loglevel';
 import 'jquery-form/jquery.form';
 import promiseSubmit from './utils';
-import _ from 'lodash-es';
 
 const SPLIT_FORM = 'form.split-form';
 const SLIDE_DURATION = 350;
@@ -81,10 +81,10 @@ $(SPLIT_FORM).each((i, form) => {
   function updateFormGroupErrors(html) {
     function prependErrorsToElem($elem, errorsAsJson, errorType) {
       $elem.prepend(
-        errorsAsJson.map((err, index) =>
-          $('<div>').addClass('help-block').attr('id', `${errorType}_error_${index}`)
-            .html(`<i class="fal fa-exclamation-triangle"/>${err}`),
-        ),
+        errorsAsJson.map((err, index) => $('<div>')
+          .addClass('help-block')
+          .attr('id', `${errorType}_error_${index}`)
+          .html(`<i class="fal fa-exclamation-triangle"/>${err}`)),
       );
     }
 
@@ -182,7 +182,7 @@ $(SPLIT_FORM).each((i, form) => {
         if (!hasErrors()) {
           const baseAudience = $form.data('base-audience');
           if (baseAudience > 100) {
-            const msg = `Are you sure you want to send this alert to ${baseAudience} people?`;
+            const msg = `Are you sure you want to send this item to ${baseAudience} ${baseAudience === 1 ? 'person' : 'people'}?`;
             $confirmationModal.find('.modal-body').text(msg);
             $confirmationModal.modal('show');
           } else { confirm(); }

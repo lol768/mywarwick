@@ -1,14 +1,23 @@
 {
   "presets": [
-    "es2015",
-    "react"
+    [
+      "@babel/preset-env",
+      {
+        "modules": "false",
+        "useBuiltIns": "entry",
+        "corejs": 3,
+        "forceAllTransforms": true
+      }
+    ],
+    "@babel/preset-flow",
+    "@babel/preset-react"
   ],
   "plugins": [
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-proposal-object-rest-spread",
+    "@babel/plugin-syntax-dynamic-import",
+    "dev-expression",
     "flow-react-proptypes",
-    "transform-class-properties",
-    "transform-object-rest-spread",
-    "syntax-dynamic-import",
-    "lodash",
-    "dev-expression"
+    "lodash"
   ]
 }

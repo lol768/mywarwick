@@ -22,19 +22,26 @@ $('.datetimepicker').each(function setUpDateTimePicker() {
   const inputGroup = $(this).find('.input-group');
   const textField = inputGroup.find('input');
 
-  textField.val(
-    moment(hiddenField.val(), dateTimeHiddenFieldFormat).format(dateTimeTextFieldFormat),
-  );
-
-  inputGroup.datetimepicker({
+  const options = {
     format: dateTimeTextFieldFormat,
     icons,
     sideBySide: true,
     allowInputToggle: true,
     stepping: 1,
-  }).on('dp.change', ({ date }) =>
-    hiddenField.val(moment(date, dateTimeTextFieldFormat).format(dateTimeHiddenFieldFormat)),
+  };
+
+  const minDate = textField.attr('minDate');
+  if (minDate) {
+    options.minDate = minDate;
+  }
+
+  textField.val(
+    moment(hiddenField.val(), dateTimeHiddenFieldFormat).format(dateTimeTextFieldFormat),
   );
+
+  inputGroup.datetimepicker(options).on('dp.change', ({ date }) => hiddenField.val(
+    moment(date, dateTimeTextFieldFormat).format(dateTimeHiddenFieldFormat),
+  ));
 });
 
 const dateHiddenFieldFormat = 'YYYY-MM-DD';
@@ -45,15 +52,22 @@ $('.datepicker').each(function setUpDatePicker() {
   const inputGroup = $(this).find('.input-group');
   const textField = inputGroup.find('input');
 
-  textField.val(moment(hiddenField.val(), dateHiddenFieldFormat).format(dateTextFieldFormat));
-
-  inputGroup.datetimepicker({
+  const options = {
     format: dateTextFieldFormat,
     icons,
     sideBySide: true,
     allowInputToggle: true,
     stepping: 1,
-  }).on('dp.change', ({ date }) =>
-    hiddenField.val(moment(date, dateTextFieldFormat).format(dateHiddenFieldFormat)),
-  );
+  };
+
+  const minDate = textField.attr('minDate');
+  if (minDate) {
+    options.minDate = minDate;
+  }
+
+  textField.val(moment(hiddenField.val(), dateHiddenFieldFormat).format(dateTextFieldFormat));
+
+  inputGroup.datetimepicker(options).on('dp.change', ({ date }) => hiddenField.val(
+    moment(date, dateTextFieldFormat).format(dateHiddenFieldFormat),
+  ));
 });

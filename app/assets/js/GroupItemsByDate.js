@@ -20,22 +20,28 @@ export function groupForItem(item, now = localMoment()) {
   if (date.isSame(now.clone().add(1, 'week'), 'isoWeek') && date.isAfter(tomorrow)) {
     return 0;
     // later this week but not tomorrow
-  } else if (date.isSame(now, 'isoWeek') && date.isAfter(tomorrow)) {
+  }
+  if (date.isSame(now, 'isoWeek') && date.isAfter(tomorrow)) {
     return 1;
     // tomorrow
-  } else if (date.isSame(tomorrow, 'day')) {
+  }
+  if (date.isSame(tomorrow, 'day')) {
     return 2;
     // today
-  } else if (date.isSame(now, 'day')) {
+  }
+  if (date.isSame(now, 'day')) {
     return 3;
     // yesterday
-  } else if (date.isSame(now.clone().subtract(1, 'day'), 'day')) {
+  }
+  if (date.isSame(now.clone().subtract(1, 'day'), 'day')) {
     return 4;
     // earlier this week
-  } else if (date.isSame(now, 'isoWeek')) {
+  }
+  if (date.isSame(now, 'isoWeek')) {
     return 5;
     // last week
-  } else if (date.isSame(now.clone().subtract(1, 'week'), 'isoWeek')) {
+  }
+  if (date.isSame(now.clone().subtract(1, 'week'), 'isoWeek')) {
     return 6;
     // older
   }

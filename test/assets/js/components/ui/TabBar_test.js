@@ -7,8 +7,8 @@ describe('TabBar', () => {
     let fn = sinon.spy();
     let tabBar = (
       <TabBar onSelectItem={fn}>
-        <TabBarItem title="Me" icon="user" path="/"/>
-        <TabBarItem title="Notifications" icon="inbox" path="/alerts"/>
+        <TabBarItem title="Me" icon="user" selectedIcon="user" path="/"/>
+        <TabBarItem title="Notifications" icon="inbox" selectedIcon="inbox" path="/alerts"/>
       </TabBar>
     );
 

@@ -17,9 +17,7 @@ function boot() {
           setMethod('userInfo', userData);
         }
         return import(/* webpackChunkName: "main-import" */'./main')
-          .then(main =>
-            main.launch(userData),
-          ).catch((e) => {
+          .then(main => main.launch(userData)).catch((e) => {
             log.error(e);
             throw e;
           });

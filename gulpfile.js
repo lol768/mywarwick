@@ -46,7 +46,7 @@ global.paths = {
   styleOut: 'target/gulp/css',
   // Paths under node_modules that will be searched when @import-ing in your LESS.
   styleModules: [
-    'id7/less',
+    '@universityofwarwick',
   ],
 };
 

@@ -77,4 +77,3 @@ export function init() {
     })
     .catch(e => log.warn('Error during getSubscription()', e));
 }
-

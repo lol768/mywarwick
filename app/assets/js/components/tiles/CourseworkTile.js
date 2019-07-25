@@ -8,8 +8,7 @@ export default class CourseworkTile extends ListTile {
   getSmallBody() {
     function numAssignmentsDue(assignments) {
       const nextMonth = localMoment().add(1, 'month');
-      const items = _.takeWhile(assignments, a =>
-        localMoment(a.date).isBefore(nextMonth));
+      const items = _.takeWhile(assignments, a => localMoment(a.date).isBefore(nextMonth));
       return items.length;
     }
 

@@ -19,7 +19,8 @@ export function updateReady() {
 export function reducer(state = initialState, action) {
   switch (action.type) {
     case UPDATE_READY:
-      return { ...state,
+      return {
+        ...state,
         isUpdateReady: true,
       };
     default:

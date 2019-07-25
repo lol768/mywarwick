@@ -12,7 +12,10 @@ describe('AccountTile', () => {
         email: '',
         userId: 'wbs123',
         universityId: '1234567',
-        homeDepartment: {},
+        homeDepartment: {
+          code: 'IB',
+          name: 'Warwick Business School',
+        },
         userType: 'student',
         userSource: 'WBSLdap',
       },

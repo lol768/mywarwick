@@ -1,6 +1,7 @@
-import localforage from '../localdata';
 import log from 'loglevel';
 import _ from 'lodash-es';
+
+import localforage from '../localdata';
 
 export const USER_LOAD = 'USER_LOAD';
 export const USER_RECEIVE = 'USER_RECEIVE';
@@ -27,28 +28,33 @@ export function reducer(state = initialState, action) {
   switch (action.type) {
     case USER_LOAD: {
       const data = _.isEqual(state.data, action.data) ? state.data : action.data;
-      return { ...state,
+      return {
+        ...state,
         data,
         empty: false,
       };
     }
     case USER_RECEIVE:
-      return { ...state,
+      return {
+        ...state,
         data: action.data,
         authoritative: true,
         empty: false,
       };
     case USER_CLEAR:
-      return { ...initialState,
+      return {
+        ...initialState,
         links: state.links,
       };
     case SSO_LINKS_RECEIVE:
       if (_.isEqual(state.links, action.links)) return state;
-      return { ...state,
+      return {
+        ...state,
         links: action.links,
       };
     case FEATURES_RECEIVE:
-      return { ...state,
+      return {
+        ...state,
         features: action.features,
       };
     default:
@@ -100,8 +106,9 @@ export function loadUserFromLocalStorage(dispatch) {
 }
 
 function clearUserData() {
-  return dispatch =>
-    localforage.clear().then(() => dispatch({ type: USER_CLEAR }));
+  return dispatch => localforage.clear()
+    .then(() => dispatch({ type: USER_CLEAR }))
+    .catch(err => log.error('Failed to clear localforage', err));
 }
 
 
@@ -111,17 +118,19 @@ export function userReceive(currentUser) {
     return {}; // result is ignored below anyway.
   }
 
-  return dispatch =>
-    // If we are a different user than we were before (incl. anonymous),
-    // nuke the store, which also clears local storage
-    loadUserFromLocalStorage(dispatch).then((previousUser) => {
-      if (previousUser.usercode !== currentUser.usercode) {
-        return dispatch(clearUserData())
-          .then(() => localforage.setItem('user', currentUser).catch(setItemFailed))
-          .then(() => dispatch(receiveUserIdentity(currentUser)));
-      }
-      return localforage.setItem('user', currentUser)
-        .catch(setItemFailed)
+  // If we are a different user than we were before (incl. anonymous),
+  // nuke the store, which also clears local storage
+  return dispatch => loadUserFromLocalStorage(dispatch).then((previousUser) => {
+    if (previousUser.usercode !== currentUser.usercode) {
+      return dispatch(clearUserData())
+        .then(() => (
+          localforage.setItem('user', currentUser)
+            .catch(setItemFailed)
+        ))
         .then(() => dispatch(receiveUserIdentity(currentUser)));
-    });
+    }
+    return localforage.setItem('user', currentUser)
+      .catch(setItemFailed)
+      .then(() => dispatch(receiveUserIdentity(currentUser)));
+  });
 }

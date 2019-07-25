@@ -36,7 +36,7 @@ class NewsCategoriesView extends HideableView {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState(this.buildState(nextProps.categories, nextProps.subscribed));
+    this.setState(NewsCategoriesView.buildState(nextProps.categories, nextProps.subscribed));
   }
 
   componentDidShow() {
@@ -75,8 +75,7 @@ class NewsCategoriesView extends HideableView {
         </div>
 
         <div className="list-group setting-colour-1">
-          { _.map(this.props.categories, category =>
-            (<SwitchListGroupItem
+          { _.map(this.props.categories, category => (<SwitchListGroupItem
               key={ category.id }
               id={ `category-${category.id}` }
               icon="newspaper-o"
@@ -85,8 +84,7 @@ class NewsCategoriesView extends HideableView {
               onClick={ this.onClick }
               checked={ this.state[category.id] }
               disabled={ !this.props.isOnline }
-            />),
-          ) }
+            />)) }
         </div>
       </div>
     );

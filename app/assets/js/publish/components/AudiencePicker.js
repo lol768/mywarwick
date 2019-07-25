@@ -1,14 +1,15 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import _ from 'lodash-es';
+import update from 'immutability-helper';
+
 import { Checkbox, RadioButton } from '../../components/ui/Checkbox';
 import { InputList, InputOptionsList } from './InputList';
 import MultilineTextInput from './MultilineTextInput';
-import _ from 'lodash-es';
-import update from 'immutability-helper';
-import modulePicker from '../../publish/modulePicker';
-import seminarGroupPicker from '../../publish/seminarGroupPicker';
-import relationshipPicker from '../../publish/relationshipPicker';
+import modulePicker from '../modulePicker';
+import seminarGroupPicker from '../seminarGroupPicker';
+import relationshipPicker from '../relationshipPicker';
 
 const ELLIPSIS = '…';
 
@@ -42,13 +43,14 @@ export class AudiencePicker extends React.PureComponent {
       const deptCode = props.formData.department;
       this.state = {
         ...props.formData,
-        department: this.buildDeptObj(
+        department: AudiencePicker.buildDeptObj(
           { [deptCode]: props.departments[deptCode] },
         ),
       };
     } else {
       this.state = {
-        department: _.size(props.departments) > 1 ? ELLIPSIS : this.buildDeptObj(props.departments),
+        department: _.size(props.departments) > 1
+          ? ELLIPSIS : AudiencePicker.buildDeptObj(props.departments),
       };
     }
 
@@ -73,8 +75,8 @@ export class AudiencePicker extends React.PureComponent {
     const updateObj = obj => (
       {
         audience: {
-          [this.isChecked('audience.universityWide') ?
-            'universityWide' : 'department']: { groups: obj },
+          [this.isChecked('audience.universityWide')
+            ? 'universityWide' : 'department']: { groups: obj },
         },
       }
     );
@@ -86,9 +88,9 @@ export class AudiencePicker extends React.PureComponent {
           const updated = _.pickBy(existing, (v, k) => k !== value);
           this.setState(state => _.set(_.cloneDeep(state), path, updated));
         } else {
-          this.setState(state =>
-            _.set(_.cloneDeep(state), path, _.assign({}, existing, { [value]: undefined })),
-          );
+          this.setState(state => _.set(_.cloneDeep(state), path, _.assign(
+            {}, existing, { [value]: undefined },
+          )));
         }
         break;
       }
@@ -97,22 +99,26 @@ export class AudiencePicker extends React.PureComponent {
         break;
       case 'Dept:Module':
       case 'Module':
-        this.setState(state =>
-          update(state, updateObj({ modules: { $set: value.items } })));
+        this.setState(state => update(
+          state, updateObj({ modules: { $set: value.items } }),
+        ));
         break;
       case 'Dept:SeminarGroup':
       case 'SeminarGroup':
-        this.setState(state =>
-          update(state, updateObj({ seminarGroups: { $set: value.items } })));
+        this.setState(state => update(
+          state, updateObj({ seminarGroups: { $set: value.items } }),
+        ));
         break;
       case 'listOfUsercodes':
-        this.setState(state =>
-          update(state, updateObj({ listOfUsercodes: { $set: value } })));
+        this.setState(state => update(
+          state, updateObj({ listOfUsercodes: { $set: value } }),
+        ));
         break;
       case 'Dept:Relationship':
       case 'Relationship':
-        this.setState(state =>
-          update(state, updateObj({ staffRelationships: { $set: value.items } })));
+        this.setState(state => update(
+          state, updateObj({ staffRelationships: { $set: value.items } }),
+        ));
         break;
       default:
     }
@@ -122,7 +128,7 @@ export class AudiencePicker extends React.PureComponent {
     return _.has(this.state, path);
   }
 
-  buildDeptObj(dept) {
+  static buildDeptObj(dept) {
     const key = _.first(_.keys(dept));
     return { code: key, ...dept[key] };
   }
@@ -162,8 +168,7 @@ export class AudiencePicker extends React.PureComponent {
           value="yesLocation"
           formPath="locations"
         >
-          {Object.keys(this.props.locationOpts).map(key =>
-            (<Checkbox
+          {Object.keys(this.props.locationOpts).map(key => (<Checkbox
               key={key}
               handleChange={(name, type, path) => this.handleChange(key, type, path)}
               formPath="locations.yesLocation"
@@ -171,8 +176,7 @@ export class AudiencePicker extends React.PureComponent {
               name="audience.audience[]"
               value={`OptIn:Location:${key}`}
               isChecked={this.isChecked(`locations.yesLocation.${key}`)}
-            />),
-          )}
+            />))}
         </RadioButton>
       </div>
     );
@@ -180,14 +184,12 @@ export class AudiencePicker extends React.PureComponent {
 
   groupsInput() {
     const isPublic = this.isChecked('audience.universityWide');
-    const deptSelect = Object.keys(this.props.departments).length > 1 ?
-      (<div className="dept-select"><select
+    const deptSelect = Object.keys(this.props.departments).length > 1
+      ? (<div className="dept-select"><select
         defaultValue={this.state.department === ELLIPSIS ? '' : this.state.department.code}
         name="audience.department"
         className="form-control"
-        onChange={({ target: { value } }) =>
-          this.selectDepartment(value)
-        }
+        onChange={({ target: { value } }) => this.selectDepartment(value)}
       >
         <option disabled hidden value="">Select a department</option>
         {_.map(this.props.departments, ({ name }, code) => (
@@ -232,8 +234,7 @@ export class AudiencePicker extends React.PureComponent {
         >
         */}
 
-        {Object.keys(this.props.hallsOfResidence).map(key =>
-          (<Checkbox
+        {Object.keys(this.props.hallsOfResidence).map(key => (<Checkbox
             key={key}
             handleChange={this.handleChange}
             isChecked={this.isChecked(prefixPath(`.groups.hallsOfResidence.hall.hallsOfResidence:${key}`))}
@@ -241,8 +242,7 @@ export class AudiencePicker extends React.PureComponent {
             name="audience.audience[]"
             value={`hallsOfResidence:${key}`}
             formPath={prefixPath('.groups.hallsOfResidence.hall')}
-          />),
-        )}
+          />))}
 
         {/*
         </RadioButton>
@@ -274,8 +274,7 @@ export class AudiencePicker extends React.PureComponent {
 
     const groups = (
       <div>
-        {_.map(this.props.deptSubsetOpts, (val, key) =>
-          (<Checkbox
+        {_.map(this.props.deptSubsetOpts, (val, key) => (<Checkbox
             key={key}
             handleChange={this.handleChange}
             isChecked={this.isChecked(prefixPath(`.groups.${prefixDeptSubset(key)}`))}
@@ -283,8 +282,7 @@ export class AudiencePicker extends React.PureComponent {
             name="audience.audience[]"
             value={prefixDeptSubset(key)}
             formPath={prefixPath('.groups')}
-          />),
-        )}
+          />))}
 
         {/* The UndergradStudents options are defined only here and not passed by server */}
         <Checkbox
@@ -394,10 +392,7 @@ export class AudiencePicker extends React.PureComponent {
 
     return (
       <div> {
-        isPublic ?
-          groups
-          :
-          <div>
+        isPublic ? groups : <div>
             {deptSelect}
             <RadioButton
               handleChange={this.handleChange}
@@ -410,8 +405,8 @@ export class AudiencePicker extends React.PureComponent {
             <RadioButton
               handleChange={this.handleChange}
               isChecked={this.isChecked(prefixPath('.groups'))}
-              label={isPublic ?
-                'These groups:' : `Groups in ${_.get(this.state, 'department.name', ELLIPSIS)}`}
+              label={isPublic
+                ? 'These groups:' : `Groups in ${_.get(this.state, 'department.name', ELLIPSIS)}`}
               value="groups"
               formPath={prefixPath('')}
             >
@@ -432,8 +427,8 @@ export class AudiencePicker extends React.PureComponent {
         <div className="list-group">
           <label className="control-label">Who is this alert for?</label>
 
-          {this.props.isGod ?
-            <div>
+          {this.props.isGod
+            ? <div>
               <RadioButton
                 handleChange={this.handleChange}
                 isChecked={this.isChecked('audience.universityWide')}
@@ -474,4 +469,4 @@ function mapDispatchToProps(dispatch) {
   });
 }
 
-export default connect(_, mapDispatchToProps)(AudiencePicker);
+export default connect(null, mapDispatchToProps)(AudiencePicker);

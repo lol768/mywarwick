@@ -33,8 +33,8 @@ export default class PermissionRequest extends React.PureComponent {
 
   render() {
     return (
-      window.Notification && !this.props.isDisabled && this.state.visible ?
-        <div className={classNames('permission-request')}>
+      window.Notification && !this.props.isDisabled && this.state.visible
+        ? <div className={classNames('permission-request')}>
           <div className="permission-notice">
             My Warwick needs your permission to
             {' '}

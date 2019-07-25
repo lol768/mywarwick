@@ -11,7 +11,7 @@ describe('Hyperlink', () => {
   it('renders a link if href is present', () => {
     const newsHref = 'https://hogwarts.example.com/news';
     const result = shallow(<Hyperlink href={newsHref}>Wizard News</Hyperlink>);
-    result.html().should.equal(`<a href="${newsHref}" target="_blank">Wizard News</a>`);
+    result.html().should.equal(`<a href="${newsHref}" target="_blank" rel="noopener noreferrer">Wizard News</a>`);
   })
 
 });

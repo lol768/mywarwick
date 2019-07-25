@@ -1,7 +1,7 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import TileContent from './TileContent';
 import _ from 'lodash-es';
+import TileContent from './TileContent';
 
 const defaultMapUrl = 'https://campus.warwick.ac.uk/?lite=1&autoLocate=true';
 

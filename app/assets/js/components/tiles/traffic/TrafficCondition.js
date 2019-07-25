@@ -35,8 +35,7 @@ export default class TrafficCondition extends React.PureComponent {
   render() {
     const { route, usualDuration, actualDuration } = this.props;
 
-    const durationCoefficient =
-      Math.floor(actualDuration.value / usualDuration.value);
+    const durationCoefficient = Math.floor(actualDuration.value / usualDuration.value);
 
     let status;
     if (durationCoefficient >= 4) {

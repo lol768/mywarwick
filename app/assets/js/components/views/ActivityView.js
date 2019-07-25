@@ -61,10 +61,13 @@ class ActivityView extends React.PureComponent {
 
     if (hasOlderItemsLocally) {
       return Promise.resolve(this.showMore());
-    } else if (this.props.olderItemsOnServer) {
+    }
+
+    if (this.props.olderItemsOnServer) {
       return this.props.dispatch(notifications.fetchMoreActivities())
         .then(() => this.showMore());
     }
+
     return Promise.resolve();
   }
 
@@ -94,8 +97,8 @@ class ActivityView extends React.PureComponent {
 
     return (
       <div>
-        { hasAny ?
-          <ScrollRestore url={`/${Routes.ACTIVITY}`}>
+        { hasAny
+          ? <ScrollRestore url={`/${Routes.ACTIVITY}`}>
             <InfiniteScrollable
               hasMore={ hasMore }
               onLoadMore={ this.loadMore }

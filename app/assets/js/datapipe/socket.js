@@ -1,7 +1,7 @@
 /* eslint-env browser */
 
 import log from 'loglevel';
-import DataPipe from '../datapipe';
+import DataPipe from './index';
 
 import RestartableWebSocket from './restartable-websocket';
 

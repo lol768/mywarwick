@@ -1,7 +1,7 @@
 package controllers.publish
 
-import javax.inject.{Inject, Named, Singleton}
 import controllers.MyController
+import javax.inject.{Inject, Named, Singleton}
 import models._
 import models.news.{Link, NewsItemRender, NewsItemRenderWithAuditAndAudience, NewsItemSave}
 import models.publishing.Ability._
@@ -9,17 +9,15 @@ import models.publishing.{Ability, Publisher}
 import org.joda.time.LocalDateTime
 import play.api.data.Forms._
 import play.api.data._
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.I18nSupport
 import play.api.libs.json._
 import play.api.mvc.{Action, ActionFilter, AnyContent, Result}
 import services._
-import services.dao.DepartmentInfoDao
 import system._
 import uk.ac.warwick.util.web.Uri
 import views.html.errors
 import warwick.sso.Usercode
 
-import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 case class PublishNewsItemData(item: NewsItemData, categoryIds: Seq[String], audience: AudienceData) extends PublishableWithAudience
@@ -36,20 +34,25 @@ case class NewsItemData(
   imageId: Option[String],
   ignoreCategories: Boolean = false
 ) {
-  def toSave(usercode: Usercode, publisherId: String) = NewsItemSave(
-    usercode = usercode,
-    publisherId = publisherId,
-    title = title,
-    text = text,
-    link = for {
-      t <- linkText
-      h <- linkHref
-    } yield Link(t, Uri.parse(h)),
-    // TODO test this gives expected results of TZ&DST
-    publishDate = (if (publishDateSet) publishDate else LocalDateTime.now).toDateTime(TimeZones.LONDON),
-    imageId = imageId,
-    ignoreCategories = ignoreCategories
-  )
+  def toSave(usercode: Usercode, publisherId: String) = {
+    val now = LocalDateTime.now
+    val date = if (publishDateSet && publishDate.isAfter(now)) publishDate else now
+
+    NewsItemSave(
+      usercode = usercode,
+      publisherId = publisherId,
+      title = title,
+      text = text,
+      link = for {
+        h <- linkHref
+        t = linkText
+      } yield Link(t, Uri.parse(h)),
+      // TODO test this gives expected results of TZ&DST
+      publishDate = date.toDateTime(TimeZones.LONDON),
+      imageId = imageId,
+      ignoreCategories = ignoreCategories
+    )
+  }
 }
 
 

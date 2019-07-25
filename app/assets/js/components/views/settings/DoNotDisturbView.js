@@ -1,23 +1,23 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import HideableView from '../HideableView';
 import { connect } from 'react-redux';
+import _ from 'lodash-es';
+
+import HideableView from '../HideableView';
 import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 import { update, fetch } from '../../../state/do-not-disturb';
 import SelectInput from '../../ui/SelectInput';
 import { Info } from '../../FA';
-import _ from 'lodash-es';
 
-const numberRangePropType =
-  (end, start = 0) => function timeHourPropType(props, propName, componentName) {
-    if (!_.inRange(props[propName], start, end)) {
-      return new Error(
-        `Invalid prop '${propName}' supplied to '${componentName}'.
-      Number ${props[propName]} not in range ${start}-${end}`,
-      );
-    }
-    return null;
-  };
+const numberRangePropType = (end, start = 0) => (props, propName, componentName) => {
+  if (!_.inRange(props[propName], start, end)) {
+    return new Error(
+      `Invalid prop '${propName}' supplied to '${componentName}'.
+    Number ${props[propName]} not in range ${start}-${end}`,
+    );
+  }
+  return null;
+};
 
 const doNotDisturbTimePropType = PropTypes.shape({
   hr: numberRangePropType(24),
@@ -33,9 +33,10 @@ class DoNotDisturbView extends HideableView {
     end: doNotDisturbTimePropType.isRequired,
   };
 
-  static options = [..._.range(24)].map(i =>
-    ({ val: i, displayName: `${_.padStart(i, 2, '0')}:00` }),
-  );
+  static options = [..._.range(24)].map(i => ({
+    val: i,
+    displayName: `${_.padStart(i, 2, '0')}:00`,
+  }));
 
   constructor(props) {
     super(props);
@@ -144,8 +145,8 @@ class DoNotDisturbView extends HideableView {
           </div>
         </div>
 
-        {this.props.enabled &&
-        <div className="text--hint container-fluid">
+        {this.props.enabled
+        && <div className="text--hint container-fluid">
           <p><Info fw /> You have a do not disturb period of {this.dndPeriodHrs()} hours.</p>
         </div>
         }

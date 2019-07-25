@@ -123,8 +123,8 @@ export default class ActivityMutingView extends React.PureComponent {
         { !isPublishNotification && hintText }
         <div className="list-group">
           <label>
-            { this.isPublishNotification() ?
-              `Mute alerts from ${this.props.providerDisplayName || this.props.provider} for:`
+            { this.isPublishNotification()
+              ? `Mute alerts from ${this.props.providerDisplayName || this.props.provider} for:`
               : 'For:'
             }
           </label>
@@ -151,8 +151,8 @@ export default class ActivityMutingView extends React.PureComponent {
     return (
       <div className="activity-muting">
         <BootstrapModal id={`muting-${this.props.id}`}>
-          {this.props.isOnline ?
-            <div>
+          {this.props.isOnline
+            ? <div>
               <div className="modal-body">
                 { this.renderForm() }
               </div>
@@ -177,8 +177,7 @@ export default class ActivityMutingView extends React.PureComponent {
                 </button>
               </div>
             </div>
-            :
-            <div>
+            : <div>
               <div className="modal-body">
                 You cannot mute an alert while your device is offline
               </div>

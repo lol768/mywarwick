@@ -46,13 +46,13 @@ export default class TrafficTile extends TileContent {
       <div className="tile--traffic">
         {this.conditionList()}
         {
-          items.length > 0 ?
-            <div className="tile__item">
+          items.length > 0
+            ? <div className="tile__item">
               <i className={classNames('fal', 'fa-exclamation-triangle')} />
               <a href={items.length === 1 ? items[0].url.href : content.alerts.href}>
                 <strong className="alert-count">
-                  {`${content.alerts.items.length} traffic alert` +
-                  `${content.alerts.items.length > 1 ? 's' : ''}`}
+                  {`${content.alerts.items.length} traffic alert`
+                  + `${content.alerts.items.length > 1 ? 's' : ''}`}
                 </strong>
               </a>
             </div>
@@ -75,12 +75,12 @@ export default class TrafficTile extends TileContent {
           {this.conditionList()}
         </div>
         <div className={classNames('col-xs-12', 'col-sm-8')}>
-          { content.alerts.items.slice(0, 2).map(a =>
-            <TrafficAlert key={a.title} title={a.title} href={a.url.href} />,
+          {content.alerts.items.slice(0, 2).map(
+            a => <TrafficAlert key={a.title} title={a.title} href={a.url.href} />,
           )}
           {
-            content.alerts.items.length > 2 ?
-              <a className="more-alerts" href={content.alerts.href}>See more&hellip;</a>
+            content.alerts.items.length > 2
+              ? <a className="more-alerts" href={content.alerts.href}>See more&hellip;</a>
               : null
           }
         </div>

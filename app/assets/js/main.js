@@ -3,7 +3,6 @@
 import $ from 'jquery';
 import _ from 'lodash-es';
 import moment from 'moment';
-import localforage from './localdata';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -12,6 +11,7 @@ import { syncHistoryWithStore } from 'react-router-redux';
 import fetch from 'isomorphic-fetch';
 import log from 'loglevel';
 
+import localforage from './localdata';
 import { persistNotificationsLastRead } from './notifications-glue';
 import * as pushNotifications from './push-notifications';
 import * as userinfo from './userinfo';
@@ -40,7 +40,13 @@ import bridge from './bridge';
 import { hasAuthoritativeAuthenticatedUser, hasAuthoritativeUser } from './state';
 
 export function launch(userData) {
-  bridge({ store, tiles, notifications, userinfo, news });
+  bridge({
+    store,
+    tiles,
+    notifications,
+    userinfo,
+    news,
+  });
 
   // Expose to the world for debugging purposes
   // (no harm in having this in production)
@@ -49,14 +55,12 @@ export function launch(userData) {
   // sets and gets are implicitly wrapped in ready() waiting so no need to
   // wait on this promise for any ops.
   localforage.ready()
-    .then(() => {
-      log.info('localforage DB info:', localforage._dbInfo);
-    });
+    .then(() => log.info('localforage DB info:', localforage._dbInfo))
+    .catch(err => log.warn('localforage is not available:', err));
 
   const history = syncHistoryWithStore(browserHistory, store);
-  history.listen(location =>
-    ((location !== undefined) ? analytics.track(location.pathname) : null),
-  );
+  history.listen(location => ((location !== undefined)
+    ? analytics.track(location.pathname) : null));
 
   if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
@@ -188,8 +192,8 @@ export function launch(userData) {
       }
       switch (data.type) {
         case 'activity':
-          store.dispatch(data.activity.notification ?
-            notifications.receivedNotification(data.activity)
+          store.dispatch(data.activity.notification
+            ? notifications.receivedNotification(data.activity)
             : notifications.receivedActivity(data.activity));
           break;
         default:
@@ -316,9 +320,9 @@ export function launch(userData) {
 
   user.loadUserFromLocalStorage(store.dispatch);
 
-  const userInfoPromise = userData ?
-    Promise.resolve(userData) :
-    userinfo.fetchUserInfo().catch(e => log.warn('Failed to fetch user info:', e));
+  const userInfoPromise = userData
+    ? Promise.resolve(userData)
+    : userinfo.fetchUserInfo().catch(e => log.warn('Failed to fetch user info:', e));
 
   // ensure local version is written first, then remote version if available.
   persistedUserLinks

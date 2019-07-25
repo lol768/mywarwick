@@ -44,7 +44,7 @@ object Audience {
   case object PublicAudience extends Component
 
   case class UsercodesAudience(usercodes: Set[Usercode]) extends DepartmentSubset {
-    override val displayName: String = s"Usercodes( ${usercodes.map(_.string).mkString(", ")})"
+    override val displayName: String = s"Usercodes(${usercodes.map(_.string).mkString(", ")})"
 
     def size: Int = usercodes.size
 

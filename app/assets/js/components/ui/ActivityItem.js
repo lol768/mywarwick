@@ -41,13 +41,12 @@ class ActivityItem extends React.PureComponent {
       {
         'activity-item--with-url': this.props.url,
         'activity-item--unread': this.props.unread,
-      },
-    );
+      });
 
     return (
       <div className={ classNames }>
-        { (this.props.muteable) ?
-          <div className="muting" onClick={ this.onMuting } onKeyUp={ this.onMuting } role="button" tabIndex={0}>
+        { (this.props.muteable)
+          ? <div className="muting" onClick={ this.onMuting } onKeyUp={ this.onMuting } role="button" tabIndex={0}>
             <Mute /><ChevronDown size="xs" />
           </div> : null
         }
@@ -62,9 +61,9 @@ class ActivityItem extends React.PureComponent {
                   { this.props.title }
                   { this.props.url && <i className="fal fa-external-link activity-item__link-indicator" /> }
                 </div>
-                { (this.props.textAsHtml) ?
-                  <div className="activity-item__text" dangerouslySetInnerHTML={{ __html: this.props.textAsHtml }} /> : // eslint-disable-line react/no-danger
-                  (this.props.text) && <div className="activity-item__text">{this.props.text}</div>
+                { (this.props.textAsHtml)
+                  ? <div className="activity-item__text" dangerouslySetInnerHTML={{ __html: this.props.textAsHtml }} /> // eslint-disable-line react/no-danger
+                  : (this.props.text) && <div className="activity-item__text">{this.props.text}</div>
                 }
 
                 <div className="activity-item__date">

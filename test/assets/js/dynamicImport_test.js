@@ -3,7 +3,7 @@ describe('dynamicImport', () => {
   /**
    * All this really tests at the moment is that the
    * dynamic-import-node plugin is set up properly in
-   * babel-activate.js, to make dynamic imports not
+   * mocha-babel-activate.js, to make dynamic imports not
    * explode in Node. Webpack handles it differently.
    */
   it('works in Node', () => {

@@ -2,8 +2,8 @@
 
 import _ from 'lodash-es';
 import { createAction } from 'redux-actions';
-import { fetchWithCredentials, postJsonWithCredentials } from '../serverpipe';
 import log from 'loglevel';
+import { fetchWithCredentials, postJsonWithCredentials } from '../serverpipe';
 
 const DO_NOT_DISTURB_UPDATE = 'DO_NOT_DISTURB_UPDATE';
 const DO_NOT_DISTURB_RECEIVE = 'DO_NOT_DISTURB_RECEIVE';
@@ -12,7 +12,12 @@ const DO_NOT_DISTURB_REQUEST = 'DO_NOT_DISTURB_REQUEST';
 export const receive = createAction(DO_NOT_DISTURB_RECEIVE);
 const request = createAction(DO_NOT_DISTURB_REQUEST);
 
-function updateServerWithState({ enabled, start, end, fetched }) {
+function updateServerWithState({
+  enabled,
+  start,
+  end,
+  fetched,
+}) {
   if (fetched) {
     postJsonWithCredentials('/api/donotdisturb', { enabled, doNotDisturb: { start, end } })
       .then(response => response.json())
@@ -26,9 +31,7 @@ function updateServerWithState({ enabled, start, end, fetched }) {
   }
 }
 
-const postToServer = _.debounce(getState =>
-  updateServerWithState(getState().doNotDisturb), 500,
-);
+const postToServer = _.debounce(getState => updateServerWithState(getState().doNotDisturb), 500);
 
 export function fetch() {
   return (dispatch) => {

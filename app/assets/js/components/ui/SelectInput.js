@@ -28,7 +28,13 @@ export default class SelectInput extends React.PureComponent {
   }
 
   render() {
-    const { selectedValue, className, disabled, disabledOption, options } = this.props;
+    const {
+      selectedValue,
+      className,
+      disabled,
+      disabledOption,
+      options,
+    } = this.props;
     return (
       <select
         disabled={disabled}

@@ -115,8 +115,8 @@ export default class TextTile extends TileContent {
   getLargeBody() {
     const { content } = this.props;
 
-    const itemsToDisplay = this.props.zoomed ?
-      content.items : _.take(content.items, this.getNumberOfItemsToDisplay());
+    const itemsToDisplay = this.props.zoomed
+      ? content.items : _.take(content.items, this.getNumberOfItemsToDisplay());
 
     return (
       <div>

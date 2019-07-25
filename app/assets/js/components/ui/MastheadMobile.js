@@ -10,10 +10,10 @@ export default class MastheadMobile extends React.PureComponent {
   static buildState(props) {
     return {
       backButtonVisible:
-      props.path.indexOf(`/${Routes.SETTINGS}`) === 0 ||
-      props.path.indexOf(`/${Routes.TILES}`) === 0 ||
-      (props.features.updateTileEditUI && props.path.indexOf(`/${Routes.EDIT}`) === 0) ||
-      props.path.indexOf(`/${Routes.EDIT}/${Routes.ADD}`) === 0,
+      props.path.indexOf(`/${Routes.SETTINGS}`) === 0
+      || props.path.indexOf(`/${Routes.TILES}`) === 0
+      || (props.features.updateTileEditUI && props.path.indexOf(`/${Routes.EDIT}`) === 0)
+      || props.path.indexOf(`/${Routes.EDIT}/${Routes.ADD}`) === 0,
       backButtonText: props.path === `/${Routes.SETTINGS}` ? 'Done' : 'Back',
     };
   }
@@ -35,8 +35,8 @@ export default class MastheadMobile extends React.PureComponent {
   render() {
     return (
       <div className="start-masthead use-popover">
-        { this.props.showSettingsButton &&
-        <div
+        { this.props.showSettingsButton
+        && <div
           className="settings-btn"
           onClick={this.props.onSettings}
           onKeyUp={this.props.onSettings}
@@ -46,17 +46,17 @@ export default class MastheadMobile extends React.PureComponent {
           <i className="fal fa-fw fa-cog" />
         </div>
         }
-        { this.props.showEditButton &&
-        <div
+        { this.props.showEditButton
+        && <div
           className="edit-btn pulse"
           onClick={this.props.onEditComplete}
           onKeyUp={this.props.onEditComplete}
           role="button"
           tabIndex={0}
         >
-          {this.props.editing ?
-            <i className="fal fa-fw fa-check" /> :
-            <i className="fal fa-fw fa-arrows-alt" />
+          {this.props.editing
+            ? <i className="fal fa-fw fa-check" />
+            : <i className="fal fa-fw fa-arrows-alt" />
           }
         </div>
         }
@@ -67,8 +67,8 @@ export default class MastheadMobile extends React.PureComponent {
           transitionEnterTimeout={300}
           transitionLeaveTimeout={300}
         >
-          { this.state.backButtonVisible &&
-          <div
+          { this.state.backButtonVisible
+          && <div
             className="back-btn"
             onClick={this.props.onBackClick}
             onKeyUp={this.props.onBackClick}

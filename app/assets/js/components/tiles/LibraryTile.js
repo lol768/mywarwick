@@ -19,15 +19,14 @@ export default class LibraryTile extends TextTile {
           case 'loan':
             return this.makeLoanItem(item);
           case 'hold':
-            return this.makeHoldItem(item);
+            return LibraryTile.makeHoldItem(item);
           default:
             return null;
         }
-      },
-      );
+      });
   }
 
-  makeSubtitle(type, length) {
+  static makeSubtitle(type, length) {
     return (
       <span>
         <span className="tile__callout">
@@ -68,31 +67,31 @@ export default class LibraryTile extends TextTile {
       <Hyperlink key={item.id} href={item.href}>
         <div key={item.id} className="tile__item">
           <span className="tile__text">
-            {item.recallDate ?
-              `Recalled on ${
+            {item.recallDate
+              ? `Recalled on ${
                 moment(item.recallDate, 'YYYY-MM-DD').format('MMM Do YYYY')
-              }, ${item.dueMessage.toLowerCase()}` :
-              item.dueMessage}: {item.itemTitle}
+              }, ${item.dueMessage.toLowerCase()}`
+              : item.dueMessage}: {item.itemTitle}
           </span>
         </div>
       </Hyperlink>
     );
   }
 
-  makeHoldItems(items) {
+  static makeHoldItems(items) {
     return items
       .filter(e => e.type === 'hold')
-      .map(this.makeHoldItem);
+      .map(LibraryTile.makeHoldItem);
   }
 
-  makeHoldItem(item) {
+  static makeHoldItem(item) {
     return (
       <Hyperlink key={item.id} href={item.href}>
         <div key={item.id} className="tile__item">
           <span className="tile__text">
-            {item.status.toLowerCase().indexOf('ready') !== -1 ?
-              `${item.status} at ${item.pickupLocation}` :
-              item.status}: {item.itemTitle}
+            {item.status.toLowerCase().indexOf('ready') !== -1
+              ? `${item.status} at ${item.pickupLocation}`
+              : item.status}: {item.itemTitle}
           </span>
         </div>
       </Hyperlink>
@@ -106,18 +105,18 @@ export default class LibraryTile extends TextTile {
   getLargeBody() {
     const { content } = this.props;
 
-    const itemsToDisplay = this.props.zoomed ?
-      content.items : _.take(content.items, content.items.length);
+    const itemsToDisplay = this.props.zoomed
+      ? content.items : _.take(content.items, content.items.length);
 
     const loanItems = itemsToDisplay.filter(e => e.type === 'loan');
     const holdItlems = itemsToDisplay.filter(e => e.type === 'hold');
 
     return (
       <div>
-        {this.makeSubtitle('loan', loanItems.length)}
+        {LibraryTile.makeSubtitle('loan', loanItems.length)}
         {this.makeLoanItems(loanItems)}
-        {this.makeSubtitle('hold', holdItlems.length)}
-        {this.makeHoldItems(holdItlems)}
+        {LibraryTile.makeSubtitle('hold', holdItlems.length)}
+        {LibraryTile.makeHoldItems(holdItlems)}
       </div>
     );
   }

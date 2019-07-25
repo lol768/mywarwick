@@ -81,8 +81,8 @@ export default class AccountTile extends TileContent {
   static getMediaLeft(user) {
     return (
       <div className="flex-photo">
-        {user.photo && user.photo.url &&
-        <Hyperlink href="//photos.warwick.ac.uk/yourphoto">
+        {user.photo && user.photo.url
+        && <Hyperlink href="//photos.warwick.ac.uk/yourphoto">
           <AccountPhoto user={user} className="media-object media-object-img-fix" />
         </Hyperlink>
         }
@@ -215,7 +215,7 @@ export default class AccountTile extends TileContent {
   }
 
   getSmallBody() {
-    const member = this.props.content;
+    const { content: member } = this.props;
     return (
       <ul className="list-unstyled">
         {AccountTile.makeFullName(member)}
@@ -228,8 +228,7 @@ export default class AccountTile extends TileContent {
   }
 
   getWideBody() {
-    const member = this.props.content;
-    const user = this.props.user;
+    const { user, content: member } = this.props;
     return (
       <div className="flex-container">
         {AccountTile.getMediaLeft(user)}
@@ -247,8 +246,7 @@ export default class AccountTile extends TileContent {
   }
 
   getLargeBody() {
-    const member = this.props.content;
-    const user = this.props.user;
+    const { user, content: member } = this.props;
 
     return (
       <div className="flex-container">
@@ -269,8 +267,8 @@ export default class AccountTile extends TileContent {
             <li>&nbsp;</li>
           </ul>
 
-          {member.userSource === 'WBSLdap' && // user has signed in with WBS credentials
-          <div className="wbs-message">
+          {member.userSource === 'WBSLdap' // user has signed in with WBS credentials
+          && <div className="wbs-message">
             You’re signed in with your WBS account. To access all the features of My Warwick,
             please&nbsp;
             <a

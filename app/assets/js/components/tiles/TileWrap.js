@@ -17,7 +17,14 @@ export default class TileWrap extends React.PureComponent {
   };
 
   render() {
-    const { icon, zoomIcon, title, children, onClickExpand } = this.props;
+    const {
+      icon,
+      zoomIcon,
+      title,
+      children,
+      onClickExpand,
+    } = this.props;
+
     return (
       <div className="tile__wrap">
         <header className="tile__header">
@@ -38,4 +45,3 @@ export default class TileWrap extends React.PureComponent {
     );
   }
 }
-

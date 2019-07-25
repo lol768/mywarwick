@@ -130,8 +130,7 @@ export function takeFromStream(stream: Stream, n: number): Item[] {
       if (result.length >= n) return result;
       return result.concat(_.take(part, n - result.length));
     },
-    [],
-  );
+    []);
 }
 
 export function getLastItemInStream(stream: Stream): Item {
@@ -161,8 +160,7 @@ export function getNumItemsSince(stream: Stream, date: moment): number {
 
   return _.reduce(stream,
     (sum, part) => sum + part.filter(item => moment(item.date).isAfter(date)).length,
-    0,
-  );
+    0);
 }
 
 /** Convert to a regular array for the persisted module */
@@ -171,7 +169,7 @@ export function freeze({
   olderItemsOnServer,
   filter,
   filterOptions,
-  }: FetchedActivities): any {
+}: FetchedActivities): any {
   return {
     items: _.flatten(_.values(stream)),
     meta: {
@@ -184,13 +182,13 @@ export function freeze({
 
 export function filterStream(stream: Stream, filter: Filter): Stream {
   return _.pickBy(
-    _.mapValues(stream, part =>
-      _.filter(part, item =>
-        _.every(_.keys(filter), key =>
-          item[key] === undefined ||
-          filter[key] === undefined ||
-          filter[key][item[key]] === undefined ||
-          filter[key][item[key]],
+    _.mapValues(
+      stream, part => _.filter(
+        part, item => _.every(
+          _.keys(filter), key => item[key] === undefined
+        || filter[key] === undefined
+        || filter[key][item[key]] === undefined
+        || filter[key][item[key]],
         ),
       ),
     ),

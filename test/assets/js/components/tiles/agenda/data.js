@@ -7,11 +7,12 @@ export const ITEMS = {
     title: 'First Event',
     start: now.toISOString(),
     end: end.toISOString(),
-    location: {
-      name: 'Location'
-    },
+    location: [{
+      name: 'Location',
+      href: 'https://campus.warwick.ac.uk/?slid=29129',
+    }],
     organiser: {
-      name: 'John Smith'
+      name: 'John Smith',
     },
     academicWeek: 0,
   },
@@ -20,11 +21,12 @@ export const ITEMS = {
     title: 'Second Event',
     start: end.toISOString(),
     end: end.toISOString(),
-    location: {
-      name: 'Location'
-    },
+    location: [{
+      name: 'Location',
+      href: 'https://campus.warwick.ac.uk/?slid=29129',
+    }],
     organiser: {
-      name: 'John Smith'
+      name: 'John Smith',
     },
     academicWeek: 1
   },
@@ -36,9 +38,10 @@ export const ITEMS = {
     },
     start: end.toISOString(),
     end: end.toISOString(),
-    location: {
-      name: 'Location'
-    },
+    location: [{
+      name: 'Location',
+      href: 'https://campus.warwick.ac.uk/?slid=29129',
+    }],
     organiser: {
       name: 'John Smith'
     },

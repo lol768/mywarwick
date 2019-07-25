@@ -37,7 +37,11 @@ describe('persisted', () => {
 
   beforeEach(() => {
     store.dispatch({type: 'test.wipe'});
-    return localforage.clear();
+    return localforage.clear()
+      .catch((err) => {
+        log.error(err);
+        fail('Error clearing localforage');
+      });
   })
 
   it('thaws a value into store using defaults', () => {
@@ -47,6 +51,10 @@ describe('persisted', () => {
         assert(store.subscribe.called);
         const actions = store.getState().actions;
         actions.should.include({type:'nothingUseful',payload:'testval'});
+      })
+      .catch((err) => {
+        log.error(err);
+        fail('Error persisting to localforage');
       });
   });
 
@@ -65,6 +73,10 @@ describe('persisted', () => {
         // it's been saved into local storage
         val.should.equal('cool value');
       })
+      .catch((err) => {
+        log.error(err);
+        fail('Error persisting to localforage');
+      });
   })
 
 });

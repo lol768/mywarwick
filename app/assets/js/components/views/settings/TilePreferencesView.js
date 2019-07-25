@@ -49,8 +49,7 @@ class TilePreferencesView extends HideableView {
         </div>
 
         <div className="list-group">
-          { _.map(_.sortBy(this.props.tiles, 'title'), tile =>
-            (<div
+          { _.map(_.sortBy(this.props.tiles, 'title'), tile => (<div
               key={ tile.id }
               className={ `list-group-item setting-colour-${tile.colour}` }
               role="button"
@@ -73,8 +72,7 @@ class TilePreferencesView extends HideableView {
                   <i className="fal fa-fw fa-chevron-right" />
                 </div>
               </div>
-            </div>),
-          )
+            </div>))
           }
         </div>
       </div>

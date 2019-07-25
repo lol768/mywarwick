@@ -19,7 +19,8 @@ export function reducer(state = initialState, action) {
     case 'device.width':
       return { ...state, width: action.width, pointWidth: action.pointWidth };
     case 'UPDATE_NOTIFICATION_PERMISSIONS':
-      return { ...state,
+      return {
+        ...state,
         notificationPermission: window.Notification && Notification.permission,
       };
     case 'UPDATE_DEVICE_ONLINE_STATUS':

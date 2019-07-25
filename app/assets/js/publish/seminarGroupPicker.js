@@ -1,7 +1,7 @@
 import $ from 'jquery';
-import { postJsonWithCredentials } from '../serverpipe';
 import 'bootstrap-3-typeahead';
 import log from 'loglevel';
+import { postJsonWithCredentials } from '../serverpipe';
 
 class SeminarGroupPicker {
   constructor(input, {

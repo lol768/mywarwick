@@ -2,11 +2,12 @@
 
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import ScrollRestore from '../ui/ScrollRestore';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import _ from 'lodash-es';
+
+import ScrollRestore from '../ui/ScrollRestore';
 import { Routes } from '../AppRoot';
 import HideableView from './HideableView';
 import * as newsCategories from '../../state/news-categories';
@@ -178,7 +179,13 @@ class SettingsView extends HideableView {
   }
 
   static renderFetchedCount(props) {
-    const { fetching, failed, selected, total, fetched } = props;
+    const {
+      fetching,
+      failed,
+      selected,
+      total,
+      fetched,
+    } = props;
     if (fetching) {
       return (
         <div>
@@ -186,7 +193,9 @@ class SettingsView extends HideableView {
           <FAChevronRight />
         </div>
       );
-    } else if ((failed && fetched) || !fetched) {
+    }
+
+    if ((failed && fetched) || !fetched) {
       return (
         <div>
           <i className="fal fa-exclamation-circle text-danger" />
@@ -194,11 +203,17 @@ class SettingsView extends HideableView {
         </div>
       );
     }
+
     return SettingsView.renderFractionCount(selected, total);
   }
 
   static renderFetchedBool(props, enabledLabel = 'Enabled', disabledLabel = 'Disabled') {
-    const { fetching, failed, enabled, fetched } = props;
+    const {
+      fetching,
+      failed,
+      enabled,
+      fetched,
+    } = props;
     if (fetching) {
       return (
         <div>
@@ -206,7 +221,9 @@ class SettingsView extends HideableView {
           <FAChevronRight />
         </div>
       );
-    } else if ((failed && fetched) || !fetched) {
+    }
+
+    if ((failed && fetched) || !fetched) {
       return (
         <div>
           <i className="fal fa-exclamation-circle text-danger" />
@@ -214,6 +231,7 @@ class SettingsView extends HideableView {
         </div>
       );
     }
+
     return (
       <div>
         {(enabled) ? enabledLabel : disabledLabel}
@@ -248,7 +266,7 @@ class SettingsView extends HideableView {
 
   getVersionString() {
     const { assetsRevision, appVersion } = this.props;
-    const userAgent = window.navigator.userAgent;
+    const { userAgent } = window.navigator;
 
     const versions = [];
 
@@ -287,10 +305,8 @@ class SettingsView extends HideableView {
   }
 
   chosenSchemeName() {
-    const colourSchemes = this.props.colourSchemes;
-    const fetching = colourSchemes.fetching;
-    const failed = colourSchemes.failed;
-    const fetched = colourSchemes.fetched;
+    const { colourSchemes } = this.props;
+    const { fetching, failed, fetched } = colourSchemes;
 
     if (fetching) {
       return (
@@ -299,7 +315,9 @@ class SettingsView extends HideableView {
           <FAChevronRight />
         </div>
       );
-    } else if ((failed && fetched) || !fetched) {
+    }
+
+    if ((failed && fetched) || !fetched) {
       return (
         <div>
           <i className="fal fa-exclamation-circle text-danger" />
@@ -351,8 +369,8 @@ class SettingsView extends HideableView {
       if (this.props.newsOptIn.fetched && !this.props.newsOptIn.failed) {
         this.props.dispatch(
           push(
-            `/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}/` +
-            `${Routes.SettingsRoutes.OptInTypes.LOCATION}`,
+            `/${Routes.SETTINGS}/${Routes.SettingsRoutes.OPT_IN}/`
+            + `${Routes.SettingsRoutes.OptInTypes.LOCATION}`,
           ),
         );
       }
@@ -381,7 +399,7 @@ class SettingsView extends HideableView {
         push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.TIMETABLE_ALARMS}`),
       );
     }, e);
-  }
+  };
 
   onEditTiles(e) {
     wrapKeyboardSelect(() => {
@@ -428,8 +446,8 @@ class SettingsView extends HideableView {
           </div>
 
           <div className="list-group setting-colour-0">
-            {this.props.features.eap &&
-            <ListGroupItemBtn handler={this.onEAP}>
+            {this.props.features.eap
+            && <ListGroupItemBtn handler={this.onEAP}>
               {SettingsView.renderSetting(
                 'eye',
                 'Early access program',
@@ -438,8 +456,8 @@ class SettingsView extends HideableView {
                 }, 'On', 'Off'),
               )}
             </ListGroupItemBtn>}
-            {this.props.features.updateTileEditUI &&
-            <ListGroupItemBtn handler={this.onEditTiles}>
+            {this.props.features.updateTileEditUI
+            && <ListGroupItemBtn handler={this.onEditTiles}>
               {SettingsView.renderSetting(
                 'th-large',
                 'Rearrange, resize & show or hide tiles',
@@ -453,8 +471,8 @@ class SettingsView extends HideableView {
                 <FAChevronRight />,
               )}
             </ListGroupItemBtn>
-            {SettingsView.shouldShowColourSchemes() &&
-            <ListGroupItemBtn handler={this.onColourScheme}>
+            {SettingsView.shouldShowColourSchemes()
+            && <ListGroupItemBtn handler={this.onColourScheme}>
               {SettingsView.renderSetting(
                 'paint-brush',
                 'Colour scheme',
@@ -473,8 +491,8 @@ class SettingsView extends HideableView {
                 SettingsView.renderSingleCount(this.props.mutes),
               )}
             </ListGroupItemBtn>
-            {this.shouldShowDoNotDisturb() &&
-            <ListGroupItemBtn handler={this.onDoNotDisturb}>
+            {this.shouldShowDoNotDisturb()
+            && <ListGroupItemBtn handler={this.onDoNotDisturb}>
               {SettingsView.renderSetting(
                 'clock',
                 'Do not disturb',
@@ -492,8 +510,8 @@ class SettingsView extends HideableView {
               onClick={this.onNotificationEmailCopyChange}
               checked={this.state.emailNotificationsOptIn.wantsEmails}
               failure={this.state.emailNotificationsOptIn.failed && !this.props.isOnline}
-              loading={!this.state.emailNotificationsOptIn.fetchedOnce &&
-              this.props.emailNotificationsOptIn.fetching}
+              loading={!this.state.emailNotificationsOptIn.fetchedOnce
+                && this.props.emailNotificationsOptIn.fetching}
               disabled={!this.props.isOnline}
             />
             <ListGroupItemBtn handler={this.onSMS}>
@@ -508,21 +526,22 @@ class SettingsView extends HideableView {
           </div>
 
           <div className="list-group setting-colour-1">
-            {/* <ListGroupItemBtn
-            handler={ this.props.newsCategories.fetched && !this.props.newsCategories.failed ? () =>
-              this.props.dispatch(
-                push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`),
-              ) : null
-            }
-          >
-            { SettingsView.renderSetting(
-              'newspaper-o',
-              'News categories',
-              SettingsView.renderFetchedCount({
-                ...this.props.newsCategories,
-              }),
-            ) }
-          </div>*/}
+            {
+              this.props.features.news ? <ListGroupItemBtn
+                handler={ this.props.newsCategories.fetched
+                  && !this.props.newsCategories.failed ? () => this.props.dispatch(
+                    push(`/${Routes.SETTINGS}/${Routes.SettingsRoutes.NEWS_CATEGORIES}`),
+                  ) : null
+                }
+              >
+                { SettingsView.renderSetting(
+                  'newspaper',
+                  'News categories',
+                  SettingsView.renderFetchedCount({
+                    ...this.props.newsCategories,
+                  }),
+                ) }
+              </ListGroupItemBtn> : null}
             <ListGroupItemBtn handler={this.onLocationPreferences}>
               {SettingsView.renderSetting(
                 'map-signs',
@@ -539,16 +558,16 @@ class SettingsView extends HideableView {
             </ListGroupItemBtn>
           </div>
 
-          {SettingsView.shouldShowTimetableAlarms() &&
-          <div className="list-group setting-colour-2">
+          {SettingsView.shouldShowTimetableAlarms()
+          && <div className="list-group setting-colour-2">
             <ListGroupItemBtn handler={this.onTimetableAlarms}>
               {SettingsView.renderSetting(
                 'bell',
                 'Timetable alarms',
                 <div>
-                  {this.props.timetableAlarms.enabled ?
-                    `${this.props.timetableAlarms.minutesBeforeEvent} minutes before` :
-                    'Off'}
+                  {this.props.timetableAlarms.enabled
+                    ? `${this.props.timetableAlarms.minutesBeforeEvent} minutes before`
+                    : 'Off'}
                   <FAChevronRight />
                 </div>,
               )}
@@ -603,8 +622,8 @@ class SettingsView extends HideableView {
                 </div>
               </div>
             </ListGroupItemBtn>
-            {SettingsView.canLaunchTour() &&
-            <ListGroupItemBtn handler={SettingsView.launchTour}>
+            {SettingsView.canLaunchTour()
+            && <ListGroupItemBtn handler={SettingsView.launchTour}>
               {SettingsView.renderSetting(
                 'arrow-alt-circle-right',
                 'Take a tour',
@@ -640,14 +659,14 @@ class SettingsView extends HideableView {
 
 // Remove from the user's filter choice any keys that are not present in the filter options
 function ensureValidFilterChoice(filter, filterOptions) {
-  return _.mapValues(filter, (options, optionType) =>
-    _.pickBy(options, (v, option) =>
-      filterOptions[optionType] !== undefined &&
-      _.find(filterOptions[optionType], filterOption =>
-        filterOption.id === option,
+  return _.mapValues(filter, (options, optionType) => _.pickBy(
+    options,
+    (v, option) => filterOptions[optionType] !== undefined
+      && _.find(
+        filterOptions[optionType],
+        filterOption => filterOption.id === option,
       ) !== undefined,
-    ),
-  );
+  ));
 }
 
 const select = (state) => {

@@ -56,8 +56,8 @@ export default class ListGroupItem extends React.PureComponent {
         onKeyUp={ this.onClick }
       >
         <div className="media">
-          { this.props.icon &&
-          <div className="media-left">
+          { this.props.icon
+          && <div className="media-left">
             <i className={ `fal fa-fw fa-${this.props.icon}` } />
           </div> }
           <div

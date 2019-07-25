@@ -36,8 +36,9 @@ export default class UtilityBar extends React.PureComponent {
 
     return (
       <ul>
-        {!user.empty ?
-          <li>{ userData.authenticated ? this.renderAccountPhoto() : this.renderSignInLink() }</li>
+        {!user.empty
+          ? <li>{ userData.authenticated
+            ? this.renderAccountPhoto() : this.renderSignInLink() }</li>
           : null}
       </ul>
     );

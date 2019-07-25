@@ -37,7 +37,13 @@ export class InputList extends React.PureComponent {
   }
 
   render() {
-    const { picker, name, items, placeholderText, type } = this.props;
+    const {
+      picker,
+      name,
+      items,
+      placeholderText,
+      type,
+    } = this.props;
 
     return (
       <div>
@@ -98,7 +104,7 @@ class InputSearch extends React.PureComponent {
       <input
         className="form-control input-search"
         placeholder={this.props.placeholderText}
-        ref={picker => (this.picker = picker)}
+        ref={(picker) => { this.picker = picker; }}
         value={this.state.value}
         onChange={this.handleTextChange}
       />
@@ -132,11 +138,17 @@ class ListItem extends React.PureComponent {
   }
 
   render() {
-    const { className, name, text, type, value } = this.props;
+    const {
+      className,
+      name,
+      text,
+      type,
+      value,
+    } = this.props;
     return (
       <li className={className}>
         <input
-          ref={input => (this.hiddenInput = input)}
+          ref={(input) => { this.hiddenInput = input; }}
           name={name}
           value={`${type}:${value}`}
           readOnly
@@ -171,31 +183,39 @@ class ListItemWithOptions extends ListItem {
   toggleOption(value) {
     const oldOption = _.find(this.props.options, opt => opt[value])[value];
     const updatedOption = { [value]: { ...oldOption, selected: !oldOption.selected } };
-    const newOptions =
-      [..._.filter(this.props.options, opt => opt[value] === undefined), updatedOption];
+    const newOptions = [
+      ..._.filter(this.props.options, opt => opt[value] === undefined),
+      updatedOption,
+    ];
     this.props.toggleOption(this.props.value, newOptions);
   }
 
   render() {
-    const { name, value, type, text, options, className } = this.props;
+    const {
+      name,
+      value,
+      type,
+      text,
+      options,
+      className,
+    } = this.props;
 
-    const optBtn = option =>
-      _.map(option, (val, key) => (
-        <div className="checkbox--list-item-option" key={key}>
-          <label className="control-label">
-            <input
-              ref={input => (this.hiddenInput = input)}
-              className="form-check"
-              type="checkbox"
-              name={name}
-              value={`${type}:${key}:${value}`}
-              checked={val.selected}
-              onChange={() => this.toggleOption(key)}
-            />
-            {`${val.students.length} ${val.studentRole}(s)`}
-          </label>
-        </div>
-      ))[0];
+    const optBtn = option => _.map(option, (val, key) => (
+      <div className="checkbox--list-item-option" key={key}>
+        <label className="control-label">
+          <input
+            ref={(input) => { this.hiddenInput = input; }}
+            className="form-check"
+            type="checkbox"
+            name={name}
+            value={`${type}:${key}:${value}`}
+            checked={val.selected}
+            onChange={() => this.toggleOption(key)}
+          />
+          {`${val.students.length} ${val.studentRole}(s)`}
+        </label>
+      </div>
+    ))[0];
 
     return (
       <li className={className}>
@@ -242,7 +262,13 @@ export class InputOptionsList extends InputList {
   }
 
   render() {
-    const { picker, name, items, placeholderText, type } = this.props;
+    const {
+      picker,
+      name,
+      items,
+      placeholderText,
+      type,
+    } = this.props;
     return (
       <div>
         <InputSearch

@@ -44,14 +44,14 @@ export default class TabBarItem extends React.PureComponent {
         ref={(li) => { this.listItem = li; }}
       >
         <i
-          className={ this.props.active ?
-            `fal fa-${this.props.selectedIcon}` :
-            `fal fa-${this.props.icon}`
+          className={ this.props.active
+            ? `fal fa-${this.props.selectedIcon}`
+            : `fal fa-${this.props.icon}`
           }
         />
-        { (this.props.badge > 0) ?
-          <span className="badge">{ formatBadgeCount(this.props.badge) }</span> :
-          null
+        { (this.props.badge > 0)
+          ? <span className="badge">{ formatBadgeCount(this.props.badge) }</span>
+          : null
         }
         <span className="tab-label">{ this.props.title }</span>
       </li>

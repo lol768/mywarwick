@@ -30,14 +30,14 @@ export class TileOptionView extends React.PureComponent {
       // Populate the options
       if (tileOption.type === 'array') {
         currentPreferences[key] = {};
-        tileOption.options.forEach(option => (currentPreferences[key][option.value] = false));
+        tileOption.options.forEach((option) => { currentPreferences[key][option.value] = false; });
       } else {
         currentPreferences[key] = '';
       }
 
       // Load the defaults
       if (tileOption.type === 'array') {
-        tileOption.default.forEach(value => (currentPreferences[key][value] = true));
+        tileOption.default.forEach((value) => { currentPreferences[key][value] = true; });
       } else {
         currentPreferences[key] = tileOption.default;
       }
@@ -139,15 +139,15 @@ export class TileOptionView extends React.PureComponent {
     this.setState({ currentPreferences }, this.saveTilePreferences);
   }
 
-  groupedOptions(options) {
+  static groupedOptions(options) {
     const canGroup = options.length === options.filter(e => e.group).length;
     return canGroup ? _.groupBy(options, 'group') : canGroup;
   }
 
   makeList(tileOption, section) {
-    const options = tileOption.options;
+    const { options } = tileOption;
     const type = tileOption.type.toLowerCase();
-    const groupedOptions = this.groupedOptions(options);
+    const groupedOptions = TileOptionView.groupedOptions(options);
     if (groupedOptions) return this.makeGroupedList(groupedOptions, type, section);
     return this.makeUngroupedList(options, type, section);
   }
@@ -193,16 +193,14 @@ export class TileOptionView extends React.PureComponent {
           </div>
         </div>
 
-        { _.flatMap(this.props.tileOptions, (tileOption, section) =>
-          (<div key={ section }>
+        { _.flatMap(this.props.tileOptions, (tileOption, section) => (<div key={ section }>
             <p className="text--hint container-fluid">
               { tileOption.description }
             </p>
             <div key={ section } className="list-group">
               { this.makeList(tileOption, section) }
             </div>
-          </div>),
-        ) }
+          </div>)) }
       </div>
     );
   }

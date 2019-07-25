@@ -6,13 +6,14 @@ import _ from 'lodash-es';
 import $ from 'jquery';
 import { connect } from 'react-redux';
 import { goBack, push } from 'react-router-redux';
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
+
 import * as TILE_TYPES from '../tiles';
 import Tile from '../tiles/Tile';
 import { Routes } from '../AppRoot';
 import ScrollRestore from '../ui/ScrollRestore';
 import wrapKeyboardSelect from '../../keyboard-nav';
 import DismissableInfoModal from '../ui/DismissableInfoModal';
-import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 class TileView extends React.PureComponent {
   constructor(props) {

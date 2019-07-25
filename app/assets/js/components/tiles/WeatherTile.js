@@ -80,8 +80,7 @@ export default class WeatherTile extends TileContent {
   }
 }
 
-const WeatherTable = ({ items }) =>
-  (<div className="row text--light">
+const WeatherTable = ({ items }) => (<div className="row text--light">
     {_.take(items, 6).map(item => (
       <div className="col-xs-2" key={item.id}>
         <div>{formatTime(item.time)}</div>

@@ -2,10 +2,11 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
 import { connect } from 'react-redux';
+import $ from 'jquery';
+
 import * as notifications from '../../../state/notifications';
 import Switch from '../../ui/Switch';
 import wrapKeyboardSelect from '../../../keyboard-nav';
-import $ from 'jquery';
 import { Mute } from '../../FA';
 
 class StreamFilterOptionView extends React.PureComponent {
@@ -37,9 +38,9 @@ class StreamFilterOptionView extends React.PureComponent {
     };
     _.forEach(filterOptions.provider, (p) => {
       updatedState.provider[p.id] = (
-        filter.provider === undefined ||
-        filter.provider[p.id] === undefined ||
-        filter.provider[p.id]
+        filter.provider === undefined
+        || filter.provider[p.id] === undefined
+        || filter.provider[p.id]
       );
     });
     return updatedState;
@@ -60,8 +61,7 @@ class StreamFilterOptionView extends React.PureComponent {
     wrapKeyboardSelect((e) => {
       const dataset = $(e.currentTarget).data();
       if (dataset.disabled) return;
-      const value = dataset.value;
-      const name = dataset.name;
+      const { value, name } = dataset;
       const newOption = _.cloneDeep(this.state[name]);
       newOption[value] = !newOption[value];
 
@@ -86,8 +86,8 @@ class StreamFilterOptionView extends React.PureComponent {
 
     return (
       <div>
-        {plural === 'Alerts' &&
-        <p className="text--hint container-fluid">
+        {plural === 'Alerts'
+        && <p className="text--hint container-fluid">
           Filtering alerts will not stop them playing a sound or appearing on
           your phone’s lock screen. To stop this you
           should use the <Mute fw /> icon next to each alert in the Alerts tab.
@@ -99,13 +99,12 @@ class StreamFilterOptionView extends React.PureComponent {
         <div className="list-group">
           { _.map(
             _.sortBy(providers, o => (o.displayName ? o.displayName : o.name)),
-            option =>
-              (<div
+            option => (<div
                 key={ `provider:${option.id}` }
                 className="list-group-item"
                 data-name="provider"
                 data-value={option.id}
-                data-disabled={!this.props.isOnline || option.overrideMuting}
+                data-disabled={!this.props.isOnline || !!option.overrideMuting}
                 role="button"
                 tabIndex={0}
                 onClick={ this.onClick }
@@ -127,7 +126,7 @@ class StreamFilterOptionView extends React.PureComponent {
                     <Switch
                       id={ `${this.props.filterType}:provider:${option.id}` }
                       checked={ this.state.provider[option.id] }
-                      disabled={ !this.props.isOnline || option.overrideMuting }
+                      disabled={ !this.props.isOnline || !!option.overrideMuting }
                     />
                   </div>
                 </div>
@@ -173,18 +172,16 @@ function selectNotification(state) {
   };
 }
 
-export const ActivityStreamFilterOptionView =
-  connect(
-    selectActivity,
-    dispatch => ({
-      saveFilter: thisState => dispatch(notifications.persistActivityFilter(thisState)),
-    }),
-  )(StreamFilterOptionView);
+export const ActivityStreamFilterOptionView = connect(
+  selectActivity,
+  dispatch => ({
+    saveFilter: thisState => dispatch(notifications.persistActivityFilter(thisState)),
+  }),
+)(StreamFilterOptionView);
 
-export const NotificationStreamFilterOptionView =
-  connect(
-    selectNotification,
-    dispatch => ({
-      saveFilter: thisState => dispatch(notifications.persistNotificationFilter(thisState)),
-    }),
-  )(StreamFilterOptionView);
+export const NotificationStreamFilterOptionView = connect(
+  selectNotification,
+  dispatch => ({
+    saveFilter: thisState => dispatch(notifications.persistNotificationFilter(thisState)),
+  }),
+)(StreamFilterOptionView);
