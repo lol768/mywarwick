@@ -23,7 +23,7 @@ function exportAssetModule(name, taskName, baseDir, extraExtensions) {
     const srcPaths = srcs.map( s => `${base}/**/*.${s}` );
 
     return gulp.src(srcPaths, { base: base })
-      .pipe(gulp.dest(paths.assetsOut + '/lib/' + name))
+      .pipe(gulp.dest(paths.assetsOut + '/lib/' + name.split('/').slice(-1)[0]))
   });
 }
 
