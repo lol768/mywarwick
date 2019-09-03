@@ -253,7 +253,7 @@ describe('Checkboxes', () => {
   it('should render as ungrouped options information if not supplied', () => {
     const thisProps = _.cloneDeep(props);
     thisProps.tileOptions.checkboxOption.default = [];
-    thisProps.tile.preferences = [];
+    thisProps.tile.preferences = {};
 
     const result = enzyme.shallow(<TileOptionView {...thisProps} />);
     const checkboxes = result.find(SwitchListGroupItem);
@@ -265,7 +265,7 @@ describe('Checkboxes', () => {
   it('should render group information if available', () => {
     const thisProps = _.cloneDeep(propsWithGroup);
     thisProps.tileOptions.checkboxOption.default = [];
-    thisProps.tile.preferences = [];
+    thisProps.tile.preferences = {};
     const result = enzyme.shallow(<TileOptionView {...thisProps}  />);
     const checkboxes = result.find(SwitchListGroupItem);
     expect(checkboxes.findWhere(r => r.prop('name') === 'checkboxOption')).to.have.length(4);
@@ -280,7 +280,7 @@ describe('Checkboxes', () => {
   it('unselected if no preference (undefined) and no default', () => {
     const thisProps = _.cloneDeep(props);
     thisProps.tileOptions.checkboxOption.default = [];
-    thisProps.tile.preferences = [];
+    thisProps.tile.preferences = {};
 
     const result = enzyme.shallow(<TileOptionView {...thisProps} />);
     const checkboxes = result.find(SwitchListGroupItem);

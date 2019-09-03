@@ -16,8 +16,8 @@ export default function wrapKeyboardSelect(callback, event) {
   if (event.type === 'click') {
     event.currentTarget.blur(); // for outline removal
     callback(event);
-  } else if (event.type === 'keyup' &&
-    (event.keyCode === ENTER_KEYCODE || event.keyCode === SPACE_KEYCODE)) {
+  } else if (event.type === 'keyup'
+    && (event.keyCode === ENTER_KEYCODE || event.keyCode === SPACE_KEYCODE)) {
     event.preventDefault();
     callback(event);
   } else if (event.type === 'submit') {

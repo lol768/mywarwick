@@ -1,6 +1,7 @@
 import tk from 'timekeeper';
 import jsxChai from 'jsx-chai';
 import * as enzyme from 'enzyme';
+import ShallowRenderer from 'react-test-renderer/shallow';
 
 const chai = require('chai');
 global.expect = chai.expect;
@@ -10,9 +11,11 @@ global.sinon = require('sinon');
 chai.use(require('sinon-chai'));
 chai.use(jsxChai);
 
+const JSDOM = require("jsdom").JSDOM;
+
 function setupBlankDocument() {
-  global.document = require('jsdom').jsdom();
-  global.window = global.document.defaultView;
+  global.window = new JSDOM().window;
+  global.document = global.window.document;
   global.navigator = global.window.navigator;
 }
 
@@ -48,7 +51,7 @@ global.spy = function spy(object, method) {
 };
 
 global.shallowRender = function shallowRender(component) {
-  let renderer = ReactTestUtils.createRenderer();
+  let renderer = new ShallowRenderer();
   renderer.render(component);
 
   return renderer.getRenderOutput();

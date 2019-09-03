@@ -26,6 +26,7 @@ class ID7Layout extends React.PureComponent {
     user: PropTypes.shape({
       data: PropTypes.shape({
         authenticated: PropTypes.bool.isRequired,
+        masquerading: PropTypes.bool.isRequired,
       }).isRequired,
     }).isRequired,
     path: PropTypes.string.isRequired,
@@ -39,9 +40,9 @@ class ID7Layout extends React.PureComponent {
   static setColourTheme(newProps) {
     if (newProps.colourSchemesLoaded) {
       $('html')
-        .removeClass((i, className) =>
-          _.filter(className.split(' '), singleClass => _.startsWith(singleClass, 'theme-')).join(' '),
-        )
+        .removeClass((i, className) => _.filter(
+          className.split(' '), singleClass => _.startsWith(singleClass, 'theme-'),
+        ).join(' '))
         .addClass(`theme-${newProps.colourTheme}`)
         .find('meta[name="theme-color"]')
         .attr('content', newProps.schemeColour);
@@ -84,9 +85,9 @@ class ID7Layout extends React.PureComponent {
   componentWillReceiveProps(nextProps) {
     nextProps.dispatch(ui.updateUIContext());
 
-    const $body = $('body').removeClass((i, className) =>
-      _.filter(className.split(' '), singleClass => _.startsWith(singleClass, 'in-')).join(' '),
-    );
+    const $body = $('body').removeClass((i, className) => _.filter(
+      className.split(' '), singleClass => _.startsWith(singleClass, 'in-'),
+    ).join(' '));
     const pathClasses = _.filter(nextProps.path.split('/'), path => path.length > 0);
     if (pathClasses.length === 0) {
       $body.addClass('in-root');
@@ -97,8 +98,8 @@ class ID7Layout extends React.PureComponent {
 
   componentDidUpdate(prevProps) {
     if (
-      prevProps.colourTheme !== this.props.colourTheme ||
-        prevProps.colourSchemesLoaded !== this.props.colourSchemesLoaded
+      prevProps.colourTheme !== this.props.colourTheme
+        || prevProps.colourSchemesLoaded !== this.props.colourSchemesLoaded
     ) {
       ID7Layout.setColourTheme(this.props);
     }
@@ -155,9 +156,9 @@ class ID7Layout extends React.PureComponent {
     const { user, path, features } = this.props;
 
     const showSettingsButton = !(
-      _.startsWith(path, `/${Routes.SETTINGS}`) ||
-      _.startsWith(path, `/${Routes.POST_TOUR}`) ||
-      (features.updateTileEditUI && _.startsWith(path, `/${Routes.EDIT}`))
+      _.startsWith(path, `/${Routes.SETTINGS}`)
+      || _.startsWith(path, `/${Routes.POST_TOUR}`)
+      || (features.updateTileEditUI && _.startsWith(path, `/${Routes.EDIT}`))
     );
 
     return (
@@ -175,8 +176,7 @@ class ID7Layout extends React.PureComponent {
                 onEditComplete={this.onEditComplete}
                 editing={this.isEditing()}
                 showEditButton={
-                  this.isEditing() ||
-                  (path === '/' && !this.props.features.updateTileEditUI)
+                  this.isEditing() || (path === '/' && !this.props.features.updateTileEditUI)
                 }
                 onSettings={this.onSettings}
                 showSettingsButton={showSettingsButton}

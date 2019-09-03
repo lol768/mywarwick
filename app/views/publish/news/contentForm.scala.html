@@ -1,11 +1,9 @@
-@import models.publishing.PermissionScope
-@import system.RequestContext
-@import org.joda.time.LocalDateTime
-@import models.publishing.Publisher
+@import models.news.Link
+@import models.publishing.{PermissionScope, Publisher}
+@import play.api.libs.json.{JsBoolean, JsValue, Json}
 @import services.dao.DepartmentInfo
-@import play.api.libs.json.{Json, JsValue}
-
-@import play.api.libs.json.JsBoolean
+@import system.RequestContext
+@import warwick.core.helpers.JavaTime
 @(
     form: Form[_],
     publisher: Publisher,
@@ -14,6 +12,7 @@
     permissionScope: PermissionScope,
     audience: Audience,
     createOrUpdate: String,
+    earliestDate: String = JavaTime.localDateTime.withSecond(0).withNano(0).toString,
     audienceJson: JsValue = Json.obj(),
     categoriesJson: JsValue = Json.obj(),
     audienceIndicatorHint: JsValue = Json.obj(
@@ -74,7 +73,9 @@
     )
 
     @b3.text(form("item.linkText"),
-      '_label -> "Link title"
+      '_label -> "Link text",
+      'value -> form("item.linkText").value.getOrElse(Link.MoreText),
+      'placeholder -> Link.MoreText
     )
   </section>
 
@@ -90,7 +91,8 @@
     @tags.datetimePicker(form("item.publishDate"),
       '_label -> "Publish date",
       '_help -> "You can select a time in the future, and this news item will appear to users after that time",
-      'value -> LocalDateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
+      'minDate -> earliestDate,
+      'value -> earliestDate
     )
 
     @tags.submitOrCancel(createOrUpdate, controllers.publish.routes.NewsController.list(publisher.id))

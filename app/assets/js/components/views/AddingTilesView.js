@@ -57,17 +57,15 @@ class AddingTilesView extends React.PureComponent {
         h: 1,
       }));
 
-    const hiddenTileComponents = hiddenTiles.map(tile =>
-      (<div key={ tile.id }>
+    const hiddenTileComponents = hiddenTiles.map(tile => (<div key={ tile.id }>
         <HiddenTile {...tile} onShow={ this.onShowTile } />
-      </div>),
-    );
+      </div>));
 
     return (
       <div>
         <h3>Add more tiles</h3>
-        { hiddenTileComponents.length > 0 ?
-          <ReactGridLayoutBase
+        { hiddenTileComponents.length > 0
+          ? <ReactGridLayoutBase
             layout={layout}
             isDraggable={false}
             isResizable={false}

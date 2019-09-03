@@ -6,7 +6,7 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import log from 'loglevel';
 import * as notifications from '../../state/notifications';
-import makeCancelable from '../../promise';
+import { CancelledPromiseError, makeCancellable } from '../../promise';
 import HideableView from '../views/HideableView';
 
 export default class InfiniteScrollable extends HideableView {
@@ -25,7 +25,7 @@ export default class InfiniteScrollable extends HideableView {
     };
     this.unmounted = false;
     this.boundScrollListener = this.onScroll.bind(this);
-    this.cancellableShowMorePromise = makeCancelable(Promise.resolve());
+    this.cancellableShowMorePromise = makeCancellable(Promise.resolve());
   }
 
   componentWillUnmount() {
@@ -66,14 +66,15 @@ export default class InfiniteScrollable extends HideableView {
     if (scrollTop >= loadMoreThreshold) {
       this.suppressScroll = true;
       this.setState({ loading: true });
-      this.cancellableShowMorePromise = makeCancelable(this.props.onLoadMore());
+      this.cancellableShowMorePromise = makeCancellable(this.props.onLoadMore());
       this.cancellableShowMorePromise.promise.then(() => {
         if (!this.unmounted) this.setState({ loading: false });
       }).catch((e) => {
         if (this.unmounted) return;
-        if (e.isCanceled) {
+        if (e instanceof CancelledPromiseError) {
           return;
-        } else if (e instanceof notifications.UnnecessaryFetchError) {
+        }
+        if (e instanceof notifications.UnnecessaryFetchError) {
           log.debug(`Unnecessary fetch: ${e.message}`);
           return;
         }

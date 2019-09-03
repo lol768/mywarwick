@@ -2,6 +2,8 @@
   .panel;
   .break-word;
 
+  line-height: @line-height-tile;
+
   &__body {
     .panel-body;
   }
@@ -9,11 +11,21 @@
   &__title {
     .h4;
     border: 0;
+    margin-bottom: 0;
+  }
+
+  &__image {
+    margin: (@line-height-tile-computed / 2) 0;
+  }
+
+  &__link {
+    margin-bottom: (@line-height-tile-computed / 2);
   }
 
   &__footer {
     .small;
     .text-muted;
+    margin-top: @line-height-tile-computed;
   }
 
   &__category-tags {
@@ -50,4 +62,8 @@
     color: @text-color;
     background-color: #fff;
   }
+}
+
+.inset-alert {
+  margin: 10px;
 }

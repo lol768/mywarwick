@@ -1,4 +1,5 @@
 import CountTile from 'components/tiles/CountTile';
+import { TILE_SIZES } from '../../../../../app/assets/js/components/tiles/TileContent';
 
 describe('CountTile', () => {
 
@@ -21,7 +22,7 @@ describe('CountTile', () => {
         count: 53,
         word: 'herons',
       },
-      size: 'small',
+      size: TILE_SIZES.SMALL,
     };
     checkCountBehaviour(props, props.content.count);
   });
@@ -32,7 +33,7 @@ describe('CountTile', () => {
         items: ['a', 'b', 'c'],
         word: 'letters',
       },
-      size: 'small',
+      size: TILE_SIZES.SMALL,
     };
     checkCountBehaviour(props, 3);
   });
@@ -44,6 +45,7 @@ describe('CountTile', () => {
         items: [{id: 1}, {id: 2}],
         word: 'objects',
       },
+      size: TILE_SIZES.SMALL,
     };
     const html = shallowRender(<CountTile { ...props } />);
     html.type.should.equal('ul');

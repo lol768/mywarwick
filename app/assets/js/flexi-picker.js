@@ -1,6 +1,6 @@
 import $ from 'jquery';
-import { postJsonWithCredentials } from './serverpipe';
 import log from 'loglevel';
+import { postJsonWithCredentials } from './serverpipe';
 
 /**
  * RichResultField is a text field that can be overlaid with a similar-looking
@@ -13,8 +13,8 @@ class RichResultField {
   constructor(input) {
     const self = this;
     this.$input = $(input);
-    this.$uneditable = $('<span><span class="val"></span>' +
-      '<a href="#" class="clear-field" title="Clear">&times;</a></span>');
+    this.$uneditable = $('<span><span class="val"></span>'
+      + '<a href="#" class="clear-field" title="Clear">&times;</a></span>');
     this.$uneditable.attr({
       class: `uneditable-input rich-result-field ${this.$input.attr('class')}`,
       disabled: true,
@@ -136,8 +136,8 @@ export default class FlexiPicker {
       },
       highlighter: html => html,
       afterSelect: (item) => {
-        const description =
-          (typeof (item.description) !== 'undefined' ? ` (${item.description})` : '');
+        const description = (typeof (item.description) !== 'undefined'
+          ? ` (${item.description})` : '');
         const text = `${item.title}${description}`;
         self.richResultField.store(item.value, text);
         $element.data('item', item);

@@ -5,7 +5,7 @@ import Observable from './system/Observable';
 export default class Visible extends React.PureComponent {
   static propTypes = {
     visible: PropTypes.bool.isRequired,
-    children: React.PropTypes.element.isRequired,
+    children: PropTypes.element.isRequired,
   };
 
   static childContextTypes = {
@@ -53,4 +53,3 @@ export default class Visible extends React.PureComponent {
     </div>);
   }
 }
-

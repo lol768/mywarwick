@@ -28,7 +28,8 @@ export function handleRedirects(response) {
     if (data.refresh) {
       window.location = rewriteRefreshUrl(data.refresh, window.location.href);
       return [data, true];
-    } else if (!data.user.authenticated) {
+    }
+    if (!data.user.authenticated) {
       window.location = data.links.login;
       return [data, true];
     }

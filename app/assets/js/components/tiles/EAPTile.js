@@ -1,9 +1,10 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import TileContent, { TILE_SIZES } from './TileContent';
 import _ from 'lodash-es';
 import moment from 'moment';
 import $ from 'jquery';
+
+import TileContent, { TILE_SIZES } from './TileContent';
 import Hyperlink from '../ui/Hyperlink';
 import * as FA from '../FA';
 import wrapKeyboardSelect from '../../keyboard-nav';
@@ -37,10 +38,14 @@ export default class EAPTile extends TileContent {
 
     if (!item.startDate && !item.endDate) {
       return item.name;
-    } else if (!item.endDate) {
+    }
+
+    if (!item.endDate) {
       const startDate = moment(item.startDate, parseFormat).format(printFormat);
       return `From ${startDate}, ${item.name}`;
-    } else if (!item.startDate) {
+    }
+
+    if (!item.startDate) {
       const endDate = moment(item.endDate, parseFormat).format(printFormat);
       return `Until ${endDate}, ${item.name}`;
     }
@@ -56,6 +61,7 @@ export default class EAPTile extends TileContent {
         type="button"
         className="btn btn-default"
         target="_blank"
+        rel="noopener noreferrer"
         href={item.feedbackUrl}
       >
         Send feedback
@@ -66,7 +72,9 @@ export default class EAPTile extends TileContent {
   static modalSubheading(item) {
     if (!item.startDate && !item.endDate) {
       return null;
-    } else if (!item.endDate) {
+    }
+
+    if (!item.endDate) {
       return (
         <span>
           <FA.Calendar />
@@ -74,7 +82,9 @@ export default class EAPTile extends TileContent {
           Evaluation period for this feature is from {item.startDate}
         </span>
       );
-    } else if (!item.startDate) {
+    }
+
+    if (!item.startDate) {
       return (
         <span>
           <FA.Calendar />
@@ -134,8 +144,8 @@ export default class EAPTile extends TileContent {
     return (
       <li key={item.id} className="feature" data-id={item.id}>
         <div className="date-and-name">{EAPTile.renderDateAndName(item)}</div>
-        {item.summary && item.summary.length > 0 && item.summaryRaw && item.summaryRaw.length > 0 &&
-          <div
+        {item.summary && item.summary.length > 0 && item.summaryRaw && item.summaryRaw.length > 0
+          && <div
             className="more-info"
             role="button"
             tabIndex={0}
@@ -145,8 +155,8 @@ export default class EAPTile extends TileContent {
             <FA.Info />More info
           </div>
         }
-        {item.feedbackUrl && item.feedbackUrl.length > 0 &&
-          <div className="feedback">
+        {item.feedbackUrl && item.feedbackUrl.length > 0
+          && <div className="feedback">
             <Hyperlink href={item.feedbackUrl}>
               <FA.Commenting />Send feedback
             </Hyperlink>
@@ -164,8 +174,8 @@ export default class EAPTile extends TileContent {
         <ul className="list-unstyled">
           {_.map(itemsToShow, item => this.renderItem(item))}
         </ul>
-        {!this.props.zoomed &&
-          <ShowMore
+        {!this.props.zoomed
+          && <ShowMore
             items={this.props.content.items}
             showing={3}
             onClick={this.props.onClickExpand}

@@ -13,8 +13,8 @@ if (window.addEventListener) {
   window.addEventListener('error', window.myWarwickErrorHandler, true);
 }
 
-import 'core-js/modules/es6.object.assign';
-import 'core-js/modules/es7.array.includes';
+import 'core-js/modules/es.object.assign';
+import 'core-js/modules/es.array.includes';
 import promisePolyfill from 'es6-promise/lib/es6-promise/polyfill';
 
 promisePolyfill();

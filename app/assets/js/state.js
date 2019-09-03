@@ -7,4 +7,3 @@ export function hasAuthoritativeUser(state) {
 export function hasAuthoritativeAuthenticatedUser(state) {
   return hasAuthoritativeUser(state) && state.user.data.authenticated === true;
 }
-

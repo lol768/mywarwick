@@ -1,7 +1,7 @@
 package models.news
 
 import controllers.publish.NewsItemData
-import models.{Audience, AudienceSize, DateFormats, NewsCategory}
+import models.{Audience, AudienceSize, NewsCategory}
 import org.joda.time.DateTime
 import play.api.libs.json._
 import uk.ac.warwick.util.web.Uri
@@ -21,6 +21,11 @@ object Link {
   implicit val jsonReader = new Reads[Link] {
     override def reads(json: JsValue): JsResult[Link] = ???
   }
+
+  val MoreText = "More info…"
+
+  def apply(text: Option[String], href: Uri): Link =
+    Link(text.getOrElse(MoreText), href)
 }
 
 sealed trait NewsItemRenderFields {
@@ -63,7 +68,8 @@ case class NewsItemRender (
 }
 
 object NewsItemRender {
-  import DateFormats.isoDateFormats
+  // import models.DateFormats.isoDateFormats needed for implicit
+  import models.DateFormats.isoDateFormats
   implicit val format: OFormat[NewsItemRender] = Json.format[NewsItemRender]
 }
 

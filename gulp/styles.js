@@ -3,14 +3,11 @@
 const gulp = require('gulp');
 const path = require('path');
 const playAssets = require('gulp-play-assets');
-
 const sourcemaps = require('gulp-sourcemaps');
 const less = require('gulp-less');
-
 const postcss = require('gulp-postcss');
 const autoprefix = require('autoprefixer');
 const swagger = require('gulp-swagger');
-
 const bundleEvents = require('./events');
 
 /**
@@ -26,11 +23,11 @@ function exportAssetModule(name, taskName, baseDir, extraExtensions) {
     const srcPaths = srcs.map( s => `${base}/**/*.${s}` );
 
     return gulp.src(srcPaths, { base: base })
-      .pipe(gulp.dest(paths.assetsOut + '/lib/' + name))
+      .pipe(gulp.dest(paths.assetsOut + '/lib/' + name.split('/').slice(-1)[0]))
   });
 }
 
-exportAssetModule('id7', 'id7-static', 'dist');
+exportAssetModule('@universityofwarwick/id7', 'id7-static', 'dist');
 exportAssetModule('@fortawesome/fontawesome-pro', 'fontawesome-pro', 'webfonts');
 
 gulp.task('styles', cb => {
@@ -46,7 +43,7 @@ gulp.task('styles', cb => {
     }))
     .on('error', err => cb(err.message))
     .pipe(postcss([
-      autoprefix({ browsers: 'last 1 version' }),
+      autoprefix(),
     ]))
     .pipe(playAssets())
     .pipe(sourcemaps.write('.'))

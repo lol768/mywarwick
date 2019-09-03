@@ -26,11 +26,10 @@ export function fetch() {
 }
 
 export function persist(enabled) {
-  return dispatch =>
-    postJsonWithCredentials('/api/eap', { enabled })
-      .then(fetchUserInfo)
-      .then(receiveUserInfo)
-      .then(() => dispatch(fetchTiles()));
+  return dispatch => postJsonWithCredentials('/api/eap', { enabled })
+    .then(fetchUserInfo)
+    .then(receiveUserInfo)
+    .then(() => dispatch(fetchTiles()));
 }
 
 export function toggleEnabled(value) {

@@ -4,11 +4,12 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
 import classNames from 'classnames';
+import $ from 'jquery';
+
 import { localMoment } from '../../dateFormats';
 import TileWrap from './TileWrap';
-import { TILE_SIZES } from '../tiles/TileContent';
+import { TILE_SIZES } from './TileContent';
 import wrapKeyboardSelect from '../../keyboard-nav';
-import $ from 'jquery';
 import HideableView from '../views/HideableView';
 
 export default class Tile extends HideableView {
@@ -39,15 +40,24 @@ export default class Tile extends HideableView {
 
     if (fetching) {
       return iconJsx('fal', 'fa-sync fa-spin');
-    } else if (errors) {
+    }
+
+    if (errors) {
       return iconJsx('fal', 'fa-exclamation-triangle');
-    } else if (customIcon) {
+    }
+
+    if (customIcon) {
       return customIcon;
-    } else if (icon === 'bus' || icon === 'car') {
+    }
+
+    if (icon === 'bus' || icon === 'car') {
       return iconJsx('fas', `fa-${icon}`);
-    } else if (icon) {
+    }
+
+    if (icon) {
       return iconJsx('fal', `fa-${icon}`);
     }
+
     return iconJsx('fal', 'fa-question-circle');
   }
 
@@ -175,8 +185,8 @@ export default class Tile extends HideableView {
           ref={ (article) => { this.articleElement = article; }}
           style={ style }
         >
-          { this.getContentInstance() && this.getContentInstance().constructor.isRemovable() &&
-            <div
+          { this.getContentInstance() && this.getContentInstance().constructor.isRemovable()
+            && <div
               className="tile__edit-control top-left"
               onClick={ this.props.onHide }
               onKeyUp={ this.props.onHide }
@@ -188,8 +198,8 @@ export default class Tile extends HideableView {
             </div>
           }
 
-          { this.getContentInstance() && this.getContentInstance().constructor.isMovable() &&
-            <div
+          { this.getContentInstance() && this.getContentInstance().constructor.isMovable()
+            && <div
               className="tile__edit-control bottom-right"
               onClick={ this.props.onResize }
               onKeyUp={ this.props.onResize }
@@ -201,8 +211,8 @@ export default class Tile extends HideableView {
             </div>
           }
 
-          { this.getContentInstance() && this.getContentInstance().constructor.isMovable() &&
-            <div
+          { this.getContentInstance() && this.getContentInstance().constructor.isMovable()
+            && <div
               className="tile__edit-control bottom-left tile__drag-handle"
               title="Drag to re-arrange tile"
             >

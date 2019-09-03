@@ -101,11 +101,11 @@ export function resizeTile(tile, layoutWidth, width, height) {
 const ALL_TILES = undefined;
 export function fetchTileContent(tileSpec = ALL_TILES) {
   return (dispatch, getState) => {
-    const tilesToFetch = tileSpec === ALL_TILES ?
-      getState().tiles.data.tiles
+    const tilesToFetch = tileSpec === ALL_TILES
+      ? getState().tiles.data.tiles
         .filter(tile => tile.needsFetch && !tile.removed)
-        .map(tile => tile.id) :
-      [tileSpec];
+        .map(tile => tile.id)
+      : [tileSpec];
 
     return Promise.all(tilesToFetch.map((tileId) => {
       dispatch({
@@ -115,15 +115,13 @@ export function fetchTileContent(tileSpec = ALL_TILES) {
 
       return fetchWithCredentials(`/api/tiles/content/${tileId}`)
         .then(response => response.json())
-        .then(json =>
-          _.each(json.data, (result, tile) => {
-            if (result.content) {
-              dispatch(fetchedTileContent(tile, result.content));
-            } else {
-              dispatch(failedTileContentFetch(tile, result.errors));
-            }
-          }),
-        )
+        .then(json => _.each(json.data, (result, tile) => {
+          if (result.content) {
+            dispatch(fetchedTileContent(tile, result.content));
+          } else {
+            dispatch(failedTileContentFetch(tile, result.errors));
+          }
+        }))
         .catch((err) => {
           log.warn('Tile fetch failed because', err);
           return dispatch(failedTileContentFetch(tileId, NETWORK_ERRORS));
@@ -135,11 +133,11 @@ export function fetchTileContent(tileSpec = ALL_TILES) {
 export function persistTiles() {
   return (dispatch, getState) => {
     if (getState().tiles.fetched) { // NEWSTART-1290 disappearing tiles
-      const tiles = getState().tiles.data.tiles.map(item =>
-        _.pick(item, ['id', 'preferences', 'removed']),
-      );
+      const tiles = getState().tiles.data.tiles.map(item => _.pick(
+        item, ['id', 'preferences', 'removed'],
+      ));
 
-      const layout = getState().tiles.data.layout;
+      const { layout } = getState().tiles.data;
 
       return fetchWithCredentials('/api/tiles', {
         method: 'PUT',
@@ -192,13 +190,15 @@ const initialState = {
 };
 
 function updateTileById(state, id, callback) {
-  const tiles = state.data.tiles;
+  const { tiles } = state.data;
   const index = _.findIndex(tiles, tile => tile.id === id);
   const newTiles = Object.assign([], tiles, {
     [index]: callback(tiles[index]),
   });
-  return { ...state,
-    data: { ...state.data,
+  return {
+    ...state,
+    data: {
+      ...state.data,
       tiles: newTiles,
     },
   };
@@ -211,11 +211,10 @@ export function formatPreferenceData(preferencesFromAction, availableTileOptions
     switch (option.type) {
       case 'array': {
         preferences[key] = {};
-        option.options.forEach(o => (
-          preferences[key][o.value] = (
-            (preferencesFromAction[key] && preferencesFromAction[key][o.value]) || false
-          )
-        ));
+        option.options.forEach((o) => {
+          preferences[key][o.value] = ((preferencesFromAction[key]
+            && preferencesFromAction[key][o.value]) || false);
+        });
         break;
       }
       case 'string': {
@@ -279,10 +278,9 @@ export function tilesReducer(state = initialState, action) {
         removed: false,
       }));
     case TILE_RESIZE: {
-      const layout = state.data.layout;
-      const index = _.findIndex(layout, i =>
-        i.layoutWidth === action.layoutWidth && i.tile === action.tile.id,
-      );
+      const { layout } = state.data;
+      const index = _.findIndex(layout, i => i.layoutWidth === action.layoutWidth
+        && i.tile === action.tile.id);
       return {
         ...state,
         data: {
@@ -308,8 +306,10 @@ export function tilesReducer(state = initialState, action) {
       }));
       const oldRemoved = _.filter(state.data.layout, i => i.layoutWidth !== action.layoutWidth);
       const newLayout = toAdd.concat(oldRemoved);
-      return { ...state,
-        data: { ...state.data,
+      return {
+        ...state,
+        data: {
+          ...state.data,
           layout: newLayout,
         },
       };
@@ -324,7 +324,8 @@ export function tileContentReducer(state = initialContentState, action) {
     case USER_CLEAR:
       return initialContentState;
     case TILE_CONTENT_FETCH: {
-      const change = tile => ({ ...tile,
+      const change = tile => ({
+        ...tile,
         errors: undefined,
         fetching: true,
       });
@@ -334,7 +335,8 @@ export function tileContentReducer(state = initialContentState, action) {
       return _.mapValues(state, change);
     }
     case TILE_CONTENT_FETCH_SUCCESS: {
-      const change = tile => ({ ...tile,
+      const change = tile => ({
+        ...tile,
         fetching: false,
         fetchedAt: action.fetchedAt,
         content: action.content,
@@ -343,7 +345,8 @@ export function tileContentReducer(state = initialContentState, action) {
       return update(state, { [action.tile]: { $apply: change } });
     }
     case TILE_CONTENT_FETCH_FAILURE: {
-      const change = tile => ({ ...tile,
+      const change = tile => ({
+        ...tile,
         fetching: false,
         errors: action.errors,
       });
@@ -356,7 +359,8 @@ export function tileContentReducer(state = initialContentState, action) {
     case TILE_CONTENT_LOAD_ALL: {
       const merger = (prev = {}, next) => {
         if (next.content && !prev.content) {
-          return { ...prev,
+          return {
+            ...prev,
             content: next.content,
             fetchedAt: next.fetchedAt,
           };
@@ -370,4 +374,3 @@ export function tileContentReducer(state = initialContentState, action) {
       return state;
   }
 }
-

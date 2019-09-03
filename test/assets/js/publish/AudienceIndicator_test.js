@@ -8,6 +8,7 @@ describe('AudienceIndicator', () => {
     hint: {
       isNews: false,
     },
+    promiseSubmit: () => {},
   };
 
   it('makes correct help text when user did not choose any audience', () => {
@@ -27,7 +28,7 @@ describe('AudienceIndicator', () => {
     expect(enzyme
       .shallow(AudienceIndicator.makePeopleInTotalText(0, { group1: 0 }))
       .html())
-      .to.equal('<div>0 people in current selection</div>');
+      .to.equal('<div>No people in current selection</div>');
   });
 
   it('renders hint block properly', () => {

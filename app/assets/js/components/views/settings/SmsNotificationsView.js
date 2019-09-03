@@ -1,16 +1,17 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import HideableView from '../HideableView';
-import * as smsNotifications from '../../../state/sms-notifications';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
+import _ from 'lodash-es';
+
+import HideableView from '../HideableView';
+import * as smsNotifications from '../../../state/sms-notifications';
 import BootstrapModal from '../../ui/BootstrapModal';
 import ListGroupItem from '../../ui/ListGroupItem';
 import NetworkAwareControl from '../../ui/NetworkAwareControl';
 import Switch from '../../ui/Switch';
 import wrapKeyboardSelect from '../../../keyboard-nav';
-import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
-import _ from 'lodash-es';
 
 class SmsNotificationsView extends HideableView {
   static propTypes = {
@@ -80,13 +81,11 @@ class SmsNotificationsView extends HideableView {
   }
 
   onEditCancel(e) {
-    wrapKeyboardSelect(() =>
-      this.setState({
-        editing: false,
-        fromEmpty: false,
-        submitErrors: undefined,
-      }),
-    e);
+    wrapKeyboardSelect(() => this.setState({
+      editing: false,
+      fromEmpty: false,
+      submitErrors: undefined,
+    }), e);
   }
 
   isWantsSms() {
@@ -195,8 +194,8 @@ class SmsNotificationsView extends HideableView {
                 defaultValue={ this.state.smsNumber || '' }
                 ref={ (i) => { this.phoneNumberInput = i; } }
               />
-              { this.state.submitErrors && this.state.submitErrors.phoneNumber &&
-              <span className="help-block">{ this.state.submitErrors.phoneNumber }</span>
+              { this.state.submitErrors && this.state.submitErrors.phoneNumber
+              && <span className="help-block">{ this.state.submitErrors.phoneNumber }</span>
               }
             </div>
             <p className="text--hint">
@@ -204,8 +203,8 @@ class SmsNotificationsView extends HideableView {
               won’t share the number with any other application or with any third party.
               You can turn off SMS alerting at any time.
             </p>
-            { this.state.verificationRequired &&
-            <div>
+            { this.state.verificationRequired
+            && <div>
               <div className={ classNames({
                 'form-group': true,
                 'has-error': this.state.submitErrors && this.state.submitErrors.verificationCode,
@@ -221,8 +220,8 @@ class SmsNotificationsView extends HideableView {
                   placeholder="Verification code"
                   ref={ (i) => { this.verificationCodeInput = i; } }
                 />
-                { this.state.submitErrors && this.state.submitErrors.verificationCode &&
-                <span className="help-block">{ this.state.submitErrors.verificationCode }</span>
+                { this.state.submitErrors && this.state.submitErrors.verificationCode
+                && <span className="help-block">{ this.state.submitErrors.verificationCode }</span>
                 }
               </div>
               <button

@@ -72,7 +72,7 @@ module.exports = {
       'draggable-core' : topLevelModule('draggable-core'),
       'react-draggable' : topLevelModule('react-draggable/index'),
       // Force some modules to use the ES6 source, for better optimisation.
-      // May also need to add to babel-activate.js in the tests.
+      // May also need to add to mocha-babel-activate.js in the tests.
       'lodash' : 'lodash-es',
       'localforage' : 'localforage/src/localforage',
       // Replace some Search stuff we don't need with a big fake module
@@ -91,6 +91,7 @@ module.exports = {
         include: [
           path.resolve(__dirname, 'app/assets/js'),
           // Some 3rd party modules that need compiling too
+          topLevelModule('es6-promise/lib'),
           topLevelModule('localforage/src'),
           topLevelModule('react-draggable/lib'),
         ],
@@ -98,12 +99,7 @@ module.exports = {
         options: webpackMerge(
           readJSON('.babelrc'),
           {
-            presets: [
-              // modules:false keeps `import` statements as they are,
-              // and lets webpack take advantage of extra optimisations.
-              ['es2015', { modules: false }]
-            ],
-            cacheDirectory: 'target/babel-loader-cache'
+            cacheDirectory: 'target/babel-loader-cache',
           }
         ),
       },
@@ -121,7 +117,7 @@ module.exports = {
             babelrc: false,
             plugins: [],
             presets: [
-              'airbnb', 'react'
+              '@babel/preset-env', '@babel/preset-react'
             ],
             cacheDirectory: 'target/babel-loader-search-cache'
           }

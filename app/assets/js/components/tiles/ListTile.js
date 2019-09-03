@@ -74,13 +74,18 @@ export default class ListTile extends TileContent {
   getSmallBody() {
     const { content } = this.props;
 
-    const itemsToDisplay = this.props.zoomed ?
-      content.items : _.take(content.items, this.getNumberOfItemsToDisplay());
+    const itemsToDisplay = this.props.zoomed
+      ? content.items : _.take(content.items, this.getNumberOfItemsToDisplay());
     return (
       <ul className="list-unstyled tile-list-group">
         {_.compact(itemsToDisplay).map((item) => {
           const clickProps = (item.body) ? { handleOnClick: this.onItemClick } : {};
-          return this.listItem({ key: item.id, size: this.props.size, ...clickProps, ...item });
+          return this.listItem({
+            key: item.id,
+            size: this.props.size,
+            ...clickProps,
+            ...item,
+          });
         })}
       </ul>
     );
@@ -116,14 +121,15 @@ export class ListTileItem extends React.PureComponent {
     } : {};
     return (
       <li className="tile-list-item--with-separator">
-        <a href={this.props.href} target="_blank" {...clickProps}>
+        <a href={this.props.href}
+           target="_blank"
+           rel="noopener noreferrer"
+           {...clickProps}>
           { this.props.title && <span className="list-group-item__title">{this.props.title}</span> }
           { this.props.date && <span className="list-group-item__date">{formatDateTime(this.props.date)}</span> }
           <span className="list-group-item__text">
             {this.props.text}
-            {this.props.body &&
-              <i className="fal fa-fw fa-info-circle" />
-            }
+            {this.props.body && <i className="fal fa-fw fa-info-circle" />}
           </span>
         </a>
       </li>

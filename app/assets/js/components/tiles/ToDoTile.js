@@ -1,7 +1,7 @@
 /* eslint-env browser */
 import React from 'react';
-import ListTile, { ListTileItem } from './ListTile';
 import * as PropTypes from 'prop-types';
+import ListTile, { ListTileItem } from './ListTile';
 import { formatDate } from '../../dateFormats';
 import { TILE_SIZES } from './TileContent';
 
@@ -69,11 +69,14 @@ class ToDoItem extends ListTileItem {
     } : {};
     return (
       <li className="tile-list-item--with-separator">
-        <a href={this.props.href} target="_blank" {...clickProps}>
+        <a href={this.props.href}
+           target="_blank"
+           rel="noopener noreferrer"
+           {...clickProps}>
           {this.props.title && <span className="list-group-item__title">{this.props.subject}</span>}
           {
-            this.props.dueDateTime &&
-            <span className="list-group-item__date">{formatDate(this.props.dueDateTime)}</span>
+            this.props.dueDateTime
+            && <span className="list-group-item__date">{formatDate(this.props.dueDateTime)}</span>
           }
           <span className="list-group-item__text">
             {this.props.subject}

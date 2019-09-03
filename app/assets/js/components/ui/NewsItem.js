@@ -7,12 +7,11 @@ import * as dateFormats from '../../dateFormats';
 import Hyperlink from './Hyperlink';
 
 // Convert newlines to paragraphs.
-export const render = content =>
-  content
-    .split('\n')
-    .map(t => t.trim())
-    .filter(t => t.length)
-    .map((t, i) => <p key={i}>{t}</p>);
+export const render = content => content
+  .split('\n')
+  .map(t => t.trim())
+  .filter(t => t.length)
+  .map((t, i) => <p key={i}>{t}</p>);
 
 class NewsItem extends React.PureComponent {
   static propTypes = {
@@ -33,7 +32,16 @@ class NewsItem extends React.PureComponent {
   };
 
   render() {
-    const { id, link, title, publishDate, text, imageId, categories, width } = this.props;
+    const {
+      id,
+      link,
+      title,
+      publishDate,
+      text,
+      imageId,
+      categories,
+      width,
+    } = this.props;
     const { analyticsClientId } = this.props;
 
     const url = link && `/news/${id}/redirect?clientId=${analyticsClientId}`;
@@ -44,11 +52,7 @@ class NewsItem extends React.PureComponent {
     return (
       <article className="news-item">
         <div className="news-item__body">
-          <h1 className="news-item__title">
-            <Hyperlink href={url}>
-              {title}
-            </Hyperlink>
-          </h1>
+          <h1 className="news-item__title">{title}</h1>
 
           { imageId && <NewsItemImage id={imageId} width={imageWidth} alt={title} /> }
 
@@ -57,7 +61,7 @@ class NewsItem extends React.PureComponent {
           </div>
 
           <div className="news-item__footer">
-            { moreLink }
+            <div className="news-item__link">{ moreLink }</div>
             <div className="news-item__category-tags">
               {categories.map(c => <NewsItemTag key={c.id} name={c.name} />)}
             </div>
@@ -85,8 +89,7 @@ NewsItemImage.propTypes = {
   alt: PropTypes.string.isRequired,
 };
 
-const NewsItemTag = props =>
-  (<span className="badge">
+const NewsItemTag = props => (<span className="badge">
     { props.name }
   </span>);
 

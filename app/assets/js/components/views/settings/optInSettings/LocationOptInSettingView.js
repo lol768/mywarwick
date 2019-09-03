@@ -64,8 +64,7 @@ export default class LocationOptInSettingsView extends React.PureComponent {
         </p>
 
         <div className="list-group setting-colour-1">
-          { _.map(this.props.options, location =>
-            (<SwitchListGroupItem
+          { _.map(this.props.options, location => (<SwitchListGroupItem
               key={ `OptIn:Locations:${location.value}` }
               icon="map-signs"
               description={ location.description }
@@ -74,8 +73,7 @@ export default class LocationOptInSettingsView extends React.PureComponent {
               checked={ this.state[location.value] }
               id={ `OptIn:Locations:${location.value}` }
               disabled={ this.props.disabled }
-            />),
-          ) }
+            />)) }
         </div>
       </div>
     );

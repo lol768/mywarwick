@@ -2,12 +2,12 @@
 /* eslint-env browser */
 
 import $ from 'jquery';
+import log from 'loglevel';
 import store from './store';
 import * as user from './state/user';
 import * as analytics from './analytics';
 import { fetchUserInfo, handleRedirects } from './userinfo-base';
 import { hasAuthoritativeAuthenticatedUser } from './state';
-import log from 'loglevel';
 
 export { fetchUserInfo } from './userinfo-base';
 
@@ -24,9 +24,9 @@ export function receiveUserInfo(response) {
 
             const analyticsData = data.user.analytics;
             if (analyticsData !== undefined) {
-              analyticsData.dimensions.forEach(dimension =>
-                analytics.setDimension(dimension.index, dimension.value),
-              );
+              analyticsData.dimensions.forEach(dimension => analytics.setDimension(
+                dimension.index, dimension.value,
+              ));
 
               analytics.setUserId(analyticsData.identifier);
             }
@@ -44,8 +44,7 @@ export function receiveUserInfo(response) {
     });
 }
 
-const feedbackFormLocation =
-  'https://warwick.ac.uk/mw-support/feedback';
+const feedbackFormLocation = 'https://warwick.ac.uk/mw-support/feedback';
 
 export function showFeedbackForm(deviceDetails) {
   const state = store.getState();
@@ -91,4 +90,3 @@ export function signOut() {
   const state = store.getState();
   window.location = state.user.links.logout;
 }
-

@@ -21,6 +21,8 @@ describe('ActivityView', () => {
       ]),
       dispatch: () => {},
       numberToShow: 20,
+      isFiltered: false,
+      providerOverrideMuting: false,
     };
     const ungrouped = enzyme.render(<ActivityView.WrappedComponent {...ungroupedProps} />);
     expect(ungrouped.find('.list-group')).to.have.length(0);
@@ -49,6 +51,8 @@ describe('ActivityView', () => {
       ]),
       dispatch: () => {},
       numberToShow: 20,
+      isFiltered: false,
+      providerOverrideMuting: false,
     };
     const grouped = enzyme.render(<ActivityView.WrappedComponent {...groupedProps} />);
     expect(grouped.find('.activity-item')).to.have.length(2);

@@ -13,19 +13,28 @@
 <article id="@item.id" class="news-item row">
   <div class="col-xs-10">
     <div class="news-item__body">
-      <div class="news-item__title">@item.title</div>
+      <h1 class="news-item__title">@item.title</h1>
       @item.imageId.map { imageId =>
         <div class="news-item__image">
           <img src="@controllers.api.routes.NewsImagesController.show(imageId)" alt="@item.title">
         </div>
       }
+
       <div class="news-item__content">@item.text</div>
-      @item.link.map { link =>
-        <div class="news-item__footer">
-          <a href="@link.href" target="_blank">@link.text</a>
-        </div>
-      }
+
       <div class="news-item__footer">
+        <div class="news-item__link">
+        @item.link.map { link =>
+          <a href="@link.href" target="_blank">@link.text</a>
+        }
+        </div>
+
+        <div class="news-item__category-tags">
+          @item.categories.map { category =>
+            <span class="badge">@category.name</span>
+          }
+        </div>
+
         Published @models.DateFormats.emailDateTime(item.publishDate),
         @item.updated.map { updated =>
           updated by
@@ -36,6 +45,7 @@
           @item.createdBy.flatMap(_.name.full).getOrElse("[Unknown]")
           @models.DateFormats.emailDateTime(item.created)
         }
+
         <div class="click-count"><i class="fal fa-spin fa-sync"></i></div>
         @item.audienceSize match {
           case AudienceSize.Public => {
@@ -52,12 +62,6 @@
           }
           case _ => {}
         }
-
-        <div>
-        @item.categories.map { category =>
-          <span class="badge">@category.name</span>
-        }
-        </div>
       </div>
     </div>
   </div>

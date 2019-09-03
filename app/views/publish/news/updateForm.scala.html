@@ -1,11 +1,10 @@
 @import controllers.publish.PublishNewsItemData
+@import models.publishing.{PermissionScope, Publisher}
+@import play.api.libs.json.{JsValue, Json}
+@import services.dao.DepartmentInfo
 @import system.RequestContext
 @import views.html._
-@import models.publishing.PermissionScope
-@import models.publishing.Publisher
-@import services.dao.DepartmentInfo
-@import play.api.libs.json.{Json, JsValue}
-
+@import warwick.core.helpers.JavaTime
 @(
     publisher: Publisher,
     id: String,
@@ -24,6 +23,6 @@
 
 @common.admin("Update news") {
   @b3.form(action = controllers.publish.routes.NewsController.update(publisher.id, id, submitted = true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.publish.routes.NewsController.audienceInfo(publisher.id)) {
-    @views.html.publish.news.contentForm(form, publisher, departmentOptions, categories, permissionScope, audience, "Update", audienceJson,categoriesJson)
+    @views.html.publish.news.contentForm(form, publisher, departmentOptions, categories, permissionScope, audience, "Update", form("item.publishDate").value.getOrElse(JavaTime.localDateTime.withSecond(0).withNano(0).toString), audienceJson,categoriesJson)
   }
 }

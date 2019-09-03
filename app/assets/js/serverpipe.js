@@ -1,8 +1,8 @@
 /* eslint-env browser */
 import fetch from 'isomorphic-fetch';
-import { getCsrfHeaderName, getCsrfToken } from './csrfToken';
 import log from 'loglevel';
 import Url from 'url';
+import { getCsrfHeaderName, getCsrfToken } from './csrfToken';
 
 function isIE() {
   const ua = window.navigator.userAgent;
@@ -33,7 +33,8 @@ export function fetchWithCredentials(url, options = {}) {
       credentials: 'same-origin',
       headers,
       ...options,
-    });
+    },
+  );
 }
 
 export function postJsonWithCredentials(url, body, options = {}) {
@@ -48,4 +49,3 @@ export function postJsonWithCredentials(url, body, options = {}) {
     ...options,
   });
 }
-

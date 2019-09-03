@@ -1,8 +1,8 @@
 import $ from 'jquery';
-import { postJsonWithCredentials } from '../serverpipe';
 import 'bootstrap-3-typeahead';
 import log from 'loglevel';
 import _ from 'lodash-es';
+import { postJsonWithCredentials } from '../serverpipe';
 
 class RelationshipPicker {
   constructor(input, {
@@ -49,7 +49,7 @@ class RelationshipPicker {
             return [];
           })
           .then((response) => {
-            const relationships = response.relationships;
+            const { relationships } = response;
             const text = `${item.name} (${item.department})`;
             this.addItem({
               value: item.value,

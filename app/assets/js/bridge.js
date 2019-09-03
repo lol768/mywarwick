@@ -8,6 +8,7 @@ import $ from 'jquery';
 import get from 'lodash-es/get';
 import { push } from 'react-router-redux';
 import { createSelector } from 'reselect';
+import log from 'loglevel';
 import * as stream from './stream';
 import { displayUpdateProgress } from './state/update';
 import { fetchWithCredentials, postJsonWithCredentials } from './serverpipe';
@@ -17,14 +18,19 @@ import { navRequest } from './state/ui';
 import { loadNative } from './state/app';
 import { showFeedbackForm } from './userinfo';
 import { isiPhoneX } from './helpers';
-import log from 'loglevel';
 
 /**
  * Factory method for bridge so you can create an instance
  * with different dependencies.
  */
 export default function init(opts) {
-  const { store, tiles, notifications, userinfo, news } = opts;
+  const {
+    store,
+    tiles,
+    notifications,
+    userinfo,
+    news,
+  } = opts;
 
   function doInit(native) {
     const nativeSelectors = [
@@ -86,7 +92,7 @@ export default function init(opts) {
     store.subscribe(update);
     update();
 
-    const userAgent = window.navigator.userAgent;
+    const { userAgent } = window.navigator;
     const appPlatform = userAgent.indexOf('Android') >= 0 ? 'android' : 'ios';
 
     if (native.getAppVersion && native.getAppBuild) {
@@ -123,7 +129,7 @@ export default function init(opts) {
   }
 
   const $html = $('html');
-  const userAgent = window.navigator.userAgent;
+  const { userAgent } = window.navigator;
 
   if (userAgent.indexOf('Android') >= 0) {
     $html.addClass('android');
@@ -150,9 +156,9 @@ export default function init(opts) {
       navigate(path) {
         // click event to dismiss active tooltips
         document.dispatchEvent(new Event('click'));
-        if (path.indexOf(`/${Routes.EDIT}`) === 0 ||
-          path.indexOf(`/${Routes.TILES}`) === 0 ||
-          path.indexOf(`/${Routes.SETTINGS}`) === 0
+        if (path.indexOf(`/${Routes.EDIT}`) === 0
+          || path.indexOf(`/${Routes.TILES}`) === 0
+          || path.indexOf(`/${Routes.SETTINGS}`) === 0
         ) {
           store.dispatch(push(path));
         } else {
@@ -212,4 +218,3 @@ export default function init(opts) {
     $html.addClass('not-app');
   }
 }
-

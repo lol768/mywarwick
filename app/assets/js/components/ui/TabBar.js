@@ -1,5 +1,5 @@
-import React, { PureComponent, PropTypes } from 'react';
-
+import React, { PureComponent } from 'react';
+import * as PropTypes from 'prop-types';
 import $ from 'jquery';
 import ReactDOM from 'react-dom';
 import _ from 'lodash-es';
@@ -8,14 +8,16 @@ import { Routes } from '../AppRoot';
 export default class TabBar extends PureComponent {
   static itemIsActive(item, currentPath) {
     if (item.path === '/' && (
-      currentPath === '/' ||
-      _.startsWith(currentPath, `/${Routes.TILES}/`) ||
-      _.startsWith(currentPath, `/${Routes.EDIT}`)
+      currentPath === '/'
+      || _.startsWith(currentPath, `/${Routes.TILES}/`)
+      || _.startsWith(currentPath, `/${Routes.EDIT}`)
     )) {
       return true;
-    } else if (
-      item.path === `/${Routes.NOTIFICATIONS}` &&
-    _.startsWith(currentPath, `/${Routes.NOTIFICATIONS}`)
+    }
+
+    if (
+      item.path === `/${Routes.NOTIFICATIONS}`
+        && _.startsWith(currentPath, `/${Routes.NOTIFICATIONS}`)
     ) {
       return true;
     }

@@ -250,8 +250,8 @@ class AppRoot extends React.Component {
     const optInPath = this.singleOptInSetting();
 
     const views = _.map(RouteViews, (args, path) => (
-      this.shouldRender(path) ?
-        <Visible key={ path } visible={ location.pathname === path }>
+      this.shouldRender(path)
+        ? <Visible key={ path } visible={ location.pathname === path }>
           {
             React.createElement(
               args.view,
@@ -262,8 +262,8 @@ class AppRoot extends React.Component {
     ));
 
     if ((tilePath || []).length >= 2) {
-      const queryParams = (this.state.location.search.length > 0) ?
-        _.fromPairs(
+      const queryParams = (this.state.location.search.length > 0)
+        ? _.fromPairs(
           _.compact(
             _.map(
               this.state.location.search.substr(1).split('&'),

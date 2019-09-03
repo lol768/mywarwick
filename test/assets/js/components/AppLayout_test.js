@@ -9,12 +9,14 @@ describe('AppLayout', () => {
     location,
     user: ({}),
     features: { news: true },
-    notificationsCount: '7',
+    notificationsCount: 7,
+    authenticated: false,
     onSelectItem: () => {
     },
+    children: false,
   };
 
-  it('includes a tab bar item mobile', () => {
+  it('includes a tab bar item on mobile', () => {
     // because we have an implicit dependency on the react router.
     const result = shallowRender(
       <AppLayout
@@ -28,7 +30,7 @@ describe('AppLayout', () => {
         <TabBarItem title="Me" icon="user" selectedIcon="user" path="/"/>
         <TabBarItem
           title="Alerts" icon="bell" selectedIcon="bell" path="/alerts"
-          badge='7' isDisabled={true}
+          badge={7} isDisabled={true}
         />
         <TabBarItem
           title="Activity" icon="tachometer" selectedIcon="tachometer" path="/activity"
@@ -41,7 +43,7 @@ describe('AppLayout', () => {
     );
   });
 
-  it('does not include news tabbar itme if it is disabled', () => {
+  it('does not include news tabbar item if it is disabled', () => {
     // because we have an implicit dependency on the react router.
     const result = shallowRender(
       <AppLayout
@@ -57,7 +59,7 @@ describe('AppLayout', () => {
     result.should.include(
       <TabBar onSelectItem={function noRefCheck() {}} selectedItem="/" >
         <TabBarItem icon="user" path="/" selectedIcon="user" title="Me" />
-        <TabBarItem badge="7" icon="bell" isDisabled={true} path="/alerts" selectedIcon="bell" title="Alerts" />
+        <TabBarItem badge={7} icon="bell" isDisabled={true} path="/alerts" selectedIcon="bell" title="Alerts" />
         <TabBarItem icon="tachometer" isDisabled={true} path="/activity" selectedIcon="tachometer" title="Activity" />
         <TabBarItem icon="search" path="/search" selectedIcon="search" title="Search" />
       </TabBar>

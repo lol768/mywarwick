@@ -11,8 +11,7 @@ export default class ShowMore extends React.PureComponent<Props> {
   props: Props;
 
   render() {
-    const items = this.props.items;
-    const showing = this.props.showing;
+    const { items, showing } = this.props;
     if (items.length > showing) {
       return (
         <div className="text-right">

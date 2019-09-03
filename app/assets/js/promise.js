@@ -5,22 +5,34 @@ type PromiseAndCancel<T> = {
   cancel: () => void
 };
 
-export default function makeCancelable<T>(promise: Promise<T>): PromiseAndCancel<T> {
-  let hasCanceled_ = false;
+export class CancelledPromiseError extends Error {
+  constructor(params) {
+    super(params);
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, CancelledPromiseError);
+    }
+
+    this.name = 'CancelledPromiseError';
+  }
+}
+
+export function makeCancellable<T>(promise: Promise<T>): PromiseAndCancel<T> {
+  let hasCancelled_ = false;
 
   const wrappedPromise = new Promise((resolve, reject) => {
     promise.then(val => (
-      hasCanceled_ ? reject({ isCanceled: true }) : resolve(val)
+      hasCancelled_ ? reject(new CancelledPromiseError()) : resolve(val)
     ));
     promise.catch(error => (
-      hasCanceled_ ? reject({ isCanceled: true }) : reject(error)
+      hasCancelled_ ? reject(new CancelledPromiseError()) : reject(error)
     ));
   });
 
   return {
     promise: wrappedPromise,
     cancel() {
-      hasCanceled_ = true;
+      hasCancelled_ = true;
     },
   };
 }

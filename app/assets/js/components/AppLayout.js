@@ -28,8 +28,12 @@ export class AppLayout extends React.PureComponent {
   }
 
   render() {
-    const { location, notificationsCount, children, authenticated }
-      = this.props;
+    const {
+      location,
+      notificationsCount,
+      children,
+      authenticated,
+    } = this.props;
 
     log.debug('AppLayout.render');
 

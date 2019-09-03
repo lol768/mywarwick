@@ -52,8 +52,8 @@ export default class GroupedList extends React.PureComponent {
     let subtitle;
     const getSubtitle = (items) => {
       const oldSub = subtitle;
-      subtitle = this.props.groupBy.subtitleForGroup ?
-        this.props.groupBy.subtitleForGroup(items) : null;
+      subtitle = this.props.groupBy.subtitleForGroup
+        ? this.props.groupBy.subtitleForGroup(items) : null;
       if (this.props.groupBy.noRepeatSubtitle) {
         return subtitle !== oldSub ? subtitle : null;
       }

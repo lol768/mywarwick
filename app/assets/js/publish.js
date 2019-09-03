@@ -3,27 +3,28 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
-import FileUpload from './publish/components/FileUpload';
-import { fetchWithCredentials } from './serverpipe';
-import './publish/news';
-import './publish/groupPicker';
-import './publish/modulePicker';
 import _ from 'lodash-es';
-import './flexi-picker';
+import { Provider } from 'react-redux';
+import Tablesort from 'tablesort';
+import log from 'loglevel';
+
 import AudiencePicker from './publish/components/AudiencePicker';
 import AudienceIndicator from './publish/components/AudienceIndicator';
 import store from './publish/publishStore';
 import promiseSubmit from './publish/utils';
-import { Provider } from 'react-redux';
-import log from 'loglevel';
 import NewsCategoryPicker from './publish/components/NewsCategoryPicker';
-import Tablesort from 'tablesort';
+import { fetchWithCredentials } from './serverpipe';
+import FileUpload from './publish/components/FileUpload';
+
+import './flexi-picker';
+import './publish/news';
+import './publish/groupPicker';
+import './publish/modulePicker';
 
 function tablesortAddNumberSorting() {
   Tablesort.extend('number',
     item => item.match(/^[-+]?(\d)*-?([,.]){0,1}-?(\d)+([E,e][-+][\d]+)?%?$/),
-    (a, b) => parseInt(a, 10) - parseInt(b, 10),
-  );
+    (a, b) => parseInt(a, 10) - parseInt(b, 10));
 }
 
 function setupAudienceIndicator() {
@@ -244,9 +245,7 @@ function initSentDetails() {
 }
 
 function sortableTables() {
-  $('table.sortable-table').each((i, el) =>
-    new Tablesort(el),
-  );
+  $('table.sortable-table').each((i, el) => new Tablesort(el));
 }
 
 $(() => {

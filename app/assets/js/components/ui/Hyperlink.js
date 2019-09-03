@@ -30,8 +30,12 @@ export default class Hyperlink extends React.PureComponent {
   render() {
     const child = this.props.children;
     const el = React.isValidElement(child) ? child : <span>{child}</span>;
-    return this.props.href ?
-      <a onClick={this.onClick} href={this.props.href} target="_blank" {...this.props}>{child}</a>
+    return this.props.href
+      ? <a onClick={this.onClick}
+           href={this.props.href}
+           target="_blank"
+           rel="noopener noreferrer"
+           {...this.props}>{child}</a>
       : el;
   }
 }
@@ -41,4 +45,3 @@ Hyperlink.propTypes = {
   children: PropTypes.node,
   href: PropTypes.string,
 };
-

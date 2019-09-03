@@ -66,7 +66,13 @@ export default class FileUpload extends React.PureComponent {
 
   render() {
     const { inputName } = this.props;
-    const { imageId, uploading, error, loaded, total } = this.state;
+    const {
+      imageId,
+      uploading,
+      error,
+      loaded,
+      total,
+    } = this.state;
 
     if (imageId) {
       return (
@@ -100,8 +106,8 @@ export default class FileUpload extends React.PureComponent {
         <label className="control-label col-md-3" htmlFor={ inputName }>Choose an image</label>
 
         <div className="col-md-9">
-          { error ?
-            <p className="help-block">
+          { error
+            ? <p className="help-block">
               { error }
             </p>
             : null }
@@ -114,8 +120,8 @@ export default class FileUpload extends React.PureComponent {
             accept="image/*"
           />
 
-          { uploading ?
-            <div>
+          { uploading
+            ? <div>
               <p>
                 Uploading, please wait&hellip;
               </p>

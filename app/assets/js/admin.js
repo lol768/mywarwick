@@ -29,7 +29,8 @@ function pollForClientReport() {
     .then((response) => {
       if (response.status === 200) {
         return response.text();
-      } else if (Number(new Date()) > endTime) {
+      }
+      if (Number(new Date()) > endTime) {
         throw new Error('timeout');
       }
 

@@ -31,13 +31,14 @@ export function fetch() {
   };
 }
 
-const persistSubscribedCategories = categories => () =>
-  postJsonWithCredentials('/api/news/categories', { categories });
+const persistSubscribedCategories = categories => () => postJsonWithCredentials(
+  '/api/news/categories', { categories },
+);
 
 let store = {};
-const persistSubscriptionsDebounced = _.debounce(() =>
-  store.dispatch(persistSubscribedCategories(store.getState().newsCategories.subscribed))
-  , 500);
+const persistSubscriptionsDebounced = _.debounce(() => store.dispatch(
+  persistSubscribedCategories(store.getState().newsCategories.subscribed),
+), 500);
 
 export function subscribe(id) {
   return (dispatch, getState) => {

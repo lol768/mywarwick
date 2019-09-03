@@ -1,6 +1,8 @@
 /* eslint-env browser */
-import React, { PropTypes } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
+import * as PropTypes from 'prop-types';
+
 import HideableView from '../HideableView';
 import SwitchListGroupItem from '../../ui/SwitchListGroupItem';
 import RadioListGroupItem from '../../ui/RadioListGroupItem';
@@ -75,23 +77,21 @@ export class TimetableAlarmsView extends HideableView {
           />
         </div>
 
-        {enabled &&
-        <div className="list-group setting-colour-2">
-          {TIMINGS.map(minutes =>
-            (<RadioListGroupItem
+        {enabled
+        && <div className="list-group setting-colour-2">
+          {TIMINGS.map(minutes => (<RadioListGroupItem
               key={`timetable-minutes-${minutes.toString(10)}`}
               description={`${TimetableAlarmsView.getDescriptionForTiming(minutes)}`}
               onClick={this.onSetTiming(minutes)}
               value={minutes.toString(10)}
               checked={minutesBeforeEvent === minutes}
-            />),
-          )}
+            />))}
         </div>}
 
-        {enabled &&
-        window.MyWarwickNative &&
-        window.MyWarwickNative.setTimetableNotificationsSoundEnabled &&
-        <div className="list-group setting-colour-2">
+        {enabled
+        && window.MyWarwickNative
+        && window.MyWarwickNative.setTimetableNotificationsSoundEnabled
+        && <div className="list-group setting-colour-2">
           <SwitchListGroupItem
             id="timetableAlarmsSoundEnabled"
             value=""
@@ -116,9 +116,9 @@ export class TimetableAlarmsView extends HideableView {
     if (timingInMinute < 60) return `${makeMinutePhrase(timingInMinute)} before`;
     const hours = Math.floor(timingInMinute / 60);
     const remaining = timingInMinute % 60;
-    return remaining > 0 ?
-      `${makeHourPhrase(hours)} ${makeMinutePhrase(remaining)} before` :
-      `${makeHourPhrase(hours)} before`;
+    return remaining > 0
+      ? `${makeHourPhrase(hours)} ${makeMinutePhrase(remaining)} before`
+      : `${makeHourPhrase(hours)} before`;
   }
 }
 

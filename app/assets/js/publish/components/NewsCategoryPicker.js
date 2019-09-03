@@ -1,8 +1,9 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
 import _ from 'lodash-es';
-import { Checkbox } from '../../components/ui/Checkbox';
 import { connect } from 'react-redux';
+
+import { Checkbox } from '../../components/ui/Checkbox';
 
 export class NewsCategoryPicker extends React.PureComponent {
   static propTypes = {
@@ -40,9 +41,9 @@ export class NewsCategoryPicker extends React.PureComponent {
 
   handleCategoriesChange(value) {
     this.setState({
-      chosenCategories: _.includes(this.state.chosenCategories, value) ?
-        _.remove(this.state.chosenCategories.slice(), id => id !== value) :
-        this.state.chosenCategories.slice().concat([value]),
+      chosenCategories: _.includes(this.state.chosenCategories, value)
+        ? _.remove(this.state.chosenCategories.slice(), id => id !== value)
+        : this.state.chosenCategories.slice().concat([value]),
     });
     this.updateAudienceIndicator();
   }
@@ -57,8 +58,7 @@ export class NewsCategoryPicker extends React.PureComponent {
   makeOptions() {
     return (<div>
       {
-        _.map(this.props.newsCategories, (name, id) =>
-          (<Checkbox
+        _.map(this.props.newsCategories, (name, id) => (<Checkbox
             key={id.toString()}
             handleChange={this.handleCategoriesChange}
             label={name.toString()}
@@ -66,8 +66,7 @@ export class NewsCategoryPicker extends React.PureComponent {
             formPath=""
             value={id.toString()}
             isChecked={_.includes(this.state.chosenCategories, id)}
-          />),
-        )
+          />))
       }
     </div>);
   }
@@ -105,4 +104,4 @@ function mapDispatchToProps(dispatch) {
   });
 }
 
-export default connect(_, mapDispatchToProps)(NewsCategoryPicker);
+export default connect(null, mapDispatchToProps)(NewsCategoryPicker);

@@ -51,22 +51,29 @@ export class NewsView extends HideableView {
   }
 
   render() {
-    const { failed, fetching, items, moreAvailable } = this.props;
+    const {
+      failed,
+      fetching,
+      items,
+      moreAvailable,
+    } = this.props;
 
     const width = this.state.width || this.props.width;
 
     if (failed) {
       return (
-        <div className="alert alert-warning">
-          <p>
-            Unable to fetch news.
-          </p>
-          <p>
-            <button type="button" onClick={ this.onClickRefresh } className="btn btn-default">
-              <i className="fal fa-sync fa-fw" />
-              Retry
-            </button>
-          </p>
+        <div className="inset-alert">
+          <div className="alert alert-warning">
+            <p>
+              <i className="fal fa-fw fa-times" /> Unable to fetch news.
+            </p>
+            <p>
+              <button type="button" onClick={ this.onClickRefresh } className="btn btn-default">
+                <i className="fal fa-fw fa-sync" />
+                Retry
+              </button>
+            </p>
+          </div>
         </div>
       );
     }
@@ -78,15 +85,19 @@ export class NewsView extends HideableView {
     const itemComponents = items
       .map(item => <NewsItem key={item.id} width={width} {...item} />);
 
-    const maybeMessage = !fetching ?
-      (<div className="container-fluid">
-        <p>No news to show you yet</p>
+    const maybeMessage = !fetching
+      ? (<div className="inset-alert">
+        <div className="alert alert-info">
+          <p>
+            <i className="fal fa-lightbulb-slash" /> There is no news to show you yet.
+          </p>
+        </div>
       </div>) : null;
 
     return (
       <div>
-        { items.length ?
-          <ScrollRestore url={`/${Routes.NEWS}`}>
+        { items.length
+          ? <ScrollRestore url={`/${Routes.NEWS}`}>
             <InfiniteScrollable
               hasMore={moreAvailable}
               onLoadMore={this.loadMore}
@@ -96,8 +107,8 @@ export class NewsView extends HideableView {
             </InfiniteScrollable>
           </ScrollRestore> : maybeMessage
         }
-        { fetching ?
-          <div className="centered">
+        { fetching
+          ? <div className="centered">
             <i className="fal fa-lg fa-sync fa-spin" />
           </div> : null }
       </div>

@@ -1,9 +1,10 @@
 import React from 'react';
 import once from 'lodash-es/once';
+import log from 'loglevel';
+
 import Bundle from '../system/Bundle';
 import ScrollRestore from '../ui/ScrollRestore';
 import { Routes } from '../AppRoot';
-import log from 'loglevel';
 
 const Loading = () => <div />;
 

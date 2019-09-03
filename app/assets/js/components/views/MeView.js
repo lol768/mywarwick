@@ -70,8 +70,8 @@ class MeView extends HideableView {
     };
     this.onTileDismiss = this.onTileDismiss.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
-    this.onDragStart = this.onDragStart.bind(this);
-    this.onDragStop = this.onDragStop.bind(this);
+    MeView.onDragStart = MeView.onDragStart.bind(this);
+    MeView.onDragStop = MeView.onDragStop.bind(this);
     this.onAdd = this.onAdd.bind(this);
     this.showModal = this.showModal.bind(this);
   }
@@ -82,11 +82,11 @@ class MeView extends HideableView {
     }
   }
 
-  onDragStop() {
+  static onDragStop() {
     $('.id7-main-content-area').removeClass('is-dragging');
   }
 
-  onDragStart(layout, item, newItem, placeholder, e) {
+  static onDragStart(layout, item, newItem, placeholder, e) {
     e.preventDefault();
 
     // Disable rubber banding so the users' finger and the tile they are dragging
@@ -105,12 +105,17 @@ class MeView extends HideableView {
     if (this.props.tiles.length === 0) {
       // If the store has been cleared don't save the new layout
       return false;
-    } else if (this.previousLayout === undefined) {
+    }
+
+    if (this.previousLayout === undefined) {
       this.previousLayout = _.cloneDeep(layout);
-    } else if (!_.isEqual(layout, this.previousLayout)) {
+    }
+
+    if (!_.isEqual(layout, this.previousLayout)) {
       this.props.dispatch(tiles.tileLayoutChange(layout, this.props.layoutWidth));
       this.previousLayout = _.cloneDeep(layout);
     }
+
     return true;
   }
 
@@ -144,9 +149,8 @@ class MeView extends HideableView {
   }
 
   getTileSize(id) {
-    const layout = this.props.layout.filter(i =>
-      i.tile === id && i.layoutWidth === this.props.layoutWidth,
-    )[0];
+    const layout = this.props.layout.filter(i => i.tile === id
+      && i.layoutWidth === this.props.layoutWidth)[0];
 
     if (!layout) {
       return TILE_SIZES.SMALL;
@@ -171,7 +175,7 @@ class MeView extends HideableView {
       });
   }
 
-  getGridLayoutWidth() {
+  static getGridLayoutWidth() {
     return GridSizingHelper.getGridLayoutWidth(margin);
   }
 
@@ -201,15 +205,13 @@ class MeView extends HideableView {
     const hiddenTiles = allTiles.filter(t => t.removed);
 
     const layout = this.getTileLayout(this.props.layout, layoutWidth);
-    const tileComponents = visibleTiles.map(tile =>
-      (<div
+    const tileComponents = visibleTiles.map(tile => (<div
         key={tile.id}
         className={editing === tile.id ? 'react-grid-item--editing' : ''}
         style={{ touchAction: 'auto' }} // Allow touches to scroll (overrides react-draggable)
       >
         { this.renderTile(tile) }
-      </div>),
-    );
+      </div>));
 
     /* eslint-disable */
     // Justification: conflicting rules here result in a wild goose chase
@@ -225,9 +227,9 @@ class MeView extends HideableView {
             margin={margin}
             onLayoutChange={this.onLayoutChange}
             verticalCompact
-            onDragStart={this.onDragStart}
-            onDragStop={this.onDragStop}
-            width={this.getGridLayoutWidth()}
+            onDragStart={MeView.onDragStart}
+            onDragStop={MeView.onDragStop}
+            width={MeView.getGridLayoutWidth()}
             draggableHandle=".tile__drag-handle"
           >
             { tileComponents }

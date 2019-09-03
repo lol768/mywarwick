@@ -3,7 +3,12 @@
 import log from 'loglevel';
 import thunk from 'redux-thunk';
 import createHistory from 'history/lib/createBrowserHistory';
-import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
+import {
+  applyMiddleware,
+  combineReducers,
+  compose,
+  createStore,
+} from 'redux';
 import { routerMiddleware, routerReducer } from 'react-router-redux';
 import { unstable_batchedUpdates } from 'react-dom'; // eslint-disable-line camelcase
 import * as allReducers from './state/all-reducers';

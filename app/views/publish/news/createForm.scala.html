@@ -1,10 +1,9 @@
 @import controllers.publish.PublishNewsItemData
-@import views.html._
-@import system.RequestContext
-@import models.publishing.PermissionScope
-@import models.publishing.Publisher
+@import models.publishing.{PermissionScope, Publisher}
 @import services.dao.DepartmentInfo
-
+@import system.RequestContext
+@import views.html._
+@import warwick.core.helpers.JavaTime
 @(
     publisher: Publisher,
     form: Form[PublishNewsItemData],
@@ -23,6 +22,6 @@
     action = controllers.publish.routes.NewsController.create(publisher.id, submitted = true),
     'class -> "split-form",
     Symbol("data-audience-action") -> controllers.publish.routes.NewsController.audienceInfo(publisher.id)) {
-    @views.html.publish.news.contentForm(form, publisher, departmentOptions, categories, permissionScope, audience, "Create")
+    @views.html.publish.news.contentForm(form, publisher, departmentOptions, categories, permissionScope, audience, "Create", JavaTime.localDateTime.withSecond(0).withNano(0).toString)
   }
 }

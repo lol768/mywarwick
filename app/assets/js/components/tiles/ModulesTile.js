@@ -1,7 +1,7 @@
 import React from 'react';
+import * as PropTypes from 'prop-types';
 import ListTile, { ListTileItem } from './ListTile';
 import ShowMore from './ShowMore';
-import * as PropTypes from 'prop-types';
 import { formatDateTime } from '../../dateFormats';
 import HyperLink from '../ui/Hyperlink';
 import DismissableInfoModal from '../ui/DismissableInfoModal';
@@ -46,13 +46,18 @@ class ModuleTileItem extends ListTileItem {
   }
 
   handleClick() {
-    const { fullName, announcements, moduleCode, showModal, hideModal, lastUpdated } = this.props;
-    const modalMoreBtn =
-      (<HyperLink type="button" className="btn btn-default" href={this.props.href}>
+    const {
+      fullName,
+      announcements,
+      moduleCode,
+      showModal,
+      hideModal,
+      lastUpdated,
+    } = this.props;
+    const modalMoreBtn = (<HyperLink type="button" className="btn btn-default" href={this.props.href}>
         Open module in Moodle
       </HyperLink>);
-    const modal =
-      (<DismissableInfoModal
+    const modal = (<DismissableInfoModal
         heading={moduleCode ? `${moduleCode}: ${fullName}` : fullName}
         subHeadings={[`Last updated: ${formatDateTime(lastUpdated)}`]}
         onDismiss={hideModal}
@@ -67,27 +72,25 @@ class ModuleTileItem extends ListTileItem {
   }
 
   render() {
-    const { size, moduleCode, fullName, href, lastUpdated } = this.props;
+    const {
+      size,
+      moduleCode,
+      fullName,
+      href,
+      lastUpdated,
+    } = this.props;
     // const { lastUpdated, announcements} = this.props;
     const isSmall = size === 'small' || size === 'wide';
-    const content = isSmall ?
-      (<span><span className="text--underline">{moduleCode ? `${moduleCode}:` : fullName}</span>
+    const content = isSmall
+      ? (<span><span className="text--underline">{moduleCode ? `${moduleCode}:` : fullName}</span>
         &nbsp;{moduleCode && fullName}</span>)
-      :
-      (<span className="text--underline">{moduleCode && `${moduleCode}: `}{fullName}</span>);
+      : (<span className="text--underline">{moduleCode && `${moduleCode}: `}{fullName}</span>);
 
     return (
       <li className="tile-list-item text-overflow-block">
-        {/* {announcements.length ?*/}
-        {/* <a onClick={this.handleClick} role="button" target="_blank" tabIndex={0}>*/}
-        {/* {content}*/}
-        {/* <Info fw />*/}
-        {/* </a>*/}
-        {/* :*/}
         <HyperLink href={href}>
           {content}
         </HyperLink>
-        {/* }*/}
         {!isSmall && <div>Last updated: {formatDateTime(lastUpdated)}</div>}
       </li>
     );
@@ -111,8 +114,8 @@ export default class ModulesTile extends ListTile {
     return (
       <div>
         {super.getSmallBody()}
-        {!this.props.zoomed &&
-        <ShowMore
+        {!this.props.zoomed
+        && <ShowMore
           items={this.props.content.items}
           showing={super.getNumberOfItemsToDisplay()}
           onClick={this.props.onClickExpand}

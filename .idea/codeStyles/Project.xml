@@ -20,6 +20,7 @@
       <option name="alwaysUsedImports">
         <array>
           <option value="DateFormats.isoDateReads" />
+          <option value="models.DateFormats.isoDateFormats" />
         </array>
       </option>
     </ScalaCodeStyleSettings>

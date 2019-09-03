@@ -22,15 +22,14 @@ export default class ToggleSwitch extends React.PureComponent {
     return (
       <div>
         { this.props.buttonText }
-        { this.state.switchOn ?
-          <i
+        { this.state.switchOn
+          ? <i
             tabIndex={0}
             role="button"
             className={ classNames('fal', 'fa-toggle-on', 'fa-2x', 'active', 'pull-right') }
             onClick={ this.handleClick }
           />
-          :
-          <i
+          : <i
             tabIndex={0}
             role="button"
             className={

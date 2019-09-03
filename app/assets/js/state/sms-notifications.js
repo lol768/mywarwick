@@ -26,7 +26,12 @@ export function fetch() {
 export function persist(wantsSms, smsNumber, verificationCode, resendVerification = false) {
   return postJsonWithCredentials(
     '/api/smsNotificationPreferences',
-    { wantsSms, smsNumber, verificationCode, resendVerification },
+    {
+      wantsSms,
+      smsNumber,
+      verificationCode,
+      resendVerification,
+    },
   );
 }
 

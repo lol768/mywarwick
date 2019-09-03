@@ -1,13 +1,21 @@
 import React from 'react';
+import * as PropTypes from 'prop-types';
 import { createSelector } from 'reselect';
 import warning from 'warning';
 import _ from 'lodash-es';
-import { formatDateTime, formatDate, formatTime, localMoment } from '../../../dateFormats';
+
+import {
+  formatDateTime,
+  formatDate,
+  formatTime,
+  localMoment,
+} from '../../../dateFormats';
 import TileContent, { DEFAULT_TILE_SIZES, TILE_SIZES } from '../TileContent';
 import DismissableInfoModal from '../../ui/DismissableInfoModal';
 import LargeBody from './LargeBody';
 import SingleEvent from './SingleEvent';
 import ShowMore from '../ShowMore';
+import Hyperlink from '../../ui/Hyperlink';
 
 // Create an agenda view for the given calendar events.  All-day events
 // spanning multiple days appear on each day.  Events are sorted by start
@@ -19,7 +27,7 @@ const agendaViewTransform = (items) => {
     i => _.flatMap(i, (e) => {
       const date = localMoment(e.start);
       const end = (e.end !== undefined) ? localMoment(e.end) : localMoment(e.start);
-      let academicWeek = e.academicWeek;
+      let { academicWeek } = e;
       const instances = [];
 
       while (date.isBefore(end)) {
@@ -34,8 +42,7 @@ const agendaViewTransform = (items) => {
           // Displaying them as midnight to midnight looks a bit rubbish
           // so just display them as all day
           isAllDay: e.isAllDay || (
-            localMoment(e.start).isBefore(date) &&
-            date.clone().add(1, 'day').isBefore(end)
+            localMoment(e.start).isBefore(date) && date.clone().add(1, 'day').isBefore(end)
           ),
         });
 
@@ -67,16 +74,24 @@ const agendaViewTransform = (items) => {
 
       return instances;
     }),
-    i => _.filter(i, e => now.isBefore(e.end) || // Include if it hasn't ended
-      (!e.end && now.isBefore(e.start)) || // Or it has no end and it hasn't started
-      (!e.end && e.isAllDay), // Or it has no end and it's all-day
-      // (events spanning multiple days always have an end from the code above)
-    ),
+    i => _.filter(i, e => now.isBefore(e.end) // Include if it hasn't ended
+      || (!e.end && now.isBefore(e.start)) // Or it has no end and it hasn't started
+      || (!e.end && e.isAllDay)), // Or it has no end and it's all-day
+    // (events spanning multiple days always have an end from the code above)
     i => _.sortBy(i, e => e.start),
   )(items);
 };
 
 export default class AgendaTile extends TileContent {
+  static propTypes = {
+    onClickExpand: PropTypes.func,
+    defaultText: PropTypes.string,
+  };
+
+  static defaultProps = {
+    onClickExpand: () => {},
+  };
+
   constructor(props) {
     super(props);
     this.agendaViewSelector = createSelector(_.identity, agendaViewTransform);
@@ -114,9 +129,8 @@ export default class AgendaTile extends TileContent {
     const startOfToday = localMoment().startOf('day');
     const startOfTomorrow = localMoment().add(1, 'day').startOf('day');
 
-    return _.filter(events, e =>
-      localMoment(e.start).isBetween(startOfToday, startOfTomorrow, null, '[)'),
-    );
+    return _.filter(events, e => localMoment(e.start)
+      .isBetween(startOfToday, startOfTomorrow, null, '[)'));
   }
 
   getAgendaViewItems() {
@@ -210,8 +224,8 @@ export default class AgendaTile extends TileContent {
     }
 
     function personToString(person) {
-      return person.firstName ?
-        `${person.firstName} ${person.lastName}`
+      return person.firstName
+        ? `${person.firstName} ${person.lastName}`
         : person.name;
     }
 
@@ -225,19 +239,32 @@ export default class AgendaTile extends TileContent {
     const DEFAULT_DATETIME_OPTIONS = { printToday: true };
     const DATETIME_OPTIONS = { ...DEFAULT_DATETIME_OPTIONS, ...options };
     const renderedStart = formatDateTime(event.start, undefined, DATETIME_OPTIONS);
-    return event.end === undefined || event.start === event.end ?
-      renderedStart : `${renderedStart}–${formatTime(event.end)}`;
+    return event.end === undefined || event.start === event.end
+      ? renderedStart : `${renderedStart}–${formatTime(event.end)}`;
   }
 
-  static getLocationString(location) {
-    if (!location) {
+  static buildLocation(location) {
+    if (_.isEmpty(location)) {
       return null;
     }
 
-    if (_.isArray(location)) {
-      return _.join(_.map(location, 'name'), ', ');
-    }
-
-    return location.name;
+    return location.map((loc, index) => {
+      if (loc.href) {
+        return (
+          <span key="{event.name}-loc{index}">
+            { index > 0 && ', ' }
+            <Hyperlink href={loc.href} className="text--dotted-underline">
+              {loc.name}
+            </Hyperlink>
+          </span>
+        );
+      }
+      return (
+        // eslint-disable-next-line react/jsx-key
+        <span key="{event.name}-loc{index}">
+          { index > 0 && ', ' }{ loc.name }
+        </span>
+      );
+    });
   }
 }

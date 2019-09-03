@@ -23,6 +23,7 @@ const propsTestData = {
     }
   ],
   isOnline: true,
+  isHighContrast: false,
 };
 
 describe('ColourSchemesView', () => {

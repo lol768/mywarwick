@@ -20,7 +20,7 @@ export function pluralise(unit, count, plural) {
  */
 export function mkString(list) {
   if (!list || list.length === 0) return '';
-  else if (list.length === 1) return list[0];
+  if (list.length === 1) return list[0];
   return `${list.slice(0, list.length - 1).join(', ')}${list.length > 2 ? ',' : ''} and ${list[list.length - 1]}`;
 }
 
@@ -33,7 +33,6 @@ export function lowercaseFirst(string) {
 
 export function isiPhoneX() {
   const theWindow = window;
-  const height = theWindow.screen.height;
-  const width = theWindow.screen.width;
+  const { height, width } = theWindow.screen;
   return (height === 812 && width === 375);
 }

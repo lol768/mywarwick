@@ -76,4 +76,3 @@ SearchField.propTypes = {
   onSearch: PropTypes.func,
   onChange: PropTypes.func,
 };
-

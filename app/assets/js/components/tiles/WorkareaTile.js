@@ -16,8 +16,7 @@ export default class WorkareaTile extends TextTile {
           {this.makeTileText(workarea)}
         </div>
       </div>
-    ),
-    );
+    ));
   }
 
   makeCallout(workarea) {
