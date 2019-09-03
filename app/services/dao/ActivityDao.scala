@@ -249,6 +249,13 @@ class ActivityDaoImpl @Inject()(
         AND ACTIVITY_ID > {since}
         AND ACTIVITY_ID < {before}
       """
+    else if (beforeDate.isEmpty && sinceDate.isEmpty)
+      // If we don't specify either it can cause high load on the DB
+      // This normally happens on a fresh app install so limit to the past 12 months
+      // This will cause no activity to display if the oldest is longer than 12 months ago
+      """
+        AND PUBLISHED_AT > {oneYearAgo}
+      """
     else maybeBefore + maybeSince
 
     // If requesting activities since an activity, return the activities
@@ -293,7 +300,8 @@ class ActivityDaoImpl @Inject()(
       'since -> since.orNull,
       'beforeDate -> beforeDate.orNull,
       'sinceDate -> sinceDate.orNull,
-      'notifications -> notifications
+      'notifications -> notifications,
+      'oneYearAgo -> DateTime.now().minusYears(1)
     )
       .as(activityRenderParser.*)
   }
