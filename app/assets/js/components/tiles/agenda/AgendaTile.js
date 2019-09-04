@@ -248,6 +248,10 @@ export default class AgendaTile extends TileContent {
       return null;
     }
 
+    if (!_.isArray(location)) {
+      return location.name;
+    }
+
     return location.map((loc, index) => {
       if (loc.href) {
         return (
