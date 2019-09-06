@@ -161,8 +161,8 @@ export class AudienceIndicator extends React.PureComponent {
       if (canEstimateAudience) {
         const count = _.reduce(groups, (acc, group) => acc + (groupedAudience[group] || 0), 0);
         return (fetching
-          ? <i className="fal fa-spin fa-fw fa-sync"/> :
-          <span className="badge">{count}</span>);
+          ? <i className="fal fa-spin fa-fw fa-sync"/>
+          : <span className="badge">{count}</span>);
       }
       return null;
     };
@@ -209,7 +209,7 @@ export class AudienceIndicator extends React.PureComponent {
             case 'listOfUsercodes':
               if (components !== undefined) {
                 const groups = _.filter(
-                  _.keys(groupedAudience), key => _.startsWith(key, 'UsercodesAudience')
+                  _.keys(groupedAudience), key => _.startsWith(key, 'UsercodesAudience'),
                 );
                 renderedAudience.push((<li key={audienceType}>
                   Usercodes or university IDs {getCount(groups)}

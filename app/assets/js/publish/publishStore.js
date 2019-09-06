@@ -1,3 +1,5 @@
+/* eslint-env browser */
+
 import { createStore } from 'redux';
 
 const initialState = {
