@@ -22,7 +22,11 @@
 }
 
 @common.admin("Update news") {
-  @b3.form(action = controllers.publish.routes.NewsController.update(publisher.id, id, submitted = true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.publish.routes.NewsController.audienceInfo(publisher.id)) {
+  @b3.form(
+    action = controllers.publish.routes.NewsController.update(publisher.id, id, submitted = true),
+    'class -> "split-form",
+    Symbol("data-audience-action") -> controllers.publish.routes.NewsController.audienceInfo(publisher.id)
+  ) {
     @views.html.publish.news.contentForm(form, publisher, departmentOptions, categories, permissionScope, audience, "Update", form("item.publishDate").value.getOrElse(JavaTime.localDateTime.withSecond(0).withNano(0).toString), audienceJson,categoriesJson)
   }
 }

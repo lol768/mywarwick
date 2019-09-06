@@ -15,9 +15,7 @@
     earliestDate: String = JavaTime.localDateTime.withSecond(0).withNano(0).toString,
     audienceJson: JsValue = Json.obj(),
     categoriesJson: JsValue = Json.obj(),
-    audienceIndicatorHint: JsValue = Json.obj(
-      "isNews" -> JsBoolean(true)
-    )
+    itemType: String = "news item"
 )(implicit fc: b3.B3FieldConstructor, messages: Messages, context: RequestContext)
 
 @context.csrfHelper.formField
@@ -32,7 +30,7 @@
 <div class="row">
   <div
   class=" col-lg-4 col-lg-push-8 audience-indicator"
-  data-hint="@audienceIndicatorHint"
+  data-item-type="@itemType"
   ></div>
   <div class="col-lg-8 col-lg-pull-4 split-form__sections">
   <section>

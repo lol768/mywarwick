@@ -1,13 +1,12 @@
 import { NewsCategoryPicker } from 'publish/components/NewsCategoryPicker';
-import { RadioButton, Checkbox } from '../../../../app/assets/js/components/ui/Checkbox';
+import { Checkbox } from '../../../../app/assets/js/components/ui/Checkbox';
 import * as React from 'react';
 import * as enzyme from 'enzyme';
 import _ from 'lodash-es';
 
 const context = {
   store: {
-    dispatch: () => {
-    },
+    dispatch: () => {},
   },
 };
 
@@ -27,20 +26,18 @@ const props = {
     }
   ],
   formData: {},
-  audienceDidUpdate: () => {
-  },
+  updateAudience: () => {},
 };
 
 describe('NewsCategoryPicker', () => {
-
   it('should set initial state properly if formData is not supplied', () => {
     let shallow = enzyme.shallow(<NewsCategoryPicker {...props} />);
-    expect(shallow.state().ignoreCategories).to.eql(false);
-    expect(shallow.state().chosenCategories).to.eql([]);
+    shallow.state().ignoreCategories.should.eql(false);
+    shallow.state().chosenCategories.should.eql([]);
 
     shallow = enzyme.shallow(<NewsCategoryPicker {...{ ...props, formData: null }} />);
-    expect(shallow.state().ignoreCategories).to.eql(false);
-    expect(shallow.state().chosenCategories).to.eql([]);
+    shallow.state().ignoreCategories.should.eql(false);
+    shallow.state().chosenCategories.should.eql([]);
 
   });
 
@@ -51,31 +48,28 @@ describe('NewsCategoryPicker', () => {
         chosenCategories: ['mac', 'linux']
       }
     }} />);
-    expect(shallow.state().ignoreCategories).to.eql(true);
-    expect(shallow.state().chosenCategories).to.eql(['mac', 'linux']);
+    shallow.state().ignoreCategories.should.eql(true);
+    shallow.state().chosenCategories.should.eql(['mac', 'linux']);
   });
 
   it('should should render the correct number of checkboxes', () => {
     let shallow = enzyme.shallow(<NewsCategoryPicker {...props} />);
-    expect(shallow.find(Checkbox).length).to.eql(4);
+    shallow.find(Checkbox).length.should.eql(4);
   });
 
   it('should update states according to checkbox changes', () => {
     let wrapper = enzyme.mount(<NewsCategoryPicker {...props} />, { context });
 
     wrapper.find(Checkbox).first().find('input').simulate('change');
-    expect(wrapper.state().chosenCategories.length).to.eql(1);
+    wrapper.state().chosenCategories.length.should.eql(1);
 
     wrapper.find(Checkbox).first().find('input').simulate('change');
-    expect(wrapper.state().chosenCategories.length).to.eql(0);
+    wrapper.state().chosenCategories.length.should.eql(0);
 
     wrapper.find(Checkbox).first().find('input').simulate('change');
     wrapper.find(Checkbox).at(1).find('input').simulate('change');
     wrapper.find(Checkbox).last().find('input').simulate('change');
-    expect(wrapper.state().chosenCategories.length).to.eql(2);
-    expect(wrapper.state().ignoreCategories).to.eql(true);
-
+    wrapper.state().chosenCategories.length.should.eql(2);
+    wrapper.state().ignoreCategories.should.eql(true);
   })
-
-
 });

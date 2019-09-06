@@ -126,12 +126,16 @@ object Audience {
     case object All extends UndergradStudents("All")
     case object First extends UndergradStudents("First")
     case object Second extends UndergradStudents("Second")
+    case object Third extends UndergradStudents("Third")
+    case object Fourth extends UndergradStudents("Fourth")
     case object Final extends UndergradStudents("Final")
-    def values = Seq(All, First, Second, Final)
+    def values = Seq(All, First, Second, Third, Fourth, Final)
     def fromValue(value: String): Option[UndergradStudents] = values.find(_.value == value)
     def levelToNumStr(level: UndergradStudents): String = level match {
       case First => "1"
       case Second => "2"
+      case Third => "3"
+      case Fourth => "4"
       case Final => "f"
       case _ => ""
     }

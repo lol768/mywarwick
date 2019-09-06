@@ -29,10 +29,10 @@ function tablesortAddNumberSorting() {
 
 function setupAudienceIndicator() {
   const audienceIndicator = $('.audience-indicator');
-  const hint = audienceIndicator.data('hint');
+  const itemType = audienceIndicator.data('item-type');
   const props = {
     promiseSubmit,
-    hint,
+    itemType,
   };
   if (audienceIndicator.length) {
     setTimeout(() => {
@@ -59,6 +59,7 @@ function setupAudiencePicker() {
       locationOpts: audiencePicker.data('location-opts') || {},
       deptSubsetOpts: audiencePicker.data('dept-subset-opts') || {},
       hallsOfResidence: audiencePicker.data('halls-of-residence') || {},
+      itemName: audiencePicker.data('item-name') || 'alert',
       store,
     };
     ReactDOM.render(
@@ -230,7 +231,7 @@ function initSentDetails() {
       .then(({ sent: { delivered, readCount } }) => {
         $item.find('.activity-item__messages-read-val').text(readCount);
         if (typeof delivered === 'undefined' && typeof readCount === 'undefined') {
-          $item.html('<div class="col-sm-12"><i class="fa fa-exclamation-triangle"></i> Error fetching sent details for this alert</div>');
+          $item.html('<div class="col-sm-12"><i class="fa fa-exclamation-triangle"></i> Error fetching sent details for this item</div>');
         } else if (typeof delivered === 'undefined') { // NEWSTART-1240 old alerts won't have this data
           $item.find('[class^=activity-item__messages-delivered-]').hide();
         } else {
@@ -238,8 +239,8 @@ function initSentDetails() {
         }
       })
       .catch((err) => {
-        $item.html('<div class="col-sm-12"><i class="fa fa-exclamation-triangle"></i> Error fetching sent details for this alert</div>');
-        log.error(`Error updating alert sent details from json response. Alert Id: ${activityId}`, err);
+        $item.html('<div class="col-sm-12"><i class="fa fa-exclamation-triangle"></i> Error fetching sent details for this item</div>');
+        log.error(`Error updating sent details from json response. Alert Id: ${activityId}`, err);
       });
   });
 }

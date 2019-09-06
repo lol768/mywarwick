@@ -181,7 +181,8 @@ $(SPLIT_FORM).each((i, form) => {
 
         if (!hasErrors()) {
           const baseAudience = $form.data('base-audience');
-          if (baseAudience > 100) {
+          const confirmAbove = $form.data('confirm-above') || Number.MAX_VALUE;
+          if (baseAudience > confirmAbove) {
             const msg = `Are you sure you want to send this item to ${baseAudience} ${baseAudience === 1 ? 'person' : 'people'}?`;
             $confirmationModal.find('.modal-body').text(msg);
             $confirmationModal.modal('show');

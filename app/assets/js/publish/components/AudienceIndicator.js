@@ -12,25 +12,66 @@ export class AudienceIndicator extends React.PureComponent {
   static propTypes = {
     audienceComponents: PropTypes.object,
     promiseSubmit: PropTypes.func.isRequired,
-    hint: PropTypes.shape({
-      isNews: PropTypes.bool.isRequired,
-    }),
+    itemType: PropTypes.string.isRequired,
+    canEstimateAudience: PropTypes.bool.isRequired,
   };
 
-  static makePeopleInTotalText(baseAudience, groupedAudience) {
-    if (baseAudience === 0 && _.isEmpty(groupedAudience)) {
-      return (<em>(Waiting for all options to be selected…)</em>);
+  static totaliser(error, fetching, baseAudience) {
+    if (error) {
+      return <div className="media">
+        <div className="media-left">
+          <i className="fal fa-user-slash"></i>
+        </div>
+        <div className="media-body">
+          Cannot estimate user count
+          <div className="small text-muted">
+            {error}
+          </div>
+        </div>
+      </div>;
+    }
+
+    if (fetching) {
+      return <div className="media">
+        <div className="media-left">
+          <i className="fal fa-spin fa-sync"></i>
+        </div>
+        <div className="media-body">
+          Recalculating user estimate…
+        </div>
+      </div>;
     }
 
     if (baseAudience === 0) {
-      return (<div>No people in current selection</div>);
+      return <div className="media">
+        <div className="media-left">
+          <i className="fal fa-user-slash"></i>
+        </div>
+        <div className="media-body">
+          No matching users
+        </div>
+      </div>;
     }
 
     if (baseAudience === 1) {
-      return (<div>Only one person</div>);
+      return <div className="media">
+        <div className="media-left">
+          <i className="fal fa-user"></i>
+        </div>
+        <div className="media-body">
+          One matching user
+        </div>
+      </div>;
     }
 
-    return (<div>{baseAudience} people in total</div>);
+    return <div className="media">
+      <div className="media-left">
+        <i className="fal fa-users"></i>
+      </div>
+      <div className="media-body">
+        {baseAudience} matching users
+      </div>
+    </div>;
   }
 
   constructor(props) {
@@ -40,10 +81,11 @@ export class AudienceIndicator extends React.PureComponent {
       groupedAudience: {},
       fetching: false,
       public: false,
+      error: false,
     };
     this.fetchAudienceEstimate = this.fetchAudienceEstimate.bind(this);
     this.onAudienceChange = _.debounce(this.onAudienceChange.bind(this), 500);
-    this.readableAudienceComponents = this.readableAudienceComponents.bind(this);
+    this.parseAudienceComponents = this.parseAudienceComponents.bind(this);
   }
 
   componentDidMount() {
@@ -64,41 +106,68 @@ export class AudienceIndicator extends React.PureComponent {
   }
 
   fetchAudienceEstimate() {
-    this.setState({ fetching: true });
-    const $form = $($('.split-form').get(0));
+    const list = this.parseAudienceComponents();
+    if (_.isEmpty(_.compact(list))) {
+      this.setState({
+        baseAudience: 0,
+        groupedAudience: {},
+        fetching: false,
+        error: false,
+      });
+    } else {
+      this.setState({ fetching: true });
+      const $form = $($('.split-form').get(0));
 
-    this.props.promiseSubmit($form, {
-      url: $form.attr('data-audience-action'),
-      dataType: 'json',
-    })
-      .then((result) => {
-        const { baseAudience, groupedAudience } = result.data;
-        this.setState({
-          baseAudience,
-          groupedAudience,
-          fetching: false,
-        });
+      this.props.promiseSubmit($form, {
+        url: $form.attr('data-audience-action'),
+        dataType: 'json',
       })
-      .catch((e) => {
-        this.setState({
-          baseAudience: 0,
-          groupedAudience: {},
-        });
-        log.error('Audience estimate returned error', e);
-      })
-      .then(() => this.setState({ fetching: false }));
+        .then((result) => {
+          const { baseAudience, groupedAudience } = result.data;
+          this.setState({
+            baseAudience,
+            groupedAudience,
+            fetching: false,
+            error: false,
+          });
+        })
+        .catch((e) => {
+          const jsonErrors = _.get(e, 'responseJSON.errors', []);
+          if (_.some(jsonErrors, 'message', 'error.audience.usercodes.invalid')) {
+            this.setState({
+              baseAudience: 0,
+              groupedAudience: {},
+              error: 'One or more usercode or university ID supplied was invalid',
+            });
+          } else {
+            this.setState({
+              baseAudience: 0,
+              groupedAudience: {},
+              error: 'There was an unexpected error estimating the user count',
+            });
+            log.error('Audience estimate returned error', e);
+          }
+        })
+        .then(() => this.setState({ fetching: false }));
+    }
   }
 
-  readableAudienceComponents() {
-    const { audienceComponents } = this.props;
+  parseAudienceComponents() {
+    const { audienceComponents, canEstimateAudience } = this.props;
     const { fetching, groupedAudience } = this.state;
     const dept = audienceComponents.department;
 
     const getCount = (groups) => {
-      const peopleCount = _.reduce(groups, (acc, group) => acc + (groupedAudience[group] || 0), 0);
-      return (fetching
-        ? <i className="fal fa-spin fa-fw fa-sync" /> : `${peopleCount} ${peopleCount === 1 ? 'person' : 'people'}`);
+      if (canEstimateAudience) {
+        const count = _.reduce(groups, (acc, group) => acc + (groupedAudience[group] || 0), 0);
+        return (fetching
+          ? <i className="fal fa-spin fa-fw fa-sync"/> :
+          <span className="badge">{count}</span>);
+      }
+      return null;
     };
+
+    const renderedAudience = [];
 
     if (audienceComponents.audience) {
       const isUniWide = audienceComponents.audience.universityWide !== undefined;
@@ -106,92 +175,115 @@ export class AudienceIndicator extends React.PureComponent {
 
       if (audience !== undefined) {
         if ('Dept:All' in audience && dept.name !== undefined) {
-          return <div>{`Everyone in ${dept.name}`}</div>;
+          renderedAudience.push(<li key="all">{`Everyone in ${dept.name}`}</li>);
         }
-        return (<div> {
-          _.map(audience.groups, (components, audienceType) => {
-            switch (audienceType) {
-              case 'hallsOfResidence':
-                if (components !== undefined) {
-                  const halls = components.hall;
-                  return halls
-                    ? _.map(halls, (value, key) => {
-                      const displayName = titleCase(sentenceCase(_.last(key.split(':'))));
-                      return (
-                        <div key={key}>
-                          All residents
-                          of {displayName}: {getCount([`ResidenceAudience(${displayName.replace(' ', '')})`], halls)}
-                        </div>
-                      );
-                    }) : null;
+
+        _.map(audience.groups, (components, audienceType) => {
+          switch (audienceType) {
+            case 'hallsOfResidence':
+              if (components !== undefined) {
+                const halls = components.hall;
+                if (halls) {
+                  renderedAudience.push(_.map(halls, (value, key) => {
+                    const displayName = titleCase(sentenceCase(_.last(key.split(':'))));
+                    return (
+                      <li key={key}>
+                        All residents
+                        of {displayName} {getCount([`ResidenceAudience(${displayName.replace(' ', '')})`], halls)}
+                      </li>
+                    );
+                  }));
                 }
-                return null;
-              case 'modules':
-                return _.map(components, ({ text, value }) => (<div
-                    key={`${audienceType}:${value}`}
-                  >{text || value}: {getCount([`ModuleAudience(${value})`])}</div>));
-              case 'seminarGroups':
-                return _.map(components, ({ text, value }) => (<div
-                    key={`${audienceType}:${text}`}
-                  >{text}: {getCount([`SeminarGroupAudience(${value})`])}</div>));
-              case 'listOfUsercodes':
-                return (components !== undefined)
-                  ? (<div key={audienceType}>
-                    {`Usercodes or university IDs: ${components.length} ${components.length === 1 ? 'person' : 'people'}`}
-                  </div>)
-                  : null;
-              case 'staffRelationships':
-                return _.flatMap(
-                  components,
-                  rel => rel.options.map(opt => _.map(opt, val => (val.selected
-                    ? (<div>{`${_.startCase(val.studentRole)}s of ${rel.text}`}: {getCount([`RelationshipAudience(personalTutor,UniversityID(${rel.value}))`])}</div>)
-                    : (<div />)
-                  ))),
+              }
+              break;
+            case 'modules':
+              renderedAudience.push(_.map(components, ({ text, value }) => (<li
+                  key={`${audienceType}:${value}`}
+              >{text || value} {getCount([`ModuleAudience(${value})`])}</li>)));
+              break;
+            case 'seminarGroups':
+              renderedAudience.push(_.map(components, ({ text, value }) => (<li
+                  key={`${audienceType}:${text}`}
+              >{text} {getCount([`SeminarGroupAudience(${value})`])}</li>)));
+              break;
+            case 'listOfUsercodes':
+              if (components !== undefined) {
+                const groups = _.filter(
+                  _.keys(groupedAudience), key => _.startsWith(key, 'UsercodesAudience')
                 );
-              case 'undergraduates':
-                if (components !== undefined) {
-                  const subset = dept.name !== undefined ? dept.name : 'the University';
-                  if (_.has(components, 'year')) {
-                    const years = _.map(components.year, (k, year) => _.last(_.split(year, ':')).toLowerCase());
-                    return years.length
-                      ? <div key={audienceType}>
-                        {`All ${mkString(years)} year Undergraduates in ${subset}`}: {getCount(_.map(years, _.capitalize))}
-                      </div> : null;
+                renderedAudience.push((<li key={audienceType}>
+                  Usercodes or university IDs {getCount(groups)}
+                </li>));
+              }
+              break;
+            case 'staffRelationships':
+              renderedAudience.push(_.flatMap(
+                components,
+                rel => rel.options.map(opt => _.map(opt, val => (val.selected
+                  ? (<li key={val}>{`${_.startCase(val.studentRole)}s of ${rel.text}`} {getCount([`RelationshipAudience(personalTutor,UniversityID(${rel.value}))`])}</li>)
+                  : null
+                ))),
+              ));
+              break;
+            case 'undergraduates':
+              if (components !== undefined) {
+                const subset = dept.name !== undefined ? dept.name : 'the University';
+                if (_.has(components, 'year')) {
+                  const years = _.map(components.year, (k, year) => _.last(_.split(year, ':')).toLowerCase());
+                  if (years.length) {
+                    renderedAudience.push(<li key={audienceType}>
+                      {`All ${mkString(years)} year Undergraduates in ${subset}`} {getCount(_.map(years, _.capitalize))}
+                    </li>);
                   }
-                  return (<div key={audienceType}>
-                    {`All Undergraduates in ${subset}`}: {getCount(['All'])}
-                  </div>);
+                } else {
+                  renderedAudience.push(<li key={audienceType}>
+                    {`All Undergraduates in ${subset}`} {getCount(['All'])}
+                  </li>);
                 }
-                return null;
-              default: {
-                const group = _.replace(audienceType, 'Dept:', '');
-                const groupDisplayName = _.startCase(group);
-                return (isUniWide || !_.isEmpty(dept.name))
-                  ? <div key={audienceType}>
-                    {`All ${groupDisplayName} in ${_.startsWith(audienceType, 'Dept:') ? dept.name : 'the University'}`}: {getCount([group])}
-                  </div> : null;
+              }
+              break;
+            default: {
+              const group = _.replace(audienceType, 'Dept:', '');
+              const groupDisplayName = _.startCase(group);
+              if (isUniWide || !_.isEmpty(dept.name)) {
+                renderedAudience.push(<li key={audienceType}>
+                  {`All ${groupDisplayName} in ${_.startsWith(audienceType, 'Dept:') ? dept.name : 'the University'}`} {getCount([group])}
+                </li>);
               }
             }
-          })
-        } </div>);
+          }
+        });
       }
     }
-    return null;
+
+    return renderedAudience;
   }
 
   render() {
-    const { baseAudience, fetching, groupedAudience } = this.state;
+    const { baseAudience, fetching, error } = this.state;
+    const { itemType, canEstimateAudience } = this.props;
 
     if (this.state.public) {
       return (
-        <div className="alert alert-info">
-          <div>Public audience</div>
+        <div className="well well-sm">
+          <div className="pull-right">
+            <p className="lead">
+              <i className="fal fa-globe-europe"></i> This {itemType} will be public
+            </p>
+          </div>
         </div>
       );
     }
 
+    const list = _.compact(this.parseAudienceComponents());
+    const renderedList = list.length > 0
+      ? list : <li>Build your audience using options on the left</li>;
+
+    const renderedError = error
+      || (canEstimateAudience ? null : 'You need to specify both target audience and tag(s)');
+
     return (
-      <div className="alert alert-info">
+      <div className="well well-sm">
         <div className="pull-right">
           <i
             className="fal fa-info-circle"
@@ -201,14 +293,10 @@ export class AudienceIndicator extends React.PureComponent {
         have been selected"
           />
         </div>
-        <div>This { this.props.hint.isNews ? 'news' : 'alert' } will be published to:</div>
-        <div className="audience-component-list">{this.readableAudienceComponents()}</div>
-        <div>{
-          fetching ? <i className="fal fa-spin fa-fw fa-sync" /> : AudienceIndicator.makePeopleInTotalText(
-            baseAudience,
-            groupedAudience,
-          )
-        }</div>
+        <p className="lead">
+          {AudienceIndicator.totaliser(renderedError, fetching, baseAudience)}
+        </p>
+        <ul className="audience-component-list">{renderedList}</ul>
       </div>
     );
   }
@@ -217,6 +305,7 @@ export class AudienceIndicator extends React.PureComponent {
 function select(store) {
   return {
     audienceComponents: store.audience,
+    canEstimateAudience: store.canEstimateAudience,
   };
 }
 

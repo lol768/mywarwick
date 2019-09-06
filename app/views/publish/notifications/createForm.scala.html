@@ -17,7 +17,12 @@
 }
 
 @common.admin("Create alert") {
-  @b3.form(action = controllers.publish.routes.NotificationsController.create(publisher.id, submitted = true), 'class -> "split-form", Symbol("data-audience-action") -> controllers.publish.routes.NotificationsController.audienceInfo(publisher.id)) {
+  @b3.form(
+    action = controllers.publish.routes.NotificationsController.create(publisher.id, submitted = true),
+    'class -> "split-form",
+    Symbol("data-audience-action") -> controllers.publish.routes.NotificationsController.audienceInfo(publisher.id),
+    Symbol("data-confirm-above") -> 100
+  ) {
     @views.html.publish.notifications.contentForm(form, publisher, departmentOptions, providers, permissionScope, audience, "Create")
   }
 }

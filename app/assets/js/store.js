@@ -39,16 +39,17 @@ const logger = (/* store */) => next => (action) => {
 
 export const browserHistory = createHistory();
 
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
 export default createStore(
   reducer,
   initialState,
-  compose(
+  composeEnhancers(
     applyMiddleware(
       thunk,
       logger,
       routerMiddleware(browserHistory),
       batchedUpdatesMiddleware,
     ),
-    window.devToolsExtension ? window.devToolsExtension() : f => f,
   ),
 );

@@ -25,6 +25,7 @@ export class AudiencePicker extends React.PureComponent {
     hallsOfResidence: PropTypes.object,
     locationOpts: PropTypes.object,
     audienceDidUpdate: PropTypes.func.isRequired,
+    itemName: PropTypes.string,
   };
 
   static defaultProps = {
@@ -34,6 +35,7 @@ export class AudiencePicker extends React.PureComponent {
     deptSubsetOpts: {},
     locationOpts: {},
     hallsOfResidence: {},
+    itemName: 'alert',
   };
 
   constructor(props) {
@@ -142,16 +144,17 @@ export class AudiencePicker extends React.PureComponent {
   }
 
   locationInput() {
+    const { itemName } = this.props;
+    const hint = `You can optionally select one or more locations to target recipients for this ${itemName}`;
     return (
       <div className="list-group">
         <label className="control-label">
-          Is this alert specific to where people live?&nbsp;
+          Is this {itemName} specific to where people live?&nbsp;
           <i
             className="fal fa-info-circle"
             data-toggle="tooltip"
             data-placement="left"
-            title="Users can select one or more locations to receive
-             alerts, or may choose not to specify any"
+            title={hint}
           />
         </label>
         <RadioButton
@@ -325,6 +328,22 @@ export class AudiencePicker extends React.PureComponent {
             />
             <Checkbox
               handleChange={this.handleChange}
+              isChecked={this.isChecked(prefixPath(`.groups.undergraduates.year.${prefixDeptSubset('UndergradStudents:Third')}`))}
+              label="Third year"
+              name="audience.audience[]"
+              value={prefixDeptSubset('UndergradStudents:Third')}
+              formPath={prefixPath('.groups.undergraduates.year')}
+            />
+            <Checkbox
+              handleChange={this.handleChange}
+              isChecked={this.isChecked(prefixPath(`.groups.undergraduates.year.${prefixDeptSubset('UndergradStudents:Fourth')}`))}
+              label="Fourth year"
+              name="audience.audience[]"
+              value={prefixDeptSubset('UndergradStudents:Fourth')}
+              formPath={prefixPath('.groups.undergraduates.year')}
+            />
+            <Checkbox
+              handleChange={this.handleChange}
               isChecked={this.isChecked(prefixPath(`.groups.undergraduates.year.${prefixDeptSubset('UndergradStudents:Final')}`))}
               label="Final year"
               name="audience.audience[]"
@@ -422,10 +441,11 @@ export class AudiencePicker extends React.PureComponent {
   }
 
   render() {
+    const { itemName } = this.props;
     return (
       <div>
         <div className="list-group">
-          <label className="control-label">Who is this alert for?</label>
+          <label className="control-label">Who is this {itemName} for?</label>
 
           {this.props.isGod
             ? <div>
