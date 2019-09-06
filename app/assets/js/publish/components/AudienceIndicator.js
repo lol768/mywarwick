@@ -282,6 +282,17 @@ export class AudienceIndicator extends React.PureComponent {
     const renderedError = error
       || (canEstimateAudience ? null : 'You need to specify both target audience and tag(s)');
 
+    const hint = canEstimateAudience && list.length > 0
+      && (<div className="media hint">
+            <div className="media-left">
+              <i className="fal fa-lightbulb"></i>
+            </div>
+            <div className="media-body">
+              <p>This estimate accounts for all filters/options selected,
+                but may double-count when categories overlap.</p>
+            </div>
+      </div>);
+
     return (
       <div className="well well-sm">
         <div className="pull-right">
@@ -297,6 +308,7 @@ export class AudienceIndicator extends React.PureComponent {
           {AudienceIndicator.totaliser(renderedError, fetching, baseAudience)}
         </p>
         <ul className="audience-component-list">{renderedList}</ul>
+        {hint}
       </div>
     );
   }
